@@ -7,7 +7,7 @@ import {forwardRef} from '#preact/compat';
 
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 
 // Correct PlayerStates taken from
@@ -136,7 +136,7 @@ function BentoYoutubeWithRef(
     const {'event': event, 'info': parsedInfo} = parsedData;
 
     if (event == 'initialDelivery') {
-      dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      dispatchVideoEvent(currentTarget, VideoEvents_Enum.LOADEDMETADATA);
       onLoad?.();
       return;
     }

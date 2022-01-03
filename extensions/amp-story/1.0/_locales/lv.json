@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Saņemt saiti"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "Īsziņa"
   },
-  "13": {
-    "string": "Vairāk"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Lai skaitītu šo saturu, jums ir jāiespējo amp-story eksperiments."
   },
   "21": {
     "string": "Atvainojiet! Izskatās, ka jūsu pārlūkprogramma neatbalsta šo saturu"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Turpināt"
   },
-  "31": {
-    "string": "Skaņa izslēgta"
-  },
-  "32": {
-    "string": "Skaņa ieslēgta"
-  },
-  "33": {
-    "string": "Šajā lapā nav skaņas"
-  },
   "34": {
     "string": "Atskaņot video"
   },
   "35": {
     "string": "Pavilkt uz augšu"
-  },
-  "36": {
-    "string": "Izvērst Twitter ierakstu"
-  },
-  "62": {
-    "string": "Kopīgot, sākot ar šo lapu"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Kopīgot stāstu"
-  },
-  "70": {
-    "string": "Pārslēgt stāsta izvēlni"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Ieteikums"
-  },
-  "82": {
-    "string": "Iepriekšējā lapa"
   },
   "83": {
     "string": "Aktivizēt"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Notiek atvēršana"
+  },
+  "98": {
+    "string": "Veidlapa nav iesniegta, mēģiniet vēlreiz"
+  },
+  "99": {
+    "string": "Veidlapa veiksmīgi iesniegta"
   }
 }

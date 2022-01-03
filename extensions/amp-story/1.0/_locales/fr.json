@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Obtenir le lien"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Plus"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Vous devez activer l'expérience amp-story pour voir ce contenu."
   },
   "21": {
     "string": "Nous sommes désolés, mais votre navigateur n'est pas compatible avec cette expérience"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Continuer quand même"
   },
-  "31": {
-    "string": "Son désactivé"
-  },
-  "32": {
-    "string": "Son activé"
-  },
-  "33": {
-    "string": "Cette page n'a pas de son"
-  },
   "34": {
     "string": "Regarder la vidéo"
   },
   "35": {
     "string": "Balayer l'écran vers le haut"
-  },
-  "36": {
-    "string": "Développer le tweet"
-  },
-  "62": {
-    "string": "Partager à partir de cette page"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Partager l'histoire"
-  },
-  "70": {
-    "string": "Afficher le menu de l'histoire"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Astuce"
-  },
-  "82": {
-    "string": "Page précédente"
   },
   "83": {
     "string": "Activer"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Ouverture"
+  },
+  "98": {
+    "string": "Formulaire non envoyé, réessayez"
+  },
+  "99": {
+    "string": "Formulaire envoyé avec succès"
   }
 }

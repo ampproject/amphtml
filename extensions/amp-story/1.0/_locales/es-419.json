@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Obtener enlace"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Más"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Para ver este contenido, debes habilitar el experimento en amp-story."
   },
   "21": {
     "string": "Lo sentimos, parece que esta experiencia no está disponible para su navegador"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Continuar de todas formas"
   },
-  "31": {
-    "string": "Sonido desactivado"
-  },
-  "32": {
-    "string": "Sonido activado"
-  },
-  "33": {
-    "string": "Esta página no tiene sonido"
-  },
   "34": {
     "string": "Reproducir video"
   },
   "35": {
     "string": "Deslizar el dedo hacia arriba"
-  },
-  "36": {
-    "string": "Mostrar tuit"
-  },
-  "62": {
-    "string": "Compartir a partir de esta página"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Compartir historia"
-  },
-  "70": {
-    "string": "Alternar el menú de la historia"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Consejo"
-  },
-  "82": {
-    "string": "Página anterior"
   },
   "83": {
     "string": "Activar"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Abriendo..."
+  },
+  "98": {
+    "string": "No se envió el formulario, intenta de nuevo"
+  },
+  "99": {
+    "string": "El formulario se envió correctamente"
   }
 }

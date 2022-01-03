@@ -87,7 +87,7 @@ String that customizes the button text. The default is "Swipe up".
 ```html
 <amp-story-page-attachment
   layout="nodisplay"
-  cta-text="Call To Action">
+  cta-text="Explore Tasting Menu">
    ...
 </amp-story-page-attachment>
 ```
@@ -95,6 +95,8 @@ String that customizes the button text. The default is "Swipe up".
 ### `cta-image` (optional)
 
 String representing a URL pointing to an image. Optimize performance and avoid distortion by using a 48x48px image.
+
+![amp-story-page-attachment-1-image](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-1-image.jpg)
 
 ```html
 <amp-story-page-attachment
@@ -104,11 +106,11 @@ String representing a URL pointing to an image. Optimize performance and avoid d
 </amp-story-page-attachment>
 ```
 
-![amp-story-page-attachment-1-image](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-1-image.jpg)
-
 ### `cta-image-2` (optional)
 
 String representing a URL pointing to an image. Two images will display when `cta-image` and `cta-image-2` are defined. Optimize performance and avoid distortion by using a 48x48px image.
+
+![amp-story-page-attachment-2-images](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-2-images.jpg)
 
 ```html
 <amp-story-page-attachment
@@ -118,8 +120,6 @@ String representing a URL pointing to an image. Two images will display when `ct
    ...
 </amp-story-page-attachment>
 ```
-
-![amp-story-page-attachment-2-images](https://github.com/ampproject/amphtml/raw/main/extensions/amp-story/img/amp-story-page-attachment-2-images.jpg)
 
 ### `title` (optional)
 

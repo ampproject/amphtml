@@ -8,7 +8,7 @@
  */
 export class DomBasedWeakRef {
   /**
-   * @param {!Window} win
+   * @param {Window} win
    * @param {string} id
    * @package
    */
@@ -21,9 +21,9 @@ export class DomBasedWeakRef {
   /**
    * Returns a WeakRef. Uses this implementation if the real WeakRef class
    * is not available.
-   * @param {!Window} win
-   * @param {!Element} element
-   * @return {!WeakRef<!Element>|!DomBasedWeakRef<!Element>}
+   * @param {Window} win
+   * @param {Element} element
+   * @return {WeakRef<Element>|DomBasedWeakRef}
    */
   static make(win, element) {
     if (win.WeakRef) {
@@ -36,7 +36,7 @@ export class DomBasedWeakRef {
     return new DomBasedWeakRef(win, element.id);
   }
 
-  /** @return {!Element|undefined} */
+  /** @return {Element|undefined} */
   deref() {
     return this.win.document.getElementById(this.id_) || undefined;
   }

@@ -3,7 +3,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
-import {user, userAssert} from '#utils/log';
+import {userAssert} from '#utils/log';
 
 import {urls} from '../../../src/config';
 import {loadScript} from '../../../src/validator-integration';
@@ -67,9 +67,6 @@ const buildLogMessageTemplate = (element) => {
   </div>`;
 };
 
-/** @const {string} */
-const TAG = 'AMP_STORY_DEV_TOOLS_DEBUG';
-
 export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed() {
@@ -96,7 +93,11 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
   buildCallback() {
     this.storyUrl_ = this.element.getAttribute('data-story-url');
     this.element.classList.add('i-amphtml-story-dev-tools-tab');
-    return loadScript(this.element.ownerDocument, `${urls.cdn}/v0/validator.js`)
+    return loadScript(
+      this.element.ownerDocument,
+      `${urls.cdn}/v0/validator_wasm.js`
+    )
+      .then(() => amp.validator.init())
       .then(() =>
         this.validateUrl_(/* global amp: false */ amp.validator, this.storyUrl_)
       )
@@ -134,9 +135,6 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
           error.message = validator.renderErrorMessage(error);
           return error;
         });
-      })
-      .catch((error) => {
-        user().error(TAG, error);
       });
   }
 

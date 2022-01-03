@@ -3,7 +3,7 @@
 const {
   verifySelectorsInvisible,
   verifySelectorsVisible,
-} = require('../../build-system/tasks/visual-diff/helpers');
+} = require('../../build-system/tasks/visual-diff/verifiers');
 
 module.exports = {
   'single selector select option 2': async (page, name) => {

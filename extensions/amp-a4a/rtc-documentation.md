@@ -149,6 +149,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   Purch
 -   Rubicon
 -   Salesforce
+-   [Snigel](https://www.snigel.com)
 -   T13
 -   Tail
 -   The Ozone Project

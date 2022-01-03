@@ -8,23 +8,13 @@ describes.sandboxed('released components: ', {}, function () {
   runTest.call(this, false);
 });
 
-describes.sandboxed('released components with polyfills: ', {}, function () {
-  runTest.call(this, true);
-});
-
-function runTest(shouldKillPolyfillableApis) {
+function runTest() {
   describe('Rendering of released components', function () {
     this.timeout(5000);
     let fixture;
-    beforeEach(() => {
+    beforeEach(async () => {
       this.timeout(3100);
-      return createFixtureIframe('test/fixtures/released.html', 3000, (win) => {
-        if (shouldKillPolyfillableApis) {
-          win.Promise = undefined;
-        }
-      }).then((f) => {
-        fixture = f;
-      });
+      fixture = await createFixtureIframe('test/fixtures/released.html', 3000);
     });
 
     // There is really weird behavior when running this test in FF during

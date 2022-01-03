@@ -28,8 +28,6 @@ const COMMON_GLOBS = [
   'node_modules/resize-observer-polyfill/ResizeObserver.install.js',
   'node_modules/obj-str/package.json',
   'node_modules/obj-str/dist/obj-str.mjs',
-  'node_modules/promise-pjs/package.json',
-  'node_modules/promise-pjs/promise.mjs',
   'node_modules/rrule/dist/es5/rrule.js',
   'node_modules/timeago.js/package.json',
   'node_modules/timeago.js/**/*.js',
@@ -107,6 +105,8 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-lightbox/1.0/*.js',
   // For amp-bind in the web worker (ww.js).
   'extensions/amp-bind/**/*.js',
+  // amp-dailymotion 0.1 and 1.0 share this file.
+  'extensions/amp-dailymotion/dailymotion-api.js',
   // amp-date-display 0.1 and 1.0 share this file.
   'extensions/amp-date-display/format.js',
   // Needed to access to Variant interface from other extensions

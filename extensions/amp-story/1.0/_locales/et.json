@@ -1,4 +1,25 @@
 {
+  "2": {
+    "string": "Toksake valikut Järgmine"
+  },
+  "3": {
+    "string": "Toksake valikut Tagasi"
+  },
+  "4": {
+    "string": "Linki ei saanud lõikelauale kopeerida :("
+  },
+  "5": {
+    "string": "Link on kopeeritud!"
+  },
+  "6": {
+    "string": "E-post"
+  },
+  "7": {
+    "string": "Facebook"
+  },
+  "9": {
+    "string": "Hangi link"
+  },
   "10": {
     "string": "LinkedIn"
   },
@@ -8,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Veel"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -19,12 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Selle sisu vaatamiseks peate lubama amp-story kogemuse."
-  },
-  "2": {
-    "string": "Toksake valikut Järgmine"
   },
   "21": {
     "string": "Vabandame, kahjuks ei saa teie brauseris seda lugu vaadata"
@@ -44,38 +56,11 @@
   "27": {
     "string": "Jätka sellegipoolest"
   },
-  "3": {
-    "string": "Toksake valikut Tagasi"
-  },
-  "31": {
-    "string": "Heli välja"
-  },
-  "32": {
-    "string": "Heli sisse"
-  },
-  "33": {
-    "string": "Sellel lehel pole heli"
-  },
   "34": {
     "string": "Esita video"
   },
   "35": {
     "string": "Pühkige üles"
-  },
-  "36": {
-    "string": "Laiendage säutsu"
-  },
-  "4": {
-    "string": "Linki ei saanud lõikelauale kopeerida :("
-  },
-  "5": {
-    "string": "Link on kopeeritud!"
-  },
-  "6": {
-    "string": "E-post"
-  },
-  "62": {
-    "string": "Jaga alates sellest lehest"
   },
   "63": {
     "string": "Line"
@@ -97,12 +82,6 @@
   },
   "69": {
     "string": "Jaga lugu"
-  },
-  "7": {
-    "string": "Facebook"
-  },
-  "70": {
-    "string": "Ava/peida loo menüü"
   },
   "71": {
     "string": "A"
@@ -131,17 +110,11 @@
   "79": {
     "string": "Nipsake, et liikuda järgmise loo juurde"
   },
-  "8": {
-    "string": "Google+"
-  },
   "80": {
     "string": "Sain aru"
   },
   "81": {
     "string": "Näpunäide"
-  },
-  "82": {
-    "string": "Eelmine leht"
   },
   "83": {
     "string": "Aktiveeri"
@@ -164,9 +137,6 @@
   "89": {
     "string": "Teie vastus saadetakse aadressile"
   },
-  "9": {
-    "string": "Hangi link"
-  },
   "90": {
     "string": "Järgmine lugu"
   },
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Avamine"
+  },
+  "98": {
+    "string": "Vormi ei esitatud, proovige uuesti"
+  },
+  "99": {
+    "string": "Vorm on esitatud"
   }
 }

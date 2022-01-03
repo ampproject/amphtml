@@ -4,8 +4,8 @@ import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
 import {
-  Layout,
-  LayoutPriority,
+  LayoutPriority_Enum,
+  Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
@@ -379,7 +379,7 @@ export class AmpA4A extends AMP.BaseElement {
     // therefore we want this to match the 3p priority.
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
+    return isPWA ? LayoutPriority_Enum.METADATA : LayoutPriority_Enum.ADS;
   }
 
   /** @override */
@@ -594,7 +594,7 @@ export class AmpA4A extends AMP.BaseElement {
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
     const fixedSizeZeroHeightOrWidth =
-      this.getLayout() != Layout.FLUID &&
+      this.getLayout() != Layout_Enum.FLUID &&
       (slotRect.height == 0 || slotRect.width == 0);
     if (
       fixedSizeZeroHeightOrWidth ||
@@ -993,7 +993,7 @@ export class AmpA4A extends AMP.BaseElement {
         if (!sanitizedHeadElement) {
           return this.handleFallback_(fallbackHttpResponse, checkStillCurrent);
         }
-        this.updateLayoutPriority(LayoutPriority.CONTENT);
+        this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
         this.isVerifiedAmpCreative_ = true;
         return sanitizedHeadElement;
       });
@@ -1011,7 +1011,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Experiment to give non-AMP creatives same benefits as AMP so
     // update priority.
     if (this.inNonAmpPreferenceExp()) {
-      this.updateLayoutPriority(LayoutPriority.CONTENT);
+      this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
     }
     return fallbackHttpResponse.arrayBuffer().then((domTextContent) => {
       checkStillCurrent();
@@ -1111,13 +1111,13 @@ export class AmpA4A extends AMP.BaseElement {
             if (this.inNonAmpPreferenceExp()) {
               // Experiment to give non-AMP creatives same benefits as AMP so
               // update priority.
-              this.updateLayoutPriority(LayoutPriority.CONTENT);
+              this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
             }
             return null;
           }
 
           // Update priority.
-          this.updateLayoutPriority(LayoutPriority.CONTENT);
+          this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
 
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
@@ -2326,13 +2326,6 @@ export class AmpA4A extends AMP.BaseElement {
       'https://tpc.googlesyndication.com/safeframe/' +
       `${this.safeframeVersion}/html/container.html`
     );
-  }
-
-  /**
-   * @return {boolean} whether this is a sticky ad unit
-   */
-  isStickyAd() {
-    return false;
   }
 
   /**

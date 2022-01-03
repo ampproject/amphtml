@@ -1,10 +1,10 @@
-#ifndef AMPVALIDATOR__KEYFRAMES_PARSE_CSS_H_
-#define AMPVALIDATOR__KEYFRAMES_PARSE_CSS_H_
+#ifndef CPP_ENGINE_KEYFRAMES_PARSE_CSS_H_
+#define CPP_ENGINE_KEYFRAMES_PARSE_CSS_H_
 
 #include <string>
 #include <vector>
 
-#include "css/parse-css.h"
+#include "cpp/htmlparser/css/parse-css.h"
 //
 // This is *not* meant to be a public API.
 //
@@ -23,4 +23,4 @@ void ValidateKeyframesCss(
     std::vector<std::unique_ptr<htmlparser::css::ErrorToken>>* errors);
 }  // namespace amp::validator::parse_css
 
-#endif  // AMPVALIDATOR__KEYFRAMES_PARSE_CSS_H_
+#endif  // CPP_ENGINE_KEYFRAMES_PARSE_CSS_H_

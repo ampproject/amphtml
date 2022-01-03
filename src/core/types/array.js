@@ -1,7 +1,7 @@
 /**
  * Converts an array-like object to an array.
- * @param {?IArrayLike<T>|string} arrayLike
- * @return {!Array<T>}
+ * @param {?ArrayLike<T>|string} arrayLike
+ * @return {Array<T>}
  * @template T
  */
 export function toArray(arrayLike) {
@@ -11,7 +11,7 @@ export function toArray(arrayLike) {
 /**
  * Determines if value is actually an Array.
  * @param {*} value
- * @return {boolean}
+ * @return {value is Array}
  */
 export const {isArray} = Array;
 
@@ -23,23 +23,23 @@ export const {isArray} = Array;
  * with declared type {string|!Array<string>} and return a value with a type of
  * {!Array<string|Array<string>>}.
  *
- * @param {!Array<T>|S} arrayOrSingleItem
- * @return {!Array<T>|!Array<S>}
+ * @param {Array<T>|S} arrayOrSingleItem
+ * @return {Array<T>|Array<S>}
  * @template S
  * @template T
  */
 export function arrayOrSingleItemToArray(arrayOrSingleItem) {
   return isArray(arrayOrSingleItem)
-    ? /** @type {!Array<T>} */ (arrayOrSingleItem)
-    : [/** @type {!S} */ (arrayOrSingleItem)];
+    ? /** @type {Array<T>} */ (arrayOrSingleItem)
+    : [/** @type {S} */ (arrayOrSingleItem)];
 }
 
 /**
  * Compares if two arrays contains exactly same elements of same number
  * of same order. Note that it does NOT handle NaN case as expected.
  *
- * @param {!Array<T>} arr1
- * @param {!Array<T>} arr2
+ * @param {Array<T>} arr1
+ * @param {Array<T>} arr2
  * @return {boolean}
  * @template T
  */
@@ -58,9 +58,9 @@ export function areEqualOrdered(arr1, arr2) {
 /**
  * Removes elements that shouldRemove returns true for from the array.
  *
- * @param {!Array<T>} array
- * @param {function(T, number, !Array<T>):boolean} shouldRemove
- * @return {!Array<T>}
+ * @param {Array<T>} array
+ * @param {function(T, number, Array<T>):boolean} shouldRemove
+ * @return {Array<T>}
  * @template T
  */
 export function remove(array, shouldRemove) {
@@ -87,8 +87,8 @@ export function remove(array, shouldRemove) {
  * Returns the index of the first element matching the predicate.
  * Like Array#findIndex.
  *
- * @param {!Array<T>} array
- * @param {function(T, number, !Array<T>):boolean} predicate
+ * @param {Array<T>} array
+ * @param {function(T, number, Array<T>):boolean} predicate
  * @return {number}
  * @template T
  */
@@ -104,7 +104,7 @@ export function findIndex(array, predicate) {
 /**
  * Converts the given iterator to an array.
  *
- * @param {!Iterator<T>} iterator
+ * @param {Iterator<T>} iterator
  * @return {Array<T>}
  * @template T
  */
@@ -136,7 +136,7 @@ export function pushIfNotExist(array, item) {
  * Removes the first matching item in the array. Returns `true` if the array
  * has changed.
  *
- * @param {!Array<T>} array
+ * @param {Array<T>} array
  * @param {T} item
  * @return {boolean}
  * @template T

@@ -15,6 +15,7 @@ const NON_DATA_ATTRIBUTE_ALLOWLIST = {
   'layout': true,
   'height': true,
   'width': true,
+  'sticky': true,
 };
 
 /**

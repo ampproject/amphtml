@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {tryResolve} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
@@ -7,7 +7,7 @@ import {isArray} from '#core/types';
 
 import {Services} from '#service';
 
-import {AutoLightboxEvents} from '../../../../src/auto-lightbox';
+import {AutoLightboxEvents_Enum} from '../../../../src/auto-lightbox';
 import {
   Criteria,
   DocMetaAnnotations,
@@ -94,9 +94,9 @@ describes.realWin(
       const signals = new Signals();
       element.signals = () => signals;
       if (isLoadedSuccessfully) {
-        signals.signal(CommonSignals.LOAD_END);
+        signals.signal(CommonSignals_Enum.LOAD_END);
       } else {
-        signals.rejectSignal(CommonSignals.LOAD_END, 'Mocked rejection');
+        signals.rejectSignal(CommonSignals_Enum.LOAD_END, 'Mocked rejection');
       }
       return element;
     }
@@ -549,14 +549,14 @@ describes.realWin(
         const signals = new Signals();
         img.signals = () => signals;
 
-        signals.signal(CommonSignals.LOAD_END);
+        signals.signal(CommonSignals_Enum.LOAD_END);
 
         const candidatePromise = Promise.all(runCandidates(env.ampdoc, [img]));
 
         // Skip microtask and reset LOAD_END to emulate unloading in the middle
         // of the candidate's measurement.
         await new Promise((resolve) => resolve());
-        signals.reset(CommonSignals.LOAD_END);
+        signals.reset(CommonSignals_Enum.LOAD_END);
 
         const elected = await candidatePromise;
         expect(elected[0]).to.be.undefined;
@@ -766,7 +766,7 @@ describes.realWin(
         `;
 
         const eventSpy = env.sandbox.spy();
-        element.addEventListener(AutoLightboxEvents.NEWLY_SET, eventSpy);
+        element.addEventListener(AutoLightboxEvents_Enum.NEWLY_SET, eventSpy);
 
         await apply(env.ampdoc, element);
         expect(eventSpy).to.be.calledOnce;

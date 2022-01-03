@@ -14,7 +14,7 @@ const jobName = 'visual-diff-tests.js';
  * Steps to run during push builds.
  */
 function pushBuildWorkflow() {
-  timedExecOrDie('amp visual-diff --nobuild --main');
+  timedExecOrDie('amp visual-diff --esm --minified --main');
 }
 
 /**
@@ -22,9 +22,9 @@ function pushBuildWorkflow() {
  */
 function prBuildWorkflow() {
   if (buildTargetsInclude(Targets.RUNTIME, Targets.VISUAL_DIFF)) {
-    timedExecOrDie('amp visual-diff --nobuild');
+    timedExecOrDie('amp visual-diff --esm --minified');
   } else {
-    timedExecOrDie('amp visual-diff --empty');
+    timedExecOrDie('amp visual-diff --empty --esm --minified');
     skipDependentJobs(
       jobName,
       'this PR does not affect the runtime or visual diff tests'

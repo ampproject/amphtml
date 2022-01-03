@@ -117,6 +117,18 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
         'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com'
       );
     });
+
+    it('should add the ACAO queryparam if the video is crossorigin', async () => {
+      const videoEl = createVideo([{'src': 'video.html'}]);
+      videoEl.setAttribute('crossorigin', '');
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
+      );
+    });
   });
 
   describe('add sources', () => {
@@ -151,7 +163,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
             sources: [
               {
                 'url': 'video1.mp4',
-                'codec': 'vp09.02.30.11',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 700,
                 type: 'video/mp4',
               },
@@ -176,10 +188,11 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       const addedSources = videoEl.querySelectorAll('source');
+
       const srcType0 = addedSources[0].getAttribute('type');
       const srcType1 = addedSources[1].getAttribute('type');
       const srcType2 = addedSources[2].getAttribute('type');
-      expect(srcType0).to.equal('video/mp4; codecs=vp09.02.30.11');
+      expect(srcType0).to.equal('video/mp4; codecs=vp09.00.30.08');
       expect(srcType1).to.equal('video/mp4');
       expect(srcType2).to.equal('video/mp4; codecs=unknown');
     });
@@ -191,19 +204,19 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
             sources: [
               {
                 'url': 'video1.mp4',
-                'codec': 'vp09.02.30.11',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 700,
                 type: 'video/mp4',
               },
               {
                 'url': 'video2.mp4',
-                'codec': 'vp09.00.15.08',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 2000,
                 type: 'video/mp4',
               },
               {
                 'url': 'video3.mp4',
-                'codec': 'vp09.00.25.00',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 1500,
                 type: 'video/mp4',
               },
@@ -234,13 +247,13 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
               },
               {
                 'url': 'video2.mp4',
-                'codec': 'vp09.02.30.11',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 1000,
                 type: 'video/mp4',
               },
               {
                 'url': 'video3.mp4',
-                'codec': 'vp09.00.15.08',
+                'codec': 'vp09.00.30.08',
                 'bitrate_kbps': 2000,
                 type: 'video/mp4',
               },
@@ -265,10 +278,10 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const srcType3 = addedSources[3].getAttribute('type');
 
       expect(addedSources[0].getAttribute('data-bitrate')).to.equal('2000');
-      expect(srcType0).to.equal('video/mp4; codecs=vp09.00.15.08');
+      expect(srcType0).to.equal('video/mp4; codecs=vp09.00.30.08');
 
       expect(addedSources[1].getAttribute('data-bitrate')).to.equal('1000');
-      expect(srcType1).to.equal('video/mp4; codecs=vp09.02.30.11');
+      expect(srcType1).to.equal('video/mp4; codecs=vp09.00.30.08');
 
       expect(addedSources[2].getAttribute('data-bitrate')).to.equal('3000');
       expect(srcType2).to.equal('video/mp4');
