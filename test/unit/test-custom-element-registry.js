@@ -12,6 +12,8 @@ import {
   upgradeOrRegisterElement,
 } from '#service/custom-element-registry';
 
+import {FakePerformance} from '#testing/fake-dom';
+
 import {BaseElement} from '../../src/base-element';
 import {getImplSyncForTesting} from '../../src/custom-element';
 import {ElementStub} from '../../src/element-stub';
@@ -278,6 +280,7 @@ describes.realWin('CustomElement register', {amp: true}, (env) => {
         },
         HTMLElement,
         __AMP_EXTENDED_ELEMENTS: {},
+        performance: new FakePerformance(window),
       };
       doc.defaultView = win;
 

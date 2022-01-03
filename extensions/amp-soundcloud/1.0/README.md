@@ -6,9 +6,7 @@ Embeds a [Soundcloud](https://soundcloud.com) clip.
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-soundcloud>` web component.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/soundcloud
@@ -19,51 +17,60 @@ import {defineElement as defineBentoSoundcloud} from '@bentoproject/soundcloud';
 defineBentoSoundcloud();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-soundcloud {
-      display: block;
-      overflow: hidden;
-      position: relative;
-    }
-  </style>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"
-  ></script>
-  <style>
-    bento-soundcloud {
-      aspect-ratio: 1;
-    }
-  </style>
-</head>
-<bento-soundcloud
-  id="my-track"
-  data-trackid="243169232"
-  data-visual="true"
-></bento-soundcloud>
-<div class="buttons" style="margin-top: 8px">
-  <button id="change-track">Change track</button>
-</div>
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.css" crossorigin="anonymous">
+```
 
-<script>
-  (async () => {
-    const soundcloud = document.querySelector('#my-track');
-    await customElements.whenDefined('bento-soundcloud');
+### Example
 
-    // set up button actions
-    document.querySelector('#change-track').onclick = () => {
-      soundcloud.setAttribute('data-trackid', '243169232');
-      soundcloud.setAttribute('data-color', 'ff5500');
-      soundcloud.removeAttribute('data-visual');
-    };
-  })();
-</script>
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.css"
+    />
+    <style>
+      bento-soundcloud {
+        width: 300px;
+        height: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-soundcloud
+      id="my-track"
+      data-trackid="89299804"
+      data-visual="true"
+    ></bento-soundcloud>
+  </body>
+</html>
 ```
 
 ### Layout and style
@@ -103,38 +110,94 @@ bento-soundcloud {
 
 ### Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-trackid</strong></td>
-    <td>This attribute is required if <code>data-playlistid</code> is not defined.<br />
-The value for this attribute is the ID of a track, an integer.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-playlistid</strong></td>
-    <td>This attribute is required if <code>data-trackid</code> is not defined.
-The value for this attribute is the ID of a playlist, an integer.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-secret-token (optional)</strong></td>
-    <td>The secret token of the track, if it is private.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-visual (optional)</strong></td>
-    <td>If set to <code>true</code>, displays full-width "Visual" mode; otherwise, it displays as "Classic" mode. The default value is <code>false</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-color (optional)</strong></td>
-    <td>This attribute is a custom color override for the "Classic" mode. The attribute is ignored in "Visual" mode. Specify a hexadecimal color value, without the leading # (e.g., <code>data-color="e540ff"</code>).</td>
-  </tr>
-</table>
+Programmatically changing one of the attributes will result in the player being automatically updated.
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-soundcloud-1.0.css"
+    />
+    <style>
+      bento-soundcloud {
+        width: 300px;
+        height: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-soundcloud
+      id="my-track"
+      data-trackid="89299804"
+      data-visual="true"
+    ></bento-soundcloud>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-track">Change track</button>
+    </div>
+
+    <script>
+      (async () => {
+        const soundcloud = document.querySelector('#my-track');
+        await customElements.whenDefined('bento-soundcloud');
+
+        // set up button actions
+        document.querySelector('#change-track').onclick = () => {
+          soundcloud.setAttribute('data-trackid', '243169232');
+          soundcloud.setAttribute('data-color', 'ff5500');
+          soundcloud.removeAttribute('data-visual');
+        };
+      })();
+    </script>
+  </body>
+</html>
+```
+
+##### data-track
+
+This attribute is required if <code>data-playlistid</code> is not defined. The value for this attribute is the ID of a track, an integer.
+
+##### data-playlistid
+
+This attribute is required if <code>data-trackid</code> is not defined. The value for this attribute is the ID of a playlist, an integer.
+
+##### data-secret-token (optional)
+
+The secret token of the track, if it is private.
+
+##### data-visual (optional)
+
+If set to <code>true</code>, displays full-width "Visual" mode; otherwise, it displays as "Classic" mode. The default value is <code>false</code>.
+
+##### data-color (optional)
+
+This attribute is a custom color override for the "Classic" mode. The attribute is ignored in "Visual" mode. Specify a hexadecimal color value, without the leading # (e.g., <code>data-color="e540ff"</code>).
 
 ---
 
 ## Preact/React Component
 
-The examples below demonstrate use of the `<BentoSoundcloud>` as a functional component usable with the Preact or React libraries.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/soundcloud
@@ -183,27 +246,24 @@ Or via `className`:
 
 ### Props
 
-<table>
-  <tr>
-    <td width="40%"><strong>trackId</strong></td>
-    <td>This attribute is required if <code>data-playlistid</code> is not defined.<br />
-The value for this attribute is the ID of a track, an integer.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>playlistId</strong></td>
-    <td>This attribute is required if <code>data-trackid</code> is not defined.
-The value for this attribute is the ID of a playlist, an integer.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>secretToken (optional)</strong></td>
-    <td>The secret token of the track, if it is private.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>visual (optional)</strong></td>
-    <td>If set to <code>true</code>, displays full-width "Visual" mode; otherwise, it displays as "Classic" mode. The default value is <code>false</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>color (optional)</strong></td>
-    <td>This attribute is a custom color override for the "Classic" mode. The attribute is ignored in "Visual" mode. Specify a hexadecimal color value, without the leading # (e.g., <code>data-color="e540ff"</code>).</td>
-  </tr>
-</table>
+##### trackId
+
+This attribute is required if <code>data-playlistid</code> is not defined.
+The value for this attribute is the ID of a track, an integer.
+
+##### playlistId
+
+This attribute is required if <code>data-trackid</code> is not defined.
+The value for this attribute is the ID of a playlist, an integer.
+
+##### secretToken (optional)
+
+The secret token of the track, if it is private.
+
+##### visual (optional)
+
+If set to <code>true</code>, displays full-width "Visual" mode; otherwise, it displays as "Classic" mode. The default value is <code>false</code>.
+
+##### color (optional)
+
+This attribute is a custom color override for the "Classic" mode. The attribute is ignored in "Visual" mode. Specify a hexadecimal color value, without the leading # (e.g., <code>data-color="e540ff"</code>).

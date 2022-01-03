@@ -17,9 +17,9 @@ amp-story[standalone] {
     --i-amphtml-story-desktop-one-panel-ratio: 69 / 116;
     --i-amphtml-story-desktop-one-panel-responsive-margin: max(74px, 8.25vh);
     /** Calculates panel height by subtracting responsive vertical margin. */
-    --i-amphtml-story-desktop-one-panel-height: calc(100vh - var(--i-amphtml-story-desktop-one-panel-responsive-margin) * 2);
+    --i-amphtml-story-desktop-one-panel-height: calc(var(--story-100dvh) - var(--i-amphtml-story-desktop-one-panel-responsive-margin) * 2);
     --i-amphtml-story-desktop-one-panel-width: calc(var(--i-amphtml-story-desktop-one-panel-height) * var(--i-amphtml-story-desktop-one-panel-ratio));
-    --i-amphtml-story-desktop-one-panel-border-radius: 10px;
+    --i-amphtml-story-desktop-one-panel-border-radius: 20px;
     --story-page-vw: calc(var(--i-amphtml-story-desktop-one-panel-width) * .01) !important;
     --story-page-vh: calc(var(--i-amphtml-story-desktop-one-panel-height) * .01) !important;
   }
@@ -27,7 +27,7 @@ amp-story[standalone] {
   @media(max-height: 756px) {
     :root:not([data-story-supports-landscape]):not([i-amphtml-story-mobile]) {
       --i-amphtml-story-desktop-one-panel-responsive-margin: 0px;
-      --i-amphtml-story-desktop-one-panel-width: calc(100vh * var(--i-amphtml-story-desktop-one-panel-ratio));
+      --i-amphtml-story-desktop-one-panel-width: calc(var(--story-100dvh) * var(--i-amphtml-story-desktop-one-panel-ratio));
       --i-amphtml-story-desktop-one-panel-border-radius: 0;
     }
   }

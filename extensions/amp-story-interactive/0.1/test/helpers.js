@@ -201,3 +201,5 @@ export const addThresholdsToInteractive = (interactive, thresholdList) => {
     );
   });
 };
+
+export const MOCK_URL = 'https://amp.dev';

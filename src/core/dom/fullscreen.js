@@ -1,7 +1,7 @@
 /**
  * Replacement for `Element.requestFullscreen()` method.
  * https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullscreen
- * @param {!Element} element
+ * @param {Element} element
  */
 export function fullscreenEnter(element) {
   const requestFs =
@@ -19,7 +19,7 @@ export function fullscreenEnter(element) {
 /**
  * Replacement for `Document.exitFullscreen()` method.
  * https://developer.mozilla.org/en-US/docs/Web/API/Document/exitFullscreen
- * @param {!Element} element
+ * @param {Element} element
  */
 export function fullscreenExit(element) {
   const elementBoundExit =
@@ -52,7 +52,7 @@ export function fullscreenExit(element) {
 /**
  * Replacement for `Document.fullscreenElement`.
  * https://developer.mozilla.org/en-US/docs/Web/API/Document/fullscreenElement
- * @param {!Element} element
+ * @param {Element} element
  * @return {boolean}
  */
 export function isFullscreenElement(element) {

@@ -1,6 +1,7 @@
 import '../amp-mathml';
 
-import {MessageType, serializeMessage} from '#core/3p-frame-messaging';
+import {expect} from 'chai';
+
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
@@ -30,10 +31,12 @@ describes.realWin(
       const ampMathmlElement = createAmpMathmlElement(env, {
         title: mockTitle,
         formula: mockFormula,
+        style: 'height: 40px;',
       });
       env.win.document.body.appendChild(ampMathmlElement);
       await waitForRender(ampMathmlElement);
 
+      expect(ampMathmlElement.style.height).to.equal('40px');
       expect(ampMathmlElement.shadowRoot.querySelector('iframe').src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html'
       );
@@ -45,6 +48,7 @@ describes.realWin(
       const ampMathmlElement = createAmpMathmlElement(env, {
         title: mockTitle,
         formula: mockFormula,
+        style: 'height: 40px;',
       });
       env.win.document.body.appendChild(ampMathmlElement);
       await waitForRender(ampMathmlElement);
@@ -57,13 +61,7 @@ describes.realWin(
       expect(formula).to.equal(mockFormula);
     });
 
-    it('should call amp actions', async () => {
-      env.win.IntersectionObserver = env.sandbox.stub();
-      env.win.IntersectionObserver.callsFake(() => ({
-        observe: env.sandbox.stub(),
-        unobserve: env.sandbox.stub(),
-      }));
-
+    it('should render nothing without explicit dimension', async () => {
       const mockTitle = 'mock title';
       const mockFormula = QUADRATIC_FORMULA;
       const ampMathmlElement = createAmpMathmlElement(env, {
@@ -73,94 +71,7 @@ describes.realWin(
       env.win.document.body.appendChild(ampMathmlElement);
       await waitForRender(ampMathmlElement);
 
-      const iframe = ampMathmlElement.shadowRoot.querySelector('iframe');
-      const divFrameWrapper = iframe.parentElement.parentElement;
-
-      const impl = await ampMathmlElement.getImpl(false);
-      const attemptChangeSizeStub = env.sandbox.stub(impl, 'attemptChangeSize');
-      attemptChangeSizeStub.returns(Promise.resolve());
-      const onLoadStub = env.sandbox.stub(impl, 'handleOnLoad');
-      onLoadStub.returns(undefined);
-
-      const mockEvent = new CustomEvent('message');
-      mockEvent.data = serializeMessage(
-        MessageType.EMBED_SIZE,
-        JSON.parse(iframe.getAttribute('name')).attributes.sentinel,
-        {
-          height: 1001,
-          width: 1002,
-        }
-      );
-      mockEvent.source = iframe.contentWindow;
-      env.win.dispatchEvent(mockEvent);
-
-      // wait for useIntersectionObserver hook to execute
-      await Promise.resolve();
-
-      // simulate offscreen intersection to force "render"
-      const ioCallback = env.win.IntersectionObserver.lastCall.firstArg;
-      ioCallback([{isIntersecting: false, target: divFrameWrapper}]);
-
-      // wait for useEffectHook to execute
-      await waitForHooks();
-
-      expect(onLoadStub).to.be.calledOnce;
-      expect(attemptChangeSizeStub).to.be.calledOnce.calledWith(
-        1001,
-        /* width should be ignored for non-inline elements */
-        undefined
-      );
-    });
-
-    it('should render inline correctly', async () => {
-      env.win.IntersectionObserver = env.sandbox.stub();
-      env.win.IntersectionObserver.callsFake(() => ({
-        observe: env.sandbox.stub(),
-        unobserve: env.sandbox.stub(),
-      }));
-
-      const mockTitle = 'mock title';
-      const mockFormula = QUADRATIC_FORMULA;
-      const ampMathmlElement = createAmpMathmlElement(env, {
-        title: mockTitle,
-        formula: mockFormula,
-        inline: true,
-      });
-      env.win.document.body.appendChild(ampMathmlElement);
-      await waitForRender(ampMathmlElement);
-
-      const iframe = ampMathmlElement.shadowRoot.querySelector('iframe');
-      const divFrameWrapper = iframe.parentElement.parentElement;
-      expect(divFrameWrapper.classList.toString().includes('inline')).to.be
-        .true;
-
-      const impl = await ampMathmlElement.getImpl(false);
-      const attemptChangeSizeStub = env.sandbox.stub(impl, 'attemptChangeSize');
-      attemptChangeSizeStub.returns(Promise.resolve());
-
-      const mockEvent = new CustomEvent('message');
-      mockEvent.data = serializeMessage(
-        MessageType.EMBED_SIZE,
-        JSON.parse(iframe.getAttribute('name')).attributes.sentinel,
-        {
-          height: 1001,
-          width: 1002,
-        }
-      );
-      mockEvent.source = iframe.contentWindow;
-      env.win.dispatchEvent(mockEvent);
-
-      // wait for useIntersectionObserver hook to execute
-      await Promise.resolve();
-
-      // simulate offscreen intersection to force "render"
-      const ioCallback = env.win.IntersectionObserver.lastCall.firstArg;
-      ioCallback([{isIntersecting: false, target: divFrameWrapper}]);
-
-      // wait for useEffectHook to execute
-      await waitForHooks();
-
-      expect(attemptChangeSizeStub).to.be.calledOnce.calledWith(1001, 1002);
+      expect(ampMathmlElement.style.height).to.be.empty;
     });
   }
 );
@@ -184,8 +95,4 @@ async function waitForRender(element) {
     'iframe mounted'
   );
   await loadPromise;
-}
-
-async function waitForHooks() {
-  return new Promise((r) => setTimeout(r, 50));
 }

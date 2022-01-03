@@ -1,5 +1,5 @@
-#ifndef HTMLPARSER__HASH_H_
-#define HTMLPARSER__HASH_H_
+#ifndef CPP_HTMLPARSER_HASH_H_
+#define CPP_HTMLPARSER_HASH_H_
 
 #include <string_view>
 
@@ -43,4 +43,4 @@ class Hash {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__HASH_H_
+#endif  // CPP_HTMLPARSER_HASH_H_

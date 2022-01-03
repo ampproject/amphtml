@@ -4,7 +4,7 @@ import {
   installImg,
 } from '#builtins/amp-img/amp-img';
 
-import {Layout, LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum, Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 
@@ -68,7 +68,7 @@ describes.sandboxed('amp-img', {}, (env) => {
       referrerpolicy: 'origin',
     });
     const impl = await ampImg.getImpl(false);
-    expect(impl.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+    expect(impl.getLayoutPriority()).to.equal(LayoutPriority_Enum.CONTENT);
 
     const img = ampImg.querySelector('img');
     expect(img.tagName).to.equal('IMG');
@@ -86,7 +86,7 @@ describes.sandboxed('amp-img', {}, (env) => {
       height: 200,
     });
     const impl = await ampImg.getImpl(false);
-    expect(impl.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+    expect(impl.getLayoutPriority()).to.equal(LayoutPriority_Enum.CONTENT);
 
     const img = ampImg.querySelector('img');
     expect(img.tagName).to.equal('IMG');
@@ -715,7 +715,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     it('should generate correct sizes for layout fixed', () => {
       const impl = getStubbedImg(
         {
-          layout: Layout.FIXED,
+          layout: Layout_Enum.FIXED,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -735,7 +735,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     it('should generate correct sizes for layout responsive', () => {
       const impl = getStubbedImg(
         {
-          layout: Layout.RESPONSIVE,
+          layout: Layout_Enum.RESPONSIVE,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -755,7 +755,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     it('should generate correct sizes for layout fixed-height', () => {
       const impl = getStubbedImg(
         {
-          layout: Layout.FIXED_HEIGHT,
+          layout: Layout_Enum.FIXED_HEIGHT,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -775,7 +775,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     it('should generate correct sizes for layout fill', () => {
       const impl = getStubbedImg(
         {
-          layout: Layout.FILL,
+          layout: Layout_Enum.FILL,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,
@@ -795,7 +795,7 @@ describes.sandboxed('amp-img', {}, (env) => {
     it('should generate correct sizes for layout flex-item', () => {
       const impl = getStubbedImg(
         {
-          layout: Layout.FLEX_ITEM,
+          layout: Layout_Enum.FLEX_ITEM,
           src: 'test.jpg',
           srcset: 'large.jpg 2000w, small.jpg 1000w',
           width: 300,

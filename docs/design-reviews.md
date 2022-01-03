@@ -19,7 +19,7 @@ You can optionally join the [design review Google Group](https://groups.google.c
 
 Because AMP contributors are located all over the world we rotate the design review times to accommodate people in different time zones. The time and date for a design review will be specified in that design review's issue.
 
-If none of the design review times are convenient for you and you have a design you would like to discuss please reach out to mrjoro on [Slack](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#discussion-channels).
+If none of the design review times are convenient for you and you have a design you would like to discuss please reach out on the [#contributing](https://amphtml.slack.com/messages/C9HRJ1GPN/) channel in Slack.
 
 ## Bringing your design to a design review
 
@@ -58,7 +58,7 @@ For larger design topics (e.g. new features, or a significant change), the use o
     -   You create an explainer as a Pull Request, and comments/updates can be made using the normal PR review process.
     -   Explainers should be added to the appropriate Working Group repository. Explainers for work that span multiple working groups may be placed in any of the appropriate WG repos. Explainers for work that does not align with a WG may use the [ampproject design-doc](https://github.com/ampproject/design-docs) repository.
     -   You _may_ use a public Google document (with public comments enabled) instead of an md file for your explainer, but this has significant disadvantages. If you use a Google document, you _must_ submit a PDF version in the same repository you would have used for an explainer md file.
-    -   The [W3C TAG Explainer document](https://w3ctag.github.io/explainers) describes what an explainer should contain and a recommended template. [Design docs at Google](https://www.industrialempathy.com/posts/design-docs-at-google/) also has tips on documenting a design.
+    -   The [W3C TAG Explainer document](https://tag.w3.org/explainers/) describes what an explainer should contain and a recommended template. [Design docs at Google](https://www.industrialempathy.com/posts/design-docs-at-google/) also has tips on documenting a design.
     -   An explainer does not need to be "final" before being merged in. You may merge in a draft copy and handle updates through issues/PRs as needed.
     -   Explainers (whether as an md file or in a Google document) should be visible to the public, and any member of the community should be able to comment on it. The explainer should not link to non-public information except in extraordinary circumstances, and the non-public nature of the link and the reason for it not being public should be detailed.
 -   See the ["Using React/Preact to implement AMP elements" explainer](https://github.com/ampproject/wg-bento/blob/main/react/explainer.md) for an example.

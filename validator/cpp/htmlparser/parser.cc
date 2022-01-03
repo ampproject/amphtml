@@ -6,21 +6,17 @@
 #endif               // DUMP_NODES
 
 #include "absl/flags/flag.h"
-#include "atomutil.h"
-#include "comparators.h"
-#include "defer.h"
-#include "doctype.h"
-#include "foreign.h"
-#include "logging.h"
-#include "parser.h"
-#include "strings.h"
+#include "absl/status/status.h"
+#include "cpp/htmlparser/atomutil.h"
+#include "cpp/htmlparser/comparators.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/doctype.h"
+#include "cpp/htmlparser/foreign.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/htmlparser/parser.h"
+#include "cpp/htmlparser/strings.h"
 
-ABSL_FLAG(uint32_t, htmlparser_max_nodes_depth_count, 245,
-          "Maximum depth of open nodes. "
-          "For: <a><b><c><d></d></c></b/></a>, the stack size is 4 as <a> is "
-          "kept open until three elements <b>,<c> and <d> are closed. "
-          "For: <a>a</a><b>b</b><c>c</c><d>d</d> the depth is 1 as they are "
-          "closed immediately after one child element.");
+ABSL_RETIRED_FLAG(uint32_t, htmlparser_max_nodes_depth_count, 245, "retired");
 
 namespace htmlparser {
 
@@ -85,16 +81,14 @@ std::unique_ptr<Document> ParseFragmentWithOptions(std::string_view html,
 
   auto doc = parser->Parse();
 
-  // doc could be nullptr when, for example, the stack depth >
-  // htmlparser_max_nodes_depth_count).
-  if (doc == nullptr) return nullptr;
-
-  Node* parent = fragment_parent ? root : doc->root_node_;
-  for (Node* c = parent->FirstChild(); c;) {
-    Node* next = c->NextSibling();
-    doc->fragment_nodes_.push_back(std::move(c));
-    parent->RemoveChild(c);
-    c = next;
+  if (doc->status().ok()) {
+    Node* parent = fragment_parent ? root : doc->root_node_;
+    for (Node* c = parent->FirstChild(); c;) {
+      Node* next = c->NextSibling();
+      doc->fragment_nodes_.push_back(std::move(c));
+      parent->RemoveChild(c);
+      c = next;
+    }
   }
 
   return doc;
@@ -134,13 +128,6 @@ Parser::Parser(std::string_view html, const ParseOptions& options,
 std::unique_ptr<Document> Parser::Parse() {
   bool eof = tokenizer_->IsEOF();
   while (!eof) {
-    if (open_elements_stack_.size() >
-        ::absl::GetFlag(FLAGS_htmlparser_max_nodes_depth_count)) {
-      // Skipping parsing. Document too complex.
-      delete document_.release();
-      return nullptr;
-    }
-
     Node* node = open_elements_stack_.Top();
     tokenizer_->SetAllowCDATA(node && !node->name_space_.empty());
     // Read and parse the next token.
@@ -150,7 +137,9 @@ std::unique_ptr<Document> Parser::Parse() {
     if (token_type == TokenType::ERROR_TOKEN) {
       eof = tokenizer_->IsEOF();
       if (!eof && tokenizer_->Error()) {
-        return nullptr;
+        document_->status_ = absl::InvalidArgumentError(
+            "htmlparser::Parser tokenizer error.");
+        return std::move(document_);
       }
     }
     token_ = tokenizer_->token();
@@ -217,7 +206,7 @@ int Parser::IndexOfElementInScope(Scope scope,
           }
           break;
         default:
-          CHECK(false, "HTML Parser reached unreachable scope");
+          CHECK(false) << "HTML Parser reached unreachable scope";
       }
     }
 
@@ -274,7 +263,7 @@ void Parser::ClearStackToContext(Scope scope) {
         }
         break;
       default:
-        CHECK(false, "HTML Parser reached unreachable scope");
+        CHECK(false) << "HTML Parser reached unreachable scope";
     }
   }
 }  // Parser::ClearStackToContext.
@@ -548,8 +537,8 @@ void Parser::AcknowledgeSelfClosingTag() {
 
 // Section 12.2.4.1, "using the rules for".
 void Parser::SetOriginalIM() {
-  CHECK(!original_insertion_mode_,
-        "html: bad parser state: original_insertion_mode was set twice");
+  CHECK(!original_insertion_mode_)
+      << "html: bad parser state: original_insertion_mode was set twice";
   original_insertion_mode_ = insertion_mode_;
 }  // Parser::SetOriginalIM.
 
@@ -1016,8 +1005,8 @@ bool Parser::InHeadNoscriptIM() {
       break;
   }
   open_elements_stack_.Pop();
-  CHECK(top()->atom_ == Atom::HEAD,
-        "html: the new current node will be a head element.");
+  CHECK(top()->atom_ == Atom::HEAD)
+      << "html: the new current node will be a head element.";
 
   insertion_mode_ = std::bind(&Parser::InHeadIM, this);
   if (token_.atom == Atom::NOSCRIPT) {
@@ -1119,7 +1108,7 @@ bool Parser::AfterHeadIM() {
 }  // Parser::AfterHeadIM.
 
 // Section 12.2.6.4.7.
-bool Parser::InBodyIM() {
+bool Parser::InBodyIM() {  // NOLINT
   switch (token_.token_type) {
     case TokenType::TEXT_TOKEN: {
       std::string d = token_.data;
@@ -1751,7 +1740,8 @@ bool Parser::InBodyIM() {
   }
 
   return true;
-}  // Parser::InBodyIM.
+}  // NOLINT(readability/fn_size)
+// Parser::InBodyIM end.
 
 void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
   // This is the "adoption agency" algorithm, described at
@@ -2868,9 +2858,9 @@ bool Parser::AfterBodyIM() {
     case TokenType::COMMENT_TOKEN: {
       // The comment is attached to the <html> element.
       CHECK(open_elements_stack_.size() > 0 &&
-                open_elements_stack_.at(0)->atom_ == Atom::HTML,
-            "html: bad parser state: <html> element not found, in the "
-            "after-body insertion mode");
+            open_elements_stack_.at(0)->atom_ == Atom::HTML)
+          << "html: bad parser state: <html> element not found, in the "
+             "after-body insertion mode";
       Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       if (record_node_offsets_) {
@@ -3136,7 +3126,7 @@ bool Parser::ParseForeignContent() {
         }
         AdjustSVGAttributeNames(&token_.attributes);
       } else {
-        CHECK(false, "html: bad parser state: unexpected namespace");
+        CHECK(false) << "html: bad parser state: unexpected namespace";
       }
 
       AdjustForeignAttributes(&token_.attributes);

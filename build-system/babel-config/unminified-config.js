@@ -32,6 +32,7 @@ function getUnminifiedConfig() {
   ];
   const replacePlugin = getReplacePlugin();
   const unminifiedPlugins = [
+    './build-system/babel-plugins/babel-plugin-jsx-style-object',
     getImportResolverPlugin(),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     replacePlugin,

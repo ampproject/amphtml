@@ -1,5 +1,5 @@
-#ifndef HTMLPARSER__FILEUTIL_H_
-#define HTMLPARSER__FILEUTIL_H_
+#ifndef CPP_HTMLPARSER_FILEUTIL_H_
+#define CPP_HTMLPARSER_FILEUTIL_H_
 
 #include <climits>
 #include <functional>
@@ -241,4 +241,4 @@ class FileUtil {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__FILEUTIL_H_
+#endif  // CPP_HTMLPARSER_FILEUTIL_H_

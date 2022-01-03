@@ -1,4 +1,7 @@
-/** @const */
+/**
+ * @const
+ * @type {Object<string, string>}
+ */
 export const StoryAdSegmentExp = {
   ID: 'story-ad-progress-segment',
   CONTROL: '31063379', // No ad advance, no page advance, no new cta.
@@ -9,7 +12,10 @@ export const StoryAdSegmentExp = {
   FOURTEEN_SECONDS: '31063384',
 };
 
-/** @const */
+/**
+ * @const
+ * @type {Object<string, string>}
+ */
 export const StoryAdSegmentTimes = {
   SENTINEL: '999999ms',
   TEN_SECONDS: '10000ms',
@@ -17,7 +23,10 @@ export const StoryAdSegmentTimes = {
   FOURTEEN_SECONDS: '14000ms',
 };
 
-/** @const */
+/**
+ * @const
+ * @type {Object<string, string>}
+ */
 export const BranchToTimeValues = {
   [StoryAdSegmentExp.TEN_SECONDS]: StoryAdSegmentTimes.TEN_SECONDS,
   [StoryAdSegmentExp.TWELVE_SECONDS]: StoryAdSegmentTimes.TWELVE_SECONDS,
