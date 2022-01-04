@@ -25,7 +25,6 @@ describes.sandboxed('validateAdContentRating', {}, function () {
     const runTest = (contentRating) => {
       expect(validateAdContentRating(contentRating)).to.equal(false);
     };
-    // One of pub control params is missing.
     runTest(
       "abcd"
     );
@@ -37,23 +36,4 @@ describes.sandboxed('validateAdContentRating', {}, function () {
     );
   });
 
-// it('should reject invalid content ratings', function () {
-//   const runTest = (contentRating, expectedErrorRegex) => {
-//     const validationError = validateAdContentRating(contentRating);
-//     expect(validationError).to.match(expectedErrorRegex);
-//   };
-//   // One of pub control params is missing.
-//   runTest(
-//     "abcd",
-//     /Max Ad Content Rating value, .*, is not a valid rating/
-//   );
-//   runTest(
-//     123,
-//     /Max Ad Content Rating value, .* , is not a valid rating/
-//   );
-//   runTest(
-//     "PG",
-//     /Max Ad Content Rating value, .* , is not a valid rating/
-//   );
-// });
 });
