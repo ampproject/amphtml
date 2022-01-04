@@ -52,7 +52,7 @@
       owners: [{name: 'ampproject/wg-performance', required: true}],
     },
     {
-      pattern: '**/*.d.js',
+      pattern: '**/*.d.ts',
       owners: [
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},
