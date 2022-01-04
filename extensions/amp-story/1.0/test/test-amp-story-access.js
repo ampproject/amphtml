@@ -1,7 +1,7 @@
 import {
-  Action,
+  Action_Enum,
   AmpStoryStoreService,
-  StateProperty,
+  StateProperty_Enum,
 } from '../amp-story-store-service';
 import {AmpStoryAccess, Type_Enum} from '../amp-story-access';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -67,7 +67,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
   it('should display the access blocking paywall on state update', async () => {
     storyAccess.buildCallback();
 
-    storeService.dispatch(Action.TOGGLE_ACCESS, true);
+    storeService.dispatch(Action_Enum.TOGGLE_ACCESS, true);
 
     await afterRenderPromise(win);
     expect(storyAccess.element).to.have.class('i-amphtml-story-access-visible');
@@ -77,7 +77,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
     storyAccess.element.setAttribute('type', Type_Enum.NOTIFICATION);
     storyAccess.buildCallback();
 
-    storeService.dispatch(Action.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'foo',
       index: 0,
     });
@@ -90,7 +90,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
     storyAccess.buildCallback();
 
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_ALLOWLIST
+      StateProperty_Enum.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({tagOrTarget: 'SCRIPT', method: 'login'});
   });
@@ -105,7 +105,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
     storyAccess.buildCallback();
 
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_ALLOWLIST
+      StateProperty_Enum.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'SCRIPT',
@@ -125,7 +125,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
 
     // Both namespaced and default actions are allowed.
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_ALLOWLIST
+      StateProperty_Enum.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({tagOrTarget: 'SCRIPT', method: 'login'});
     expect(actions).to.deep.contain({
@@ -153,7 +153,7 @@ describes.realWin('amp-story-access', {amp: true}, (env) => {
     storyAccess.buildCallback();
 
     const actions = storyAccess.storeService_.get(
-      StateProperty.ACTIONS_ALLOWLIST
+      StateProperty_Enum.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'SCRIPT',

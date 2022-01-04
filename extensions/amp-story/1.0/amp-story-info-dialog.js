@@ -5,8 +5,8 @@ import {
   getAnalyticsService,
 } from './story-analytics';
 import {
-  Action,
-  StateProperty,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
@@ -134,9 +134,12 @@ export class InfoDialog {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.INFO_DIALOG_STATE, (isOpen) => {
-      this.onInfoDialogStateUpdated_(isOpen);
-    });
+    this.storeService_.subscribe(
+      StateProperty_Enum.INFO_DIALOG_STATE,
+      (isOpen) => {
+        this.onInfoDialogStateUpdated_(isOpen);
+      }
+    );
   }
 
   /**
@@ -173,7 +176,7 @@ export class InfoDialog {
    * @private
    */
   close_() {
-    this.storeService_.dispatch(Action.TOGGLE_INFO_DIALOG, false);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_INFO_DIALOG, false);
   }
 
   /**

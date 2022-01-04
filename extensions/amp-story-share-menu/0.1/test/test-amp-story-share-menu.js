@@ -5,9 +5,9 @@ import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
-  Action,
+  Action_Enum,
   AmpStoryStoreService,
-  StateProperty,
+  StateProperty_Enum,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStoryShareMenu, VISIBLE_CLASS} from '../amp-story-share-menu';
 
@@ -61,7 +61,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   it('should show the share menu on store property update', async () => {
     await shareMenu.buildCallback();
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, true);
 
     expect(shareMenu.rootEl_).to.have.class(VISIBLE_CLASS);
   });
@@ -69,17 +69,17 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
   it('should hide the share menu on click on the overlay', async () => {
     await shareMenu.buildCallback();
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, true);
     shareMenu.rootEl_.dispatchEvent(new Event('click'));
 
     expect(shareMenu.rootEl_).not.to.have.class(VISIBLE_CLASS);
-    expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
+    expect(storeService.get(StateProperty_Enum.SHARE_MENU_STATE)).to.be.false;
   });
 
   it('should not hide the share menu on click on the widget container', async () => {
     await shareMenu.buildCallback();
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, true);
     hostEl
       .querySelector('.i-amphtml-story-share-menu-container')
       .dispatchEvent(new Event('click'));
@@ -93,7 +93,7 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
     const clickCallbackSpy = env.sandbox.spy();
     win.addEventListener('keyup', clickCallbackSpy);
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, true);
     // Create escape keyup event.
     const keyupEvent = new Event('keyup');
     keyupEvent.keyCode = Keys_Enum.ESCAPE;

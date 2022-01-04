@@ -33,8 +33,8 @@ import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-b
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
-  StateProperty,
-  UIType,
+  StateProperty_Enum,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -217,7 +217,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   forcePlaceAdAfterPage_(adPage) {
     const pageBeforeAdId = /** @type {string} */ (
-      this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
+      this.storeService_.get(StateProperty_Enum.CURRENT_PAGE_ID)
     );
     adPage.registerLoadCallback(() =>
       this.adPageManager_
@@ -276,7 +276,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   isAutomaticAdInsertionAllowed_() {
-    return !!this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
+    return !!this.storeService_.get(StateProperty_Enum.CAN_INSERT_AUTOMATIC_AD);
   }
 
   /**
@@ -284,12 +284,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
+    this.storeService_.subscribe(StateProperty_Enum.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
 
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      StateProperty_Enum.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -297,23 +297,26 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(
-      StateProperty.UI_STATE,
+      StateProperty_Enum.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, (pageId) => {
-      const pageIndex = this.storeService_.get(
-        StateProperty.CURRENT_PAGE_INDEX
-      );
+    this.storeService_.subscribe(
+      StateProperty_Enum.CURRENT_PAGE_ID,
+      (pageId) => {
+        const pageIndex = this.storeService_.get(
+          StateProperty_Enum.CURRENT_PAGE_INDEX
+        );
 
-      this.handleActivePageChange_(
-        dev().assertNumber(pageIndex),
-        dev().assertString(pageId)
-      );
-    });
+        this.handleActivePageChange_(
+          dev().assertNumber(pageIndex),
+          dev().assertString(pageId)
+        );
+      }
+    );
   }
 
   /**
@@ -353,7 +356,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Reacts to UI state updates and passes the information along as
    * attributes to the shadowed ad badge.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -364,10 +367,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       // TODO(#33969) can no longer be null when launched.
       this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
-      if (uiState === UIType.DESKTOP_FULLBLEED) {
+      if (uiState === UIType_Enum.DESKTOP_FULLBLEED) {
         this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
       }
-      if (uiState === UIType.DESKTOP_ONE_PANEL) {
+      if (uiState === UIType_Enum.DESKTOP_ONE_PANEL) {
         this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
         this.progressBarBackground_?.setAttribute(DESKTOP_ONE_PANEL, '');
       }
@@ -494,9 +497,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.ampStory_.element.appendChild(host);
 
     // TODO(#33969) move this to init listeners when no longer conditional.
-    this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
-      this.onPauseStateUpdate_(isPaused);
-    });
+    this.storeService_.subscribe(
+      StateProperty_Enum.PAUSED_STATE,
+      (isPaused) => {
+        this.onPauseStateUpdate_(isPaused);
+      }
+    );
   }
 
   /**
@@ -504,7 +510,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {boolean} isPaused
    */
   onPauseStateUpdate_(isPaused) {
-    const adShowing = this.storeService_.get(StateProperty.AD_STATE);
+    const adShowing = this.storeService_.get(StateProperty_Enum.AD_STATE);
     if (!adShowing) {
       return;
     }

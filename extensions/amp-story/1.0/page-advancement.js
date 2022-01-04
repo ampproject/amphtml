@@ -1,10 +1,10 @@
 import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
-  Action,
-  EmbeddedComponentState,
+  Action_Enum,
+  EmbeddedComponentState_Enum,
   InteractiveComponentDef,
-  StateProperty,
-  UIType,
+  StateProperty_Enum,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
@@ -275,7 +275,7 @@ export class ManualAdvancement extends AdvancementConfig {
       this.storeService_ = getStoreService(element.ownerDocument.defaultView);
     }
 
-    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
+    const rtlState = this.storeService_.get(StateProperty_Enum.RTL_STATE);
     this.sections_ = {
       // Width and navigation direction of each section depend on whether the
       // document is RTL or LTR.
@@ -350,11 +350,14 @@ export class ManualAdvancement extends AdvancementConfig {
     }
     this.touchstartTimestamp_ = Date.now();
     this.pausedState_ = /** @type {boolean} */ (
-      this.storeService_.get(StateProperty.PAUSED_STATE)
+      this.storeService_.get(StateProperty_Enum.PAUSED_STATE)
     );
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
-      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+      this.storeService_.dispatch(
+        Action_Enum.TOGGLE_SYSTEM_UI_IS_VISIBLE,
+        false
+      );
     }, HOLD_TOUCH_THRESHOLD_MS);
   }
 
@@ -388,12 +391,17 @@ export class ManualAdvancement extends AdvancementConfig {
     if (!this.touchstartTimestamp_) {
       return;
     }
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, this.pausedState_);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, this.pausedState_);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
     this.timeoutId_ = null;
-    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE)) {
-      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    if (
+      !this.storeService_.get(StateProperty_Enum.SYSTEM_UI_IS_VISIBLE_STATE)
+    ) {
+      this.storeService_.dispatch(
+        Action_Enum.TOGGLE_SYSTEM_UI_IS_VISIBLE,
+        true
+      );
     }
   }
 
@@ -652,7 +660,7 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     const expandedElement = this.storeService_.get(
-      StateProperty.AFFILIATE_LINK_STATE
+      StateProperty_Enum.AFFILIATE_LINK_STATE
     );
 
     return expandedElement != null || clickedOnLink;
@@ -673,11 +681,11 @@ export class ManualAdvancement extends AdvancementConfig {
       event.stopPropagation();
       event.preventDefault();
       const embedComponent = /** @type {InteractiveComponentDef} */ (
-        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+        this.storeService_.get(StateProperty_Enum.INTERACTIVE_COMPONENT_STATE)
       );
-      this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+      this.storeService_.dispatch(Action_Enum.TOGGLE_INTERACTIVE_COMPONENT, {
         element: target,
-        state: embedComponent.state || EmbeddedComponentState.FOCUSED,
+        state: embedComponent.state || EmbeddedComponentState_Enum.FOCUSED,
         clientX: event.clientX,
         clientY: event.clientY,
       });
@@ -689,9 +697,9 @@ export class ManualAdvancement extends AdvancementConfig {
       event.stopPropagation();
       const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
       if (clickedOnLink) {
-        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, target);
+        this.storeService_.dispatch(Action_Enum.TOGGLE_AFFILIATE_LINK, target);
       } else {
-        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, null);
+        this.storeService_.dispatch(Action_Enum.TOGGLE_AFFILIATE_LINK, null);
       }
       return;
     }
@@ -710,7 +718,7 @@ export class ManualAdvancement extends AdvancementConfig {
     event.stopPropagation();
 
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
+      Action_Enum.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
 
@@ -736,8 +744,8 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   getStoryPageRect_() {
-    const uiState = this.storeService_.get(StateProperty.UI_STATE);
-    if (uiState !== UIType.DESKTOP_ONE_PANEL) {
+    const uiState = this.storeService_.get(StateProperty_Enum.UI_STATE);
+    if (uiState !== UIType_Enum.DESKTOP_ONE_PANEL) {
       return this.element_.getLayoutBox();
     } else {
       return this.element_
@@ -892,7 +900,7 @@ export class TimeBasedAdvancement extends AdvancementConfig {
   /** @override */
   onAdvance() {
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
+      Action_Enum.SET_ADVANCEMENT_MODE,
       AdvancementMode.AUTO_ADVANCE_TIME
     );
     super.onAdvance();
@@ -1131,7 +1139,7 @@ export class MediaBasedAdvancement extends AdvancementConfig {
   /** @override */
   onAdvance() {
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
+      Action_Enum.SET_ADVANCEMENT_MODE,
       AdvancementMode.AUTO_ADVANCE_MEDIA
     );
     super.onAdvance();

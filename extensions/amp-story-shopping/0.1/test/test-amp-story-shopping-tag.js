@@ -4,8 +4,8 @@ import '../amp-story-shopping';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
-  Action,
-  StateProperty,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 
@@ -49,7 +49,7 @@ describes.realWin(
       const shoppingData = {
         'sunglasses': {'product-title': 'Spectacular Spectacles'},
       };
-      storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
+      storeService.dispatch(Action_Enum.ADD_SHOPPING_DATA, shoppingData);
     }
 
     it('should build and layout shopping tag component', () => {
@@ -86,7 +86,9 @@ describes.realWin(
 
       env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
         expect(
-          storeService.get(StateProperty.SHOPPING_DATA['activeProductData'])
+          storeService.get(
+            StateProperty_Enum.SHOPPING_DATA['activeProductData']
+          )
         ).to.deep.equal(tagData);
       });
     });

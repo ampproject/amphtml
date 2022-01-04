@@ -4,7 +4,7 @@ import * as Preact from '#core/dom/jsx';
  */
 
 import {Services} from '#service';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {StateProperty_Enum, getStoreService} from './amp-story-store-service';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {getAmpdoc} from '../../../src/service-helpers';
 
@@ -78,7 +78,7 @@ export class AmpStoryAffiliateLink {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.AFFILIATE_LINK_STATE,
+      StateProperty_Enum.AFFILIATE_LINK_STATE,
       (elementToToggleExpand) => {
         const expand = this.element_ === elementToToggleExpand;
         if (expand) {

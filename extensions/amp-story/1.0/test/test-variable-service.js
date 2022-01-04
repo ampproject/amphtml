@@ -1,4 +1,4 @@
-import {Action, getStoreService} from '../amp-story-store-service';
+import {Action_Enum, getStoreService} from '../amp-story-store-service';
 import {AdvancementMode} from '../story-analytics';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 
@@ -12,7 +12,7 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
   });
 
   it('should update pageIndex and pageId on change', () => {
-    storeService.dispatch(Action.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'my-page-id',
       index: 123,
     });
@@ -33,8 +33,8 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
   });
 
   it('should calculate storyProgress correctly on change', () => {
-    storeService.dispatch(Action.SET_PAGE_IDS, ['a', 'b', 'c', 'd', 'e']);
-    storeService.dispatch(Action.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.SET_PAGE_IDS, ['a', 'b', 'c', 'd', 'e']);
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'd',
       index: 3,
     });
@@ -44,8 +44,8 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
   });
 
   it('should calculate storyProgress when a story only has 1 page', () => {
-    storeService.dispatch(Action.SET_PAGE_IDS, ['a']);
-    storeService.dispatch(Action.CHANGE_PAGE, {
+    storeService.dispatch(Action_Enum.SET_PAGE_IDS, ['a']);
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'a',
       index: 0,
     });

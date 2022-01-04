@@ -5,7 +5,7 @@ import {
 } from '../amp-story-interactive-abstract';
 import {
   AmpStoryStoreService,
-  StateProperty,
+  StateProperty_Enum,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {
   AmpStoryVariableService,
@@ -361,7 +361,7 @@ describes.realWin(
 
       expect(
         ampStoryInteractive.storeService_.get(
-          StateProperty.INTERACTIVE_REACT_STATE
+          StateProperty_Enum.INTERACTIVE_REACT_STATE
         )['id']
       ).to.be.deep.equals({
         option: {

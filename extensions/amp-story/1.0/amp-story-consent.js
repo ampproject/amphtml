@@ -1,7 +1,7 @@
 import * as Preact from '#core/dom/jsx';
 import {
-  Action,
-  StateProperty,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
@@ -184,7 +184,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         {tagOrTarget: 'AMP-CONSENT', method: 'prompt'},
         {tagOrTarget: 'AMP-CONSENT', method: 'reject'},
       ];
-      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
+      this.storeService_.dispatch(
+        Action_Enum.ADD_TO_ACTIONS_ALLOWLIST,
+        actions
+      );
 
       this.setAcceptButtonFontColor_();
 
@@ -208,7 +211,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      StateProperty_Enum.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -347,7 +350,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
   storeConsentId_(consentId) {
     // checkConsentHref response overrides the amp-geo config, if provided.
     if (this.consentConfig_.checkConsentHref) {
-      this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+      this.storeService_.dispatch(Action_Enum.SET_CONSENT_ID, consentId);
       return;
     }
 
@@ -362,7 +365,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
         if (geo && !matchedGeoGroups.includes(geoGroup)) {
           return;
         }
-        this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
+        this.storeService_.dispatch(Action_Enum.SET_CONSENT_ID, consentId);
       });
     }
   }

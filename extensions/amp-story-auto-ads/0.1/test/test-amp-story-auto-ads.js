@@ -18,9 +18,9 @@ import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
 import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
 import {
-  Action,
-  StateProperty,
-  UIType,
+  Action_Enum,
+  StateProperty_Enum,
+  UIType_Enum,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import * as storyEvents from '../../../amp-story/1.0/events';
@@ -73,7 +73,7 @@ describes.realWin(
       storeGetterStub = env.sandbox.stub(storeService, 'get');
       // Tests by default assume an 8 page parent story. Overide if needed.
       storeGetterStub
-        .withArgs(StateProperty.PAGE_IDS)
+        .withArgs(StateProperty_Enum.PAGE_IDS)
         .returns(['1', '2', '3', '4', '5', '6', '7', '8']);
       storeGetterStub.callThrough();
     });
@@ -146,7 +146,7 @@ describes.realWin(
 
       it('doesnt create ad when story pages < min interval', async () => {
         storeGetterStub
-          .withArgs(StateProperty.PAGE_IDS)
+          .withArgs(StateProperty_Enum.PAGE_IDS)
           .returns(['1', '2', '3', '4']);
         await autoAds.buildCallback();
         await autoAds.layoutCallback();
@@ -159,7 +159,7 @@ describes.realWin(
         await autoAds.layoutCallback();
 
         // Fake click to ad page.
-        storeService.dispatch(Action.CHANGE_PAGE, {
+        storeService.dispatch(Action_Enum.CHANGE_PAGE, {
           id: 'i-amphtml-ad-page-1',
           index: 7,
         });
@@ -169,7 +169,7 @@ describes.realWin(
 
       it('creates multiple ads if enough pages', async () => {
         storeGetterStub
-          .withArgs(StateProperty.PAGE_IDS)
+          .withArgs(StateProperty_Enum.PAGE_IDS)
           .returns([
             '1',
             '2',
@@ -191,7 +191,7 @@ describes.realWin(
         await autoAds.layoutCallback();
 
         // Fake click to ad page.
-        storeService.dispatch(Action.CHANGE_PAGE, {
+        storeService.dispatch(Action_Enum.CHANGE_PAGE, {
           id: 'i-amphtml-ad-page-1',
           index: 7,
         });
@@ -204,12 +204,12 @@ describes.realWin(
         await autoAds.layoutCallback();
 
         // Fake click to ad page.
-        storeService.dispatch(Action.CHANGE_PAGE, {
+        storeService.dispatch(Action_Enum.CHANGE_PAGE, {
           id: 'i-amphtml-ad-page-1',
           index: 7,
         });
         // Visit ad page again.
-        storeService.dispatch(Action.CHANGE_PAGE, {
+        storeService.dispatch(Action_Enum.CHANGE_PAGE, {
           id: 'i-amphtml-ad-page-1',
           index: 7,
         });
@@ -294,7 +294,7 @@ describes.realWin(
         await autoAds.buildCallback();
         await autoAds.layoutCallback();
         // Switching to ad page.
-        storeService.dispatch(Action.CHANGE_PAGE, {
+        storeService.dispatch(Action_Enum.CHANGE_PAGE, {
           id: 'i-amphtml-ad-page-1',
           index: 7,
         });
@@ -357,7 +357,7 @@ describes.realWin(
         );
         expect(adBadgeContainer).not.to.have.attribute(Attributes.AD_SHOWING);
         expect(progressBackground).not.to.have.attribute(Attributes.AD_SHOWING);
-        storeService.dispatch(Action.TOGGLE_AD, true);
+        storeService.dispatch(Action_Enum.TOGGLE_AD, true);
         expect(adBadgeContainer).to.have.attribute(Attributes.AD_SHOWING);
         expect(progressBackground).to.have.attribute(Attributes.AD_SHOWING);
       });
@@ -369,14 +369,17 @@ describes.realWin(
         const progressBackground = doc.querySelector(
           '.i-amphtml-story-ad-progress-background'
         );
-        storeService.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
+        storeService.dispatch(Action_Enum.TOGGLE_UI, UIType_Enum.MOBILE);
         expect(adBadgeContainer).not.to.have.attribute(
           Attributes.DESKTOP_ONE_PANEL
         );
         expect(progressBackground).not.to.have.attribute(
           Attributes.DESKTOP_ONE_PANEL
         );
-        storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_ONE_PANEL);
+        storeService.dispatch(
+          Action_Enum.TOGGLE_UI,
+          UIType_Enum.DESKTOP_ONE_PANEL
+        );
         expect(adBadgeContainer).to.have.attribute(
           Attributes.DESKTOP_ONE_PANEL
         );
@@ -390,7 +393,7 @@ describes.realWin(
           '.i-amphtml-ad-overlay-container'
         );
         expect(adBadgeContainer).not.to.have.attribute(Attributes.DIR);
-        storeService.dispatch(Action.TOGGLE_RTL, true);
+        storeService.dispatch(Action_Enum.TOGGLE_RTL, true);
         expect(adBadgeContainer).to.have.attribute(Attributes.DIR, 'rtl');
       });
 
@@ -398,11 +401,11 @@ describes.realWin(
         const progressBackground = doc.querySelector(
           '.i-amphtml-story-ad-progress-background'
         );
-        storeService.dispatch(Action.TOGGLE_AD, true);
+        storeService.dispatch(Action_Enum.TOGGLE_AD, true);
         expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
-        storeService.dispatch(Action.TOGGLE_PAUSED, true);
+        storeService.dispatch(Action_Enum.TOGGLE_PAUSED, true);
         expect(progressBackground).to.have.attribute(Attributes.PAUSED);
-        storeService.dispatch(Action.TOGGLE_PAUSED, false);
+        storeService.dispatch(Action_Enum.TOGGLE_PAUSED, false);
         expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
       });
 
@@ -411,11 +414,11 @@ describes.realWin(
         const progressBackground = doc.querySelector(
           '.i-amphtml-story-ad-progress-background'
         );
-        storeService.dispatch(Action.TOGGLE_AD, false);
+        storeService.dispatch(Action_Enum.TOGGLE_AD, false);
         expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
-        storeService.dispatch(Action.TOGGLE_PAUSED, true);
+        storeService.dispatch(Action_Enum.TOGGLE_PAUSED, true);
         expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
-        storeService.dispatch(Action.TOGGLE_PAUSED, false);
+        storeService.dispatch(Action_Enum.TOGGLE_PAUSED, false);
         expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
       });
     });
@@ -469,7 +472,7 @@ describes.realWin(
     describe('development mode', () => {
       it('should immediately insert and navigate to ad page', async () => {
         storeGetterStub
-          .withArgs(StateProperty.CURRENT_PAGE_ID)
+          .withArgs(StateProperty_Enum.CURRENT_PAGE_ID)
           .returns('story-page-0');
 
         const storyImpl = new MockStoryImpl(storyElement);

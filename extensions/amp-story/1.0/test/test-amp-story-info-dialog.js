@@ -1,7 +1,7 @@
 import {
-  Action,
+  Action_Enum,
   AmpStoryStoreService,
-  StateProperty,
+  StateProperty_Enum,
 } from '../amp-story-store-service';
 import {
   DIALOG_VISIBLE_CLASS,
@@ -98,27 +98,27 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
 
   it('should show the info dialog on store property update', async () => {
     await infoDialog.build();
-    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
+    storeService.dispatch(Action_Enum.TOGGLE_INFO_DIALOG, true);
     expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
   });
 
   it('should hide the info dialog on click on the overlay', async () => {
     await infoDialog.build();
-    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
+    storeService.dispatch(Action_Enum.TOGGLE_INFO_DIALOG, true);
     infoDialog.element_.dispatchEvent(new Event('click'));
 
     expect(infoDialog.element_).not.to.have.class(DIALOG_VISIBLE_CLASS);
-    expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.false;
+    expect(storeService.get(StateProperty_Enum.INFO_DIALOG_STATE)).to.be.false;
   });
 
   it('should not hide the info dialog on click on the inner container', async () => {
     await infoDialog.build();
-    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
+    storeService.dispatch(Action_Enum.TOGGLE_INFO_DIALOG, true);
     parentEl
       .querySelector('.i-amphtml-story-info-dialog-container')
       .dispatchEvent(new Event('click'));
 
     expect(infoDialog.element_).to.have.class(DIALOG_VISIBLE_CLASS);
-    expect(storeService.get(StateProperty.INFO_DIALOG_STATE)).to.be.true;
+    expect(storeService.get(StateProperty_Enum.INFO_DIALOG_STATE)).to.be.true;
   });
 });

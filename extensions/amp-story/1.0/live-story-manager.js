@@ -1,5 +1,5 @@
 import * as Preact from '#core/dom/jsx';
-import {Action, getStoreService} from './amp-story-store-service';
+import {Action_Enum, getStoreService} from './amp-story-store-service';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Services} from '#service';
 import {lastChildElement} from '#core/dom/query';
@@ -75,7 +75,7 @@ export class LiveStoryManager {
     const storyPages = this.storyEl_.querySelectorAll('amp-story-page');
     const pageIds = Array.prototype.map.call(storyPages, (el) => el.id);
 
-    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
-    this.storeService_.dispatch(Action.ADD_NEW_PAGE_ID, lastNewPageEl.id);
+    this.storeService_.dispatch(Action_Enum.SET_PAGE_IDS, pageIds);
+    this.storeService_.dispatch(Action_Enum.ADD_NEW_PAGE_ID, lastNewPageEl.id);
   }
 }

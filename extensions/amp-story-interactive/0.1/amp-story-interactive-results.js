@@ -3,7 +3,7 @@ import {
   InteractiveType,
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-results-0.1.css';
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {StateProperty_Enum} from '../../amp-story/1.0/amp-story-store-service';
 import {computedStyle, setStyle} from '#core/dom/style';
 import {dev} from '#utils/log';
 import {htmlFor} from '#core/dom/static-template';
@@ -218,7 +218,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
       ).textContent = this.element.getAttribute('prompt-text');
     }
     this.storeService_.subscribe(
-      StateProperty.INTERACTIVE_REACT_STATE,
+      StateProperty_Enum.INTERACTIVE_REACT_STATE,
       (data) => this.onInteractiveReactStateUpdate(data),
       true
     );

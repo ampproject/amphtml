@@ -1,5 +1,5 @@
 import {
-  Action,
+  Action_Enum,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
@@ -84,7 +84,7 @@ describes.realWin(
       addConfigToInteractive(ampStoryResultsDetailed, 3);
       await ampStoryResultsDetailed.buildCallback();
       await ampStoryResultsDetailed.layoutCallback();
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {'resultscategory': 'results-category 2'},
         'type': InteractiveType.POLL,
@@ -100,12 +100,12 @@ describes.realWin(
       addThresholdsToInteractive(ampStoryResultsDetailed, [80, 20, 50]);
       await ampStoryResultsDetailed.buildCallback();
       await ampStoryResultsDetailed.layoutCallback();
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct'},
         'type': InteractiveType.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
         'type': InteractiveType.QUIZ,
@@ -121,17 +121,17 @@ describes.realWin(
       addThresholdsToInteractive(ampStoryResultsDetailed, [80, 20, 50]);
       await ampStoryResultsDetailed.buildCallback();
       await ampStoryResultsDetailed.layoutCallback();
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct'},
         'type': InteractiveType.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
         'type': InteractiveType.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'k',
         'option': {},
         'type': InteractiveType.QUIZ,
@@ -145,22 +145,22 @@ describes.realWin(
 
     it('should correctly create elements corresponding to the number of quizzes', async () => {
       addThresholdsToInteractive(ampStoryResultsDetailed, [80, 20, 50]);
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct'},
         'type': InteractiveType.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
         'type': InteractiveType.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'k',
         'option': {},
         'type': InteractiveType.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'l',
         'option': {},
         'type': InteractiveType.POLL,
@@ -176,17 +176,17 @@ describes.realWin(
 
     it('should correctly create elements corresponding to the number of polls', async () => {
       addConfigToInteractive(ampStoryResultsDetailed, 3);
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {},
         'type': InteractiveType.POLL,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
         'type': InteractiveType.POLL,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'k',
         'option': {},
         'type': InteractiveType.QUIZ,
@@ -203,7 +203,7 @@ describes.realWin(
     it('should correctly set images for the detailed results elements', async () => {
       addThresholdsToInteractive(ampStoryResultsDetailed, [80, 20, 50]);
       const image = 'https://example.com/image';
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct', image},
         'type': InteractiveType.QUIZ,

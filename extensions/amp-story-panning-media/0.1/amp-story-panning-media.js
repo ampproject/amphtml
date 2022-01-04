@@ -12,8 +12,8 @@ import {dev, user} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-panning-media-0.1.css';
 import {
-  Action,
-  StateProperty,
+  Action_Enum,
+  StateProperty_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
@@ -124,7 +124,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
   /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.PAGE_SIZE,
+      StateProperty_Enum.PAGE_SIZE,
       () => {
         this.elementSize_ = {
           width: this.element./*OK*/ offsetWidth,
@@ -137,7 +137,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       true /** callToInitialize */
     );
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
+      StateProperty_Enum.CURRENT_PAGE_ID,
       (currPageId) => {
         this.isOnActivePage_ = currPageId === this.getPageId_();
         this.animate_();
@@ -145,7 +145,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       true /** callToInitialize */
     );
     this.storeService_.subscribe(
-      StateProperty.PANNING_MEDIA_STATE,
+      StateProperty_Enum.PANNING_MEDIA_STATE,
       (panningMediaState) => this.onPanningMediaStateChange_(panningMediaState),
       true /** callToInitialize */
     );
@@ -222,13 +222,13 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
     if (!this.isOnActivePage_) {
       return;
     }
-    const startPos = this.storeService_.get(StateProperty.PANNING_MEDIA_STATE)[
-      this.groupId_
-    ];
+    const startPos = this.storeService_.get(
+      StateProperty_Enum.PANNING_MEDIA_STATE
+    )[this.groupId_];
 
     // Don't animate if first instance of group or prefers-reduced-motion.
     if (!startPos || prefersReducedMotion(this.win)) {
-      this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
+      this.storeService_.dispatch(Action_Enum.ADD_PANNING_MEDIA_STATE, {
         [this.groupId_]: this.animateTo_,
       });
       return;
@@ -246,7 +246,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
       if (elapsedTime < DURATION_MS) {
         const {x, y, zoom} = this.animateTo_;
         const easing = easeInOutQuad(elapsedTime / DURATION_MS);
-        this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
+        this.storeService_.dispatch(Action_Enum.ADD_PANNING_MEDIA_STATE, {
           [this.groupId_]: {
             x: startPos.x + (x - startPos.x) * easing,
             y: startPos.y + (y - startPos.y) * easing,
@@ -258,7 +258,7 @@ export class AmpStoryPanningMedia extends AMP.BaseElement {
           requestAnimationFrame(nextFrame);
         }
       } else {
-        this.storeService_.dispatch(Action.ADD_PANNING_MEDIA_STATE, {
+        this.storeService_.dispatch(Action_Enum.ADD_PANNING_MEDIA_STATE, {
           [this.groupId_]: this.animateTo_,
         });
       }

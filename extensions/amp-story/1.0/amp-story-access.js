@@ -1,7 +1,7 @@
 import * as Preact from '#core/dom/jsx';
 import {
-  Action,
-  StateProperty,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {Layout_Enum} from '#core/dom/layout';
@@ -83,12 +83,15 @@ export class AmpStoryAccess extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.ACCESS_STATE, (isAccess) => {
-      this.onAccessStateChange_(isAccess);
-    });
+    this.storeService_.subscribe(
+      StateProperty_Enum.ACCESS_STATE,
+      (isAccess) => {
+        this.onAccessStateChange_(isAccess);
+      }
+    );
 
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_INDEX,
+      StateProperty_Enum.CURRENT_PAGE_INDEX,
       (currentPageIndex) => {
         this.onCurrentPageIndexChange_(currentPageIndex);
       },
@@ -128,7 +131,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
   onOverflowClick_(event) {
     // Closes the menu if click happened directly on overflow element.
     if (event.target === event.currentTarget) {
-      this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
+      this.storeService_.dispatch(Action_Enum.TOGGLE_ACCESS, false);
     }
   }
 
@@ -252,7 +255,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
       }
     });
 
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
+    this.storeService_.dispatch(Action_Enum.ADD_TO_ACTIONS_ALLOWLIST, actions);
   }
 
   /**

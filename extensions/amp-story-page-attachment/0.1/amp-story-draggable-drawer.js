@@ -13,9 +13,9 @@ import {dev} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-draggable-drawer-header-0.1.css';
 import {
-  Action,
-  StateProperty,
-  UIType,
+  Action_Enum,
+  StateProperty_Enum,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
@@ -184,7 +184,7 @@ export class DraggableDrawer extends AMP.BaseElement {
    */
   initializeListeners_() {
     this.storeService.subscribe(
-      StateProperty.UI_STATE,
+      StateProperty_Enum.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
@@ -228,11 +228,11 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @protected
    */
   onUIStateUpdate_(uiState) {
-    const isMobile = uiState === UIType.MOBILE;
+    const isMobile = uiState === UIType_Enum.MOBILE;
     isMobile
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();
@@ -550,7 +550,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.state = DrawerState.OPEN;
 
-    this.storeService.dispatch(Action.TOGGLE_PAUSED, true);
+    this.storeService.dispatch(Action_Enum.TOGGLE_PAUSED, true);
 
     this.mutateElement(() => {
       this.element.setAttribute('aria-hidden', false);
@@ -593,7 +593,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
     this.state = DrawerState.CLOSED;
 
-    this.storeService.dispatch(Action.TOGGLE_PAUSED, false);
+    this.storeService.dispatch(Action_Enum.TOGGLE_PAUSED, false);
     this.handleSoftKeyboardOnDrawerClose_();
 
     this.mutateElement(() => {

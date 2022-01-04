@@ -1,5 +1,5 @@
 import {Services} from '#service';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {StateProperty_Enum, getStoreService} from './amp-story-store-service';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {getVariableService} from './variable-service';
 import {map} from '#core/types/object';
@@ -95,18 +95,18 @@ export class StoryAnalyticsService {
   /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
+      StateProperty_Enum.CURRENT_PAGE_ID,
       (pageId) => {
-        const isAd = this.storeService_.get(StateProperty.AD_STATE);
+        const isAd = this.storeService_.get(StateProperty_Enum.AD_STATE);
         if (!pageId || isAd) {
           return;
         }
 
         this.triggerEvent(StoryAnalyticsEvent.PAGE_VISIBLE);
 
-        const pageIds = this.storeService_.get(StateProperty.PAGE_IDS);
+        const pageIds = this.storeService_.get(StateProperty_Enum.PAGE_IDS);
         const pageIndex = this.storeService_.get(
-          StateProperty.CURRENT_PAGE_INDEX
+          StateProperty_Enum.CURRENT_PAGE_INDEX
         );
         if (pageIndex === pageIds.length - 1) {
           this.triggerEvent(StoryAnalyticsEvent.LAST_PAGE_VISIBLE);

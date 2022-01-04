@@ -4,9 +4,9 @@ import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
-  Action,
+  Action_Enum,
   AmpStoryStoreService,
-  StateProperty,
+  StateProperty_Enum,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStoryEducation, State} from '../amp-story-education';
 
@@ -67,31 +67,31 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
 
   it('should propagate the dir attribute', () => {
     storyEducation.buildCallback();
-    storeService.dispatch(Action.TOGGLE_RTL, true);
+    storeService.dispatch(Action_Enum.TOGGLE_RTL, true);
     expect(storyEducation.containerEl_).to.have.attribute('dir', 'rtl');
   });
 
   describe('amp-story-education paused state', () => {
     it('should not update the paused state when hidden', () => {
-      storeService.dispatch(Action.TOGGLE_PAUSED, false);
+      storeService.dispatch(Action_Enum.TOGGLE_PAUSED, false);
       storyEducation.buildCallback();
 
-      expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.false;
+      expect(storeService.get(StateProperty_Enum.PAUSED_STATE)).to.be.false;
     });
 
     it('should pause the story when visible', () => {
-      storeService.dispatch(Action.TOGGLE_PAUSED, false);
+      storeService.dispatch(Action_Enum.TOGGLE_PAUSED, false);
       storyEducation.buildCallback();
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
       storyEducation.setState_(State.NAVIGATION_TAP);
 
-      expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
+      expect(storeService.get(StateProperty_Enum.PAUSED_STATE)).to.be.true;
     });
 
     it('should unpause the story once the education is dismissed', () => {
-      storeService.dispatch(Action.TOGGLE_PAUSED, false);
+      storeService.dispatch(Action_Enum.TOGGLE_PAUSED, false);
       storyEducation.buildCallback();
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
@@ -100,11 +100,11 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
       storyEducation.containerEl_.dispatchEvent(clickEvent);
 
-      expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.false;
+      expect(storeService.get(StateProperty_Enum.PAUSED_STATE)).to.be.false;
     });
 
     it('should not unpause a story that was already paused', () => {
-      storeService.dispatch(Action.TOGGLE_PAUSED, true);
+      storeService.dispatch(Action_Enum.TOGGLE_PAUSED, true);
       storyEducation.buildCallback();
 
       // TODO(gmajoulet): remove private method call when viewer messaging is
@@ -113,7 +113,7 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
       storyEducation.containerEl_.dispatchEvent(clickEvent);
 
-      expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
+      expect(storeService.get(StateProperty_Enum.PAUSED_STATE)).to.be.true;
     });
   });
 

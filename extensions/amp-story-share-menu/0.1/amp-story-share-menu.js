@@ -21,9 +21,9 @@ import {Toast} from 'extensions/amp-story/1.0/toast';
 import {CSS} from '../../../build/amp-story-share-menu-0.1.css';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {
-  Action,
-  StateProperty,
-  UIType,
+  Action_Enum,
+  StateProperty_Enum,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
@@ -126,7 +126,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.UI_STATE,
+      StateProperty_Enum.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
@@ -134,7 +134,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(
-      StateProperty.SHARE_MENU_STATE,
+      StateProperty_Enum.SHARE_MENU_STATE,
       (isOpen) => {
         this.onShareMenuStateUpdate_(isOpen);
       },
@@ -163,12 +163,12 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
 
   /**
    * Reacts to UI state updates and triggers the right UI.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     this.vsync_.mutate(() => {
-      uiState !== UIType.MOBILE
+      uiState !== UIType_Enum.MOBILE
         ? this.rootEl_.setAttribute('desktop', '')
         : this.rootEl_.removeAttribute('desktop');
     });
@@ -179,7 +179,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
    * @private
    */
   close_() {
-    this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_SHARE_MENU, false);
   }
 
   /**

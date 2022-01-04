@@ -1,5 +1,5 @@
 import {Services} from '#service';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {StateProperty_Enum, getStoreService} from './amp-story-store-service';
 import {dict} from '#core/types/object';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 
@@ -74,12 +74,12 @@ export class AmpStoryVariableService {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.PAGE_IDS, (pageIds) => {
+    this.storeService_.subscribe(StateProperty_Enum.PAGE_IDS, (pageIds) => {
       this.variables_[AnalyticsVariable.STORY_PAGE_COUNT] = pageIds.length;
     });
 
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
+      StateProperty_Enum.CURRENT_PAGE_ID,
       (pageId) => {
         if (!pageId) {
           return;
@@ -91,12 +91,12 @@ export class AmpStoryVariableService {
         this.variables_[AnalyticsVariable.STORY_PAGE_ID] = pageId;
 
         const pageIndex = /** @type {number} */ (
-          this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+          this.storeService_.get(StateProperty_Enum.CURRENT_PAGE_INDEX)
         );
         this.variables_[AnalyticsVariable.STORY_PAGE_INDEX] = pageIndex;
 
         const numberOfPages = this.storeService_.get(
-          StateProperty.PAGE_IDS
+          StateProperty_Enum.PAGE_IDS
         ).length;
         if (numberOfPages > 0) {
           if (numberOfPages === 1) {

@@ -13,9 +13,9 @@ import {dev} from '#utils/log';
 import {CSS} from '../../../build/amp-story-education-0.1.css';
 import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {
-  Action,
-  StateProperty,
-  UIType,
+  Action_Enum,
+  StateProperty_Enum,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
@@ -97,7 +97,8 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
     this.viewer_ = Services.viewerForDoc(this.element);
     const isMobileUI =
-      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
+      this.storeService_.get(StateProperty_Enum.UI_STATE) ===
+      UIType_Enum.MOBILE;
     if (this.viewer_.isEmbedded() && isMobileUI) {
       const screen = this.viewer_.hasCapability('swipe')
         ? Screen.ONBOARDING_NAVIGATION_TAP_AND_SWIPE
@@ -139,7 +140,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      StateProperty_Enum.RTL_STATE,
       (rtlState) => this.onRtlStateUpdate_(rtlState),
       true /** callToInitialize */
     );
@@ -187,13 +188,13 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
     switch (state) {
       case State.HIDDEN:
-        this.storeService_.dispatch(Action.TOGGLE_EDUCATION, false);
+        this.storeService_.dispatch(Action_Enum.TOGGLE_EDUCATION, false);
         this.mutateElement(() => {
           removeChildren(this.containerEl_);
           toggle(this.element, false);
           toggle(this.containerEl_, false);
           this.storeService_.dispatch(
-            Action.TOGGLE_PAUSED,
+            Action_Enum.TOGGLE_PAUSED,
             this.storyPausedStateToRestore_
           );
           setModalAsClosed(this.element);
@@ -255,12 +256,12 @@ export class AmpStoryEducation extends AMP.BaseElement {
   showTemplate_(template) {
     if (this.storyPausedStateToRestore_ === null) {
       this.storyPausedStateToRestore_ = !!this.storeService_.get(
-        StateProperty.PAUSED_STATE
+        StateProperty_Enum.PAUSED_STATE
       );
     }
 
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
-    this.storeService_.dispatch(Action.TOGGLE_EDUCATION, true);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, true);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_EDUCATION, true);
 
     this.mutateElement(() => {
       removeChildren(this.containerEl_);

@@ -1,10 +1,10 @@
 import * as Preact from '#core/dom/jsx';
 import {
-  Action,
-  EmbeddedComponentState,
+  Action_Enum,
+  EmbeddedComponentState_Enum,
   InteractiveComponentDef,
-  StateProperty,
-  UIType,
+  StateProperty_Enum,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {
@@ -193,14 +193,14 @@ export class AmpStoryEmbeddedComponent {
     this.componentPage_ = null;
 
     this.storeService_.subscribe(
-      StateProperty.INTERACTIVE_COMPONENT_STATE,
+      StateProperty_Enum.INTERACTIVE_COMPONENT_STATE,
       /** @param {!InteractiveComponentDef} component */ (component) => {
         this.onComponentStateUpdate_(component);
       }
     );
 
     /** @private {EmbeddedComponentState} */
-    this.state_ = EmbeddedComponentState.HIDDEN;
+    this.state_ = EmbeddedComponentState_Enum.HIDDEN;
 
     /** @private {?Element} */
     this.buttonLeft_ = null;
@@ -222,24 +222,27 @@ export class AmpStoryEmbeddedComponent {
    */
   onComponentStateUpdate_(component) {
     switch (component.state) {
-      case EmbeddedComponentState.HIDDEN:
-        this.setState_(EmbeddedComponentState.HIDDEN, null /** component */);
+      case EmbeddedComponentState_Enum.HIDDEN:
+        this.setState_(
+          EmbeddedComponentState_Enum.HIDDEN,
+          null /** component */
+        );
         break;
-      case EmbeddedComponentState.FOCUSED:
-        this.setState_(EmbeddedComponentState.FOCUSED, component);
+      case EmbeddedComponentState_Enum.FOCUSED:
+        this.setState_(EmbeddedComponentState_Enum.FOCUSED, component);
         break;
     }
   }
 
   /**
    * Sets new state for the embedded component.
-   * @param {EmbeddedComponentState} state
+   * @param {EmbeddedComponentState_Enum} state
    * @param {?InteractiveComponentDef} component
    * @private
    */
   setState_(state, component) {
     switch (state) {
-      case EmbeddedComponentState.FOCUSED:
+      case EmbeddedComponentState_Enum.FOCUSED:
         this.state_ = state;
         this.onFocusedStateUpdate_(component);
         this.analyticsService_.triggerEvent(
@@ -247,7 +250,7 @@ export class AmpStoryEmbeddedComponent {
           this.triggeringTarget_
         );
         break;
-      case EmbeddedComponentState.HIDDEN:
+      case EmbeddedComponentState_Enum.HIDDEN:
         this.state_ = state;
         this.onFocusedStateUpdate_(null);
         break;
@@ -297,8 +300,8 @@ export class AmpStoryEmbeddedComponent {
       this.clearTooltip_();
     }, TOOLTIP_CLOSE_ANIMATION_MS);
 
-    this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
-      state: EmbeddedComponentState.HIDDEN,
+    this.storeService_.dispatch(Action_Enum.TOGGLE_INTERACTIVE_COMPONENT, {
+      state: EmbeddedComponentState_Enum.HIDDEN,
     });
   }
 
@@ -365,17 +368,17 @@ export class AmpStoryEmbeddedComponent {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.UI_STATE,
+      StateProperty_Enum.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
+    this.storeService_.subscribe(StateProperty_Enum.CURRENT_PAGE_ID, () => {
       // Hide active tooltip when page switch is triggered by keyboard or
       // desktop buttons.
-      if (this.state_ === EmbeddedComponentState.FOCUSED) {
+      if (this.state_ === EmbeddedComponentState_Enum.FOCUSED) {
         this.close_();
       }
     });
@@ -384,7 +387,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Reacts to desktop state updates and hides navigation buttons since we
    * already have in the desktop UI.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -392,8 +395,8 @@ export class AmpStoryEmbeddedComponent {
       dev().assertElement(this.focusedStateOverlay_),
       () => {
         const isDesktop = [
-          UIType.DESKTOP_FULLBLEED,
-          UIType.DESKTOP_ONE_PANEL,
+          UIType_Enum.DESKTOP_FULLBLEED,
+          UIType_Enum.DESKTOP_ONE_PANEL,
         ].includes(uiState);
         this.focusedStateOverlay_.toggleAttribute('desktop', isDesktop);
       }
@@ -559,7 +562,7 @@ export class AmpStoryEmbeddedComponent {
       this.buttonLeft_.removeAttribute('hidden');
       this.buttonRight_.removeAttribute('hidden');
     } else {
-      this.storeService_.get(StateProperty.RTL_STATE)
+      this.storeService_.get(StateProperty_Enum.RTL_STATE)
         ? this.buttonLeft_.setAttribute('hidden', true)
         : this.buttonRight_.setAttribute('hidden', true);
     }
@@ -571,8 +574,12 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   isLastPage_() {
-    const pageIndex = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
-    const pageCount = this.storeService_.get(StateProperty.PAGE_IDS).length;
+    const pageIndex = this.storeService_.get(
+      StateProperty_Enum.CURRENT_PAGE_INDEX
+    );
+    const pageCount = this.storeService_.get(
+      StateProperty_Enum.PAGE_IDS
+    ).length;
     return pageIndex + 1 === pageCount;
   }
 
@@ -707,7 +714,7 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   renderFocusedStateElement_() {
-    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
+    const rtlState = this.storeService_.get(StateProperty_Enum.RTL_STATE);
 
     this.tooltipArrow_ = <div class="i-amphtml-story-tooltip-arrow"></div>;
     this.tooltip_ = (
@@ -785,7 +792,7 @@ export class AmpStoryEmbeddedComponent {
   onNavigationalClick_(event, direction) {
     event.preventDefault();
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
+      Action_Enum.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
     dispatch(

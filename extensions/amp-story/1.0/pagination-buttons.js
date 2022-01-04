@@ -1,7 +1,7 @@
 import * as Preact from '#core/dom/jsx';
 import {
-  Action,
-  StateProperty,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
@@ -133,7 +133,7 @@ class PaginationButton {
     e.preventDefault();
 
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
+      Action_Enum.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
 
@@ -194,17 +194,17 @@ export class PaginationButtons {
   /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_INDEX,
+      StateProperty_Enum.CURRENT_PAGE_INDEX,
       (pageIndex) => {
         this.onCurrentPageIndexUpdate_(pageIndex);
       }
     );
 
     this.storeService_.subscribe(
-      StateProperty.PAGE_IDS,
+      StateProperty_Enum.PAGE_IDS,
       () => {
         const currentPageIndex = Number(
-          this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+          this.storeService_.get(StateProperty_Enum.CURRENT_PAGE_INDEX)
         );
         this.onCurrentPageIndexUpdate_(currentPageIndex);
       },
@@ -212,7 +212,7 @@ export class PaginationButtons {
     );
 
     this.storeService_.subscribe(
-      StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+      StateProperty_Enum.SYSTEM_UI_IS_VISIBLE_STATE,
       (isVisible) => this.onSystemUiIsVisibleStateUpdate_(isVisible)
     );
   }
@@ -222,7 +222,9 @@ export class PaginationButtons {
    * @private
    */
   onCurrentPageIndexUpdate_(pageIndex) {
-    const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
+    const totalPages = this.storeService_.get(
+      StateProperty_Enum.PAGE_IDS
+    ).length;
 
     // Hide back button if no previous page.
     this.backButton_.setEnabled(pageIndex > 0);

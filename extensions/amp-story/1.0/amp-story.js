@@ -13,11 +13,11 @@ import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
 import {
-  Action,
-  EmbeddedComponentState,
+  Action_Enum,
+  EmbeddedComponentState_Enum,
   InteractiveComponentDef,
-  StateProperty,
-  UIType,
+  StateProperty_Enum,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
@@ -207,7 +207,7 @@ export class AmpStory extends AMP.BaseElement {
 
     // Check if story is RTL.
     if (isRTL(this.win.document)) {
-      this.storeService_.dispatch(Action.TOGGLE_RTL, true);
+      this.storeService_.dispatch(Action_Enum.TOGGLE_RTL, true);
     }
 
     /** @private {!./story-analytics.StoryAnalyticsService} */
@@ -370,7 +370,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeStoryPlayer_();
 
     this.uiState_ = this.getUIType_();
-    this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_UI, this.uiState_);
     if (this.isLandscapeSupported_()) {
       this.win.document.documentElement.setAttribute(
         'data-story-supports-landscape',
@@ -400,7 +400,7 @@ export class AmpStory extends AMP.BaseElement {
           return;
         }
         this.storeService_.dispatch(
-          Action.SET_ADVANCEMENT_MODE,
+          Action_Enum.SET_ADVANCEMENT_MODE,
           AdvancementMode.GO_TO_PAGE
         );
         this.switchTo_(args['id'], NavigationDirection.NEXT);
@@ -459,7 +459,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   pause_() {
     this.setPausedStateToRestore_();
-    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+    if (!this.storeService_.get(StateProperty_Enum.MUTED_STATE)) {
       this.pauseBackgroundAudio_();
     }
     // If viewer has navigated to the next document, reset the active page.
@@ -478,7 +478,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   resume_() {
     this.restorePausedState_();
-    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+    if (!this.storeService_.get(StateProperty_Enum.MUTED_STATE)) {
       this.playBackgroundAudio_();
     }
   }
@@ -489,16 +489,16 @@ export class AmpStory extends AMP.BaseElement {
     // setting the visibilitystate to paused and then inactive.
     if (this.pausedStateToRestore_ === null) {
       this.pausedStateToRestore_ = !!this.storeService_.get(
-        StateProperty.PAUSED_STATE
+        StateProperty_Enum.PAUSED_STATE
       );
     }
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, true);
   }
 
   /** @private */
   restorePausedState_() {
     this.storeService_.dispatch(
-      Action.TOGGLE_PAUSED,
+      Action_Enum.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
     this.pausedStateToRestore_ = null;
@@ -533,7 +533,7 @@ export class AmpStory extends AMP.BaseElement {
       pageEls[i].id = newId;
       pageIds[i] = newId;
     }
-    this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
+    this.storeService_.dispatch(Action_Enum.SET_PAGE_IDS, pageIds);
   }
 
   /**
@@ -601,7 +601,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.storeService_.subscribe(
-      StateProperty.MUTED_STATE,
+      StateProperty_Enum.MUTED_STATE,
       (isMuted) => {
         this.onMutedStateUpdate_(isMuted);
         this.variableService_.onVariableUpdate(
@@ -613,7 +613,7 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     this.storeService_.subscribe(
-      StateProperty.MUTED_STATE,
+      StateProperty_Enum.MUTED_STATE,
       (isMuted) => {
         // We do not want to trigger an analytics event for the initialization of
         // the muted state.
@@ -626,15 +626,18 @@ export class AmpStory extends AMP.BaseElement {
       false /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.ADVANCEMENT_MODE, (mode) => {
-      this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_ADVANCEMENT_MODE,
-        mode
-      );
-    });
+    this.storeService_.subscribe(
+      StateProperty_Enum.ADVANCEMENT_MODE,
+      (mode) => {
+        this.variableService_.onVariableUpdate(
+          AnalyticsVariable.STORY_ADVANCEMENT_MODE,
+          mode
+        );
+      }
+    );
 
     this.storeService_.subscribe(
-      StateProperty.CAN_SHOW_AUDIO_UI,
+      StateProperty_Enum.CAN_SHOW_AUDIO_UI,
       (show) => {
         this.element.classList.toggle('i-amphtml-story-no-audio-ui', !show);
       },
@@ -690,7 +693,7 @@ export class AmpStory extends AMP.BaseElement {
     // Actions allowlist could be initialized empty, or with some actions some
     // other components registered.
     this.storeService_.subscribe(
-      StateProperty.ACTIONS_ALLOWLIST,
+      StateProperty_Enum.ACTIONS_ALLOWLIST,
       (actionsAllowlist) => {
         const actions = Services.actionServiceForDoc(this.element);
         actions.setAllowlist(actionsAllowlist);
@@ -698,16 +701,19 @@ export class AmpStory extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
+    this.storeService_.subscribe(StateProperty_Enum.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
 
-    this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
-      this.onPausedStateUpdate_(isPaused);
-    });
+    this.storeService_.subscribe(
+      StateProperty_Enum.PAUSED_STATE,
+      (isPaused) => {
+        this.onPausedStateUpdate_(isPaused);
+      }
+    );
 
     this.storeService_.subscribe(
-      StateProperty.UI_STATE,
+      StateProperty_Enum.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
@@ -723,8 +729,8 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     this.win.document.addEventListener('contextmenu', (e) => {
-      const uiState = this.storeService_.get(StateProperty.UI_STATE);
-      if (uiState === UIType.MOBILE) {
+      const uiState = this.storeService_.get(StateProperty_Enum.UI_STATE);
+      if (uiState === UIType_Enum.MOBILE) {
         if (!this.allowContextMenuOnMobile_(e.target)) {
           e.preventDefault();
         }
@@ -790,7 +796,7 @@ export class AmpStory extends AMP.BaseElement {
 
       // Updates presence of the `amp-mode-keyboard-active` class on the store.
       this.storeService_.dispatch(
-        Action.TOGGLE_KEYBOARD_ACTIVE_STATE,
+        Action_Enum.TOGGLE_KEYBOARD_ACTIVE_STATE,
         bodyEl.classList.contains('amp-mode-keyboard-active')
       );
     });
@@ -813,14 +819,18 @@ export class AmpStory extends AMP.BaseElement {
     gestures.onGesture(SwipeXYRecognizer, (gesture) => {
       const {deltaX, deltaY} = gesture.data;
       const embedComponent = /** @type {InteractiveComponentDef} */ (
-        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+        this.storeService_.get(StateProperty_Enum.INTERACTIVE_COMPONENT_STATE)
       );
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (
-        embedComponent.state !== EmbeddedComponentState.HIDDEN ||
-        this.storeService_.get(StateProperty.ACCESS_STATE) ||
-        !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
-        !this.storeService_.get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)
+        embedComponent.state !== EmbeddedComponentState_Enum.HIDDEN ||
+        this.storeService_.get(StateProperty_Enum.ACCESS_STATE) ||
+        !this.storeService_.get(
+          StateProperty_Enum.SYSTEM_UI_IS_VISIBLE_STATE
+        ) ||
+        !this.storeService_.get(
+          StateProperty_Enum.CAN_SHOW_NAVIGATION_OVERLAY_HINT
+        )
       ) {
         // Cancels the event for this gesture entirely, ensuring the hint won't
         // show even if the user keeps swiping without releasing the touch.
@@ -944,7 +954,9 @@ export class AmpStory extends AMP.BaseElement {
         this.initializeStoryNavigationPath_();
 
         // Build pagination buttons if they can be displayed.
-        if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
+        if (
+          this.storeService_.get(StateProperty_Enum.CAN_SHOW_PAGINATION_BUTTONS)
+        ) {
           new PaginationButtons(this);
         }
       })
@@ -1005,7 +1017,7 @@ export class AmpStory extends AMP.BaseElement {
       this.liveStoryManager_ = new LiveStoryManager(this);
       this.liveStoryManager_.build();
 
-      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
+      this.storeService_.dispatch(Action_Enum.ADD_TO_ACTIONS_ALLOWLIST, [
         {tagOrTarget: 'AMP-LIVE-LIST', method: 'update'},
       ]);
 
@@ -1123,10 +1135,10 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, true);
 
     consentPromise.then(() => {
-      this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+      this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, false);
     });
   }
 
@@ -1207,7 +1219,7 @@ export class AmpStory extends AMP.BaseElement {
       this.switchTo_(nextPage.element.id, NavigationDirection.NEXT);
     }
 
-    this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_ACCESS, false);
   }
 
   /** @override */
@@ -1225,7 +1237,7 @@ export class AmpStory extends AMP.BaseElement {
     return Promise.all(pageImplPromises).then((pages) => {
       this.pages_ = pages;
       if (isExperimentOn(this.win, 'amp-story-branching')) {
-        this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
+        this.storeService_.dispatch(Action_Enum.ADD_TO_ACTIONS_ALLOWLIST, [
           {tagOrTarget: 'AMP-STORY', method: 'goToPage'},
         ]);
       }
@@ -1268,7 +1280,7 @@ export class AmpStory extends AMP.BaseElement {
   onNoNextPage_() {
     if (this.viewer_.hasCapability('swipe') && this.viewerMessagingHandler_) {
       const advancementMode = this.storeService_.get(
-        StateProperty.ADVANCEMENT_MODE
+        StateProperty_Enum.ADVANCEMENT_MODE
       );
       this.viewerMessagingHandler_.send(
         'selectDocument',
@@ -1297,7 +1309,7 @@ export class AmpStory extends AMP.BaseElement {
   onNoPreviousPage_() {
     if (this.viewer_.hasCapability('swipe') && this.viewerMessagingHandler_) {
       const advancementMode = this.storeService_.get(
-        StateProperty.ADVANCEMENT_MODE
+        StateProperty_Enum.ADVANCEMENT_MODE
       );
       this.viewerMessagingHandler_.send(
         'selectDocument',
@@ -1306,7 +1318,9 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    if (this.storeService_.get(StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP)) {
+    if (
+      this.storeService_.get(StateProperty_Enum.CAN_SHOW_PREVIOUS_PAGE_HELP)
+    ) {
       this.ampStoryHint_.showFirstPageHintOverlay();
     }
   }
@@ -1317,7 +1331,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   performTapNavigation_(direction) {
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
+      Action_Enum.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
 
@@ -1358,7 +1372,7 @@ export class AmpStory extends AMP.BaseElement {
     // If the next page is paywall protected, display the access UI and wait for
     // the document to be reauthorized.
     if (targetPage.element.hasAttribute('amp-access-hide')) {
-      this.storeService_.dispatch(Action.TOGGLE_ACCESS, true);
+      this.storeService_.dispatch(Action_Enum.TOGGLE_ACCESS, true);
       this.navigateToPageAfterAccess_ = targetPage;
       return Promise.resolve();
     }
@@ -1382,7 +1396,7 @@ export class AmpStory extends AMP.BaseElement {
         // Starts playing the page, if the story is not paused.
         // Note: navigation is prevented when the story is paused, this test
         // covers the case where the story is rendered paused (eg: consent).
-        if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
+        if (!this.storeService_.get(StateProperty_Enum.PAUSED_STATE)) {
           targetPage.setState(PageState.PLAYING);
         } else {
           // Even if the page won't be playing, setting the active attribute
@@ -1406,7 +1420,7 @@ export class AmpStory extends AMP.BaseElement {
 
           if (oldPage.isAd()) {
             this.storeService_.dispatch(
-              Action.SET_ADVANCEMENT_MODE,
+              Action_Enum.SET_ADVANCEMENT_MODE,
               AdvancementMode.ADVANCE_TO_ADS
             );
           }
@@ -1414,16 +1428,16 @@ export class AmpStory extends AMP.BaseElement {
 
         let storePageIndex = pageIndex;
         if (targetPage.isAd()) {
-          this.storeService_.dispatch(Action.TOGGLE_AD, true);
+          this.storeService_.dispatch(Action_Enum.TOGGLE_AD, true);
           setAttributeInMutate(this, Attributes.AD_SHOWING);
 
           // Keep current page index when an ad is shown. Otherwise it messes
           // up with the progress variable in the VariableService.
           storePageIndex = this.storeService_.get(
-            StateProperty.CURRENT_PAGE_INDEX
+            StateProperty_Enum.CURRENT_PAGE_INDEX
           );
         } else {
-          this.storeService_.dispatch(Action.TOGGLE_AD, false);
+          this.storeService_.dispatch(Action_Enum.TOGGLE_AD, false);
           removeAttributeInMutate(this, Attributes.AD_SHOWING);
 
           // Start progress bar update for pages that are not ads or auto-
@@ -1436,7 +1450,7 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
-        this.storeService_.dispatch(Action.CHANGE_PAGE, {
+        this.storeService_.dispatch(Action_Enum.CHANGE_PAGE, {
           id: targetPageId,
           index: storePageIndex,
         });
@@ -1485,7 +1499,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   updateNavigationPath_(targetPageId, direction) {
     const navigationPath = /** @type {!Array<string>} */ (
-      this.storeService_.get(StateProperty.NAVIGATION_PATH)
+      this.storeService_.get(StateProperty_Enum.NAVIGATION_PATH)
     );
 
     if (direction === NavigationDirection.PREVIOUS) {
@@ -1501,7 +1515,10 @@ export class AmpStory extends AMP.BaseElement {
       navigationPath.push(targetPageId);
     }
 
-    this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, navigationPath);
+    this.storeService_.dispatch(
+      Action_Enum.SET_NAVIGATION_PATH,
+      navigationPath
+    );
     setHistoryState(this.win, HistoryState.NAVIGATION_PATH, navigationPath);
   }
 
@@ -1550,11 +1567,11 @@ export class AmpStory extends AMP.BaseElement {
    */
   onKeyDown_(e) {
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
+      Action_Enum.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
 
-    const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
+    const rtlState = this.storeService_.get(StateProperty_Enum.RTL_STATE);
 
     switch (e.key) {
       case Keys_Enum.LEFT_ARROW:
@@ -1572,7 +1589,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   onResizeDebounced() {
     this.uiState_ = this.getUIType_();
-    this.storeService_.dispatch(Action.TOGGLE_UI, this.uiState_);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_UI, this.uiState_);
 
     const isLandscape = this.isLandscape_();
     const isLandscapeSupported = this.isLandscapeSupported_();
@@ -1589,7 +1606,7 @@ export class AmpStory extends AMP.BaseElement {
     if (height === 0 && width === 0) {
       return;
     }
-    this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
+    this.storeService_.dispatch(Action_Enum.SET_PAGE_SIZE, {height, width});
     setImportantStyles(this.win.document.documentElement, {
       '--story-dvh': px(height / 100),
     });
@@ -1629,7 +1646,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onAdStateUpdate_(isAd) {
-    if (this.storeService_.get(StateProperty.MUTED_STATE)) {
+    if (this.storeService_.get(StateProperty_Enum.MUTED_STATE)) {
       return;
     }
 
@@ -1638,14 +1655,14 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     this.backgroundBlur_?.detach();
     this.backgroundBlur_ = null;
     switch (uiState) {
-      case UIType.MOBILE:
+      case UIType_Enum.MOBILE:
         this.vsync_.mutate(() => {
           this.win.document.documentElement.setAttribute(
             'i-amphtml-story-mobile',
@@ -1656,7 +1673,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
-      case UIType.DESKTOP_ONE_PANEL:
+      case UIType_Enum.DESKTOP_ONE_PANEL:
         if (!this.backgroundBlur_) {
           this.backgroundBlur_ = new BackgroundBlur(this.win, this.element);
           this.backgroundBlur_.attach();
@@ -1674,7 +1691,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
         break;
-      case UIType.DESKTOP_FULLBLEED:
+      case UIType_Enum.DESKTOP_FULLBLEED:
         this.vsync_.mutate(() => {
           this.win.document.documentElement.removeAttribute(
             'i-amphtml-story-mobile'
@@ -1686,7 +1703,7 @@ export class AmpStory extends AMP.BaseElement {
         break;
       // Because of the DOM mutations, switching from this mode to another is
       // not allowed, and prevented within the store service.
-      case UIType.VERTICAL:
+      case UIType_Enum.VERTICAL:
         const pageAttachments = scopedQuerySelectorAll(
           this.element,
           'amp-story-page amp-story-page-attachment'
@@ -1732,12 +1749,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Retrieves the UI type that should be used to view the story.
-   * @return {!UIType}
+   * @return {!UIType_Enum}
    * @private
    */
   getUIType_() {
     if (
-      this.uiState_ === UIType.MOBILE &&
+      this.uiState_ === UIType_Enum.MOBILE &&
       this.androidSoftKeyboardIsProbablyOpen_()
     ) {
       // The opening of the Android soft keyboard triggers a viewport resize
@@ -1745,23 +1762,23 @@ export class AmpStory extends AMP.BaseElement {
       // desktop. Here, we assume that the soft keyboard is open if the latest
       // UI state is mobile while an input element has focus, and we then
       // ensure that the UI type does not unintentionally alter.
-      return UIType.MOBILE;
+      return UIType_Enum.MOBILE;
     }
 
     if (this.platform_.isBot()) {
-      return UIType.VERTICAL;
+      return UIType_Enum.VERTICAL;
     }
 
     if (!this.isDesktop_()) {
-      return UIType.MOBILE;
+      return UIType_Enum.MOBILE;
     }
 
     if (this.isLandscapeSupported_()) {
-      return UIType.DESKTOP_FULLBLEED;
+      return UIType_Enum.DESKTOP_FULLBLEED;
     }
 
     // Desktop one panel UI (default).
-    return UIType.DESKTOP_ONE_PANEL;
+    return UIType_Enum.DESKTOP_ONE_PANEL;
   }
 
   /**
@@ -1891,7 +1908,7 @@ export class AmpStory extends AMP.BaseElement {
       // There may be other 1 skip away pages due to branching.
       if (isExperimentOn(this.win, 'amp-story-branching')) {
         const navigationPath = this.storeService_.get(
-          StateProperty.NAVIGATION_PATH
+          StateProperty_Enum.NAVIGATION_PATH
         );
         const indexInStack = navigationPath.indexOf(
           this.activePage_.element.id
@@ -1988,7 +2005,7 @@ export class AmpStory extends AMP.BaseElement {
         page.setDistance(0);
         page.signals().whenSignal(CommonSignals_Enum.LOAD_END).then(res);
         // Don't call preload if user navigates before page loads, since the navigation will call preload properly.
-        this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, rej);
+        this.storeService_.subscribe(StateProperty_Enum.CURRENT_PAGE_ID, rej);
       }).then(
         () => preloadAllPages(),
         () => {}
@@ -2240,7 +2257,7 @@ export class AmpStory extends AMP.BaseElement {
       this.element.hasAttribute('background-audio');
 
     this.storeService_.dispatch(
-      Action.TOGGLE_STORY_HAS_PLAYBACK_UI,
+      Action_Enum.TOGGLE_STORY_HAS_PLAYBACK_UI,
       containsElementsWithPlayback || storyHasBackgroundAudio
     );
   }
@@ -2266,7 +2283,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
+      Action_Enum.SET_ADVANCEMENT_MODE,
       AdvancementMode.VIEWER_SELECT_PAGE
     );
 
@@ -2294,7 +2311,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   switchDelta_(delta) {
     const currentPageIdx = this.storeService_.get(
-      StateProperty.CURRENT_PAGE_INDEX
+      StateProperty_Enum.CURRENT_PAGE_INDEX
     );
 
     const newPageIdx =
@@ -2333,12 +2350,15 @@ export class AmpStory extends AMP.BaseElement {
     ) {
       navigationPath = [];
     }
-    this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, navigationPath);
+    this.storeService_.dispatch(
+      Action_Enum.SET_NAVIGATION_PATH,
+      navigationPath
+    );
   }
 
   /** @private */
   replay_() {
-    this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, []);
+    this.storeService_.dispatch(Action_Enum.SET_NAVIGATION_PATH, []);
     const switchPromise = this.switchTo_(
       dev().assertElement(this.pages_[0].element).id,
       NavigationDirection.NEXT
@@ -2406,7 +2426,7 @@ export class AmpStory extends AMP.BaseElement {
 
     if (
       pageToBeInserted.isAd() &&
-      !this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD)
+      !this.storeService_.get(StateProperty_Enum.CAN_INSERT_AUTOMATIC_AD)
     ) {
       dev().expectedError(TAG, 'Inserting ads automatically is disallowed.');
       return false;

@@ -1,9 +1,9 @@
 import * as Preact from '#core/dom/jsx';
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 import {
-  EmbeddedComponentState,
-  StateProperty,
-  UIType,
+  EmbeddedComponentState_Enum,
+  StateProperty_Enum,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -109,7 +109,7 @@ export class AmpStoryHint {
     const root = createShadowRootWithStyle(<div />, this.hintContainer_, CSS);
 
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      StateProperty_Enum.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -117,19 +117,19 @@ export class AmpStoryHint {
     );
 
     this.storeService_.subscribe(
-      StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+      StateProperty_Enum.SYSTEM_UI_IS_VISIBLE_STATE,
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
 
     this.storeService_.subscribe(
-      StateProperty.INTERACTIVE_COMPONENT_STATE,
+      StateProperty_Enum.INTERACTIVE_COMPONENT_STATE,
       /** @param {./amp-story-store-service.InteractiveComponentDef} component */ (
         component
       ) => {
         this.hideOnFocusedState_(
-          component.state === EmbeddedComponentState.FOCUSED
+          component.state === EmbeddedComponentState_Enum.FOCUSED
         );
       }
     );
@@ -145,7 +145,9 @@ export class AmpStoryHint {
    * @private
    */
   showHint_(hintClass) {
-    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.MOBILE) {
+    if (
+      this.storeService_.get(StateProperty_Enum.UI_STATE) !== UIType_Enum.MOBILE
+    ) {
       return;
     }
 
@@ -175,7 +177,7 @@ export class AmpStoryHint {
    */
   showNavigationOverlay() {
     // Don't show the overlay if the share menu is open.
-    if (this.storeService_.get(StateProperty.SHARE_MENU_STATE)) {
+    if (this.storeService_.get(StateProperty_Enum.SHARE_MENU_STATE)) {
       return;
     }
 

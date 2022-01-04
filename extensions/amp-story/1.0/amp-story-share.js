@@ -3,8 +3,8 @@ import {Services} from '#service';
 import {user} from '#utils/log';
 import {getAmpdoc} from 'src/service-helpers';
 import {
-  Action,
-  StateProperty,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {
@@ -50,22 +50,25 @@ export class AmpStoryShare {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, (isOpen) => {
-      if (isOpen) {
-        if (this.isSystemShareSupported_()) {
-          this.openSystemShare_();
-          this.close_();
-        } else {
-          this.buildFallbackMenu_();
+    this.storeService_.subscribe(
+      StateProperty_Enum.SHARE_MENU_STATE,
+      (isOpen) => {
+        if (isOpen) {
+          if (this.isSystemShareSupported_()) {
+            this.openSystemShare_();
+            this.close_();
+          } else {
+            this.buildFallbackMenu_();
+          }
         }
-      }
 
-      this.shareMenuEl_[ANALYTICS_TAG_NAME] = TAG;
-      this.analyticsService_.triggerEvent(
-        isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
-        this.shareMenuEl_
-      );
-    });
+        this.shareMenuEl_[ANALYTICS_TAG_NAME] = TAG;
+        this.analyticsService_.triggerEvent(
+          isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+          this.shareMenuEl_
+        );
+      }
+    );
   }
 
   /**
@@ -117,6 +120,6 @@ export class AmpStoryShare {
    * @private
    */
   close_() {
-    this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, false);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_SHARE_MENU, false);
   }
 }

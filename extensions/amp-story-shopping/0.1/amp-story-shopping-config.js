@@ -5,7 +5,7 @@ import {Services} from '#service';
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 
 import {
-  Action,
+  Action_Enum,
   ShoppingConfigDataDef,
 } from '../../amp-story/1.0/amp-story-store-service';
 
@@ -34,7 +34,10 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     for (const item of shoppingConfig['items']) {
       productIDtoProduct[item['product-tag-id']] = item;
     }
-    this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, productIDtoProduct);
+    this.storeService_.dispatch(
+      Action_Enum.ADD_SHOPPING_DATA,
+      productIDtoProduct
+    );
     //TODO(#36412): Add call to validate config here.
   }
 

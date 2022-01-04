@@ -1,6 +1,6 @@
 import {
-  Action,
-  StateProperty,
+  Action_Enum,
+  StateProperty_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
@@ -19,7 +19,7 @@ const DataSources = {
 /**
  * @typedef {{
  *   dataSource: !DataSources,
- *   property: (!StateProperty|!AnalyticsVariable)
+ *   property: (!StateProperty_Enum|!AnalyticsVariable)
  * }}
  */
 let GetStateConfigurationDef;
@@ -28,23 +28,23 @@ let GetStateConfigurationDef;
 const GET_STATE_CONFIGURATIONS = {
   'CURRENT_PAGE_ID': {
     dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.CURRENT_PAGE_ID,
+    property: StateProperty_Enum.CURRENT_PAGE_ID,
   },
   'EDUCATION_STATE': {
     dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.EDUCATION_STATE,
+    property: StateProperty_Enum.EDUCATION_STATE,
   },
   'MUTED_STATE': {
     dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.MUTED_STATE,
+    property: StateProperty_Enum.MUTED_STATE,
   },
   'PAGE_ATTACHMENT_STATE': {
     dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.PAGE_ATTACHMENT_STATE,
+    property: StateProperty_Enum.PAGE_ATTACHMENT_STATE,
   },
   'UI_STATE': {
     dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.UI_STATE,
+    property: StateProperty_Enum.UI_STATE,
   },
   'STORY_PROGRESS': {
     dataSource: DataSources.VARIABLE_SERVICE,
@@ -52,13 +52,13 @@ const GET_STATE_CONFIGURATIONS = {
   },
 };
 
-/** @typedef {{action: !Action, isValueValid: function(*):boolean}} */
+/** @typedef {{action: !Action_Enum, isValueValid: function(*):boolean}} */
 let SetStateConfigurationDef;
 
 /** @enum {!SetStateConfigurationDef} */
 const SET_STATE_CONFIGURATIONS = {
   'MUTED_STATE': {
-    action: Action.TOGGLE_MUTED,
+    action: Action_Enum.TOGGLE_MUTED,
     isValueValid: (value) => typeof value === 'boolean',
   },
 };
@@ -192,7 +192,7 @@ export class AmpStoryViewerMessagingHandler {
    */
   onCustomDocumentUI_(data) {
     this.storeService_.dispatch(
-      Action.SET_VIEWER_CUSTOM_CONTROLS,
+      Action_Enum.SET_VIEWER_CUSTOM_CONTROLS,
       data.controls
     );
   }

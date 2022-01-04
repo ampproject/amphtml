@@ -15,9 +15,9 @@ import {
   AmpStoryAffiliateLink,
 } from './amp-story-affiliate-link';
 import {
-  Action,
-  StateProperty,
-  UIType,
+  Action_Enum,
+  StateProperty_Enum,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementConfig} from './page-advancement';
@@ -276,7 +276,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     this.setDescendantCssTextStyles_();
     this.storeService_.subscribe(
-      StateProperty.UI_STATE,
+      StateProperty_Enum.UI_STATE,
       (uiState) => this.onUIStateUpdate_(uiState),
       true /* callToInitialize */
     );
@@ -288,7 +288,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   maybeSetPreviewDuration_() {
-    if (this.storeService_.get(StateProperty.PREVIEW_STATE)) {
+    if (this.storeService_.get(StateProperty_Enum.PREVIEW_STATE)) {
       const videos = this.getAllVideos_();
 
       const autoAdvanceAttr =
@@ -479,7 +479,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.pauseAllMedia_(true /** rewindToBeginning */);
 
-    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+    if (!this.storeService_.get(StateProperty_Enum.MUTED_STATE)) {
       this.muteAllMedia();
     }
 
@@ -506,7 +506,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           this.startListeningToVideoEvents_();
           // iOS 14.2 and 14.3 requires play to be called before unmute
           this.playAllMedia_().then(() => {
-            if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+            if (!this.storeService_.get(StateProperty_Enum.MUTED_STATE)) {
               this.unmuteAllMedia();
             }
           });
@@ -540,11 +540,12 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.mediaPoolPromise_,
     ]);
   }
+  UIType_Enum;
 
   /**
    * Reacts to UI state updates.
    * @param {!UIType} uiState
-   * @private
+   * @privateUIType_Enum
    */
   onUIStateUpdate_(uiState) {
     // On vertical rendering, render all the animations with their final state.
@@ -1179,7 +1180,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     const navigationPath = this.storeService_.get(
-      StateProperty.NAVIGATION_PATH
+      StateProperty_Enum.NAVIGATION_PATH
     );
 
     const pagePathIndex = navigationPath.lastIndexOf(this.element.id);
@@ -1271,7 +1272,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, false);
     this.switchTo_(pageId, NavigationDirection.PREVIOUS);
   }
 
@@ -1294,7 +1295,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, false);
     this.switchTo_(pageId, NavigationDirection.NEXT);
   }
 
@@ -1322,7 +1323,10 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.element.querySelector('amp-audio') ||
       this.hasVideoWithAudio_();
 
-    this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, pageHasAudio);
+    this.storeService_.dispatch(
+      Action_Enum.TOGGLE_PAGE_HAS_AUDIO,
+      pageHasAudio
+    );
   }
 
   /**
@@ -1349,7 +1353,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.getAllMedia_().length > 0;
 
     this.storeService_.dispatch(
-      Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK,
+      Action_Enum.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK,
       pageHasElementWithPlayback
     );
   }

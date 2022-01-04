@@ -1,5 +1,5 @@
 import {
-  Action,
+  Action_Enum,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
@@ -86,7 +86,7 @@ describes.realWin(
       addConfigToInteractive(ampStoryResults, 3);
       await ampStoryResults.buildCallback();
       await ampStoryResults.layoutCallback();
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {'resultscategory': 'results-category 2'},
         'type': InteractiveType.POLL,
@@ -197,12 +197,12 @@ describes.realWin(
       addThresholdsToInteractive(ampStoryResults, [80, 20, 50]);
       await ampStoryResults.buildCallback();
       await ampStoryResults.layoutCallback();
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct'},
         'type': InteractiveType.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
         'type': InteractiveType.QUIZ,
@@ -218,17 +218,17 @@ describes.realWin(
       addThresholdsToInteractive(ampStoryResults, [80, 20, 50]);
       await ampStoryResults.buildCallback();
       await ampStoryResults.layoutCallback();
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {correct: 'correct'},
         'type': InteractiveType.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'j',
         'option': {},
         'type': InteractiveType.QUIZ,
       });
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+      storeService.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'k',
         'option': {},
         'type': InteractiveType.QUIZ,

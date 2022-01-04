@@ -4,7 +4,7 @@ import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
-import {Action} from '../../amp-story/1.0/amp-story-store-service';
+import {Action_Enum} from '../../amp-story/1.0/amp-story-store-service';
 import {
   renderLoadingSpinner,
   toggleLoadingSpinner,
@@ -16,7 +16,7 @@ import {
  */
 export function allowlistFormActions(win) {
   const storeService = Services.storyStoreService(win);
-  storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
+  storeService.dispatch(Action_Enum.ADD_TO_ACTIONS_ALLOWLIST, [
     {tagOrTarget: 'FORM', method: 'clear'},
     {tagOrTarget: 'FORM', method: 'submit'},
   ]);

@@ -1,7 +1,7 @@
 import {
-  Action,
+  Action_Enum,
   AmpStoryStoreService,
-  StateProperty,
+  StateProperty_Enum,
 } from '../amp-story-store-service';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
@@ -14,33 +14,36 @@ describes.fakeWin('amp-story-store-service', {}, (env) => {
   });
 
   it('should return the default state', () => {
-    expect(storeService.get(StateProperty.MUTED_STATE)).to.be.true;
+    expect(storeService.get(StateProperty_Enum.MUTED_STATE)).to.be.true;
   });
 
   it('should subscribe to property mutations and receive the new value', () => {
     const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_MUTED, false);
+    storeService.subscribe(StateProperty_Enum.MUTED_STATE, listenerSpy);
+    storeService.dispatch(Action_Enum.TOGGLE_MUTED, false);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(false);
   });
 
   it('should not trigger a listener if another property changed', () => {
     const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.CAN_INSERT_AUTOMATIC_AD, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_MUTED, true);
+    storeService.subscribe(
+      StateProperty_Enum.CAN_INSERT_AUTOMATIC_AD,
+      listenerSpy
+    );
+    storeService.dispatch(Action_Enum.TOGGLE_MUTED, true);
     expect(listenerSpy).to.have.callCount(0);
   });
 
   it('should not trigger a listener on subscribe by default', () => {
     const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy);
+    storeService.subscribe(StateProperty_Enum.MUTED_STATE, listenerSpy);
     expect(listenerSpy).to.have.callCount(0);
   });
 
   it('should trigger a listener on subscribe if option is set to true', () => {
     const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy, true);
+    storeService.subscribe(StateProperty_Enum.MUTED_STATE, listenerSpy, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(true);
   });
@@ -56,7 +59,7 @@ describes.fakeWin('amp-story-store-service embed mode', {}, (env) => {
   });
 
   it('should override the state with the expected mode', () => {
-    expect(storeService.get(StateProperty.MUTED_STATE)).to.be.false;
+    expect(storeService.get(StateProperty_Enum.MUTED_STATE)).to.be.false;
   });
 });
 
@@ -70,16 +73,16 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
 
   it('should toggle the muted state', () => {
     const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_MUTED, false);
+    storeService.subscribe(StateProperty_Enum.MUTED_STATE, listenerSpy);
+    storeService.dispatch(Action_Enum.TOGGLE_MUTED, false);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(false);
   });
 
   it('should update the current page id', () => {
     const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.CURRENT_PAGE_ID, listenerSpy);
-    storeService.dispatch(Action.CHANGE_PAGE, {
+    storeService.subscribe(StateProperty_Enum.CURRENT_PAGE_ID, listenerSpy);
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'test-page',
       index: 1,
     });
@@ -89,8 +92,8 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
 
   it('should update the current page index', () => {
     const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.CURRENT_PAGE_INDEX, listenerSpy);
-    storeService.dispatch(Action.CHANGE_PAGE, {
+    storeService.subscribe(StateProperty_Enum.CURRENT_PAGE_INDEX, listenerSpy);
+    storeService.dispatch(Action_Enum.CHANGE_PAGE, {
       id: 'test-page',
       index: 1,
     });
@@ -100,62 +103,65 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
 
   it('should pause the story when displaying the share menu', () => {
     const pausedListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.subscribe(StateProperty_Enum.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, true);
     expect(pausedListenerSpy).to.have.been.calledOnce;
     expect(pausedListenerSpy).to.have.been.calledWith(true);
   });
 
   it('should unpause the story when hiding the share menu', () => {
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, true);
 
     const pausedListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, false);
+    storeService.subscribe(StateProperty_Enum.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, false);
     expect(pausedListenerSpy).to.have.been.calledOnce;
     expect(pausedListenerSpy).to.have.been.calledWith(false);
   });
 
   it('should pause the story when displaying the info dialog', () => {
     const pausedListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
-    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
+    storeService.subscribe(StateProperty_Enum.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action_Enum.TOGGLE_INFO_DIALOG, true);
     expect(pausedListenerSpy).to.have.been.calledOnce;
     expect(pausedListenerSpy).to.have.been.calledWith(true);
   });
 
   it('should unpause the story when hiding the info dialog', () => {
-    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, true);
+    storeService.dispatch(Action_Enum.TOGGLE_INFO_DIALOG, true);
 
     const pausedListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.PAUSED_STATE, pausedListenerSpy);
-    storeService.dispatch(Action.TOGGLE_INFO_DIALOG, false);
+    storeService.subscribe(StateProperty_Enum.PAUSED_STATE, pausedListenerSpy);
+    storeService.dispatch(Action_Enum.TOGGLE_INFO_DIALOG, false);
     expect(pausedListenerSpy).to.have.been.calledOnce;
     expect(pausedListenerSpy).to.have.been.calledWith(false);
   });
 
   it('should not update PAUSED_STATE if ACCESS_STATE is unchanged', () => {
     // Story is paused.
-    storeService.dispatch(Action.TOGGLE_PAUSED, true);
+    storeService.dispatch(Action_Enum.TOGGLE_PAUSED, true);
 
     // ACCESS_STATE was already false but is set to false again.
-    expect(storeService.get(StateProperty.ACCESS_STATE)).to.be.false;
-    storeService.dispatch(Action.TOGGLE_ACCESS, false);
+    expect(storeService.get(StateProperty_Enum.ACCESS_STATE)).to.be.false;
+    storeService.dispatch(Action_Enum.TOGGLE_ACCESS, false);
 
     // PAUSED_STATE did not get affected.
-    expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
+    expect(storeService.get(StateProperty_Enum.PAUSED_STATE)).to.be.true;
   });
 
   it('should add an action to the allowlist', () => {
     const action1 = {tagOrTarget: 'foo', method: 1};
     const action2 = {tagOrTarget: 'foo', method: 2};
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, action1);
+    storeService.dispatch(Action_Enum.ADD_TO_ACTIONS_ALLOWLIST, action1);
 
     const actionsListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.ACTIONS_ALLOWLIST, actionsListenerSpy);
+    storeService.subscribe(
+      StateProperty_Enum.ACTIONS_ALLOWLIST,
+      actionsListenerSpy
+    );
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, action2);
+    storeService.dispatch(Action_Enum.ADD_TO_ACTIONS_ALLOWLIST, action2);
 
     expect(actionsListenerSpy).to.have.been.calledOnceWithExactly([
       action1,
@@ -168,12 +174,18 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     const action2 = {tagOrTarget: 'foo', method: 2};
     const action3 = {tagOrTarget: 'foo', method: 3};
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, action1);
+    storeService.dispatch(Action_Enum.ADD_TO_ACTIONS_ALLOWLIST, action1);
 
     const actionsListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.ACTIONS_ALLOWLIST, actionsListenerSpy);
+    storeService.subscribe(
+      StateProperty_Enum.ACTIONS_ALLOWLIST,
+      actionsListenerSpy
+    );
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [action2, action3]);
+    storeService.dispatch(Action_Enum.ADD_TO_ACTIONS_ALLOWLIST, [
+      action2,
+      action3,
+    ]);
 
     expect(actionsListenerSpy).to.have.been.calledOnceWithExactly([
       action1,
@@ -206,12 +218,12 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     it('should trigger the interaction subscription when initializing interactive', () => {
       const actionsListenerSpy = env.sandbox.spy();
       storeService.subscribe(
-        StateProperty.INTERACTIVE_REACT_STATE,
+        StateProperty_Enum.INTERACTIVE_REACT_STATE,
         actionsListenerSpy
       );
 
       storeService.dispatch(
-        Action.ADD_INTERACTIVE_REACT,
+        Action_Enum.ADD_INTERACTIVE_REACT,
         makeInteractive('foo')
       );
       expect(actionsListenerSpy).to.have.been.calledOnce;
@@ -220,16 +232,16 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     it('should trigger the interaction subscription when answering interactive', () => {
       const actionsListenerSpy = env.sandbox.spy();
       storeService.dispatch(
-        Action.ADD_INTERACTIVE_REACT,
+        Action_Enum.ADD_INTERACTIVE_REACT,
         makeInteractive('foo')
       );
       storeService.subscribe(
-        StateProperty.INTERACTIVE_REACT_STATE,
+        StateProperty_Enum.INTERACTIVE_REACT_STATE,
         actionsListenerSpy
       );
 
       storeService.dispatch(
-        Action.ADD_INTERACTIVE_REACT,
+        Action_Enum.ADD_INTERACTIVE_REACT,
         makeInteractive('foo', true)
       );
 
@@ -239,20 +251,20 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     it('should not trigger the interaction subscription twice when not updating the interactive', () => {
       const actionsListenerSpy = env.sandbox.spy();
       storeService.dispatch(
-        Action.ADD_INTERACTIVE_REACT,
+        Action_Enum.ADD_INTERACTIVE_REACT,
         makeInteractive('foo')
       );
       storeService.subscribe(
-        StateProperty.INTERACTIVE_REACT_STATE,
+        StateProperty_Enum.INTERACTIVE_REACT_STATE,
         actionsListenerSpy
       );
 
       storeService.dispatch(
-        Action.ADD_INTERACTIVE_REACT,
+        Action_Enum.ADD_INTERACTIVE_REACT,
         makeInteractive('foo', true)
       );
       storeService.dispatch(
-        Action.ADD_INTERACTIVE_REACT,
+        Action_Enum.ADD_INTERACTIVE_REACT,
         makeInteractive('foo', true)
       );
 
@@ -262,20 +274,20 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     it('should trigger the interaction subscription once for each update', () => {
       const actionsListenerSpy = env.sandbox.spy();
       storeService.dispatch(
-        Action.ADD_INTERACTIVE_REACT,
+        Action_Enum.ADD_INTERACTIVE_REACT,
         makeInteractive('bar')
       );
       storeService.subscribe(
-        StateProperty.INTERACTIVE_REACT_STATE,
+        StateProperty_Enum.INTERACTIVE_REACT_STATE,
         actionsListenerSpy
       );
 
       storeService.dispatch(
-        Action.ADD_INTERACTIVE_REACT,
+        Action_Enum.ADD_INTERACTIVE_REACT,
         makeInteractive('foo', true)
       );
       storeService.dispatch(
-        Action.ADD_INTERACTIVE_REACT,
+        Action_Enum.ADD_INTERACTIVE_REACT,
         makeInteractive('bar', true)
       );
       expect(actionsListenerSpy).to.have.been.calledTwice;

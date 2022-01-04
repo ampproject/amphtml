@@ -1,4 +1,4 @@
-import {Action} from '../amp-story-store-service';
+import {Action_Enum} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
@@ -135,7 +135,7 @@ describes.realWin(
       newPage.id = 'new-page';
       ampStory.element.appendChild(newPage);
       liveStoryManager.update();
-      expect(dispatchSpy).to.have.been.calledWith(Action.SET_PAGE_IDS, [
+      expect(dispatchSpy).to.have.been.calledWith(Action_Enum.SET_PAGE_IDS, [
         'cover',
         'page-1',
         'new-page',

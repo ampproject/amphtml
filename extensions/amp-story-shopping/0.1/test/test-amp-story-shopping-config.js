@@ -5,7 +5,7 @@ import '../amp-story-shopping';
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
-  StateProperty,
+  StateProperty_Enum,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 
@@ -76,7 +76,7 @@ describes.realWin(
         '{"city-pop":{"product-tag-id":"city-pop","product-title":"Plastic Love","product-price": "19"}}'
       );
 
-      expect(storeService.get(StateProperty.SHOPPING_DATA)).to.deep.eql(
+      expect(storeService.get(StateProperty_Enum.SHOPPING_DATA)).to.deep.eql(
         expectedRemoteResult
       );
     });

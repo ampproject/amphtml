@@ -1,4 +1,4 @@
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {Action_Enum, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
@@ -111,7 +111,10 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   it('should apply the aspect-ratio attribute from the responsiveness preset', async () => {
     gridLayerEl.setAttribute('preset', '2021-foreground');
 
-    storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
+    storeService.dispatch(Action_Enum.SET_PAGE_SIZE, {
+      width: 1000,
+      height: 1000,
+    });
 
     expect(
       getComputedStyle(gridLayerEl).getPropertyValue('--aspect-ratio')

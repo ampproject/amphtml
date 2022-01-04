@@ -1,9 +1,9 @@
 import * as Preact from '#core/dom/jsx';
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
 import {
-  Action,
-  StateProperty,
-  UIType,
+  Action_Enum,
+  StateProperty_Enum,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
@@ -309,7 +309,7 @@ export class SystemLayer {
     this.initializeListeners_();
 
     this.storeService_.subscribe(
-      StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
+      StateProperty_Enum.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
       (canShowButtons) => {
         this.systemLayerEl_.classList.toggle(
           'i-amphtml-story-ui-no-buttons',
@@ -419,12 +419,12 @@ export class SystemLayer {
       }
     });
 
-    this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
+    this.storeService_.subscribe(StateProperty_Enum.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
 
     this.storeService_.subscribe(
-      StateProperty.CAN_SHOW_AUDIO_UI,
+      StateProperty_Enum.CAN_SHOW_AUDIO_UI,
       (show) => {
         this.onCanShowAudioUiUpdate_(show);
       },
@@ -432,7 +432,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.CAN_SHOW_SHARING_UIS,
+      StateProperty_Enum.CAN_SHOW_SHARING_UIS,
       (show) => {
         this.onCanShowSharingUisUpdate_(show);
       },
@@ -440,7 +440,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.STORY_HAS_PLAYBACK_UI_STATE,
+      StateProperty_Enum.STORY_HAS_PLAYBACK_UI_STATE,
       (hasPlaybackUi) => {
         this.onStoryHasPlaybackUiStateUpdate_(hasPlaybackUi);
       },
@@ -448,7 +448,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.MUTED_STATE,
+      StateProperty_Enum.MUTED_STATE,
       (isMuted) => {
         this.onMutedStateUpdate_(isMuted);
       },
@@ -456,7 +456,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.UI_STATE,
+      StateProperty_Enum.UI_STATE,
       (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
@@ -464,7 +464,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.PAUSED_STATE,
+      StateProperty_Enum.PAUSED_STATE,
       (isPaused) => {
         this.onPausedStateUpdate_(isPaused);
       },
@@ -472,7 +472,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_INDEX,
+      StateProperty_Enum.CURRENT_PAGE_INDEX,
       (index) => {
         this.onPageIndexUpdate_(index);
       },
@@ -480,7 +480,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      StateProperty_Enum.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -488,7 +488,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.KEYBOARD_ACTIVE_STATE,
+      StateProperty_Enum.KEYBOARD_ACTIVE_STATE,
       (keyboardState) => {
         this.onKeyboardActiveUpdate_(keyboardState);
       },
@@ -496,7 +496,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.PAGE_HAS_AUDIO_STATE,
+      StateProperty_Enum.PAGE_HAS_AUDIO_STATE,
       (audio) => {
         this.onPageHasAudioStateUpdate_(audio);
       },
@@ -504,7 +504,7 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE,
+      StateProperty_Enum.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE,
       (hasPlaybackUi) => {
         this.onPageHasElementsWithPlaybackStateUpdate_(hasPlaybackUi);
       },
@@ -512,18 +512,21 @@ export class SystemLayer {
     );
 
     this.storeService_.subscribe(
-      StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
+      StateProperty_Enum.SYSTEM_UI_IS_VISIBLE_STATE,
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
 
-    this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, () => {
-      this.onNewPageAvailable_();
-    });
+    this.storeService_.subscribe(
+      StateProperty_Enum.NEW_PAGE_AVAILABLE_ID,
+      () => {
+        this.onNewPageAvailable_();
+      }
+    );
 
     this.storeService_.subscribe(
-      StateProperty.VIEWER_CUSTOM_CONTROLS,
+      StateProperty_Enum.VIEWER_CUSTOM_CONTROLS,
       (config) => this.onViewerCustomControls_(config),
       true /* callToInitialize */
     );
@@ -603,7 +606,9 @@ export class SystemLayer {
   onPageHasAudioStateUpdate_(pageHasAudio) {
     pageHasAudio =
       pageHasAudio ||
-      !!this.storeService_.get(StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE);
+      !!this.storeService_.get(
+        StateProperty_Enum.STORY_HAS_BACKGROUND_AUDIO_STATE
+      );
     this.vsync_.mutate(() => {
       pageHasAudio
         ? this.getShadowRoot().setAttribute(
@@ -690,7 +695,7 @@ export class SystemLayer {
 
   /**
    * Reacts to UI state updates and triggers the expected UI.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -702,11 +707,11 @@ export class SystemLayer {
       shadowRoot.removeAttribute('desktop');
 
       switch (uiState) {
-        case UIType.DESKTOP_FULLBLEED:
+        case UIType_Enum.DESKTOP_FULLBLEED:
           shadowRoot.setAttribute('desktop', '');
           shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
           break;
-        case UIType.DESKTOP_ONE_PANEL:
+        case UIType_Enum.DESKTOP_ONE_PANEL:
           shadowRoot.classList.add('i-amphtml-story-desktop-one-panel');
           break;
       }
@@ -734,7 +739,7 @@ export class SystemLayer {
   onPageIndexUpdate_(index) {
     this.vsync_.mutate(() => {
       const lastIndex =
-        this.storeService_.get(StateProperty.PAGE_IDS).length - 1;
+        this.storeService_.get(StateProperty_Enum.PAGE_IDS).length - 1;
       this.getShadowRoot().classList.toggle(
         'i-amphtml-first-page-active',
         index === 0
@@ -779,7 +784,7 @@ export class SystemLayer {
    * @private
    */
   onAudioIconClick_(mute) {
-    this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_MUTED, mute);
   }
 
   /**
@@ -788,7 +793,7 @@ export class SystemLayer {
    * @private
    */
   onPausedClick_(paused) {
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, paused);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, paused);
   }
 
   /**
@@ -803,8 +808,8 @@ export class SystemLayer {
       return;
     }
 
-    const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
-    this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
+    const isOpen = this.storeService_.get(StateProperty_Enum.SHARE_MENU_STATE);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_SHARE_MENU, !isOpen);
   }
 
   /**
@@ -830,8 +835,8 @@ export class SystemLayer {
    * @private
    */
   onInfoClick_() {
-    const isOpen = this.storeService_.get(StateProperty.INFO_DIALOG_STATE);
-    this.storeService_.dispatch(Action.TOGGLE_INFO_DIALOG, !isOpen);
+    const isOpen = this.storeService_.get(StateProperty_Enum.INFO_DIALOG_STATE);
+    this.storeService_.dispatch(Action_Enum.TOGGLE_INFO_DIALOG, !isOpen);
   }
 
   /**

@@ -4,8 +4,8 @@ import {
 } from '../../amp-story/1.0/story-analytics';
 import {clamp} from '#core/math';
 import {
-  Action,
-  StateProperty,
+  Action_Enum,
+  StateProperty_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 import {CSS} from '../../../build/amp-story-interactive-0.1.css';
@@ -445,7 +445,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
+      StateProperty_Enum.RTL_STATE,
       (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
@@ -454,7 +454,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     // Check if the component page is active, and add class.
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
+      StateProperty_Enum.CURRENT_PAGE_ID,
       (currPageId) => {
         this.mutateElement(() => {
           const toggle = currPageId === this.getPageEl().getAttribute('id');
@@ -803,7 +803,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       interactiveId: this.getInteractiveId_(),
       type: this.interactiveType_,
     };
-    this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
+    this.storeService_.dispatch(Action_Enum.ADD_INTERACTIVE_REACT, update);
   }
 
   /**

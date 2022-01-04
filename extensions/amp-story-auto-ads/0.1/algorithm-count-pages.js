@@ -2,7 +2,7 @@ import {hasOwn, map} from '#core/types/object';
 
 import {InsertionState} from './story-ad-page-manager';
 
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {StateProperty_Enum} from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {number} */
 const INTERVAL = 7;
@@ -36,7 +36,7 @@ export class CountPagesAlgorithm {
 
   /** @override */
   isStoryEligible() {
-    const numPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
+    const numPages = this.storeService_.get(StateProperty_Enum.PAGE_IDS).length;
     return numPages > INTERVAL;
   }
 
@@ -82,7 +82,7 @@ export class CountPagesAlgorithm {
    * @return {boolean}
    */
   shouldCreateNextAd_(pageIndex) {
-    const numPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
+    const numPages = this.storeService_.get(StateProperty_Enum.PAGE_IDS).length;
     return numPages - pageIndex > INTERVAL;
   }
 

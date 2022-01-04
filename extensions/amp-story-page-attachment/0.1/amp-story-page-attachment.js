@@ -22,9 +22,9 @@ import {
   renderOutlinkLinkIconElement,
 } from '../../amp-story/1.0/amp-story-open-page-attachment';
 import {
-  Action,
-  StateProperty,
-  UIType,
+  Action_Enum,
+  StateProperty_Enum,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {HistoryState, setHistoryState} from '../../amp-story/1.0/history';
 import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
@@ -333,8 +333,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     super.open(shouldAnimate);
 
-    this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
-    this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    this.storeService.dispatch(Action_Enum.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+    this.storeService.dispatch(Action_Enum.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
 
     // Don't create a new history entry for remote attachment as user is
     // navigating away.
@@ -345,7 +345,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       const historyState = {
         ...currentHistoryState,
         [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService.get(
-          StateProperty.CURRENT_PAGE_ID
+          StateProperty_Enum.CURRENT_PAGE_ID
         ),
       };
 
@@ -391,7 +391,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     };
 
     const isMobileUI =
-      this.storeService.get(StateProperty.UI_STATE) === UIType.MOBILE;
+      this.storeService.get(StateProperty_Enum.UI_STATE) === UIType_Enum.MOBILE;
     if (!isMobileUI) {
       programaticallyClickOnTarget();
     } else {
@@ -435,8 +435,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     this.toggleBackgroundOverlay_(false);
 
-    this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, false);
-    this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    this.storeService.dispatch(Action_Enum.TOGGLE_PAGE_ATTACHMENT_STATE, false);
+    this.storeService.dispatch(Action_Enum.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
 
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
     const animationEl = storyEl.querySelector(

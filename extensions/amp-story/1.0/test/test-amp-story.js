@@ -1,10 +1,10 @@
 import * as consent from '../../../../src/consent';
 import * as utils from '../utils';
 import {
-  Action,
+  Action_Enum,
   AmpStoryStoreService,
-  StateProperty,
-  UIType,
+  StateProperty_Enum,
+  UIType_Enum,
 } from '../amp-story-store-service';
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
@@ -284,7 +284,7 @@ describes.realWin(
       const dispatchSpy = env.sandbox.spy(story.storeService_, 'dispatch');
 
       await story.layoutCallback();
-      expect(dispatchSpy).to.have.been.calledWith(Action.CHANGE_PAGE, {
+      expect(dispatchSpy).to.have.been.calledWith(Action_Enum.CHANGE_PAGE, {
         id: firstPageId,
         index: 0,
       });
@@ -317,7 +317,7 @@ describes.realWin(
     it('should not set first page to active when rendering paused story', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
 
-      story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+      story.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, true);
 
       await story.layoutCallback();
       expect(story.getPageById('cover').state_).to.equal(PageState.NOT_ACTIVE);
@@ -332,8 +332,8 @@ describes.realWin(
       story.buildCallback();
 
       await story.layoutCallback();
-      expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
-        UIType.DESKTOP_ONE_PANEL
+      expect(story.storeService_.get(StateProperty_Enum.UI_STATE)).to.equals(
+        UIType_Enum.DESKTOP_ONE_PANEL
       );
     });
 
@@ -347,8 +347,8 @@ describes.realWin(
       story.buildCallback();
 
       await story.layoutCallback();
-      expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
-        UIType.DESKTOP_FULLBLEED
+      expect(story.storeService_.get(StateProperty_Enum.UI_STATE)).to.equals(
+        UIType_Enum.DESKTOP_FULLBLEED
       );
     });
 
@@ -455,7 +455,9 @@ describes.realWin(
         'page-2',
       ]);
 
-      expect(story.storeService_.get(StateProperty.PAGE_IDS)).to.deep.equal([
+      expect(
+        story.storeService_.get(StateProperty_Enum.PAGE_IDS)
+      ).to.deep.equal([
         'cover',
         'page-1',
         'cover__1',
@@ -603,7 +605,8 @@ describes.realWin(
         onVisibilityChangedStub.getCall(0).args[0]();
 
         // Paused state has been changed to true.
-        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+        expect(story.storeService_.get(StateProperty_Enum.PAUSED_STATE)).to.be
+          .true;
       });
 
       it('should play the story when tab becomes active', async () => {
@@ -615,7 +618,7 @@ describes.realWin(
           'onVisibilityChanged'
         );
 
-        story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+        story.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, true);
 
         story.buildCallback();
 
@@ -625,7 +628,8 @@ describes.realWin(
         onVisibilityChangedStub.getCall(0).args[0]();
 
         // Paused state has been changed to false.
-        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
+        expect(story.storeService_.get(StateProperty_Enum.PAUSED_STATE)).to.be
+          .false;
       });
 
       it('should pause the story when viewer becomes inactive', async () => {
@@ -635,7 +639,8 @@ describes.realWin(
         story
           .getAmpDoc()
           .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
-        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+        expect(story.storeService_.get(StateProperty_Enum.PAUSED_STATE)).to.be
+          .true;
       });
 
       it('should rewind the story page when viewer becomes inactive', async () => {
@@ -656,7 +661,8 @@ describes.realWin(
 
         await story.layoutCallback();
         story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.HIDDEN);
-        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+        expect(story.storeService_.get(StateProperty_Enum.PAUSED_STATE)).to.be
+          .true;
       });
 
       it('should pause the story page when viewer becomes hidden', async () => {
@@ -675,7 +681,8 @@ describes.realWin(
 
         await story.layoutCallback();
         story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
-        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+        expect(story.storeService_.get(StateProperty_Enum.PAUSED_STATE)).to.be
+          .true;
       });
 
       it('should pause the story page when viewer becomes paused', async () => {
@@ -695,7 +702,8 @@ describes.realWin(
         await story.layoutCallback();
         story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
         story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
-        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
+        expect(story.storeService_.get(StateProperty_Enum.PAUSED_STATE)).to.be
+          .false;
       });
 
       it('should play the story page when viewer becomes active after paused', async () => {
@@ -734,18 +742,19 @@ describes.realWin(
       it('should keep the story paused on resume when previously paused', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
-        story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+        story.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, true);
 
         await story.layoutCallback();
         story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
         story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
-        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+        expect(story.storeService_.get(StateProperty_Enum.PAUSED_STATE)).to.be
+          .true;
       });
 
       it('should keep the story paused on resume when previously paused + inactive', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
-        story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+        story.storeService_.dispatch(Action_Enum.TOGGLE_PAUSED, true);
 
         await story.layoutCallback();
         story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
@@ -753,7 +762,8 @@ describes.realWin(
           .getAmpDoc()
           .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
         story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
-        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+        expect(story.storeService_.get(StateProperty_Enum.PAUSED_STATE)).to.be
+          .true;
       });
 
       describe('amp-story continue anyway', () => {
@@ -768,7 +778,7 @@ describes.realWin(
           ).to.be.null;
           const dispatchTogglePaused = env.sandbox
             .spy(story.storeService_, 'dispatch')
-            .withArgs(Action.TOGGLE_PAUSED, true);
+            .withArgs(Action_Enum.TOGGLE_PAUSED, true);
           await story.layoutCallback();
           await poll(
             'TOGGLE_PAUSED true',
@@ -793,7 +803,7 @@ describes.realWin(
 
           const dispatchTogglePausedRestore = env.sandbox
             .spy(story.storeService_, 'dispatch')
-            .withArgs(Action.TOGGLE_PAUSED, story.pausedStateToRestore_);
+            .withArgs(Action_Enum.TOGGLE_PAUSED, story.pausedStateToRestore_);
 
           const continueAnywayButton = element.querySelector(
             '.i-amphtml-story-unsupported-browser-overlay button'
@@ -857,7 +867,7 @@ describes.realWin(
             .resolves();
 
           await story.layoutCallback();
-          story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+          story.storeService_.dispatch(Action_Enum.TOGGLE_MUTED, false);
           expect(blessAllStub).to.have.been.calledOnce;
         });
 
@@ -871,8 +881,8 @@ describes.realWin(
           await story.layoutCallback();
           const pauseStub = env.sandbox.stub(story.mediaPool_, 'pause');
 
-          story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
-          story.storeService_.dispatch(Action.TOGGLE_AD, true);
+          story.storeService_.dispatch(Action_Enum.TOGGLE_MUTED, false);
+          story.storeService_.dispatch(Action_Enum.TOGGLE_AD, true);
 
           expect(pauseStub).to.have.been.calledOnce;
           expect(pauseStub).to.have.been.calledWith(backgroundAudioEl);
@@ -887,13 +897,13 @@ describes.realWin(
 
           await story.layoutCallback();
           // Displaying an ad and not muted.
-          story.storeService_.dispatch(Action.TOGGLE_AD, true);
-          story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+          story.storeService_.dispatch(Action_Enum.TOGGLE_AD, true);
+          story.storeService_.dispatch(Action_Enum.TOGGLE_MUTED, false);
 
           const unmuteStub = env.sandbox.stub(story.mediaPool_, 'unmute');
           const playStub = env.sandbox.stub(story.mediaPool_, 'play');
 
-          story.storeService_.dispatch(Action.TOGGLE_AD, false);
+          story.storeService_.dispatch(Action_Enum.TOGGLE_AD, false);
 
           expect(unmuteStub).to.have.been.calledOnce;
           expect(unmuteStub).to.have.been.calledWith(backgroundAudioEl);
@@ -909,12 +919,12 @@ describes.realWin(
           await createStoryWithPages(2, ['cover', 'page-1']);
 
           await story.layoutCallback();
-          story.storeService_.dispatch(Action.TOGGLE_AD, true);
+          story.storeService_.dispatch(Action_Enum.TOGGLE_AD, true);
 
           const unmuteStub = env.sandbox.stub(story.mediaPool_, 'unmute');
           const playStub = env.sandbox.stub(story.mediaPool_, 'play');
 
-          story.storeService_.dispatch(Action.TOGGLE_AD, false);
+          story.storeService_.dispatch(Action_Enum.TOGGLE_AD, false);
 
           expect(unmuteStub).not.to.have.been.called;
           expect(playStub).not.to.have.been.called;
@@ -928,7 +938,7 @@ describes.realWin(
 
         expect(story.element.hasAttribute('muted')).to.be.true;
 
-        story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
+        story.storeService_.dispatch(Action_Enum.TOGGLE_MUTED, false);
         expect(story.element.hasAttribute('muted')).to.be.false;
       });
 
@@ -937,7 +947,7 @@ describes.realWin(
 
         await story.layoutCallback();
 
-        story.storeService_.dispatch(Action.TOGGLE_MUTED, true);
+        story.storeService_.dispatch(Action_Enum.TOGGLE_MUTED, true);
         expect(story.element.hasAttribute('muted')).to.be.true;
       });
 
@@ -1195,7 +1205,7 @@ describes.realWin(
             .getPageById('page-1')
             .element.setAttribute('amp-access-hide', '');
           await story.switchTo_('page-1');
-          expect(story.storeService_.get(StateProperty.ACCESS_STATE)).to.be
+          expect(story.storeService_.get(StateProperty_Enum.ACCESS_STATE)).to.be
             .true;
         });
 
@@ -1277,7 +1287,7 @@ describes.realWin(
             .element.removeAttribute('amp-access-hide');
           authorizedCallback();
 
-          expect(story.storeService_.get(StateProperty.ACCESS_STATE)).to.be
+          expect(story.storeService_.get(StateProperty_Enum.ACCESS_STATE)).to.be
             .false;
         });
 
@@ -1336,7 +1346,7 @@ describes.realWin(
           await story.switchTo_('page-1');
           authorizedCallback();
 
-          expect(story.storeService_.get(StateProperty.ACCESS_STATE)).to.be
+          expect(story.storeService_.get(StateProperty_Enum.ACCESS_STATE)).to.be
             .true;
         });
 
@@ -1410,7 +1420,10 @@ describes.realWin(
 
         const dispatchSwipeEvent = (deltaX, deltaY) => {
           // Triggers mobile UI so hint overlay can attach.
-          story.storeService_.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
+          story.storeService_.dispatch(
+            Action_Enum.TOGGLE_UI,
+            UIType_Enum.MOBILE
+          );
 
           story.element.dispatchEvent(
             new TouchEvent('touchstart', getTouchOptions(-10, -10))
@@ -1683,11 +1696,13 @@ describes.realWin(
           .signals()
           .whenSignal(CommonSignals_Enum.LOAD_END);
         expect(
-          story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
+          story.storeService_.get(
+            StateProperty_Enum.STORY_HAS_PLAYBACK_UI_STATE
+          )
         ).to.be.true;
         expect(
           story.storeService_.get(
-            StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
+            StateProperty_Enum.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
           )
         ).to.be.true;
       });
@@ -1700,11 +1715,13 @@ describes.realWin(
           .signals()
           .whenSignal(CommonSignals_Enum.LOAD_END);
         expect(
-          story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
+          story.storeService_.get(
+            StateProperty_Enum.STORY_HAS_PLAYBACK_UI_STATE
+          )
         ).to.be.false;
         expect(
           story.storeService_.get(
-            StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
+            StateProperty_Enum.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE
           )
         ).to.be.false;
       });

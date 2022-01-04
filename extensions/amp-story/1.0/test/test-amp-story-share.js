@@ -2,9 +2,9 @@ import {Services} from '#service';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
-  Action,
+  Action_Enum,
   AmpStoryStoreService,
-  StateProperty,
+  StateProperty_Enum,
 } from '../amp-story-store-service';
 
 import {AmpStoryShare} from '../amp-story-share';
@@ -46,7 +46,7 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
 
   it('should build the sharing menu if native sharing is unsupported', () => {
     const buildSpy = env.sandbox.spy(ampStoryShare, 'buildFallbackMenu_');
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, true);
     expect(buildSpy).to.have.been.called;
   });
 
@@ -56,7 +56,7 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
 
     env.sandbox.stub(ampStoryShare, 'isSystemShareSupported_').returns(true);
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, true);
     expect(shareSpy).to.have.been.called;
   });
 
@@ -65,9 +65,9 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
     win.navigator.share = () => Promise.resolve();
     env.sandbox.stub(ampStoryShare, 'isSystemShareSupported_').returns(true);
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, true);
 
-    expect(storeService.get(StateProperty.SHARE_MENU_STATE)).to.be.false;
+    expect(storeService.get(StateProperty_Enum.SHARE_MENU_STATE)).to.be.false;
   });
 
   it('should share natively if available with the canonical url and window title', () => {
@@ -81,7 +81,7 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
       .returns({canonicalUrl: 'https://amp.dev'});
     win.document.title = 'AMP';
 
-    storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
+    storeService.dispatch(Action_Enum.TOGGLE_SHARE_MENU, true);
 
     expect(shareSpy).to.be.calledWith({
       url: 'https://amp.dev',

@@ -19,8 +19,8 @@ import {Matrix, Renderer} from '#third_party/zuho/zuho';
 
 import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {
-  Action,
-  StateProperty,
+  Action_Enum,
+  StateProperty_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {timeStrToMillis} from '../../amp-story/1.0/utils';
 
@@ -358,29 +358,35 @@ export class AmpStory360 extends AMP.BaseElement {
       Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
         this.storeService_ = storeService;
 
-        storeService.subscribe(StateProperty.PAGE_SIZE, () =>
+        storeService.subscribe(StateProperty_Enum.PAGE_SIZE, () =>
           this.resizeRenderer_()
         );
 
         if (attr('controls') === 'gyroscope') {
           storeService.subscribe(
-            StateProperty.GYROSCOPE_PERMISSION_STATE,
+            StateProperty_Enum.GYROSCOPE_PERMISSION_STATE,
             (permissionState) => this.onPermissionState_(permissionState)
           );
           this.checkGyroscopePermissions_();
         }
 
-        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
-          this.isOnActivePage_ = currPageId === this.getPageId_();
-          this.onPageNavigation_();
-          this.maybeShowDiscoveryAnimation_();
-        });
-
-        this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
-          if (this.isOnActivePage_) {
-            isPaused ? this.pause_() : this.play_();
+        storeService.subscribe(
+          StateProperty_Enum.CURRENT_PAGE_ID,
+          (currPageId) => {
+            this.isOnActivePage_ = currPageId === this.getPageId_();
+            this.onPageNavigation_();
+            this.maybeShowDiscoveryAnimation_();
           }
-        });
+        );
+
+        this.storeService_.subscribe(
+          StateProperty_Enum.PAUSED_STATE,
+          (isPaused) => {
+            if (this.isOnActivePage_) {
+              isPaused ? this.pause_() : this.play_();
+            }
+          }
+        );
       }),
 
       Services.localizationServiceForOrNull(this.element).then(
@@ -619,9 +625,15 @@ export class AmpStory360 extends AMP.BaseElement {
    */
   setPermissionState_(permissionState) {
     if (permissionState === 'granted') {
-      this.storeService_.dispatch(Action.SET_GYROSCOPE_PERMISSION, 'granted');
+      this.storeService_.dispatch(
+        Action_Enum.SET_GYROSCOPE_PERMISSION,
+        'granted'
+      );
     } else if (permissionState === 'denied') {
-      this.storeService_.dispatch(Action.SET_GYROSCOPE_PERMISSION, 'denied');
+      this.storeService_.dispatch(
+        Action_Enum.SET_GYROSCOPE_PERMISSION,
+        'denied'
+      );
     }
   }
 

@@ -5,10 +5,10 @@ import {Services} from '#service';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
-  Action,
+  Action_Enum,
   ShoppingConfigDataDef,
   ShoppingDataDef,
-  StateProperty,
+  StateProperty_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
@@ -78,7 +78,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.storeService_.subscribe(
-      StateProperty.SHOPPING_DATA,
+      StateProperty_Enum.SHOPPING_DATA,
       (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
@@ -89,7 +89,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   onClick_(tagData) {
-    this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+    this.storeService_.dispatch(Action_Enum.ADD_SHOPPING_DATA, {
       'activeProductData': tagData,
     });
   }

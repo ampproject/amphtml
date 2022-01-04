@@ -1,5 +1,5 @@
 import * as VideoUtils from '#core/dom/video';
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {Action_Enum, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
@@ -207,7 +207,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   it('should unmute audio when state becomes active', (done) => {
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
-    storeService.dispatch(Action.TOGGLE_MUTED, false);
+    storeService.dispatch(Action_Enum.TOGGLE_MUTED, false);
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
@@ -488,7 +488,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should mute audio when state becomes active', (done) => {
-    storeService.dispatch(Action.TOGGLE_MUTED, false);
+    storeService.dispatch(Action_Enum.TOGGLE_MUTED, false);
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
