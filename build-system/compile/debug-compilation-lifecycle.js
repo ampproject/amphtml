@@ -16,9 +16,6 @@ const pad = (value, length) =>
 const LIFECYCLES = {
   'pre-babel': 'pre-babel',
   'post-babel': 'post-babel',
-  'pre-closure': 'pre-closure',
-  'closured-pre-babel': 'closured-pre-babel',
-  'closured-pre-terser': 'closured-pre-terser',
   'complete': 'complete',
 };
 

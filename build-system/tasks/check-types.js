@@ -6,7 +6,6 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
-const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green} = require('kleur/colors');
@@ -49,7 +48,6 @@ async function checkTypes() {
 
   // Prepare build environment
   process.env.NODE_ENV = 'production';
-  cleanupBuildDir();
   typecheckNewServer();
   await Promise.all([compileCss(), compileJison()]);
 

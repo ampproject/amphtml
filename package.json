@@ -22,7 +22,6 @@
     "@ampproject/worker-dom": "0.32.1",
     "@webcomponents/webcomponentsjs": "2.6.0",
     "dompurify": "2.3.3",
-    "google-closure-library": "20210808.0.0",
     "intersection-observer": "0.12.0",
     "jss": "10.8.2",
     "jss-preset-default": "10.8.2",
@@ -39,7 +38,6 @@
   },
   "devDependencies": {
     "@ampproject/filesize": "4.3.0",
-    "@ampproject/google-closure-compiler": "20210601.0.0",
     "@ampproject/remapping": "1.0.1",
     "@babel/core": "7.15.0",
     "@babel/eslint-parser": "7.15.0",
