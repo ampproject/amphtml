@@ -1440,11 +1440,6 @@ export class AmpStory extends AMP.BaseElement {
       () => {
         this.preloadPagesByDistance_(/* prioritizeActivePage */ !oldPage);
         this.triggerActiveEventForPage_();
-
-        this.systemLayer_.resetDeveloperLogs();
-        this.systemLayer_.setDeveloperLogContextString(
-          this.activePage_.element.id
-        );
       },
     ];
 
