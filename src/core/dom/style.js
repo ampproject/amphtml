@@ -240,7 +240,7 @@ export function translateX(value) {
  * @return {string}
  */
 export function translate(x, opt_y) {
-  return opt_y == null
+  return opt_y === undefined || opt_y === null
     ? `translate(${units(x, px)})`
     : `translate(${units(x, px)}, ${units(opt_y, px)})`;
 }
