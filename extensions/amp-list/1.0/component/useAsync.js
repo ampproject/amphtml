@@ -1,6 +1,8 @@
-import {useCallback, useEffect, useRef, useState} from '#preact';
+import {useCallback, useEffect} from '#preact';
 
-function useAsyncCallback(asyncCallback, dependencies) {
+import {useStateSafe} from './useStateSafe';
+
+export function useAsyncCallback(asyncCallback, dependencies) {
   const [state, setState] = useStateSafe(() => ({
     loading: false,
     error: null,
@@ -27,28 +29,4 @@ export function useAsync(asyncCallback, dependencies) {
   }, dependencies);
 
   return state;
-}
-
-function useStateSafe(initial) {
-  const isMounted = useRef(false);
-  useEffect(() => {
-    isMounted.current = true;
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  const [state, setState] = useState(initial);
-  const setStateSafe = useCallback(
-    (newState) => {
-      if (!isMounted.current) {
-        return;
-      }
-      setState(newState);
-    },
-    [setState]
-  );
-
-  return [state, setStateSafe];
 }
