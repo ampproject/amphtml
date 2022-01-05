@@ -486,9 +486,17 @@ export function BentoImageSliderWithRef(
       {/* Masks */}
       <div ref={leftMaskRef} class={styles.imageSliderLeftMask}>
         <div ref={leftLabelWrapperRef} class={styles.imageSliderLabelWrapper}>
-          <DisplayAs as={firstLabelAs} ref={leftLabelRef} />
+          <DisplayAs
+            as={firstLabelAs}
+            class="image-slider-left-label"
+            ref={leftLabelRef}
+          />
         </div>
-        <DisplayAs as={firstImageAs} ref={leftImageRef} />
+        <DisplayAs
+          as={firstImageAs}
+          class="image-slider-left-image"
+          ref={leftImageRef}
+        />
       </div>
       <div
         ref={rightMaskRef}
@@ -504,11 +512,16 @@ export function BentoImageSliderWithRef(
             [styles.imageSliderPushLeft]: true,
           })}
         >
-          <DisplayAs ref={rightLabelRef} as={secondLabelAs} />
+          <DisplayAs
+            ref={rightLabelRef}
+            class="image-slider-right-label"
+            as={secondLabelAs}
+          />
         </div>
         <DisplayAs
           as={secondImageAs}
           ref={rightImageRef}
+          class="image-slider-right-image"
           containerClass={objstr({
             [styles.imageSliderPushLeft]: true,
           })}
@@ -543,7 +556,10 @@ export function BentoImageSliderWithRef(
           <DisplayAs
             as={leftHintAs}
             ref={leftHintArrowRef}
-            class={styles.imageSliderHintLeft}
+            class={objstr({
+              [styles.imageSliderHintLeft]: true,
+              ['image-slider-left-hint']: true,
+            })}
           />
         </div>
       </div>
@@ -558,7 +574,10 @@ export function BentoImageSliderWithRef(
           <DisplayAs
             as={rightHintAs}
             ref={rightHintArrowRef}
-            class={styles.imageSliderHintRight}
+            class={objstr({
+              [styles.imageSliderHintRight]: true,
+              ['image-slider-right-hint']: true,
+            })}
           />
         </div>
       </div>
