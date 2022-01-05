@@ -45,6 +45,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         `<div><p>one</p><p>two</p><p>three</p></div>`
       );
     });
+
     it('the list should have aria-roles defined', async () => {
       const component = mount(<BentoList src="TEST.json" />);
 
@@ -252,6 +253,70 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
     it.skip('should allow for custom rendering of the data', async () => {});
   });
 
+  describe('load-more', () => {
+    describe('manual', () => {
+      const mockData = [
+        {
+          'load-more-src': 'page-2.json',
+          items: ['one', 'two', 'three'],
+        },
+        {
+          'load-more-src': 'page-3.json',
+          items: ['four', 'five'],
+        },
+        {
+          'load-more-src': null,
+          items: ['six', 'seven', 'eight', 'nine'],
+        },
+      ];
+      const expectedPage1 = `<div><p>one</p><p>two</p><p>three</p></div><button>Load more</button>`;
+      const expectedPage2 = `<div><p>one</p><p>two</p><p>three</p><p>four</p><p>five</p></div><button>Load more</button>`;
+      const expectedPage3 = `<div><p>one</p><p>two</p><p>three</p><p>four</p><p>five</p><p>six</p><p>seven</p><p>eight</p><p>nine</p></div>`;
+
+      let component;
+      beforeEach(async () => {
+        mockData.forEach((page, index) => {
+          dataStub.onCall(index).resolves(page);
+        });
+        component = mount(<BentoList src="page-1.json" loadMore="manual" />);
+
+        await waitForData(component);
+      });
+
+      it('should render a "Load more" button', async () => {
+        expect(component.find('button').html()).to.equal(
+          `<button>Load more</button>`
+        );
+        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage1);
+      });
+
+      it('clicking the button should keep loading more data', async () => {
+        // Check page 1:
+        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage1);
+
+        // Load page 2:
+        component.find('button').simulate('click');
+        expect(xhrUtils.fetchJson).callCount(2).calledWith('page-2.json');
+        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage1);
+        await waitForData(component, 2);
+        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage2);
+
+        // Load page 3:
+        component.find('button').simulate('click');
+        expect(xhrUtils.fetchJson).callCount(3).calledWith('page-3.json');
+        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage2);
+        await waitForData(component, 3);
+        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage3);
+      });
+
+      describe('loadMoreBookmark', () => {
+        it('', async () => {
+          //
+        });
+      });
+    });
+  });
+
   describe('API', () => {
     let ref;
     let component;
@@ -286,7 +351,7 @@ function snapshot(component, {keepAttributes = false} = {}) {
   let html = component.html();
   if (!keepAttributes) {
     // Simple logic to clean attributes from HTML:
-    html = html.replace(/\s([-\w]+)(="[^"]*")?/g, '');
+    html = html.replace(/\s([-\w]+)(="[^"]*")/g, '');
   }
   return html;
 }
