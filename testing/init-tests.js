@@ -56,7 +56,7 @@ function initializeTests() {
   initializeTestConstructs();
   exposeKarmaConfig();
   resetTestingState();
-  overrideAmpExtensionInstaller();
+  // overrideAmpExtensionInstaller();
 }
 
 /**
@@ -151,7 +151,7 @@ function resetTestingState() {
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
   Services.resourcesForDoc(ampdoc).ampInitComplete();
-  adoptWithMultidocDeps(window);
+  // adoptWithMultidocDeps(window);
   configureEnzyme({adapter: new PreactEnzyme()});
 }
 
