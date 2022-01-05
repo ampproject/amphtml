@@ -30,7 +30,7 @@ import {getSourceOrigin} from '../../../src/url';
 
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
-import {localize} from './amp-story-localization-service';
+import {localize, localizeAsync} from './amp-story-localization-service';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -283,6 +283,11 @@ export class SystemLayer {
     if (this.root_) {
       return this.root_;
     }
+
+    localizeAsync(
+      this.parentEl_,
+      LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
+    );
 
     this.systemLayerEl_ = renderSystemLayerElement(
       this.parentEl_,
