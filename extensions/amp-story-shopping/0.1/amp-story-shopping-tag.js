@@ -87,7 +87,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       <div
         class="amp-story-shopping-tag-inner"
         role="button"
-        onClick={() => this.onClick_(this.tagData_)}
+        onClick={() => this.onClick_()}
       >
         <span class="amp-story-shopping-tag-dot"></span>
         <span class="amp-story-shopping-tag-pill">
