@@ -35,5 +35,4 @@ describes.sandboxed('validateAdContentRating', {}, function () {
       "PG"
     );
   });
-
 });
