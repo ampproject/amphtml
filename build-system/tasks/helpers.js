@@ -143,12 +143,10 @@ async function compileBentoRuntime(options) {
  * @return {!Promise}
  */
 async function compileAllJs(options) {
+  log(`Compiling ${cyan(options.minified ? 'minified' : 'unminified')} JS...`);
+
   const {minify} = options;
-  if (minify) {
-    log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
-  } else {
-    log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
-  }
+
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
