@@ -14,10 +14,6 @@ const {
   printNobuildHelp,
 } = require('./helpers');
 const {
-  cleanupBuildDir,
-  printClosureConcurrency,
-} = require('../compile/compile');
-const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
@@ -30,6 +26,7 @@ const {
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
+const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, copyCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
@@ -112,7 +109,6 @@ async function dist() {
     minify: true,
     watch: argv.watch,
   };
-  printClosureConcurrency();
   printNobuildHelp();
   printDistHelp(options);
   await runPreDistSteps(options);
