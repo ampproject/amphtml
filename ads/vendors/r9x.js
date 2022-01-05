@@ -16,7 +16,7 @@ export function r9x(global, data) {
     () => {
       loadScript(
         global,
-        'https://header.r9x.in/realtime-123.js' + data.siteid + '.js',
+        'https://header.r9x.in/realtime-' + data.siteid + '.js',
         () => {
           window.r9x.initAmp(
             global,
