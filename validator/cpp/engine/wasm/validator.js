@@ -85,7 +85,7 @@ function digitizeValidationErrorFields(error) {
  * Hence when a plain object neeeds to be transformed back to protobuf,
  * the attached base64 could be directly used.
  */
-const PB_BASE64 = Symbol('PB_BASE64');
+const PB_BASE64 = '_PB_BASE64';
 
 /**
  * Validates a document input as a string.
