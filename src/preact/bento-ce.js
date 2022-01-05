@@ -85,13 +85,9 @@ let win = null;
  * @return {typeof HTMLElement}
  */
 function createBentoElementClass(BaseElement, _win = self) {
-  if (win !== _win) {
+  if (!ExtendableHTMLElement || win !== _win) {
     win = _win;
-    ExtendableHTMLElement = null;
-  }
-
-  if (!ExtendableHTMLElement) {
-    ExtendableHTMLElement = maybeWrapNativeSuper(HTMLElement);
+    ExtendableHTMLElement = maybeWrapNativeSuper(win.HTMLElement);
   }
   return class CustomElement extends ExtendableHTMLElement {
     /** */
