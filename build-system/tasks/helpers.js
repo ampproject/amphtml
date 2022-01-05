@@ -143,7 +143,7 @@ async function compileBentoRuntime(options) {
  * @return {!Promise}
  */
 async function compileAllJs(options) {
-  log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
+  log(`Compiling ${cyan(options.minified ? 'minified' : 'unminified')} JS...`);
 
   const {minify} = options;
 

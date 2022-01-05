@@ -3,9 +3,6 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
-const {
-  displayLifecycleDebugging,
-} = require('../compile/debug-compilation-lifecycle');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green} = require('kleur/colors');
@@ -57,7 +54,6 @@ async function checkTypes() {
     : Object.keys(TSC_TYPECHECK_TARGETS);
 
   log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
-  displayLifecycleDebugging();
 
   await Promise.all(targets.map(typeCheck));
   exitCtrlcHandler(handlerProcess);
@@ -70,6 +66,5 @@ module.exports = {
 /* eslint "local/camelcase": 0 */
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
-  debug: 'Output the file contents during compilation lifecycles',
   targets: 'Comma-delimited list of targets to type-check',
 };
