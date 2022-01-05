@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes} from '#core/dom';
+import {createElementWithAttributes, removeChildren} from '#core/dom';
 import {dict} from '#core/types/object';
 
-import {dev, user} from '#utils/log';
+import {Services} from '#service';
+
+import {listen} from '#utils/event-helper';
+import {user} from '#utils/log';
+
+import {parseUrlDeprecated} from 'src/url';
 
 import {
+  AUTHORIZATION_TIMEOUT,
   CONFIG_BASE_PATH,
   DEFAULT_MESSAGES,
   TAG,
@@ -60,31 +66,68 @@ export class AmpAccessFewcents {
     /** @private {!JsonObject} */
     this.i18n_ = Object.assign(dict(), DEFAULT_MESSAGES);
 
+    /** @private {string} */
+    this.fewCentsBidId_ = null;
+
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
+    this.xhr_ = Services.xhrFor(this.ampdoc.win);
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.ampdoc.win);
+
+    /** @private {JsonObject} */
+    this.purchaseOptions_ = null;
+
+    /** @private {string} */
+    this.loginDialogUrl_ = null;
+
     installStylesForDoc(this.ampdoc, CSS, () => {}, false, TAG);
   }
 
   /**
-   * Decides to show the paywall or publisher content by calling authorize endpoint
+   * Decides whether to show the paywall or not
    * @return {!Promise<!JsonObject>}
    */
   authorize() {
-    return this.getPaywallData_().then(
-      // [TODO] : More edge cases to be added with actual call
-      (response) => {
-        // Removing the paywall from dialogContainer
+    return this.getPaywallData_()
+      .then(
+        (response) => {
+          // removing the paywall if shown and showing the content
+          this.emptyContainer_();
+          return {access: response.data.access};
+        },
+        (err) => {
+          // showing the paywall
+          if (!err || !err.response) {
+            throw err;
+          }
+
+          const {response} = err;
+          // showing paywall when error code is 402 i.e payment required
+          if (response.status !== 402) {
+            throw err;
+          }
+
+          // rendering the paywall
+          return response
+            .json()
+            .catch(() => {
+              throw err;
+            })
+            .then((responseJson) => {
+              this.parseAuthorizeResponse_(responseJson);
+              this.emptyContainer_().then(
+                this.renderPurchaseOverlay_.bind(this)
+              );
+              return {access: false};
+            });
+        }
+      )
+      .catch(() => {
+        // showing the content when authorize endpoint fails
         this.emptyContainer_();
-        // Showing the publisher's content
-        return {access: response.data.access};
-      },
-      (err) => {
-        // Rendering the paywall when request promise is rejected
-        const {response} = err;
-        return response.json().then(() => {
-          this.emptyContainer_().then(this.renderPurchaseOverlay_.bind(this));
-          return {access: false};
-        });
-      }
-    );
+        return {access: true};
+      });
   }
 
   /**
@@ -93,9 +136,40 @@ export class AmpAccessFewcents {
    * @private
    */
   prepareAuthorizeUrl_() {
-    // [TODO]: Actual implementation
-    dev().fine(TAG, 'Publishers config', this.fewcentsConfig_);
-    return;
+    const accessKey = this.fewcentsConfig_['accessKey'];
+    const articleIdentifier = this.fewcentsConfig_['articleIdentifier'];
+    const category = this.fewcentsConfig_['category'];
+
+    const {hostname} = parseUrlDeprecated();
+
+    return (
+      CONFIG_BASE_PATH +
+      '&accessKey=' +
+      accessKey +
+      '&category=' +
+      category +
+      '&articleIdentifier=' +
+      articleIdentifier +
+      '&domain=' +
+      hostname
+    );
+  }
+
+  /**
+   * Parse the response from authorize endpoint
+   * @param {json} response
+   * @private
+   */
+  parseAuthorizeResponse_(response) {
+    const purchaseOptionsList = response?.data?.purchaseOptions;
+    this.purchaseOptions_ = purchaseOptionsList?.[0];
+    this.loginDialogUrl_ = response?.data?.loginUrl;
+    const fewCentsBidId = response?.data?.bidId;
+
+    // Setting the fewcentsBidId for re-authorize
+    if (fewCentsBidId) {
+      this.fewCentsBidId_ = fewCentsBidId;
+    }
   }
 
   /**
@@ -104,18 +178,31 @@ export class AmpAccessFewcents {
    * @private
    */
   getPaywallData_() {
-    // [TODO]: Actual API implementation using fetch
-    dev().fine(TAG, 'authorizeUrl', this.authorizeUrl_, CONFIG_BASE_PATH);
+    let authorizeUrl = this.authorizeUrl_;
 
-    // Currently, case only for showing the paywall later in future depend upon API response
-    return Promise.reject({
-      response: {
-        status: 402,
-        json() {
-          return Promise.resolve({success: true});
-        },
-      },
-    });
+    // appending bidId in the authorize url during re-authorize
+    if (this.fewCentsBidId_) {
+      authorizeUrl = authorizeUrl + '&bidId=' + this.fewCentsBidId_;
+    }
+
+    // replacing variable READER_Id, CANONICAL_URL in the authorize url
+    const urlPromise = this.accessSource_.buildUrl(
+      authorizeUrl,
+      /* useAuthData */ false
+    );
+
+    return urlPromise
+      .then((url) => {
+        // replacing variable RETURN_URL in the authorize url
+        return this.accessSource_.getLoginUrl(url);
+      })
+      .then((url) => {
+        return this.timer_
+          .timeoutPromise(AUTHORIZATION_TIMEOUT, this.xhr_.fetchJson(url, {}))
+          .then((res) => {
+            return res.json();
+          });
+      });
   }
 
   /**
@@ -124,8 +211,23 @@ export class AmpAccessFewcents {
    * @return {!Promise}
    */
   emptyContainer_() {
-    // [TODO]: Actual implementation
-    return Promise.resolve();
+    if (this.containerEmpty_) {
+      return Promise.resolve();
+    }
+
+    if (this.unlockButtonListener_) {
+      this.unlockButtonListener_ = null;
+    }
+
+    if (this.alreadyPurchasedListener_) {
+      this.alreadyPurchasedListener_ = null;
+    }
+
+    return this.vsync_.mutatePromise(() => {
+      this.containerEmpty_ = true;
+      this.innerContainer_ = null;
+      removeChildren(this.getPaywallContainer_());
+    });
   }
 
   /**
@@ -148,7 +250,6 @@ export class AmpAccessFewcents {
    * @private
    */
   renderPurchaseOverlay_() {
-    // [TODO]: Create entire paywall element with button event listener for login flow
     this.dialogContainer_ = this.getPaywallContainer_();
     this.innerContainer_ = createElementWithAttributes(
       this.ampdoc.win.document,
@@ -158,7 +259,18 @@ export class AmpAccessFewcents {
       }
     );
 
-    // Creating header text of paywall
+    // Creating publisher logo for the paywall
+    const publisherLogo = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'img',
+      {
+        class: TAG_SHORTHAND + '-imageTag',
+        src: this.fewcentsConfig_['publisherLogoUrl'],
+      }
+    );
+    this.innerContainer_.appendChild(publisherLogo);
+
+    // Creating header text
     const headerText = createElementWithAttributes(
       this.ampdoc.win.document,
       'div',
@@ -170,6 +282,55 @@ export class AmpAccessFewcents {
     headerText.textContent = this.i18n_['fcTitleText'];
     this.innerContainer_.appendChild(headerText);
 
+    // Creating already bought link
+    const alreadyBought = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'a',
+      {
+        class: TAG_SHORTHAND + '-already-bought',
+        href: this.loginDialogUrl_,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      }
+    );
+
+    alreadyBought.textContent = this.i18n_['fcPromptText'];
+    this.alreadyPurchasedListener_ = listen(alreadyBought, 'click', (ev) => {
+      this.handlePurchase_(ev);
+    });
+    this.innerContainer_.appendChild(alreadyBought);
+
+    // 'div' element for article price and unlock button
+    const priceAndButtonDiv = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'div',
+      {
+        class: TAG_SHORTHAND + '-price-btn-div',
+      }
+    );
+    this.innerContainer_.appendChild(priceAndButtonDiv);
+
+    // Article price element
+    const articlePrice = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'div',
+      {
+        class: TAG_SHORTHAND + '-article-price',
+      }
+    );
+
+    articlePrice.textContent = this.purchaseOptions_?.price?.price;
+    priceAndButtonDiv.appendChild(articlePrice);
+
+    // Unlock button div element
+    const unlockButtonDiv = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'div',
+      {
+        class: TAG_SHORTHAND + '-btn-div',
+      }
+    );
+
     // Creating unlock button on paywall
     const unlockButton = createElementWithAttributes(
       this.ampdoc.win.document,
@@ -180,9 +341,121 @@ export class AmpAccessFewcents {
     );
 
     unlockButton.textContent = this.i18n_['fcButtonText'];
-    this.innerContainer_.appendChild(unlockButton);
+    this.unlockButtonListener_ = listen(unlockButton, 'click', (ev) => {
+      this.handlePurchase_(ev);
+    });
+    unlockButtonDiv.appendChild(unlockButton);
+    priceAndButtonDiv.appendChild(unlockButtonDiv);
+
+    // 'div' element for reference row and fewcents logo
+    const bottomDiv = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'div',
+      {
+        class: TAG_SHORTHAND + '-bottom-div',
+      }
+    );
+
+    // Reference row for terms and conditions
+    const refRow = this.createRefRowElement_();
+    bottomDiv.appendChild(refRow);
+
+    // Creating fewcents logo for the paywall
+    const fewcentsLogo = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'img',
+      {
+        class: TAG_SHORTHAND + '-fewcents-image-tag',
+        src: this.i18n_['fcPoweredImageRef'],
+      }
+    );
+    bottomDiv.appendChild(fewcentsLogo);
+    this.innerContainer_.appendChild(bottomDiv);
 
     this.dialogContainer_.appendChild(this.innerContainer_);
     this.containerEmpty_ = false;
+  }
+
+  /**
+   * Create reference elements on paywall
+   * @private
+   */
+  createRefRowElement_() {
+    const refRow = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'div',
+      {
+        class: TAG_SHORTHAND + '-refRow',
+      }
+    );
+
+    const terms = createElementWithAttributes(this.ampdoc.win.document, 'a', {
+      class: TAG_SHORTHAND + '-refElements',
+      href: this.i18n_['fcTermsRef'],
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    });
+    terms.textContent = 'Terms';
+    refRow.appendChild(terms);
+    this.createPartitionbar_(refRow);
+
+    const privacy = createElementWithAttributes(this.ampdoc.win.document, 'a', {
+      class: TAG_SHORTHAND + '-refElements',
+      href: this.i18n_['fcPrivacyRef'],
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    });
+    privacy.textContent = 'Privacy';
+    refRow.appendChild(privacy);
+    this.createPartitionbar_(refRow);
+
+    const contactUs = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'a',
+      {
+        class: TAG_SHORTHAND + '-refElements',
+        href: this.i18n_['fcContactUsRef'],
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      }
+    );
+    contactUs.textContent = 'Contact Us';
+    refRow.appendChild(contactUs);
+    this.createPartitionbar_(refRow);
+
+    return refRow;
+  }
+
+  /**
+   * Create partition bar for the reference elements
+   * @private
+   */
+  createPartitionbar_(refRow) {
+    const partitionBar = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'span',
+      {
+        class: TAG_SHORTHAND + '-partition-bar',
+      }
+    );
+    partitionBar.textContent = '|';
+    refRow.appendChild(partitionBar);
+  }
+
+  /**
+   * Open login dialog when click on unlock button
+   * @param {!Event} ev
+   * @private
+   */
+  handlePurchase_(ev) {
+    ev.preventDefault();
+    const urlPromise = this.accessSource_.buildUrl(
+      this.loginDialogUrl_,
+      /* useAuthData */ false
+    );
+
+    return urlPromise.then((url) => {
+      this.accessSource_.loginWithUrl(url);
+    });
   }
 }

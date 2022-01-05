@@ -32,8 +32,8 @@ AMP.extension(TAG, '0.1', function (AMP) {
         const source = accessService.getVendorSource('fewcents');
         const vendor = new AmpAccessFewcents(accessService, source);
         const adapter = /** @type {
-             !../../amp-access/0.1/amp-access-vendor.AccessVendorAdapter
-           } */ (source.getAdapter());
+              !../../amp-access/0.1/amp-access-vendor.AccessVendorAdapter
+            } */ (source.getAdapter());
         adapter.registerVendor(vendor);
         return vendor;
       });
