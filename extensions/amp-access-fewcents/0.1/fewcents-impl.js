@@ -75,6 +75,9 @@ export class AmpAccessFewcents {
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.ampdoc.win);
 
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.ampdoc.win);
+
     /** @private {JsonObject} */
     this.purchaseOptions_ = null;
 
