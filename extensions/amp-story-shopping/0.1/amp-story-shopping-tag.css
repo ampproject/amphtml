@@ -13,6 +13,7 @@ amp-story-shopping-tag {
   --i-amphtml-shopping-tag-backdrop-filter: blur(20px);
 }
 
+/* Maintains the dot position in RTL mode */
 [dir=rtl].amp-story-shopping-tag-inner {
   flex-flow: row-reverse !important;
 }
