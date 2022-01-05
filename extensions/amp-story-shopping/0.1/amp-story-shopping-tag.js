@@ -25,50 +25,6 @@ const FONTS_TO_LOAD = [
     src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
-
-/**
- * @param {!ShoppingConfigDataDef} tagData
- * @param {function(!ShoppingConfigDataDef): undefined} onClick
- * @param {!AmpElement} element
- * @param {?../../../src/service/localization.LocalizationService} localizationService
- * @return {!Element}
- */
-const renderShoppingTagTemplate = (
-  tagData,
-  onClick,
-  element,
-  localizationService
-) => (
-  <div
-    class="amp-story-shopping-tag-inner"
-    role="button"
-    onClick={() => onClick(tagData)}
-  >
-    <span class="amp-story-shopping-tag-dot"></span>
-    <span class="amp-story-shopping-tag-pill">
-      <span
-        class="amp-story-shopping-tag-pill-image"
-        style={
-          tagData['product-icon'] && {
-            backgroundImage: 'url(' + tagData['product-icon'] + ') !important',
-            backgroundSize: 'cover !important',
-          }
-        }
-      ></span>
-      <span class="amp-story-shopping-tag-pill-text">
-        {tagData['product-tag-text'] ||
-          new Intl.NumberFormat(
-            localizationService.getLanguageCodesForElement(element)[0],
-            {
-              style: 'currency',
-              currency: tagData['product-price-currency'],
-            }
-          ).format(tagData['product-price'])}
-      </span>
-    </span>
-  </div>
-);
-
 export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -122,6 +78,47 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
+   * @param {!ShoppingConfigDataDef} tagData
+   * @param {function(!ShoppingConfigDataDef): undefined} onClick
+   * @return {!Element}
+   */
+  renderShoppingTagTemplate_(tagData, onClick) {
+    return (
+      <div
+        class="amp-story-shopping-tag-inner"
+        role="button"
+        onClick={() => onClick(tagData)}
+      >
+        <span class="amp-story-shopping-tag-dot"></span>
+        <span class="amp-story-shopping-tag-pill">
+          <span
+            class="amp-story-shopping-tag-pill-image"
+            style={
+              tagData['product-icon'] && {
+                backgroundImage:
+                  'url(' + tagData['product-icon'] + ') !important',
+                backgroundSize: 'cover !important',
+              }
+            }
+          ></span>
+          <span class="amp-story-shopping-tag-pill-text">
+            {tagData['product-tag-text'] ||
+              new Intl.NumberFormat(
+                this.localizationService_.getLanguageCodesForElement(
+                  this.element_
+                )[0],
+                {
+                  style: 'currency',
+                  currency: tagData['product-price-currency'],
+                }
+              ).format(tagData['product-price'])}
+          </span>
+        </span>
+      </div>
+    );
+  }
+
+  /**
    * @param {!ShoppingDataDef} shoppingData
    * @private
    */
@@ -134,11 +131,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.mutateElement(() => {
       createShadowRootWithStyle(
         this.element,
-        renderShoppingTagTemplate(
-          tagData,
-          (tagData) => this.onClick_(tagData),
-          this.element,
-          this.localizationService_
+        this.renderShoppingTagTemplate_(tagData, (tagData) =>
+          this.onClick_(tagData)
         ),
         shoppingTagCSS
       );
