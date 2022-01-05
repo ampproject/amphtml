@@ -126,6 +126,12 @@ export class PreactBaseElement extends BaseElement {
     return !this.usesLoading();
   }
 
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    // eslint-disable-next-line local/no-static-this
+    return this.previewAllowed();
+  }
+
   /**
    * Override to provide the Component definition.
    *
