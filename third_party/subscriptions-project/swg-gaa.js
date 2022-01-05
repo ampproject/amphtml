@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.197 */
+/** Version: 0.1.22.198 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1246,7 +1246,7 @@ class GaaMeteringRegwall {
    * @param {{ iframeUrl: string, caslUrl: string }} params
    * @return {!Promise<!GaaUserDef|!GoogleIdentityV1|!Object>}
    */
-  static show({iframeUrl, caslUrl}) {
+  static async show({iframeUrl, caslUrl}) {
     const queryString = GaaUtils.getQueryString();
     if (!queryStringHasFreshGaaParams(queryString)) {
       const errorMessage =
@@ -1263,18 +1263,18 @@ class GaaMeteringRegwall {
     GaaMeteringRegwall.render_({iframeUrl, caslUrl});
     GaaMeteringRegwall.sendIntroMessageToGsiIframe_({iframeUrl});
     GaaMeteringRegwall.logButtonClickEvents_();
-    return GaaMeteringRegwall.getGaaUser_()
-      .then((gaaUser) => {
-        GaaMeteringRegwall.remove();
-        return gaaUser;
-      })
-      .catch((err) => {
-        // Close the Regwall, since the flow failed.
-        GaaMeteringRegwall.remove();
 
-        // Rethrow error.
-        throw err;
-      });
+    try {
+      const gaaUser = await GaaMeteringRegwall.getGaaUser_();
+      GaaMeteringRegwall.remove();
+      return gaaUser;
+    } catch (err) {
+      // Close the Regwall, since the flow failed.
+      GaaMeteringRegwall.remove();
+
+      // Rethrow error.
+      throw err;
+    }
   }
 
   /**
@@ -1295,10 +1295,9 @@ class GaaMeteringRegwall {
    * @nocollapse
    * @return {!Promise}
    */
-  static signOut() {
-    return configureGoogleSignIn().then(() =>
-      self.gapi.auth2.getAuthInstance().signOut()
-    );
+  static async signOut() {
+    await configureGoogleSignIn();
+    await self.gapi.auth2.getAuthInstance().signOut();
   }
 
   /**
@@ -1574,7 +1573,7 @@ class GaaGoogleSignInButton {
    * @nocollapse
    * @param {{ allowedOrigins: !Array<string> }} params
    */
-  static show({allowedOrigins}) {
+  static async show({allowedOrigins}) {
     // Optionally grab language code from URL.
     const queryString = GaaUtils.getQueryString();
     const queryParams = parseQueryString(queryString);
@@ -1607,12 +1606,11 @@ class GaaGoogleSignInButton {
       });
     });
 
-    function sendErrorMessageToParent() {
-      sendMessageToParentFnPromise.then((sendMessageToParent) => {
-        sendMessageToParent({
-          stamp: POST_MESSAGE_STAMP,
-          command: POST_MESSAGE_COMMAND_ERROR,
-        });
+    async function sendErrorMessageToParent() {
+      const sendMessageToParent = await sendMessageToParentFnPromise;
+      sendMessageToParent({
+        stamp: POST_MESSAGE_STAMP,
+        command: POST_MESSAGE_COMMAND_ERROR,
       });
     }
 
@@ -1635,66 +1633,66 @@ class GaaGoogleSignInButton {
     }
 
     // Render the Google Sign-In button.
-    configureGoogleSignIn()
-      .then(
-        // Promise credentials.
-        () =>
-          new Promise((resolve) => {
-            // Render the Google Sign-In button.
-            const buttonEl = self.document.createElement('div');
-            buttonEl.id = GOOGLE_SIGN_IN_BUTTON_ID;
-            buttonEl.tabIndex = 0;
-            self.document.body.appendChild(buttonEl);
-            self.gapi.signin2.render(GOOGLE_SIGN_IN_BUTTON_ID, {
-              'longtitle': true,
-              'onsuccess': resolve,
-              'prompt': 'select_account',
-              'scope': 'profile email',
-              'theme': 'dark',
-            });
+    try {
+      await configureGoogleSignIn();
 
-            // Track button clicks.
-            buttonEl.addEventListener('click', () => {
-              // Tell parent frame about button click.
-              sendMessageToParentFnPromise.then((sendMessageToParent) => {
-                sendMessageToParent({
-                  stamp: POST_MESSAGE_STAMP,
-                  command: POST_MESSAGE_COMMAND_BUTTON_CLICK,
-                });
-              });
-            });
-          })
-      )
-      .then((googleUser) => {
-        // Gather GAA user details.
-        const basicProfile = /** @type {!GoogleUserDef} */ (
-          googleUser
-        ).getBasicProfile();
-        // Gather authorization response.
-        const authorizationData = /** @type {!GoogleUserDef} */ (
-          googleUser
-        ).getAuthResponse(true);
-        /** @type {!GaaUserDef} */
-        const gaaUser = {
-          idToken: authorizationData.id_token,
-          name: basicProfile.getName(),
-          givenName: basicProfile.getGivenName(),
-          familyName: basicProfile.getFamilyName(),
-          imageUrl: basicProfile.getImageUrl(),
-          email: basicProfile.getEmail(),
-          authorizationData,
-        };
+      // Promise credentials.
+      const googleUser = await new Promise((resolve) => {
+        // Render the Google Sign-In button.
+        const buttonEl = self.document.createElement('div');
+        buttonEl.id = GOOGLE_SIGN_IN_BUTTON_ID;
+        buttonEl.tabIndex = 0;
+        self.document.body.appendChild(buttonEl);
+        self.gapi.signin2.render(GOOGLE_SIGN_IN_BUTTON_ID, {
+          'longtitle': true,
+          'onsuccess': resolve,
+          'prompt': 'select_account',
+          'scope': 'profile email',
+          'theme': 'dark',
+        });
 
-        // Send GAA user to parent frame.
-        sendMessageToParentFnPromise.then((sendMessageToParent) => {
+        // Track button clicks.
+        buttonEl.addEventListener('click', async () => {
+          // Tell parent frame about button click.
+          const sendMessageToParent = await sendMessageToParentFnPromise;
           sendMessageToParent({
             stamp: POST_MESSAGE_STAMP,
-            command: POST_MESSAGE_COMMAND_USER,
-            gaaUser,
+            command: POST_MESSAGE_COMMAND_BUTTON_CLICK,
           });
         });
-      })
-      .catch(sendErrorMessageToParent);
+      });
+
+      // Gather GAA user details.
+      const basicProfile = /** @type {!GoogleUserDef} */ (
+        googleUser
+      ).getBasicProfile();
+
+      // Gather authorization response.
+      const authorizationData = /** @type {!GoogleUserDef} */ (
+        googleUser
+      ).getAuthResponse(true);
+
+      /** @type {!GaaUserDef} */
+      const gaaUser = {
+        idToken: authorizationData.id_token,
+        name: basicProfile.getName(),
+        givenName: basicProfile.getGivenName(),
+        familyName: basicProfile.getFamilyName(),
+        imageUrl: basicProfile.getImageUrl(),
+        email: basicProfile.getEmail(),
+        authorizationData,
+      };
+
+      // Send GAA user to parent frame.
+      const sendMessageToParent = await sendMessageToParentFnPromise;
+      sendMessageToParent({
+        stamp: POST_MESSAGE_STAMP,
+        command: POST_MESSAGE_COMMAND_USER,
+        gaaUser,
+      });
+    } catch (err) {
+      sendErrorMessageToParent();
+    }
   }
 }
 
@@ -1707,26 +1705,23 @@ class GaaGoogleSignInButton {
  *
  * @return {!Promise}
  */
-function configureGoogleSignIn() {
+async function configureGoogleSignIn() {
   // Wait for Google Sign-In API.
-  return (
-    new Promise((resolve) => {
-      const apiCheckInterval = setInterval(() => {
-        if (!!self.gapi) {
-          clearInterval(apiCheckInterval);
-          resolve();
-        }
-      }, 50);
-    })
-      // Load Auth2 module.
-      .then(() => new Promise((resolve) => self.gapi.load('auth2', resolve)))
-      // Specify "redirect" mode. It plays nicer with webviews.
-      .then(
-        () =>
-          // Only initialize Google Sign-In once.
-          self.gapi.auth2.getAuthInstance() || self.gapi.auth2.init()
-      )
-  );
+  await new Promise((resolve) => {
+    const apiCheckInterval = setInterval(() => {
+      if (!!self.gapi) {
+        clearInterval(apiCheckInterval);
+        resolve();
+      }
+    }, 50);
+  });
+
+  // Load Auth2 module.
+  await new Promise((resolve) => self.gapi.load('auth2', resolve));
+
+  // Specify "redirect" mode. It plays nicer with webviews.
+  // Only initialize Google Sign-In once.
+  await (self.gapi.auth2.getAuthInstance() || self.gapi.auth2.init());
 }
 
 /**
@@ -1834,12 +1829,11 @@ class GaaGoogle3pSignInButton {
       });
     });
 
-    function sendErrorMessageToParent() {
-      sendMessageToParentFnPromise.then((sendMessageToParent) => {
-        sendMessageToParent({
-          stamp: POST_MESSAGE_STAMP,
-          command: POST_MESSAGE_COMMAND_ERROR,
-        });
+    async function sendErrorMessageToParent() {
+      const sendMessageToParent = await sendMessageToParentFnPromise;
+      sendMessageToParent({
+        stamp: POST_MESSAGE_STAMP,
+        command: POST_MESSAGE_COMMAND_ERROR,
       });
     }
 
@@ -1884,24 +1878,24 @@ class GaaGoogle3pSignInButton {
  * }} params
  */
 function logEvent({analyticsEvent, showcaseEvent, isFromUserAction} = {}) {
-  callSwg((swg) => {
+  callSwg(async (swg) => {
     // Get reference to event manager.
-    swg.getEventManager().then((eventManager) => {
-      // Get list of analytics events.
-      const eventTypes = showcaseEvent
-        ? showcaseEventToAnalyticsEvents(showcaseEvent)
-        : [analyticsEvent];
+    const eventManager = await swg.getEventManager();
 
-      // Log each analytics event.
-      eventTypes.forEach((eventType) => {
-        eventManager.logEvent({
-          eventType,
-          eventOriginator: EventOriginator.SWG_CLIENT,
-          isFromUserAction,
-          additionalParameters: null,
-        });
+    // Get list of analytics events.
+    const eventTypes = showcaseEvent
+      ? showcaseEventToAnalyticsEvents(showcaseEvent)
+      : [analyticsEvent];
+
+    // Log each analytics event.
+    for (const eventType of eventTypes) {
+      eventManager.logEvent({
+        eventType,
+        eventOriginator: EventOriginator.SWG_CLIENT,
+        isFromUserAction,
+        additionalParameters: null,
       });
-    });
+    }
   });
 }
 
