@@ -37,6 +37,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     /** @param {boolean} element */
     this.hasAppendedInnerShoppingTagEl_ = false;
+
+    /** @param {!ShoppingConfigDataDef} tagData */
+    this.tagData_ = null;
   }
 
   /** @override */
@@ -63,12 +66,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * @param {!ShoppingConfigDataDef} tagData
    * @private
    */
-  onClick_(tagData) {
+  onClick_() {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-      'activeProductData': tagData,
+      'activeProductData': this.tagData_,
     });
   }
 
@@ -78,40 +80,38 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * @param {!ShoppingConfigDataDef} tagData
-   * @param {function(!ShoppingConfigDataDef): undefined} onClick
    * @return {!Element}
    */
-  renderShoppingTagTemplate_(tagData, onClick) {
+  renderShoppingTagTemplate_() {
     return (
       <div
         class="amp-story-shopping-tag-inner"
         role="button"
-        onClick={() => onClick(tagData)}
+        onClick={() => this.onClick_(this.tagData_)}
       >
         <span class="amp-story-shopping-tag-dot"></span>
         <span class="amp-story-shopping-tag-pill">
           <span
             class="amp-story-shopping-tag-pill-image"
             style={
-              tagData['product-icon'] && {
+              this.tagData_['product-icon'] && {
                 backgroundImage:
-                  'url(' + tagData['product-icon'] + ') !important',
+                  'url(' + this.tagData_['product-icon'] + ') !important',
                 backgroundSize: 'cover !important',
               }
             }
           ></span>
           <span class="amp-story-shopping-tag-pill-text">
-            {tagData['product-tag-text'] ||
+            {this.tagData_['product-tag-text'] ||
               new Intl.NumberFormat(
                 this.localizationService_.getLanguageCodesForElement(
                   this.element_
                 )[0],
                 {
                   style: 'currency',
-                  currency: tagData['product-price-currency'],
+                  currency: this.tagData_['product-price-currency'],
                 }
-              ).format(tagData['product-price'])}
+              ).format(this.tagData_['product-price'])}
           </span>
         </span>
       </div>
@@ -123,17 +123,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
-    const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
-    if (this.hasAppendedInnerShoppingTagEl_ || !tagData) {
+    this.tagData_ = shoppingData[this.element.getAttribute('data-tag-id')];
+    if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
 
     this.mutateElement(() => {
       createShadowRootWithStyle(
         this.element,
-        this.renderShoppingTagTemplate_(tagData, (tagData) =>
-          this.onClick_(tagData)
-        ),
+        this.renderShoppingTagTemplate_(),
         shoppingTagCSS
       );
       this.hasAppendedInnerShoppingTagEl_ = true;
