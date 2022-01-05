@@ -22,7 +22,7 @@ export const _default = () => {
 
   return (
     <BentoImageSlider
-      initialSliderPosition={0.5}
+      initialPosition={0.2}
       firstImageAs={(props) => (
         <img
           src={first}
