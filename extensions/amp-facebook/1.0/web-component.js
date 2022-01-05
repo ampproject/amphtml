@@ -1,4 +1,5 @@
 import {defineBentoElement} from '#preact/bento-ce';
+
 import {
   BaseElement,
   COMMENTS_TAG,

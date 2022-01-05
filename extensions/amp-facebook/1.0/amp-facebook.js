@@ -2,6 +2,8 @@ import {dashToUnderline} from '#core/types/string';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {userAssert} from '#utils/log';
 
 import {
@@ -70,13 +72,25 @@ function AmpFacebookMixin(clazz1) {
   };
 }
 
-class AmpFacebook extends AmpFacebookMixin(BaseElement) {}
+class AmpFacebook extends setSuperClass(
+  AmpFacebookMixin(BaseElement),
+  AmpPreactBaseElement
+) {}
 
-class AmpFacebookComments extends AmpFacebookMixin(CommentsBaseElement) {}
+class AmpFacebookComments extends setSuperClass(
+  AmpFacebookMixin(CommentsBaseElement),
+  AmpPreactBaseElement
+) {}
 
-class AmpFacebookLike extends AmpFacebookMixin(LikeBaseElement) {}
+class AmpFacebookLike extends setSuperClass(
+  AmpFacebookMixin(LikeBaseElement),
+  AmpPreactBaseElement
+) {}
 
-class AmpFacebookPage extends AmpFacebookMixin(PageBaseElement) {}
+class AmpFacebookPage extends setSuperClass(
+  AmpFacebookMixin(PageBaseElement),
+  AmpPreactBaseElement
+) {}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFacebook);

@@ -1,3 +1,5 @@
+import {defineBentoElement} from '#preact/bento-ce';
+
 import {BaseElement, TAG} from './base-element';
 import {
   TAG as PAGINATION_TAG,
@@ -7,7 +9,6 @@ import {
   TAG as THUMBNAIL_TAG,
   ThumbnailsBaseElement,
 } from './thumbnails-base-element';
-import {defineBentoElement} from '#preact/bento-ce';
 
 /**
  * Registers `<bento-inline-gallery> component to CustomElements registry
