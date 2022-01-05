@@ -125,7 +125,7 @@ exports.extensionBundles = [
 ];
 ```
 
-The entry for your component must have `options.wrapper = "bento"`. It may optionally include `options.npm = true` to publish the Preact component portion on npm automatically, following AMP's [release schedule](./release-schedule.md).
+The entry for your component must have `options.wrapper = "bento"` and `"experimental": true`. It may optionally include `options.npm = true` to publish the Preact component portion on npm automatically, following AMP's [release schedule](./release-schedule.md).
 
 ```diff
 exports.extensionBundles = [
@@ -133,6 +133,7 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "1.0",
++   "experimental": true,
     "options": {
 +     "npm": true,
 +     "wrapper": "bento"
@@ -157,6 +158,7 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "npm": true,
       "wrapper": "bento"

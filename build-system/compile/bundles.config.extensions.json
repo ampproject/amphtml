@@ -53,6 +53,7 @@
   {
     "name": "amp-accordion",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -172,6 +173,7 @@
   {
     "name": "amp-base-carousel",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -201,6 +203,7 @@
   {
     "name": "amp-brightcove",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -258,6 +261,7 @@
   {
     "name": "amp-date-countdown",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "npm": true,
       "bento": true,
@@ -271,6 +275,7 @@
   {
     "name": "amp-date-display",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "npm": true,
       "bento": true,
@@ -302,6 +307,7 @@
   {
     "name": "amp-embedly-card",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -322,6 +328,7 @@
   {
     "name": "amp-facebook",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -350,6 +357,7 @@
   {
     "name": "amp-fit-text",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -412,6 +420,7 @@
   {
     "name": "amp-iframe",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -461,6 +470,7 @@
   {
     "name": "amp-inline-gallery",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -481,6 +491,7 @@
   {
     "name": "amp-instagram",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -506,6 +517,7 @@
   {
     "name": "amp-jwplayer",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "bento": true,
@@ -526,6 +538,7 @@
   {
     "name": "amp-lightbox",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -542,6 +555,7 @@
   {
     "name": "amp-lightbox-gallery",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -583,6 +597,7 @@
   {
     "name": "amp-mathml",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "bento": true,
@@ -736,6 +751,7 @@
   {
     "name": "amp-selector",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -762,6 +778,7 @@
   {
     "name": "amp-sidebar",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -792,6 +809,7 @@
   {
     "name": "amp-social-share",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -805,6 +823,7 @@
   {
     "name": "amp-soundcloud",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -925,6 +944,7 @@
   {
     "name": "amp-stream-gallery",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -959,6 +979,7 @@
   {
     "name": "amp-timeago",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -979,6 +1000,7 @@
   {
     "name": "amp-twitter",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -999,6 +1021,7 @@
   {
     "name": "amp-video",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -1019,6 +1042,7 @@
   {
     "name": "amp-video-iframe",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -1043,6 +1067,7 @@
   {
     "name": "amp-vimeo",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -1075,6 +1100,7 @@
   {
     "name": "amp-wordpress-embed",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
@@ -1092,6 +1118,7 @@
   {
     "name": "amp-youtube",
     "version": "1.0",
+    "experimental": true,
     "options": {
       "hasCss": true,
       "npm": true,
