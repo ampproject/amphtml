@@ -1,9 +1,14 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 
-import {BaseElement} from './base-element';
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {BaseElement as BentoVideo} from './base-element';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
-export class AmpVideoBaseElement extends BaseElement {
+export class AmpVideoBaseElement extends setSuperClass(
+  BentoVideo,
+  AmpPreactBaseElement
+) {
   /** @override */
   init() {
     this.registerApiAction_('play', (api) => api.play());
