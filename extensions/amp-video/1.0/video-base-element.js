@@ -3,7 +3,7 @@ import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {BaseElement} from './base-element';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
-export class VideoBaseElement extends BaseElement {
+export class AmpVideoBaseElement extends BaseElement {
   /** @override */
   init() {
     this.registerApiAction_('play', (api) => api.play());
