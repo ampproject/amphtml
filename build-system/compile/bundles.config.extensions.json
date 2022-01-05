@@ -103,6 +103,11 @@
     "version": "0.1"
   },
   {
+    "name": "amp-ad-network-smartadserver-impl",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-ad-network-valueimpression-impl",
     "version": "0.1"
   },
