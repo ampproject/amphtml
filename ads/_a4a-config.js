@@ -39,3 +39,12 @@ export function getA4ARegistry() {
 
   return a4aRegistry;
 }
+
+/**
+ * An object mapping signing server names to their corresponding URLs.
+ * @type {!Object<string, string>}
+ */
+export const signingServerURLs = {
+  'google': 'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
+  'google-dev': 'https://cdn.ampproject.org/amp-ad-verifying-keyset-dev.json',
+};
