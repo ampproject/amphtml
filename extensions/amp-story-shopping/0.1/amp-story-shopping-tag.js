@@ -82,6 +82,23 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) => {
+      this.onRtlStateUpdate_(rtlState);
+    });
+  }
+
+  /**
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
+   * @private
+   */
+  onRtlStateUpdate_(rtlState) {
+    this.mutateElement(() => {
+      rtlState
+        ? this.shoppingTagEl_.setAttribute('dir', 'rtl')
+        : this.shoppingTagEl_.removeAttribute('dir');
+    });
   }
 
   /**
@@ -108,10 +125,14 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     if (this.hasAppendedInnerShoppingTagEl_ || !tagData) {
       return;
     }
+    this.shoppingTagEl_ = renderShoppingTagTemplate(tagData, (tagData) =>
+      this.onClick_(tagData)
+    );
+    this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
     this.mutateElement(() => {
       createShadowRootWithStyle(
         this.element,
-        renderShoppingTagTemplate(tagData, (tagData) => this.onClick_(tagData)),
+        this.shoppingTagEl_,
         shoppingTagCSS
       );
       this.hasAppendedInnerShoppingTagEl_ = true;
