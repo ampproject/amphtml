@@ -6,22 +6,13 @@ const fs = require('fs-extra');
 const path = require('path');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
-const {cpus} = require('os');
-const {cyan, green} = require('kleur/colors');
 const {getAmpConfigForFile} = require('../tasks/prepend-global');
-const {log, logLocalDev} = require('../common/logging');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel} = require('./pre-closure-babel');
 const {runClosure} = require('./closure-compile');
 const {sanitize} = require('./sanitize');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 const {writeSourcemaps} = require('./helpers');
-
-const queue = [];
-let inProgress = 0;
-
-const MAX_PARALLEL_CLOSURE_INVOCATIONS =
-  parseInt(argv.closure_concurrency, 10) || cpus().length;
 
 /**
  * @typedef {{
@@ -42,65 +33,6 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS =
  * }}
  */
 let OptionsDef;
-
-/**
- * Compiles AMP with the closure compiler. This is intended only for
- * production use. During development we intend to continue using
- * babel, as it has much faster incremental compilation.
- *
- * @param {string|string[]} entryModuleFilename
- * @param {string} outputDir
- * @param {string} outputFilename
- * @param {!OptionsDef} options
- * @param {{startTime?: number}=} timeInfo
- * @return {Promise<void>}
- */
-async function closureCompile(
-  entryModuleFilename,
-  outputDir,
-  outputFilename,
-  options,
-  timeInfo = {}
-) {
-  // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
-  // concurrent processes.
-  return new Promise(function (resolve, reject) {
-    /**
-     * Kicks off the first closure invocation.
-     */
-    function start() {
-      inProgress++;
-      compile(
-        entryModuleFilename,
-        outputDir,
-        outputFilename,
-        options,
-        timeInfo
-      ).then(
-        function () {
-          inProgress--;
-          next();
-          resolve();
-        },
-        (reason) => reject(reason)
-      );
-    }
-
-    /**
-     * Keeps track of the invocation count.
-     */
-    function next() {
-      if (!queue.length) {
-        return;
-      }
-      if (inProgress < MAX_PARALLEL_CLOSURE_INVOCATIONS) {
-        queue.shift()();
-      }
-    }
-    queue.push(start);
-    next();
-  });
-}
 
 /**
  * Cleans up the placeholder directories for fake build modules.
@@ -384,15 +316,15 @@ function generateFlags(
  * @param {string} outputDir
  * @param {string} outputFilename
  * @param {!OptionsDef} options
- * @param {{startTime?: number}} timeInfo
+ * @param {{startTime?: number}=} timeInfo
  * @return {Promise<void>}
  */
-async function compile(
+async function closureCompile(
   entryModuleFilenames,
   outputDir,
   outputFilename,
   options,
-  timeInfo
+  timeInfo = {}
 ) {
   if (timeInfo) {
     timeInfo.startTime = Date.now();
@@ -438,26 +370,7 @@ async function compile(
   }
 }
 
-/**
- * Indicates the current closure concurrency and how to override it.
- */
-function printClosureConcurrency() {
-  log(
-    green('Using up to'),
-    cyan(MAX_PARALLEL_CLOSURE_INVOCATIONS.toString()),
-    green('concurrent invocations of closure compiler.')
-  );
-  if (!argv.closure_concurrency) {
-    logLocalDev(
-      green('⤷ Use'),
-      cyan('--closure_concurrency=N'),
-      green('to change this number.')
-    );
-  }
-}
-
 module.exports = {
   cleanupBuildDir,
   closureCompile,
-  printClosureConcurrency,
 };
