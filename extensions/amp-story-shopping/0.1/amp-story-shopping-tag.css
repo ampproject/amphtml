@@ -72,7 +72,7 @@ amp-story-shopping-tag {
   padding: 4px 12px 4px 4px !important;
 }
 
-.amp-story-shopping-tag-pill-overflow {
+.amp-story-shopping-tag-pill-multi-line {
   border-radius: 10px !important;
 }
 
@@ -99,11 +99,5 @@ amp-story-shopping-tag {
   text-overflow: ellipsis !important;
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
   max-height: 36px !important;
-  direction: ltr !important;
-}
-
-.amp-story-shopping-tag-pill-text-rtl {
-  direction: rtl !important;
 }
