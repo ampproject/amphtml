@@ -1,6 +1,7 @@
 import '../amp-image-slider';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {createElementWithAttributes} from '#core/dom';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {createElementWithAttributes, tryFocus} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
@@ -60,16 +61,17 @@ describes.realWin(
         'layout': 'fixed',
         'width': '300px',
         'height': '200px',
+        'initial-slider-position': '0.3',
       });
       leftImage = createElementWithAttributes(win.document, 'amp-img', {
         'slot': 'first-image',
         'layout': 'fill',
-        'src': 'image1.jpg',
+        'src': '/examples/img/hero@1x.jpg',
       });
       rightImage = createElementWithAttributes(win.document, 'amp-img', {
         'slot': 'second-image',
         'layout': 'fill',
-        'src': 'image2.jpg',
+        'src': '/examples/img/hero@2x.jpg',
       });
       element.appendChild(leftImage);
       element.appendChild(rightImage);
@@ -94,6 +96,23 @@ describes.realWin(
       expect(imageSlots[1].assignedElements()).to.have.ordered.members([
         rightImage,
       ]);
+    });
+
+    it('should throw warning', async () => {
+      element.removeChild(leftImage);
+      element.removeChild(rightImage);
+      const originalWarn = console.warn;
+      const consoleOutput = [];
+      const mockedWarn = (output) => consoleOutput.push(output);
+      console.warn = mockedWarn;
+
+      await element.buildInternal();
+      element.layoutCallback();
+      expect(consoleOutput.length).to.equal(1);
+      expect(consoleOutput[0]).to.equal(
+        '2 images must be provided for comparison'
+      );
+      console.warn = originalWarn;
     });
 
     it('should not render labels by default', async () => {
@@ -188,6 +207,63 @@ describes.realWin(
       element.enqueAction(invocation('seekTo', {percent: 0.7}));
       expect(sliderBar.style.transform).to.equal('translateX(70%)');
       expect(rightMask.style.transform).to.equal('translateX(70%)');
+    });
+
+    it('should execute have initial position', async () => {
+      await waitForRender();
+
+      const sliderBar = element.shadowRoot.querySelector(
+        `.${styles.imageSliderBar}`
+      );
+      const rightMask = element.shadowRoot.querySelector(
+        `.${styles.imageSliderRightMask}`
+      );
+      await waitFor(
+        () => sliderBar.style.transform !== '',
+        'Slider Moved to initial position'
+      );
+      expect(sliderBar.style.transform).to.equal('translateX(30%)');
+      expect(rightMask.style.transform).to.equal('translateX(30%)');
+    });
+
+    it('should hide hints on mouse down event', async () => {
+      await waitForRender();
+      const container = element.shadowRoot.querySelector(
+        `.${styles.imageSliderContainer}`
+      );
+
+      container.dispatchEvent(new MouseEvent('mousedown', {clientX: 200}));
+      await waitFor(
+        () =>
+          element.shadowRoot.querySelector(`.${styles.imageSliderHintHidden}`),
+        'Mouse down event called'
+      );
+      expect(
+        element.shadowRoot.querySelector(`.${styles.imageSliderHintHidden}`)
+      ).not.to.be.null;
+    });
+
+    it('should move slider with keyboard event', async () => {
+      await waitForRender();
+      const container = element.shadowRoot.querySelector(
+        `.${styles.imageSliderContainer}`
+      );
+      const sliderBar = element.shadowRoot.querySelector(
+        `.${styles.imageSliderBar}`
+      );
+
+      element.focus();
+      const kbEnterEvent = new KeyboardEvent('keydown', {
+        key: Keys_Enum.LEFT_ARROW,
+        bubbles: true,
+      });
+      container.dispatchEvent(kbEnterEvent);
+      await waitFor(
+        () => sliderBar.style.transform === 'translateX(20%)',
+        'Keyboad Moved'
+      );
+
+      expect(sliderBar.style.transform).to.equal('translateX(20%)');
     });
   }
 );

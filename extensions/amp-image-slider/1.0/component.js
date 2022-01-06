@@ -73,11 +73,8 @@ export function BentoImageSliderWithRef(
   const gesturesRef = useRef(null);
   const isEventRegistered = false;
   const styles = useStyles();
-
   /** Common variables */
-  const win = useRef(null);
   const doc = useRef(null);
-
   /** Container Reference */
   const containerRef = useRef(null);
 
@@ -379,9 +376,8 @@ export function BentoImageSliderWithRef(
       // This is to prevent right mouse button down when left still down
       unlisten(unlistenMouseMove?.current);
       unlisten(unlistenMouseUp?.current);
-
-      unlistenMouseMove.current = listen(win.current, 'mousemove', onMouseMove);
-      unlistenMouseUp.current = listen(win.current, 'mouseup', onMouseUp);
+      unlistenMouseMove.current = listen(window, 'mousemove', onMouseMove);
+      unlistenMouseUp.current = listen(window, 'mouseup', onMouseUp);
 
       animateHideHint();
     },
@@ -432,8 +428,6 @@ export function BentoImageSliderWithRef(
     if (!checkProps(firstImageAs, secondImageAs)) {
       return null;
     }
-    /** Common variables */
-    win.current = containerRef?.current?.ownerDocument?.defaultView;
     doc.current = containerRef?.current?.ownerDocument;
 
     observeIntersections(containerRef.current, ({isIntersecting}) =>
