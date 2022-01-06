@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.197 */
+/** Version: 0.1.22.199 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1893,14 +1893,14 @@ function logEvent({analyticsEvent, showcaseEvent, isFromUserAction} = {}) {
         : [analyticsEvent];
 
       // Log each analytics event.
-      eventTypes.forEach((eventType) => {
+      for (const eventType of eventTypes) {
         eventManager.logEvent({
           eventType,
           eventOriginator: EventOriginator.SWG_CLIENT,
           isFromUserAction,
           additionalParameters: null,
         });
-      });
+      }
     });
   });
 }

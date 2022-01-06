@@ -14,10 +14,6 @@ const {
   printNobuildHelp,
 } = require('./helpers');
 const {
-  cleanupBuildDir,
-  printClosureConcurrency,
-} = require('../compile/compile');
-const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
@@ -90,7 +86,6 @@ function printDistHelp(options) {
  * @return {Promise<void>}
  */
 async function runPreDistSteps(options) {
-  cleanupBuildDir();
   await prebuild();
   await compileCss(options);
   await copyCss();
@@ -112,7 +107,6 @@ async function dist() {
     minify: true,
     watch: argv.watch,
   };
-  printClosureConcurrency();
   printNobuildHelp();
   printDistHelp(options);
   await runPreDistSteps(options);

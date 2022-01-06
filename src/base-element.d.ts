@@ -107,9 +107,6 @@ declare namespace AMP {
   ) => void;
 }
 
-// TODO(samouri): Move the types below to better locations.
-declare type AmpElement = HTMLElement;
-
 declare type Layout =
   | 'nodisplay'
   | 'fixed'
@@ -136,6 +133,3 @@ declare type LayoutRect = {
 type Mutations = {
   [key: string]: null | boolean | string | number | Array<any> | Object;
 };
-
-// TODO:(samouri): correctly type this within src/core/types/object/json
-declare type JsonObject = any;

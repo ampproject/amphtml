@@ -52,6 +52,13 @@
       owners: [{name: 'ampproject/wg-performance', required: true}],
     },
     {
+      pattern: '**/*.d.ts',
+      owners: [
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-performance'},
+      ],
+    },
+    {
       pattern: '**/build-dom.js',
       owners: [{name: 'samouri'}],
     },

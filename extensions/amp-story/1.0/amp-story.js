@@ -35,8 +35,8 @@ import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
-import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
+import {AmpStoryShare} from './amp-story-share';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {BackgroundBlur} from './background-blur';
@@ -53,7 +53,6 @@ import {LiveStoryManager} from './live-story-manager';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '#service';
-import {ShareMenu} from '../../amp-story-share-menu/0.1/amp-story-share-menu';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
@@ -221,9 +220,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private @const {!ShareMenu} Preloads and prerenders the share menu. */
-    this.shareMenu_ = new ShareMenu(this.win, this.element);
-
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win, this.element);
 
@@ -369,7 +365,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.initializeListeners_();
-    this.initializeListenersForDev_();
     this.initializePageIds_();
     this.initializeStoryPlayer_();
 
@@ -783,6 +778,8 @@ export class AmpStory extends AMP.BaseElement {
     if (this.viewerMessagingHandler_) {
       this.viewerMessagingHandler_.startListening();
     }
+
+    new AmpStoryShare(this.win, this.element);
   }
 
   /** @private */
@@ -852,17 +849,6 @@ export class AmpStory extends AMP.BaseElement {
     const sideSwipe = Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX;
     const upSwipe = -1 * deltaY >= MIN_SWIPE_FOR_HINT_OVERLAY_PX;
     return sideSwipe || upSwipe;
-  }
-
-  /** @private */
-  initializeListenersForDev_() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.element.addEventListener(EventType.DEV_LOG_ENTRIES_AVAILABLE, (e) => {
-      this.systemLayer_.logAll(/** @type {?} */ (getDetail(e)));
-    });
   }
 
   /** @private */
@@ -964,9 +950,6 @@ export class AmpStory extends AMP.BaseElement {
         if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
           this.activePage_.openAttachment(false /** shouldAnimate */);
         }
-
-        // Preloads and prerenders the share menu.
-        this.shareMenu_.build();
 
         if (
           shouldShowStoryUrlInfo(devAssert(this.viewer_), this.storeService_)
@@ -1457,11 +1440,6 @@ export class AmpStory extends AMP.BaseElement {
       () => {
         this.preloadPagesByDistance_(/* prioritizeActivePage */ !oldPage);
         this.triggerActiveEventForPage_();
-
-        this.systemLayer_.resetDeveloperLogs();
-        this.systemLayer_.setDeveloperLogContextString(
-          this.activePage_.element.id
-        );
       },
     ];
 
@@ -2529,7 +2507,5 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
-  AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
-  AMP.registerElement('amp-story-page-outlink', AmpStoryPageAttachment); // Shares codepath with amp-story-page-attachment.
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

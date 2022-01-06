@@ -3,8 +3,8 @@
 //
 #include "cpp/engine/error-formatter.h"
 
-#include "glog/logging.h"
 #include "cpp/engine/validator_pb.h"
+#include "cpp/htmlparser/logging.h"
 #include "cpp/htmlparser/strings.h"
 #include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)

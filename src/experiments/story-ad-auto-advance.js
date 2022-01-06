@@ -1,15 +1,19 @@
 import {randomlySelectUnsetExperiments} from '#experiments';
 
-import {ExperimentInfoDef} from './experiments.type';
-
-/** @const {!Object<string, string>} */
+/**
+ * @const
+ * @type {Object<string, string>}
+ */
 export const AdvanceExpToTime = {
   '31060905': '6s',
   '31060906': '8s',
   '31060907': '10s',
 };
 
-/** @const */
+/**
+ * @const
+ * @type {Object<string, string>}
+ */
 export const StoryAdAutoAdvance = {
   ID: 'story-ad-auto-advance',
   CONTROL: '31060904',
@@ -20,10 +24,10 @@ export const StoryAdAutoAdvance = {
 
 /**
  * Choose what time value to auto advance story ads.
- * @param {!Window} win
+ * @param {Window} win
  */
 export function divertStoryAdAutoAdvance(win) {
-  /** @type {!ExperimentInfoDef} */
+  /** @type {import('./types.d').ExperimentInfo} */
   const experimentInfo = {
     experimentId: StoryAdAutoAdvance.ID,
     isTrafficEligible: () => true,

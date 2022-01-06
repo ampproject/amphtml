@@ -326,7 +326,7 @@
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-menu"
+        "amp-story-share-menu"
       ]
     },
     {
@@ -476,7 +476,7 @@
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-menu"
+        "amp-story-share-menu"
       ]
     },
     {
