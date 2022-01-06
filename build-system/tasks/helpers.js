@@ -341,7 +341,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: true,
-        sourceRoot: path.join(process.cwd(), destDir),
+        sourceRoot: path.join(process.cwd(), path.dirname(destFile)),
         sourcesContent: !!argv.full_sourcemaps,
         outfile: destFile,
         define: experimentDefines,
@@ -716,6 +716,9 @@ function massageSourcemaps(sourcemaps, babelMaps, options) {
       // (which have a sourcemap) from the actual source file by pretending the
       // source file exists in the '__SOURCE__' root directory.
       const map = babelMaps.get(f);
+      if (!map) {
+        throw new Error(`failed to find sourcemap for babel file "${f}"`);
+      }
       return {
         ...map,
         sourceRoot: path.join(
