@@ -341,7 +341,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: true,
-        sourceRoot: path.join(process.cwd(), path.dirname(destFile)),
+        sourceRoot: path.dirname(destFile),
         sourcesContent: !!argv.full_sourcemaps,
         outfile: destFile,
         define: experimentDefines,
@@ -710,21 +710,19 @@ function massageSourcemaps(sourcemaps, babelMaps, options) {
       if (f.includes('__SOURCE__')) {
         return null;
       }
+      const file = path.join(root, f);
       // The Babel tranformed file and the original file have the same path,
       // which makes it difficult to distinguish during remapping's load phase.
       // We perform some manual path mangling to destingish the babel files
       // (which have a sourcemap) from the actual source file by pretending the
       // source file exists in the '__SOURCE__' root directory.
-      const map = babelMaps.get(f);
+      const map = babelMaps.get(file);
       if (!map) {
         throw new Error(`failed to find sourcemap for babel file "${f}"`);
       }
       return {
         ...map,
-        sourceRoot: path.join(
-          '/__SOURCE__/',
-          path.relative(root, path.dirname(f))
-        ),
+        sourceRoot: path.posix.join('/__SOURCE__/', f),
       };
     },
     !argv.full_sourcemaps
