@@ -13,7 +13,7 @@ export function duplicateErrorIfNecessary(error) {
   const e = new Error(message);
   // Copy all the extraneous things we attach.
   for (const prop in error) {
-    e[prop] = error[prop];
+    /** @type {*} */ (e)[prop] = /** @type {*} */ (error)[prop];
   }
   // Ensure these are copied.
   e.stack = stack;

@@ -29,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "More"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "You must enable the AMP Story experiment to view this content."
   },
   "21": {
     "string": "We're sorry, it looks like your browser doesn't support this experience"
@@ -62,23 +56,11 @@
   "27": {
     "string": "Continue Anyway"
   },
-  "31": {
-    "string": "Sound off"
-  },
-  "32": {
-    "string": "Sound on"
-  },
-  "33": {
-    "string": "This page has no sound"
-  },
   "34": {
     "string": "Play video"
   },
   "35": {
     "string": "Swipe up"
-  },
-  "62": {
-    "string": "Share starting from this page"
   },
   "63": {
     "string": "Line"
@@ -100,9 +82,6 @@
   },
   "69": {
     "string": "Share story"
-  },
-  "70": {
-    "string": "Toggle story menu"
   },
   "71": {
     "string": "A"
@@ -136,9 +115,6 @@
   },
   "81": {
     "string": "Tip"
-  },
-  "82": {
-    "string": "Previous page"
   },
   "83": {
     "string": "Activate"

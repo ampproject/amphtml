@@ -162,14 +162,6 @@ describes.realWin(
       expect(story.element.innerText).to.not.have.string(textToRemove);
     });
 
-    it('should prerender/load the share menu', async () => {
-      await createStoryWithPages(2);
-
-      const buildShareMenuStub = env.sandbox.stub(story.shareMenu_, 'build');
-      await story.layoutCallback();
-      expect(buildShareMenuStub).to.have.been.calledOnce;
-    });
-
     it('should return a valid page index', async () => {
       await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
       await story.layoutCallback();
@@ -1167,21 +1159,6 @@ describes.realWin(
 
           const clickEvent = new MouseEvent('click', {clientX: 200});
           tappableEl.dispatchEvent(clickEvent);
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
-        it('should NOT navigate when clicking on a shadow DOM element', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          await story.layoutCallback();
-          const clickEvent = new MouseEvent('click', {clientX: 200});
-          story.shareMenu_.element_.dispatchEvent(clickEvent);
-
           expect(story.activePage_.element.id).to.equal('cover');
         });
 

@@ -2,13 +2,15 @@ import {bytesToString, stringToBytes, utf8Decode, utf8Encode} from './bytes';
 
 /**
  * Character mapping from base64url to base64.
- * @const {Object<string, string>}
+ * @type {Object<string, string>}
+ * @const
  */
 const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
 
 /**
  * Character mapping from base64 to base64url.
- * @const {Object<string, string>}
+ * @type {Object<string, string>}
+ * @const
  */
 const base64UrlEncodeSubs = {'+': '-', '/': '_', '=': '.'};
 
