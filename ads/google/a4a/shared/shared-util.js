@@ -14,4 +14,4 @@
 export function validateAdContentRating(contentRating) {
   // Verify that content rating is a valid rating
   return contentRating === 'e' || contentRating === 'pg' || contentRating === 't' || contentRating === 'ma';
-  }
+}
