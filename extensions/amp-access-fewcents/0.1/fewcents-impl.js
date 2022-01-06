@@ -97,7 +97,7 @@ export class AmpAccessFewcents {
         (response) => {
           // removing the paywall if shown and showing the content
           this.emptyContainer_();
-          return {access: response.data.access};
+          return {access: response.data.access, data: JSON.stringify(response)};
         },
         (err) => {
           // showing the paywall
@@ -122,7 +122,7 @@ export class AmpAccessFewcents {
               this.emptyContainer_().then(
                 this.renderPurchaseOverlay_.bind(this)
               );
-              return {access: false};
+              return {access: false, data: JSON.stringify(responseJson)};
             });
         }
       )
