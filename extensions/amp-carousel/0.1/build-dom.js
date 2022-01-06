@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert';
 import {isAmp4Email} from '#core/document/format';
 import {isServerRendered} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
@@ -43,7 +44,7 @@ function assertDomQueryResults() {
  * Builds a carousel button for next/prev.
  * @param {Element} element
  * @param {{className: string, title: string, enabled: boolean}} options
- * @return {?HTMLDivElement}
+ * @return {HTMLDivElement}
  */
 function buildButton(element, {className, enabled, title}) {
   /*
@@ -218,6 +219,7 @@ function buildSlideScrollCarousel(element) {
   slidesContainer.setAttribute('aria-live', 'polite');
   element.appendChild(slidesContainer);
 
+  /** @type {HTMLDivElement[]} */
   const slideWrappers = [];
   slides.forEach((slide) => {
     slide.classList.add(ClassNames.SLIDE);
@@ -317,13 +319,16 @@ export function getPrevButtonTitle(element, options = {}) {
  * - Slides    : "Next item in carousel (X of Y)"
  *
  * @param {*} element
- * @param {{prefix: string, index: string, total:string}} param1
+ * @param {{prefix: string, index?: string, total?:string}} param1
  * @return {string}
  */
 function getButtonTitle(element, {index, prefix, total}) {
   if (isScrollable(element)) {
     return prefix;
   }
+  // Slides carousel should always have index/total provided.
+  devAssert(index);
+  devAssert(total);
 
   /**
    * A format string for the button label. Should be a string, containing two
