@@ -135,8 +135,6 @@ function getFileBabelOptions(babelOptions, filename) {
 
   return {
     ...babelOptions,
-    sourceMaps:
-      babelOptions.sourceMaps === 'inline' ? 'both' : babelOptions.sourceMaps,
     filename,
     filenameRelative,
   };
