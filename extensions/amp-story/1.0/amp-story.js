@@ -318,7 +318,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.initializeListeners_();
-    this.initializeListenersForDev_();
     this.initializePageIds_();
     this.initializeStoryPlayer_();
 
@@ -803,17 +802,6 @@ export class AmpStory extends AMP.BaseElement {
     const sideSwipe = Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX;
     const upSwipe = -1 * deltaY >= MIN_SWIPE_FOR_HINT_OVERLAY_PX;
     return sideSwipe || upSwipe;
-  }
-
-  /** @private */
-  initializeListenersForDev_() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.element.addEventListener(EventType.DEV_LOG_ENTRIES_AVAILABLE, (e) => {
-      this.systemLayer_.logAll(/** @type {?} */ (getDetail(e)));
-    });
   }
 
   /** @private */
@@ -1405,11 +1393,6 @@ export class AmpStory extends AMP.BaseElement {
       () => {
         this.preloadPagesByDistance_(/* prioritizeActivePage */ !oldPage);
         this.triggerActiveEventForPage_();
-
-        this.systemLayer_.resetDeveloperLogs();
-        this.systemLayer_.setDeveloperLogContextString(
-          this.activePage_.element.id
-        );
       },
     ];
 

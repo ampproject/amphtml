@@ -101,9 +101,8 @@ export class LocalizationService {
   /**
    * @param {!Element} element
    * @return {!Array<string>}
-   * @private
    */
-  getLanguageCodesForElement_(element) {
+  getLanguageCodesForElement(element) {
     const languageEl = closest(element, (el) => el.hasAttribute('lang'));
     const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
     const languageCodesToUse = getLanguageCodesFromString(languageCode || '');
@@ -144,7 +143,7 @@ export class LocalizationService {
    * @return {?string}
    */
   getLocalizedString(localizedStringId, elementToUse = this.element_) {
-    const languageCodes = this.getLanguageCodesForElement_(elementToUse);
+    const languageCodes = this.getLanguageCodesForElement(elementToUse);
 
     return findLocalizedString(
       this.localizedStringBundles_,
