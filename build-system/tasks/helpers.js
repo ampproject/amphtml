@@ -364,7 +364,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       code = minified;
       map = await massageSourcemaps([minifiedMap, map], babelMaps, options);
     } else {
-      // TODO
       map = await massageSourcemaps([map], babelMaps, options);
     }
 
@@ -704,25 +703,26 @@ function massageSourcemaps(sourcemaps, babelMaps, options) {
   const remapped = remapping(
     sourcemaps,
     (f) => {
-      if (!f.includes('__SOURCE__')) {
-        // The Babel tranformed file and the original file have the same path,
-        // which makes it difficult to distinguish during remapping's load
-        // phase. We perform some manual path mangling to destingish the babel
-        // files (which have a sourcemap) from the actual source file by pretending
-        // the source file exists in the '__SOURCE__' root directory.
-        const map = babelMaps.get(f);
-        return {
-          ...map,
-          sourceRoot: path.join(
-            '/__SOURCE__/',
-            path.relative(root, path.dirname(f))
-          ),
-        };
+      if (f.includes('__SOURCE__')) {
+        return null;
       }
-      return null;
+      // The Babel tranformed file and the original file have the same path,
+      // which makes it difficult to distinguish during remapping's load phase.
+      // We perform some manual path mangling to destingish the babel files
+      // (which have a sourcemap) from the actual source file by pretending the
+      // source file exists in the '__SOURCE__' root directory.
+      const map = babelMaps.get(f);
+      return {
+        ...map,
+        sourceRoot: path.join(
+          '/__SOURCE__/',
+          path.relative(root, path.dirname(f))
+        ),
+      };
     },
     !argv.full_sourcemaps
   );
+
   remapped.sources = remapped.sources.map((source) => {
     if (source.startsWith('/__SOURCE__/')) {
       return source.slice('/__SOURCE__/'.length);
