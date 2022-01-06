@@ -262,7 +262,46 @@ export class AmpAccessFewcents {
       }
     );
 
-    // Creating publisher logo for the paywall
+    this.createLogoAndHeader_();
+
+    this.createAlreadyBoughtElement_();
+
+    this.createPriceAndButton_();
+
+    // 'div' element for reference row and fewcents logo
+    const bottomDiv = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'div',
+      {
+        class: TAG_SHORTHAND + '-bottom-div',
+      }
+    );
+
+    // Reference row for terms and conditions
+    const refRow = this.createRefRowElement_();
+    bottomDiv.appendChild(refRow);
+
+    // Creating fewcents logo for the paywall
+    const fewcentsLogo = createElementWithAttributes(
+      this.ampdoc.win.document,
+      'img',
+      {
+        class: TAG_SHORTHAND + '-fewcents-image-tag',
+        src: this.i18n_['fcPoweredImageRef'],
+      }
+    );
+    bottomDiv.appendChild(fewcentsLogo);
+    this.innerContainer_.appendChild(bottomDiv);
+
+    this.dialogContainer_.appendChild(this.innerContainer_);
+    this.containerEmpty_ = false;
+  }
+
+  /**
+   * Creates publisher logo and header text for the paywall
+   * @private
+   */
+  createLogoAndHeader_() {
     const publisherLogo = createElementWithAttributes(
       this.ampdoc.win.document,
       'img',
@@ -273,7 +312,6 @@ export class AmpAccessFewcents {
     );
     this.innerContainer_.appendChild(publisherLogo);
 
-    // Creating header text
     const headerText = createElementWithAttributes(
       this.ampdoc.win.document,
       'div',
@@ -284,8 +322,13 @@ export class AmpAccessFewcents {
 
     headerText.textContent = this.i18n_['fcTitleText'];
     this.innerContainer_.appendChild(headerText);
+  }
 
-    // Creating already bought link
+  /**
+   * Creates already bought link
+   * @private
+   */
+  createAlreadyBoughtElement_() {
     const alreadyBought = createElementWithAttributes(
       this.ampdoc.win.document,
       'a',
@@ -302,8 +345,13 @@ export class AmpAccessFewcents {
       this.handlePurchase_(ev);
     });
     this.innerContainer_.appendChild(alreadyBought);
+  }
 
-    // 'div' element for article price and unlock button
+  /**
+   * Create elements for article price and unlock button
+   * @private
+   */
+  createPriceAndButton_() {
     const priceAndButtonDiv = createElementWithAttributes(
       this.ampdoc.win.document,
       'div',
@@ -349,34 +397,6 @@ export class AmpAccessFewcents {
     });
     unlockButtonDiv.appendChild(unlockButton);
     priceAndButtonDiv.appendChild(unlockButtonDiv);
-
-    // 'div' element for reference row and fewcents logo
-    const bottomDiv = createElementWithAttributes(
-      this.ampdoc.win.document,
-      'div',
-      {
-        class: TAG_SHORTHAND + '-bottom-div',
-      }
-    );
-
-    // Reference row for terms and conditions
-    const refRow = this.createRefRowElement_();
-    bottomDiv.appendChild(refRow);
-
-    // Creating fewcents logo for the paywall
-    const fewcentsLogo = createElementWithAttributes(
-      this.ampdoc.win.document,
-      'img',
-      {
-        class: TAG_SHORTHAND + '-fewcents-image-tag',
-        src: this.i18n_['fcPoweredImageRef'],
-      }
-    );
-    bottomDiv.appendChild(fewcentsLogo);
-    this.innerContainer_.appendChild(bottomDiv);
-
-    this.dialogContainer_.appendChild(this.innerContainer_);
-    this.containerEmpty_ = false;
   }
 
   /**
