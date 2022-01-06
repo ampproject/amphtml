@@ -9,7 +9,7 @@ export const CONFIG_BASE_PATH =
   'https://api.hounds.fewcents.co/v1/amp/authorizeBid?articleUrl=SOURCE_URL&ampReaderId=READER_ID&returnUrl=RETURN_URL';
 
 /** @const {number} */
-export const AUTHORIZATION_TIMEOUT = 3000;
+export const AUTHORIZATION_TIMEOUT = 10000;
 
 /** @const {JsonObject} */
 export const DEFAULT_MESSAGES = {
