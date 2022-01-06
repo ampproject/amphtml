@@ -97,7 +97,6 @@ import {
 import {isEsm} from '#core/mode';
 import {upgradeBackgroundAudio} from './audio';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {LocalizationService} from '#service/localization';
 import {getLocalizationService} from './amp-story-localization-service';
 
 /** @private @const {number} */

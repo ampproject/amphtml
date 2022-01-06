@@ -12,7 +12,6 @@ import {createShadowRootWithStyle} from './utils';
 import {localizeAsync} from './amp-story-localization-service';
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
 const renderHintElement = () => (

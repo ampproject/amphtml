@@ -1,8 +1,7 @@
 import {closest} from '#core/dom/query';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
-
-import {executeRequest} from 'extensions/amp-story/1.0/request-utils';
 
 import {
   LocalizedStringBundleDef,
@@ -92,8 +91,9 @@ export class LocalizationService {
      */
     this.localizedStringBundles_ = {};
 
-    this.viewerLanguageBundlePromise_ = executeRequest(
-      element,
+    const xhr = Services.xhrFor(getWin(element));
+
+    this.viewerLanguageBundlePromise_ = xhr.fetchJson(
       'https://gist.githubusercontent.com/mszylkowski/3ed540186b18f4da4083e087bff36122/raw/a46b0204d5a7e12615a924b4ae192d9d77128bff/amp-story.es.json'
     );
   }
