@@ -20,6 +20,7 @@ const babelTransforms = new Map([
   ['babel-jest', 'getEmptyConfig'],
   ['bento-element-minified', 'getBentoElementMinifiedConfig'],
   ['bento-element-unminified', 'getBentoElementUnminifiedConfig'],
+  ['post-esbuild-compile', 'getPostEsbuildCompileConfig'],
   ['test', 'getTestConfig'],
   ['unminified', 'getUnminifiedConfig'],
   ['minified', 'getMinifiedConfig'],

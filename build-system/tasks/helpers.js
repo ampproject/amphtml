@@ -317,11 +317,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
-  const babelMaps = new Map();
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
     /* enableCache */ true,
-    {babelMaps}
+    {postCompileCaller: 'post-esbuild-compile'}
   );
   const plugins = [babelPlugin];
 
@@ -349,8 +348,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         format: options.outputFormat,
         banner,
         footer,
-        // For es5 builds, ensure esbuild-injected code is transpiled.
-        target: argv.esm ? 'es6' : 'es5',
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
@@ -361,19 +358,20 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       result = await result.rebuild();
     }
     let code = result.outputFiles.find(({path}) => !path.endsWith('.map')).text;
-    let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
+    let map = JSON.parse(
+      result.outputFiles.find(({path}) => path.endsWith('.map')).text
+    );
 
     if (options.minify) {
       const {code: minified, map: minifiedMap} = await minify(code);
+      map = remapping([minifiedMap, map], () => null, !argv.full_sourcemaps);
       code = minified;
-      map = await massageSourcemaps([minifiedMap, map], babelMaps, options);
-    } else {
-      map = await massageSourcemaps([map], babelMaps, options);
     }
+    massageSourcemaps(map, options);
 
     await Promise.all([
       fs.outputFile(destFile, code),
-      fs.outputFile(`${destFile}.map`, map),
+      fs.outputJson(`${destFile}.map`, map),
     ]);
 
     await finishBundle(destDir, destFilename, options, startTime);
@@ -697,49 +695,14 @@ async function getDependencies(entryPoint, options) {
 }
 
 /**
- * @param {!Array<string|object>} sourcemaps
- * @param {Map<string, string|object>} babelMaps
+ * @param {Object} map
  * @param {*} options
- * @return {string}
  */
-function massageSourcemaps(sourcemaps, babelMaps, options) {
-  const root = process.cwd();
-  const remapped = remapping(
-    sourcemaps,
-    (f) => {
-      if (f.includes('__SOURCE__')) {
-        return null;
-      }
-      const file = path.join(root, f);
-      // The Babel tranformed file and the original file have the same path,
-      // which makes it difficult to distinguish during remapping's load phase.
-      // We perform some manual path mangling to destingish the babel files
-      // (which have a sourcemap) from the actual source file by pretending the
-      // source file exists in the '__SOURCE__' root directory.
-      const map = babelMaps.get(file);
-      if (!map) {
-        throw new Error(`failed to find sourcemap for babel file "${f}"`);
-      }
-      return {
-        ...map,
-        sourceRoot: path.posix.join('/__SOURCE__/', path.dirname(f)),
-      };
-    },
-    !argv.full_sourcemaps
-  );
-
-  remapped.sources = remapped.sources.map((source) => {
-    if (source.startsWith('/__SOURCE__/')) {
-      return source.slice('/__SOURCE__/'.length);
-    }
-    return source;
-  });
-  remapped.sourceRoot = getSourceRoot(options);
-  if (remapped.file) {
-    remapped.file = path.basename(remapped.file);
+function massageSourcemaps(map, options) {
+  map.sourceRoot = getSourceRoot(options);
+  if (map.file) {
+    map.file = path.basename(map.file);
   }
-
-  return remapped.toString();
 }
 
 module.exports = {
