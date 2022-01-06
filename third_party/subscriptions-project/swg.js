@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.197 */
+/** Version: 0.1.22.199 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -2952,9 +2952,9 @@ function setStyles(element, styles) {
  */
 function resetStyles(element, properties) {
   const styleObj = {};
-  properties.forEach((prop) => {
-    styleObj[prop] = null;
-  });
+  for (const property of properties) {
+    styleObj[property] = null;
+  }
   setStyles(element, styleObj);
 }
 
@@ -3545,6 +3545,9 @@ class JwtHelper {
  * limitations under the License.
  */
 
+/** Source for Google-provided non-metering entitlements. */
+const GOOGLE_SOURCE = 'google';
+
 /** Source for Google-provided metering entitlements. */
 const GOOGLE_METERING_SOURCE = 'google:metering';
 
@@ -3553,6 +3556,9 @@ const PRIVILEGED_SOURCE = 'privileged';
 
 /** Subscription token for dev mode entitlements. */
 const DEV_MODE_TOKEN = 'GOOGLE_DEV_MODE_TOKEN';
+
+/** Order ID returned for dev mode entitlements. */
+const DEV_MODE_ORDER = 'GOOGLE_DEV_MODE_ORDER';
 
 /**
  * The holder of the entitlements for a service.
@@ -3636,8 +3642,8 @@ class Entitlements {
     const entitlement = this.getEntitlementForThis();
     return (
       !!entitlement &&
-      entitlement.source !== GOOGLE_METERING_SOURCE &&
-      entitlement.subscriptionToken !== DEV_MODE_TOKEN
+      !this.enablesThisWithGoogleMetering() &&
+      !this.enablesThisWithGoogleDevMode()
     );
   }
 
@@ -3651,6 +3657,23 @@ class Entitlements {
   enablesThisWithGoogleMetering() {
     const entitlement = this.getEntitlementForThis();
     return !!entitlement && entitlement.source === GOOGLE_METERING_SOURCE;
+  }
+
+  /**
+   * Returns true if the current article is unlocked by a Google dev mode
+   * entitlement.
+   * @return {boolean}
+   */
+  enablesThisWithGoogleDevMode() {
+    const entitlement = this.getEntitlementForThis();
+    if (!entitlement) {
+      return false;
+    }
+    const isFirstPartyToken =
+      entitlement.source === GOOGLE_SOURCE &&
+      entitlement.subscriptionToken.indexOf(DEV_MODE_ORDER) !== -1;
+    const isThirdPartyToken = entitlement.subscriptionToken === DEV_MODE_TOKEN;
+    return isFirstPartyToken || isThirdPartyToken;
   }
 
   /**
@@ -4883,7 +4906,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.197',
+    '_client': 'SwG 0.1.22.199',
   });
 }
 
@@ -5273,6 +5296,11 @@ class PayCompleteFlow {
         });
 
         this.readyPromise_ = this.dialogManager_.openView(activityIframeView);
+
+        this.readyPromise_.then(() => {
+          this.deps_.callbacks().triggerPayConfirmOpened(activityIframeView);
+        });
+
         return activityIframeView;
       }));
   }
@@ -6196,7 +6224,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.197',
+        '_client': 'SwG 0.1.22.199',
         'supportsEventManager': true,
       },
       args || {}
@@ -6602,6 +6630,17 @@ const ExperimentFlags = {
    * Experiment flag for guarding changes to fix PayClient redirect flow.
    */
   PAY_CLIENT_REDIRECT: 'pay-client-redirect',
+
+  /**
+   * Directs basic-runtime to use the article endpoint instead of the separate
+   * entitlements and clientconfiguration endpoints.
+   */
+  USE_ARTICLE_ENDPOINT: 'use-article-endpoint',
+
+  /**
+   * Experiment flag for logging audience activity.
+   */
+  LOGGING_AUDIENCE_ACTIVITY: 'logging-audience-activity',
 };
 
 /**
@@ -6688,18 +6727,18 @@ function getExperiments(win) {
 
     // Format:
     // - experimentString = (experimentSpec,)*
-    combinedExperimentString.split(',').forEach((s) => {
-      s = s.trim();
-      if (!s) {
-        return;
+    for (let experimentString of combinedExperimentString.split(',')) {
+      experimentString = experimentString.trim();
+      if (!experimentString) {
+        continue;
       }
       try {
-        parseSetExperiment(win, experimentMap, s);
+        parseSetExperiment(win, experimentMap, experimentString);
       } catch (e) {
         // Ignore: experiment parsing cannot block runtime.
         ErrorUtils.throwAsync(e);
       }
-    });
+    }
   }
   return experimentMap;
 }
@@ -7026,11 +7065,11 @@ class AnalyticsService {
   addLabels(labels) {
     if (labels && labels.length > 0) {
       const newLabels = [].concat(this.context_.getLabelList());
-      labels.forEach((label) => {
+      for (const label of labels) {
         if (newLabels.indexOf(label) == -1) {
           newLabels.push(label);
         }
-      });
+      }
       this.context_.setLabelList(newLabels);
     }
   }
@@ -7075,7 +7114,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.197');
+    context.setClientVersion('SwG 0.1.22.199');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7801,7 +7840,7 @@ class ButtonApi {
     options,
     attributeValueToCallback
   ) {
-    attributeValues.forEach((attributeValue) => {
+    for (const attributeValue of attributeValues) {
       const elements = this.doc_
         .getRootNode()
         .querySelectorAll(`[${attribute}="${attributeValue}"]`);
@@ -7820,7 +7859,7 @@ class ButtonApi {
           );
         }
       }
-    });
+    }
   }
 
   /**
@@ -7939,6 +7978,7 @@ const CallbackId = {
   LINK_COMPLETE: 6,
   FLOW_STARTED: 7,
   FLOW_CANCELED: 8,
+  PAY_CONFIRM_OPENED: 9,
 };
 
 /**
@@ -8033,6 +8073,21 @@ class Callbacks {
    */
   hasLinkCompletePending() {
     return !!this.resultBuffer_[CallbackId.LINK_COMPLETE];
+  }
+
+  /**
+   * @param {function(!../ui/activity-iframe-view.ActivityIframeView)} callback
+   */
+  setOnPayConfirmOpened(callback) {
+    this.setCallback_(CallbackId.PAY_CONFIRM_OPENED, callback);
+  }
+
+  /**
+   * @param {!../ui/activity-iframe-view.ActivityIframeView} activityIframeView
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerPayConfirmOpened(activityIframeView) {
+    return this.trigger_(CallbackId.PAY_CONFIRM_OPENED, activityIframeView);
   }
 
   /**
@@ -8440,11 +8495,15 @@ const ClientTheme = {
  */
 class ClientConfigManager {
   /**
+   * @param {!./deps.DepsDef} deps
    * @param {string} publicationId
    * @param {!./fetcher.Fetcher} fetcher
    * @param {!../api/basic-subscriptions.ClientOptions=} clientOptions
    */
-  constructor(publicationId, fetcher, clientOptions) {
+  constructor(deps, publicationId, fetcher, clientOptions) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
     /** @private @const {!../api/basic-subscriptions.ClientOptions} */
     this.clientOptions_ = clientOptions || {};
 
@@ -8460,14 +8519,17 @@ class ClientConfigManager {
 
   /**
    * Fetches the client config from the server.
+   * @param {Promise<void>=} readyPromise optional promise to wait on before
+   * attempting to fetch the clientConfiguration.
    * @return {!Promise<!ClientConfig>}
    */
-  fetchClientConfig() {
+  fetchClientConfig(readyPromise) {
     if (!this.publicationId_) {
       throw new Error('fetchClientConfig requires publicationId');
     }
     if (!this.responsePromise_) {
-      this.responsePromise_ = this.fetch_();
+      readyPromise = readyPromise || Promise.resolve();
+      this.responsePromise_ = readyPromise.then(() => this.fetch_());
     }
     return this.responsePromise_;
   }
@@ -8556,19 +8618,30 @@ class ClientConfigManager {
    * @return {!Promise<!ClientConfig>}
    */
   fetch_() {
-    const url = serviceUrl(
-      '/publication/' +
-        encodeURIComponent(this.publicationId_) +
-        '/clientconfiguration'
-    );
-    return this.fetcher_.fetchCredentialedJson(url).then((json) => {
-      if (json.errorMessages && json.errorMessages.length > 0) {
-        json.errorMessages.forEach((errorMessage) => {
-          warn('SwG ClientConfigManager: ' + errorMessage);
-        });
-      }
-      return this.parseClientConfig_(json);
-    });
+    return this.deps_
+      .entitlementsManager()
+      .getArticle()
+      .then((article) => {
+        if (article) {
+          return this.parseClientConfig_(article['clientConfig']);
+        } else {
+          // If there was no article from the entitlement manager, we need
+          // to fetch our own using the internal version.
+          const url = serviceUrl(
+            '/publication/' +
+              encodeURIComponent(this.publicationId_) +
+              '/clientconfiguration'
+          );
+          return this.fetcher_.fetchCredentialedJson(url).then((json) => {
+            if (json.errorMessages && json.errorMessages.length > 0) {
+              for (const errorMessage of json.errorMessages) {
+                warn('SwG ClientConfigManager: ' + errorMessage);
+              }
+            }
+            return this.parseClientConfig_(json);
+          });
+        }
+      });
   }
 
   /**
@@ -9262,9 +9335,9 @@ class LoadingView {
       {}
     );
     if (config.additionalClasses) {
-      config.additionalClasses.forEach((additionalClass) => {
+      for (const additionalClass of config.additionalClasses) {
         this.loadingContainer_.classList.add(additionalClass);
-      });
+      }
     }
 
     /** @private @const {!Element} */
@@ -10304,12 +10377,17 @@ const MeterClientTypes = {
 const IFRAME_BOX_SHADOW =
   'rgba(60, 64, 67, 0.3) 0px -2px 5px, rgba(60, 64, 67, 0.15) 0px -5px 5px';
 const MINIMIZED_IFRAME_SIZE = '420px';
+const DEFAULT_IFRAME_URL = '/metertoastiframe';
 
 class MeterToastApi {
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!MeterToastApiParams=} params
    */
-  constructor(deps) {
+  constructor(
+    deps,
+    {iframeUrl = DEFAULT_IFRAME_URL, iframeUrlParams = {}} = {}
+  ) {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
@@ -10330,7 +10408,7 @@ class MeterToastApi {
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
       this.activityPorts_,
-      feUrl('/metertoastiframe'),
+      feUrl(iframeUrl, iframeUrlParams),
       iframeArgs,
       /* shouldFadeBody */ false
     );
@@ -11031,7 +11109,7 @@ class EntitlementsManager {
    * @param {!./fetcher.Fetcher} fetcher
    * @param {!./deps.DepsDef} deps
    */
-  constructor(win, pageConfig, fetcher, deps) {
+  constructor(win, pageConfig, fetcher, deps, useArticleEndpoint) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -11069,6 +11147,14 @@ class EntitlementsManager {
      */
     this.encodedParams_ = null;
 
+    /** @protected {!string} */
+    this.encodedParamName_ = useArticleEndpoint
+      ? 'encodedEntitlementsParams'
+      : 'encodedParams';
+
+    /** @protected {!string} */
+    this.action_ = useArticleEndpoint ? '/article' : '/entitlements';
+
     /** @private @const {!./storage.Storage} */
     this.storage_ = deps.storage();
 
@@ -11083,6 +11169,12 @@ class EntitlementsManager {
      * @visibleForTesting
      */
     this.entitlementsPostPromise = null;
+
+    /** @private @const {boolean} */
+    this.useArticleEndpoint_ = useArticleEndpoint;
+
+    /** @private {?Article} */
+    this.article_ = null;
 
     this.deps_
       .eventManager()
@@ -11280,9 +11372,7 @@ class EntitlementsManager {
     }
 
     let url =
-      '/publication/' +
-      encodeURIComponent(this.publicationId_) +
-      '/entitlements';
+      '/publication/' + encodeURIComponent(this.publicationId_) + this.action_;
     url = addDevModeParamsToUrl(this.win_.location, url);
 
     // Promise that sets this.encodedParams_ when it resolves.
@@ -11305,7 +11395,7 @@ class EntitlementsManager {
     this.entitlementsPostPromise = encodedParamsPromise.then(() => {
       url = addQueryParam(
         url,
-        'encodedParams',
+        this.encodedParamName_,
         /** @type {!string} */ (this.encodedParams_)
       );
 
@@ -11360,6 +11450,20 @@ class EntitlementsManager {
         return ents;
       });
     });
+  }
+
+  /**
+   * If the manager is also responsible for fetching the Article, it
+   * will be accessible from here and should resolve a null promise otherwise.
+   * @returns {!Promise<?Article>}
+   */
+  getArticle() {
+    // The base manager only fetches from the entitlements endpoint, which does
+    // not contain an Article.
+    if (!this.useArticleEndpoint_ || !this.responsePromise_) {
+      return Promise.resolve();
+    }
+    return this.responsePromise_.then(() => Promise.resolve(this.article_));
   }
 
   /**
@@ -11678,9 +11782,7 @@ class EntitlementsManager {
       : this.storage_.get(Constants$1.USER_TOKEN, true);
 
     let url =
-      '/publication/' +
-      encodeURIComponent(this.publicationId_) +
-      '/entitlements';
+      '/publication/' + encodeURIComponent(this.publicationId_) + this.action_;
 
     return Promise.all([
       hash(getCanonicalUrl(this.deps_.doc())),
@@ -11741,7 +11843,7 @@ class EntitlementsManager {
               }
 
               const attributeNames = Object.keys(attributes);
-              attributeNames.forEach((attributeName) => {
+              for (const attributeName of attributeNames) {
                 const name = `${category}_${attributeName}`;
                 const timestamp = Number(attributes[attributeName].timestamp);
 
@@ -11759,7 +11861,7 @@ class EntitlementsManager {
                   name,
                   timestamp,
                 });
-              });
+              }
             }
             collectAttributes({
               attributes: params.metering.state.standardAttributes,
@@ -11774,7 +11876,11 @@ class EntitlementsManager {
             this.encodedParams_ = base64UrlEncodeFromBytes(
               utf8EncodeSync(JSON.stringify(encodableParams))
             );
-            url = addQueryParam(url, 'encodedParams', this.encodedParams_);
+            url = addQueryParam(
+              url,
+              this.encodedParamName_,
+              this.encodedParams_
+            );
           } else {
             warn(
               `SwG Entitlements: Please specify a metering state ID string, ideally a hash to avoid PII.`
@@ -11792,12 +11898,18 @@ class EntitlementsManager {
         return this.fetcher_.fetchCredentialedJson(url);
       })
       .then((json) => {
-        if (json.errorMessages && json.errorMessages.length > 0) {
-          json.errorMessages.forEach((errorMessage) => {
-            warn('SwG Entitlements: ' + errorMessage);
-          });
+        let response = json;
+        if (this.useArticleEndpoint_) {
+          this.article_ = json;
+          response = json['entitlements'];
         }
-        return this.parseEntitlements(json);
+
+        if (json.errorMessages && json.errorMessages.length > 0) {
+          for (const errorMessage of json.errorMessages) {
+            warn('SwG Entitlements: ' + errorMessage);
+          }
+        }
+        return this.parseEntitlements(response);
       });
   }
 }
@@ -11992,9 +12104,9 @@ function fetchPolyfill(input, init) {
     }
 
     if (init.headers) {
-      Object.keys(init.headers).forEach(function (header) {
+      for (const header of Object.keys(init.headers)) {
         xhr.setRequestHeader(header, init.headers[header]);
-      });
+      }
     }
 
     xhr.onreadystatechange = () => {
@@ -17319,6 +17431,7 @@ class ConfiguredRuntime {
    *     fetcher: (!Fetcher|undefined),
    *     configPromise: (!Promise|undefined),
    *     enableGoogleAnalytics: (boolean|undefined),
+   *     useArticleEndpoint: (boolean|undefined)
    *   }=} integr
    * @param {!../api/subscriptions.Config=} config
    * @param {!{
@@ -17407,11 +17520,13 @@ class ConfiguredRuntime {
       this.win_,
       this.pageConfig_,
       this.fetcher_,
-      this // See note about 'this' above
+      this, // See note about 'this' above
+      integr.useArticleEndpoint || false
     );
 
     /** @private @const {!ClientConfigManager} */
     this.clientConfigManager_ = new ClientConfigManager(
+      this, // See note about 'this' above
       pageConfig.getPublicationId(),
       this.fetcher_,
       clientOptions
@@ -17533,44 +17648,52 @@ class ConfiguredRuntime {
   configure_(config) {
     // Validate first.
     let error = '';
-    for (const k in config) {
-      const v = config[k];
-      switch (k) {
+    for (const key in config) {
+      const value = config[key];
+      switch (key) {
         case 'windowOpenMode':
-          if (v != WindowOpenMode.AUTO && v != WindowOpenMode.REDIRECT) {
-            error = 'Unknown windowOpenMode: ' + v;
+          if (
+            value != WindowOpenMode.AUTO &&
+            value != WindowOpenMode.REDIRECT
+          ) {
+            error = 'Unknown windowOpenMode: ' + value;
           }
           break;
         case 'experiments':
-          v.forEach((experiment) => setExperiment(this.win_, experiment, true));
+          for (const experiment of value) {
+            setExperiment(this.win_, experiment, true);
+          }
           if (this.analytics()) {
             // If analytics service isn't set up yet, then it will get the
             // experiments later.
-            this.analytics().addLabels(v);
+            this.analytics().addLabels(value);
           }
           break;
         case 'analyticsMode':
-          if (v != AnalyticsMode.DEFAULT && v != AnalyticsMode.IMPRESSIONS) {
-            error = 'Unknown analytics mode: ' + v;
+          if (
+            value != AnalyticsMode.DEFAULT &&
+            value != AnalyticsMode.IMPRESSIONS
+          ) {
+            error = 'Unknown analytics mode: ' + value;
           }
           break;
         case 'enableSwgAnalytics':
-          if (!isBoolean(v)) {
-            error = 'Unknown enableSwgAnalytics value: ' + v;
+          if (!isBoolean(value)) {
+            error = 'Unknown enableSwgAnalytics value: ' + value;
           }
           break;
         case 'enablePropensity':
-          if (!isBoolean(v)) {
-            error = 'Unknown enablePropensity value: ' + v;
+          if (!isBoolean(value)) {
+            error = 'Unknown enablePropensity value: ' + value;
           }
           break;
         case 'skipAccountCreationScreen':
-          if (!isBoolean(v)) {
-            error = 'Unknown skipAccountCreationScreen value: ' + v;
+          if (!isBoolean(value)) {
+            error = 'Unknown skipAccountCreationScreen value: ' + value;
           }
           break;
         default:
-          error = 'Unknown config property: ' + k;
+          error = 'Unknown config property: ' + key;
       }
     }
     // Throw error string if it's not null
