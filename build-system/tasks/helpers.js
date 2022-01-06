@@ -6,6 +6,7 @@ const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
 const open = require('open');
 const path = require('path');
+const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const wrappers = require('../compile/compile-wrappers');
 const {
@@ -21,6 +22,9 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
 
 /**
  * Tasks that should print the `--nobuild` help text.
