@@ -59,12 +59,11 @@ class PaginationButton {
    * @param {!Window} win
    */
   constructor(doc, initialState, storeService, win) {
-    /** @private {!PaginationButtonStateDef} */
-    this.state_ = initialState;
-
     /** @const {!Element} */
     this.element = renderPaginationButton((e) => this.onClick_(e));
-    this.updateState(initialState);
+
+    /** @private {?PaginationButtonStateDef} */
+    this.state_ = null;
 
     /** @private @const {!Element} */
     this.buttonElement_ = devAssert(this.element.firstElementChild);
@@ -77,6 +76,10 @@ class PaginationButton {
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(doc);
+
+    this.doc_ = doc;
+
+    this.updateState(initialState);
   }
 
   /** @param {!PaginationButtonStateDef} state */
@@ -88,7 +91,7 @@ class PaginationButton {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
     });
-    localizeAsync(this.win_, state.label).then((translation) =>
+    localizeAsync(this.doc_, state.label).then((translation) =>
       this.buttonElement_.setAttribute('aria-label', translation)
     );
 
