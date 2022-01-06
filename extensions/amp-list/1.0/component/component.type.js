@@ -10,6 +10,7 @@ var BentoListDef = {};
  *   itemsKey?: string,
  *   maxItems?: number,
  *   resetOnRefresh?: boolean,
+ *   loadMore?: 'manual' | 'none' | 'auto',
  *   template?: function(): PreactDef.Renderable,
  *   wrapper?: function(): PreactDef.Renderable,
  *   loading?: function(): PreactDef.Renderable,

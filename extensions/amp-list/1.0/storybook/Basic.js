@@ -31,7 +31,33 @@ export const ErrorState = (args) => {
     <BentoList
       {...args}
       fetchItems={async () => {
-        throw new Error('Failed to fetch');
+        throw new Error('example error message');
+      }}
+    />
+  );
+};
+
+function delay(ms = 500) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+export const LoadMore = (args) => {
+  return (
+    <BentoList
+      {...args}
+      loadMore="manual"
+      src="page-1"
+      fetchItems={async (url) => {
+        if (url === 'page-1') {
+          return {items: ['one', 'two', 'three'], 'load-more-src': 'page-2'};
+        }
+        if (url === 'page-2') {
+          await delay();
+          return {items: ['four', 'five', 'six'], 'load-more-src': 'page-3'};
+        }
+        if (url === 'page-3') {
+          await delay();
+          return {items: ['seven', 'eight', 'nine'], 'load-more-src': null};
+        }
       }}
     />
   );
