@@ -9,13 +9,13 @@ import {
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
-import {localize} from './amp-story-localization-service';
+import {localizeAsync} from './amp-story-localization-service';
 
 /**
  * @param {!Element} element
  * @return {!Element}
  */
-const renderHintElement = (element) => (
+const renderHintElement = () => (
   <aside
     class={
       'i-amphtml-story-hint-container ' +
@@ -28,12 +28,12 @@ const renderHintElement = (element) => (
           <div class="i-amphtml-story-hint-tap-button">
             <div class="i-amphtml-story-hint-tap-button-icon" />
           </div>
-          <div class="i-amphtml-story-hint-tap-button-text">
-            {localize(
-              element,
+          <div
+            class="i-amphtml-story-hint-tap-button-text"
+            data-localized-text={
               LocalizedStringId_Enum.AMP_STORY_HINT_UI_PREVIOUS_LABEL
-            )}
-          </div>
+            }
+          ></div>
         </div>
       </div>
       <div class="i-amphtml-story-navigation-help-section next-page">
@@ -41,12 +41,12 @@ const renderHintElement = (element) => (
           <div class="i-amphtml-story-hint-tap-button">
             <div class="i-amphtml-story-hint-tap-button-icon" />
           </div>
-          <div class="i-amphtml-story-hint-tap-button-text">
-            {localize(
-              element,
+          <div
+            class="i-amphtml-story-hint-tap-button-text"
+            data-localized-text={
               LocalizedStringId_Enum.AMP_STORY_HINT_UI_NEXT_LABEL
-            )}
-          </div>
+            }
+          ></div>
         </div>
       </div>
     </div>
@@ -104,9 +104,11 @@ export class AmpStoryHint {
       return;
     }
 
-    this.hintContainer_ = renderHintElement(this.parentEl_);
+    this.hintContainer_ = renderHintElement();
 
     const root = createShadowRootWithStyle(<div />, this.hintContainer_, CSS);
+
+    this.localize_();
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
@@ -253,5 +255,22 @@ export class AmpStoryHint {
     if (isActive) {
       this.hideAllNavigationHint();
     }
+  }
+
+  /**
+   * @private
+   */
+  localize_() {
+    this.hintContainer_
+      .querySelectorAll('[data-localized-text]')
+      .forEach((el) => {
+        localizeAsync(
+          this.parentEl_,
+          el.getAttribute('data-localized-text')
+        ).then((translation) => {
+          el.textContent = translation;
+          el.removeAttribute('data-localized-text');
+        });
+      });
   }
 }

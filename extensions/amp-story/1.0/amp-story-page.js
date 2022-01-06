@@ -42,7 +42,7 @@ import {debounce, once} from '#core/types/function';
 import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {localize} from './amp-story-localization-service';
+import {localizeAsync} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
@@ -118,9 +118,7 @@ const renderPlayMessageElement = (context, onClick) => (
     class="i-amphtml-story-page-play-button i-amphtml-story-system-reset"
     onClick={onClick}
   >
-    <span class="i-amphtml-story-page-play-label">
-      {localize(context, LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO)}
-    </span>
+    <span class="i-amphtml-story-page-play-label"></span>
     <span class="i-amphtml-story-page-play-icon"></span>
   </button>
 );
@@ -1502,6 +1500,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         .then(() => this.playAllMedia_());
     });
 
+    localizeAsync(
+      this.element,
+      LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO
+    ).then((translation) => {
+      this.playMessageEl_.querySelector(
+        '.i-amphtml-story-page-play-label'
+      ).textContent = translation;
+    });
+
     this.mutateElement(() => this.element.appendChild(this.playMessageEl_));
   }
 
@@ -1537,10 +1544,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     const labelEl = this.errorMessageEl_.querySelector(
       '.i-amphtml-story-page-error-label'
     );
-    labelEl.textContent = localize(
+
+    localizeAsync(
       this.element,
       LocalizedStringId_Enum.AMP_STORY_PAGE_ERROR_VIDEO
-    );
+    ).then((translation) => {
+      labelEl.textContent = translation;
+    });
 
     this.mutateElement(() => this.element.appendChild(this.errorMessageEl_));
   }

@@ -15,6 +15,10 @@ import {dev, user, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 
 import {setStyle, toggle} from '#core/dom/style';
+import {
+  getLocalizationService,
+  localizeAsync,
+} from './amp-story-localization-service';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -341,4 +345,19 @@ export const maybeMakeProxyUrl = (url, ampDoc) => {
  */
 export function isTransformed(ampdoc) {
   return ampdoc.getRootNode().documentElement.hasAttribute('transformed');
+}
+
+/**
+ * Elements with the attribute `label` will be set the `aria-label` to the translated string.
+ * @param {!Element} element
+ * @param {!Function} func
+ * @param {?Element} context
+ */
+export function localizeAsyncForAll(element, func, context = null) {
+  const localizationService = getLocalizationService(context || element);
+  element.querySelectorAll('[data-localized-id]').forEach((el) => {
+    localizationService
+      .localizeAsync(el.getAttribute('data-localized-id'))
+      .then(func);
+  });
 }

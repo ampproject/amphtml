@@ -2,6 +2,8 @@ import {closest} from '#core/dom/query';
 
 import {Services} from '#service';
 
+import {executeRequest} from 'extensions/amp-story/1.0/request-utils';
+
 import {
   LocalizedStringBundleDef,
   // The LocalizedStringId_Enum type is imported even though it is not used because
@@ -89,6 +91,11 @@ export class LocalizationService {
      * @private @const {!Object<string, !LocalizedStringBundleDef>}
      */
     this.localizedStringBundles_ = {};
+
+    this.viewerLanguageBundlePromise_ = executeRequest(
+      element,
+      'https://gist.githubusercontent.com/mszylkowski/3ed540186b18f4da4083e087bff36122/raw/a46b0204d5a7e12615a924b4ae192d9d77128bff/amp-story.es.json'
+    );
   }
 
   /**
@@ -143,6 +150,16 @@ export class LocalizationService {
       this.localizedStringBundles_,
       languageCodes,
       localizedStringId
+    );
+  }
+
+  /**
+   * @param {LocalizedStringId_Enum} key
+   * @return {!Promise<?string>}
+   */
+  localizeAsync(key) {
+    return this.viewerLanguageBundlePromise_.then(
+      (languageBundle) => languageBundle[key]
     );
   }
 }

@@ -9,7 +9,7 @@ import {EventType, dispatch} from './events';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {devAssert} from '#utils/log';
-import {localize} from './amp-story-localization-service';
+import {localizeAsync} from './amp-story-localization-service';
 
 /** @struct @typedef {{className: string, triggers: string, label: LocalizedStringId_Enum}} */
 let PaginationButtonStateDef;
@@ -39,20 +39,12 @@ const ButtonStates = {
 };
 
 /**
- * @param {!Node} context
- * @param {PaginationButtonStateDef} initialState
  * @param {function(Event)} onClick
  * @return {!Element}
  */
-const renderPaginationButton = (context, initialState, onClick) => (
-  <div
-    onClick={onClick}
-    class={`i-amphtml-story-button-container ${initialState.className}`}
-  >
-    <button
-      class="i-amphtml-story-button-move"
-      aria-label={initialState.label && localize(context, initialState.label)}
-    ></button>
+const renderPaginationButton = (onClick) => (
+  <div onClick={onClick} class={`i-amphtml-story-button-container`}>
+    <button class="i-amphtml-story-button-move"></button>
   </div>
 );
 
@@ -71,9 +63,8 @@ class PaginationButton {
     this.state_ = initialState;
 
     /** @const {!Element} */
-    this.element = renderPaginationButton(doc, initialState, (e) =>
-      this.onClick_(e)
-    );
+    this.element = renderPaginationButton((e) => this.onClick_(e));
+    this.updateState(initialState);
 
     /** @private @const {!Element} */
     this.buttonElement_ = devAssert(this.element.firstElementChild);
@@ -96,11 +87,10 @@ class PaginationButton {
     this.mutator_.mutateElement(this.element, () => {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
-      this.buttonElement_.setAttribute(
-        'aria-label',
-        localize(this.win_.document, state.label)
-      );
     });
+    localizeAsync(this.win_, state.label).then((translation) =>
+      this.buttonElement_.setAttribute('aria-label', translation)
+    );
 
     this.state_ = state;
   }

@@ -97,6 +97,8 @@ import {
 import {isEsm} from '#core/mode';
 import {upgradeBackgroundAudio} from './audio';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {LocalizationService} from '#service/localization';
+import {getLocalizationService} from './amp-story-localization-service';
 
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;
@@ -285,6 +287,9 @@ export class AmpStory extends AMP.BaseElement {
     this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
+
+    // Start fetching the localization strings.
+    getLocalizationService(this.element);
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();

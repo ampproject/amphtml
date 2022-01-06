@@ -16,7 +16,7 @@ import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '#core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 import {dev} from '#utils/log';
-import {localize} from './amp-story-localization-service';
+import {localizeAsync} from './amp-story-localization-service';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
@@ -70,12 +70,13 @@ export class InfoDialog {
     const {canonicalUrl} = Services.documentInfoForDoc(this.parentEl_);
 
     const linkElement = (
-      <a class="i-amphtml-story-info-moreinfo" target="_blank">
-        {localize(
-          this.parentEl_,
+      <a
+        class="i-amphtml-story-info-moreinfo"
+        target="_blank"
+        data-localized-text={
           LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
-        )}
-      </a>
+        }
+      ></a>
     );
 
     this.element_ = (
@@ -94,12 +95,12 @@ export class InfoDialog {
             this.onClick_(event);
           }}
         >
-          <h1 class="i-amphtml-story-info-heading">
-            {localize(
-              this.parentEl_,
+          <h1
+            class="i-amphtml-story-info-heading"
+            data-localized-text={
               LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
-            )}
-          </h1>
+            }
+          ></h1>
           <a class="i-amphtml-story-info-link" href={canonicalUrl}>
             {
               // Add zero-width space character (\u200B) after "." and "/"
@@ -111,6 +112,8 @@ export class InfoDialog {
         </div>
       </div>
     );
+
+    this.localize_();
 
     this.initializeListeners_();
 
@@ -193,5 +196,20 @@ export class InfoDialog {
         }
         return assertAbsoluteHttpOrHttpsUrl(dev().assertString(moreInfoUrl));
       });
+  }
+
+  /**
+   * @private
+   */
+  localize_() {
+    this.element_.querySelectorAll('[data-localized-text]').forEach((el) => {
+      localizeAsync(
+        this.parentEl_,
+        el.getAttribute('data-localized-text')
+      ).then((translation) => {
+        el.textContent = translation;
+        el.removeAttribute('data-localized-text');
+      });
+    });
   }
 }

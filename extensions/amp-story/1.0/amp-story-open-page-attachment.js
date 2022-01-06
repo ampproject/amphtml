@@ -5,7 +5,7 @@ import * as Preact from '#core/dom/jsx';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {dev} from '#utils/log';
-import {localize} from './amp-story-localization-service';
+
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
@@ -13,6 +13,7 @@ import {
 } from './utils';
 import {getWin} from '#core/window';
 import {scopedQuerySelector} from '#core/dom/query';
+import {Services} from '#service';
 
 /**
  * @enum {string}
@@ -92,16 +93,24 @@ const ctaLabelFromAttr = (element) =>
  * @param {!Element} element
  * @param {!Element} attachmentEl
  * @param {?string} label
- * @return {?string}
+ * @return {!Promise<string>}
  */
-const openLabelOrFallback = (element, attachmentEl, label) =>
-  attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT'
-    ? localize(element, LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL)
-    : label?.trim() ||
-      localize(
-        element,
-        LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-      );
+const openLabelOrFallback = (element, attachmentEl, label) => {
+  const isShopping = attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT';
+  if (isShopping) {
+    return Services.localizationServiceForOrNull(element).then((service) =>
+      service.localizeAsync(LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL)
+    );
+  }
+  if (label) {
+    return Promise.resolve(label.trim());
+  }
+  return Services.localizationServiceForOrNull(element).then((service) =>
+    service.localizeAsync(
+      LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+    )
+  );
+};
 
 /**
  * Renders inline page attachment UI.
@@ -122,7 +131,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
 
   const theme = attachmentEl.getAttribute('theme')?.toLowerCase();
 
-  const openLabel = openLabelOrFallback(
+  const openLabelPromise = openLabelOrFallback(
     pageEl,
     attachmentEl,
     anchorChild?.textContent || ctaLabelFromAttr(attachmentEl)
@@ -138,7 +147,6 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
       target="_top"
       title={attachmentTitle}
       theme={theme}
-      aria-label={openLabel}
     >
       {renderOutlinkAttachmentArrow()}
       <div class="i-amphtml-story-outlink-page-attachment-outlink-chip">
@@ -150,10 +158,17 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
         ) : (
           renderOutlinkLinkIconElement()
         )}
-        <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
+        <span class="i-amphtml-story-page-attachment-label"></span>
       </div>
     </a>
   );
+
+  openLabelPromise.then((label) => {
+    openAttachmentEl.setAttribute('aria-label', label);
+    openAttachmentEl.querySelector(
+      '.i-amphtml-story-page-attachment-label'
+    ).textContent = label;
+  });
 
   if (theme === AttachmentTheme.CUSTOM) {
     setCustomThemeStyles(attachmentEl, openAttachmentEl);
@@ -194,29 +209,34 @@ const renderInlineUi = (pageEl, attachmentEl) => {
   };
 
   const theme = attachmentEl.getAttribute('theme')?.toLowerCase();
-  const openLabel = openLabelOrFallback(
+  const openLabelPromise = openLabelOrFallback(
     pageEl,
     attachmentEl,
     ctaLabelFromAttr(attachmentEl)
   );
 
-  return (
+  const inlineEl = (
     <a
       class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
       role="button"
       theme={AttachmentTheme.DARK === theme && theme}
-      aria-label={openLabel}
     >
       <div class="i-amphtml-story-inline-page-attachment-chip">
         {makeImgElWithBG('cta-image')}
         {makeImgElWithBG('cta-image-2')}
         <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
       </div>
-      {openLabel !== 'none' && (
-        <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
-      )}
     </a>
   );
+  openLabelPromise.then((label) => {
+    inlineEl.setAttribute('aria-label', label);
+    if (label !== 'none') {
+      inlineEl.appendChild(
+        <span class="i-amphtml-story-page-attachment-label">{label}</span>
+      );
+    }
+  });
+  return inlineEl;
 };
 
 /**
