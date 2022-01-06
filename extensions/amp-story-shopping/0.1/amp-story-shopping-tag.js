@@ -96,7 +96,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * and sets the styling properties dynamically based on the number of lines.
    * @private
    */
-  countLinesResizeLanguageRightToLeft_() {
+  styleTagText_() {
     if (this.element.shadowRoot) {
       const pillEl = this.element.shadowRoot.querySelector(
         '.amp-story-shopping-tag-pill'
@@ -106,25 +106,18 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         '.amp-story-shopping-tag-pill-text'
       );
 
-      const tagTextStyle = computedStyle(window, textEl).getPropertyValue(
+      const fontSize = computedStyle(window, textEl).getPropertyValue(
         'font-size'
       );
-
-      const fontSize = parseFloat(tagTextStyle);
-      const lineHeight = Math.floor(fontSize * 1.5);
+      const ratioOfLineHeightToFontSize = 1.5;
+      const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
       const height = textEl./*OK*/ clientHeight;
       const numLines = Math.ceil(height / lineHeight);
 
-      if (numLines == 1) {
-        if (pillEl.classList.contains('amp-story-shopping-tag-pill-overflow')) {
-          pillEl.classList.remove('amp-story-shopping-tag-pill-overflow');
-        }
+      if (numLines <= 1) {
+        pillEl.classList.remove('amp-story-shopping-tag-pill-overflow');
       } else {
-        if (
-          !pillEl.classList.contains('amp-story-shopping-tag-pill-overflow')
-        ) {
-          pillEl.classList.add('amp-story-shopping-tag-pill-overflow');
-        }
+        pillEl.classList.add('amp-story-shopping-tag-pill-overflow');
       }
 
       if (
@@ -142,7 +135,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
-
     if (!tagData) {
       return;
     }
@@ -155,7 +147,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         );
       },
       () => {
-        this.countLinesResizeLanguageRightToLeft_();
+        this.styleTagText_();
       }
     );
   }
