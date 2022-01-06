@@ -707,6 +707,7 @@ function massageSourcemaps(sourcemaps, babelMaps, options) {
   const remapped = remapping(
     sourcemaps,
     (f) => {
+      console.log(f);
       if (f.includes('__SOURCE__')) {
         return null;
       }
@@ -722,7 +723,7 @@ function massageSourcemaps(sourcemaps, babelMaps, options) {
       }
       return {
         ...map,
-        sourceRoot: path.posix.join('/__SOURCE__/', f),
+        sourceRoot: path.posix.join('/__SOURCE__/', path.dirname(f)),
       };
     },
     !argv.full_sourcemaps
