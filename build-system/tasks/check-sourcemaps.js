@@ -6,7 +6,6 @@ const {cyan, green, red} = require('kleur/colors');
 const {decode} = require('sourcemap-codec');
 const {execOrDie} = require('../common/exec');
 const {log} = require('../common/logging');
-const {shouldUseClosure} = require('./helpers');
 
 // Compile related constants
 const distWithSourcemapsCmd = 'amp dist --core_runtime_only --full_sourcemaps';
@@ -113,15 +112,8 @@ function checkSourcemapMappings(sourcemapJson, map) {
     throw new Error('Could not find mappings array');
   }
 
-  // In closure builds there is a newline immediately after the AMP_CONFIG.
-  // This whole segment has no mapping to the original source.
-  // Therefore we must skip the zeroth sub-array, indicated by a ';'.
-  // In  esbuild builds there is no newline after the config, so the
-  // first line is fair game.
-  const firstLineIndex = shouldUseClosure() ? 1 : 0;
-
   // See https://www.npmjs.com/package/sourcemap-codec#usage.
-  const firstLineMapping = decode(sourcemapJson.mappings)[firstLineIndex][0];
+  const firstLineMapping = decode(sourcemapJson.mappings)[0][0];
   const [, sourceIndex = 0, sourceCodeLine = 0, sourceCodeColumn] =
     firstLineMapping;
 
@@ -134,7 +126,7 @@ function checkSourcemapMappings(sourcemapJson, map) {
     '.';
 
   // Mapping related constants
-  let expectedFirstLine = map.includes('mjs')
+  const expectedFirstLine = map.includes('mjs')
     ? {
         file: 'src/polyfills/abort-controller.js',
         code: 'class AbortController {',
@@ -143,13 +135,6 @@ function checkSourcemapMappings(sourcemapJson, map) {
         file: 'node_modules/@babel/runtime/helpers/esm/createClass.js',
         code: 'function _defineProperties(target, props) {',
       };
-
-  // TODO(samouri): remove branching once we decide for or against closure
-  if (shouldUseClosure()) {
-    expectedFirstLine = map.includes('mjs')
-      ? {file: 'src/core/mode/version.js', code: 'function version() {'}
-      : {file: 'src/core/mode/prod.js', code: 'export function isProd() {'};
-  }
 
   if (firstLineFile != expectedFirstLine.file) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');
