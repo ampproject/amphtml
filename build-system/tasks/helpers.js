@@ -6,6 +6,7 @@ const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
 const open = require('open');
 const path = require('path');
+const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const wrappers = require('../compile/compile-wrappers');
 const {
@@ -21,6 +22,9 @@ const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -313,9 +317,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
+  const babelMaps = new Map();
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
-    /* enableCache */ true
+    /* enableCache */ true,
+    {babelMaps}
   );
   const plugins = [babelPlugin];
 
@@ -335,6 +341,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: true,
+        sourceRoot: path.dirname(destFile),
+        sourcesContent: !!argv.full_sourcemaps,
         outfile: destFile,
         define: experimentDefines,
         plugins,
@@ -356,8 +364,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map} = await minify(code, map));
-      map = await massageSourcemaps(map, options);
+      const {code: minified, map: minifiedMap} = await minify(code);
+      code = minified;
+      map = await massageSourcemaps([minifiedMap, map], babelMaps, options);
+    } else {
+      map = await massageSourcemaps([map], babelMaps, options);
     }
 
     await Promise.all([
@@ -450,10 +461,9 @@ const mangleIdentifier = {
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
- * @param {string} map
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code, map) {
+async function minify(code) {
   /* eslint-disable local/camelcase */
   const terserOptions = {
     mangle: {
@@ -471,7 +481,7 @@ async function minify(code, map) {
       beautify: !!argv.pretty_print,
       keep_quoted_props: true,
     },
-    sourceMap: {content: map},
+    sourceMap: true,
     toplevel: true,
     module: !!argv.esm,
     nameCache: argv.nomanglecache ? undefined : nameCache,
@@ -687,27 +697,49 @@ async function getDependencies(entryPoint, options) {
 }
 
 /**
- * @param {*} sourcemapsFile
+ * @param {!Array<string|object>} sourcemaps
+ * @param {Map<string, string|object>} babelMaps
  * @param {*} options
- * @return {*}
+ * @return {string}
  */
-function massageSourcemaps(sourcemapsFile, options) {
-  const sourcemaps = JSON.parse(sourcemapsFile);
-  sourcemaps.sources = sourcemaps.sources.map((source) => {
-    if (source.startsWith('../')) {
-      return source.slice('../'.length);
+function massageSourcemaps(sourcemaps, babelMaps, options) {
+  const root = process.cwd();
+  const remapped = remapping(
+    sourcemaps,
+    (f) => {
+      if (f.includes('__SOURCE__')) {
+        return null;
+      }
+      const file = path.join(root, f);
+      // The Babel tranformed file and the original file have the same path,
+      // which makes it difficult to distinguish during remapping's load phase.
+      // We perform some manual path mangling to destingish the babel files
+      // (which have a sourcemap) from the actual source file by pretending the
+      // source file exists in the '__SOURCE__' root directory.
+      const map = babelMaps.get(file);
+      if (!map) {
+        throw new Error(`failed to find sourcemap for babel file "${f}"`);
+      }
+      return {
+        ...map,
+        sourceRoot: path.posix.join('/__SOURCE__/', path.dirname(f)),
+      };
+    },
+    !argv.full_sourcemaps
+  );
+
+  remapped.sources = remapped.sources.map((source) => {
+    if (source.startsWith('/__SOURCE__/')) {
+      return source.slice('/__SOURCE__/'.length);
     }
     return source;
   });
-  sourcemaps.sourceRoot = getSourceRoot(options);
-  if (sourcemaps.file) {
-    sourcemaps.file = path.basename(sourcemaps.file);
-  }
-  if (!argv.full_sourcemaps) {
-    delete sourcemaps.sourcesContent;
+  remapped.sourceRoot = getSourceRoot(options);
+  if (remapped.file) {
+    remapped.file = path.basename(remapped.file);
   }
 
-  return JSON.stringify(sourcemaps);
+  return remapped.toString();
 }
 
 module.exports = {

@@ -141,7 +141,7 @@ export function queryCarouselControls(element) {
  * @param {Element} element
  * @return {{
  *   container: HTMLDivElement
- *   cells: HTMLDivElement[]
+ *   cells: HTMLElement[]
  * }}
  */
 function buildScrollableCarousel(element) {
@@ -150,7 +150,7 @@ function buildScrollableCarousel(element) {
   }
 
   const doc = element.ownerDocument;
-  const cells = realChildElements(element);
+  const cells = /** @type {HTMLElement[]} */ (realChildElements(element));
   const container = doc.createElement('div');
 
   container.classList.add(ClassNames.SCROLLABLE_CONTAINER);
@@ -170,7 +170,7 @@ function buildScrollableCarousel(element) {
  * @param {Element} element
  * @return {{
  *   container: HTMLDivElement
- *   cells: HTMLDivElement[]
+ *   cells: HTMLElement[]
  * }}
  */
 function queryScrollableCarousel(element) {
@@ -179,7 +179,7 @@ function queryScrollableCarousel(element) {
       `.${escapeCssSelectorIdent(ClassNames.SCROLLABLE_CONTAINER)}`
     )
   );
-  const cells = /** @type {HTMLDivElement[]} */ (
+  const cells = /** @type {HTMLElement[]} */ (
     Array.from(
       element.querySelectorAll(`.${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
     )
@@ -192,7 +192,7 @@ function queryScrollableCarousel(element) {
  * Builds the DOM necessary for slidescroll carousel.
  * @param {Element} element
  * @return {{
- *   slides: HTMLDivElement[]
+ *   slides: Element[]
  *   slidesContainer: HTMLDivElement
  *   slideWrappers: HTMLDivElement[]
  * }}
@@ -236,7 +236,7 @@ function buildSlideScrollCarousel(element) {
  * Queries for ivars for slidescroll.
  * @param {Element} element
  * @return {{
- *   slides: HTMLDivElement[]
+ *   slides: Element[]
  *   slidesContainer: HTMLDivElement
  *   slideWrappers: HTMLDivElement[]
  * }}
@@ -254,10 +254,8 @@ function querySlideScrollCarousel(element) {
       )
     )
   );
-  const slides = /** @type {HTMLDivElement[]} */ (
-    Array.from(
-      element.querySelectorAll(`.${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
-    )
+  const slides = Array.from(
+    element.querySelectorAll(`.${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
   );
   assertDomQueryResults(slidesContainer, slideWrappers, slides);
   return {slides, slidesContainer, slideWrappers};
@@ -270,8 +268,8 @@ function querySlideScrollCarousel(element) {
  *   prevButton: HTMLDivElement,
  *   nextButton: HTMLDivElement
  *   container?: HTMLDivElement
- *   cells?: HTMLDivElement[]
- *   slides?: HTMLDivElement[]
+ *   cells?: HTMLElement[]
+ *   slides?: Element[]
  *   slidesContainer?: HTMLDivElement
  *   slideWrappers?: HTMLDivElement[]
  * }}
