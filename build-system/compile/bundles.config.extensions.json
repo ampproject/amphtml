@@ -400,7 +400,8 @@
     "version": "1.0",
     "options": {
       "hasCss": true,
-      "bento": true
+      "bento": true,
+      "npm": true
     }
   },
   {
