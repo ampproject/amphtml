@@ -102,6 +102,14 @@ function getEsbuildBabelPlugin(
     async setup(build) {
       preSetup?.();
 
+      const {initialOptions} = build;
+      const inlineSourcemap =
+        initialOptions.sourcemap === 'inline' ||
+        initialOptions.sourcemap === 'both';
+      if (inlineSourcemap) {
+        initialOptions.sourcemap = 'both';
+      }
+
       const babelOptionsLoad =
         babel.loadOptions({caller: {name: callerName}}) || {};
       let babelOptionsEnd;
@@ -124,7 +132,10 @@ function getEsbuildBabelPlugin(
         const code = outputFiles.find(({path}) => !path.endsWith('.map'));
         const map = outputFiles.find(({path}) => path.endsWith('.map'));
 
-        const maps = [map.text];
+        const maps = [];
+        if (map) {
+          maps.push(map.text);
+        }
         if (postCompileCaller) {
           babelOptionsEnd ||=
             babel.loadOptions({caller: {name: postCompileCaller}}) || {};
@@ -144,6 +155,9 @@ function getEsbuildBabelPlugin(
           maps.unshift(transformedMap);
         }
 
+        if (!map) {
+          return;
+        }
         const root = path.dirname(map.path);
         const remapped = remapping(
           maps,
@@ -181,7 +195,20 @@ function getEsbuildBabelPlugin(
           return source;
         });
 
-        replaceOutputFile(outputFiles, map, remapped.toString());
+        const sourcemapJson = remapped.toString();
+        replaceOutputFile(outputFiles, map, sourcemapJson);
+        if (inlineSourcemap) {
+          replaceOutputFile(
+            outputFiles,
+            code,
+            code.text.replace(
+              /sourceMappingURL=.*/,
+              `data:application/json;charset=utf-8;base64,${Buffer.from(
+                sourcemapJson
+              ).toString('base64')}`
+            )
+          );
+        }
       });
     },
   };
