@@ -1,12 +1,55 @@
+import {devAssert} from '#core/assert';
+import {createElementWithAttributes} from '#core/dom';
+import {applyFillContent} from '#core/dom/layout';
+import {childElementByAttr, childElementByTag} from '#core/dom/query';
+
+import * as Preact from '#preact';
+
+import {installShadowStyle} from '../shadow-embed';
+
+const SHADOW_CONTAINER_ATTRS = {
+  'style': 'display: contents; background: inherit;',
+  'part': 'c',
+};
+
 /**
- * @param Ctor
+ * @type {string}
  */
-function createBentoContainer(Ctor, element) {
+const SERVICE_SLOT_NAME = 'i-amphtml-svc';
+
+/**
+ * @type {JsonObject}
+ */
+const SERVICE_SLOT_ATTRS = {'name': SERVICE_SLOT_NAME};
+
+const RENDERED_ATTR = 'i-amphtml-rendered';
+
+const RENDERED_ATTRS = {'i-amphtml-rendered': ''};
+
+/**
+ * This is an internal property that marks light DOM nodes that were rendered
+ * by AMP/Preact bridge and thus must be ignored by the mutation observer to
+ * avoid mutate->rerender->mutate loops.
+ */
+const RENDERED_PROP = '__AMP_RENDERED';
+// TODO: MARK RENDERED DURING HYDRATION.
+
+/**
+ * @param {{}} Ctor
+ * @param {HTMLElement} element
+ * @return {{
+ *   hydrationPending: boolean,
+ *   container: HTMLElement
+ * }}
+ */
+export function createBentoContainer(Ctor, element) {
   const isShadow = Ctor['usesShadowDom'];
   const lightDomTag = isShadow ? null : Ctor['lightDomTag'];
   const isDetached = Ctor['detached'];
   const doc = element.ownerDoc;
+  let hydrationPending = false;
 
+  let container;
   if (isShadow) {
     devAssert(
       !isDetached,
@@ -14,22 +57,18 @@ function createBentoContainer(Ctor, element) {
         'when "props" are configured with "children" property.'
     );
     // Check if there's a pre-constructed shadow DOM.
-    let {shadowRoot} = this.element;
-    let container = shadowRoot && childElementByTag(shadowRoot, 'c');
+    let {shadowRoot} = element;
+    container = shadowRoot && childElementByTag(shadowRoot, 'c');
     if (container) {
-      this.hydrationPending_ = true;
+      hydrationPending = true;
     } else {
-      // Create new shadow root.
-      shadowRoot = this.element.attachShadow({
-        mode: 'open',
-        delegatesFocus: Ctor['delegatesFocus'],
-      });
+      shadowRoot = createShadowRoot(element, Ctor['delegatesFocus']);
 
       // The pre-constructed shadow root is required to have the stylesheet
       // inline. Thus, only the new shadow roots share the stylesheets.
       const shadowCss = Ctor['shadowCss'];
       if (shadowCss) {
-        installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
+        installShadowStyle(shadowRoot, element.tagName, shadowCss);
       }
 
       // Create container.
@@ -45,37 +84,57 @@ function createBentoContainer(Ctor, element) {
         SERVICE_SLOT_ATTRS
       );
       shadowRoot.appendChild(serviceSlot);
-      this.getPlaceholder?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
-      this.getFallback?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
-      this.getOverflowElement?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+      // TODO!
+      // this.getPlaceholder?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+      // this.getFallback?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
+      // this.getOverflowElement?.()?.setAttribute('slot', SERVICE_SLOT_NAME);
     }
-    this.container_ = container;
-
-    // Connect shadow root to the element's context.
-    setParent(shadowRoot, this.element);
-    // In Shadow DOM, only the children distributed in
-    // slots are displayed. All other children are undisplayed. We need
-    // to create a simple mechanism that would automatically compute
-    // `CanRender = false` on undistributed children.
-    addGroup(this.element, UNSLOTTED_GROUP, MATCH_ANY, /* weight */ -1);
-    // eslint-disable-next-line local/restrict-this-access
-    setGroupProp(this.element, UNSLOTTED_GROUP, CanRender, this, false);
   } else if (lightDomTag) {
-    this.container_ = this.element;
+    container = element;
     const replacement =
-      childElementByAttr(this.container_, RENDERED_ATTR) ||
+      childElementByAttr(container, RENDERED_ATTR) ||
       createElementWithAttributes(doc, lightDomTag, RENDERED_ATTRS);
     replacement[RENDERED_PROP] = true;
     if (Ctor['layoutSizeDefined']) {
       replacement.classList.add('i-amphtml-fill-content');
     }
-    this.container_.appendChild(replacement);
+    container.appendChild(replacement);
   } else {
-    const container = doc.createElement('i-amphtml-c');
-    this.container_ = container;
+    container = doc.createElement('i-amphtml-c');
     applyFillContent(container);
     if (!isDetached) {
-      this.element.appendChild(container);
+      element.appendChild(container);
     }
   }
+  return {hydrationPending, container};
+}
+
+/**
+ * Constructs a Shadow Root for both server
+ * and client environments.
+ *
+ * @param {HTMLElement} element
+ * @param {boolean} delegatesFocus
+ * @return {HTMLTemplateElement | ShadowRoot}
+ */
+function createShadowRoot(element, delegatesFocus) {
+  if (isBrowser()) {
+    return element.attachShadow({
+      mode: 'open',
+      delegatesFocus,
+    });
+  }
+
+  const template = (
+    <template shadowroot="open" shadowrootdelegatesfocus={delegatesFocus} />
+  );
+  return template;
+}
+
+// TODO: verify this is this the right way to check (compiler.js needs to be compat).
+/**
+ * @return {boolean}
+ */
+function isBrowser() {
+  return typeof window !== null; // eslint-disable-line local/no-global
 }

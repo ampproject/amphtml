@@ -79,6 +79,7 @@ const RENDERED_ATTRS = dict({'i-amphtml-rendered': ''});
  * avoid mutate->rerender->mutate loops.
  */
 const RENDERED_PROP = '__AMP_RENDERED';
+// TODO: MARK RENDERED DURING HYDRATION.
 
 const UNSLOTTED_GROUP = 'unslotted';
 

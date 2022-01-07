@@ -136,6 +136,3 @@ declare type LayoutRect = {
 type Mutations = {
   [key: string]: null | boolean | string | number | Array<any> | Object;
 };
-
-// TODO:(samouri): correctly type this within src/core/types/object/json
-declare type JsonObject = any;

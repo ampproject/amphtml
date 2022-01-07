@@ -7,7 +7,7 @@ import {
   isShadowCssSupported,
 } from '#core/dom/web-components';
 import {toArray} from '#core/types/array';
-import {getWin, toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -291,8 +291,9 @@ function getStylesheetRules(doc, css) {
  */
 export function installShadowStyle(shadowRoot, name, cssText) {
   const doc = shadowRoot.ownerDocument;
-  const win = toWin(doc.defaultView);
+  const win = doc.defaultView;
   if (
+    win &&
     shadowRoot.adoptedStyleSheets !== undefined &&
     win.CSSStyleSheet.prototype.replaceSync !== undefined
   ) {

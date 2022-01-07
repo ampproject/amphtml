@@ -1,10 +1,10 @@
-import * as Preact from './';
-
 import {MediaQueryProps} from '#core/dom/media-query-props';
+
+import * as Preact from '.';
 import {collectProps} from './parse-props';
 
 /**
- * @param Ctor
+ * @param {*} Ctor
  * @return {() => void}
  */
 export function getBuildDom(Ctor) {
