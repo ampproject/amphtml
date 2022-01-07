@@ -98,17 +98,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * @param {number} rightEdgeOfScreentoTagDistance
    * @return {!Element}
    */
-  renderShoppingTagTemplate_(rightEdgeOfScreentoTagDistance) {
+  renderShoppingTagTemplate_() {
     return (
       <div
-        class={
-          rightEdgeOfScreentoTagDistance > 100
-            ? 'amp-story-shopping-tag-inner'
-            : 'amp-story-shopping-tag-inner-flipped'
-        }
+        class={'amp-story-shopping-tag-inner'}
         role="button"
         onClick={() => this.onClick_()}
       >
@@ -155,21 +150,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       return;
     }
 
-    let rightEdgeOfScreentoTagDistance = 0.0;
-    this.measureElement(() => {});
-
     this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
 
     this.measureMutateElement(
       () => {
-        rightEdgeOfScreentoTagDistance =
-          document.getElementsByTagName('amp-story-shopping-attachment')[0]
-            ./*OK*/ clientWidth -
-          (this.element./*OK*/ offsetLeft +
-            this.element./*OK*/ clientWidth / 2.0);
-        this.shoppingTagEl_ = this.renderShoppingTagTemplate_(
-          rightEdgeOfScreentoTagDistance
-        );
+        this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
       },
       () => {
         createShadowRootWithStyle(
@@ -178,6 +163,43 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
           shoppingTagCSS
         );
         this.hasAppendedInnerShoppingTagEl_ = true;
+
+        const rightEdgeOfScreentoTagDistance =
+          document.getElementsByTagName('amp-story-shopping-attachment')[0]
+            ./*OK*/ clientWidth *
+            0.5 -
+          this.element./*OK*/ offsetLeft -
+          this.element./*OK*/ offsetWidth * 0.5;
+
+        const shoppingTagInner = this.element.shadowRoot.querySelector(
+          '.amp-story-shopping-tag-inner'
+        );
+
+        if (this.shoppingTagEl_.getAttribute('dir') !== 'rtl') {
+          if (rightEdgeOfScreentoTagDistance > -160) {
+            shoppingTagInner?.classList.remove('amp-story-shopping-tag-inner');
+            shoppingTagInner?.classList.add(
+              'amp-story-shopping-tag-inner-flipped'
+            );
+          } else {
+            shoppingTagInner?.classList.add('amp-story-shopping-tag-inner');
+            shoppingTagInner?.classList.remove(
+              'amp-story-shopping-tag-inner-flipped'
+            );
+          }
+        } else {
+          if (rightEdgeOfScreentoTagDistance > 160) {
+            shoppingTagInner?.classList.remove('amp-story-shopping-tag-inner');
+            shoppingTagInner?.classList.add(
+              'amp-story-shopping-tag-inner-flipped'
+            );
+          } else {
+            shoppingTagInner?.classList.add('amp-story-shopping-tag-inner');
+            shoppingTagInner?.classList.remove(
+              'amp-story-shopping-tag-inner-flipped'
+            );
+          }
+        }
       }
     );
   }
