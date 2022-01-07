@@ -1,4 +1,3 @@
-import {devAssert} from '#core/assert';
 import {isAmp4Email} from '#core/document/format';
 import {isServerRendered} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
@@ -289,9 +288,9 @@ export function buildDom(element) {
 /**
  * @param {Element} element
  * @return {string} The default title to use for the next button.
- * @param {{index?: string, total?: string}} options - The default title to use for the previous button.
+ * @param {{index: string, total: string}} options - The default title to use for the previous button.
  */
-export function getNextButtonTitle(element, options = {}) {
+export function getNextButtonTitle(element, options) {
   const prefix =
     element.getAttribute('data-next-button-aria-label') ||
     'Next item in carousel';
@@ -301,10 +300,10 @@ export function getNextButtonTitle(element, options = {}) {
 
 /**
  * @param {Element} element
- * @param {{index?: string, total?: string}} options - The default title to use for the previous button.
+ * @param {{index: string, total: string}} options - The default title to use for the previous button.
  * @return {string} The default title to use for the previous button.
  */
-export function getPrevButtonTitle(element, options = {}) {
+export function getPrevButtonTitle(element, options) {
   const prefix =
     element.getAttribute('data-prev-button-aria-label') ||
     'Previous item in carousel';
@@ -318,17 +317,14 @@ export function getPrevButtonTitle(element, options = {}) {
  * - Scrollable: "Next item in carousel"
  * - Slides    : "Next item in carousel (X of Y)"
  *
- * @param {*} element
- * @param {{prefix: string, index?: string, total?:string}} param1
+ * @param {Element} element
+ * @param {{prefix: string, index: string, total:string}} opts
  * @return {string}
  */
 function getButtonTitle(element, {index, prefix, total}) {
   if (isScrollable(element)) {
     return prefix;
   }
-  // Slides carousel should always have index/total provided.
-  devAssert(index);
-  devAssert(total);
 
   /**
    * A format string for the button label. Should be a string, containing two
