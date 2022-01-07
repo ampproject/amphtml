@@ -1,11 +1,6 @@
-// Adds product-images to config.
-// Adds product-brand to config
-// Renders PLP when drawer is opened.
-// Styling for PLP.
-
-// styling
+// Responsive styling
 // update all example pages
-// write tests
+// tests
 
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
