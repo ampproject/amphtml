@@ -3,8 +3,12 @@
     {
       "product-tag-id": "city-pop",
       "product-title": "Plastic Love",
+      "product-brand": "Nest",
       "product-price": 19,
-      "product-price-currency": "JPY"
+      "product-price-currency": "JPY",
+      "product-images": [
+        "/examples/visual-tests/amp-story/img/shopping/product-1.png"
+      ]
     }
   ]
 }

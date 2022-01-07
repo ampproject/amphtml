@@ -1,5 +1,21 @@
+// Adds product-images to config.
+// Adds product-brand to config
+// Renders PLP when drawer is opened.
+// Styling for PLP.
+
+// styling
+// update all example pages
+// write tests
+
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {Services} from '#service';
+
+import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+
+import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 
 export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -8,6 +24,19 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.attachmentEl_ = null;
+
+    /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = null;
+
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
+
+    /** @private {?Element} */
+    this.templateWrapper_ = null;
+
+    this.shoppingTags_ = this.element
+      .closest('amp-story-page')
+      .querySelectorAll('amp-story-shopping-tag');
   }
 
   /** @override */
@@ -19,6 +48,15 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       ></amp-story-page-attachment>
     );
     this.element.appendChild(this.attachmentEl_);
+    this.templateWrapper_ = this.attachmentEl_.appendChild(<div></div>);
+
+    return Promise.all([
+      Services.storyStoreServiceForOrNull(this.win),
+      Services.localizationServiceForOrNull(this.element),
+    ]).then(([storeService, localizationService]) => {
+      this.storeService_ = storeService;
+      this.localizationService_ = localizationService;
+    });
   }
 
   /**
@@ -27,9 +65,59 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @return {!Promise}
    */
   open(shouldAnimate = true) {
+    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
+
+    const shoppingDataForPage = Array.from(this.shoppingTags_).map(
+      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-tag-id')]
+    );
+
+    const plpTemplate = this.renderPlpTemplate(shoppingDataForPage);
+
+    this.templateWrapper_.replaceChildren(plpTemplate);
+
     return this.attachmentEl_
       .getImpl()
       .then((impl) => impl.open(shouldAnimate));
+  }
+
+  renderPlpTemplate(shoppingDataForPage) {
+    return (
+      <div class="amp-story-shopping-plp">
+        <div class="amp-story-shopping-plp-header">
+          {localize(
+            this.element,
+            LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_LABEL
+          )}
+        </div>
+        <div class="amp-story-shopping-plp-cards">
+          {shoppingDataForPage.map((data) => (
+            <div class="amp-story-shopping-plp-card">
+              <img
+                class="amp-story-shopping-plp-card-image"
+                src={data['product-images'][0]}
+              ></img>
+              <div class="amp-story-shopping-plp-card-brand">
+                {data['product-brand']}
+              </div>
+              <div class="amp-story-shopping-plp-card-title">
+                {data['product-title']}
+              </div>
+              <div class="amp-story-shopping-plp-card-price">
+                {new Intl.NumberFormat(
+                  this.localizationService_.getLanguageCodesForElement(
+                    this.element
+                  )[0],
+                  {
+                    style: 'currency',
+                    currency: data['product-price-currency'],
+                  }
+                ).format(data['product-price'])}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   /** @override */
