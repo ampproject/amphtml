@@ -3,6 +3,8 @@ import {intersectionEntryToJson} from '#core/dom/layout/intersection';
 import {dict} from '#core/types/object';
 import {utf8Decode} from '#core/types/string/bytes';
 
+import {getIntersectionChangeEntry} from '#utils/intersection-observer-3p-host';
+
 import {Renderer} from './amp-ad-type-defs';
 
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
@@ -40,7 +42,9 @@ export class NameFrameRenderer extends Renderer {
     );
     contextMetadata['creative'] = creative;
 
-    const intersection = element.getIntersectionChangeEntry();
+    const intersection = getIntersectionChangeEntry(
+      this.element./*OK*/ getLayoutBoxes()
+    );
     contextMetadata['_context']['initialIntersection'] =
       intersectionEntryToJson(intersection);
     const attributes = dict({

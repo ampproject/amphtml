@@ -1,3 +1,4 @@
+import {getIntersectionChangeEntry} from '#utils/intersection-observer-3p-host';
 import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
@@ -394,7 +395,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // here, though, allows us to measure the impact of ad throttling via
         // incrementLoadingAds().
 
-        const intersection = this.element.getIntersectionChangeEntry();
+        const intersection = getIntersectionChangeEntry(
+          this.element.getLayoutBoxes()
+        );
         const iframe = getIframe(
           getWin(this.element),
           this.element,

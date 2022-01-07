@@ -24,7 +24,11 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, (env) => {
   function getInObEntry() {
     const rootBounds = layoutRectLtwh(198, 299, 100, 100);
     const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-    return getIntersectionChangeEntry(layoutBox, null, rootBounds);
+    return getIntersectionChangeEntry({
+      elementBox: layoutBox,
+      ownerBox: null,
+      viewportBox: rootBounds,
+    });
   }
 
   function getIframe(src) {

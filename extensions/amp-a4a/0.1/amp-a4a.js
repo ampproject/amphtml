@@ -30,6 +30,7 @@ import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {DomTransformStream} from '#utils/dom-tranform-stream';
 import {listenOnce} from '#utils/event-helper';
+import {getIntersectionChangeEntry} from '#utils/intersection-observer-3p-host';
 import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
 
 import {A4AVariableSource} from './a4a-variable-source';
@@ -2097,7 +2098,9 @@ export class AmpA4A extends AMP.BaseElement {
       this.sentinel
     );
 
-    const intersection = this.element.getIntersectionChangeEntry();
+    const intersection = getIntersectionChangeEntry(
+      this.element./*OK*/ getLayoutBoxes()
+    );
     contextMetadata['_context']['initialIntersection'] =
       intersectionEntryToJson(intersection);
     return this.iframeRenderHelper_(
@@ -2172,7 +2175,9 @@ export class AmpA4A extends AMP.BaseElement {
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
 
-      const intersection = this.element.getIntersectionChangeEntry();
+      const intersection = getIntersectionChangeEntry(
+        this.element./*OK*/ getLayoutBoxes()
+      );
       contextMetadata['initialIntersection'] =
         intersectionEntryToJson(intersection);
       if (method == XORIGIN_MODE.NAMEFRAME) {

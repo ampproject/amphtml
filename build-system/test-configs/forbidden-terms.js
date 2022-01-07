@@ -1008,7 +1008,7 @@ const forbiddenTermsSrcInclusive = {
       'function to build-system/common/ci.js',
   },
   '\\.matches\\(': 'Please use matches() helper in src/core/dom/query.js',
-  '\\.getLayoutBox': {
+  '\\.getLayoutBox(es)?': {
     message: measurementApiDeprecated,
     allowlist: [
       'src/base-element.js',

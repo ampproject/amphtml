@@ -29,31 +29,37 @@ export const DEFAULT_THRESHOLD = [
   0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1,
 ];
 
-/** @typedef {{
+/**
+ * @typedef {{
  *    element: !Element,
  *    currentThresholdSlot: number,
- *  }}
+ *  }} ElementIntersectionStateDef
  */
-let ElementIntersectionStateDef;
 
 /** @const @private */
 const INIT_TIME = Date.now();
 
 /**
  * A function to get the element's current IntersectionObserverEntry
- * regardless of the intersetion ratio. Only available when element is not
+ * regardless of the intersection ratio. Only available when element is not
  * nested in a container iframe.
- * @param {!../layout-rect.LayoutRectDef} element element's rect
- * @param {?../layout-rect.LayoutRectDef} owner element's owner rect
- * @param {!../layout-rect.LayoutRectDef} hostViewport hostViewport's rect
+ * @param {{
+ *   elementBox: LayoutRect,
+ *   ownerBox: LayoutRect,
+ *   viewportBox: LayoutRect,
+ * }} param
  * @return {!IntersectionObserverEntry} A change entry.
  */
-export function getIntersectionChangeEntry(element, owner, hostViewport) {
+export function getIntersectionChangeEntry({
+  elementBox,
+  ownerBox,
+  viewportBox,
+}) {
   const intersection =
-    rectIntersection(element, owner, hostViewport) ||
+    rectIntersection(elementBox, ownerBox, viewportBox) ||
     layoutRectLtwh(0, 0, 0, 0);
-  const ratio = intersectionRatio(intersection, element);
-  return calculateChangeEntry(element, hostViewport, intersection, ratio);
+  const ratio = intersectionRatio(intersection, elementBox);
+  return calculateChangeEntry(elementBox, viewportBox, intersection, ratio);
 }
 
 /**
