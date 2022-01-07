@@ -103,7 +103,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   renderShoppingTagTemplate_() {
     return (
       <div
-        class={'amp-story-shopping-tag-inner'}
+        class="amp-story-shopping-tag-inner"
         role="button"
         onClick={() => this.onClick_()}
       >
