@@ -707,7 +707,6 @@ function massageSourcemaps(sourcemaps, babelMaps, options) {
   const remapped = remapping(
     sourcemaps,
     (f) => {
-      console.log(f);
       if (f.includes('__SOURCE__')) {
         return null;
       }
