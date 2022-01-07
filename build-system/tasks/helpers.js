@@ -352,6 +352,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         format: options.outputFormat,
         banner,
         footer,
+        // It's important to let esbuild compile with esnext target, so that it
+        // won't try to transpile any features. We tranform with babel as a
+        // followup to either ES5  or ESM syntax.
+        target: 'esnext',
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
