@@ -93,6 +93,8 @@ class PaginationButton {
     if (state === this.state_) {
       return;
     }
+    // console.log(state);
+
     this.mutator_.mutateElement(this.element, () => {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
@@ -100,9 +102,8 @@ class PaginationButton {
         'aria-label',
         localize(this.win_.document, state.label)
       );
+      this.state_ = state;
     });
-
-    this.state_ = state;
   }
 
   /**
@@ -230,12 +231,12 @@ export class PaginationButtons {
     if (pageIndex < totalPages - 1) {
       this.forwardButton_.updateState(ButtonStates.NEXT_PAGE);
     } else {
-      const viewer = Services.viewerForDoc(this.ampStory_.element);
-      if (viewer.hasCapability('swipe')) {
-        this.forwardButton_.updateState(ButtonStates.NEXT_STORY);
-      } else {
-        this.forwardButton_.updateState(ButtonStates.REPLAY);
-      }
+      // const viewer = Services.viewerForDoc(this.ampStory_.element);
+      // if (viewer.hasCapability('swipe')) {
+      //   this.forwardButton_.updateState(ButtonStates.NEXT_STORY);
+      // } else {
+      this.forwardButton_.updateState(ButtonStates.REPLAY);
+      // }
     }
   }
 
