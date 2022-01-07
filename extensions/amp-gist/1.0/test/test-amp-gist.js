@@ -1,7 +1,10 @@
 import '../amp-gist';
-import {htmlFor} from '#core/dom/static-template';
+import {createElementWithAttributes} from '#core/dom';
+
 import {toggleExperiment} from '#experiments';
+
 import {waitFor} from '#testing/helpers/service';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 
 describes.realWin(
   'amp-gist-v1.0',
@@ -13,21 +16,35 @@ describes.realWin(
   (env) => {
     let win;
     let doc;
-    let html;
+    let element;
+
+    const waitForRender = async () => {
+      await element.buildInternal();
+      const loadPromise = element.layoutCallback();
+      const shadow = element.shadowRoot;
+      await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
+      await loadPromise;
+    };
 
     beforeEach(async () => {
       win = env.win;
       doc = win.document;
-      html = htmlFor(doc);
       toggleExperiment(win, 'bento-gist', true, true);
+
+      // Override global window here because Preact uses global `createElement`.
+      doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
-    // DO NOT SUBMIT: This is example code only.
-    it('example test renders', async () => {
-      const element = html` <amp-gist></amp-gist> `;
+    it('renders', async () => {
+      element = createElementWithAttributes(win.document, 'amp-gist', {
+        'data-gistid': 'b9bb35bc68df68259af94430f012425f',
+        'height': 500,
+        'layout': 'fixed-height',
+      });
       doc.body.appendChild(element);
-      await waitFor(() => element.isConnected, 'element connected');
-      expect(element.parentNode).to.equal(doc.body);
+      await waitForRender();
+
+      expect(element.shadowRoot.querySelector('iframe').src).not.to.be.null;
     });
   }
 );
