@@ -103,28 +103,30 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   styleTagText_() {
-    if (this.element.shadowRoot) {
-      const pillEl = this.element.shadowRoot.querySelector(
-        '.amp-story-shopping-tag-pill'
-      );
+    const pillEl = this.element.shadowRoot?.querySelector(
+      '.amp-story-shopping-tag-pill'
+    );
 
-      const textEl = this.element.shadowRoot.querySelector(
-        '.amp-story-shopping-tag-pill-text'
-      );
+    const textEl = this.element.shadowRoot?.querySelector(
+      '.amp-story-shopping-tag-pill-text'
+    );
 
-      const fontSize = computedStyle(window, textEl).getPropertyValue(
-        'font-size'
-      );
-      const ratioOfLineHeightToFontSize = 1.5;
-      const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
-      const height = textEl./*OK*/ clientHeight;
-      const numLines = Math.ceil(height / lineHeight);
+    if (!pillEl || !textEl) {
+      return;
+    }
 
-      if (numLines <= 1) {
-        pillEl.classList.remove('amp-story-shopping-tag-pill-multi-line');
-      } else {
-        pillEl.classList.add('amp-story-shopping-tag-pill-multi-line');
-      }
+    const fontSize = computedStyle(window, textEl).getPropertyValue(
+      'font-size'
+    );
+    const ratioOfLineHeightToFontSize = 1.5;
+    const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
+    const height = textEl./*OK*/ clientHeight;
+    const numLines = Math.ceil(height / lineHeight);
+
+    if (numLines <= 1) {
+      pillEl.classList.remove('amp-story-shopping-tag-pill-multi-line');
+    } else {
+      pillEl.classList.add('amp-story-shopping-tag-pill-multi-line');
     }
   }
 
