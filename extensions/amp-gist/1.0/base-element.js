@@ -10,6 +10,7 @@ BaseElement['Component'] = BentoGist;
 /** @override */
 BaseElement['props'] = {
   'gistId': {attr: 'data-gistid'},
+  'file': {attr: 'data-file'},
 };
 
 /** @override */

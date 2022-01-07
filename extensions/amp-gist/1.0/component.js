@@ -14,14 +14,14 @@ const FULL_HEIGHT = '100%';
  */
 export function BentoGist({
   gistId,
+  file,
   title = DEFAULT_TITLE,
   requestResize,
   style,
   ...rest
 }) {
   const iframeRef = useRef(null);
-
-  const [height, setHeight] = useState(FULL_HEIGHT);
+  const [height, setHeight] = useState(null);
   const messageHandler = useCallback(
     (event) => {
       const data = deserializeMessage(event.data);
@@ -47,9 +47,11 @@ export function BentoGist({
   const options = useMemo(
     () => ({
       gistid: gistId,
+      file,
     }),
-    [gistId]
+    [gistId, file]
   );
+  console.log(gistId, file);
   return (
     <ProxyIframeEmbed
       title={title}
