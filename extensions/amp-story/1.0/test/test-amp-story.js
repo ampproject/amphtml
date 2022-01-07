@@ -921,6 +921,18 @@ describes.realWin(
         });
       });
 
+      it('should update the STORY_HAS_BACKGROUND_AUDIO property if story has background audio', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+        story.element.setAttribute('background-audio', 'audio.mp3');
+        await story.layoutCallback();
+
+        expect(
+          story.storeService_.get(
+            StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE
+          )
+        ).to.be.true;
+      });
+
       it('should remove the muted attribute on unmuted state change', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 

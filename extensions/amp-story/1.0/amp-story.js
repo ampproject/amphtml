@@ -587,6 +587,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildSystemLayer_(initialPageId) {
+    this.updateAudioIcon_();
     this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
@@ -2225,6 +2226,19 @@ export class AmpStory extends AMP.BaseElement {
     }
     this.mediaPool_.unmute(this.backgroundAudioEl_);
     this.mediaPool_.play(this.backgroundAudioEl_);
+  }
+
+  /**
+   * Update the store if the story has background audio.
+   * @private
+   */
+  updateAudioIcon_() {
+    const storyHasBackgroundAudio =
+      this.element.hasAttribute('background-audio');
+    this.storeService_.dispatch(
+      Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
+      storyHasBackgroundAudio
+    );
   }
 
   /**

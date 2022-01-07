@@ -212,6 +212,7 @@ export const Action = {
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   ADD_SHOPPING_DATA: 'addShoppingData',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
+  TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
@@ -353,6 +354,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: !!data,
+      });
+    case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
       });
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
