@@ -9,6 +9,7 @@ var BentoGistDef = {};
  *   requestResize: (function(number):*|undefined),
  *   title: (string|undefined),
  *   gistId: (string),
+ *   file: (string|undefined),
  * }}
  */
 BentoGistDef.Props;
