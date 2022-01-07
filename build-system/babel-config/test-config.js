@@ -61,7 +61,7 @@ function getTestConfig() {
     compact: false,
     plugins: testPlugins,
     presets: testPresets,
-    sourceMaps: 'inline',
+    sourceMaps: 'both',
   };
 }
 

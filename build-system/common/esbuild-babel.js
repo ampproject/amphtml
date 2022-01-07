@@ -8,6 +8,8 @@ const {TransformCache, batchedRead, md5} = require('./transform-cache');
 const remapping = /** @type {*} */ (Remapping);
 
 const argv = require('minimist')(process.argv.slice(2));
+
+// eslint-disable-next-line local/no-forbidden-terms
 const te = new TextEncoder();
 
 /**
@@ -94,8 +96,6 @@ function getEsbuildBabelPlugin(
   {postCompileCaller, postLoad, preSetup} = {}
 ) {
   const babelMaps = new Map();
-  // eslint-disable-next-line local/no-forbidden-terms
-
   return {
     name: 'babel',
 
@@ -144,7 +144,7 @@ function getEsbuildBabelPlugin(
           maps.unshift(transformedMap);
         }
 
-        const root = process.cwd();
+        const root = path.dirname(map.path);
         const remapped = remapping(
           maps,
           (f) => {
@@ -152,26 +152,31 @@ function getEsbuildBabelPlugin(
             // which makes it difficult to distinguish during remapping's load phase.
             // We perform some manual path mangling to destingish the babel files
             // (which have a sourcemap) from the actual source file by pretending the
-            // source file exists in the '__SOURCE__' root directory.
-            if (f.includes('__SOURCE__')) {
+            // source file exists in the 'source:' protocol.
+            if (f.startsWith('source:')) {
               return null;
             }
             const file = path.join(root, f);
             const map = babelMaps.get(file);
             if (!map) {
+              if (file.includes('/node_modules/')) {
+                // Excuse node_modules since they may have been marked external
+                // (and so not processed by babel).
+                return null;
+              }
               throw new Error(`failed to find sourcemap for babel file "${f}"`);
             }
             return {
               ...map,
               file: f,
-              sourceRoot: path.join('/__SOURCE__/', path.dirname(f)),
+              sourceRoot: `source:/${path.dirname(f)}`,
             };
           },
           !argv.full_sourcemaps
         );
         remapped.sources = remapped.sources.map((source) => {
-          if (source.startsWith('/__SOURCE__/')) {
-            return source.slice('/__SOURCE__/'.length);
+          if (source.startsWith('source:/')) {
+            return source.slice('source:/'.length);
           }
           return source;
         });
