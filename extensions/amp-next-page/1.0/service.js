@@ -623,7 +623,7 @@ export class NextPageService {
           ) {
             return;
           }
-          messageDeliverer(eventType, data, awaitResponse);
+          return messageDeliverer(eventType, data, awaitResponse);
         });
       }
 
