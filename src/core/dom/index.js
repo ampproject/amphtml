@@ -20,9 +20,8 @@ const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
  * @typedef {{
  *   bubbles: (boolean|undefined),
  *   cancelable: (boolean|undefined),
- * }}
+ * }} CustomEventOptionsDef;
  */
-export let CustomEventOptionsDef;
 
 /** @const {CustomEventOptionsDef} */
 const DEFAULT_CUSTOM_EVENT_OPTIONS = {bubbles: true, cancelable: true};
@@ -63,7 +62,7 @@ export function waitForChild(parent, checkFunc, callback) {
  * promise is resolved.
  * @param {Element} parent
  * @param {function(Element):boolean} checkFunc
- * @return {Promise}
+ * @return {Promise<void>}
  */
 export function waitForChildPromise(parent, checkFunc) {
   return new Promise((resolve) => {
@@ -83,7 +82,7 @@ export function waitForBodyOpen(doc, callback) {
 /**
  * Waits for document's body to be available.
  * @param {Document} doc
- * @return {Promise}
+ * @return {Promise<void>}
  */
 export function waitForBodyOpenPromise(doc) {
   return new Promise((resolve) =>
@@ -376,7 +375,7 @@ export function escapeHtml(text) {
 }
 
 /**
- * @param {string} c
+ * @param {keyof HTML_ESCAPE_CHARS} c
  * @return {string}
  */
 function escapeHtmlChar(c) {

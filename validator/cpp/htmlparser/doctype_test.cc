@@ -1,5 +1,5 @@
-#include "doctype.h"
-#include "node.h"
+#include "cpp/htmlparser/doctype.h"
+#include "cpp/htmlparser/node.h"
 
 #include "gtest/gtest.h"
 

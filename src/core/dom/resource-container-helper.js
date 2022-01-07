@@ -4,8 +4,13 @@ import {arrayOrSingleItemToArray} from '#core/types/array';
 const AMP_CLASS = 'i-amphtml-element';
 const DEEP = true;
 
+/** @type {function(AmpElement): Promise<void>} */
 const ensureLoaded = (element) => element.ensureLoaded();
+
+/** @type {function(AmpElement): void} */
 const pause = (element) => element.pause();
+
+/** @type {function(AmpElement): Promise<void>} */
 const unmount = (element) => element.unmount();
 
 /**

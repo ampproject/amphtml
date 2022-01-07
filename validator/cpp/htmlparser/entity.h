@@ -1,15 +1,15 @@
 // AUTO GENERATED; DO NOT EDIT.
 // To regenerate this file, see comments in bin/entitytablegen.cc
 
-#ifndef HTMLPARSER__ENTITY_H_
-#define HTMLPARSER__ENTITY_H_
+#ifndef CPP_HTMLPARSER_ENTITY_H_
+#define CPP_HTMLPARSER_ENTITY_H_
 
 #include <algorithm>
 #include <array>
 #include <string>
 #include <string_view>
 
-#include "comparators.h"
+#include "cpp/htmlparser/comparators.h"
 
 namespace htmlparser {
 
@@ -2271,4 +2271,4 @@ inline std::string_view EntityLookup(std::string_view entity_name) {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__ENTITY_H_
+#endif  // CPP_HTMLPARSER_ENTITY_H_

@@ -3,12 +3,11 @@ import {tryCallback} from '#core/error';
 import {remove} from '#core/types/array';
 import {getWin} from '#core/window';
 
-import {LayoutSizeDef} from './rect';
-
+/** @typedef {import('./rect').LayoutSizeDef} LayoutSizeDef */
 /** @typedef {LayoutSizeDef|ResizeObserverSize} TargetSize */
 /**
+ * @typedef {function(Size): void} SizeCallback
  * @template {TargetSize} Size
- * @typedef {function(Size):void} SizeCallback
  */
 
 /** @enum {number} */
@@ -31,10 +30,12 @@ const VERTICAL_RE = /vertical/;
 const observers = /* #__PURE__ */ new WeakMap();
 
 /**
- * @const {WeakMap<Element, Array<{
- *   type: !Type_Enum,
- *   callback: !SizeCallback
+ * @type {WeakMap<Element, Array<{
+ *   type: Type_Enum,
+ *   callback: SizeCallback<TargetSize>
  * }>>}
+ *
+ * @const
  */
 const targetObserverMultimap = /* #__PURE__ */ new WeakMap();
 
@@ -63,6 +64,7 @@ export function unobserveContentSize(element, callback) {
  */
 export function measureContentSize(element) {
   return new Promise((resolve) => {
+    /** @param {LayoutSizeDef} size */
     const onSize = (size) => {
       resolve(size);
       unobserveContentSize(element, onSize);
@@ -96,6 +98,7 @@ export function unobserveBorderBoxSize(element, callback) {
  */
 export function measureBorderBoxSize(element) {
   return new Promise((resolve) => {
+    /** @param {ResizeObserverSize} size */
     const onSize = (size) => {
       resolve(size);
       unobserveBorderBoxSize(element, onSize);
@@ -222,7 +225,7 @@ function computeAndCall(type, callback, entry) {
       const {target} = entry;
       const win = getWin(target);
       const isVertical = VERTICAL_RE.test(
-        computedStyle(win, /** @type {HTMLElement} */ (target))['writing-mode']
+        computedStyle(win, /** @type {HTMLElement} */ (target)).writingMode
       );
       const {offsetHeight, offsetWidth} = /** @type {HTMLElement} */ (target);
       let inlineSize, blockSize;
