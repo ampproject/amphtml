@@ -396,6 +396,14 @@
     "version": "0.1"
   },
   {
+    "name": "amp-gist",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-google-document-embed",
     "version": "0.1"
   },
