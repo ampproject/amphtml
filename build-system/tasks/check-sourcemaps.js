@@ -126,15 +126,10 @@ function checkSourcemapMappings(sourcemapJson, map) {
     '.';
 
   // Mapping related constants
-  const expectedFirstLine = map.includes('mjs')
-    ? {
-        file: 'src/polyfills/abort-controller.js',
-        code: 'class AbortController {',
-      }
-    : {
-        file: 'node_modules/@babel/runtime/helpers/esm/createClass.js',
-        code: 'function _defineProperties(target, props) {',
-      };
+  const expectedFirstLine = {
+    file: 'src/polyfills/abort-controller.js',
+    code: 'class AbortController {',
+  };
 
   if (firstLineFile != expectedFirstLine.file) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');
