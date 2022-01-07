@@ -239,7 +239,7 @@ class RuntimeTestConfig {
       },
       plugins: [importPathPlugin, babelPlugin],
       mainFields: ['module', 'browser', 'main'],
-      sourcemap: 'inline',
+      sourcemap: 'both',
     };
   }
 
