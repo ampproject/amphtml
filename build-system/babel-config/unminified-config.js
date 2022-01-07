@@ -19,17 +19,6 @@ function getUnminifiedConfig() {
     },
   ];
 
-  const targets =
-    argv.esm || argv.sxg ? {esmodules: true} : {browsers: ['Last 2 versions']};
-  const presetEnv = [
-    '@babel/preset-env',
-    {
-      bugfixes: true,
-      modules: false,
-      loose: true,
-      targets,
-    },
-  ];
   const replacePlugin = getReplacePlugin();
   const unminifiedPlugins = [
     './build-system/babel-plugins/babel-plugin-jsx-style-object',
@@ -46,11 +35,9 @@ function getUnminifiedConfig() {
     './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);
-  const unminifiedPresets = [presetEnv];
   return {
     compact: false,
     plugins: unminifiedPlugins,
-    presets: unminifiedPresets,
     sourceMaps: true,
     assumptions: {
       constantSuper: true,

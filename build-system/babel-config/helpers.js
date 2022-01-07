@@ -115,8 +115,30 @@ function getReplaceGlobalsPlugin() {
   ];
 }
 
+/**
+ * @param {boolean} isProd
+ * @return {Array<string|Object>}
+ */
+function getPresetEnv(isProd) {
+  return [
+    '@babel/preset-env',
+    {
+      bugfixes: true,
+      modules: false,
+      loose: !isProd,
+      targets:
+        argv.esm || argv.sxg
+          ? {esmodules: true}
+          : isProd
+          ? {ie: 11, chrome: 41}
+          : {browsers: ['Last 2 versions']},
+    },
+  ];
+}
+
 module.exports = {
   getExperimentConstant,
   getReplacePlugin,
   getReplaceGlobalsPlugin,
+  getPresetEnv,
 };

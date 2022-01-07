@@ -43,7 +43,7 @@ function getModuleResolver(packages) {
  * @param {!Object} config
  * @return {Object}
  */
-function withModuleResolver(config) {
+function mergeWithConfig(config) {
   return {
     ...config,
     plugins: [getModuleResolver(getSharedBentoSymbols()), ...config.plugins],
@@ -54,14 +54,14 @@ function withModuleResolver(config) {
  * @return {!Object}
  */
 function getBentoElementUnminifiedConfig() {
-  return withModuleResolver(getUnminifiedConfig());
+  return mergeWithConfig(getUnminifiedConfig());
 }
 
 /**
  * @return {!Object}
  */
 function getBentoElementMinifiedConfig() {
-  return withModuleResolver(getMinifiedConfig());
+  return mergeWithConfig(getMinifiedConfig());
 }
 
 module.exports = {

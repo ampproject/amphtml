@@ -1,31 +1,38 @@
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
+const {getPresetEnv} = require('./helpers');
 
 /**
  * Gets the config that transforms any syntax output by esbuild into the
  * appropriate target syntax.
  *
+ * @param {boolean} isProd
  * @return {!Object}
  */
-function getPostEsbuildCompileConfig() {
-  const presetEnv = [
-    '@babel/preset-env',
-    {
-      bugfixes: true,
-      modules: false,
-      targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
-    },
-  ];
-
+function config(isProd) {
   return {
     compact: false,
-    presets: [presetEnv],
+    presets: [getPresetEnv(isProd)],
     inputSourceMap: false,
     sourceMaps: true,
   };
 }
 
+/**
+ * @return {!Object}
+ */
+function getPostEsbuildCompileMinifiedConfig() {
+  return config(true);
+}
+
+/**
+ * @return {!Object}
+ */
+function getPostEsbuildCompileUnminifiedConfig() {
+  return config(true);
+}
+
 module.exports = {
-  getPostEsbuildCompileConfig,
+  getPostEsbuildCompileMinifiedConfig,
+  getPostEsbuildCompileUnminifiedConfig,
 };

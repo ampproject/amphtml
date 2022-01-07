@@ -59,20 +59,11 @@ function getMinifiedConfig() {
     ],
     ['@babel/plugin-transform-for-of', {loose: true, allowArrayLike: true}],
   ].filter(Boolean);
-  const presetEnv = [
-    '@babel/preset-env',
-    {
-      bugfixes: true,
-      modules: false,
-      targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
-    },
-  ];
 
   return {
     compact: false,
     plugins,
     sourceMaps: true,
-    presets: [presetEnv],
     retainLines: true,
     assumptions: {
       constantSuper: true,

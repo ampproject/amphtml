@@ -320,7 +320,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
     /* enableCache */ true,
-    {postCompileCaller: 'post-esbuild-compile'}
+    {
+      postCompileCaller: options.minify
+        ? 'post-esbuild-compile-minified'
+        : 'post-esbuild-compile-unminified',
+    }
   );
   const plugins = [babelPlugin];
 
