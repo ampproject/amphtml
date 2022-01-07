@@ -101,7 +101,6 @@ export let ShoppingDataDef;
  *    viewerCustomControls: !Array<!Object>,
  *    adState: boolean,
  *    pageAttachmentState: boolean,
- *    affiliateLinkState: !Element,
  *    desktopState: boolean,
  *    educationState: boolean,
  *    gyroscopeEnabledState: string,
@@ -149,7 +148,6 @@ export const StateProperty = {
   // App States.
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
-  AFFILIATE_LINK_STATE: 'affiliateLinkState',
   EDUCATION_STATE: 'educationState',
   GYROSCOPE_PERMISSION_STATE: 'gyroscopePermissionState',
   INFO_DIALOG_STATE: 'infoDialogState',
@@ -196,7 +194,6 @@ export const Action = {
   SET_NAVIGATION_PATH: 'setNavigationPath',
   SET_PAGE_IDS: 'setPageIds',
   TOGGLE_AD: 'toggleAd',
-  TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
@@ -307,12 +304,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.AD_STATE]: !!data,
-      });
-    // Expands or collapses the affiliate link.
-    case Action.TOGGLE_AFFILIATE_LINK:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.AFFILIATE_LINK_STATE]: data,
       });
     case Action.TOGGLE_EDUCATION:
       return /** @type {!State} */ ({
@@ -545,7 +536,6 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.VIEWER_CUSTOM_CONTROLS]: [],
       [StateProperty.AD_STATE]: false,
-      [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
       [StateProperty.INFO_DIALOG_STATE]: false,
