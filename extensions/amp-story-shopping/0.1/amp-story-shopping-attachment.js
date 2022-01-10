@@ -9,7 +9,6 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
-import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   ShoppingConfigDataDef,
   StateProperty,
@@ -102,9 +101,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     return (
       <div class="amp-story-shopping-plp">
         <div class="amp-story-shopping-plp-header">
-          {localize(
-            this.element,
-            LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER
+          {this.localizationService_.getLocalizedString(
+            LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER,
+            this.element
           )}
         </div>
         <div class="amp-story-shopping-plp-cards">
