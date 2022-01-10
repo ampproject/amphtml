@@ -1,9 +1,9 @@
-#include "renderer.h"
+#include "cpp/htmlparser/renderer.h"
 
 #include <sstream>
 
 #include "gtest/gtest.h"
-#include "parser.h"
+#include "cpp/htmlparser/parser.h"
 
 using namespace std::string_literals;
 

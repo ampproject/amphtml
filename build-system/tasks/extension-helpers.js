@@ -4,7 +4,7 @@ const debounce = require('../common/debounce');
 const dedent = require('dedent');
 const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const legacyLatestVersions = require('../compile/bundles.legacy-latest-versions');
+const json5 = require('json5');
 const path = require('path');
 const wrappers = require('../compile/compile-wrappers');
 const {
@@ -38,6 +38,13 @@ const {parse: pathParse} = require('path');
 const {renameSelectorsToBentoTagNames} = require('./css/bento-css');
 const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
+
+const legacyLatestVersions = json5.parse(
+  fs.readFileSync(
+    require.resolve('../compile/bundles.legacy-latest-versions.jsonc'),
+    'utf8'
+  )
+);
 
 /**
  * Extensions to build when `--extensions=inabox`.
@@ -170,7 +177,10 @@ function setExtensionsToBuildFromDocuments(examples) {
  * @return {!Array<string>}
  */
 function getExtensionsToBuild(preBuild = false) {
-  extensionsToBuild = argv.core_runtime_only ? [] : DEFAULT_EXTENSION_SET;
+  extensionsToBuild =
+    argv.core_runtime_only || argv.bento_runtime_only
+      ? []
+      : DEFAULT_EXTENSION_SET;
   if (argv.extensions) {
     if (typeof argv.extensions !== 'string') {
       log(red('ERROR:'), 'Missing list of extensions.');
@@ -452,10 +462,10 @@ async function buildExtension(name, version, hasCss, options, extraGlobs) {
     return;
   }
 
-  if (options.bento) {
-    await buildBentoExtensionJs(extDir, name, options);
-  }
-  await buildExtensionJs(extDir, name, options);
+  await Promise.all([
+    maybeBuildBentoExtensionJs(extDir, name, options),
+    buildExtensionJs(extDir, name, {...options, bento: false}),
+  ]);
 }
 
 /**
@@ -478,19 +488,19 @@ async function buildNpmCss(extDir, options) {
   endBuildStep('Wrote CSS', `${options.name} → styles.css`, startCssTime);
 }
 
-/** @type {TransformCache} */
+/** @type {TransformCache<string>} */
 let jssCache;
 
 /**
  * Returns the minified CSS for a .jss.js file.
  *
  * @param {string} jssFile
- * @return {Promise<string|Buffer>}
+ * @return {Promise<string>}
  */
 async function getCssForJssFile(jssFile) {
   // Lazily instantiate the TransformCache
   if (!jssCache) {
-    jssCache = new TransformCache('.jss-cache', '.css');
+    jssCache = new TransformCache('.jss-cache');
   }
 
   const {contents, hash} = await batchedRead(jssFile);
@@ -661,11 +671,20 @@ function buildBinaries(extDir, binaries, options) {
  * @param {!Object} options
  * @return {!Promise}
  */
-async function buildBentoExtensionJs(dir, name, options) {
+async function maybeBuildBentoExtensionJs(dir, name, options) {
+  if (!options.bento) {
+    return;
+  }
   const bentoName = getBentoName(name);
   return buildExtensionJs(dir, bentoName, {
     ...options,
+    // Use esbuild since Closure does not use a different babel config for
+    // Bento elements.
+    esbuild: true,
     wrapper: 'bento',
+    babelCaller: options.minify
+      ? 'bento-element-minified'
+      : 'bento-element-unminified',
     filename: await getBentoBuildFilename(
       dir,
       bentoName,

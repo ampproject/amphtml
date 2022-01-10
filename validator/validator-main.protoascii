@@ -1377,6 +1377,8 @@ tags: {
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
       protocol: "line"
+      # (https://docs.microsoft.com/en-us/windows/uwp/launch-resume/launch-default-app#microsoft-edge-uri-scheme)
+      protocol: "microsoft-edge"
       protocol: "skype"
       protocol: "sms"
       protocol: "snapchat"
@@ -1826,6 +1828,7 @@ tags: {
   spec_name: "Standard Img"
   descriptive_name: "img"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   attrs: {
     name: "decoding"
     value_casei: "async"
@@ -1839,6 +1842,7 @@ tags: {
   spec_name: "Hero Img"
   descriptive_name: "img"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   attrs: {
     name: "data-hero"
     mandatory: true
@@ -1857,6 +1861,7 @@ tags: {
   spec_name: "Img using srcset"
   descriptive_name: "img"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   attrs: {
     name: "decoding"
     value_casei: "async"
@@ -1873,6 +1878,7 @@ tags: {
   spec_name: "Standard Image"
   descriptive_name: "img"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   attrs: {
     name: "decoding"
     value_casei: "async"
@@ -1886,6 +1892,7 @@ tags: {
   spec_name: "Hero Image"
   descriptive_name: "img"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   attrs: {
     name: "data-hero"
     mandatory: true
@@ -1903,6 +1910,7 @@ tags: {
   tag_name: "IMAGE"
   spec_name: "Image using srcset"
   disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
   descriptive_name: "img"
   attrs: {
     name: "decoding"
@@ -5154,6 +5162,7 @@ attr_lists: {
   attrs: { name: "aria-labelledby" }
   attrs: { name: "aria-level" }
   attrs: { name: "aria-live" }
+  attrs: { name: "aria-modal" }
   attrs: { name: "aria-multiline" }
   attrs: { name: "aria-multiselectable" }
   attrs: { name: "aria-orientation" }

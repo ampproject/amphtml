@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
-import {useRenderer} from '#preact/component';
+import {useRenderer} from '#preact/component/renderer';
 
 describes.sandboxed('useRenderer', {}, (env) => {
   function Component({data, render}) {

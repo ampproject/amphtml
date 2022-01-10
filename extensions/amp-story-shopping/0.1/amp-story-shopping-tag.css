@@ -13,6 +13,23 @@ amp-story-shopping-tag {
   --i-amphtml-shopping-tag-backdrop-filter: blur(20px);
 }
 
+.amp-story-shopping-product-tag-text {
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  line-height: 15.4px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Maintains the dot position in RTL mode */
+[dir=rtl].amp-story-shopping-tag-inner {
+  flex-flow: row-reverse !important;
+}
+
+[dir=rtl] .amp-story-shopping-tag-dot {
+  margin-inline-start: 4px !important;
+}
+
 .amp-story-shopping-tag-inner {
   height: 36px !important;
   display: flex !important;
@@ -30,6 +47,7 @@ amp-story-shopping-tag {
   align-items: center !important;
   justify-content: center !important;
   margin-inline-end: 4px !important;
+  flex-shrink: 0 !important;
   backdrop-filter: var(--i-amphtml-shopping-tag-backdrop-filter) !important;
 }
 
@@ -60,6 +78,7 @@ amp-story-shopping-tag {
   justify-content: center !important;
   background-color: rgba(0, 0, 0, 0.6) !important;
   border-radius: 100% !important;
+  flex-shrink: 0 !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg width="12" height="12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.49 5.755 6.24.505a1.16 1.16 0 0 0-.823-.338H1.334A1.17 1.17 0 0 0 .167 1.333v4.084c0 .32.128.612.344.828l5.25 5.25c.21.21.502.338.823.338.32 0 .612-.128.822-.344l4.083-4.083a1.14 1.14 0 0 0 .345-.823c0-.32-.134-.618-.345-.828ZM2.208 3.083a.874.874 0 1 1 0-1.75.874.874 0 1 1 0 1.75Z" fill="#fff"/></svg>') !important;
   background-repeat: no-repeat !important;
   background-position: center !important;

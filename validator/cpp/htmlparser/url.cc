@@ -1,6 +1,6 @@
-#include "url.h"
+#include "cpp/htmlparser/url.h"
 
-#include "strings.h"
+#include "cpp/htmlparser/strings.h"
 
 namespace htmlparser {
 
