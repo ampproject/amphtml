@@ -114,7 +114,6 @@
     "eslint-plugin-react": "7.26.1",
     "eslint-plugin-react-hooks": "4.2.0",
     "eslint-plugin-sort-destructure-keys": "1.4.0",
-    "eslint-plugin-sort-requires": "2.1.0",
     "esprima": "4.0.1",
     "event-stream": "4.0.1",
     "events": "3.3.0",

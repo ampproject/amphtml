@@ -15,8 +15,8 @@
  * ⚠️ Only use standard node modules.
  * This file cannot depend on `npm install`.
  */
-const https = require('https');
 const {readdir} = require('fs').promises;
+const https = require('https');
 const {relative} = require('path');
 const {RotationItemDef, TemplateDef} = require('./types');
 

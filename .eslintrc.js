@@ -39,7 +39,6 @@ module.exports = {
     'react',
     'react-hooks',
     'sort-destructure-keys',
-    'sort-requires',
     '@typescript-eslint',
   ],
   'env': {
@@ -342,7 +341,6 @@ module.exports = {
         'ignoreDeclarationSort': true,
       },
     ],
-    // 'sort-requires/sort-requires': 2,
   },
   'overrides': [
     {
