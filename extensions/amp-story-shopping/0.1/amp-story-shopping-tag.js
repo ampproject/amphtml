@@ -163,12 +163,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
                 {this.tagData_['product-tag-text']}
               </span>
             )) ||
-              formatI18nNumber(
-                this.localizationService_,
-                this.element,
-                this.tagData_['product-price-currency'],
-                this.tagData_['product-price']
-              )}
+              new Intl.NumberFormat(
+                this.localizationService_.getLanguageCodesForElement(
+                  this.element_
+                )[0],
+                {
+                  style: 'currency',
+                  currency: this.tagData_['product-price-currency'],
+                }
+              ).format(this.tagData_['product-price'])}
           </span>
         </span>
       </div>
