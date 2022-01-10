@@ -13,6 +13,8 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
+import {formatI18nNumber, loadFonts} from './amp-story-shopping';
+
 /** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
 const FONTS_TO_LOAD = [
   {
@@ -45,7 +47,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.loadFonts_();
+    loadFonts(this.win, FONTS_TO_LOAD);
     this.element.setAttribute('role', 'button');
 
     return Promise.all([
@@ -161,15 +163,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
                 {this.tagData_['product-tag-text']}
               </span>
             )) ||
-              new Intl.NumberFormat(
-                this.localizationService_.getLanguageCodesForElement(
-                  this.element_
-                )[0],
-                {
-                  style: 'currency',
-                  currency: this.tagData_['product-price-currency'],
-                }
-              ).format(this.tagData_['product-price'])}
+              formatI18nNumber(
+                this.localizationService_,
+                this.element,
+                this.tagData_['product-price-currency'],
+                this.tagData_['product-price']
+              )}
           </span>
         </span>
       </div>
@@ -202,16 +201,5 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         this.styleTagText_();
       }
     );
-  }
-
-  /** @private */
-  loadFonts_() {
-    if (this.win.document.fonts && FontFace) {
-      FONTS_TO_LOAD.forEach(({family, src, style = 'normal', weight}) =>
-        new FontFace(family, src, {weight, style})
-          .load()
-          .then((font) => this.win.document.fonts.add(font))
-      );
-    }
   }
 }
