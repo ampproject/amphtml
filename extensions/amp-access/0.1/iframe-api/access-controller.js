@@ -9,12 +9,12 @@
 export class AccessController {
   /**
    * Check origin, protocol and configuration and initialize controller.
-   * @param {string} origin
-   * @param {string} protocol
-   * @param {!JsonObject} config
+   * @param {string} origin_unused
+   * @param {string} protocol_unused
+   * @param {!JsonObject} config_unused
    * @return {!Promise|undefined}
    */
-  connect(origin, protocol, config) {}
+  connect(origin_unused, protocol_unused, config_unused) {}
 
   /**
    * Authorize document.
