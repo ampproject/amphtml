@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 import {format} from 'date-fns';
 import {mount} from 'enzyme';
+import {RRule} from 'rrule';
 
 import * as Preact from '#preact';
 
@@ -440,6 +441,11 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
 
     it('disables dates using RFC 5545 RRULEs', () => {
+      const rrule = new RRule({
+        freq: RRule.WEEKLY,
+        byweekday: RRule.SA,
+        dtstart: new Date(2022, 0),
+      });
       const expectedBlockedDates = [
         new Date(2022, 0, 1),
         new Date(2022, 0, 8),
@@ -451,7 +457,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="single"
           initialVisibleMonth={new Date(2022, 0)}
-          blocked="FREQ=WEEKLY;WKST=SU;BYDAY=SA"
+          blocked={rrule.toString()}
         ></DatePicker>
       );
 
@@ -466,6 +472,11 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
 
     it('disables dates using RFC 5545 RRULEs and Date objects', () => {
+      const rrule = new RRule({
+        freq: RRule.WEEKLY,
+        byweekday: RRule.SA,
+        dtstart: new Date(2022, 0),
+      });
       const expectedBlockedDates = [
         new Date(2022, 0, 1),
         new Date(2022, 0, 2),
@@ -478,7 +489,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="single"
           initialVisibleMonth={new Date(2022, 0)}
-          blocked={['FREQ=WEEKLY;WKST=SU;BYDAY=SA', new Date(2022, 0, 2)]}
+          blocked={[rrule.toString(), new Date(2022, 0, 2)]}
         ></DatePicker>
       );
 
@@ -604,6 +615,11 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
 
     it('highlights dates using RFC 5545 RRULEs', () => {
+      const rrule = new RRule({
+        freq: RRule.WEEKLY,
+        byweekday: RRule.SA,
+        dtstart: new Date(2022, 0),
+      });
       const expectedHighlightedDates = [
         new Date(2022, 0, 1),
         new Date(2022, 0, 8),
@@ -615,7 +631,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="single"
           initialVisibleMonth={new Date(2022, 0)}
-          highlighted="FREQ=WEEKLY;WKST=SU;BYDAY=SA"
+          highlighted={rrule.toString()}
         ></DatePicker>
       );
 
