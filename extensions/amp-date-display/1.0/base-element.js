@@ -7,8 +7,8 @@ import {createParseAttrsWithPrefix} from '#preact/parse-props';
 import {BentoDateDisplay} from './component';
 
 /**
- * @param {string} str
- * @return string with escaped backticks (`)
+ * @param {string} str string with backticks
+ * @return {string} string with escaped backticks for use in template strings
  */
 function escapeBackticks(str) {
   return str.replaceAll('`', '\\`');
