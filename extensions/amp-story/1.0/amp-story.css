@@ -22,7 +22,7 @@
   }
 }
 
-body {
+html[transformed] body {
   animation:none !important;
   -webkit-animation: none !important;
   -moz-animation: none !important;
