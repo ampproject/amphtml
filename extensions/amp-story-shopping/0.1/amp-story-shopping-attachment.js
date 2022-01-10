@@ -77,19 +77,21 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @return {!Promise}
    */
   open(shouldAnimate = true) {
-    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
-
-    const shoppingDataForPage = Array.from(this.shoppingTags_).map(
-      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-tag-id')]
-    );
-
-    const plpTemplate = this.renderPlpTemplate_(shoppingDataForPage);
-
-    this.templateContainer_.replaceChildren(plpTemplate);
+    this.setTemplate_();
 
     return this.attachmentEl_
       .getImpl()
       .then((impl) => impl.open(shouldAnimate));
+  }
+
+  /** @private */
+  setTemplate_() {
+    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
+    const shoppingDataForPage = Array.from(this.shoppingTags_).map(
+      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-tag-id')]
+    );
+    const plpTemplate = this.renderPlpTemplate_(shoppingDataForPage);
+    this.templateContainer_.replaceChildren(plpTemplate);
   }
 
   /**
