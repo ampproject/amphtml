@@ -1,5 +1,5 @@
-#ifndef AMPVALIDATOR__UTF8_UTIL_H_
-#define AMPVALIDATOR__UTF8_UTIL_H_
+#ifndef CPP_ENGINE_UTF8_UTIL_H_
+#define CPP_ENGINE_UTF8_UTIL_H_
 
 #include <string>
 #include <vector>
@@ -37,4 +37,4 @@ class CodePointTraverser {
 
 }  // namespace amp::validator::utf8_util
 
-#endif  // AMPVALIDATOR__UTF8_UTIL_H_
+#endif  // CPP_ENGINE_UTF8_UTIL_H_

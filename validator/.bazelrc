@@ -1,0 +1,11 @@
+# Defaults to optimized build.
+build -c opt
+
+# Tested and compiles in llvm.
+build --repo_env=CC=clang
+
+# Contains c++17 features.
+build --cxxopt='-std=c++17'
+
+# Enabled operator new and operator delete for custom allocators.
+build --cxxopt='-fsized-deallocation'

@@ -1,14 +1,15 @@
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
-import {MessageType} from '#core/3p-frame-messaging';
-import {toWin} from '#core/window';
-import {ContainWrapper, useIntersectionObserver} from '#preact/component';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {getWin} from '#core/window';
+import {ContainWrapper} from '#preact/component';
+import {useIntersectionObserver} from '#preact/component/intersection-observer';
 import {setStyle} from '#core/dom/style';
 import {useMergeRefs} from '#preact/utils';
 import {
   DEFAULT_THRESHOLD,
   cloneEntryForCrossOrigin,
-} from '../../../src/utils/intersection-observer-3p-host';
+} from '#utils/intersection-observer-3p-host';
 import {postMessage} from '../../../src/iframe-helper';
 import {dict} from '#core/types/object';
 
@@ -45,7 +46,7 @@ export function BentoIframe({
     }
     postMessage(
       iframe,
-      MessageType.INTERSECTION,
+      MessageType_Enum.INTERSECTION,
       dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
       targetOrigin
     );
@@ -58,12 +59,12 @@ export function BentoIframe({
     }
     if (
       event.source !== iframe.contentWindow ||
-      event.data?.type !== MessageType.SEND_INTERSECTIONS
+      event.data?.type !== MessageType_Enum.SEND_INTERSECTIONS
     ) {
       return;
     }
     targetOriginRef.current = event.origin;
-    const win = toWin(iframe.ownerDocument.defaultView);
+    const win = getWin(iframe);
     observerRef.current = new win.IntersectionObserver(viewabilityCb, {
       threshold: DEFAULT_THRESHOLD,
     });
@@ -75,7 +76,7 @@ export function BentoIframe({
     if (!iframe) {
       return;
     }
-    const win = toWin(iframe.ownerDocument.defaultView);
+    const win = getWin(iframe);
     win.addEventListener('message', handleSendIntersectionsPostMessage);
     let observer = observerRef.current;
 
@@ -129,7 +130,7 @@ export function BentoIframe({
 
   const handleEmbedSizePostMessage = useCallback(
     (event) => {
-      if (event.data?.type !== MessageType.EMBED_SIZE) {
+      if (event.data?.type !== MessageType_Enum.EMBED_SIZE) {
         return;
       }
       dataRef.current = event.data;
@@ -150,7 +151,7 @@ export function BentoIframe({
     if (!iframe) {
       return;
     }
-    const win = toWin(iframe.ownerDocument.defaultView);
+    const win = getWin(iframe);
     if (!win) {
       return;
     }

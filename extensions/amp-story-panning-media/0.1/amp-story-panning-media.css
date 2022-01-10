@@ -18,13 +18,10 @@ amp-story-panning-media {
 
 amp-story-panning-media amp-img {
   backface-visibility: hidden !important;
-  /* Width explicitly set for mobile chrome, desktop safari & desktop firefox. */
-  width: 100% !important;
-  height: 100% !important;
 }
 
 amp-story-grid-layer[template="fill"] amp-story-panning-media amp-img img {
   /* override for layout=fill */
   position: relative !important;
-  display: block !important;
+  display: inline-block !important;
 }

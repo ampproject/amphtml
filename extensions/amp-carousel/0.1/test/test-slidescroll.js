@@ -1,11 +1,13 @@
 import '../amp-carousel';
 import {ActionService} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {AmpSlideScroll} from '../slidescroll';
+import {buildDom} from '../build-dom';
 
 describes.realWin(
   'SlideScroll',
@@ -27,6 +29,14 @@ describes.realWin(
       resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
+    /**
+     * @param {boolean=} opt_hasLooping
+     * @param {number=} opt_slideCount
+     * @param {boolean=} opt_attachToDom
+     * @param {boolean=} opt_hasAutoplay
+     * @param {boolean=} opt_autoplayLoops
+     * @return {!Element}
+     */
     function getAmpSlideScroll(
       opt_hasLooping,
       opt_slideCount = 5,
@@ -127,15 +137,15 @@ describes.realWin(
 
       const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
-      impl.goCallback(1);
+      impl.go(1);
       expect(showSlideSpy).to.have.been.calledWith(1);
       expect(showSlideSpy).to.be.calledOnce;
 
-      impl.goCallback(-1);
+      impl.go(-1);
       expect(showSlideSpy).to.have.been.calledWith(0);
       expect(showSlideSpy).to.have.callCount(2);
 
-      impl.goCallback(0);
+      impl.go(0);
       expect(showSlideSpy).to.have.callCount(2);
     });
 
@@ -353,76 +363,76 @@ describes.realWin(
     it('should show/hide the correct controls', async () => {
       const ampSlideScroll = await getAmpSlideScroll();
       const impl = await ampSlideScroll.getImpl();
+      const controls = impl.controls_;
+      const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
 
       impl.showSlide_(1);
-      expect(impl.hasNext()).to.be.true;
-      expect(impl.hasPrev()).to.be.true;
-      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
-      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+      expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
+      expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
       impl.showSlide_(0);
-      expect(impl.hasNext()).to.be.true;
-      expect(impl.hasPrev()).to.be.false;
-      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
-      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
+      expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
+      expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
 
       impl.showSlide_(4);
-      expect(impl.hasNext()).to.be.false;
-      expect(impl.hasPrev()).to.be.true;
-      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.true;
-      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+      expect(nextBtn.classList.contains('amp-disabled')).to.be.true;
+      expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
       // Verify aria roles for the button
-      expect(impl.nextButton_.getAttribute('role')).equal('button');
-      expect(impl.prevButton_.getAttribute('role')).equal('button');
+      expect(nextBtn.getAttribute('role')).equal('button');
+      expect(prevBtn.getAttribute('role')).equal('button');
     });
 
     it('should properly style controls; focusable but not visible', async () => {
       const ampSlideScroll = await getAmpSlideScroll();
       const impl = await ampSlideScroll.getImpl();
+      const controls = impl.controls_;
+      const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
 
       impl.showSlide_(0);
-      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
-      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
-      expect(impl.prevButton_.tabIndex).to.equal(-1);
-      expect(impl.nextButton_.tabIndex).to.equal(0);
-      expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
-      expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
+      expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
+      expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
+      expect(prevBtn.tabIndex).to.equal(-1);
+      expect(nextBtn.tabIndex).to.equal(0);
+      expect(isScreenReaderHidden(prevBtn)).to.be.false;
+      expect(isScreenReaderHidden(nextBtn)).to.be.false;
 
-      impl.nextButton_.focus();
-      expect(doc.activeElement).to.equal(impl.nextButton_);
+      nextBtn.focus();
+      expect(doc.activeElement).to.equal(nextBtn);
 
       impl.showSlide_(4);
-      expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.true;
-      expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
-      expect(impl.prevButton_.tabIndex).to.equal(0);
-      expect(impl.nextButton_.tabIndex).to.equal(-1);
-      expect(isScreenReaderHidden(impl.prevButton_)).to.be.false;
-      expect(isScreenReaderHidden(impl.nextButton_)).to.be.false;
-      expect(doc.activeElement).to.equal(impl.nextButton_);
+      expect(nextBtn.classList.contains('amp-disabled')).to.be.true;
+      expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
+      expect(prevBtn.tabIndex).to.equal(0);
+      expect(nextBtn.tabIndex).to.equal(-1);
+      expect(isScreenReaderHidden(prevBtn)).to.be.false;
+      expect(isScreenReaderHidden(nextBtn)).to.be.false;
+      expect(doc.activeElement).to.equal(nextBtn);
     });
 
     it('should show focus outline and border on next and prev buttons', async () => {
       const ampSlideScroll = await getAmpSlideScroll();
       const impl = await ampSlideScroll.getImpl();
+      const controls = impl.controls_;
+      const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
 
       impl.showSlide_(1);
 
-      impl.prevButton_.focus();
-      expect(doc.activeElement).to.equal(impl.prevButton_);
-      expect(win.getComputedStyle(impl.prevButton_).outline).to.equal(
+      prevBtn.focus();
+      expect(doc.activeElement).to.equal(prevBtn);
+      expect(win.getComputedStyle(prevBtn).outline).to.equal(
         'rgb(255, 255, 255) solid 1px'
       );
-      expect(win.getComputedStyle(impl.prevButton_).border).to.equal(
+      expect(win.getComputedStyle(prevBtn).border).to.equal(
         '1px solid rgb(0, 0, 0)'
       );
 
-      impl.nextButton_.focus();
-      expect(doc.activeElement).to.equal(impl.nextButton_);
-      expect(win.getComputedStyle(impl.nextButton_).outline).to.equal(
+      nextBtn.focus();
+      expect(doc.activeElement).to.equal(nextBtn);
+      expect(win.getComputedStyle(nextBtn).outline).to.equal(
         'rgb(255, 255, 255) solid 1px'
       );
-      expect(win.getComputedStyle(impl.nextButton_).border).to.equal(
+      expect(win.getComputedStyle(nextBtn).border).to.equal(
         '1px solid rgb(0, 0, 0)'
       );
     });
@@ -833,7 +843,10 @@ describes.realWin(
           impl,
           'hideRestOfTheSlides_'
         );
-        const setControlsStateSpy = env.sandbox.spy(impl, 'setControlsState');
+        const setControlsStateSpy = env.sandbox.spy(
+          impl.controls_,
+          'setControlsState'
+        );
 
         expect(impl.slides_[0].getAttribute('aria-hidden')).to.equal('false');
         expect(impl.slides_[1].getAttribute('aria-hidden')).to.equal('true');
@@ -1040,24 +1053,20 @@ describes.realWin(
       it('should show/hide the correct controls when looping', async () => {
         const ampSlideScroll = await getAmpSlideScroll(true);
         const impl = await ampSlideScroll.getImpl();
+        const controls = impl.controls_;
+        const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
 
         impl.showSlide_(1);
-        expect(impl.hasNext()).to.be.true;
-        expect(impl.hasPrev()).to.be.true;
-        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
-        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+        expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
+        expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
         impl.showSlide_(0);
-        expect(impl.hasNext()).to.be.true;
-        expect(impl.hasPrev()).to.be.true;
-        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
-        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+        expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
+        expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
         impl.showSlide_(4);
-        expect(impl.hasNext()).to.be.true;
-        expect(impl.hasPrev()).to.be.true;
-        expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
-        expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+        expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
+        expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
       });
 
       it('should set the correct scrollLeft when there is only one slide', async () => {
@@ -1180,15 +1189,15 @@ describes.realWin(
 
         const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
 
-        impl.goCallback(-1);
+        impl.go(-1);
         expect(showSlideSpy).to.have.been.calledWith(4);
         expect(showSlideSpy).to.be.calledOnce;
 
-        impl.goCallback(1);
+        impl.go(1);
         expect(showSlideSpy).to.have.been.calledWith(0);
         expect(showSlideSpy).to.have.callCount(2);
 
-        impl.goCallback(1);
+        impl.go(1);
         expect(showSlideSpy).to.have.been.calledWith(1);
         expect(showSlideSpy).to.have.callCount(3);
       });
@@ -1219,20 +1228,20 @@ describes.realWin(
 
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
-        impl.goCallback(-1, /* animate */ false);
+        impl.go(-1, /* animate */ false);
         expect(triggerSpy).to.have.been.calledWith(
           ampSlideScroll,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 4}),
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
 
-        impl.goCallback(1, /* animate */ false);
+        impl.go(1, /* animate */ false);
         expect(triggerSpy).to.have.been.calledWith(
           ampSlideScroll,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 0}),
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
       });
 
@@ -1243,15 +1252,15 @@ describes.realWin(
         let event;
         win.document.addEventListener('slideChange', (e) => (event = e));
 
-        impl.goCallback(-1, /* animate */ false);
+        impl.go(-1, /* animate */ false);
         expect(win.document.eventListeners.count('slideChange')).to.equal(1);
         expect(event.data.index).to.equal(4);
-        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+        expect(event.data.actionTrust).to.equal(ActionTrust_Enum.HIGH);
 
-        impl.goCallback(1, /* animate */ false);
+        impl.go(1, /* animate */ false);
         expect(win.document.eventListeners.count('slideChange')).to.equal(1);
         expect(event.data.index).to.equal(0);
-        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+        expect(event.data.actionTrust).to.equal(ActionTrust_Enum.HIGH);
       });
 
       it('should goToSlide on action', async () => {
@@ -1459,6 +1468,66 @@ describes.realWin(
         });
       });
     });
+
+    describe('buildDom', () => {
+      it('buildDom and buildCallback should result in the same outerHTML', async () => {
+        const el1 = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        const el2 = el1.cloneNode(/* deep */ true);
+        const impl = new AmpSlideScroll(el1);
+        impl.setupSlideBehavior_ = () => {};
+        await impl.buildCallback();
+        buildDom(el2);
+
+        expect(el2.outerHTML).equal(el1.outerHTML);
+      });
+
+      it('buildCallback should assign ivars even when server rendered', async () => {
+        const el1 = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        buildDom(el1);
+        el1.setAttribute('i-amphtml-ssr', '');
+        const impl = new AmpSlideScroll(el1);
+        impl.setupSlideBehavior_ = () => {};
+        await impl.buildCallback();
+
+        expect(impl.slides_).length(5);
+        expect(impl.slideWrappers_).length(5);
+        expect(impl.slidesContainer_).ok;
+      });
+
+      it('buildDom should throw if invalid server rendered dom', async () => {
+        const carousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        carousel.setAttribute('i-amphtml-ssr', '');
+        expect(() => buildDom(carousel)).throws(/Invalid server render/);
+      });
+
+      it('buildDom should not modify dom for server rendered element', async () => {
+        const carousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        buildDom(carousel);
+        carousel.setAttribute('i-amphtml-ssr', '');
+
+        const before = carousel.outerHTML;
+        buildDom(carousel);
+        const after = carousel.outerHTML;
+
+        expect(before).equal(after);
+      });
+    });
   }
 );
 
@@ -1497,7 +1566,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       );
       expect(element.enqueAction).to.be.calledWith(
         env.sandbox.match({
@@ -1508,7 +1577,7 @@ describes.realWin(
           method: 'goToSlide',
           node: element,
           source: 'source',
-          trust: ActionTrust.HIGH,
+          trust: ActionTrust_Enum.HIGH,
         })
       );
 
@@ -1520,7 +1589,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       );
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.match(

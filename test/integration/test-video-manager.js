@@ -6,10 +6,11 @@ import {toArray} from '#core/types/array';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
+import {listenOncePromise} from '#utils/event-helper';
+
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 
-import {listenOncePromise} from '../../src/event-helper';
-import {PlayingStates, VideoEvents} from '../../src/video-interface';
+import {PlayingStates_Enum, VideoEvents_Enum} from '../../src/video-interface';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.
 // See #11588.
@@ -93,7 +94,7 @@ describes.sandboxed
           entry.isVisible_ = false;
 
           const curState = videoManager.getPlayingState(impl);
-          expect(curState).to.equal(PlayingStates.PAUSED);
+          expect(curState).to.equal(PlayingStates_Enum.PAUSED);
         });
 
         it('autoplay - should be PLAYING_MANUAL if user interacted', () => {
@@ -107,9 +108,9 @@ describes.sandboxed
           entry.loaded_ = true;
 
           impl.play();
-          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+          return listenOncePromise(video, VideoEvents_Enum.PLAYING).then(() => {
             const curState = videoManager.getPlayingState(impl);
-            expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+            expect(curState).to.equal(PlayingStates_Enum.PLAYING_MANUAL);
           });
         });
 
@@ -125,9 +126,9 @@ describes.sandboxed
           entry.loaded_ = true;
           entry.videoVisibilityChanged_();
 
-          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+          return listenOncePromise(video, VideoEvents_Enum.PLAYING).then(() => {
             const curState = videoManager.getPlayingState(impl);
-            expect(curState).to.equal(PlayingStates.PLAYING_AUTO);
+            expect(curState).to.equal(PlayingStates_Enum.PLAYING_AUTO);
           });
         });
 
@@ -157,12 +158,12 @@ describes.sandboxed
             entry.videoVisibilityChanged_();
 
             return new Promise(function (resolve, reject) {
-              listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+              listenOncePromise(video, VideoEvents_Enum.PLAYING).then(() => {
                 reject();
               });
               setTimeout(function () {
                 const curState = videoManager.getPlayingState(impl);
-                expect(curState).to.equal(PlayingStates.PAUSED);
+                expect(curState).to.equal(PlayingStates_Enum.PAUSED);
                 resolve('Video did not autoplay as expected');
               }, 1000);
             });
@@ -181,9 +182,9 @@ describes.sandboxed
           entry.isVisible_ = false;
 
           impl.pause();
-          return listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+          return listenOncePromise(video, VideoEvents_Enum.PAUSE).then(() => {
             const curState = videoManager.getPlayingState(impl);
-            expect(curState).to.equal(PlayingStates.PAUSED);
+            expect(curState).to.equal(PlayingStates_Enum.PAUSED);
           });
         });
 
@@ -200,8 +201,14 @@ describes.sandboxed
         it('autoplay - there should be user interaction if the ad was unmuted', async () => {
           video.setAttribute('autoplay', '');
 
-          const playingPromise = listenOncePromise(video, VideoEvents.PLAYING);
-          const unmutedPromise = listenOncePromise(video, VideoEvents.UNMUTED);
+          const playingPromise = listenOncePromise(
+            video,
+            VideoEvents_Enum.PLAYING
+          );
+          const unmutedPromise = listenOncePromise(
+            video,
+            VideoEvents_Enum.UNMUTED
+          );
 
           videoManager.register(impl);
           const entry = videoManager.getEntry_(impl);
@@ -211,7 +218,7 @@ describes.sandboxed
 
           expect(videoManager.userInteracted(impl)).to.be.false;
 
-          dispatchCustomEvent(video, VideoEvents.AD_START);
+          dispatchCustomEvent(video, VideoEvents_Enum.AD_START);
 
           await playingPromise;
 
@@ -225,14 +232,17 @@ describes.sandboxed
           video.setAttribute('autoplay', '');
           video.setAttribute('controls', '');
 
-          const playingPromise = listenOncePromise(video, VideoEvents.PLAYING);
+          const playingPromise = listenOncePromise(
+            video,
+            VideoEvents_Enum.PLAYING
+          );
 
           videoManager.register(impl);
           const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = true;
           entry.loaded_ = true;
 
-          dispatchCustomEvent(video, VideoEvents.AD_START);
+          dispatchCustomEvent(video, VideoEvents_Enum.AD_START);
 
           entry.autoplayLoadedVideoVisibilityChanged_();
 
@@ -253,7 +263,10 @@ describes.sandboxed
           video.setAttribute('autoplay', '');
           video.setAttribute('controls', '');
 
-          const playingPromise = listenOncePromise(video, VideoEvents.PLAYING);
+          const playingPromise = listenOncePromise(
+            video,
+            VideoEvents_Enum.PLAYING
+          );
 
           videoManager.register(impl);
           const entry = videoManager.getEntry_(impl);
@@ -291,7 +304,7 @@ describes.sandboxed
           entry.isVisible_ = false;
           entry.videoVisibilityChanged_();
           const curState = videoManager.getPlayingState(impl);
-          expect(curState).to.equal(PlayingStates.PAUSED);
+          expect(curState).to.equal(PlayingStates_Enum.PAUSED);
         });
 
         it('no autoplay - should pause if user presses pause after playing', () => {
@@ -300,11 +313,11 @@ describes.sandboxed
           entry.isVisible_ = false;
 
           impl.play();
-          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+          return listenOncePromise(video, VideoEvents_Enum.PLAYING).then(() => {
             impl.pause();
-            listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+            listenOncePromise(video, VideoEvents_Enum.PAUSE).then(() => {
               const curState = videoManager.getPlayingState(impl);
-              expect(curState).to.equal(PlayingStates.PAUSED);
+              expect(curState).to.equal(PlayingStates_Enum.PAUSED);
             });
           });
         });
@@ -315,9 +328,9 @@ describes.sandboxed
           entry.isVisible_ = false;
 
           impl.play();
-          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+          return listenOncePromise(video, VideoEvents_Enum.PLAYING).then(() => {
             const curState = videoManager.getPlayingState(impl);
-            expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+            expect(curState).to.equal(PlayingStates_Enum.PLAYING_MANUAL);
           });
         });
       }
@@ -480,7 +493,7 @@ function createFakeVideoPlayerClass(win) {
       this.element.appendChild(iframe);
 
       return Promise.resolve().then(() => {
-        dispatchCustomEvent(this.element, VideoEvents.LOAD);
+        dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
       });
     }
 
@@ -505,10 +518,10 @@ function createFakeVideoPlayerClass(win) {
      */
     play(unusedIsAutoplay) {
       Promise.resolve().then(() => {
-        dispatchCustomEvent(this.element, VideoEvents.PLAYING);
+        dispatchCustomEvent(this.element, VideoEvents_Enum.PLAYING);
         this.timeoutId_ = this.timer_.delay(() => {
           this.currentTime_ = this.duration_;
-          dispatchCustomEvent(this.element, VideoEvents.PAUSE);
+          dispatchCustomEvent(this.element, VideoEvents_Enum.PAUSE);
         }, this.length_);
       });
     }
@@ -518,7 +531,7 @@ function createFakeVideoPlayerClass(win) {
      */
     pause() {
       Promise.resolve().then(() => {
-        dispatchCustomEvent(this.element, VideoEvents.PAUSE);
+        dispatchCustomEvent(this.element, VideoEvents_Enum.PAUSE);
         this.timer_.cancel(this.timeoutId_);
       });
     }
@@ -528,7 +541,7 @@ function createFakeVideoPlayerClass(win) {
      */
     mute() {
       Promise.resolve().then(() => {
-        dispatchCustomEvent(this.element, VideoEvents.MUTED);
+        dispatchCustomEvent(this.element, VideoEvents_Enum.MUTED);
       });
     }
 
@@ -537,7 +550,7 @@ function createFakeVideoPlayerClass(win) {
      */
     unmute() {
       Promise.resolve().then(() => {
-        dispatchCustomEvent(this.element, VideoEvents.UNMUTED);
+        dispatchCustomEvent(this.element, VideoEvents_Enum.UNMUTED);
       });
     }
 

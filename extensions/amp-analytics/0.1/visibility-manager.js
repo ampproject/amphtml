@@ -1,6 +1,6 @@
 import {Services} from '#service';
 import {VisibilityModel} from './visibility-model';
-import {dev, user} from '../../../src/log';
+import {dev, user} from '#utils/log';
 import {dict, map} from '#core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getMinOpacity} from './opacity';

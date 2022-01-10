@@ -1,6 +1,7 @@
 import {Services} from '#service';
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
+
 import {addParamToUrl} from '../../../src/url';
 import {AmpAdNetworkBase} from '../../amp-a4a/0.1/amp-ad-network-base';
 import {

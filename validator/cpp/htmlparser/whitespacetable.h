@@ -1,5 +1,5 @@
-#ifndef HTMLPARSER__WHITESPACETABLE_H_
-#define HTMLPARSER__WHITESPACETABLE_H_
+#ifndef CPP_HTMLPARSER_WHITESPACETABLE_H_
+#define CPP_HTMLPARSER_WHITESPACETABLE_H_
 
 #include <array>
 
@@ -187,4 +187,4 @@ constexpr static std::array<std::array<uint8_t, 255>, 10> kWhitespaceTable {{
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__WHITESPACETABLE_H_
+#endif  // CPP_HTMLPARSER_WHITESPACETABLE_H_

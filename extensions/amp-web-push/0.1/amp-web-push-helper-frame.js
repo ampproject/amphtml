@@ -16,11 +16,12 @@
 
 import {parseQueryString} from '#core/types/string/url';
 
+import {initLogConstructor, setReportError, user} from '#utils/log';
+
 import {TAG} from './vars';
 import {WindowMessenger} from './window-messenger';
 
 import {reportError} from '../../../src/error-reporting';
-import {initLogConstructor, setReportError, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 
 initLogConstructor();

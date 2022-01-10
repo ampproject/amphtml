@@ -1,5 +1,6 @@
+import {Keys_Enum} from '#core/constants/key-codes';
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
@@ -10,13 +11,13 @@ import {
   realChildElements,
 } from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
-import {createCustomEvent, getDetail, listen} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
+import {createCustomEvent, getDetail, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 
 /**
  * @enum {string}
@@ -51,7 +52,7 @@ class AmpCarousel extends AMP.BaseElement {
           actionSource: this.getActionSource_(trust),
         });
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'toggleAutoplay',
@@ -61,8 +62,10 @@ class AmpCarousel extends AMP.BaseElement {
         const toggle = args ? args['toggleOn'] : undefined;
         this.toggleAutoplay_(toggle);
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
+    /** If the element is in an email document, allow its `goToSlide` action. */
+    this.action_.addToAllowlist('AMP-CAROUSEL', 'goToSlide', ['email']);
   }
 
   /** @param {!AmpElement} element */
@@ -161,8 +164,8 @@ class AmpCarousel extends AMP.BaseElement {
         this.onScrollPositionChanged_();
       }
     );
-    this.prevButton_.addEventListener('click', () => this.interactionPrev());
-    this.nextButton_.addEventListener('click', () => this.interactionNext());
+    this.setupButtonInteraction(this.nextButton_, () => this.interactionNext());
+    this.setupButtonInteraction(this.prevButton_, () => this.interactionPrev());
     this.handlePropagationInViewer_();
 
     const owners = Services.ownersForDoc(element);
@@ -204,6 +207,24 @@ class AmpCarousel extends AMP.BaseElement {
     }
 
     return this.mutateElement(() => {});
+  }
+
+  /**
+   * @param {!HTMLDivElement} button
+   * @param {*} onInteraction
+   */
+  setupButtonInteraction(button, onInteraction) {
+    button.addEventListener('click', onInteraction);
+    button.addEventListener('keydown', (event) => {
+      if (event.defaultPrevented) {
+        return;
+      }
+
+      if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
+        event.preventDefault();
+        onInteraction();
+      }
+    });
   }
 
   /** @override */
@@ -329,12 +350,12 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Gets the ActionSource to use for a given ActionTrust.
-   * @param {!ActionTrust} trust
+   * Gets the ActionSource to use for a given ActionTrust_Enum.
+   * @param {!ActionTrust_Enum} trust
    * @return {!ActionSource}
    */
   getActionSource_(trust) {
-    return trust >= ActionTrust.DEFAULT
+    return trust >= ActionTrust_Enum.DEFAULT
       ? ActionSource.GENERIC_HIGH_TRUST
       : ActionSource.GENERIC_LOW_TRUST;
   }
@@ -557,7 +578,7 @@ class AmpCarousel extends AMP.BaseElement {
     const data = dict({'index': index});
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+    const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;
     const dataWithActionTrust = dict({'index': index, 'actionTrust': trust});
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);

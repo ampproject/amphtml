@@ -7,10 +7,10 @@ import {
   TAG as THUMBNAILS_TAG,
 } from './amp-inline-gallery-thumbnails';
 import {BaseElement} from './base-element';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-inline-gallery';
@@ -23,7 +23,7 @@ class AmpInlineGallery extends BaseElement {
         isExperimentOn(this.win, 'bento-inline-gallery'),
       'expected global "bento" or specific "bento-inline-gallery" experiment to be enabled'
     );
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 }
 

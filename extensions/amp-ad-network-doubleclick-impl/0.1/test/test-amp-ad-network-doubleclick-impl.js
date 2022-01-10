@@ -11,7 +11,7 @@ import {
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import * as bytesUtils from '#core/types/string/bytes';
 
 import {toggleExperiment} from '#experiments';
@@ -1219,6 +1219,14 @@ for (const {config, name} of [
             /(\?|&)ptt=13(&|$)/
           );
         });
+
+        it('should set ppid parameter if set in json', () => {
+          impl.uiHandler = {isStickyAd: () => false};
+          element.setAttribute('json', '{"ppid": "testId"}');
+          return expect(impl.getAdUrl()).to.eventually.match(
+            /(\?|&)ppid=testId(&|$)/
+          );
+        });
       });
 
       describe('#getPageParameters', () => {
@@ -1713,7 +1721,7 @@ for (const {config, name} of [
         });
 
         it('should return safeframe if fluid', () => {
-          impl.isLayoutSupported(Layout.FLUID);
+          impl.isLayoutSupported(Layout_Enum.FLUID);
           expect(impl.getNonAmpCreativeRenderingMethod()).to.equal(
             XORIGIN_MODE.SAFEFRAME
           );

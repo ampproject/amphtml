@@ -1,11 +1,12 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {base64UrlDecodeToBytes} from '#core/types/string/base64';
 
 import {Services} from '#service';
 import {installRuntimeServices} from '#service/core-services';
 import {
-  ELEMENT_TYPE,
+  ELEMENT_TYPE_ENUM,
   Performance,
   installPerformanceService,
 } from '#service/performance-impl';
@@ -876,8 +877,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
 
   async function toggleVisibility(perf, on) {
     viewerVisibilityState = on
-      ? VisibilityState.VISIBLE
-      : VisibilityState.HIDDEN;
+      ? VisibilityState_Enum.VISIBLE
+      : VisibilityState_Enum.HIDDEN;
     perf.onAmpDocVisibilityChange_();
   }
 
@@ -1041,7 +1042,11 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       toggleVisibility(perf, false);
 
       const lcpEvents = perf.events_.filter(({label}) => label === 'lcp');
-      expect(lcpEvents.length).to.equal(1);
+      expect(lcpEvents.length).to.equal(2);
+      expect(lcpEvents).deep.include({
+        label: 'lcp',
+        delta: 12,
+      });
       expect(lcpEvents).deep.include({
         label: 'lcp',
         delta: 23,
@@ -1095,16 +1100,37 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       // Flush LCP again.
       toggleVisibility(perf, false);
 
+      // A textual paragraph
+      const p = document.createElement('p');
+      p.textContent = 'hello';
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'largest-contentful-paint',
+              startTime: 25,
+              element: p,
+            },
+          ];
+        },
+      });
+      // Flush LCP again.
+      toggleVisibility(perf, false);
+
       const lcptEvents = perf.events_.filter(({label}) =>
         label.startsWith('lcpt')
       );
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: ELEMENT_TYPE.image,
+        delta: ELEMENT_TYPE_ENUM.image,
       });
       expect(lcptEvents).deep.include({
         label: 'lcpt',
-        delta: ELEMENT_TYPE.carousel,
+        delta: ELEMENT_TYPE_ENUM.carousel,
+      });
+      expect(lcptEvents).deep.include({
+        label: 'lcpt',
+        delta: ELEMENT_TYPE_ENUM.text,
       });
     });
   });
@@ -1226,7 +1252,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
       });
 
-      viewerVisibilityState = VisibilityState.INACTIVE;
+      viewerVisibilityState = VisibilityState_Enum.INACTIVE;
       perf.onAmpDocVisibilityChange_();
 
       const clsEvents = perf.events_.filter((evt) =>
@@ -1373,7 +1399,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
   });
 });
 
-describes.realWin('log canonicalUrl', {amp: true}, (env) => {
+describes.realWin('log extraParams', {amp: true}, (env) => {
   let win;
   let perf;
   let viewerSendMessageStub;
@@ -1400,6 +1426,18 @@ describes.realWin('log canonicalUrl', {amp: true}, (env) => {
       expect(viewerSendMessageStub.lastCall.args[1].canonicalUrl).to.equal(
         canonicalUrl
       );
+    });
+  });
+
+  it('should add the random eventid to sendCsi', () => {
+    return perf.coreServicesAvailable().then(() => {
+      viewerSendMessageStub.reset();
+      perf.flush();
+      expect(viewerSendMessageStub.lastCall.args[0]).to.equal('sendCsi');
+      const {eventid} = viewerSendMessageStub.lastCall.args[1];
+      expect(() => {
+        base64UrlDecodeToBytes(eventid);
+      }).not.to.throw();
     });
   });
 });

@@ -3,7 +3,7 @@ import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
 import {Services} from '#service';
-import {devAssert, userAssert} from '../../../src/log';
+import {devAssert, userAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getResourceTiming} from './resource-timing';
 import {isArray, isFiniteNumber, isObject} from '#core/types';

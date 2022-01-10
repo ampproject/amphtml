@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
@@ -9,15 +10,13 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest, matches} from '#core/dom/query';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
-import {dev} from '../../../src/log';
-import {getAmpdoc} from '../../../src/service-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
-import {htmlFor} from '#core/dom/static-template';
+import {dev} from '#utils/log';
+import {localize} from './amp-story-localization-service';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
@@ -42,15 +41,6 @@ export class InfoDialog {
     /** @private {?Element} */
     this.element_ = null;
 
-    /** @private {?Element} */
-    this.innerContainerEl_ = null;
-
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
-    /** @private @const {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(parentEl);
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
@@ -61,13 +51,10 @@ export class InfoDialog {
     this.parentEl_ = parentEl;
 
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
-
-    /** @private {?Element} */
-    this.moreInfoLinkEl_ = null;
+    this.mutator_ = Services.mutatorForDoc(parentEl);
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = Services.viewerForDoc(this.parentEl_);
+    this.viewer_ = Services.viewerForDoc(parentEl);
   }
 
   /**
@@ -76,54 +63,71 @@ export class InfoDialog {
    *     before assertions.
    */
   build() {
-    if (this.isBuilt()) {
+    if (this.element_) {
       return Promise.resolve();
     }
 
-    this.isBuilt_ = true;
-    const root = this.win_.document.createElement('div');
-    const html = htmlFor(this.parentEl_);
-    this.element_ = html`
-      <div class="i-amphtml-story-info-dialog i-amphtml-story-system-reset">
-        <div class="i-amphtml-story-info-dialog-container">
-          <h1 class="i-amphtml-story-info-heading"></h1>
-          <a class="i-amphtml-story-info-link"></a>
-          <a class="i-amphtml-story-info-moreinfo"></a>
-        </div>
-      </div>
-    `;
+    const {canonicalUrl} = Services.documentInfoForDoc(this.parentEl_);
 
-    createShadowRootWithStyle(root, this.element_, CSS);
-    this.initializeListeners_();
-
-    this.innerContainerEl_ = this.element_.querySelector(
-      '.i-amphtml-story-info-dialog-container'
+    const linkElement = (
+      <a class="i-amphtml-story-info-moreinfo" target="_blank">
+        {localize(
+          this.parentEl_,
+          LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
+        )}
+      </a>
     );
 
-    const appendPromise = this.mutator_.mutateElement(this.parentEl_, () => {
-      this.parentEl_.appendChild(root);
-    });
+    this.element_ = (
+      <div
+        class="i-amphtml-story-info-dialog i-amphtml-story-system-reset"
+        onClick={(event) => {
+          // Close if click occurred directly on this element.
+          if (event.target === event.currentTarget) {
+            this.close_();
+          }
+        }}
+      >
+        <div
+          class="i-amphtml-story-info-dialog-container"
+          onClick={(event) => {
+            this.onClick_(event);
+          }}
+        >
+          <h1 class="i-amphtml-story-info-heading">
+            {localize(
+              this.parentEl_,
+              LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
+            )}
+          </h1>
+          <a class="i-amphtml-story-info-link" href={canonicalUrl}>
+            {
+              // Add zero-width space character (\u200B) after "." and "/"
+              // characters to help line-breaks occur more naturally.
+              canonicalUrl.replace(/([/.]+)/gi, '$1\u200B')
+            }
+          </a>
+          {linkElement}
+        </div>
+      </div>
+    );
 
-    const pageUrl = Services.documentInfoForDoc(
-      getAmpdoc(this.parentEl_)
-    ).canonicalUrl;
+    this.initializeListeners_();
 
     return Promise.all([
-      appendPromise,
-      this.setHeading_(),
-      this.setPageLink_(pageUrl),
-      this.requestMoreInfoLink_().then((moreInfoUrl) =>
-        this.setMoreInfoLinkUrl_(moreInfoUrl)
-      ),
+      this.mutator_.mutateElement(this.parentEl_, () => {
+        const root = createShadowRootWithStyle(<div />, this.element_, CSS);
+        this.parentEl_.appendChild(root);
+      }),
+      this.requestMoreInfoLink_().then((moreInfoUrl) => {
+        if (moreInfoUrl) {
+          return this.mutator_.mutateElement(this.parentEl_, () => {
+            linkElement.classList.add(MOREINFO_VISIBLE_CLASS);
+            linkElement.setAttribute('href', moreInfoUrl);
+          });
+        }
+      }),
     ]);
-  }
-
-  /**
-   * Whether the element has been built.
-   * @return {boolean}
-   */
-  isBuilt() {
-    return this.isBuilt_;
   }
 
   /**
@@ -133,10 +137,6 @@ export class InfoDialog {
     this.storeService_.subscribe(StateProperty.INFO_DIALOG_STATE, (isOpen) => {
       this.onInfoDialogStateUpdated_(isOpen);
     });
-
-    this.element_.addEventListener('click', (event) =>
-      this.onInfoDialogClick_(event)
-    );
   }
 
   /**
@@ -158,18 +158,12 @@ export class InfoDialog {
   }
 
   /**
-   * Handles click events and maybe closes the dialog.
    * @param  {!Event} event
    */
-  onInfoDialogClick_(event) {
-    const el = dev().assertElement(event.target);
-    // Closes the dialog if click happened outside of the dialog main container.
-    if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
-      this.close_();
-    }
+  onClick_(event) {
     const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
     if (anchorClicked) {
-      triggerClickFromLightDom(anchorClicked, this.element);
+      triggerClickFromLightDom(anchorClicked, this.element_);
       event.preventDefault();
     }
   }
@@ -199,69 +193,5 @@ export class InfoDialog {
         }
         return assertAbsoluteHttpOrHttpsUrl(dev().assertString(moreInfoUrl));
       });
-  }
-
-  /**
-   * Sets the heading on the dialog.
-   * @return {*} TODO(#23582): Specify return type
-   */
-  setHeading_() {
-    const label = this.localizationService_.getLocalizedString(
-      LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
-    );
-    const headingEl = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-info-heading')
-    );
-
-    return this.mutator_.mutateElement(headingEl, () => {
-      headingEl.textContent = label;
-    });
-  }
-
-  /**
-   * @param {string} pageUrl The URL to the canonical version of the current
-   *     document.
-   * @return {*} TODO(#23582): Specify return type
-   */
-  setPageLink_(pageUrl) {
-    const linkEl = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-info-link')
-    );
-
-    return this.mutator_.mutateElement(linkEl, () => {
-      linkEl.setAttribute('href', pageUrl);
-
-      // Add zero-width space character (\u200B) after "." and "/" characters
-      // to help line-breaks occur more naturally.
-      linkEl.textContent = pageUrl.replace(/([/.]+)/gi, '$1\u200B');
-    });
-  }
-
-  /**
-   * @param {?string} moreInfoUrl The URL to the "more info" page, if there is
-   * one.
-   * @return {*} TODO(#23582): Specify return type
-   */
-  setMoreInfoLinkUrl_(moreInfoUrl) {
-    if (!moreInfoUrl) {
-      return Promise.resolve();
-    }
-
-    this.moreInfoLinkEl_ = dev().assertElement(
-      this.element_.querySelector('.i-amphtml-story-info-moreinfo')
-    );
-
-    return this.mutator_.mutateElement(this.moreInfoLinkEl_, () => {
-      const label = this.localizationService_.getLocalizedString(
-        LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
-      );
-      this.moreInfoLinkEl_.classList.add(MOREINFO_VISIBLE_CLASS);
-      this.moreInfoLinkEl_.setAttribute(
-        'href',
-        dev().assertString(moreInfoUrl)
-      );
-      this.moreInfoLinkEl_.setAttribute('target', '_blank');
-      this.moreInfoLinkEl_.textContent = label;
-    });
   }
 }

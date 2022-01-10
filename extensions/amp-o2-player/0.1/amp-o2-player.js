@@ -1,4 +1,4 @@
-import {MessageType} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
@@ -6,12 +6,13 @@ import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {userAssert} from '#utils/log';
+
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpO2Player extends AMP.BaseElement {
@@ -121,9 +122,13 @@ class AmpO2Player extends AMP.BaseElement {
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     applyFillContent(iframe);
 
-    listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
-      this.sendConsentData_(source, origin);
-    });
+    listenFor(
+      iframe,
+      MessageType_Enum.SEND_CONSENT_DATA,
+      (data, source, origin) => {
+        this.sendConsentData_(source, origin);
+      }
+    );
 
     this.pauseHelper_.updatePlaying(true);
 
@@ -186,7 +191,7 @@ class AmpO2Player extends AMP.BaseElement {
           origin,
           dict({
             'sentinel': 'amp',
-            'type': MessageType.CONSENT_DATA,
+            'type': MessageType_Enum.CONSENT_DATA,
             'consentData': consentData,
           })
         );

@@ -1,5 +1,5 @@
 import {addParamsToUrl, assertHttpsUrl} from '../../src/url';
-import {dev} from '../../src/log';
+import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {loadScript, validateData, writeScript} from '#3p/3p';
 
@@ -18,7 +18,7 @@ const DEFAULT_NX_SITE = 'none';
  * @param {!Object} data
  */
 export function netletix(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global._netletix_amp = {
     allowed_data: ['nxasync', 'nxv', 'nxsite', 'nxid', 'nxscript'],
     mandatory_data: ['nxkey', 'nxunit', 'nxwidth', 'nxheight'],

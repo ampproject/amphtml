@@ -1,19 +1,20 @@
 import {getDataParamsFromAttributes} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {toggle} from '#core/dom/style';
 import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
 import {getSocialConfig} from './social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-1.0.css';
-import {userAssert} from '../../../src/log';
 import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */
@@ -32,9 +33,7 @@ const DEFAULT_RESPONSIVE_DIMENSIONS = dict({
  */
 const getTypeConfigOrUndefined = (element) => {
   const viewer = Services.viewerForDoc(element);
-  const platform = Services.platformFor(
-    toWin(element.ownerDocument.defaultView)
-  );
+  const platform = Services.platformFor(getWin(element));
   const type = userAssert(
     element.getAttribute('type'),
     'The type attribute is required. %s',
@@ -137,7 +136,7 @@ class AmpSocialShare extends BaseElement {
     this.element.classList.add(`amp-social-share-${this.ampSocialShareType_}`);
 
     this.renderWithHrefAndTarget_(typeConfig);
-    if (this.element.getAttribute('layout') === Layout.RESPONSIVE) {
+    if (this.element.getAttribute('layout') === Layout_Enum.RESPONSIVE) {
       return DEFAULT_RESPONSIVE_DIMENSIONS;
     }
   }

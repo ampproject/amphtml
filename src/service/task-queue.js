@@ -1,4 +1,4 @@
-import {devAssert} from '../log';
+import {devAssert} from '#utils/log';
 
 /**
  * The internal structure for the task.

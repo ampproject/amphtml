@@ -1,9 +1,9 @@
 import {tryResolve} from '#core/data-structures/promise';
 
+import {user} from '#utils/log';
+
 import {SizeInfoDef} from './ad-network-config';
 import {PlacementState} from './placement';
-
-import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';

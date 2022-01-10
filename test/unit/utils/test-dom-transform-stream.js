@@ -1,6 +1,6 @@
-import {macroTask} from '#testing/helpers';
+import {DomTransformStream} from '#utils/dom-tranform-stream';
 
-import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
+import {macroTask} from '#testing/helpers';
 
 describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
   async function flush() {

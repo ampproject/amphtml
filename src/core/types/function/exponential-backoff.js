@@ -1,15 +1,13 @@
 /**
  * @param {number=} opt_base Exponential base. Defaults to 2.
- * @return {function(function()): number} Function that when invoked will
+ * @return {function(function()): ReturnType<typeof setTimeout>} Function that when invoked will
  *     call the passed in function. On every invocation the next
  *     invocation of the passed in function will be exponentially
  *     later. Returned function returns timeout id.
  */
 export function exponentialBackoff(opt_base) {
   const getTimeout = exponentialBackoffClock(opt_base);
-  return (work) => {
-    return setTimeout(work, getTimeout());
-  };
+  return (work) => setTimeout(work, getTimeout());
 }
 
 /**

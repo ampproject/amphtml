@@ -27,11 +27,12 @@ import {
   maybeMakeProxyUrl,
 } from '../../amp-story/1.0/utils';
 import {deduplicateInteractiveIds} from './utils';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
 import {emojiConfetti} from './interactive-confetti';
 import {toArray} from '#core/types/array';
 import {isExperimentOn} from '#experiments/';
+import {executeRequest} from 'extensions/amp-story/1.0/request-utils';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
@@ -174,9 +175,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @public {../../../src/service/localizationService} */
     this.localizationService = null;
 
-    /** @protected {?../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = null;
-
     /** @protected {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
@@ -256,9 +254,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         this.storeService_ = service;
         this.updateStoryStoreState_(null);
       }),
-      Services.storyRequestServiceForOrNull(this.win).then((service) => {
-        this.requestService_ = service;
-      }),
       Services.storyAnalyticsServiceForOrNull(this.win).then((service) => {
         this.analyticsService_ = service;
       }),
@@ -284,24 +279,18 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     });
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   loadFonts_() {
     if (
       !AmpStoryInteractive.loadedFonts &&
       this.win.document.fonts &&
       FontFace
     ) {
-      fontsToLoad.forEach((fontProperties) => {
-        const font = new FontFace(fontProperties.family, fontProperties.src, {
-          weight: fontProperties.weight,
-          style: 'normal',
-        });
-        font.load().then(() => {
-          this.win.document.fonts.add(font);
-        });
-      });
+      fontsToLoad.forEach(({family, src, style = 'normal', weight}) =>
+        new FontFace(family, src, {weight, style})
+          .load()
+          .then((font) => this.win.document.fonts.add(font))
+      );
     }
     AmpStoryInteractive.loadedFonts = true;
   }
@@ -720,9 +709,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         url = appendPathToUrl(this.urlService_.parse(url), ':vote');
       }
       url = addParamsToUrl(url, requestParams);
-      return this.requestService_
-        .executeRequest(url, requestOptions)
-        .catch((err) => dev().error(TAG, err));
+      return executeRequest(this.element, url, requestOptions).catch((err) =>
+        dev().error(TAG, err)
+      );
     });
   }
 

@@ -2,7 +2,7 @@ import {Services} from '#service';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {createLoaderLogo} from '../../amp-facebook/0.1/facebook-loader';
 import {dashToUnderline} from '#core/types/string';
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isObject} from '#core/types';
 import {listenFor} from '../../../src/iframe-helper';

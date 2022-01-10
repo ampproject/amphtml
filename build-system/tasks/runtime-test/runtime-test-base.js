@@ -226,8 +226,10 @@ class RuntimeTestConfig {
     const babelPlugin = getEsbuildBabelPlugin(
       /* callerName */ 'test',
       /* enableCache */ true,
-      /* preSetup */ this.logBabelStart,
-      /* postLoad */ this.printBabelDot
+      {
+        preSetup: this.logBabelStart,
+        postLoad: this.printBabelDot,
+      }
     );
     this.esbuild = {
       target: 'es5',
@@ -236,6 +238,7 @@ class RuntimeTestConfig {
         'process.env.NODE_ENV': '"test"',
       },
       plugins: [importPathPlugin, babelPlugin],
+      mainFields: ['module', 'browser', 'main'],
       sourcemap: 'inline',
     };
   }

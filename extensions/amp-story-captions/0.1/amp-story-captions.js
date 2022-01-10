@@ -1,10 +1,11 @@
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {toArray} from '#core/types/array';
+
+import {listen} from '#utils/event-helper';
 
 import {TrackRenderer} from './track-renderer';
 
 import {CSS} from '../../../build/amp-story-captions-0.1.css';
-import {listen} from '../../../src/event-helper';
 
 export class AmpStoryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -28,12 +29,11 @@ export class AmpStoryCaptions extends AMP.BaseElement {
   buildCallback() {
     this.container_ = this.element.ownerDocument.createElement('div');
     this.element.appendChild(this.container_);
-    applyFillContent(this.container_, /* replacedContent */ true);
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return isLayoutSizeDefined(layout) || layout === Layout_Enum.CONTAINER;
   }
 
   /**

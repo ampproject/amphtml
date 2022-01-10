@@ -1,13 +1,12 @@
-import {dict} from '#core/types/object';
-
 import {isExperimentOn} from '#experiments';
+
+import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 import {TYPE} from './utils';
 
 import {CSS} from '../../../build/amp-mathml-1.0.css';
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-mathml';
@@ -24,15 +23,6 @@ class AmpMathml extends BaseElement {
       getBootstrapUrl(TYPE),
     ];
     return urls;
-  }
-
-  /** @override */
-  init() {
-    return dict({
-      'requestResize': ({height, width}) => {
-        return this.attemptChangeSize(height, width);
-      },
-    });
   }
 
   /** @override */

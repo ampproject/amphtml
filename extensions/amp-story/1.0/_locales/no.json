@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Hent lenke"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Mer"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Du må aktivere amp-story-eksperimentet for å se innholdet."
   },
   "21": {
     "string": "Vi beklager! Det virker som om nettleseren din ikke støtter denne opplevelsen"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Fortsett likevel"
   },
-  "31": {
-    "string": "Lyd av"
-  },
-  "32": {
-    "string": "Lyd på"
-  },
-  "33": {
-    "string": "Denne siden har ingen lyd"
-  },
   "34": {
     "string": "Spill av video"
   },
   "35": {
     "string": "Sveip opp"
-  },
-  "36": {
-    "string": "Utvid Tweet"
-  },
-  "62": {
-    "string": "Del med start fra denne siden"
   },
   "63": {
     "string": "Linje"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Del historie"
-  },
-  "70": {
-    "string": "Slå på/av historiemeny"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Tips"
-  },
-  "82": {
-    "string": "Forrige side"
   },
   "83": {
     "string": "Aktiver"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Åpner"
+  },
+  "98": {
+    "string": "Skjema ikke sendt inn. Prøv igjen"
+  },
+  "99": {
+    "string": "Skjema sendt inn"
   }
 }

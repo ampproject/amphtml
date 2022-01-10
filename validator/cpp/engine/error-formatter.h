@@ -8,8 +8,8 @@
 // then call the ErrorFormatter::ApplyFormat function.
 //
 // A Java port is available: java/com/google/amp/validator/ErrorFormatter.java.
-#ifndef AMPVALIDATOR__ERROR_FORMATTER_H_
-#define AMPVALIDATOR__ERROR_FORMATTER_H_
+#ifndef CPP_ENGINE_ERROR_FORMATTER_H_
+#define CPP_ENGINE_ERROR_FORMATTER_H_
 
 #include <string>
 
@@ -39,4 +39,4 @@ class ErrorFormatter {
 };
 }  // namespace amp::validator
 
-#endif  // AMPVALIDATOR__ERROR_FORMATTER_H_
+#endif  // CPP_ENGINE_ERROR_FORMATTER_H_

@@ -4,7 +4,7 @@ import {Services} from '#service';
 import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {debounce} from '#core/types/function';
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
 import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {px, resetStyles, setStyles} from '#core/dom/style';

@@ -1,6 +1,7 @@
 import {parseQueryString, tryDecodeUriComponent} from '#core/types/string/url';
 
-import {listen} from '../../../src/event-helper';
+import {listen} from '#utils/event-helper';
+
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 
 /**

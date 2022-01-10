@@ -7,7 +7,10 @@ import {
 } from '#core/dom';
 import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
+
+/** @const {!Array<string>} */
+const CODECS_IN_ASCENDING_PRIORITY = ['h264', 'vp09'];
 
 /**
  * Add the caching sources to the video if opted in.
@@ -50,6 +53,9 @@ export function fetchCachedSources(
       const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
         'amp_video_host_url':
           /* document url that contains the video */ canonicalUrl,
+        'amp_video_require_acao_header': videoEl.hasAttribute('crossorigin')
+          ? 1
+          : null,
       });
       return Services.xhrFor(win).fetch(requestUrl, {prerenderSafe: true});
     })
@@ -85,17 +91,66 @@ function selectVideoSource(videoEl) {
  */
 function applySourcesToVideo(videoEl, sources, maxBitrate) {
   sources
-    .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
+    .sort((a, b) => {
+      // This comparator sorts the video sources from least to most preferred.
+
+      const A_GOES_FIRST = -1;
+      const B_GOES_FIRST = 1;
+
+      // 'codec' values can contain metadata after the '.' that we must strip
+      // for sorting purposes. For example, "vp09.00.30.08" contains level,
+      // profile, and color depth values that are ignored in this sort.
+      const aCodec = a['codec']?.split('.')[0];
+      const bCodec = b['codec']?.split('.')[0];
+
+      // Codec priority is the primary sorting factor of this comparator.
+      // The greater the codec priority, the more the source is preferred.
+      const aCodecPriority = CODECS_IN_ASCENDING_PRIORITY.indexOf(aCodec);
+      const bCodecPriority = CODECS_IN_ASCENDING_PRIORITY.indexOf(bCodec);
+      if (aCodecPriority > bCodecPriority) {
+        return B_GOES_FIRST;
+      }
+      if (aCodecPriority < bCodecPriority) {
+        return A_GOES_FIRST;
+      }
+
+      // Bitrate is the tiebreaking sorting factor of this comparator.
+      // The greater the bitrate, the more the source is preferred.
+      const aBitrate = a['bitrate_kbps'];
+      const bBitrate = b['bitrate_kbps'];
+      if (aBitrate > bBitrate) {
+        return B_GOES_FIRST;
+      }
+      if (aBitrate < bBitrate) {
+        return A_GOES_FIRST;
+      }
+
+      return 0;
+    })
     .forEach((source) => {
+      // This callback inserts each source as the first child within the video.
+      // So, although the sources were just sorted in ascending preference,
+      // they are ultimately arranged within the video element in descending
+      // preference.
+
       if (source['bitrate_kbps'] > maxBitrate) {
         return;
+      }
+
+      let type = source['type'];
+      // If the codec information is available, add it to the type attribute.
+      // We do not append H.264 codec strings because, unlike their synonymous
+      // AVC codec strings (e.g., "avc1.4d002a"), "h264" is not recognized as a
+      // playable type by the browser.
+      if (source['codec'] && source['codec'] !== 'h264') {
+        type += '; codecs=' + source['codec'];
       }
       const sourceEl = createElementWithAttributes(
         videoEl.ownerDocument,
         'source',
         {
           'src': source['url'],
-          'type': source['type'],
+          type,
           'data-bitrate': source['bitrate_kbps'],
           'i-amphtml-video-cached-source': '',
         }

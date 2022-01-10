@@ -17,9 +17,6 @@
   "7": {
     "string": "Facebook"
   },
-  "8": {
-    "string": "Google+"
-  },
   "9": {
     "string": "Dapatkan Tautan"
   },
@@ -32,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Selengkapnya"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -43,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Anda harus mengaktifkan eksperimen amp-story untuk melihat konten ini."
   },
   "21": {
     "string": "Maaf, sepertinya browser Anda tidak mendukung pengalaman cerita ini"
@@ -65,26 +56,11 @@
   "27": {
     "string": "Lanjutkan Saja"
   },
-  "31": {
-    "string": "Suara dimatikan"
-  },
-  "32": {
-    "string": "Suara dinyalakan"
-  },
-  "33": {
-    "string": "Halaman ini tidak bersuara"
-  },
   "34": {
     "string": "Putar video"
   },
   "35": {
     "string": "Usap ke atas"
-  },
-  "36": {
-    "string": "Perluas Tweet"
-  },
-  "62": {
-    "string": "Bagikan mulai dari halaman ini"
   },
   "63": {
     "string": "Line"
@@ -106,9 +82,6 @@
   },
   "69": {
     "string": "Bagikan cerita"
-  },
-  "70": {
-    "string": "Beralih menu cerita"
   },
   "71": {
     "string": "A"
@@ -142,9 +115,6 @@
   },
   "81": {
     "string": "Kiat"
-  },
-  "82": {
-    "string": "Halaman sebelumnya"
   },
   "83": {
     "string": "Aktifkan"
@@ -184,5 +154,11 @@
   },
   "97": {
     "string": "Pembukaan"
+  },
+  "98": {
+    "string": "Formulir belum dikirim, coba lagi"
+  },
+  "99": {
+    "string": "Formulir berhasil dikirim"
   }
 }

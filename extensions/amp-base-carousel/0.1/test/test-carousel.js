@@ -3,7 +3,7 @@
  */
 
 import {Carousel} from '../carousel';
-import {dev} from '../../../../src/log';
+import {dev} from '#utils/log';
 import {setInitialDisplay, setStyle, setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 

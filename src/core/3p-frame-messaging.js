@@ -14,7 +14,7 @@ export const CONSTANTS = {
 };
 
 /** @enum {string} */
-export const MessageType = {
+export const MessageType_Enum = {
   // For amp-ad
   SEND_EMBED_STATE: 'send-embed-state',
   EMBED_STATE: 'embed-state',
@@ -55,11 +55,11 @@ export const MessageType = {
 
 /**
  * Listens for the specified event on the element.
- * @param {!EventTarget} element
+ * @param {EventTarget} element
  * @param {string} eventType
- * @param {function(!Event)} listener
+ * @param {function(Event):void} listener
  * @param {Object=} opt_evtListenerOpts
- * @return {!UnlistenDef}
+ * @return {import('#core/types/function/types').UnlistenCallback}
  */
 export function listen(element, eventType, listener, opt_evtListenerOpts) {
   return internalListenImplementation(
@@ -103,9 +103,12 @@ export function deserializeMessage(message) {
   if (!isAmpMessage(message)) {
     return null;
   }
-  const startPos = devAssertString(message).indexOf('{');
+
+  devAssertString(message);
+
+  const startPos = message.indexOf('{');
   devAssert(startPos != -1, 'JSON missing in %s', message);
-  return tryParseJson(devAssertString(message).substr(startPos), (e) => {
+  return tryParseJson(message.substr(startPos), (e) => {
     rethrowAsync(
       new Error(`MESSAGING: Failed to parse message: ${message}\n${e.message}`)
     );
@@ -125,8 +128,7 @@ export function isAmpMessage(message) {
   );
 }
 
-/** @typedef {{creativeId: string, message: string}} */
-export let IframeTransportEventDef;
+/** @typedef {{creativeId: string, message: string}} IframeTransportEventDef */
 // An event, and the transport ID of the amp-analytics tags that
 // generated it. For instance if the creative with transport
 // ID 2 sends "hi", then an IframeTransportEventDef would look like:

@@ -2,12 +2,13 @@ import {debounce} from '#core/types/function';
 
 import {Services} from '#service';
 
+import {dev} from '#utils/log';
+
 import {
-  PositionObserverFidelity, // eslint-disable-line no-unused-vars
+  PositionObserverFidelity_Enum, // eslint-disable-line no-unused-vars
   PositionObserverWorker,
 } from './position-observer-worker';
 
-import {dev} from '../../log';
 import {registerServiceBuilderForDoc} from '../../service-helpers';
 
 /** @const @private */
@@ -60,7 +61,7 @@ export class PositionObserver {
 
   /**
    * @param {!Element} element
-   * @param {!PositionObserverFidelity} fidelity
+   * @param {!PositionObserverFidelity_Enum} fidelity
    * @param {function(?./position-observer-worker.PositionInViewportEntryDef)} handler
    * @return {!UnlistenDef}
    */

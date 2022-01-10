@@ -7,7 +7,7 @@ import {
   IntersectionObserver3pHost,
   getIntersectionChangeEntry,
   intersectionRatio,
-} from '../../src/utils/intersection-observer-3p-host';
+} from '#utils/intersection-observer-3p-host';
 
 const fakeAmpDoc = {
   getRootNode: () => {

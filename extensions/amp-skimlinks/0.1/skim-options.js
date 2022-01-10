@@ -1,5 +1,7 @@
 import {getChildJsonConfig} from '#core/dom';
 
+import {userAssert} from '#utils/log';
+
 import {
   DEFAULT_CONFIG,
   GLOBAL_DOMAIN_DENYLIST,
@@ -7,8 +9,6 @@ import {
   WAYPOINT_BASE_URL,
 } from './constants';
 import {getNormalizedHostnameFromUrl} from './utils';
-
-import {userAssert} from '../../../src/log';
 
 /**
  *

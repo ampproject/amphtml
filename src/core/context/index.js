@@ -1,5 +1,9 @@
 import {ContextNode} from './node';
-import {ContextPropDef} from './prop.type';
+
+/**
+ * @template T, DEP
+ * @typedef {import('./types.d').IContextProp<T, DEP>} IContextProp
+ */
 
 export {contextProp} from './prop';
 export {subscribe, unsubscribe} from './subscriber';
@@ -11,8 +15,8 @@ export {subscribe, unsubscribe} from './subscriber';
  *
  * See `Element.assignedSlot` API.
  *
- * @param {!Node} node The target node.
- * @param {!Node} slot The slot to which the target node is assigned.
+ * @param {Node} node The target node.
+ * @param {Node} slot The slot to which the target node is assigned.
  */
 export function assignSlot(node, slot) {
   ContextNode.assignSlot(node, slot);
@@ -22,8 +26,8 @@ export function assignSlot(node, slot) {
  * Unassigns the direct slot previously done by the `assignSlot` call.
  * Automatically starts the discovery phase for the affected nodes.
  *
- * @param {!Node} node The target node.
- * @param {!Node} slot The slot from which the target node is assigned.
+ * @param {Node} node The target node.
+ * @param {Node} slot The slot from which the target node is assigned.
  */
 export function unassignSlot(node, slot) {
   ContextNode.unassignSlot(node, slot);
@@ -33,7 +37,7 @@ export function unassignSlot(node, slot) {
  * Sets (or unsets) the direct parent. If the parent is set, the node will no
  * longer try to discover itself.
  *
- * @param {!Node} node
+ * @param {Node} node
  * @param {?Node} parent
  */
 export function setParent(node, parent) {
@@ -41,7 +45,7 @@ export function setParent(node, parent) {
 }
 
 /**
- * @param {!Node} node
+ * @param {Node} node
  */
 export function discover(node) {
   ContextNode.get(node).discover();
@@ -51,7 +55,7 @@ export function discover(node) {
  * Designates (or undesignates) the node as a root node. If the node is
  * designated as a root, it will no longer discover itself.
  *
- * @param {!Node} node
+ * @param {Node} node
  * @param {boolean} isRoot
  */
 export function setIsRoot(node, isRoot) {
@@ -61,7 +65,7 @@ export function setIsRoot(node, isRoot) {
 /**
  * Reruns discovery on the children of the specified node, if any.
  *
- * @param {!Node} node
+ * @param {Node} node
  */
 export function rediscoverChildren(node) {
   ContextNode.rediscoverChildren(node);
@@ -81,9 +85,9 @@ export function rediscoverChildren(node) {
  * Once the input is set, the recalculation is rescheduled asynchronously.
  * All dependent properties are also recalculated.
  *
- * @param {!Node} node The target node.
- * @param {!ContextPropDef<T>} prop
- * @param {function(T)} setter
+ * @param {Node} node The target node.
+ * @param {IContextProp<T, ?>} prop
+ * @param {function(T):void} setter
  * @param {T} value
  * @template T
  */
@@ -95,9 +99,9 @@ export function setProp(node, prop, setter, value) {
  * Unsets the input value for the specified property and setter.
  * See `setProp()` for more info.
  *
- * @param {!Node} node The target node.
- * @param {!ContextPropDef<T>} prop
- * @param {function(T)} setter
+ * @param {Node} node The target node.
+ * @param {IContextProp<T, ?>} prop
+ * @param {function(T):void} setter
  * @template T
  */
 export function removeProp(node, prop, setter) {
@@ -105,9 +109,9 @@ export function removeProp(node, prop, setter) {
 }
 
 /**
- * @param {!Node} node
+ * @param {Node} node
  * @param {string} name
- * @param {function(!Node):boolean} match
+ * @param {function(Node):boolean} match
  * @param {number=} weight
  */
 export function addGroup(node, name, match, weight = 0) {
@@ -115,24 +119,24 @@ export function addGroup(node, name, match, weight = 0) {
 }
 
 /**
- * @param {!Node} node
+ * @param {Node} node
  * @param {string} groupName
- * @param {!ContextPropDef<T>} prop
- * @param {function(T)} setter
+ * @param {IContextProp<T, ?>} prop
+ * @param {function(T):void} setter
  * @param {T} value
  * @template T
  */
 export function setGroupProp(node, groupName, prop, setter, value) {
-  ContextNode.get(node).group(groupName).values.set(prop, setter, value);
+  ContextNode.get(node).group(groupName)?.values.set(prop, setter, value);
 }
 
 /**
- * @param {!Node} node
+ * @param {Node} node
  * @param {string} groupName
- * @param {!ContextPropDef<T>} prop
- * @param {function(T)} setter
+ * @param {IContextProp<T, ?>} prop
+ * @param {function(T):void} setter
  * @template T
  */
 export function removeGroupProp(node, groupName, prop, setter) {
-  ContextNode.get(node).group(groupName).values.remove(prop, setter);
+  ContextNode.get(node).group(groupName)?.values.remove(prop, setter);
 }

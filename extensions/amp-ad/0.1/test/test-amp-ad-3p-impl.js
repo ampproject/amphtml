@@ -7,12 +7,12 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {Services} from '#service';
 import {adConfig} from '#ads/_config';
 import {createElementWithAttributes} from '#core/dom';
 import {macroTask} from '#testing/helpers';
-import {stubServiceForDoc} from '#testing/test-helper';
+import {stubServiceForDoc} from '#testing/helpers/service';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -651,7 +651,7 @@ describes.sandboxed('#getLayoutPriority', {}, () => {
     (env) => {
       it('should return priority of 1', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
+        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority_Enum.METADATA);
       });
     }
   );
@@ -666,7 +666,7 @@ describes.sandboxed('#getLayoutPriority', {}, () => {
     (env) => {
       it('should return priority of 2', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority_Enum.ADS);
       });
     }
   );

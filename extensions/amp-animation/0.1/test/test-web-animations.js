@@ -4,9 +4,10 @@ import {isArray, isObject} from '#core/types';
 
 import {Services} from '#service';
 
+import {user} from '#utils/log';
+
 import {poll} from '#testing/iframe';
 
-import {user} from '../../../../src/log';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {WebAnimationPlayState} from '../web-animation-types';
 import {Builder} from '../web-animations';

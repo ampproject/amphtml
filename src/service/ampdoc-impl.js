@@ -1,20 +1,21 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
-import {isDocumentReady, whenDocumentReady} from '#core/document-ready';
+import {isDocumentReady, whenDocumentReady} from '#core/document/ready';
 import {
   addDocumentVisibilityChangeListener,
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
-} from '#core/document-visibility';
+} from '#core/document/visibility';
 import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
 import {isEnumValue} from '#core/types';
 import {map} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 import {WindowInterface} from '#core/window/interface';
 
-import {dev, devAssert} from '../log';
+import {dev, devAssert} from '#utils/log';
+
 import {
   disposeServicesForDoc,
   getParentWindowFrameElement,
@@ -31,7 +32,7 @@ const PARAMS_SENTINEL = '__AMP__';
  * @typedef {{
  *   params: (!Object<string, string>|undefined),
  *   signals: (?Signals|undefined),
- *   visibilityState: (?VisibilityState|undefined),
+ *   visibilityState: (?VisibilityState_Enum|undefined),
  * }}
  */
 export let AmpDocOptions;
@@ -40,7 +41,7 @@ export let AmpDocOptions;
  * Private ampdoc signals.
  * @enum {string}
  */
-const AmpDocSignals = {
+const AmpDocSignals_Enum = {
   // A complete preinstalled list of extensions is known.
   EXTENSIONS_KNOWN: '-ampdoc-ext-known',
   // Signals the document has become visible for the first time.
@@ -236,7 +237,7 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
-    /** @private {!Object<../enums.AMPDOC_SINGLETON_NAME, boolean>} */
+    /** @private {!Object<../enums.AMPDOC_SINGLETON_NAME_ENUM, boolean>} */
     this.registeredSingleton_ = map();
 
     /** @public @const {?AmpDoc} */
@@ -257,10 +258,10 @@ export class AmpDoc {
     const paramsVisibilityState = this.params_['visibilityState'];
     devAssert(
       !paramsVisibilityState ||
-        isEnumValue(VisibilityState, paramsVisibilityState)
+        isEnumValue(VisibilityState_Enum, paramsVisibilityState)
     );
 
-    /** @private {?VisibilityState} */
+    /** @private {?VisibilityState_Enum} */
     this.visibilityStateOverride_ =
       (opt_options && opt_options.visibilityState) ||
       paramsVisibilityState ||
@@ -269,10 +270,10 @@ export class AmpDoc {
     // Start with `null` to be updated by updateVisibilityState_ in the end
     // of the constructor to ensure the correct "update" logic and promise
     // resolution.
-    /** @private {?VisibilityState} */
+    /** @private {?VisibilityState_Enum} */
     this.visibilityState_ = null;
 
-    /** @private @const {!Observable<!VisibilityState>} */
+    /** @private @const {!Observable<!VisibilityState_Enum>} */
     this.visibilityStateHandlers_ = new Observable();
 
     /** @private {?time} */
@@ -323,15 +324,6 @@ export class AmpDoc {
    */
   getParent() {
     return this.parent_;
-  }
-
-  /**
-   * DO NOT CALL. Retained for backward compat during rollout.
-   * @return {!Window}
-   * @deprecated Use `ampdoc.win` instead.
-   */
-  getWin() {
-    return this.win;
   }
 
   /** @return {!Signals} */
@@ -451,7 +443,7 @@ export class AmpDoc {
    * @restricted
    */
   setExtensionsKnown() {
-    this.signals_.signal(AmpDocSignals.EXTENSIONS_KNOWN);
+    this.signals_.signal(AmpDocSignals_Enum.EXTENSIONS_KNOWN);
   }
 
   /**
@@ -459,7 +451,7 @@ export class AmpDoc {
    * @return {!Promise}
    */
   whenExtensionsKnown() {
-    return this.signals_.whenSignal(AmpDocSignals.EXTENSIONS_KNOWN);
+    return this.signals_.whenSignal(AmpDocSignals_Enum.EXTENSIONS_KNOWN);
   }
 
   /**
@@ -559,7 +551,7 @@ export class AmpDoc {
   }
 
   /**
-   * @param {!VisibilityState} visibilityState
+   * @param {!VisibilityState_Enum} visibilityState
    * @restricted
    */
   overrideVisibilityState(visibilityState) {
@@ -577,9 +569,9 @@ export class AmpDoc {
     );
 
     // Parent visibility: pick the first non-visible state.
-    let parentVisibilityState = VisibilityState.VISIBLE;
+    let parentVisibilityState = VisibilityState_Enum.VISIBLE;
     for (let p = this.parent_; p; p = p.getParent()) {
-      if (p.getVisibilityState() != VisibilityState.VISIBLE) {
+      if (p.getVisibilityState() != VisibilityState_Enum.VISIBLE) {
         parentVisibilityState = p.getVisibilityState();
         break;
       }
@@ -588,48 +580,65 @@ export class AmpDoc {
     // Pick the most restricted visibility state.
     let visibilityState;
     const visibilityStateOverride =
-      this.visibilityStateOverride_ || VisibilityState.VISIBLE;
+      this.visibilityStateOverride_ || VisibilityState_Enum.VISIBLE;
     if (
-      visibilityStateOverride == VisibilityState.VISIBLE &&
-      parentVisibilityState == VisibilityState.VISIBLE &&
-      naturalVisibilityState == VisibilityState.VISIBLE
+      visibilityStateOverride == VisibilityState_Enum.VISIBLE &&
+      parentVisibilityState == VisibilityState_Enum.VISIBLE &&
+      naturalVisibilityState == VisibilityState_Enum.VISIBLE
     ) {
-      visibilityState = VisibilityState.VISIBLE;
+      visibilityState = VisibilityState_Enum.VISIBLE;
     } else if (
-      naturalVisibilityState == VisibilityState.HIDDEN &&
-      visibilityStateOverride == VisibilityState.PAUSED
+      naturalVisibilityState == VisibilityState_Enum.HIDDEN &&
+      visibilityStateOverride == VisibilityState_Enum.PAUSED
     ) {
       // Hidden document state overrides "paused".
       visibilityState = naturalVisibilityState;
     } else if (
-      visibilityStateOverride == VisibilityState.PAUSED ||
-      visibilityStateOverride == VisibilityState.INACTIVE
+      visibilityStateOverride == VisibilityState_Enum.PAUSED ||
+      visibilityStateOverride == VisibilityState_Enum.INACTIVE
     ) {
       visibilityState = visibilityStateOverride;
     } else if (
-      parentVisibilityState == VisibilityState.PAUSED ||
-      parentVisibilityState == VisibilityState.INACTIVE
+      parentVisibilityState == VisibilityState_Enum.PAUSED ||
+      parentVisibilityState == VisibilityState_Enum.INACTIVE
     ) {
       visibilityState = parentVisibilityState;
     } else if (
-      visibilityStateOverride == VisibilityState.PRERENDER ||
-      naturalVisibilityState == VisibilityState.PRERENDER ||
-      parentVisibilityState == VisibilityState.PRERENDER
+      visibilityStateOverride == VisibilityState_Enum.PRERENDER ||
+      naturalVisibilityState == VisibilityState_Enum.PRERENDER ||
+      parentVisibilityState == VisibilityState_Enum.PRERENDER
     ) {
-      visibilityState = VisibilityState.PRERENDER;
+      visibilityState = VisibilityState_Enum.PRERENDER;
     } else {
-      visibilityState = VisibilityState.HIDDEN;
+      visibilityState = VisibilityState_Enum.HIDDEN;
     }
 
     if (this.visibilityState_ != visibilityState) {
-      this.visibilityState_ = visibilityState;
-      if (visibilityState == VisibilityState.VISIBLE) {
-        this.lastVisibleTime_ = Date.now();
-        this.signals_.signal(AmpDocSignals.FIRST_VISIBLE);
-        this.signals_.signal(AmpDocSignals.NEXT_VISIBLE);
+      if (visibilityState == VisibilityState_Enum.VISIBLE) {
+        const {performance} = this.win;
+        // We use the initial loading time of the document as the base
+        // visibleTime. If we are initialized in visible mode, then this is
+        // accounts for the time that user saw a blank page waiting for JS
+        // execution.
+        let visibleTime = Math.floor(
+          performance.timeOrigin ?? performance.timing.navigationStart
+        );
+        if (this.visibilityState_ != null) {
+          // We're transitioning into visible mode (instead of being
+          // initialized in it). In this case, we want to adjust the
+          // visibleTime to the current timestamp, because the user hasn't
+          // actually been waiting for the page to load. Remember that
+          // performance.now() is relative to the load time of the document, so
+          // the current timestamp is actually load+now.
+          visibleTime += Math.floor(performance.now());
+        }
+        this.lastVisibleTime_ = visibleTime;
+        this.signals_.signal(AmpDocSignals_Enum.FIRST_VISIBLE, visibleTime);
+        this.signals_.signal(AmpDocSignals_Enum.NEXT_VISIBLE, visibleTime);
       } else {
-        this.signals_.reset(AmpDocSignals.NEXT_VISIBLE);
+        this.signals_.reset(AmpDocSignals_Enum.NEXT_VISIBLE);
       }
+      this.visibilityState_ = visibilityState;
       this.visibilityStateHandlers_.fire();
     }
   }
@@ -641,7 +650,7 @@ export class AmpDoc {
    */
   whenFirstVisible() {
     return this.signals_
-      .whenSignal(AmpDocSignals.FIRST_VISIBLE)
+      .whenSignal(AmpDocSignals_Enum.FIRST_VISIBLE)
       .then(() => undefined);
   }
 
@@ -652,7 +661,7 @@ export class AmpDoc {
    */
   whenNextVisible() {
     return this.signals_
-      .whenSignal(AmpDocSignals.NEXT_VISIBLE)
+      .whenSignal(AmpDocSignals_Enum.NEXT_VISIBLE)
       .then(() => undefined);
   }
 
@@ -663,7 +672,7 @@ export class AmpDoc {
    */
   getFirstVisibleTime() {
     return /** @type {?number} */ (
-      this.signals_.get(AmpDocSignals.FIRST_VISIBLE)
+      this.signals_.get(AmpDocSignals_Enum.FIRST_VISIBLE)
     );
   }
 
@@ -679,7 +688,7 @@ export class AmpDoc {
   /**
    * Returns visibility state configured by the viewer.
    * See {@link isVisible}.
-   * @return {!VisibilityState}
+   * @return {!VisibilityState_Enum}
    */
   getVisibilityState() {
     return devAssert(this.visibilityState_);
@@ -693,7 +702,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isVisible() {
-    return this.visibilityState_ == VisibilityState.VISIBLE;
+    return this.visibilityState_ == VisibilityState_Enum.VISIBLE;
   }
 
   /**
@@ -710,7 +719,7 @@ export class AmpDoc {
    * Adds a "visibilitychange" event listener for viewer events. The
    * callback can check {@link isVisible} and {@link getPrefetchCount}
    * methods for more info.
-   * @param {function(!VisibilityState)} handler
+   * @param {function(!VisibilityState_Enum)} handler
    * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {
@@ -720,7 +729,7 @@ export class AmpDoc {
   /**
    * Attempt to register a singleton for each ampdoc.
    * Caller need to handle user error when registration returns false.
-   * @param {!../enums.AMPDOC_SINGLETON_NAME} name
+   * @param {!../enums.AMPDOC_SINGLETON_NAME_ENUM} name
    * @return {boolean}
    */
   registerSingleton(name) {

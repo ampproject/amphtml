@@ -1,6 +1,7 @@
 import {computedStyle} from '#core/dom/style';
 
-import {dev} from './log';
+import {dev} from '#utils/log';
+
 import {getParentWindowFrameElement} from './service-helpers';
 
 const AD_CONTAINER_PROP = '__AMP__AD_CONTAINER';

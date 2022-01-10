@@ -21,9 +21,9 @@ import {isFiniteNumber} from '#core/types';
 
 import {Services} from '#service';
 
-import {FontLoader} from './fontloader';
+import {user, userAssert} from '#utils/log';
 
-import {user, userAssert} from '../../../src/log';
+import {FontLoader} from './fontloader';
 
 const TAG = 'amp-font';
 

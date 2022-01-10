@@ -1,5 +1,5 @@
-import {CommonSignals} from '#core/constants/common-signals';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {isConnectedNode} from '#core/dom';
 import {childElementsByTag} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
@@ -8,7 +8,8 @@ import {isArray, isObject} from '#core/types';
 import {Services} from '#service';
 import {parseExtensionUrl} from '#service/extension-script';
 
-import {dev, user} from './log';
+import {dev, user} from '#utils/log';
+
 import {getMode} from './mode';
 import {
   disposeServicesForDoc,
@@ -100,7 +101,7 @@ export class MultidocManager {
 
     /**
      * Sets the document's visibility state.
-     * @param {!VisibilityState} state
+     * @param {!VisibilityState_Enum} state
      */
     amp['setVisibilityState'] = function (state) {
       ampdoc.overrideVisibilityState(state);
@@ -193,7 +194,7 @@ export class MultidocManager {
     builder(amp, shadowRoot, ampdoc).then(() => {
       // Document is ready.
       ampdoc.setReady();
-      ampdoc.signals().signal(CommonSignals.RENDER_START);
+      ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
       setStyle(hostElement, 'visibility', 'visible');
     });
 
@@ -240,7 +241,7 @@ export class MultidocManager {
         // specifically, we have to wait for stubbing to complete, which may
         // take awhile due to importNode.
         setTimeout(() => {
-          ampdoc.signals().signal(CommonSignals.RENDER_START);
+          ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
           setStyle(hostElement, 'visibility', 'visible');
         }, 50);
 
@@ -291,7 +292,7 @@ export class MultidocManager {
           if (!renderStarted) {
             renderStarted = true;
             setTimeout(() => {
-              ampdoc.signals().signal(CommonSignals.RENDER_START);
+              ampdoc.signals().signal(CommonSignals_Enum.RENDER_START);
               setStyle(hostElement, 'visibility', 'visible');
             }, 50);
           }
@@ -488,7 +489,7 @@ export class MultidocManager {
     const amp = shadowRoot.AMP;
     delete shadowRoot.AMP;
     const {ampdoc} = amp;
-    ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
+    ampdoc.overrideVisibilityState(VisibilityState_Enum.INACTIVE);
     disposeServicesForDoc(ampdoc);
 
     // There is a race between the visibility state change finishing and

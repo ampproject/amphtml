@@ -31,7 +31,6 @@ module.exports = {
   'parser': '@babel/eslint-parser',
   'plugins': [
     'chai-expect',
-    'google-camelcase',
     'import',
     'jsdoc',
     'local',
@@ -97,7 +96,6 @@ module.exports = {
     'chai-expect/no-inner-compare': 2,
     'chai-expect/terminating-properties': 2,
     'curly': 2,
-    'google-camelcase/google-camelcase': 2,
 
     // Rules restricting/standardizing import statements
     'import/no-unresolved': [
@@ -165,8 +163,11 @@ module.exports = {
 
     // Custom repo rules defined in build-system/eslint-rules
     'local/await-expect': 2,
+    'local/camelcase': 2,
     'local/closure-type-primitives': 2,
+    'local/core-dom-jsx': 2,
     'local/dict-string-keys': 2,
+    'local/enums': 2,
     'local/get-mode-usage': 2,
     'local/html-template': 2,
     'local/is-experiment-on': 2,
@@ -176,7 +177,6 @@ module.exports = {
     'local/no-bigint': 2,
     'local/no-deep-destructuring': 2,
     'local/no-duplicate-import': 2,
-    'local/no-duplicate-name-typedef': 2,
     'local/no-dynamic-import': 2,
     'local/no-es2015-number-props': 2,
     'local/no-export-side-effect': 2,
@@ -356,6 +356,7 @@ module.exports = {
       'rules': {
         'require-jsdoc': 0,
         'local/always-call-chai-methods': 2,
+        'local/enums': 0,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
         'local/no-function-async': 0,
@@ -437,7 +438,7 @@ module.exports = {
         'jsdoc/check-tag-names': 0,
         'local/closure-type-primitives': 0,
         'local/no-duplicate-name-typedef': 0,
-        'google-camelcase/google-camelcase': 0,
+        'local/camelcase': 0,
       },
     },
     {
@@ -457,6 +458,16 @@ module.exports = {
     {
       'files': ['src/preact/**', 'extensions/**/1.0/**', '**/storybook/**'],
       'rules': {'local/preact-preferred-props': 2},
+    },
+    {
+      // Files that use JSX for plain DOM nodes instead of Preact
+      'files': [
+        'extensions/amp-story/**',
+        'extensions/amp-story-*/**',
+        // Extensions whose version is lower than 1.0 do not use Preact
+        'extensions/*/0.*/**',
+      ],
+      'rules': {'local/preact': [2, '#core/dom/jsx']},
     },
   ],
 };

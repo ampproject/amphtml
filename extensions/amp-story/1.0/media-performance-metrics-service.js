@@ -1,10 +1,7 @@
-import {
-  MEDIA_LOAD_FAILURE_SRC_PROPERTY,
-  listen,
-} from '../../../src/event-helper';
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY, listen} from '#utils/event-helper';
 import {Services} from '#service';
-import {TickLabel} from '#core/constants/enums';
-import {dev} from '../../../src/log';
+import {TickLabel_Enum} from '#core/constants/enums';
+import {dev} from '#utils/log';
 import {lastChildElement, matches} from '#core/dom/query';
 import {registerServiceBuilder} from '../../../src/service-helpers';
 import {toArray} from '#core/types/array';
@@ -192,11 +189,11 @@ export class MediaPerformanceMetricsService {
     const {media, metrics} = mediaEntry;
 
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_CACHE_STATE,
+      TickLabel_Enum.VIDEO_CACHE_STATE,
       this.getVideoCacheState_(media)
     );
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_ON_FIRST_PAGE,
+      TickLabel_Enum.VIDEO_ON_FIRST_PAGE,
       matches(media, `amp-story-page:first-of-type ${media.tagName}`)
         ? FirstPageState.ON_FIRST_PAGE
         : FirstPageState.NOT_ON_FIRST_PAGE
@@ -205,7 +202,7 @@ export class MediaPerformanceMetricsService {
     // If the media errored.
     if (metrics.error !== null) {
       this.performanceService_.tickDelta(
-        TickLabel.VIDEO_ERROR,
+        TickLabel_Enum.VIDEO_ERROR,
         metrics.error || 0
       );
       this.performanceService_.flush();
@@ -224,7 +221,7 @@ export class MediaPerformanceMetricsService {
     // If the playback did not start.
     if (!metrics.jointLatency) {
       this.performanceService_.tickDelta(
-        TickLabel.VIDEO_ERROR,
+        TickLabel_Enum.VIDEO_ERROR,
         5 /* Custom error code */
       );
       this.performanceService_.flush();
@@ -236,24 +233,24 @@ export class MediaPerformanceMetricsService {
     );
 
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_JOINT_LATENCY,
+      TickLabel_Enum.VIDEO_JOINT_LATENCY,
       metrics.jointLatency
     );
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_WATCH_TIME,
+      TickLabel_Enum.VIDEO_WATCH_TIME,
       metrics.watchTime
     );
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_REBUFFERS,
+      TickLabel_Enum.VIDEO_REBUFFERS,
       metrics.rebuffers
     );
     this.performanceService_.tickDelta(
-      TickLabel.VIDEO_REBUFFER_RATE,
+      TickLabel_Enum.VIDEO_REBUFFER_RATE,
       rebufferRate
     );
     if (metrics.rebuffers) {
       this.performanceService_.tickDelta(
-        TickLabel.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
+        TickLabel_Enum.VIDEO_MEAN_TIME_BETWEEN_REBUFFER,
         Math.round(metrics.watchTime / metrics.rebuffers)
       );
     }

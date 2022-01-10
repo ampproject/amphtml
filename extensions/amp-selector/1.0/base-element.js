@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert/dev';
 import {
   createElementWithAttributes,
   toggleAttribute,
@@ -10,10 +11,9 @@ import {dict} from '#core/types/object';
 import * as Preact from '#preact';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
+import {propName} from '#preact/utils';
 
-import {Option, Selector} from './component';
-
-import {devAssert} from '../../../src/log';
+import {BentoSelector, BentoSelectorOption} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -112,7 +112,7 @@ function getOptions(element, mu) {
       if (selected) {
         value.push(option);
       }
-      const optionChild = <Option {...props} />;
+      const optionChild = <BentoSelectorOption {...props} />;
       options.push(option);
       children.push(optionChild);
     });
@@ -120,7 +120,7 @@ function getOptions(element, mu) {
 }
 
 /**
- * @param {!SelectorDef.OptionProps} props
+ * @param {!BentoSelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
 export function OptionShim({
@@ -131,7 +131,7 @@ export function OptionShim({
   role = 'option',
   selected,
   shimDomElement,
-  tabIndex,
+  [propName('tabIndex')]: tabIndex,
 }) {
   const syncEvent = useCallback(
     (type, handler) => {
@@ -174,7 +174,7 @@ export function OptionShim({
 }
 
 /**
- * @param {!SelectorDef.Props} props
+ * @param {!BentoSelectorDef.Props} props
  * @return {PreactDef.Renderable}
  */
 function SelectorShim({
@@ -186,8 +186,8 @@ function SelectorShim({
   onKeyDown,
   role = 'listbox',
   shimDomElement,
-  tabIndex,
   value,
+  [propName('tabIndex')]: tabIndex,
 }) {
   const input = useRef(null);
   if (!input.current) {
@@ -251,7 +251,7 @@ function SelectorShim({
 }
 
 /** @override */
-BaseElement['Component'] = Selector;
+BaseElement['Component'] = BentoSelector;
 
 /** @override */
 BaseElement['detached'] = true;

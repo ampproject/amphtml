@@ -11,15 +11,15 @@ import {
   UnmuteTask,
   UpdateSourcesTask,
 } from './media-tasks';
-import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper';
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '#utils/event-helper';
 import {Services} from '#service';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
 import {findIndex} from '#core/types/array';
 import {isConnectedNode} from '#core/dom';
 import {matches} from '#core/dom/query';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */
@@ -65,7 +65,7 @@ export let ElementDistanceFnDef;
  * Represents a task to be executed on a media element.
  * @typedef {function(!PoolBoundElementDef, *): !Promise}
  */
-let ElementTask_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let ElementTask_1_0_Def; // eslint-disable-line local/camelcase
 
 /**
  * @const {string}
@@ -850,6 +850,11 @@ export class MediaPool {
       return Promise.resolve();
     }
 
+    // When a video is muted, reset its volume to the default value of 1.
+    if (mediaType == MediaType.VIDEO) {
+      domMediaEl.volume = 1;
+    }
+
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
   }
 
@@ -868,6 +873,16 @@ export class MediaPool {
 
     if (!poolMediaEl) {
       return Promise.resolve();
+    }
+
+    if (mediaType == MediaType.VIDEO) {
+      const ampVideoEl = domMediaEl.parentElement;
+      if (ampVideoEl) {
+        const volume = ampVideoEl.getAttribute('volume');
+        if (volume) {
+          domMediaEl.volume = parseFloat(volume);
+        }
+      }
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
@@ -977,7 +992,7 @@ export class MediaPool {
     const newId = String(nextInstanceId++);
     element[POOL_MEDIA_ELEMENT_PROPERTY_NAME] = newId;
     instances[newId] = new MediaPool(
-      toWin(root.getElement().ownerDocument.defaultView),
+      getWin(root.getElement()),
       root.getMaxMediaElementCounts(),
       (element) => root.getElementDistance(element)
     );

@@ -9,8 +9,9 @@ import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 
 import {Xhr} from '#service/xhr-impl';
 
+import {devAssert} from '#utils/log';
+
 import {BaseElement} from '../../../../src/base-element';
-import {devAssert} from '../../../../src/log';
 import {
   AmpA4A,
   EXPERIMENT_FEATURE_HEADER_NAME,

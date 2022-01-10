@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {
   insertAtStart,
   isJsonScriptTag,
@@ -18,17 +18,18 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
 import {CSS} from '../../../build/amp-next-page-1.0.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {
   parseFavicon,
   parseOgImage,
@@ -331,11 +332,11 @@ export class NextPageService {
     this.pages_.forEach((page, index) => {
       if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
-          page.setVisibility(VisibilityState.HIDDEN);
+          page.setVisibility(VisibilityState_Enum.HIDDEN);
         }
       } else if (page.relativePos !== ViewportRelativePos.LEAVING_VIEWPORT) {
         if (!page.isVisible()) {
-          page.setVisibility(VisibilityState.VISIBLE);
+          page.setVisibility(VisibilityState_Enum.VISIBLE);
         }
         this.hidePreviousPages_(index);
         this.resumePausedPages_(index);
@@ -344,7 +345,7 @@ export class NextPageService {
 
     // If no page is visible then the host page should be
     if (!this.pages_.some((page) => page.isVisible())) {
-      this.hostPage_.setVisibility(VisibilityState.VISIBLE);
+      this.hostPage_.setVisibility(VisibilityState_Enum.VISIBLE);
     }
 
     // Hide elements if necessary
@@ -389,7 +390,7 @@ export class NextPageService {
       this.visibilityObserver_.isScrollingDown() &&
       this.hostPage_.isVisible()
     ) {
-      this.hostPage_.setVisibility(VisibilityState.HIDDEN);
+      this.hostPage_.setVisibility(VisibilityState_Enum.HIDDEN);
     }
 
     // Get all the pages that the user scrolled past (or didn't see yet)
@@ -407,7 +408,7 @@ export class NextPageService {
         .map((page, away) => {
           // Hide all pages whose visibility state have changed to hidden
           if (page.isVisible()) {
-            page.setVisibility(VisibilityState.HIDDEN);
+            page.setVisibility(VisibilityState_Enum.HIDDEN);
           }
           // Pause those that are too far away
           if (away >= pausePageCount) {
@@ -500,7 +501,7 @@ export class NextPageService {
           image,
         },
         PageState.INSERTED /** initState */,
-        VisibilityState.VISIBLE /** initVisibility */,
+        VisibilityState_Enum.VISIBLE /** initVisibility */,
         this.doc_
       )
     );
@@ -599,7 +600,7 @@ export class NextPageService {
         content,
         page.url,
         {
-          visibilityState: VisibilityState.PRERENDER,
+          visibilityState: VisibilityState_Enum.PRERENDER,
           cap: this.getCapabilities_(),
         }
       );
@@ -926,7 +927,7 @@ export class NextPageService {
       this.ampdoc_,
       this.getHost_(),
       {
-        urlReplacement: UrlReplacementPolicy.ALL,
+        urlReplacement: UrlReplacementPolicy_Enum.ALL,
         xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
       }
     )

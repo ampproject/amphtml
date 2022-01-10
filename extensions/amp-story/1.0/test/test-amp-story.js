@@ -9,19 +9,21 @@ import {
 import {AdvancementMode} from '../story-analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {CommonSignals} from '#core/constants/common-signals';
-import {Keys} from '#core/constants/key-codes';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {LocalizationService} from '#service/localization';
 import {MediaType} from '../media-pool';
 import {PageState} from '../amp-story-page';
 import {Performance} from '#service/performance-impl';
 import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {createElementWithAttributes} from '#core/dom';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/test-helper';
+import {setImportantStyles} from '#core/dom/style';
+import {waitFor} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
@@ -116,6 +118,10 @@ describes.realWin(
       });
 
       AmpStory.isBrowserSupported = () => true;
+
+      // Fakes the size of amp-story so it's not built/laid out until we call build/layoutCallbacks
+      // allowing us to mock function calls before the lifecycle callbacks.
+      setImportantStyles(win.document.documentElement, {'height': 'auto'});
     });
 
     afterEach(() => {
@@ -131,7 +137,6 @@ describes.realWin(
 
     it('should activate the first page when built', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
-
       await story.layoutCallback();
       // Getting all the AmpStoryPage objets.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
@@ -157,15 +162,6 @@ describes.realWin(
       expect(story.element.innerText).to.not.have.string(textToRemove);
     });
 
-    it('should prerender/load the share menu', async () => {
-      await createStoryWithPages(2);
-
-      const buildShareMenuStub = env.sandbox.stub(story.shareMenu_, 'build');
-
-      await story.layoutCallback();
-      expect(buildShareMenuStub).to.have.been.calledOnce;
-    });
-
     it('should return a valid page index', async () => {
       await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
       await story.layoutCallback();
@@ -183,7 +179,6 @@ describes.realWin(
 
     it('should pause/resume pages when switching pages', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
-
       await story.layoutCallback();
       // Getting all the AmpStoryPage objects.
       const pageElements = story.element.getElementsByTagName('amp-story-page');
@@ -222,7 +217,7 @@ describes.realWin(
       });
 
       const eventObj = createEvent('keydown');
-      eventObj.key = Keys.RIGHT_ARROW;
+      eventObj.key = Keys_Enum.RIGHT_ARROW;
       eventObj.which = KEYBOARD_EVENT_WHICH_RIGHT_ARROW;
       const docEl = win.document.documentElement;
       docEl.dispatchEvent
@@ -235,7 +230,6 @@ describes.realWin(
 
     it('lock body when amp-story is initialized', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
-
       await story.layoutCallback();
       story.lockBody_();
       expect(win.document.body.style.getPropertyValue('overflow')).to.be.equal(
@@ -248,7 +242,6 @@ describes.realWin(
 
     it('checks if pagination buttons exist ', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
-
       await story.layoutCallback();
       expect(
         story.element.querySelectorAll('.i-amphtml-story-button-container')
@@ -272,13 +265,13 @@ describes.realWin(
           }
         },
       };
-      story.onResize();
+      story.onResizeDebounced();
       expect(isDesktopStub).to.be.calledOnce;
       expect(story.element.classList.contains('i-amphtml-story-landscape')).to
         .be.true;
       story.element.style.width = '10px';
       story.element.style.height = '11px';
-      story.onResize();
+      story.onResizeDebounced();
       expect(isDesktopStub).to.be.calledTwice;
       expect(story.element.classList.contains('i-amphtml-story-landscape')).to
         .be.false;
@@ -420,7 +413,7 @@ describes.realWin(
 
       await story.layoutCallback();
       story.landscapeOrientationMedia_ = {matches: false};
-      story.onResize();
+      story.onResizeDebounced();
       await Promise.resolve();
       expect(story.element).to.have.attribute('orientation');
       expect(story.element.getAttribute('orientation')).to.equal('portrait');
@@ -639,7 +632,9 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
+        story
+          .getAmpDoc()
+          .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -648,7 +643,9 @@ describes.realWin(
 
         await story.layoutCallback();
         const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
+        story
+          .getAmpDoc()
+          .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
           PageState.NOT_ACTIVE
         );
@@ -658,7 +655,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -667,7 +664,7 @@ describes.realWin(
 
         await story.layoutCallback();
         const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.HIDDEN);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.HIDDEN);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
         );
@@ -677,7 +674,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -686,7 +683,7 @@ describes.realWin(
 
         await story.layoutCallback();
         const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
         );
@@ -696,8 +693,8 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
       });
 
@@ -706,8 +703,8 @@ describes.realWin(
 
         await story.layoutCallback();
         const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
           PageState.PLAYING
         );
@@ -718,9 +715,11 @@ describes.realWin(
 
         await story.layoutCallback();
         const setStateStub = env.sandbox.stub(story.activePage_, 'setState');
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
+        story
+          .getAmpDoc()
+          .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
         expect(setStateStub.getCall(0)).to.have.been.calledWithExactly(
           PageState.PAUSED
         );
@@ -738,8 +737,8 @@ describes.realWin(
         story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -749,9 +748,11 @@ describes.realWin(
         story.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
 
         await story.layoutCallback();
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.INACTIVE);
-        story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.PAUSED);
+        story
+          .getAmpDoc()
+          .overrideVisibilityState(VisibilityState_Enum.INACTIVE);
+        story.getAmpDoc().overrideVisibilityState(VisibilityState_Enum.ACTIVE);
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
       });
 
@@ -760,12 +761,24 @@ describes.realWin(
           await createStoryWithPages(2, ['cover', 'page-4']);
           AmpStory.isBrowserSupported = () => false;
           story = new AmpStory(element);
-          const dispatchSpy = env.sandbox.spy(story.storeService_, 'dispatch');
+          expect(
+            element.querySelector(
+              '.i-amphtml-story-unsupported-browser-overlay'
+            )
+          ).to.be.null;
+          const dispatchTogglePaused = env.sandbox
+            .spy(story.storeService_, 'dispatch')
+            .withArgs(Action.TOGGLE_PAUSED, true);
           await story.layoutCallback();
-          expect(dispatchSpy).to.have.been.calledWith(
-            Action.TOGGLE_SUPPORTED_BROWSER,
-            false
+          await poll(
+            'TOGGLE_PAUSED true',
+            () => dispatchTogglePaused.callCount > 0
           );
+          expect(
+            element.querySelector(
+              '.i-amphtml-story-unsupported-browser-overlay'
+            )
+          ).to.not.be.null;
         });
 
         it('should display the story after clicking "continue" button', async () => {
@@ -773,19 +786,28 @@ describes.realWin(
 
           AmpStory.isBrowserSupported = () => false;
           story = new AmpStory(element);
-          const dispatchSpy = env.sandbox.spy(
-            story.unsupportedBrowserLayer_.storeService_,
-            'dispatch'
-          );
 
           story.buildCallback();
 
           await story.layoutCallback();
-          story.unsupportedBrowserLayer_.continueButton_.click();
-          expect(dispatchSpy).to.have.been.calledWith(
-            Action.TOGGLE_SUPPORTED_BROWSER,
-            true
+
+          const dispatchTogglePausedRestore = env.sandbox
+            .spy(story.storeService_, 'dispatch')
+            .withArgs(Action.TOGGLE_PAUSED, story.pausedStateToRestore_);
+
+          const continueAnywayButton = element.querySelector(
+            '.i-amphtml-story-unsupported-browser-overlay button'
           );
+          continueAnywayButton.click();
+
+          await poll(
+            '.i-amphtml-story-unsupported-browser-overlay is removed',
+            () =>
+              element.querySelector(
+                '.i-amphtml-story-unsupported-browser-overlay'
+              ) == null
+          );
+          expect(dispatchTogglePausedRestore).to.have.been.calledOnce;
         });
       });
 
@@ -817,7 +839,7 @@ describes.realWin(
             .then(() =>
               story.activePage_.element
                 .signals()
-                .whenSignal(CommonSignals.LOAD_END)
+                .whenSignal(CommonSignals_Enum.LOAD_END)
             )
             .then(() => {
               expect(story.backgroundAudioEl_).to.exist;
@@ -897,6 +919,18 @@ describes.realWin(
           expect(unmuteStub).not.to.have.been.called;
           expect(playStub).not.to.have.been.called;
         });
+      });
+
+      it('should update the STORY_HAS_BACKGROUND_AUDIO property if story has background audio', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+        story.element.setAttribute('background-audio', 'audio.mp3');
+        await story.layoutCallback();
+
+        expect(
+          story.storeService_.get(
+            StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE
+          )
+        ).to.be.true;
       });
 
       it('should remove the muted attribute on unmuted state change', async () => {
@@ -1032,7 +1066,7 @@ describes.realWin(
             const clickEvent = new MouseEvent('click', {clientX: 200});
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
-              if (sendMessageStub.calledOnce) {
+              if (sendMessageStub.called) {
                 expect(sendMessageStub).to.be.calledWithExactly(
                   'selectDocument',
                   {
@@ -1088,7 +1122,7 @@ describes.realWin(
             const clickEvent = new MouseEvent('click', {clientX: 10});
             story.activePage_.element.dispatchEvent(clickEvent);
             await waitFor(() => {
-              if (sendMessageStub.calledOnce) {
+              if (sendMessageStub.called) {
                 expect(sendMessageStub).to.be.calledWithExactly(
                   'selectDocument',
                   {
@@ -1140,21 +1174,6 @@ describes.realWin(
           expect(story.activePage_.element.id).to.equal('cover');
         });
 
-        it('should NOT navigate when clicking on a shadow DOM element', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          await story.layoutCallback();
-          const clickEvent = new MouseEvent('click', {clientX: 200});
-          story.shareMenu_.element_.dispatchEvent(clickEvent);
-
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
         it('should NOT navigate when clicking on a CTA link', async () => {
           await createStoryWithPages(4, [
             'cover',
@@ -1171,221 +1190,6 @@ describes.realWin(
           const clickEvent = new MouseEvent('click', {clientX: 200});
           ctaLink.dispatchEvent(clickEvent);
           expect(story.activePage_.element.id).to.equal('cover');
-        });
-      });
-
-      describe('amp-access navigation', () => {
-        it('should set the access state to true if next page blocked', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          expect(story.storeService_.get(StateProperty.ACCESS_STATE)).to.be
-            .true;
-        });
-
-        it('should not navigate if next page is blocked by paywall', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
-        it('should navigate once the doc is reauthorized', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          let authorizedCallback;
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigates to a paywall protected page, and waits until the document
-          // is successfuly reauthorized to navigate.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          story
-            .getPageById('page-1')
-            .element.removeAttribute('amp-access-hide');
-          authorizedCallback();
-
-          expect(story.activePage_.element.id).to.equal('page-1');
-        });
-
-        it('should hide the paywall once the doc is reauthorized', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          let authorizedCallback;
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigates to a paywall protected page, and waits until the document
-          // is successfuly reauthorized to hide the access UI.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          expect(story.activePage_.element.id).to.equal('cover');
-          story
-            .getPageById('page-1')
-            .element.removeAttribute('amp-access-hide');
-          authorizedCallback();
-
-          expect(story.storeService_.get(StateProperty.ACCESS_STATE)).to.be
-            .false;
-        });
-
-        it('should not navigate on doc reauthorized if page still blocked', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          let authorizedCallback;
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigates to a paywall protected page, and does not navigate to that
-          // page if the document has been reauthorized with insuficient rights.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          authorizedCallback();
-
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
-        it('should show paywall on doc reauthorized if page still blocked', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          let authorizedCallback;
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigates to a paywall protected page, and does not hide the access UI
-          // if the document has been reauthorized with insuficient rights.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          authorizedCallback();
-
-          expect(story.storeService_.get(StateProperty.ACCESS_STATE)).to.be
-            .true;
-        });
-
-        it('should block navigation if doc authorizations are pending', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => false,
-            onApplyAuthorizations: () => {},
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigates to a maybe protected page (has amp-access="" rule), but the
-          // document authorizations are still pending. Asserts that it blocks the
-          // navigation.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access', 'random condition');
-          await story.switchTo_('page-1');
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
-        it('should navigate only after the doc is first authorized', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          let authorizedCallback;
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => false,
-            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigation to a maybe protected page (has amp-access="" rule) is
-          // blocked until the authorizations are completed.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access', 'random condition');
-          await story.switchTo_('page-1');
-          authorizedCallback();
-          expect(story.activePage_.element.id).to.equal('page-1');
         });
       });
 
@@ -1674,7 +1478,7 @@ describes.realWin(
         await story.layoutCallback();
         await story.activePage_.element
           .signals()
-          .whenSignal(CommonSignals.LOAD_END);
+          .whenSignal(CommonSignals_Enum.LOAD_END);
         expect(
           story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
         ).to.be.true;
@@ -1691,7 +1495,7 @@ describes.realWin(
         await story.layoutCallback();
         await story.activePage_.element
           .signals()
-          .whenSignal(CommonSignals.LOAD_END);
+          .whenSignal(CommonSignals_Enum.LOAD_END);
         expect(
           story.storeService_.get(StateProperty.STORY_HAS_PLAYBACK_UI_STATE)
         ).to.be.false;
@@ -1741,7 +1545,7 @@ describes.realWin(
         // Check page 1 is not loaded.
         expect(pages[1].hasAttribute('distance')).to.be.false;
 
-        signals.signal(CommonSignals.LOAD_END);
+        signals.signal(CommonSignals_Enum.LOAD_END);
         await nextTick();
 
         // Check page 1 is loaded with distance 1.
