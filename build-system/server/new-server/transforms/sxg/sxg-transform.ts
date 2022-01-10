@@ -19,7 +19,7 @@ function sxgTransform(
   }
 
   if (options.minified) {
-    const src = node.attrs.src;
+    const {src} = node.attrs;
     node.attrs.src = src.replace('.js', '.sxg.js');
   } else {
     const url = new URL(node.attrs.src);
