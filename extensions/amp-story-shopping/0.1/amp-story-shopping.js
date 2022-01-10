@@ -19,7 +19,10 @@ export const formatI18nNumber = (i18nService, element, currency, price) => {
   );
 };
 
-/** @param {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins */
+/**
+ * @param {!Window} win
+ * @param {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins
+ */
 export const loadFonts = (win, fontFaces) => {
   if (win.document.fonts && FontFace) {
     fontFaces.forEach(({family, src, weight}) =>

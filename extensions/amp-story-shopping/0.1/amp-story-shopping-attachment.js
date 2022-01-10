@@ -3,15 +3,17 @@
 
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {Services} from '#service';
-
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
-
-import {localize} from '../../amp-story/1.0/amp-story-localization-service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
+
+import {localize} from '../../amp-story/1.0/amp-story-localization-service';
+import {
+  ShoppingConfigDataDef,
+  StateProperty,
+} from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
 const FONTS_TO_LOAD = [
@@ -82,7 +84,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-tag-id')]
     );
 
-    const plpTemplate = this.renderPlpTemplate(shoppingDataForPage);
+    const plpTemplate = this.renderPlpTemplate_(shoppingDataForPage);
 
     this.templateWrapper_.replaceChildren(plpTemplate);
 
@@ -91,7 +93,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       .then((impl) => impl.open(shouldAnimate));
   }
 
-  renderPlpTemplate(shoppingDataForPage) {
+  /**
+   * @param {!Array<!ShoppingConfigDataDef} shoppingDataForPage
+   * @return {Element}
+   * @private
+   */
+  renderPlpTemplate_(shoppingDataForPage) {
     return (
       <div class="amp-story-shopping-plp">
         <div class="amp-story-shopping-plp-header">

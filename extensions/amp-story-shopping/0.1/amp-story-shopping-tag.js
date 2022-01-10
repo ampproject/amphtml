@@ -4,6 +4,8 @@ import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
+import {formatI18nNumber, loadFonts} from './amp-story-shopping';
+
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
   Action,
@@ -12,8 +14,6 @@ import {
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
-
-import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
 /** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
 const FONTS_TO_LOAD = [
