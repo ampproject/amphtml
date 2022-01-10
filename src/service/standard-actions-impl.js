@@ -227,7 +227,6 @@ export class StandardActions {
       COPY_ERROR: 'copy-error',
       COPY_SUCCESS: 'copy-success',
     };
-    let eventName;
     let eventResult;
     const {args, node} = invocation;
     const win = getWin(node);
@@ -259,7 +258,7 @@ export class StandardActions {
      *
      *  Example: <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy</button>
      */
-    eventName = CopyEvents.COPY_ERROR;
+    let eventName = CopyEvents.COPY_ERROR;
     if (isCopyingToClipboardSupported(win.document)) {
       if (copyTextToClipboard(win, textToCopy)) {
         eventName = CopyEvents.COPY_SUCCESS;
