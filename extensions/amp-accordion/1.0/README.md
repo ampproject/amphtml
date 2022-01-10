@@ -25,7 +25,76 @@ import {defineElement as defineBentoAccordion} from '@bentoproject/accordion';
 defineBentoAccordion();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css" crossorigin="anonymous">
+```
+
+### Example
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-accordion id="my-accordion">
+      <section>
+        <h2>Section 1</h2>
+        <div>Content in section 1.</div>
+      </section>
+      <section>
+        <h2>Section 2</h2>
+        <div>Content in section 2.</div>
+      </section>
+       <!-- Expanded on page load due to attribute: -->
+      <section expanded>
+        <h2>Section 3</h2>
+        <div>Content in section 3.</div>
+      </section>
+    </bento-accordion>
+  </body>
+</html>
+```
+
+### Interactivity and API usage
+
+Bento components are highly interactive through their API. The `bento-accordion` component API is accessible by including the following script tag in your document:
+
+```javascript
+await customElements.whenDefined('bento-accordion');
+const api = await accordion.getApi();
+```
+
+#### API Example
 
 <!--% example %-->
 
@@ -85,15 +154,6 @@ defineBentoAccordion();
     </script>
   </body>
 </html>
-```
-
-### Interactivity and API usage
-
-Bento enabled components in standalone use are highly interactive through their API. The `bento-accordion` component API is accessible by including the following script tag in your document:
-
-```javascript
-await customElements.whenDefined('bento-accordion');
-const api = await accordion.getApi();
 ```
 
 #### Actions
@@ -420,9 +480,18 @@ Keep the following points in mind when you style an amp-accordion:
 npm install @bentoproject/accordion
 ```
 
-```javascript
+### Example
+
+<!--% example %-->
+
+```jsx
 import React from 'react';
-import {BentoAccordion} from '@bentoproject/accordion/react';
+import {
+  BentoAccordion,
+  BentoAccordionSection,
+  BentoAccordionHeader,
+  BentoAccordionContent
+} from '@bentoproject/accordion/react';
 import '@bentoproject/accordion/styles.css';
 
 function App() {
@@ -457,7 +526,7 @@ function App() {
 
 Bento components are highly interactive through their API. The `BentoAccordion` component API is accessible by passing a `ref`:
 
-```javascript
+```jsx
 import React, {createRef} from 'react';
 const ref = createRef();
 
@@ -540,47 +609,64 @@ See [example](#events-example) below for example.
 
 ##### Events Example
 
+<!--% example %-->
+
 ```jsx
-<BentoAccordion ref={ref}>
-  <BentoAccordionSection
-    id="section1"
-    key={1}
-    onExpandStateChange={(expanded) => {
-      alert(expanded ?  'section1 expanded' : 'section1 collapsed');
-    }}
-  >
-    <BentoAccordionHeader>
-      <h1>Section 1</h1>
-    </BentoAccordionHeader>
-    <BentoAccordionContent>Content 1</BentoAccordionContent>
-  </BentoAccordionSection>
+import React, {createRef} from 'react';
+import {
+  BentoAccordion,
+  BentoAccordionSection,
+  BentoAccordionHeader,
+  BentoAccordionContent
+} from '@bentoproject/accordion/react';
+import '@bentoproject/accordion/styles.css';
 
-  <BentoAccordionSection
-    id="section2"
-    key={2}
-    onExpandStateChange={(expanded) => {
-      alert(expanded ?  'section2 expanded' : 'section2 collapsed');
-    }}
-  >
-    <BentoAccordionHeader>
-      <h1>Section 2</h1>
-    </BentoAccordionHeader>
-    <BentoAccordionContent>Content 2</BentoAccordionContent>
-  </BentoAccordionSection>
 
-  <BentoAccordionSection
-    id="section3"
-    key={3}
-    onExpandStateChange={(expanded) => {
-      alert(expanded ?  'section3 expanded' : 'section3 collapsed');
-    }}
-  >
-    <BentoAccordionHeader>
-      <h1>Section 3</h1>
-    </BentoAccordionHeader>
-    <BentoAccordionContent>Content 3</BentoAccordionContent>
-  </BentoAccordionSection>
-</BentoAccordion>
+function App() {
+  const ref = createRef();
+  return (
+    <BentoAccordion ref={ref}>
+      <BentoAccordionSection
+        id="section1"
+        key={1}
+        onExpandStateChange={(expanded) => {
+          alert(expanded ?  'section1 expanded' : 'section1 collapsed');
+        }}
+      >
+        <BentoAccordionHeader>
+          <h1>Section 1</h1>
+        </BentoAccordionHeader>
+        <BentoAccordionContent>Content 1</BentoAccordionContent>
+      </BentoAccordionSection>
+
+      <BentoAccordionSection
+        id="section2"
+        key={2}
+        onExpandStateChange={(expanded) => {
+          alert(expanded ?  'section2 expanded' : 'section2 collapsed');
+        }}
+      >
+        <BentoAccordionHeader>
+          <h1>Section 2</h1>
+        </BentoAccordionHeader>
+        <BentoAccordionContent>Content 2</BentoAccordionContent>
+      </BentoAccordionSection>
+
+      <BentoAccordionSection
+        id="section3"
+        key={3}
+        onExpandStateChange={(expanded) => {
+          alert(expanded ?  'section3 expanded' : 'section3 collapsed');
+        }}
+      >
+        <BentoAccordionHeader>
+          <h1>Section 3</h1>
+        </BentoAccordionHeader>
+        <BentoAccordionContent>Content 3</BentoAccordionContent>
+      </BentoAccordionSection>
+    </BentoAccordion>
+  )
+}
 ```
 
 ### Layout and style

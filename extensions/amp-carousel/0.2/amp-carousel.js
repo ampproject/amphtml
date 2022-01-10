@@ -1,3 +1,4 @@
+import {Keys_Enum} from '#core/constants/key-codes';
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
@@ -63,6 +64,8 @@ class AmpCarousel extends AMP.BaseElement {
       },
       ActionTrust_Enum.LOW
     );
+    /** If the element is in an email document, allow its `goToSlide` action. */
+    this.action_.addToAllowlist('AMP-CAROUSEL', 'goToSlide', ['email']);
   }
 
   /** @param {!AmpElement} element */
@@ -161,8 +164,8 @@ class AmpCarousel extends AMP.BaseElement {
         this.onScrollPositionChanged_();
       }
     );
-    this.prevButton_.addEventListener('click', () => this.interactionPrev());
-    this.nextButton_.addEventListener('click', () => this.interactionNext());
+    this.setupButtonInteraction(this.nextButton_, () => this.interactionNext());
+    this.setupButtonInteraction(this.prevButton_, () => this.interactionPrev());
     this.handlePropagationInViewer_();
 
     const owners = Services.ownersForDoc(element);
@@ -204,6 +207,24 @@ class AmpCarousel extends AMP.BaseElement {
     }
 
     return this.mutateElement(() => {});
+  }
+
+  /**
+   * @param {!HTMLDivElement} button
+   * @param {*} onInteraction
+   */
+  setupButtonInteraction(button, onInteraction) {
+    button.addEventListener('click', onInteraction);
+    button.addEventListener('keydown', (event) => {
+      if (event.defaultPrevented) {
+        return;
+      }
+
+      if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
+        event.preventDefault();
+        onInteraction();
+      }
+    });
   }
 
   /** @override */

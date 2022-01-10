@@ -1,5 +1,5 @@
 import * as Preact from '#core/dom/jsx';
-import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
+import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
 import {
   Action,
   StateProperty,
@@ -8,10 +8,6 @@ import {
 } from './amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
-import {
-  DevelopmentModeLog,
-  DevelopmentModeLogButtonSet,
-} from './development-ui';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '#service';
@@ -25,7 +21,6 @@ import {
 import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 
 import {setImportantStyles} from '#core/dom/style';
@@ -66,9 +61,6 @@ const PAUSE_CLASS = 'i-amphtml-story-pause-control';
 const PLAY_CLASS = 'i-amphtml-story-play-control';
 
 /** @private @const {string} */
-const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
-
-/** @private @const {string} */
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
@@ -88,10 +80,12 @@ const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
 /**
  * @param {!Element} element
+ * @param {?Element=} children
  * @return {!Element}
  */
-const renderSystemLayerElement = (element) => (
+const renderSystemLayerElement = (element, children) => (
   <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
+    {children}
     <a class={String(ATTRIBUTION_CLASS)} target="_blank">
       <div class="i-amphtml-story-attribution-logo-container">
         <img alt="" class="i-amphtml-story-attribution-logo" />
@@ -119,26 +113,6 @@ const renderSystemLayerElement = (element) => (
         )}
       />
       <div class="i-amphtml-story-sound-display">
-        <div role="alert" class="i-amphtml-message-container">
-          <div class="i-amphtml-story-mute-text">
-            {localize(
-              element,
-              LocalizedStringId_Enum.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT
-            )}
-          </div>
-          <div class="i-amphtml-story-unmute-sound-text">
-            {localize(
-              element,
-              LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT
-            )}
-          </div>
-          <div class="i-amphtml-story-unmute-no-sound-text">
-            {localize(
-              element,
-              LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT
-            )}
-          </div>
-        </div>
         <button
           class={UNMUTE_CLASS + ' i-amphtml-story-button'}
           aria-label={localize(
@@ -253,9 +227,6 @@ export class SystemLayer {
     /** @protected @const {!Element} */
     this.parentEl_ = parentEl;
 
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
     /**
      * Root element containing a shadow DOM root.
      * @private {?Element}
@@ -273,12 +244,6 @@ export class SystemLayer {
 
     /** @private @const {!ProgressBar} */
     this.progressBar_ = ProgressBar.create(win, this.parentEl_);
-
-    /** @private {!DevelopmentModeLog} */
-    this.developerLog_ = DevelopmentModeLog.create(win);
-
-    /** @private {!DevelopmentModeLogButtonSet} */
-    this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
@@ -304,33 +269,29 @@ export class SystemLayer {
    * @param {string} initialPageId
    */
   build(initialPageId) {
-    if (this.isBuilt_) {
-      return this.getRoot();
+    if (this.root_) {
+      return this.root_;
     }
 
-    this.isBuilt_ = true;
-
-    this.root_ = this.win_.document.createElement('div');
-    this.root_.classList.add('i-amphtml-system-layer-host');
-    this.systemLayerEl_ = renderSystemLayerElement(this.parentEl_);
+    this.systemLayerEl_ = renderSystemLayerElement(
+      this.parentEl_,
+      this.progressBar_.build(initialPageId)
+    );
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
     this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
       Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
-    createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
-
-    this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(initialPageId),
-      this.systemLayerEl_.firstChild
+    this.root_ = createShadowRootWithStyle(
+      <div class="i-amphtml-system-layer-host"></div>,
+      this.systemLayerEl_,
+      CSS
     );
 
     this.buttonsContainer_ = this.systemLayerEl_.querySelector(
       '.i-amphtml-story-system-layer-buttons'
     );
-
-    this.buildForDevelopmentMode_();
 
     this.initializeListeners_();
 
@@ -363,9 +324,8 @@ export class SystemLayer {
 
     this.maybeBuildAttribution_();
 
-    this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
-    return this.getRoot();
+    return this.root_;
   }
 
   /** @private */
@@ -393,22 +353,6 @@ export class SystemLayer {
       this.parentEl_.getAttribute('publisher');
 
     anchorEl.classList.add('i-amphtml-story-attribution-visible');
-  }
-
-  /**
-   * @private
-   */
-  buildForDevelopmentMode_() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.buttonsContainer_.appendChild(
-      this.developerButtons_.build(
-        this.developerLog_.toggle.bind(this.developerLog_)
-      )
-    );
-    this.getShadowRoot().appendChild(this.developerLog_.build());
   }
 
   /**
@@ -462,14 +406,6 @@ export class SystemLayer {
       StateProperty.CAN_SHOW_SHARING_UIS,
       (show) => {
         this.onCanShowSharingUisUpdate_(show);
-      },
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.STORY_HAS_AUDIO_STATE,
-      (hasAudio) => {
-        this.onStoryHasAudioStateUpdate_(hasAudio);
       },
       true /** callToInitialize */
     );
@@ -567,13 +503,6 @@ export class SystemLayer {
   /**
    * @return {!Element}
    */
-  getRoot() {
-    return dev().assertElement(this.root_);
-  }
-
-  /**
-   * @return {!Element}
-   */
   getShadowRoot() {
     return dev().assertElement(this.systemLayerEl_);
   }
@@ -618,21 +547,6 @@ export class SystemLayer {
       this.getShadowRoot().classList.toggle(
         'i-amphtml-story-no-sharing',
         !canShowSharingUis
-      );
-    });
-  }
-
-  /**
-   * Reacts to has audio state updates, determining if the story has a global
-   * audio track playing, or if any page has audio.
-   * @param {boolean} hasAudio
-   * @private
-   */
-  onStoryHasAudioStateUpdate_(hasAudio) {
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().classList.toggle(
-        'i-amphtml-story-has-audio',
-        hasAudio
       );
     });
   }
@@ -737,7 +651,7 @@ export class SystemLayer {
    * @private
    */
   hideMessageInternal_(message) {
-    if (!this.isBuilt_) {
+    if (!this.root_) {
       return;
     }
     this.vsync_.mutate(() => {
@@ -837,10 +751,6 @@ export class SystemLayer {
    */
   onAudioIconClick_(mute) {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideMessageAfterTimeout_(MESSAGE_DISPLAY_CLASS);
-    });
   }
 
   /**
@@ -931,9 +841,8 @@ export class SystemLayer {
           defaultConfig.selector
         );
       } else {
-        element = this.win_.document.createElement('button');
+        element = <button class="i-amphtml-story-button" />;
         this.vsync_.mutate(() => {
-          element.classList.add('i-amphtml-story-button');
           this.buttonsContainer_.appendChild(element);
         });
       }
@@ -993,76 +902,5 @@ export class SystemLayer {
   updateProgress(pageId, progress) {
     // TODO(newmuis) avoid passing progress logic through system-layer
     this.progressBar_.updateProgress(pageId, progress);
-  }
-
-  /**
-   * @param {!./logging.AmpStoryLogEntryDef} logEntry
-   * @private
-   */
-  logInternal_(logEntry) {
-    this.developerButtons_.log(logEntry);
-    this.developerLog_.log(logEntry);
-  }
-
-  /**
-   * Logs an array of entries to the developer logs.
-   * @param {!Array<!./logging.AmpStoryLogEntryDef>} logEntries
-   */
-  logAll(logEntries) {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.vsync_.mutate(() => {
-      logEntries.forEach((logEntry) => this.logInternal_(logEntry));
-    });
-  }
-
-  /**
-   * Logs a single entry to the developer logs.
-   * @param {!./logging.AmpStoryLogEntryDef} logEntry
-   */
-  log(logEntry) {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.logInternal_(logEntry);
-  }
-
-  /**
-   * Clears any state held by the developer log or buttons.
-   */
-  resetDeveloperLogs() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerButtons_.clear();
-    this.developerLog_.clear();
-  }
-
-  /**
-   * Sets the string providing context for the developer logs window.  This is
-   * often the name or ID of the element that all logs are for (e.g. the page).
-   * @param {string} contextString
-   */
-  setDeveloperLogContextString(contextString) {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerLog_.setContextString(contextString);
-  }
-
-  /**
-   * Hides the developer log in the UI.
-   */
-  hideDeveloperLog() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerLog_.hide();
   }
 }

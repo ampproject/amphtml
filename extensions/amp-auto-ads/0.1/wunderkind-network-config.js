@@ -53,8 +53,8 @@ export class WunderkindNetworkConfig {
       'type': 'wunderkind',
       'data-ad': 'wunderkind',
       'layout': 'responsive',
-      'height': '250',
-      'width': '250',
+      'height': '75vw',
+      'width': '100vw',
     });
     return attributes;
   }
@@ -66,11 +66,8 @@ export class WunderkindNetworkConfig {
     ).getSize().height;
     return {
       initialMinSpacing: viewportHeight,
-      subsequentMinSpacing: [
-        {adCount: 3, spacing: viewportHeight * 2},
-        {adCount: 6, spacing: viewportHeight * 3},
-      ],
-      maxAdCount: 8,
+      subsequentMinSpacing: [],
+      maxAdCount: 10,
     };
   }
 

@@ -1,4 +1,3 @@
-import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
   Action,
   EmbeddedComponentState,
@@ -638,27 +637,6 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Check if click should be handled by the affiliate link logic.
-   * @param {!Element} target
-   * @private
-   * @return {boolean}
-   */
-  isHandledByAffiliateLink_(target) {
-    const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
-
-    // do not handle if clicking on expanded affiliate link
-    if (clickedOnLink && target.hasAttribute('expanded')) {
-      return false;
-    }
-
-    const expandedElement = this.storeService_.get(
-      StateProperty.AFFILIATE_LINK_STATE
-    );
-
-    return expandedElement != null || clickedOnLink;
-  }
-
-  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
@@ -681,18 +659,6 @@ export class ManualAdvancement extends AdvancementConfig {
         clientX: event.clientX,
         clientY: event.clientY,
       });
-      return;
-    }
-
-    if (this.isHandledByAffiliateLink_(target)) {
-      event.preventDefault();
-      event.stopPropagation();
-      const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
-      if (clickedOnLink) {
-        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, target);
-      } else {
-        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, null);
-      }
       return;
     }
 
@@ -1153,10 +1119,13 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       // amp-video, amp-audio, as well as amp-story-page with a background audio
       // are eligible for media based auto advance.
       let element = pageEl.querySelector(
-        `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
-          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
+        `amp-video[data-id=${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}], amp-video#${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}, amp-audio[data-id=${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}], amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (
         matches(

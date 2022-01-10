@@ -326,7 +326,7 @@
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-menu"
+        "amp-story-share-menu"
       ]
     },
     {
@@ -351,7 +351,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
+      "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html?transform=0",
       "name": "amp-story: unsupported browser",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
@@ -428,7 +428,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-consent.js"
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html",
+      "url": "examples/visual-tests/amp-story/amp-story-unsupported-browser-layer.html?transform=0",
       "name": "amp-story: unsupported browser (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
@@ -476,7 +476,7 @@
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
-        ".i-amphtml-story-share-menu"
+        "amp-story-share-menu"
       ]
     },
     {

@@ -1,10 +1,15 @@
-import {devAssert, devAssertElement} from '#core/assert';
+import {devAssert} from '#core/assert';
 import * as mode from '#core/mode';
+import {isElement} from '#core/types';
 import {pushIfNotExist, removeItem} from '#core/types/array';
 
-import {ContextPropDef} from './prop.type';
 import {throttleTail} from './scheduler';
 import {Values} from './values';
+
+/**
+ * @template T, DEP
+ * @typedef {import('./types.d').IContextProp<T, DEP>} IContextProp
+ */
 
 // Properties set on the DOM nodes to track the context state.
 const NODE_PROP = '__AMP_NODE';
@@ -13,7 +18,6 @@ const AMP_PREFIX = 'AMP-';
 
 // Relevant node types.
 // See https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType.
-const ELEMENT_NODE = 1;
 const DOCUMENT_NODE = 9;
 // Includes shadow root, template, etc.
 const FRAGMENT_NODE = 11;
@@ -22,12 +26,11 @@ const FRAGMENT_NODE = 11;
  * The structure for a group of nodes.
  *
  * @typedef {{
- *   cn: !ContextNode,
- *   match: function(!Node, !Node):boolean,
+ *   cn: ContextNode<?>,
+ *   match: function(Node, Node):boolean,
  *   weight: number,
- * }}
+ * }} GroupDef
  */
-let GroupDef;
 
 /**
  * The context node is a sparse tree over the DOM tree. Any node that needs
@@ -42,11 +45,11 @@ export class ContextNode {
   /**
    * Returns the existing context node or creates a new one.
    *
-   * @param {!Node} node
-   * @return {!ContextNode}
+   * @param {Node} node
+   * @return {ContextNode<?>}
    */
   static get(node) {
-    let contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
+    let contextNode = /** @type {ContextNode<?>|undefined} */ (node[NODE_PROP]);
     if (!contextNode) {
       contextNode = new ContextNode(node, null);
       if (mode.isLocalDev() || mode.isTest()) {
@@ -77,19 +80,20 @@ export class ContextNode {
    * Root nodes (document or shadow root) and AMP elements are auto-created
    * during the traversal.
    *
-   * @param {!Node} node The node from which to perform the search.
+   * @param {Node} node The node from which to perform the search.
    * @param {boolean=} includeSelf Whether the specified node itself should
    * be included in the search. Defaults to `true`.
-   * @return {?ContextNode}
+   * @return {?ContextNode<?>}
    */
   static closest(node, includeSelf = true) {
+    /** @type {?Node} */
     let n = node;
     while (n) {
       // Check if a node is a candidate to be returned.
       if (n != node || includeSelf) {
         if (n[NODE_PROP]) {
           // Already a discovered node.
-          return /** @type {!ContextNode} */ (n[NODE_PROP]);
+          return /** @type {ContextNode<?>} */ (n[NODE_PROP]);
         }
         const {nodeType} = n;
         if (
@@ -101,21 +105,21 @@ export class ContextNode {
           nodeType == FRAGMENT_NODE ||
           // An AMP node will always have a context node backing it at some
           // point.
-          (nodeType == ELEMENT_NODE &&
-            devAssertElement(n).tagName.startsWith(AMP_PREFIX))
+          (isElement(n) && n.tagName.startsWith(AMP_PREFIX))
         ) {
           return ContextNode.get(n);
         }
       }
       // Navigate up the DOM tree. Notice that we do not automatically go over
       // a root node boundary.
+      /** @type {Node|Element|undefined|null} */
       const assignedSlot =
         /** @type {?Node|undefined} */ (n[ASSIGNED_SLOT_PROP]) ||
-        n.assignedSlot;
+        /** @type {Element} */ (n).assignedSlot;
       if (assignedSlot) {
         n = assignedSlot;
       } else {
-        n = n.parentNode;
+        n = /** @type {?Node} */ (n.parentNode);
       }
     }
     // Only disconnected nodes will return `null` here.
@@ -129,8 +133,8 @@ export class ContextNode {
    *
    * See `Element.assignedSlot` API.
    *
-   * @param {!Node} node The target node.
-   * @param {!Node} slot The slot to which the target node is assigned.
+   * @param {Node} node The target node.
+   * @param {Node} slot The slot to which the target node is assigned.
    */
   static assignSlot(node, slot) {
     if (node[ASSIGNED_SLOT_PROP] == slot) {
@@ -144,8 +148,8 @@ export class ContextNode {
    * Unassigns the direct slot previously done by the `assignSlot` call.
    * Automatically starts the discovery phase for the affected nodes.
    *
-   * @param {!Node} node The target node.
-   * @param {!Node} slot The slot from which the target node is assigned.
+   * @param {Node} node The target node.
+   * @param {Node} slot The slot from which the target node is assigned.
    */
   static unassignSlot(node, slot) {
     if (node[ASSIGNED_SLOT_PROP] != slot) {
@@ -158,24 +162,33 @@ export class ContextNode {
   /**
    * Reruns discovery on the children of the specified node, if any.
    *
-   * @param {!Node} node
+   * @param {Node} node
    */
   static rediscoverChildren(node) {
-    const contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
+    const contextNode = /** @type {ContextNode<?>|undefined} */ (
+      node[NODE_PROP]
+    );
     contextNode?.children?.forEach(discoverContextNode);
   }
 
   /**
    * Creates the context node and automatically starts the discovery process.
    *
-   * @param {!Node} node
+   * @param {Node} node
    * @param {?string} name
    */
   constructor(node, name) {
-    /** @const {!Node} */
+    /**
+     * @const
+     * @type {Node}
+     */
     this.node = node;
 
-    /** @const @package {?string} */
+    /**
+     * @const
+     * @package
+     * @type {?string}
+     */
     this.name = name;
 
     /**
@@ -183,7 +196,8 @@ export class ContextNode {
      * considered as roots. But other nodes can become roots as well
      * (e.g. shadow roots) via `setIsRoot()` API.
      *
-     * @package {boolean}
+     * @package
+     * @type {boolean}
      */
     this.isRoot = node.nodeType == DOCUMENT_NODE;
 
@@ -191,7 +205,8 @@ export class ContextNode {
      * The root context node. Always available for a DOM node connected to a
      * root node after the discovery phase.
      *
-     * @package {?ContextNode}
+     * @package
+     * @type {?ContextNode<?>}
      */
     this.root = this.isRoot ? this : null;
 
@@ -202,30 +217,48 @@ export class ContextNode {
      * why the API is declared as package-private. However, it needs to be
      * unobfuscated to avoid cross-binary issues.
      *
-     * @package {?ContextNode}
+     * @package
+     * @type {?ContextNode<?>}
      */
     this.parent = null;
 
     /**
      * See `parent` description.
      *
-     * @package {?Array<!ContextNode>}
+     * @package
+     * @type {?ContextNode<?>[]}
      */
     this.children = null;
 
-    /** @package {?Map<string, !GroupDef>} */
+    /**
+     * @package
+     * @type {?Map<string, GroupDef>}
+     */
     this.groups = null;
 
-    /** @package {!Values} */
+    /**
+     * @package
+     * @type {!Values}
+     */
     this.values = new Values(this);
 
-    /** @private {?Map<!SID, !./subscriber.Subscriber>} */
+    /**
+     * @private
+     * @type {?Map<SID, import('./subscriber').Subscriber<?>>}
+     */
     this.subscribers_ = null;
 
-    /** @private {boolean} */
+    /**
+     * @private
+     * @type {boolean}
+     */
     this.parentOverridden_ = false;
 
-    /** @const @private {function()} */
+    /**
+     * @const
+     * @private
+     * @type {function():void}
+     */
     this.scheduleDiscover_ = throttleTail(
       this.discover_.bind(this),
       setTimeout
@@ -271,12 +304,12 @@ export class ContextNode {
    * Sets (or unsets) the direct parent. If the parent is set, the node will no
    * longer try to discover itself.
    *
-   * @param {!ContextNode|!Node|null} parent
+   * @param {?(ContextNode<?>|Node)} parent
    */
   setParent(parent) {
-    const parentContext = parent?.nodeType
+    const parentContext = /** @type {*} */ (parent)?.nodeType
       ? ContextNode.get(/** @type {!Node} */ (parent))
-      : /** @type {?ContextNode} */ (parent);
+      : /** @type {?ContextNode<?>} */ (parent);
     this.updateTree_(parentContext, /* parentOverridden */ parent != null);
   }
 
@@ -293,7 +326,7 @@ export class ContextNode {
   }
 
   /**
-   * @param {?ContextNode} root
+   * @param {?ContextNode<?>} root
    * @protected Used cross-binary.
    */
   updateRoot(root) {
@@ -316,9 +349,9 @@ export class ContextNode {
 
   /**
    * @param {string} name
-   * @param {function(!Node):boolean} match
+   * @param {function(Node):boolean} match
    * @param {number} weight
-   * @return {!ContextNode}
+   * @return {ContextNode<?>}
    */
   addGroup(name, match, weight) {
     const groups = this.groups || (this.groups = new Map());
@@ -332,15 +365,15 @@ export class ContextNode {
 
   /**
    * @param {string} name
-   * @return {?ContextNode}
+   * @return {?ContextNode<?>}
    */
   group(name) {
     return this.groups?.get(name)?.cn || null;
   }
 
   /**
-   * @param {!Node} node
-   * @return {?ContextNode}
+   * @param {Node} node
+   * @return {?ContextNode<?>}
    * @protected
    */
   findGroup(node) {
@@ -363,17 +396,25 @@ export class ContextNode {
    * Add or update a subscriber with a specified ID. If subscriber doesn't
    * yet exist, it will be created using the specified factory. The use
    * of factory is important to reduce bundling costs for context node.
+   * If `func` returns a function, that function is called on cleanup.
    *
-   * @param {!SID} id
-   * @param {typeof ./subscriber.Subscriber} Ctor
-   * @param {!Function} func
-   * @param {!Array<!ContextPropDef>} deps
+   * @param {SID} id
+   * @param {typeof import('./subscriber').Subscriber} Ctor
+   * @param {import('./subscriber').SubscribeCallback<DEP>} func
+   * @param {IContextProp<DEP, ?>[]} deps
+   * @template DEP
    */
   subscribe(id, Ctor, func, deps) {
     const subscribers = this.subscribers_ || (this.subscribers_ = new Map());
     let subscriber = subscribers.get(id);
     if (!subscriber) {
-      subscriber = new Ctor(this, func, deps);
+      subscriber = new Ctor(
+        /** @type {ContextNode<function(...DEP):void>} */ (
+          /** @type {?} */ (this)
+        ),
+        func,
+        deps
+      );
       subscribers.set(id, subscriber);
     }
   }
@@ -381,13 +422,14 @@ export class ContextNode {
   /**
    * Removes the subscriber previously set with `subscribe`.
    *
-   * @param {!SID} id
+   * @param {SID} id
    */
   unsubscribe(id) {
     const subscribers = this.subscribers_;
     const subscriber = subscribers?.get(id);
     if (subscriber) {
       subscriber.dispose();
+      devAssert(subscribers);
       subscribers.delete(id);
     }
   }
@@ -408,7 +450,7 @@ export class ContextNode {
   }
 
   /**
-   * @param {?ContextNode} parent
+   * @param {?ContextNode<?>} parent
    * @param {boolean} parentOverridden
    * @private
    */
@@ -422,7 +464,8 @@ export class ContextNode {
 
       // Remove from the old parent.
       if (oldParent?.children) {
-        removeItem(devAssert(oldParent.children), this);
+        devAssert(oldParent.children);
+        removeItem(oldParent.children, this);
       }
 
       // Add to the new parent.
@@ -453,8 +496,8 @@ export class ContextNode {
  * Iterates over all context nodes that are contained within the specified
  * `node`. Only iterates over known context nodes.
  *
- * @param {!Node} node
- * @param {function(!ContextNode)} callback
+ * @param {Node} node
+ * @param {function(ContextNode<?>):void} callback
  * @param {boolean=} includeSelf
  */
 function forEachContained(node, callback, includeSelf = true) {
@@ -474,14 +517,14 @@ function forEachContained(node, callback, includeSelf = true) {
 }
 
 /**
- * @param {!Node} node
+ * @param {Node} node
  */
 function discoverContained(node) {
   forEachContained(node, discoverContextNode);
 }
 
 /**
- * @param {!ContextNode} cn
+ * @param {ContextNode<?>} cn
  */
 function discoverContextNode(cn) {
   cn.discover();

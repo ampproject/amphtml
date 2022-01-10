@@ -19,7 +19,17 @@ import {defineElement as defineBentoSocialShare} from '@bentoproject/social-shar
 defineBentoSocialShare();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-social-share-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-social-share-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-social-share-1.0.css" crossorigin="anonymous">
+```
+
+### Example
 
 <!--% example %-->
 
@@ -33,21 +43,15 @@ defineBentoSocialShare();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <script
-      type="module"
-      async
-      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.mjs"
-    ></script>
-    <script
-      nomodule
-      async
-      src="https://cdn.ampproject.org/v0/bento-twitter-1.0.js"
-    ></script>
     <link
       rel="stylesheet"
       type="text/css"
-      href="https://cdn.ampproject.org/v0/bento-twitter-1.0.css"
+      href="https://cdn.ampproject.org/v0/bento-social-share-1.0.css"
     />
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-social-share-1.0.js"
+    ></script>
     <style>
       bento-social-share {
         width: 375px;
@@ -68,13 +72,13 @@ defineBentoSocialShare();
 
     <script>
       (async () => {
-        const button = document.querySelector('#my-share');
+        const socialShare = document.querySelector('#my-share');
         await customElements.whenDefined('bento-social-share');
 
         // set up button actions
         document.querySelector('#change-share').onclick = () => {
-          twitter.setAttribute('type', 'linkedin');
-          twitter.setAttribute('aria-label', 'Share on LinkedIn');
+          socialShare.setAttribute('type', 'linkedin');
+          socialShare.setAttribute('aria-label', 'Share on LinkedIn');
         };
       })();
     </script>
@@ -328,6 +332,65 @@ All `data-param-*` prefixed attributes are turned into URL parameters and passed
 #### aria-label
 
 The description of the button for accessibility. A recommended label is "Share on \<type>".
+
+#### API Example
+
+Programmatically changing any of the attribute values will automatically update the element. For example, by changing the `type` attribute, you can switch between different share providers.
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-social-share-1.0.css"
+    />
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-social-share-1.0.js"
+    ></script>
+    <style>
+      bento-social-share {
+        width: 375px;
+        height: 472px;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-social-share
+      id="my-share"
+      type="twitter"
+      aria-label="Share on Twitter"
+    ></bento-social-share>
+
+    <div class="buttons" style="margin-top: 8px">
+      <button id="change-share">Change share button</button>
+    </div>
+
+    <script>
+      (async () => {
+        const socialShare = document.querySelector('#my-share');
+        await customElements.whenDefined('bento-social-share');
+
+        // set up button actions
+        document.querySelector('#change-share').onclick = () => {
+          socialShare.setAttribute('type', 'linkedin');
+          socialShare.setAttribute('aria-label', 'Share on LinkedIn');
+        };
+      })();
+    </script>
+  </body>
+</html>
+```
 
 ---
 

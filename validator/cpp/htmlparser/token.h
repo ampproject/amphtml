@@ -1,12 +1,12 @@
-#ifndef HTMLPARSER__TOKEN_H_
-#define HTMLPARSER__TOKEN_H_
+#ifndef CPP_HTMLPARSER_TOKEN_H_
+#define CPP_HTMLPARSER_TOKEN_H_
 
 #include <memory>
 #include <optional>
 #include <string>
 #include <vector>
 
-#include "atom.h"
+#include "cpp/htmlparser/atom.h"
 
 namespace htmlparser {
 
@@ -92,4 +92,4 @@ struct Token {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__TOKEN_H_
+#endif  // CPP_HTMLPARSER_TOKEN_H_

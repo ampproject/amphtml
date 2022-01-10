@@ -442,7 +442,7 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     win = {
       document: doc,
       performance: {
-        now: Date.now,
+        now: performance.now,
         timeOrigin: 1,
       },
     };
@@ -456,7 +456,7 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     childWin = {
       document: childDoc,
       performance: {
-        now: Date.now,
+        now: performance.now,
         timeOrigin: 2,
       },
     };
@@ -538,20 +538,32 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
 
   describe('firstVisibleTime', () => {
     it('should prefer timeOrigin doc initialized to visible', () => {
-      win.performance.timeOrigin = 10;
+      // Move page load time to 2021-01-01T12:30Z
+      win.performance.timeOrigin = 1609504200000;
+      // Page has been active for 30min
+      env.sandbox.stub(win.performance, 'now').returns(30 * 60 * 1000);
+      // Move epoch time to 2021-01-01T13:00Z
+      clock.tick(1609506000000 - Date.now());
       top = new AmpDocSingle(win, {visibilityState: 'visible'});
 
-      expect(top.getFirstVisibleTime()).to.equal(10);
+      expect(top.getFirstVisibleTime()).to.equal(win.performance.timeOrigin);
+      expect(top.getFirstVisibleTime()).not.to.equal(Date.now());
     });
 
     it('should wait for visible', () => {
+      // Move page load time to 2021-01-01T12:30Z
+      win.performance.timeOrigin = 1609504200000;
+      // Page has been active for 30min
+      env.sandbox.stub(win.performance, 'now').returns(30 * 60 * 1000);
+      // Move epoch time to 2021-01-01T13:00Z
+      clock.tick(1609506000000 - Date.now());
       top = new AmpDocSingle(win, {visibilityState: 'prerender'});
 
       expect(top.getFirstVisibleTime()).to.equal(null);
 
-      clock.tick(100);
       top.overrideVisibilityState('visible');
-      expect(top.getFirstVisibleTime()).to.equal(101);
+      expect(top.getFirstVisibleTime()).to.equal(1609506000000);
+      expect(top.getFirstVisibleTime()).to.equal(Date.now());
     });
   });
 
@@ -666,15 +678,19 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(embedOtherWindow.isVisible()).to.be.true;
     expect(embedChild.isVisible()).to.be.true;
 
-    expect(top.getFirstVisibleTime()).to.equal(2);
-    expect(embedSameWindow.getFirstVisibleTime()).to.equal(2);
-    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(2);
-    expect(embedChild.getFirstVisibleTime()).to.equal(2);
+    const epoch = win.performance.timeOrigin + performance.now();
+    const childEpoch = childWin.performance.timeOrigin + performance.now();
+    expect(epoch).to.equal(3);
+    expect(childEpoch).to.equal(4);
+    expect(top.getFirstVisibleTime()).to.equal(epoch);
+    expect(embedSameWindow.getFirstVisibleTime()).to.equal(epoch);
+    expect(embedOtherWindow.getFirstVisibleTime()).to.equal(childEpoch);
+    expect(embedChild.getFirstVisibleTime()).to.equal(childEpoch);
 
-    expect(top.getLastVisibleTime()).to.equal(2);
-    expect(embedSameWindow.getLastVisibleTime()).to.equal(2);
-    expect(embedOtherWindow.getLastVisibleTime()).to.equal(2);
-    expect(embedChild.getLastVisibleTime()).to.equal(2);
+    expect(top.getLastVisibleTime()).to.equal(epoch);
+    expect(embedSameWindow.getLastVisibleTime()).to.equal(epoch);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(childEpoch);
+    expect(embedChild.getLastVisibleTime()).to.equal(childEpoch);
 
     return Promise.all([
       top.whenFirstVisible(),
@@ -714,8 +730,10 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(embedOtherWindow.getVisibilityState()).to.equal('visible');
     expect(embedChild.getVisibilityState()).to.equal('visible');
 
+    const epoch = win.performance.timeOrigin + performance.now();
+    expect(epoch).to.equal(4);
     expect(top.getFirstVisibleTime()).to.equal(1);
-    expect(top.getLastVisibleTime()).to.equal(3);
+    expect(top.getLastVisibleTime()).to.equal(epoch);
   });
 
   it('should update visibility in children', () => {
@@ -747,9 +765,9 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(embedSameWindow.getFirstVisibleTime()).to.equal(1);
     expect(embedSameWindow.getLastVisibleTime()).to.equal(1);
     expect(embedOtherWindow.getFirstVisibleTime()).to.equal(2);
-    expect(embedOtherWindow.getLastVisibleTime()).to.equal(3);
+    expect(embedOtherWindow.getLastVisibleTime()).to.equal(5);
     expect(embedChild.getFirstVisibleTime()).to.equal(2);
-    expect(embedChild.getLastVisibleTime()).to.equal(3);
+    expect(embedChild.getLastVisibleTime()).to.equal(5);
   });
 
   it('should update when document visibility changes', () => {

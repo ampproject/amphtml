@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.193 */
+/** Version: 0.1.22.199 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -252,6 +252,9 @@ const AnalyticsEvent = {
   IMPRESSION_TWG_STATIC_BUTTON: 30,
   IMPRESSION_TWG_DYNAMIC_BUTTON: 31,
   IMPRESSION_TWG_STICKER_SELECTION_SCREEN: 32,
+  IMPRESSION_TWG_PUBLICATION_NOT_SET_UP: 33,
+  IMPRESSION_REGWALL_OPT_IN: 34,
+  IMPRESSION_NEWSLETTER_OPT_IN: 35,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -305,7 +308,14 @@ const AnalyticsEvent = {
   ACTION_TWG_FREE_TRANSACTION_START_NEXT_BUTTON_CLICK: 1050,
   ACTION_TWG_PAID_TRANSACTION_START_NEXT_BUTTON_CLICK: 1051,
   ACTION_TWG_STICKER_SELECTION_SCREEN_CLOSE_CLICK: 1052,
+  ACTION_TWG_ARTICLE_LEVEL_SUPPORTER_WALL_CTA_CLICK: 1053,
+  ACTION_REGWALL_OPT_IN_BUTTON_CLICK: 1054,
+  ACTION_REGWALL_ALREADY_OPTED_IN_CLICK: 1055,
+  ACTION_NEWSLETTER_OPT_IN_BUTTON_CLICK: 1056,
+  ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
   EVENT_PAYMENT_FAILED: 2000,
+  EVENT_REGWALL_OPT_IN_FAILED: 2001,
+  EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -329,6 +339,8 @@ const AnalyticsEvent = {
   EVENT_TWG_POST_TRANSACTION_SETTING_PRIVATE: 3020,
   EVENT_TWG_PRE_TRANSACTION_PRIVACY_SETTING_PUBLIC: 3021,
   EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
+  EVENT_REGWALL_OPTED_IN: 3023,
+  EVENT_NEWSLETTER_OPTED_IN: 3024,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -500,12 +512,6 @@ function parseUrl(url) {
 function parseUrlWithA(a, url) {
   a.href = url;
 
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
   /** @type {!LocationDef} */
   const info = {
     href: a.href,
@@ -518,22 +524,6 @@ function parseUrlWithA(a, url) {
     hash: a.hash,
     origin: '', // Set below.
   };
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if (
-    (info.protocol == 'http:' && info.port == 80) ||
-    (info.protocol == 'https:' && info.port == 443)
-  ) {
-    info.port = '';
-    info.host = info.hostname;
-  }
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
@@ -945,8 +935,7 @@ const REGWALL_HTML = `
   .gaa-metering-regwall--description,
   .gaa-metering-regwall--description strong,
   .gaa-metering-regwall--iframe,
-  .gaa-metering-regwall--casl,
-  .gaa-metering-regwall--publisher-no-thanks-button {
+  .gaa-metering-regwall--casl {
     all: initial !important;
     box-sizing: border-box !important;
     font-family: Roboto, arial, sans-serif !important;
@@ -1009,7 +998,7 @@ const REGWALL_HTML = `
   .gaa-metering-regwall--iframe {
     border: none !important;
     display: block !important;
-    height: 36px !important;
+    height: 44px !important;
     margin: 0 0 30px !important;
     width: 100% !important;
   }
@@ -1033,20 +1022,12 @@ const REGWALL_HTML = `
     margin: 0 0 24px !important;
   }
 
-  .gaa-metering-regwall--publisher-sign-in-button,
-  .gaa-metering-regwall--publisher-no-thanks-button {
-    color: #1967d2 !important;
-    display: block !important;
-    cursor: pointer !important;
-    font-size: 12px !important;
-  }
-
   .gaa-metering-regwall--publisher-sign-in-button {
-  }
-
-  .gaa-metering-regwall--publisher-no-thanks-button {
-    display: none !important;
-    float: right !important;
+    color: #1967d2 !important;
+    cursor: pointer !important;
+    display: block !important;
+    font-size: 12px !important;
+    text-decoration: underline !important;
   }
 
   .gaa-metering-regwall--google-sign-in-button {
@@ -1120,6 +1101,11 @@ const GOOGLE_SIGN_IN_IFRAME_STYLES = `
   #${GOOGLE_SIGN_IN_BUTTON_ID} {
     margin: 0 auto;
   }
+
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID}{
+    width: 220px;
+  }
+
   #${GOOGLE_3P_SIGN_IN_BUTTON_ID} > div,
   #${SIGN_IN_WITH_GOOGLE_BUTTON_ID} > div,
   #${GOOGLE_SIGN_IN_BUTTON_ID} > div {
@@ -1453,8 +1439,7 @@ class GaaMeteringRegwall {
       'script[type="application/ld+json"]'
     );
 
-    for (let i = 0; i < ldJsonElements.length; i++) {
-      const ldJsonElement = ldJsonElements[i];
+    for (const ldJsonElement of ldJsonElements) {
       let ldJson = /** @type {*} */ (parseJson(ldJsonElement.textContent));
 
       if (!Array.isArray(ldJson)) {
@@ -1483,8 +1468,7 @@ class GaaMeteringRegwall {
       '[itemscope][itemtype][itemprop="publisher"] [itemprop="name"]'
     );
 
-    for (let i = 0; i < publisherNameElements.length; i++) {
-      const publisherNameElement = publisherNameElements[i];
+    for (const publisherNameElement of publisherNameElements) {
       const publisherName = publisherNameElement.content;
       if (publisherName) {
         return publisherName;
@@ -1525,8 +1509,8 @@ class GaaMeteringRegwall {
       self.addEventListener('message', (e) => {
         if (e.data.stamp === POST_MESSAGE_STAMP) {
           if (e.data.command === POST_MESSAGE_COMMAND_USER) {
-            // Pass along GAA user.
-            resolve(e.data.gaaUser);
+            // Pass along user details.
+            resolve(e.data.gaaUser || e.data.jwtPayload);
           }
 
           if (e.data.command === POST_MESSAGE_COMMAND_ERROR) {
@@ -1633,8 +1617,7 @@ class GaaGoogleSignInButton {
     }
 
     // Validate origins.
-    for (let i = 0; i < allowedOrigins.length; i++) {
-      const allowedOrigin = allowedOrigins[i];
+    for (const allowedOrigin of allowedOrigins) {
       const url = new URL(allowedOrigin);
 
       const isOrigin = url.origin === allowedOrigin;
@@ -1910,14 +1893,14 @@ function logEvent({analyticsEvent, showcaseEvent, isFromUserAction} = {}) {
         : [analyticsEvent];
 
       // Log each analytics event.
-      eventTypes.forEach((eventType) => {
+      for (const eventType of eventTypes) {
         eventManager.logEvent({
           eventType,
           eventOriginator: EventOriginator.SWG_CLIENT,
           isFromUserAction,
           additionalParameters: null,
         });
-      });
+      }
     });
   });
 }

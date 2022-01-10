@@ -17,7 +17,9 @@ exports.jsBundles = {
     minifiedDestDir: './build/',
   },
   'bento.js': {
-    srcDir: './src/',
+    // This file is generated, so we find its source in the build/ dir
+    // See compileBentoRuntime() and generateBentoRuntimeEntrypoint()
+    srcDir: 'build/',
     srcFilename: 'bento.js',
     destDir: './dist',
     minifiedDestDir: './dist',
@@ -255,25 +257,6 @@ exports.verifyExtensionBundles = function () {
       'is missing from',
       bundle.name,
       bundleString
-    );
-    verifyBundle_(
-      'latestVersion' in bundle,
-      'latestVersion',
-      'is missing from',
-      bundle.name,
-      bundleString
-    );
-    const duplicates = exports.extensionBundles.filter(
-      (duplicate) => duplicate.name === bundle.name
-    );
-    verifyBundle_(
-      duplicates.every(
-        (duplicate) => duplicate.latestVersion === bundle.latestVersion
-      ),
-      'latestVersion',
-      'is not the same for all versions of',
-      bundle.name,
-      JSON.stringify(duplicates, null, 2)
     );
   });
 };
