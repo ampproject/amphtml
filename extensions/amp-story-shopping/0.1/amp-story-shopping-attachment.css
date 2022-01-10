@@ -2,57 +2,59 @@ amp-story-shopping-attachment {
   height: 100% !important;
   width: 100% !important;
   font-family: 'Poppins', sans-serif !important;
+  font-size: calc(var(--story-page-vmin) * 3) !important; /* override with ems for pixel perfect layout */
+  --shopping-attachment-horizontal-padding: 1.5em;
 }
 
 amp-story-shopping-attachment a {
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 .amp-story-shopping-plp {
-  padding: 0 1em 0;
+  padding: 0 var(--shopping-attachment-horizontal-padding) !important;
 }
 
 .amp-story-shopping-plp-header {
-  font-weight: 600; /* semi bold */
-  font-size: calc(var(--story-page-vmin) * 4.5);
-  margin-bottom: .8em;
-  margin-top: 13px;
+  font-weight: 600 !important; /* semi bold */
+  font-size: 1.5em !important;
+  margin-bottom: 1.2em !important;
+  margin-top: 13px !important;
 }
 
 .amp-story-shopping-plp-cards {
-  justify-content: space-between;
-  display: flex;
-  flex-wrap: wrap;
+  justify-content: space-between !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
 }
 
 .amp-story-shopping-plp-card {
-  cursor: pointer;
-  width: calc(50% - .5em);
-  margin-bottom: 36px;
+  width: calc(50% - var(--shopping-attachment-horizontal-padding) / 2) !important;
+  margin-bottom: 3em !important;
 }
 
 .amp-story-shopping-plp-card-image {
-  border-radius: .875em;
-  width: 100%;
+  width: 100% !important;
+  margin-bottom: 0.75em !important;
+  border-radius: 2em !important;
 }
 
 .amp-story-shopping-plp-card-brand {
   font-weight: 500 !important; /* medium */
-  margin-bottom: .33em;
-  line-height: .75em;
-  font-size: .625em;
+  margin-bottom: 0.7em !important;
+  line-height: .75em !important;
+  font-size: .9em !important;
 }
 
 .amp-story-shopping-plp-card-title {
-  font-weight: 600; /* semi bold */
-  margin-bottom: .33em;
-  line-height: 1em;
-  font-size: .875em;
+  font-weight: 600 !important; /* semi bold */
+  margin-bottom: 0.4em !important;
+  line-height: 1.2em !important;
+  font-size: 1.25em !important;
 }
 
 .amp-story-shopping-plp-card-price {
   font-weight: 500 !important; /* medium */
-  margin-bottom: .33em;
-  line-height: 1em;
-  font-size: .75em;
+  margin-bottom: .33em !important;
+  line-height: 1em !important;
+  font-size: 1.1em !important;
 }
