@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>bento-timeago</title>
     <script
       type="module"
       async
@@ -22,13 +25,45 @@
       type="text/css"
       href="https://cdn.ampproject.org/v0/bento-timeago-1.0.css"
     />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol';
+        margin: 2rem;
+        background: #ecf1f3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      bento-timeago {
+        font-size: 22px;
+      }
+      .buttons {
+        display: flex;
+        flex-direction: column;
+      }
+      button {
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        color: #269da3;
+        background: white;
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0.5rem auto;
+        width: 300px;
+      }
+    </style>
   </head>
   <body>
     <bento-timeago
       id="my-timeago"
       datetime="2017-04-11T00:37:33.809Z"
       locale="en"
-      style="height: 30px"
+      style="height: 30px; width: 300px; margin: 0 auto"
     >
       Saturday 11 April 2017 00.37
     </bento-timeago>

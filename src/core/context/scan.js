@@ -1,12 +1,14 @@
+/** @typedef {import('./node').ContextNode<?>} ContextNode */
+
 /**
  * Performs the `closest()` scan through context nodes to find the one that
  * matches the predicate with an optional argument.
  *
- * @param {!./node.ContextNode} startNode
- * @param {function(!./node.ContextNode, T):boolean} predicate
+ * @param {ContextNode} startNode
+ * @param {function(ContextNode, T|undefined):boolean} predicate
  * @param {T=} arg
  * @param {boolean=} includeSelf
- * @return {?./node.ContextNode}
+ * @return {?ContextNode}
  * @template T
  */
 export function findParent(
@@ -29,8 +31,8 @@ export function findParent(
  * subtree by returning a falsy result. Otherwise, the subtree will be scanned
  * and the result value will be passed to the children callbacks.
  *
- * @param {!./node.ContextNode} startNode
- * @param {function(!./node.ContextNode, T, S):S} callback
+ * @param {ContextNode} startNode
+ * @param {function(ContextNode, T|undefined, S):S} callback
  * @param {T=} arg
  * @param {S=} state
  * @param {boolean=} includeSelf
@@ -41,7 +43,7 @@ export function deepScan(
   startNode,
   callback,
   arg = undefined,
-  state = true,
+  state = /** @type {S} */ (/** @type {?} */ (true)),
   includeSelf = true
 ) {
   if (includeSelf) {

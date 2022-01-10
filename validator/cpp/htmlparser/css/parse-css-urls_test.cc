@@ -1,11 +1,11 @@
-#include "css/parse-css-urls.h"
+#include "cpp/htmlparser/css/parse-css-urls.h"
 
 #include <ostream>
 
 #include <gmock/gmock.h>
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
-#include "strings.h"
+#include "cpp/htmlparser/strings.h"
 
 using testing::Eq;
 using testing::Pointwise;

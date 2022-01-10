@@ -19,7 +19,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-ooyala-player';
 
@@ -128,7 +128,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     });
 
     const loaded = this.loadPromise(this.iframe_).then(() => {
-      dispatchCustomEvent(el, VideoEvents.LOAD);
+      dispatchCustomEvent(el, VideoEvents_Enum.LOAD);
     });
     this.playerReadyResolver_(loaded);
 
@@ -185,10 +185,10 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
     redispatch(this.element, data['data'], {
-      'playing': VideoEvents.PLAYING,
-      'paused': VideoEvents.PAUSE,
-      'muted': VideoEvents.MUTED,
-      'unmuted': VideoEvents.UNMUTED,
+      'playing': VideoEvents_Enum.PLAYING,
+      'paused': VideoEvents_Enum.PAUSE,
+      'muted': VideoEvents_Enum.MUTED,
+      'unmuted': VideoEvents_Enum.UNMUTED,
     });
   }
 

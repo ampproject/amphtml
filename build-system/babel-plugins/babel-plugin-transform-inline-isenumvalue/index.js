@@ -165,14 +165,19 @@ module.exports = function (babel) {
       isEnumValueCache.set(evaluated.value, id);
 
       // (x) => x === 1 || x === 2 || x === 3 || ...
-      const expression = Object.values(evaluated.value)
-        .map((value) =>
-          t.binaryExpression('===', t.identifier('x'), t.valueToNode(value))
-        )
-        .reduce(
-          (a, b) => t.logicalExpression('||', a, b),
-          t.booleanLiteral(false)
-        );
+      const values = Object.values(evaluated.value);
+      const expression =
+        values.length === 0
+          ? t.booleanLiteral(false)
+          : values
+              .map((value) =>
+                t.binaryExpression(
+                  '===',
+                  t.identifier('x'),
+                  t.valueToNode(value)
+                )
+              )
+              .reduce((a, b) => t.logicalExpression('||', a, b));
       pushIntoProgramScope(
         path,
         id,

@@ -30,7 +30,7 @@ describes.endtoend(
       await controller.switchToLight();
 
       const shareMenuHost = await controller.findElement(
-        '.i-amphtml-story-share-menu-host'
+        'amp-story-share-menu'
       );
       await controller.switchToShadowRoot(shareMenuHost);
       const getLinkButton = await controller.findElement(

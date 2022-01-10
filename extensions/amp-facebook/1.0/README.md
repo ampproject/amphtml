@@ -6,7 +6,7 @@ Embeds a [Facebook](https://facebook.com) post, a Facebook video, or a comment o
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/facebook
@@ -17,7 +17,17 @@ import {defineElement as defineBentoFacebook} from '@bentoproject/facebook';
 defineBentoFacebook();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-facebook-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-facebook-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-facebook-1.0.css" crossorigin="anonymous">
+```
+
+### Example
 
 ##### Embed a Facebook Post
 
@@ -33,14 +43,11 @@ defineBentoFacebook();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-facebook {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-facebook-1.0.css"
+    />
     <script
       type="module"
       async
@@ -99,14 +106,11 @@ defineBentoFacebook();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-facebook {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-facebook-1.0.css"
+    />
     <script
       type="module"
       async
@@ -166,14 +170,11 @@ defineBentoFacebook();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-facebook {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-facebook-1.0.css"
+    />
     <script
       type="module"
       async
@@ -233,14 +234,11 @@ defineBentoFacebook();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-facebook {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-facebook-1.0.css"
+    />
     <script
       type="module"
       async
@@ -283,14 +281,11 @@ defineBentoFacebook();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-    <style>
-      bento-facebook {
-        display: block;
-        overflow: hidden;
-        position: relative;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-facebook-1.0.css"
+    />
     <script
       type="module"
       async
@@ -449,7 +444,7 @@ Define a `title` attribute for the component to propagate to the underlying `<if
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/facebook

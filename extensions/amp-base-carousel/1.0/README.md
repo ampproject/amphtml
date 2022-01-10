@@ -6,7 +6,7 @@ A generic carousel for displaying multiple similar pieces of content along a hor
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/base-carousel
@@ -17,7 +17,17 @@ import {defineElement as defineBentoBaseCarousel} from '@bentoproject/base-carou
 defineBentoBaseCarousel();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css" crossorigin="anonymous">
+```
+
+### Example
 
 <!--% example %-->
 
@@ -31,14 +41,68 @@ defineBentoBaseCarousel();
       src="https://cdn.ampproject.org/bento.mjs"
     ></script>
     <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
-    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css"
+    />
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.js"
+    ></script>
     <style>
-      bento-base-carousel {
-        display: block;
-        overflow: hidden;
-        position: relative;
+      bento-base-carousel,
+      bento-base-carousel > div {
+        aspect-ratio: 4/1;
+      }
+      .red {
+        background: darkred;
+      }
+      .blue {
+        background: steelblue;
+      }
+      .green {
+        background: seagreen;
       }
     </style>
+  </head>
+  <body>
+    <bento-base-carousel id="my-carousel">
+      <div class="red"></div>
+      <div class="blue"></div>
+      <div class="green"></div>
+    </bento-base-carousel>
+  </body>
+</html>
+```
+
+### Interactivity and API usage
+
+Bento components are highly interactive through their API. The `bento-base-carousel` component API is accessible by including the following script tag in your document:
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-base-carousel-1.0.css"
+    />
     <script
       type="module"
       async
@@ -96,10 +160,6 @@ defineBentoBaseCarousel();
   </body>
 </html>
 ```
-
-### Interactivity and API usage
-
-Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-base-carousel` component API is accessible by including the following script tag in your document:
 
 ```javascript
 await customElements.whenDefined('bento-base-carousel');
@@ -345,7 +405,7 @@ Arrow buttons can be customized by passing in your own custom markup. For exampl
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/base-carousel

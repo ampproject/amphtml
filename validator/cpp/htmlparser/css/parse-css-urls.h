@@ -7,8 +7,8 @@
 // CSS. See search/amphtml/transformers/external_url_rewrite_transformer.cc for
 // the primary use case of this library.
 
-#ifndef HTMLPARSER__CSS_PARSE_CSS_URLS_H_
-#define HTMLPARSER__CSS_PARSE_CSS_URLS_H_
+#ifndef CPP_HTMLPARSER_CSS_PARSE_CSS_URLS_H_
+#define CPP_HTMLPARSER_CSS_PARSE_CSS_URLS_H_
 
 #include <memory>
 #include <string>
@@ -17,7 +17,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/types/variant.h"
-#include "css/parse-css-urls.pb.h"
+#include "cpp/htmlparser/css/parse-css-urls.pb.h"
 
 namespace htmlparser::css::url {
 // Implements 3.3. Preprocessing the input stream.
@@ -266,4 +266,4 @@ bool SegmentCss(const std::string& utf8_css,
 
 }  // namespace htmlparser::css::url
 
-#endif  // HTMLPARSER__CSS_PARSE_CSS_URLS_H_
+#endif  // CPP_HTMLPARSER_CSS_PARSE_CSS_URLS_H_

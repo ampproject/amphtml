@@ -146,7 +146,7 @@ function extractTextContentWebVtt(text) {
     .join(' ');
   // Super loose HTML parsing to get HTML entity parsing and removal
   // of WebVTT elements.
-  const div = document.createElement('div');
+  const div = <div />;
   div./* element is never added to DOM */ innerHTML = text;
   return div.textContent;
 }

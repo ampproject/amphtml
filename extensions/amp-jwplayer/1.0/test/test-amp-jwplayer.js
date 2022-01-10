@@ -95,6 +95,34 @@ describes.realWin(
       );
     });
 
+    it('should pass the loading attribute to the underlying iframe', async () => {
+      const attrs = {
+        'data-media-id': 'BZ6tc0gy',
+        'data-player-id': 'uoIbMPm3',
+        'data-playlist-id': '482jsTAr',
+        'data-loading': 'lazy',
+      };
+
+      const element = await mountComp(env.win.document, attrs);
+
+      expect(
+        element.shadowRoot.querySelector('iframe').getAttribute('loading')
+      ).to.equal('lazy');
+    });
+
+    it('should set data-loading="auto" if no value is specified', async () => {
+      const attrs = {
+        'data-media-id': 'BZ6tc0gy',
+        'data-player-id': 'uoIbMPm3',
+      };
+
+      const element = await mountComp(env.win.document, attrs);
+
+      expect(
+        element.shadowRoot.querySelector('iframe').getAttribute('loading')
+      ).to.equal('auto');
+    });
+
     describe('contextual search', () => {
       it('should get search val from meta tag', async () => {
         const metaTitle = 'mockTitle1';

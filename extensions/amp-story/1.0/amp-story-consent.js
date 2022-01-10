@@ -4,10 +4,10 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
-import {Layout} from '#core/dom/layout';
-import {LocalizedStringId} from '#service/localization/strings';
+import {Layout_Enum} from '#core/dom/layout';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
@@ -59,9 +59,7 @@ const renderElement = (element, config, consentId, logoSrc) => (
         <div class="i-amphtml-story-consent-header">
           <div
             class="i-amphtml-story-consent-logo"
-            style={
-              logoSrc ? {backgroundImage: `url('${logoSrc}') !important`} : ''
-            }
+            style={logoSrc && {backgroundImage: `url('${logoSrc}') !important`}}
           />
         </div>
         <div class="i-amphtml-story-consent-content">
@@ -98,7 +96,7 @@ const renderElement = (element, config, consentId, logoSrc) => (
         >
           {localize(
             element,
-            LocalizedStringId.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL
+            LocalizedStringId_Enum.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL
           )}
         </button>
         <button
@@ -110,7 +108,7 @@ const renderElement = (element, config, consentId, logoSrc) => (
         >
           {localize(
             element,
-            LocalizedStringId.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL
+            LocalizedStringId_Enum.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL
           )}
         </button>
       </div>
@@ -196,7 +194,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /**
@@ -232,7 +230,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     }
     if (event.target.hasAttribute('on')) {
       const targetEl = dev().assertElement(event.target);
-      this.actions_.trigger(targetEl, 'tap', event, ActionTrust.HIGH);
+      this.actions_.trigger(targetEl, 'tap', event, ActionTrust_Enum.HIGH);
     }
     const anchorClicked = closest(event.target, (e) => matches(e, 'a[href]'));
     if (anchorClicked) {

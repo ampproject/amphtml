@@ -183,9 +183,20 @@ cc_library(
 )
 
 cc_library(
+    name = "glog_polyfill",
+    hdrs = [
+        "glog_polyfill.h",
+    ],
+    copts = ["-std=c++17"],
+)
+
+cc_library(
     name = "logging",
     hdrs = [
         "logging.h",
+    ],
+    deps = [
+        ":glog_polyfill",
     ],
     copts = ["-std=c++17"],
 )
@@ -224,7 +235,6 @@ cc_library(
         ":error",
         ":logging",
         ":token",
-        "@com_github_glog//:glog",
     ],
 )
 
@@ -240,6 +250,16 @@ cc_test(
         ":parser",
         ":renderer",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "iterators",
+    hdrs = [
+        "iterators.h",
+    ],
+    deps = [
+        ":node",
     ],
 )
 
@@ -276,9 +296,11 @@ cc_library(
     copts = ["-std=c++17"],
     deps = [
         ":allocator",
+        ":iterators",
         ":node",
         ":token",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -327,9 +349,9 @@ cc_library(
         ":node",
         ":strings",
         ":tokenizer",
-        "@com_github_glog//:glog",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -402,7 +424,6 @@ cc_library(
         ":htmlentities",
         ":logging",
         ":whitespacetable",
-        "@com_github_glog//:glog",
         "@com_google_absl//absl/base",
     ],
 )
