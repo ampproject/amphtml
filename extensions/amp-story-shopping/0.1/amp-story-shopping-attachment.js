@@ -43,7 +43,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.localizationService_ = null;
 
     /** @private {?Element} */
-    this.templateWrapper_ = null;
+    this.templateContainer_ = null;
 
     this.shoppingTags_ = this.element
       .closest('amp-story-page')
@@ -60,7 +60,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       ></amp-story-page-attachment>
     );
     this.element.appendChild(this.attachmentEl_);
-    this.templateWrapper_ = this.attachmentEl_.appendChild(<div></div>);
+    this.templateContainer_ = this.attachmentEl_.appendChild(<div></div>);
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -85,7 +85,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     const plpTemplate = this.renderPlpTemplate_(shoppingDataForPage);
 
-    this.templateWrapper_.replaceChildren(plpTemplate);
+    this.templateContainer_.replaceChildren(plpTemplate);
 
     return this.attachmentEl_
       .getImpl()
