@@ -13,7 +13,7 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
-import {formatI18nNumber} from './amp-story-shopping';
+import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
 /** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
 const FONTS_TO_LOAD = [
@@ -21,16 +21,6 @@ const FONTS_TO_LOAD = [
     family: 'Poppins',
     weight: '400',
     src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
-  },
-  {
-    family: 'Poppins',
-    weight: '500',
-    src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLGT9Z1xlFd2JQEk.woff2) format('woff2')",
-  },
-  {
-    family: 'Poppins',
-    weight: '600',
-    src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
   },
   {
     family: 'Poppins',
@@ -57,7 +47,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.loadFonts_();
+    loadFonts(this.win, FONTS_TO_LOAD);
     this.element.setAttribute('role', 'button');
 
     return Promise.all([
@@ -207,16 +197,5 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         this.styleTagText_();
       }
     );
-  }
-
-  /** @private */
-  loadFonts_() {
-    if (this.win.document.fonts && FontFace) {
-      FONTS_TO_LOAD.forEach(({family, src, style = 'normal', weight}) =>
-        new FontFace(family, src, {weight, style})
-          .load()
-          .then((font) => this.win.document.fonts.add(font))
-      );
-    }
   }
 }

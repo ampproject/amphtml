@@ -11,7 +11,21 @@ import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 
 import {localize} from '../../amp-story/1.0/amp-story-localization-service';
 
-import {formatI18nNumber} from './amp-story-shopping';
+import {formatI18nNumber, loadFonts} from './amp-story-shopping';
+
+/** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+const FONTS_TO_LOAD = [
+  {
+    family: 'Poppins',
+    weight: '500',
+    src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLGT9Z1xlFd2JQEk.woff2) format('woff2')",
+  },
+  {
+    family: 'Poppins',
+    weight: '600',
+    src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
+  },
+];
 
 export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -37,6 +51,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    loadFonts(this.win, FONTS_TO_LOAD);
     this.attachmentEl_ = (
       <amp-story-page-attachment
         layout="nodisplay"

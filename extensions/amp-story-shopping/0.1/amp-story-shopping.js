@@ -19,6 +19,17 @@ export const formatI18nNumber = (i18nService, element, currency, price) => {
   );
 };
 
+/** @param {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins */
+export const loadFonts = (win, fontFaces) => {
+  if (win.document.fonts && FontFace) {
+    fontFaces.forEach(({family, src, weight}) =>
+      new FontFace(family, src, {weight})
+        .load()
+        .then((font) => win.document.fonts.add(font))
+    );
+  }
+};
+
 AMP.extension('amp-story-shopping', '0.1', (AMP) => {
   AMP.registerElement('amp-story-shopping-config', AmpStoryShoppingConfig);
   AMP.registerElement(
