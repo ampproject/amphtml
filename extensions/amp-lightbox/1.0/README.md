@@ -6,7 +6,7 @@ Displays any content in a full-viewport "lightbox" modal.
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/lightbox
@@ -17,7 +17,17 @@ import {defineElement as defineBentoLightbox} from '@bentoproject/lightbox';
 defineBentoLightbox();
 ```
 
-### Example: Import via `<script>`
+### Import via `<script>`
+
+```html
+<script type="module" async src="https://cdn.ampproject.org/bento.mjs"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+<script type="module" async src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.mjs"></script>
+<script nomodule async src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css">
+```
+
+### Example
 
 <!--% example %-->
 
@@ -48,7 +58,7 @@ defineBentoLightbox();
     ></script>
   </head>
   <body>
-    <bento-lightbox id="my-lightbox">
+    <bento-lightbox id="my-lightbox" hidden>
       Lightboxed content
       <button id="close-button">Close lightbox</button>
     </bento-lightbox>
@@ -70,9 +80,7 @@ defineBentoLightbox();
 
 ### Interactivity and API usage
 
-Bento enabled components in standalone use are highly interactive through their API.
-
-The `bento-lightbox` component API is accessible by including the following script tag in your document:
+Bento components are highly interactive through their API. The `bento-lightbox` component API is accessible by including the following script tag in your document:
 
 ```js
 await customElements.whenDefined('bento-lightbox');
@@ -159,11 +167,62 @@ Defines the style of animation for opening the lightbox. By default, this will b
 
 When the `scrollable` attribute is present, the content of the lightbox can scroll when overflowing the height of the lightbox.
 
+#### API Example
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-lightbox-1.0.css"
+    />
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-1.0.js"
+    ></script>
+  </head>
+  <body>
+    <bento-lightbox id="my-lightbox" hidden>
+      Lightboxed content
+      <button id="close-button">Close lightbox</button>
+    </bento-lightbox>
+    <button id="open-button">Open lightbox</button>
+    <script>
+      (async () => {
+        const lightbox = document.querySelector('#my-lightbox');
+        await customElements.whenDefined('bento-lightbox');
+        const api = await lightbox.getApi();
+
+        // set up button actions
+        document.querySelector('#open-button').onclick = () => api.open();
+        document.querySelector('#close-button').onclick = () => api.close();
+      })();
+    </script>
+  </body>
+</html>
+```
+
 ---
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/lightbox

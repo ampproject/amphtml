@@ -22,7 +22,7 @@ module.exports = function (context) {
         name = name.slice('opt_'.length);
       }
       if (name.endsWith('_Enum')) {
-        name = name.slice(0, '_Enum'.length);
+        name = name.slice(0, -'_Enum'.length);
       }
 
       if (!name.includes('_')) {

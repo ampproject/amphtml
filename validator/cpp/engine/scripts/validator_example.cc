@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string_view>
 
-#include "validator.h"
+#include "cpp/engine/validator.h"
 #include "validator.pb.h"
 
 static constexpr std::string_view kValidAMPHtml{R"HTML(

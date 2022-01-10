@@ -50,7 +50,42 @@
       </amp-story-grid-layer>
       <amp-story-grid-layer template="vertical" class="bottom">
         <div class="scrim">
+          <div class="static-text">This element is always above captions.</div>
           <amp-story-captions id="captions" layout="fixed-height" height="100"></amp-story-captions>
+          <div class="static-text">This element is always below captions and never overlaps.</div>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="page-container" auto-advance-after="video-container">
+      <amp-story-grid-layer template="fill">
+        <amp-video id="video-container"
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay captions-id="captions-container">
+          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
+        </amp-video>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical" class="bottom">
+        <div class="scrim">
+          <div class="static-text">This element is always above captions and never overlaps.</div>
+          <amp-story-captions id="captions-container" layout="container"></amp-story-captions>
+          <div class="static-text">This element is always below captions and never overlaps.</div>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="page-fill" auto-advance-after="video-fill">
+      <amp-story-grid-layer template="fill">
+        <amp-video id="video-fill"
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay captions-id="captions-fill">
+          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
+        </amp-video>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical" class="bottom">
+        <div class="scrim">
+          <div class="static-text">This element is always above captions and never overlaps.</div>
+          <amp-story-captions id="captions-fill" layout="fill"></amp-story-captions>
           <div class="static-text">This element is always below captions and never overlaps.</div>
         </div>
       </amp-story-grid-layer>

@@ -10,7 +10,7 @@ import {isEnumValue} from '#core/types/enum';
 /**
  * @enum {string}
  */
-export const Layout = {
+export const Layout_Enum = {
   NODISPLAY: 'nodisplay',
   FIXED: 'fixed',
   FIXED_HEIGHT: 'fixed-height',
@@ -27,7 +27,7 @@ export const Layout = {
  * BaseElement#updateLayoutPriority().
  * @enum {number}
  */
-export const LayoutPriority = {
+export const LayoutPriority_Enum = {
   CONTENT: 0,
   METADATA: 1,
   ADS: 2,
@@ -36,24 +36,22 @@ export const LayoutPriority = {
 
 /**
  * CSS Length type. E.g. "1px" or "20vh".
- * @typedef {string}
+ * @typedef {string} LengthDef;
  */
-export let LengthDef;
 
 /**
  * @typedef {{
  *   width: string,
  *   height: string
- * }}
+ * }} DimensionsDef;
  */
-export let DimensionsDef;
 
 /**
  * Elements that the progress can be shown for. This set has to be externalized
  * since the element's implementation may not be downloaded yet.
  * This list does not include video players which are found via regex later.
  * @enum {string}
- * @private  Visible for testing only!
+ * @private Visible for testing only
  */
 export const LOADING_ELEMENTS_ENUM = {
   AMP_AD: 'AMP-AD',
@@ -77,27 +75,25 @@ export const LOADING_ELEMENTS_ENUM = {
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
  * reasons, so they are listed individually.
- * @private @const {!RegExp}
+ * @private @const {RegExp}
  */
 const videoPlayerTagNameRe =
   /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
 
 /**
  * @param {string} s
- * @return {!Layout|undefined} Returns undefined in case of failure to parse
+ * @return {Layout_Enum|undefined} Returns undefined in case of failure to parse
  *   the layout string.
  */
 export function parseLayout(s) {
-  for (const k in Layout) {
-    if (Layout[k] == s) {
-      return Layout[k];
-    }
+  if (isEnumValue(Layout_Enum, s)) {
+    return /** @type {Layout_Enum} */ (s);
   }
   return undefined;
 }
 
 /**
- * @param {!Layout} layout
+ * @param {Layout_Enum} layout
  * @return {string}
  */
 export function getLayoutClass(layout) {
@@ -106,35 +102,35 @@ export function getLayoutClass(layout) {
 
 /**
  * Whether an element with this layout inherently defines the size.
- * @param {!Layout} layout
+ * @param {Layout_Enum} layout
  * @return {boolean}
  */
 export function isLayoutSizeDefined(layout) {
   return (
-    layout == Layout.FIXED ||
-    layout == Layout.FIXED_HEIGHT ||
-    layout == Layout.RESPONSIVE ||
-    layout == Layout.FILL ||
-    layout == Layout.FLEX_ITEM ||
-    layout == Layout.FLUID ||
-    layout == Layout.INTRINSIC
+    layout == Layout_Enum.FIXED ||
+    layout == Layout_Enum.FIXED_HEIGHT ||
+    layout == Layout_Enum.RESPONSIVE ||
+    layout == Layout_Enum.FILL ||
+    layout == Layout_Enum.FLEX_ITEM ||
+    layout == Layout_Enum.FLUID ||
+    layout == Layout_Enum.INTRINSIC
   );
 }
 
 /**
  * Whether an element with this layout has a fixed dimension.
- * @param {!Layout} layout
+ * @param {Layout_Enum} layout
  * @return {boolean}
  */
 export function isLayoutSizeFixed(layout) {
-  return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+  return layout == Layout_Enum.FIXED || layout == Layout_Enum.FIXED_HEIGHT;
 }
 
 /**
  * Parses the CSS length value. If no units specified, the assumed value is
  * "px". Returns undefined in case of parsing error.
  * @param {string|undefined|null} s
- * @return {!LengthDef|undefined}
+ * @return {LengthDef|undefined}
  */
 export function parseLength(s) {
   if (typeof s == 'number') {
@@ -154,24 +150,26 @@ export function parseLength(s) {
 
 /**
  * Asserts that the supplied value is a non-percent CSS Length value.
- * @param {!LengthDef|string|null|undefined} length
- * @return {!LengthDef}
+ * @param {LengthDef|string|null|undefined} length
+ * @return {LengthDef}
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertLength(length) {
   userAssert(
-    /^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(length),
+    /^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(
+      length ?? ''
+    ),
     'Invalid length value: %s',
     length
   );
-  return /** @type {!LengthDef} */ (length);
+  return /** @type {LengthDef} */ (length);
 }
 
 /**
  * Asserts that the supplied value is a CSS Length value
  * (including percent unit).
- * @param {!LengthDef|string} length
- * @return {!LengthDef}
+ * @param {LengthDef|string} length
+ * @return {LengthDef}
  * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertLengthOrPercent(length) {
@@ -185,26 +183,25 @@ export function assertLengthOrPercent(length) {
 
 /**
  * Returns units from the CSS length value.
- * @param {!LengthDef|string|null|undefined} length
+ * @param {LengthDef|string|null|undefined} length
  * @return {string}
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  const m = userAssert(
-    /[a-z]+/i.exec(length),
-    'Failed to read units from %s',
-    length
-  );
+  const m = /[a-z]+/i.exec(length ?? '');
+  userAssert(m, 'Failed to read units from %s', length);
   return m[0];
 }
 
 /**
  * Returns the numeric value of a CSS length value.
- * @param {!LengthDef|string|null|undefined|number} length
+ * @param {LengthDef|string|null|undefined|number} length
  * @return {number|undefined}
  */
 export function getLengthNumeral(length) {
-  const res = parseFloat(length);
+  // TS demands that we only pass a string to `parseFloat`, even though the spec
+  // allows anything.
+  const res = parseFloat(/** @type {?} */ (length));
   return isFiniteNumber(res) ? res : undefined;
 }
 
@@ -212,7 +209,7 @@ export function getLengthNumeral(length) {
  * Whether the loading can be shown for the specified element. This set has
  * to be externalized since the element's implementation may not be
  * downloaded yet.
- * @param {!Element} element
+ * @param {Element} element
  * @return {boolean}
  */
 export function isLoadingAllowed(element) {
@@ -245,7 +242,7 @@ export function isIframeVideoPlayerComponent(tagName) {
  * content" styling should be applied. Replaced content is not allowed to
  * have its own paddings or border.
  *
- * @param {!Element} element
+ * @param {Element} element
  * @param {boolean=} opt_replacedContent
  */
 export function applyFillContent(element, opt_replacedContent) {

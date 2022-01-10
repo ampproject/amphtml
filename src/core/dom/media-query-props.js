@@ -1,12 +1,13 @@
-/** @typedef {!Array<{query: ?MediaQueryList, value: string}>} */
-let ExprDef;
+import {devAssert} from '#core/assert';
+
+/** @typedef {Array<{query: ?MediaQueryList, value: string}>} ExprDef */
 
 const TRUE_VALUE = '1';
 
 export class MediaQueryProps {
   /**
-   * @param {!Window} win
-   * @param {function()} callback
+   * @param {Window} win
+   * @param {function():void} callback
    */
   constructor(win, callback) {
     /** @private @const */
@@ -15,10 +16,16 @@ export class MediaQueryProps {
     /** @private @const */
     this.callback_ = callback;
 
-    /** @private {!Object<string, !ExprDef>} */
+    /**
+     * @type {Object<string, ExprDef>}
+     * @private
+     */
     this.exprMap_ = {};
 
-    /** @private {?Object<string, !ExprDef>} */
+    /**
+     * @type {?Object<string, ExprDef>}
+     * @private
+     */
     this.prevExprMap_ = null;
   }
 
@@ -37,7 +44,7 @@ export class MediaQueryProps {
    */
   resolveMatchQuery(queryString) {
     // This will create a list query like this:
-    // `[{query: matchMedia(queryString), value: true}, {query: null, value: false}]`
+    // `[{query: matchMedia(queryHeadString), value: true}, {query: null, value: false}]`
     return (
       this.resolve_(queryString, parseMediaQueryMatchExpr, TRUE_VALUE) ===
       TRUE_VALUE
@@ -77,7 +84,7 @@ export class MediaQueryProps {
 
   /**
    * @param {string} exprString
-   * @param {function(!Window, string):!ExprDef} parser
+   * @param {function(Window, string):ExprDef} parser
    * @param {string} emptyExprValue
    * @return {string} value
    */
@@ -85,7 +92,11 @@ export class MediaQueryProps {
     if (!exprString.trim()) {
       return emptyExprValue;
     }
-    let expr = this.exprMap_[exprString] || this.prevExprMap_[exprString];
+    let expr = this.exprMap_[exprString];
+    if (!expr) {
+      devAssert(this.prevExprMap_);
+      expr = this.prevExprMap_[exprString];
+    }
     if (!expr) {
       expr = parser(this.win_, exprString);
       toggleOnChange(expr, this.callback_, true);
@@ -96,9 +107,9 @@ export class MediaQueryProps {
 }
 
 /**
- * @param {!Window} win
+ * @param {Window} win
  * @param {string} queryString
- * @return {!ExprDef}
+ * @return {ExprDef}
  */
 function parseMediaQueryMatchExpr(win, queryString) {
   const query = win.matchMedia(queryString);
@@ -109,12 +120,12 @@ function parseMediaQueryMatchExpr(win, queryString) {
 }
 
 /**
- * @param {!Window} win
+ * @param {Window} win
  * @param {string} exprString
- * @return {!ExprDef}
+ * @return {ExprDef}
  */
 function parseMediaQueryListExpr(win, exprString) {
-  return (
+  return /** @type {ExprDef} */ (
     exprString
       .split(',')
       .map((part) => {
@@ -213,7 +224,7 @@ function parseMediaQueryListExpr(win, exprString) {
 }
 
 /**
- * @param {!ExprDef} expr
+ * @param {ExprDef} expr
  * @return {string} value
  */
 function resolveMediaQueryListExpr(expr) {
@@ -227,8 +238,8 @@ function resolveMediaQueryListExpr(expr) {
 }
 
 /**
- * @param {!ExprDef} expr
- * @param {function()} callback
+ * @param {ExprDef} expr
+ * @param {function():void} callback
  * @param {boolean} on
  */
 function toggleOnChange(expr, callback, on) {
@@ -255,7 +266,7 @@ function toggleOnChange(expr, callback, on) {
  * Native animations will not run when a device is set up to reduced motion.
  * In that case, we need to disable all animation treatment, and whatever
  * setup changes that depend on an animation running later on.
- * @param {!Window} win
+ * @param {Window} win
  * @return {boolean}
  */
 export function prefersReducedMotion(win) {

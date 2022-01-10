@@ -3,20 +3,20 @@
 #include <sstream>
 #include <utility>
 
-#include "defer.h"
-#include "fileutil.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
 
 const char kFileHeader[] =
     R"HEADER(// AUTO GENERATED; DO NOT EDIT.
 // To regenerate this file, see comments in bin/casetable.cc
 
-#ifndef HTMLPARSER__CASETABLE_H_
-#define HTMLPARSER__CASETABLE_H_
+#ifndef CPP_HTMLPARSER_CASETABLE_H_
+#define CPP_HTMLPARSER_CASETABLE_H_
 
 #include <algorithm>
 #include <utility>
 
-#include "comparators.h"
+#include "cpp/htmlparser/comparators.h"
 
 namespace htmlparser {
 
@@ -70,7 +70,7 @@ inline char32_t ToUpperChar(char32_t c) {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__CASETABLE_H_
+#endif  // CPP_HTMLPARSER_CASETABLE_H_
 )FOOTER";
 
 namespace htmlparser {
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  std::ofstream fd("casetable.h");
+  std::ofstream fd("cpp/htmlparser/casetable.h");
   htmlparser::Defer __([&]() { fd.close(); });
 
   fd << kFileHeader;

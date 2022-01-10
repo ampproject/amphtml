@@ -1,8 +1,6 @@
 import * as Preact from '#preact';
 import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {forwardRef, toChildArray} from '#preact/compat';
-import {setStyle} from '#core/dom/style';
-import {getWin} from '#core/window';
+import {Children, forwardRef} from '#preact/compat';
 import {
   useCallback,
   useImperativeHandle,
@@ -10,6 +8,8 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {setStyle} from '#core/dom/style';
+import {getWin} from '#core/window';
 import {useStyles} from './component.jss';
 import objstr from 'obj-str';
 import {propName} from '#preact/utils';
@@ -41,7 +41,7 @@ function BentoStreamGalleryWithRef(props, ref) {
   const classes = useStyles();
   const carouselRef = useRef(null);
   const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE_COUNT);
-  const {length} = toChildArray(children);
+  const length = Children.count(children);
   const measure = useCallback(
     (containerWidth) =>
       getVisibleCount(

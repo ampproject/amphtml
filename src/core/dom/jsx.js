@@ -37,28 +37,28 @@ import {devAssert} from '#core/assert';
 let DomJsxChildDef;
 
 /**
- * @param {!Element} parent
- * @param {!DomJsxChildDef|Array<!DomJsxChildDef>} child
+ * @param {Element} parent
+ * @param {DomJsxChildDef|Array<DomJsxChildDef>} child
  */
 function appendChild(parent, child) {
   if (!!child === child || child == null) {
     return;
   }
   if (Array.isArray(child)) {
-    const children = /** @type {!Array<!DomJsxChildDef>} */ (child);
+    const children = /** @type {Array<DomJsxChildDef>} */ (child);
     children.forEach((child) => {
       appendChild(parent, child);
     });
     return;
   }
-  const maybeNode = /** @type {!Node} */ (child);
+  const maybeNode = /** @type {Node} */ (child);
   parent.appendChild(
     maybeNode.nodeType ? maybeNode : self.document.createTextNode(String(child))
   );
 }
 
 /**
- * @param {!Element} element
+ * @param {Element} element
  * @param {string} name
  * @param {*} value
  */
@@ -75,11 +75,10 @@ function setAttribute(element, name, value) {
 }
 
 /**
- * @param {string|function(T):!Element} tag
- * @param {T} props
+ * @param {string | (function(*): Element)} tag
+ * @param {Object<string, *>} props
  * @param {...*} children
- * @return {!Element}
- * @template T
+ * @return {Element}
  */
 export function createElement(tag, props, ...children) {
   if (typeof tag !== 'string') {
@@ -107,9 +106,10 @@ export function createElement(tag, props, ...children) {
  * @return {null}
  */
 export function Fragment() {
-  return devAssert(
+  devAssert(
     null,
     "Don't use Fragment (<></>) with #core/dom/jsx. " +
       'Use a root node or an array of nodes instead.'
   );
+  return null;
 }

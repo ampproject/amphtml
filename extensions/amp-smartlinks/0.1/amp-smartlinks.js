@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
@@ -141,7 +141,7 @@ export class AmpSmartlinks extends AMP.BaseElement {
    */
   postPageImpression_() {
     // When using layout='nodisplay' manually trigger CustomEventReporterBuilder
-    this.signals().signal(CommonSignals.LOAD_START);
+    this.signals().signal(CommonSignals_Enum.LOAD_START);
     const payload = this.buildPageImpressionPayload_();
 
     const builder = new CustomEventReporterBuilder(this.element);

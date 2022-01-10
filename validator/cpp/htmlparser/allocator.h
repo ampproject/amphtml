@@ -165,8 +165,8 @@
 //    - 62 is multiple of 4?
 //     60 & (4 - 1) != 0;
 
-#ifndef HTMLPARSER__ALLOCATOR_H_
-#define HTMLPARSER__ALLOCATOR_H_
+#ifndef CPP_HTMLPARSER_ALLOCATOR_H_
+#define CPP_HTMLPARSER_ALLOCATOR_H_
 
 #include <unistd.h>  // For getpagesize()
 
@@ -366,4 +366,4 @@ class Allocator {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__ALLOCATOR_H_
+#endif  // CPP_HTMLPARSER_ALLOCATOR_H_

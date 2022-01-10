@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {getChildJsonConfig} from '#core/dom';
 import {setInitialDisplay, setStyles, toggle} from '#core/dom/style';
 import {clamp} from '#core/math';
@@ -122,43 +122,47 @@ export class AmpAnimation extends AMP.BaseElement {
     this.registerDefaultAction(
       this.startAction_.bind(this),
       'start',
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'restart',
       this.restartAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
-    this.registerAction('pause', this.pauseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction(
+      'pause',
+      this.pauseAction_.bind(this),
+      ActionTrust_Enum.LOW
+    );
     this.registerAction(
       'resume',
       this.resumeAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'togglePause',
       this.togglePauseAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'seekTo',
       this.seekToAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'reverse',
       this.reverseAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'finish',
       this.finishAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'cancel',
       this.cancelAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 

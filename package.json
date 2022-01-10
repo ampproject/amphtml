@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@ampproject/animations": "0.2.2",
-    "@ampproject/bento-compiler": "0.0.11",
+    "@ampproject/bento-compiler": "0.0.12",
     "@ampproject/toolbox-cache-url": "2.8.0",
     "@ampproject/viewer-messaging": "1.1.2",
     "@ampproject/worker-dom": "0.32.1",
@@ -151,7 +151,6 @@
     "kleur": "4.1.4",
     "list-imports-exports": "0.1.2",
     "lodash.debounce": "4.0.8",
-    "magic-string": "0.25.7",
     "markdown-link-check": "3.8.7",
     "markdown-toc": "1.2.0",
     "marked": "3.0.8",

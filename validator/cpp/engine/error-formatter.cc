@@ -1,11 +1,11 @@
 // AMP Validator client library to validate if given html is a valid AMP
 // document.
 //
-#include "error-formatter.h"
+#include "cpp/engine/error-formatter.h"
 
-#include "glog/logging.h"
-#include "validator_pb.h"
-#include "strings.h"
+#include "cpp/engine/validator_pb.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/htmlparser/strings.h"
 #include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 

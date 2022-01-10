@@ -8,7 +8,7 @@ It is a specialization of Bento Base Carousel and uses [ResizeObservers](https:/
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/stream-gallery
@@ -19,7 +19,17 @@ import {defineElement as defineBentoStreamGallery} from '@bentoproject/stream-ga
 defineBentoStreamGallery();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
+
+```html
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css" crossorigin="anonymous">
+```
+
+### Example
 
 <!--% example %-->
 
@@ -59,27 +69,13 @@ defineBentoStreamGallery();
       <div style="height: 100px; background: orange;">F</div>
       <div style="height: 100px; background: fuchsia;">G</div>
     </bento-stream-gallery>
-    <script>
-      (async () => {
-        const streamGallery = document.querySelector('#my-stream-gallery');
-        await customElements.whenDefined('bento-stream-gallery');
-        const api = await streamGallery.getApi();
-
-        // programatically go to next slide
-        api.next();
-        // programatically go to prev slide
-        api.prev();
-        // programatically go to slide
-        api.goToSlide(4);
-      })();
-    </script>
   </body>
 </html>
 ```
 
 ### Interactivity and API usage
 
-Bento enabled components in standalone use are highly interactive through their API. The `bento-stream-gallery` component API is accessible by including the following script tag in your document:
+Bento components are highly interactive through their API. The `bento-stream-gallery` component API is accessible by including the following script tag in your document:
 
 ```javascript
 await customElements.whenDefined('bento-stream-gallery');
@@ -151,6 +147,66 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 </style>
 ```
 
+#### API Example
+
+This example demonstrates how to programmatically switch to the next/previous slide and jump to specific slides.
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-stream-gallery id="my-stream-gallery" style="height: 150px;" min-item-width="75" max-item-width="100">
+      <div style="height: 100px; background: red;">A</div>
+      <div style="height: 100px; background: green;">B</div>
+      <div style="height: 100px; background: blue;">C</div>
+      <div style="height: 100px; background: yellow;">D</div>
+      <div style="height: 100px; background: purple;">E</div>
+      <div style="height: 100px; background: orange;">F</div>
+      <div style="height: 100px; background: fuchsia;">G</div>
+    </bento-stream-gallery>
+    <script>
+      (async () => {
+        const streamGallery = document.querySelector('#my-stream-gallery');
+        await customElements.whenDefined('bento-stream-gallery');
+        const api = await streamGallery.getApi();
+
+        // programatically go to next slide
+        api.next();
+        // programatically go to prev slide
+        api.prev();
+        // programatically go to slide
+        api.goToSlide(4);
+      })();
+    </script>
+  </body>
+</html>
+```
+
 ### Attributes
 
 #### Behavior
@@ -215,7 +271,7 @@ You may use the `bento-stream-gallery` element selector to style the streamGalle
 
 ## Preact/React Component
 
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/stream-gallery
