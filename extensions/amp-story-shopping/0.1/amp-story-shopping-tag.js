@@ -13,6 +13,8 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
+import {formatI18nNumber} from './amp-story-shopping';
+
 /** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
 const FONTS_TO_LOAD = [
   {
@@ -168,20 +170,13 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
             }
           ></span>
           <span class="amp-story-shopping-tag-pill-text">
-            {(this.tagData_['product-tag-text'] && (
-              <span class="amp-story-shopping-product-tag-text">
-                {this.tagData_['product-tag-text']}
-              </span>
-            )) ||
-              new Intl.NumberFormat(
-                this.localizationService_.getLanguageCodesForElement(
-                  this.element_
-                )[0],
-                {
-                  style: 'currency',
-                  currency: this.tagData_['product-price-currency'],
-                }
-              ).format(this.tagData_['product-price'])}
+            {this.tagData_['product-tag-text'] ||
+              formatI18nNumber(
+                this.localizationService_,
+                this.element,
+                this.tagData_['product-price-currency'],
+                this.tagData_['product-price']
+              )}
           </span>
         </span>
       </div>

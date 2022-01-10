@@ -1,4 +1,3 @@
-// Responsive styling
 // update all example pages
 // tests
 
@@ -11,6 +10,8 @@ import {Services} from '#service';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 
 import {localize} from '../../amp-story/1.0/amp-story-localization-service';
+
+import {formatI18nNumber} from './amp-story-shopping';
 
 export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -98,15 +99,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
                 {data['product-title']}
               </div>
               <div class="amp-story-shopping-plp-card-price">
-                {new Intl.NumberFormat(
-                  this.localizationService_.getLanguageCodesForElement(
-                    this.element
-                  )[0],
-                  {
-                    style: 'currency',
-                    currency: data['product-price-currency'],
-                  }
-                ).format(data['product-price'])}
+                {formatI18nNumber(
+                  this.localizationService_,
+                  this.element,
+                  data['product-price-currency'],
+                  data['product-price']
+                )}
               </div>
             </div>
           ))}
