@@ -15,10 +15,9 @@ amp-story-shopping-attachment a {
 }
 
 .amp-story-shopping-plp-header {
-  font-weight: 600 !important; /* semi bold */
+  font-weight: 600 !important;
   font-size: 1.5em !important;
   margin-bottom: 1.2em !important;
-  margin-top: 13px !important;
 }
 
 .amp-story-shopping-plp-cards {
@@ -39,21 +38,21 @@ amp-story-shopping-attachment a {
 }
 
 .amp-story-shopping-plp-card-brand {
-  font-weight: 500 !important; /* medium */
+  font-weight: 500 !important;
   margin-bottom: 0.7em !important;
   line-height: .75em !important;
   font-size: .9em !important;
 }
 
 .amp-story-shopping-plp-card-title {
-  font-weight: 600 !important; /* semi bold */
+  font-weight: 600 !important;
   margin-bottom: 0.4em !important;
   line-height: 1.2em !important;
   font-size: 1.25em !important;
 }
 
 .amp-story-shopping-plp-card-price {
-  font-weight: 500 !important; /* medium */
+  font-weight: 500 !important;
   margin-bottom: .33em !important;
   line-height: 1em !important;
   font-size: 1.1em !important;

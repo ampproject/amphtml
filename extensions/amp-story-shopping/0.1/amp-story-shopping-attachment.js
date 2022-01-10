@@ -82,7 +82,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         <div class="amp-story-shopping-plp-header">
           {localize(
             this.element,
-            LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_LABEL
+            LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER
           )}
         </div>
         <div class="amp-story-shopping-plp-cards">

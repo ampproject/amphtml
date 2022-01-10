@@ -25,13 +25,11 @@ const FONTS_TO_LOAD = [
   {
     family: 'Poppins',
     weight: '500',
-    style: 'normal',
     src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLGT9Z1xlFd2JQEk.woff2) format('woff2')",
   },
   {
     family: 'Poppins',
     weight: '600',
-    style: 'normal',
     src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
   },
   {
