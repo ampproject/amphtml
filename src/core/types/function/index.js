@@ -9,13 +9,15 @@
  * different.
  *
  * @template T
- * @param {(function(...any):T)} fn
- * @return {(function(...any):T)}
+ * @param {(function(...any):T?)} fn
+ * @return {(function(...any):T?)}
  */
 export function once(fn) {
   let evaluated = false;
+  /** @type {T?} */
   let retValue = null;
   let callback = fn;
+
   return (...args) => {
     if (!evaluated) {
       retValue = callback.apply(self, args);
@@ -40,10 +42,12 @@ export function once(fn) {
  */
 export function throttle(win, callback, minInterval) {
   let locker = 0;
+
+  /** @type {T[]?} */
   let nextCallArgs = null;
 
   /**
-   * @param {Object} args
+   * @param {T[]} args
    */
   function fire(args) {
     nextCallArgs = null;
@@ -88,10 +92,12 @@ export function throttle(win, callback, minInterval) {
 export function debounce(win, callback, minInterval) {
   let locker = 0;
   let timestamp = 0;
+
+  /** @type {T[]?} */
   let nextCallArgs = null;
 
   /**
-   * @param {?Array} args
+   * @param {T[]?} args
    */
   function fire(args) {
     nextCallArgs = null;
@@ -103,7 +109,7 @@ export function debounce(win, callback, minInterval) {
    */
   function waiter() {
     locker = 0;
-    const remaining = minInterval - (Date.now() - timestamp);
+    const remaining = minInterval - (win.Date.now() - timestamp);
     if (remaining > 0) {
       locker = win.setTimeout(waiter, remaining);
     } else {
@@ -112,7 +118,7 @@ export function debounce(win, callback, minInterval) {
   }
 
   return function (...args) {
-    timestamp = Date.now();
+    timestamp = win.Date.now();
     nextCallArgs = args;
     if (!locker) {
       locker = win.setTimeout(waiter, minInterval);

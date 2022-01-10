@@ -29,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Lagi"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Anda mesti mendayakan eksperimen amp-story untuk melihat kandungan ini."
   },
   "21": {
     "string": "Maaf, nampaknya penyemak imbas anda tidak menyokong pengalaman ini"
@@ -62,23 +56,11 @@
   "27": {
     "string": "Teruskan Juga"
   },
-  "31": {
-    "string": "Bunyi dimatikan"
-  },
-  "32": {
-    "string": "Bunyi dihidupkan"
-  },
-  "33": {
-    "string": "Halaman ini tiada bunyi"
-  },
   "34": {
     "string": "Mainkan video"
   },
   "35": {
     "string": "Leret ke atas"
-  },
-  "62": {
-    "string": "Berkongsi bermula dari halaman ini"
   },
   "63": {
     "string": "Line"
@@ -100,9 +82,6 @@
   },
   "69": {
     "string": "Kongsi cerita"
-  },
-  "70": {
-    "string": "Togol menu cerita"
   },
   "71": {
     "string": "A"
@@ -136,9 +115,6 @@
   },
   "81": {
     "string": "Petua"
-  },
-  "82": {
-    "string": "Halaman sebelumnya"
   },
   "83": {
     "string": "Aktifkan"

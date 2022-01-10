@@ -14,7 +14,6 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {Services} from '#service';
 import {tryFocus} from '#core/dom';
 import {closest, matches} from '#core/dom/query';
@@ -25,7 +24,6 @@ import {
 } from './utils';
 import {dev, devAssert, user, userAssert} from '#utils/log';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {localize} from './amp-story-localization-service';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 import {resetStyles, setImportantStyles} from '#core/dom/style';
@@ -52,7 +50,6 @@ const EMBEDDED_COMPONENTS_SELECTORS = {
   'amp-twitter': {
     customIconClassName: 'amp-social-share-twitter-no-background',
     actionIcon: LAUNCH_ICON_CLASS,
-    localizedStringId: LocalizedStringId_Enum.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter[interactive]',
   },
 };
@@ -65,7 +62,7 @@ const EMBEDDED_COMPONENTS_SELECTORS = {
 const LAUNCHABLE_COMPONENTS = {
   'a': {
     actionIcon: LAUNCH_ICON_CLASS,
-    selector: 'a[href]:not([affiliate-link-icon])',
+    selector: 'a[href]',
   },
   ...EMBEDDED_COMPONENTS_SELECTORS,
 };
@@ -422,7 +419,7 @@ export class AmpStoryEmbeddedComponent {
       this.tooltip_.classList.add(DARK_THEME_CLASS);
     }
 
-    this.updateTooltipText_(component.element, embedConfig);
+    this.updateTooltipText_(component.element);
     this.updateTooltipComponentIcon_(component.element, embedConfig);
     this.updateTooltipActionIcon_(embedConfig);
     this.updateNavButtons_();
@@ -482,13 +479,11 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Updates tooltip text content.
    * @param {!Element} target
-   * @param {!Object} embedConfig
    * @private
    */
-  updateTooltipText_(target, embedConfig) {
+  updateTooltipText_(target) {
     const tooltipText =
       target.getAttribute('data-tooltip-text') ||
-      localize(this.storyEl_, embedConfig.localizedStringId) ||
       getSourceOriginForElement(target, this.getElementHref_(target));
     const existingTooltipText = this.tooltip_.querySelector(
       '.i-amphtml-tooltip-text'

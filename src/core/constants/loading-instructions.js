@@ -31,7 +31,10 @@ export const Loading_Enum = {
   UNLOAD: 'unload',
 };
 
-/** @const {Array<Loading_Enum>} */
+/**
+ * @type {Array<Loading_Enum>}
+ * @const
+ */
 const ORDER = [
   Loading_Enum.AUTO,
   Loading_Enum.LAZY,
@@ -39,7 +42,10 @@ const ORDER = [
   Loading_Enum.UNLOAD,
 ];
 
-/** @const {Object<string, number>} */
+/**
+ * @type {Object<string, number>}
+ * @const
+ */
 const MAP = {
   [Loading_Enum.AUTO]: 0,
   [Loading_Enum.LAZY]: 1,
