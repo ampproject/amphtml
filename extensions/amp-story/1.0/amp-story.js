@@ -46,7 +46,7 @@ import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
-import {InfoDialog} from './amp-story-info-dialog';
+// import {InfoDialog} from './amp-story-info-dialog';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {Layout_Enum} from '#core/dom/layout';
 import {LiveStoryManager} from './live-story-manager';
@@ -94,7 +94,7 @@ import {
   isTransformed,
   removeAttributeInMutate,
   setAttributeInMutate,
-  shouldShowStoryUrlInfo,
+  // shouldShowStoryUrlInfo,
 } from './utils';
 import {isEsm} from '#core/mode';
 import {upgradeBackgroundAudio} from './audio';
@@ -951,12 +951,12 @@ export class AmpStory extends AMP.BaseElement {
           this.activePage_.openAttachment(false /** shouldAnimate */);
         }
 
-        if (
-          shouldShowStoryUrlInfo(devAssert(this.viewer_), this.storeService_)
-        ) {
-          const infoDialog = new InfoDialog(this.win, this.element);
-          infoDialog.build();
-        }
+        // if (
+        //   shouldShowStoryUrlInfo(devAssert(this.viewer_), this.storeService_)
+        // ) {
+        //   const infoDialog = new InfoDialog(this.win, this.element);
+        //   infoDialog.build();
+        // }
       });
 
     // Do not block the layout callback on the completion of these promises, as
