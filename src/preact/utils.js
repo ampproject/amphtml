@@ -16,8 +16,9 @@ export function useResourcesNotify() {
 }
 
 /**
- * @param {{current: ?}|function()} ref
- * @param {Element} value
+ * @param {import('preact').Ref<T>} ref
+ * @param {T} value
+ * @template T
  */
 function setRef(ref, value) {
   if (typeof ref === 'function') {
@@ -29,8 +30,9 @@ function setRef(ref, value) {
 
 /**
  * Combines refs to pass into `ref` prop.
- * @param {Array<*>} refs
- * @return {function(Element):function()}
+ * @param {import('preact').Ref<T>[]} refs
+ * @return {function(T):void}
+ * @template T
  */
 export function useMergeRefs(refs) {
   return useCallback(

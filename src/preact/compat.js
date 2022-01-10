@@ -5,11 +5,16 @@ import * as mode from '#core/mode';
 const REACT_FORWARD_SYMBOL =
   (typeof Symbol !== 'undefined' && Symbol.for?.('react.forward_ref')) || 0xf47;
 
-// `__b` is the known mangled name exported by preact. This is called during
-// the diffing algorithm with the constructed VNode, before the vnode is
-// actually used to diff.
-const oldDiff = options['__b'];
-options['__b'] = newDiff;
+/**
+ * @type {*}
+ * `__b` is the known mangled name exported by preact. This is called during
+ * the diffing algorithm with the constructed VNode, before the vnode is
+ * actually used to diff.
+ *
+ */
+const diffKey = '__b';
+const oldDiff = /** @type {*} */ (options)[diffKey];
+/** @type {*} */ (options)[diffKey] = newDiff;
 
 /**
  * Checks if our VNode type has a `forwardRef_` sigil, in which case it was created by our forwardRef implementation.
@@ -17,11 +22,7 @@ options['__b'] = newDiff;
  *
  * See VNode type at https://github.com/preactjs/preact/blob/55ee4bc069f84cf5e3af8f2e2f338f4e74aca4d8/src/create-element.js#L58-L76
  *
- * @param {{
- *   type: (string|function()),
- *   ref: *,
- *   props: !Object,
- * }} vnode
+ * @param {*} vnode
  */
 function newDiff(vnode) {
   if (vnode['type']?.forwardRef_ && vnode['ref']) {
@@ -35,15 +36,13 @@ function newDiff(vnode) {
  * Reimplements forwardRef without dragging in everything from preact/compat.
  * See https://github.com/preactjs/preact/issues/3295
  *
- * @param {function(P):R} Component
- * @return {function(P):R}
- * @template P
- * @template R
+ * @param {*} Component
+ * @return {ReturnType<import('preact/compat').forwardRef>}
  */
 export function forwardRef(Component) {
   /**
-   * @param {Object} props
-   * @return {R}
+   * @param {JsonObject} props
+   * @return {*}
    */
   function Forward(props) {
     const {ref, ...clone} = props;
@@ -70,20 +69,19 @@ export function forwardRef(Component) {
     })`;
   }
 
-  return Forward;
+  return /** @type {*} */ (Forward);
 }
 
 /**
- * @param {PreactDef.Renderable} children
- * @return {Array<PreactDef.Renderable>}
+ * @type {typeof import('preact').toChildArray} children
  */
 function toArray(children) {
   return toChildArray(children);
 }
 
 /**
- * @param {PreactDef.Renderable} children
- * @param {function(PreactDef.Renderable):R} fn
+ * @param {import('preact').ComponentChildren} children
+ * @param {function(import('preact').ComponentChildren):R} fn
  * @return {Array<R>}
  * @template R
  */
@@ -92,7 +90,7 @@ function map(children, fn) {
 }
 
 /**
- * @param {PreactDef.Renderable} children
+ * @param {import('preact').ComponentChildren} children
  * @return {number}
  */
 function count(children) {

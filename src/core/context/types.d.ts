@@ -44,7 +44,7 @@ export interface IContextProp<T, DEP> {
    * 3. If it's a recursive property, the parent value.
    * 4. If `deps` are specified - the dep values.
    */
-  compute: (node: Node, inputs: T[], ...deps: DEP[]) => (T | undefined);
+  compute: (node: Node, inputs: T[], ...deps: T[]) => (T | undefined);
 
   /**
    * The default value of a recursive property.
