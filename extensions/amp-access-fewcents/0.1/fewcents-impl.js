@@ -389,6 +389,7 @@ export class AmpAccessFewcents {
       'button',
       {
         class: TAG_SHORTHAND + '-purchase-button',
+        style: 'background:'.concat(this.fewcentsConfig_['primaryColor']),
       }
     );
 
