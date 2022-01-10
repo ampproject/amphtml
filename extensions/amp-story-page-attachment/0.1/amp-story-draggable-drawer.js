@@ -89,13 +89,11 @@ export class DraggableDrawer extends AMP.BaseElement {
     /** @protected {!DrawerState} */
     this.state = DrawerState.CLOSED;
 
-    /** @protected @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService = devAssert(Services.storyStoreService(this.win));
+    /** @protected @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService = null;
 
-    /** @protected @const {!../../../src/services/localization.LocalizationService} */
-    this.localizationService = devAssert(
-      Services.localizationForDoc(this.element)
-    );
+    /** @protected @const {?../../../src/services/localization.LocalizationService} */
+    this.localizationService = null;
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -126,37 +124,48 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.element.classList.add('amp-story-draggable-drawer-root');
+    return Promise.all([
+      Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
+        this.storeService = storeService;
+      }),
+      Services.localizationServiceForOrNull(this.element).then(
+        (localizationService) => {
+          this.localizationService = localizationService;
+        }
+      ),
+    ]).then(() => {
+      this.element.classList.add('amp-story-draggable-drawer-root');
 
-    const templateEl = renderDrawerElement();
-    this.headerEl = renderHeaderElement();
+      const templateEl = renderDrawerElement();
+      this.headerEl = renderHeaderElement();
 
-    this.containerEl = dev().assertElement(
-      templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
-    );
-    this.contentEl = dev().assertElement(
-      this.containerEl.querySelector(
-        '.i-amphtml-story-draggable-drawer-content'
-      )
-    );
+      this.containerEl = dev().assertElement(
+        templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
+      );
+      this.contentEl = dev().assertElement(
+        this.containerEl.querySelector(
+          '.i-amphtml-story-draggable-drawer-content'
+        )
+      );
 
-    const spacerEl = (
-      <button
-        role="button"
-        class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
-        aria-label={this.localizationService.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-        )}
-      ></button>
-    );
+      const spacerEl = (
+        <button
+          role="button"
+          class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
+          aria-label={this.localizationService.getLocalizedString(
+            LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+          )}
+        ></button>
+      );
 
-    this.containerEl.insertBefore(spacerEl, this.contentEl);
-    this.contentEl.appendChild(
-      createShadowRootWithStyle(<div />, this.headerEl, CSS)
-    );
+      this.containerEl.insertBefore(spacerEl, this.contentEl);
+      this.contentEl.appendChild(
+        createShadowRootWithStyle(<div />, this.headerEl, CSS)
+      );
 
-    this.element.appendChild(templateEl);
-    this.element.setAttribute('aria-hidden', true);
+      this.element.appendChild(templateEl);
+      this.element.setAttribute('aria-hidden', true);
+    });
   }
 
   /** @override */

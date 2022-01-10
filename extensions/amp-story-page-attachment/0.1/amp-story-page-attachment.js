@@ -1,3 +1,5 @@
+import {devAssert} from '#core/assert';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {removeElement} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {closest} from '#core/dom/query';
@@ -65,10 +67,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   constructor(element) {
     super(element);
 
-    /** @private @const {!../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = Services.storyAnalyticsService(this.win);
+    /** @private @const {?../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = null;
 
-    /** @private @const {!../../../src/service/history-impl.History} */
+    /** @private @const {?../../../src/service/history-impl.History} */
     this.historyService_ = Services.historyForDoc(this.element);
 
     /** @private {?AttachmentType} */
@@ -79,32 +81,35 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @override
    */
   buildCallback() {
-    super.buildCallback();
-    this.maybeSetDarkThemeForElement_(this.headerEl);
-    this.maybeSetDarkThemeForElement_(this.element);
+    return super.buildCallback().then(() => {
+      this.analyticsService_ = Services.storyAnalyticsService(this.win);
 
-    // Outlinks can be an amp-story-page-outlink or the legacy version,
-    // an amp-story-page-attachment with an href.
-    const isOutlink =
-      this.element.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
-      this.element.hasAttribute('href');
-    this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
+      this.maybeSetDarkThemeForElement_(this.headerEl);
+      this.maybeSetDarkThemeForElement_(this.element);
 
-    if (this.type_ === AttachmentType.INLINE) {
-      this.buildInline_();
-    }
+      // Outlinks can be an amp-story-page-outlink or the legacy version,
+      // an amp-story-page-attachment with an href.
+      const isOutlink =
+        this.element.tagName === 'AMP-STORY-PAGE-OUTLINK' ||
+        this.element.hasAttribute('href');
+      this.type_ = isOutlink ? AttachmentType.OUTLINK : AttachmentType.INLINE;
 
-    this.win.addEventListener('pageshow', (event) => {
-      // On browser back, Safari does not reload the page but resumes its cached
-      // version. This event's parameter lets us know when this happens so we
-      // can cleanup the remote opening animation.
-      if (event.persisted) {
-        this.closeInternal_(false /** shouldAnimate */);
+      if (this.type_ === AttachmentType.INLINE) {
+        this.buildInline_();
       }
-    });
 
-    toggle(this.element, true);
-    this.element.setAttribute('aria-live', 'assertive');
+      this.win.addEventListener('pageshow', (event) => {
+        // On browser back, Safari does not reload the page but resumes its cached
+        // version. This event's parameter lets us know when this happens so we
+        // can cleanup the remote opening animation.
+        if (event.persisted) {
+          this.closeInternal_(false /** shouldAnimate */);
+        }
+      });
+
+      toggle(this.element, true);
+      this.element.setAttribute('aria-live', 'assertive');
+    });
   }
 
   /**
