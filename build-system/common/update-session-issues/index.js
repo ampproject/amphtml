@@ -399,7 +399,7 @@ function getSessionDateFromTitle(title) {
   }
   const [
     // @ts-ignore
-    unusedFullMatch, // eslint-disable-line no-unused-vars
+    unusedFullMatch, // eslint-disable-line @typescript-eslint/no-unused-vars
     day,
     time,
   ] = match;

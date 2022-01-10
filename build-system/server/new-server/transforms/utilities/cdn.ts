@@ -1,5 +1,3 @@
-
-
 import {URL} from 'url';
 import {parse, format, basename} from 'path';
 

@@ -1,7 +1,7 @@
 import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 /**

@@ -28,7 +28,7 @@ export function upgradeIntersectionObserverPolyfill(win) {
   registerServiceBuilder(win, TAG, upgrade, /* instantiate */ true);
 }
 
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 AMP.extension(TAG, '0.1', function (AMP) {
   upgradeIntersectionObserverPolyfill(window);
 });

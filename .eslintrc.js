@@ -260,7 +260,8 @@ module.exports = {
     'no-sequences': 2,
     'no-throw-literal': 2,
     'no-unused-expressions': 0,
-    'no-unused-vars': [
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
       2,
       {
         'argsIgnorePattern': '^(var_args$|opt_|unused)',
@@ -344,6 +345,12 @@ module.exports = {
     // 'sort-requires/sort-requires': 2,
   },
   'overrides': [
+    {
+      'files': ['**/*.ts'],
+      'rules': {
+        'require-jsdoc': 0,
+      },
+    },
     {
       'files': [
         'test/**/*.js',
@@ -432,7 +439,7 @@ module.exports = {
       'rules': {
         'no-var': 0,
         'no-undef': 0,
-        'no-unused-vars': 0,
+        '@typescript-eslint/no-unused-vars': 0,
         'prefer-const': 0,
         'require-jsdoc': 0,
         'jsdoc/check-tag-names': 0,

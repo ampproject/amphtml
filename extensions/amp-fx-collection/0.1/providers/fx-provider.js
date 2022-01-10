@@ -25,10 +25,10 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../../src/service-helpers';
-import {FxType} from '../fx-type'; // eslint-disable-line no-unused-vars
+import {FxType} from '../fx-type'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import {
   ScrollToggleDispatch,
-  ScrollTogglePosition, // eslint-disable-line no-unused-vars
+  ScrollTogglePosition, // eslint-disable-line @typescript-eslint/no-unused-vars
   assertValidScrollToggleElement,
   getScrollToggleFloatInOffset,
   getScrollTogglePosition,
