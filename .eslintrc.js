@@ -28,7 +28,7 @@ function getExperimentGlobals() {
 
 module.exports = {
   'root': true,
-  'parser': '@babel/eslint-parser',
+  'parser': '@typescript-eslint/parser',
   'plugins': [
     'chai-expect',
     'import',
@@ -40,13 +40,13 @@ module.exports = {
     'react-hooks',
     'sort-destructure-keys',
     'sort-requires',
+    '@typescript-eslint',
   ],
   'env': {
     'es6': true,
     'browser': true,
   },
   'parserOptions': {
-    'ecmaVersion': 6,
     'jsx': true,
     'sourceType': 'module',
   },
@@ -341,7 +341,7 @@ module.exports = {
         'ignoreDeclarationSort': true,
       },
     ],
-    'sort-requires/sort-requires': 2,
+    // 'sort-requires/sort-requires': 2,
   },
   'overrides': [
     {
