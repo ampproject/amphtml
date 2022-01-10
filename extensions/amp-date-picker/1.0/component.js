@@ -44,39 +44,55 @@ export function BentoDatePicker({
     return new DatesList(highlighted);
   }, [highlighted]);
 
+  const datePicker = useMemo(() => {
+    const commonProps = {
+      blockedDates,
+      format,
+      id,
+      initialVisibleMonth,
+      mode,
+      onError,
+      children,
+    };
+    if (type === DatePickerType.SINGLE) {
+      const props = {
+        ...commonProps,
+        inputSelector,
+      };
+      return <SingleDatePicker {...props} />;
+    } else if (type === DatePickerType.RANGE) {
+      const props = {
+        ...commonProps,
+        startInputSelector,
+        endInputSelector,
+        allowBlockedEndDate,
+        allowBlockedRanges,
+      };
+      return <DateRangePicker {...props} />;
+    } else {
+      onError('Invalid date picker type');
+    }
+  }, [
+    blockedDates,
+    format,
+    id,
+    initialVisibleMonth,
+    mode,
+    onError,
+    type,
+    allowBlockedEndDate,
+    allowBlockedRanges,
+    startInputSelector,
+    endInputSelector,
+    inputSelector,
+    children,
+  ]);
+
   return (
     <AttributesContext.Provider
       value={{blockedDates, highlightedDates, allowBlockedEndDate}}
     >
-      {type === DatePickerType.SINGLE && (
-        <SingleDatePicker
-          blockedDates={blockedDates}
-          format={format}
-          id={id}
-          initialVisibleMonth={initialVisibleMonth}
-          inputSelector={inputSelector}
-          mode={mode}
-          onError={onError}
-        >
-          {children}
-        </SingleDatePicker>
-      )}
-      {type === DatePickerType.RANGE && (
-        <DateRangePicker
-          blockedDates={blockedDates}
-          format={format}
-          id={id}
-          initialVisibleMonth={initialVisibleMonth}
-          startInputSelector={startInputSelector}
-          endInputSelector={endInputSelector}
-          mode={mode}
-          onError={onError}
-          allowBlockedEndDate={allowBlockedEndDate}
-          allowBlockedRanges={allowBlockedRanges}
-        >
-          {children}
-        </DateRangePicker>
-      )}
+      {datePicker}
     </AttributesContext.Provider>
   );
 }
