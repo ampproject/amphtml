@@ -225,7 +225,7 @@ export class PreactBaseElement extends BaseElement {
   /**
    * Provides a mapping of Preact prop to AmpElement DOM attributes.
    *
-   * @protected {Object<string, !AmpElementPropDef>}
+   * @protected {Object<string, AmpElementPropDef>}
    */
   static props = {};
 
