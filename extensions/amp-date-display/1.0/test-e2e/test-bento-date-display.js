@@ -1,9 +1,9 @@
 describes.endtoend(
-  'bento-timeago',
+  'bento-date-display',
   {
     version: '1.0',
     fixture: 'bento/date-display.html',
-    environments: ['single'], // TODO
+    environments: ['single'],
   },
   (env) => {
     let controller;
