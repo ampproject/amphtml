@@ -39,7 +39,7 @@ FAIL
 |
 |      <!-- Valid: with autoplay. -->
 |      <amp-dailymotion
-|        autoplay  
+|        autoplay
 |        data-videoid="x3rdtfy"
 |        width="500"
 |        height="281"
