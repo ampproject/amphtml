@@ -1292,6 +1292,7 @@ export class AmpStoryPlayer {
    */
   setSrc_(story, url) {
     const {iframe} = story;
+    // TODO(#37129): Confirm this doesn't need to be modified for PREVIEW mode.
     const {href} = this.getEncodedLocation_(
       url,
       VisibilityState_Enum.PRERENDER
