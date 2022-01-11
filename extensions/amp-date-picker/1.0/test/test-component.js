@@ -642,7 +642,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
   });
 
-  xdescribe('limiting the available days', () => {
+  describe('limiting the available days', () => {
     it('disables all days before the min if a min is specified', () => {
       const expectedDisbledDates = [
         new Date(2022, 0, 1),

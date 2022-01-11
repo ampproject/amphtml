@@ -35,6 +35,7 @@ export function BentoDatePicker({
   allowBlockedRanges,
   allowBlockedEndDate,
   highlighted,
+  min,
 }) {
   const blockedDates = useMemo(() => {
     return new DatesList(blocked);
@@ -90,7 +91,7 @@ export function BentoDatePicker({
 
   return (
     <AttributesContext.Provider
-      value={{blockedDates, highlightedDates, allowBlockedEndDate}}
+      value={{blockedDates, highlightedDates, allowBlockedEndDate, min}}
     >
       {datePicker}
     </AttributesContext.Provider>

@@ -14,15 +14,15 @@ export function DayButton({date, displayMonth}) {
   const buttonRef = useRef();
 
   const day = useDay(date, displayMonth, buttonRef);
-  const {isDisabled, isHighlighted, label} = useAttributes(date);
+  const {getLabel, isDisabled, isHighlighted} = useAttributes();
 
   return (
     <Button
       {...day.buttonProps}
       ref={buttonRef}
-      aria-label={label}
-      aria-disabled={isDisabled}
-      data-highlighted={isHighlighted}
+      aria-label={getLabel(date)}
+      aria-disabled={isDisabled(date)}
+      data-highlighted={isHighlighted(date)}
     />
   );
 }

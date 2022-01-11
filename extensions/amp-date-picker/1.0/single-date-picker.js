@@ -26,6 +26,7 @@ import {
 } from './constants';
 import {getFormattedDate, parseDate} from './date-helpers';
 import {DayButton} from './day-button';
+import {useAttributes} from './use-attributes';
 
 /**
  * @param {!DateInput.Props} props
@@ -50,6 +51,8 @@ export function SingleDatePicker({
   const containerRef = useRef();
 
   const [isOpen] = useState(mode === DatePickerMode.STATIC);
+
+  const {isDisabled} = useAttributes();
 
   /**
    * Generate a name for a hidden input.
@@ -149,6 +152,7 @@ export function SingleDatePicker({
           mode="single"
           selected={date}
           onSelect={setDate}
+          disabled={[isDisabled]}
         />
       )}
     </ContainWrapper>
