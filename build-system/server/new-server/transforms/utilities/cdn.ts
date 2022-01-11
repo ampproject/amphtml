@@ -32,11 +32,6 @@ function getMinifiedName(minifiedBasename: string): string {
 
 /**
  * Convert an existing URL to one from the local `serve` command.
- * @param url the url
- * @param pathnames
- * @param extension
- * @param port
- * @param useMaxNames
  */
 export function CDNURLToLocalDistURL(
   url: URL,

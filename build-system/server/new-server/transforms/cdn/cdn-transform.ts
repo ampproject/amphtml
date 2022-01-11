@@ -53,9 +53,7 @@ export default function (
   return function (tree: posthtml.Node) {
     tree.match(
       [{tag: 'script'}, {tag: 'link', attrs: {rel: 'stylesheet'}}],
-      (node) => {
-        return maybeModifyCdnUrl(node, options);
-      }
+      (node) => maybeModifyCdnUrl(node, options)
     );
   };
 }
