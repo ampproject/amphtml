@@ -131,6 +131,104 @@ export class PreactBaseElement extends BaseElement {
     return !this.usesLoading();
   }
 
+  /**
+   * Override to provide the Component definition.
+   *
+   * @protected {!PreactDef.FunctionalComponent}
+   */
+  static Component() {
+    devAssert(false, 'Must provide Component');
+  }
+
+  /**
+   * If default props are static, this can be used instead of init().
+   * @protected {!JsonObject|undefined}
+   */
+  static staticProps = undefined;
+
+  /**
+   * @protected {!Array<!ContextProp>}
+   */
+  static useContexts = mode.isLocalDev() ? Object.freeze([]) : [];
+
+  /**
+   * Whether the component implements a loading protocol.
+   *
+   * @protected {boolean}
+   */
+  static loadable = false;
+
+  /**
+   * Whether a component should be unloaded for `pauseCallback`.
+   *
+   * @protected {boolean}
+   */
+  static unloadOnPause = false;
+
+  /**
+   * An override to specify that the component requires `layoutSizeDefined`.
+   * This typically means that the element's `isLayoutSupported()` is
+   * implemented via `isLayoutSizeDefined()`, and this is how the default
+   * `isLayoutSupported()` is implemented when this flag is set.
+   *
+   * @protected {string}
+   */
+  static layoutSizeDefined = false;
+
+  /**
+   * The tag name, e.g. "div", "span", time" that should be used as a replacement
+   * node for Preact rendering. This is the node that Preact will diff with
+   * with specified, instead of rendering a new node. Only applicable to light-DOM
+   * mapping styles.
+   *
+   * @protected {string}
+   */
+  static lightDomTag = '';
+
+  /**
+   * Whether this element uses "templates" system.
+   *
+   * @protected {boolean}
+   */
+  static usesTemplate = false;
+
+  /**
+   * The CSS for shadow stylesheets.
+   *
+   * @protected {?string}
+   */
+  static shadowCss = null;
+
+  /**
+   * Whether this element uses Shadow DOM.
+   *
+   * @protected {boolean}
+   */
+  static usesShadowDom = false;
+
+  /**
+   * Enabling detached mode alters the children to be rendered in an
+   * unappended container. By default the children will be attached to the DOM.
+   *
+   * @protected {boolean}
+   */
+  static detached = false;
+
+  /**
+   * This enables the 'delegatesFocus' option when creating the shadow DOM for
+   * this component.  A key feature of 'delegatesFocus' set to true is that
+   * when elements within the shadow DOM gain focus, the focus is also applied
+   * to the host element.
+   */
+  static delegatesFocus = false;
+
+  /**
+   * Provides a mapping of Preact prop to AmpElement DOM attributes.
+   *
+   * @protected {!Object<string, !AmpElementPropDef>}
+   */
+  static props = {};
+
   /** @param {!Element} element */
   constructor(element) {
     super(element);
@@ -758,8 +856,7 @@ export class PreactBaseElement extends BaseElement {
     const keys = Object.keys(current);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      // eslint-disable-next-line local/restrict-this-access
-      wrapRefProperty(this, api, key);
+      this.wrapRefProperty(api, key);
     }
     this.apiWrapper_ = api;
     if (this.deferredApi_) {
@@ -837,126 +934,27 @@ export class PreactBaseElement extends BaseElement {
   updateIsPlaying_(isPlaying) {
     this.pauseHelper_.updatePlaying(isPlaying);
   }
+
+  /**
+   * @param {!Object} api
+   * @param {string} key
+   */
+  wrapRefProperty(api, key) {
+    // eslint-disable-next-line local/restrict-this-access
+    const that = this;
+    Object.defineProperty(api, key, {
+      configurable: true,
+
+      get() {
+        return that.currentRef_[key];
+      },
+
+      set(v) {
+        that.currentRef_[key] = v;
+      },
+    });
+  }
 }
-
-/**
- * @param {typeof PreactBaseElement} baseElement
- * @param {!Object} api
- * @param {string} key
- */
-function wrapRefProperty(baseElement, api, key) {
-  Object.defineProperty(api, key, {
-    configurable: true,
-
-    get() {
-      return baseElement.currentRef_[key];
-    },
-
-    set(v) {
-      baseElement.currentRef_[key] = v;
-    },
-  });
-}
-
-// Ideally, these would be Static Class Fields. But Closure can't even.
-
-/**
- * Override to provide the Component definition.
- *
- * @protected {!PreactDef.FunctionalComponent}
- */
-PreactBaseElement['Component'] = function () {
-  devAssert(false, 'Must provide Component');
-};
-
-/**
- * If default props are static, this can be used instead of init().
- * @protected {!JsonObject|undefined}
- */
-PreactBaseElement['staticProps'] = undefined;
-
-/**
- * @protected {!Array<!ContextProp>}
- */
-PreactBaseElement['useContexts'] = mode.isLocalDev() ? Object.freeze([]) : [];
-
-/**
- * Whether the component implements a loading protocol.
- *
- * @protected {boolean}
- */
-PreactBaseElement['loadable'] = false;
-
-/**
- * Whether a component should be unloaded for `pauseCallback`.
- *
- * @protected {boolean}
- */
-PreactBaseElement['unloadOnPause'] = false;
-
-/**
- * An override to specify that the component requires `layoutSizeDefined`.
- * This typically means that the element's `isLayoutSupported()` is
- * implemented via `isLayoutSizeDefined()`, and this is how the default
- * `isLayoutSupported()` is implemented when this flag is set.
- *
- * @protected {string}
- */
-PreactBaseElement['layoutSizeDefined'] = false;
-
-/**
- * The tag name, e.g. "div", "span", time" that should be used as a replacement
- * node for Preact rendering. This is the node that Preact will diff with
- * with specified, instead of rendering a new node. Only applicable to light-DOM
- * mapping styles.
- *
- * @protected {string}
- */
-PreactBaseElement['lightDomTag'] = '';
-
-/**
- * Whether this element uses "templates" system.
- *
- * @protected {boolean}
- */
-PreactBaseElement['usesTemplate'] = false;
-
-/**
- * The CSS for shadow stylesheets.
- *
- * @protected {?string}
- */
-PreactBaseElement['shadowCss'] = null;
-
-/**
- * Whether this element uses Shadow DOM.
- *
- * @protected {boolean}
- */
-PreactBaseElement['usesShadowDom'] = false;
-
-/**
- * Enabling detached mode alters the children to be rendered in an
- * unappended container. By default the children will be attached to the DOM.
- *
- * @protected {boolean}
- */
-PreactBaseElement['detached'] = false;
-
-/**
- * This enables the 'delegatesFocus' option when creating the shadow DOM for
- * this component.  A key feature of 'delegatesFocus' set to true is that
- * when elements within the shadow DOM gain focus, the focus is also applied
- * to the host element.
- */
-PreactBaseElement['delegatesFocus'] = false;
-
-/**
- * Provides a mapping of Preact prop to AmpElement DOM attributes.
- *
- * @protected {!Object<string, !AmpElementPropDef>}
- */
-PreactBaseElement['props'] = {};
 
 /**
  * @param {!NodeList} nodeList
