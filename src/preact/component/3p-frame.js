@@ -20,7 +20,8 @@ import {
   generateSentinel,
   getBootstrapUrl,
   getDefaultBootstrapBaseUrl,
-} from '../../3p-frame';
+} from '../../3p-frame'; // eslint-disable-line import/no-restricted-paths
+// eslint-disable-next-line import/no-restricted-paths
 import {parseUrlDeprecated} from '../../url';
 
 /** @type {!Object<string,function():void>} 3p frames for that type. */

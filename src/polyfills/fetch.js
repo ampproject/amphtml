@@ -4,6 +4,7 @@ import {hasOwn, map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {utf8Encode} from '#core/types/string/bytes';
 
+// eslint-disable-next-line import/no-restricted-paths
 import {dev, user} from '#utils/log';
 
 /** @const {!Array<string>} */
