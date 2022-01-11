@@ -20,7 +20,7 @@
   }
 }
 
-html[transformed] body {
+body {
   animation:none !important;
   -webkit-animation: none !important;
   -moz-animation: none !important;
