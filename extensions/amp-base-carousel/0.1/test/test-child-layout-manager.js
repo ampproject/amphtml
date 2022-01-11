@@ -1,22 +1,6 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ChildLayoutManager} from '../child-layout-manager';
-import {Services} from '../../../../src/services';
-import {setInitialDisplay, setStyles} from '../../../../src/style';
+import {Services} from '#service';
+import {setInitialDisplay, setStyles} from '#core/dom/style';
 
 /**
  * @return {!Promise<undefined>} A Promise that resolves after the browser has
@@ -95,7 +79,6 @@ describes.realWin('child layout manager', {}, (env) => {
       scheduleUnlayout: env.sandbox.spy(),
       schedulePause: env.sandbox.spy(),
       scheduleResume: env.sandbox.spy(),
-      updateInViewport: env.sandbox.spy(),
     };
     env.sandbox.stub(Services, 'ownersForDoc').returns(ownersMock);
   });
@@ -171,7 +154,7 @@ describes.realWin('child layout manager', {}, (env) => {
       await afterRenderPromise();
 
       expect(ownersMock.scheduleLayout)
-        .to.have.callCount(2)
+        .to.have.callCount(3)
         .to.have.been.calledWith(domElementMock, el.children[0])
         .to.have.been.calledWith(domElementMock, el.children[1]);
     });
@@ -192,7 +175,7 @@ describes.realWin('child layout manager', {}, (env) => {
       await afterRenderPromise();
 
       expect(ownersMock.scheduleLayout)
-        .to.have.callCount(2)
+        .to.have.callCount(3)
         .to.have.been.calledWith(domElementMock, el.children[0])
         .to.have.been.calledWith(domElementMock, el.children[1]);
     });
@@ -214,7 +197,7 @@ describes.realWin('child layout manager', {}, (env) => {
       await afterRenderPromise();
 
       expect(ownersMock.scheduleLayout)
-        .to.have.callCount(2)
+        .to.have.callCount(3)
         .to.have.been.calledWith(domElementMock, newChildren[0])
         .to.have.been.calledWith(domElementMock, newChildren[1]);
     });
@@ -229,14 +212,6 @@ describes.realWin('child layout manager', {}, (env) => {
       clm.updateChildren(el.children);
       clm.wasLaidOut();
       await afterRenderPromise();
-
-      expect(ownersMock.updateInViewport)
-        .to.have.callCount(5)
-        .to.have.been.calledWith(domElementMock, el.children[0], true)
-        .to.have.been.calledWith(domElementMock, el.children[1], false)
-        .to.have.been.calledWith(domElementMock, el.children[2], false)
-        .to.have.been.calledWith(domElementMock, el.children[3], false)
-        .to.have.been.calledWith(domElementMock, el.children[4], false);
     });
 
     it('should call the viewportIntersectionCallback', async () => {
@@ -276,7 +251,7 @@ describes.realWin('child layout manager', {}, (env) => {
       await afterScrollAndIntersectingPromise(el.children[1], el);
 
       expect(ownersMock.scheduleLayout)
-        .to.have.callCount(1)
+        .to.have.callCount(2)
         .to.have.been.calledWith(domElementMock, el.children[2]);
     });
 
@@ -326,27 +301,6 @@ describes.realWin('child layout manager', {}, (env) => {
         .to.have.been.calledWith(domElementMock, el.children[3])
         .to.have.been.calledWith(domElementMock, el.children[4]);
     });
-
-    it('should updateInViewport on scroll', async () => {
-      const el = createHorizontalScroller(5);
-      const clm = new ChildLayoutManager({
-        ampElement: ampElementMock,
-        intersectionElement: el,
-      });
-
-      clm.updateChildren(el.children);
-      clm.wasLaidOut();
-      await afterRenderPromise();
-
-      ownersMock.updateInViewport.resetHistory();
-      await afterScrollAndIntersectingPromise(el.children[1], el);
-      await afterRenderPromise();
-
-      expect(ownersMock.updateInViewport)
-        .to.have.callCount(2)
-        .to.have.been.calledWith(domElementMock, el.children[0], false)
-        .to.have.been.calledWith(domElementMock, el.children[1], true);
-    });
   });
 
   describe('queuing changes', () => {
@@ -387,7 +341,7 @@ describes.realWin('child layout manager', {}, (env) => {
       clm.flushChanges();
 
       expect(ownersMock.scheduleLayout)
-        .to.have.callCount(1)
+        .to.have.callCount(2)
         .to.have.been.calledWith(domElementMock, el.children[2]);
     });
 
@@ -419,34 +373,6 @@ describes.realWin('child layout manager', {}, (env) => {
       expect(ownersMock.scheduleUnlayout)
         .to.have.callCount(1)
         .to.have.been.calledWith(domElementMock, el.children[0]);
-    });
-
-    it('should queue updateInViewport on scroll', async () => {
-      const el = createHorizontalScroller(5);
-      const clm = new ChildLayoutManager({
-        ampElement: ampElementMock,
-        intersectionElement: el,
-      });
-
-      clm.setQueueChanges(true);
-      clm.updateChildren(el.children);
-      clm.wasLaidOut();
-      await afterRenderPromise();
-
-      clm.flushChanges();
-      ownersMock.updateInViewport.resetHistory();
-      await afterScrollAndIntersectingPromise(el.children[1], el);
-      await afterRenderPromise();
-
-      // Make sure changes are not applied yet.
-      expect(ownersMock.updateInViewport).to.have.not.been.called;
-      // Now flush the changes and check that they are applied.
-      clm.flushChanges();
-
-      expect(ownersMock.updateInViewport)
-        .to.have.callCount(2)
-        .to.have.been.calledWith(domElementMock, el.children[0], false)
-        .to.have.been.calledWith(domElementMock, el.children[1], true);
     });
   });
 });

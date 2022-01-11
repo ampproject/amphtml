@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Story Attribution</title>
+    <script async src="../../dist/amp-story-player.js"></script>
+    <link href="../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+    <style page>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  </head>
+  <body>
+    <h1>Story Attribution</h1>
+
+    <amp-story-player style="width: 360px; height: 600px;">
+        <script type="application/json">
+          {
+            "display": {
+              "attribution": "auto"
+            }
+          }
+        </script>
+        <a href="./ampconf.html">
+          <img src="./img/overview.jpg" loading="lazy" data-amp-story-player-poster-img width="360" height="600"></img>
+          <span class="title">A local’s guide to what to eat and do in New York City</span>
+        </a>
+    </amp-story-player>
+
+  </body>
+</html>

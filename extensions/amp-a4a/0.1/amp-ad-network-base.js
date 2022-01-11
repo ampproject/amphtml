@@ -1,23 +1,9 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {map} from '#core/types/object';
+
+import {dev, devAssert} from '#utils/log';
 
 import {FailureType, RecoveryModeType} from './amp-ad-type-defs';
-import {dev, devAssert} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {map} from '../../../src/utils/object';
 import {sendXhrRequest} from './amp-ad-utils';
 
 const TAG = 'amp-ad-network-base';
@@ -172,7 +158,12 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
         response.headers.get('AMP-Ad-Response-Type') || 'default';
       devAssert(this.validators_[validatorType], 'Validator never registered!');
       return this.validators_[validatorType]
-        .validate(this.context_, unvalidatedBytes, response.headers)
+        .validate(
+          this.context_,
+          this.element,
+          unvalidatedBytes,
+          response.headers
+        )
         .catch((err) =>
           Promise.reject({type: FailureType.VALIDATOR_ERROR, msg: err})
         );

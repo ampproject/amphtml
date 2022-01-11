@@ -1,25 +1,9 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
 import {AnalyticsEventType} from './events';
-import {ChunkPriority, chunk} from '../../../src/chunk';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '../../../src/utils/promise';
+import {Deferred} from '#core/data-structures/promise';
 import {
   ExpansionOptions,
   VariableService,
@@ -30,21 +14,22 @@ import {
   InstrumentationService,
   instrumentationServicePromiseForDoc,
 } from './instrumentation';
-import {LayoutPriority} from '../../../src/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {LinkerManager} from './linker-manager';
 import {RequestHandler, expandPostMessage} from './requests';
-import {Services} from '../../../src/services';
+import {Services} from '#service';
+import {SessionManager, sessionServicePromiseForDoc} from './session-manager';
 import {Transport} from './transport';
-import {dev, devAssert, rethrowAsync, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {expandTemplate} from '../../../src/string';
+import {dev, devAssert, user} from '#utils/log';
+import {dict, hasOwn} from '#core/types/object';
+import {expandTemplate} from '#core/types/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
-import {isAnalyticsChunksExperimentOn} from './analytics-group';
-import {isArray, isEnumValue} from '../../../src/types';
-import {isIframed} from '../../../src/dom';
+import {isArray, isEnumValue} from '#core/types';
+import {rethrowAsync} from '#core/error';
+
+import {isIframed} from '#core/dom';
 import {isInFie} from '../../../src/iframe-helper';
-import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
 
@@ -53,8 +38,9 @@ const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsRep
 const ALLOWLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.VISIBLE,
   AnalyticsEventType.HIDDEN,
+  AnalyticsEventType.INI_LOAD,
+  AnalyticsEventType.RENDER_START,
 ];
-
 export class AmpAnalytics extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -100,11 +86,17 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {./transport.Transport} */
     this.transport_ = null;
 
+    /** @private {string} */
+    this.type_ = this.element.getAttribute('type');
+
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win).runtime == 'inabox';
 
     /** @private {?./linker-manager.LinkerManager} */
     this.linkerManager_ = null;
+
+    /** @private {?./session-manager.SessionManager} */
+    this.sessionManager_ = null;
 
     /** @private {?boolean} */
     this.isInFie_ = null;
@@ -113,7 +105,9 @@ export class AmpAnalytics extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
+    return this.isInabox_
+      ? LayoutPriority_Enum.CONTENT
+      : LayoutPriority_Enum.METADATA;
   }
 
   /** @override */
@@ -208,16 +202,14 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iniPromise_) {
       return this.iniPromise_;
     }
-    toggle(this.element, false);
 
-    this.iniPromise_ = this.getAmpDoc()
+    const ampdoc = this.getAmpDoc();
+    this.iniPromise_ = ampdoc
       .whenFirstVisible()
       // Rudimentary "idle" signal.
       .then(() => Services.timerFor(this.win).promise(1))
       .then(() => this.consentPromise_)
-      .then(() => Services.ampdocServiceFor(this.win))
-      .then((ampDocService) => ampDocService.getAmpDoc(this.element))
-      .then((ampdoc) =>
+      .then(() =>
         Promise.all([
           instrumentationServicePromiseForDoc(ampdoc),
           variableServicePromiseForDoc(ampdoc),
@@ -231,10 +223,11 @@ export class AmpAnalytics extends AMP.BaseElement {
           const configPromise = new AnalyticsConfig(this.element).loadConfig();
           loadConfigDeferred.resolve(configPromise);
         };
-        if (isAnalyticsChunksExperimentOn(this.win)) {
-          chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
-        } else {
+        if (this.isInabox_) {
+          // Chunk in inabox ad leads to activeview regression, handle seperately
           loadConfigTask();
+        } else {
+          chunk(this.element, loadConfigTask, ChunkPriority_Enum.HIGH);
         }
         return loadConfigDeferred.promise;
       })
@@ -245,12 +238,16 @@ export class AmpAnalytics extends AMP.BaseElement {
       })
       .then(() => {
         this.transport_ = new Transport(
-          this.win,
+          this.getAmpDoc(),
           this.config_['transport'] || {}
         );
       })
+      .then(this.maybeInitializeSessionManager_.bind(this))
       .then(this.registerTriggers_.bind(this))
       .then(this.initializeLinker_.bind(this));
+    this.iniPromise_.then(() => {
+      this./*OK*/ collapse();
+    });
     return this.iniPromise_;
   }
 
@@ -269,6 +266,26 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.isInFie_ = isInFie(this.element);
     }
     return this.isInFie_;
+  }
+
+  /**
+   * Maybe initializes Session Manager.
+   * @return {!Promise}
+   */
+  maybeInitializeSessionManager_() {
+    if (!this.config_['triggers']) {
+      return Promise.resolve();
+    }
+    const shouldInitialize = Object.values(this.config_['triggers']).some(
+      (trigger) => trigger?.['session']?.['persistEvent']
+    );
+    if (shouldInitialize && this.type_) {
+      const ampdoc = this.getAmpDoc();
+      return sessionServicePromiseForDoc(ampdoc).then((manager) => {
+        this.sessionManager_ = manager;
+      });
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -414,7 +431,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Calls `AnalyticsGroup.addTrigger` and reports any errors.
    * @param {!JsonObject} config
    * @private
-   * @noinline
    * @return {!Promise}
    */
   addTrigger_(config) {
@@ -573,20 +589,20 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   initializeLinker_() {
-    const type = this.element.getAttribute('type');
     this.linkerManager_ = new LinkerManager(
       this.getAmpDoc(),
       this.config_,
-      type,
+      this.type_,
       this.element
     );
     const linkerTask = () => {
       this.linkerManager_.init();
     };
-    if (isAnalyticsChunksExperimentOn(this.win)) {
-      chunk(this.element, linkerTask, ChunkPriority.LOW);
-    } else {
+    if (this.isInabox_) {
+      // Chunk in inabox ad leads to activeview regression, handle seperately
       linkerTask();
+    } else {
+      chunk(this.element, linkerTask, ChunkPriority_Enum.LOW);
     }
   }
 
@@ -599,6 +615,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleEvent_(trigger, event) {
+    const persistEvent = !!trigger.session?.['persistEvent'];
+    if (persistEvent) {
+      this.sessionManager_?.updateEvent(this.type_);
+    }
     const requests = isArray(trigger['request'])
       ? trigger['request']
       : [trigger['request']];
@@ -638,11 +658,20 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     this.checkTriggerEnabled_(trigger, event).then((enabled) => {
-      if (!enabled) {
+      const isConnected =
+        this.element.ownerDocument && this.element.ownerDocument.defaultView;
+      if (!enabled || !isConnected) {
         return;
       }
       this.expandAndSendRequest_(request, trigger, event);
-      this.expandAndPostMessage_(trigger, event);
+
+      const shouldSendToAmpAd =
+        trigger['parentPostMessage'] &&
+        this.allowParentPostMessage_() &&
+        isIframed(this.win);
+      if (shouldSendToAmpAd) {
+        this.expandAndPostMessage_(trigger, event);
+      }
     });
   }
 
@@ -669,10 +698,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   expandAndPostMessage_(trigger, event) {
     const msg = trigger['parentPostMessage'];
-    if (!msg || !this.allowParentPostMessage_()) {
-      // Only send message for AMP ad with parentPostMessage specified.
-      return;
-    }
     const expansionOptions = this.expansionOptions_(event, trigger);
     expandPostMessage(
       this.getAmpDoc(),
@@ -682,10 +707,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       expansionOptions,
       this.element
     ).then((message) => {
-      if (isIframed(this.win)) {
-        // Only post message with explict `parentPostMessage`
-        this.win.parent./*OK*/ postMessage(message, '*');
-      }
+      this.win.parent./*OK*/ postMessage(message, '*');
     });
   }
 
@@ -720,10 +742,11 @@ export class AmpAnalytics extends AMP.BaseElement {
           .then((digest) => digest * 100 < threshold);
         sampleDeferred.resolve(samplePromise);
       };
-      if (isAnalyticsChunksExperimentOn(this.win)) {
-        chunk(this.element, sampleInTask, ChunkPriority.LOW);
-      } else {
+      if (this.isInabox_) {
+        // Chunk in inabox ad leads to activeview regression, handle seperately
         sampleInTask();
+      } else {
+        chunk(this.element, sampleInTask, ChunkPriority_Enum.LOW);
       }
       return sampleDeferred.promise;
     }
@@ -778,10 +801,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve(spec);
     }
 
-    return this.expandTemplateWithUrlParams_(
-      spec,
-      expansionOptions
-    ).then((val) => stringToBool(val));
+    return this.expandTemplateWithUrlParams_(spec, expansionOptions).then(
+      (val) => stringToBool(val)
+    );
   }
 
   /**
@@ -838,6 +860,7 @@ AMP.extension(TAG, '0.1', (AMP) => {
   );
   AMP.registerServiceForDoc('activity', Activity);
   installLinkerReaderService(AMP.win);
+  AMP.registerServiceForDoc('amp-analytics-session', SessionManager);
   AMP.registerServiceForDoc('amp-analytics-variables', VariableService);
   // Register the element.
   AMP.registerElement(TAG, AmpAnalytics);

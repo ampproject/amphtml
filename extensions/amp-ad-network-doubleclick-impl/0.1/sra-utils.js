@@ -1,26 +1,14 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isInManualExperiment} from '#ads/google/a4a/traffic-experiments';
+import {getEnclosingContainerTypes} from '#ads/google/a4a/utils';
+
+import {tryResolve} from '#core/data-structures/promise';
+import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
+import {isObject} from '#core/types';
+import {utf8Encode} from '#core/types/string/bytes';
+
+import {dev, devAssert} from '#utils/log';
 
 import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
-import {dev, devAssert} from '../../../src/log';
-import {getEnclosingContainerTypes} from '../../../ads/google/a4a/utils';
-import {isInManualExperiment} from '../../../ads/google/a4a/traffic-experiments';
-import {isObject} from '../../../src/types';
-import {tryResolve} from '../../../src/utils/promise';
-import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -95,7 +83,9 @@ export function combineInventoryUnits(impls) {
   const prevIusEncoded = [];
   impls.forEach((instance) => {
     const iu = devAssert(instance.element.getAttribute('data-slot'));
-    const componentNames = iu.split('/');
+    const componentNames = iu
+      .split('/')
+      .map((componentName) => componentName.replace(/,/g, ':'));
     const encodedNames = [];
     for (let i = 0; i < componentNames.length; i++) {
       if (componentNames[i] == '') {
@@ -306,7 +296,7 @@ export function getPageOffsets(impls) {
   const adxs = [];
   const adys = [];
   impls.forEach((impl) => {
-    const layoutBox = impl.getPageLayoutBox();
+    const layoutBox = getPageLayoutBoxBlocking(impl.element);
     adxs.push(layoutBox.left);
     adys.push(layoutBox.top);
   });
@@ -399,13 +389,15 @@ function serializeItem_(key, value) {
  * @param {boolean} done
  * @param {!Array<function(?Response)>} sraRequestAdUrlResolvers
  * @param {string} sraUrl url of SRA request for error reporting
+ * @param {boolean=} isNoSigning
  */
 export function sraBlockCallbackHandler(
   creative,
   headersObj,
   done,
   sraRequestAdUrlResolvers,
-  sraUrl
+  sraUrl,
+  isNoSigning
 ) {
   const headerNames = Object.keys(headersObj);
   if (headerNames.length == 1 && isObject(headersObj[headerNames[0]])) {
@@ -435,12 +427,20 @@ export function sraBlockCallbackHandler(
       },
       has: (name) => !!headersObj[name.toLowerCase()],
     });
-  const fetchResponse =
-    /** @type {?Response} */
-    ({
-      headers,
-      arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
-    });
+
+  let fetchResponse;
+  if (isNoSigning) {
+    const stringifiedHeaders = stringifyHeaderValues(headersObj);
+    fetchResponse = new Response(creative, {headers: stringifiedHeaders});
+  } else {
+    fetchResponse =
+      /** @type {?Response} */
+      ({
+        headers,
+        arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
+      });
+  }
+
   // Pop head off of the array of resolvers as the response
   // should match the order of blocks declared in the ad url.
   // This allows the block to start rendering while the SRA
@@ -456,4 +456,22 @@ export function sraBlockCallbackHandler(
       sraUrl
     );
   }
+}
+
+/**
+ * Takes any parsed header values from the object that are not strings and
+ * converts them back to the orginal stringified version.
+ * TODO above indicates this might get fixed upstream at some point.
+ * @param {!Object} headersObj
+ * @return {!Object<string, string>}
+ */
+function stringifyHeaderValues(headersObj) {
+  return Object.keys(headersObj).reduce((stringifiedHeaders, headerName) => {
+    let headerValue = headersObj[headerName];
+    if (headerValue && typeof headerValue != 'string') {
+      headerValue = JSON.stringify(headerValue);
+    }
+    stringifiedHeaders[headerName] = headerValue;
+    return stringifiedHeaders;
+  }, {});
 }

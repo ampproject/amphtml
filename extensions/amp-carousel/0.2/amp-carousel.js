@@ -1,34 +1,23 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {Keys_Enum} from '#core/constants/key-codes';
 import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '../../../src/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {CSS} from '../../../build/amp-carousel-0.2.css';
-import {Carousel} from '../../amp-base-carousel/0.1/carousel.js';
+import {Carousel} from '../../amp-base-carousel/0.1/carousel';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
-import {Services} from '../../../src/services';
-import {closestAncestorElementBySelector} from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {htmlFor} from '../../../src/static-template';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {Services} from '#service';
+import {
+  closestAncestorElementBySelector,
+  realChildElements,
+} from '#core/dom/query';
+import {computedStyle} from '#core/dom/style';
+import {createCustomEvent, getDetail, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+import {dict} from '#core/types/object';
+import {dispatchCustomEvent} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {triggerAnalyticsEvent} from '#utils/analytics';
 
 /**
  * @enum {string}
@@ -39,6 +28,11 @@ const CarouselType = {
 };
 
 class AmpCarousel extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /**
    * @private
    */
@@ -58,7 +52,7 @@ class AmpCarousel extends AMP.BaseElement {
           actionSource: this.getActionSource_(trust),
         });
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'toggleAutoplay',
@@ -68,8 +62,10 @@ class AmpCarousel extends AMP.BaseElement {
         const toggle = args ? args['toggleOn'] : undefined;
         this.toggleAutoplay_(toggle);
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
+    /** If the element is in an email document, allow its `goToSlide` action. */
+    this.action_.addToAllowlist('AMP-CAROUSEL', 'goToSlide', ['email']);
   }
 
   /** @param {!AmpElement} element */
@@ -115,6 +111,15 @@ class AmpCarousel extends AMP.BaseElement {
 
     /** @private {?ChildLayoutManager} */
     this.childLayoutManager_ = null;
+
+    /**
+     * Whether to show control buttons
+     * @private {boolean}
+     */
+    this.showControls_ = false;
+
+    /** If the ampdoc is in the Viewer */
+    this.isViewerEmbeded_ = Services.viewerForDoc(element).isEmbedded();
   }
 
   /** @override */
@@ -123,16 +128,11 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
 
     const {element, win} = this;
-    const slides = this.getRealChildren();
+    const slides = realChildElements(this.element);
 
     element.appendChild(this.renderContainerDom_());
     this.scrollContainer_ = this.element.querySelector(
@@ -145,7 +145,7 @@ class AmpCarousel extends AMP.BaseElement {
       win,
       element,
       scrollContainer: dev().assertElement(this.scrollContainer_),
-      initialIndex: Number(this.element.getAttribute('slide')),
+      initialIndex: Number(this.element.getAttribute('slide') || '0'),
       runMutate: (cb) => this.mutateElement(cb),
     });
     this.configureCarousel_(slides);
@@ -164,8 +164,9 @@ class AmpCarousel extends AMP.BaseElement {
         this.onScrollPositionChanged_();
       }
     );
-    this.prevButton_.addEventListener('click', () => this.interactionPrev());
-    this.nextButton_.addEventListener('click', () => this.interactionNext());
+    this.setupButtonInteraction(this.nextButton_, () => this.interactionNext());
+    this.setupButtonInteraction(this.prevButton_, () => this.interactionPrev());
+    this.handlePropagationInViewer_();
 
     const owners = Services.ownersForDoc(element);
     this.childLayoutManager_ = new ChildLayoutManager({
@@ -193,7 +194,37 @@ class AmpCarousel extends AMP.BaseElement {
     // Need to wait for slides to exist first.
     this.carousel_.goToSlide(Number(this.element.getAttribute('slide') || '0'));
     // Signal for runtime to check children for layout.
+
+    if (this.element.hasAttribute('controls')) {
+      this.showControls_ = true;
+    } else {
+      Services.inputFor(this.win).onMouseDetected((mouseDetected) => {
+        if (mouseDetected) {
+          this.showControls_ = true;
+          this.updateUi_();
+        }
+      }, true);
+    }
+
     return this.mutateElement(() => {});
+  }
+
+  /**
+   * @param {!HTMLDivElement} button
+   * @param {*} onInteraction
+   */
+  setupButtonInteraction(button, onInteraction) {
+    button.addEventListener('click', onInteraction);
+    button.addEventListener('keydown', (event) => {
+      if (event.defaultPrevented) {
+        return;
+      }
+
+      if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
+        event.preventDefault();
+        onInteraction();
+      }
+    });
   }
 
   /** @override */
@@ -319,12 +350,12 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Gets the ActionSource to use for a given ActionTrust.
-   * @param {!ActionTrust} trust
+   * Gets the ActionSource to use for a given ActionTrust_Enum.
+   * @param {!ActionTrust_Enum} trust
    * @return {!ActionSource}
    */
   getActionSource_(trust) {
-    return trust >= ActionTrust.DEFAULT
+    return trust >= ActionTrust_Enum.DEFAULT
       ? ActionSource.GENERIC_HIGH_TRUST
       : ActionSource.GENERIC_LOW_TRUST;
   }
@@ -470,17 +501,18 @@ class AmpCarousel extends AMP.BaseElement {
    */
   updateUi_() {
     const index = this.carousel_.getCurrentIndex();
-    const bothDisabled =
-      this.hadTouch_ && !this.element.hasAttribute('controls');
+    const bothDisabled = this.hadTouch_ && !this.showControls_;
     const prevDisabled = bothDisabled || this.carousel_.isAtStart();
     const nextDisabled = bothDisabled || this.carousel_.isAtEnd();
 
     this.prevButton_.classList.toggle('amp-disabled', prevDisabled);
     this.prevButton_.setAttribute('aria-disabled', prevDisabled);
     this.prevButton_.title = this.getPrevButtonTitle_(index);
+    this.prevButton_.tabIndex = prevDisabled ? -1 : 0;
     this.nextButton_.classList.toggle('amp-disabled', nextDisabled);
     this.nextButton_.setAttribute('aria-disabled', nextDisabled);
     this.nextButton_.title = this.getNextButtonTitle_(index);
+    this.nextButton_.tabIndex = nextDisabled ? -1 : 0;
   }
 
   /**
@@ -508,7 +540,10 @@ class AmpCarousel extends AMP.BaseElement {
 
       if (isSlides) {
         const wrapper = document.createElement('div');
-        wrapper.className = 'i-amphtml-carousel-slotted';
+        wrapper.classList.add(
+          'i-amphtml-carousel-slotted',
+          'i-amphtml-carousel-wrapper'
+        );
         wrapper.appendChild(slide);
         return wrapper;
       }
@@ -543,11 +578,12 @@ class AmpCarousel extends AMP.BaseElement {
     const data = dict({'index': index});
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+    const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;
+    const dataWithActionTrust = dict({'index': index, 'actionTrust': trust});
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
-    this.element.dispatchCustomEvent(name, data);
+    dispatchCustomEvent(this.element, name, dataWithActionTrust);
     this.triggerAnalyticsEvent_(prevIndex, index);
   }
 
@@ -604,6 +640,19 @@ class AmpCarousel extends AMP.BaseElement {
       actionSource == ActionSource.TOUCH ||
       actionSource == ActionSource.GENERIC_HIGH_TRUST
     );
+  }
+
+  /**
+   * Attach singal onto touchmove event to stop propagation to viewer
+   * to be handled at the viewer integration layer in bubble phase.
+   */
+  handlePropagationInViewer_() {
+    if (!this.isViewerEmbeded_) {
+      return;
+    }
+    listen(this.scrollContainer_, 'touchmove', (event) => {
+      event.shouldViewerCancelPropagation = true;
+    });
   }
 
   /**

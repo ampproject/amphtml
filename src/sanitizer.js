@@ -1,18 +1,5 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isAmp4Email} from '#core/document/format';
+import {dict} from '#core/types/object';
 
 import {
   ALLOWLISTED_ATTRS,
@@ -21,15 +8,16 @@ import {
   BIND_PREFIX,
   DENYLISTED_TAGS,
   EMAIL_ALLOWLISTED_AMP_TAGS,
+  EMAIL_TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   isValidAttr,
-} from './purifier/sanitation';
-import {dict} from './utils/object';
-import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
-import {isAmp4Email} from './format';
+} from '#purifier/sanitation';
+
+import {user} from '#utils/log';
+
+import {htmlSanitizer} from '#third_party/caja/html-sanitizer';
+
 import {rewriteAttributeValue} from './url-rewrite';
-import {startsWith} from './string';
-import {user} from './log';
 
 /** @private @const {string} */
 const TAG = 'sanitizer';
@@ -105,7 +93,7 @@ export function sanitizeHtml(html, doc) {
         }
         return;
       }
-      const isAmpElement = startsWith(tagName, 'amp-');
+      const isAmpElement = tagName.startsWith('amp-');
       // Preprocess "binding" attributes, e.g. [attr], by stripping enclosing
       // brackets before custom validation and restoring them afterwards.
       const bindingAttribs = [];
@@ -115,7 +103,7 @@ export function sanitizeHtml(html, doc) {
           continue;
         }
         const classicBinding = attr[0] == '[' && attr[attr.length - 1] == ']';
-        const alternativeBinding = startsWith(attr, BIND_PREFIX);
+        const alternativeBinding = attr.startsWith(BIND_PREFIX);
         if (classicBinding) {
           attribs[i] = attr.slice(1, -1);
         }
@@ -135,10 +123,9 @@ export function sanitizeHtml(html, doc) {
         // Ask Caja to validate the element as well.
         // Use the resulting properties.
         const savedAttribs = attribs.slice(0);
-        const scrubbed = /** @type {!JsonObject} */ (tagPolicy(
-          tagName,
-          attribs
-        ));
+        const scrubbed = /** @type {!JsonObject} */ (
+          tagPolicy(tagName, attribs)
+        );
         if (!scrubbed) {
           ignore++;
         } else {
@@ -214,7 +201,7 @@ export function sanitizeHtml(html, doc) {
           continue;
         }
         emit(' ');
-        if (bindingAttribs.includes(i) && !startsWith(attrName, BIND_PREFIX)) {
+        if (bindingAttribs.includes(i) && !attrName.startsWith(BIND_PREFIX)) {
           emit(`[${attrName}]`);
         } else {
           emit(attrName);
@@ -257,19 +244,23 @@ export function sanitizeHtml(html, doc) {
  * We do so in sanitizeHtml which occurs after this initial sanitizing.
  *
  * @param {string} html
+ * @param {!Document} doc
  * @return {string}
  */
-export function sanitizeTagsForTripleMustache(html) {
-  return htmlSanitizer.sanitizeWithPolicy(html, tripleMustacheTagPolicy);
+export function sanitizeTagsForTripleMustache(html, doc) {
+  return htmlSanitizer.sanitizeWithPolicy(html, (tagName, attribs) =>
+    tripleMustacheTagPolicy(tagName, attribs, doc)
+  );
 }
 
 /**
  * Tag policy for handling what is valid html in templates.
  * @param {string} tagName
  * @param {!Array<string>} attribs
+ * @param {!Document} doc
  * @return {?{tagName: string, attribs: !Array<string>}}
  */
-function tripleMustacheTagPolicy(tagName, attribs) {
+function tripleMustacheTagPolicy(tagName, attribs, doc) {
   if (tagName == 'template') {
     for (let i = 0; i < attribs.length; i += 2) {
       if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
@@ -280,7 +271,11 @@ function tripleMustacheTagPolicy(tagName, attribs) {
       }
     }
   }
-  if (!TRIPLE_MUSTACHE_ALLOWLISTED_TAGS.includes(tagName)) {
+  if (isAmp4Email(doc)) {
+    if (!EMAIL_TRIPLE_MUSTACHE_ALLOWLISTED_TAGS.includes(tagName)) {
+      return null;
+    }
+  } else if (!TRIPLE_MUSTACHE_ALLOWLISTED_TAGS.includes(tagName)) {
     return null;
   }
   return {

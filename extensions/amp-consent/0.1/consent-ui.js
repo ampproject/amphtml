@@ -1,49 +1,39 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
+import {Deferred} from '#core/data-structures/promise';
+import {Services} from '#service';
 import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  elementByTag,
-  insertAtStart,
-  isAmpElement,
-  removeElement,
-  tryFocus,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {dev, user} from '#utils/log';
+import {dict} from '#core/types/object';
+import {elementByTag} from '#core/dom/query';
 import {expandConsentEndpointUrl} from './consent-config';
 import {getConsentStateValue} from './consent-info';
-import {getData} from '../../../src/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service';
-import {htmlFor} from '../../../src/static-template';
-import {setImportantStyles, setStyles, toggle} from '../../../src/style';
+import {getData} from '#utils/event-helper';
+import {getConsentStateManager} from './consent-state-manager';
+import {htmlFor} from '#core/dom/static-template';
+import {insertAtStart, removeElement, tryFocus} from '#core/dom';
+import {
+  isAmpElement,
+  whenUpgradedToCustomElement,
+} from '#core/dom/amp-element-helpers';
+import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
+import {isEsm} from '#core/mode';
 
 const TAG = 'amp-consent-ui';
-const CONSENT_STATE_MANAGER = 'consentStateManager';
-const DEFAULT_INITIAL_HEIGHT = '30vh';
+const MINIMUM_INITIAL_HEIGHT = 10;
+const DEFAULT_INITIAL_HEIGHT = 30;
+const MODAL_HEIGHT_ENABLED = 60;
+const MAX_INITIAL_HEIGHT = 80;
 const DEFAULT_ENABLE_BORDER = true;
 const FULLSCREEN_SUCCESS = 'Entering fullscreen.';
 const FULLSCREEN_ERROR =
   'Could not enter fullscreen. Fullscreen is only supported ' +
-  'when the iframe is visible and after user interaction.';
+  'when the iframe is visible as a bottom sheet and after ' +
+  'user interaction.';
 const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
 const BUTTON_ACTION_CAPTION = 'Focus Prompt';
+const CANCEL_OVERLAY = 'cancelFullOverlay';
+const REQUEST_OVERLAY = 'requestFullOverlay';
+
+const IFRAME_RUNNING_TIMEOUT = 1000;
 
 export const actionState = {
   error: 'error',
@@ -58,13 +48,15 @@ export const ampConsentMessageType = {
 export const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
+  modal: 'i-amphtml-consent-ui-modal',
   in: 'i-amphtml-consent-ui-in',
   loading: 'i-amphtml-consent-ui-loading',
   fill: 'i-amphtml-consent-ui-fill',
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
-  enableBorder: 'i-amphtml-consent-ui-enable-border',
+  borderEnabled: 'i-amphtml-consent-ui-border-enabled',
   screenReaderDialog: 'i-amphtml-consent-alertdialog',
+  iframeTransform: 'i-amphtml-consent-ui-iframe-transform',
 };
 
 export class ConsentUI {
@@ -145,6 +137,9 @@ export class ConsentUI {
     /** @private {?Deferred} */
     this.iframeReady_ = null;
 
+    /** @private {boolean} */
+    this.removeIframe_ = false;
+
     /** @private {?JsonObject} */
     this.clientConfig_ = null;
 
@@ -152,10 +147,13 @@ export class ConsentUI {
     this.placeholder_ = null;
 
     /** @private {string} */
-    this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
+    this.initialHeight_ = `${DEFAULT_INITIAL_HEIGHT}vh`;
 
     /** @private {boolean} */
-    this.enableBorder_ = DEFAULT_ENABLE_BORDER;
+    this.borderEnabled_ = DEFAULT_ENABLE_BORDER;
+
+    /** @private {boolean} */
+    this.modalEnabled_ = false;
 
     /** @private {boolean} */
     this.isActionPromptTrigger_ = false;
@@ -163,8 +161,8 @@ export class ConsentUI {
     /** @private @const {!Function} */
     this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
 
-    /** @private {?Promise<string>} */
-    this.promptUISrcPromise_ = null;
+    /** @private @const {!JsonObject} */
+    this.config_ = config;
 
     this.init_(config, opt_postPromptUI);
   }
@@ -199,16 +197,20 @@ export class ConsentUI {
           promptUI
         );
       }
+      // Warn of use of <amp-iframe> within a promptUI element.
+      if (!isEsm() && promptElement.querySelector('amp-iframe')) {
+        user().error(
+          TAG,
+          '`promptUI` element contains an <amp-iframe>. This may cause content flashing when consent is not required. Consider using `promptUISrc` instead. See https://go.amp.dev/c/amp-analytics'
+        );
+      }
       this.ui_ = dev().assertElement(promptElement);
     } else if (promptUISrc) {
       // Create an iframe element with the provided src
       this.isCreatedIframe_ = true;
       assertHttpsUrl(promptUISrc, this.parent_);
       // TODO: Preconnect to the promptUISrc?
-      this.promptUISrcPromise_ = expandConsentEndpointUrl(
-        this.parent_,
-        promptUISrc
-      );
+
       this.ui_ = this.createPromptIframe_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
@@ -232,9 +234,12 @@ export class ConsentUI {
     const {classList} = this.parent_;
     classList.add('amp-active');
     classList.remove('amp-hidden');
-    // Add to fixed layer
-    this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
-    if (this.isCreatedIframe_ && this.promptUISrcPromise_) {
+
+    this.baseInstance_
+      .getViewport()
+      .addToFixedLayer(this.parent_, /* forceTransfer */ true);
+
+    if (this.isCreatedIframe_) {
       // show() can be called multiple times, but notificationsUiManager
       // ensures that only 1 is shown at a time, so no race condition here
       this.isActionPromptTrigger_ = isActionPromptTrigger;
@@ -269,15 +274,7 @@ export class ConsentUI {
           this.elementWithFocusBeforeShowing_ = this.document_.activeElement;
 
           this.maybeShowOverlay_();
-
-          // scheduleLayout is required everytime because some AMP element may
-          // get un laid out after toggle display (#unlayoutOnPause)
-          // for example <amp-iframe>
-          Services.ownersForDoc(this.baseInstance_.element).scheduleLayout(
-            this.baseInstance_.element,
-            this.ui_
-          );
-
+          this.resume();
           this.ui_./*OK*/ focus();
         }
       };
@@ -287,7 +284,7 @@ export class ConsentUI {
       // at build time. (see #18841).
       if (isAmpElement(this.ui_)) {
         whenUpgradedToCustomElement(this.ui_)
-          .then(() => this.ui_.whenBuilt())
+          .then(() => this.ui_.build())
           .then(() => show());
       } else {
         show();
@@ -305,6 +302,8 @@ export class ConsentUI {
       // Nothing to hide from;
       return;
     }
+
+    this.pause();
 
     this.baseInstance_.mutateElement(() => {
       if (this.isCreatedIframe_) {
@@ -347,13 +346,41 @@ export class ConsentUI {
     });
   }
 
+  /** */
+  pause() {
+    if (this.ui_) {
+      Services.ownersForDoc(this.baseInstance_.element).schedulePause(
+        this.baseInstance_.element,
+        this.ui_
+      );
+    }
+  }
+
+  /** */
+  resume() {
+    if (this.ui_) {
+      // scheduleLayout is required everytime because some AMP element may
+      // get un laid out after toggle display (#unlayoutOnPause)
+      // for example <amp-iframe>
+      Services.ownersForDoc(this.baseInstance_.element).scheduleLayout(
+        this.baseInstance_.element,
+        this.ui_
+      );
+      Services.ownersForDoc(this.baseInstance_.element).scheduleResume(
+        this.baseInstance_.element,
+        this.ui_
+      );
+    }
+  }
+
   /**
    * Handle the ready event from the CMP iframe
    * @param {!JsonObject} data
    */
   handleReady_(data) {
-    this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
-    this.enableBorder_ = DEFAULT_ENABLE_BORDER;
+    this.initialHeight_ = `${DEFAULT_INITIAL_HEIGHT}vh`;
+    this.borderEnabled_ = DEFAULT_ENABLE_BORDER;
+    this.modalEnabled_ = false;
 
     // Set our initial height
     if (data['initialHeight']) {
@@ -362,14 +389,25 @@ export class ConsentUI {
         data['initialHeight'].indexOf('vh') >= 0
       ) {
         const dataHeight = parseInt(data['initialHeight'], 10);
+        // Set initialHeight to max height fallback if applicable
+        this.initialHeight_ =
+          dataHeight >= MAX_INITIAL_HEIGHT
+            ? `${MAX_INITIAL_HEIGHT}vh`
+            : this.initialHeight_;
 
-        if (dataHeight >= 10 && dataHeight <= 60) {
+        if (
+          dataHeight >= MINIMUM_INITIAL_HEIGHT &&
+          dataHeight <= MAX_INITIAL_HEIGHT
+        ) {
           this.initialHeight_ = `${dataHeight}vh`;
+          this.modalEnabled_ = dataHeight > MODAL_HEIGHT_ENABLED;
+          // Force overlay if modal is enabled.
+          this.overlayEnabled_ = this.modalEnabled_ || this.overlayEnabled_;
         } else {
           user().error(
             TAG,
             `Inavlid initial height: ${data['initialHeight']}.` +
-              'Minimum: 10vh. Maximum: 60vh.'
+              `Minimum: ${MINIMUM_INITIAL_HEIGHT}vh. Maximum: ${MAX_INITIAL_HEIGHT}vh.`
           );
         }
       } else {
@@ -381,9 +419,9 @@ export class ConsentUI {
       }
     }
 
-    // Enable/disable our border
-    if (data['border'] === false) {
-      this.enableBorder_ = false;
+    // Disable our border, if set to false and not modal view.
+    if (data['border'] === false && !this.modalEnabled_) {
+      this.borderEnabled_ = false;
     }
 
     this.iframeReady_.resolve();
@@ -399,11 +437,7 @@ export class ConsentUI {
 
     this.resetAnimationStyles_();
 
-    this.viewer_.sendMessage(
-      'requestFullOverlay',
-      dict(),
-      /* cancelUnsent */ true
-    );
+    this.sendViewerEvent_(REQUEST_OVERLAY);
 
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
@@ -411,6 +445,14 @@ export class ConsentUI {
     this.disableScroll_();
 
     this.isFullscreen_ = true;
+  }
+
+  /**
+   * Send viewer an event.
+   * @param {string} event
+   */
+  sendViewerEvent_(event) {
+    this.viewer_.sendMessage(event, dict(), /* cancelUnsent */ true);
   }
 
   /**
@@ -475,11 +517,8 @@ export class ConsentUI {
    * @return {!Promise<JsonObject>}
    */
   getClientInfoPromise_() {
-    const consentStatePromise = getServicePromiseForDoc(
-      this.ampdoc_,
-      CONSENT_STATE_MANAGER
-    );
-    return consentStatePromise.then((consentStateManager) => {
+    const consentStateManagerPromise = getConsentStateManager(this.ampdoc_);
+    return consentStateManagerPromise.then((consentStateManager) => {
       return consentStateManager
         .getLastConsentInstanceInfo()
         .then((consentInfo) => {
@@ -494,6 +533,7 @@ export class ConsentUI {
             'consentString': consentInfo['consentString'],
             'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
             'isDirty': !!consentInfo['isDirty'],
+            'purposeConsents': consentInfo['purposeConsents'],
           });
         });
     });
@@ -513,9 +553,16 @@ export class ConsentUI {
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
-    const iframePromise = this.promptUISrcPromise_.then((expandedSrc) => {
-      this.ui_.src = expandedSrc;
-      return this.getClientInfoPromise_().then((clientInfo) => {
+    this.removeIframe_ = false;
+    const iframePromise = this.getClientInfoPromise_().then((clientInfo) => {
+      return expandConsentEndpointUrl(
+        this.parent_,
+        this.config_['promptUISrc'],
+        {
+          'CONSENT_INFO': (property) => JSON.stringify(clientInfo[property]),
+        }
+      ).then((expandedSrc) => {
+        this.ui_.src = expandedSrc;
         this.ui_.setAttribute('name', JSON.stringify(clientInfo));
         this.win_.addEventListener('message', this.boundHandleIframeMessages_);
         insertAtStart(this.parent_, dev().assertElement(this.ui_));
@@ -540,6 +587,10 @@ export class ConsentUI {
     classList.add(consentUiClasses.iframeActive);
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
+    if (this.modalEnabled_) {
+      classList.add(consentUiClasses.modal);
+      tryFocus(dev().assertElement(this.ui_));
+    }
 
     // Remove transition styles added by the fixed layer
     // Transform styles applied by us for the animation.
@@ -571,35 +622,42 @@ export class ConsentUI {
    */
   resetIframe_() {
     const {classList} = this.parent_;
-
-    // Remove the iframe active to go back to our normal height
+    // It is ok to remove classes even when they're not present
     classList.remove(consentUiClasses.iframeActive);
+    classList.remove(consentUiClasses.modal);
+    classList.remove(consentUiClasses.borderEnabled);
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
     classList.remove(consentUiClasses.iframeFullscreen);
+    // TODO(micajuineho) consolidate code to user viewport
     if (this.isFullscreen_) {
-      this.viewer_.sendMessage(
-        'cancelFullOverlay',
-        dict(),
-        /* cancelUnsent */ true
-      );
+      this.sendViewerEvent_(CANCEL_OVERLAY);
+    } else if (this.modalEnabled_) {
+      this.viewport_.leaveLightboxMode();
     }
     this.isFullscreen_ = false;
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
     this.ui_.removeAttribute('name');
     toggle(dev().assertElement(this.placeholder_), false);
-    removeElement(dev().assertElement(this.ui_));
+    this.removeIframe_ = true;
+    this.win_.setTimeout(() => {
+      if (this.removeIframe_) {
+        removeElement(dev().assertElement(this.ui_));
+      }
+    }, IFRAME_RUNNING_TIMEOUT);
   }
 
   /**
    * If this is the first time viewing the iframe, create
    * an 'invisible' alert dialog with a title and a button.
    * Clicking on the button will transfer focus to the iframe.
+   *
+   * This only applies for bottom pane iframes.
    */
   maybeShowSrAlert_() {
     // If the SR alert has been shown, don't show it again
-    if (this.srAlertShown_) {
+    if (this.srAlertShown_ || this.modalEnabled_) {
       return;
     }
 
@@ -658,6 +716,7 @@ export class ConsentUI {
    * Apply styles for ready event
    */
   applyInitialStyles_() {
+    const {classList} = this.parent_;
     // Apply our initial height and border
     if (this.ui_) {
       setStyles(this.ui_, {
@@ -665,11 +724,15 @@ export class ConsentUI {
       });
     }
     setImportantStyles(this.parent_, {
-      transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
+      '--i-amphtml-modal-height': `${this.initialHeight_}`,
     });
-    if (this.enableBorder_) {
-      const {classList} = this.parent_;
-      classList.add(consentUiClasses.enableBorder);
+    classList.add(consentUiClasses.iframeTransform);
+    // Border is default with modal enabled and option with non-modal
+    if (this.borderEnabled_ || this.modalEnabled_) {
+      classList.add(consentUiClasses.borderEnabled);
+    }
+    if (this.modalEnabled_) {
+      this.viewport_.enterLightboxMode();
     }
   }
 
@@ -773,8 +836,10 @@ export class ConsentUI {
       // Do nothing iff:
       // - iframe not visible or
       // - iframe not active element && not called via actionPromptTrigger
+      // - iframe is not modalEnabled
       if (
         !this.isIframeVisible_ ||
+        this.modalEnabled_ ||
         (this.document_.activeElement !== this.ui_ &&
           !this.isActionPromptTrigger_)
       ) {

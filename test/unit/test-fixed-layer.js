@@ -1,33 +1,24 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {toggle} from '#core/dom/style';
+import {endsWith} from '#core/types/string';
 
-import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
-import {FakeMutationObserver, FakeWindow} from '../../testing/fake-dom';
-import {FixedLayer} from '../../src/service/fixed-layer';
-import {Services} from '../../src/services';
-import {endsWith} from '../../src/string';
-import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {toggle} from '../../src/style';
-import {toggleExperiment} from '../../src/experiments';
-import {user} from '../../src/log';
+import {Services} from '#service';
+import {AmpDocSingle, installDocService} from '#service/ampdoc-impl';
+import {FixedLayer} from '#service/fixed-layer';
+import {installHiddenObserverForDoc} from '#service/hidden-observer-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {installViewerServiceForDoc} from '#service/viewer-impl';
 
-describes.sandboxed('FixedLayer', {}, () => {
+import {Animation} from '#utils/animation';
+import {user} from '#utils/log';
+
+import {
+  FakeMutationObserver,
+  FakePerformance,
+  FakeWindow,
+} from '#testing/fake-dom';
+
+describes.sandboxed('FixedLayer', {}, (env) => {
   let parentApi;
   let documentApi;
   let ampdoc;
@@ -163,6 +154,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         navigator: window.navigator,
         location: window.location,
         cookie: '',
+        performance: new FakePerformance(window),
       },
       createElement: (name) => {
         return createElement(name);
@@ -552,7 +544,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should add and remove element directly', () => {
-        const updateStub = window.sandbox.stub(fixedLayer, 'update');
+        const updateStub = env.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         // Add.
@@ -898,7 +890,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         expect(state['F0'].top).to.equal('0px');
 
         // Update to transient padding.
-        window.sandbox.stub(fixedLayer, 'update').callsFake(() => {});
+        env.sandbox.stub(fixedLayer, 'update').callsFake(() => {});
         fixedLayer.updatePaddingTop(22, /* transient */ true);
         vsyncTasks[0].measure(state);
         expect(state['F0'].fixed).to.be.true;
@@ -1168,7 +1160,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         element1.setAttribute('style', 'bottom: 10px');
         element1.style.bottom = '10px';
 
-        const userError = window.sandbox.stub(user(), 'error');
+        const userError = env.sandbox.stub(user(), 'error');
         fixedLayer.setup();
         // Expect error regarding inline styles.
         expect(userError).calledWithMatch(
@@ -1180,11 +1172,6 @@ describes.sandboxed('FixedLayer', {}, () => {
       describe('hidden toggle', () => {
         let mutationObserver;
         beforeEach(() => {
-          toggleExperiment(
-            documentApi.defaultView,
-            'hidden-mutation-observer',
-            true
-          );
           fixedLayer.observeHiddenMutations();
           mutationObserver = Services.hiddenObserverForDoc(
             documentApi.documentElement
@@ -1205,7 +1192,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
           element1.computedStyle['display'] = '';
 
-          window.sandbox.stub(timer, 'delay').callsFake((callback) => {
+          env.sandbox.stub(timer, 'delay').callsFake((callback) => {
             callback();
           });
           return mutationObserver
@@ -1225,7 +1212,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should ignore descendants of already-tracked elements', () => {
-        const updateStub = window.sandbox.stub(fixedLayer, 'update');
+        const updateStub = env.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         element1.appendChild(element6);
@@ -1237,7 +1224,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should replace descendants of tracked elements', () => {
-        const updateStub = window.sandbox.stub(fixedLayer, 'update');
+        const updateStub = env.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         element6.appendChild(element1);
@@ -1579,7 +1566,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       element1.setAttribute('style', 'bottom: 10px');
       element1.style.bottom = '10px';
 
-      const userError = window.sandbox.stub(user(), 'error');
+      const userError = env.sandbox.stub(user(), 'error');
       fixedLayer.setup();
       // Expect error regarding inline styles.
       expect(userError).calledWithMatch(
@@ -1591,11 +1578,6 @@ describes.sandboxed('FixedLayer', {}, () => {
     describe('hidden toggle', () => {
       let mutationObserver;
       beforeEach(() => {
-        toggleExperiment(
-          documentApi.defaultView,
-          'hidden-mutation-observer',
-          true
-        );
         fixedLayer.observeHiddenMutations();
         mutationObserver = Services.hiddenObserverForDoc(
           documentApi.documentElement
@@ -1616,7 +1598,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
         element1.computedStyle['display'] = '';
 
-        window.sandbox.stub(timer, 'delay').callsFake((callback) => {
+        env.sandbox.stub(timer, 'delay').callsFake((callback) => {
           callback();
         });
         return mutationObserver
@@ -1717,7 +1699,6 @@ describes.sandboxed('FixedLayer Setup Execution Bailouts', {}, () => {
     window.__AMP_MODE = {
       localDev: false,
       development: false,
-      minified: false,
       test: false,
       version: '$internalRuntimeVersion$',
     };
@@ -1787,7 +1768,6 @@ describes.sandboxed(
       window.__AMP_MODE = {
         localDev: true,
         development: false,
-        minified: false,
         test: false,
         version: '$internalRuntimeVersion$',
       };
@@ -1840,6 +1820,58 @@ describes.sandboxed(
       );
       const executed = fixedLayer.setup();
       expect(executed).to.be.true;
+    });
+  }
+);
+
+describes.sandboxed(
+  'FixedLayer bug due to calling browser native instead of AMP implementation',
+  {},
+  (env) => {
+    let win;
+    let ampdoc;
+    let viewer;
+    let vsyncApi;
+
+    beforeEach(() => {
+      win = new FakeWindow();
+      window.__AMP_MODE = {
+        localDev: true,
+        development: false,
+        test: false,
+        version: '$internalRuntimeVersion$',
+      };
+
+      const vsyncTasks = [];
+      vsyncApi = {
+        runPromise: async (task) => {
+          vsyncTasks.push(task);
+        },
+        mutate: (mutator) => {
+          vsyncTasks.push({mutate: mutator});
+        },
+      };
+    });
+
+    it('should call Animation.animate in animateFixedElements', () => {
+      const animateSpy = env.sandbox.spy(Animation, 'animate');
+
+      ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
+
+      const fixedLayer = new FixedLayer(
+        ampdoc,
+        vsyncApi,
+        /* borderTop */ 0,
+        /* paddingTop */ 11,
+        /* transfer */ false
+      );
+      fixedLayer.animateFixedElements(123, 456, 789, 'ease-in', false);
+      expect(animateSpy).to.be.calledOnce;
     });
   }
 );

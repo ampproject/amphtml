@@ -1,70 +1,75 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {signingServerURLs} from '#ads/_a4a-config';
+
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {createElementWithAttributes} from '#core/dom';
+import {
+  LayoutPriority_Enum,
+  Layout_Enum,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
+import {setStyle} from '#core/dom/style';
+import {duplicateErrorIfNecessary} from '#core/error';
+import {isArray, isEnumValue, isObject} from '#core/types';
+import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+import {padStart} from '#core/types/string';
+import {utf8Decode} from '#core/types/string/bytes';
+import {tryDecodeUriComponent} from '#core/types/string/url';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
+import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {DomTransformStream} from '#utils/dom-tranform-stream';
+import {listenOnce} from '#utils/event-helper';
+import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
 
 import {A4AVariableSource} from './a4a-variable-source';
+import {getExtensionsFromMetadata} from './amp-ad-utils';
+import {processHead} from './head-validation';
 import {
-  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
-import {Deferred, tryResolve} from '../../../src/utils/promise';
-import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
-import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
-import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {Services} from '../../../src/services';
+  createSecureDocSkeleton,
+  createSecureFrame,
+  isAttributionReportingSupported,
+} from './secure-frame';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
+import {whenWithinViewport} from './within-viewport';
+
 import {
   applySandbox,
   generateSentinel,
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
-import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
-import {cancellation, isCancellation} from '../../../src/error';
-import {createElementWithAttributes} from '../../../src/dom';
-import {createSecureFrame} from './secure-frame';
-import {
-  dev,
-  devAssert,
-  duplicateErrorIfNecessary,
-  user,
-} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {
-  getAmpAdRenderOutsideViewport,
-  incrementLoadingAds,
-  is3pThrottled,
-} from '../../amp-ad/0.1/concurrent-load';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getExperimentBranch} from '../../../src/experiments';
-import {getMode} from '../../../src/mode';
+import {cancellation, isCancellation} from '../../../src/error-reporting';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
-import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isArray, isEnumValue, isObject} from '../../../src/types';
-import {parseJson} from '../../../src/json';
-import {processHead} from './head-validation';
-import {setStyle} from '../../../src/style';
-import {signingServerURLs} from '../../../ads/_a4a-config';
-import {streamResponseToWriter} from '../../../src/utils/stream-response';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {
+  installFriendlyIframeEmbed,
+  isSrcdocSupported,
+  preloadFriendlyIframeEmbedExtensions,
+} from '../../../src/friendly-iframe-embed';
+import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getMode} from '../../../src/mode';
+import {assertHttpsUrl} from '../../../src/url';
+import {
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+} from '../../amp-ad/0.1/concurrent-load';
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -140,7 +145,9 @@ export let CreativeMetaDataDef;
 /** @typedef {{
       consentState: (?CONSENT_POLICY_STATE|undefined),
       consentString: (?string|undefined),
+      consentStringType: (?CONSENT_STRING_TYPE|boolean),
       gdprApplies: (?boolean|undefined),
+      additionalConsent: (?string|undefined),
     }} */
 export let ConsentTupleDef;
 
@@ -173,15 +180,6 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
-};
-
-/**
- * @const @enum {string}
- */
-export const NO_SIGNING_EXP = {
-  id: 'a4a-no-signing',
-  control: '21066324',
-  experiment: '21066325',
 };
 
 /**
@@ -240,7 +238,10 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?Promise<undefined>} */
     this.keysetPromise_ = null;
 
-    /** @private {?Promise<?CreativeMetaDataDef>} */
+    /**
+     * In no signing experiment metadata will be data from head validation.
+     * @private {?Promise<?CreativeMetaDataDef|?./head-validation.ValidatedHeadDef>}
+     */
     this.adPromise_ = null;
 
     /**
@@ -276,7 +277,7 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.creativeSize_ = null;
 
-    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    /** @private {?../../../src/layout-rect.LayoutSizeDef} */
     this.originalSlotSize_ = null;
 
     /**
@@ -284,7 +285,8 @@ export class AmpA4A extends AMP.BaseElement {
      * uses safeframe when response header is not specified.
      * @private {?XORIGIN_MODE}
      */
-    this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
+    this.experimentalNonAmpCreativeRenderMethod_ =
+      this.getNonAmpCreativeRenderingMethod();
 
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
@@ -316,13 +318,6 @@ export class AmpA4A extends AMP.BaseElement {
      * @type {?HTMLIFrameElement}
      */
     this.iframe = null;
-
-    /**
-     * TODO(keithwrightbos) - remove once resume behavior is verified.
-     * {boolean} whether most recent ad request was generated as part
-     *    of resume callback.
-     */
-    this.fromResumeCallback = false;
 
     /** @type {string} */
     this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
@@ -366,24 +361,14 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.isSinglePageStoryAd = false;
 
-    const sanitizedHeadPromise = new Deferred();
-    /**
-     * Promise that will resolve with processed <head> from ad server response.
-     * @private {!Promise}
-     */
-    this.sanitizedHeadPromise_ = sanitizedHeadPromise.promise;
-
-    /**
-     * Resolves the promise that the head has been processed.
-     * @private {function()}
-     */
-    this.sanitizedHeadResolver_ = sanitizedHeadPromise.resolve;
-
     /**
      * Transfers elements from the detached body to the given body element.
      * @private {?function(!Element)}
      */
-    this.transferBody_ = null;
+    this.transferDomBody_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -394,7 +379,7 @@ export class AmpA4A extends AMP.BaseElement {
     // therefore we want this to match the 3p priority.
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
+    return isPWA ? LayoutPriority_Enum.METADATA : LayoutPriority_Enum.ADS;
   }
 
   /** @override */
@@ -422,15 +407,20 @@ export class AmpA4A extends AMP.BaseElement {
     );
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
+    this.uiHandler.validateStickyAd();
 
-    const verifier = signatureVerifierFor(this.win);
-    this.keysetPromise_ = this.getAmpDoc()
-      .whenFirstVisible()
-      .then(() => {
-        this.getSigningServiceNames().forEach((signingServiceName) => {
-          verifier.loadKeyset(signingServiceName);
+    // Disable crypto key fetching if we are not going to use it in no-signing path.
+    // TODO(ccordry): clean up with no-signing launch.
+    if (!this.isInNoSigningExp()) {
+      const verifier = signatureVerifierFor(this.win);
+      this.keysetPromise_ = this.getAmpDoc()
+        .whenFirstVisible()
+        .then(() => {
+          this.getSigningServiceNames().forEach((signingServiceName) => {
+            verifier.loadKeyset(signingServiceName);
+          });
         });
-      });
+    }
 
     this.a4aAnalyticsConfig_ = this.getA4aAnalyticsConfig();
     if (this.a4aAnalyticsConfig_) {
@@ -543,13 +533,20 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /** @override */
+  pauseCallback() {
+    if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.pause();
+    }
+  }
+
+  /** @override */
   resumeCallback() {
     // FIE that was not destroyed on unlayoutCallback does not require a new
     // ad request.
     if (this.friendlyIframeEmbed_) {
+      this.friendlyIframeEmbed_.resume();
       return;
     }
-    this.fromResumeCallback = true;
     // If layout of page has not changed, onLayoutMeasure will not be called
     // so do so explicitly.
     const resource = this.getResource();
@@ -597,7 +594,7 @@ export class AmpA4A extends AMP.BaseElement {
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
     const fixedSizeZeroHeightOrWidth =
-      this.getLayout() != Layout.FLUID &&
+      this.getLayout() != Layout_Enum.FLUID &&
       (slotRect.height == 0 || slotRect.width == 0);
     if (
       fixedSizeZeroHeightOrWidth ||
@@ -612,7 +609,10 @@ export class AmpA4A extends AMP.BaseElement {
       );
       return false;
     }
-    if (!isAdPositionAllowed(this.element, this.win)) {
+    if (
+      !this.uiHandler.isStickyAd() &&
+      !isAdPositionAllowed(this.element, this.win)
+    ) {
       user().warn(
         TAG,
         `<${this.element.tagName}> is not allowed to be ` +
@@ -640,6 +640,28 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   onLayoutMeasure() {
     this.initiateAdRequest();
+  }
+
+  /**
+   * Resolves when underlying element is within the viewport range given or
+   * has been loaded already.
+   * @param {number|boolean} viewport derived from renderOutsideViewport.
+   * @return {!Promise}
+   * @protected
+   */
+  whenWithinViewport(viewport) {
+    devAssert(viewport !== false);
+    const resource = this.getResource();
+    if (WITHIN_VIEWPORT_INOB || getMode().localDev || getMode().test) {
+      // Resolve is already laid out or viewport is true.
+      if (!resource.isLayoutPending() || viewport === true) {
+        return Promise.resolve();
+      }
+      // Track when within the specified number of viewports.
+      const viewportNum = dev().assertNumber(viewport);
+      return whenWithinViewport(this.element, viewportNum);
+    }
+    return resource.whenWithinViewport(viewport);
   }
 
   /**
@@ -688,7 +710,7 @@ export class AmpA4A extends AMP.BaseElement {
         // meeting the definition as opposed to waiting on the promise.
         const delay = this.delayAdRequestEnabled();
         if (delay) {
-          return this.getResource().whenWithinViewport(
+          return this.whenWithinViewport(
             typeof delay == 'number' ? delay : this.renderOutsideViewport()
           );
         }
@@ -744,11 +766,34 @@ export class AmpA4A extends AMP.BaseElement {
         const gdprApplies = consentMetadata
           ? consentMetadata['gdprApplies']
           : consentMetadata;
+        const additionalConsent = consentMetadata
+          ? consentMetadata['additionalConsent']
+          : consentMetadata;
+        const consentStringType = consentMetadata
+          ? consentMetadata['consentStringType']
+          : consentMetadata;
 
-        return /** @type {!Promise<?string>} */ (this.getAdUrl(
-          {consentState, consentString, gdprApplies},
-          this.tryExecuteRealTimeConfig_(consentState, consentString)
-        ));
+        return /** @type {!Promise<?string>} */ (
+          this.getServeNpaSignal().then((npaSignal) =>
+            this.getAdUrl(
+              {
+                consentState,
+                consentString,
+                consentStringType,
+                gdprApplies,
+                additionalConsent,
+              },
+              this.tryExecuteRealTimeConfig_(
+                consentState,
+                consentString,
+                /** @type {?Object<string, string|number|boolean|undefined>} */ (
+                  consentMetadata
+                )
+              ),
+              npaSignal
+            )
+          )
+        );
       })
       // This block returns the (possibly empty) response to the XHR request.
       /** @return {!Promise<?Response>} */
@@ -840,7 +885,7 @@ export class AmpA4A extends AMP.BaseElement {
       })
       .then((fetchResponse) =>
         this.isInNoSigningExp()
-          ? this.streamResponse_(fetchResponse)
+          ? this.streamResponse_(fetchResponse, checkStillCurrent)
           : this.startValidationFlow_(fetchResponse, checkStillCurrent)
       )
       .catch((error) => {
@@ -869,29 +914,46 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   isInNoSigningExp() {
-    return (
-      getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
-      NO_SIGNING_EXP.experiment
-    );
+    return NO_SIGNING_RTV;
+  }
+
+  /**
+   * Allow subclasses to skip client side validation of non-amp creatives
+   * based on http headers for perfomance. When true, ads will fall back to
+   * x-domain earlier.
+   * @param {!Headers} unusedHeaders
+   * @return {boolean}
+   */
+  skipClientSideValidation(unusedHeaders) {
+    return false;
   }
 
   /**
    * Start streaming response into the detached document.
-   * @param {!Response} response
-   * @return {boolean}
+   * @param {!Response} httpResponse
+   * @param {function()} checkStillCurrent
+   * @return {Promise<?./head-validation.ValidatedHeadDef>}
    */
-  streamResponse_(response) {
-    // TODO(ccordry): handle fallback case and set isVerifiedAmpCreative and
-    // creativeBody appropriately.
-    this.isVerifiedAmpCreative_ = true;
+  streamResponse_(httpResponse, checkStillCurrent) {
+    if (httpResponse.status === 204) {
+      this.forceCollapse();
+      return Promise.reject(NO_CONTENT_RESPONSE);
+    }
 
-    const size = this.extractSize(response.headers);
+    // Extract size will also parse x-ampanalytics header for some subclasses.
+    const size = this.extractSize(httpResponse.headers);
     this.creativeSize_ = size || this.creativeSize_;
 
-    // TODO(ccordry): handle fallback and ensure this is only set for creatives
-    // that can be rendered friendly.
-    // Update priority.
-    this.updateLayoutPriority(LayoutPriority.CONTENT);
+    if (
+      !isPlatformSupported(this.win) ||
+      this.skipClientSideValidation(httpResponse.headers)
+    ) {
+      return this.handleFallback_(httpResponse, checkStillCurrent);
+    }
+
+    // Duplicating httpResponse stream as safeframe/nameframe rendering will need the
+    // unaltered httpResponse content.
+    const fallbackHttpResponse = httpResponse.clone();
 
     // This transformation consumes the detached DOM chunks and
     // exposes our waitForHead and transferBody methods.
@@ -902,30 +964,70 @@ export class AmpA4A extends AMP.BaseElement {
       (chunk) => transformStream.onChunk(chunk),
       (doc) => transformStream.onEnd(doc)
     );
-    // Decodes our response bytes and pipes them to the
+
+    this.transferDomBody_ = transformStream.transferBody.bind(transformStream);
+
+    // Decodes our httpResponse bytes and pipes them to the
     // DetachedDomStream.
-    streamResponseToWriter(this.win, response, detachedStream);
+    return streamResponseToWriter(this.win, httpResponse, detachedStream)
+      .then((responseBodyHasContent) => {
+        checkStillCurrent();
+        // `amp-ff-empty-creative` header is not present, and httpResponse.body
+        // is empty.
+        if (!responseBodyHasContent) {
+          this.forceCollapse();
+          return Promise.reject(NO_CONTENT_RESPONSE);
+        }
+      })
+      .then(() => {
+        checkStillCurrent();
+        return transformStream.waitForHead();
+      })
+      .then((head) => {
+        checkStillCurrent();
+        return this.validateHeadElement_(head);
+      })
+      .then((sanitizedHeadElement) => {
+        checkStillCurrent();
+        // We should not render as FIE.
+        if (!sanitizedHeadElement) {
+          return this.handleFallback_(fallbackHttpResponse, checkStillCurrent);
+        }
+        this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
+        this.isVerifiedAmpCreative_ = true;
+        return sanitizedHeadElement;
+      });
+  }
 
-    transformStream
-      .waitForHead()
-      .then((head) => this.validateHead_(head))
-      .then(this.sanitizedHeadResolver_);
-
-    this.transferBody_ = transformStream.transferBody.bind(transformStream);
-
-    // TODO(ccordry): throw NO_CONTENT_RESPONSE if body is empty. Only gets
-    // here if amp-ff-empty-creative header is not present.
-    return true;
+  /**
+   * Handles case where creative cannot or has chosen not to be rendered
+   * safely in FIE. Returning null forces x-domain render in
+   * attemptToRenderCreative
+   * @param {!Response} fallbackHttpResponse
+   * @param {function()} checkStillCurrent
+   * @return {!Promise<null>}
+   */
+  handleFallback_(fallbackHttpResponse, checkStillCurrent) {
+    // Experiment to give non-AMP creatives same benefits as AMP so
+    // update priority.
+    if (this.inNonAmpPreferenceExp()) {
+      this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
+    }
+    return fallbackHttpResponse.arrayBuffer().then((domTextContent) => {
+      checkStillCurrent();
+      this.creativeBody_ = domTextContent;
+      return null;
+    });
   }
 
   /**
    * Prepare the creative <head> by removing any non-secure elements and
    * exracting extensions
-   * @param {!Element} head
+   * @param {!Element} headElement
    * @return {?./head-validation.ValidatedHeadDef} head data or null if we should fall back to xdomain.
    */
-  validateHead_(head) {
-    return processHead(this.win, this.element, head);
+  validateHeadElement_(headElement) {
+    return processHead(this.win, this.element, headElement);
   }
 
   /**
@@ -1000,26 +1102,28 @@ export class AmpA4A extends AMP.BaseElement {
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
           let creativeMetaDataDef;
+
           if (
+            !isPlatformSupported(this.win) ||
             !creativeDecoded ||
             !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))
           ) {
             if (this.inNonAmpPreferenceExp()) {
               // Experiment to give non-AMP creatives same benefits as AMP so
               // update priority.
-              this.updateLayoutPriority(LayoutPriority.CONTENT);
+              this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
             }
             return null;
           }
 
           // Update priority.
-          this.updateLayoutPriority(LayoutPriority.CONTENT);
+          this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
+
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
-          const extensions = Services.extensionsFor(this.win);
-          creativeMetaDataDef.customElementExtensions.forEach((extensionId) =>
-            extensions.preloadExtension(extensionId)
-          );
+          const extensions = getExtensionsFromMetadata(creativeMetaDataDef);
+          preloadFriendlyIframeEmbedExtensions(this.win, extensions);
+
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach((font) =>
             Services.preconnectFor(this.win).preload(
@@ -1194,7 +1298,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Additional arguments.
     assignAdUrlToError(/** @type {!Error} */ (error), this.adUrl_);
 
-    if (getMode().development || getMode().localDev || getMode().log) {
+    if (getMode().development || getMode().localDev || logHashParam()) {
       user().error(TAG, error);
     } else {
       user().warn(TAG, error);
@@ -1210,7 +1314,12 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.isRefreshing) {
       this.destroyFrame(true);
     }
-    return this.attemptToRenderCreative();
+    return this.attemptToRenderCreative().then(() => {
+      this.unobserveIntersections_ = observeIntersections(
+        this.element,
+        ({isIntersecting}) => this.viewportCallback(isIntersecting)
+      );
+    });
   }
 
   /**
@@ -1231,9 +1340,16 @@ export class AmpA4A extends AMP.BaseElement {
     }
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
-    return this.adPromise_
-      .then((creativeMetaData) => {
+
+    return Promise.all([
+      this.adPromise_,
+      this.uiHandler.getScrollPromiseForStickyAd(),
+    ])
+      .then((values) => {
         checkStillCurrent();
+
+        this.uiHandler.maybeInitStickyAd();
+        const creativeMetaData = values[0];
         if (this.isCollapsed_) {
           return Promise.resolve();
         }
@@ -1253,10 +1369,15 @@ export class AmpA4A extends AMP.BaseElement {
 
         if (this.isInNoSigningExp()) {
           friendlyRenderPromise = this.renderFriendlyTrustless_(
+            /** @type {!./head-validation.ValidatedHeadDef} */ (
+              creativeMetaData
+            ),
             checkStillCurrent
           );
         } else {
-          friendlyRenderPromise = this.renderAmpCreative_(creativeMetaData);
+          friendlyRenderPromise = this.renderAmpCreative_(
+            /** @type {!CreativeMetaDataDef} */ (creativeMetaData)
+          );
         }
 
         // Must be an AMP creative.
@@ -1292,12 +1413,14 @@ export class AmpA4A extends AMP.BaseElement {
     // Store original size of slot in order to allow re-expansion on
     // unlayoutCallback so that it is reverted to original size in case
     // of resumeCallback.
-    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
+    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutSize();
     return super.attemptChangeSize(newHeight, newWidth);
   }
 
   /** @override  */
   unlayoutCallback() {
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     this.tearDownSlot();
     return true;
   }
@@ -1331,13 +1454,13 @@ export class AmpA4A extends AMP.BaseElement {
 
     // Remove rendering frame, if it exists.
     this.destroyFrame();
-
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
-    this.fromResumeCallback = false;
-    this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
+    this.transferDomBody_ = null;
+    this.experimentalNonAmpCreativeRenderMethod_ =
+      this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
   }
 
@@ -1373,9 +1496,15 @@ export class AmpA4A extends AMP.BaseElement {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
     }
+    if (this.uiHandler) {
+      this.uiHandler.cleanup();
+    }
   }
 
-  /** @override  */
+  /**
+   * @param {boolean}  inViewport
+   * @protected
+   */
   viewportCallback(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
@@ -1387,10 +1516,50 @@ export class AmpA4A extends AMP.BaseElement {
    * by network.
    * @param {!ConsentTupleDef=} opt_ununsedConsentTuple
    * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
+   * @param {boolean=} opt_serveNpaSignal
    * @return {!Promise<string>|string}
    */
-  getAdUrl(opt_ununsedConsentTuple, opt_rtcResponsesPromise) {
+  getAdUrl(
+    opt_ununsedConsentTuple,
+    opt_rtcResponsesPromise,
+    opt_serveNpaSignal
+  ) {
     throw new Error('getAdUrl not implemented!');
+  }
+
+  /**
+   * Checks if the `always-serve-npa` attribute is present and valid
+   * based on the geolocation.  To be implemented by network.
+   * @return {!Promise<boolean>}
+   */
+  getServeNpaSignal() {
+    return Promise.resolve(false);
+  }
+
+  /**
+   * Checks if the `block-rtc` attribute is present and valid
+   * based on the geolocation.
+   * @return {!Promise<boolean>}
+   */
+  getBlockRtc_() {
+    if (!this.element.getAttribute('block-rtc')) {
+      return Promise.resolve(false);
+    }
+    return Services.geoForDocOrNull(this.element).then((geoService) => {
+      userAssert(geoService, '%s: requires <amp-geo> to use `block-rtc`', TAG);
+      const blockRtcLocations = this.element.getAttribute('block-rtc');
+      const locations = blockRtcLocations.split(',');
+      for (let i = 0; i < locations.length; i++) {
+        const geoGroup = geoService.isInCountryGroup(locations[i]);
+        if (geoGroup === GEO_IN_GROUP.IN) {
+          return true;
+        } else if (geoGroup === GEO_IN_GROUP.NOT_DEFINED) {
+          user().warn('AMP-AD', `Geo group "${locations[i]}" was not defined.`);
+        }
+      }
+      // Not in any of the defined geo groups.
+      return false;
+    });
   }
 
   /**
@@ -1455,7 +1624,7 @@ export class AmpA4A extends AMP.BaseElement {
     devAssert(this.uiHandler);
     // Store original size to allow for reverting on unlayoutCallback so that
     // subsequent pageview allows for ad request.
-    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutBox();
+    this.originalSlotSize_ = this.originalSlotSize_ || this.getLayoutSize();
     this.uiHandler.applyNoContentUI();
     this.isCollapsed_ = true;
   }
@@ -1614,59 +1783,82 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @param {!./head-validation.ValidatedHeadDef} headData
    * @param {function()} checkStillCurrent
    * @return {!Promise} Whether the creative was successfully rendered.
    */
-  renderFriendlyTrustless_(checkStillCurrent) {
-    return this.sanitizedHeadPromise_.then((headData) => {
-      checkStillCurrent();
-      devAssert(this.element.ownerDocument);
-      this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
+  renderFriendlyTrustless_(headData, checkStillCurrent) {
+    checkStillCurrent();
+    devAssert(this.element.ownerDocument);
+    this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
 
-      const {height, width} = this.creativeSize_;
-      const {extensions, fonts, head} = headData;
-      this.iframe = createSecureFrame(
-        this.element.ownerDocument,
-        head,
-        this.getIframeTitle(),
-        height,
-        width
-      );
-      this.applyFillContent(this.iframe);
+    const {height, width} = this.creativeSize_;
+    const {extensions, fonts, head} = headData;
+    this.iframe = createSecureFrame(
+      this.win,
+      this.getIframeTitle(),
+      height,
+      width
+    );
+    if (!this.uiHandler.isStickyAd()) {
+      applyFillContent(this.iframe);
+    }
 
-      // TODO(ccordry): FIE does not handle extension versioning, but we have
-      // it accessible here.
-      const extensionIds = extensions.map((extension) => extension.extensionId);
-
-      return installFriendlyIframeEmbed(
-        devAssert(this.iframe),
-        this.element,
-        {
-          host: this.element,
-          url: devAssert(this.adUrl_),
-          html: null,
-          extensionIds,
-          fonts,
-        },
-        (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
-      ).then((friendlyIframeEmbed) => {
-        checkStillCurrent();
-        const fieBody = this.getFieBody_(friendlyIframeEmbed);
-        const renderComplete = this.transferBody_(devAssert(fieBody));
-        this.makeFieVisible_(
-          friendlyIframeEmbed,
-          // TODO(ccordry): subclasses are passed creativeMetadata which does
-          // not exist in unsigned case. All it is currently used for is to
-          // check if it is an AMP creative, and extension list.
-          {
-            minifiedCreative: '',
-            customStylesheets: [],
-            customElementExtensions: extensionIds,
-          },
-          checkStillCurrent
+    let body = '';
+    const transferComplete = new Deferred();
+    // If srcdoc is not supported, streaming is also not supported so we
+    // can go ahead and write the ad content body.
+    if (!isSrcdocSupported()) {
+      body = head.ownerDocument.body./*OK */ outerHTML;
+      transferComplete.resolve();
+    } else {
+      // Once skeleton doc has be written to srcdoc we start transferring
+      // body chunks.
+      listenOnce(this.iframe, 'load', () => {
+        const fieBody = this.iframe.contentDocument.body;
+        this.transferDomBody_(devAssert(fieBody)).then(
+          transferComplete.resolve
         );
-        return renderComplete;
       });
+    }
+
+    const secureDoc = createSecureDocSkeleton(
+      devAssert(this.adUrl_),
+      head./*OK*/ outerHTML,
+      body
+    );
+
+    const fieInstallPromise = this.installFriendlyIframeEmbed_(
+      secureDoc,
+      extensions,
+      fonts,
+      true // skipHtmlMerge
+    );
+
+    // Tell the FIE it is done after transferring.
+    Promise.all([fieInstallPromise, transferComplete.promise]).then(
+      (values) => {
+        const friendlyIframeEmbed = values[0];
+        // #installFriendlyIframeEmbed will return null if removed before install is complete.
+        friendlyIframeEmbed && friendlyIframeEmbed.renderCompleted();
+      }
+    );
+
+    const extensionIds = extensions.map((extension) => extension.extensionId);
+    return fieInstallPromise.then((friendlyIframeEmbed) => {
+      checkStillCurrent();
+      this.makeFieVisible_(
+        friendlyIframeEmbed,
+        // TODO(ccordry): subclasses are passed creativeMetadata which does
+        // not exist in unsigned case. All it is currently used for is to
+        // check if it is an AMP creative, and extension list.
+        {
+          minifiedCreative: '',
+          customStylesheets: [],
+          customElementExtensions: extensionIds,
+        },
+        checkStillCurrent
+      );
     });
   }
 
@@ -1682,22 +1874,29 @@ export class AmpA4A extends AMP.BaseElement {
     devAssert(!!this.element.ownerDocument, 'missing owner document?!');
     this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
     // Create and setup friendly iframe.
-    this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
-      /** @type {!Document} */ (this.element.ownerDocument),
-      'iframe',
-      dict({
-        // NOTE: It is possible for either width or height to be 'auto',
-        // a non-numeric value.
-        'height': this.creativeSize_.height,
-        'width': this.creativeSize_.width,
-        'frameborder': '0',
-        'allowfullscreen': '',
-        'allowtransparency': '',
-        'scrolling': 'no',
-        'title': this.getIframeTitle(),
-      })
-    ));
-    this.applyFillContent(this.iframe);
+    this.iframe = /** @type {!HTMLIFrameElement} */ (
+      createElementWithAttributes(
+        /** @type {!Document} */ (this.element.ownerDocument),
+        'iframe',
+        dict({
+          // NOTE: It is possible for either width or height to be 'auto',
+          // a non-numeric value.
+          'height': this.creativeSize_.height,
+          'width': this.creativeSize_.width,
+          'frameborder': '0',
+          'allowfullscreen': '',
+          'allowtransparency': '',
+          'scrolling': 'no',
+          'title': this.getIframeTitle(),
+          'role': 'region',
+          'aria-label': 'Advertisement',
+          'tabindex': '0',
+        })
+      )
+    );
+    if (!this.uiHandler.isStickyAd()) {
+      applyFillContent(this.iframe);
+    }
     const fontsArray = [];
     if (creativeMetaData.customStylesheets) {
       creativeMetaData.customStylesheets.forEach((s) => {
@@ -1708,11 +1907,13 @@ export class AmpA4A extends AMP.BaseElement {
       });
     }
     const checkStillCurrent = this.verifyStillCurrent();
-    const {minifiedCreative, customElementExtensions} = creativeMetaData;
+    const {minifiedCreative} = creativeMetaData;
+    const extensions = getExtensionsFromMetadata(creativeMetaData);
     return this.installFriendlyIframeEmbed_(
       minifiedCreative,
-      customElementExtensions,
-      fontsArray || []
+      extensions,
+      fontsArray || [],
+      false // skipHtmlMerge
     ).then((friendlyIframeEmbed) =>
       this.makeFieVisible_(
         friendlyIframeEmbed,
@@ -1725,11 +1926,12 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Convert the iframe to FIE impl and append to DOM.
    * @param {string} html
-   * @param {!Array<string>} extensionIds
+   * @param {!Array<{extensionId: string, extensionVersion: string}>} extensions
    * @param {!Array<string>} fonts
+   * @param {boolean} skipHtmlMerge
    * @return {!Promise<!../../../src/friendly-iframe-embed.FriendlyIframeEmbed>}
    */
-  installFriendlyIframeEmbed_(html, extensionIds, fonts) {
+  installFriendlyIframeEmbed_(html, extensions, fonts, skipHtmlMerge) {
     return installFriendlyIframeEmbed(
       devAssert(this.iframe),
       this.element,
@@ -1738,8 +1940,9 @@ export class AmpA4A extends AMP.BaseElement {
         // Need to guarantee that this is no longer null
         url: devAssert(this.adUrl_),
         html,
-        extensionIds,
+        extensions,
         fonts,
+        skipHtmlMerge,
       },
       (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
     );
@@ -1753,9 +1956,7 @@ export class AmpA4A extends AMP.BaseElement {
   preinstallCallback_(embedWin, ampdoc) {
     const parentAmpdoc = this.getAmpDoc();
     installUrlReplacementsForEmbed(
-      // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
-      ampdoc || parentAmpdoc,
-      embedWin,
+      ampdoc,
       new A4AVariableSource(parentAmpdoc, embedWin)
     );
   }
@@ -1815,6 +2016,9 @@ export class AmpA4A extends AMP.BaseElement {
         'height': this.creativeSize_.height,
         'width': this.creativeSize_.width,
         'title': this.getIframeTitle(),
+        'role': 'region',
+        'aria-label': 'Advertisement',
+        'tabindex': '0',
       })
     );
 
@@ -1824,15 +2028,23 @@ export class AmpA4A extends AMP.BaseElement {
     // Block synchronous XHR in ad. These are very rare, but super bad for UX
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
-    mergedAttributes['allow'] = "sync-xhr 'none';";
-    this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
-      /** @type {!Document} */ (this.element.ownerDocument),
-      'iframe',
-      /** @type {!JsonObject} */ (Object.assign(
-        mergedAttributes,
-        SHARED_IFRAME_PROPERTIES
-      ))
-    ));
+    let featurePolicies = "sync-xhr 'none';";
+
+    if (isAttributionReportingSupported(this.win.document)) {
+      featurePolicies += "attribution-reporting 'src';";
+    }
+
+    mergedAttributes['allow'] = featurePolicies;
+
+    this.iframe = /** @type {!HTMLIFrameElement} */ (
+      createElementWithAttributes(
+        /** @type {!Document} */ (this.element.ownerDocument),
+        'iframe',
+        /** @type {!JsonObject} */ (
+          Object.assign(mergedAttributes, SHARED_IFRAME_PROPERTIES)
+        )
+      )
+    );
     if (this.sandboxHTMLCreativeFrame()) {
       applySandbox(this.iframe);
     }
@@ -1879,12 +2091,19 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaIframeGet_(adUrl) {
     this.maybeTriggerAnalyticsEvent_('renderCrossDomainStart');
+    const contextMetadata = getContextMetadata(
+      this.win,
+      this.element,
+      this.sentinel
+    );
+
+    const intersection = this.element.getIntersectionChangeEntry();
+    contextMetadata['_context']['initialIntersection'] =
+      intersectionEntryToJson(intersection);
     return this.iframeRenderHelper_(
       dict({
         'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-        'name': JSON.stringify(
-          getContextMetadata(this.win, this.element, this.sentinel)
-        ),
+        'name': JSON.stringify(contextMetadata),
       })
     );
   }
@@ -1952,7 +2171,10 @@ export class AmpA4A extends AMP.BaseElement {
         this.sentinel,
         this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME)
       );
-      // TODO(bradfrizzell) Clean up name assigning.
+
+      const intersection = this.element.getIntersectionChangeEntry();
+      contextMetadata['initialIntersection'] =
+        intersectionEntryToJson(intersection);
       if (method == XORIGIN_MODE.NAMEFRAME) {
         contextMetadata['creative'] = creative;
         name = JSON.stringify(contextMetadata);
@@ -1962,6 +2184,7 @@ export class AmpA4A extends AMP.BaseElement {
           `${this.safeframeVersion};${creative.length};${creative}` +
           `${contextMetadata}`;
       }
+
       return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
@@ -2033,6 +2256,9 @@ export class AmpA4A extends AMP.BaseElement {
         }
       } else {
         metaData.customElementExtensions = [];
+      }
+      if (metaDataObj['extensions']) {
+        metaData.extensions = metaDataObj['extensions'];
       }
       if (metaDataObj['customStylesheets']) {
         // Expect array of objects with at least one key being 'href' whose
@@ -2116,10 +2342,12 @@ export class AmpA4A extends AMP.BaseElement {
     const analyticsEvent = devAssert(
       LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]
     );
-    const analyticsVars = /** @type {!JsonObject} */ (Object.assign(
-      dict({'time': Math.round(this.getNow_())}),
-      this.getA4aAnalyticsVars(analyticsEvent)
-    ));
+    const analyticsVars = /** @type {!JsonObject} */ (
+      Object.assign(
+        dict({'time': Math.round(this.getNow_())}),
+        this.getA4aAnalyticsVars(analyticsEvent)
+      )
+    );
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 
@@ -2149,27 +2377,30 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Attempts to execute Real Time Config, if the ad network has enabled it.
    * If it is not supported by the network, but the publisher has included
-   * the rtc-config attribute on the amp-ad element, warn.
+   * the rtc-config attribute on the amp-ad element, warn. Additionaly,
+   * if the publisher has included a valid `block-rtc` attribute, don't send.
    * @param {?CONSENT_POLICY_STATE} consentState
    * @param {?string} consentString
+   * @param {?Object<string, string|number|boolean|undefined>} consentMetadata
    * @return {Promise<!Array<!rtcResponseDef>>|undefined}
    */
-  tryExecuteRealTimeConfig_(consentState, consentString) {
-    if (!!AMP.RealTimeConfigManager) {
-      try {
-        return new AMP.RealTimeConfigManager(this).maybeExecuteRealTimeConfig(
-          this.getCustomRealTimeConfigMacros_(),
-          consentState,
-          consentString
-        );
-      } catch (err) {
-        user().error(TAG, 'Could not perform Real Time Config.', err);
-      }
-    } else if (this.element.getAttribute('rtc-config')) {
-      user().error(
-        TAG,
-        'RTC not supported for ad network ' +
-          `${this.element.getAttribute('type')}`
+  tryExecuteRealTimeConfig_(consentState, consentString, consentMetadata) {
+    if (this.element.getAttribute('rtc-config')) {
+      installRealTimeConfigServiceForDoc(this.getAmpDoc());
+      return this.getBlockRtc_().then((shouldBlock) =>
+        shouldBlock
+          ? undefined
+          : Services.realTimeConfigForDoc(this.getAmpDoc()).then(
+              (realTimeConfig) =>
+                realTimeConfig.maybeExecuteRealTimeConfig(
+                  this.element,
+                  this.getCustomRealTimeConfigMacros_(),
+                  consentState,
+                  consentString,
+                  consentMetadata,
+                  this.verifyStillCurrent()
+                )
+            )
       );
     }
   }
@@ -2237,6 +2468,40 @@ export class AmpA4A extends AMP.BaseElement {
   getIframeTitle() {
     return this.element.getAttribute('title') || '3rd party ad content';
   }
+
+  /**
+   * Returns any enabled SSR experiments via the amp-usqp meta tag. These
+   * correspond to the proto field ids in cs/AmpTransformerParams.
+   *
+   * These experiments do not have a fully unique experiment id for each value,
+   * so we concatenate the key and value to generate a psuedo id. We assume
+   * that any experiment is either a boolean (so two branches), or an enum with
+   * 100 or less branches. So, the value is padded a leading 0 if necessary.
+   *
+   * @protected
+   * @return {!Array<string>}
+   */
+  getSsrExpIds_() {
+    const exps = [];
+    const meta = this.getAmpDoc().getMetaByName('amp-usqp');
+    if (meta) {
+      const keyValues = meta.split(',');
+      for (let i = 0; i < keyValues.length; i++) {
+        const kv = keyValues[i].split('=');
+        if (kv.length !== 2) {
+          continue;
+        }
+        // Reasonably assume that all important exps are either booleans, or
+        // enums with 100 or less branches.
+        const val = Number(kv[1]);
+        if (!isNaN(kv[0]) && val >= 0 && val < 100) {
+          const padded = padStart(kv[1], 2, '0');
+          exps.push(kv[0] + padded);
+        }
+      }
+    }
+    return exps;
+  }
 }
 
 /**
@@ -2276,4 +2541,29 @@ export function signatureVerifierFor(win) {
     win[propertyName] ||
     (win[propertyName] = new SignatureVerifier(win, signingServerURLs))
   );
+}
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isPlatformSupported(win) {
+  // Require Shadow DOM support for a4a.
+  if (
+    !isNative(win.Element.prototype.attachShadow) &&
+    isExperimentOn(win, 'disable-a4a-non-sd')
+  ) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Returns `true` if the passed function exists and is native to the browser.
+ * @param {Function|undefined} func
+ * @return {boolean}
+ */
+function isNative(func) {
+  return !!func && func.toString().indexOf('[native code]') != -1;
 }

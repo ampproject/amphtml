@@ -1,25 +1,10 @@
 <!--
-  Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS-IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the license.
--->
-<!--
   Test Description:
   Test to make sure amp-video under amp-story gets an error if it doesn't have the "poster"
   attribute set.
 -->
 <!doctype html>
-<html ⚡>
+<html ⚡ lang="en">
 <head>
   <meta charset="utf-8">
   <title>STAMP examples</title>
@@ -47,7 +32,40 @@
          </amp-video>
       </amp-story-grid-layer>
     </amp-story-page>
+    <amp-story-page id="2" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+      <amp-story-grid-layer template="horizontal">
+        <!-- This should fail because amp-video volume should be within [0.1, 1]. -->
+        <amp-video width="480"
+                   height="270"
+                   poster="/foo.jpg"
+                   src="/video/tokyo.mp4"
+                   layout="responsive"
+                   volume="0">
+             <div fallback>
+               <p>Your browser doesn't support HTML5 video.</p>
+             </div>
+             <source type="video/mp4" src="/video/tokyo.mp4">
+             <source type="video/webm" src="/video/tokyo.webm">
+         </amp-video>
+      </amp-story-grid-layer>
+    </amp-story-page>
+    <amp-story-page id="3" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+      <amp-story-grid-layer template="horizontal">
+        <!-- This should fail because amp-video volume should be within [0.1, 1]. -->
+        <amp-video width="480"
+                   height="270"
+                   poster="/foo.jpg"
+                   src="/video/tokyo.mp4"
+                   layout="responsive"
+                   volume="1.01">
+             <div fallback>
+               <p>Your browser doesn't support HTML5 video.</p>
+             </div>
+             <source type="video/mp4" src="/video/tokyo.mp4">
+             <source type="video/webm" src="/video/tokyo.webm">
+         </amp-video>
+      </amp-story-grid-layer>
+    </amp-story-page>
   </amp-story>
 </body>
 </html>
-

@@ -1,32 +1,20 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import {dict} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
 
-import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
-import {CSS} from '../../../build/amp-access-scroll-0.1.css';
-import {PROTOCOL_VERSION} from './scroll-protocol';
-import {ReadDepthTracker} from './read-depth-tracker.js';
-import {Relay} from './scroll-relay';
+import {Services} from '#service';
+
+import {ReadDepthTracker} from './read-depth-tracker';
 import {ScrollBar} from './scroll-bar';
-import {Services} from '../../../src/services';
+import {PROTOCOL_VERSION} from './scroll-protocol';
+import {Relay} from './scroll-relay';
 import {Sheet} from './scroll-sheet';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
+import {buildUrl, connectHostname} from './scroll-url';
+
+import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {parseQueryString} from '../../../src/url';
+import {addParamToUrl, isProxyOrigin} from '../../../src/url';
+import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 
 const TAG = 'amp-access-scroll-elt';
 /**
@@ -96,28 +84,6 @@ const analyticsConfig = (baseUrl) => {
 };
 
 /**
- * The eTLD for scroll URLs in development mode.
- *
- * Enables amp-access-scroll to work with dev/staging environments.
- *
- * @param {!JsonObject} config
- * @return {string}
- */
-const devEtld = (config) => {
-  return getMode().development && config['etld'] ? config['etld'] : '';
-};
-
-/**
- * The connect server hostname.
- *
- * @param {!JsonObject} config
- * @return {string}
- */
-const connectHostname = (config) => {
-  return `https://connect${devEtld(config) || '.scroll.com'}`;
-};
-
-/**
  * amp-access vendor that authenticates against the scroll.com service.
  * If the user is authenticated, also adds a fixed position iframe
  * to the page.
@@ -159,11 +125,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
       if (response && response['scroll']) {
         if (!isStory) {
           // Display Scrollbar and set up features
-          const bar = new ScrollBar(
-            this.ampdoc,
-            this.accessSource_,
-            this.baseUrl_
-          );
+          const bar = new ScrollBar(this.ampdoc, this.accessSource_);
           const sheet = new Sheet(this.ampdoc);
 
           const relay = new Relay(this.baseUrl_);
@@ -195,7 +157,11 @@ export class ScrollAccessVendor extends AccessClientAdapter {
           response['blocker'] &&
           ScrollContentBlocker.shouldCheck(this.ampdoc)
         ) {
-          new ScrollContentBlocker(this.ampdoc, this.accessSource_).check();
+          new ScrollContentBlocker(
+            this.ampdoc,
+            this.accessSource_,
+            response['features'] && response['features']['r']
+          ).check();
         }
       }
       return response;
@@ -220,13 +186,17 @@ class ScrollContentBlocker {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
+   * @param {boolean} redirect
    */
-  constructor(ampdoc, accessSource) {
+  constructor(ampdoc, accessSource, redirect) {
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /** @const @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
+
+    /** @const @private {boolean} */
+    this.redirect_ = redirect;
   }
 
   /**
@@ -236,26 +206,40 @@ class ScrollContentBlocker {
     Services.xhrFor(this.ampdoc_.win)
       .fetchJson('https://block.scroll.com/check.json')
       .then(
-        () => false,
+        (response) => response.json().then((json) => json['dns'] === true),
         (e) => this.blockedByScrollApp_(e.message)
       )
       .then((blockedByScrollApp) => {
         if (blockedByScrollApp === true) {
-          // TODO(dbow): Ideally we would automatically redirect to the page
-          // here, but for now we are adding a button so we redirect on user
-          // action.
-          const baseUrl = connectHostname(
-            this.accessSource_.getAdapterConfig()
-          );
-          const bar = new ScrollBar(this.ampdoc_, this.accessSource_, baseUrl);
-          const relay = new Relay(baseUrl);
-          relay.register(bar.window, (message) => {
-            if (message['_scramp'] === 'st') {
-              bar.update(message);
-            }
-          });
+          this.handleBlocked_();
         }
       });
+  }
+
+  /** @private */
+  handleBlocked_() {
+    // Redirect app auth flow if enabled and not on AMP proxy.
+    if (this.redirect_ && !isProxyOrigin(this.ampdoc_.win.location)) {
+      buildUrl(this.accessSource_, 'https://scroll.com/loginwithapp').then(
+        (url) => {
+          const navigationService = Services.navigationForDoc(this.ampdoc_);
+          navigationService.navigateTo(
+            this.ampdoc_.win,
+            addParamToUrl(url, 'feature', 'r')
+          );
+        }
+      );
+    } else {
+      // Prompt to activate.
+      const baseUrl = connectHostname(this.accessSource_.getAdapterConfig());
+      const bar = new ScrollBar(this.ampdoc_, this.accessSource_);
+      const relay = new Relay(baseUrl);
+      relay.register(bar.window, (message) => {
+        if (message['_scramp'] === 'st') {
+          bar.update(message);
+        }
+      });
+    }
   }
 
   /**

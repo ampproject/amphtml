@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.base.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "checkJs": false
+  },
+
+  "include": ["src", "3p", "ads", "extensions", "test", "testing"]
+}

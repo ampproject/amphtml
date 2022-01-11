@@ -1,0 +1,51 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This test demonstrates that if the first script is a module LTS version, all
+|    following scripts must also be a module/nomodule LTS version pair.
+|  -->
+|  <!doctype html>
+|  <html ⚡ transformed="google;v=1">
+|  <head>
+|    <meta charset="utf-8">
+|    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+|    <meta name="viewport" content="width=device-width">
+|
+|    <!-- Valid: first script is a module LTS version -->
+|    <script async crossorigin=anonymous src=https://cdn.ampproject.org/lts/v0.mjs type=module></script>
+|
+|    <!-- Valid: nomodule LTS version pair -->
+|    <script async nomodule src=https://cdn.ampproject.org/lts/v0.js></script>
+|
+|    <!-- Valid: module LTS version pair -->
+|    <script async crossorigin=anonymous custom-element=amp-ad src=https://cdn.ampproject.org/lts/v0/amp-ad-0.1.mjs type=module></script>
+|
+|    <!-- Valid: nomodule LTS version pair -->
+|    <script async custom-element=amp-ad nomodule src=https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js></script>
+|
+|    <!-- Invalid: standard version -->
+|    <script async custom-element=amp-analytics src=https://cdn.ampproject.org/v0/amp-analytics-0.1.js></script>
+>>   ^~~~~~~~~
+transformed_feature_tests/first_script_module_lts.html:26:2 The script version for 'amp-analytics' is a standard version which mismatches with the first script on the page using the module/nomodule LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+|
+|    <!-- Invalid: LTS version -->
+|    <script async custom-element=amp-anim src=https://cdn.ampproject.org/lts/v0/amp-anim-0.1.js></script>
+>>   ^~~~~~~~~
+transformed_feature_tests/first_script_module_lts.html:29:2 The script version for 'amp-anim' is a LTS version which mismatches with the first script on the page using the module/nomodule LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+|
+|    <!-- Invalid: module version -->
+|    <script async crossorigin=anonymous custom-element=amp-audio src=https://cdn.ampproject.org/v0/amp-audio-0.1.mjs type=module></script>
+>>   ^~~~~~~~~
+transformed_feature_tests/first_script_module_lts.html:32:2 The script version for 'amp-audio' is a module/nomodule version which mismatches with the first script on the page using the module/nomodule LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+|
+|    <!-- Invalid: nomodule version -->
+|    <script async custom-element=amp-audio nomodule src=https://cdn.ampproject.org/v0/amp-audio-0.1.js></script>
+>>   ^~~~~~~~~
+transformed_feature_tests/first_script_module_lts.html:35:2 The script version for 'amp-audio' is a module/nomodule version which mismatches with the first script on the page using the module/nomodule LTS version. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+|
+|    <link rel="canonical" href="./regular-html-version.html">
+|  </head>
+|  <body>
+|    Hello, world.
+|  </body>
+|  </html>

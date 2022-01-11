@@ -1,0 +1,153 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <title>Grid layer presets story</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="page-layer.html">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Poppins', sans-serif;
+      }
+      amp-story-page {
+        background: black;
+      }
+      .lower-title {
+        color: white;
+        padding: 0;
+        background: #ffffff11;
+        border: 2px solid #ffffff22;
+      }
+      .lower-title .contents {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        text-align: center;
+        padding-bottom: 10vh;
+      }
+      .bordered {
+        border: 2px solid #ffffff6f;
+      }
+      .small span {
+        font-size: 0.3em;
+        color: white;
+      }
+      .lower-title span {
+        font-size: 0.2em;
+        color: white;
+      }
+      .lower-title h1 {
+        line-height: 1em;
+        margin: 0;
+        margin-bottom: 0.2em;
+        font-size: 1em;
+        color: white;
+      }
+      a.dev-tools-link {
+        position: absolute;
+        top: 20%;
+        width: 100%;
+        text-align: center;
+        padding: 3vh;
+        font-size: 1vh;
+        color: white;
+      }
+      .boat-circle {
+        border: 0.1em solid rgb(14, 208, 212);
+        width: 0.8em;
+        height: 0.8em;
+        border-radius: 50%;
+        left: 52.2%;
+        position: absolute;
+        top: 38.5%;
+      }
+      .boat-circle.wrong {
+        border-color: rgb(229, 102, 102);
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story standalone title="Grid layer presets showcase" supports-landscape>
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
+            layout="responsive" width="69" height="116">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" class="lower-title">
+          <a href="#development=1" data-tooltip-text="Open Dev Tools" class="dev-tools-link">Test this story with #development=1</a>
+          <div class="boat-circle wrong"></div>
+          <div class="contents">
+            <span>This is a</span>
+            <h1>full-page</h1>
+            <span>story with cover background</span>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="cover-2">
+        <amp-story-grid-layer template="fill" blurred>
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=300&blur=30&q=50"
+            layout="responsive" width="69" height="116">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill" preset="2021-background">
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
+            layout="responsive" width="69" height="116">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" class="lower-title">
+          <div class="boat-circle"></div>
+          <div class="contents">
+            <span>This is a</span>
+            <h1>full-page</h1>
+            <span>story with consistent background</span>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="anchors">
+        <amp-story-grid-layer template="fill" preset="2021-background">
+          <amp-img src="https://images.unsplash.com/photo-1522072629756-c9274e34ef5e?w=1000&q=80"
+            layout="responsive" width="69" height="116">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="right" class="bordered small">
+          <span style="position: absolute; right: 0; top: 45%">Right</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="left" class="bordered small">
+          <span style="position: absolute; left: 0; top: 45%">Left</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="top" class="bordered small">
+          <span style="position: absolute; left: 40%; top: 0">Top</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="bottom" class="bordered small">
+          <span style="position: absolute; left: 40%; bottom: 0">Bottom</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" class="bordered small">
+          <span style="position: absolute; left: 40%; top: 45%">Center</span>
+          <span style="position: absolute; left: 0; top: 70%; right:0; text-align: center">(test with #development=1!)</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="top right" class="bordered small">
+          <span style="position: absolute; right: 0; top: 0">Top Right</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="top left" class="bordered small">
+          <span style="position: absolute; left: 0; top: 0">Top Left</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="bottom right" class="bordered small">
+          <span style="position: absolute; right: 0; bottom: 0">Bottom Right</span>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer preset="2021-foreground" anchor="bottom left" class="bordered small">
+          <span style="position: absolute; left: 0; bottom: 0">Bottom Left</span>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

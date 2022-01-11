@@ -1,31 +1,18 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getStyle} from '#core/dom/style';
+import {setShadowDomSupportedVersionForTesting} from '#core/dom/web-components';
+
+import {Services} from '#service';
+import {AmpDocShadow, AmpDocSingle} from '#service/ampdoc-impl';
+import {installPerformanceService} from '#service/performance-impl';
+import {installPlatformService} from '#service/platform-impl';
+
+import {isAnimationNone} from '#testing/helpers/service';
 
 import * as rds from '../../src/render-delaying-services';
-import * as styles from '../../src/style-installer';
-import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
 import {createShadowRoot} from '../../src/shadow-embed';
-import {getStyle} from '../../src/style';
-import {installPerformanceService} from '../../src/service/performance-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {isAnimationNone} from '../../testing/test-helper';
-import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
+import * as styles from '../../src/style-installer';
 
-describe('Styles', () => {
+describes.sandboxed('Styles', {}, () => {
   describes.realWin('makeBodyVisible', {amp: true}, (env) => {
     let win, doc, ampdoc;
     let resources;
@@ -263,6 +250,28 @@ describe('Styles', () => {
           });
         });
 
+        it('should discover existing extension link[rel=stylesheet] and not overwrite it', () => {
+          const serverEl = doc.createElement('link');
+          serverEl.setAttribute('amp-extension', 'amp-story');
+          serverEl.setAttribute(
+            'href',
+            '/examples/amp-story/amp-story-1.0.css'
+          );
+          serverEl.setAttribute('rel', 'stylesheet');
+          head.appendChild(serverEl);
+          const promise = installStylesAsPromise('other{}', false, 'amp-story');
+          return promise.then((styleEl) => {
+            expect(head.__AMP_CSS_SM['amp-runtime']).to.not.exist;
+            expect(head.__AMP_CSS_SM['amp-extension=amp-story']).to.equal(
+              serverEl
+            );
+            expect(styleEl).to.equal(serverEl);
+            expect(
+              head.querySelectorAll('link[amp-extension=amp-story]')
+            ).to.have.length(1);
+          });
+        });
+
         it('should re-create extension style', () => {
           installStylesAsPromise('runtime{}', true);
           const promise = installStylesAsPromise('other{}', false, 'amp-ext1');
@@ -371,74 +380,4 @@ describe('Styles', () => {
       });
     }
   );
-
-  describes.realWin('installStylesLegacy', {}, (env) => {
-    let win, doc;
-
-    beforeEach(() => {
-      win = env.win;
-      doc = win.document;
-    });
-
-    /**
-     * @param {!Document} doc
-     * @param {string} cssText
-     * @param {boolean} isRuntimeCss
-     * @param {string=} opt_ext
-     * @return {!Promise<!Element>}
-     */
-    function installStylesAsPromise(cssText, isRuntimeCss, opt_ext) {
-      return new Promise((resolve) => {
-        styles.installStylesLegacy(
-          doc,
-          cssText,
-          resolve,
-          isRuntimeCss,
-          opt_ext
-        );
-      });
-    }
-
-    it('should install runtime styles', () => {
-      const cssText = '/*amp-runtime*/';
-      return installStylesAsPromise(cssText, true).then((styleEl) => {
-        expect(styleEl.parentElement).to.equal(doc.head);
-        expect(doc.head.__AMP_CSS_SM['amp-runtime']).to.equal(styleEl);
-        expect(styleEl.hasAttribute('amp-runtime')).to.be.true;
-        expect(styleEl.textContent).to.equal(cssText);
-      });
-    });
-
-    it('should install extension styles after runtime', () => {
-      const runtimeCssText = '/*amp-runtime*/';
-      const extCssText = '/*amp-ext1*/';
-      return installStylesAsPromise(runtimeCssText, true)
-        .then(() => {
-          const otherEl = doc.createElement('link');
-          doc.head.appendChild(otherEl);
-          // Install extension styles.
-          return installStylesAsPromise(extCssText, false, 'amp-ext1');
-        })
-        .then((styleEl) => {
-          expect(styleEl.parentElement).to.equal(doc.head);
-          expect(styleEl.previousElementSibling).to.equal(
-            doc.head.__AMP_CSS_SM['amp-runtime']
-          );
-          expect(styleEl.getAttribute('amp-extension')).to.equal('amp-ext1');
-          expect(styleEl.textContent).to.equal(extCssText);
-        });
-    });
-
-    it('should create a amp-custom style', () => {
-      const promise = installStylesAsPromise('/*other*/', false, 'amp-custom');
-      return promise.then((styleEl) => {
-        expect(styleEl.getAttribute('amp-custom')).to.equal('');
-        expect(doc.head.lastElementChild).to.equal(styleEl);
-        expect(styleEl.textContent).to.equal('/*other*/');
-        expect(doc.head.querySelectorAll('style[amp-custom]')).to.have.length(
-          1
-        );
-      });
-    });
-  });
 });

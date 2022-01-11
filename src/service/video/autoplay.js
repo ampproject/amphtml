@@ -1,23 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {removeElement} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
 
-import {Services} from '../../services';
-import {dev} from '../../log';
-import {htmlFor} from '../../static-template';
-import {removeElement} from '../../dom';
+import {dev} from '#utils/log';
 
 /**
  * @param {!Element} node
@@ -29,14 +13,22 @@ function cloneDeep(node) {
 
 /**
  * @param {!Element|!Document} elOrDoc
+ * @param {?{title: (string|undefined)}=} metadata
  * @return {!Element}
  */
-export function renderInteractionOverlay(elOrDoc) {
+export function renderInteractionOverlay(elOrDoc, metadata) {
   const html = htmlFor(elOrDoc);
-  return html`
-    <i-amphtml-video-mask class="i-amphtml-fill-content" role="button">
-    </i-amphtml-video-mask>
+  const element = html`
+    <button
+      aria-label="Unmute video"
+      class="i-amphtml-video-mask i-amphtml-fill-content"
+      tabindex="0"
+    ></button>
   `;
+  if (metadata && metadata.title) {
+    element.setAttribute('aria-label', metadata.title);
+  }
+  return element;
 }
 
 /**
@@ -69,11 +61,6 @@ export function renderIcon(win, elOrDoc) {
 
   // Remove seed column.
   removeElement(firstCol);
-
-  if (Services.platformFor(win).isIos()) {
-    // iOS is unable to pause hardware accelerated animations.
-    icon.setAttribute('unpausable', '');
-  }
 
   return icon;
 }

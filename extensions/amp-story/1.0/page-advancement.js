@@ -1,38 +1,22 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
   Action,
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
+  UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {Services} from '../../../src/services';
-import {TAPPABLE_ARIA_ROLES} from '../../../src/service/action-impl';
-import {VideoEvents} from '../../../src/video-interface';
-import {closest, matches} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {getAmpdoc} from '../../../src/service';
+import {Services} from '#service';
+import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
+import {VideoEvents_Enum} from '../../../src/video-interface';
+import {closest, matches} from '#core/dom/query';
+import {dev, user} from '#utils/log';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';
+import {listenOnce} from '#utils/event-helper';
 import {interactiveElementsSelectors} from './amp-story-embedded-component';
-import {listenOnce} from '../../../src/event-helper';
-import {startsWith} from '../../../src/string';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -47,16 +31,32 @@ const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
 const TOP_REGION = 0.8;
 
 /**
- * Protected edges of the screen in pixels. When tapped on these areas, we will
+ * Protected edges of the screen as a percent of page width. When tapped on these areas, we will
  * always perform navigation. Even if a clickable element is there.
  * @const {number}
  * @private
  */
-const PROTECTED_SCREEN_EDGE_PX = 48;
+const PROTECTED_SCREEN_EDGE_PERCENT = 12;
 
-const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
-  interactiveElementsSelectors()
-).join(',');
+/**
+ * Minimum protected edges of the screen in pixels.
+ * If PROTECTED_SCREEN_EDGE_PERCENT results in a protected edge value less than MINIMUM_PROTECTED_SCREEN_EDGE_PX,
+ * we will use MINIMUM_PROTECTED_SCREEN_EDGE_PX.
+ * @const {number}
+ * @private
+ */
+const MINIMUM_PROTECTED_SCREEN_EDGE_PX = 48;
+
+/** @private @const {number} */
+const MINIMUM_TIME_BASED_AUTO_ADVANCE_MS = 500;
+
+/**
+ * Maximum percent of screen that can be occupied by a single link
+ * before the link is considered navigation blocking and ignored.
+ * @const {number}
+ * @private
+ */
+const MAX_LINK_SCREEN_PERCENT = 0.8;
 
 /** @const {number} */
 export const POLL_INTERVAL_MS = 300;
@@ -348,9 +348,9 @@ export class ManualAdvancement extends AdvancementConfig {
       return;
     }
     this.touchstartTimestamp_ = Date.now();
-    this.pausedState_ = /** @type {boolean} */ (this.storeService_.get(
-      StateProperty.PAUSED_STATE
-    ));
+    this.pausedState_ = /** @type {boolean} */ (
+      this.storeService_.get(StateProperty.PAUSED_STATE)
+    );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
@@ -391,12 +391,7 @@ export class ManualAdvancement extends AdvancementConfig {
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
     this.timeoutId_ = null;
-    if (
-      !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
-      /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      )).state !== EmbeddedComponentState.EXPANDED
-    ) {
+    if (!this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE)) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
   }
@@ -457,14 +452,27 @@ export class ManualAdvancement extends AdvancementConfig {
       (el) => {
         tagName = el.tagName.toLowerCase();
 
-        if (tagName === 'amp-story-page-attachment') {
+        // Prevents navigation when clicking inside of draggable drawer elements,
+        // such as <amp-story-page-attachment> and <amp-story-page-outlink>.
+        if (el.classList.contains('amp-story-draggable-drawer-root')) {
           shouldHandleEvent = false;
           return true;
         }
 
         if (
-          startsWith(tagName, 'amp-story-interactive-') &&
-          !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
+          tagName.startsWith('amp-story-interactive-') &&
+          (!this.isInStoryPageSideEdge_(event, this.getStoryPageRect_()) ||
+            event.path[0].classList.contains(
+              'i-amphtml-story-interactive-disclaimer-icon'
+            ))
+        ) {
+          shouldHandleEvent = false;
+          return true;
+        }
+        if (
+          el.classList.contains(
+            'i-amphtml-story-interactive-disclaimer-dialog-container'
+          )
         ) {
           shouldHandleEvent = false;
           return true;
@@ -485,7 +493,7 @@ export class ManualAdvancement extends AdvancementConfig {
 
   /**
    * For an element to trigger a tooltip it has to be descendant of
-   * amp-story-page but not of amp-story-cta-layer or amp-story-page-attachment.
+   * amp-story-page but not of amp-story-cta-layer, amp-story-page-attachment or amp-story-page-outlink.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
@@ -501,7 +509,30 @@ export class ManualAdvancement extends AdvancementConfig {
     // <span>).
     const target = dev().assertElement(event.target);
 
-    if (this.isInScreenSideEdge_(event, pageRect)) {
+    const canShow = !!closest(
+      target,
+      (el) => {
+        tagName = el.tagName.toLowerCase();
+
+        if (
+          tagName === 'amp-story-cta-layer' ||
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-page-outlink'
+        ) {
+          valid = false;
+          return false;
+        }
+
+        return tagName === 'amp-story-page' && valid;
+      },
+      /* opt_stopAt */ this.element_
+    );
+
+    if (
+      canShow &&
+      (this.isInStoryPageSideEdge_(event, pageRect) ||
+        this.isTooLargeOnPage_(event, pageRect))
+    ) {
       event.preventDefault();
       return false;
     }
@@ -515,23 +546,7 @@ export class ManualAdvancement extends AdvancementConfig {
       return false;
     }
 
-    return !!closest(
-      target,
-      (el) => {
-        tagName = el.tagName.toLowerCase();
-
-        if (
-          tagName === 'amp-story-cta-layer' ||
-          tagName === 'amp-story-page-attachment'
-        ) {
-          valid = false;
-          return false;
-        }
-
-        return tagName === 'amp-story-page' && valid;
-      },
-      /* opt_stopAt */ this.element_
-    );
+    return canShow;
   }
 
   /**
@@ -547,17 +562,61 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Checks if click was inside of one of the side edges of the screen.
+   * Checks if click was inside of one of the side edges of the page.
    * @param {!Event} event
    * @param {!ClientRect} pageRect
    * @return {boolean}
    * @private
    */
-  isInScreenSideEdge_(event, pageRect) {
-    return (
-      event.clientX <= PROTECTED_SCREEN_EDGE_PX ||
-      event.clientX >= pageRect.width - PROTECTED_SCREEN_EDGE_PX
+  isInStoryPageSideEdge_(event, pageRect) {
+    // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
+    // These clicks should never be overriden for navigation.
+    if (event.clientX === 0 && event.clientY === 0) {
+      return false;
+    }
+
+    const sideEdgeWidthFromPercent =
+      pageRect.width * (PROTECTED_SCREEN_EDGE_PERCENT / 100);
+    const sideEdgeLimit = Math.max(
+      sideEdgeWidthFromPercent,
+      MINIMUM_PROTECTED_SCREEN_EDGE_PX
     );
+
+    return (
+      event.clientX <= pageRect.x + sideEdgeLimit ||
+      event.clientX >= pageRect.x + pageRect.width - sideEdgeLimit
+    );
+  }
+
+  /**
+   * Checks if click target is too large on the page and preventing navigation.
+   * If yes, the link is ignored & logged.
+   * @param {!Event} event
+   * @param {!ClientRect} pageRect
+   * @return {boolean}
+   * @private
+   */
+  isTooLargeOnPage_(event, pageRect) {
+    // Clicks with coordinates (0,0) are assumed to be from keyboard or Talkback.
+    // These clicks should never be overriden for navigation.
+    if (event.clientX === 0 && event.clientY === 0) {
+      return false;
+    }
+
+    const target = dev().assertElement(event.target);
+    const targetRect = target./*OK*/ getBoundingClientRect();
+    if (
+      (targetRect.height * targetRect.width) /
+        (pageRect.width * pageRect.height) >=
+      MAX_LINK_SCREEN_PERCENT
+    ) {
+      user().error(
+        'AMP-STORY-PAGE',
+        'Link was too large; skipped for navigation. For more information, see https://github.com/ampproject/amphtml/issues/31108'
+      );
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -570,37 +629,11 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   isHandledByEmbeddedComponent_(event, pageRect) {
     const target = dev().assertElement(event.target);
-    const stored = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-      StateProperty.INTERACTIVE_COMPONENT_STATE
-    ));
-    const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
 
     return (
-      inExpandedMode ||
-      (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
-        this.canShowTooltip_(event, pageRect))
+      matches(target, interactiveElementsSelectors()) &&
+      this.canShowTooltip_(event, pageRect)
     );
-  }
-
-  /**
-   * Check if click should be handled by the affiliate link logic.
-   * @param {!Element} target
-   * @private
-   * @return {boolean}
-   */
-  isHandledByAffiliateLink_(target) {
-    const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
-
-    // do not handle if clicking on expanded affiliate link
-    if (clickedOnLink && target.hasAttribute('expanded')) {
-      return false;
-    }
-
-    const expandedElement = this.storeService_.get(
-      StateProperty.AFFILIATE_LINK_STATE
-    );
-
-    return expandedElement != null || clickedOnLink;
   }
 
   /**
@@ -611,32 +644,21 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   maybePerformNavigation_(event) {
     const target = dev().assertElement(event.target);
-    const pageRect = this.element_.getLayoutBox();
+
+    const pageRect = this.getStoryPageRect_();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
       event.stopPropagation();
       event.preventDefault();
-      const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
-        StateProperty.INTERACTIVE_COMPONENT_STATE
-      ));
+      const embedComponent = /** @type {InteractiveComponentDef} */ (
+        this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
+      );
       this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
         element: target,
         state: embedComponent.state || EmbeddedComponentState.FOCUSED,
         clientX: event.clientX,
         clientY: event.clientY,
       });
-      return;
-    }
-
-    if (this.isHandledByAffiliateLink_(target)) {
-      event.preventDefault();
-      event.stopPropagation();
-      const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
-      if (clickedOnLink) {
-        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, target);
-      } else {
-        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, null);
-      }
       return;
     }
 
@@ -670,6 +692,24 @@ export class ManualAdvancement extends AdvancementConfig {
     };
 
     this.onTapNavigation(this.getTapDirection_(page));
+  }
+
+  /**
+   * Calculates the pageRect based on the UIType.
+   * We can an use LayoutBox for mobile since the story page occupies entire screen.
+   * Desktop UI needs the most recent value from the getBoundingClientRect function.
+   * @return {DOMRect | LayoutBox}
+   * @private
+   */
+  getStoryPageRect_() {
+    const uiState = this.storeService_.get(StateProperty.UI_STATE);
+    if (uiState !== UIType.DESKTOP_ONE_PANEL) {
+      return this.element_.getLayoutBox();
+    } else {
+      return this.element_
+        .querySelector('amp-story-page[active]')
+        ./*OK*/ getBoundingClientRect();
+    }
   }
 
   /**
@@ -722,6 +762,14 @@ export class TimeBasedAdvancement extends AdvancementConfig {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
+    if (delayMs < MINIMUM_TIME_BASED_AUTO_ADVANCE_MS) {
+      user().warn(
+        'AMP-STORY-PAGE',
+        `${element.id} has an auto advance duration that is too short. ` +
+          `${MINIMUM_TIME_BASED_AUTO_ADVANCE_MS}ms is used instead.`
+      );
+      delayMs = MINIMUM_TIME_BASED_AUTO_ADVANCE_MS;
+    }
     /** @private @const {number} */
     this.delayMs_ = delayMs;
 
@@ -814,6 +862,21 @@ export class TimeBasedAdvancement extends AdvancementConfig {
       AdvancementMode.AUTO_ADVANCE_TIME
     );
     super.onAdvance();
+  }
+
+  /**
+   * Updates the delay (and derived values) from the given auto-advance string.
+   * @param {string} autoAdvanceStr The value of the updated auto-advance-after attribute.
+   */
+  updateTimeDelay(autoAdvanceStr) {
+    const newDelayMs = timeStrToMillis(autoAdvanceStr);
+    if (newDelayMs === undefined || isNaN(newDelayMs)) {
+      return;
+    }
+    if (this.remainingDelayMs_) {
+      this.remainingDelayMs_ += newDelayMs - this.delayMs_;
+    }
+    this.delayMs_ = newDelayMs;
   }
 
   /**
@@ -923,10 +986,9 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     super.start();
 
     // Prevents race condition when checking for video interface classname.
-    (this.element_.whenBuilt
-      ? this.element_.whenBuilt()
-      : Promise.resolve()
-    ).then(() => this.startWhenBuilt_());
+    (this.element_.build ? this.element_.build() : Promise.resolve()).then(() =>
+      this.startWhenBuilt_()
+    );
   }
 
   /** @private */
@@ -984,9 +1046,14 @@ export class MediaBasedAdvancement extends AdvancementConfig {
     this.element_.querySelector('video').removeAttribute('loop');
 
     this.unlistenFns_.push(
-      listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(), {
-        capture: true,
-      })
+      listenOnce(
+        this.element_,
+        VideoEvents_Enum.ENDED,
+        () => this.onAdvance(),
+        {
+          capture: true,
+        }
+      )
     );
 
     this.onProgressUpdate();
@@ -1052,10 +1119,13 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       // amp-video, amp-audio, as well as amp-story-page with a background audio
       // are eligible for media based auto advance.
       let element = pageEl.querySelector(
-        `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
-          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
+        `amp-video[data-id=${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}], amp-video#${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}, amp-audio[data-id=${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}], amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (
         matches(

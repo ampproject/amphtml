@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-kaltura-player';
 
 describes.realWin(
@@ -43,7 +27,7 @@ describes.realWin(
       }
       doc.body.appendChild(kalturaPlayer);
       return kalturaPlayer
-        .build()
+        .buildInternal()
         .then(() => {
           return kalturaPlayer.layoutCallback();
         })
@@ -61,6 +45,22 @@ describes.realWin(
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
           'https://cdnapisec.kaltura.com/p/1281471/sp/128147100/embedIframeJs/uiconf_id/33502051/partner_id/1281471?iframeembed=true&playerId=kaltura_player_amp&entry_id=1_3ts1ms9c'
+        );
+      });
+    });
+
+    it('renders with service-url', () => {
+      return getKaltura({
+        'data-service-url': 'front.video.funke.press',
+        'data-partner': '106',
+        'data-entryid': '0_b87xdluw',
+        'data-uiconf': '23464665',
+      }).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://front.video.funke.press/p/106/sp/10600/embedIframeJs/uiconf_id/23464665/partner_id/106?iframeembed=true&playerId=kaltura_player_amp&entry_id=0_b87xdluw'
         );
       });
     });
@@ -84,7 +84,7 @@ describes.realWin(
       return allowConsoleError(() => {
         return getKaltura({})
           .then((kp) => {
-            kp.build();
+            kp.buildInternal();
           })
           .should.eventually.be.rejectedWith(
             /The data-partner attribute is required for/
@@ -104,6 +104,23 @@ describes.realWin(
       });
     });
 
+    it('unlayout and relayout', async () => {
+      const kp = await getKaltura({
+        'data-partner': '1281471',
+        'data-entryid': '1_3ts1ms9c',
+        'data-uiconf': '33502051',
+        'data-param-my-param': 'hello world',
+      });
+      expect(kp.querySelector('iframe')).to.exist;
+
+      const unlayoutResult = kp.unlayoutCallback();
+      expect(unlayoutResult).to.be.true;
+      expect(kp.querySelector('iframe')).to.not.exist;
+
+      await kp.layoutCallback();
+      expect(kp.querySelector('iframe')).to.exist;
+    });
+
     describe('createPlaceholderCallback', () => {
       it('should create a placeholder image', () => {
         return getKaltura({
@@ -111,13 +128,15 @@ describes.realWin(
           'data-entryid': '1_3ts1ms9c',
           'data-uiconf': '33502051',
         }).then((kp) => {
-          const img = kp.querySelector('amp-img');
+          const img = kp.querySelector('img');
           expect(img).to.not.be.null;
+          expect(img).to.have.attribute('placeholder');
+          expect(img).to.have.class('i-amphtml-fill-content');
+          expect(img.getAttribute('loading')).to.equal('lazy');
           expect(img.getAttribute('src')).to.equal(
             'https://cdnapisec.kaltura.com/p/1281471/thumbnail/entry_id/' +
               '1_3ts1ms9c/width/111/height/222'
           );
-          expect(img.getAttribute('layout')).to.equal('fill');
           expect(img.hasAttribute('placeholder')).to.be.true;
           expect(img.getAttribute('referrerpolicy')).to.equal('origin');
           expect(img.getAttribute('alt')).to.equal('Loading video');
@@ -130,9 +149,8 @@ describes.realWin(
           'data-uiconf': '33502051',
           'aria-label': 'great video',
         }).then((kp) => {
-          const img = kp.querySelector('amp-img');
+          const img = kp.querySelector('img');
           expect(img).to.not.be.null;
-          expect(img.hasAttribute('placeholder')).to.be.true;
           expect(img.getAttribute('aria-label')).to.equal('great video');
           expect(img.getAttribute('alt')).to.equal(
             'Loading video - great video'

@@ -6,22 +6,6 @@ teaser:
   text: Displays a Viqeo video player.
 ---
 
-<!---
-Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-viqeo-player
 
 ## Example
@@ -66,5 +50,9 @@ The `width` and `height` attributes determine the aspect ratio of the Viqeo embe
   <tr>
     <td width="40%"><strong>width and height</strong></td>
     <td>The width and height attributes are special for the Viqeo embed. Viqeo supports any proportions of videos. Basically Viqeo generates an unique code for each video depending on video size and proportions, but Viqeo user may change proportions in interface. Anyway after pressing 'Get code' button an unique code will be generated.</td>
+  </tr>
+   <tr>
+    <td width="40%"><strong>title</strong></td>
+    <td>Define a <code>title</code> attribute for the component. The default is <code>Viqeo video</code>.</td>
   </tr>
 </table>

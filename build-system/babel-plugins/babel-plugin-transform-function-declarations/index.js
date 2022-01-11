@@ -1,25 +1,16 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// @ts-nocheck
 
-// Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
-// See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
+/**
+ * Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.
+ * See BAIL_OUT_CONDITIONS for reasons why FunctionDeclarations would not be modified.
+ * @interface {babel.PluginPass}
+ * @param {babel} babel
+ * @return {babel.PluginObj}
+ */
 module.exports = function ({types: t}) {
   /**
    * This transform is targetted toward these types only.
-   * @param {*} path
+   * @param {BabelPath} path
    * @return {boolean}
    */
   function isNotFunction(path) {
@@ -30,7 +21,7 @@ module.exports = function ({types: t}) {
 
   /**
    * This transform cannot safely convert generator functions.
-   * @param {*} path
+   * @param {BabelPath} path
    * @return {boolean}
    */
   function isGenerator(path) {
@@ -39,7 +30,7 @@ module.exports = function ({types: t}) {
 
   /**
    * Only transform a body with a single return statement.
-   * @param {*} path
+   * @param {BabelPath} path
    * @return {boolean}
    */
   function isNotSingleReturnStatement(path) {
@@ -52,7 +43,7 @@ module.exports = function ({types: t}) {
 
   /**
    * Only convert functions that do not contains usage of `arguments`.
-   * @param {*} path
+   * @param {BabelPath} path
    * @return {boolean}
    */
   function containsArgumentsUsage(path) {
@@ -71,7 +62,7 @@ module.exports = function ({types: t}) {
   /**
    * If the FunctionDeclaration contains a ThisExpression, converting from a FunctionDeclaration to a
    * VariableDeclaration => VariableDeclarator => ArrowFunctionExpression isn't necessarily valid.
-   * @param {*} path
+   * @param {BabelPath} path
    * @return {boolean}
    */
   function containsThisExpression(path) {
@@ -87,7 +78,7 @@ module.exports = function ({types: t}) {
 
   /**
    * If the FunctionDeclaration identifier is used a manner besides a CallExpression, bail.
-   * @param {*} path
+   * @param {BabelPath} path
    * @param {string} name
    * @return {boolean}
    */
@@ -98,16 +89,29 @@ module.exports = function ({types: t}) {
     );
   }
 
+  /**
+   * @param {CompilerNode} node
+   * @return {ReturnType<t['arrowFunctionExpression']>}
+   */
   function createArrowFunctionExpression(node) {
-    const {params, body, async} = t.cloneNode(node);
+    const {async, body, params} = t.cloneNode(node);
     return t.arrowFunctionExpression(params, body.body[0].argument, async);
   }
 
+  /**
+   * @param {BabelPath} path
+   * @param {string} name
+   * @return {ReturnType<t['variableDeclarator']>}
+   */
   function createVariableDeclarator(path, name) {
     const arrowFunction = createArrowFunctionExpression(path.node);
     return t.variableDeclarator(t.identifier(name), arrowFunction);
   }
 
+  /**
+   * @param {BabelPath} path
+   * @return {ReturnType<t['variableDeclaration']>}
+   */
   function createVariableDeclaration(path) {
     const declarator = createVariableDeclarator(path, path.node.id.name);
     const declaration = t.variableDeclaration('let', [declarator]);

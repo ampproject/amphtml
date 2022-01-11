@@ -1,23 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-mega-menu';
-import {Keys} from '../../../../src/utils/key-codes';
-import {htmlFor} from '../../../../src/static-template';
-import {tryFocus} from '../../../../src/dom';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {tryFocus} from '#core/dom';
+import {htmlFor} from '#core/dom/static-template';
 
 describes.realWin(
   'amp-mega-menu',
@@ -63,14 +47,14 @@ describes.realWin(
     }
 
     it('should create a single mask element in DOM', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
       const maskClass = '.i-amphtml-mega-menu-mask';
       expect(doc.querySelectorAll(maskClass).length).to.equal(1);
     });
 
     it('should add correct classes for each menu item, heading and content', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
       const itemClass = '.i-amphtml-mega-menu-item';
       expect(element.querySelectorAll(itemClass).length).to.equal(3);
@@ -81,7 +65,7 @@ describes.realWin(
     });
 
     it('should expand when heading of a collapsed menu item is clicked', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
       const heading = doc.getElementById('heading1');
       expect(heading.parentNode.hasAttribute('open')).to.be.false;
@@ -93,10 +77,11 @@ describes.realWin(
     });
 
     it('should collapse when heading of a expanded menu item is clicked', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading = doc.getElementById('heading1');
-      element.implementation_.expand_(heading.parentNode);
+      impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
       const clickEvent = new Event('click');
@@ -106,11 +91,12 @@ describes.realWin(
     });
 
     it('should collapse an expanded menu item when another heading is clicked', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading1 = doc.getElementById('heading1');
       const heading2 = doc.getElementById('heading2');
-      element.implementation_.expand_(heading1.parentNode);
+      impl.expand_(heading1.parentNode);
       expect(heading1.parentNode.hasAttribute('open')).to.be.true;
       expect(heading1.getAttribute('aria-expanded')).to.equal('true');
       const clickEvent = new Event('click');
@@ -122,10 +108,11 @@ describes.realWin(
     });
 
     it('should collapse any expanded item after clicking outside the component', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading = doc.getElementById('heading1');
-      element.implementation_.expand_(heading.parentNode);
+      impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
       const clickEvent = new Event('click');
@@ -135,11 +122,12 @@ describes.realWin(
     });
 
     it('should not collapse when click is inside the expanded content', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading = doc.getElementById('heading1');
       const content = doc.getElementById('content1');
-      element.implementation_.expand_(heading.parentNode);
+      impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
       const clickEvent = new Event('click');
@@ -149,10 +137,11 @@ describes.realWin(
     });
 
     it('should collapse any expanded item on component unlayout', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading = doc.getElementById('heading1');
-      element.implementation_.expand_(heading.parentNode);
+      impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
       await element.unlayoutCallback();
@@ -161,26 +150,29 @@ describes.realWin(
     });
 
     it('should collapse when ESC key is pressed', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
+      const impl = await element.getImpl(false);
       const heading = doc.getElementById('heading1');
-      element.implementation_.expand_(heading.parentNode);
+      impl.expand_(heading.parentNode);
       expect(heading.parentNode.hasAttribute('open')).to.be.true;
       expect(heading.getAttribute('aria-expanded')).to.equal('true');
-      const escKey = new KeyboardEvent('keydown', {key: Keys.ESCAPE});
+      const escKey = new KeyboardEvent('keydown', {key: Keys_Enum.ESCAPE});
       doc.documentElement.dispatchEvent(escKey);
       expect(heading.parentNode.hasAttribute('open')).to.be.false;
       expect(heading.getAttribute('aria-expanded')).to.equal('false');
     });
 
     it('should be navigable by left/right arrow keys when a heading has focus', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
       const heading1 = doc.getElementById('heading1');
       const heading2 = doc.getElementById('heading2');
       const heading3 = doc.getElementById('heading3');
-      const leftKey = new KeyboardEvent('keydown', {key: Keys.LEFT_ARROW});
-      const rightKey = new KeyboardEvent('keydown', {key: Keys.RIGHT_ARROW});
+      const leftKey = new KeyboardEvent('keydown', {key: Keys_Enum.LEFT_ARROW});
+      const rightKey = new KeyboardEvent('keydown', {
+        key: Keys_Enum.RIGHT_ARROW,
+      });
       tryFocus(heading1);
       expect(doc.activeElement).to.equal(heading1);
       heading1.dispatchEvent(leftKey);
@@ -194,10 +186,10 @@ describes.realWin(
     });
 
     it('should remove event listeners on root element when menu is closed', async () => {
-      await element.build();
+      await element.buildInternal();
       await element.layoutCallback();
       await element.unlayoutCallback();
-      const impl = element.implementation_;
+      const impl = await element.getImpl(false);
       const clickEvent = new Event('click');
       const rootClickSpy = env.sandbox.spy(impl, 'handleRootClick_');
       doc.documentElement.dispatchEvent(clickEvent);

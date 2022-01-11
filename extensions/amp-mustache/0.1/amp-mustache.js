@@ -1,31 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {dict} from '../../../src/utils/object';
-import {iterateCursor, templateContentClone} from '../../../src/dom';
+import {BaseTemplate} from '../../../src/base-template';
+import {dict} from '#core/types/object';
+import {iterateCursor, templateContentClone} from '#core/dom';
 import {
   sanitizeHtml,
   sanitizeTagsForTripleMustache,
 } from '../../../src/sanitizer';
-import {user} from '../../../src/log';
-import mustache from '../../../third_party/mustache/mustache';
+import {user} from '#utils/log';
+import mustache from '#third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
-
-const BaseTemplate = /** @type {typeof ../../../src/service/template-impl.BaseTemplate} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -42,7 +25,9 @@ export class AmpMustache extends BaseTemplate {
     super(element, win);
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    mustache.setUnescapedSanitizer(sanitizeTagsForTripleMustache);
+    mustache.setUnescapedSanitizer((html) =>
+      sanitizeTagsForTripleMustache(html, this.win.document)
+    );
 
     user().warn(
       TAG,
@@ -79,7 +64,8 @@ export class AmpMustache extends BaseTemplate {
       const container = this.element.ownerDocument.createElement('div');
       container.appendChild(content);
       return container./*OK*/ innerHTML;
-    } else if (this.element.tagName == 'SCRIPT') {
+    }
+    if (this.element.tagName == 'SCRIPT') {
       return this.element.textContent;
     }
 
@@ -101,9 +87,8 @@ export class AmpMustache extends BaseTemplate {
       const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
       this.nestedTemplates_[nestedTemplateKey] =
         nestedTemplate./*OK*/ outerHTML;
-      const nestedTemplateAsVariable = this.element.ownerDocument.createTextNode(
-        `{{{${nestedTemplateKey}}}}`
-      );
+      const nestedTemplateAsVariable =
+        this.element.ownerDocument.createTextNode(`{{{${nestedTemplateKey}}}}`);
       nestedTemplate.parentNode.replaceChild(
         nestedTemplateAsVariable,
         nestedTemplate
@@ -113,21 +98,38 @@ export class AmpMustache extends BaseTemplate {
 
   /** @override */
   setHtml(html) {
-    return this.serializeHtml_(html);
+    const wrapped = `<div>${html}</div>`;
+    const serialized = this.serializeHtml_(wrapped);
+    return this.unwrapChildren(serialized);
   }
 
   /** @override */
   render(data) {
+    const html = this.render_(data);
+    return this.serializeHtml_(html);
+  }
+
+  /** @override */
+  renderAsString(data) {
+    const html = this.render_(data);
+    return sanitizeHtml(html, this.win.document);
+  }
+
+  /**
+   * @param {!JsonObject|string} data
+   * @return {string}
+   * @private
+   */
+  render_(data) {
     let mustacheData = data;
     if (typeof data === 'object') {
       mustacheData = {...data, ...this.nestedTemplates_};
     }
-    const html = mustache.render(
+    return mustache.render(
       this.template_,
       mustacheData,
       /* partials */ undefined
     );
-    return this.serializeHtml_(html);
   }
 
   /**
@@ -141,7 +143,7 @@ export class AmpMustache extends BaseTemplate {
     const root = doc.createElement('div');
     const sanitized = sanitizeHtml(html, doc);
     root./*OK*/ innerHTML = sanitized;
-    return this.unwrap(root);
+    return this.tryUnwrap(root);
   }
 }
 

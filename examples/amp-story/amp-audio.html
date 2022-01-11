@@ -1,0 +1,54 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="robots" content="none">
+    <title>QA Story</title>
+    <link rel="canonical" href="navigation.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js" nonce="1Cj0hIrd7TASSx52tMxlmQ"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js" nonce="1Cj0hIrd7TASSx52tMxlmQ"></script>
+    <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js" nonce="1Cj0hIrd7TASSx52tMxlmQ"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet" nonce="1Cj0hIrd7TASSx52tMxlmQ">
+    <style type="text/css" amp-custom>
+      amp-story-page {
+        background: rgb(147, 218, 33);
+        background: radial-gradient(circle, rgb(53, 170, 23, 1) 0%, rgba(171, 148, 233, 1) 100%);
+      }
+
+      .text {
+        font-family: 'Roboto', sans-serif;
+        color: rgba(255, 255, 255, 0.87);
+        align-content: end;
+      }
+    </style>
+  </head>
+  <body>
+    <amp-story
+        standalone
+        title="QA Story"
+        publisher="AMP Story team"
+        publisher-logo-src="assets/logo.png"
+        poster-portrait-src="assets/poster.jpg">
+
+      <amp-story-page id="page1" auto-advance-after="audio0">
+        <amp-story-grid-layer template="vertical" class="text">
+          <amp-audio autoplay id="audio0" layout="nodisplay">
+            <source type="video/mp4" src="./video/p1.mp4" />
+          </amp-audio>
+          <span>auto-advance after amp-audio</span>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page2">
+        <amp-story-grid-layer template="vertical" class="text">
+          <amp-audio autoplay id="audio1" layout="nodisplay">
+            <source type="video/mp4" src="./video/p1.mp4" />
+          </amp-audio>
+          <span>amp-story-page using amp-audio</span>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

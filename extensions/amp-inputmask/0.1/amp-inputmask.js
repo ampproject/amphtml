@@ -1,23 +1,9 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {iterateCursor} from '#core/dom';
 
-import {AmpEvents} from '../../../src/amp-events';
+import {listen} from '#utils/event-helper';
+
 import {TextMask} from './text-mask';
-import {iterateCursor} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
 
 const SERVICE = 'inputmask';
 const TAG = `amp-${SERVICE}`;
@@ -35,7 +21,7 @@ export class AmpInputmaskService {
     /** @const */
     this.domUpdateUnlistener_ = listen(
       this.ampdoc.getRootNode(),
-      AmpEvents.DOM_UPDATE,
+      AmpEvents_Enum.DOM_UPDATE,
       () => this.install()
     );
   }
@@ -44,7 +30,9 @@ export class AmpInputmaskService {
    * Install the inputmask service and controllers.
    */
   install() {
-    const maskElements = this.ampdoc.getRootNode().querySelectorAll('[mask]');
+    const maskElements = this.ampdoc
+      .getRootNode()
+      .querySelectorAll('input[mask]');
     iterateCursor(maskElements, (element) => {
       if (TextMask.isMasked(element)) {
         return;

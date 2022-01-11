@@ -1,31 +1,15 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Key} from '../../../../build-system/tasks/e2e/functional-test-controller';
-import sleep from 'sleep-promise';
+import {Key} from '#testing/helpers/types';
+import {sleep} from '#testing/helpers';
 
 describes.endtoend(
   'amp story share menu',
   {
-    testUrl: 'http://localhost:8000/test/manual/amp-story/amp-story.amp.html',
+    fixture: 'amp-story/amp-story.amp.html',
     browsers: ['chrome'],
     environments: ['single'],
     deviceName: 'iPhone X',
   },
-  async (env) => {
+  (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
 
@@ -33,7 +17,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should copy the link using the browser share menu', async () => {
+    it.skip('should copy the link using the browser share menu', async () => {
       // copy link
       const systemLayerHost = await controller.findElement(
         '.i-amphtml-system-layer-host'
@@ -46,7 +30,7 @@ describes.endtoend(
       await controller.switchToLight();
 
       const shareMenuHost = await controller.findElement(
-        '.i-amphtml-story-share-menu-host'
+        'amp-story-share-menu'
       );
       await controller.switchToShadowRoot(shareMenuHost);
       const getLinkButton = await controller.findElement(

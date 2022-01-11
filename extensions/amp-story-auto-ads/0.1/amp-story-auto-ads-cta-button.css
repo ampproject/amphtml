@@ -1,0 +1,46 @@
+
+
+/* If you are changing anything here that affects font, please update measurer
+ in story-ad-button-text-fitter.js */
+.i-amphtml-story-ad-link {
+  background-color: #ffffff !important;
+  border-radius: 20px !important;
+  box-sizing: border-box !important;
+  bottom: 32px !important;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.16) !important;
+  color: #4285f4 !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-weight: bold !important;
+  height: 36px !important;
+  letter-spacing: 0.2px !important;
+  line-height: 36px !important;
+  overflow: hidden !important;
+  /* no important on opacity b/c ff does not allow keyframes to override. */
+  opacity: 0;
+  padding: 0 10px !important;
+  position: absolute !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  min-width: 120px !important;
+  max-width: calc(100vw - 64px);
+}
+
+[cta-active].i-amphtml-story-ad-link {
+  animation-delay: 100ms !important;
+  animation-duration: 300ms !important;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  animation-fill-mode: forwards !important;
+  animation-name: ad-cta !important;
+}
+
+@keyframes ad-cta {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

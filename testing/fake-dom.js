@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {parseUrlDeprecated, resolveRelativeUrl} from '../src/url';
 
 /**
@@ -63,7 +47,12 @@ export class FakeWindow {
     /** @const */
     this.Promise = window.Promise;
     /** @const */
+    this.IntersectionObserver = window.IntersectionObserver;
+    /** @const */
     this./*OK*/ pageYOffset = window./*OK*/ pageYOffset;
+
+    /** @const */
+    this.IntersectionObserver = window.IntersectionObserver;
 
     /** @const */
     this.crypto = window.crypto || window.msCrypto;
@@ -221,6 +210,9 @@ export class FakeWindow {
     /** @const */
     this.Date = window.Date;
 
+    /** @const */
+    this.performance = new FakePerformance(this);
+
     /** polyfill setTimeout. */
     this.setTimeout = function () {
       return window.setTimeout.apply(window, arguments);
@@ -291,6 +283,7 @@ class EventListeners {
     target.eventListeners = new EventListeners();
     const {
       addEventListener: originalAdd,
+      postMessage: originalPostMessage,
       removeEventListener: originalRemove,
     } = target;
     target.addEventListener = function (type, handler, captureOrOpts) {
@@ -303,6 +296,14 @@ class EventListeners {
       target.eventListeners.remove(type, handler, captureOrOpts);
       if (originalRemove) {
         originalRemove.apply(target, arguments);
+      }
+    };
+    target.postMessage = function (type) {
+      const e = new Event('message');
+      e.data = type;
+      target.eventListeners.fire(e);
+      if (originalPostMessage) {
+        originalPostMessage.apply(target, arguments);
       }
     };
   }
@@ -655,8 +656,6 @@ export class FakeStorage {
     delete this.values[name];
   }
 
-  /**
-   */
   clear() {
     Object.keys(this.values).forEach((name) => {
       delete this.values[name];
@@ -752,6 +751,21 @@ export class FakeMutationObserver {
       this.scheduled_ = null;
       this.callback_(this.takeRecords_());
     }));
+  }
+}
+
+export class FakePerformance {
+  constructor(win) {
+    /** @const */
+    this.win_ = win;
+  }
+
+  get timeOrigin() {
+    return 1;
+  }
+
+  now() {
+    return this.win_.Date.now();
   }
 }
 

@@ -1,27 +1,14 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {
   LocalStorageBinding,
   Storage,
   Store,
   ViewerStorageBinding,
-} from '../../src/service/storage-impl';
-import {dev} from '../../src/log';
+} from '#service/storage-impl';
+
+import {dev} from '#utils/log';
+
+import {FakePerformance} from '#testing/fake-dom';
 
 describes.sandboxed('Storage', {}, (env) => {
   let storage;
@@ -32,6 +19,7 @@ describes.sandboxed('Storage', {}, (env) => {
   let windowApi;
   let ampdoc;
   let viewerBroadcastHandler;
+  let clock;
 
   // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
@@ -51,6 +39,7 @@ describes.sandboxed('Storage', {}, (env) => {
         windowApi = {
           document: {},
           location: 'https://acme.com/document1',
+          performance: new FakePerformance(window),
         };
         ampdoc = new AmpDocSingle(windowApi);
 
@@ -311,6 +300,47 @@ describes.sandboxed('Storage', {}, (env) => {
               'key2': undefined,
             });
           });
+      });
+
+      it('should get unexpired value based on duration', async () => {
+        clock = env.sandbox.useFakeTimers();
+        const store1 = new Store({});
+        store1.set('key1', 'value1');
+        expect(store1.values_).to.deep.equal({
+          'key1': {v: 'value1', t: 0},
+        });
+
+        bindingMock
+          .expects('loadBlob')
+          .withExactArgs('https://acme.com')
+          .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+          .once();
+        bindingMock
+          .expects('saveBlob')
+          .withExactArgs(
+            'https://acme.com',
+            env.sandbox.match((arg) => {
+              const store2 = new Store(JSON.parse(atob(arg)));
+              return store2.get('key1') === undefined;
+            })
+          )
+          .returns(Promise.resolve())
+          .twice();
+        viewerMock
+          .expects('broadcast')
+          .withExactArgs(
+            env.sandbox.match((arg) => {
+              return (
+                arg['type'] == 'amp-storage-reset' &&
+                arg['origin'] == 'https://acme.com'
+              );
+            })
+          )
+          .once();
+
+        expect(await storage.get('key1', 10)).to.equal('value1');
+        clock.tick(100);
+        expect(await storage.get('key1', 5)).to.be.undefined;
       });
 
       it('should react to reset messages', () => {

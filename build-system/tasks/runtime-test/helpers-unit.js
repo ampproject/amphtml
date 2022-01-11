@@ -1,33 +1,17 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs');
-const globby = require('globby');
 const listImportsExports = require('list-imports-exports');
-const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
+const {cyan, green} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
-const {gitDiffNameOnlyMaster} = require('../../common/git');
-const {green, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../../common/travis');
-const {reportTestSkipped} = require('../report-test-status');
+const {gitDiffNameOnlyMain} = require('../../common/git');
+const {isCiBuild} = require('../../common/ci');
+const {log, logLocalDev} = require('../../common/logging');
 
 const LARGE_REFACTOR_THRESHOLD = 50;
 const TEST_FILE_COUNT_THRESHOLD = 20;
@@ -40,7 +24,7 @@ let testsToRun = null;
  * @return {boolean}
  */
 function isLargeRefactor() {
-  const filesChanged = gitDiffNameOnlyMaster();
+  const filesChanged = gitDiffNameOnlyMain();
   return filesChanged.length >= LARGE_REFACTOR_THRESHOLD;
 }
 
@@ -51,11 +35,18 @@ function isLargeRefactor() {
  * @return {!Object<string, string>}
  */
 function extractCssJsFileMap() {
-  execOrDie('gulp css', {'stdio': 'ignore'});
+  execOrDie('amp css', {'stdio': 'ignore'});
   maybeInitializeExtensions(extensions);
+  /** @type {Object<string, string>} */
   const cssJsFileMap = {};
 
-  // Adds an entry that maps a CSS file to a JS file
+  /**
+   * Adds an entry that maps a CSS file to a JS file
+   *
+   * @param {Object} cssData
+   * @param {string} cssBinaryName
+   * @param {Object} cssJsFileMap
+   */
   function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
     const cssFilePath =
       `extensions/${cssData['name']}/${cssData['version']}/` +
@@ -87,7 +78,9 @@ function extractCssJsFileMap() {
  */
 function getImports(jsFile) {
   const jsFileContents = fs.readFileSync(jsFile, 'utf8');
-  const {imports} = listImportsExports.parse(jsFileContents);
+  const {imports} = listImportsExports.parse(jsFileContents, [
+    'importAssertions',
+  ]);
   const files = [];
   const jsFileDir = path.dirname(jsFile);
   imports.forEach(function (file) {
@@ -124,6 +117,10 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
   return jsFiles;
 }
 
+/**
+ * Computes the list of unit tests to run under difference scenarios
+ * @return {Array<string>|void}
+ */
 function getUnitTestsToRun() {
   log(green('INFO:'), 'Determining which unit tests to run...');
 
@@ -132,7 +129,6 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'Skipping tests on local changes because this is a large refactor.'
     );
-    reportTestSkipped();
     return;
   }
 
@@ -142,15 +138,13 @@ function getUnitTestsToRun() {
       green('INFO:'),
       'No unit tests were directly affected by local changes.'
     );
-    reportTestSkipped();
     return;
   }
-  if (isTravisBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
+  if (isCiBuild() && tests.length > TEST_FILE_COUNT_THRESHOLD) {
     log(
       green('INFO:'),
       'Several tests were affected by local changes. Running all tests below.'
     );
-    reportTestSkipped();
     return;
   }
 
@@ -173,17 +167,26 @@ function unitTestsToRun() {
     return testsToRun;
   }
   const cssJsFileMap = extractCssJsFileMap();
-  const filesChanged = gitDiffNameOnlyMaster();
+  const filesChanged = gitDiffNameOnlyMain();
   const {unitTestPaths} = testConfig;
   testsToRun = [];
   let srcFiles = [];
 
+  /**
+   * @param {string} file
+   * @return {boolean}
+   */
   function isUnitTest(file) {
     return unitTestPaths.some((pattern) => {
       return minimatch(file, pattern);
     });
   }
 
+  /**
+   * @param {string} testFile
+   * @param {string[]} srcFiles
+   * @return {boolean}
+   */
   function shouldRunTest(testFile, srcFiles) {
     const filesImported = getImports(testFile);
     return (
@@ -193,10 +196,15 @@ function unitTestsToRun() {
     );
   }
 
-  // Retrieves the set of unit tests that should be run
-  // for a set of source files.
+  /**
+   * Retrieves the set of unit tests that should be run
+   * for a set of source files.
+   *
+   * @param {string[]} srcFiles
+   * @return {string[]}
+   */
   function getTestsFor(srcFiles) {
-    const allUnitTests = globby.sync(unitTestPaths);
+    const allUnitTests = fastGlob.sync(unitTestPaths);
     return allUnitTests.filter((testFile) => {
       return shouldRunTest(testFile, srcFiles);
     });
@@ -204,9 +212,12 @@ function unitTestsToRun() {
 
   filesChanged.forEach((file) => {
     if (!fs.existsSync(file)) {
-      if (!isTravisBuild()) {
-        log(green('INFO:'), 'Skipping', cyan(file), 'because it was deleted');
-      }
+      logLocalDev(
+        green('INFO:'),
+        'Skipping',
+        cyan(file),
+        'because it was deleted'
+      );
     } else if (isUnitTest(file)) {
       testsToRun.push(file);
     } else if (path.extname(file) == '.js') {

@@ -1,21 +1,10 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {
+  Loading_Enum,
+  reducer as loadingReducer,
+} from '#core/constants/loading-instructions';
 
-import * as Preact from './index';
-import {createContext, useContext} from './index';
+import * as Preact from '#preact';
+import {createContext, useContext, useMemo} from '#preact';
 
 /** @type {PreactDef.Context} */
 let context;
@@ -29,14 +18,15 @@ let context;
  * - playable: whether the playback is allowed in this vDOM area. If playback
  *   is not allow, the component must immediately stop the playback.
  *
- * @return {!PreactDef.Context}
+ * @return {!PreactDef.Context<AmpContextDef.ContextType>}
  */
-export function getAmpContext() {
+function getAmpContext() {
   return (
     context ||
     (context = createContext({
-      'renderable': true,
-      'playable': true,
+      renderable: true,
+      playable: true,
+      loading: Loading_Enum.AUTO,
     }))
   );
 }
@@ -44,18 +34,53 @@ export function getAmpContext() {
 /**
  * A wrapper-component that recalculates and propagates AmpContext properties.
  *
- * @param {!JsonObject} props
+ * @param {!AmpContextDef.ProviderProps} props
  * @return {!PreactDef.VNode}
  */
-export function WithAmpContext(props) {
+export function WithAmpContext({
+  children,
+  loading: loadingProp = 'auto',
+  notify: notifyProp,
+  playable: playableProp = true,
+  renderable: renderableProp = true,
+}) {
+  const parent = useAmpContext();
+  const renderable = renderableProp && parent.renderable;
+  const playable = renderable && playableProp && parent.playable;
+  const loading = loadingReducer(
+    renderable ? Loading_Enum.AUTO : Loading_Enum.LAZY,
+    loadingReducer(loadingProp, parent.loading)
+  );
+  const notify = notifyProp || parent.notify;
+  const current = useMemo(
+    () =>
+      /** @type {!AmpContextDef.ContextType} */ ({
+        renderable,
+        playable,
+        loading,
+        notify,
+      }),
+    [renderable, playable, loading, notify]
+  );
   const AmpContext = getAmpContext();
-  const parent = useContext(AmpContext);
-  const current = {
-    ...props,
-    'renderable': parent['renderable'] && props['renderable'],
-    'playable': parent['playable'] && props['playable'],
-    'children': undefined,
-  };
+  return <AmpContext.Provider children={children} value={current} />;
+}
 
-  return <AmpContext.Provider children={props['children']} value={current} />;
+/**
+ * @return {!AmpContextDef.ContextType}
+ */
+export function useAmpContext() {
+  const AmpContext = getAmpContext();
+  return useContext(AmpContext);
+}
+
+/**
+ * Whether the calling component should currently be in the loaded state.
+ *
+ * @param {!Loading_Enum|string} loadingProp
+ * @return {boolean}
+ */
+export function useLoading(loadingProp) {
+  const {loading: loadingContext} = useAmpContext();
+  return loadingReducer(loadingProp, loadingContext);
 }

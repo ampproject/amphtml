@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad'; // eslint-disable-line no-unused-vars
 import {AmpAdNetworkFakeImpl} from '../amp-ad-network-fake-impl';
 
@@ -235,10 +219,13 @@ describes.realWin(
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,minimum-scale=1">
         <style amp4ads-boilerplate>body{visibility:hidden}</style>
+        <style amp-custom>
+          #foo { background-color: red; }
+        </style>
         <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
       </head>
       <body>
-        <p>Hello, AMP4ADS world.</p>
+        <p id="foo">Hello, AMP4ADS world.</p>
       </body>
       </html>
       `;
@@ -253,11 +240,12 @@ describes.realWin(
 
       expect(fakeImpl.isValidElement()).to.be.true;
       expect(fakeImpl.getAdUrl()).to.equal(
-        'data:text/html,' + encodeURI(creative)
+        'data:text/html,' + encodeURIComponent(creative)
       );
       const response = await fakeImpl.sendXhrRequest(fakeImpl.getAdUrl());
       const responseText = await response.text();
-      expect(responseText).to.contain('<p>Hello, AMP4ADS world.</p>');
+      expect(responseText).to.contain('#foo { background-color: red; }');
+      expect(responseText).to.contain('<p id="foo">Hello, AMP4ADS world.</p>');
       expect(responseText).to.contain(
         '<script type="application/json" amp-ad-metadata>{"ampRuntimeUtf16CharOffsets":[110,183]}</script></body></html>'
       );

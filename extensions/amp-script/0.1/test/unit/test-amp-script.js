@@ -1,33 +1,20 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
+import {user} from '#utils/log';
+
+import {FakeWindow} from '#testing/fake-dom';
+
+import {
+  registerServiceBuilderForDoc,
+  resetServiceForTesting,
+} from '../../../../../src/service-helpers';
 import {
   AmpScript,
   AmpScriptService,
   SanitizerImpl,
   StorageLocation,
+  setUpgradeForTest,
 } from '../../amp-script';
-import {FakeWindow} from '../../../../../testing/fake-dom';
-import {Services} from '../../../../../src/services';
-import {
-  registerServiceBuilderForDoc,
-  resetServiceForTesting,
-} from '../../../../../src/service';
-import {user} from '../../../../../src/log';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   let element;
@@ -36,6 +23,11 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   let xhr;
 
   beforeEach(() => {
+    registerServiceBuilderForDoc(
+      env.win.document,
+      'amp-script',
+      AmpScriptService
+    );
     element = document.createElement('amp-script');
     env.ampdoc.getBody().appendChild(element);
 
@@ -52,12 +44,16 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       fetchText: env.sandbox.stub(),
     };
     xhr.fetchText
-      .withArgs(env.sandbox.match(/amp-script-worker-0.1.js/))
+      .withArgs(env.sandbox.match(/amp-script-worker/))
       .resolves({text: () => Promise.resolve('/* noop */')});
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
-    // Make @ampproject/worker-dom dependency a no-op for these unit tests.
-    env.sandbox.stub(WorkerDOM, 'upgrade').resolves();
+    // Make @ampproject/worker-dom dependency essentially a noop for these tests.
+    setUpgradeForTest((unused, scriptsPromise) => scriptsPromise);
+  });
+
+  afterEach(() => {
+    resetServiceForTesting(env.win, 'amp-script');
   });
 
   function stubFetch(url, headers, text, responseUrl) {
@@ -82,6 +78,27 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
 
     expectAsyncConsoleError(/Same-origin "src" requires/);
     return script.layoutCallback().should.be.rejected;
+  });
+
+  it('should support nodom variant', async () => {
+    element.setAttribute('nodom', '');
+    element.setAttribute('src', 'https://foo.example/foo.txt');
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    stubFetch(
+      'https://foo.example/foo.txt',
+      {'Content-Type': 'text/javascript; charset=UTF-8'}, // Valid content-type.
+      'alert(1)'
+    );
+
+    xhr.fetchText
+      .withArgs(env.sandbox.match(/amp-script-worker-0.1.js/))
+      .rejects();
+    xhr.fetchText
+      .withArgs(env.sandbox.match(/amp-script-worker-nodom-0.1.js/))
+      .resolves({text: () => Promise.resolve('/* noop */')});
+
+    await script.buildCallback();
+    await script.layoutCallback();
   });
 
   it('should work with "text/javascript" content-type for same-origin src', () => {
@@ -113,18 +130,45 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     expect(service.checkSha384).to.be.called;
   });
 
+  it('should skip the check for sha384(author_js) for cross-origin src in sandboxed mode', async () => {
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://bar.example/bar.js');
+    element.setAttribute('sandboxed', '');
+
+    stubFetch(
+      'https://bar.example/bar.js',
+      {'Content-Type': 'application/javascript; charset=UTF-8'},
+      'alert(1)'
+    );
+
+    await script.buildCallback();
+    await script.layoutCallback();
+    expect(service.checkSha384).not.to.be.called;
+  });
+
+  it('callFunction waits for initialization to complete before returning', async () => {
+    element.setAttribute('script', 'local-script');
+    script.workerDom_ = {callFunction: env.sandbox.spy()};
+
+    script.callFunction('fetchData', true);
+    expect(script.workerDom_.callFunction).not.called;
+
+    await script.initialize_.resolve();
+    expect(script.workerDom_.callFunction).calledWithExactly('fetchData', true);
+  });
+
   describe('Initialization skipped warning due to zero height/width', () => {
     it('should not warn when there is positive width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutBox').returns({height: 1, width: 1});
-      script.onMeasureChanged();
+      env.sandbox.stub(script, 'getLayoutSize').returns({height: 1, width: 1});
+      script.onLayoutMeasure();
       expect(warnStub).to.have.callCount(0);
     });
 
     it('should warn if there is zero width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutBox').returns({height: 0, width: 0});
-      script.onMeasureChanged();
+      env.sandbox.stub(script, 'getLayoutSize').returns({height: 0, width: 0});
+      script.onLayoutMeasure();
 
       expect(warnStub).calledWith(
         'amp-script',
@@ -139,7 +183,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       allowConsoleError(() => {
         script.layoutCallback();
       });
-      script.onMeasureChanged();
+      script.onLayoutMeasure();
       expect(warnStub).to.have.callCount(0);
     });
   });
@@ -203,17 +247,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   });
 
   describe('development mode', () => {
-    beforeEach(() => {
-      registerServiceBuilderForDoc(
-        env.win.document,
-        'amp-script',
-        AmpScriptService
-      );
-    });
-    afterEach(() => {
-      resetServiceForTesting(env.win, 'amp-script');
-    });
-
     it('should not be in dev mode by default', () => {
       script.buildCallback();
       expect(script.development_).false;
@@ -299,7 +332,7 @@ describes.repeated(
   }
 );
 
-describe('SanitizerImpl', () => {
+describes.sandboxed('SanitizerImpl', {}, (env) => {
   let el;
   let win;
   let s;
@@ -309,7 +342,7 @@ describe('SanitizerImpl', () => {
     win = new FakeWindow();
     el = win.document.createElement('div');
 
-    getSanitizer = ({byUserGesture, byFixedSize}) =>
+    getSanitizer = ({byFixedSize, byUserGesture}) =>
       new SanitizerImpl(
         {
           win,
@@ -503,11 +536,11 @@ describe('SanitizerImpl', () => {
 
     beforeEach(() => {
       bind = {
-        getStateValue: window.sandbox.stub(),
-        setState: window.sandbox.stub(),
-        constrain: window.sandbox.stub(),
+        getStateValue: env.sandbox.stub(),
+        setState: env.sandbox.stub(),
+        constrain: env.sandbox.stub(),
       };
-      window.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
     it('AMP.setState(json), without user interaction', async () => {

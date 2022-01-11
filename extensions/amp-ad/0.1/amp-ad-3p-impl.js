@@ -1,39 +1,23 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
-} from '../../../ads/google/utils';
+} from '#ads/google/utils';
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '../../../src/consent-state';
+} from '#core/constants/consent-state';
 import {
-  Layout, // eslint-disable-line no-unused-vars
-  LayoutPriority,
+  LayoutPriority_Enum,
+  Layout_Enum, // eslint-disable-line no-unused-vars
   isLayoutSizeDefined,
-} from '../../../src/layout';
-import {Services} from '../../../src/services';
-import {adConfig} from '../../../ads/_config';
-import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle} from '../../../src/style';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+} from '#core/dom/layout';
+import {Services} from '#service';
+import {adConfig} from '#ads/_config';
+import {clamp} from '#core/math';
+import {computedStyle, setStyle} from '#core/dom/style';
+import {dev, devAssert, userAssert} from '#utils/log';
+import {dict} from '#core/types/object';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
 import {
@@ -42,13 +26,16 @@ import {
   is3pThrottled,
 } from './concurrent-load';
 import {
+  getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {toWin} from '../../../src/types';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+import {moveLayoutRect} from '#core/dom/layout/rect';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {getWin} from '#core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
@@ -109,6 +96,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      */
     this.unlistenViewportChanges_ = null;
 
+    /** @private {Array<Function>} */
+    this.unlisteners_ = [];
+
     /**
      * @private {IntersectionObserver}
      * @visibleForTesting
@@ -136,6 +126,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
      * @private {boolean}
      */
     this.isFullWidthRequested_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /** @override */
@@ -143,7 +136,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // Loads ads after other content,
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
+    return isPWA ? LayoutPriority_Enum.METADATA : LayoutPriority_Enum.ADS;
   }
 
   /** @override */
@@ -157,7 +150,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Layout} layout
+   * @param {!Layout_Enum} layout
    * @override
    */
   isLayoutSupported(layout) {
@@ -195,6 +188,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     userAssert(this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
+    this.uiHandler.validateStickyAd();
 
     this.isFullWidthRequested_ = this.shouldRequestFullWidth_();
 
@@ -235,12 +229,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     const preconnect = Services.preconnectFor(this.win);
     // We always need the bootstrap.
-    preloadBootstrap(
-      this.win,
-      this.getAmpDoc(),
-      preconnect,
-      this.config.remoteHTMLDisabled
-    );
+    preloadBootstrap(this.win, this.type_, this.getAmpDoc(), preconnect);
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
@@ -334,9 +323,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.measureIframeLayoutBox_();
     }
 
-    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (devAssert(
-      this.iframeLayoutBox_
-    ));
+    const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (
+      devAssert(this.iframeLayoutBox_)
+    );
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -346,9 +335,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       return this.layoutPromise_;
     }
     userAssert(
-      !this.isInFixedContainer_,
+      !this.isInFixedContainer_ || this.uiHandler.isStickyAd(),
       '<amp-ad> is not allowed to be placed in elements with ' +
-        'position:fixed: %s',
+        'position:fixed: %s unless it has sticky attribute',
       this.element
     );
 
@@ -357,55 +346,83 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     const consentStringPromise = consentPolicyId
       ? getConsentPolicyInfo(this.element, consentPolicyId)
       : Promise.resolve(null);
+    const consentMetadataPromise = consentPolicyId
+      ? getConsentMetadata(this.element, consentPolicyId)
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
+    const pageViewId64Promise = Services.documentInfoForDoc(
+      this.element
+    ).pageViewId64;
+
+    // For sticky ad only: must wait for scrolling event before loading the ad
+    const scrollPromise = this.uiHandler.getScrollPromiseForStickyAd();
 
     this.layoutPromise_ = Promise.all([
       getAdCid(this),
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
-    ]).then((consents) => {
-      // Use JsonObject to preserve field names so that ampContext can access
-      // values with name
-      // ampcontext.js and this file are compiled in different compilation unit
+      consentMetadataPromise,
+      scrollPromise,
+      pageViewId64Promise,
+    ])
+      .then((consents) => {
+        this.uiHandler.maybeInitStickyAd();
 
-      // Note: Field names can by perserved by using JsonObject, or by adding
-      // perserved name to extern. We are doing both right now.
-      // Please also add new introduced variable
-      // name to the extern list.
-      const opt_context = dict({
-        'clientId': consents[0] || null,
-        'container': this.container_,
-        'initialConsentState': consents[1],
-        'consentSharedData': consents[2],
+        // Use JsonObject to preserve field names so that ampContext can access
+        // values with name
+        // ampcontext.js and this file are compiled in different compilation unit
+
+        // Note: Field names can by perserved by using JsonObject, or by adding
+        // perserved name to extern. We are doing both right now.
+        // Please also add new introduced variable
+        // name to the extern list.
+        const opt_context = dict({
+          'clientId': consents[0] || null,
+          'container': this.container_,
+          'initialConsentState': consents[1],
+          'consentSharedData': consents[2],
+          'initialConsentValue': consents[3],
+          'initialConsentMetadata': consents[4],
+          'pageViewId64': consents[6],
+        });
+
+        // In this path, the request and render start events are entangled,
+        // because both happen inside a cross-domain iframe.  Separating them
+        // here, though, allows us to measure the impact of ad throttling via
+        // incrementLoadingAds().
+
+        const intersection = this.element.getIntersectionChangeEntry();
+        const iframe = getIframe(
+          getWin(this.element),
+          this.element,
+          this.type_,
+          opt_context,
+          {
+            initialIntersection: intersectionEntryToJson(intersection),
+          }
+        );
+        iframe.title = this.element.title || 'Advertisement';
+        this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
+        return this.xOriginIframeHandler_.init(iframe);
+      })
+      .then(() => {
+        this.unobserveIntersections_ = observeIntersections(
+          this.element,
+          ({isIntersecting}) => this.viewportCallback_(isIntersecting)
+        );
       });
-      opt_context['initialConsentValue'] = consents[3];
-
-      // In this path, the request and render start events are entangled,
-      // because both happen inside a cross-domain iframe.  Separating them
-      // here, though, allows us to measure the impact of ad throttling via
-      // incrementLoadingAds().
-      const iframe = getIframe(
-        toWin(this.element.ownerDocument.defaultView),
-        this.element,
-        this.type_,
-        opt_context,
-        {disallowCustom: this.config.remoteHTMLDisabled}
-      );
-      this.xOriginIframeHandler_ = new AmpAdXOriginIframeHandler(this);
-      return this.xOriginIframeHandler_.init(iframe);
-    });
     incrementLoadingAds(this.win, this.layoutPromise_);
     return this.layoutPromise_;
   }
 
   /**
    * @param {boolean} inViewport
-   * @override
+   * @private
    */
-  viewportCallback(inViewport) {
+  viewportCallback_(inViewport) {
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -413,32 +430,24 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   unlayoutOnPause() {
-    return (
-      !this.xOriginIframeHandler_ || !this.xOriginIframeHandler_.isPausable()
-    );
-  }
-
-  /** @override  */
-  pauseCallback() {
-    if (this.xOriginIframeHandler_) {
-      this.xOriginIframeHandler_.setPaused(true);
-    }
-  }
-
-  /** @override  */
-  resumeCallback() {
-    if (this.xOriginIframeHandler_) {
-      this.xOriginIframeHandler_.setPaused(false);
-    }
+    return true;
   }
 
   /** @override  */
   unlayoutCallback() {
+    this.unlisteners_.forEach((unlisten) => unlisten());
+    this.unlisteners_.length = 0;
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
+
     this.layoutPromise_ = null;
     this.uiHandler.applyUnlayoutUI();
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.freeXOriginIframe();
       this.xOriginIframeHandler_ = null;
+    }
+    if (this.uiHandler) {
+      this.uiHandler.cleanup();
     }
     return true;
   }

@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Image Poll Story</title>
+    <link rel="canonical" href="interactive_img_polls.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Poppins', sans-serif;
+      }
+
+      amp-story-interactive-img-poll, amp-story-interactive-results {
+        justify-self: center;
+      }
+
+      h1 {
+        color: #005af0;
+        font-size: 40px;
+        margin-bottom: 40px;
+        text-align: center;
+      }
+
+      .container {
+        background-color: white;
+        border-radius: 60px;
+        padding: 40px;
+      }
+
+      .label {
+        background-color: white;
+        border-radius: 10px;
+        margin-left: 10%;
+        opacity: 0.8;
+        padding: 10px;
+        position: relative;
+        text-align: center;
+        top: 80%;
+        width: 80%;
+      }
+    </style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
+  </head>
+  <body>
+    <amp-story
+      standalone
+      title="Image Poll Story"
+      publisher="AMP Story testing"
+      publisher-logo-src="example.com/logo.png"
+      poster-portrait-src="example.com/poster.jpg"
+    >
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="container">
+            <h1>Image Polls</h1>
+            <p>
+              This story contains pages of image polls with varying
+              configurations
+            </p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="info">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <div class="container">
+            <p>
+              Most polls have the default configurations with 1 or 2 changes
+            </p>
+            <br />
+            <p>
+              The exception to this is that all of the polls unless otherwise
+              noted have prompt-size="large"
+            </p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="4-options">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>4 options</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="4-options-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="3-options">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>3 options</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="3-options-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="2-options">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>2 options</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="2-options-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="default-prompt">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Custom prompt alignment with default prompt size</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="default-prompt-poll"
+            prompt-text="Which of these places would you travel to first?"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            style="--interactive-prompt-alignment: left"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="custom-bg-color">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Custom background color</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="custom-bg-color-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            style="--interactive-accent-color: #f34e4e"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="custom-colors">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Custom colors</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="custom-colors-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            style="
+              --interactive-accent-color: rgb(16, 218, 93);
+              --interactive-prompt-background: rgb(4, 41, 18);
+              --interactive-prompt-text-color: rgb(16, 218, 93);
+            "
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="dark-theme">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Dark theme</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="dark-theme-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            theme="dark"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="custom-colors-dark">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Custom colors with dark theme</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="custom-colors-dark-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            style="
+              --interactive-prompt-background: #001f6d;
+              --interactive-prompt-text-color: yellow;
+            "
+            theme="dark"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="shadow-chip-style">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Chip style = shadow (not yet supported)</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="shadow-chip-style-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            chip-style="shadow"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="transparent-chip-style">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Chip style = transparent</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="transparent-chip-style-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            chip-style="transparent"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="dark-transparent-chip-style">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Dark theme with chip style = transparent</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="dark-transparent-chip-style-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            theme="dark"
+            chip-style="transparent"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="invalid-endpoint">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Invalid endpoint</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="invalid-endpoint-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://amp.dev/about/stories/"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="no-prompt">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>No prompt</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="no-prompt-poll"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="missing-img">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Missing image</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="missing-img-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="missing-img-dark">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Missing image with dark theme</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-img-poll
+            id="missing-img-dark-poll"
+            prompt-text="Which of these places would you travel to first?"
+            prompt-size="large"
+            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+            theme="dark"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-image-alt="Lake Tahoe"
+            option-1-confetti="🌲"
+            option-1-results-category="Lake lover"
+            option-2-image="https://webstoriesinteractivity-beta.web.app/api/v1"
+            option-2-image-alt="Hong Kong"
+            option-2-confetti="🏙️"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-image-alt="Hawaii"
+            option-3-confetti="🏝️"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-image-alt="Grand Canyon"
+            option-4-confetti="🏞️"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-img-poll>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="results">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src="https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            layout="responsive"
+            width="467"
+            height="702"
+          >
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <div>
+            <div class="label">
+              <p>Integration with results component</p>
+            </div>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-interactive-results
+            id="results-component"
+            prompt-text="You are a"
+            option-1-image="https://images.unsplash.com/photo-1577416026704-0fe2d48a0f20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-1-results-category="Lake lover"
+            option-2-image="https://images.unsplash.com/photo-1506970845246-18f21d533b20?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-2-results-category="City-goer"
+            option-3-image="https://images.unsplash.com/photo-1559494007-9f5847c49d94?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=668&q=80"
+            option-3-results-category="Tropical explorer"
+            option-4-image="https://images.unsplash.com/photo-1516302350523-4c29d47b89e0?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80"
+            option-4-results-category="National Park lover"
+          >
+          </amp-story-interactive-results>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

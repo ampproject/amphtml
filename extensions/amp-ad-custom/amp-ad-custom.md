@@ -6,22 +6,6 @@ teaser:
   text: Alternative way to serve valid AMPHTML ads.
 ---
 
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # AMP Template Ad Integration Guidelines
 
 ## Overview
@@ -30,9 +14,9 @@ AMP template ads are an alternative way to serve valid AMPHTML ads without the c
 
 For any ad network to serve AMPHTML template ads, the integration consists of 3 parts:
 
-- AMPHTML Ad template creation
-- Ad server change: ad serving endpoint
-- Ads tag in AMP
+-   AMPHTML Ad template creation
+-   Ad server change: ad serving endpoint
+-   Ads tag in AMP
 
 ## AMPHTML Ad Template Creation
 
@@ -75,9 +59,9 @@ The ad network needs to provide a new serving endpoint that returns a CORS respo
 
 The response requires a couple of custom headers:
 
-- custom headers for CORS
-- AMP-Ad-Template-Extension: amp-mustache
-- Amp-Ad-Response-Type: template
+-   custom headers for CORS
+-   AMP-Ad-Template-Extension: amp-mustache
+-   Amp-Ad-Response-Type: template
 
 ## Ads tag
 

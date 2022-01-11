@@ -1,0 +1,56 @@
+---
+name: Intent-to-Implement (I2I)
+description: Propose a significant feature or change to AMP.
+labels: INTENT TO IMPLEMENT
+body:
+  - type: markdown
+    id: header
+    attributes:
+      value: |
+        Thanks for creating this Intent-to-Implement (I2I) issue.
+        - See AMP's [code contribution guide](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md) for instructions on how to fill out this I2I form and how to get help.
+        - Note that if you are implementing a minor change or fix, you likely do not need to file an I2I.
+        - If you haven't already done so, sign AMP's [Contributor License Agreement (CLA)](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md#contributor-license-agreement).
+        - A signed CLA is not required to submit this I2I or to create a PR, but is required before code can be merged.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A brief description of the feature being implemented.
+      placeholder: Provide a brief description of the feature you are planning on implementing.
+    validations:
+      required: true
+  - type: textarea
+    id: design_doc
+    attributes:
+      label: Design Document
+      description: Document that describes the feature's design.
+      placeholder: Provide a link to your design document once you have one. You do not need a design document to file this I2I.
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: The rationale behind this feature.
+      placeholder: Explain why AMP needs this change. It may be useful to describe what AMP developers/users are forced to do without it. When possible, include links to back up your claims.
+    validations:
+      required: true
+  - type: textarea
+    id: alternative_solutions
+    attributes:
+      label: Alternative Solutions
+      description: Alternative solutions for developers using AMP.
+      placeholder: Provide a clear and concise description of any alternative solutions or features you've considered.
+    validations:
+      required: true
+  - type: textarea
+    id: launch_tracker
+    attributes:
+      label: Launch Tracker
+      description: A tracker for the project's status.
+      placeholder: Provide a link to the launch tracker for this work here if applicable. A template with instructions can be found at bit.ly/amp-launch-tracker.
+  - type: textarea
+    id: notifications
+    attributes:
+      label: Notifications
+      description: Add working groups or individuals you want to notify about this I2I, including a code reviewer once you have found one. See [here](https://github.com/ampproject/amphtml/blob/main/docs/contributing-code.md) for help.
+      value: /cc @ampproject/wg-approvers

@@ -1,24 +1,8 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog';
+import {parseUrlDeprecated} from '../../../../src/url';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
+import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog';
 import {WebPushService} from '../web-push-service';
 import {WindowMessenger} from '../window-messenger';
-import {parseUrlDeprecated} from '../../../../src/url';
 
 const FAKE_IFRAME_URL =
   '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';
@@ -35,12 +19,10 @@ describes.realWin(
 
     function setDefaultConfigParams_() {
       webPushConfig[WebPushConfigAttributes.HELPER_FRAME_URL] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.PERMISSION_DIALOG_URL
-      ] = FAKE_IFRAME_URL;
-      webPushConfig[
-        WebPushConfigAttributes.SERVICE_WORKER_URL
-      ] = FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.PERMISSION_DIALOG_URL] =
+        FAKE_IFRAME_URL;
+      webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL] =
+        FAKE_IFRAME_URL;
     }
 
     /**
@@ -59,12 +41,11 @@ describes.realWin(
         iframeWindow = helperIframe.contentWindow;
         iframeWindow.WindowMessenger = WindowMessenger;
         iframeWindow.AmpWebPushPermissionDialog = AmpWebPushPermissionDialog;
-        iframeWindow._ampWebPushPermissionDialog = new iframeWindow.AmpWebPushPermissionDialog(
-          {
+        iframeWindow._ampWebPushPermissionDialog =
+          new iframeWindow.AmpWebPushPermissionDialog({
             debug: true,
             windowContext: iframeWindow,
-          }
-        );
+          });
       });
     }
 
@@ -77,7 +58,8 @@ describes.realWin(
     it.skip('should detect opened as popup', () => {
       return setupPermissionDialogFrame().then(() => {
         env.sandbox./*OK*/ stub(iframeWindow, 'opener').callsFake(true);
-        const isCurrentDialogPopup = iframeWindow._ampWebPushPermissionDialog.isCurrentDialogPopup();
+        const isCurrentDialogPopup =
+          iframeWindow._ampWebPushPermissionDialog.isCurrentDialogPopup();
         expect(isCurrentDialogPopup).to.eq(true);
       });
     });
@@ -104,7 +86,7 @@ describes.realWin(
       });
     });
 
-    // TODO(jasonpang): This fails on master under headless Chrome.
+    // TODO(jasonpang): This fails during CI under headless Chrome.
     it.skip('should request notification permissions, when opened as popup', () => {
       return setupPermissionDialogFrame().then(() => {
         env.sandbox
@@ -121,7 +103,7 @@ describes.realWin(
       });
     });
 
-    // TODO(jasonpang): This fails on master under headless Chrome.
+    // TODO(jasonpang): This fails during CI under headless Chrome.
     it.skip('should request notification permissions when redirected', () => {
       return setupPermissionDialogFrame().then(() => {
         env.sandbox
@@ -142,7 +124,7 @@ describes.realWin(
       });
     });
 
-    // TODO(jasonpang): This fails on master under headless Chrome.
+    // TODO(jasonpang): This fails during CI under headless Chrome.
     it.skip('should redirect back to original site, when redirected', () => {
       let spy = null;
       return setupPermissionDialogFrame()

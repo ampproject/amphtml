@@ -1,0 +1,151 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="https://amp.dev">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <title>10 videos with flexible bitrate</title>
+
+  <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async custom-element="amp-cache-url" src="https://cdn.ampproject.org/v0/amp-cache-url-0.1.js"></script>
+
+	<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    input#flexible-bitrate-debug {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+    </style>
+  <script>
+    (self.AMP = self.AMP || []).push(function(AMP) {
+      AMP.toggleExperiment('flexible-bitrate', true);
+    });
+    const IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING =
+      'i-amphtml-is-video-fully-loaded-override-for-testing';
+
+    window.onload = () => {
+      const debugField = document.querySelector('input#flexible-bitrate-debug');
+      debugField.addEventListener('keyup', (e) => {
+        const number = debugField.value.slice(0, -1);
+        const videoEl = document.querySelector(`amp-video#video${number} video`);
+        if (!videoEl) {
+          return;
+        }
+        if (e.key === 'd') {
+          videoEl.dispatchEvent(new Event('downgrade'));
+        } else if (e.key === 'l') {
+          videoEl.setAttribute(IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING, 'true');
+        } else if (e.key === 'u') {
+          videoEl.setAttribute(IS_VIDEO_FULLY_LOADED_OVERRIDE_FOR_TESTING, 'false');
+        } else {
+          return;
+        }
+        // If key was command, clean field.
+        debugField.value = '';
+      });
+      document.body.appendChild(debugField);
+    }
+    Object.defineProperty(window.navigator.connection, 'effectiveType', {
+      get: () => '4g'
+    });
+</script>
+</head>
+  <body>
+    <input id="flexible-bitrate-debug">
+    <amp-story standalone id="cats" supports-landscape
+        title="Key Highlights of AMP Conf 2018" publisher="The AMP team"
+        poster-portrait-src="logo.png"
+        publisher-logo-src="logo.png">
+
+      <amp-story-page id="page-1">
+        <amp-story-grid-layer template="fill">
+					<amp-video autoplay loop
+						id="video1"
+            width="400"
+            height="750"
+            poster="img-city1.jpeg#1"
+            layout="fill">
+            <source src="/examples/av/ForBiggerJoyrides-short.mp4#med1" type="video/mp4" data-bitrate="720">
+            <source src="/examples/av/ForBiggerJoyrides-short.mp4#low1" type="video/mp4" data-bitrate="400">
+            <source src="/examples/av/ForBiggerJoyrides-short.mp4#high1" type="video/mp4" data-bitrate="2000">
+          </amp-video>
+				</amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-2">
+        <amp-story-grid-layer template="fill">
+					<amp-video autoplay loop
+					id="video2"
+            width="400"
+            height="750"
+            poster="img-city1.jpeg#2"
+            layout="fill">
+            <source src="/examples/av/ForBiggerJoyrides.mp4#med2" type="video/mp4" data-bitrate="720">
+            <source src="/examples/av/ForBiggerJoyrides.mp4#low2" type="video/mp4" data-bitrate="400">
+            <source src="/examples/av/ForBiggerJoyrides.mp4#high2" type="video/mp4" data-bitrate="2000">
+          </amp-video>
+				</amp-story-grid-layer>
+			</amp-story-page>
+
+			<amp-story-page id="page-3">
+        <amp-story-grid-layer template="fill">
+					<amp-video autoplay loop
+					id="video3"
+            width="400"
+            height="750"
+            poster="img-city1.jpeg#3"
+            layout="fill">
+            <source src="https://amp-dev.cdn.ampproject.org/c/s/amp.dev/static/samples/video/tokyo.mp4"
+                amp-orig-src="https://amp.dev/static/samples/video/tokyo.mp4" type="video/mp4">
+          </amp-video>
+				</amp-story-grid-layer>
+			</amp-story-page>
+
+			<amp-story-page id="page-4">
+        <amp-story-grid-layer template="fill">
+					<amp-video autoplay loop
+					id="video4"
+            width="400"
+            height="750"
+            poster="img-city1.jpeg#4"
+            layout="fill">
+            <source src="/examples/av/ForBiggerJoyrides.mp4#low4" type="video/mp4" data-bitrate="400">
+            <source src="/examples/av/ForBiggerJoyrides.mp4#med4" type="video/mp4" data-bitrate="720">
+            <source src="/examples/av/ForBiggerJoyrides.mp4#high4" type="video/mp4" data-bitrate="2000">
+          </amp-video>
+				</amp-story-grid-layer>
+			</amp-story-page>
+
+      <amp-story-page id="page-5">
+        <amp-story-grid-layer template="fill">
+					<amp-video autoplay loop
+					id="video5"
+            width="400"
+            height="750"
+            poster="img-city1.jpeg#5"
+            layout="fill"
+            cache="google">
+            <source src="https://amp.dev/static/samples/video/tokyo.mp4">
+          </amp-video>
+				</amp-story-grid-layer>
+			</amp-story-page>
+
+      <amp-story-page id="page-6">
+        <amp-story-grid-layer template="fill">
+					<amp-video autoplay loop
+					id="video6"
+            width="400"
+            height="750"
+            poster="img-city1.jpeg#6"
+            layout="fill"
+            src="https://amp-dev.cdn.ampproject.org/c/s/amp.dev/static/samples/video/tokyo.mp4"
+            amp-orig-src="https://amp.dev/static/samples/video/tokyo.mp4">
+          </amp-video>
+				</amp-story-grid-layer>
+			</amp-story-page>
+    </amp-story>
+  </body>
+</html>

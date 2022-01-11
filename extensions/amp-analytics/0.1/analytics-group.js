@@ -1,26 +1,9 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ChunkPriority, chunk} from '../../../src/chunk';
-import {Deferred} from '../../../src/utils/promise';
-import {dev, userAssert} from '../../../src/log';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
+import {Deferred} from '#core/data-structures/promise';
+import {dev, userAssert} from '#utils/log';
 import {getMode} from '../../../src/mode';
 import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
-import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
+import {getWin} from '#core/window';
 
 /**
  * @const {number}
@@ -56,7 +39,7 @@ export class AnalyticsGroup {
     this.triggerCount_ = 0;
 
     /** @private @const {!Window} */
-    this.win_ = toWin(analyticsElement.ownerDocument.defaultView);
+    this.win_ = getWin(analyticsElement);
   }
 
   /** @override */
@@ -106,29 +89,17 @@ export class AnalyticsGroup {
     };
     if (
       this.triggerCount_ < IMMEDIATE_TRIGGER_THRES ||
-      !isAnalyticsChunksExperimentOn(this.win_)
+      getMode(this.win_).runtime == 'inabox'
     ) {
       task();
     } else {
       const priority =
         this.triggerCount_ < HIGH_PRIORITY_TRIGGER_THRES
-          ? ChunkPriority.HIGH
-          : ChunkPriority.LOW;
+          ? ChunkPriority_Enum.HIGH
+          : ChunkPriority_Enum.LOW;
       chunk(this.analyticsElement_, task, priority);
     }
     this.triggerCount_++;
     return deferred.promise;
   }
-}
-
-/**
- * Determine if the analytics-chunks experiment should be applied
- * @param {!Window} win
- * @return {boolean}
- */
-export function isAnalyticsChunksExperimentOn(win) {
-  if (getMode(win).runtime == 'inabox') {
-    return isExperimentOn(win, 'analytics-chunks-inabox');
-  }
-  return isExperimentOn(win, 'analytics-chunks');
 }

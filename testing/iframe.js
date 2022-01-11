@@ -1,35 +1,24 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {deserializeMessage, isAmpMessage} from '#core/3p-frame-messaging';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
-import {AmpEvents} from '../src/amp-events';
-import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
-import {FakeLocation} from './fake-dom';
-import {FormEvents} from '../extensions/amp-form/0.1/form-events';
-import {Services} from '../src/services';
-import {cssText as ampDocCss} from '../build/ampdoc.css';
-import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
+import {install as installCustomElements} from '#polyfills/custom-elements';
+
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   installAmpdocServices,
   installRuntimeServices,
-} from '../src/service/core-services';
-import {install as installCustomElements} from '../src/polyfills/custom-elements';
-import {installDocService} from '../src/service/ampdoc-impl';
-import {installExtensionsService} from '../src/service/extensions-impl';
-import {installStylesLegacy} from '../src/style-installer';
+} from '#service/core-services';
+import {installExtensionsService} from '#service/extensions-impl';
+
+import {dev} from '#utils/log';
+
+import {FakeLocation} from './fake-dom';
+
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
+import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {parseIfNeeded} from '../src/iframe-helper';
 
 let iframeCount = 0;
@@ -65,16 +54,20 @@ export function createFixtureIframe(
   initialIframeHeight,
   opt_beforeLoad
 ) {
+  dev().assertNumber(
+    initialIframeHeight,
+    'Attempted to create fixture iframe with non-numeric height'
+  );
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
-      [AmpEvents.ATTACHED]: 0,
-      [AmpEvents.DOM_UPDATE]: 0,
-      [AmpEvents.ERROR]: 0,
-      [AmpEvents.LOAD_END]: 0,
-      [AmpEvents.LOAD_START]: 0,
-      [AmpEvents.STUBBED]: 0,
-      [AmpEvents.UNLOAD]: 0,
+      [AmpEvents_Enum.ATTACHED]: 0,
+      [AmpEvents_Enum.DOM_UPDATE]: 0,
+      [AmpEvents_Enum.ERROR]: 0,
+      [AmpEvents_Enum.LOAD_END]: 0,
+      [AmpEvents_Enum.LOAD_START]: 0,
+      [AmpEvents_Enum.STUBBED]: 0,
+      [AmpEvents_Enum.UNLOAD]: 0,
       [BindEvents.INITIALIZE]: 0,
       [BindEvents.SET_STATE]: 0,
       [BindEvents.RESCAN_TEMPLATE]: 0,
@@ -88,7 +81,7 @@ export function createFixtureIframe(
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
     }
-    html = maybeSwitchToCompiledJs(html);
+    html = maybeSwitchToMinifiedJs(html);
     window.ENABLE_LOG = true;
     // This global function will be called by the iframe immediately when it
     // starts loading. This appears to be the only way to get the correct
@@ -263,7 +256,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
               const iWin = iframe.contentWindow;
               const p = onInsert(iWin)
                 .then(() => {
-                  return element.build();
+                  return element.buildInternal();
                 })
                 .then(() => {
                   if (!element.getPlaceholder()) {
@@ -272,16 +265,22 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
                       element.appendChild(placeholder);
                     }
                   }
+                  const resources = Services.resourcesForDoc(ampdoc);
+                  const resource =
+                    resources.getResourceForElementOptional(element);
+                  if (resource) {
+                    resource.measure();
+                  }
+                })
+                .then(() => {
                   if (element.layoutCount_ == 0) {
                     if (opt_beforeLayoutCallback) {
                       opt_beforeLayoutCallback(element);
                     }
-                    return element.layoutCallback().then(() => {
-                      return element;
-                    });
+                    return element.layoutCallback();
                   }
-                  return element;
-                });
+                })
+                .then(() => element);
               iWin.document.getElementById('parent').appendChild(element);
               return p;
             },
@@ -292,6 +291,44 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     iframe.onerror = reject;
     document.body.appendChild(iframe);
   });
+}
+
+/**
+ * @param {!Document} doc
+ * @param {string} cssText
+ * @param {function()} cb
+ */
+function installStylesLegacy(doc, cssText, cb) {
+  const style = doc.createElement('style');
+  style.textContent = cssText;
+  doc.head.appendChild(style);
+
+  // Styles aren't always available synchronously. E.g. if there is a
+  // pending style download, it will have to finish before the new
+  // style is visible.
+  // For this reason we poll until the style becomes available.
+  // Sync case.
+  const styleLoaded = () => {
+    const sheets = doc.styleSheets;
+    for (let i = 0; i < sheets.length; i++) {
+      const sheet = sheets[i];
+      if (sheet.ownerNode == style) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  if (styleLoaded()) {
+    cb();
+  } else {
+    const interval = setInterval(() => {
+      if (styleLoaded()) {
+        clearInterval(interval);
+        cb();
+      }
+    }, 4);
+  }
 }
 
 export function createServedIframe(src) {
@@ -509,12 +546,14 @@ export function expectBodyToBecomeVisible(win, opt_timeout) {
  * Calling `triggerError` on the respective resources makes them
  * appear in error state.
  * @param {!Window} win
+ * @param {!Object} sandbox
  */
-export function doNotLoadExternalResourcesInTest(win) {
+export function doNotLoadExternalResourcesInTest(win, sandbox) {
+  const {document} = win;
   const {prototype} = win.Document;
   const {createElement} = prototype;
-  prototype.createElement = function (tagName) {
-    const element = createElement.apply(this, arguments);
+  sandbox.stub(prototype, 'createElement').callsFake(function (tagName) {
+    const element = createElement.apply(document, arguments);
     tagName = tagName.toLowerCase();
     if (tagName == 'iframe' || tagName == 'img') {
       // Make get/set write to a fake property instead of
@@ -547,7 +586,7 @@ export function doNotLoadExternalResourcesInTest(win) {
       }
     }
     return element;
-  };
+  });
 }
 
 /**
@@ -571,14 +610,13 @@ function onInsert(win) {
 }
 
 /**
- * Takes a HTML document that is pointing to unminified JS and HTML
- * binaries and massages the URLs to pointed to compiled binaries
- * instead.
+ * Takes a HTML document that is pointing to unminified JS and HTML binaries and
+ * massages the URLs to pointed to minified binaries instead.
  * @param {string} html
  * @return {string}
  */
-export function maybeSwitchToCompiledJs(html) {
-  if (window.ampTestRuntimeConfig.useCompiledJs) {
+export function maybeSwitchToMinifiedJs(html) {
+  if (window.ampTestRuntimeConfig.useMinifiedJs) {
     return (
       html
         // Main JS

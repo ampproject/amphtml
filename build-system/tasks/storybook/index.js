@@ -1,68 +1,127 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {exec} = require('../../common/exec');
-const {installPackages} = require('../../common/utils');
+const path = require('path');
+const {createCtrlcHandler} = require('../../common/ctrlcHandler');
+const {cyan} = require('kleur/colors');
+const {defaultTask: runAmpDevBuildServer} = require('../default-task');
+const {exec, execScriptAsync} = require('../../common/exec');
+const {getBaseUrl} = require('../pr-deploy-bot-utils');
+const {isCiBuild} = require('../../common/ci');
+const {isPullRequestBuild} = require('../../common/ci');
+const {log} = require('../../common/logging');
+const {writeFileSync} = require('fs-extra');
+const {yellow} = require('kleur/colors');
 
-let storybookArgs = '--quiet';
-if (argv.port) {
-  storybookArgs += ` -p ${argv.port}`;
+const ENV_PORTS = {
+  amp: 9001,
+  preact: 9002,
+};
+
+const repoDir = path.join(__dirname, '../../..');
+
+/**
+ * @param {string} env 'amp' or 'preact'
+ * @return {string}
+ */
+const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
+
+/**
+ * @param {string} env 'amp' or 'preact'
+ */
+function launchEnv(env) {
+  if (env === 'amp') {
+    log(
+      yellow('AMP environment for storybook is temporarily disabled.\n') +
+        'See https://github.com/ampproject/storybook-addon-amp/issues/57'
+    );
+    return;
+  }
+  log(`Launching storybook for the ${cyan(env)} environment...`);
+  const {'storybook_port': port = ENV_PORTS[env]} = argv;
+  execScriptAsync(
+    [
+      './node_modules/.bin/start-storybook',
+      `--config-dir ${envConfigDir(env)}`,
+      `--static-dir ${repoDir}/`,
+      `--port ${port}`,
+      '--quiet',
+      isCiBuild() ? '--ci' : '',
+    ].join(' '),
+    {cwd: __dirname, stdio: 'inherit'}
+  ).on('error', () => {
+    throw new Error('Launch failed');
+  });
 }
 
-function runStorybook(mode) {
-  // install storybook-specific modules
-  installPackages(__dirname);
+/**
+ * @param {string} env 'amp' or 'preact'
+ */
+function buildEnv(env) {
+  if (env === 'amp') {
+    log(
+      yellow('AMP environment for storybook is temporarily disabled.\n') +
+        'See https://github.com/ampproject/storybook-addon-amp/issues/57'
+    );
+    return;
+  }
 
-  exec(
-    `./node_modules/.bin/start-storybook -c ./${mode}-env ${storybookArgs}`,
-    {
-      'stdio': [null, process.stdout, process.stderr],
-      cwd: __dirname,
-      env: process.env,
-    }
+  const configDir = envConfigDir(env);
+
+  if (env === 'amp' && isPullRequestBuild()) {
+    // Allows PR deploys to reference built binaries.
+    writeFileSync(
+      `${configDir}/preview.js`,
+      // If you change this JS template, make sure to JSON.stringify every
+      // dynamic value. This prevents XSS and other types of garbling.
+      `// DO NOT${' '}SUBMIT.
+       // This preview.js file was generated for a specific PR build.
+       export const parameters = (${JSON.stringify({
+         ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
+       })});`
+    );
+  }
+  log(`Building storybook for the ${cyan(env)} environment...`);
+  const result = exec(
+    [
+      './node_modules/.bin/build-storybook',
+      `--config-dir ${configDir}`,
+      `--output-dir ${repoDir}/examples/storybook/${env}`,
+      '--quiet',
+      `--loglevel ${isCiBuild() ? 'warn' : 'info'}`,
+    ].join(' '),
+    {cwd: __dirname, stdio: 'inherit'}
   );
+  if (result.status != 0) {
+    throw new Error('Build failed');
+  }
 }
 
 /**
- * Simple wrapper around the storybook start script
- * for AMP components (HTML Environment)
+ * @return {Promise<void>}
  */
-function storybookAmp() {
-  runStorybook('amp' /** mode */);
-}
-
-/**
- * Simple wrapper around the storybook start script.
- */
-function storybookPreact() {
-  runStorybook('preact' /** mode */);
+async function storybook() {
+  const {build = false, 'storybook_env': env = 'amp,preact'} = argv;
+  const envs = env.split(',');
+  if (!build && envs.includes('amp')) {
+    await runAmpDevBuildServer();
+  }
+  if (!build) {
+    createCtrlcHandler('storybook');
+  }
+  envs.map(build ? buildEnv : launchEnv);
 }
 
 module.exports = {
-  storybookAmp,
-  storybookPreact,
+  storybook,
 };
 
-storybookPreact.description =
-  'Isolated testing and development for AMP Bento components in Preact mode.';
-storybookAmp.description =
-  'Isolated testing and development for AMPHTML components.';
+storybook.description =
+  'Set up isolated development and testing for AMP components';
 
-storybookPreact.flags = storybookAmp.flags = {
-  'port': '  Change the port that the storybook dashboard is served from',
+storybook.flags = {
+  'build': 'Build a static web application (see https://storybook.js.org/docs)',
+  'storybook_env':
+    "Environment(s) to run Storybook (either 'amp', 'preact' or a list as 'amp,preact')",
+  'storybook_port': 'Port from which to run the Storybook dashboard',
 };

@@ -1,19 +1,3 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   clickThroughPages,
   switchToAdFrame,
@@ -27,8 +11,7 @@ const viewport = {
 describes.endtoend(
   'amp-story-auto-ads:fullbleed',
   {
-    testUrl:
-      'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/fullbleed.html',
+    fixture: 'amp-story-auto-ads/fullbleed.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
     // TODO(ccordry): re-enable viewer-demo that should handle the 64px
     // offset set by the viewer header.
@@ -41,7 +24,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should render correctly', async () => {
+    // TODO(#35241): flaky test disabled in #35176
+    it.skip('should render correctly', async () => {
       await clickThroughPages(controller, /* numPages */ 7);
       const activePage = await controller.findElement('[active]');
       await expect(controller.getElementAttribute(activePage, 'ad')).to.exist;
@@ -89,14 +73,13 @@ async function validateAdOverlay(controller) {
     .to.exist;
 
   const adBadge = await controller.findElement('.i-amphtml-story-ad-badge');
-  await expect(controller.getElementText(adBadge)).to.equal('Ad');
   await expect(controller.getElementCssValue(adBadge, 'visibility')).to.equal(
     'visible'
   );
-  // Design spec is 14px from top, 16px from left.
+  // Design spec is 12px from top, 12px from left.
   await expect(controller.getElementRect(adBadge)).to.include({
-    left: 16,
-    top: 14,
+    left: 12,
+    top: 12,
   });
 
   await controller.switchToLight();

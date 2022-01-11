@@ -4,23 +4,9 @@ formats:
   - websites
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis, with optional pagination dots and thumbnails.
+experimental: true
+bento: true
 ---
-
-<!---
-Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 
 # amp-inline-gallery
 
@@ -28,7 +14,7 @@ limitations under the License.
 
 The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display slides. The page must have the required scripts for both components in the document head. Typical usage might look like:
 
-[example preview="inline" playground="true" imports="amp-inline-gallery,amp-base-carousel,amp-lightbox-gallery"]
+[example preview="inline" playground="true" imports="amp-inline-gallery:1.0,amp-base-carousel:1.0"]
 
 ```html
 <amp-inline-gallery layout="container">
@@ -38,9 +24,8 @@ The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display sl
     width="3.6"
     height="2"
     snap-align="center"
-    loop="true"
+    loop
     visible-count="1.2"
-    lightbox
   >
     <amp-img
       src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
@@ -70,13 +55,22 @@ The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display sl
 
 The above example shows slides using an aspect ratio of 3:2, with 10% of a slide peeking on either side. An aspect ratio of 3.6:2 is used on the `amp-base-carousel` to show 1.2 slides at a time.
 
+### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-inline-gallery`, see [**`bento-inline-gallery`**](./1.0/README.md).
+
 ### Include pagination indicators
 
 The `<amp-inline-gallery-pagination>` component determines how a pagination idicator should be displayed. By default, no pagination indicator is displayed.
 
 The pagination indicator renders as dots when there are eight or fewer slides in the `amp-base-carousel`. For nine or more slides, the pagination indicator renders the current slide number and total number of slides, aligned to the right.
 
-The pagination indicator location defaults to underneath the carousel. Adding the inset attribute to the `<amp-inline-gallery-pagination>` tag will overlay the pagination indicator on the carousel. To use different styles for different screen sizes, use the media attribute:
+The pagination indicator location defaults to underneath the carousel. Adding the inset attribute to the `<amp-inline-gallery-pagination>` tag will overlay the pagination indicator on the carousel. To use different styles for different screen sizes, use the [media attribute](./../../docs/spec/amp-html-responsive-attributes.md):
 
 ```html
 <amp-inline-gallery layout="container">
@@ -102,22 +96,24 @@ The pagination indicator location defaults to underneath the carousel. Adding th
 
 Displays the pagination indicator as inset, overlaying the carousel itself. When using `inset`, you should give the `<amp-inline-gallery-pagination>` element `layout="nodisplay"`.
 
+The default CSS for an `<amp-inline-gallery-pagination>` element with `inset` specifies it at `bottom: 0` with respect to its parent element. You may overwrite this to position the element over the carousel if there are other elements, such as `<amp-inline-gallery-thumbnails>`, directly below it.
+
 ##### common attributes
 
 The `<amp-inline-gallery-pagination>` element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.
 
 ### Include thumbnails
 
-The `amp-inline-gallery` component can display thumbnail preview in addition to, or instead of, the pagination indicators. By default, not thumbnails are shown in the gallery. Keep in mind the following best practices when using thumbnails:
+The `amp-inline-gallery` component can display thumbnail preview in addition to, or instead of, the pagination indicators. By default, no thumbnails are shown in the gallery. Keep in mind the following best practices when using thumbnails:
 
-- Avoid using both pagination indicators and thumbnails with less than eight slides. The indicator dots are redundant in smaller galleries.
-- When using both pagination indicators and thumbnails, inset the pagination indicators to overlap the slides. View the code sample below to see an example.
-- Use the `media` attribute to show pagination indicators on smaller mobile devices and thumbnails on larger screens.
-- Load lower resolution images at thumbnails by using `srcset`. You can omit the `sizes` on `<amp-img>`, it will be automatically generated based on the rendered width.
+-   Avoid using both pagination indicators and thumbnails with less than eight slides. The indicator dots are redundant in smaller galleries.
+-   When using both pagination indicators and thumbnails, inset the pagination indicators to overlap the slides. View the code sample below to see an example.
+-   Use the `media` attribute to show pagination indicators on smaller mobile devices and thumbnails on larger screens.
+-   Load lower resolution images at thumbnails by using `data-thumbnail-src` on your slide elements.
 
 The example below demonstrates a gallery with thumbnails visible at larger resolutions.
 
-[example preview="inline" playground="true" imports="amp-inline-gallery,amp-base-carousel"]
+[example preview="inline" playground="true" imports="amp-inline-gallery:1.0,amp-base-carousel:1.0"]
 
 ```html
 <amp-inline-gallery layout="container">
@@ -133,7 +129,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
       width="3"
       height="2"
       snap-align="center"
-      loop="true"
+      loop
     >
       <amp-img
         class="slide"
@@ -142,6 +138,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
         srcset="https://picsum.photos/id/779/150/100 150w,
                 https://picsum.photos/id/779/600/400 600w,
                 https://picsum.photos/id/779/1200/800 1200w"
+        data-thumbnail-src="https://picsum.photos/id/779/150/100"
       >
       </amp-img>
       <amp-img
@@ -151,6 +148,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
         srcset="https://picsum.photos/id/1048/150/100 150w,
                 https://picsum.photos/id/1048/600/400 600w,
                 https://picsum.photos/id/1048/1200/800 1200w"
+        data-thumbnail-src="https://picsum.photos/id/1048/150/100"
       >
       </amp-img>
       <amp-img
@@ -160,6 +158,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
         srcset="https://picsum.photos/id/108/150/100 150w,
                 https://picsum.photos/id/108/600/400 600w,
                 https://picsum.photos/id/108/1200/800 1200w"
+        data-thumbnail-src="https://picsum.photos/id/108/150/100"
       >
       </amp-img>
       <amp-img
@@ -169,6 +168,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
         srcset="https://picsum.photos/id/130/150/100 150w,
                 https://picsum.photos/id/130/600/400 600w,
                 https://picsum.photos/id/130/1200/800 1200w"
+        data-thumbnail-src="https://picsum.photos/id/130/150/100"
       >
       </amp-img>
       <amp-img
@@ -178,6 +178,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
         srcset="https://picsum.photos/id/14/150/100 150w,
                 https://picsum.photos/id/14/600/400 600w,
                 https://picsum.photos/id/14/1200/800 1200w"
+        data-thumbnail-src="https://picsum.photos/id/14/150/100"
       >
       </amp-img>
       <amp-img
@@ -187,6 +188,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
         srcset="https://picsum.photos/id/165/150/100 150w,
                 https://picsum.photos/id/165/600/400 600w,
                 https://picsum.photos/id/165/1200/800 1200w"
+        data-thumbnail-src="https://picsum.photos/id/165/150/100"
       >
       </amp-img>
       <amp-img
@@ -196,6 +198,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
         srcset="https://picsum.photos/id/179/150/100 150w,
                 https://picsum.photos/id/179/600/400 600w,
                 https://picsum.photos/id/179/1200/800 1200w"
+        data-thumbnail-src="https://picsum.photos/id/179/150/100"
       >
       </amp-img>
       <amp-img
@@ -205,6 +208,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
         srcset="https://picsum.photos/id/392/150/100 150w,
                 https://picsum.photos/id/392/600/400 600w,
                 https://picsum.photos/id/392/1200/800 1200w"
+        data-thumbnail-src="https://picsum.photos/id/392/150/100"
       >
       </amp-img>
       <amp-img
@@ -214,6 +218,7 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
         srcset="https://picsum.photos/id/468/150/100 150w,
                 https://picsum.photos/id/468/600/400 600w,
                 https://picsum.photos/id/468/1200/800 1200w"
+        data-thumbnail-src="https://picsum.photos/id/468/150/100"
       >
       </amp-img>
     </amp-base-carousel>
@@ -237,17 +242,18 @@ The example below demonstrates a gallery with thumbnails visible at larger resol
 
 #### `amp-inline-gallery-thumbnails` attributes
 
-##### `aspect-ratio-height` (optional)
+##### Media Queries
 
-Specifies the aspect ratio when used with `aspect-ratio-width`. The aspect radio defaults to match the slides in `<amp-base-carousel>`.
+The attributes for `<amp-inline-gallery-thumbnails>` can be configured to use different
+options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
-##### `aspect-ratio-width` (optional)
+##### `aspect-ratio` (optional)
 
-Specifies the aspect ratio when used with `aspect-ratio-height`. The aspect radio defaults to match the slides in `<amp-base-carousel>`.
+Specifies the aspect ratio expressed as `width / height`. The aspect radio defaults to match the slides in `<amp-base-carousel>`.
 
 ##### `loop` (optional)
 
-Loops thumbnails. Takes a value of `"true"` or `"false"`. Defaults to `"true"`.
+Loops thumbnails. Takes a value of `"true"` or `"false"`. Defaults to `"false"`.
 
 ##### common attributes
 
@@ -259,6 +265,11 @@ The `<amp-inline-gallery-thumbnails>` element includes <a href="https://amp.dev/
 
 This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.
 
-## Validation
+## Version notes
 
-See [amp-inline-gallery rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-inline-gallery/validator-amp-inline-gallery.protoascii) in the AMP validator specification.
+Unlike `0.1`, the experimental `1.0` version of `amp-inline-gallery` includes the following changes:
+
+-   `amp-inline-gallery-pagination` with `inset` attribute positions the element with an overwritable `bottom: 0`.
+-   `amp-inline-gallery-thumbnails` takes `data-thumbnail-src` from slide elements (children of the `amp-base-carousel`) instead of `srcset`.
+-   `amp-inline-gallery-thumbnails` takes `aspect-ratio` as expressed by `width / height` instead of two separate attributes, `aspect-ratio-width` and `aspect-ratio-height`.
+-   `amp-inline-gallery-thumbnails` configuration for `loop` defaults to `"false"`.

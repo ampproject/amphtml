@@ -1,25 +1,12 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+import {dict} from '#core/types/object';
+import {utf8Decode} from '#core/types/string/bytes';
 
 import {Renderer} from './amp-ad-type-defs';
-import {createElementWithAttributes} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {getContextMetadata} from '../../../src/iframe-attributes';
+
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {getContextMetadata} from '../../../src/iframe-attributes';
 
 /**
  * Render a non-AMP creative into a NameFrame.
@@ -27,7 +14,9 @@ import {utf8Decode} from '../../../src/utils/bytes';
 export class NameFrameRenderer extends Renderer {
   /** @override */
   render(context, element, crossDomainData) {
-    crossDomainData = /** @type {!./amp-ad-type-defs.CrossDomainDataDef} */ (crossDomainData);
+    crossDomainData = /** @type {!./amp-ad-type-defs.CrossDomainDataDef} */ (
+      crossDomainData
+    );
 
     if (!crossDomainData.creative && !crossDomainData.rawCreativeBytes) {
       // No creative, nothing to do.
@@ -50,6 +39,10 @@ export class NameFrameRenderer extends Renderer {
       crossDomainData.additionalContextMetadata
     );
     contextMetadata['creative'] = creative;
+
+    const intersection = element.getIntersectionChangeEntry();
+    contextMetadata['_context']['initialIntersection'] =
+      intersectionEntryToJson(intersection);
     const attributes = dict({
       'src': srcPath,
       'name': JSON.stringify(contextMetadata),
@@ -72,6 +65,5 @@ export class NameFrameRenderer extends Renderer {
     );
     // TODO(glevitzky): Ensure that applyFillContent or equivalent is called.
     element.appendChild(iframe);
-    return Promise.resolve();
   }
 }

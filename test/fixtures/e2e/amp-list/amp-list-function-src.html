@@ -1,0 +1,26 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+    <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+    <style amp4email-boilerplate>body{visibility:hidden}</style>
+</head>
+<body>
+
+  <amp-script id="fns" script="fruit-script" nodom data-ampdevmode></amp-script>
+  <script id="fruit-script" type="text/plain" target="amp-script">
+    exportFunction('getFruit', () => ({items: [{name: 'Pineapple'}, {name: 'Mango'}]}));
+  </script>
+
+  <amp-list id="amp-list" width="auto" height="100" layout="fixed-height"
+      src="amp-script:fns.getFruit">
+      <template type="amp-mustache">
+          <div class="fruit">{{name}}</div>
+      </template>
+  </amp-list>
+
+</body>
+</html>

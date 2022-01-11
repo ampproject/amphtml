@@ -1,21 +1,5 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {BrowserController} from '../../../../../testing/test-helper';
-import {poll as classicPoll} from '../../../../../testing/iframe';
+import {BrowserController} from '#testing/helpers/service';
+import {poll as classicPoll} from '#testing/iframe';
 
 const TIMEOUT = 10000;
 
@@ -23,10 +7,10 @@ function poll(description, condition, opt_onError) {
   return classicPoll(description, condition, opt_onError, TIMEOUT);
 }
 
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
-  .run('amp-script', function () {
+  .run('amp-script', {}, function () {
     this.timeout(TIMEOUT);
 
     let browser, doc, element;
@@ -34,14 +18,12 @@ describe
     describes.integration(
       'container ',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert Hello World!</button>
         <button id="long">Long task</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
       (env) => {
@@ -121,7 +103,6 @@ describe
     describes.integration(
       'sanitizer',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <p>Number of mutations: <span id="mutationCount">0</span></p>
@@ -129,7 +110,6 @@ describe
         <button id="img">Insert img</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
       (env) => {
@@ -188,16 +168,35 @@ describe
     );
 
     describes.integration(
+      'sandboxed',
+      {
+        body: `<amp-script sandboxed src="/examples/amp-script/export-functions.js"></amp-script>`,
+        extensions: ['amp-script'],
+      },
+      (env) => {
+        beforeEach(() => {
+          browser = new BrowserController(env.win);
+          doc = env.win.document;
+          element = doc.querySelector('amp-script');
+        });
+
+        it('should let you call functions on it', async () => {
+          const impl = await element.getImpl(true);
+          const result = await impl.callFunction('getData');
+          expect(result).deep.equal({data: true});
+        });
+      }
+    );
+
+    describes.integration(
       'defined-layout',
       {
-        /* eslint-disable max-len */
         body: `
       <amp-script layout=fixed width=300 height=200
           src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert</button>
       </amp-script>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-script'],
       },
       (env) => {

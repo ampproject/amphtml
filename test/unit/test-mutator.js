@@ -1,35 +1,64 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as fakeTimers from '@sinonjs/fake-timers';
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {LayoutPriority} from '../../src/layout';
-import {MutatorImpl} from '../../src/service/mutator-impl';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {ResourcesImpl} from '../../src/service/resources-impl';
-import {Services} from '../../src/services';
-import {Signals} from '../../src/utils/signals';
-import {VisibilityState} from '../../src/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {Signals} from '#core/data-structures/signals';
+import {LayoutPriority_Enum} from '#core/dom/layout';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {MutatorImpl} from '#service/mutator-impl';
+import {Resource, ResourceState_Enum} from '#service/resource';
+import {ResourcesImpl} from '#service/resources-impl';
+
 import {installInputService} from '../../src/input';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
 
 /** @type {?Event|undefined} */
 const NO_EVENT = undefined;
 
-describe('mutator changeSize', () => {
+describes.realWin('mutator changeSize', {amp: true}, (env) => {
+  let window, document;
+  let clock;
+  let viewportMock;
+  let resources, mutator;
+  let resource1, resource2;
+
+  beforeEach(() => {
+    window = env.win;
+    document = window.document;
+    delete window.requestIdleCallback;
+    delete window.cancelIdleCallback;
+    clock = fakeTimers.withGlobal(window).install();
+    const ampdoc = new AmpDocSingle(window);
+    resources = new ResourcesImpl(ampdoc);
+    resources.isRuntimeOn_ = false;
+    resources.win = {
+      location: {
+        href: 'https://example.org/doc1',
+      },
+      Date: window.Date,
+      getComputedStyle: (el) => {
+        return el.fakeComputedStyle
+          ? el.fakeComputedStyle
+          : window.getComputedStyle(el);
+      },
+    };
+    mutator = new MutatorImpl(ampdoc);
+    mutator.win = resources.win;
+    mutator.resources_ = resources;
+
+    installInputService(resources.win);
+
+    viewportMock = env.sandbox.mock(mutator.viewport_);
+
+    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resources.owners_ = [resource1, resource2];
+  });
+
+  afterEach(() => {
+    viewportMock.verify();
+  });
+
   function createElement(rect) {
     const signals = new Signals();
     return {
@@ -46,26 +75,24 @@ describe('mutator changeSize', () => {
       },
       hasAttribute: () => false,
       getBoundingClientRect: () => rect,
-      applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
-      viewportCallback: window.sandbox.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       unlayoutCallback: () => true,
-      pauseCallback: () => {},
-      unlayoutOnPause: () => true,
+      pause: () => {},
+      unmount: () => {},
       isRelayoutNeeded: () => true,
-      /* eslint-disable google-camelcase/google-camelcase */
+      /* eslint-disable local/camelcase */
       contains: (unused_otherElement) => false,
       updateLayoutBox: () => {},
-      togglePlaceholder: () => window.sandbox.spy(),
+      togglePlaceholder: () => env.sandbox.spy(),
       overflowCallback: (
         unused_overflown,
         unused_requestedHeight,
         unused_requestedWidth
-        /* eslint-enable google-camelcase/google-camelcase */
+        /* eslint-enable local/camelcase */
       ) => {},
-      getLayoutPriority: () => LayoutPriority.CONTENT,
+      getLayoutPriority: () => LayoutPriority_Enum.CONTENT,
       signals: () => signals,
       fakeComputedStyle: {
         marginTop: '0px',
@@ -79,52 +106,11 @@ describe('mutator changeSize', () => {
   function createResource(id, rect) {
     const resource = new Resource(id, createElement(rect), resources);
     resource.element['__AMP__RESOURCE'] = resource;
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
     resource.initialLayoutBox_ = resource.layoutBox_ = rect;
-    resource.changeSize = window.sandbox.spy();
+    resource.changeSize = env.sandbox.spy();
     return resource;
   }
-
-  let clock;
-  let viewportMock;
-  let resources, mutator;
-  let resource1, resource2;
-
-  beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
-    const ampdoc = new AmpDocSingle(window);
-    resources = new ResourcesImpl(ampdoc);
-    resources.isRuntimeOn_ = false;
-    resources.win = {
-      location: {
-        href: 'https://example.org/doc1',
-      },
-      getComputedStyle: (el) => {
-        return el.fakeComputedStyle
-          ? el.fakeComputedStyle
-          : window.getComputedStyle(el);
-      },
-    };
-    mutator = new MutatorImpl(ampdoc);
-    mutator.win = resources.win;
-    mutator.resources_ = resources;
-
-    installPlatformService(resources.win);
-    const platform = Services.platformFor(resources.win);
-    window.sandbox.stub(platform, 'isIe').returns(false);
-
-    installInputService(resources.win);
-
-    viewportMock = window.sandbox.mock(mutator.viewport_);
-
-    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
-    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
-    resources.owners_ = [resource1, resource2];
-  });
-
-  afterEach(() => {
-    viewportMock.verify();
-  });
 
   it('should schedule separate requests', () => {
     mutator.scheduleChangeSize_(
@@ -191,7 +177,8 @@ describe('mutator changeSize', () => {
       false
     );
     expect(resources.requestsChangeSize_.length).to.equal(2);
-    resource1.unload();
+    resource1.state_ = ResourceState_Enum.LAYOUT_SCHEDULED;
+    resource1.unlayout();
     resources.cleanupTasks_(resource1);
     expect(resources.requestsChangeSize_.length).to.equal(1);
     expect(resources.requestsChangeSize_[0].resource).to.equal(resource2);
@@ -294,8 +281,8 @@ describe('mutator changeSize', () => {
 
   it('should measure non-measured elements', () => {
     resource1.initialLayoutBox_ = null;
-    resource1.measure = window.sandbox.spy();
-    resource2.measure = window.sandbox.spy();
+    resource1.measure = env.sandbox.spy();
+    resource2.measure = env.sandbox.spy();
 
     mutator.scheduleChangeSize_(resource1, 111, 200, undefined, NO_EVENT, true);
     mutator.scheduleChangeSize_(resource2, 111, 222, undefined, NO_EVENT, true);
@@ -323,7 +310,7 @@ describe('mutator changeSize', () => {
     let viewportRect;
 
     beforeEach(() => {
-      overflowCallbackSpy = window.sandbox.spy();
+      overflowCallbackSpy = env.sandbox.spy();
       resource1.element.overflowCallback = overflowCallbackSpy;
 
       viewportRect = {top: 2, left: 0, right: 100, bottom: 200, height: 200};
@@ -335,12 +322,12 @@ describe('mutator changeSize', () => {
         bottom: 50,
         height: 50,
       };
-      vsyncSpy = window.sandbox.stub(mutator.vsync_, 'run');
+      vsyncSpy = env.sandbox.stub(mutator.vsync_, 'run');
       resources.visible_ = true;
     });
 
     it('should NOT change size when height is unchanged', () => {
-      const callback = window.sandbox.spy();
+      const callback = env.sandbox.spy();
       resource1.layoutBox_ = {
         top: 10,
         left: 0,
@@ -365,7 +352,7 @@ describe('mutator changeSize', () => {
     });
 
     it('should NOT change size when height and margins are unchanged', () => {
-      const callback = window.sandbox.spy();
+      const callback = env.sandbox.spy();
       resource1.layoutBox_ = {
         top: 10,
         left: 0,
@@ -401,7 +388,7 @@ describe('mutator changeSize', () => {
     });
 
     it('should change size when margins but not height changed', () => {
-      const callback = window.sandbox.spy();
+      const callback = env.sandbox.spy();
       resource1.layoutBox_ = {
         top: 10,
         left: 0,
@@ -454,9 +441,9 @@ describe('mutator changeSize', () => {
       .skipSafari()
       .run('should change size when document is invisible', () => {
         resources.visible_ = false;
-        window.sandbox
+        env.sandbox
           .stub(resources.ampdoc, 'getVisibilityState')
-          .returns(VisibilityState.PRERENDER);
+          .returns(VisibilityState_Enum.PRERENDER);
         mutator.scheduleChangeSize_(
           resource1,
           111,
@@ -611,7 +598,7 @@ describe('mutator changeSize', () => {
       () => {
         viewportMock.expects('getContentHeight').returns(10000).atLeast(1);
 
-        const callback = window.sandbox.spy();
+        const callback = env.sandbox.spy();
         resource1.layoutBox_ = {
           top: 100,
           left: 0,
@@ -969,7 +956,7 @@ describe('mutator changeSize', () => {
       expect(overflowCallbackSpy).to.not.been.called;
     });
 
-    // TODO(#25518): investigate failure on Travis Safari
+    // TODO(#25518): investigate failure on Safari
     it.configure().skipSafari(
       'in viewport should change size if in the last 15% and ' +
         'in the last 1000px',
@@ -1082,7 +1069,7 @@ describe('mutator changeSize', () => {
       () => {
         const parent = document.createElement('div');
         parent.style.width = '222px';
-        parent.getLayoutWidth = () => 222;
+        parent.getLayoutSize = () => ({width: 222, height: 111});
         const element = document.createElement('div');
         element.overflowCallback = overflowCallbackSpy;
         parent.appendChild(element);
@@ -1132,7 +1119,7 @@ describe('mutator changeSize', () => {
       () => {
         const parent = document.createElement('div');
         parent.style.width = '222px';
-        parent.getLayoutWidth = () => 222;
+        parent.getLayoutSize = () => ({width: 222, height: 111});
         const element = document.createElement('div');
         const sibling = document.createElement('div');
         sibling.style.width = '1px';
@@ -1383,27 +1370,24 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
     element.signals = () => new Signals();
     element.whenBuilt = () => Promise.resolve();
     element.isBuilt = () => true;
-    element.build = () => Promise.resolve();
+    element.buildInternal = () => Promise.resolve();
     element.isUpgraded = () => true;
     element.updateLayoutBox = () => {};
     element.getPlaceholder = () => null;
-    element.getLayoutPriority = () => LayoutPriority.CONTENT;
-    element.dispatchCustomEvent = () => {};
+    element.getLayoutPriority = () => LayoutPriority_Enum.CONTENT;
     element.getLayout = () => 'fixed';
 
     element.isInViewport = () => false;
     element.getAttribute = () => null;
     element.hasAttribute = () => false;
     element.getBoundingClientRect = () => rect;
-    element.applySizesAndMediaQuery = () => {};
     element.layoutCallback = () => Promise.resolve();
-    element.viewportCallback = env.sandbox.spy();
     element.prerenderAllowed = () => true;
     element.renderOutsideViewport = () => true;
     element.isRelayoutNeeded = () => true;
-    element.pauseCallback = () => {};
+    element.pause = () => {};
+    element.unmount = () => {};
     element.unlayoutCallback = () => true;
-    element.unlayoutOnPause = () => true;
     element.togglePlaceholder = () => env.sandbox.spy();
 
     env.win.document.body.appendChild(element);
@@ -1417,7 +1401,7 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, (env) => {
       resources
     );
     resource.element['__AMP__RESOURCE'] = resource;
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState_Enum.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
     resource.changeSize = env.sandbox.spy();
     resource.completeCollapse = env.sandbox.spy();

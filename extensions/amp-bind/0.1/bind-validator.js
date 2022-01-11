@@ -1,23 +1,7 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseSrcset} from '#core/dom/srcset';
+import {hasOwn, ownProperty} from '#core/types/object';
 
-import {hasOwn, ownProperty} from '../../../src/utils/object';
-import {parseSrcset} from '../../../src/srcset';
-import {startsWith} from '../../../src/string';
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 const TAG = 'amp-bind';
 
@@ -139,7 +123,7 @@ export class BindValidator {
         }
       }
     }
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
+    // @see validator/js/engine/validator.ParsedTagSpec.validateAttributes()
     const {denylistedValueRegex} = rules;
     if (value && denylistedValueRegex) {
       const re = new RegExp(denylistedValueRegex, 'i');
@@ -159,7 +143,7 @@ export class BindValidator {
    * @private
    */
   isUrlValid_(url, rules) {
-    // @see validator/engine/validator.js#validateUrlAndProtocol()
+    // @see validator/js/engine/validator.js#validateUrlAndProtocol()
     if (url) {
       if (/__amp_source_origin/.test(url)) {
         return false;
@@ -191,7 +175,7 @@ export class BindValidator {
    */
   rulesForTagAndProperty_(tag, property) {
     // Allow binding to all ARIA attributes.
-    if (startsWith(property, 'aria-')) {
+    if (property.startsWith('aria-')) {
       return null;
     }
     // Disallow URL property bindings if configured as such.
@@ -203,7 +187,7 @@ export class BindValidator {
       return /** @type {PropertyRulesDef} */ (globalRules);
     }
     const ampPropertyRules = ownProperty(AMP_PROPERTY_RULES, property);
-    if (startsWith(tag, 'AMP-') && ampPropertyRules !== undefined) {
+    if (tag.startsWith('AMP-') && ampPropertyRules !== undefined) {
       return /** @type {PropertyRulesDef} */ (ampPropertyRules);
     }
     const tagRules = ownProperty(ELEMENT_RULES, tag);
@@ -312,6 +296,13 @@ function createElementRules_() {
       'state': null,
       'is-layout-container': null,
     },
+    'AMP-RENDER': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
     'AMP-SELECTOR': {
       'disabled': null,
       'selected': null,
@@ -371,6 +362,7 @@ function createElementRules_() {
           'fb-messenger': true,
           'intent': true,
           'line': true,
+          'microsoft-edge': true,
           'skype': true,
           'sms': true,
           'snapchat': true,
@@ -444,6 +436,7 @@ function createElementRules_() {
     },
     'SECTION': {
       'data-expand': null,
+      'expanded': null,
     },
     'SELECT': {
       'autofocus': null,

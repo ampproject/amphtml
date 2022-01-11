@@ -1,80 +1,89 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import * as Preact from '../../../src/preact';
-import * as styles from './base-carousel.css';
-import {dict} from '../../../src/utils/object';
+import * as Preact from '#preact';
+import {useCallback} from '#preact';
+import {useStyles} from './component.jss';
+import objstr from 'obj-str';
+import {propName} from '#preact/utils';
 
 /**
- * @param {!JsonObject} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function Arrow(props) {
-  const {
-    'customArrow': customArrow,
-    'dir': dir,
-    'advance': advance,
-    'disabled': disabled,
-  } = props;
-  const button = customArrow
-    ? customArrow
-    : renderDefaultArrow(dict({'dir': dir}));
-  const {
-    'children': children,
-    'disabled': customDisabled,
-    'onClick': onCustomClick,
-    ...rest
-  } = button.props;
-  const isDisabled = disabled || customDisabled;
-  const onClick = (e) => {
-    if (onCustomClick) {
-      onCustomClick(e);
+export function Arrow({
+  advance,
+  as: Comp = DefaultArrow,
+  by,
+  disabled,
+  outsetArrows,
+  rtl,
+}) {
+  const classes = useStyles();
+  const onClick = useCallback(() => {
+    if (!disabled) {
+      advance();
     }
-    advance();
-  };
+  }, [advance, disabled]);
   return (
-    <div
-      style={{
-        ...styles.arrowPlacement,
-        // Offset button from the edge.
-        [dir < 0 ? 'left' : 'right']: '0px',
-      }}
-    >
-      {Preact.cloneElement(
-        button,
-        {
-          'onClick': onClick,
-          'disabled': isDisabled,
-          'aria-disabled': isDisabled,
-          ...rest,
-        },
-        children
-      )}
-    </div>
+    <Comp
+      aria-disabled={String(!!disabled)}
+      by={by}
+      class={objstr({
+        [classes.arrow]: true,
+        [classes.arrowDisabled]: disabled,
+        [classes.arrowPrev]: by < 0,
+        [classes.arrowNext]: by > 0,
+        [classes.outsetArrow]: outsetArrows,
+        [classes.insetArrow]: !outsetArrows,
+        [classes.rtl]: rtl,
+        [classes.ltr]: !rtl,
+      })}
+      disabled={disabled}
+      onClick={onClick}
+      outsetArrows={outsetArrows}
+      rtl={rtl.toString()}
+    />
   );
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!BentoBaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function renderDefaultArrow(props) {
+function DefaultArrow({
+  'aria-disabled': ariaDisabled,
+  by,
+  disabled,
+  onClick,
+  [propName('class')]: className,
+}) {
+  const classes = useStyles();
   return (
-    <button style={styles.defaultArrowButton}>
-      {props['dir'] < 0 ? '<<' : '>>'}
-    </button>
+    <div class={className}>
+      <button
+        aria-disabled={ariaDisabled}
+        aria-label={
+          by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
+        }
+        class={classes.defaultArrowButton}
+        disabled={disabled}
+        onClick={onClick}
+      >
+        <div class={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}></div>
+        <div class={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}></div>
+        <div
+          class={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}
+        ></div>
+        <svg class={classes.arrowIcon} viewBox="0 0 24 24">
+          <path
+            d={
+              by < 0 ? 'M14,7.4 L9.4,12 L14,16.6' : 'M10,7.4 L14.6,12 L10,16.6'
+            }
+            fill="none"
+            stroke-width="2px"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </div>
   );
 }

@@ -1,29 +1,14 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {BrowserController} from '../../testing/test-helper';
-import {poll as classicPoll} from '../../testing/iframe';
+import {BrowserController} from '#testing/helpers/service';
+import {poll as classicPoll} from '#testing/iframe';
 
 const TIMEOUT = 10000;
 
 // Skip Edge, which throws "Permission denied" errors when inspecting
 // element properties in the testing iframe (Edge 17, Windows 10).
-describe
+describes.sandboxed
   .configure()
   .skipEdge()
-  .run('amp-bind', function () {
+  .run('amp-bind', {}, function () {
     this.timeout(TIMEOUT);
 
     // Helper that sets the poll timeout.
@@ -34,13 +19,11 @@ describe
     describes.integration(
       'basic',
       {
-        /* eslint-disable max-len */
         body: `
       <button on="tap:AMP.setState({t: 'after_text'})" id="changeText"></button>
       <button on="tap:AMP.setState({c: 'after_class'})" id="changeClass"></button>
       <p class="before_class" [class]="c" [text]="t">before_text</p>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind'],
       },
       (env) => {
@@ -129,7 +112,6 @@ describe
     describes.integration(
       '+ forms',
       {
-        /* eslint-disable max-len */
         body: `
       <input type="range" min=0 max=100 value=0 on="change:AMP.setState({rangeChange: event})">
       <p id="range" [text]="rangeChange.min + ' <= ' + rangeChange.value + ' <= ' + rangeChange.max">before_range</p>
@@ -141,7 +123,6 @@ describe
       <input type="radio" on="change:AMP.setState({radioChange: event})">
       <p id="radio" [text]="'checked: ' + radioChange.checked" id="radioText">before_radio</p>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind'],
       },
       (env) => {
@@ -202,7 +183,6 @@ describe
     describes.integration(
       '+ amp-carousel',
       {
-        /* eslint-disable max-len */
         body: `
       <button on="tap:AMP.setState({slide: 1})" id="goToSlideOne"></button>
       <p [text]="slide">0</p>
@@ -212,7 +192,6 @@ describe
         <amp-img src="http://example.com/bar.jpg" width=10 height=10></amp-img>
       </amp-carousel>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind', 'amp-carousel'],
       },
       (env) => {
@@ -262,7 +241,6 @@ describe
       }
     );
 
-    /* eslint-disable max-len */
     const list = `
     <amp-state id="foo">
       <script type="application/json">
@@ -276,7 +254,6 @@ describe
       <p [text]="foo.bar"></p>
     </template>
   `;
-    /* eslint-enable max-len */
 
     const listTests = (env) => {
       let doc;
@@ -331,7 +308,6 @@ describe
     describes.integration(
       '+ amp-selector',
       {
-        /* eslint-disable max-len */
         body: `
       <button on="tap:AMP.setState({selected: 2})"></button>
       <p [text]="selected"></p>
@@ -341,7 +317,6 @@ describe
         <amp-img src="/2.jpg" width=10 height=10 option=2></amp-img>
       </amp-selector>
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-bind', 'amp-selector'],
       },
       (env) => {

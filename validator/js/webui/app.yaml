@@ -1,0 +1,28 @@
+runtime: go113
+
+main: ./main
+
+handlers:
+- url: /fetch
+  script: auto
+  secure: always
+
+- url: /$
+  static_files: index.html
+  upload: index\.html
+  secure: always
+
+- url: /legacy\.html$
+  static_files: legacy.html
+  upload: legacy\.html
+  secure: always
+
+- url: /amp_favicon.png$
+  static_files: amp_favicon.png
+  upload: amp_favicon\.png$
+  secure: always
+
+- url: /logo-blue.svg$
+  static_files: logo-blue.svg
+  upload: logo-blue\.svg$
+  secure: always

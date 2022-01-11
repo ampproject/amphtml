@@ -1,21 +1,6 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {DEFAULT_ACTION} from '#core/constants/action-constants';
 
 import {AmpAnimation} from '../amp-animation';
-import {DEFAULT_ACTION} from '../../../../src/action-constants';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {WebAnimationPlayState} from '../web-animation-types';
 
@@ -33,9 +18,17 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
         ioCallback = callback;
         ioCallbacks.push(callback);
       }
-      observe() {
+      observe(target) {
+        const isIntersecting = (config && config.isIntersecting) ?? true;
+        const intersectionRatio =
+          (config && config.intersectionRatio) ?? (isIntersecting ? 1 : 0);
         ioCallback([
-          {isIntersecting: (config && config.isIntersecting) ?? true},
+          {
+            target,
+            isIntersecting,
+            intersectionRatio,
+            boundingClientRect: target.getBoundingClientRect(),
+          },
         ]);
       }
       unobserve() {}
@@ -62,12 +55,19 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
     }
 
     win.document.body.appendChild(element);
-    return element.build().then(() => element.implementation_);
+    return element.buildInternal().then(() => element.getImpl());
   }
 
-  function updateIntersection(isIntersecting) {
+  function updateIntersection(target, intersectionRatio) {
     ioCallbacks.forEach((callback) => {
-      callback([{isIntersecting}]);
+      callback([
+        {
+          target,
+          isIntersecting: intersectionRatio > 0,
+          intersectionRatio,
+          boundingClientRect: target.getBoundingClientRect(),
+        },
+      ]);
     });
   }
 
@@ -158,8 +158,8 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
         );
       });
 
-      it('should update visibility from viewer', function* () {
-        const anim = yield createAnim({}, {duration: 1001});
+      it('should update visibility from viewer', async () => {
+        const anim = await createAnim({}, {duration: 1001});
         expect(anim.visible_).to.be.false;
 
         viewer.setVisibilityState_('visible');
@@ -176,7 +176,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
         viewer.setVisibilityState_('visible');
         expect(anim.visible_).to.be.false;
 
-        updateIntersection(true);
+        updateIntersection(anim.element.parentElement, 1);
         expect(anim.visible_).to.be.true;
       });
 
@@ -825,7 +825,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
       }
 
       it('should find target in the embed only via selector', function* () {
-        const parentWin = env.ampdoc.win;
+        const {parentWin} = env;
         const embedWin = embed.win;
         const anim = yield createAnim(
           {},
@@ -845,7 +845,7 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
       });
 
       it('should find target in the embed only via target', function* () {
-        const parentWin = env.ampdoc.win;
+        const {parentWin} = env;
         const embedWin = embed.win;
         const anim = yield createAnim(
           {},

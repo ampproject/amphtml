@@ -1,19 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @externs */
 
 // HACK. Define application types used in default AMP externs
@@ -221,6 +205,10 @@ var google;
 google.ima;
 google.ima.Ad;
 google.ima.Ad.getSkipTimeOffset;
+google.ima.Ad.getAdPodInfo;
+google.ima.AdPodInfo;
+google.ima.AdPodInfo.getAdPosition;
+google.ima.AdPodInfo.getTotalAds;
 google.ima.AdDisplayContainer;
 google.ima.AdDisplayContainer.initialize;
 google.ima.ImaSdkSettings;
@@ -252,6 +240,8 @@ google.ima.AdEvent.Type.AD_PROGRESS;
 google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
 google.ima.AdEvent.Type.LOADED;
+google.ima.AdEvent.Type.PAUSED;
+google.ima.AdEvent.Type.RESUMED;
 google.ima.AdEvent.Type.ALL_ADS_COMPLETED;
 google.ima.AdsManager;
 google.ima.AdsManager.getRemainingTime;
@@ -303,6 +293,32 @@ data.s;
 // adpicker.js
 data.ph;
 
+// adpushup.js
+window.adpushup = {};
+window.adpushup.initAmp = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots,
+  jsontargeting,
+  extras
+) {};
+
+// andbeyond.js
+window.andbeyond = {};
+window.andbeyond.initAmp = function (
+  global,
+  width,
+  height,
+  siteid,
+  slotpath,
+  totalampslots,
+  jsontargeting,
+  extras
+) {};
+
 // adreactor.js
 data.zid;
 data.pid;
@@ -338,12 +354,24 @@ data.siteId;
 // aduptech.js
 window.uAd = {};
 window.uAd.embed;
+data.amp;
 data.responsive;
+data.placementkey;
+data.mincpc;
+data.query;
+data.pageurl;
+data.gdpr;
+data.gdpr_consent;
+data.adtest;
 data.onAds;
 data.onNoAds;
 
 // amoad.js
 data.sid;
+
+// amplified.js
+data.amplified_id;
+data.amplified_params;
 
 // appnexus.js
 data.tagid;
@@ -600,6 +628,12 @@ data.size;
 data.site;
 data.zone;
 data.callback;
+
+// seedtag.js
+data.adunitId;
+data.placement;
+data.publisherId;
+data.forceCreative;
 
 // sharethrough.js
 data.pkey;

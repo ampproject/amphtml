@@ -1,40 +1,33 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as fakeTimers from '@sinonjs/fake-timers';
 
-import * as lolex from 'lolex';
-import * as url from '../../src/url';
-import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
-import {Services} from '../../src/services';
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
   isOptedOutOfCid,
   optOutOfCid,
-} from '../../src/service/cid-impl';
-import {getCookie, setCookie} from '../../src/cookies';
+} from '#service/cid-impl';
+import {Crypto, installCryptoService} from '#service/crypto-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
+import {installExtensionsService} from '#service/extensions-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {installViewerServiceForDoc} from '#service/viewer-impl';
+
+import {FakePerformance} from '#testing/fake-dom';
+import {macroTask} from '#testing/helpers';
+import {stubServiceForDoc} from '#testing/helpers/service';
+
 import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installExtensionsService} from '../../src/service/extensions-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {macroTask} from '../../testing/yield';
+import {getCookie, setCookie} from '../../src/cookies';
+import * as cookie from '../../src/cookies';
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../src/service-helpers';
 import {parseUrlDeprecated} from '../../src/url';
-import {stubServiceForDoc} from '../../testing/test-helper';
+import * as url from '../../src/url';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -105,6 +98,7 @@ describes.sandboxed('cid', {}, (env) => {
       clearTimeout: window.clearTimeout,
       Math: window.Math,
       Promise: window.Promise,
+      performance: new FakePerformance(window),
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
@@ -126,6 +120,7 @@ describes.sandboxed('cid', {}, (env) => {
 
     installViewerServiceForDoc(ampdoc);
     storageGetStub = stubServiceForDoc(env.sandbox, ampdoc, 'storage', 'get');
+
     viewer = Services.viewerForDoc(ampdoc);
     env.sandbox.stub(ampdoc, 'whenFirstVisible').callsFake(function () {
       return whenFirstVisible;
@@ -797,7 +792,7 @@ describes.sandboxed('cid', {}, (env) => {
   }
 });
 
-describe('getProxySourceOrigin', () => {
+describes.sandboxed('getProxySourceOrigin', {}, () => {
   it('should fail on non-proxy origin', () => {
     allowConsoleError(() => {
       expect(() => {
@@ -812,20 +807,40 @@ describes.realWin('cid', {amp: true}, (env) => {
   let win;
   let ampdoc;
   let clock;
+  let storage;
+  let storageMock;
+  let storageValue;
   const hasConsent = Promise.resolve();
 
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    clock = lolex.install({
-      target: win,
+    clock = fakeTimers.withGlobal(win).install({
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
     cid = cidServiceForDocForTesting(ampdoc);
     env.sandbox.stub(cid.cacheCidApi_, 'isSupported').returns(false);
+    storageValue = {};
+    storage = {
+      setNonBoolean: (name, value) => {
+        storageValue[name] = value;
+        return Promise.resolve();
+      },
+      get: (name) => {
+        return Promise.resolve(storageValue[name]);
+      },
+      isViewerStorage: () => false,
+    };
+    storageMock = env.sandbox.mock(storage);
+
+    resetServiceForTesting(win, 'storage');
+    registerServiceBuilder(win, 'storage', function () {
+      return Promise.resolve(storage);
+    });
   });
 
   afterEach(() => {
+    storageMock.verify();
     clock.uninstall();
   });
 
@@ -855,6 +870,119 @@ describes.realWin('cid', {amp: true}, (env) => {
       expect(fooCid).to.equal(fooCid2);
     }
   );
+
+  describe('CID backup', () => {
+    beforeEach(() => {
+      cid.isBackupCidExpOn = true;
+      env.sandbox
+        .stub(cid.viewerCidApi_, 'isSupported')
+        .returns(Promise.resolve(false));
+    });
+
+    it('generates a new CID and backup', async () => {
+      setCookie(win, 'foo', '', 0);
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+        },
+        hasConsent
+      );
+      expect(fooCid).to.have.string('amp-');
+      expect(storageValue['amp-cid:foo']).to.equal(fooCid);
+    });
+
+    it('should find AMP generated CID in cookie and backup', async () => {
+      const cidString = 'amp-abc123';
+      win.document.cookie = `foo=${cidString};`;
+
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+        },
+        hasConsent
+      );
+      expect(fooCid).to.equal(cidString);
+      expect(storageValue['amp-cid:foo']).to.equal(fooCid);
+
+      const nonAmpCidString = 'xyz987';
+      win.document.cookie = `bar=${nonAmpCidString};`;
+      expect(
+        await cid.get(
+          {
+            scope: 'bar',
+            createCookieIfNotPresent: true,
+          },
+          hasConsent
+        )
+      ).to.equal(nonAmpCidString);
+      expect(storageValue['amp-cid:bar']).to.not.equal(nonAmpCidString);
+    });
+
+    it('only use backup when necessary and update accordingly', async () => {
+      storageValue['amp-cid:foo'] = 'amp-foo-bar';
+      const cidString = 'amp-abc123';
+      win.document.cookie = `foo=${cidString};`;
+      storageMock
+        .expects('setNonBoolean')
+        .withExactArgs('amp-cid:foo', cidString)
+        .once();
+
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+        },
+        hasConsent
+      );
+      expect(fooCid).to.equal(cidString);
+    });
+
+    it('should use CID backup', async () => {
+      const cidString = 'amp-abc123';
+      storageMock.expects('setNonBoolean').once();
+      setCookie(win, 'foo', '', 0);
+      env.sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
+        win.document.cookie = `${name}=${value}`;
+      });
+      storageValue['amp-cid:foo'] = cidString;
+
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+        },
+        hasConsent
+      );
+
+      expect(fooCid).to.equal(cidString);
+      expect(getCookie(win, 'foo')).to.equal(cidString);
+    });
+
+    it('should not use or store CID backup if opt-out', async () => {
+      const cidString = 'amp-abc123';
+      setCookie(win, 'foo', '', 0);
+      env.sandbox.stub(cookie, 'setCookie').callsFake((win, name, value) => {
+        win.document.cookie = `${name}=${value}`;
+      });
+      storageMock.expects('setNonBoolean').never();
+      // To check amp-cid-optout
+      storageMock.expects('get').once();
+      storageValue['amp-cid:foo'] = cidString;
+
+      const fooCid = await cid.get(
+        {
+          scope: 'foo',
+          createCookieIfNotPresent: true,
+          disableBackup: true,
+        },
+        hasConsent
+      );
+
+      expect(fooCid).to.not.equal(cidString);
+    });
+  });
 
   it('get method should return CID when in Viewer ', () => {
     env.sandbox
@@ -893,13 +1021,7 @@ describes.realWin('cid', {amp: true}, (env) => {
     stubServiceForDoc(env.sandbox, ampdoc, 'viewer', 'isTrustedViewer').returns(
       Promise.resolve(true)
     );
-    const storageGetStub = stubServiceForDoc(
-      env.sandbox,
-      ampdoc,
-      'storage',
-      'get'
-    );
-    storageGetStub.withArgs('amp-cid-optout').returns(Promise.resolve(false));
+    storage['amp-cid-optout'] = false;
     env.sandbox.stub(url, 'isProxyOrigin').returns(true);
     let scopedCid = undefined;
     let resolved = false;
@@ -991,6 +1113,28 @@ describes.realWin('cid', {amp: true}, (env) => {
             expect(getCookie(win, '_ga')).to.be.null;
           });
       });
+
+      it(
+        'should not store CID in storage if opt-in,' +
+          ' since CID is stored on servers',
+        () => {
+          storageMock.expects('setNonBoolean').never();
+          cid.apiKeyMap_ = {'AMP_ECID_GOOGLE': 'cid-api-key'};
+          const getScopedCidStub = env.sandbox.stub(
+            cid.cidApi_,
+            'getScopedCid'
+          );
+          getScopedCidStub.returns(Promise.resolve('cid-from-api'));
+          return cid.get(
+            {
+              scope: 'AMP_ECID_GOOGLE',
+              cookieName: '_ga',
+              createCookieIfNotPresent: true,
+            },
+            hasConsent
+          );
+        }
+      );
     });
 
   describe('isScopeOptedIn', () => {

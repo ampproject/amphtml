@@ -1,0 +1,7 @@
+{
+  "plugins": [
+    "../../../.."
+  ],
+  "sourceType": "module",
+  "filename": "component.js"
+}

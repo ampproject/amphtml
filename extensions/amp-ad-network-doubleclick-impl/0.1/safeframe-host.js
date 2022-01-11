@@ -1,27 +1,15 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
+import {getStyle, setStyles} from '#core/dom/style';
+import {throttle} from '#core/types/function';
+import {dict, hasOwn} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 
-import {Services} from '../../../src/services';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
-import {getData} from '../../../src/event-helper';
-import {getStyle, setStyles} from '../../../src/style';
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
 import {parseUrlDeprecated} from '../../../src/url';
-import {throttle} from '../../../src/utils/rate-limit';
-import {tryParseJson} from '../../../src/json';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
@@ -203,7 +191,7 @@ export class SafeframeHostApi {
    * Returns true if the given window matches the Safeframe's content window.
    * Comparing to a null window will always return false.
    *
-   * @param {Window|null} otherWindow
+   * @param {?Window} otherWindow
    * @return {boolean}
    */
   equalsSafeframeContentWindow(otherWindow) {
@@ -282,15 +270,11 @@ export class SafeframeHostApi {
    * Returns the initialGeometry to assign to the name of the safeframe
    * for rendering. This needs to be done differently than all the other
    * geometry updates, because we don't actually have access to the
-   * rendered safeframe yet. Note that we are using getPageLayoutBox,
-   * which is not guaranteed to be perfectly accurate as it is from
-   * the last measure of the element. This is fine for our use case
-   * here, as even if the position is slightly off, we'll send the right
-   * size.
+   * rendered safeframe yet.
    * @return {string}
    */
   getInitialGeometry() {
-    const ampAdBox = this.baseInstance_.getPageLayoutBox();
+    const ampAdBox = getPageLayoutBoxBlocking(this.baseInstance_.element);
     const heightOffset = (ampAdBox.height - this.creativeSize_.height) / 2;
     const widthOffset = (ampAdBox.width - this.creativeSize_.width) / 2;
     const iframeBox = /** @type {!../../../src/layout-rect.LayoutRectDef} */ ({
@@ -754,7 +738,7 @@ export class SafeframeHostApi {
       })
       .catch((err) => {
         user().warn(TAG, err);
-        const {width, height} = this.baseInstance_.getSlotSize();
+        const {height, width} = this.baseInstance_.getSlotSize();
         if (width && height) {
           this.onFluidResize_(height);
         }

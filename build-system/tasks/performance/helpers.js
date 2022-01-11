@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
@@ -93,16 +77,15 @@ function getLocalPathFromExtension(extension) {
  * @param {string} version
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function downloadToDisk(url, version = CONTROL) {
+async function downloadToDisk(url, version = CONTROL) {
   touchDirs();
 
-  return fetch(url)
-    .then((response) => response.text())
-    .then((document) => {
-      const filepath = urlToCachePath(url, version);
-      fs.writeFileSync(filepath, document);
-      return filepath.split(`performance/cache/${version}/`)[1];
-    });
+  const response = await fetch(url);
+  const document = await response.text();
+  const filepath = urlToCachePath(url, version);
+  fs.writeFileSync(filepath, document);
+
+  return filepath.split(`performance/cache/${version}/`)[1];
 }
 
 /**
@@ -112,7 +95,7 @@ function downloadToDisk(url, version = CONTROL) {
  * @param {string} version
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function copyToCache(filePath, version = EXPERIMENT) {
+async function copyToCache(filePath, version = EXPERIMENT) {
   touchDirs();
 
   const fromPath = path.join(__dirname, '../../../dist/', filePath);
@@ -122,7 +105,7 @@ function copyToCache(filePath, version = EXPERIMENT) {
 
   fs.copyFileSync(fromPath, destPath);
 
-  return Promise.resolve(filePath);
+  return filePath;
 }
 
 /**
@@ -143,7 +126,7 @@ function maybeCopyImageToCache(configUrl, src) {
 
   touchDirs();
 
-  const filename = src.split('/').pop();
+  const filename = src.split('/').pop() ?? '';
   const destPath = path.join(IMG_CACHE_PATH, filename);
 
   if (!fs.existsSync(destPath)) {
@@ -172,8 +155,8 @@ function getLocalVendorConfig(vendor) {
  * @param {string} filePath
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function getFileFromAbsolutePath(filePath) {
-  return Promise.resolve(fs.readFileSync(filePath));
+async function getFileFromAbsolutePath(filePath) {
+  return fs.readFileSync(filePath, 'utf-8');
 }
 
 /**

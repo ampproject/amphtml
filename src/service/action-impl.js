@@ -1,41 +1,26 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
-  ActionTrust,
+  ActionTrust_Enum,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
   actionTrustToString,
-} from '../action-constants';
-import {Keys} from '../utils/key-codes';
-import {Services} from '../services';
-import {debounce, throttle} from '../utils/rate-limit';
-import {dev, devAssert, user, userAssert} from '../log';
-import {dict, hasOwn, map} from '../utils/object';
-import {getDetail} from '../event-helper';
+} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
+import {isAmp4Email} from '#core/document/format';
+import {isEnabled} from '#core/dom';
+import {isFiniteNumber} from '#core/types';
+import {isArray, toArray} from '#core/types/array';
+import {debounce, throttle} from '#core/types/function';
+import {dict, getValueForExpr, hasOwn, map} from '#core/types/object';
+import {getWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {getDetail} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {reportError} from '../error-reporting';
 import {getMode} from '../mode';
-import {getValueForExpr} from '../json';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
-import {isAmp4Email} from '../format';
-import {isArray, isFiniteNumber, toArray, toWin} from '../types';
-import {isEnabled} from '../dom';
-import {reportError} from '../error';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -66,6 +51,7 @@ const DEFAULT_EMAIL_ALLOWLIST = [
   {tagOrTarget: '*', method: 'hide'},
   {tagOrTarget: '*', method: 'show'},
   {tagOrTarget: '*', method: 'toggleClass'},
+  {tagOrTarget: '*', method: 'toggleChecked'},
   {tagOrTarget: '*', method: 'toggleVisibility'},
 ];
 
@@ -171,7 +157,7 @@ export class ActionInvocation {
    * @param {?Element} source Element that generated the `event`.
    * @param {?Element} caller Element containing the on="..." action handler.
    * @param {?ActionEventDef} event The event object that triggered this action.
-   * @param {!ActionTrust} trust The trust level of this invocation's trigger.
+   * @param {!ActionTrust_Enum} trust The trust level of this invocation's trigger.
    * @param {?string} actionEventType The AMP event name that triggered this.
    * @param {?string} tagOrTarget The global target name or the element tagName.
    * @param {number} sequenceId An identifier for this action's sequence (all
@@ -201,7 +187,7 @@ export class ActionInvocation {
     this.caller = caller;
     /** @const {?ActionEventDef} */
     this.event = event;
-    /** @const {!ActionTrust} */
+    /** @const {!ActionTrust_Enum} */
     this.trust = trust;
     /** @const {?string} */
     this.actionEventType = actionEventType;
@@ -214,7 +200,7 @@ export class ActionInvocation {
   /**
    * Returns true if the trigger event has a trust equal to or greater than
    * `minimumTrust`. Otherwise, logs a user error and returns false.
-   * @param {ActionTrust} minimumTrust
+   * @param {ActionTrust_Enum} minimumTrust
    * @return {boolean}
    */
   satisfiesTrust(minimumTrust) {
@@ -242,7 +228,6 @@ export class ActionInvocation {
  *    simply can search target in DOM and trigger methods on it.
  * 2. A class that configures event recognizers and rules and then
  *    simply calls action.trigger.
- * @implements {../service.EmbeddableService}
  */
 export class ActionService {
   /**
@@ -283,7 +268,7 @@ export class ActionService {
     this.globalTargets_ = map();
 
     /**
-     * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust}>}
+     * @const @private {!Object<string, {handler: ActionHandlerDef, minTrust: ActionTrust_Enum}>}
      */
     this.globalMethodHandlers_ = map();
 
@@ -298,19 +283,6 @@ export class ActionService {
   }
 
   /**
-   * @param {!Window} embedWin
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   * @nocollapse
-   */
-  static installInEmbedWindow(embedWin, ampdoc) {
-    installServiceInEmbedScope(
-      embedWin,
-      'action',
-      new ActionService(ampdoc, embedWin.document)
-    );
-  }
-
-  /**
    * @param {string} name
    * TODO(dvoytenko): switch to a system where the event recognizers are
    * registered with Action instead, e.g. "doubletap", "tap to zoom".
@@ -322,13 +294,13 @@ export class ActionService {
       this.root_.addEventListener('click', (event) => {
         if (!event.defaultPrevented) {
           const element = dev().assertElement(event.target);
-          this.trigger(element, name, event, ActionTrust.HIGH);
+          this.trigger(element, name, event, ActionTrust_Enum.HIGH);
         }
       });
       this.root_.addEventListener('keydown', (event) => {
         const {key, target} = event;
         const element = dev().assertElement(target);
-        if (key == Keys.ENTER || key == Keys.SPACE) {
+        if (key == Keys_Enum.ENTER || key == Keys_Enum.SPACE) {
           const role = element.getAttribute('role');
           const isTapEventRole =
             role && hasOwn(TAPPABLE_ARIA_ROLES, role.toLowerCase());
@@ -337,7 +309,7 @@ export class ActionService {
               element,
               name,
               event,
-              ActionTrust.HIGH
+              ActionTrust_Enum.HIGH
             );
             // Only if the element has an action do we prevent the default.
             // In the absence of an action, e.g. on="[event].method", we do not
@@ -353,13 +325,13 @@ export class ActionService {
         const element = dev().assertElement(event.target);
         // For get requests, the delegating to the viewer needs to happen
         // before this.
-        this.trigger(element, name, event, ActionTrust.HIGH);
+        this.trigger(element, name, event, ActionTrust_Enum.HIGH);
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, (event) => {
         const element = dev().assertElement(event.target);
         this.addTargetPropertiesAsDetail_(event);
-        this.trigger(element, name, event, ActionTrust.HIGH);
+        this.trigger(element, name, event, ActionTrust_Enum.HIGH);
       });
     } else if (name == 'input-debounced') {
       const debouncedInput = debounce(
@@ -370,7 +342,7 @@ export class ActionService {
             target,
             name,
             /** @type {!ActionEventDef} */ (event),
-            ActionTrust.HIGH
+            ActionTrust_Enum.HIGH
           );
         },
         DEFAULT_DEBOUNCE_WAIT
@@ -392,7 +364,7 @@ export class ActionService {
             target,
             name,
             /** @type {!ActionEventDef} */ (event),
-            ActionTrust.HIGH
+            ActionTrust_Enum.HIGH
           );
         },
         DEFAULT_THROTTLE_INTERVAL
@@ -406,7 +378,7 @@ export class ActionService {
     } else if (name == 'valid' || name == 'invalid') {
       this.root_.addEventListener(name, (event) => {
         const element = dev().assertElement(event.target);
-        this.trigger(element, name, event, ActionTrust.HIGH);
+        this.trigger(element, name, event, ActionTrust_Enum.HIGH);
       });
     }
   }
@@ -424,9 +396,9 @@ export class ActionService {
    * Registers the action handler for a common method.
    * @param {string} name
    * @param {ActionHandlerDef} handler
-   * @param {ActionTrust} minTrust
+   * @param {ActionTrust_Enum} minTrust
    */
-  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.DEFAULT) {
+  addGlobalMethodHandler(name, handler, minTrust = ActionTrust_Enum.DEFAULT) {
     this.globalMethodHandlers_[name] = {handler, minTrust};
   }
 
@@ -435,7 +407,7 @@ export class ActionService {
    * @param {!Element} target
    * @param {string} eventType
    * @param {?ActionEventDef} event
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @param {?JsonObject=} opt_args
    * @return {boolean} true if the target has an action.
    */
@@ -451,7 +423,7 @@ export class ActionService {
    * @param {?Element} source
    * @param {?Element} caller
    * @param {?ActionEventDef} event
-   * @param {ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    */
   execute(target, method, args, source, caller, event, trust) {
     const invocation = new ActionInvocation(
@@ -496,7 +468,7 @@ export class ActionService {
     const queuedInvocations = target[ACTION_QUEUE_];
     if (isArray(queuedInvocations)) {
       // Invoke and clear all queued invocations now handler is installed.
-      Services.timerFor(toWin(target.ownerDocument.defaultView)).delay(() => {
+      Services.timerFor(getWin(target)).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         queuedInvocations.forEach((invocation) => {
           try {
@@ -598,7 +570,7 @@ export class ActionService {
    * @param {Array<string>=} opt_forFormat
    */
   addToAllowlist(tagOrTarget, methods, opt_forFormat) {
-    // TODO(wg-runtime): When it becomes possible to getFormat(),
+    // TODO(wg-performance): When it becomes possible to getFormat(),
     // we can store `format_` instead of `isEmail_` and check
     // (opt_forFormat && !opt_forFormat.includes(this.format_))
     if (opt_forFormat && opt_forFormat.includes('email') !== this.isEmail_) {
@@ -626,7 +598,7 @@ export class ActionService {
    * @param {!Element} source
    * @param {string} actionEventType
    * @param {?ActionEventDef} event
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @param {?JsonObject=} opt_args
    * @return {boolean} True if the element has an action.
    * @private
@@ -644,7 +616,7 @@ export class ActionService {
     /** @type {?Promise} */
     let currentPromise = null;
     action.actionInfos.forEach((actionInfo) => {
-      const {target, args, method, str} = actionInfo;
+      const {args, method, str, target} = actionInfo;
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
         const node = this.getActionNode_(target);
@@ -986,26 +958,29 @@ export function parseActionMap(action, context) {
   do {
     tok = toks.next();
     if (
-      tok.type == TokenType.EOF ||
-      (tok.type == TokenType.SEPARATOR && tok.value == ';')
+      tok.type == TokenType_Enum.EOF ||
+      (tok.type == TokenType_Enum.SEPARATOR && tok.value == ';')
     ) {
       // Expected, ignore.
-    } else if (tok.type == TokenType.LITERAL || tok.type == TokenType.ID) {
+    } else if (
+      tok.type == TokenType_Enum.LITERAL ||
+      tok.type == TokenType_Enum.ID
+    ) {
       // Format: event:target.method
 
       // Event: "event:"
       const event = tok.value;
 
       // Target: ":target." separator
-      assertToken(toks.next(), [TokenType.SEPARATOR], ':');
+      assertToken(toks.next(), [TokenType_Enum.SEPARATOR], ':');
 
       const actions = [];
 
       // Handlers for event.
       do {
         const target = assertToken(toks.next(), [
-          TokenType.LITERAL,
-          TokenType.ID,
+          TokenType_Enum.LITERAL,
+          TokenType_Enum.ID,
         ]).value;
 
         // Method: ".method". Method is optional.
@@ -1013,15 +988,17 @@ export function parseActionMap(action, context) {
         let args = null;
 
         peek = toks.peek();
-        if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
+        if (peek.type == TokenType_Enum.SEPARATOR && peek.value == '.') {
           toks.next(); // Skip '.'
           method =
-            assertToken(toks.next(), [TokenType.LITERAL, TokenType.ID]).value ||
-            method;
+            assertToken(toks.next(), [
+              TokenType_Enum.LITERAL,
+              TokenType_Enum.ID,
+            ]).value || method;
 
           // Optionally, there may be arguments: "(key = value, key = value)".
           peek = toks.peek();
-          if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
+          if (peek.type == TokenType_Enum.SEPARATOR && peek.value == '(') {
             toks.next(); // Skip '('
             args = tokenizeMethodArguments(toks, assertToken, assertAction);
           }
@@ -1040,7 +1017,7 @@ export function parseActionMap(action, context) {
 
         peek = toks.peek();
       } while (
-        peek.type == TokenType.SEPARATOR &&
+        peek.type == TokenType_Enum.SEPARATOR &&
         peek.value == ',' &&
         toks.next()
       ); // skip "," when found
@@ -1054,7 +1031,7 @@ export function parseActionMap(action, context) {
       // Unexpected token.
       assertAction(false, `; unexpected token [${tok.value || ''}]`);
     }
-  } while (tok.type != TokenType.EOF);
+  } while (tok.type != TokenType_Enum.EOF);
 
   return actionMap;
 }
@@ -1072,38 +1049,38 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
   let tok;
   let args = null;
   // Object literal. Format: {...}
-  if (peek.type == TokenType.OBJECT) {
+  if (peek.type == TokenType_Enum.OBJECT) {
     // Don't parse object literals. Tokenize as a single expression
     // fragment and delegate to specific action handler.
     args = map();
     const {value} = toks.next();
     args[RAW_OBJECT_ARGS_KEY] = value;
-    assertToken(toks.next(), [TokenType.SEPARATOR], ')');
+    assertToken(toks.next(), [TokenType_Enum.SEPARATOR], ')');
   } else {
     // Key-value pairs. Format: key = value, ....
     do {
       tok = toks.next();
       const {type, value} = tok;
-      if (type == TokenType.SEPARATOR && (value == ',' || value == ')')) {
+      if (type == TokenType_Enum.SEPARATOR && (value == ',' || value == ')')) {
         // Expected: ignore.
-      } else if (type == TokenType.LITERAL || type == TokenType.ID) {
+      } else if (type == TokenType_Enum.LITERAL || type == TokenType_Enum.ID) {
         // Key: "key = "
-        assertToken(toks.next(), [TokenType.SEPARATOR], '=');
+        assertToken(toks.next(), [TokenType_Enum.SEPARATOR], '=');
         // Value is either a literal or an expression: "foo.bar.baz"
         tok = assertToken(toks.next(/* convertValue */ true), [
-          TokenType.LITERAL,
-          TokenType.ID,
+          TokenType_Enum.LITERAL,
+          TokenType_Enum.ID,
         ]);
         const argValueTokens = [tok];
         // Expressions have one or more dereferences: ".identifier"
-        if (tok.type == TokenType.ID) {
+        if (tok.type == TokenType_Enum.ID) {
           for (
             peek = toks.peek();
-            peek.type == TokenType.SEPARATOR && peek.value == '.';
+            peek.type == TokenType_Enum.SEPARATOR && peek.value == '.';
             peek = toks.peek()
           ) {
             toks.next(); // Skip '.'.
-            tok = assertToken(toks.next(false), [TokenType.ID]);
+            tok = assertToken(toks.next(false), [TokenType_Enum.ID]);
             argValueTokens.push(tok);
           }
         }
@@ -1114,7 +1091,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
         args[value] = argValue;
         peek = toks.peek();
         assertAction(
-          peek.type == TokenType.SEPARATOR &&
+          peek.type == TokenType_Enum.SEPARATOR &&
             (peek.value == ',' || peek.value == ')'),
           'Expected either [,] or [)]'
         );
@@ -1122,7 +1099,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
         // Unexpected token.
         assertAction(false, `; unexpected token [${tok.value || ''}]`);
       }
-    } while (!(tok.type == TokenType.SEPARATOR && tok.value == ')'));
+    } while (!(tok.type == TokenType_Enum.SEPARATOR && tok.value == ')'));
   }
   return args;
 }
@@ -1208,7 +1185,7 @@ function assertActionForParser(s, context, condition, opt_message) {
  * @param {string} s
  * @param {!Element} context
  * @param {!TokenDef} tok
- * @param {Array<TokenType>} types
+ * @param {Array<TokenType_Enum>} types
  * @param {*=} opt_value
  * @return {!TokenDef}
  * @private
@@ -1230,7 +1207,7 @@ function assertTokenForParser(s, context, tok, types, opt_value) {
 /**
  * @enum {number}
  */
-const TokenType = {
+const TokenType_Enum = {
   INVALID: 0,
   EOF: 1,
   SEPARATOR: 2,
@@ -1240,7 +1217,7 @@ const TokenType = {
 };
 
 /**
- * @typedef {{type: TokenType, value: *}}
+ * @typedef {{type: TokenType_Enum, value: *}}
  */
 let TokenDef;
 
@@ -1294,12 +1271,12 @@ class ParserTokenizer {
 
   /**
    * @param {boolean} convertValues
-   * @return {!{type: TokenType, value: *, index: number}}
+   * @return {!{type: TokenType_Enum, value: *, index: number}}
    */
   next_(convertValues) {
     let newIndex = this.index_ + 1;
     if (newIndex >= this.str_.length) {
-      return {type: TokenType.EOF, index: this.index_};
+      return {type: TokenType_Enum.EOF, index: this.index_};
     }
 
     let c = this.str_.charAt(newIndex);
@@ -1313,7 +1290,7 @@ class ParserTokenizer {
         }
       }
       if (newIndex >= this.str_.length) {
-        return {type: TokenType.EOF, index: newIndex};
+        return {type: TokenType_Enum.EOF, index: newIndex};
       }
       c = this.str_.charAt(newIndex);
     }
@@ -1341,12 +1318,12 @@ class ParserTokenizer {
       const s = this.str_.substring(newIndex, end);
       const value = hasFraction ? parseFloat(s) : parseInt(s, 10);
       newIndex = end - 1;
-      return {type: TokenType.LITERAL, value, index: newIndex};
+      return {type: TokenType_Enum.LITERAL, value, index: newIndex};
     }
 
     // Different separators.
     if (SEPARATOR_SET.indexOf(c) != -1) {
-      return {type: TokenType.SEPARATOR, value: c, index: newIndex};
+      return {type: TokenType_Enum.SEPARATOR, value: c, index: newIndex};
     }
 
     // String literal.
@@ -1359,11 +1336,11 @@ class ParserTokenizer {
         }
       }
       if (end == -1) {
-        return {type: TokenType.INVALID, index: newIndex};
+        return {type: TokenType_Enum.INVALID, index: newIndex};
       }
       const value = this.str_.substring(newIndex + 1, end);
       newIndex = end;
-      return {type: TokenType.LITERAL, value, index: newIndex};
+      return {type: TokenType_Enum.LITERAL, value, index: newIndex};
     }
 
     // Object literal.
@@ -1383,11 +1360,11 @@ class ParserTokenizer {
         }
       }
       if (end == -1) {
-        return {type: TokenType.INVALID, index: newIndex};
+        return {type: TokenType_Enum.INVALID, index: newIndex};
       }
       const value = this.str_.substring(newIndex, end + 1);
       newIndex = end;
-      return {type: TokenType.OBJECT, value, index: newIndex};
+      return {type: TokenType_Enum.OBJECT, value, index: newIndex};
     }
 
     // Advance until next special character.
@@ -1403,16 +1380,16 @@ class ParserTokenizer {
     // Boolean literal.
     if (convertValues && (s == 'true' || s == 'false')) {
       const value = s == 'true';
-      return {type: TokenType.LITERAL, value, index: newIndex};
+      return {type: TokenType_Enum.LITERAL, value, index: newIndex};
     }
 
     // Identifier.
     if (!isNum(s.charAt(0))) {
-      return {type: TokenType.ID, value: s, index: newIndex};
+      return {type: TokenType_Enum.ID, value: s, index: newIndex};
     }
 
     // Key.
-    return {type: TokenType.LITERAL, value: s, index: newIndex};
+    return {type: TokenType_Enum.LITERAL, value: s, index: newIndex};
   }
 }
 

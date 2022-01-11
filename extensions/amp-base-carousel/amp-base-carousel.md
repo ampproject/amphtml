@@ -5,23 +5,8 @@ formats:
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis or vertical axis.
 experimental: true
+bento: true
 ---
-
-<!---
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 
 # amp-base-carousel
 
@@ -39,25 +24,84 @@ navigational arrows to go forward or backwards a single item.
 The carousel advances between items if the user swipes or uses the customizable
 arrow buttons.
 
+### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-base-carousel`, see [**`bento-base-carousel`**](./1.0/README.md).
+
+### Behavior users should be aware of
+
+#### Right-to-left slide change
+
+`<amp-base-carousel>` requires that you define when it is in an
+right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will
+generally work without this, there may be a few bugs. You can let the carousel
+know that it should operate as `rtl` as follows:
+
+```html
+<amp-base-carousel dir="rtl" …>
+  …
+</amp-base-carousel>
+```
+
+If the carousel is in a RTL context, and you want the carousel to operate as
+LTR, you can explicitly set the `dir="ltr"` on the carousel.
+
+#### Slide layout
+
+Slides are automatically sized by the carousel when **not** specifying
+`mixed-lengths`. You should give the slides `layout="flex-item"`:
+
+```html
+<amp-base-carousel …>
+  <amp-img layout="flex-item" src="…"></amp-img>
+</amp-base-carousel>
+```
+
+The slides have a default height of `100%` when the carousel is laid out
+horizontally. This can easily be changed with CSS or by using
+`layout="fixed-height"`. When specifying the height, the slide will be
+vertically centered within the carousel.
+
+If you want to horizontally center your slide content, you will want to create a
+wrapping element, and use that to center the content.
+
+#### Number of visible slides
+
+When changing the number of visible slides using `visible-slides`, in response
+to a media query, you will likely want to change the aspect ratio of the
+carousel itself to match the new number of visible slides. For example, if you
+want to show three slides at a time with a one by one aspect ratio, you would
+want an aspect ratio of three by one for the carousel itself. Similiarly, with
+four slides at a time you would want an aspect ratio of four by one. In
+addition, when changing `visible-slides`, you likely want to change
+`advance-count`.
+
+```html
+<!-- Using an aspect ratio of 3:2 for the slides in this example. -->
+<amp-base-carousel
+  layout="responsive"
+  width="3"
+  height="1"
+  heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)"
+  visible-count="(min-width: 600px) 4, 3"
+  advance-count="(min-width: 600px) 4, 3"
+>
+  <amp-img layout="flex-item" src="…"></amp-img>
+  …
+</amp-base-carousel>
+```
+
 ## Attributes
 
 ### Media Queries
 
 The attributes for `<amp-base-carousel>` can be configured to use different
-options based on a media query. You can also use a value without any media
-queries. The format looks like:
-
-```html
-<amp-base-carousel
-  attr-name="(min-width: 1000px) valueOne, (min-width: 600px) valueTwo, defaultValue"
-></amp-base-carousel>
-```
-
-The media queries are evaluated from left to right, with the first matching
-media query being used. A default value (without a media query) is required. In
-this case, if the page has a screen width of 1000px or more, `valueOne` is used.
-If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or
-smaller, `defaultValue` is used.
+options based on a [media query](./../../docs/spec/amp-html-responsive-attributes.md).
 
 ### Configuration Options
 
@@ -124,9 +168,17 @@ carousel.
 ##### snap-by
 
 A number, defaults to `1`. This determines the granularity of snapping and is
-useful when using `visible-count`. This
+useful when using `visible-count`.
 
 #### Miscellaneous
+
+##### controls
+
+Either `"always"`, `"auto"`, or `"never"`, defaults to `"auto"`. This determines if and when prev/next navigational arrows are displayed. Note: When `outset-arrows` is `true`, the arrows are shown `"always"`.
+
+-   `always`: Arrows are always displayed.
+-   `auto`: Arrows are displayed when the carousel has most recently received interaction via mouse, and not displayed when the carousel has most recently received interaction via touch. On first load for touch devices, arrows are displayed until first interaction.
+-   `never`: Arrows are never displayed.
 
 ##### slide
 
@@ -136,15 +188,11 @@ showing.
 
 ##### loop
 
-Either `true` or `false`, defaults to `true`. When true, the carousel will allow
-the user to move from the first item back to the last item and visa versa. There
-must be at least three slides present for looping to occur.
+Either `true` or `false`, defaults to `false` when omitted. When true, the carousel will allow the user to move from the first item back to the last item and visa versa. There must be at least three times the `visible-count` of slides present for looping to occur.
 
-##### horizontal
+##### orientation
 
-Either `true` or `false`, defaults to `true`. When true the carousel will lay
-out horizontally, with the user being able to swipe left and right. When false,
-the carousel lays out vertically, with the user being able to swipe up and down.
+Either `horizontal` or `vertical`, defaults to `horizontal`. When `horizontal` the carousel will lay out horizontally, with the user being able to swipe left and right. When `vertical`, the carousel lays out vertically, with the user being able to swipe up and down.
 
 ##### common attributes
 
@@ -232,69 +280,6 @@ location, you can use the following HTML:
   <button on="tap:carousel-1.next()">Next</button>
 ```
 
-## Usage Notes
+## Version notes
 
-### RTL
-
-`<amp-base-carousel>` currently requires that you let it know when it is in an
-right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will
-generally work without this, there may be a few bugs. You can let the carousel
-know that it should operate as `rtl` as follows:
-
-```html
-<amp-base-carousel dir="rtl" …>
-  …
-</amp-base-carousel>
-```
-
-If the carousel is in a RTL context, and you want the carousel to operate as
-LTR, you can explicitly set the `dir="ltr"` on the carousel.
-
-### Slide layout
-
-Slides are automatically sized by the carousel when **not** specifying
-`mixed-lengths`. You should give the slides `layout="flex-item"`:
-
-```html
-<amp-base-carousel …>
-  <amp-img layout="flex-item" src="…"></amp-img>
-</amp-base-carousel>
-```
-
-The slides have a default height of `100%` when the carousel is laid out
-horizontally. This can easily be changed with CSS or by using
-`layout="fixed-height"`. When specifying the height, the slide will be
-vertically centered within the carousel.
-
-If you want to horizontally center your slide content, you will want to create a
-wrapping element, and use that to center the content.
-
-### Number of Visible Slides
-
-When changing the number of visible slides using `visible-slides`, in response
-to a media query, you will likely want to change the aspect ratio of the
-carousel itself to match the new number of visible slides. For example, if you
-want to show three slides at a time with a one by one aspect ratio, you would
-want an aspect ratio of three by one for the carousel itself. Similiarly, with
-four slides at a time you would want an aspect ratio of four by one. In
-addition, when changing `visible-slides`, you likely want to change
-`advance-count`.
-
-```html
-<!-- Using an aspect ratio of 3:2 for the slides in this example. -->
-<amp-base-carousel
-  layout="responsive"
-  width="3"
-  height="1"
-  heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)"
-  visible-count="(min-width: 600px) 4, 3"
-  advance-count="(min-width: 600px) 4, 3"
->
-  <amp-img layout="flex-item" src="…"></amp-img>
-  …
-</amp-base-carousel>
-```
-
-## Validation
-
-See [amp-base-carousel rules](validator-amp-base-carousel.protoascii) in the AMP validator specification.
+Unlike `0.1`, the experimental `1.0` version of `amp-base-carousel` allows configuring the carousel slide orientation via `"orientation"="horizontal"|"vertical"` attributes instead of `"horizontal"="true"|"false"` attributes.

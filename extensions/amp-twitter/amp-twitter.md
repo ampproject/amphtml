@@ -2,32 +2,17 @@
 $category@: social
 formats:
   - websites
-  - stories
 teaser:
   text: Displays a Twitter Tweet or Moment.
+experimental: true
+bento: true
 ---
-
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
 
 # amp-twitter
 
 ## Behavior
 
-The `amp-twitter` component allows you to embed a Tweet or Moment for the specified Twitter ID.
+The `amp-twitter` component allows you to embed a Tweet or Moment.
 
 Here's an example of a basic embedded Tweet:
 
@@ -44,6 +29,15 @@ Here's an example of a basic embedded Tweet:
 ```
 
 [/example]
+
+### Standalone use outside valid AMP documents
+
+Bento allows you to use AMP components in non-AMP pages without needing
+to commit to fully valid AMP. You can take these components and place them
+in implementations with frameworks and CMSs that don't support AMP. Read
+more in our guide [Use AMP components in non-AMP pages](https://amp.dev/documentation/guides-and-tutorials/start/bento_guide/).
+
+To find the standalone version of `amp-twitter`, see [**`bento-twitter`**](./1.0/README.md).
 
 ## Appearance
 
@@ -132,6 +126,10 @@ For details on the available arguments, see the "Timelines" section in <a href="
     <td>You can specify options for the Tweet, Moment, or Timeline appearance by setting <code>data-</code> attributes. For example, <code>data-cards="hidden"</code> deactivates Twitter cards.
 For details on the available options, see Twitter's docs <a href="https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference">for tweets</a>, <a href="https://developer.twitter.com/en/docs/twitter-for-websites/moments/guides/parameter-reference0">for moments</a> and <a href="https://developer.twitter.com/en/docs/twitter-for-websites/timelines/guides/parameter-reference">for timelines</a>.</td>
   </tr>
+   <tr>
+    <td width="40%"><strong>title (optional)</strong></td>
+    <td>Define a <code>title</code> attribute for the component. The default is <code>Twitter</code>.</td>
+  </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
@@ -140,4 +138,4 @@ For details on the available options, see Twitter's docs <a href="https://develo
 
 ## Validation
 
-See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/validator-amp-twitter.protoascii) in the AMP validator specification.
+See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-twitter/validator-amp-twitter.protoascii) in the AMP validator specification.

@@ -1,0 +1,198 @@
+<!--
+  Demonstrates Showcase metering,
+  with *subscription* entitlements that grant.
+
+  Since the subscription entitlements grant,
+  the metering entitlements should be ignored.
+
+  (amp-subscriptions-google)
+-->
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Showcase with subscription entitlements that grant</title>
+    <link rel="canonical" href="amp-subscriptions-metering-gaa-bail.amp.html" />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      }
+      @-webkit-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-moz-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-ms-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-o-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+    </style>
+    <noscript
+      ><style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style></noscript
+    >
+    <script
+      async
+      custom-element="amp-subscriptions"
+      src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-subscriptions-google"
+      src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"
+    ></script>
+    <script
+      async
+      custom-template="amp-mustache"
+      src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"
+    ></script>
+    <script
+      async
+      custom-element="amp-analytics"
+      src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"
+    ></script>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "isAccessibleForFree": "False",
+        "publisher": {
+          "name": "The Scenic - USA",
+          "@type": "Organization",
+          "@id": "scenic-2017.appspot.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://scenic-2017.appspot.com/icons/icon-2x.png"
+          }
+        },
+        "isPartOf": {
+          "@type": ["CreativeWork", "Product"],
+          "name": "Product A",
+          "productID": "scenic-2017.appspot.com:news"
+        }
+      }
+    </script>
+    <script type="application/json" id="amp-subscriptions">
+      {
+        "services": [
+          {
+            "authorizationUrl": "//localhost:8000/subscription/1/entitlements",
+            "pingbackUrl": "//localhost:8000/subscription/pingback",
+            "actions": {
+              "login": "//localhost:8000/subscription/login",
+              "subscribe": "//localhost:8000/subscription/subscribe"
+            }
+          },
+          {
+            "serviceId": "subscribe.google.com",
+            "enableMetering": true,
+            "googleSignInHelperUrl": "http://localhost:8000/examples/amp-subscriptions-google/amp-subscriptions-metering-registration-widget.html",
+            "extendedAccessRegistrationUrl": "http://localhost:8000/subscription/register"
+          }
+        ]
+      }
+    </script>
+
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <style amp-custom>
+      body {
+        margin: 0;
+        font-family: 'Roboto', Serif;
+      }
+
+      .content-container p {
+        line-height: 1.4;
+      }
+
+      header,
+      .article-body {
+        margin: 15px;
+      }
+
+      .header-time {
+        color: #a8a3ae;
+        font-family: 'Roboto';
+        font-size: 12px;
+      }
+
+      h1 {
+        margin: 5px 0;
+        font-weight: normal;
+      }
+    </style>
+  </head>
+  <body>
+    <main role="main">
+      <article>
+        <div class="content-container">
+          <header>
+            <h1 itemprop="headline">SwG Metering Example</h1>
+            <time
+              class="header-time"
+              itemprop="datePublished"
+              datetime="2015-09-14 13:00"
+              >January 1, 1970</time
+            >
+          </header>
+
+          <div subscriptions-section="content-not-granted" class="article-body">
+            <p>-- PAYWALL --</p>
+          </div>
+
+          <div subscriptions-section="content" class="article-body">
+            <p>🎉 Congratulations! You unlocked the paywall!</p>
+          </div>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>
