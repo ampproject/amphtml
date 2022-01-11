@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Bento Date Display</title>
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+  <script async src="https://cdn.ampproject.org/bento.js"></script>
+  <script async src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css">
+  </head>
+  <body>
+    <h1>Date Display</h1>
+    <template id="t1">
+      <p>${dayName}, ${monthName} ${day}th ${year}</p>
+    </template>
+
+    <bento-date-display
+      datetime="2021-12-09T16:02:08.494Z"
+      displayIn="utc"
+      locale="en-GB"
+      template="t1"
+    >
+    </bento-date-display>
+  </body>
+</html>
