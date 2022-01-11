@@ -550,6 +550,9 @@ AmpElement.prototype.isBuildRenderBlocking = function () {};
 /** @return {boolean} */
 AmpElement.prototype.prerenderAllowed = function () {};
 
+/** @return {boolean} */
+AmpElement.prototype.previewAllowed = function () {};
+
 /** @return {string} */
 AmpElement.prototype.getLayout = function () {};
 

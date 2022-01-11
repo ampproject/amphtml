@@ -127,7 +127,7 @@ export class PreactBaseElement extends BaseElement {
   }
 
   /** @override @nocollapse */
-  static prerenderAllowed() {
+  static previewAllowed() {
     // eslint-disable-next-line local/no-static-this
     return this.previewAllowed();
   }
