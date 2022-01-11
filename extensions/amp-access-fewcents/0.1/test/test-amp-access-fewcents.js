@@ -25,7 +25,7 @@ const paywallResponse = {
   message: 'Amp article price returned with unlock url.',
   data: {
     loginUrl:
-      'https://wallet.hounds.fewcents.co?login_source=amp_paywall&login_publisher_id=47&login_publisher_bid_id=90531&bid_mode=paywall&bid_price=622.38&login_redirect_url=http%3A%2F%2Flocalhost%3A8000%2Fexamples%2Famp-access-fewcents.html&login_publisher_logo_url=https%3A%2F%2Fi1.wp.com%2Fthefix.media%2Fwp-content%2Fuploads%2F2021%2F04%2Flogo-no-margins.png&amp_reader_id=amp-yfpD7ewsxdSdbH4xCboNIw',
+      'https://wallet.hounds.fewcents.co/?login_source=amp_paywall&login_publisher_id=47&login_publisher_bid_id=90531&bid_mode=paywall&bid_price=622.38&login_redirect_url=http%3A%2F%2Flocalhost%3A8000%2Fexamples%2Famp-access-fewcents.html&login_publisher_logo_url=https%3A%2F%2Fi1.wp.com%2Fthefix.media%2Fwp-content%2Fuploads%2F2021%2F04%2Flogo-no-margins.png&amp_reader_id=amp-yfpD7ewsxdSdbH4xCboNIw',
     purchaseOptions: [
       {
         price: {
@@ -33,7 +33,7 @@ const paywallResponse = {
           price: 622.38,
         },
         unlockUrl:
-          'https://wallet.hounds.fewcents.co?login_source=amp_paywall&login_publisher_id=47&login_publisher_bid_id=90531&bid_mode=paywall&bid_price=622.38&login_redirect_url=http%3A%2F%2Flocalhost%3A8000%2Fexamples%2Famp-access-fewcents.html&login_publisher_logo_url=https%3A%2F%2Fi1.wp.com%2Fthefix.media%2Fwp-content%2Fuploads%2F2021%2F04%2Flogo-no-margins.png&amp_reader_id=amp-yfpD7ewsxdSdbH4xCboNIw',
+          'https://wallet.hounds.fewcents.co/?login_source=amp_paywall&login_publisher_id=47&login_publisher_bid_id=90531&bid_mode=paywall&bid_price=622.38&login_redirect_url=http%3A%2F%2Flocalhost%3A8000%2Fexamples%2Famp-access-fewcents.html&login_publisher_logo_url=https%3A%2F%2Fi1.wp.com%2Fthefix.media%2Fwp-content%2Fuploads%2F2021%2F04%2Flogo-no-margins.png&amp_reader_id=amp-yfpD7ewsxdSdbH4xCboNIw',
       },
     ],
     bidId: 90531,
@@ -285,7 +285,7 @@ describes.realWin(
         vendor.purchaseOptions_ = {
           price: {currency: 'INR', price: '881'},
           unlockUrl:
-            'https://wallet.hounds.fewcents.co?login_source=amp…53A8000%252Fexamples%252Famp-access-fewcents.html',
+            'https://wallet.hounds.fewcents.co/?login_source=amp…53A8000%252Fexamples%252Famp-access-fewcents.html',
         };
         vendor.renderPurchaseOverlay_();
       });
