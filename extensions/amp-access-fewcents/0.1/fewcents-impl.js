@@ -145,17 +145,18 @@ export class AmpAccessFewcents {
 
     const {hostname} = parseUrlDeprecated();
 
-    return (
+    const url =
       CONFIG_BASE_PATH +
       '&accessKey=' +
-      accessKey +
+      encodeURIComponent(accessKey) +
       '&category=' +
-      category +
+      encodeURIComponent(category) +
       '&articleIdentifier=' +
-      articleIdentifier +
+      encodeURIComponent(articleIdentifier) +
       '&domain=' +
-      hostname
-    );
+      encodeURIComponent(hostname);
+
+    return url;
   }
 
   /**
