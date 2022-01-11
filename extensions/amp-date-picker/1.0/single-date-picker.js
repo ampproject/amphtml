@@ -47,12 +47,10 @@ export function SingleDatePicker({
   const [attributes, setAttributes] = useState();
 
   const onErrorRef = useRef(onError);
-
   const containerRef = useRef();
+  const {isDisabled} = useAttributes();
 
   const [isOpen] = useState(mode === DatePickerMode.STATIC);
-
-  const {isDisabled} = useAttributes();
 
   /**
    * Generate a name for a hidden input.

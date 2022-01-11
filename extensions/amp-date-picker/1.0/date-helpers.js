@@ -1,6 +1,6 @@
-import {format, isValid, parse} from 'date-fns';
+import {format, isValid, parse, startOfToday} from 'date-fns';
 
-import {DEFAULT_FORMAT} from '../0.1/constants';
+import {ISO_8601} from './constants';
 /**
  * Forgivingly parse an ISO8601 input string into a date object,
  * preferring the date picker's configured format.
@@ -26,7 +26,7 @@ export function parseDate(value, dateFormat) {
  * @param {string} dateFormat
  * @return {string}
  */
-export function getFormattedDate(date, dateFormat = DEFAULT_FORMAT) {
+export function getFormattedDate(date, dateFormat = ISO_8601) {
   if (!date) {
     return '';
   }
@@ -40,5 +40,5 @@ export function getFormattedDate(date, dateFormat = DEFAULT_FORMAT) {
  * @return {Date}
  */
 export function getCurrentDate() {
-  return new Date();
+  return startOfToday();
 }

@@ -667,7 +667,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
   });
 
-  describe('limiting the available days', () => {
+  describe('limiting the available days for a single date picker', () => {
     it('disables all days before the min if a min is specified', () => {
       const expectedDisbledDates = [
         new Date(2022, 0, 1),
@@ -680,6 +680,118 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           type="single"
           initialVisibleMonth={new Date(2022, 0)}
           min={new Date(2022, 0, 5)}
+        />
+      );
+      expectedDisbledDates.forEach((date) => {
+        const formattedDate = format(date, DATE_FORMAT);
+        expect(
+          wrapper
+            .find(`button[aria-label="Not available. ${formattedDate}"]`)
+            .prop('aria-disabled')
+        ).to.be.true;
+      });
+    });
+
+    it("defaults the min today's date if no min is specified", () => {
+      env.sandbox
+        .stub(helpers, 'getCurrentDate')
+        .callsFake(() => new Date(2022, 0, 3));
+
+      const expectedDisbledDates = [new Date(2022, 0, 1), new Date(2022, 0, 2)];
+      const wrapper = mount(
+        <DatePicker type="single" initialVisibleMonth={new Date(2022, 0)} />
+      );
+      expectedDisbledDates.forEach((date) => {
+        const formattedDate = format(date, DATE_FORMAT);
+        expect(
+          wrapper
+            .find(`button[aria-label="Not available. ${formattedDate}"]`)
+            .prop('aria-disabled')
+        ).to.be.true;
+      });
+    });
+
+    it('disables all days after the max if the max is specified', () => {
+      const expectedDisbledDates = [
+        new Date(2022, 0, 28),
+        new Date(2022, 0, 29),
+        new Date(2022, 0, 30),
+        new Date(2022, 0, 31),
+      ];
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2022, 0)}
+          max={new Date(2022, 0, 27)}
+        />
+      );
+      expectedDisbledDates.forEach((date) => {
+        const formattedDate = format(date, DATE_FORMAT);
+        expect(
+          wrapper
+            .find(`button[aria-label="Not available. ${formattedDate}"]`)
+            .prop('aria-disabled')
+        ).to.be.true;
+      });
+    });
+  });
+
+  describe('limiting the available days for a date range picker', () => {
+    it('disables all days before the min if a min is specified', () => {
+      const expectedDisbledDates = [
+        new Date(2022, 0, 1),
+        new Date(2022, 0, 2),
+        new Date(2022, 0, 3),
+        new Date(2022, 0, 4),
+      ];
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          initialVisibleMonth={new Date(2022, 0)}
+          min={new Date(2022, 0, 5)}
+        />
+      );
+      expectedDisbledDates.forEach((date) => {
+        const formattedDate = format(date, DATE_FORMAT);
+        expect(
+          wrapper
+            .find(`button[aria-label="Not available. ${formattedDate}"]`)
+            .prop('aria-disabled')
+        ).to.be.true;
+      });
+    });
+
+    it("defaults the min today's date if no min is specified", () => {
+      env.sandbox
+        .stub(helpers, 'getCurrentDate')
+        .callsFake(() => new Date(2022, 0, 3));
+
+      const expectedDisbledDates = [new Date(2022, 0, 1), new Date(2022, 0, 2)];
+      const wrapper = mount(
+        <DatePicker type="range" initialVisibleMonth={new Date(2022, 0)} />
+      );
+      expectedDisbledDates.forEach((date) => {
+        const formattedDate = format(date, DATE_FORMAT);
+        expect(
+          wrapper
+            .find(`button[aria-label="Not available. ${formattedDate}"]`)
+            .prop('aria-disabled')
+        ).to.be.true;
+      });
+    });
+
+    it('disables all days after the max if the max is specified', () => {
+      const expectedDisbledDates = [
+        new Date(2022, 0, 28),
+        new Date(2022, 0, 29),
+        new Date(2022, 0, 30),
+        new Date(2022, 0, 31),
+      ];
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          initialVisibleMonth={new Date(2022, 0)}
+          max={new Date(2022, 0, 27)}
         />
       );
       expectedDisbledDates.forEach((date) => {

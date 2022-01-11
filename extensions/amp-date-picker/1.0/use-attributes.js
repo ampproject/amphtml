@@ -1,4 +1,4 @@
-import {format, isBefore, subDays} from 'date-fns';
+import {format, isAfter, isBefore, subDays} from 'date-fns';
 
 import {createContext, useCallback, useContext} from 'src/preact';
 
@@ -17,7 +17,8 @@ export function useAttributes() {
   if (!context) {
     throw new Error('Must be wrapped in LabelContext.Provider component');
   }
-  const {allowBlockedEndDate, blockedDates, highlightedDates, min} = context;
+  const {allowBlockedEndDate, blockedDates, highlightedDates, max, min} =
+    context;
 
   const getFormattedDate = useCallback((date) => {
     return format(date, DATE_FORMAT);
@@ -30,16 +31,23 @@ export function useAttributes() {
     [min]
   );
 
+  const isAfterMax = useCallback(
+    (date) => {
+      return isAfter(date, max);
+    },
+    [max]
+  );
+
   const isDisabled = useCallback(
     (date) => {
-      if (isBeforeMin(date)) {
+      if (isBeforeMin(date) || isAfterMax(date)) {
         return true;
       }
       const allowBlocked =
         allowBlockedEndDate && !blockedDates.contains(subDays(date, 1));
       return blockedDates.contains(date) && !allowBlocked;
     },
-    [blockedDates, allowBlockedEndDate, isBeforeMin]
+    [blockedDates, allowBlockedEndDate, isBeforeMin, isAfterMax]
   );
 
   const isHighlighted = useCallback(
