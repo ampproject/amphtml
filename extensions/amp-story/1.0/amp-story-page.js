@@ -11,10 +11,6 @@ import * as Preact from '#core/dom/jsx';
  */
 import {isAutoplaySupported, tryPlay} from '#core/dom/video';
 import {
-  AFFILIATE_LINK_SELECTOR,
-  AmpStoryAffiliateLink,
-} from './amp-story-affiliate-link';
-import {
   Action,
   StateProperty,
   UIType,
@@ -43,9 +39,7 @@ import {dev} from '#utils/log';
 import {dict} from '#core/types/object';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {localize} from './amp-story-localization-service';
-import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
-import {getMode} from '../../../src/mode';
 import {isExperimentOn} from '#experiments';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {listen, listenOnce} from '#utils/event-helper';
@@ -506,8 +500,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
-
-    this.reportDevModeErrors_();
   }
 
   /** @override */
@@ -644,7 +636,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   findAndPrepareEmbeddedComponents_() {
     this.addClickShieldToEmbeddedComponents_();
-    this.buildAffiliateLinks_();
   }
 
   /**
@@ -665,18 +656,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       componentEls.forEach((el) => {
         el.classList.add('i-amphtml-embedded-component');
       });
-    });
-  }
-
-  /**
-   * Initializes affiliate links.
-   */
-  buildAffiliateLinks_() {
-    toArray(
-      scopedQuerySelectorAll(this.element, AFFILIATE_LINK_SELECTOR)
-    ).forEach((el) => {
-      const link = new AmpStoryAffiliateLink(this.win, el);
-      link.build();
     });
   }
 
@@ -1341,26 +1320,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK,
       pageHasElementWithPlayback
     );
-  }
-
-  /**
-   * @private
-   */
-  reportDevModeErrors_() {
-    if (!getMode().development) {
-      return;
-    }
-
-    getLogEntries(this.element).then((logEntries) => {
-      dispatch(
-        this.win,
-        this.element,
-        EventType.DEV_LOG_ENTRIES_AVAILABLE,
-        // ? is OK because all consumers are internal.
-        /** @type {?} */ (logEntries),
-        {bubbles: true}
-      );
-    });
   }
 
   /**

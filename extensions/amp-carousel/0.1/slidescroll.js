@@ -417,7 +417,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   }
 
   /**
-   * @param {!LayoutSize} size
+   * @param {import('#core/dom/layout/rect').LayoutSizeDef} size
    * @private
    */
   onResized_(size) {

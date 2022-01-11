@@ -62,7 +62,7 @@ const EMBEDDED_COMPONENTS_SELECTORS = {
 const LAUNCHABLE_COMPONENTS = {
   'a': {
     actionIcon: LAUNCH_ICON_CLASS,
-    selector: 'a[href]:not([affiliate-link-icon])',
+    selector: 'a[href]',
   },
   ...EMBEDDED_COMPONENTS_SELECTORS,
 };

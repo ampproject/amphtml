@@ -81,6 +81,7 @@ amp-story[desktop] .i-amphtml-story-page-attachment-remote  {
 }
 
 .i-amphtml-story-page-attachment-remote-title :first-child {
+  flex-shrink: 0 !important;
   font-weight: bold !important;
 }
 

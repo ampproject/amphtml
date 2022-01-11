@@ -93,6 +93,7 @@ class PaginationButton {
     if (state === this.state_) {
       return;
     }
+
     this.mutator_.mutateElement(this.element, () => {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
@@ -100,9 +101,8 @@ class PaginationButton {
         'aria-label',
         localize(this.win_.document, state.label)
       );
+      this.state_ = state;
     });
-
-    this.state_ = state;
   }
 
   /**
