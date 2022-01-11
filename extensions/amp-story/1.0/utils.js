@@ -345,6 +345,9 @@ export function isTransformed(ampdoc) {
 }
 
 /**
+ * Wrapper for classes that depend on story services being installed
+ * so they can fetch the services synchronously. This allows the extension
+ * to be installed on the doc as a script tag.
  *
  * @param {AMP.BaseElement.constructor} klass
  * @return {AMP.BaseElement.constructor}
