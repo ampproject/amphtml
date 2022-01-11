@@ -16,7 +16,7 @@
 <body>
     <div class="container">
         <h1>Bento Sidebar</h1>
-        <bento-sidebar id="sidebar1" side="right" 
+        <bento-sidebar id="sidebar1" side="right"
         style="
           background-color: rgb(181, 255, 248);
         ">
@@ -32,13 +32,11 @@
         <div class="buttons" style="margin-top: 8px">
           <button id="open-sidebar">Open sidebar</button>
         </div>
-    
         <script>
           (async () => {
             const sidebar = document.querySelector("#sidebar1");
             await customElements.whenDefined("bento-sidebar");
             const api = await sidebar.getApi();
-    
             // set up button actions
             document.querySelector("#open-sidebar").onclick = () => api.open();
           })();
