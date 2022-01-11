@@ -1,5 +1,6 @@
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
+
 import {formatI18nNumber} from '../amp-story-shopping';
 
 describes.realWin(
