@@ -5,6 +5,7 @@ import './amp-date-picker.css';
 import {
   DEFAULT_END_INPUT_SELECTOR,
   DEFAULT_INPUT_SELECTOR,
+  DEFAULT_MONTH_FORMAT,
   DEFAULT_ON_ERROR,
   DEFAULT_START_INPUT_SELECTOR,
   DatePickerMode,
@@ -38,6 +39,7 @@ export function BentoDatePicker({
   highlighted,
   min = getCurrentDate(),
   max,
+  monthFormat = DEFAULT_MONTH_FORMAT,
 }) {
   const blockedDates = useMemo(() => {
     return new DatesList(blocked);
@@ -50,12 +52,13 @@ export function BentoDatePicker({
   const datePicker = useMemo(() => {
     const commonProps = {
       blockedDates,
+      children,
       format,
+      monthFormat,
       id,
       initialVisibleMonth,
       mode,
       onError,
-      children,
     };
     if (type === DatePickerType.SINGLE) {
       const props = {
@@ -89,6 +92,7 @@ export function BentoDatePicker({
     endInputSelector,
     inputSelector,
     children,
+    monthFormat,
   ]);
 
   return (

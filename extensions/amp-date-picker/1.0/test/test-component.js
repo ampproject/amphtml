@@ -804,4 +804,56 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       });
     });
   });
+
+  describe('date formatting for a single day picker', () => {
+    it('defaults to MMMM YYYY month format', () => {
+      const wrapper = mount(
+        <DatePicker type="single" initialVisibleMonth={new Date(2022, 0)} />
+      );
+
+      expect(wrapper.find('[aria-label="Calendar"]').last().text()).to.contain(
+        'January 2022'
+      );
+    });
+
+    it('allows the user to specify the month format', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2022, 0)}
+          monthFormat="MMM yy"
+        />
+      );
+
+      expect(wrapper.find('[aria-label="Calendar"]').last().text()).to.contain(
+        'Jan 22'
+      );
+    });
+  });
+
+  describe('date formatting for a date range picker', () => {
+    it('defaults to MMMM YYYY month format', () => {
+      const wrapper = mount(
+        <DatePicker type="range" initialVisibleMonth={new Date(2022, 0)} />
+      );
+
+      expect(wrapper.find('[aria-label="Calendar"]').last().text()).to.contain(
+        'January 2022'
+      );
+    });
+
+    it('allows the user to specify the month format', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          initialVisibleMonth={new Date(2022, 0)}
+          monthFormat="MMM yy"
+        />
+      );
+
+      expect(wrapper.find('[aria-label="Calendar"]').last().text()).to.contain(
+        'Jan 22'
+      );
+    });
+  });
 });

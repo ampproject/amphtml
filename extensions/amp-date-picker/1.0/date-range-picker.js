@@ -1,5 +1,4 @@
 import {addDays, differenceInDays, isAfter, isSameDay} from 'date-fns';
-import {DayPicker} from 'react-day-picker';
 
 import {
   closestAncestorElementBySelector,
@@ -11,6 +10,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
 import {Children} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
+import {BaseDatePicker} from './base-date-picker';
 import {
   DateFieldNameByType,
   DateFieldType,
@@ -19,7 +19,6 @@ import {
   TAG,
 } from './constants';
 import {getFormattedDate, parseDate} from './date-helpers';
-import {DayButton} from './day-button';
 
 /**
  * @param {!DateInput.Props} props
@@ -33,10 +32,10 @@ export function DateRangePicker({
   endInputSelector,
   format,
   id,
-  initialVisibleMonth,
   mode,
   onError,
   startInputSelector,
+  ...rest
 }) {
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
@@ -252,13 +251,11 @@ export function DateRangePicker({
     >
       {inputElements}
       {isOpen && (
-        <DayPicker
-          aria-label="Calendar"
-          defaultMonth={initialVisibleMonth}
-          components={{Day: DayButton}}
+        <BaseDatePicker
           mode="range"
           selected={dateRange}
           onSelect={setDateRange}
+          {...rest}
         />
       )}
     </ContainWrapper>

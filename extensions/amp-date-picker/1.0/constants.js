@@ -3,6 +3,7 @@ export const DEFAULT_START_INPUT_SELECTOR = '#startdate';
 export const DEFAULT_END_INPUT_SELECTOR = '#enddate';
 export const ISO_8601 = 'yyyy-MM-dd';
 export const FORM_INPUT_SELECTOR = 'form';
+export const DEFAULT_MONTH_FORMAT = 'MMMM yyyy';
 // TODO: Check on this tag name
 export const TAG = 'BentoDatePicker';
 export const DEFAULT_ON_ERROR = (message) => {

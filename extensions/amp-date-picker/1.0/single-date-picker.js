@@ -1,5 +1,3 @@
-import {DayPicker} from 'react-day-picker';
-
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
@@ -17,6 +15,7 @@ import {
 import {Children} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
+import {BaseDatePicker} from './base-date-picker';
 import {
   DateFieldNameByType,
   DateFieldType,
@@ -25,8 +24,6 @@ import {
   TAG,
 } from './constants';
 import {getFormattedDate, parseDate} from './date-helpers';
-import {DayButton} from './day-button';
-import {useAttributes} from './use-attributes';
 
 /**
  * @param {!DateInput.Props} props
@@ -37,7 +34,6 @@ export function SingleDatePicker({
   children,
   format,
   id,
-  initialVisibleMonth,
   inputSelector,
   mode,
   onError,
@@ -48,7 +44,6 @@ export function SingleDatePicker({
 
   const onErrorRef = useRef(onError);
   const containerRef = useRef();
-  const {isDisabled} = useAttributes();
 
   const [isOpen] = useState(mode === DatePickerMode.STATIC);
 
@@ -139,18 +134,14 @@ export function SingleDatePicker({
     <ContainWrapper
       ref={containerRef}
       data-date={getFormattedDate(date, format)}
-      {...rest}
     >
       {inputElement}
       {isOpen && (
-        <DayPicker
-          aria-label="Calendar"
-          defaultMonth={initialVisibleMonth}
-          components={{Day: DayButton}}
+        <BaseDatePicker
           mode="single"
           selected={date}
           onSelect={setDate}
-          disabled={[isDisabled]}
+          {...rest}
         />
       )}
     </ContainWrapper>
