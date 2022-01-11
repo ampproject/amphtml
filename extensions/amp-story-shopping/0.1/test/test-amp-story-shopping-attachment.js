@@ -1,7 +1,6 @@
 import {expect} from 'chai';
 
 import {createElementWithAttributes} from '#core/dom';
-
 import '../../../amp-story/1.0/amp-story';
 import '../amp-story-shopping';
 import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
@@ -47,6 +46,7 @@ describes.realWin(
       const story = win.document.createElement('amp-story');
       win.document.body.appendChild(story);
       pageEl = win.document.createElement('amp-story-page');
+      pageEl.id = 'page1';
       const tagEl = createElementWithAttributes(
         win.document,
         'amp-story-shopping-tag',
@@ -56,10 +56,23 @@ describes.realWin(
         }
       );
       pageEl.appendChild(tagEl);
-      pageEl.id = 'page1';
       shoppingEl = win.document.createElement('amp-story-shopping-attachment');
       pageEl.appendChild(shoppingEl);
       story.appendChild(pageEl);
+
+      const pageEl2 = win.document.createElement('amp-story-page');
+      pageEl2.id = 'page2';
+      const tagEl2 = createElementWithAttributes(
+        win.document,
+        'amp-story-shopping-tag',
+        {
+          'layout': 'container',
+          'data-tag-id': 'backpack',
+        }
+      );
+      pageEl2.appendChild(tagEl2);
+      story.appendChild(pageEl2);
+
       shoppingImpl = await shoppingEl.getImpl();
     });
 
@@ -75,6 +88,19 @@ describes.realWin(
             '/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png',
           'product-images': [
             '/examples/visual-tests/amp-story/img/shopping/product-2.png',
+          ],
+        },
+        'backpack': {
+          'product-tag-id': 'backpack',
+          'product-title': 'Beastly Backpack',
+          'product-brand': 'Nest',
+          'product-price': '1000.00',
+          'product-price-currency': 'BRL',
+          'product-tag-text': 'Beastly Backpack',
+          'product-icon':
+            '/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png',
+          'product-images': [
+            '/examples/visual-tests/amp-story/img/shopping/product-3.png',
           ],
         },
       };
@@ -105,6 +131,21 @@ describes.realWin(
       env.sandbox.stub(attachmentChildImpl, 'open');
       await shoppingImpl.open(true);
       expect(pageEl.querySelector('.amp-story-shopping-plp')).to.not.be.null;
+    });
+
+    it('should build PLP with data from tag on page', async () => {
+      await shoppingDataDispatchStoreService();
+      const attachmentChildEl = shoppingEl.querySelector(
+        'amp-story-page-attachment'
+      );
+      const attachmentChildImpl = await attachmentChildEl.getImpl();
+      env.sandbox.stub(attachmentChildImpl, 'open');
+      await shoppingImpl.open(true);
+      expect(
+        pageEl.querySelector(
+          '.amp-story-shopping-plp-card .amp-story-shopping-plp-card-title'
+        ).textContent
+      ).to.equal('Spectacular Spectacles');
     });
   }
 );
