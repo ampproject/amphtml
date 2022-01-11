@@ -353,13 +353,17 @@ export class ResourcesImpl {
       return;
     }
 
-    // During prerender mode, don't build elements that aren't allowed to be
-    // prerendered. This avoids wasting our prerender build quota.
+    // During prerender/preview mode, don't build elements that aren't allowed
+    // to be prerendered. This avoids wasting our prerender build quota.
     // See isUnderBuildQuota_() for more details.
-    const shouldBuildResource =
-      this.ampdoc.getVisibilityState() != VisibilityState_Enum.PRERENDER ||
-      resource.prerenderAllowed();
-    if (!shouldBuildResource) {
+    const visibilityState = this.ampdoc.getVisibilityState();
+    const shouldSkipForPrerender =
+      visibilityState == VisibilityState_Enum.PRERENDER &&
+      !resource.prerenderAllowed();
+    const shouldSkipForPreview =
+      visibilityState == VisibilityState_Enum.PREVIEW &&
+      !resource.previewAllowed();
+    if (shouldSkipForPrerender || shouldSkipForPreview) {
       return;
     }
 
@@ -1499,13 +1503,15 @@ export class ResourcesImpl {
 
     // Don't schedule elements when we're not visible, or in prerender mode
     // (and they can't prerender).
-    if (!this.visible_) {
-      if (
-        this.ampdoc.getVisibilityState() != VisibilityState_Enum.PRERENDER ||
-        !resource.prerenderAllowed()
-      ) {
-        return false;
-      }
+    const visibilityState = this.ampdoc.getVisibilityState();
+    const shouldPrerender =
+      visibilityState == VisibilityState_Enum.PRERENDER &&
+      resource.prerenderAllowed();
+    const shouldPreview =
+      visibilityState == VisibilityState_Enum.PREVIEW &&
+      resource.previewAllowed();
+    if (!this.visible_ && !(shouldPrerender || shouldPreview)) {
+      return false;
     }
 
     // The element has to be in its rendering corridor.
