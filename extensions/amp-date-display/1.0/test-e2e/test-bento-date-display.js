@@ -19,5 +19,13 @@ describes.endtoend(
         'Thursday, December 9th 2021'
       );
     });
+
+    it('should render the date for locale=fr-FR', async () => {
+      const element = await controller.findElement('#fr');
+
+      await expect(controller.getElementText(element)).to.contain(
+        'jeudi, décembre 9th 2021'
+      );
+    });
   }
 );
