@@ -3,7 +3,7 @@
  * - display:block element
  * - size-defined element
  */
- amp-dailymotion{
+ amp-dailymotion {
   display: block;
   overflow: hidden;
   position: relative;

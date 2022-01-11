@@ -49,7 +49,7 @@ FAIL
 |      <!-- Invalid: missing data-videoid. -->
 |      <amp-dailymotion
 >>     ^~~~~~~~~
-amp-dailymotion/1.0/test/validator-amp-dailymotion.html:64:4 The mandatory attribute 'data-videoid' is missing in tag 'amp-dailymotion'. (see https://amp.dev/documentation/components/amp-dailymotion/)
+amp-dailymotion/1.0/test/validator-amp-dailymotion.html:49:4 The mandatory attribute 'data-videoid' is missing in tag 'amp-dailymotion'. (see https://amp.dev/documentation/components/amp-dailymotion/)
 |        width="500"
 |        height="281">
 |      </amp-dailymotion>
@@ -57,12 +57,12 @@ amp-dailymotion/1.0/test/validator-amp-dailymotion.html:64:4 The mandatory attri
 |      <!-- Invalid: missing dimensions. -->
 |      <amp-dailymotion data-videoid="x3rdtfy"></amp-dailymotion>
 >>     ^~~~~~~~~
-amp-dailymotion/1.0/test/validator-amp-dailymotion.html:70:4 Incomplete layout attributes specified for tag 'amp-dailymotion'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-dailymotion/)
+amp-dailymotion/1.0/test/validator-amp-dailymotion.html:55:4 Incomplete layout attributes specified for tag 'amp-dailymotion'. For example, provide attributes 'width' and 'height'. (see https://amp.dev/documentation/components/amp-dailymotion/)
 |
 |      <!-- Invalid: data-videoid must be a video id not a URL. -->
 |      <amp-dailymotion
 >>     ^~~~~~~~~
-amp-dailymotion/1.0/test/validator-amp-dailymotion.html:73:4 The attribute 'data-videoid' in tag 'amp-dailymotion' is set to the invalid value 'https://www.dailymotion.com/embed/video/x3rdtfy?api=1&html=1&app=amp'. (see https://amp.dev/documentation/components/amp-dailymotion/)
+amp-dailymotion/1.0/test/validator-amp-dailymotion.html:58:4 The attribute 'data-videoid' in tag 'amp-dailymotion' is set to the invalid value 'https://www.dailymotion.com/embed/video/x3rdtfy?api=1&html=1&app=amp'. (see https://amp.dev/documentation/components/amp-dailymotion/)
 |        data-videoid="https://www.dailymotion.com/embed/video/x3rdtfy?api=1&html=1&app=amp"
 |        width="500"
 |        height="281">
