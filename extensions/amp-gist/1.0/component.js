@@ -51,7 +51,7 @@ export function BentoGist({
     }),
     [gistId, file]
   );
-  console.log(gistId, file);
+
   return (
     <ProxyIframeEmbed
       title={title}

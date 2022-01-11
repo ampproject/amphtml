@@ -4,7 +4,7 @@ import * as Preact from '#preact';
 
 import {BentoGist} from '../component';
 
-describes.sandboxed('BentoGist preact component v1.0', {}, (env) => {
+describes.sandboxed('BentoGist preact component v1.0', {}, () => {
   it('should render', () => {
     const wrapper = mount(
       <BentoGist
