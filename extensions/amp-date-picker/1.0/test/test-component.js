@@ -15,6 +15,7 @@ import {
 } from './test-helpers';
 
 import {BentoDatePicker} from '../component';
+import * as helpers from '../date-helpers';
 
 const DEFAULT_PROPS = {
   layout: 'fixed-height',
@@ -172,6 +173,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('showing the date picker in static mode for a single date', () => {
+    beforeEach(() => {
+      env.sandbox
+        .stub(helpers, 'getCurrentDate')
+        .callsFake(() => new Date(2021, 0));
+    });
+
     it('shows the calendar view by default', () => {
       const wrapper = mount(
         <DatePicker
@@ -257,6 +264,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('showing the date picker in static mode for a date range', () => {
+    beforeEach(() => {
+      env.sandbox
+        .stub(helpers, 'getCurrentDate')
+        .callsFake(() => new Date(2021, 0));
+    });
+
     it('shows the calendar view by default', () => {
       const wrapper = mount(
         <DatePicker
@@ -505,6 +518,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('blocked dates for a range', () => {
+    beforeEach(() => {
+      env.sandbox
+        .stub(helpers, 'getCurrentDate')
+        .callsFake(() => new Date(2021, 0));
+    });
+
     it('does not allow the user to select a blocked start date', () => {
       const blockedDate = new Date(2021, 0, 5);
       const wrapper = mount(
@@ -600,6 +619,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('highlighted dates for a single date picker', () => {
+    beforeEach(() => {
+      env.sandbox
+        .stub(helpers, 'getCurrentDate')
+        .callsFake(() => new Date(2021, 0));
+    });
+
     it('shows a highlighted attribute', () => {
       const highlightedDate = new Date(2021, 0, 5);
       const wrapper = mount(

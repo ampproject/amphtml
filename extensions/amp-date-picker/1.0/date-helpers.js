@@ -25,7 +25,6 @@ export function parseDate(value, dateFormat) {
  * @param {?Date} date
  * @param {string} dateFormat
  * @return {string}
- * @private
  */
 export function getFormattedDate(date, dateFormat = DEFAULT_FORMAT) {
   if (!date) {
@@ -34,4 +33,12 @@ export function getFormattedDate(date, dateFormat = DEFAULT_FORMAT) {
   // const isUnixTimestamp = format.match(/[Xx]/);
   // const _locale = isUnixTimestamp ? DEFAULT_LOCALE : locale;
   return format(date, dateFormat);
+}
+
+/**
+ * Returns today's date as a Date object
+ * @return {Date}
+ */
+export function getCurrentDate() {
+  return new Date();
 }

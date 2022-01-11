@@ -11,6 +11,7 @@ import {
   DatePickerType,
   ISO_8601,
 } from './constants';
+import {getCurrentDate} from './date-helpers';
 import {DateRangePicker} from './date-range-picker';
 import {DatesList} from './dates-list';
 import {SingleDatePicker} from './single-date-picker';
@@ -35,7 +36,7 @@ export function BentoDatePicker({
   allowBlockedRanges,
   allowBlockedEndDate,
   highlighted,
-  min,
+  min = getCurrentDate(),
 }) {
   const blockedDates = useMemo(() => {
     return new DatesList(blocked);
