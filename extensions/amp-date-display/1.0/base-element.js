@@ -4,43 +4,22 @@ import {dict} from '#core/types/object';
 import {PreactBaseElement} from '#preact/base-element';
 import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
-import {BentoDateDisplay} from './component';
+import {getTemplateElement, getTemplateFunction} from '#utils/template-utils';
 
-/**
- * @param {string} str string with backticks
- * @return {string} string with escaped backticks for use in template strings
- */
-function escapeBackticks(str) {
-  return str.replaceAll('`', '\\`');
-}
+import {BentoDateDisplay} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
   checkPropsPostMutations() {
-    const template = this.element.hasAttribute('template')
-      ? this.element.ownerDocument.getElementById(
-          this.element.getAttribute('template')
-        )
-      : this.element.querySelector('template');
+    const template = getTemplateElement(this.element);
     if (!template) {
-      // show error
       return;
     }
 
     this.mutateProps(
       dict({
         'render': (data) => {
-          let destructure = '';
-          for (const [key, value] of Object.entries(data)) {
-            destructure += `const ${key} = '${value}';`;
-          }
-          let templateStr = '';
-          for (let i = 0; i < template.content.children.length; i++) {
-            templateStr += template.content.children[i]./*REVIEW*/ outerHTML;
-          }
-          const templateFn = new Function(
-            `${destructure} return \`${escapeBackticks(templateStr)}\`;`
-          );
+          const templateFn = getTemplateFunction(data, template);
           return dict({'__html': templateFn()});
         },
       })
