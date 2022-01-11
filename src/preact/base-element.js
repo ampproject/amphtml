@@ -855,7 +855,7 @@ export class PreactBaseElement extends BaseElement {
     const keys = Object.keys(current);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      this.wrapRefProperty(api, key);
+      this.wrapRefProperty_(api, key);
     }
     this.apiWrapper_ = api;
     if (this.deferredApi_) {
@@ -937,19 +937,15 @@ export class PreactBaseElement extends BaseElement {
   /**
    * @param {Object} api
    * @param {string} key
+   * @private
    */
-  wrapRefProperty(api, key) {
-    // eslint-disable-next-line local/restrict-this-access
-    const that = this;
+  wrapRefProperty_(api, key) {
     Object.defineProperty(api, key, {
       configurable: true,
 
-      get() {
-        return that.currentRef_[key];
-      },
-
-      set(v) {
-        that.currentRef_[key] = v;
+      get: () => this.currentRef_[key],
+      set: (v) => {
+        this.currentRef_[key] = v;
       },
     });
   }
