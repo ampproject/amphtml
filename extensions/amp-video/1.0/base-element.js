@@ -4,16 +4,18 @@ import {CSS as CSS_AUTOPLAY} from './autoplay.jss';
 import {BentoVideo} from './component';
 import {CSS} from './component.jss';
 
-export class BaseElement extends PreactBaseElement {}
+export class BentoVideoBaseElement extends PreactBaseElement {}
+// export with alias for bento builds
+export {BentoVideoBaseElement as BaseElement};
 
 /** @override */
-BaseElement['Component'] = BentoVideo;
+BentoVideoBaseElement['Component'] = BentoVideo;
 
 /** @override */
-BaseElement['loadable'] = true;
+BentoVideoBaseElement['loadable'] = true;
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BentoVideoBaseElement['layoutSizeDefined'] = true;
 
 /**
  * Defaults to `{component: 'video'}` from `BentoVideo` component.
@@ -25,10 +27,10 @@ BaseElement['layoutSizeDefined'] = true;
  * ```
  * @override
  */
-BaseElement['staticProps'];
+BentoVideoBaseElement['staticProps'];
 
 /** @override */
-BaseElement['props'] = {
+BentoVideoBaseElement['props'] = {
   'album': {attr: 'album'},
   'alt': {attr: 'alt'},
   'artist': {attr: 'artist'},
@@ -60,7 +62,7 @@ BaseElement['props'] = {
 };
 
 /** @override */
-BaseElement['shadowCss'] = CSS + CSS_AUTOPLAY;
+BentoVideoBaseElement['shadowCss'] = CSS + CSS_AUTOPLAY;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BentoVideoBaseElement['usesShadowDom'] = true;

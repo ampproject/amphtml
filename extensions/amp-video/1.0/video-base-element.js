@@ -2,11 +2,11 @@ import {ActionTrust_Enum} from '#core/constants/action-constants';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
-import {BaseElement as BentoVideo} from './base-element';
+import {BentoVideoBaseElement} from './base-element';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
 export class AmpVideoBaseElement extends setSuperClass(
-  BentoVideo,
+  BentoVideoBaseElement,
   AmpPreactBaseElement
 ) {
   /** @override */

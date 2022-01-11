@@ -2,9 +2,9 @@ import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoBrightcove} from './component';
 
-import {BaseElement as BentoVideo} from '../../amp-video/1.0/base-element';
+import {BentoVideoBaseElement} from '../../amp-video/1.0/base-element';
 
-export class BaseElement extends BentoVideo {}
+export class BaseElement extends BentoVideoBaseElement {}
 
 /** @override */
 BaseElement['Component'] = BentoBrightcove;

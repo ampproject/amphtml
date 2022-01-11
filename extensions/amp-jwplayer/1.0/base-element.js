@@ -4,9 +4,9 @@ import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoJwplayer} from './component';
 
-import {BaseElement as BentoVideo} from '../../amp-video/1.0/base-element';
+import {BentoVideoBaseElement} from '../../amp-video/1.0/base-element';
 
-export class BaseElement extends BentoVideo {
+export class BaseElement extends BentoVideoBaseElement {
   /** @override */
   init() {
     super.init();
