@@ -225,45 +225,5 @@ describes.realWin(
       expect(sliderBar.style.transform).to.equal('translateX(30%)');
       expect(rightMask.style.transform).to.equal('translateX(30%)');
     });
-
-    it('should hide hints on mouse down event', async () => {
-      await waitForRender();
-      const container = element.shadowRoot.querySelector(
-        `.${styles.imageSliderContainer}`
-      );
-
-      container.dispatchEvent(new MouseEvent('mousedown', {clientX: 200}));
-      await waitFor(
-        () =>
-          element.shadowRoot.querySelector(`.${styles.imageSliderHintHidden}`),
-        'Mouse down event called'
-      );
-      expect(
-        element.shadowRoot.querySelector(`.${styles.imageSliderHintHidden}`)
-      ).not.to.be.null;
-    });
-
-    it('should move slider with keyboard event', async () => {
-      await waitForRender();
-      const container = element.shadowRoot.querySelector(
-        `.${styles.imageSliderContainer}`
-      );
-      const sliderBar = element.shadowRoot.querySelector(
-        `.${styles.imageSliderBar}`
-      );
-
-      element.focus();
-      const kbEnterEvent = new KeyboardEvent('keydown', {
-        key: Keys_Enum.LEFT_ARROW,
-        bubbles: true,
-      });
-      container.dispatchEvent(kbEnterEvent);
-      await waitFor(
-        () => sliderBar.style.transform === 'translateX(20%)',
-        'Keyboad Moved'
-      );
-
-      expect(sliderBar.style.transform).to.equal('translateX(20%)');
-    });
   }
 );
