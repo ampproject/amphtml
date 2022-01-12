@@ -98,8 +98,6 @@ export class LocalizationService {
         'https://gist.githubusercontent.com/mszylkowski/3ed540186b18f4da4083e087bff36122/raw/a46b0204d5a7e12615a924b4ae192d9d77128bff/amp-story.es.json'
       )
       .then((res) => res.json());
-
-    this.viewerLanguageBundlePromise_.then((val) => console.log(val));
   }
 
   /**

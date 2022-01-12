@@ -136,7 +136,6 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     this.localizationService
       .localizeAsync(this.localizedAnswerChoices_[index])
       .then((translation) => {
-        console.log(translation);
         answerChoiceEl.textContent = translation;
       });
     return convertedOption;

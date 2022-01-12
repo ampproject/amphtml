@@ -16,10 +16,6 @@ import {
   getTextColorForRGB,
   maybeMakeProxyUrl,
 } from '../../amp-story/1.0/utils';
-import {getWin} from '#core/window';
-import {scopedQuerySelector} from '#core/dom/query';
-import {Services} from '#service';
-
 
 /**
  * @enum {string}

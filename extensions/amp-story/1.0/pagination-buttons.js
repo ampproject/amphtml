@@ -5,17 +5,13 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {devAssert} from '#utils/log';
 
-import {localize} from './amp-story-localization-service';
+import {localizeAsync} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
   getStoreService,
-} from './amp-story-store-service'; 
+} from './amp-story-store-service';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {devAssert} from '#utils/log';
-import {localizeAsync} from './amp-story-localization-service';
 import {AdvancementMode} from './story-analytics';
 
 /** @struct @typedef {{className: string, triggers: string, label: LocalizedStringId_Enum}} */

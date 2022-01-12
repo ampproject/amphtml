@@ -35,7 +35,7 @@ import {listen, listenOnce} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
 import {embeddedElementsSelectors} from './amp-story-embedded-component';
-import {localize} from './amp-story-localization-service';
+import {localizeAsync} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -43,37 +43,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AnimationManager, hasAnimations} from './animation';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {Deferred} from '#core/data-structures/promise';
-import {EventType, dispatch} from './events';
-import {Layout_Enum} from '#core/dom/layout';
-import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {MediaPool} from './media-pool';
-import {Services} from '#service';
-import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
-import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
-import {iterateCursor} from '#core/dom';
-import {
-  closestAncestorElementBySelector,
-  scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {setTextBackgroundColor} from './utils';
-import {debounce, once} from '#core/types/function';
-import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {localizeAsync} from './amp-story-localization-service';
-import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
-import {isExperimentOn} from '#experiments';
-import {isPrerenderActivePage} from './prerender-active-page';
-import {listen, listenOnce} from '#utils/event-helper';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {toggle} from '#core/dom/style';
-import {renderPageDescription} from './semantic-render';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-
-import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';
 import {EventType, dispatch} from './events';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';

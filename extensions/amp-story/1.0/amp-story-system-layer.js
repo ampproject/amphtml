@@ -10,7 +10,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
 
-import {localize} from './amp-story-localization-service';
+import {localizeAsync} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -26,9 +26,6 @@ import {
   triggerClickFromLightDom,
 } from './utils';
 
-import {setImportantStyles} from '#core/dom/style';
-import {toArray} from '#core/types/array';
-import {localizeAsync} from './amp-story-localization-service';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
 import {getSourceOrigin} from '../../../src/url';

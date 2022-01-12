@@ -3,7 +3,7 @@ import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
-import {localize} from './amp-story-localization-service';
+import {localizeAsync} from './amp-story-localization-service';
 import {
   EmbeddedComponentState,
   StateProperty,
@@ -11,7 +11,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
-import {localizeAsync} from './amp-story-localization-service';
 
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 

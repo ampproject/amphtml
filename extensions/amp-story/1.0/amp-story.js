@@ -45,16 +45,6 @@ import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
 import {dict, map} from '#core/types/object';
 import {endsWith} from '#core/types/string';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {findIndex, lastItem, toArray} from '#core/types/array';
-import {getConsentPolicyState} from '../../../src/consent';
-import {getDetail} from '#utils/event-helper';
-import {getMode, isModeDevelopment} from '../../../src/mode';
-import {getHistoryState as getWindowHistoryState} from '#core/window/history';
-import {isExperimentOn} from '#experiments';
-import {isPreviewMode} from './embed-mode';
-import {isRTL, removeElement} from '#core/dom';
-import {parseQueryString} from '#core/types/string/url';
 import {parseQueryString} from '#core/types/string/url';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 
@@ -106,10 +96,6 @@ import {
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
-import {isEsm} from '#core/mode';
-import {upgradeBackgroundAudio} from './audio';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {getLocalizationService} from './amp-story-localization-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 
 import {CSS} from '../../../build/amp-story-1.0.css';

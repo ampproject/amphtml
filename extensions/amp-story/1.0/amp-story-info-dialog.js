@@ -6,7 +6,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
 
-import {localize} from './amp-story-localization-service';
+import {localizeAsync} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -18,8 +18,6 @@ import {
   getAnalyticsService,
 } from './story-analytics';
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
-import {dev} from '#utils/log';
-import {localizeAsync} from './amp-story-localization-service';
 
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
