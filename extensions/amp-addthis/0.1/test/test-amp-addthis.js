@@ -1,21 +1,21 @@
-import {ALT_TEXT, CONFIGURATION_EVENT, ICON_SIZE, ORIGIN} from '../constants';
-import {ConfigManager} from '../config-manager';
-
-import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
 import {createElementWithAttributes} from '#core/dom';
+import {toArray} from '#core/types/array';
 import {dict} from '#core/types/object';
+
+import {getKeywordsString} from '../addthis-utils/classify';
+import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
+import {getWidgetOverload} from '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
+import {getDetailsForMeta, getMetaElements} from '../addthis-utils/meta';
 import {
   getAddThisMode,
   isProductCode,
   isPubId,
   isWidgetId,
 } from '../addthis-utils/mode';
-import {getConfigManager} from '../amp-addthis';
-import {getDetailsForMeta, getMetaElements} from '../addthis-utils/meta';
-import {getKeywordsString} from '../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
-import {getWidgetOverload} from '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
-import {toArray} from '#core/types/array';
+import {getConfigManager} from '../amp-addthis';
+import {ConfigManager} from '../config-manager';
+import {ALT_TEXT, CONFIGURATION_EVENT, ICON_SIZE, ORIGIN} from '../constants';
 
 describes.realWin(
   'amp-addthis',

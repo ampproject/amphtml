@@ -1,5 +1,3 @@
-import {Services} from '#service';
-import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 import {
   createElementWithAttributes,
   iterateCursor,
@@ -7,7 +5,12 @@ import {
 } from '#core/dom';
 import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
 import {user} from '#utils/log';
+
+import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 
 /** @const {!Array<string>} */
 const CODECS_IN_ASCENDING_PRIORITY = ['h264', 'vp09'];

@@ -1,6 +1,8 @@
 import {userAssert} from '#core/assert';
 import {dashToUnderline} from '#core/types/string';
+
 import {PreactBaseElement} from '#preact/base-element';
+
 import {BentoFacebook} from './component';
 
 /** @const {string} */

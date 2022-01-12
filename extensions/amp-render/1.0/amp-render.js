@@ -1,16 +1,20 @@
+import {Layout_Enum} from '#core/dom/layout';
+import {computedStyle, setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
 import {BaseElement} from './base-element';
+
 import {
   BatchFetchOptionsDef,
   UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Layout_Enum} from '#core/dom/layout';
-import {Services} from '#service';
-import {computedStyle, setStyles} from '#core/dom/style';
-import {dev, user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {toArray} from '#core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-render';

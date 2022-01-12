@@ -1,8 +1,10 @@
-import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '#core/dom/layout';
 import {px, setImportantStyles, setStyle, setStyles} from '#core/dom/style';
 import {throttle} from '#core/types/function';
+
 import {buildDom, mirrorNode} from './build-dom';
+
+import {CSS} from '../../../build/amp-fit-text-0.1.css';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15; // WARNING: when updating this ensure you also update the css values for line-height.

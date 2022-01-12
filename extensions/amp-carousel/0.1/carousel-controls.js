@@ -1,7 +1,9 @@
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Services} from '#service';
 import {toggleAttribute} from '#core/dom';
 import {getWin} from '#core/window';
+
+import {Services} from '#service';
+
 import {ClassNames, setButtonState} from './build-dom';
 
 /**

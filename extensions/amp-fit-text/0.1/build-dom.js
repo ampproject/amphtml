@@ -1,7 +1,7 @@
-import {realChildNodes} from '#core/dom/query';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {copyChildren, isServerRendered, removeChildren} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {applyFillContent} from '#core/dom/layout';
+import {realChildNodes} from '#core/dom/query';
 
 const MEASURER_CLASS = 'i-amphtml-fit-text-measurer';
 const CONTENT_CLASS = 'i-amphtml-fit-text-content';

@@ -1,7 +1,8 @@
-import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
-import {devAssert} from '#utils/log';
+import {Deferred} from '#core/data-structures/promise';
 import {dict} from '#core/types/object';
+
+import {devAssert} from '#utils/log';
 
 /**
  * This class implements visibility calculations based on the

@@ -1,10 +1,14 @@
-import {Services} from '#service';
-import {StateProperty, getStoreService} from './amp-story-store-service';
 import {getDataParamsFromAttributes} from '#core/dom';
-import {getVariableService} from './variable-service';
 import {map} from '#core/types/object';
-import {registerServiceBuilder} from '../../../src/service-helpers';
+
+import {Services} from '#service';
+
 import {triggerAnalyticsEvent} from '#utils/analytics';
+
+import {StateProperty, getStoreService} from './amp-story-store-service';
+import {getVariableService} from './variable-service';
+
+import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /** @const {string} */
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';

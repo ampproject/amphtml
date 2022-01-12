@@ -1,4 +1,18 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
+
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '#core/constants/consent-state';
+import {dict} from '#core/types/object';
+
+import {macroTask} from '#testing/helpers';
+
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service-helpers';
+import {expandPolicyConfig} from '../consent-config';
 import {
   CONSENT_ITEM_STATE,
   PURPOSE_CONSENT_STATE,
@@ -6,21 +20,9 @@ import {
   constructMetadata,
 } from '../consent-info';
 import {
-  CONSENT_POLICY_STATE,
-  CONSENT_STRING_TYPE,
-} from '#core/constants/consent-state';
-import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
 } from '../consent-policy-manager';
-import {dict} from '#core/types/object';
-import {expandPolicyConfig} from '../consent-config';
-import {macroTask} from '#testing/helpers';
-
-import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../../../src/service-helpers';
 
 describes.realWin(
   'ConsentPolicyManager',

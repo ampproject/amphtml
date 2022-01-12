@@ -1,18 +1,21 @@
-import * as Preact from '#core/dom/jsx';
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
-import {LocalizedStringId_Enum} from '#service/localization/strings';
+import * as Preact from '#core/dom/jsx';
+import {scopedQuerySelector} from '#core/dom/query';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
+import {getWin} from '#core/window';
+
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
 import {dev} from '#utils/log';
+
 import {localize} from './amp-story-localization-service';
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
   maybeMakeProxyUrl,
 } from './utils';
-import {getWin} from '#core/window';
-import {scopedQuerySelector} from '#core/dom/query';
 
 /**
  * @enum {string}

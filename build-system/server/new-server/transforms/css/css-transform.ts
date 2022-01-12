@@ -1,6 +1,7 @@
+import {readFileSync} from 'fs';
 import minimist from 'minimist';
 import posthtml from 'posthtml';
-import {readFileSync} from 'fs';
+
 import {Lazy} from '../utilities/lazy';
 
 const argv = minimist(process.argv.slice(2));

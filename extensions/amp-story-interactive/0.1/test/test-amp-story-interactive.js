@@ -1,19 +1,12 @@
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {
-  AmpStoryInteractive,
-  InteractiveType,
-} from '../amp-story-interactive-abstract';
-import {
-  AmpStoryStoreService,
-  StateProperty,
-} from '../../../amp-story/1.0/amp-story-store-service';
-import {
-  AmpStoryVariableService,
-  AnalyticsVariable,
-} from '../../../amp-story/1.0/variable-service';
-import {LocalizationService} from '#service/localization';
+import {htmlFor} from '#core/dom/static-template';
+import {dict} from '#core/types/object';
+
+import {toggleExperiment} from '#experiments/';
+
 import {Services} from '#service';
-import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
 import {
   MOCK_URL,
   addConfigToInteractive,
@@ -22,11 +15,22 @@ import {
   getMockOutOfBoundsData,
   getMockScrambledData,
 } from './helpers';
-import {dict} from '#core/types/object';
-import {getBackendSpecs} from '../interactive-disclaimer';
-import {htmlFor} from '#core/dom/static-template';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {toggleExperiment} from '#experiments/';
+import {
+  AmpStoryStoreService,
+  StateProperty,
+} from '../../../amp-story/1.0/amp-story-store-service';
+import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
+import {
+  AmpStoryVariableService,
+  AnalyticsVariable,
+} from '../../../amp-story/1.0/variable-service';
+import {
+  AmpStoryInteractive,
+  InteractiveType,
+} from '../amp-story-interactive-abstract';
+import {getBackendSpecs} from '../interactive-disclaimer';
 
 class InteractiveTest extends AmpStoryInteractive {
   constructor(element) {

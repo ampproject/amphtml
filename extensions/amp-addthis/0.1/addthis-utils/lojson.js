@@ -1,5 +1,5 @@
-import {API_SERVER} from '../constants';
-import {callPixelEndpoint} from './pixel';
+import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
 
 import {
   classifyPage,
@@ -12,11 +12,12 @@ import {
   getFragmentId,
   getServiceFromUrlFragment,
 } from './fragment';
-import {dict} from '#core/types/object';
 import {getMetaElements} from './meta';
+import {callPixelEndpoint} from './pixel';
 import {getSessionId} from './session';
+
 import {parseUrlDeprecated} from '../../../../src/url';
-import {toArray} from '#core/types/array';
+import {API_SERVER} from '../constants';
 
 const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;

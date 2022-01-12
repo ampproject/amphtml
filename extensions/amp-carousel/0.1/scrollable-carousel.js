@@ -1,14 +1,17 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Animation} from '#utils/animation';
-import {CarouselControls} from './carousel-controls';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {dev} from '#utils/log';
 import {isLayoutSizeFixed} from '#core/dom/layout';
-import {listen} from '#utils/event-helper';
-import {numeric} from '#core/dom/transition';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {numeric} from '#core/dom/transition';
+
+import {Services} from '#service';
+
+import {Animation} from '#utils/animation';
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {buildDom} from './build-dom';
+import {CarouselControls} from './carousel-controls';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
