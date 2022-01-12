@@ -5,9 +5,11 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
 } from '#preact';
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
+import {useIsInViewport} from '#preact/component/intersection-observer';
 import {useAmpContext} from '#preact/context';
 import {xhrUtils} from '#preact/utils/xhr';
 
@@ -88,6 +90,7 @@ export function BentoListWithRef(
     resetOnRefresh = false,
     loadMore: loadMoreMode = 'none',
     loadMoreBookmark = 'load-more-src',
+    viewportBuffer = 2.0, // When loadMore === 'auto', keep loading up to 2 pages-worth of data
     template: itemTemplate = defaultItemTemplate,
     wrapper: wrapperTemplate = defaultWrapperTemplate,
     loading: loadingTemplate = defaultLoadingTemplate,
@@ -102,31 +105,51 @@ export function BentoListWithRef(
   // eslint-disable-next-line no-unused-vars
   const styles = useStyles();
 
-  const {error, hasMore, loadMore, loading, pages, refresh} = useInfiniteQuery(
-    async ({pageParam: nextUrl}) => {
+  const ioOptions = useMemo(() => {
+    const bufferPct = Math.floor(viewportBuffer * 100);
+    return /** @type {IOOptions} */ {
+      rootMargin: `0% 0% ${bufferPct}% 0%`,
+      threshold: 0,
+    };
+  }, [viewportBuffer]);
+
+  const bottomRef = useRef(null);
+  const isBottomNearingViewport = useIsInViewport(bottomRef, ioOptions);
+
+  const {error, hasMore, loadMore, loading, pages, reset} = useInfiniteQuery({
+    fetchPage: async ({pageParam: nextUrl} = {}) => {
       if (!renderable) {
         return null;
       }
       const page = await fetchItems(nextUrl);
       return page;
     },
-    {
-      getNextPageParam(lastPage) {
-        if (!lastPage) {
-          return src;
-        }
-        return getNextUrl(lastPage, loadMoreBookmark);
-      },
-    }
-  );
+    getNextPageParam(lastPage) {
+      if (!lastPage) {
+        return src;
+      }
+      return getNextUrl(lastPage, loadMoreBookmark);
+    },
+  });
+
+  const shouldLoadMore =
+    renderable &&
+    loadMoreMode === 'auto' &&
+    isBottomNearingViewport &&
+    !loading &&
+    hasMore;
 
   useEffect(() => {
-    if (renderable) {
-      // Load the initial page:
-      refresh();
+    if (shouldLoadMore) {
+      loadMore();
     }
-  }, [renderable, src]);
+  }, [shouldLoadMore, loadMore]);
 
+  useEffect(() => {
+    reset();
+  }, [src, reset]);
+
+  // Rendering logic:
   const list = useMemo(() => {
     // Gather all items from all pages of data:
     let items = pages.reduce((allItems, page) => {
@@ -151,9 +174,9 @@ export function BentoListWithRef(
     ref,
     () =>
       /** @type {!BentoListDef.BentoListApi} */ ({
-        refresh,
+        refresh: reset,
       }),
-    [refresh]
+    [reset]
   );
 
   return (
@@ -164,6 +187,7 @@ export function BentoListWithRef(
         {error && errorTemplate?.(error)}
         {showLoadMore &&
           augment(loadMoreTemplate(), {onClick: () => loadMore()})}
+        {loadMoreMode === 'auto' && <span ref={bottomRef} />}
       </Fragment>
     </ContainWrapper>
   );

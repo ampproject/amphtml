@@ -30,3 +30,34 @@ export function useIntersectionObserver(callback, ioOptions) {
 
   return refCb;
 }
+
+/**
+ * Determines if an element is within the viewport.
+ *
+ * Returns 2 values; the `isInViewport` value, and a ref to be used to capture the element.
+ *
+ * @param {{current: ?Element}} ref
+ * @param {IOOptions} [ioOptions]
+ * @return {boolean}
+ */
+export function useIsInViewport(ref, ioOptions) {
+  const [isInViewport, setIsInViewport] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) {
+      return null;
+    }
+
+    const unobserve = observeIntersections(
+      node,
+      (entry) => {
+        setIsInViewport(entry.isIntersecting);
+      },
+      ioOptions
+    );
+    return unobserve;
+  }, [ref, ioOptions]);
+
+  return isInViewport;
+}

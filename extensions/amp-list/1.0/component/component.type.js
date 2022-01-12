@@ -11,6 +11,7 @@ var BentoListDef = {};
  *   maxItems?: number,
  *   resetOnRefresh?: boolean,
  *   loadMore?: 'manual' | 'none' | 'auto',
+ *   viewportBuffer?: number,
  *   template?: function(): PreactDef.Renderable,
  *   wrapper?: function(): PreactDef.Renderable,
  *   loading?: function(): PreactDef.Renderable,

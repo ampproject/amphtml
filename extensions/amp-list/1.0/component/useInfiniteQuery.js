@@ -1,4 +1,5 @@
-import {useRef} from '#preact';
+import {useCallback} from '#preact';
+import {useValueRef} from '#preact/component';
 
 import {useStateSafe} from './useStateSafe';
 
@@ -11,58 +12,54 @@ const initialState = {
 
 /**
  *
- * @param {function({ pageParam: TPageParam }): Promise<TPage>} fetchPage
- * @param {object} getNextPageParam
- * @param {function(page: TPage): TPageParam} getNextPageParam.getNextPageParam
+ * @param {object} config
+ * @param {function({ pageParam: TPageParam }): Promise<TPage>} config.fetchPage
+ * @param {function(page: TPage): TPageParam} config.getNextPageParam
  * @return {{pages: *[], loadMore: ((function(*=): Promise<void>)|*), hasMore: boolean, refresh: refresh, loading: boolean, error: null}}
  * @template TPage
  * @template TPageParam
  */
-export function useInfiniteQuery(fetchPage, {getNextPageParam}) {
+export function useInfiniteQuery({fetchPage, getNextPageParam}) {
   const [state, setState] = useStateSafe(initialState);
 
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  const ref = useValueRef({fetchPage, getNextPageParam, state});
 
-  const loadMore = async (resetting = false) => {
-    // const state = reset ? initialState : stateRef.current;
-    const state = stateRef.current;
-    if (!resetting && state.loading) {
-      return;
-    }
+  const loadMore = useCallback(
+    async (resetting = false) => {
+      const {fetchPage, getNextPageParam, state} = ref.current;
 
-    setState({...state, loading: true});
+      if (!resetting && state.loading) {
+        return;
+      }
 
-    try {
-      const lastPage =
-        !resetting && state.pages.length
-          ? state.pages[state.pages.length - 1]
-          : undefined;
+      setState((s) => ({...s, loading: true}));
 
-      const newPage = await fetchPage({
-        pageParam: getNextPageParam(lastPage),
-      });
+      try {
+        const pages = resetting ? [] : state.pages;
+        const lastPage = pages.length ? pages[pages.length - 1] : undefined;
 
-      const nextPageParam = getNextPageParam(newPage);
+        const newPage = await fetchPage({
+          pageParam: getNextPageParam(lastPage),
+        });
 
-      setState((s) => ({
-        loading: false,
-        error: null,
-        pages: resetting ? [newPage] : s.pages.concat(newPage),
-        hasMore: nextPageParam !== undefined && nextPageParam !== null,
-      }));
-    } catch (error) {
-      setState((s) => ({...s, loading: false, error}));
-    }
-  };
+        const nextPageParam = getNextPageParam(newPage);
 
-  const refresh = () => {
-    loadMore(true);
-  };
+        setState({
+          loading: false,
+          error: null,
+          pages: [...pages, newPage],
+          hasMore: nextPageParam !== undefined && nextPageParam !== null,
+        });
+      } catch (error) {
+        setState((s) => ({...s, loading: false, error}));
+      }
+    },
+    [ref, setState]
+  );
 
   return {
     ...state,
     loadMore,
-    refresh,
+    reset: useCallback(() => loadMore(true), [loadMore]),
   };
 }
