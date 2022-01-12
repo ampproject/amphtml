@@ -13,7 +13,7 @@ export class AmpFitText extends AMP.BaseElement {
     return true;
   }
 
-  /** @param {!AmpElement} element */
+  /** @param {AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -150,7 +150,7 @@ export class AmpFitText extends AMP.BaseElement {
  * @param {number} minFontSize
  * @param {number} maxFontSize
  * @return {number}
- * @private  Visible for testing only!
+ * @private  Visible for testing only
  */
 export function calculateFontSize_(
   measurer,
@@ -181,7 +181,7 @@ export function calculateFontSize_(
  * @param {Element} measurer
  * @param {number} maxHeight
  * @param {number} fontSize
- * @private  Visible for testing only!
+ * @private  Visible for testing only
  */
 export function updateOverflow_(content, measurer, maxHeight, fontSize) {
   setStyle(measurer, 'fontSize', px(fontSize));
