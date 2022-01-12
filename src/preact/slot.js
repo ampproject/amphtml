@@ -133,7 +133,7 @@ export function useSlotContext(ref, opt_props) {
 
 /**
  * @param {HTMLSlotElement} slot
- * @param {function(Element[] | Element):void|function(AmpElement[]):void} action
+ * @param {function(Element|Element[]|AmpElement[]):void} action
  * @param {boolean} schedule
  */
 function execute(slot, action, schedule) {

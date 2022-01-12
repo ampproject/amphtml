@@ -10,7 +10,7 @@ import * as Preact from '#preact';
 
 import {Slot, createSlot} from './slot';
 
-/** @typedef {*} MediaQueryProps */
+/** @typedef {import('#core/dom/media-query-props').MediaQueryProps} MediaQueryProps */
 
 /** @typedef {Object<string, AmpElementProp>} AmpElementProps */
 
@@ -221,11 +221,14 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
   for (const name in propDefs) {
     const def = /** @type {AmpElementProp} */ (propDefs[name]);
     devAssert(
-      Number(!!def.attr && !!def.attrs && !!def.attrMatches) +
-        Number(!!def.selector) +
-        Number(!!def.passthrough) +
-        Number(!!def.passthroughNonEmpty) <=
-        1,
+      [
+        def.attr,
+        def.attrs,
+        def.attrMatches,
+        def.selector,
+        def.passthrough,
+        def.passthroughNonEmpty,
+      ].filter(Boolean).length <= 1,
       ONE_OF_ERROR_MESSAGE
     );
     let value;
@@ -244,6 +247,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     } else if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
+        devAssert(mediaQueryProps);
         value = mediaQueryProps.resolveListQuery(String(value));
       }
     } else if (def.parseAttrs) {

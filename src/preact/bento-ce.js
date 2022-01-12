@@ -64,7 +64,7 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
            * @template T
            */
           this.implementation = new BaseElement(
-            /** @type {AmpElement} */ (/** @type {?}*/ (this))
+            /** @type {AmpElement} */ (/** @type {?} */ (this))
           );
         }
 
@@ -110,7 +110,7 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
   }
 
   BaseElement = /** @type {typeof AMP.BaseElement} */ (
-    /** @type {?}*/ (CeBaseElement)
+    /** @type {?} */ (CeBaseElement)
   );
 }
 

@@ -87,7 +87,7 @@ export function rediscoverChildren(node) {
  *
  * @param {Node} node The target node.
  * @param {IContextProp<T, ?>} prop
- * @param {function(*):*} setter
+ * @param {function(*):void} setter
  * @param {T} value
  * @template T
  */
@@ -101,7 +101,7 @@ export function setProp(node, prop, setter, value) {
  *
  * @param {Node} node The target node.
  * @param {IContextProp<T, ?>} prop
- * @param {function(*):*} setter
+ * @param {function(*):void} setter
  * @template T
  */
 export function removeProp(node, prop, setter) {

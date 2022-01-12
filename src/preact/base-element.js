@@ -1008,7 +1008,7 @@ export class PreactBaseElement extends BaseElement {
       get: () => {
         const ref = this.currentRef_;
         devAssert(ref);
-        ref[key];
+        return ref[key];
       },
       set: (v) => {
         const ref = this.currentRef_;
