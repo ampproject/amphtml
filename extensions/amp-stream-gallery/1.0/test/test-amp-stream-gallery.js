@@ -1,14 +1,18 @@
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-stream-gallery';
-import {ActionInvocation} from '#service/action-impl';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
-import {poll} from '#testing/iframe';
 import {setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
+
 import {toggleExperiment} from '#experiments';
-import {useStyles} from '../../../amp-base-carousel/1.0/component.jss';
+
+import {ActionInvocation} from '#service/action-impl';
+
 import {waitFor} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
+
+import {useStyles} from '../../../amp-base-carousel/1.0/component.jss';
 
 describes.realWin(
   'amp-stream-gallery',

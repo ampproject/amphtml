@@ -8,55 +8,21 @@
  * </amp-story>
  * </code>
  */
-import * as Preact from '#core/dom/jsx';
+
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
-import {
-  Action,
-  EmbeddedComponentState,
-  InteractiveComponentDef,
-  StateProperty,
-  UIType,
-  getStoreService,
-} from './amp-story-store-service';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {
-  AdvancementMode,
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryCtaLayer} from './amp-story-cta-layer';
-import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
-import {AmpStoryGridLayer} from './amp-story-grid-layer';
-import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
-import {AmpStoryRenderService} from './amp-story-render-service';
-import {AmpStoryShare} from './amp-story-share';
-import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
-import {AnalyticsVariable, getVariableService} from './variable-service';
-import {BackgroundBlur} from './background-blur';
-import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {EventType, dispatch} from './events';
-import {Gestures} from '../../../src/gesture';
-import {prefersReducedMotion} from '#core/dom/media-query-props';
-import {HistoryState, getHistoryState, setHistoryState} from './history';
-import {InfoDialog} from './amp-story-info-dialog';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Layout_Enum} from '#core/dom/layout';
-import {LiveStoryManager} from './live-story-manager';
-import {MediaPool, MediaType} from './media-pool';
-import {PaginationButtons} from './pagination-buttons';
-import {Services} from '#service';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {SystemLayer} from './amp-story-system-layer';
-import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {isRTL, removeElement} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import * as Preact from '#core/dom/jsx';
+import {Layout_Enum} from '#core/dom/layout';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {
   childElement,
   childElementByTag,
@@ -74,8 +40,9 @@ import {
   setImportantStyles,
   toggle,
 } from '#core/dom/style';
+import {isEsm} from '#core/mode';
+import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
-import {dev, devAssert, user} from '#utils/log';
 import {dict, map} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
@@ -88,6 +55,51 @@ import {isExperimentOn} from '#experiments';
 import {isPreviewMode} from './embed-mode';
 import {isRTL, removeElement} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
+import {parseQueryString} from '#core/types/string/url';
+import {getHistoryState as getWindowHistoryState} from '#core/window/history';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {getDetail} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
+import {AmpStoryConsent} from './amp-story-consent';
+import {AmpStoryCtaLayer} from './amp-story-cta-layer';
+import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
+import {AmpStoryGridLayer} from './amp-story-grid-layer';
+import {AmpStoryHint} from './amp-story-hint';
+import {InfoDialog} from './amp-story-info-dialog';
+import {getLocalizationService} from './amp-story-localization-service';
+import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
+import {AmpStoryRenderService} from './amp-story-render-service';
+import {AmpStoryShare} from './amp-story-share';
+import {
+  Action,
+  EmbeddedComponentState,
+  InteractiveComponentDef,
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
+import {SystemLayer} from './amp-story-system-layer';
+import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
+import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
+import {upgradeBackgroundAudio} from './audio';
+import {BackgroundBlur} from './background-blur';
+import {isPreviewMode} from './embed-mode';
+import {EventType, dispatch} from './events';
+import {HistoryState, getHistoryState, setHistoryState} from './history';
+import {LiveStoryManager} from './live-story-manager';
+import {MediaPool, MediaType} from './media-pool';
+import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
+import {PaginationButtons} from './pagination-buttons';
+import {
+  AdvancementMode,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
 import {
   isTransformed,
   removeAttributeInMutate,
@@ -98,6 +110,13 @@ import {isEsm} from '#core/mode';
 import {upgradeBackgroundAudio} from './audio';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {getLocalizationService} from './amp-story-localization-service';
+import {AnalyticsVariable, getVariableService} from './variable-service';
+
+import {CSS} from '../../../build/amp-story-1.0.css';
+import {getConsentPolicyState} from '../../../src/consent';
+import {Gestures} from '../../../src/gesture';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {getMode, isModeDevelopment} from '../../../src/mode';
 
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;
@@ -240,12 +259,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {!MediaPool} */
     this.mediaPool_ = MediaPool.for(this);
-
-    /** @private {boolean} */
-    this.areAccessAuthorizationsCompleted_ = false;
-
-    /** @private */
-    this.navigateToPageAfterAccess_ = null;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
@@ -538,6 +551,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildSystemLayer_(initialPageId) {
+    this.updateAudioIcon_();
     this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
@@ -770,7 +784,6 @@ export class AmpStory extends AMP.BaseElement {
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (
         embedComponent.state !== EmbeddedComponentState.HIDDEN ||
-        this.storeService_.get(StateProperty.ACCESS_STATE) ||
         !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
         !this.storeService_.get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)
       ) {
@@ -876,7 +889,6 @@ export class AmpStory extends AMP.BaseElement {
     ])
       .then(() => {
         this.handleConsentExtension_();
-        this.initializeStoryAccess_();
 
         this.pages_.forEach((page, index) => {
           page.setState(PageState.NOT_ACTIVE);
@@ -1094,63 +1106,6 @@ export class AmpStory extends AMP.BaseElement {
     toRemoveChildren.forEach((el) => consentEl.removeChild(el));
   }
 
-  /**
-   * @private
-   */
-  initializeStoryAccess_() {
-    Services.accessServiceForDocOrNull(this.element).then((accessService) => {
-      if (!accessService) {
-        return;
-      }
-
-      this.areAccessAuthorizationsCompleted_ =
-        accessService.areFirstAuthorizationsCompleted();
-      accessService.onApplyAuthorizations(() =>
-        this.onAccessApplyAuthorizations_()
-      );
-
-      const firstPage = this.pages_[0].element;
-
-      // First amp-story-page can't be paywall protected.
-      // Removes the access attributes, and throws an error during development.
-      if (
-        firstPage.hasAttribute('amp-access') ||
-        firstPage.hasAttribute('amp-access-hide')
-      ) {
-        firstPage.removeAttribute('amp-access');
-        firstPage.removeAttribute('amp-access-hide');
-        user().error(
-          TAG,
-          'First amp-story-page cannot have amp-access ' +
-            'or amp-access-hide attributes'
-        );
-      }
-    });
-  }
-
-  /**
-   * On amp-access document reauthorization, maybe hide the access UI, and maybe
-   * perform navigation.
-   * @private
-   */
-  onAccessApplyAuthorizations_() {
-    this.areAccessAuthorizationsCompleted_ = true;
-
-    const nextPage = this.navigateToPageAfterAccess_;
-
-    // Step out if the next page is still hidden by the access extension.
-    if (nextPage && nextPage.element.hasAttribute('amp-access-hide')) {
-      return;
-    }
-
-    if (nextPage) {
-      this.navigateToPageAfterAccess_ = null;
-      this.switchTo_(nextPage.element.id, NavigationDirection.NEXT);
-    }
-
-    this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
-  }
-
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout_Enum.CONTAINER;
@@ -1282,25 +1237,6 @@ export class AmpStory extends AMP.BaseElement {
 
     // Step out if trying to navigate to the currently active page.
     if (this.activePage_ && this.activePage_.element.id === targetPageId) {
-      return Promise.resolve();
-    }
-
-    // If the next page might be paywall protected, and the access
-    // authorizations did not resolve yet, wait before navigating.
-    // TODO(gmajoulet): implement a loading state.
-    if (
-      targetPage.element.hasAttribute('amp-access') &&
-      !this.areAccessAuthorizationsCompleted_
-    ) {
-      this.navigateToPageAfterAccess_ = targetPage;
-      return Promise.resolve();
-    }
-
-    // If the next page is paywall protected, display the access UI and wait for
-    // the document to be reauthorized.
-    if (targetPage.element.hasAttribute('amp-access-hide')) {
-      this.storeService_.dispatch(Action.TOGGLE_ACCESS, true);
-      this.navigateToPageAfterAccess_ = targetPage;
       return Promise.resolve();
     }
 
@@ -2163,6 +2099,19 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Update the store if the story has background audio.
+   * @private
+   */
+  updateAudioIcon_() {
+    const storyHasBackgroundAudio =
+      this.element.hasAttribute('background-audio');
+    this.storeService_.dispatch(
+      Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
+      storyHasBackgroundAudio
+    );
+  }
+
+  /**
    * Shows the play/pause icon if there is an element with playback on the story.
    * @private
    */
@@ -2455,7 +2404,6 @@ export class AmpStory extends AMP.BaseElement {
 
 AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story', AmpStory, CSS);
-  AMP.registerElement('amp-story-access', AmpStoryAccess);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);

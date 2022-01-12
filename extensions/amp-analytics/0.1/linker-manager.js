@@ -1,15 +1,19 @@
 import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
-import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {Priority_Enum} from '#service/navigation';
-import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
-import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 import {createElementWithAttributes} from '#core/dom';
-import {createLinker} from './linker';
-import {dict} from '#core/types/object';
-import {getHighestAvailableDomain} from '../../../src/cookies';
 import {isObject} from '#core/types';
+import {dict} from '#core/types/object';
+import {WindowInterface} from '#core/window/interface';
+
+import {Services} from '#service';
+import {Priority_Enum} from '#service/navigation';
+
 import {user} from '#utils/log';
+
+import {createLinker} from './linker';
+import {ExpansionOptions, variableServiceForDoc} from './variables';
+
+import {getHighestAvailableDomain} from '../../../src/cookies';
+import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';

@@ -42,7 +42,7 @@ function newDiff(vnode) {
  */
 export function forwardRef(Component) {
   /**
-   * @param {!Object} props
+   * @param {Object} props
    * @return {R}
    */
   function Forward(props) {
@@ -75,7 +75,7 @@ export function forwardRef(Component) {
 
 /**
  * @param {PreactDef.Renderable} children
- * @return {!Array<PreactDef.Renderable>}
+ * @return {Array<PreactDef.Renderable>}
  */
 function toArray(children) {
   return toChildArray(children);
@@ -84,7 +84,7 @@ function toArray(children) {
 /**
  * @param {PreactDef.Renderable} children
  * @param {function(PreactDef.Renderable):R} fn
- * @return {!Array<R>}
+ * @return {Array<R>}
  * @template R
  */
 function map(children, fn) {

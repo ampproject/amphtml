@@ -1,8 +1,7 @@
-
-
+import {basename, format, parse} from 'path';
 import {URL} from 'url';
-import {parse, format, basename} from 'path';
 
+// eslint-disable-next-line local/no-forbidden-terms
 export const VALID_CDN_ORIGIN = 'https://cdn.ampproject.org';
 
 export const AMP_MAIN_BINARIES_RENAMES = new Map([
@@ -19,7 +18,8 @@ export const AMP_MAIN_BINARIES_RENAMES = new Map([
 ]);
 
 /**
- * @param minifiedBasename should be without extension
+ * @param {string} minifiedBasename should be without extension
+ * @return {string}
  */
 function getMinifiedName(minifiedBasename: string): string {
   const renamedBasename = AMP_MAIN_BINARIES_RENAMES.get(minifiedBasename);
@@ -90,6 +90,10 @@ export function CDNURLToLocalHostRelativeAbsoluteDist(
 
 /**
  * Convert an existing URL to one from a specific RTV.
+ * @param url
+ * @param mode
+ * @param pathnames
+ * @param extension
  */
 export function CDNURLToRTVURL(
   url: URL,

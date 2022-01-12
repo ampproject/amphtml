@@ -1,35 +1,38 @@
+import {Deferred} from '#core/data-structures/promise';
+import {isIframed} from '#core/dom';
+import {LayoutPriority_Enum} from '#core/dom/layout';
+import {rethrowAsync} from '#core/error';
+import {isArray, isEnumValue} from '#core/types';
+import {dict, hasOwn} from '#core/types/object';
+import {expandTemplate} from '#core/types/string';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user} from '#utils/log';
+
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
-import {AnalyticsEventType} from './events';
-import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '#core/data-structures/promise';
+import {AnalyticsEventType} from './events';
+import {
+  InstrumentationService,
+  instrumentationServicePromiseForDoc,
+} from './instrumentation';
+import {LinkerManager} from './linker-manager';
+import {installLinkerReaderService} from './linker-reader';
+import {RequestHandler, expandPostMessage} from './requests';
+import {SessionManager, sessionServicePromiseForDoc} from './session-manager';
+import {Transport} from './transport';
 import {
   ExpansionOptions,
   VariableService,
   stringToBool,
   variableServicePromiseForDoc,
 } from './variables';
-import {
-  InstrumentationService,
-  instrumentationServicePromiseForDoc,
-} from './instrumentation';
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {LinkerManager} from './linker-manager';
-import {RequestHandler, expandPostMessage} from './requests';
-import {Services} from '#service';
-import {SessionManager, sessionServicePromiseForDoc} from './session-manager';
-import {Transport} from './transport';
-import {dev, devAssert, user} from '#utils/log';
-import {dict, hasOwn} from '#core/types/object';
-import {expandTemplate} from '#core/types/string';
-import {getMode} from '../../../src/mode';
-import {installLinkerReaderService} from './linker-reader';
-import {isArray, isEnumValue} from '#core/types';
-import {rethrowAsync} from '#core/error';
 
-import {isIframed} from '#core/dom';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {isInFie} from '../../../src/iframe-helper';
+import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-analytics';
 

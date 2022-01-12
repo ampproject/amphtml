@@ -1,3 +1,6 @@
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {dict} from '#core/types/object';
+
 import {
   CONSENT_ITEM_STATE,
   METADATA_STORAGE_KEY,
@@ -11,8 +14,6 @@ import {
   isConsentInfoStoredValueSame,
   recalculateConsentStateValue,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
-import {dict} from '#core/types/object';
 
 describes.fakeWin('ConsentInfo', {}, () => {
   describe('getStoredConsentInfo', () => {

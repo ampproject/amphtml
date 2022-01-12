@@ -8,7 +8,7 @@ import {
   // The LocalizedStringId_Enum type is imported even though it is not used because
   // the compiler does not output types for enums, but we want to distinguish
   // between LocalizedStringId_Enum enum values and any other strings.
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   LocalizedStringId_Enum,
 } from './strings';
 

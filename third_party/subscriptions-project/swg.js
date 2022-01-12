@@ -2091,7 +2091,7 @@ const FilterResult = {
  */
 let ClientEvent;
 
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @interface
  */

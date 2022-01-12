@@ -17,8 +17,10 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
 
     // Set up the story.
     const storyEl = win.document.createElement('amp-story');
+    const pageEl = win.document.createElement('amp-story-page');
     storyEl.getAmpDoc = () => new AmpDocSingle(win);
     win.document.body.appendChild(storyEl);
+    storyEl.appendChild(pageEl);
 
     const localizationService = new LocalizationService(win.document.body);
     registerServiceBuilder(win, 'localization', function () {
@@ -33,13 +35,13 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     // Set up the attachment element for inline attachment testing.
     attachmentEl = win.document.createElement('amp-story-page-attachment');
     attachmentEl.getAmpDoc = () => new AmpDocSingle(win);
-    storyEl.appendChild(attachmentEl);
+    pageEl.appendChild(attachmentEl);
     attachment = new AmpStoryPageAttachment(attachmentEl);
 
     // Set up the outlink element for outlink testing.
     outlinkEl = win.document.createElement('amp-story-page-outlink');
     outlinkEl.getAmpDoc = () => new AmpDocSingle(win);
-    storyEl.appendChild(outlinkEl);
+    pageEl.appendChild(outlinkEl);
     outlinkEl.appendChild(win.document.createElement('a'));
     outlink = new AmpStoryPageAttachment(outlinkEl);
   });

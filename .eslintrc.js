@@ -28,7 +28,7 @@ function getExperimentGlobals() {
 
 module.exports = {
   'root': true,
-  'parser': '@babel/eslint-parser',
+  'parser': '@typescript-eslint/parser',
   'plugins': [
     'chai-expect',
     'import',
@@ -39,14 +39,13 @@ module.exports = {
     'react',
     'react-hooks',
     'sort-destructure-keys',
-    'sort-requires',
+    '@typescript-eslint',
   ],
   'env': {
     'es6': true,
     'browser': true,
   },
   'parserOptions': {
-    'ecmaVersion': 6,
     'jsx': true,
     'sourceType': 'module',
   },
@@ -260,7 +259,8 @@ module.exports = {
     'no-sequences': 2,
     'no-throw-literal': 2,
     'no-unused-expressions': 0,
-    'no-unused-vars': [
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
       2,
       {
         'argsIgnorePattern': '^(var_args$|opt_|unused)',
@@ -299,9 +299,7 @@ module.exports = {
     ],
     'sort-destructure-keys/sort-destructure-keys': 2,
     'import/order': [
-      // Disabled for now, so individual folders can opt-in one PR at a time and
-      // minimize disruption/merge conflicts
-      0,
+      2,
       {
         // Split up imports groups with exactly one newline
         'newlines-between': 'always',
@@ -341,9 +339,17 @@ module.exports = {
         'ignoreDeclarationSort': true,
       },
     ],
-    'sort-requires/sort-requires': 2,
   },
   'overrides': [
+    {
+      'files': ['**/*.ts'],
+      'rules': {
+        'require-jsdoc': 0,
+        'jsdoc/require-param': 0,
+        'jsdoc/require-param-type': 0,
+        'jsdoc/require-returns': 0,
+      },
+    },
     {
       'files': [
         'test/**/*.js',
@@ -432,7 +438,7 @@ module.exports = {
       'rules': {
         'no-var': 0,
         'no-undef': 0,
-        'no-unused-vars': 0,
+        '@typescript-eslint/no-unused-vars': 0,
         'prefer-const': 0,
         'require-jsdoc': 0,
         'jsdoc/check-tag-names': 0,
@@ -452,8 +458,8 @@ module.exports = {
       },
     },
     {
-      'files': ['3p/**/*.js', 'src/**/*.js', 'test/**/*.js', 'testing/**/*.js'],
-      'rules': {'import/order': 2},
+      'files': ['build-system/**/*.js'],
+      'rules': {'import/order': 0},
     },
     {
       'files': ['src/preact/**', 'extensions/**/1.0/**', '**/storybook/**'],

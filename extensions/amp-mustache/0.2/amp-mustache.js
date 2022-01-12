@@ -1,11 +1,15 @@
-import {BaseTemplate} from '../../../src/base-template';
-import {Purifier} from '#purifier';
-import {dict} from '#core/types/object';
-import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {iterateCursor, templateContentClone} from '#core/dom';
-import {rewriteAttributeValue} from '../../../src/url-rewrite';
+import {dict} from '#core/types/object';
+
+import {Purifier} from '#purifier';
+
 import {user} from '#utils/log';
+
 import mustache from '#third_party/mustache/mustache';
+
+import {BaseTemplate} from '../../../src/base-template';
+import {getService, registerServiceBuilder} from '../../../src/service-helpers';
+import {rewriteAttributeValue} from '../../../src/url-rewrite';
 
 const TAG = 'amp-mustache';
 

@@ -1,20 +1,11 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AutocompleteBindingDef} from './autocomplete-binding-def';
-import {AutocompleteBindingInline} from './autocomplete-binding-inline';
-import {AutocompleteBindingSingle} from './autocomplete-binding-single';
-import {CSS} from '../../../build/amp-autocomplete-0.1.css';
 import {Keys_Enum} from '#core/constants/key-codes';
+import {removeChildren, tryFocus} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
-import {Services} from '#service';
-import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
-import {
-  UrlReplacementPolicy_Enum,
-  batchFetchJsonFor,
-  requestForBatchFetch,
-} from '../../../src/batched-json';
-import {addParamToUrl} from '../../../src/url';
-import {createCustomEvent} from '#utils/event-helper';
-import {dev, user, userAssert} from '#utils/log';
+import {toggle} from '#core/dom/style';
+import {mod} from '#core/math';
+import {isArray, isEnumValue} from '#core/types';
+import {once} from '#core/types/function';
 import {
   dict,
   getValueForExpr,
@@ -22,17 +13,29 @@ import {
   map,
   ownProperty,
 } from '#core/types/object';
-
-import {includes} from '#core/types/string';
-import {isArray, isEnumValue} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
+import {includes} from '#core/types/string';
 
-import {mod} from '#core/math';
-import {once} from '#core/types/function';
-import {removeChildren, tryFocus} from '#core/dom';
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
 import {setupAMPCors, setupInput, setupJsonFetchInit} from '#utils/xhr-utils';
-import {toggle} from '#core/dom/style';
+
 import fuzzysearch from '#third_party/fuzzysearch';
+
+import {AutocompleteBindingDef} from './autocomplete-binding-def';
+import {AutocompleteBindingInline} from './autocomplete-binding-inline';
+import {AutocompleteBindingSingle} from './autocomplete-binding-single';
+
+import {CSS} from '../../../build/amp-autocomplete-0.1.css';
+import {
+  UrlReplacementPolicy_Enum,
+  batchFetchJsonFor,
+  requestForBatchFetch,
+} from '../../../src/batched-json';
+import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
+import {addParamToUrl} from '../../../src/url';
 
 /**
  * @typedef {{
@@ -40,7 +43,7 @@ import fuzzysearch from '#third_party/fuzzysearch';
  *   selectedText: ?string
  * }}
  */
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let SelectionValues;
 
 const TAG = 'amp-autocomplete';

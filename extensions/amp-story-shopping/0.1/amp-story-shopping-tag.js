@@ -119,7 +119,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
             }
           ></span>
           <span class="amp-story-shopping-tag-pill-text">
-            {this.tagData_['product-tag-text'] ||
+            {(this.tagData_['product-tag-text'] && (
+              <span class="amp-story-shopping-product-tag-text">
+                {this.tagData_['product-tag-text']}
+              </span>
+            )) ||
               new Intl.NumberFormat(
                 this.localizationService_.getLanguageCodesForElement(
                   this.element_

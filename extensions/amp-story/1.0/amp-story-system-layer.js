@@ -1,5 +1,16 @@
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
-import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
+import {closest, matches, scopedQuerySelector} from '#core/dom/query';
+import {setImportantStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {dev} from '#utils/log';
+
+import {localize} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -7,25 +18,20 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
-import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
-import {Services} from '#service';
-import {closest, matches, scopedQuerySelector} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
 } from './utils';
-import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getSourceOrigin} from '../../../src/url';
 
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {localizeAsync} from './amp-story-localization-service';
+import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
+import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
+import {getSourceOrigin} from '../../../src/url';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
