@@ -1,3 +1,4 @@
+import {devAssert} from '#core/assert';
 import {toWin} from '#core/window';
 
 const SHADOW_CSS_CACHE = '__AMP_SHADOW_CSS';
@@ -18,6 +19,7 @@ export function installShadowStyle(shadowRoot, name, cssText) {
     let styleSheet = cache[name];
     if (!styleSheet) {
       styleSheet = new win.CSSStyleSheet();
+      devAssert(styleSheet.replaceSync);
       styleSheet.replaceSync(cssText);
       cache[name] = styleSheet;
     }

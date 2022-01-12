@@ -1,6 +1,10 @@
 export {};
 
 declare global {
+  interface Window {
+    __AMP_SHADOW_CSS?: null | {[key: string]: CSSStyleSheet};
+  }
+
   // An interface for elements with pause functionality, such as media players.
   interface IPausable {
     pause: () => void;
