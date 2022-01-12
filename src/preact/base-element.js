@@ -241,7 +241,7 @@ export class PreactBaseElement extends BaseElement {
 
       /**
        * @param {import('#core/constants/ready-state').ReadyState_Enum} state
-       * @param {*} opt_failure
+       * @param {Error=} opt_failure
        */
       'onReadyState': (state, opt_failure) => {
         this.onReadyState_(state, opt_failure);
