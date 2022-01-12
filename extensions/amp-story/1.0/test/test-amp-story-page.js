@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
@@ -13,9 +15,6 @@ import {afterRenderPromise} from '#testing/helpers';
 
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {scopedQuerySelectorAll} from '#core/dom/query';
-import {afterRenderPromise} from '#testing/helpers';
-import {expect} from 'chai';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
