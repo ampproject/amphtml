@@ -1,6 +1,3 @@
-import {
-  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
-} from '#core/constants/consent-state';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
@@ -10,7 +7,7 @@ import {Services} from '#service';
  * for resolve. Or if consent service is not available.
  * @param {!Element|!ShadowRoot} element
  * @param {string=} policyId
- * @return {!Promise<?CONSENT_POLICY_STATE>}
+ * @return {!Promise<import('#core/constants/consent-state').CONSENT_POLICY_STATE|null>}
  */
 export function getConsentPolicyState(element, policyId = 'default') {
   return Services.consentPolicyServiceForDocOrNull(element).then(

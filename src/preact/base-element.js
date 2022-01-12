@@ -39,23 +39,23 @@ import {
 
 import {installShadowStyle} from '../shadow-embed';
 
-/** @const {!MutationObserverInit} */
+/** @const {MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
   childList: true,
 };
 
-/** @const {!MutationObserverInit} */
+/** @const {MutationObserverInit} */
 const PASSTHROUGH_MUTATION_INIT = {
   childList: true,
   characterData: true,
 };
 
-/** @const {!MutationObserverInit} */
+/** @const {MutationObserverInit} */
 const TEMPLATES_MUTATION_INIT = {
   childList: true,
 };
 
-/** @const {!JsonObject<string, string>} */
+/** @const {JsonObject<string, string>} */
 const SHADOW_CONTAINER_ATTRS = dict({
   'style': 'display: contents; background: inherit;',
   'part': 'c',
@@ -64,13 +64,13 @@ const SHADOW_CONTAINER_ATTRS = dict({
 /** @const {string} */
 const SERVICE_SLOT_NAME = 'i-amphtml-svc';
 
-/** @const {!JsonObject<string, string>} */
+/** @const {JsonObject<string, string>} */
 const SERVICE_SLOT_ATTRS = dict({'name': SERVICE_SLOT_NAME});
 
 /** @const {string} */
 const RENDERED_ATTR = 'i-amphtml-rendered';
 
-/** @const {!JsonObject<string, string>} */
+/** @const {JsonObject<string, string>} */
 const RENDERED_ATTRS = dict({'i-amphtml-rendered': ''});
 
 /**
@@ -86,13 +86,13 @@ const UNSLOTTED_GROUP = 'unslotted';
 const MATCH_ANY = () => true;
 
 /**
- * @param {!AmpElementPropDef} def
+ * @param {AmpElementPropDef} def
  * @return {boolean}
  */
 const HAS_MEDIA = (def) => !!def.media;
 
 /**
- * @param {!AmpElementPropDef} def
+ * @param {AmpElementPropDef} def
  * @return {boolean}
  */
 const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
@@ -131,11 +131,109 @@ export class PreactBaseElement extends BaseElement {
     return !this.usesLoading();
   }
 
-  /** @param {!Element} element */
+  /**
+   * Override to provide the Component definition.
+   *
+   * @protected {PreactDef.FunctionalComponent}
+   */
+  static Component() {
+    devAssert(false, 'Must provide Component');
+  }
+
+  /**
+   * If default props are static, this can be used instead of init().
+   * @protected {JsonObject|undefined}
+   */
+  static staticProps = undefined;
+
+  /**
+   * @protected {Array<ContextProp>}
+   */
+  static useContexts = mode.isLocalDev() ? Object.freeze([]) : [];
+
+  /**
+   * Whether the component implements a loading protocol.
+   *
+   * @protected {boolean}
+   */
+  static loadable = false;
+
+  /**
+   * Whether a component should be unloaded for `pauseCallback`.
+   *
+   * @protected {boolean}
+   */
+  static unloadOnPause = false;
+
+  /**
+   * An override to specify that the component requires `layoutSizeDefined`.
+   * This typically means that the element's `isLayoutSupported()` is
+   * implemented via `isLayoutSizeDefined()`, and this is how the default
+   * `isLayoutSupported()` is implemented when this flag is set.
+   *
+   * @protected {string}
+   */
+  static layoutSizeDefined = false;
+
+  /**
+   * The tag name, e.g. "div", "span", time" that should be used as a replacement
+   * node for Preact rendering. This is the node that Preact will diff with
+   * with specified, instead of rendering a new node. Only applicable to light-DOM
+   * mapping styles.
+   *
+   * @protected {string}
+   */
+  static lightDomTag = '';
+
+  /**
+   * Whether this element uses "templates" system.
+   *
+   * @protected {boolean}
+   */
+  static usesTemplate = false;
+
+  /**
+   * The CSS for shadow stylesheets.
+   *
+   * @protected {?string}
+   */
+  static shadowCss = null;
+
+  /**
+   * Whether this element uses Shadow DOM.
+   *
+   * @protected {boolean}
+   */
+  static usesShadowDom = false;
+
+  /**
+   * Enabling detached mode alters the children to be rendered in an
+   * unappended container. By default the children will be attached to the DOM.
+   *
+   * @protected {boolean}
+   */
+  static detached = false;
+
+  /**
+   * This enables the 'delegatesFocus' option when creating the shadow DOM for
+   * this component.  A key feature of 'delegatesFocus' set to true is that
+   * when elements within the shadow DOM gain focus, the focus is also applied
+   * to the host element.
+   */
+  static delegatesFocus = false;
+
+  /**
+   * Provides a mapping of Preact prop to AmpElement DOM attributes.
+   *
+   * @protected {Object<string, AmpElementPropDef>}
+   */
+  static props = {};
+
+  /** @param {Element} element */
   constructor(element) {
     super(element);
 
-    /** @private {!JsonObject} */
+    /** @private {JsonObject} */
     this.defaultProps_ = dict({
       'loading': Loading_Enum.AUTO,
       'onReadyState': (state, opt_failure) => {
@@ -155,7 +253,7 @@ export class PreactBaseElement extends BaseElement {
       },
     });
 
-    /** @private {!AmpContextDef.ContextType} */
+    /** @private {AmpContextDef.ContextType} */
     this.context_ = {
       renderable: false,
       playable: true,
@@ -186,7 +284,7 @@ export class PreactBaseElement extends BaseElement {
       this.maybeUpdateReadyState_();
     };
 
-    /** @type {?Deferred<!API_TYPE>} */
+    /** @type {?Deferred<API_TYPE>} */
     this.deferredApi_ = null;
 
     /** @private {?Array} */
@@ -216,7 +314,7 @@ export class PreactBaseElement extends BaseElement {
     /** @protected {?MutationObserver} */
     this.observer = null;
 
-    /** @private {!PauseHelper} */
+    /** @private {PauseHelper} */
     this.pauseHelper_ = new PauseHelper(element);
 
     /** @protected {?MediaQueryProps} */
@@ -226,14 +324,14 @@ export class PreactBaseElement extends BaseElement {
   /**
    * A chance to initialize default Preact props for the element.
    *
-   * @return {!JsonObject|undefined}
+   * @return {JsonObject|undefined}
    */
   init() {}
 
   /** @override */
   isLayoutSupported(layout) {
     const Ctor = this.constructor;
-    if (Ctor['layoutSizeDefined']) {
+    if (Ctor.layoutSizeDefined) {
       return (
         isLayoutSizeDefined(layout) ||
         // This allows a developer to specify the component's size using the
@@ -257,14 +355,14 @@ export class PreactBaseElement extends BaseElement {
     const Ctor = this.constructor;
 
     this.observer = new MutationObserver((rs) => this.checkMutations_(rs));
-    const props = Ctor['props'];
+    const {props} = Ctor;
     const childrenInit = checkPropsFor(props, HAS_SELECTOR)
       ? CHILDREN_MUTATION_INIT
       : null;
     const passthroughInit = checkPropsFor(props, HAS_PASSTHROUGH)
       ? PASSTHROUGH_MUTATION_INIT
       : null;
-    const templatesInit = Ctor['usesTemplate'] ? TEMPLATES_MUTATION_INIT : null;
+    const templatesInit = Ctor.usesTemplate ? TEMPLATES_MUTATION_INIT : null;
     this.observer.observe(this.element, {
       attributes: true,
       ...childrenInit,
@@ -276,10 +374,10 @@ export class PreactBaseElement extends BaseElement {
       ? new MediaQueryProps(this.win, () => this.scheduleRender_())
       : null;
 
-    const staticProps = Ctor['staticProps'];
+    const {staticProps} = Ctor;
     const initProps = this.init();
     Object.assign(
-      /** @type {!Object} */ (this.defaultProps_),
+      /** @type {Object} */ (this.defaultProps_),
       staticProps,
       initProps
     );
@@ -315,7 +413,7 @@ export class PreactBaseElement extends BaseElement {
       }
     );
 
-    const useContexts = Ctor['useContexts'];
+    const {useContexts} = Ctor;
     if (useContexts.length != 0) {
       subscribe(this.element, useContexts, (...contexts) => {
         this.contextValues_ = contexts;
@@ -326,7 +424,7 @@ export class PreactBaseElement extends BaseElement {
     this.renderDeferred_ = new Deferred();
     this.scheduleRender_();
 
-    if (Ctor['loadable']) {
+    if (Ctor.loadable) {
       this.setReadyState?.(ReadyState_Enum.LOADING);
     }
     this.maybeUpdateReadyState_();
@@ -337,7 +435,7 @@ export class PreactBaseElement extends BaseElement {
   /** @override */
   ensureLoaded() {
     const Ctor = this.constructor;
-    if (!Ctor['loadable']) {
+    if (!Ctor.loadable) {
       return;
     }
     this.mutateProps(dict({'loading': Loading_Enum.EAGER}));
@@ -348,7 +446,7 @@ export class PreactBaseElement extends BaseElement {
   mountCallback() {
     discover(this.element);
     const Ctor = this.constructor;
-    if (Ctor['loadable'] && this.getProp('loading') != Loading_Enum.AUTO) {
+    if (Ctor.loadable && this.getProp('loading') != Loading_Enum.AUTO) {
       this.mutateProps({'loading': Loading_Enum.AUTO});
       this.resetLoading_ = false;
     }
@@ -358,7 +456,7 @@ export class PreactBaseElement extends BaseElement {
   unmountCallback() {
     discover(this.element);
     const Ctor = this.constructor;
-    if (Ctor['loadable']) {
+    if (Ctor.loadable) {
       this.mutateProps({'loading': Loading_Enum.UNLOAD});
     }
     this.updateIsPlaying_(false);
@@ -390,15 +488,15 @@ export class PreactBaseElement extends BaseElement {
 
   /**
    * @protected
-   * @param {!JsonObject} props
+   * @param {JsonObject} props
    */
   mutateProps(props) {
-    Object.assign(/** @type {!Object} */ (this.defaultProps_), props);
+    Object.assign(/** @type {Object} */ (this.defaultProps_), props);
     this.scheduleRender_();
   }
 
   /**
-   * @return {!API_TYPE}
+   * @return {API_TYPE}
    * @protected
    */
   api() {
@@ -427,7 +525,7 @@ export class PreactBaseElement extends BaseElement {
    * A callback called immediately after mutations have been observed on a
    * component. This differs from `checkPropsPostMutations` in that it is
    * called in all cases of mutation.
-   * @param {!Array<MutationRecord>} unusedRecords
+   * @param {Array<MutationRecord>} unusedRecords
    * @protected
    */
   mutationObserverCallback(unusedRecords) {}
@@ -444,14 +542,14 @@ export class PreactBaseElement extends BaseElement {
    * A callback called to compute props before rendering is run. The properties
    * computed here and ephemeral and thus should not be persisted via a
    * `mutateProps()` method.
-   * @param {!JsonObject} unusedProps
+   * @param {JsonObject} unusedProps
    * @protected
    */
   updatePropsForRendering(unusedProps) {}
 
   /**
    * A callback called to check whether the element is ready for rendering.
-   * @param {!JsonObject} unusedProps
+   * @param {JsonObject} unusedProps
    * @return {boolean}
    * @protected
    */
@@ -460,7 +558,7 @@ export class PreactBaseElement extends BaseElement {
   }
 
   /**
-   * @param {!Array<!MutationRecord>} records
+   * @param {Array<MutationRecord>} records
    * @private
    */
   checkMutations_(records) {
@@ -492,7 +590,7 @@ export class PreactBaseElement extends BaseElement {
   }
 
   /**
-   * @param {!ReadyState_Enum} state
+   * @param {ReadyState_Enum} state
    * @param {*=} opt_failure
    * @private
    */
@@ -500,7 +598,7 @@ export class PreactBaseElement extends BaseElement {
     this.setReadyState?.(state, opt_failure);
 
     const Ctor = this.constructor;
-    if (Ctor['unloadOnPause']) {
+    if (Ctor.unloadOnPause) {
       // These are typically iframe-based elements where we don't know
       // whether a media is currently playing. So we have to assume that
       // it is whenever the element is loaded.
@@ -560,9 +658,8 @@ export class PreactBaseElement extends BaseElement {
     }
 
     const Ctor = this.constructor;
-    const isShadow = Ctor['usesShadowDom'];
-    const lightDomTag = isShadow ? null : Ctor['lightDomTag'];
-    const isDetached = Ctor['detached'];
+    const {detached: isDetached, usesShadowDom: isShadow} = Ctor;
+    const lightDomTag = isShadow ? null : Ctor.lightDomTag;
 
     if (!this.container_) {
       const doc = this.win.document;
@@ -581,12 +678,12 @@ export class PreactBaseElement extends BaseElement {
           // Create new shadow root.
           shadowRoot = this.element.attachShadow({
             mode: 'open',
-            delegatesFocus: Ctor['delegatesFocus'],
+            delegatesFocus: Ctor.delegatesFocus,
           });
 
           // The pre-constructed shadow root is required to have the stylesheet
           // inline. Thus, only the new shadow roots share the stylesheets.
-          const shadowCss = Ctor['shadowCss'];
+          const {shadowCss} = Ctor;
           if (shadowCss) {
             installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
           }
@@ -629,7 +726,7 @@ export class PreactBaseElement extends BaseElement {
           childElementByAttr(this.container_, RENDERED_ATTR) ||
           createElementWithAttributes(doc, lightDomTag, RENDERED_ATTRS);
         replacement[RENDERED_PROP] = true;
-        if (Ctor['layoutSizeDefined']) {
+        if (Ctor.layoutSizeDefined) {
           replacement.classList.add('i-amphtml-fill-content');
         }
         this.container_.appendChild(replacement);
@@ -646,7 +743,7 @@ export class PreactBaseElement extends BaseElement {
     // Exit early if contexts are not ready. Optional contexts will yield
     // right away, even when `null`. The required contexts will block the
     // `contextValues` until available.
-    const useContexts = Ctor['useContexts'];
+    const {useContexts} = Ctor;
     const contextValues = this.contextValues_;
     const isContextReady = useContexts.length == 0 || contextValues != null;
     if (!isContextReady) {
@@ -670,7 +767,7 @@ export class PreactBaseElement extends BaseElement {
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
     // this element will be reused.
-    let comp = Preact.createElement(Ctor['Component'], props);
+    let comp = Preact.createElement(Ctor.Component, props);
 
     // Add contexts.
     for (let i = 0; i < useContexts.length; i++) {
@@ -727,7 +824,7 @@ export class PreactBaseElement extends BaseElement {
    * Returns reference to upgraded imperative API object, as in React's
    * useImperativeHandle.
    *
-   * @return {!Promise<!API_TYPE>}
+   * @return {Promise<API_TYPE>}
    * @override
    */
   getApi() {
@@ -750,7 +847,7 @@ export class PreactBaseElement extends BaseElement {
    * `ref.current`. So if we ever returned `ref.current` directly, it could go
    * stale by the time its actually used.
    *
-   * @param {!API_TYPE} current
+   * @param {API_TYPE} current
    * @private
    */
   initApiWrapper_(current) {
@@ -758,8 +855,7 @@ export class PreactBaseElement extends BaseElement {
     const keys = Object.keys(current);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      // eslint-disable-next-line local/restrict-this-access
-      wrapRefProperty(this, api, key);
+      this.wrapRefProperty_(api, key);
     }
     this.apiWrapper_ = api;
     if (this.deferredApi_) {
@@ -772,7 +868,7 @@ export class PreactBaseElement extends BaseElement {
    * Verifies that every Preact render exposes the same API surface as the previous render.
    * If it does not, the API wrapper is syncrhonized.
    *
-   * @param {!API_TYPE} current
+   * @param {API_TYPE} current
    * @private
    */
   checkApiWrapper_(current) {
@@ -809,10 +905,10 @@ export class PreactBaseElement extends BaseElement {
   /**
    * Dispatches an error event. Provided as a method so Preact components can
    * call into it, while AMP components can override to trigger action services.
-   * @param {!Element} element
+   * @param {Element} element
    * @param {string} eventName
-   * @param {!JSONObject|string|undefined|null} detail
-   * @return {!Object}
+   * @param {JSONObject|string|undefined|null} detail
+   * @return {Object}
    */
   triggerEvent(element, eventName, detail) {
     dispatchCustomEvent(element, eventName, detail);
@@ -821,7 +917,7 @@ export class PreactBaseElement extends BaseElement {
   /** @override */
   pauseCallback() {
     const Ctor = this.constructor;
-    if (Ctor['unloadOnPause']) {
+    if (Ctor.unloadOnPause) {
       this.mutateProps(dict({'loading': Loading_Enum.UNLOAD}));
       this.resetLoading_ = true;
     } else {
@@ -837,129 +933,26 @@ export class PreactBaseElement extends BaseElement {
   updateIsPlaying_(isPlaying) {
     this.pauseHelper_.updatePlaying(isPlaying);
   }
+
+  /**
+   * @param {Object} api
+   * @param {string} key
+   * @private
+   */
+  wrapRefProperty_(api, key) {
+    Object.defineProperty(api, key, {
+      configurable: true,
+
+      get: () => this.currentRef_[key],
+      set: (v) => {
+        this.currentRef_[key] = v;
+      },
+    });
+  }
 }
 
 /**
- * @param {typeof PreactBaseElement} baseElement
- * @param {!Object} api
- * @param {string} key
- */
-function wrapRefProperty(baseElement, api, key) {
-  Object.defineProperty(api, key, {
-    configurable: true,
-
-    get() {
-      return baseElement.currentRef_[key];
-    },
-
-    set(v) {
-      baseElement.currentRef_[key] = v;
-    },
-  });
-}
-
-// Ideally, these would be Static Class Fields. But Closure can't even.
-
-/**
- * Override to provide the Component definition.
- *
- * @protected {!PreactDef.FunctionalComponent}
- */
-PreactBaseElement['Component'] = function () {
-  devAssert(false, 'Must provide Component');
-};
-
-/**
- * If default props are static, this can be used instead of init().
- * @protected {!JsonObject|undefined}
- */
-PreactBaseElement['staticProps'] = undefined;
-
-/**
- * @protected {!Array<!ContextProp>}
- */
-PreactBaseElement['useContexts'] = mode.isLocalDev() ? Object.freeze([]) : [];
-
-/**
- * Whether the component implements a loading protocol.
- *
- * @protected {boolean}
- */
-PreactBaseElement['loadable'] = false;
-
-/**
- * Whether a component should be unloaded for `pauseCallback`.
- *
- * @protected {boolean}
- */
-PreactBaseElement['unloadOnPause'] = false;
-
-/**
- * An override to specify that the component requires `layoutSizeDefined`.
- * This typically means that the element's `isLayoutSupported()` is
- * implemented via `isLayoutSizeDefined()`, and this is how the default
- * `isLayoutSupported()` is implemented when this flag is set.
- *
- * @protected {string}
- */
-PreactBaseElement['layoutSizeDefined'] = false;
-
-/**
- * The tag name, e.g. "div", "span", time" that should be used as a replacement
- * node for Preact rendering. This is the node that Preact will diff with
- * with specified, instead of rendering a new node. Only applicable to light-DOM
- * mapping styles.
- *
- * @protected {string}
- */
-PreactBaseElement['lightDomTag'] = '';
-
-/**
- * Whether this element uses "templates" system.
- *
- * @protected {boolean}
- */
-PreactBaseElement['usesTemplate'] = false;
-
-/**
- * The CSS for shadow stylesheets.
- *
- * @protected {?string}
- */
-PreactBaseElement['shadowCss'] = null;
-
-/**
- * Whether this element uses Shadow DOM.
- *
- * @protected {boolean}
- */
-PreactBaseElement['usesShadowDom'] = false;
-
-/**
- * Enabling detached mode alters the children to be rendered in an
- * unappended container. By default the children will be attached to the DOM.
- *
- * @protected {boolean}
- */
-PreactBaseElement['detached'] = false;
-
-/**
- * This enables the 'delegatesFocus' option when creating the shadow DOM for
- * this component.  A key feature of 'delegatesFocus' set to true is that
- * when elements within the shadow DOM gain focus, the focus is also applied
- * to the host element.
- */
-PreactBaseElement['delegatesFocus'] = false;
-
-/**
- * Provides a mapping of Preact prop to AmpElement DOM attributes.
- *
- * @protected {!Object<string, !AmpElementPropDef>}
- */
-PreactBaseElement['props'] = {};
-
-/**
- * @param {!NodeList} nodeList
+ * @param {NodeList} nodeList
  * @return {boolean}
  */
 function shouldMutationForNodeListBeRerendered(nodeList) {
@@ -986,20 +979,20 @@ function shouldMutationForNodeListBeRerendered(nodeList) {
 
 /**
  * @param {typeof PreactBaseElement} Ctor
- * @param {!MutationRecord} m
+ * @param {MutationRecord} m
  * @return {boolean}
  */
 function shouldMutationBeRerendered(Ctor, m) {
   const {type} = m;
   if (type == 'attributes') {
     // Check whether this is a templates attribute.
-    if (Ctor['usesTemplate'] && m.attributeName == 'template') {
+    if (Ctor.usesTemplate && m.attributeName == 'template') {
       return true;
     }
     // Check if the attribute is mapped to one of the properties.
-    const props = Ctor['props'];
+    const {props} = Ctor;
     for (const name in props) {
-      const def = /** @type {!AmpElementPropDef} */ (props[name]);
+      const def = /** @type {AmpElementPropDef} */ (props[name]);
       if (
         m.attributeName == def.attr ||
         (def.attrs && def.attrs.includes(devAssert(m.attributeName))) ||

@@ -28,7 +28,10 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {HistoryState, setHistoryState} from '../../amp-story/1.0/history';
 import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
-import {triggerClickFromLightDom} from '../../amp-story/1.0/utils';
+import {
+  dependsOnStoryServices,
+  triggerClickFromLightDom,
+} from '../../amp-story/1.0/utils';
 
 /**
  * Distance to swipe before opening attachment.
@@ -515,6 +518,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 }
 
 AMP.extension('amp-story-page-attachment', '0.1', (AMP) => {
-  AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment, CSS);
-  AMP.registerElement('amp-story-page-outlink', AmpStoryPageAttachment);
+  const delayedAttachmentClass = dependsOnStoryServices(AmpStoryPageAttachment);
+  AMP.registerElement('amp-story-page-attachment', delayedAttachmentClass, CSS);
+  AMP.registerElement('amp-story-page-outlink', delayedAttachmentClass);
 });
