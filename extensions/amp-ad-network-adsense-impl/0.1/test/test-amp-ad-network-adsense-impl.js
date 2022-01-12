@@ -19,7 +19,7 @@ import {Services} from '#service';
 import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
-  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
+  AmpAdXOriginIframeHandler, // eslint-disable-line @typescript-eslint/no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {
   AmpAdNetworkAdsenseImpl,

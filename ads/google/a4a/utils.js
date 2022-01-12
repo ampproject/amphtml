@@ -99,7 +99,7 @@ const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
 /** @const {string} */
-export const TOKEN_VALUE =
+const TOKEN_VALUE_3P =
   'AxOH8+XUqIxXfDG7Bxf7YR6oBTF4f73xWZNTyqhrkvIEgEmpxrpX8rzEqe9/yOsCGW9ChT05U9t++yH/aCYKCAgAAACVeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2NDMxNTUxOTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWUsInVzYWdlIjoic3Vic2V0In0=';
 
 /**
@@ -108,12 +108,12 @@ export const TOKEN_VALUE =
  * @param {!Window} win
  */
 export function maybeInsertOriginTrialToken(win) {
-  if (win.document.head.querySelector(`meta[content='${TOKEN_VALUE}']`)) {
+  if (win.document.head.querySelector(`meta[content='${TOKEN_VALUE_3P}']`)) {
     return;
   }
   const metaEl = createElementWithAttributes(win.document, 'meta', {
     'http-equiv': 'origin-trial',
-    content: TOKEN_VALUE,
+    content: TOKEN_VALUE_3P,
   });
   win.document.head.appendChild(metaEl);
 }

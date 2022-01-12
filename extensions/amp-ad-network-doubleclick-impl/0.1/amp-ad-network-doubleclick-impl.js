@@ -101,7 +101,7 @@ import {
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
-  RefreshManager, // eslint-disable-line no-unused-vars
+  RefreshManager, // eslint-disable-line @typescript-eslint/no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
