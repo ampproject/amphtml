@@ -1,8 +1,7 @@
-import * as Preact from '#core/dom/jsx';
-
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
+import * as Preact from '#core/dom/jsx';
 import {scopedQuerySelector} from '#core/dom/query';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {getWin} from '#core/window';

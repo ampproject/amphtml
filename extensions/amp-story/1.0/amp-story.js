@@ -8,7 +8,6 @@
  * </amp-story>
  * </code>
  */
-import * as Preact from '#core/dom/jsx';
 
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
@@ -21,6 +20,7 @@ import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {isRTL, removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {

@@ -1,10 +1,7 @@
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 /**
  * Util function to retrieve the localization service. Ensures we can retrieve
@@ -28,7 +25,7 @@ export function getLocalizationService(element) {
 
 /**
  * @param {!Node} context
- * @param {LocalizedStringId_Enum} key
+ * @param {import('#service/localization/strings).LocalizedStringId_Enum} key
  * @return {?string}
  */
 export function localize(context, key) {
