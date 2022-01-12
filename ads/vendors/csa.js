@@ -104,7 +104,7 @@ function orientationChangeHandler(global, containerDiv) {
   const oldHeight = getStyle(containerDiv, 'height');
   global.setTimeout(() => {
     // Force DOM reflow and repaint.
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const ignore = global.document.body./*OK*/ offsetHeight;
     // Capture new height.
     const newHeight = getStyle(containerDiv, 'height');
