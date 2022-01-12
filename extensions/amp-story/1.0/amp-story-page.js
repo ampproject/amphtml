@@ -36,7 +36,6 @@ import {dev} from '#utils/log';
 
 import {embeddedElementsSelectors} from './amp-story-embedded-component';
 import {localize} from './amp-story-localization-service';
-import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {
   Action,
   StateProperty,
