@@ -1,6 +1,6 @@
 import {format, isAfter, isBefore, subDays} from 'date-fns';
 
-import {createContext, useCallback, useContext} from 'src/preact';
+import {createContext, useCallback, useContext} from '#preact';
 
 // eslint-disable-next-line local/no-export-side-effect
 export const AttributesContext = createContext();

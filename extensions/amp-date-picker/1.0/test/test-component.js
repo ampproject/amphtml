@@ -829,6 +829,42 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         'Jan 22'
       );
     });
+
+    it('defaults to showing the first character of the weekday', () => {
+      const wrapper = mount(
+        <DatePicker type="single" initialVisibleMonth={new Date(2022, 0)} />
+      );
+
+      // TODO: is there a better way to target this?
+      expect(
+        wrapper
+          .find('thead')
+          .find('th')
+          .first()
+          .find('[aria-hidden=true]')
+          .text()
+      ).to.equal('S');
+    });
+
+    it('allows the user to specify a weekday format', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2022, 0)}
+          weekDayFormat="EEEEEE"
+        />
+      );
+
+      // TODO: is there a better way to target this?
+      expect(
+        wrapper
+          .find('thead')
+          .find('th')
+          .first()
+          .find('[aria-hidden=true]')
+          .text()
+      ).to.equal('Su');
+    });
   });
 
   describe('date formatting for a date range picker', () => {

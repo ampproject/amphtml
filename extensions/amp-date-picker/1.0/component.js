@@ -8,6 +8,7 @@ import {
   DEFAULT_MONTH_FORMAT,
   DEFAULT_ON_ERROR,
   DEFAULT_START_INPUT_SELECTOR,
+  DEFAULT_WEEK_DAY_FORMAT,
   DatePickerMode,
   DatePickerType,
   ISO_8601,
@@ -40,6 +41,7 @@ export function BentoDatePicker({
   min = getCurrentDate(),
   max,
   monthFormat = DEFAULT_MONTH_FORMAT,
+  weekDayFormat = DEFAULT_WEEK_DAY_FORMAT,
 }) {
   const blockedDates = useMemo(() => {
     return new DatesList(blocked);
@@ -59,6 +61,7 @@ export function BentoDatePicker({
       initialVisibleMonth,
       mode,
       onError,
+      weekDayFormat,
     };
     if (type === DatePickerType.SINGLE) {
       const props = {
@@ -93,6 +96,7 @@ export function BentoDatePicker({
     inputSelector,
     children,
     monthFormat,
+    weekDayFormat,
   ]);
 
   return (

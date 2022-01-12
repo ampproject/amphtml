@@ -12,7 +12,12 @@ import {useAttributes} from './use-attributes';
  * @param {!object} props
  * @return {PreactDef.Renderable}
  */
-export function BaseDatePicker({initialVisibleMonth, monthFormat, ...rest}) {
+export function BaseDatePicker({
+  initialVisibleMonth,
+  monthFormat,
+  weekDayFormat,
+  ...rest
+}) {
   const {isDisabled} = useAttributes();
 
   const formatMonth = useCallback(
@@ -21,13 +26,24 @@ export function BaseDatePicker({initialVisibleMonth, monthFormat, ...rest}) {
     },
     [monthFormat]
   );
+
+  const formatWeekday = useCallback(
+    (date) => {
+      return getFormattedDate(date, weekDayFormat);
+    },
+    [weekDayFormat]
+  );
+
   return (
     <DayPicker
       aria-label="Calendar"
       defaultMonth={initialVisibleMonth}
       components={{Day: DayButton}}
       disabled={[isDisabled]}
-      formatters={{formatCaption: formatMonth}}
+      formatters={{
+        formatCaption: formatMonth,
+        formatWeekdayName: formatWeekday,
+      }}
       {...rest}
     />
   );
