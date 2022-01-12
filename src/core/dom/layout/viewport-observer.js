@@ -3,27 +3,34 @@ import {removeItem} from '#core/types/array';
 import {getWin} from '#core/window';
 
 /**
+ * @typedef IOOptions
+ * @property {number|!Array<number>} [threshold]
+ * @property {boolean} [needsRootBounds]
+ * @property {string} [rootMargin]
+ */
+
+/**
  * Returns an IntersectionObserver tracking the Viewport.
  *
  * @param {function(Array<IntersectionObserverEntry>):void} ioCallback
  * @param {Window} win
- * @param {{
- *   threshold?: (number|!Array<number>|undefined),
- *   needsRootBounds?: (boolean|undefined),
- * }=} opts
+ * @param {IOOptions} [opts]
  * @return {IntersectionObserver}
  */
 export function createViewportObserver(ioCallback, win, opts = {}) {
-  const {needsRootBounds, threshold} = opts;
-  // The Document -> Element type conversion is necessary to satisfy the
-  // `IntersectionObserver` constructor extern that only accepts `Element`.
+  const {needsRootBounds, rootMargin, threshold} = opts;
   const root =
-    isIframed(win) && needsRootBounds
-      ? /** @type {?} */ (win.document)
+    // When in an iFrame, we must specify `root = document`
+    // to ensure rootBounds / rootMargin works correctly
+    isIframed(win) && (needsRootBounds || rootMargin)
+      ? // The Document -> Element type conversion is necessary to satisfy the
+        // `IntersectionObserver` constructor extern that only accepts `Element`.
+        /** @type {?} */ (win.document)
       : undefined;
   return new win.IntersectionObserver(ioCallback, {
     threshold,
     root,
+    rootMargin,
   });
 }
 
@@ -39,10 +46,27 @@ const viewportCallbacks = new WeakMap();
  *
  * @param {Element} element
  * @param {function(IntersectionObserverEntry):void} callback
+ * @param {IOOptions} [opts]
  * @return {UnlistenCallback} clean up closure to unobserve the element
  */
-export function observeIntersections(element, callback) {
+export function observeIntersections(element, callback, opts = {}) {
   const win = getWin(element);
+
+  if (opts) {
+    // If there are opts, we can't reuse the IntersectionObserver
+    const viewportObserverNoCache = createViewportObserver(
+      (entries) => {
+        callback(entries[0]);
+      },
+      win,
+      opts
+    );
+    viewportObserverNoCache.observe(element);
+    return () => {
+      viewportObserverNoCache.unobserve(element);
+    };
+  }
+
   let viewportObserver = viewportObservers.get(win);
   if (!viewportObserver) {
     viewportObservers.set(
