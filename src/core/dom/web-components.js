@@ -10,6 +10,8 @@ export const ShadowDomVersion_Enum = {
   V1: 'v1',
 };
 
+const SHADOW_CSS_CACHE = '__AMP_SHADOW_CSS';
+
 /**
  * @type {ShadowDomVersion_Enum|undefined}
  * @visibleForTesting
@@ -127,4 +129,12 @@ export function installShadowStyle(shadowRoot, name, cssText) {
     styleEl.textContent = cssText;
     shadowRoot.appendChild(styleEl);
   }
+}
+
+/**
+ * @param {!Window} win
+ * @visibleForTesting
+ */
+export function resetShadowStyleCacheForTesting(win) {
+  win[SHADOW_CSS_CACHE] = null;
 }

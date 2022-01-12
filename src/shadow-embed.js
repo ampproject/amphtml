@@ -24,8 +24,6 @@ const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;
 /** @const {!RegExp} */
 const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
 
-const SHADOW_CSS_CACHE = '__AMP_SHADOW_CSS';
-
 /**
  * @type {boolean|undefined}
  */
@@ -282,14 +280,6 @@ function getStylesheetRules(doc, css) {
       style.parentNode.removeChild(style);
     }
   }
-}
-
-/**
- * @param {!Window} win
- * @visibleForTesting
- */
-export function resetShadowStyleCacheForTesting(win) {
-  win[SHADOW_CSS_CACHE] = null;
 }
 
 /**
