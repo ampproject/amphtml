@@ -3,12 +3,15 @@ import {
   deserializeMessage,
   serializeMessage,
 } from '#core/3p-frame-messaging';
-import {canInspectWindow} from '../../src/iframe-helper';
-import {dev, devAssert} from '#utils/log';
 import {dict} from '#core/types/object';
+
 import {getData} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
 import {getFrameOverlayManager} from './frame-overlay-manager';
 import {getPositionObserver} from './position-observer';
+
+import {canInspectWindow} from '../../src/iframe-helper';
 
 /** @const */
 const TAG = 'InaboxMessagingHost';

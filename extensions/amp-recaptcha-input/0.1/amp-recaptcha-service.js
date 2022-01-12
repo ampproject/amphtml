@@ -3,21 +3,23 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
-
 import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {dev, devAssert} from '#utils/log';
+import {removeElement} from '#core/dom';
+import {setStyle} from '#core/dom/style';
+import * as mode from '#core/mode';
 import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {loadPromise} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
+import {urls} from '../../../src/config';
+import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {getSourceOrigin} from '../../../src/url';
-import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {loadPromise} from '#utils/event-helper';
-import {removeElement} from '#core/dom';
-import {setStyle} from '#core/dom/style';
-import {urls} from '../../../src/config';
-import * as mode from '#core/mode';
+import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 /**
  * @fileoverview

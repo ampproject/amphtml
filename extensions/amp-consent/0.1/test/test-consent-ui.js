@@ -1,22 +1,27 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
+
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {elementByTag} from '#core/dom/query';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {user} from '#utils/log';
+
+import {macroTask} from '#testing/helpers';
+import {whenCalled} from '#testing/helpers/service';
+
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service-helpers';
 import {
   CONSENT_ITEM_STATE,
   PURPOSE_CONSENT_STATE,
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
-import {Services} from '#service';
-import {dict} from '#core/types/object';
-import {elementByTag} from '#core/dom/query';
-import {macroTask} from '#testing/helpers';
-import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../../../src/service-helpers';
-import {user} from '#utils/log';
-import {whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
   'consent-ui',

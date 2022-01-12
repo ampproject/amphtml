@@ -1,12 +1,14 @@
-import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout_Enum} from '#core/dom/layout';
-import {createCustomEvent} from '#utils/event-helper';
-import {devAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {htmlFor} from '#core/dom/static-template';
 import {scopedQuerySelectorAll} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
+import {dict} from '#core/types/object';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {devAssert} from '#utils/log';
+
+import {InlineGalleryEvents} from './inline-gallery-events';
 
 /**
  * The maximum number of dots to show before converting to a count.

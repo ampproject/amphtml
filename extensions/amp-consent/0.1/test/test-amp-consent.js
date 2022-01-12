@@ -1,3 +1,18 @@
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {dict} from '#core/types/object';
+
+import {xhrServiceForTesting} from '#service/xhr-impl';
+
+import {dev, user} from '#utils/log';
+
+import {macroTask} from '#testing/helpers';
+
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service-helpers';
+import {removeSearch} from '../../../../src/url';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {ACTION_TYPE, AmpConsent} from '../amp-consent';
 import {
   CONSENT_ITEM_STATE,
@@ -8,18 +23,7 @@ import {
   constructMetadata,
   getConsentStateValue,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentStateManager} from '../consent-state-manager';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {dev, user} from '#utils/log';
-import {dict} from '#core/types/object';
-import {macroTask} from '#testing/helpers';
-import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../../../src/service-helpers';
-import {removeSearch} from '../../../../src/url';
-import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin(
   'amp-consent',

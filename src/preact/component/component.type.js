@@ -2,7 +2,7 @@
 
 /**
  * @typedef {{
- *   as: (string|!Function|undefined),
+ *   as: (string|Function|undefined),
  *   wrapperClassName: (?string|undefined),
  *   wrapperStyle: (?Object|undefined),
  *   children: (?PreactDef.Renderable|undefined),
@@ -14,13 +14,13 @@ var WrapperComponentProps;
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/contain
  *
  * @typedef {{
- *   as: (string|!Function|undefined),
+ *   as: (string|Function|undefined),
  *   size: (boolean|undefined),
  *   layout: (boolean|undefined),
  *   paint: (boolean|undefined),
  *   wrapperClassName: (?string|undefined),
  *   wrapperStyle: (?Object|undefined),
- *   contentRef: ({current: ?}|function(!Element)|undefined),
+ *   contentRef: ({current: ?}|function(Element)|undefined),
  *   contentClassName: (?string|undefined),
  *   contentStyle: (?Object|undefined),
  *   children: (?PreactDef.Renderable|undefined),
@@ -29,12 +29,12 @@ var WrapperComponentProps;
 var ContainWrapperComponentProps;
 
 /**
- * @typedef {!PreactDef.Renderable|!PreactDef.InnerHTML|null}
+ * @typedef {PreactDef.Renderable|PreactDef.InnerHTML|null}
  */
 var RendererFunctionResponseType;
 
 /**
- * @typedef {function(!JsonObject):(?RendererFunctionResponseType|!Promise<?RendererFunctionResponseType>)}
+ * @typedef {function(JsonObject):(?RendererFunctionResponseType|Promise<?RendererFunctionResponseType>)}
  */
 var RendererFunctionType;
 

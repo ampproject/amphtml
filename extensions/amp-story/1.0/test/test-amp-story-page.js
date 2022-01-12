@@ -1,20 +1,25 @@
-import * as VideoUtils from '#core/dom/video';
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {Deferred} from '#core/data-structures/promise';
-import {LocalizationService} from '#service/localization';
-import {MediaType} from '../media-pool';
-import {Services} from '#service';
 import {Signals} from '#core/data-structures/signals';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {scopedQuerySelectorAll} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
+import * as VideoUtils from '#core/dom/video';
+
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {afterRenderPromise} from '#testing/helpers';
+
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {afterRenderPromise} from '#testing/helpers';
 import {expect} from 'chai';
+import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
+import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {MediaType} from '../media-pool';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 

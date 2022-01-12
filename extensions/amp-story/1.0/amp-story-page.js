@@ -1,4 +1,3 @@
-import * as Preact from '#core/dom/jsx';
 /**
  * @fileoverview Embeds a single page in a story
  *
@@ -9,48 +8,54 @@ import * as Preact from '#core/dom/jsx';
  * </amp-story-page>
  * </code>
  */
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {Deferred} from '#core/data-structures/promise';
+import {iterateCursor} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import * as Preact from '#core/dom/jsx';
+import {Layout_Enum} from '#core/dom/layout';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {
+  closestAncestorElementBySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {toggle} from '#core/dom/style';
 import {isAutoplaySupported, tryPlay} from '#core/dom/video';
+import {toArray} from '#core/types/array';
+import {debounce, once} from '#core/types/function';
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {listen, listenOnce} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {embeddedElementsSelectors} from './amp-story-embedded-component';
+import {localize} from './amp-story-localization-service';
+import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementConfig} from './page-advancement';
 import {AnimationManager, hasAnimations} from './animation';
-import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {Deferred} from '#core/data-structures/promise';
-import {EventType, dispatch} from './events';
-import {Layout_Enum} from '#core/dom/layout';
-import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {MediaPool} from './media-pool';
-import {Services} from '#service';
-import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
-import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
-import {iterateCursor} from '#core/dom';
-import {
-  closestAncestorElementBySelector,
-  scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {setTextBackgroundColor} from './utils';
-import {debounce, once} from '#core/types/function';
-import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {localize} from './amp-story-localization-service';
-import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
-import {isExperimentOn} from '#experiments';
-import {isPrerenderActivePage} from './prerender-active-page';
-import {listen, listenOnce} from '#utils/event-helper';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {toggle} from '#core/dom/style';
-import {renderPageDescription} from './semantic-render';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-
-import {toArray} from '#core/types/array';
 import {upgradeBackgroundAudio} from './audio';
-import {embeddedElementsSelectors} from './amp-story-embedded-component';
+import {EventType, dispatch} from './events';
+import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
+import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
+import {MediaPool} from './media-pool';
+import {AdvancementConfig} from './page-advancement';
+import {isPrerenderActivePage} from './prerender-active-page';
+import {renderPageDescription} from './semantic-render';
+import {setTextBackgroundColor} from './utils';
+
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.

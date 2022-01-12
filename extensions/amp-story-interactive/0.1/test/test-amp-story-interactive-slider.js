@@ -1,14 +1,16 @@
-import {AmpStoryInteractiveSlider} from '../amp-story-interactive-slider';
-import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {Services} from '#service';
-import {LocalizationService} from '#service/localization';
-import {MOCK_URL, getSliderInteractiveData} from './helpers';
 import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {MOCK_URL, getSliderInteractiveData} from './helpers';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {
   MID_SELECTION_CLASS,
   POST_SELECTION_CLASS,
 } from '../amp-story-interactive-abstract';
+import {AmpStoryInteractiveSlider} from '../amp-story-interactive-slider';
 
 describes.realWin(
   'amp-story-interactive-slider',

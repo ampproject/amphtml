@@ -1,10 +1,12 @@
-import {API_SERVER} from '../constants';
+import {dict} from '#core/types/object';
+
 import {Services} from '#service';
 
-import {addParamsToUrl} from '../../../../src/url';
-import {dict} from '#core/types/object';
-import {getSessionId} from './session';
 import {pixelDrop} from './pixel';
+import {getSessionId} from './session';
+
+import {addParamsToUrl} from '../../../../src/url';
+import {API_SERVER} from '../constants';
 
 /**
  * Gets data to be passed along in request via params
