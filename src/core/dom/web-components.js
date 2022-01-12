@@ -1,5 +1,3 @@
-import {toWin} from '#core/window';
-
 /**
  * Possible versions of Shadow DOM spec
  * @enum {string}
@@ -9,8 +7,6 @@ export const ShadowDomVersion_Enum = {
   V0: 'v0',
   V1: 'v1',
 };
-
-const SHADOW_CSS_CACHE = '__AMP_SHADOW_CSS';
 
 /**
  * @type {ShadowDomVersion_Enum|undefined}
@@ -100,41 +96,4 @@ function getShadowDomVersion(element) {
     return ShadowDomVersion_Enum.V0;
   }
   return ShadowDomVersion_Enum.NONE;
-}
-
-/**
- * @param {ShadowRoot} shadowRoot
- * @param {string} name
- * @param {string} cssText
- */
-export function installShadowStyle(shadowRoot, name, cssText) {
-  const doc = shadowRoot.ownerDocument;
-  const win = toWin(doc.defaultView);
-  if (
-    shadowRoot.adoptedStyleSheets !== undefined &&
-    win.CSSStyleSheet.prototype.replaceSync !== undefined
-  ) {
-    const cache = win[SHADOW_CSS_CACHE] || (win[SHADOW_CSS_CACHE] = {});
-    let styleSheet = cache[name];
-    if (!styleSheet) {
-      styleSheet = new win.CSSStyleSheet();
-      styleSheet.replaceSync(cssText);
-      cache[name] = styleSheet;
-    }
-    shadowRoot.adoptedStyleSheets =
-      shadowRoot.adoptedStyleSheets.concat(styleSheet);
-  } else {
-    const styleEl = doc.createElement('style');
-    styleEl.setAttribute('data-name', name);
-    styleEl.textContent = cssText;
-    shadowRoot.appendChild(styleEl);
-  }
-}
-
-/**
- * @param {!Window} win
- * @visibleForTesting
- */
-export function resetShadowStyleCacheForTesting(win) {
-  win[SHADOW_CSS_CACHE] = null;
 }

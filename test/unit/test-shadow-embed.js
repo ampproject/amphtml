@@ -1,7 +1,9 @@
 import {
-  ShadowDomVersion_Enum,
   installShadowStyle,
   resetShadowStyleCacheForTesting,
+} from '#core/dom/shadow-embed';
+import {
+  ShadowDomVersion_Enum,
   setShadowCssSupportedForTesting,
   setShadowDomSupportedVersionForTesting,
 } from '#core/dom/web-components';
