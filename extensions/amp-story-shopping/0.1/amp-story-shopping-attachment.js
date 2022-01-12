@@ -36,8 +36,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {?NodeList<!Element>} */
     this.shoppingTags_ = null;
 
-    /** @private {?Element} */
+    /** @private {Element} */
     this.templateContainer_ = <div></div>;
+
+    /** @private {?Element} */
+    this.plpTemplate_ = null;
 
     /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
@@ -76,7 +79,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @return {!Promise}
    */
   open(shouldAnimate = true) {
-    this.setTemplate_();
+    this.populatePlp_();
 
     return this.attachmentEl_
       .getImpl()
@@ -84,13 +87,14 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /** @private */
-  setTemplate_() {
+  populatePlp_() {
+    if (this.plpTemplate_) return;
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
     const shoppingDataForPage = Array.from(this.shoppingTags_).map(
       (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-tag-id')]
     );
-    const plpTemplate = this.renderPlpTemplate_(shoppingDataForPage);
-    this.templateContainer_.replaceChildren(plpTemplate);
+    this.plpTemplate_ = this.renderPlpTemplate_(shoppingDataForPage);
+    this.templateContainer_.appendChild(this.plpTemplate_);
   }
 
   /**
