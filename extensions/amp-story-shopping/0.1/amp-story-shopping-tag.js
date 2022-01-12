@@ -115,8 +115,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       return;
     }
 
-    const fontSize = computedStyle(window, textEl).getPropertyValue(
-      'font-size'
+    const fontSize = parseInt(
+      computedStyle(window, textEl).getPropertyValue('font-size'),
+      10
     );
     const ratioOfLineHeightToFontSize = 1.5;
     const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
