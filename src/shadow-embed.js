@@ -7,7 +7,7 @@ import {
   isShadowCssSupported,
 } from '#core/dom/web-components';
 import {toArray} from '#core/types/array';
-import {getWin, toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -281,35 +281,6 @@ function getStylesheetRules(doc, css) {
     if (style.parentNode) {
       style.parentNode.removeChild(style);
     }
-  }
-}
-
-/**
- * @param {!ShadowRoot} shadowRoot
- * @param {string} name
- * @param {string} cssText
- */
-export function installShadowStyle(shadowRoot, name, cssText) {
-  const doc = shadowRoot.ownerDocument;
-  const win = toWin(doc.defaultView);
-  if (
-    shadowRoot.adoptedStyleSheets !== undefined &&
-    win.CSSStyleSheet.prototype.replaceSync !== undefined
-  ) {
-    const cache = win[SHADOW_CSS_CACHE] || (win[SHADOW_CSS_CACHE] = {});
-    let styleSheet = cache[name];
-    if (!styleSheet) {
-      styleSheet = new win.CSSStyleSheet();
-      styleSheet.replaceSync(cssText);
-      cache[name] = styleSheet;
-    }
-    shadowRoot.adoptedStyleSheets =
-      shadowRoot.adoptedStyleSheets.concat(styleSheet);
-  } else {
-    const styleEl = doc.createElement('style');
-    styleEl.setAttribute('data-name', name);
-    styleEl.textContent = cssText;
-    shadowRoot.appendChild(styleEl);
   }
 }
 
