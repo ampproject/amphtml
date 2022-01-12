@@ -7,11 +7,9 @@
  * @fileoverview
  */
 
-const globalObject = /** @type {any} */ (globalThis);
+(globalThis as any)['self'] = globalThis;
 
-globalObject['self'] = globalThis;
-
-globalObject['Node'] = {
+(globalThis as any)['Node'] = {
   ELEMENT_NODE: 1,
   ATTRIBUTE_NODE: 2,
   TEXT_NODE: 3,

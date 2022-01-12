@@ -2,9 +2,11 @@ import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/build-dom';
 
 import {applyStaticLayout} from '#core/static-layout';
 
+import type {BuildDom, BuilderMap, Versions} from './types';
+
 import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/build-dom';
 
-const versionedBuilderMap = {
+const versionedBuilderMap: {[version: string]: BuilderMap} = {
   'v0': {
     'amp-layout': ampLayoutClassic,
   },
@@ -15,13 +17,10 @@ const versionedBuilderMap = {
 
 /**
  * Wraps a buildDom function with functionality that every component needs.
- *
- * @param {import('./types').BuildDom} buildDom
- * @return {import('./types').BuildDom}
  */
-function wrap(buildDom) {
+function wrap(buildDom: BuildDom): BuildDom {
   return function wrapper(element) {
-    applyStaticLayout(/** @type {AmpElement} */ (element));
+    applyStaticLayout(element as AmpElement);
     buildDom(element);
     element.setAttribute('i-amphtml-ssr', '');
   };
@@ -29,13 +28,12 @@ function wrap(buildDom) {
 
 /**
  * Returns the set of component builders needed to server-render an AMP Document.
- * @param {import('./types').Versions} versions
- * @param {{[version: string]: import('./types').BuilderMap}} builderMap
- * @return {import('./types').BuilderMap}
  */
-export function getBuilders(versions, builderMap = versionedBuilderMap) {
-  /** @type {import('./types').BuilderMap} */
-  const builders = {};
+export function getBuilders(
+  versions: Versions,
+  builderMap = versionedBuilderMap
+): BuilderMap {
+  const builders: BuilderMap = {};
 
   for (const {component, version} of versions) {
     const builder = builderMap?.[version]?.[component];
