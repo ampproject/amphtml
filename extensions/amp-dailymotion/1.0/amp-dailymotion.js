@@ -3,7 +3,6 @@ import {CSS} from '../../../build/amp-dailymotion-1.0.css';
 import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
-import {getDailymotionIframeSrc} from '../dailymotion-api';
 
 /** @const {string} */
 const TAG = 'amp-dailymotion';
