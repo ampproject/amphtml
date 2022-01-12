@@ -5,11 +5,11 @@ import {
 import {AmpAdUIHandler} from './amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
-  CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
+  CONSENT_POLICY_STATE, // eslint-disable-line @typescript-eslint/no-unused-vars
 } from '#core/constants/consent-state';
 import {
   LayoutPriority_Enum,
-  Layout_Enum, // eslint-disable-line no-unused-vars
+  Layout_Enum, // eslint-disable-line @typescript-eslint/no-unused-vars
   isLayoutSizeDefined,
 } from '#core/dom/layout';
 import {Services} from '#service';

@@ -59,7 +59,7 @@ export function WithBentoLightboxGallery({
       return Children.map(children, CLONE_CHILD);
     }
     return <Comp srcset={srcset} />;
-  }, [children, renderProp, srcset]);
+  }, [children, renderProp, srcset, Comp]);
 
   const caption = useMemo(
     () => captionProp || alt || ariaLabel,

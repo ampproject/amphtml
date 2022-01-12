@@ -28,7 +28,6 @@ import {
   getAnalyticsService,
 } from './story-analytics';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {AmpStoryAccess} from './amp-story-access';
 import {AmpStoryConsent} from './amp-story-consent';
 import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
@@ -262,12 +261,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {!MediaPool} */
     this.mediaPool_ = MediaPool.for(this);
-
-    /** @private {boolean} */
-    this.areAccessAuthorizationsCompleted_ = false;
-
-    /** @private */
-    this.navigateToPageAfterAccess_ = null;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
@@ -585,6 +578,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildSystemLayer_(initialPageId) {
+    this.updateAudioIcon_();
     this.updatePausedIcon_();
     this.element.appendChild(this.systemLayer_.build(initialPageId));
   }
@@ -817,7 +811,6 @@ export class AmpStory extends AMP.BaseElement {
       // TODO(enriqe): Move to a separate file if this keeps growing.
       if (
         embedComponent.state !== EmbeddedComponentState.HIDDEN ||
-        this.storeService_.get(StateProperty.ACCESS_STATE) ||
         !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) ||
         !this.storeService_.get(StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT)
       ) {
@@ -923,7 +916,6 @@ export class AmpStory extends AMP.BaseElement {
     ])
       .then(() => {
         this.handleConsentExtension_();
-        this.initializeStoryAccess_();
 
         this.pages_.forEach((page, index) => {
           page.setState(PageState.NOT_ACTIVE);
@@ -1141,63 +1133,6 @@ export class AmpStory extends AMP.BaseElement {
     toRemoveChildren.forEach((el) => consentEl.removeChild(el));
   }
 
-  /**
-   * @private
-   */
-  initializeStoryAccess_() {
-    Services.accessServiceForDocOrNull(this.element).then((accessService) => {
-      if (!accessService) {
-        return;
-      }
-
-      this.areAccessAuthorizationsCompleted_ =
-        accessService.areFirstAuthorizationsCompleted();
-      accessService.onApplyAuthorizations(() =>
-        this.onAccessApplyAuthorizations_()
-      );
-
-      const firstPage = this.pages_[0].element;
-
-      // First amp-story-page can't be paywall protected.
-      // Removes the access attributes, and throws an error during development.
-      if (
-        firstPage.hasAttribute('amp-access') ||
-        firstPage.hasAttribute('amp-access-hide')
-      ) {
-        firstPage.removeAttribute('amp-access');
-        firstPage.removeAttribute('amp-access-hide');
-        user().error(
-          TAG,
-          'First amp-story-page cannot have amp-access ' +
-            'or amp-access-hide attributes'
-        );
-      }
-    });
-  }
-
-  /**
-   * On amp-access document reauthorization, maybe hide the access UI, and maybe
-   * perform navigation.
-   * @private
-   */
-  onAccessApplyAuthorizations_() {
-    this.areAccessAuthorizationsCompleted_ = true;
-
-    const nextPage = this.navigateToPageAfterAccess_;
-
-    // Step out if the next page is still hidden by the access extension.
-    if (nextPage && nextPage.element.hasAttribute('amp-access-hide')) {
-      return;
-    }
-
-    if (nextPage) {
-      this.navigateToPageAfterAccess_ = null;
-      this.switchTo_(nextPage.element.id, NavigationDirection.NEXT);
-    }
-
-    this.storeService_.dispatch(Action.TOGGLE_ACCESS, false);
-  }
-
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout_Enum.CONTAINER;
@@ -1329,25 +1264,6 @@ export class AmpStory extends AMP.BaseElement {
 
     // Step out if trying to navigate to the currently active page.
     if (this.activePage_ && this.activePage_.element.id === targetPageId) {
-      return Promise.resolve();
-    }
-
-    // If the next page might be paywall protected, and the access
-    // authorizations did not resolve yet, wait before navigating.
-    // TODO(gmajoulet): implement a loading state.
-    if (
-      targetPage.element.hasAttribute('amp-access') &&
-      !this.areAccessAuthorizationsCompleted_
-    ) {
-      this.navigateToPageAfterAccess_ = targetPage;
-      return Promise.resolve();
-    }
-
-    // If the next page is paywall protected, display the access UI and wait for
-    // the document to be reauthorized.
-    if (targetPage.element.hasAttribute('amp-access-hide')) {
-      this.storeService_.dispatch(Action.TOGGLE_ACCESS, true);
-      this.navigateToPageAfterAccess_ = targetPage;
       return Promise.resolve();
     }
 
@@ -2210,6 +2126,19 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Update the store if the story has background audio.
+   * @private
+   */
+  updateAudioIcon_() {
+    const storyHasBackgroundAudio =
+      this.element.hasAttribute('background-audio');
+    this.storeService_.dispatch(
+      Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
+      storyHasBackgroundAudio
+    );
+  }
+
+  /**
    * Shows the play/pause icon if there is an element with playback on the story.
    * @private
    */
@@ -2502,7 +2431,6 @@ export class AmpStory extends AMP.BaseElement {
 
 AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story', AmpStory, CSS);
-  AMP.registerElement('amp-story-access', AmpStoryAccess);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);

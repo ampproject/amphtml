@@ -921,6 +921,18 @@ describes.realWin(
         });
       });
 
+      it('should update the STORY_HAS_BACKGROUND_AUDIO property if story has background audio', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+        story.element.setAttribute('background-audio', 'audio.mp3');
+        await story.layoutCallback();
+
+        expect(
+          story.storeService_.get(
+            StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE
+          )
+        ).to.be.true;
+      });
+
       it('should remove the muted attribute on unmuted state change', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
@@ -1178,221 +1190,6 @@ describes.realWin(
           const clickEvent = new MouseEvent('click', {clientX: 200});
           ctaLink.dispatchEvent(clickEvent);
           expect(story.activePage_.element.id).to.equal('cover');
-        });
-      });
-
-      describe('amp-access navigation', () => {
-        it('should set the access state to true if next page blocked', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          expect(story.storeService_.get(StateProperty.ACCESS_STATE)).to.be
-            .true;
-        });
-
-        it('should not navigate if next page is blocked by paywall', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
-        it('should navigate once the doc is reauthorized', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          let authorizedCallback;
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigates to a paywall protected page, and waits until the document
-          // is successfuly reauthorized to navigate.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          story
-            .getPageById('page-1')
-            .element.removeAttribute('amp-access-hide');
-          authorizedCallback();
-
-          expect(story.activePage_.element.id).to.equal('page-1');
-        });
-
-        it('should hide the paywall once the doc is reauthorized', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          let authorizedCallback;
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigates to a paywall protected page, and waits until the document
-          // is successfuly reauthorized to hide the access UI.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          expect(story.activePage_.element.id).to.equal('cover');
-          story
-            .getPageById('page-1')
-            .element.removeAttribute('amp-access-hide');
-          authorizedCallback();
-
-          expect(story.storeService_.get(StateProperty.ACCESS_STATE)).to.be
-            .false;
-        });
-
-        it('should not navigate on doc reauthorized if page still blocked', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          let authorizedCallback;
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigates to a paywall protected page, and does not navigate to that
-          // page if the document has been reauthorized with insuficient rights.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          authorizedCallback();
-
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
-        it('should show paywall on doc reauthorized if page still blocked', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          let authorizedCallback;
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => true,
-            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigates to a paywall protected page, and does not hide the access UI
-          // if the document has been reauthorized with insuficient rights.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access-hide', '');
-          await story.switchTo_('page-1');
-          authorizedCallback();
-
-          expect(story.storeService_.get(StateProperty.ACCESS_STATE)).to.be
-            .true;
-        });
-
-        it('should block navigation if doc authorizations are pending', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => false,
-            onApplyAuthorizations: () => {},
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigates to a maybe protected page (has amp-access="" rule), but the
-          // document authorizations are still pending. Asserts that it blocks the
-          // navigation.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access', 'random condition');
-          await story.switchTo_('page-1');
-          expect(story.activePage_.element.id).to.equal('cover');
-        });
-
-        it('should navigate only after the doc is first authorized', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          let authorizedCallback;
-          const fakeAccessService = {
-            areFirstAuthorizationsCompleted: () => false,
-            onApplyAuthorizations: (fn) => (authorizedCallback = fn),
-          };
-          env.sandbox
-            .stub(Services, 'accessServiceForDocOrNull')
-            .resolves(fakeAccessService);
-
-          // Navigation to a maybe protected page (has amp-access="" rule) is
-          // blocked until the authorizations are completed.
-          await story.layoutCallback();
-          story
-            .getPageById('page-1')
-            .element.setAttribute('amp-access', 'random condition');
-          await story.switchTo_('page-1');
-          authorizedCallback();
-          expect(story.activePage_.element.id).to.equal('page-1');
         });
       });
 
