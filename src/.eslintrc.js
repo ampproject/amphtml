@@ -27,13 +27,19 @@ module.exports = {
             // Disallow importing AMP dependencies into preact/Bento
             'target': 'src/preact',
             'from': 'src',
-            'except': ['./core', './preact'],
+            'except': [
+              './core',
+              './preact',
+              './shadow-embed',
+              './3p-frame',
+              './url',
+            ],
           },
           {
             // Disallow importing non-core dependencies into polyfills
             'target': 'src/polyfills',
             'from': 'src',
-            'except': ['./core', './polyfills'],
+            'except': ['./core', './polyfills', './utils/log'],
           },
         ],
       },

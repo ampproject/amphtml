@@ -37,7 +37,6 @@ import {
   collectProps,
 } from './parse-props';
 
-// eslint-disable-next-line import/no-restricted-paths
 import {installShadowStyle} from '../shadow-embed';
 
 /** @const {!MutationObserverInit} */
