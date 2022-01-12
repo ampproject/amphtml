@@ -1,5 +1,3 @@
-import {expect} from 'chai';
-
 describes.endtoend(
   'bento-date-countdown',
   {
@@ -14,7 +12,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it('should render the date', async () => {
+    it('should render the countdown', async () => {
       const template = await controller.findElement('#one div p');
 
       const text = await controller.getElementProperty(template, 'textContent');
@@ -28,6 +26,19 @@ describes.endtoend(
       await expect(data['mm']).to.equal('00');
       await expect(data['s']).to.equal('0');
       await expect(data['ss']).to.equal('00');
+    });
+
+    it('should render the countdown for locale=fr', async () => {
+      const template = await controller.findElement('#two div p');
+
+      const text = await controller.getElementProperty(template, 'textContent');
+      const data = JSON.parse(text.trim());
+
+      await expect(data['d']).to.equal('0');
+      await expect(data['days']).to.equal('jours');
+      await expect(data['hours']).to.equal('heures');
+      await expect(data['minutes']).to.equal('minutes');
+      await expect(data['seconds']).to.equal('secondes');
     });
   }
 );
