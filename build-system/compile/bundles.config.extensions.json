@@ -1036,14 +1036,6 @@
     }
   },
   {
-    "name": "amp-story-ssr",
-    "originalSource": "amp-story",
-    "version": "1.0",
-    "options": {
-      "hasCss": false
-    }
-  },
-  {
     "name": "amp-story-360",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -1120,14 +1112,6 @@
     }
   },
   {
-    "name": "amp-story-ssr",
-    "originalSource": "amp-story",
-    "version": "1.0",
-    "options": {
-      "hasCss": false
-    }
-  },
-  {
     "name": "amp-story-share-menu",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -1148,6 +1132,14 @@
     "version": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-story-ssr",
+    "src": "amp-story",
+    "version": "1.0",
+    "options": {
+      "hasCss": false
     }
   },
   {
