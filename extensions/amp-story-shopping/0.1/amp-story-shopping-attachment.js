@@ -1,6 +1,3 @@
-// update all example pages
-// tests
-
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
@@ -36,18 +33,17 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {?Element} */
     this.attachmentEl_ = null;
 
-    /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @private {?NodeList<!Element>} */
+    this.shoppingTags_ = null;
+
+    /** @private {?Element} */
+    this.templateContainer_ = <div></div>;
+
+    /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
-
-    /** @private {?Element} */
-    this.templateContainer_ = null;
-
-    this.shoppingTags_ = this.element
-      .closest('amp-story-page')
-      .querySelectorAll('amp-story-shopping-tag');
   }
 
   /** @override */
@@ -60,7 +56,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       ></amp-story-page-attachment>
     );
     this.element.appendChild(this.attachmentEl_);
-    this.templateContainer_ = this.attachmentEl_.appendChild(<div></div>);
+    this.attachmentEl_.appendChild(this.templateContainer_);
+    this.shoppingTags_ = this.element
+      .closest('amp-story-page')
+      .querySelectorAll('amp-story-shopping-tag');
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),

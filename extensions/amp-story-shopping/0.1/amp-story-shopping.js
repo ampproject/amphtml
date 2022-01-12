@@ -6,14 +6,14 @@ import {CSS as shoppingCSS} from '../../../build/amp-story-shopping-0.1.css';
 
 /**
  * Language and currency sensitive number formatting.
- * @param {../../../src/service/localization.LocalizationService} LocalizationService
- * @param {Element} el
- * @param {string} currency // An ISO 4217 currency code.
- * @param {number} price
- * @return {string}
+ * @param {!../../../src/service/localization.LocalizationService} localizationService
+ * @param {!Element} el
+ * @param {!string} currency An ISO 4217 currency code.
+ * @param {!number} price
+ * @return {!string}
  */
-export const formatI18nNumber = (LocalizationService, el, currency, price) => {
-  const langCode = LocalizationService.getLanguageCodesForElement(el)[0];
+export const formatI18nNumber = (localizationService, el, currency, price) => {
+  const langCode = localizationService.getLanguageCodesForElement(el)[0];
   return new Intl.NumberFormat(langCode, {style: 'currency', currency}).format(
     price
   );
@@ -21,7 +21,7 @@ export const formatI18nNumber = (LocalizationService, el, currency, price) => {
 
 /**
  * @param {!Window} win
- * @param {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins
+ * @param {!Array<!Object>} fontFaces
  */
 export const loadFonts = (win, fontFaces) => {
   if (win.document.fonts && FontFace) {

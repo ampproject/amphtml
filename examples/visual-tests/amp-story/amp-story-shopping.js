@@ -26,7 +26,6 @@ module.exports = {
     await page.tap(
       `amp-story-page#${pageID} .i-amphtml-story-inline-page-attachment-chip`
     );
-    // Ensure domain label presence.
     await page.waitForSelector('.i-amphtml-story-draggable-drawer-open');
     await verifySelectorsVisible(page, name, [
       '.i-amphtml-story-draggable-drawer-open',
