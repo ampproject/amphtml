@@ -9,6 +9,7 @@ import {
 } from '#core/dom/layout/size-observer';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {closestAncestorElementBySelector} from '#core/dom/query';
+import {addSerializedEventListener} from '#core/dom/serialized-event-listener';
 import {getStyle, setStyle} from '#core/dom/style';
 import {numeric} from '#core/dom/transition';
 import {isFiniteNumber} from '#core/types';
@@ -257,13 +258,16 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
     this.cancelTouchEvents_();
 
-    this.slidesContainer_.addEventListener(
-      'scroll',
-      this.scrollHandler_.bind(this)
+    addSerializedEventListener(this.slidesContainer_, 'scroll', () =>
+      this.scrollHandler_()
     );
-    this.slidesContainer_.addEventListener(
+    addSerializedEventListener(
+      this.slidesContainer_,
       'keydown',
-      this.keydownHandler_.bind(this)
+      /** @param {KeyboardEvent} event */
+      (event) => {
+        this.keydownHandler_(event);
+      }
     );
 
     listen(
@@ -555,10 +559,9 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
   /**
    * Handles scroll on the slides container.
-   * @param {Event} unusedEvent Event object.
    * @private
    */
-  scrollHandler_(unusedEvent) {
+  scrollHandler_() {
     const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
     if (!this.isIos_ && !this.isSafari_) {

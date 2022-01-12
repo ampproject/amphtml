@@ -1,5 +1,6 @@
 import {Keys_Enum} from '#core/constants/key-codes';
 import {toggleAttribute} from '#core/dom';
+import {addSerializedEventListener} from '#core/dom/serialized-event-listener';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -47,8 +48,8 @@ export class CarouselControls {
    * Meant to be called during carousel's buildCallback().
    */
   setupBehaviors_() {
-    this.setupButtonInteraction(this.prevButton_, () => this.handlePrev());
-    this.setupButtonInteraction(this.nextButton_, () => this.handleNext());
+    this.setupButtonInteraction(this.prevButton_, this.handlePrev.bind(this));
+    this.setupButtonInteraction(this.nextButton_, this.handleNext.bind(this));
 
     if (this.element_.hasAttribute('controls')) {
       this.showControls_ = true;
@@ -74,8 +75,8 @@ export class CarouselControls {
    * @param {*} onInteraction
    */
   setupButtonInteraction(button, onInteraction) {
-    button.addEventListener('click', onInteraction);
-    button.addEventListener('keydown', (event) => {
+    /** @param {KeyboardEvent} event*/
+    function onKeyDown(event) {
       if (event.defaultPrevented) {
         return;
       }
@@ -84,7 +85,10 @@ export class CarouselControls {
         event.preventDefault();
         onInteraction();
       }
-    });
+    }
+
+    addSerializedEventListener(button, 'click', onInteraction);
+    addSerializedEventListener(button, 'keydown', onKeyDown);
   }
 
   /**

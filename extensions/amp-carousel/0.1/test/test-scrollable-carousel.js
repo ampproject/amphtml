@@ -2,6 +2,10 @@ import '../amp-carousel';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {
+  disableEventListenerSerialization,
+  enableEventListenerSerialization,
+} from '#core/dom/serialized-event-listener';
 
 import {Services} from '#service';
 import {ActionService} from '#service/action-impl';
@@ -40,9 +44,7 @@ describes.realWin(
     });
 
     function getAmpScrollableCarousel(addToDom = true) {
-      const imgUrl =
-        'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
-        'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
+      const imgUrl = 'https://picsum.photos/120/100';
 
       const carouselElement = doc.createElement('amp-carousel');
       carouselElement.setAttribute('width', '300');
@@ -51,7 +53,7 @@ describes.realWin(
       const slideCount = 7;
       for (let i = 0; i < slideCount; i++) {
         const img = document.createElement('amp-img');
-        img.setAttribute('src', imgUrl);
+        img.setAttribute('src', `${imgUrl}?i=${i}`);
         img.setAttribute('width', '120');
         img.setAttribute('height', '100');
         img.style.width = '120px';
@@ -279,6 +281,34 @@ describes.realWin(
         const after = carousel.outerHTML;
 
         expect(before).equal(after);
+      });
+
+      it('hydration should add the same event listeners as client-render', async () => {
+        enableEventListenerSerialization();
+        env.sandbox
+          .stub(Services, 'inputFor')
+          .returns({onMouseDetected: () => {}});
+
+        const el1 = await getAmpScrollableCarousel(/* addToDom */ false);
+        const el2 = el1.cloneNode(/* deep */ true);
+        const impl1 = new AmpScrollableCarousel(el1);
+        const impl2 = new AmpScrollableCarousel(el2);
+        // impl1 client render
+        doc.body.appendChild(el1);
+        await impl1.buildCallback();
+
+        // impl2 server render + hydrate
+        doc.body.appendChild(el2);
+        buildDom(el2);
+        el2.setAttribute('i-amphtml-ssr', '');
+        await impl2.buildCallback();
+        el2.removeAttribute('i-amphtml-ssr');
+
+        expect(el2.outerHTML).equal(el1.outerHTML);
+      });
+
+      afterEach(() => {
+        disableEventListenerSerialization();
       });
     });
 

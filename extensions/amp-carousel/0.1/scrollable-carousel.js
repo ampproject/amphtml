@@ -2,6 +2,7 @@ import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {isLayoutSizeFixed} from '#core/dom/layout';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {addSerializedEventListener} from '#core/dom/serialized-event-listener';
 import {numeric} from '#core/dom/transition';
 
 import {Services} from '#service';
@@ -60,10 +61,16 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
   setupBehavior_() {
     this.cancelTouchEvents_();
 
-    this.container_.addEventListener('scroll', this.scrollHandler_.bind(this));
-    this.container_.addEventListener(
+    addSerializedEventListener(this.container_, 'scroll', () =>
+      this.scrollHandler_()
+    );
+    addSerializedEventListener(
+      this.container_,
       'keydown',
-      this.keydownHandler_.bind(this)
+      /** @param {KeyboardEvent} event*/
+      (event) => {
+        this.keydownHandler_(event);
+      }
     );
 
     this.cells_.forEach((cell) => {
