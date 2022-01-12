@@ -36,7 +36,6 @@ import {dev} from '#utils/log';
 
 import {embeddedElementsSelectors} from './amp-story-embedded-component';
 import {localize} from './amp-story-localization-service';
-import {renderPageAttachmentUI} from './amp-story-open-page-attachment';
 import {
   Action,
   StateProperty,
@@ -52,9 +51,8 @@ import {MediaPool} from './media-pool';
 import {AdvancementConfig} from './page-advancement';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {renderPageDescription} from './semantic-render';
-import {createShadowRootWithStyle, setTextBackgroundColor} from './utils';
+import {setTextBackgroundColor} from './utils';
 
-import {CSS as pageAttachmentCSS} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
 
@@ -189,9 +187,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.errorMessageEl_ = null;
-
-    /** @private {?Element} */
-    this.openAttachmentEl_ = null;
 
     const deferred = new Deferred();
 
@@ -428,9 +423,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     switch (state) {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
-        if (this.openAttachmentEl_) {
-          this.openAttachmentEl_.removeAttribute('active');
-        }
         this.pause_();
         this.state_ = state;
         break;
@@ -438,9 +430,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
           this.resume_();
-          if (this.openAttachmentEl_) {
-            this.openAttachmentEl_.setAttribute('active', '');
-          }
         }
 
         if (this.state_ === PageState.PAUSED) {
@@ -1555,66 +1544,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       'amp-story-page-attachment',
       '0.1'
     );
-
-    // To prevent 'title' attribute from being used by browser, copy value to 'data-title' and remove.
-    if (attachmentEl.hasAttribute('title')) {
-      attachmentEl.setAttribute(
-        'data-title',
-        attachmentEl.getAttribute('title')
-      );
-      attachmentEl.removeAttribute('title');
-    }
-
-    if (!this.openAttachmentEl_) {
-      this.openAttachmentEl_ = renderPageAttachmentUI(
-        this.element,
-        attachmentEl
-      );
-
-      // This ensures `active` is set on first render.
-      // Otherwise setState may be called before this.openAttachmentEl_ exists.
-      if (this.element.hasAttribute('active')) {
-        this.openAttachmentEl_.setAttribute('active', '');
-      }
-
-      const container = (
-        <div
-          class="i-amphtml-story-page-open-attachment-host"
-          role="button"
-          onClick={(e) => {
-            // Prevent default so link can be opened programmatically after URL preview is shown.
-            e.preventDefault();
-            this.openAttachment();
-          }}
-        ></div>
-      );
-
-      this.mutateElement(() => {
-        this.element.appendChild(
-          createShadowRootWithStyle(
-            container,
-            this.openAttachmentEl_,
-            pageAttachmentCSS
-          )
-        );
-      });
-    }
-  }
-
-  /**
-   * Opens the attachment, if any.
-   * @param {boolean=} shouldAnimate
-   */
-  openAttachment(shouldAnimate = true) {
-    const attachmentEl = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
-    );
-
-    if (!attachmentEl) {
-      return;
-    }
-
-    attachmentEl.getImpl().then((attachment) => attachment.open(shouldAnimate));
   }
 
   /**
