@@ -1,21 +1,25 @@
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '#utils/log';
-import {dict} from '#core/types/object';
-import {elementByTag} from '#core/dom/query';
-import {expandConsentEndpointUrl} from './consent-config';
-import {getConsentStateValue} from './consent-info';
-import {getData} from '#utils/event-helper';
-import {getConsentStateManager} from './consent-state-manager';
-import {htmlFor} from '#core/dom/static-template';
 import {insertAtStart, removeElement, tryFocus} from '#core/dom';
 import {
   isAmpElement,
   whenUpgradedToCustomElement,
 } from '#core/dom/amp-element-helpers';
+import {elementByTag} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
 import {isEsm} from '#core/mode';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {dev, user} from '#utils/log';
+
+import {expandConsentEndpointUrl} from './consent-config';
+import {getConsentStateValue} from './consent-info';
+import {getConsentStateManager} from './consent-state-manager';
+
+import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-consent-ui';
 const MINIMUM_INITIAL_HEIGHT = 10;

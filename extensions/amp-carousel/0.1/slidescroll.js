@@ -1,31 +1,35 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Animation} from '#utils/animation';
-import {dev, user, userAssert} from '#utils/log';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {CarouselControls} from './carousel-controls';
 import {bezierCurve} from '#core/data-structures/curve';
-import {closestAncestorElementBySelector} from '#core/dom/query';
-import {createCustomEvent, listen} from '#utils/event-helper';
-import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
-import {getStyle, setStyle} from '#core/dom/style';
-import {isExperimentOn} from '#experiments';
-import {isFiniteNumber} from '#core/types';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {numeric} from '#core/dom/transition';
 import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {getStyle, setStyle} from '#core/dom/style';
+import {numeric} from '#core/dom/transition';
+import {isFiniteNumber} from '#core/types';
+import {dict} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
 import {triggerAnalyticsEvent} from '#utils/analytics';
+import {Animation} from '#utils/animation';
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
 import {
   ClassNames,
   buildDom,
   getNextButtonTitle,
   getPrevButtonTitle,
 } from './build-dom';
+import {CarouselControls} from './carousel-controls';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';

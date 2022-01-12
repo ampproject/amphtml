@@ -1,13 +1,16 @@
-import {Action, SubscriptionAnalytics} from '../analytics';
-import {Dialog} from '../dialog';
-import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
-import {Entitlement, GrantReason} from '../entitlement';
-import {PageConfig} from '#third_party/subscriptions-project/config';
-import {ServiceAdapter} from '../service-adapter';
-import {Services} from '#service';
-import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {PageConfig} from '#third_party/subscriptions-project/config';
+
 import {getWinOrigin} from '../../../../src/url';
+import {Action, SubscriptionAnalytics} from '../analytics';
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
+import {Dialog} from '../dialog';
+import {Entitlement, GrantReason} from '../entitlement';
+import {ServiceAdapter} from '../service-adapter';
+import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 
 describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, (env) => {
   let ampdoc;

@@ -1,9 +1,14 @@
 import * as consent from '../../../../src/consent';
+
 import '../amp-brightcove';
 import {toggleExperiment} from '#experiments';
+
 import {waitFor} from '#testing/helpers/service';
+
 import {createElementWithAttributes} from '#core/dom';
+
 import {parseUrlDeprecated} from '../../../../src/url';
+
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 
 describes.realWin(

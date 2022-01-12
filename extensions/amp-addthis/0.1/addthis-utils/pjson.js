@@ -1,11 +1,12 @@
-import {API_SERVER} from '../constants';
-import {callPixelEndpoint} from './pixel';
+import {toArray} from '#core/types/array';
 
 import {classifyPage, classifyReferrer, getKeywordsString} from './classify';
 import {getMetaElements} from './meta';
+import {callPixelEndpoint} from './pixel';
 import {getSessionId} from './session';
+
 import {parseUrlDeprecated} from '../../../../src/url';
-import {toArray} from '#core/types/array';
+import {API_SERVER} from '../constants';
 
 // "gen" value for shares
 const SHARE = 300;

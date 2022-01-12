@@ -1,3 +1,9 @@
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {AnalyticsGroup} from './analytics-group';
+import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
 import {
   AmpStoryEventTracker,
   AnalyticsEvent,
@@ -5,10 +11,7 @@ import {
   CustomEventTracker,
   getTrackerKeyName,
 } from './events';
-import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
-import {AnalyticsGroup} from './analytics-group';
-import {Services} from '#service';
-import {dict} from '#core/types/object';
+
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
   getParentWindowFrameElement,

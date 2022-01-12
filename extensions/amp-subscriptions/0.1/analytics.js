@@ -1,4 +1,5 @@
 import {dict} from '#core/types/object';
+
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {user} from '#utils/log';
 

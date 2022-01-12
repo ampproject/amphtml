@@ -9,53 +9,20 @@
  * </code>
  */
 import * as Preact from '#core/dom/jsx';
+
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
-import {
-  Action,
-  EmbeddedComponentState,
-  InteractiveComponentDef,
-  StateProperty,
-  UIType,
-  getStoreService,
-} from './amp-story-store-service';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
-import {
-  AdvancementMode,
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryCtaLayer} from './amp-story-cta-layer';
-import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
-import {AmpStoryGridLayer} from './amp-story-grid-layer';
-import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
-import {AmpStoryRenderService} from './amp-story-render-service';
-import {AmpStoryShare} from './amp-story-share';
-import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
-import {AnalyticsVariable, getVariableService} from './variable-service';
-import {BackgroundBlur} from './background-blur';
-import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {EventType, dispatch} from './events';
-import {Gestures} from '../../../src/gesture';
-import {prefersReducedMotion} from '#core/dom/media-query-props';
-import {HistoryState, getHistoryState, setHistoryState} from './history';
-import {InfoDialog} from './amp-story-info-dialog';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Layout_Enum} from '#core/dom/layout';
-import {LiveStoryManager} from './live-story-manager';
-import {MediaPool, MediaType} from './media-pool';
-import {PaginationButtons} from './pagination-buttons';
-import {Services} from '#service';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {SystemLayer} from './amp-story-system-layer';
-import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {isRTL, removeElement} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {Layout_Enum} from '#core/dom/layout';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {
   childElement,
   childElementByTag,
@@ -73,37 +40,28 @@ import {
   setImportantStyles,
   toggle,
 } from '#core/dom/style';
-import {createPseudoLocale} from '#service/localization/strings';
+import {isEsm} from '#core/mode';
+import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
-import {dev, devAssert, user} from '#utils/log';
 import {dict, map} from '#core/types/object';
 import {endsWith} from '#core/types/string';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {findIndex, lastItem, toArray} from '#core/types/array';
-import {getConsentPolicyState} from '../../../src/consent';
-import {getDetail} from '#utils/event-helper';
-import {getLocalizationService} from './amp-story-localization-service';
-import {getMode, isModeDevelopment} from '../../../src/mode';
-import {getHistoryState as getWindowHistoryState} from '#core/window/history';
-import {isExperimentOn} from '#experiments';
-import {isPreviewMode} from './embed-mode';
-import {isRTL, removeElement} from '#core/dom';
 import {parseQueryString} from '#core/types/string/url';
-import {
-  isTransformed,
-  removeAttributeInMutate,
-  setAttributeInMutate,
-  shouldShowStoryUrlInfo,
-} from './utils';
-import {isEsm} from '#core/mode';
-import {upgradeBackgroundAudio} from './audio';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {getHistoryState as getWindowHistoryState} from '#core/window/history';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+import {createPseudoLocale} from '#service/localization/strings';
+
+import {getDetail} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
 import LocalizedStringsAr from './_locales/ar.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsDe from './_locales/de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEnGb from './_locales/en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringsEs from './_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEn from './_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsEs419 from './_locales/es-419.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEs from './_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsFr from './_locales/fr.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsHi from './_locales/hi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsId from './_locales/id.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -119,6 +77,54 @@ import LocalizedStringsTr from './_locales/tr.json' assert {type: 'json'}; // lg
 import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import {AmpStoryConsent} from './amp-story-consent';
+import {AmpStoryCtaLayer} from './amp-story-cta-layer';
+import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
+import {AmpStoryGridLayer} from './amp-story-grid-layer';
+import {AmpStoryHint} from './amp-story-hint';
+import {InfoDialog} from './amp-story-info-dialog';
+import {getLocalizationService} from './amp-story-localization-service';
+import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
+import {AmpStoryRenderService} from './amp-story-render-service';
+import {AmpStoryShare} from './amp-story-share';
+import {
+  Action,
+  EmbeddedComponentState,
+  InteractiveComponentDef,
+  StateProperty,
+  UIType,
+  getStoreService,
+} from './amp-story-store-service';
+import {SystemLayer} from './amp-story-system-layer';
+import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
+import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
+import {upgradeBackgroundAudio} from './audio';
+import {BackgroundBlur} from './background-blur';
+import {isPreviewMode} from './embed-mode';
+import {EventType, dispatch} from './events';
+import {HistoryState, getHistoryState, setHistoryState} from './history';
+import {LiveStoryManager} from './live-story-manager';
+import {MediaPool, MediaType} from './media-pool';
+import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
+import {PaginationButtons} from './pagination-buttons';
+import {
+  AdvancementMode,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
+import {
+  isTransformed,
+  removeAttributeInMutate,
+  setAttributeInMutate,
+  shouldShowStoryUrlInfo,
+} from './utils';
+import {AnalyticsVariable, getVariableService} from './variable-service';
+
+import {CSS} from '../../../build/amp-story-1.0.css';
+import {getConsentPolicyState} from '../../../src/consent';
+import {Gestures} from '../../../src/gesture';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {getMode, isModeDevelopment} from '../../../src/mode';
 
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;

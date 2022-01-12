@@ -1,12 +1,12 @@
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {dict} from '#core/types/object';
+
+import {dev} from '#utils/log';
+
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../../src/consent';
-
-import {dev} from '#utils/log';
-
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 
 const TAG = 'amp-apester-media';
 

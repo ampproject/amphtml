@@ -1,24 +1,29 @@
+import {removeChildren} from '#core/dom';
+import {escapeCssSelectorNth} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
+import {scopedQuerySelector} from '#core/dom/query';
+import {scale, setImportantStyles} from '#core/dom/style';
+import {debounce} from '#core/types/function';
+import {hasOwn, map} from '#core/types/object';
+
 import {
   BranchToTimeValues,
   StoryAdSegmentExp,
 } from '#experiments/story-ad-progress-segment';
-import {EventType} from './events';
-import {POLL_INTERVAL_MS} from './page-advancement';
+
 import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
+
+import {getExperimentBranch} from 'src/experiments';
+
 import {
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {debounce} from '#core/types/function';
-import {dev, devAssert} from '#utils/log';
-import {escapeCssSelectorNth} from '#core/dom/css-selectors';
-import {getExperimentBranch} from 'src/experiments';
-import {hasOwn, map} from '#core/types/object';
-import {removeChildren} from '#core/dom';
-import {scale, setImportantStyles} from '#core/dom/style';
-import {scopedQuerySelector} from '#core/dom/query';
+import {EventType} from './events';
+import {POLL_INTERVAL_MS} from './page-advancement';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the

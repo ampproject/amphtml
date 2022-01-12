@@ -1,4 +1,5 @@
 import {BentoDailymotion} from './component';
+
 import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 export class BaseElement extends VideoBaseElement {}

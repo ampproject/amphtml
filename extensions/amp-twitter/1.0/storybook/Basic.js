@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
-import {BentoTwitter} from '../component';
 import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {BentoTwitter} from '../component';
 
 export default {
   title: 'Twitter',

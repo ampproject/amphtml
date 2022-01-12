@@ -1,5 +1,5 @@
-import {URL} from 'url';
 import {basename, format, parse} from 'path';
+import {URL} from 'url';
 
 // eslint-disable-next-line local/no-forbidden-terms
 export const VALID_CDN_ORIGIN = 'https://cdn.ampproject.org';

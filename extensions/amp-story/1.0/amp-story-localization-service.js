@@ -1,8 +1,10 @@
-import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
-import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {LocalizationService} from '#service/localization';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 /**
  * Util function to retrieve the localization service. Ensures we can retrieve

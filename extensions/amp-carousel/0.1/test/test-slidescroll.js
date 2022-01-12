@@ -1,13 +1,17 @@
 import '../amp-carousel';
-import {ActionService} from '#service/action-impl';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {user} from '#utils/log';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {AmpSlideScroll} from '../slidescroll';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {user} from '#utils/log';
+
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
 import {buildDom} from '../build-dom';
+import {AmpSlideScroll} from '../slidescroll';
 
 describes.realWin(
   'SlideScroll',

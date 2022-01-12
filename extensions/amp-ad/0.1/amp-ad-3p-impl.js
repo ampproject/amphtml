@@ -1,9 +1,9 @@
+import {adConfig} from '#ads/_config';
 import {
   ADSENSE_MCRSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '#ads/google/utils';
-import {AmpAdUIHandler} from './amp-ad-ui';
-import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
+
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line @typescript-eslint/no-unused-vars
 } from '#core/constants/consent-state';
@@ -12,30 +12,35 @@ import {
   Layout_Enum, // eslint-disable-line @typescript-eslint/no-unused-vars
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {Services} from '#service';
-import {adConfig} from '#ads/_config';
-import {clamp} from '#core/math';
+import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+import {moveLayoutRect} from '#core/dom/layout/rect';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {computedStyle, setStyle} from '#core/dom/style';
-import {dev, devAssert, userAssert} from '#utils/log';
+import {clamp} from '#core/math';
 import {dict} from '#core/types/object';
-import {getAdCid} from '../../../src/ad-cid';
-import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
+import {getWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {dev, devAssert, userAssert} from '#utils/log';
+
+import {AmpAdUIHandler} from './amp-ad-ui';
+import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
 import {
   getAmpAdRenderOutsideViewport,
   incrementLoadingAds,
   is3pThrottled,
 } from './concurrent-load';
+
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {getAdCid} from '../../../src/ad-cid';
+import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {intersectionEntryToJson} from '#core/dom/layout/intersection';
-import {moveLayoutRect} from '#core/dom/layout/rect';
-import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {getWin} from '#core/window';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
