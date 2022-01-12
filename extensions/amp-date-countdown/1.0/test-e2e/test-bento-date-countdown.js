@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 describes.endtoend(
   'bento-date-countdown',
   {
@@ -26,6 +28,7 @@ describes.endtoend(
       await expect(data['mm']).to.equal('00');
       await expect(data['s']).to.equal('0');
       await expect(data['ss']).to.equal('00');
+      await expect(true).to.equal(false);
     });
   }
 );
