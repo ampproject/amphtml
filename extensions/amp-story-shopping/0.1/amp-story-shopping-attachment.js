@@ -11,7 +11,7 @@ import {
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
 
-/** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+/** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
   {
     family: 'Poppins',
