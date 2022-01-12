@@ -117,7 +117,7 @@ export function BentoListWithRef(
   const isBottomNearingViewport = useIsInViewport(bottomRef, ioOptions);
 
   const {error, hasMore, loadMore, loading, pages, reset} = useInfiniteQuery({
-    fetchPage: async ({pageParam: nextUrl} = {}) => {
+    fetchPage: async ({pageParam: nextUrl = src}) => {
       if (!renderable) {
         return null;
       }
@@ -125,12 +125,14 @@ export function BentoListWithRef(
       return page;
     },
     getNextPageParam(lastPage) {
-      if (!lastPage) {
-        return src;
-      }
       return getNextUrl(lastPage, loadMoreBookmark);
     },
   });
+
+  // Reset when these props change:
+  useEffect(() => {
+    reset();
+  }, [src, renderable, loadMoreBookmark, reset]);
 
   const shouldLoadMore =
     renderable &&
@@ -144,10 +146,6 @@ export function BentoListWithRef(
       loadMore();
     }
   }, [shouldLoadMore, loadMore]);
-
-  useEffect(() => {
-    reset();
-  }, [src, reset]);
 
   // Rendering logic:
   const list = useMemo(() => {

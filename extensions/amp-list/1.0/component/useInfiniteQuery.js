@@ -39,7 +39,7 @@ export function useInfiniteQuery({fetchPage, getNextPageParam}) {
         const lastPage = pages.length ? pages[pages.length - 1] : undefined;
 
         const newPage = await fetchPage({
-          pageParam: getNextPageParam(lastPage),
+          pageParam: lastPage ? getNextPageParam(lastPage) : undefined,
         });
 
         const nextPageParam = getNextPageParam(newPage);
