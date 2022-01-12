@@ -88,7 +88,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @private */
   populatePlp_() {
-    if (this.plpTemplate_) return;
+    if (this.plpTemplate_) {
+      return;
+    }
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
     const shoppingDataForPage = Array.from(this.shoppingTags_).map(
       (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-tag-id')]

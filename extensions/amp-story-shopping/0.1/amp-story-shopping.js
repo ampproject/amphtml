@@ -8,9 +8,9 @@ import {CSS as shoppingCSS} from '../../../build/amp-story-shopping-0.1.css';
  * Language and currency sensitive number formatting.
  * @param {!../../../src/service/localization.LocalizationService} localizationService
  * @param {!Element} el
- * @param {!string} currency An ISO 4217 currency code.
- * @param {!number} price
- * @return {!string}
+ * @param {string} currency An ISO 4217 currency code.
+ * @param {number} price
+ * @return {string}
  */
 export const formatI18nNumber = (localizationService, el, currency, price) => {
   const langCode = localizationService.getLanguageCodesForElement(el)[0];
