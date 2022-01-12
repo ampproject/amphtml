@@ -82,7 +82,7 @@ const ONE_OF_ERROR_MESSAGE =
   'Only one of "attr", "attrs", "attrMatches", "passthrough", "passthroughNonEmpty", or "selector" must be given';
 
 /**
- * @param {!Object<string, AmpElementPropDef>} propDefs
+ * @param {Object<string, AmpElementPropDef>} propDefs
  * @param {function(AmpElementPropDef):boolean} cb
  * @return {boolean}
  */

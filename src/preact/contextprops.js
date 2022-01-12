@@ -46,7 +46,7 @@ const CanPlay = contextProp('CanPlay', {
  *
  * Default is "auto".
  *
- * @const {!ContextPropDef<Loading_Enum, boolean>}
+ * @const {ContextPropDef<Loading_Enum, boolean>}
  */
 const LoadingProp = contextProp('Loading', {
   defaultValue: Loading_Enum.AUTO,

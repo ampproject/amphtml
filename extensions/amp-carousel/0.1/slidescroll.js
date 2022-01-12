@@ -58,7 +58,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     /** @private {boolean} */
     this.hasNativeSnapPoints_ = false;
 
-    /** @private {!Array<Element>} */
+    /** @private {Array<Element>} */
     this.slides_ = [];
 
     /** @private {number} */
@@ -67,7 +67,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     /** @private {?Element} */
     this.slidesContainer_ = null;
 
-    /** @private {!Array<Element>} */
+    /** @private {Array<Element>} */
     this.slideWrappers_ = [];
 
     /** @private {boolean} */
