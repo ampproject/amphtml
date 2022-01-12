@@ -463,7 +463,7 @@ Adds support for Permutive event collection. Additionally, the following `vars` 
 -   `namespace`: your Permutive AMP namespace
 -   `key`: your Permutive public API key
 
-Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](http://support.permutive.com).
+Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](https://support.permutive.com).
 
 ### Permutive-ampscript
 
@@ -471,7 +471,7 @@ Type attribute value: `permutive-ampscript`
 
 Adds support for Permutive event collection via the Permutive SDK running inside `amp-script`. This is a newer version of the `Permutive` configuration mentioned above. It will soon replace the old configuration.
 
-To add additional properties to Permutive events use the `extraUrlParams` property and use the `customProperties` key to define any custom properties. The value should be a valid json object. Full configuration details can be found at [support.permutive.com](http://support.permutive.com).
+To add additional properties to Permutive events use the `extraUrlParams` property and use the `customProperties` key to define any custom properties. The value should be a valid json object. Full configuration details can be found at [support.permutive.com](https://support.permutive.com).
 
 ### Piano
 
