@@ -19,6 +19,7 @@ import {
 } from '#core/dom/layout';
 import {MediaQueryProps} from '#core/dom/media-query-props';
 import {childElementByAttr, childElementByTag} from '#core/dom/query';
+import {installShadowStyle} from '#core/dom/shadow-embed';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import * as mode from '#core/mode';
 import {isElement} from '#core/types';
@@ -36,8 +37,6 @@ import {
   checkPropsFor,
   collectProps,
 } from './parse-props';
-
-import {installShadowStyle} from '../shadow-embed';
 
 /** @const {MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
