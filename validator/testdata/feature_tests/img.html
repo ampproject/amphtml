@@ -37,6 +37,16 @@
        hspace=10 vspace=20 importance="high" crossorigin="use-credentials" ismap="false"
        referrerpolicy="unsafe-url" usemap="#blah" name="name">
 
+  <!-- Valid with data-hero using srcset -->
+  <img src="http://www.example.com/blah.jpg" width=92 height=10
+       data-hero alt="blah" decoding=async border="5px solid black" align="left"
+       hspace=10 vspace=20 importance="high" crossorigin="use-credentials" ismap="false"
+       referrerpolicy="unsafe-url" usemap="#blah" name="name"
+       srcset="http://www.example.com/blah2.jpg 470w,
+               http://www.example.com/blah3.jpg 800w,
+               http://www.example.com/blah4.jpg 1200w"
+       sizes="470w,800w,1200w">
+
   <!-- Invalid with wrong importance -->
   <img src=data:image/png:base64,foo width=100 height=10
        alt="blah" importance=none>
