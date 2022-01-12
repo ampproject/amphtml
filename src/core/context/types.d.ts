@@ -7,10 +7,10 @@ export interface IContextProp<T, DEP> {
   key: string;
 
   /**
-   * An optional type object that can be used for a using system. E.g.
+   * A type object that can be used for a using system. E.g.
    * this could be a Preact's Context object.
    */
-  type?: Object;
+  type: import('preact').Context<T>;
 
   /**
    * An array of dependencies that are required for the `compute` callback.

@@ -147,9 +147,11 @@ export class PreactBaseElement extends BaseElement {
   static staticProps = undefined;
 
   /**
-   * @type {import('#core/context/values').IContextProp<*,*>[]}
+   * @type {import('#core/context').IContextProp<*,*>[]}
    */
-  static useContexts = mode.isLocalDev() ? Object.freeze([]) : /** @type {?} */([]);
+  static useContexts = mode.isLocalDev()
+    ? Object.freeze([])
+    : /** @type {?} */ ([]);
 
   /**
    * Whether the component implements a loading protocol.
@@ -996,16 +998,22 @@ export class PreactBaseElement extends BaseElement {
 
   /**
    * @param {Object} api
-   * @param {string} key
+   * @param {keyof API_TYPE} key
    * @private
    */
   wrapRefProperty_(api, key) {
     Object.defineProperty(api, key, {
       configurable: true,
 
-      get: () => this.currentRef_[key],
+      get: () => {
+        const ref = this.currentRef_;
+        devAssert(ref);
+        ref[key];
+      },
       set: (v) => {
-        this.currentRef_[key] = v;
+        const ref = this.currentRef_;
+        devAssert(ref);
+        ref[key] = v;
       },
     });
   }
