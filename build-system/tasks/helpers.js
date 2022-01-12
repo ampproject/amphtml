@@ -346,9 +346,14 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const compiledFile = await getCompiledFile(srcFilename);
   banner.js = config + banner.js + compiledFile;
 
-  const babelCaller =
+  let babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
+  if (options.ssr) {
+    babelCaller += '-ssr';
+  }
+
+  const babelMaps = new Map();
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
     /* enableCache */ true,
@@ -372,6 +377,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    * @return {Promise<void>}
    */
   async function build(startTime) {
+    console.log('build entryPoint', entryPoint);
+    console.log('build outFile', destFile);
     if (!result) {
       result = await esbuild.build({
         entryPoints: [entryPoint],

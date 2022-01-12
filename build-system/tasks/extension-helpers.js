@@ -132,7 +132,8 @@ function declareExtension(name, version, options, extensionsObject) {
   const defaultOptions = {hasCss: false, npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach((v) => {
-    extensionsObject[`${name}-${v}`] = {
+    const key = options ? ( options.destName ?? name) : name;
+    extensionsObject[`${key}-${v}`] = {
       name,
       version: v,
       ...defaultOptions,
@@ -847,11 +848,15 @@ async function buildExtensionJs(dir, name, options) {
       ? wrapperOrFn(name, version, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
+  // Allow the extension entry to be able to override the destination
+  // filename. This allows for a single entry point to actually have multiple
+  // output destination compilation units.
+  const destName = options.destName ?? name;
   await compileJs(`${dir}/`, filename, './dist/v0', {
     ...options,
-    toName: `${name}-${version}.max.js`,
-    minifiedName: `${name}-${version}.js`,
-    aliasName: isLatest ? `${name}-latest.js` : '',
+    toName: `${destName}-${version}.max.js`,
+    minifiedName: `${destName}-${version}.js`,
+    aliasName: isLatest ? `${destName}-latest.js` : '',
     wrapper: resolvedWrapper,
     babelPlugins: wrapper === 'extension' ? extensionBabelPlugins : null,
   });
@@ -867,10 +872,10 @@ async function buildExtensionJs(dir, name, options) {
   if (isAliased) {
     const {aliasedVersion} = aliasBundle;
     const src = maybeToEsmName(
-      `${name}-${version}${options.minify ? '' : '.max'}.js`
+      `${destName}-${version}${options.minify ? '' : '.max'}.js`
     );
     const dest = maybeToEsmName(
-      `${name}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
+      `${destName}-${aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);

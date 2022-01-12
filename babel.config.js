@@ -22,7 +22,9 @@ const babelTransforms = new Map([
   ['nomodule-loader', 'getNoModuleLoaderConfig'],
   ['test', 'getTestConfig'],
   ['unminified', 'getUnminifiedConfig'],
+  ['unminified-ssr', 'getUnminifiedSsrConfig'],
   ['minified', 'getMinifiedConfig'],
+  ['minified-ssr', 'getMinifiedSsrConfig'],
   ['jss', 'getJssConfig'],
   ['@babel/eslint-parser', 'getEslintConfig'],
   ['is-enum-value', 'getEmptyConfig'],
@@ -45,6 +47,7 @@ module.exports = function (api) {
   });
   if (callerName && babelTransforms.has(callerName)) {
     const configFunctionName = babelTransforms.get(callerName);
+    console.log('caller' ,callerName);
     return require('./build-system/babel-config')[configFunctionName]();
   } else {
     log(

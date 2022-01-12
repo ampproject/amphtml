@@ -2775,7 +2775,11 @@ export class AmpStory extends AMP.BaseElement {
 }
 
 AMP.extension('amp-story', '1.0', (AMP) => {
-  AMP.registerElement('amp-story', AmpStory, CSS);
+  if (IS_SSR) {
+    AMP.registerElement('amp-story', AmpStory);
+  } else {
+    AMP.registerElement('amp-story', AmpStory, CSS);
+  }
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
