@@ -18,7 +18,7 @@ let context;
  * - playable: whether the playback is allowed in this vDOM area. If playback
  *   is not allow, the component must immediately stop the playback.
  *
- * @return {!PreactDef.Context<AmpContextDef.ContextType>}
+ * @return {PreactDef.Context<AmpContextDef.ContextType>}
  */
 function getAmpContext() {
   return (
@@ -34,8 +34,8 @@ function getAmpContext() {
 /**
  * A wrapper-component that recalculates and propagates AmpContext properties.
  *
- * @param {!AmpContextDef.ProviderProps} props
- * @return {!PreactDef.VNode}
+ * @param {AmpContextDef.ProviderProps} props
+ * @return {PreactDef.VNode}
  */
 export function WithAmpContext({
   children,
@@ -54,7 +54,7 @@ export function WithAmpContext({
   const notify = notifyProp || parent.notify;
   const current = useMemo(
     () =>
-      /** @type {!AmpContextDef.ContextType} */ ({
+      /** @type {AmpContextDef.ContextType} */ ({
         renderable,
         playable,
         loading,
@@ -67,7 +67,7 @@ export function WithAmpContext({
 }
 
 /**
- * @return {!AmpContextDef.ContextType}
+ * @return {AmpContextDef.ContextType}
  */
 export function useAmpContext() {
   const AmpContext = getAmpContext();
@@ -77,7 +77,7 @@ export function useAmpContext() {
 /**
  * Whether the calling component should currently be in the loaded state.
  *
- * @param {!Loading_Enum|string} loadingProp
+ * @param {Loading_Enum|string} loadingProp
  * @return {boolean}
  */
 export function useLoading(loadingProp) {

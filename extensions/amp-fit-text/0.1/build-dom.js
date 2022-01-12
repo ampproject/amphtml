@@ -64,8 +64,8 @@ export function queryDom(element) {
 /**
  * Make a destination node a clone of the source.
  *
- * @param {!Node} from
- * @param {!Node} to
+ * @param {Node} from
+ * @param {Node} to
  */
 export function mirrorNode(from, to) {
   // First clear out the destination node.

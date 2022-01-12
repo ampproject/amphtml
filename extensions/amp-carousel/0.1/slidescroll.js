@@ -48,7 +48,7 @@ const CUSTOM_SNAP_TIMEOUT = 100;
 const TAG = 'AMP-CAROUSEL';
 
 export class AmpSlideScroll extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
+  /** @param {AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -58,7 +58,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     /** @private {boolean} */
     this.hasNativeSnapPoints_ = false;
 
-    /** @private {!Array<!Element>} */
+    /** @private {Array<Element>} */
     this.slides_ = [];
 
     /** @private {number} */
@@ -67,7 +67,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     /** @private {?Element} */
     this.slidesContainer_ = null;
 
-    /** @private {!Array<!Element>} */
+    /** @private {Array<Element>} */
     this.slideWrappers_ = [];
 
     /** @private {boolean} */
@@ -132,7 +132,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     /** @private {number} */
     this.previousScrollLeft_ = 0;
 
-    /** @private {!Array<?string>} */
+    /** @private {Array<?string>} */
     this.dataSlideIdArr_ = [];
 
     const platform = Services.platformFor(this.win);
@@ -527,7 +527,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * Proceeds to the next slide in the desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
-   * @param {!ActionTrust_Enum} trust
+   * @param {ActionTrust_Enum} trust
    */
   moveSlide(dir, animate, trust) {
     if (this.slideIndex_ !== null) {
@@ -552,7 +552,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
   /**
    * Handles scroll on the slides container.
-   * @param {!Event} unusedEvent Event object.
+   * @param {Event} unusedEvent Event object.
    * @private
    */
   scrollHandler_(unusedEvent) {
@@ -577,7 +577,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * Escapes Left and Right arrow key events on the carousel container.
    * This is to prevent them from doubly interacting with surrounding viewer
    * contexts such as email clients when interacting with the amp-carousel.
-   * @param {!KeyboardEvent} event
+   * @param {KeyboardEvent} event
    * @private
    */
   keydownHandler_(event) {
@@ -626,7 +626,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * @param {number=} opt_forceDir if a valid direction is given force it to
    * move 1 slide in that direction.
    * @param {ActionTrust_Enum=} opt_trust
-   * @return {!Promise}
+   * @return {Promise}
    */
   customSnap_(currentScrollLeft, opt_forceDir, opt_trust) {
     this.snappingInProgress_ = true;
@@ -748,7 +748,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * Parses given value as integer and shows the slide with that index value
    * when element has been laid out.
    * @param {*} value
-   * @param {!ActionTrust_Enum} trust
+   * @param {ActionTrust_Enum} trust
    */
   goToSlide(value, trust) {
     const index = parseInt(value, 10);
@@ -921,7 +921,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
   /**
    * Given an index, hides rest of the slides that are not needed.
-   * @param {!Array<number>} indexArr Array of indices that
+   * @param {Array<number>} indexArr Array of indices that
    *    should not be hidden.
    * @private
    */
@@ -955,14 +955,14 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * Animate scrollLeft of the container.
    * @param {number} fromScrollLeft
    * @param {number} toScrollLeft
-   * @return {!Promise}
+   * @return {Promise}
    * @private
    */
   animateScrollLeft_(fromScrollLeft, toScrollLeft) {
     if (fromScrollLeft == toScrollLeft) {
       return Promise.resolve();
     }
-    /** @const {!TransitionDef<number>} */
+    /** @const {TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
     const curve = bezierCurve(0.8, 0, 0.6, 1); // ease-in
     const duration = 80;
@@ -1027,7 +1027,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
   /**
    * @param {string} eventType
-   * @param {!JsonObject} vars A map of vars and their values.
+   * @param {JsonObject} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {

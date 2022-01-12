@@ -19,19 +19,19 @@ export class CarouselControls {
    * }} param0
    */
   constructor({element, go, nextButton, prevButton}) {
-    /** @private @type {!AmpElement} */
+    /** @private @type {AmpElement} */
     this.element_ = element;
 
-    /** @private @type {!GoFunctionDef} */
+    /** @private @type {GoFunctionDef} */
     this.go_ = go;
 
-    /** @private @type {!Window} */
+    /** @private @type {Window} */
     this.win_ = getWin(element);
 
-    /** @private {!HTMLDivElement} */
+    /** @private {HTMLDivElement} */
     this.prevButton_ = prevButton;
 
-    /** @private {!HTMLDivElement} */
+    /** @private {HTMLDivElement} */
     this.nextButton_ = nextButton;
 
     /** @private {boolean} */
@@ -68,7 +68,7 @@ export class CarouselControls {
   }
 
   /**
-   * @param {!HTMLDivElement} button
+   * @param {HTMLDivElement} button
    * @param {*} onInteraction
    */
   setupButtonInteraction(button, onInteraction) {

@@ -17,15 +17,15 @@ import {CanPlay, CanRender, LoadingProp} from './contextprops';
 
 const EMPTY = {};
 
-/** @const {WeakMap<Element, {oldDefauls: (!Object|undefined), component: Component}>} */
+/** @const {WeakMap<Element, {oldDefauls: (Object|undefined), component: Component}>} */
 const cache = new WeakMap();
 
 /**
- * @param {!Element} element
+ * @param {Element} element
  * @param {string} name
- * @param {!Object|undefined} defaultProps
+ * @param {Object|undefined} defaultProps
  * @param {boolean|undefined} as
- * @return {!PreactDef.VNode|!PreactDef.FunctionalComponent}
+ * @return {PreactDef.VNode|PreactDef.FunctionalComponent}
  */
 export function createSlot(element, name, defaultProps, as = false) {
   element.setAttribute('slot', name);
@@ -39,8 +39,8 @@ export function createSlot(element, name, defaultProps, as = false) {
   }
 
   /**
-   * @param {!Object|undefined} props
-   * @return {!PreactDef.VNode}
+   * @param {Object|undefined} props
+   * @return {PreactDef.VNode}
    */
   function SlotWithProps(props) {
     return <Slot {...(defaultProps || EMPTY)} name={name} {...props} />;
@@ -53,8 +53,8 @@ export function createSlot(element, name, defaultProps, as = false) {
 /**
  * Slot component.
  *
- * @param {!JsonObject} props
- * @return {!PreactDef.VNode}
+ * @param {JsonObject} props
+ * @return {PreactDef.VNode}
  */
 export function Slot(props) {
   const ref = useRef(/** @type {?Element} */ (null));
@@ -73,7 +73,7 @@ export function Slot(props) {
 
 /**
  * @param {{current:?}} ref
- * @param {!JsonObject=} opt_props
+ * @param {JsonObject=} opt_props
  */
 export function useSlotContext(ref, opt_props) {
   const {'loading': loading} = opt_props || EMPTY;
@@ -90,7 +90,7 @@ export function useSlotContext(ref, opt_props) {
       slot,
       LoadingProp,
       Slot,
-      /** @type {!./core/constants/loading-instructions.Loading_Enum} */ (
+      /** @type {./core/constants/loading-instructions.Loading_Enum} */ (
         context.loading
       )
     );
@@ -129,8 +129,8 @@ export function useSlotContext(ref, opt_props) {
 }
 
 /**
- * @param {!Element} slot
- * @param {function(!AmpElement):void|function(!Array<!AmpElement>):void} action
+ * @param {Element} slot
+ * @param {function(AmpElement):void|function(Array<AmpElement>):void} action
  * @param {boolean} schedule
  */
 function execute(slot, action, schedule) {

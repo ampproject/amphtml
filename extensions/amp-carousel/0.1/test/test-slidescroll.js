@@ -35,7 +35,7 @@ describes.realWin(
      * @param {boolean=} opt_attachToDom
      * @param {boolean=} opt_hasAutoplay
      * @param {boolean=} opt_autoplayLoops
-     * @return {!Element}
+     * @return {Element}
      */
     function getAmpSlideScroll(
       opt_hasLooping,

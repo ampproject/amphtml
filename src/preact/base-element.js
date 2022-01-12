@@ -509,7 +509,7 @@ export class PreactBaseElement extends BaseElement {
    * This has no effect on Bento documents, since they lack an Actions system.
    * Instead, they should use `(await element.getApi()).action()`
    * @param {string} alias
-   * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
+   * @param {function(API_TYPE, ../service/action-impl.ActionInvocation)} handler
    * @param {../action-constants.ActionTrust_Enum} minTrust
    * @protected
    */

@@ -6,7 +6,7 @@ import {getWin} from '#core/window';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 
 /**
- * @param {!BentoFitTextDef.Props} props
+ * @param {BentoFitTextDef.Props} props
  * @return {PreactDef.Renderable}
  */
 export function BentoFitText({
