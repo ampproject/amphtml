@@ -400,11 +400,7 @@ export class PreactBaseElement extends BaseElement {
 
     const {staticProps} = Ctor;
     const initProps = this.init();
-    Object.assign(
-      /** @type {Object} */ (this.defaultProps_),
-      staticProps,
-      initProps
-    );
+    Object.assign(this.defaultProps_, staticProps, initProps);
 
     this.checkPropsPostMutations();
 
