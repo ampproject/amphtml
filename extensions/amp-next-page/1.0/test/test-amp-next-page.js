@@ -4,37 +4,51 @@ import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 
 import {Services} from '#service';
+import {installCidService} from '#service/cid-impl';
+
+import {getAmpdoc} from 'src/service-helpers';
+import * as url from 'src/url';
 
 import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 
-const MOCK_NEXT_PAGE = `<header>Header</header>
-    <div style="height:1000px"></div>
-    <footer>Footer</footer>`;
-const MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS = `<header>Header</header>
-    <div style="height:1000px"></div>
-    <amp-next-page>
-        <script type="application/json">
-        [
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 3",
-            "url": "./document3"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 4",
-            "url": "./document4"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 2",
-            "url": "./document2"
-          }
-        ]
-      </script>
-    </amp-next-page>
-    <footer>Footer</footer>`;
+const MOCK_NEXT_PAGE = /* HTML */ `
+  <header>Header</header>
+  <div style="height:1000px"></div>
+  <footer>Footer</footer>
+  <a
+    href="https://example.com?client_id=CLIENT_ID(bar)"
+    data-amp-replace="CLIENT_ID"
+  >
+    https://example.com?client_id=CLIENT_ID(bar)
+  </a>
+`;
+const MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS = /* HTML */ `
+  <header>Header</header>
+  <div style="height:1000px"></div>
+  <amp-next-page>
+    <script type="application/json">
+      [
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 3",
+          "url": "./document3"
+        },
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 4",
+          "url": "./document4"
+        },
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 2",
+          "url": "./document2"
+        }
+      ]
+    </script>
+  </amp-next-page>
+  <footer>Footer</footer>
+`;
 const VALID_CONFIG = [
   {
     'image': '/examples/img/hero@1x.jpg',
@@ -666,6 +680,57 @@ describes.realWin(
               .called;
           }
         }
+      });
+
+      it('replaces CLIENT_ID from propagated message', async () => {
+        const expectedCid = 'myCid123';
+
+        installCidService(ampdoc);
+
+        // Only Proxy Origin URLs enable the Viewer CID API
+        env.sandbox.stub(url, 'isProxyOrigin').returns(true);
+
+        const messageDeliverer = (type) => {
+          if (type === 'cid') {
+            return expectedCid;
+          }
+        };
+        Services.viewerForDoc(ampdoc).setMessageDeliverer(messageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const page of service.pages_) {
+          const {firstElementChild} = page.document;
+          const ampdoc = getAmpdoc(firstElementChild);
+
+          // CID API is bound to doc visibility
+          env.sandbox.stub(ampdoc, 'whenFirstVisible').resolves();
+
+          const viewer = Services.viewerForDoc(firstElementChild);
+
+          // Mock hasCapability and isTrustedViewer to enable Viewer CID API
+          env.sandbox
+            .stub(viewer, 'hasCapability')
+            .callsFake((capability) => capability === 'cid');
+
+          env.sandbox.stub(viewer, 'isTrustedViewer').resolves(true);
+        }
+
+        const cids = await Promise.all(
+          service.pages_.map(async (page) => {
+            const cidStruct = {scope: 'foo', cookie: 'bar'};
+            const consent = Promise.resolve();
+            const service = await Services.cidForDoc(
+              page.document.firstElementChild
+            );
+            return service.get(cidStruct, consent);
+          })
+        );
+
+        expect(
+          cids.every((cid) => cid === expectedCid),
+          'all cids are expectedCid'
+        ).to.be.true;
       });
     });
 
