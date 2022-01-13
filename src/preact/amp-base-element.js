@@ -1,3 +1,5 @@
+/* eslint-disable local/restrict-this-access */
+
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 
 import {PreactBaseElement} from './base-element';
@@ -15,9 +17,7 @@ export class AmpPreactBaseElement extends PreactBaseElement {
    * @override
    */
   mutatedAttributesCallback() {
-    // eslint-disable-next-line local/restrict-this-access
     if (this.container_) {
-      // eslint-disable-next-line local/restrict-this-access
       this.scheduleRender_();
     }
   }
@@ -31,7 +31,7 @@ export class AmpPreactBaseElement extends PreactBaseElement {
     return super.attemptChangeHeight(newHeight).catch((e) => {
       // It's okay to disable this lint rule since we check that the restricted
       // method exists.
-      // eslint-disable-next-line local/restrict-this-access
+
       if (this.getOverflowElement && !this.getOverflowElement()) {
         console./* OK */ warn(
           '[overflow] element not found. Provide one to enable resizing to full contents.',
