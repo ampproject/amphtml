@@ -36,7 +36,6 @@ export function map(opt_initial) {
  *
  * @param {Object=} opt_initial
  * @return {JsonObject}
- * @deprecated
  */
 export function dict(opt_initial) {
   // We do not copy. The linter enforces that the passed in object is a literal
