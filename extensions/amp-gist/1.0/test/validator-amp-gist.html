@@ -16,6 +16,32 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
   <body>
-    <amp-gist layout="responsive" width="150" height="80"></amp-gist>
+     <!-- Valid: Embeds an entire gist from GitHub. -->
+    <amp-gist
+      layout="fixed-height"
+      height="241"
+      data-gistid="b9bb35bc68df68259af94430f012425f">
+    </amp-gist>
+
+    <!-- Valid: Embeds one file out of a gist from GitHub. -->
+    <amp-gist
+      layout="fixed-height"
+      height="197"
+      data-gistid="a19e811dcd7df10c4da0931641538497"
+      data-file="hi.c">
+    </amp-gist>
+
+    <!-- Invalid: missing data-gistid attribute. -->
+    <amp-gist
+      layout="fixed-height"
+      height="241">
+    </amp-gist>
+
+    <!-- Invalid: illegal layout. -->
+    <amp-gist
+      layout="responsive"
+      height="241"
+      data-gistid="b9bb35bc68df68259af94430f012425f">
+    </amp-gist>
   </body>
 </html>
