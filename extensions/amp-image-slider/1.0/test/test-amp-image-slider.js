@@ -1,7 +1,6 @@
 import '../amp-image-slider';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Keys_Enum} from '#core/constants/key-codes';
-import {createElementWithAttributes, tryFocus} from '#core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
@@ -23,7 +22,6 @@ describes.realWin(
   (env) => {
     let win;
     let doc;
-    let html;
     let element;
     let leftImage, rightImage;
     const styles = useStyles();
