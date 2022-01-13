@@ -1,4 +1,4 @@
-import {useCallback} from '#preact';
+import {useCallback, useRef} from '#preact';
 import {useValueRef} from '#preact/component';
 
 import {useStateSafe} from './useStateSafe';
@@ -23,6 +23,7 @@ export function useInfiniteQuery({fetchPage, getNextPageParam}) {
   const [state, setState] = useStateSafe(initialState);
 
   const ref = useValueRef({fetchPage, getNextPageParam, state});
+  const fetchIndexRef = useRef(0);
 
   const loadMore = useCallback(
     async (resetting = false) => {
@@ -32,15 +33,22 @@ export function useInfiniteQuery({fetchPage, getNextPageParam}) {
         return;
       }
 
+      const fetchIndex = ++fetchIndexRef.current;
+
       setState((s) => ({...s, loading: true}));
 
-      try {
-        const pages = resetting ? [] : state.pages;
-        const lastPage = pages.length ? pages[pages.length - 1] : undefined;
+      const pages = resetting ? [] : state.pages;
+      const lastPage = pages.length ? pages[pages.length - 1] : undefined;
 
+      try {
         const newPage = await fetchPage({
           pageParam: lastPage ? getNextPageParam(lastPage) : undefined,
         });
+
+        if (fetchIndex !== fetchIndexRef.current) {
+          // A new request has been started; cancel this one:
+          return;
+        }
 
         const nextPageParam = getNextPageParam(newPage);
 
@@ -51,15 +59,22 @@ export function useInfiniteQuery({fetchPage, getNextPageParam}) {
           hasMore: nextPageParam !== undefined && nextPageParam !== null,
         });
       } catch (error) {
+        if (fetchIndex !== fetchIndexRef.current) {
+          // A new request has been started; cancel this one:
+          return;
+        }
+
         setState((s) => ({...s, loading: false, error}));
       }
     },
     [ref, setState]
   );
 
+  const reset = useCallback(() => loadMore(true), [loadMore]);
+
   return {
     ...state,
     loadMore,
-    reset: useCallback(() => loadMore(true), [loadMore]),
+    reset,
   };
 }

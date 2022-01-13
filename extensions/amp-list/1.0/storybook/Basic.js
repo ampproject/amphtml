@@ -142,3 +142,93 @@ export const InfiniteScrollTest = (args) => {
     </>
   );
 };
+
+export const ChangingProps = (args) => {
+  // Simulate an API with a lot of options
+  const fetchItems = async (url) => {
+    await delay(1000);
+
+    const gen = (length, create) =>
+      new Array(length).fill(null).map((_, i) => create(i));
+
+    // eslint-disable-next-line prefer-const
+    let [source, start, count] = url.split(',');
+    start = Number(start || 0);
+    count = Number(count || 2);
+    const nextUrl = [source, start + count, count].join(',');
+    const nextUrl10 = [source, start + count, 10].join(',');
+    return {
+      popularity: gen(
+        26,
+        (i) => `${source} > popularity > item ${i + 1}`
+      ).slice(start, start + count),
+      alphabetical: gen(
+        26,
+        (i) =>
+          `${source} > alphabetical > item ${String.fromCharCode(
+            'A'.charCodeAt(0) + i
+          )}`
+      ).slice(start, start + count),
+      'load-more-src': nextUrl,
+      'load-10': nextUrl10,
+    };
+  };
+
+  const srcOptions = ['url-1', 'url-2', 'url-3'];
+  const [src, setSrc] = useState(srcOptions[0]);
+
+  const itemsKeyOptions = ['popularity', 'alphabetical'];
+  const [itemsKey, setItemsKey] = useState(itemsKeyOptions[0]);
+
+  const loadMoreBookmarkOptions = ['load-more-src', 'load-10'];
+  const [loadMoreBookmark, setLoadMoreBookmark] = useState(
+    loadMoreBookmarkOptions[0]
+  );
+
+  return (
+    <>
+      <fieldset>
+        <legend>src: </legend>
+        <select onChange={(e) => setSrc(e.currentTarget.value)}>
+          {srcOptions.map((opt) => (
+            <option key={opt}>{opt}</option>
+          ))}
+        </select>{' '}
+        <span>
+          Changing this will cause the list to reset from the beginning
+        </span>
+      </fieldset>
+      <fieldset>
+        <legend>loadMoreBookmark: </legend>
+        <select onChange={(e) => setLoadMoreBookmark(e.currentTarget.value)}>
+          {loadMoreBookmarkOptions.map((opt) => (
+            <option key={opt}>{opt}</option>
+          ))}
+        </select>{' '}
+        <span>
+          Changing this will cause the list to reset from the beginning
+        </span>
+      </fieldset>
+      <fieldset>
+        <legend>itemsKey: </legend>
+        <select onChange={(e) => setItemsKey(e.currentTarget.value)}>
+          {itemsKeyOptions.map((opt) => (
+            <option key={opt}>{opt}</option>
+          ))}
+        </select>{' '}
+        <span>
+          Changing this will update instantly, because the data does not need to
+          be refetched.
+        </span>
+      </fieldset>
+      <BentoList
+        {...args}
+        src={src}
+        itemsKey={itemsKey}
+        fetchItems={fetchItems}
+        loadMore={'auto'}
+        loadMoreBookmark={loadMoreBookmark}
+      />
+    </>
+  );
+};
