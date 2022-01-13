@@ -1,4 +1,22 @@
+import {iterateCursor} from '#core/dom';
+import {
+  getStyle,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+} from '#core/dom/style';
+import {clamp, mod} from '#core/math';
+import {debounce} from '#core/types/function';
+import {dict} from '#core/types/object';
+
+import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {ActionSource} from './action-source';
+import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
+import {AutoAdvance} from './auto-advance';
+import {CarouselAccessibility} from './carousel-accessibility';
+import {CarouselEvents} from './carousel-events';
 import {
   Alignment,
   Axis,
@@ -10,22 +28,6 @@ import {
   updateLengthStyle,
   updateScrollPosition,
 } from './dimensions';
-import {AutoAdvance} from './auto-advance';
-import {CarouselAccessibility} from './carousel-accessibility';
-import {CarouselEvents} from './carousel-events';
-import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
-import {clamp, mod} from '#core/math';
-import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
-import {debounce} from '#core/types/function';
-import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {
-  getStyle,
-  setImportantStyles,
-  setStyle,
-  setStyles,
-} from '#core/dom/style';
-import {iterateCursor} from '#core/dom';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last

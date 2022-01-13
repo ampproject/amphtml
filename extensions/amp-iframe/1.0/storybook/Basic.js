@@ -1,4 +1,5 @@
 import * as Preact from '#preact';
+
 import {BentoIframe} from '../component';
 
 export default {

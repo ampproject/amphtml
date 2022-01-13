@@ -1,9 +1,11 @@
-import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants';
-import {Deferred} from '#core/data-structures/promise';
-import {Entitlement} from './entitlement';
 import {Observable} from '#core/data-structures/observable';
-import {devAssert, user} from '#utils/log';
+import {Deferred} from '#core/data-structures/promise';
 import {dict, hasOwn} from '#core/types/object';
+
+import {devAssert, user} from '#utils/log';
+
+import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants';
+import {Entitlement} from './entitlement';
 
 /** @typedef {{platformKey: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;

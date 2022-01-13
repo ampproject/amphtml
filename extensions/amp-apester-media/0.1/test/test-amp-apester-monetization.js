@@ -1,10 +1,11 @@
 import {Services} from '#service';
-import {handleCompanionAds} from '../monetization';
 import {installDocService} from '#service/ampdoc-impl';
+
 import {
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
+import {handleCompanionAds} from '../monetization';
 
 describes.realWin(
   'amp-apester-media-monetization',

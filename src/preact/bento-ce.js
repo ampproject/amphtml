@@ -36,13 +36,13 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
   let ExtendableHTMLElement;
   class CeBaseElement {
     /**
-     * @param {!Element} element
+     * @param {Element} element
      */
     constructor(element) {
-      /** @const {!Element} */
+      /** @const {Element} */
       this.element = element;
 
-      /** @const {!Window} */
+      /** @const {Window} */
       this.win = getWin(element);
     }
 
@@ -59,7 +59,7 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
         constructor() {
           super();
 
-          /** @const {!CeBaseElement} */
+          /** @const {CeBaseElement} */
           this.implementation = new BaseElement(this);
         }
 

@@ -4,6 +4,7 @@ import {
   getPrevArrowSlot,
   getSlide,
 } from './helpers';
+
 import {useStyles} from '../component.jss';
 
 /** The total number of slides in the carousel */

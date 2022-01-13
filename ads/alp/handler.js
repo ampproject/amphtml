@@ -1,15 +1,17 @@
+import {closest} from '#core/dom/query';
+import {dict} from '#core/types/object';
+import {parseQueryString} from '#core/types/string/url';
+
+import {dev} from '#utils/log';
+
+import {urls} from '../../src/config';
+import {openWindowDialog} from '../../src/open-window-dialog';
 import {
   addParamToUrl,
   isLocalhostOrigin,
   isProxyOrigin,
   parseUrlDeprecated,
 } from '../../src/url';
-import {closest} from '#core/dom/query';
-import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {openWindowDialog} from '../../src/open-window-dialog';
-import {parseQueryString} from '#core/types/string/url';
-import {urls} from '../../src/config';
 
 /**
  * Install a click listener that transforms navigation to the AMP cache

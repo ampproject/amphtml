@@ -17,7 +17,7 @@ export function useResourcesNotify() {
 
 /**
  * @param {{current: ?}|function()} ref
- * @param {!Element} value
+ * @param {Element} value
  */
 function setRef(ref, value) {
   if (typeof ref === 'function') {
@@ -29,7 +29,7 @@ function setRef(ref, value) {
 
 /**
  * Combines refs to pass into `ref` prop.
- * @param {!Array<*>} refs
+ * @param {Array<*>} refs
  * @return {function(Element):function()}
  */
 export function useMergeRefs(refs) {

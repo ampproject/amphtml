@@ -1,7 +1,11 @@
 import * as Preact from '#core/dom/jsx';
+
 import {Services} from '#service';
+
 import {user} from '#utils/log';
+
 import {getAmpdoc} from 'src/service-helpers';
+
 import {
   Action,
   StateProperty,

@@ -1,15 +1,18 @@
 import * as Preact from '#core/dom/jsx';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {devAssert} from '#utils/log';
+
+import {localize} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {devAssert} from '#utils/log';
-import {localize} from './amp-story-localization-service';
+import {AdvancementMode} from './story-analytics';
 
 /** @struct @typedef {{className: string, triggers: string, label: LocalizedStringId_Enum}} */
 let PaginationButtonStateDef;

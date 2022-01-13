@@ -1,26 +1,30 @@
-import {AmpAnalytics} from '../amp-analytics';
-import {AnalyticsConfig} from '../config';
-import {ClickEventTracker, VisibilityTracker} from '../events';
+import {expect} from 'chai';
+
+import {LayoutPriority_Enum} from '#core/dom/layout';
+
+import {Services} from '#service';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installCryptoService} from '#service/crypto-impl';
+
+import {macroTask} from '#testing/helpers';
 import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '#testing/helpers/service';
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {LinkerManager} from '../linker-manager';
-import {Services} from '#service';
-import {SessionManager} from '../session-manager';
-import {Transport} from '../transport';
-import {cidServiceForDocForTesting} from '#service/cid-impl';
-import {expect} from 'chai';
+
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
-import {installCryptoService} from '#service/crypto-impl';
 import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
+import {AmpAnalytics} from '../amp-analytics';
+import {AnalyticsConfig} from '../config';
+import {ClickEventTracker, VisibilityTracker} from '../events';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {macroTask} from '#testing/helpers';
+import {LinkerManager} from '../linker-manager';
+import {SessionManager} from '../session-manager';
+import {Transport} from '../transport';
 
 describes.realWin(
   'amp-analytics',

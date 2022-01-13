@@ -1,8 +1,9 @@
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpStoryHint} from '../amp-story-hint';
 import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 const NOOP = () => {};
 

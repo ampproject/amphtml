@@ -56,7 +56,7 @@ const RENDERED_ATTR = 'i-amphtml-rendered';
 
 /**
  * The same as `applyFillContent`, but inside the shadow.
- * @const {!Object}
+ * @const {Object}
  */
 const SIZE_DEFINED_STYLE = {
   'position': 'absolute',
@@ -82,8 +82,8 @@ const ONE_OF_ERROR_MESSAGE =
   'Only one of "attr", "attrs", "attrMatches", "passthrough", "passthroughNonEmpty", or "selector" must be given';
 
 /**
- * @param {!Object<string, !AmpElementPropDef>} propDefs
- * @param {function(!AmpElementPropDef):boolean} cb
+ * @param {Object<string, AmpElementPropDef>} propDefs
+ * @param {function(AmpElementPropDef):boolean} cb
  * @return {boolean}
  */
 export function checkPropsFor(propDefs, cb) {
@@ -91,7 +91,7 @@ export function checkPropsFor(propDefs, cb) {
 }
 
 /**
- * @param {!AmpElementPropDef} def
+ * @param {AmpElementPropDef} def
  * @return {boolean}
  */
 export const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
@@ -105,11 +105,11 @@ const IS_EMPTY_TEXT_NODE = (node) =>
 
 /**
  * @param {typeof PreactBaseElement} Ctor
- * @param {!AmpElement} element
+ * @param {AmpElement} element
  * @param {{current: ?}} ref
- * @param {!JsonObject|null|undefined} defaultProps
+ * @param {JsonObject|null|undefined} defaultProps
  * @param {?MediaQueryProps} mediaQueryProps
- * @return {!JsonObject}
+ * @return {JsonObject}
  */
 export function collectProps(
   Ctor,
@@ -128,7 +128,7 @@ export function collectProps(
     mediaQueryProps.start();
   }
 
-  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
+  const props = /** @type {JsonObject} */ ({...defaultProps, ref});
 
   // Light DOM.
   if (lightDomTag) {
@@ -158,9 +158,9 @@ export function collectProps(
 
 /**
  * @param {typeof PreactBaseElement} Ctor
- * @param {!Object} props
- * @param {!Object} propDefs
- * @param {!Element} element
+ * @param {Object} props
+ * @param {Object} propDefs
+ * @param {Element} element
  * @param {?MediaQueryProps} mediaQueryProps
  */
 function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
@@ -221,7 +221,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
   }
 
   for (const name in propDefs) {
-    const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
+    const def = /** @type {AmpElementPropDef} */ (propDefs[name]);
     devAssert(
       !!def.attr +
         !!def.attrs +
@@ -273,8 +273,8 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
 /**
  * Copies an Element into a VNode representation.
  * (Interpretation into VNode is not recursive, so it excludes children.)
- * @param {!Element} element
- * @return {!PreactDef.Renderable}
+ * @param {Element} element
+ * @return {PreactDef.Renderable}
  */
 function createShallowVNodeCopy(element) {
   const props = {
@@ -293,8 +293,8 @@ function createShallowVNodeCopy(element) {
 }
 
 /**
- * @param {!Element} element
- * @param {!Object} defs
+ * @param {Element} element
+ * @param {Object} defs
  * @return {?ChildDef}
  */
 function matchChild(element, defs) {
@@ -312,7 +312,7 @@ function matchChild(element, defs) {
 /**
  * @param {string} name
  * @param {function(string): T} parse
- * @return {{attrs: Array<string>, parseAttrs: function(!Element):(?T|undefined)}}
+ * @return {{attrs: Array<string>, parseAttrs: function(Element):(?T|undefined)}}
  * @template T
  */
 export function createParseAttr(name, parse) {
@@ -329,7 +329,7 @@ export function createParseAttr(name, parse) {
 
 /**
  * @param {string} name
- * @return {{attrMatches: function(?string=):boolean, parseAttrs: function(!Element):(?number|undefined)}}
+ * @return {{attrMatches: function(?string=):boolean, parseAttrs: function(Element):(?number|undefined)}}
  */
 export function createParseDateAttr(name) {
   return createParseAttr(name, getDate);
@@ -339,7 +339,7 @@ export function createParseDateAttr(name) {
  * Maps multiple attributes with the same prefix to a single prop object.
  * The prefix cannot equal the attribute name.
  * @param {string} prefix
- * @return {{attrMatches: function(?string=):boolean, parseAttrs: function(!Element):(undefined|Object<string, string>)}}
+ * @return {{attrMatches: function(?string=):boolean, parseAttrs: function(Element):(undefined|Object<string, string>)}}
  */
 export function createParseAttrsWithPrefix(prefix) {
   const attrMatches = (name) => name?.startsWith(prefix) && name !== prefix;

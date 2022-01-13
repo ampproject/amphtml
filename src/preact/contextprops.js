@@ -12,7 +12,7 @@ import {contextProp} from '#core/context/prop';
  *
  * Default is `true`.
  *
- * @const {!ContextPropDef<boolean>}
+ * @const {ContextPropDef<boolean>}
  */
 const CanRender = contextProp('CanRender', {
   defaultValue: true,
@@ -29,7 +29,7 @@ const CanRender = contextProp('CanRender', {
  *
  * Default is `true`.
  *
- * @const {!ContextPropDef<boolean, boolean>}
+ * @const {ContextPropDef<boolean, boolean>}
  */
 const CanPlay = contextProp('CanPlay', {
   defaultValue: true,
@@ -46,7 +46,7 @@ const CanPlay = contextProp('CanPlay', {
  *
  * Default is "auto".
  *
- * @const {!ContextPropDef<!Loading_Enum, boolean>}
+ * @const {ContextPropDef<Loading_Enum, boolean>}
  */
 const LoadingProp = contextProp('Loading', {
   defaultValue: Loading_Enum.AUTO,

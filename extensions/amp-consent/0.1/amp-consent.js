@@ -1,3 +1,23 @@
+import {Deferred} from '#core/data-structures/promise';
+import {realChildElements} from '#core/dom/query';
+import {toggle} from '#core/dom/style';
+import {isArray, isEnumValue, isObject} from '#core/types';
+import {dict, hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+import {
+  NOTIFICATION_UI_MANAGER,
+  NotificationUiManager,
+} from '#service/notification-ui-manager';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {
+  ConsentConfig,
+  expandConsentEndpointUrl,
+  expandPolicyConfig,
+} from './consent-config';
 import {
   CONSENT_ITEM_STATE,
   ConsentMetadataDef,
@@ -7,35 +27,19 @@ import {
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
-import {CSS} from '../../../build/amp-consent-0.1.css';
-import {
-  ConsentConfig,
-  expandConsentEndpointUrl,
-  expandPolicyConfig,
-} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '#core/data-structures/promise';
-import {
-  NOTIFICATION_UI_MANAGER,
-  NotificationUiManager,
-} from '#service/notification-ui-manager';
-import {Services} from '#service';
 import {TcfApiCommandManager} from './tcf-api-command-manager';
+
+import {CSS} from '../../../build/amp-consent-0.1.css';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   assertHttpsUrl,
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {dev, devAssert, user, userAssert} from '#utils/log';
-import {dict, hasOwn} from '#core/types/object';
-import {getData} from '#utils/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {isArray, isEnumValue, isObject} from '#core/types';
-import {realChildElements} from '#core/dom/query';
-import {toggle} from '#core/dom/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
