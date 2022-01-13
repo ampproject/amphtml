@@ -1,7 +1,6 @@
 import '../amp-image-slider';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 
@@ -53,7 +52,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      html = htmlFor(doc);
       toggleExperiment(win, 'bento-image-slider', true, true);
       element = createElementWithAttributes(win.document, 'amp-image-slider', {
         'layout': 'fixed',
