@@ -713,8 +713,8 @@ describes.realWin(
           const cidStruct = {scope: 'foo', cookie: 'bar'};
           const cidConsent = Promise.resolve();
           const cidService = await Services.cidForDoc(page.document);
-          const cid = cidService.get(cidStruct, cidConsent);
-          expect(cid).to.eventually.equal(expectedCid);
+          const cid = await cidService.get(cidStruct, cidConsent);
+          expect(cid).to.equal(expectedCid);
         }
       });
     });
