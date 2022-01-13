@@ -1,6 +1,7 @@
 import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
+import * as intersectionObserver from '#preact/component/intersection-observer';
 import {xhrUtils} from '#preact/utils/xhr';
 
 import {waitFor} from '#testing/helpers/service';
@@ -19,8 +20,11 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
   async function waitForData(component, callCount = 1) {
     await waitFor(
       () => dataStub.callCount === callCount,
-      'expected fetchJson to have been called'
+      'expected fetchJson to have been called' +
+        (callCount > 1 ? ` ${callCount} times` : '')
     );
+    // Ensure everything has settled:
+    await new Promise((r) => setTimeout(r, 0));
     component.update();
   }
 
@@ -254,32 +258,33 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
   });
 
   describe('load-more', () => {
+    const mockData = [
+      {
+        items: ['one', 'two', 'three'],
+        'load-more-src': 'page-2.json',
+      },
+      {
+        items: ['four', 'five'],
+        'load-more-src': 'page-3.json',
+      },
+      {
+        items: ['six', 'seven', 'eight', 'nine'],
+        'load-more-src': null,
+      },
+    ];
+    beforeEach(() => {
+      mockData.forEach((page, index) => {
+        dataStub.onCall(index).resolves(page);
+      });
+    });
     describe('manual', () => {
-      const mockData = [
-        {
-          'load-more-src': 'page-2.json',
-          items: ['one', 'two', 'three'],
-        },
-        {
-          'load-more-src': 'page-3.json',
-          items: ['four', 'five'],
-        },
-        {
-          'load-more-src': null,
-          items: ['six', 'seven', 'eight', 'nine'],
-        },
-      ];
       const expectedPage1 = `<div><p>one</p><p>two</p><p>three</p></div><button>Load more</button>`;
       const expectedPage2 = `<div><p>one</p><p>two</p><p>three</p><p>four</p><p>five</p></div><button>Load more</button>`;
       const expectedPage3 = `<div><p>one</p><p>two</p><p>three</p><p>four</p><p>five</p><p>six</p><p>seven</p><p>eight</p><p>nine</p></div>`;
 
       let component;
       beforeEach(async () => {
-        mockData.forEach((page, index) => {
-          dataStub.onCall(index).resolves(page);
-        });
         component = mount(<BentoList src="page-1.json" loadMore="manual" />);
-
         await waitForData(component);
       });
 
@@ -313,6 +318,62 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         it('', async () => {
           //
         });
+      });
+    });
+    describe('auto', () => {
+      beforeEach(() => {
+        env.sandbox
+          .stub(intersectionObserver, 'useIsInViewport')
+          .returns(false);
+      });
+      function simulateViewportVisible(component, isInViewport) {
+        intersectionObserver.useIsInViewport.returns(isInViewport);
+        component.setProps({}); // trigger a rerender
+      }
+
+      const expectedPage1 = `<div><p>one</p><p>two</p><p>three</p></div><span></span>`;
+      const expectedPage2 = `<div><p>one</p><p>two</p><p>three</p><p>four</p><p>five</p></div><span></span>`;
+      const expectedPage3 = `<div><p>one</p><p>two</p><p>three</p><p>four</p><p>five</p><p>six</p><p>seven</p><p>eight</p><p>nine</p></div><span></span>`;
+
+      let component;
+      beforeEach(async () => {
+        component = mount(<BentoList src="" loadMore="auto" />);
+      });
+      it('should automatically load the first page', async () => {
+        expect(snapshot(component.find(CONTENTS))).to.equal(
+          'Loading...<span></span>'
+        );
+
+        await waitForData(component, 1);
+
+        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage1);
+      });
+      it('should only load the first page when not in viewport', async () => {
+        await waitForData(component, 1);
+        await expect(waitForData(component, 2)).to.be.rejected;
+      });
+      it('when the element is scrolled into the viewport, it loads more data', async () => {
+        await waitForData(component, 1);
+
+        // Bring it into view, then pretend the rerender caused it to grow:
+        simulateViewportVisible(component, true);
+        simulateViewportVisible(component, false);
+
+        await waitForData(component, 2);
+        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage2);
+
+        // Bring it into view for 1 render again:
+        simulateViewportVisible(component, true);
+        simulateViewportVisible(component, false);
+
+        await waitForData(component, 3);
+        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage3);
+      });
+      it('when the element is scrolled into the viewport, it keeps loading more data', async () => {
+        simulateViewportVisible(component, true);
+
+        await waitForData(component, 3);
+        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage3);
       });
     });
   });

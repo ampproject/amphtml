@@ -32,9 +32,7 @@ export function useIntersectionObserver(callback, ioOptions) {
 }
 
 /**
- * Determines if an element is within the viewport.
- *
- * Returns 2 values; the `isInViewport` value, and a ref to be used to capture the element.
+ * Returns whether an element is within the viewport.
  *
  * @param {{current: ?Element}} ref
  * @param {IOOptions} [ioOptions]
