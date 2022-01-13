@@ -348,6 +348,8 @@ module.exports = {
         'jsdoc/require-param': 0,
         'jsdoc/require-param-type': 0,
         'jsdoc/require-returns': 0,
+        'no-undef': 0,
+        'import/no-unresolved': 0
       },
     },
     {
