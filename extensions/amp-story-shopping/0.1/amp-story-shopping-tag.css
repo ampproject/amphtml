@@ -18,8 +18,6 @@ amp-story-shopping-tag {
   font-weight: 600 !important;
   font-size: 11px !important;
   line-height: 15.4px !important;
-  display: flex !important;
-  align-items: center !important;
 }
 
 /* Maintains the dot position in RTL mode */
@@ -95,7 +93,7 @@ amp-story-shopping-tag {
 .amp-story-shopping-tag-pill-text {
   overflow: hidden !important;
   font-size: 14px !important;
-  line-height: 18px !important;
+  line-height: 14px !important;
   text-overflow: ellipsis !important;
   display: -webkit-box !important;
   -webkit-box-orient: vertical !important;
