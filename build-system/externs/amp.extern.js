@@ -147,7 +147,6 @@ let JsonValue;
 
 /**
  * @constructor
- * @dict
  */
 function VideoAnalyticsDetailsDef() {}
 /** @type {boolean} */
@@ -376,19 +375,16 @@ RRule.prototype.before = function (unusedDt, unusedInc) {};
 RRule.prototype.after = function (unusedDt, unusedInc) {};
 
 /**
- * @dict
  */
 let PropTypes = {};
 
 /**
- * @dict
  */
 let ReactDates;
 
 /** @constructor */
 ReactDates.DayPickerSingleDateController;
 
-/** @dict */
 ReactDates.DayPickerRangeController;
 
 /** @type {function(*):boolean} */
@@ -400,9 +396,6 @@ ReactDates.isInclusivelyBeforeDay;
 /** @type {function(*,*):boolean} */
 ReactDates.isSameDay;
 
-/**
- * @dict
- */
 let ReactDatesConstants = {};
 
 /** @const {string} */
@@ -428,7 +421,6 @@ Inputmask.prototype.mask = function (unusedElement) {};
 
 Inputmask.prototype.remove = function () {};
 
-/** @dict */
 window.AMP.dependencies = {};
 
 /**

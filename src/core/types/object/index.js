@@ -27,15 +27,16 @@ export function map(opt_initial) {
 }
 
 /**
+ * Legacy helper for back when AMP was compiled using Closure Compiler.  *
  * Return an empty JsonObject or makes the passed in object literal
- * an JsonObject.
- * The JsonObject type is just a simple object that is at-dict.
+ * a JsonObject.
+ *
  * See
  * https://github.com/google/closure-compiler/wiki/@struct-and-@dict-Annotations
- * for what a dict is type-wise.
- * The linter enforces that the argument is, in fact, at-dict like.
+ *
  * @param {Object=} opt_initial
  * @return {JsonObject}
+ * @deprecated
  */
 export function dict(opt_initial) {
   // We do not copy. The linter enforces that the passed in object is a literal

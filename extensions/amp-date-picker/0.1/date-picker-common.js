@@ -211,7 +211,6 @@ export function withDatePickerCommon(WrappedComponent) {
     });
   };
 
-  /** @dict */
   DateComponent['defaultProps'] = defaultProps;
 
   return DateComponent;

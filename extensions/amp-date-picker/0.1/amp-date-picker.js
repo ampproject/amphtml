@@ -38,7 +38,6 @@ import {requireExternal} from '../../../src/module';
  */
 let DateTemplateMapDef;
 
-/** @dict @extends {JsonObject} */
 class BindDateDetails {
   /**
    * @param {string} date
@@ -53,7 +52,6 @@ class BindDateDetails {
   }
 }
 
-/** @dict @extends {JsonObject} */
 class BindDatesDetails {
   /**
    * @param {!Array<!BindDateDetails>} dates
@@ -209,7 +207,6 @@ export class AmpDatePicker extends AMP.BaseElement {
     /**
      * @private
      * @const
-     * @dict
      */
     this.ReactDatesConstants_ = /** @type {!JsonObject} */ (
       requireExternal('react-dates/constants')

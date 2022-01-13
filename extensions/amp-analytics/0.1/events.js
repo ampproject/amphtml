@@ -271,7 +271,6 @@ class SignalTrackerDef {
 
 /**
  * The analytics event.
- * @dict
  */
 export class AnalyticsEvent {
   /**
