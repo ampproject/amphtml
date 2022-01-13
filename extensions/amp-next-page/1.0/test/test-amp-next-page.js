@@ -4,10 +4,6 @@ import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 
 import {Services} from '#service';
-import {installCidService} from '#service/cid-impl';
-
-import {getAmpdoc} from 'src/service-helpers';
-import * as url from 'src/url';
 
 import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
@@ -16,12 +12,6 @@ const MOCK_NEXT_PAGE = /* HTML */ `
   <header>Header</header>
   <div style="height:1000px"></div>
   <footer>Footer</footer>
-  <a
-    href="https://example.com?client_id=CLIENT_ID(bar)"
-    data-amp-replace="CLIENT_ID"
-  >
-    https://example.com?client_id=CLIENT_ID(bar)
-  </a>
 `;
 const MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS = /* HTML */ `
   <header>Header</header>
