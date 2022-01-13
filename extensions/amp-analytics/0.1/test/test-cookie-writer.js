@@ -1,11 +1,14 @@
-import * as cookie from '../../../../src/cookies';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {CookieWriter} from '../cookie-writer';
+
 import {dict} from '#core/types/object';
+
+import {stubService} from '#testing/helpers/service';
+
+import * as cookie from '../../../../src/cookies';
+import {CookieWriter} from '../cookie-writer';
 import {installLinkerReaderService} from '../linker-reader';
 import {installSessionServiceForTesting} from '../session-manager';
 import {installVariableServiceForTesting} from '../variables';
-import {stubService} from '#testing/helpers/service';
 
 const TAG = '[amp-analytics/cookie-writer]';
 

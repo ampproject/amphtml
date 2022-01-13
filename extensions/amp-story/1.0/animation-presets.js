@@ -1,4 +1,7 @@
-import {StoryAnimationPresetDef} from './animation-types';
+import {px} from '#core/dom/style';
+
+import {userAssert} from '#utils/log';
+
 import {
   calculateTargetScalingFactor,
   rotateAndTranslate,
@@ -6,8 +9,7 @@ import {
   translate2d,
   whooshIn,
 } from './animation-presets-utils';
-import {px} from '#core/dom/style';
-import {userAssert} from '#utils/log';
+import {StoryAnimationPresetDef} from './animation-types';
 
 /** @const {string} */
 const FULL_BLEED_CATEGORY = 'full-bleed';

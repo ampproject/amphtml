@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
-import {BentoSidebar, BentoSidebarToolbar} from '../component';
 import {boolean, color, select, text, withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {BentoSidebar, BentoSidebarToolbar} from '../component';
 
 export default {
   title: 'Sidebar',

@@ -23,7 +23,7 @@ import {
 } from '../../3p-frame';
 import {parseUrlDeprecated} from '../../url';
 
-/** @type {!Object<string,function():void>} 3p frames for that type. */
+/** @type {Object<string,function():void>} 3p frames for that type. */
 export const countGenerators = {};
 
 // Block synchronous XHR in ad. These are very rare, but super bad for UX
@@ -40,8 +40,8 @@ const DEFAULT_SANDBOX =
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
- * @param {!IframeEmbedDef.Props} props
- * @param {{current: (!IframeEmbedDef.Api|null)}} ref
+ * @param {IframeEmbedDef.Props} props
+ * @param {{current: (IframeEmbedDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
 function ProxyIframeEmbedWithRef(

@@ -1,7 +1,9 @@
-import {addParamsToUrl} from '../../src/url';
+import {loadScript, validateData, writeScript} from '#3p/3p';
+
 import {dict, hasOwn} from '#core/types/object';
 import {endsWith} from '#core/types/string';
-import {loadScript, validateData, writeScript} from '#3p/3p';
+
+import {addParamsToUrl} from '../../src/url';
 
 /**
  * @param {!Window} global

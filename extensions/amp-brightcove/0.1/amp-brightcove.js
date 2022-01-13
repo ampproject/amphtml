@@ -1,17 +1,4 @@
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoEvents_Enum} from '../../../src/video-interface';
-import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
-import {
-  createFrameFor,
-  isJsonOrObj,
-  mutedOrUnmutedEvent,
-  objOrParseJson,
-  redispatch,
-} from '../../../src/iframe-video';
-import {dev, user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
@@ -22,14 +9,30 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
 import {
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen} from '#utils/event-helper';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  createFrameFor,
+  isJsonOrObj,
+  mutedOrUnmutedEvent,
+  objOrParseJson,
+  redispatch,
+} from '../../../src/iframe-video';
+import {VideoEvents_Enum} from '../../../src/video-interface';
+import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
 
 /** @private @const {string} */
 const TAG = 'amp-brightcove';
