@@ -22,3 +22,5 @@ globalObject['Node'] = {
   DOCUMENT_TYPE_NODE: 10,
   DOCUMENT_FRAGMENT_NODE: 11,
 };
+
+export {};
