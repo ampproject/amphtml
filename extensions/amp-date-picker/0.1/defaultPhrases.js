@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 const calendarLabel = 'Calendar';
 const jumpToPrevMonth = 'Move backward to switch to the previous month.';
 const jumpToNextMonth = 'Move forward to switch to the next month.';
@@ -58,7 +56,7 @@ const dateIsUnavailable = (obj) => {
  * @type {!JsonObject}
  */
 // eslint-disable-next-line local/no-export-side-effect
-export const DayPickerPhrases = dict({
+export const DayPickerPhrases = {
   'calendarLabel': calendarLabel,
   'jumpToPrevMonth': jumpToPrevMonth,
   'jumpToNextMonth': jumpToNextMonth,
@@ -83,4 +81,4 @@ export const DayPickerPhrases = dict({
   'chooseAvailableEndDate': chooseAvailableEndDate,
   'chooseAvailableDate': chooseAvailableDate,
   'dateIsUnavailable': dateIsUnavailable,
-});
+};

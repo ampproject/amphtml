@@ -1,6 +1,5 @@
 import {getOptionalSandboxFlags, getRequiredSandboxFlags} from '#core/3p-frame';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
-import {dict} from '#core/types/object';
 import {includes} from '#core/types/string';
 
 import * as Preact from '#preact';
@@ -92,34 +91,28 @@ function ProxyIframeEmbedWithRef(
     if (!sentinelRef.current) {
       sentinelRef.current = generateSentinel(win);
     }
-    const context = Object.assign(
-      dict({
-        'location': {
-          'href': win.location.href,
-        },
-        'sentinel': sentinelRef.current,
-      })
-    );
-    const attrs = Object.assign(
-      dict({
-        'title': title,
-        'type': type,
-        '_context': context,
-      }),
-      options
-    );
+    const context = Object.assign({
+      'location': {
+        'href': win.location.href,
+      },
+      'sentinel': sentinelRef.current,
+    });
+    const attrs = {
+      'title': title,
+      'type': type,
+      '_context': context,
+      ...options,
+    };
     setNameAndSrc({
-      name: JSON.stringify(
-        dict({
-          'host': parseUrlDeprecated(src).hostname,
-          'bootstrap': getBootstrapUrl(type),
-          'type': type,
-          // "name" must be unique across iframes, so we add a count.
-          // See: https://github.com/ampproject/amphtml/pull/2955
-          'count': count,
-          'attributes': attrs,
-        })
-      ),
+      name: JSON.stringify({
+        'host': parseUrlDeprecated(src).hostname,
+        'bootstrap': getBootstrapUrl(type),
+        'type': type,
+        // "name" must be unique across iframes, so we add a count.
+        // See: https://github.com/ampproject/amphtml/pull/2955
+        'count': count,
+        'attributes': attrs,
+      }),
       src,
     });
   }, [count, nameProp, options, srcProp, title, type]);

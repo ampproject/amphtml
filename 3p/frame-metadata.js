@@ -1,5 +1,4 @@
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {dev} from '#utils/log';
@@ -32,11 +31,11 @@ import {parseUrlDeprecated} from '../src/url';
 export let ContextStateDef;
 
 /** @const {!JsonObject} */
-const FALLBACK = dict({
-  'attributes': dict({
-    '_context': dict(),
-  }),
-});
+const FALLBACK = {
+  'attributes': {
+    '_context': {},
+  },
+};
 
 /**
  * Gets metadata encoded in iframe name attribute.
@@ -73,7 +72,7 @@ export function getAmpConfig() {
  * @return {!JsonObject}
  */
 const getAttributeDataImpl_ = once(() => {
-  const data = Object.assign(dict({}), allMetadata()['attributes']);
+  const data = {...allMetadata()['attributes']};
 
   // TODO(alanorozco): don't delete _context. refactor data object structure.
   if ('_context' in data) {

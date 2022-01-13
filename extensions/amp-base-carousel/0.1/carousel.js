@@ -7,7 +7,6 @@ import {
 } from '#core/dom/style';
 import {clamp, mod} from '#core/math';
 import {debounce} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
 import {dev} from '#utils/log';
@@ -711,12 +710,12 @@ export class Carousel {
       createCustomEvent(
         this.win_,
         CarouselEvents.INDEX_CHANGE,
-        dict({
+        {
           'index': restingIndex,
           'total': this.slides_.length,
           'actionSource': actionSource,
           'slides': this.slides_,
-        }),
+        },
         {
           bubbles: true,
         }
@@ -737,12 +736,12 @@ export class Carousel {
       createCustomEvent(
         this.win_,
         CarouselEvents.OFFSET_CHANGE,
-        dict({
+        {
           'index': index,
           'total': this.slides_.length,
           'offset': this.forwards_ ? -offset : offset,
           'slides': this.slides_,
-        }),
+        },
         {
           bubbles: true,
         }

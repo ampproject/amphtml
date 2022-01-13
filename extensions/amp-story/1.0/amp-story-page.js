@@ -23,7 +23,6 @@ import {toggle} from '#core/dom/style';
 import {isAutoplaySupported, tryPlay} from '#core/dom/video';
 import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
@@ -1094,10 +1093,10 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    const payload = dict({
+    const payload = {
       'pageId': this.element.id,
       'progress': progress,
-    });
+    };
     const eventInit = {bubbles: true};
     dispatch(
       this.win,
@@ -1276,10 +1275,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   switchTo_(targetPageId, direction) {
-    const payload = dict({
+    const payload = {
       'targetPageId': targetPageId,
       'direction': direction,
-    });
+    };
     const eventInit = {bubbles: true};
     dispatch(this.win, this.element, EventType.SWITCH_PAGE, payload, eventInit);
   }

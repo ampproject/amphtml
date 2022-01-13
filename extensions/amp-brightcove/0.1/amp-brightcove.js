@@ -11,7 +11,6 @@ import {
 } from '#core/dom/fullscreen';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -182,12 +181,10 @@ class AmpBrightcove extends AMP.BaseElement {
       // been unlaid out by now.
       if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/ postMessage(
-          JSON.stringify(
-            dict({
-              'command': command,
-              'args': arg,
-            })
-          ),
+          JSON.stringify({
+            'command': command,
+            'args': arg,
+          }),
           'https://players.brightcove.net'
         );
       }

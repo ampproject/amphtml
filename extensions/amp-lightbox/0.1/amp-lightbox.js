@@ -19,7 +19,7 @@ import {
 } from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -54,18 +54,18 @@ let AnimationPresetDef;
 /** @private @const {!Object<string, !AnimationPresetDef>} */
 const AnimationPresets = {
   'fade-in': {
-    openStyle: dict({'opacity': 1}),
-    closedStyle: dict({'opacity': 0}),
+    openStyle: {'opacity': 1},
+    closedStyle: {'opacity': 0},
     durationSeconds: 0.1,
   },
   'fly-in-bottom': {
-    openStyle: dict({'transform': 'translate(0, 0)'}),
-    closedStyle: dict({'transform': 'translate(0, 100%)'}),
+    openStyle: {'transform': 'translate(0, 0)'},
+    closedStyle: {'transform': 'translate(0, 100%)'},
     durationSeconds: 0.2,
   },
   'fly-in-top': {
-    openStyle: dict({'transform': 'translate(0, 0)'}),
-    closedStyle: dict({'transform': 'translate(0, -100%)'}),
+    openStyle: {'transform': 'translate(0, 0)'},
+    closedStyle: {'transform': 'translate(0, -100%)'},
     durationSeconds: 0.2,
   },
 };
@@ -861,7 +861,7 @@ class AmpLightbox extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(name, trust) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
     this.action_.trigger(this.element, name, event, trust);
   }
 }
