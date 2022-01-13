@@ -313,7 +313,7 @@ export function parseFragment(fragment) {
     if (json.startsWith('{%22')) {
       json = decodeURIComponent(json);
     }
-    return /** @type {!JsonObject} */ json ? parseJson(json) : {};
+    return /** @type {!JsonObject} */ (json ? parseJson(json) : {});
   } catch (err) {
     return null;
   }
