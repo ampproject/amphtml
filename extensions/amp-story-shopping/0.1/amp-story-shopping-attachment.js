@@ -36,11 +36,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {?NodeList<!Element>} */
     this.shoppingTags_ = null;
 
-    /** @private {Element} */
-    this.templateContainer_ = <div></div>;
-
-    /** @private {?Element} */
-    this.plpTemplate_ = null;
+    /** @private @const {!Element} */
+    this.plpContainer_ = <div></div>;
 
     /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
@@ -59,7 +56,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       ></amp-story-page-attachment>
     );
     this.element.appendChild(this.attachmentEl_);
-    this.attachmentEl_.appendChild(this.templateContainer_);
+    this.attachmentEl_.appendChild(this.plpContainer_);
     this.shoppingTags_ = this.element
       .closest('amp-story-page')
       .querySelectorAll('amp-story-shopping-tag');
@@ -88,15 +85,16 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @private */
   populatePlp_() {
-    if (this.plpTemplate_) {
+    if (this.plpContainer_.querySelector('.amp-story-shopping-plp')) {
       return;
     }
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
     const shoppingDataForPage = Array.from(this.shoppingTags_).map(
       (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-tag-id')]
     );
-    this.plpTemplate_ = this.renderPlpTemplate_(shoppingDataForPage);
-    this.templateContainer_.appendChild(this.plpTemplate_);
+    this.plpContainer_.appendChild(
+      this.renderPlpTemplate_(shoppingDataForPage)
+    );
   }
 
   /**
