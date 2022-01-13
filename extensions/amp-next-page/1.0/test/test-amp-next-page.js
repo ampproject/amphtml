@@ -694,13 +694,12 @@ describes.realWin(
         await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
 
         for (const page of service.pages_) {
-          const {firstElementChild} = page.document;
-          const ampdoc = getAmpdoc(firstElementChild);
+          const ampdoc = getAmpdoc(page.document);
 
           // CID API is bound to doc visibility
           env.sandbox.stub(ampdoc, 'whenFirstVisible').resolves();
 
-          const viewer = Services.viewerForDoc(firstElementChild);
+          const viewer = Services.viewerForDoc(page.document);
 
           // Mock hasCapability and isTrustedViewer to enable Viewer CID API
           env.sandbox
@@ -713,9 +712,7 @@ describes.realWin(
         for (const page of service.pages_) {
           const cidStruct = {scope: 'foo', cookie: 'bar'};
           const consent = Promise.resolve();
-          const service = await Services.cidForDoc(
-            page.document.firstElementChild
-          );
+          const service = await Services.cidForDoc(page.document);
           const cid = service.get(cidStruct, consent);
           expect(cid).to.eventually.equal(expectedCid);
         }
