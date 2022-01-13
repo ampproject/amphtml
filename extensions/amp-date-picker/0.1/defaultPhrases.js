@@ -55,7 +55,6 @@ const dateIsUnavailable = (obj) => {
 /**
  * @type {!JsonObject}
  */
-// eslint-disable-next-line local/no-export-side-effect
 export const DayPickerPhrases = {
   'calendarLabel': calendarLabel,
   'jumpToPrevMonth': jumpToPrevMonth,
