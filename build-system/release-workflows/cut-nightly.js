@@ -192,10 +192,16 @@ async function promoteNightly(octokit, ampVersion) {
         'created on',
         cyan('ampproject/cdn-configuration')
       );
+      break;
+
     default:
-      throw new Error(
-        `An unaught status returned while attempting to create a promote workflow\n${response}`
+      log(
+        'Uncaught status',
+        cyan(response.status),
+        'returned while attempting to create a promote workflow:\n',
+        response
       );
+      throw new Error();
   }
 }
 
