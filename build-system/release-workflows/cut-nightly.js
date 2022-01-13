@@ -195,9 +195,13 @@ async function promoteNightly(octokit, ampVersion) {
       break;
 
     default:
-      throw new Error(
-        `An uncaught status returned while attempting to create a promote workflow\n${response}`
+      log(
+        'Uncaught status',
+        cyan(response.status),
+        'returned while attempting to create a promote workflow:\n',
+        response
       );
+      throw new Error();
   }
 }
 
