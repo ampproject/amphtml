@@ -10,6 +10,12 @@ body:
       label: AMP Version
       description: Replace VERSION with AMP version.
       value: |
+        <!-- ----------------------------------------------------------------------- -->
+        <!-- ----------------------------- DO NOT EDIT ----------------------------- -->
+        <!-- ----------------------------------------------------------------------- -->
+        <!-- This issue is managed automatically by the release-tagger.yml workflow. -->
+        <!-- Manually editing it can break the automation! ------------------------- -->
+        <!-- ----------------------------------------------------------------------- -->
         [VERSION](https://github.com/ampproject/amphtml/releases/tag/VERSION)
     validations:
       required: true
