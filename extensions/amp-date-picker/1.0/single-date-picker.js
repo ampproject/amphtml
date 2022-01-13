@@ -1,3 +1,4 @@
+import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
@@ -22,8 +23,11 @@ import {
   DatePickerMode,
   FORM_INPUT_SELECTOR,
   TAG,
+  noop,
 } from './constants';
 import {getFormattedDate, parseDate} from './date-helpers';
+
+import {DatePickerState} from '../0.1/amp-date-picker';
 
 /**
  * @param {!DateInput.Props} props
@@ -44,11 +48,41 @@ export function SingleDatePicker({
 
   const onErrorRef = useRef(onError);
   const containerRef = useRef();
+  const initialStateMachineState =
+    mode === DatePickerMode.OVERLAY
+      ? DatePickerState.OVERLAY_CLOSED
+      : DatePickerState.STATIC;
+
+  const stateMachineRef = useRef(
+    new FiniteStateMachine(initialStateMachineState)
+  );
 
   const initialState = {
     isOpen: mode === DatePickerMode.STATIC,
   };
   const [state, setState] = useState(initialState);
+
+  const initializeStateMachine = useCallback(() => {
+    const {OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, STATIC} =
+      DatePickerState;
+    stateMachineRef.current.addTransition(STATIC, STATIC, noop);
+
+    stateMachineRef.current.addTransition(
+      OVERLAY_CLOSED,
+      OVERLAY_OPEN_INPUT,
+      () => {
+        setState({isOpen: true, isFocused: true, focused: false});
+      }
+    );
+
+    stateMachineRef.current.addTransition(
+      OVERLAY_CLOSED,
+      OVERLAY_OPEN_PICKER,
+      () => {
+        setState({isOpen: true, isFocused: true, focused: true});
+      }
+    );
+  }, [setState]);
 
   const handleSetDate = useCallback(
     (date) => {
@@ -104,6 +138,14 @@ export function SingleDatePicker({
     [blockedDates, handleSetDate]
   );
 
+  /**
+   * Transition to a new state
+   * @param {!DatePickerState} state
+   */
+  const transitionTo = useCallback((state) => {
+    stateMachineRef.current.setState(state);
+  }, []);
+
   const inputElement = useMemo(() => {
     if (Children.toArray(children).length > 0) {
       return Children.map(children, (element) =>
@@ -114,6 +156,7 @@ export function SingleDatePicker({
   }, [inputProps, children]);
 
   useEffect(() => {
+    initializeStateMachine();
     const form = closestAncestorElementBySelector(
       containerRef.current,
       FORM_INPUT_SELECTOR
@@ -127,7 +170,7 @@ export function SingleDatePicker({
       setInputProps({
         name: inputElement.name,
         value: inputElement.value,
-        onFocus: () => setState({isOpen: true}),
+        onFocus: () => transitionTo(DatePickerState.OVERLAY_OPEN_INPUT),
       });
     } else if (mode === DatePickerMode.STATIC && !!form) {
       setInputProps({
@@ -137,7 +180,9 @@ export function SingleDatePicker({
     } else if (mode === DatePickerMode.OVERLAY) {
       onErrorRef.current(`Overlay single pickers must specify "inputSelector"`);
     }
-  }, [containerRef, getHiddenInputId, inputSelector, mode, onErrorRef, format]);
+    // This should only be called on first render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <ContainWrapper
