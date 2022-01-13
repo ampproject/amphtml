@@ -40,15 +40,26 @@ export function SingleDatePicker({
   ...rest
 }) {
   const [inputProps, setInputProps] = useState({});
+  const [date, _setDate] = useState();
 
   const onErrorRef = useRef(onError);
   const containerRef = useRef();
 
-  const [isOpen] = useState(mode === DatePickerMode.STATIC);
+  const initialState = {
+    isOpen: mode === DatePickerMode.STATIC,
+  };
+  const [state, setState] = useState(initialState);
 
-  const date = useMemo(() => {
-    return inputProps.value && parseDate(inputProps.value, format);
-  }, [format, inputProps]);
+  const handleSetDate = useCallback(
+    (date) => {
+      _setDate(date);
+      setInputProps((props) => ({
+        ...props,
+        value: getFormattedDate(date, format),
+      }));
+    },
+    [format]
+  );
 
   /**
    * Generate a name for a hidden input.
@@ -88,12 +99,9 @@ export function SingleDatePicker({
       if (blockedDates.contains(date)) {
         return;
       }
-      setInputProps((props) => ({
-        ...props,
-        value: getFormattedDate(date, format),
-      }));
+      handleSetDate(date);
     },
-    [blockedDates, format]
+    [blockedDates, handleSetDate]
   );
 
   const inputElement = useMemo(() => {
@@ -115,9 +123,11 @@ export function SingleDatePicker({
       inputSelector
     );
     if (inputElement) {
+      inputElement.value && _setDate(parseDate(inputElement.value, format));
       setInputProps({
         name: inputElement.name,
         value: inputElement.value,
+        onFocus: () => setState({isOpen: true}),
       });
     } else if (mode === DatePickerMode.STATIC && !!form) {
       setInputProps({
@@ -135,7 +145,7 @@ export function SingleDatePicker({
       data-date={getFormattedDate(date, format)}
     >
       {inputElement}
-      {isOpen && (
+      {state.isOpen && (
         <BaseDatePicker
           mode="single"
           selected={date}

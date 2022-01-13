@@ -39,3 +39,16 @@ export const DateFieldNameByType = {
   [DateFieldType.START_DATE]: 'start-date',
   [DateFieldType.END_DATE]: 'end-date',
 };
+
+/**
+ * @enum {string}
+ * @private visible for testing
+ */
+export const DatePickerState = {
+  OVERLAY_CLOSED: 'overlay-closed',
+  OVERLAY_OPEN_INPUT: 'overlay-open-input',
+  OVERLAY_OPEN_PICKER: 'overlay-open-picker',
+  STATIC: 'static',
+};
+
+export const noop = () => {};

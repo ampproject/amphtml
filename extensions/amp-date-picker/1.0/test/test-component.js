@@ -399,7 +399,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
     });
 
-    xit('shows the calendar on focus', () => {
+    it('shows the calendar on focus', () => {
       const wrapper = mount(
         <DatePicker
           type="single"
