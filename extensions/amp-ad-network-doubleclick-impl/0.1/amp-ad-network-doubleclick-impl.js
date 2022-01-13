@@ -45,7 +45,7 @@ import {
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes, isRTL, removeElement} from '#core/dom';
-import {escapeCssSelectorIdent as foo} from '#core/dom/css-selectors';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
 import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
