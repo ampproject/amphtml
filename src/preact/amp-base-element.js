@@ -45,7 +45,6 @@ export class AmpPreactBaseElement extends PreactBaseElement {
   /** @override */
   getDefaultProps() {
     return {
-      // eslint-disable-next-line local/dict-string-keys
       ...super.getDefaultProps(),
       'onLoading': () => {
         this.handleOnLoading();
