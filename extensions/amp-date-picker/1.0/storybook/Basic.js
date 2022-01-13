@@ -20,21 +20,22 @@ export const _default = (args) => {
 export const WithSingleInput = (args) => {
   return (
     <BentoDatePicker {...args}>
-      <input id="date" value="2021-01-01" />
+      <input id="date" value="2022-01-01" />
     </BentoDatePicker>
   );
 };
 
 WithSingleInput.args = {
   type: 'single',
-  initialVisibleMonth: new Date(2021, 0),
+  initialVisibleMonth: new Date(),
+  mode: 'overlay',
 };
 
 export const WithRangeInput = (args) => {
   return (
     <BentoDatePicker {...args}>
-      <input id="startdate" value="2021-01-01" />
-      <input id="enddate" value="2021-01-02" />
+      <input id="startdate" value="2022-01-01" />
+      <input id="enddate" value="2022-01-02" />
     </BentoDatePicker>
   );
 };

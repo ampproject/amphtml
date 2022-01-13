@@ -399,7 +399,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
     });
 
-    it('shows the calendar on focus', () => {
+    it('shows the calendar on input focus', () => {
       const wrapper = mount(
         <DatePicker
           type="single"
@@ -414,6 +414,29 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       wrapper.find('input[name="date"]').simulate('focus');
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+    });
+
+    // TODO: Figure out how to test this
+    xit('hides the calendar on click outside the input', () => {
+      const wrapper = mount(
+        <form>
+          <DatePicker
+            type="single"
+            mode="overlay"
+            layout="container"
+            inputSelector="[name=date]"
+          >
+            <input type="text" name="date" />
+          </DatePicker>
+          <input type="text" name="other-input"></input>
+        </form>
+      );
+
+      wrapper.find('input[name="date"]').simulate('focus');
+
+      wrapper.find('input[name="other-input"]').simulate('click');
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
     });
   });
 

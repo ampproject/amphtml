@@ -43,6 +43,8 @@ export function SingleDatePicker({
   onError,
   ...rest
 }) {
+  const inputElementRef = useRef();
+  const calendarRef = useRef();
   const [inputProps, setInputProps] = useState({});
   const [date, _setDate] = useState();
 
@@ -63,25 +65,36 @@ export function SingleDatePicker({
   const [state, setState] = useState(initialState);
 
   const initializeStateMachine = useCallback(() => {
+    const sm = stateMachineRef.current;
     const {OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, STATIC} =
       DatePickerState;
-    stateMachineRef.current.addTransition(STATIC, STATIC, noop);
+    sm.addTransition(STATIC, STATIC, noop);
 
-    stateMachineRef.current.addTransition(
-      OVERLAY_CLOSED,
-      OVERLAY_OPEN_INPUT,
-      () => {
-        setState({isOpen: true, isFocused: true, focused: false});
-      }
-    );
+    sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, () => {
+      setState({isOpen: true, isFocused: true, focused: false});
+    });
 
-    stateMachineRef.current.addTransition(
-      OVERLAY_CLOSED,
-      OVERLAY_OPEN_PICKER,
-      () => {
-        setState({isOpen: true, isFocused: true, focused: true});
-      }
-    );
+    sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, () => {
+      setState({isOpen: true, isFocused: true, focused: true});
+    });
+
+    sm.addTransition(OVERLAY_CLOSED, OVERLAY_CLOSED, noop);
+
+    sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, () => {
+      setState({
+        isOpen: true,
+        isFocused: true,
+        focused: true,
+      });
+    });
+
+    sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, () => {
+      setState({
+        isOpen: false,
+        isFocused: false,
+        focused: false,
+      });
+    });
   }, [setState]);
 
   const handleSetDate = useCallback(
@@ -147,12 +160,14 @@ export function SingleDatePicker({
   }, []);
 
   const inputElement = useMemo(() => {
+    const props = {
+      ...inputProps,
+      ref: inputElementRef,
+    };
     if (Children.toArray(children).length > 0) {
-      return Children.map(children, (element) =>
-        cloneElement(element, inputProps)
-      );
+      return Children.map(children, (element) => cloneElement(element, props));
     }
-    return <input {...inputProps} />;
+    return <input {...props} />;
   }, [inputProps, children]);
 
   useEffect(() => {
@@ -170,7 +185,6 @@ export function SingleDatePicker({
       setInputProps({
         name: inputElement.name,
         value: inputElement.value,
-        onFocus: () => transitionTo(DatePickerState.OVERLAY_OPEN_INPUT),
       });
     } else if (mode === DatePickerMode.STATIC && !!form) {
       setInputProps({
@@ -184,6 +198,35 @@ export function SingleDatePicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const document = containerRef.current.ownerDocument;
+    const inputEl = inputElementRef.current;
+    const containerEl = containerRef.current;
+    if (!document) {
+      return;
+    }
+    const handleFocus = (event) => {
+      if (event.target === inputEl) {
+        transitionTo(DatePickerState.OVERLAY_OPEN_INPUT);
+      }
+    };
+    const handleClick = (event) => {
+      const clickWasInDatePicker =
+        event.target === inputEl || containerEl.contains(event.target);
+      if (!clickWasInDatePicker) {
+        transitionTo(DatePickerState.OVERLAY_CLOSED);
+      }
+    };
+    if (mode === DatePickerMode.OVERLAY) {
+      document.addEventListener('click', handleClick);
+    }
+    inputEl.addEventListener('focus', handleFocus);
+    return () => {
+      document.addEventListener('click', handleClick);
+      inputEl.removeEventListener('focus', handleFocus);
+    };
+  }, [transitionTo, inputElement, mode]);
+
   return (
     <ContainWrapper
       ref={containerRef}
@@ -192,6 +235,7 @@ export function SingleDatePicker({
       {inputElement}
       {state.isOpen && (
         <BaseDatePicker
+          ref={calendarRef}
           mode="single"
           selected={date}
           onSelect={setDate}
