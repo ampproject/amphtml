@@ -31,12 +31,9 @@ import {BaseElement} from '#preact/bento-ce';
 
 import {WithAmpContext} from './context';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
-import {
-  AmpElementPropDef,
-  HAS_SELECTOR,
-  checkPropsFor,
-  collectProps,
-} from './parse-props';
+import {HAS_SELECTOR, checkPropsFor, collectProps} from './parse-props';
+
+/** @typedef {import('./parse-props').AmpElementProp} AmpElementProp */
 
 /** @const {MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
@@ -85,13 +82,13 @@ const UNSLOTTED_GROUP = 'unslotted';
 const MATCH_ANY = () => true;
 
 /**
- * @param {AmpElementPropDef} def
+ * @param {AmpElementProp} def
  * @return {boolean}
  */
 const HAS_MEDIA = (def) => !!def.media;
 
 /**
- * @param {AmpElementPropDef} def
+ * @param {AmpElementProp} def
  * @return {boolean}
  */
 const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
@@ -104,7 +101,10 @@ const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
  * be very few exceptions, which is why we allow options to configure the
  * class.
  *
- * @template API_TYPE
+ * @template {{
+ *  readyState?: ReadyState_Enum,
+ *  pause?: function():void
+ * }} API_TYPE
  */
 export class PreactBaseElement extends BaseElement {
   /** @override @nocollapse */
@@ -133,7 +133,8 @@ export class PreactBaseElement extends BaseElement {
   /**
    * Override to provide the Component definition.
    *
-   * @protected {PreactDef.FunctionalComponent}
+   * @type {import('preact').FunctionComponent}
+   * @return {ReturnType<import('preact').FunctionComponent>}
    */
   static Component() {
     devAssert(false, 'Must provide Component');
@@ -141,26 +142,28 @@ export class PreactBaseElement extends BaseElement {
 
   /**
    * If default props are static, this can be used instead of init().
-   * @protected {JsonObject|undefined}
+   * @type {JsonObject|undefined}
    */
   static staticProps = undefined;
 
   /**
-   * @protected {Array<ContextProp>}
+   * @type {import('#core/context').IContextProp<*,*>[]}
    */
-  static useContexts = mode.isLocalDev() ? Object.freeze([]) : [];
+  static useContexts = mode.isLocalDev()
+    ? Object.freeze([])
+    : /** @type {?} */ ([]);
 
   /**
    * Whether the component implements a loading protocol.
    *
-   * @protected {boolean}
+   * @type {boolean}
    */
   static loadable = false;
 
   /**
    * Whether a component should be unloaded for `pauseCallback`.
    *
-   * @protected {boolean}
+   * @type {boolean}
    */
   static unloadOnPause = false;
 
@@ -170,7 +173,7 @@ export class PreactBaseElement extends BaseElement {
    * implemented via `isLayoutSizeDefined()`, and this is how the default
    * `isLayoutSupported()` is implemented when this flag is set.
    *
-   * @protected {string}
+   * @type {boolean}
    */
   static layoutSizeDefined = false;
 
@@ -180,28 +183,28 @@ export class PreactBaseElement extends BaseElement {
    * with specified, instead of rendering a new node. Only applicable to light-DOM
    * mapping styles.
    *
-   * @protected {string}
+   * @type {string}
    */
   static lightDomTag = '';
 
   /**
    * Whether this element uses "templates" system.
    *
-   * @protected {boolean}
+   * @type {boolean}
    */
   static usesTemplate = false;
 
   /**
    * The CSS for shadow stylesheets.
    *
-   * @protected {?string}
+   * @type {?string}
    */
   static shadowCss = null;
 
   /**
    * Whether this element uses Shadow DOM.
    *
-   * @protected {boolean}
+   * @type {boolean}
    */
   static usesShadowDom = false;
 
@@ -209,7 +212,7 @@ export class PreactBaseElement extends BaseElement {
    * Enabling detached mode alters the children to be rendered in an
    * unappended container. By default the children will be attached to the DOM.
    *
-   * @protected {boolean}
+   * @type {boolean}
    */
   static detached = false;
 
@@ -224,20 +227,29 @@ export class PreactBaseElement extends BaseElement {
   /**
    * Provides a mapping of Preact prop to AmpElement DOM attributes.
    *
-   * @protected {Object<string, AmpElementPropDef>}
+   * @type {Object<string, AmpElementProp>}
    */
   static props = {};
 
-  /** @param {Element} element */
+  /** @param {AmpElement} element */
   constructor(element) {
     super(element);
 
     /** @private {JsonObject} */
     this.defaultProps_ = dict({
       'loading': Loading_Enum.AUTO,
+
+      /**
+       * @param {import('#core/constants/ready-state').ReadyState_Enum} state
+       * @param {Error=} opt_failure
+       */
       'onReadyState': (state, opt_failure) => {
         this.onReadyState_(state, opt_failure);
       },
+
+      /**
+       * @param {boolean} isPlaying
+       */
       'onPlayingState': (isPlaying) => {
         this.updateIsPlaying_(isPlaying);
       },
@@ -252,7 +264,10 @@ export class PreactBaseElement extends BaseElement {
       },
     });
 
-    /** @private {AmpContextDef.ContextType} */
+    /**
+     * @type {import('./context').AmpContext}
+     * @private
+     */
     this.context_ = {
       renderable: false,
       playable: true,
@@ -263,13 +278,16 @@ export class PreactBaseElement extends BaseElement {
     /** @private {boolean} */
     this.resetLoading_ = false;
 
-    /** @private {?API_TYPE} */
+    /** @private {API_TYPE|null} */
     this.apiWrapper_ = null;
 
-    /** @private {?API_TYPE} */
+    /**
+     * @type {API_TYPE|null}
+     * @private
+     */
     this.currentRef_ = null;
 
-    /** @param {?API_TYPE|null} current */
+    /** @type {function(API_TYPE):void} current */
     this.refSetter_ = (current) => {
       // The API shape **must** be consistent.
       if (current !== null) {
@@ -289,7 +307,7 @@ export class PreactBaseElement extends BaseElement {
     /** @private {?Array} */
     this.contextValues_ = null;
 
-    /** @private {?Node} */
+    /** @type {Element | null} */
     this.container_ = null;
 
     /** @private {boolean} */
@@ -323,13 +341,18 @@ export class PreactBaseElement extends BaseElement {
   /**
    * A chance to initialize default Preact props for the element.
    *
-   * @return {JsonObject|undefined}
+   * @return {JsonObject|void}
    */
   init() {}
 
-  /** @override */
+  /**
+   * @override
+   * @param {import('#core/dom/layout').Layout_Enum} layout
+   */
   isLayoutSupported(layout) {
-    const Ctor = this.constructor;
+    const Ctor = /** @type {typeof PreactBaseElement} */ (
+      /** @type {?} */ (this.constructor)
+    );
     if (Ctor.layoutSizeDefined) {
       return (
         isLayoutSizeDefined(layout) ||
@@ -351,7 +374,9 @@ export class PreactBaseElement extends BaseElement {
 
   /** @override */
   buildCallback() {
-    const Ctor = this.constructor;
+    const Ctor = /** @type {typeof PreactBaseElement} */ (
+      /** @type {?} */ (this.constructor)
+    );
 
     this.observer = new MutationObserver((rs) => this.checkMutations_(rs));
     const {props} = Ctor;
@@ -375,11 +400,7 @@ export class PreactBaseElement extends BaseElement {
 
     const {staticProps} = Ctor;
     const initProps = this.init();
-    Object.assign(
-      /** @type {Object} */ (this.defaultProps_),
-      staticProps,
-      initProps
-    );
+    Object.assign(this.defaultProps_, staticProps, initProps);
 
     this.checkPropsPostMutations();
 
@@ -402,7 +423,11 @@ export class PreactBaseElement extends BaseElement {
     // in-sync.
     subscribe(
       this.element,
-      [CanRender, CanPlay, LoadingProp],
+      /** @type {import('#core/context').IContextProp<*, boolean>[]} */ ([
+        CanRender,
+        CanPlay,
+        LoadingProp,
+      ]),
       (canRender, canPlay, loading) => {
         this.context_.renderable = canRender;
         this.context_.playable = canPlay;
@@ -433,7 +458,9 @@ export class PreactBaseElement extends BaseElement {
 
   /** @override */
   ensureLoaded() {
-    const Ctor = this.constructor;
+    const Ctor = /** @type {typeof PreactBaseElement} */ (
+      /** @type {?} */ (this.constructor)
+    );
     if (!Ctor.loadable) {
       return;
     }
@@ -444,7 +471,9 @@ export class PreactBaseElement extends BaseElement {
   /** @override */
   mountCallback() {
     discover(this.element);
-    const Ctor = this.constructor;
+    const Ctor = /** @type {typeof PreactBaseElement} */ (
+      /** @type {?} */ (this.constructor)
+    );
     if (Ctor.loadable && this.getProp('loading') != Loading_Enum.AUTO) {
       this.mutateProps({'loading': Loading_Enum.AUTO});
       this.resetLoading_ = false;
@@ -454,7 +483,9 @@ export class PreactBaseElement extends BaseElement {
   /** @override */
   unmountCallback() {
     discover(this.element);
-    const Ctor = this.constructor;
+    const Ctor = /** @type {typeof PreactBaseElement} */ (
+      /** @type {?} */ (this.constructor)
+    );
     if (Ctor.loadable) {
       this.mutateProps({'loading': Loading_Enum.UNLOAD});
     }
@@ -469,7 +500,10 @@ export class PreactBaseElement extends BaseElement {
     }
   }
 
-  /** @override */
+  /**
+   * @param {number} newHeight
+   * @override
+   */
   attemptChangeHeight(newHeight) {
     return super.attemptChangeHeight(newHeight).catch((e) => {
       // It's okay to disable this lint rule since we check that the restricted
@@ -499,7 +533,9 @@ export class PreactBaseElement extends BaseElement {
    * @protected
    */
   api() {
-    return devAssert(this.currentRef_);
+    const ref = this.currentRef_;
+    devAssert(ref);
+    return ref;
   }
 
   /**
@@ -508,14 +544,17 @@ export class PreactBaseElement extends BaseElement {
    * This has no effect on Bento documents, since they lack an Actions system.
    * Instead, they should use `(await element.getApi()).action()`
    * @param {string} alias
-   * @param {function(API_TYPE, ../service/action-impl.ActionInvocation)} handler
-   * @param {../action-constants.ActionTrust_Enum} minTrust
+   * @param {function(API_TYPE, *):void} handler
+   * @param {ActionTrust_Enum} minTrust
    * @protected
    */
   registerApiAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
     this.registerAction?.(
       alias,
-      (invocation) => handler(this.api(), invocation),
+      /** @param {*} invocation */
+      (invocation) => {
+        handler(this.api(), invocation);
+      },
       minTrust
     );
   }
@@ -561,7 +600,9 @@ export class PreactBaseElement extends BaseElement {
    * @private
    */
   checkMutations_(records) {
-    const Ctor = this.constructor;
+    const Ctor = /** @type {typeof PreactBaseElement} */ (
+      /** @type {?} */ (this.constructor)
+    );
     this.mutationObserverCallback(records);
     const rerender = records.some((m) => shouldMutationBeRerendered(Ctor, m));
     if (rerender) {
@@ -596,7 +637,9 @@ export class PreactBaseElement extends BaseElement {
   onReadyState_(state, opt_failure) {
     this.setReadyState?.(state, opt_failure);
 
-    const Ctor = this.constructor;
+    const Ctor = /** @type {typeof PreactBaseElement} */ (
+      /** @type {?} */ (this.constructor)
+    );
     if (Ctor.unloadOnPause) {
       // These are typically iframe-based elements where we don't know
       // whether a media is currently playing. So we have to assume that
@@ -656,7 +699,9 @@ export class PreactBaseElement extends BaseElement {
       return;
     }
 
-    const Ctor = this.constructor;
+    const Ctor = /** @type {typeof PreactBaseElement} */ (
+      /** @type {?} */ (this.constructor)
+    );
     const {detached: isDetached, usesShadowDom: isShadow} = Ctor;
     const lightDomTag = isShadow ? null : Ctor.lightDomTag;
 
@@ -711,18 +756,28 @@ export class PreactBaseElement extends BaseElement {
         this.container_ = container;
 
         // Connect shadow root to the element's context.
+        devAssert(shadowRoot);
         setParent(shadowRoot, this.element);
         // In Shadow DOM, only the children distributed in
         // slots are displayed. All other children are undisplayed. We need
         // to create a simple mechanism that would automatically compute
         // `CanRender = false` on undistributed children.
         addGroup(this.element, UNSLOTTED_GROUP, MATCH_ANY, /* weight */ -1);
-        // eslint-disable-next-line local/restrict-this-access
-        setGroupProp(this.element, UNSLOTTED_GROUP, CanRender, this, false);
+
+        setGroupProp(
+          this.element,
+          UNSLOTTED_GROUP,
+          CanRender,
+          // TODO: is `this` correct as the setter arg for setGroupProp
+          // eslint-disable-next-line local/restrict-this-access
+          /** @type {*} */ (this),
+          false
+        );
       } else if (lightDomTag) {
-        this.container_ = this.element;
+        const container = this.element;
+        this.container_ = container;
         const replacement =
-          childElementByAttr(this.container_, RENDERED_ATTR) ||
+          childElementByAttr(container, RENDERED_ATTR) ||
           createElementWithAttributes(doc, lightDomTag, RENDERED_ATTRS);
         replacement[RENDERED_PROP] = true;
         if (Ctor.layoutSizeDefined) {
@@ -738,6 +793,8 @@ export class PreactBaseElement extends BaseElement {
         }
       }
     }
+    const container = this.container_;
+    devAssert(container);
 
     // Exit early if contexts are not ready. Optional contexts will yield
     // right away, even when `null`. The required contexts will block the
@@ -770,6 +827,7 @@ export class PreactBaseElement extends BaseElement {
 
     // Add contexts.
     for (let i = 0; i < useContexts.length; i++) {
+      devAssert(contextValues);
       const Context = useContexts[i].type;
       const value = contextValues[i];
       if (value) {
@@ -782,26 +840,26 @@ export class PreactBaseElement extends BaseElement {
 
     if (this.hydrationPending_) {
       this.hydrationPending_ = false;
-      hydrate(v, this.container_);
+      hydrate(v, container);
     } else {
       const replacement = lightDomTag
-        ? childElementByAttr(this.container_, RENDERED_ATTR)
+        ? childElementByAttr(container, RENDERED_ATTR)
         : null;
       if (replacement) {
         replacement[RENDERED_PROP] = true;
       }
-      render(v, this.container_, replacement);
+      render(v, container, replacement ?? undefined);
     }
 
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.
     if (!isShadow && !isDetached) {
       this.mutateElement(() =>
-        dispatchCustomEvent(this.element, AmpEvents_Enum.DOM_UPDATE, null)
+        dispatchCustomEvent(this.element, AmpEvents_Enum.DOM_UPDATE, undefined)
       );
     }
 
     if (this.renderDeferred_) {
-      this.renderDeferred_.resolve();
+      this.renderDeferred_.resolve(undefined);
       this.renderDeferred_ = null;
     }
   }
@@ -809,7 +867,7 @@ export class PreactBaseElement extends BaseElement {
   /**
    * @protected
    * @param {string} prop
-   * @param {*} opt_fallback
+   * @param {*=} opt_fallback
    * @return {*}
    */
   getProp(prop, opt_fallback) {
@@ -851,7 +909,7 @@ export class PreactBaseElement extends BaseElement {
    */
   initApiWrapper_(current) {
     const api = map();
-    const keys = Object.keys(current);
+    const keys = /** @type Array<keyof API_TYPE> */ (Object.keys(current));
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       this.wrapRefProperty_(api, key);
@@ -906,8 +964,7 @@ export class PreactBaseElement extends BaseElement {
    * call into it, while AMP components can override to trigger action services.
    * @param {Element} element
    * @param {string} eventName
-   * @param {JSONObject|string|undefined|null} detail
-   * @return {Object}
+   * @param {JsonObject} detail
    */
   triggerEvent(element, eventName, detail) {
     dispatchCustomEvent(element, eventName, detail);
@@ -915,7 +972,9 @@ export class PreactBaseElement extends BaseElement {
 
   /** @override */
   pauseCallback() {
-    const Ctor = this.constructor;
+    const Ctor = /** @type {typeof PreactBaseElement} */ (
+      /** @type {?} */ (this.constructor)
+    );
     if (Ctor.unloadOnPause) {
       this.mutateProps(dict({'loading': Loading_Enum.UNLOAD}));
       this.resetLoading_ = true;
@@ -935,16 +994,22 @@ export class PreactBaseElement extends BaseElement {
 
   /**
    * @param {Object} api
-   * @param {string} key
+   * @param {keyof API_TYPE} key
    * @private
    */
   wrapRefProperty_(api, key) {
     Object.defineProperty(api, key, {
       configurable: true,
 
-      get: () => this.currentRef_[key],
+      get: () => {
+        const ref = this.currentRef_;
+        devAssert(ref);
+        return ref[key];
+      },
       set: (v) => {
-        this.currentRef_[key] = v;
+        const ref = this.currentRef_;
+        devAssert(ref);
+        ref[key] = v;
       },
     });
   }
@@ -991,11 +1056,13 @@ function shouldMutationBeRerendered(Ctor, m) {
     // Check if the attribute is mapped to one of the properties.
     const {props} = Ctor;
     for (const name in props) {
-      const def = /** @type {AmpElementPropDef} */ (props[name]);
+      const def = /** @type {AmpElementProp} */ (props[name]);
+      const attrName = m.attributeName;
+      devAssert(attrName);
       if (
-        m.attributeName == def.attr ||
-        (def.attrs && def.attrs.includes(devAssert(m.attributeName))) ||
-        def.attrMatches?.(m.attributeName)
+        attrName == def.attr ||
+        def.attrs?.includes(attrName) ||
+        def.attrMatches?.(attrName)
       ) {
         return true;
       }
