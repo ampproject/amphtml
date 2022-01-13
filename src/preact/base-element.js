@@ -236,7 +236,7 @@ export class PreactBaseElement extends BaseElement {
     super(element);
 
     /** @private {JsonObject} */
-    this.defaultProps_ = {
+    this.defaultProps_ = /** @type {JsonObject} */ ({
       'loading': Loading_Enum.AUTO,
 
       /**
@@ -262,7 +262,7 @@ export class PreactBaseElement extends BaseElement {
       'onError': () => {
         this.handleOnError();
       },
-    };
+    });
 
     /**
      * @type {import('./context').AmpContext}

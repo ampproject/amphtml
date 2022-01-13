@@ -28,7 +28,7 @@ export function setFormForElement(element, form) {
  */
 export function getFormAsObject(form) {
   const {elements} = form;
-  const data = {};
+  const data = /** @type {!JsonObject} */ ({});
   // <button> is handled separately
   const submittableTagsRegex = /^(?:input|select|textarea)$/i;
   // type=submit is handled separately

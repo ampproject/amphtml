@@ -256,7 +256,7 @@ export function getDataParamsFromAttributes(
 ) {
   const computeParamNameFunc = opt_computeParamNameFunc || ((key) => key);
   const {dataset} = element;
-  const params = {};
+  const params = /** @type {!JsonObject} */ ({});
   const paramPattern = opt_paramPattern || /^param(.+)/;
   for (const key in dataset) {
     const matches = key.match(paramPattern);
