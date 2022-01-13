@@ -10,7 +10,7 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let element;
+    let storyPageEl;
     let localizationService;
 
     beforeEach(async () => {
@@ -21,18 +21,28 @@ describes.realWin(
         .stub(Services, 'localizationServiceForOrNull')
         .returns(Promise.resolve(localizationService));
 
-      element = win.document.createElement('amp-story-page');
-      element.setAttribute('lang', 'en');
+      storyPageEl = win.document.createElement('amp-story-page');
+      storyPageEl.setAttribute('lang', 'en');
     });
 
-    it('should format i18n number', () => {
+    it('should format i18n number using USD', () => {
       const formattedNumber = formatI18nNumber(
         localizationService,
-        element,
+        storyPageEl,
         'USD',
         100
       );
       expect(formattedNumber).to.equal('$100.00');
+    });
+
+    it('should format i18n number using JPY', () => {
+      const formattedNumber = formatI18nNumber(
+        localizationService,
+        storyPageEl,
+        'JPY',
+        10000
+      );
+      expect(formattedNumber).to.equal('¥10,000');
     });
   }
 );

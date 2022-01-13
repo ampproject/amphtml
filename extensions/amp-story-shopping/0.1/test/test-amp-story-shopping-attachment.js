@@ -76,7 +76,7 @@ describes.realWin(
       shoppingImpl = await shoppingEl.getImpl();
     });
 
-    async function shoppingDataDispatchStoreService() {
+    async function dispatchTestShoppingData() {
       const shoppingData = {
         'sunglasses': {
           'product-tag-id': 'sunglasses',
@@ -112,7 +112,7 @@ describes.realWin(
     });
 
     it('should open attachment', async () => {
-      await shoppingDataDispatchStoreService();
+      await dispatchTestShoppingData();
       const attachmentChildEl = shoppingEl.querySelector(
         'amp-story-page-attachment'
       );
@@ -123,7 +123,7 @@ describes.realWin(
     });
 
     it('should build PLP on CTA click', async () => {
-      await shoppingDataDispatchStoreService();
+      await dispatchTestShoppingData();
       const attachmentChildEl = shoppingEl.querySelector(
         'amp-story-page-attachment'
       );
@@ -134,7 +134,7 @@ describes.realWin(
     });
 
     it('should build PLP with data from tag on page', async () => {
-      await shoppingDataDispatchStoreService();
+      await dispatchTestShoppingData();
       const attachmentChildEl = shoppingEl.querySelector(
         'amp-story-page-attachment'
       );
