@@ -4,6 +4,10 @@ import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 
 import {Services} from '#service';
+import {installCidService} from '#service/cid-impl';
+
+import {getAmpdoc} from 'src/service-helpers';
+import * as url from 'src/url';
 
 import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
