@@ -164,7 +164,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         );
         this.hasAppendedInnerShoppingTagEl_ = true;
 
-        const rightEdgeOfScreentoTagDistance =
+        const edgeOfScreentoTagDistance =
           document.getElementsByTagName('amp-story-shopping-attachment')[0]
             ./*OK*/ clientWidth *
             0.5 -
@@ -174,31 +174,14 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         const shoppingTagInner = this.element.shadowRoot.querySelector(
           '.amp-story-shopping-tag-inner'
         );
-
-        if (this.shoppingTagEl_.getAttribute('dir') !== 'rtl') {
-          if (rightEdgeOfScreentoTagDistance > -160) {
-            shoppingTagInner?.classList.remove('amp-story-shopping-tag-inner');
-            shoppingTagInner?.classList.add(
-              'amp-story-shopping-tag-inner-flipped'
-            );
-          } else {
-            shoppingTagInner?.classList.add('amp-story-shopping-tag-inner');
-            shoppingTagInner?.classList.remove(
-              'amp-story-shopping-tag-inner-flipped'
-            );
-          }
+        if ( (edgeOfScreentoTagDistance < -160 && this.shoppingTagEl_.getAttribute('dir') !== 'rtl')
+        || (edgeOfScreentoTagDistance > 145 && this.shoppingTagEl_.getAttribute('dir') === 'rtl')
+        ) {
+          shoppingTagInner?.classList.add('amp-story-shopping-tag-inner-flipped'); 
+          shoppingTagInner?.classList.remove('.amp-story-shopping-tag-inner');
         } else {
-          if (rightEdgeOfScreentoTagDistance > 160) {
-            shoppingTagInner?.classList.remove('amp-story-shopping-tag-inner');
-            shoppingTagInner?.classList.add(
-              'amp-story-shopping-tag-inner-flipped'
-            );
-          } else {
-            shoppingTagInner?.classList.add('amp-story-shopping-tag-inner');
-            shoppingTagInner?.classList.remove(
-              'amp-story-shopping-tag-inner-flipped'
-            );
-          }
+          shoppingTagInner?.classList.add('amp-story-shopping-tag-inner-flipped');
+          shoppingTagInner?.classList.remove('amp-story-shopping-tag-inner-flipped');
         }
       }
     );
