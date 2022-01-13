@@ -711,9 +711,9 @@ describes.realWin(
 
         for (const page of service.pages_) {
           const cidStruct = {scope: 'foo', cookie: 'bar'};
-          const consent = Promise.resolve();
-          const service = await Services.cidForDoc(page.document);
-          const cid = service.get(cidStruct, consent);
+          const cidConsent = Promise.resolve();
+          const cidService = await Services.cidForDoc(page.document);
+          const cid = cidService.get(cidStruct, cidConsent);
           expect(cid).to.eventually.equal(expectedCid);
         }
       });
