@@ -39,13 +39,16 @@ export function SingleDatePicker({
   onError,
   ...rest
 }) {
-  const [date, _setDate] = useState();
-  const [attributes, setAttributes] = useState();
+  const [inputProps, setInputProps] = useState({});
 
   const onErrorRef = useRef(onError);
   const containerRef = useRef();
 
   const [isOpen] = useState(mode === DatePickerMode.STATIC);
+
+  const date = useMemo(() => {
+    return inputProps.value && parseDate(inputProps.value, format);
+  }, [format, inputProps]);
 
   /**
    * Generate a name for a hidden input.
@@ -85,26 +88,22 @@ export function SingleDatePicker({
       if (blockedDates.contains(date)) {
         return;
       }
-      _setDate(date);
+      setInputProps((props) => ({
+        ...props,
+        value: getFormattedDate(date, format),
+      }));
     },
-    [blockedDates]
+    [blockedDates, format]
   );
-
-  const inputProps = useMemo(() => {
-    return {
-      value: date && getFormattedDate(date, format),
-      ...attributes,
-    };
-  }, [date, attributes, format]);
 
   const inputElement = useMemo(() => {
     if (Children.toArray(children).length > 0) {
       return Children.map(children, (element) =>
-        cloneElement(element, attributes)
+        cloneElement(element, inputProps)
       );
     }
     return <input {...inputProps} />;
-  }, [inputProps, children, attributes]);
+  }, [inputProps, children]);
 
   useEffect(() => {
     const form = closestAncestorElementBySelector(
@@ -116,12 +115,12 @@ export function SingleDatePicker({
       inputSelector
     );
     if (inputElement) {
-      _setDate(parseDate(inputElement.value, format));
-      setAttributes({
+      setInputProps({
         name: inputElement.name,
+        value: inputElement.value,
       });
     } else if (mode === DatePickerMode.STATIC && !!form) {
-      setAttributes({
+      setInputProps({
         type: 'hidden',
         name: getHiddenInputId(form),
       });

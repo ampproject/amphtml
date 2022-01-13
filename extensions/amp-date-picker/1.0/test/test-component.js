@@ -370,7 +370,14 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   describe('showing the date picker in overlay mode for a single date', () => {
     it('throws an error if there is no inputSelector specified', () => {
       const onErrorSpy = env.sandbox.spy();
-      mount(<DatePicker type="single" mode="overlay" onError={onErrorSpy} />);
+      mount(
+        <DatePicker
+          type="single"
+          mode="overlay"
+          layout="container"
+          onError={onErrorSpy}
+        />
+      );
 
       expect(onErrorSpy).to.have.been.calledWith(
         'Overlay single pickers must specify "inputSelector"'
@@ -379,12 +386,34 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
     it('hides the calendar view by default', () => {
       const wrapper = mount(
-        <DatePicker type="single" mode="overlay" inputSelector="[name=date]">
+        <DatePicker
+          type="single"
+          mode="overlay"
+          layout="container"
+          inputSelector="[name=date]"
+        >
           <input type="text" name="date" />
         </DatePicker>
       );
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+    });
+
+    xit('shows the calendar on focus', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          mode="overlay"
+          layout="container"
+          inputSelector="[name=date]"
+        >
+          <input type="text" name="date" />
+        </DatePicker>
+      );
+
+      wrapper.find('input[name="date"]').simulate('focus');
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
     });
   });
 
