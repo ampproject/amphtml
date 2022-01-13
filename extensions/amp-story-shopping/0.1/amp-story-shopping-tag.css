@@ -89,15 +89,16 @@ amp-story-shopping-tag {
   background-repeat: no-repeat !important;
   background-position: center !important;
   flex-shrink: 0 !important;
+  margin: 2px 4px 2px 2px !important;
 }
 
 .amp-story-shopping-tag-pill-text {
   overflow: hidden !important;
-  padding: 0px 12px 0px 4px !important;
   font-size: 14px !important;
   line-height: 18px !important;
   text-overflow: ellipsis !important;
   display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
-  max-height: 36px !important;
+  max-height: 32px !important;
 }
