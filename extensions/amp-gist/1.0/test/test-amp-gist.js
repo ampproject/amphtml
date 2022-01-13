@@ -46,5 +46,18 @@ describes.realWin(
 
       expect(element.shadowRoot.querySelector('iframe').src).not.to.be.null;
     });
+
+    it('renders with specific file', async () => {
+      element = createElementWithAttributes(win.document, 'amp-gist', {
+        'data-gistid': 'a19e811dcd7df10c4da0931641538497',
+        'data-file': 'index.js',
+        'height': 500,
+        'layout': 'fixed-height',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      expect(element.shadowRoot.querySelector('iframe').src).not.to.be.null;
+    });
   }
 );

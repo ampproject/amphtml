@@ -23,4 +23,24 @@ describes.sandboxed('BentoGist preact component v1.0', {}, () => {
     expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
     expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
   });
+
+  it('should render with specific file', () => {
+    const wrapper = mount(
+      <BentoGist
+        gistId="a19e811dcd7df10c4da0931641538497"
+        file="index.js"
+        style={{
+          'height': '65px',
+        }}
+      />
+    );
+
+    const iframe = wrapper.find('iframe');
+
+    expect(iframe.prop('src')).to.equal(
+      'http://ads.localhost:9876/dist.3p/current/frame.max.html'
+    );
+    expect(wrapper.find('iframe').prop('style').width).to.equal('100%');
+    expect(wrapper.find('iframe').prop('style').height).to.equal('100%');
+  });
 });

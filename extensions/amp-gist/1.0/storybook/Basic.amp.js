@@ -20,3 +20,14 @@ export const _default = () => {
     ></amp-gist>
   );
 };
+
+export const singleFile = () => {
+  return (
+    <amp-gist
+      data-gistid="a19e811dcd7df10c4da0931641538497"
+      data-file="index.js"
+      layout="fixed-height"
+      height="65"
+    ></amp-gist>
+  );
+};

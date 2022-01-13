@@ -5,7 +5,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 
 const TYPE = 'github';
-const DEFAULT_TITLE = 'Github gist';
+const DEFAULT_TITLE = 'Github Gist';
 const FULL_HEIGHT = '100%';
 
 /**
