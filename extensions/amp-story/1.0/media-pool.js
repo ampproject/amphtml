@@ -878,6 +878,10 @@ export class MediaPool {
     if (mediaType == MediaType.VIDEO) {
       const ampVideoEl = domMediaEl.parentElement;
       if (ampVideoEl) {
+        const noaudio = ampVideoEl.hasAttribute('noaudio')
+        if(noaudio) {
+          domMediaEl.volume = 0
+        }
         const volume = ampVideoEl.getAttribute('volume');
         if (volume) {
           domMediaEl.volume = parseFloat(volume);

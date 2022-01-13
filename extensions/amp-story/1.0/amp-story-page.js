@@ -1467,7 +1467,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
     return Array.prototype.some.call(
       ampVideoEls,
-      (video) => !video.hasAttribute('noaudio')
+      (video) => !video.hasAttribute('noaudio') && video.getAttribute('volume') !== '0'
     );
   }
 
