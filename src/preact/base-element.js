@@ -1,5 +1,4 @@
 import {devAssert} from '#core/assert';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Loading_Enum} from '#core/constants/loading-instructions';
 import {ReadyState_Enum} from '#core/constants/ready-state';
@@ -34,8 +33,6 @@ import {CanPlay, CanRender, LoadingProp} from './contextprops';
 import {HAS_SELECTOR, checkPropsFor, collectProps} from './parse-props';
 
 /** @typedef {import('./parse-props').AmpElementProp} AmpElementProp */
-
-/** @typedef {{readyState?: ReadyState_Enum, pause?: function():void }} API_TYPE */
 
 /** @const {MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
@@ -103,7 +100,10 @@ const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
  * be very few exceptions, which is why we allow options to configure the
  * class.
  *
- * @template API_TYPE
+ * @template {{
+ *  readyState?: ReadyState_Enum,
+ *  pause?: function():void
+ * }} API_TYPE
  */
 export class PreactBaseElement extends BaseElement {
   /** @override @nocollapse */

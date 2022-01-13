@@ -3,7 +3,10 @@ import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {PreactBaseElement} from './base-element';
 
 /**
- * @template API_TYPE
+ * @template {{
+ *  readyState?: import('#core/constants/ready-state').ReadyState_Enum,
+ *  pause?: function():void
+ * }} API_TYPE
  * @extends PreactBaseElement<API_TYPE>
  */
 export class AmpPreactBaseElement extends PreactBaseElement {
@@ -12,7 +15,9 @@ export class AmpPreactBaseElement extends PreactBaseElement {
    * @override
    */
   mutatedAttributesCallback() {
+    // eslint-disable-next-line local/restrict-this-access
     if (this.container_) {
+      // eslint-disable-next-line local/restrict-this-access
       this.scheduleRender_();
     }
   }

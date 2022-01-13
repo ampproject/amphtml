@@ -73,15 +73,14 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
 
 export {BaseElement};
 
-
-/** @type {typeof HTMLElement|null} */
-let ExtendableHTMLElement = null;
-/** @type {Window|null} */
-let win = null;
+/** @type {typeof HTMLElement} */
+let ExtendableHTMLElement;
+/** @type {typeof globalThis} */
+let win;
 
 /**
  * @param {typeof import('./base-element').PreactBaseElement} BaseElement
- * @param {window} _win
+ * @param {typeof globalThis} _win
  * @return {typeof HTMLElement}
  */
 function createBentoElementClass(BaseElement, _win = self) {
@@ -89,8 +88,9 @@ function createBentoElementClass(BaseElement, _win = self) {
     win = _win;
     ExtendableHTMLElement = maybeWrapNativeSuper(win.HTMLElement);
   }
+
   return class CustomElement extends ExtendableHTMLElement {
-    /** */
+    /** @override */
     constructor() {
       super();
 
@@ -123,11 +123,10 @@ function createBentoElementClass(BaseElement, _win = self) {
 }
 
 /**
- *
  * @param {string} tag
- * @param {typeof CeBaseElement} BaseElement
- * @param {Window} win
+ * @param {typeof import('./base-element').PreactBaseElement} BaseElement
+ * @param {typeof globalThis} _win
  */
-export function defineBentoElement(tag, BaseElement, win = self) {
-  win.customElements.define(tag, createBentoElementClass(BaseElement, win));
+export function defineBentoElement(tag, BaseElement, _win = self) {
+  _win.customElements.define(tag, createBentoElementClass(BaseElement, _win));
 }
