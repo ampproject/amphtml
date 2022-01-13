@@ -19,7 +19,6 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev, user, userAssert} from '#utils/log';
 
-import {localizeAsync} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -29,6 +28,7 @@ import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
   getTextColorForRGB,
+  setLocalizedContentAsync,
   triggerClickFromLightDom,
 } from './utils';
 
@@ -394,11 +394,11 @@ export class AmpStoryConsent extends AMP.BaseElement {
     this.storyConsentEl_
       .querySelectorAll('[data-localized-text]')
       .forEach((el) => {
-        localizeAsync(
-          this.element,
-          el.getAttribute('data-localized-text')
-        ).then((translation) => {
-          el.textContent = translation;
+        setLocalizedContentAsync(
+          el,
+          el.getAttribute('data-localized-text'),
+          this.element
+        ).then(() => {
           el.removeAttribute('data-localized-text');
         });
       });

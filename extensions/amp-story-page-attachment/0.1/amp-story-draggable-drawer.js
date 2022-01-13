@@ -144,11 +144,14 @@ export class DraggableDrawer extends AMP.BaseElement {
       <button
         role="button"
         class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
-        aria-label={this.localizationService.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-        )}
       ></button>
     );
+
+    this.localizationService
+      .localizeAsync(LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL)
+      .then((translation) => {
+        spacerEl.setAttribute('aria-label', translation);
+      });
 
     this.containerEl.insertBefore(spacerEl, this.contentEl);
     this.contentEl.appendChild(

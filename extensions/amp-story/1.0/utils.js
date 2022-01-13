@@ -372,3 +372,27 @@ export function dependsOnStoryServices(klass) {
     }
   };
 }
+
+/**
+ *
+ * @param {!Element} element
+ * @param {string} code
+ * @param {=Element} context
+ */
+export function setLocalizedAriaAsync(element, code, context = element) {
+  return Services.localizationServiceForOrNull(context)
+    .then((service) => service.localizeAsync(code))
+    .then((translation) => element.setAttribute('aria-label', translation));
+}
+
+/**
+ *
+ * @param {!Element} element
+ * @param {string} code
+ * @param {=Element} context
+ */
+export function setLocalizedContentAsync(element, code, context = element) {
+  return Services.localizationServiceForOrNull(context)
+    .then((service) => service.localizeAsync(code))
+    .then((translation) => (element.textContent = translation));
+}

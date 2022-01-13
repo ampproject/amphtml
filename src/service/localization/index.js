@@ -24,30 +24,6 @@ const FALLBACK_LANGUAGE_CODE = 'default';
 const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
 
 /**
- * Gets the string matching the specified localized string ID in the language
- * specified.
- * @param {!Object<string, !LocalizedStringBundleDef>} localizedStringBundles
- * @param {!Array<string>} languageCodes
- * @param {!LocalizedStringId_Enum} localizedStringId
- * @return {?string}
- */
-function findLocalizedString(
-  localizedStringBundles,
-  languageCodes,
-  localizedStringId
-) {
-  for (const code of languageCodes) {
-    const entry = localizedStringBundles[code]?.[localizedStringId];
-    if (entry != null) {
-      // In unminified builds, this is an object {"string": "foo", ...}.
-      // In minified builds, this is the actual string "foo".
-      return entry['string'] || entry;
-    }
-  }
-  return null;
-}
-
-/**
  * @param {string} languageCode
  * @return {!Array<string>} A list of language codes.
  * @visibleForTesting
@@ -78,12 +54,9 @@ export class LocalizationService {
    * @param {!Element} element
    */
   constructor(element) {
-    this.element_ = element;
-
-    /**
-     * @private @const {?string}
-     */
-    this.viewerLanguageCode_ = Services.viewerForDoc(element).getParam('lang');
+    this.language_ =
+      getWin(element).document.querySelector('[lang]')?.getAttribute('lang') ||
+      'en';
 
     /**
      * A mapping of language code to localized string bundle.
@@ -97,7 +70,21 @@ export class LocalizationService {
       .fetchJson(
         'https://gist.githubusercontent.com/mszylkowski/3ed540186b18f4da4083e087bff36122/raw/a46b0204d5a7e12615a924b4ae192d9d77128bff/amp-story.es.json'
       )
-      .then((res) => res.json());
+      .then((res) => {
+        const json = res.json();
+        this.registerLocalizedStringBundle(this.language_, json);
+        return json;
+      });
+  }
+
+  getLocalizedString(code) {
+    const languageDict = this.localizedStringBundles_[this.language_];
+    if (languageDict && languageDict[code]) {
+      console.log('should not be localizing', code, languageDict[code]);
+      return languageDict[code];
+    }
+    console.log('should not be localizing', code, 'NOT WORKING');
+    return 'NOT WORKING';
   }
 
   /**
@@ -134,24 +121,6 @@ export class LocalizationService {
       localizedStringBundle
     );
     return this;
-  }
-
-  /**
-   * @param {!LocalizedStringId_Enum} localizedStringId
-   * @param {!Element=} elementToUse The element where the string will be
-   *     used.  The language is based on the language at that part of the
-   *     document.  If unspecified, will use the document-level language, if
-   *     one exists, or the default otherwise.
-   * @return {?string}
-   */
-  getLocalizedString(localizedStringId, elementToUse = this.element_) {
-    const languageCodes = this.getLanguageCodesForElement(elementToUse);
-
-    return findLocalizedString(
-      this.localizedStringBundles_,
-      languageCodes,
-      localizedStringId
-    );
   }
 
   /**

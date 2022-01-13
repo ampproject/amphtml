@@ -6,7 +6,6 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
 
-import {localizeAsync} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -207,13 +206,11 @@ export class InfoDialog {
    */
   localize_() {
     this.element_.querySelectorAll('[data-localized-text]').forEach((el) => {
-      localizeAsync(
-        this.parentEl_,
-        el.getAttribute('data-localized-text')
-      ).then((translation) => {
-        el.textContent = translation;
-        el.removeAttribute('data-localized-text');
-      });
+      setLocalizedContentAsync(
+        el,
+        el.getAttribute('data-localized-text'),
+        this.parentEl_
+      ).then(() => el.removeAttribute('data-localized-text'));
     });
   }
 }

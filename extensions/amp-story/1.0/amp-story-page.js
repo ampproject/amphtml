@@ -35,7 +35,6 @@ import {listen, listenOnce} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
 import {embeddedElementsSelectors} from './amp-story-embedded-component';
-import {localizeAsync} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -51,7 +50,7 @@ import {MediaPool} from './media-pool';
 import {AdvancementConfig} from './page-advancement';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {renderPageDescription} from './semantic-render';
-import {setTextBackgroundColor} from './utils';
+import {setLocalizedContentAsync, setTextBackgroundColor} from './utils';
 
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
@@ -1452,14 +1451,11 @@ export class AmpStoryPage extends AMP.BaseElement {
         .then(() => this.playAllMedia_());
     });
 
-    localizeAsync(
-      this.element,
-      LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO
-    ).then((translation) => {
-      this.playMessageEl_.querySelector(
-        '.i-amphtml-story-page-play-label'
-      ).textContent = translation;
-    });
+    setLocalizedContentAsync(
+      this.playMessageEl_.querySelector('.i-amphtml-story-page-play-label'),
+      LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO,
+      this.element
+    );
 
     this.mutateElement(() => this.element.appendChild(this.playMessageEl_));
   }
@@ -1497,14 +1493,13 @@ export class AmpStoryPage extends AMP.BaseElement {
       '.i-amphtml-story-page-error-label'
     );
 
-    localizeAsync(
-      this.element,
-      LocalizedStringId_Enum.AMP_STORY_PAGE_ERROR_VIDEO
-    ).then((translation) => {
-      labelEl.textContent = translation;
-    });
-
-    this.mutateElement(() => this.element.appendChild(this.errorMessageEl_));
+    setLocalizedContentAsync(
+      labelEl,
+      LocalizedStringId_Enum.AMP_STORY_PAGE_ERROR_VIDEO,
+      this.element
+    ).then(() =>
+      this.mutateElement(() => this.element.appendChild(this.errorMessageEl_))
+    );
   }
 
   /**

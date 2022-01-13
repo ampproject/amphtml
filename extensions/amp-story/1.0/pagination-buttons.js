@@ -5,7 +5,6 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {devAssert} from '#utils/log';
 
-import {localizeAsync} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -13,6 +12,7 @@ import {
 } from './amp-story-store-service';
 import {EventType, dispatch} from './events';
 import {AdvancementMode} from './story-analytics';
+import {setLocalizedAriaAsync} from './utils';
 
 /** @struct @typedef {{className: string, triggers: string, label: LocalizedStringId_Enum}} */
 let PaginationButtonStateDef;
@@ -95,9 +95,7 @@ class PaginationButton {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
     });
-    localizeAsync(this.doc_, state.label).then((translation) =>
-      this.buttonElement_.setAttribute('aria-label', translation)
-    );
+    setLocalizedAriaAsync(this.buttonElement_, state.label, this.doc_);
 
     this.state_ = state;
   }

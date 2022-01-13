@@ -2,8 +2,7 @@ import * as Preact from '#core/dom/jsx';
 
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
-import {localizeAsync} from './amp-story-localization-service';
-import {createShadowRootWithStyle} from './utils';
+import {createShadowRootWithStyle, setLocalizedContentAsync} from './utils';
 
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
 
@@ -13,7 +12,7 @@ import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
  * @param {string} continueAnyway
  * @return {!Element}
  */
-const renderContent = (context, continueAnyway) => (
+const renderContent = (continueAnyway) => (
   <div class="i-amphtml-story-unsupported-browser-overlay">
     <div class="i-amphtml-overlay-container">
       <div class="i-amphtml-gear-icon" />
@@ -40,12 +39,12 @@ const renderContent = (context, continueAnyway) => (
  * @return {!Element}
  */
 export function renderUnsupportedBrowserLayer(context, continueAnyway) {
-  const content = renderContent(context, continueAnyway);
+  const content = renderContent(continueAnyway);
   content.querySelectorAll('[data-localized-text]').forEach((el) => {
-    localizeAsync(context, el.getAttribute('data-localized-text')).then(
-      (translation) => {
-        el.textContent = translation;
-      }
+    setLocalizedContentAsync(
+      el,
+      el.getAttribute('data-localized-text'),
+      context
     );
   });
   return createShadowRootWithStyle(<div />, content, CSS);

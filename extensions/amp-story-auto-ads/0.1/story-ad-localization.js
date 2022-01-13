@@ -109,6 +109,7 @@ export class StoryAdLocalization {
       LocalizedStringsEn,
       (s) => `[${s} one two]`
     );
+    
 
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsEn)

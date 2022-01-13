@@ -1,3 +1,4 @@
+import { getWin } from '#core/window';
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
@@ -18,16 +19,12 @@ export function getLocalizationService(element) {
     registerServiceBuilderForDoc(element, 'localization', function () {
       return localizationService;
     });
+
+    Services.xhrFor(getWin(element))
+      .fetchJson(
+        'https://gist.githubusercontent.com/mszylkowski/3ed540186b18f4da4083e087bff36122/raw/a46b0204d5a7e12615a924b4ae192d9d77128bff/amp-story.es.json'
+      ).then((res) => Services.localizationForDoc(element).registerLocalizedStringBundle('en', res.json()));
   }
 
   return localizationService;
-}
-
-/**
- * @param {!Node} context
- * @param {import('#service/localization/strings).LocalizedStringId_Enum} key
- * @return {?string}
- */
-export function localizeAsync(context, key) {
-  return getLocalizationService(context).localizeAsync(key);
 }

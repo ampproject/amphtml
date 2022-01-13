@@ -10,7 +10,6 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
 
-import {localizeAsync} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -22,6 +21,8 @@ import {ProgressBar} from './progress-bar';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
+  setLocalizedAriaAsync,
+  setLocalizedContentAsync,
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
 } from './utils';
@@ -901,22 +902,16 @@ export class SystemLayer {
     this.systemLayerEl_
       .querySelectorAll('[data-localized-label]')
       .forEach((el) => {
-        localizeAsync(
-          this.parentEl_,
-          el.getAttribute('data-localized-label')
-        ).then((translation) => {
-          el.setAttribute('aria-label', translation);
-          el.removeAttribute('data-localized-label');
-        });
+        setLocalizedAriaAsync(
+          el,
+          el.getAttribute('data-localized-label'),
+          this.parentEl_
+        ).then(() => el.removeAttribute('data-localized-label'));
       });
-    localizeAsync(
-      this.parentEl_,
-      LocalizedStringId_Enum.AMP_STORY_HAS_NEW_PAGE_TEXT
-    ).then(
-      (translation) =>
-        (this.systemLayerEl_.querySelector(
-          '.i-amphtml-story-has-new-page-text'
-        ).textContent = translation)
+    setLocalizedContentAsync(
+      this.systemLayerEl_.querySelector('.i-amphtml-story-has-new-page-text'),
+      LocalizedStringId_Enum.AMP_STORY_HAS_NEW_PAGE_TEXT,
+      this.parentEl_
     );
   }
 }

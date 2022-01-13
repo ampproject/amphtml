@@ -3,14 +3,13 @@ import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
-import {localizeAsync} from './amp-story-localization-service';
 import {
   EmbeddedComponentState,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {createShadowRootWithStyle} from './utils';
+import {createShadowRootWithStyle, setLocalizedContentAsync} from './utils';
 
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 
@@ -266,13 +265,11 @@ export class AmpStoryHint {
     this.hintContainer_
       .querySelectorAll('[data-localized-text]')
       .forEach((el) => {
-        localizeAsync(
-          this.parentEl_,
-          el.getAttribute('data-localized-text')
-        ).then((translation) => {
-          el.textContent = translation;
-          el.removeAttribute('data-localized-text');
-        });
+        setLocalizedContentAsync(
+          el,
+          el.getAttribute('data-localized-text'),
+          this.parentEl_
+        ).then(() => el.removeAttribute('data-localized-text'));
       });
   }
 }

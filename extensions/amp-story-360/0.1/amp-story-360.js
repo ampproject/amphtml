@@ -22,7 +22,10 @@ import {
   Action,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {timeStrToMillis} from '../../amp-story/1.0/utils';
+import {
+  setLocalizedContentAsync,
+  timeStrToMillis,
+} from '../../amp-story/1.0/utils';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -547,14 +550,16 @@ export class AmpStory360 extends AMP.BaseElement {
       const page = this.getPage_();
       const discoveryTemplate = page && renderDiscoveryTemplate();
       // Support translation of discovery dialogue text.
-      this.mutateElement(() => {
-        discoveryTemplate.querySelector(
-          '.i-amphtml-story-360-discovery-text'
-        ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_DISCOVERY_DIALOG_TEXT
-        );
-      });
-      this.mutateElement(() => page.appendChild(discoveryTemplate));
+      this.localizationService_
+        .localizeAsync(LocalizedStringId_Enum.AMP_STORY_DISCOVERY_DIALOG_TEXT)
+        .then((translation) => {
+          this.mutateElement(() => {
+            discoveryTemplate.querySelector(
+              '.i-amphtml-story-360-discovery-text'
+            ).textContent = translation;
+            page.appendChild(discoveryTemplate);
+          });
+        });
     }
   }
 
@@ -587,17 +592,17 @@ export class AmpStory360 extends AMP.BaseElement {
     const ampStoryPage = this.getPage_();
     this.activateButton_ = ampStoryPage && renderActivateButtonTemplate();
 
-    this.activateButton_.querySelector(
-      '.i-amphtml-story-360-activate-text'
-    ).textContent = this.localizationService_.getLocalizedString(
-      LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
-    );
-
     this.activateButton_.addEventListener('click', () =>
       this.requestGyroscopePermissions_()
     );
 
-    this.mutateElement(() => ampStoryPage.appendChild(this.activateButton_));
+    setLocalizedContentAsync(
+      this.activateButton_.querySelector('.i-amphtml-story-360-activate-text'),
+      LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT,
+      this.element
+    ).then(() =>
+      this.mutateElement(() => ampStoryPage.appendChild(this.activateButton_))
+    );
   }
 
   /** @private */
