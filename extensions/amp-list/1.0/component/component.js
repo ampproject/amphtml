@@ -14,7 +14,7 @@ import {useAmpContext} from '#preact/context';
 import {xhrUtils} from '#preact/utils/xhr';
 
 import {useStyles} from './component.jss';
-import {useInfiniteQuery} from './useInfiniteQuery';
+import {useInfiniteQuery} from './hooks/useInfiniteQuery';
 
 const defaultItemTemplate = (item) => <p>{String(item)}</p>;
 const defaultWrapperTemplate = (list) => <div>{list}</div>;
