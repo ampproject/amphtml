@@ -72,6 +72,12 @@ function getValue(object, keys) {
   }, object);
 }
 
+/**
+ * Returns the nextUrl, according to the `loadMoreBookmark` string
+ * @param {*} lastPage
+ * @param {string} loadMoreBookmark
+ * @return {*}
+ */
 function getNextUrl(lastPage, loadMoreBookmark) {
   return getValue(lastPage, loadMoreBookmark);
 }
@@ -196,7 +202,7 @@ BentoList.displayName = 'List';
 export {BentoList};
 
 /**
- * Augments the component(s) with properties
+ * Augments the component with properties
  *
  * @param {PreactDef.Renderable} component
  * @param {object} props
@@ -210,9 +216,10 @@ function augment(component, props) {
 }
 
 /**
+ * Determines if the argument is a Preact component or just a native value
  * @param {PreactDef.Renderable} component
  * @return {component is PreactDef.VNode}
  */
 function isComponent(component) {
-  return typeof component === 'object';
+  return typeof component === 'object' && component !== null;
 }
