@@ -710,21 +710,15 @@ describes.realWin(
           env.sandbox.stub(viewer, 'isTrustedViewer').resolves(true);
         }
 
-        const cids = await Promise.all(
-          service.pages_.map(async (page) => {
-            const cidStruct = {scope: 'foo', cookie: 'bar'};
-            const consent = Promise.resolve();
-            const service = await Services.cidForDoc(
-              page.document.firstElementChild
-            );
-            return service.get(cidStruct, consent);
-          })
-        );
-
-        expect(
-          cids.every((cid) => cid === expectedCid),
-          'all cids are expectedCid'
-        ).to.be.true;
+        for (const page of service.pages_) {
+          const cidStruct = {scope: 'foo', cookie: 'bar'};
+          const consent = Promise.resolve();
+          const service = await Services.cidForDoc(
+            page.document.firstElementChild
+          );
+          const cid = service.get(cidStruct, consent);
+          expect(cid).to.eventually.equal(expectedCid);
+        }
       });
     });
 
