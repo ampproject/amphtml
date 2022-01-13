@@ -72,7 +72,8 @@ export function getAmpConfig() {
  * @return {!JsonObject}
  */
 const getAttributeDataImpl_ = once(() => {
-  const data = {...allMetadata()['attributes']};
+  // eslint-disable-next-line local/prefer-spread-props
+  const data = Object.assign({}, allMetadata()['attributes']);
 
   // TODO(alanorozco): don't delete _context. refactor data object structure.
   if ('_context' in data) {
