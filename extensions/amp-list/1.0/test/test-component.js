@@ -254,7 +254,21 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
   });
 
   describe('template', () => {
-    it.skip('should allow for custom rendering of the data', async () => {});
+    it('should allow for custom rendering of the data', async () => {
+      const component = mount(
+        <BentoList
+          src=""
+          template={(item) => <li>{item}</li>}
+          wrapper={(list) => <ul>{list}</ul>}
+        />
+      );
+      await waitForData(component);
+      expect(
+        snapshot(component.find(CONTENTS), {keepAttributes: true})
+      ).to.equal(
+        `<ul role="list"><li role="listitem">one</li><li role="listitem">two</li><li role="listitem">three</li></ul>`
+      );
+    });
   });
 
   describe('load-more', () => {
@@ -365,12 +379,6 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         // Bring it into view for 1 render again:
         simulateViewportVisible(component, true);
         simulateViewportVisible(component, false);
-
-        await waitForData(component, 3);
-        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage3);
-      });
-      it('when the element is scrolled into the viewport, it keeps loading more data', async () => {
-        simulateViewportVisible(component, true);
 
         await waitForData(component, 3);
         expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage3);
