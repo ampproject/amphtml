@@ -144,6 +144,7 @@ const forbiddenTermsGlobal = {
       'build-system/compile/build-compiler.js',
       'build-system/compile/build-constants.js',
       'src/core/mode/esm.js',
+      'src/core/mode/globals.d.ts',
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
       'src/core/mode/version.js',
@@ -607,7 +608,7 @@ const forbiddenTermsGlobal = {
   '\\b(__)?AMP_EXP\\b': {
     message:
       'Do not access AMP_EXP directly. Use isExperimentOn() to access config',
-    allowlist: ['src/experiments/index.js'],
+    allowlist: ['src/experiments/index.js', 'src/experiments/amp-globals.d.ts'],
   },
   'AMP_CONFIG': {
     message:

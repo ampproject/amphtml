@@ -26,7 +26,7 @@ const ABOUT_BLANK = 'about:blank';
 const canResetSrc = (src) => src && src != ABOUT_BLANK && !src.includes('#');
 
 /**
- * @param {!IframeEmbedDef.Props} props
+ * @param {IframeEmbedDef.Props} props
  * @param {{current: ?IframeEmbedDef.Api}} ref
  * @return {PreactDef.Renderable}
  */

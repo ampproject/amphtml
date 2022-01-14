@@ -1,18 +1,21 @@
-import {Services} from '#service';
-import {VisibilityModel} from './visibility-model';
-import {dev, user} from '#utils/log';
-import {dict, map} from '#core/types/object';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {getMinOpacity} from './opacity';
-import {getMode} from '../../../src/mode';
-import {getParentWindowFrameElement} from '../../../src/service-helpers';
-import {isArray, isFiniteNumber} from '#core/types';
-
+import {rootNodeFor} from '#core/dom';
 import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
 } from '#core/dom/layout/rect';
-import {rootNodeFor} from '#core/dom';
+import {isArray, isFiniteNumber} from '#core/types';
+import {dict, map} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {dev, user} from '#utils/log';
+
+import {getMinOpacity} from './opacity';
+import {VisibilityModel} from './visibility-model';
+
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {getMode} from '../../../src/mode';
+import {getParentWindowFrameElement} from '../../../src/service-helpers';
 
 const TAG = 'amp-analytics/visibility-manager';
 
