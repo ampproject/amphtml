@@ -39,7 +39,7 @@ experiment_job: &experiment_job
       type: enum
       enum: ['A', 'B', 'C']
   environment:
-    FLAVOR: experiment<< parameters.flavor >>
+    FLAVOR: experiment<< parameters.exp >>
 
 executors:
   base-docker-small:
