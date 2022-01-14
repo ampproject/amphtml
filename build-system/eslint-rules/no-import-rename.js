@@ -6,24 +6,22 @@ const path = require('path');
 // name. This aids in writing lint rules for these imports.
 //
 // GOOD
-// import { setStyle } from 'src/core/dom/style';
+// import { setStyle } from '#core/dom/style';
 // setStyle();
 //
 // BAD
-// import * as obj from 'src/core/dom/style';
+// import * as obj from '#core/dom/style';
 // obj.setStyle()
 //
 // Bad
-// import { setStyle as otherName } from 'src/core/dom/style';
+// import { setStyle as otherName } from '#core/dom/style';
 // otherName()
 
-// TODO(wg-infra): None of these paths match! They've since been aliased
-// (#core/dom instead of src/core/dom) and or/moved. Update them.
 const imports = {
-  'src/core/dom/css': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
-  'src/core/dom/query': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
-  'src/core/dom/static-template': ['htmlFor'],
-  'src/core/dom/style': [
+  '#core/dom/css-selectors': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
+  '#core/dom/query': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
+  '#core/dom/static-template': ['htmlFor'],
+  '#core/dom/style': [
     'assertDoesNotContainDisplay',
     'assertNotDisplay',
     'resetStyles',
@@ -31,8 +29,8 @@ const imports = {
     'setStyle',
     'setStyles',
   ],
-  'src/experiments': ['isExperimentOn'],
-  'src/log': ['user', 'dev'],
+  '#experiments': ['isExperimentOn'],
+  '#utils/log': ['user', 'dev'],
   'src/mode': ['getMode'],
 };
 
