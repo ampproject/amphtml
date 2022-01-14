@@ -68,6 +68,38 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) => {
       this.onRtlStateUpdate_(rtlState);
     });
+
+    this.storeService_.subscribe(StateProperty.PAGE_SIZE, () => {
+      this.onPageSizeStateUpdate_();
+    });
+  }
+
+  /**
+   * Helper function to check if the shopping tag should flip if it's too far to the right.
+   * @private
+   */
+  shoudTagFlip_() {
+    const {offsetLeft, offsetWidth} = this.element;
+    this.measureElement(() => {
+      /* We only check the right hand side, as resizing only expands the border to the right. */
+
+      const storyPageWidth =
+        this.element.closest('amp-story-page')./*OK*/ offsetWidth;
+      const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
+
+      this.shoppingTagEl_.classList.toggle(
+        'amp-story-shopping-tag-inner-flipped',
+        shouldFlip
+      );
+    });
+  }
+
+  /**
+   * Reacts to PageSize state updates and triggers the UI for PageSize.
+   * @private
+   */
+  onPageSizeStateUpdate_() {
+    this.shoudTagFlip_();
   }
 
   /**
@@ -164,16 +196,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         );
         this.hasAppendedInnerShoppingTagEl_ = true;
 
-        const {offsetLeft, offsetWidth} = this.element;
-        const storyPageWidth =
-          this.element.closest('amp-story-page')./*OK*/ offsetWidth;
-
-        const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
-
-        this.shoppingTagEl_.classList.toggle(
-          'amp-story-shopping-tag-inner-flipped',
-          shouldFlip
-        );
+        this.shoudTagFlip_();
       }
     );
   }

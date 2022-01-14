@@ -39,11 +39,9 @@ amp-story-shopping-tag {
 }
 
 .amp-story-shopping-tag-inner-flipped {
-  height: 36px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
   flex-direction: row-reverse !important;
+  transform: translate(-80%) !important;
+  margin-inline-start: 4px !important;
 }
 
 .amp-story-shopping-tag-dot {
@@ -58,6 +56,7 @@ amp-story-shopping-tag {
   margin-inline-end: 4px !important;
   flex-shrink: 0 !important;
   backdrop-filter: var(--i-amphtml-shopping-tag-backdrop-filter) !important;
+
 }
 
 .amp-story-shopping-tag-dot:before {
