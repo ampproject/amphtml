@@ -1,8 +1,10 @@
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-list-1.0.css';
-import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
+
 import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-list-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -10,15 +12,10 @@ const TAG = 'amp-list';
 class AmpList extends BaseElement {
   /** @override */
   init() {
-    // DO NOT SUBMIT: This is example code only.
-    this.registerApiAction('exampleToggle', (api) =>
-      api./*OK*/ exampleToggle()
-    );
+    this.registerApiAction('refresh', (api) => api./*OK*/ refresh());
 
-    return dict({
-      // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
-    });
+    // TODO: Handle templates, pass in fetchJson
+    return super.init();
   }
 
   /** @override */

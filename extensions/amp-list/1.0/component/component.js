@@ -13,7 +13,6 @@ import {useIsInViewport} from '#preact/component/intersection-observer';
 import {useAmpContext} from '#preact/context';
 import {xhrUtils} from '#preact/utils/xhr';
 
-import {useStyles} from './component.jss';
 import {useInfiniteQuery} from './hooks/useInfiniteQuery';
 
 const defaultItemTemplate = (item) => <p>{String(item)}</p>;
@@ -107,9 +106,6 @@ export function BentoListWithRef(
   ref
 ) {
   const {renderable} = useAmpContext();
-
-  // eslint-disable-next-line no-unused-vars
-  const styles = useStyles();
 
   const ioOptions = useMemo(() => {
     const bufferPct = Math.floor(viewportBuffer * 100);
