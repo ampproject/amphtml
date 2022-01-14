@@ -112,14 +112,14 @@ const renderSystemLayerElement = (element, children) => (
       </div>
     </div>
     <div class="i-amphtml-story-system-layer-buttons">
-      <div
+      {/* <div
         role="button"
         class={INFO_CLASS + ' i-amphtml-story-button'}
         aria-label={localize(
           element,
           LocalizedStringId_Enum.AMP_STORY_INFO_BUTTON_LABEL
         )}
-      />
+      /> */}
       <div class="i-amphtml-story-sound-display">
         <div role="alert" class="i-amphtml-message-container">
           <div class="i-amphtml-story-mute-text">
@@ -156,7 +156,7 @@ const renderSystemLayerElement = (element, children) => (
           )}
         />
       </div>
-      <div class="i-amphtml-paused-display">
+      {/* <div class="i-amphtml-paused-display">
         <button
           class={PAUSE_CLASS + ' i-amphtml-story-button'}
           aria-label={localize(
@@ -171,7 +171,7 @@ const renderSystemLayerElement = (element, children) => (
             LocalizedStringId_Enum.AMP_STORY_PLAY_BUTTON_LABEL
           )}
         />
-      </div>
+      </div> */}
       <button
         class={
           SKIP_TO_NEXT_CLASS +

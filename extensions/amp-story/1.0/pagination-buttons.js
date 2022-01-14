@@ -182,8 +182,8 @@ export class PaginationButtons {
 
     this.initializeListeners_();
 
-    this.ampStory_.element.appendChild(this.forwardButton_.element);
-    this.ampStory_.element.appendChild(this.backButton_.element);
+    // this.ampStory_.element.appendChild(this.forwardButton_.element);
+    // this.ampStory_.element.appendChild(this.backButton_.element);
   }
 
   /** @private */
