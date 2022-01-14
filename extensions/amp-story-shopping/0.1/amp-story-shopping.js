@@ -3,6 +3,7 @@ import {AmpStoryShoppingConfig} from './amp-story-shopping-config';
 import {AmpStoryShoppingTag} from './amp-story-shopping-tag';
 
 import {CSS as shoppingCSS} from '../../../build/amp-story-shopping-0.1.css';
+import {dependsOnStoryServices} from '../../amp-story/1.0/utils';
 
 /**
  * Language and currency sensitive number formatting.
@@ -42,6 +43,6 @@ AMP.extension('amp-story-shopping', '0.1', (AMP) => {
   );
   AMP.registerElement(
     'amp-story-shopping-attachment',
-    AmpStoryShoppingAttachment
+    dependsOnStoryServices(AmpStoryShoppingAttachment)
   );
 });
