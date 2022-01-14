@@ -1,18 +1,16 @@
-'use strict';
+('use strict');
 
 const argv = require('minimist')(process.argv.slice(2));
 const path = require('path');
+const {build: buildBinary} = require('../build');
 const {createCtrlcHandler} = require('../../common/ctrlcHandler');
 const {cyan} = require('kleur/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
-const {getBaseUrl} = require('../pr-deploy-bot-utils');
 const {isCiBuild} = require('../../common/ci');
-const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
-const {writeFileSync} = require('fs-extra');
-const {yellow} = require('kleur/colors');
 
+/** @type {Object<StorybookEnv, number>} */
 const ENV_PORTS = {
   amp: 9001,
   preact: 9002,
@@ -33,13 +31,6 @@ const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
  * @param {StorybookEnv} env
  */
 function launchEnv(env) {
-  if (env === 'amp') {
-    log(
-      yellow('AMP environment for storybook is temporarily disabled.\n') +
-        'See https://github.com/ampproject/storybook-addon-amp/issues/57'
-    );
-    return;
-  }
   log(`Launching storybook for the ${cyan(env)} environment...`);
   const {'storybook_port': port = ENV_PORTS[env]} = argv;
   execScriptAsync(
@@ -52,8 +43,8 @@ function launchEnv(env) {
       isCiBuild() ? '--ci' : '',
     ].join(' '),
     {cwd: __dirname, stdio: 'inherit'}
-  ).on('error', () => {
-    throw new Error('Launch failed');
+  ).on('error', (err) => {
+    throw new Error(`Launch failed: ${err}`);
   });
 }
 
@@ -61,28 +52,6 @@ function launchEnv(env) {
  * @param {StorybookEnv} env
  */
 function buildEnv(env) {
-  if (env === 'amp') {
-    log(
-      yellow('AMP environment for storybook is temporarily disabled.\n') +
-        'See https://github.com/ampproject/storybook-addon-amp/issues/57'
-    );
-    return;
-    if (env === 'amp' && isPullRequestBuild()) {
-      // Allows PR deploys to reference built binaries.
-      const parameters = {
-        ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
-      };
-      const previewFileContents = [
-        // eslint-disable-next-line local/no-forbidden-terms
-        '// DO NOT SUBMIT',
-        '// This preview.js file was generated for a specific PR build.',
-        // JSON.stringify here. prevents XSS and other types of garbling.
-        `export const parameters = (${JSON.stringify(parameters)});`,
-      ].join('\n');
-      writeFileSync(`${envConfigDir(env)}/preview.js`, previewFileContents);
-    }
-  }
-
   const configDir = envConfigDir(env);
 
   log(`Building storybook for the ${cyan(env)} environment...`);
@@ -104,28 +73,33 @@ function buildEnv(env) {
 /**
  * @return {Promise<void>}
  */
-async function storybook() {
-  const {build = false, 'storybook_env': env = 'amp,preact'} = argv;
+async function storybookReact() {
+  // React dist needs to be compiled before running
+  await buildBinary();
+
+  const {build = false, 'storybook_env': env = 'react'} = argv;
   const envs = env.split(',');
-  if (!build && envs.includes('amp')) {
+  if (build) {
+    envs.forEach(buildEnv);
+    return;
+  }
+
+  if (envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
-  if (!build) {
-    createCtrlcHandler('storybook');
-  }
-  envs.map(build ? buildEnv : launchEnv);
+  createCtrlcHandler('storybook-react');
+  envs.forEach(launchEnv);
 }
 
 module.exports = {
-  storybook,
+  'storybook-react': storybookReact,
 };
 
-storybook.description =
-  'Set up isolated development and testing for AMP components';
+storybookReact.description =
+  'Set up isolated development and testing for React Bento components';
 
-storybook.flags = {
+storybookReact.flags = {
   'build': 'Build a static web application (see https://storybook.js.org/docs)',
-  'storybook_env':
-    "Environment(s) to run Storybook (either 'amp', 'preact' or a list as 'amp,preact')",
+  'storybook_env': 'Environment(s) to run Storybook for react',
   'storybook_port': 'Port from which to run the Storybook dashboard',
 };
