@@ -6,7 +6,8 @@ import type {BuildDom, BuilderMap, Versions} from './types';
 
 import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/build-dom';
 
-const versionedBuilderMap: {[version: string]: BuilderMap} = {
+type VersionedBuilderMap = {[version: string]: BuilderMap};
+const versionedBuilderMap: VersionedBuilderMap = {
   'v0': {
     'amp-layout': ampLayoutClassic,
   },
@@ -31,7 +32,7 @@ function wrap(buildDom: BuildDom): BuildDom {
  */
 export function getBuilders(
   versions: Versions,
-  builderMap = versionedBuilderMap
+  builderMap: VersionedBuilderMap = versionedBuilderMap
 ): BuilderMap {
   const builders: BuilderMap = {};
 

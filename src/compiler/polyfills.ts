@@ -7,9 +7,9 @@
  * @fileoverview
  */
 
-(globalThis as any)['self'] = globalThis;
+globalThis.self = globalThis as any;
 
-(globalThis as any)['Node'] = {
+globalThis.Node = {
   ELEMENT_NODE: 1,
   ATTRIBUTE_NODE: 2,
   TEXT_NODE: 3,
@@ -19,6 +19,6 @@
   DOCUMENT_NODE: 9,
   DOCUMENT_TYPE_NODE: 10,
   DOCUMENT_FRAGMENT_NODE: 11,
-};
+} as any;
 
 export {};
