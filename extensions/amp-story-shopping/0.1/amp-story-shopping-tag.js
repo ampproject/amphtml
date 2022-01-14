@@ -91,6 +91,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         'amp-story-shopping-tag-inner-flipped',
         shouldFlip
       );
+
+      this.shoppingTagEl_.classList.toggle(
+        'amp-story-shopping-tag-visible',
+        true
+      );
     });
   }
 
@@ -184,21 +189,17 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
 
-    this.measureMutateElement(
-      () => {
-        this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
-      },
-      () => {
-        createShadowRootWithStyle(
-          this.element,
-          this.shoppingTagEl_,
-          shoppingTagCSS
-        );
-        this.hasAppendedInnerShoppingTagEl_ = true;
+    this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
+    this.mutateElement(() => {
+      createShadowRootWithStyle(
+        this.element,
+        this.shoppingTagEl_,
+        shoppingTagCSS
+      );
+      this.hasAppendedInnerShoppingTagEl_ = true;
 
-        this.shoudTagFlip_();
-      }
-    );
+      this.shoudTagFlip_();
+    });
   }
 
   /** @private */

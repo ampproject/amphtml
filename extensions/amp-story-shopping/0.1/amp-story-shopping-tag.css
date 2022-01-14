@@ -1,3 +1,4 @@
+
 amp-story-shopping-tag {
   font-family: 'Poppins', sans-serif !important;
   font-weight: 700 !important;
@@ -35,7 +36,12 @@ amp-story-shopping-tag {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  flex-direction: row !important;
+  /*opacity 0 initially to avoid showing tag flip on initilization */
+  opacity: 0 !important;
+}
+
+.amp-story-shopping-tag-visible { 
+  opacity: 1 !important;
 }
 
 .amp-story-shopping-tag-inner-flipped {
