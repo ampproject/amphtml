@@ -164,25 +164,16 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         );
         this.hasAppendedInnerShoppingTagEl_ = true;
 
-        const edgeOfScreentoTagDistance =
-          document.getElementsByTagName('amp-story-shopping-attachment')[0]
-            ./*OK*/ clientWidth *
-            0.5 -
-          this.element./*OK*/ offsetLeft -
-          this.element./*OK*/ offsetWidth * 0.5;
+        const {offsetLeft, offsetWidth} = this.element;
+        const storyPageWidth =
+          this.element.closest('amp-story-page')./*OK*/ offsetWidth;
 
-        const shoppingTagInner = this.element.shadowRoot.querySelector(
-          '.amp-story-shopping-tag-inner'
+        const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
+
+        this.shoppingTagEl_.classList.toggle(
+          'amp-story-shopping-tag-inner-flipped',
+          shouldFlip
         );
-        if ( (edgeOfScreentoTagDistance < -160 && this.shoppingTagEl_.getAttribute('dir') !== 'rtl')
-        || (edgeOfScreentoTagDistance > 145 && this.shoppingTagEl_.getAttribute('dir') === 'rtl')
-        ) {
-          shoppingTagInner?.classList.add('amp-story-shopping-tag-inner-flipped'); 
-          shoppingTagInner?.classList.remove('.amp-story-shopping-tag-inner');
-        } else {
-          shoppingTagInner?.classList.add('amp-story-shopping-tag-inner-flipped');
-          shoppingTagInner?.classList.remove('amp-story-shopping-tag-inner-flipped');
-        }
       }
     );
   }
