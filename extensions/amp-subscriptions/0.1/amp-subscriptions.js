@@ -1,4 +1,4 @@
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -793,14 +793,14 @@ export class SubscriptionService {
         devAssert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
           SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-          dict({
+          {
             'action': action,
             'serviceId': platformKey,
-          }),
-          dict({
+          },
+          {
             'action': action,
             'status': ActionStatus.STARTED,
-          })
+          }
         );
         resolve(platform.executeAction(action, sourceId));
       });

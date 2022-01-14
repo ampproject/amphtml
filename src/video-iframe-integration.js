@@ -3,7 +3,6 @@
 import {tryResolve} from '#core/data-structures/promise';
 import {isFiniteNumber} from '#core/types';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {getData, listen} from '#utils/event-helper';
@@ -336,7 +335,7 @@ export class AmpVideoIntegration {
    * @param {string} event
    */
   postEvent(event) {
-    this.postToParent_(dict({'event': event}));
+    this.postToParent_({'event': event});
   }
 
   /**
@@ -345,15 +344,13 @@ export class AmpVideoIntegration {
    * @param {!Object<string, string>=} opt_vars
    */
   postAnalyticsEvent(eventType, opt_vars) {
-    this.postToParent_(
-      dict({
-        'event': 'analytics',
-        'analytics': {
-          'eventType': eventType,
-          'vars': opt_vars,
-        },
-      })
-    );
+    this.postToParent_({
+      'event': 'analytics',
+      'analytics': {
+        'eventType': eventType,
+        'vars': opt_vars,
+      },
+    });
   }
 
   /**
@@ -402,7 +399,7 @@ export class AmpVideoIntegration {
    */
   getFromHostForTesting_(method, callback) {
     this.listenToOnce_();
-    return this.postToParent_(dict({'method': method}), callback);
+    return this.postToParent_({'method': method}, callback);
   }
 }
 

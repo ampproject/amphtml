@@ -15,7 +15,6 @@
  */
 
 import {createElementWithAttributes, removeChildren} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -64,7 +63,7 @@ export class AmpAccessFewcents {
     this.authorizeUrl_ = this.prepareAuthorizeUrl_();
 
     /** @private {!JsonObject} */
-    this.i18n_ = Object.assign(dict(), DEFAULT_MESSAGES);
+    this.i18n_ = {...DEFAULT_MESSAGES};
 
     /** @private {string} */
     this.fewCentsBidId_ = null;

@@ -1,4 +1,3 @@
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import {dev, userAssert} from '#utils/log';
@@ -29,7 +28,7 @@ export class Actions {
     /** @private @const {!Object<string, string>} */
     this.actionsConfig_ = actionMap;
     /** @private @const {!Object<string, string>} */
-    this.builtActionUrlMap_ = dict();
+    this.builtActionUrlMap_ = {};
     /** @private @const {!./url-builder.UrlBuilder} */
     this.urlBuilder_ = urlBuilder;
     /** @private @const {!./analytics.SubscriptionAnalytics} */

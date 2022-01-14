@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {isExperimentOn} from '#experiments';
 
 import {userAssert} from '#utils/log';
@@ -24,9 +22,9 @@ class AmpInstagram extends BaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height) => this.attemptChangeHeight(height),
-    });
+    };
   }
 }
 

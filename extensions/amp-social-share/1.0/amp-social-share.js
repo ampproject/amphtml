@@ -1,7 +1,6 @@
 import {getDataParamsFromAttributes} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 import {getWin} from '#core/window';
 
@@ -21,10 +20,10 @@ import {addParamsToUrl} from '../../../src/url';
 const TAG = 'amp-social-share';
 
 /** @const {!JsonObject<string, string>} */
-const DEFAULT_RESPONSIVE_DIMENSIONS = dict({
+const DEFAULT_RESPONSIVE_DIMENSIONS = {
   'width': '100%',
   'height': '100%',
-});
+};
 
 /**
  * @private
@@ -55,7 +54,7 @@ const getTypeConfigOrUndefined = (element) => {
       return;
     }
   }
-  return /** @type {!JsonObject} */ (getSocialConfig(type)) || dict();
+  return /** @type {!JsonObject} */ (getSocialConfig(type)) || {};
 };
 
 /**
@@ -173,7 +172,7 @@ class AmpSocialShare extends BaseElement {
   renderWithHrefAndTarget_(typeConfig) {
     const customEndpoint = this.element.getAttribute('data-share-endpoint');
     const shareEndpoint = customEndpoint || typeConfig['shareEndpoint'] || '';
-    const urlParams = typeConfig['defaultParams'] || dict();
+    const urlParams = typeConfig['defaultParams'] || {};
     Object.assign(urlParams, getDataParamsFromAttributes(this.element));
     const hrefWithVars = addParamsToUrl(shareEndpoint, urlParams);
     const urlReplacements = Services.urlReplacementsForDoc(this.element);
@@ -192,21 +191,17 @@ class AmpSocialShare extends BaseElement {
         const target = this.element.getAttribute('data-target') || '_blank';
 
         if (customEndpoint) {
-          this.mutateProps(
-            dict({
-              'endpoint': expandedUrl,
-              'params': null,
-              'target': target,
-            })
-          );
+          this.mutateProps({
+            'endpoint': expandedUrl,
+            'params': null,
+            'target': target,
+          });
         } else {
-          this.mutateProps(
-            dict({
-              'endpoint': null,
-              'params': parseQueryString(search),
-              'target': target,
-            })
-          );
+          this.mutateProps({
+            'endpoint': null,
+            'params': parseQueryString(search),
+            'target': target,
+          });
         }
       });
   }

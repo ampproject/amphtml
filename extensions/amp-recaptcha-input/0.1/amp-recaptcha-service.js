@@ -7,7 +7,6 @@ import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {setStyle} from '#core/dom/style';
 import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -150,10 +149,10 @@ export class AmpRecaptchaService {
       reject: executePromise.reject,
     };
     this.recaptchaApiReady_.promise.then(() => {
-      const message = dict({
+      const message = {
         'id': messageId,
         'action': 'amp_' + action,
-      });
+      };
 
       // Send the message
       this.postMessageToIframe_(
@@ -226,13 +225,11 @@ export class AmpRecaptchaService {
       iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
       iframe.setAttribute(
         'name',
-        JSON.stringify(
-          dict({
-            'sitekey': this.sitekey_,
-            'sentinel': 'amp-recaptcha',
-            'global': this.global_,
-          })
-        )
+        JSON.stringify({
+          'sitekey': this.sitekey_,
+          'sentinel': 'amp-recaptcha',
+          'global': this.global_,
+        })
       );
       iframe.classList.add('i-amphtml-recaptcha-iframe');
       setStyle(iframe, 'border', 'none');

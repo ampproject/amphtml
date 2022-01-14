@@ -6,7 +6,6 @@ import {
 } from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
@@ -41,30 +40,26 @@ export class BaseElement extends PreactBaseElement {
     // See https://github.com/ampproject/amp-react-prototype/issues/40.
     const onChangeHandler = (event) => {
       const {option, value} = event;
-      this.triggerEvent(
-        this.element,
-        'select',
-        dict({
-          'targetOption': option,
-          'selectedOptions': value,
-        })
-      );
+      this.triggerEvent(this.element, 'select', {
+        'targetOption': option,
+        'selectedOptions': value,
+      });
 
       this.isExpectedMutation = true;
-      this.mutateProps(dict({'value': value}));
+      this.mutateProps({'value': value});
     };
 
     // Return props
     const {children, options, value} = getOptions(element, mu);
     this.optionState = options;
-    return dict({
+    return {
       'as': SelectorShim,
       'shimDomElement': element,
       'children': children,
       'value': value,
       'options': options,
       'onChange': onChangeHandler,
-    });
+    };
   }
 }
 
