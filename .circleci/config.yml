@@ -659,6 +659,6 @@ workflows:
           name: 'Trigger Promote'
           <<: *release_builds_only
           requires:
-            - upload_release
+            - 'Upload Release'
           context:
             - release-build-uploader
