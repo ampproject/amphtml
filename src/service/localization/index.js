@@ -52,11 +52,16 @@ export function getLanguageCodesFromString(languageCode) {
 export class LocalizationService {
   /**
    * @param {!Element} element
+   * @param {?string} remoteBundleUrl
    */
-  constructor(element) {
+  constructor(element, remoteBundleUrl) {
+    this.element_ = element;
+
     this.language_ =
       getWin(element).document.querySelector('[lang]')?.getAttribute('lang') ||
       'en';
+    
+    this.fetchedRemote_ = Promise.resolve();
 
     /**
      * A mapping of language code to localized string bundle.
@@ -64,17 +69,9 @@ export class LocalizationService {
      */
     this.localizedStringBundles_ = {};
 
-    const xhr = Services.xhrFor(getWin(element));
-
-    this.viewerLanguageBundlePromise_ = xhr
-      .fetchJson(
-        'https://gist.githubusercontent.com/mszylkowski/3ed540186b18f4da4083e087bff36122/raw/a46b0204d5a7e12615a924b4ae192d9d77128bff/amp-story.es.json'
-      )
-      .then((res) => {
-        const json = res.json();
-        this.registerLocalizedStringBundle(this.language_, json);
-        return json;
-      });
+    if (remoteBundleUrl) {
+      this.fetchedRemote_ = Services.xhrFor(getWin(element)).fetchJson(remoteBundleUrl).then((res) => this.registerLocalizedStringBundle(this.language_, res.json()));
+    }
   }
 
   getLocalizedString(code) {
@@ -123,13 +120,7 @@ export class LocalizationService {
     return this;
   }
 
-  /**
-   * @param {LocalizedStringId_Enum} key
-   * @return {!Promise<?string>}
-   */
-  localizeAsync(key) {
-    return this.viewerLanguageBundlePromise_.then(
-      (languageBundle) => languageBundle[key]
-    );
+  whenInitialized() {
+    return this.fetchedRemote_;
   }
 }
