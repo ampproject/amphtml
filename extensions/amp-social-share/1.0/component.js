@@ -1,5 +1,4 @@
 import {Keys_Enum} from '#core/constants/key-codes';
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import * as Preact from '#preact';
@@ -96,10 +95,10 @@ function processChildren(type, children, color, background) {
     return children;
   } else {
     const typeConfig = getSocialConfig(type) || {};
-    const iconStyle = dict({
+    const iconStyle = {
       'color': color || typeConfig.defaultColor,
       'backgroundColor': background || typeConfig.defaultBackgroundColor,
-    });
+    };
     return (
       <BentoSocialShareIcon
         style={{
@@ -247,11 +246,11 @@ function getQueryString(endpoint) {
  * @return {boolean}
  */
 function isIos() {
-  return /** @type {boolean} */ (
-    window &&
-      window.navigator &&
-      window.navigator.userAgent &&
-      window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0
+  return (
+    /** @type {boolean} */ window &&
+    window.navigator &&
+    window.navigator.userAgent &&
+    window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0
   );
 }
 

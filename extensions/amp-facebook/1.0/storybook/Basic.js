@@ -1,4 +1,5 @@
 import * as Preact from '#preact';
+
 import {BentoFacebook} from '../component';
 
 export default {

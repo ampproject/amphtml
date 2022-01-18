@@ -6,7 +6,7 @@ import {useLayoutEffect, useState} from '#preact';
  * in a layout effect and allows the result to be a promise.
  *
  * @param {?RendererFunctionType|undefined} renderer
- * @param {!JsonObject} data
+ * @param {JsonObject} data
  * @return {?RendererFunctionResponseType}
  */
 export function useRenderer(renderer, data) {

@@ -1,7 +1,7 @@
 import {LruCache} from '#core/data-structures/lru-cache';
 import * as mode from '#core/mode';
 import {arrayOrSingleItemToArray} from '#core/types/array';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {parseQueryString} from '#core/types/string/url';
 
@@ -251,7 +251,7 @@ export function addParamsToUrl(url, params) {
 export function addMissingParamsToUrl(url, params) {
   const location = parseUrlDeprecated(url);
   const existingParams = parseQueryString(location.search);
-  const paramsToAdd = dict({});
+  const paramsToAdd = {};
   const keys = Object.keys(params);
   for (let i = 0; i < keys.length; i++) {
     if (!hasOwn(existingParams, keys[i])) {

@@ -1,7 +1,5 @@
 import {mount} from 'enzyme';
 
-import {dict} from '#core/types/object';
-
 import * as Preact from '#preact';
 import {Wrapper} from '#preact/component';
 
@@ -25,9 +23,7 @@ describes.sandboxed('BentoSocialShare 1.0 preact component', {}, (env) => {
       const mockedWarn = (output) => consoleOutput.push(output);
       console.warn = mockedWarn;
 
-      const jsx = (
-        <BentoSocialShare {...dict({'type': 'not-configured-type'})} />
-      );
+      const jsx = <BentoSocialShare {...{'type': 'not-configured-type'}} />;
       const wrapper = mount(jsx);
 
       expect(wrapper.exists('div')).to.equal(false);
@@ -39,7 +35,7 @@ describes.sandboxed('BentoSocialShare 1.0 preact component', {}, (env) => {
   );
 
   it('should include the button class for focus styling', () => {
-    const jsx = <BentoSocialShare {...dict({'type': 'email'})} />;
+    const jsx = <BentoSocialShare {...{'type': 'email'}} />;
     const wrapper = mount(jsx);
 
     const button = wrapper.getDOMNode();

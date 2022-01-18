@@ -1,32 +1,29 @@
 import * as Preact from '#core/dom/jsx';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {devAssert} from '#utils/log';
+
+import {localize} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {devAssert} from '#utils/log';
-import {localize} from './amp-story-localization-service';
+import {AdvancementMode} from './story-analytics';
 
-/** @struct @typedef {{className: string, triggers: (string|undefined)}} */
+/** @struct @typedef {{className: string, triggers: string, label: LocalizedStringId_Enum}} */
 let PaginationButtonStateDef;
 
 /** @const {!Object<string, !PaginationButtonStateDef>} */
-const BackButtonStates = {
-  HIDDEN: {className: 'i-amphtml-story-button-hidden'},
+const ButtonStates = {
   PREVIOUS_PAGE: {
     className: 'i-amphtml-story-back-prev',
     triggers: EventType.PREVIOUS_PAGE,
     label: LocalizedStringId_Enum.AMP_STORY_PREVIOUS_PAGE,
   },
-};
-
-/** @const {!Object<string, !PaginationButtonStateDef>} */
-const ForwardButtonStates = {
-  HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   NEXT_PAGE: {
     className: 'i-amphtml-story-fwd-next',
     triggers: EventType.NEXT_PAGE,
@@ -76,7 +73,7 @@ class PaginationButton {
     /** @private {!PaginationButtonStateDef} */
     this.state_ = initialState;
 
-    /** @public @const {!Element} */
+    /** @const {!Element} */
     this.element = renderPaginationButton(doc, initialState, (e) =>
       this.onClick_(e)
     );
@@ -89,6 +86,9 @@ class PaginationButton {
 
     /** @private @const {!Window} */
     this.win_ = win;
+
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(doc);
   }
 
   /** @param {!PaginationButtonStateDef} state */
@@ -96,16 +96,16 @@ class PaginationButton {
     if (state === this.state_) {
       return;
     }
-    this.element.classList.remove(this.state_.className);
-    this.element.classList.add(state.className);
-    state.label
-      ? this.buttonElement_.setAttribute(
-          'aria-label',
-          localize(this.win_.document, state.label)
-        )
-      : this.buttonElement_.removeAttribute('aria-label');
 
-    this.state_ = state;
+    this.mutator_.mutateElement(this.element, () => {
+      this.element.classList.remove(this.state_.className);
+      this.element.classList.add(state.className);
+      this.buttonElement_.setAttribute(
+        'aria-label',
+        localize(this.win_.document, state.label)
+      );
+      this.state_ = state;
+    });
   }
 
   /**
@@ -113,6 +113,19 @@ class PaginationButton {
    */
   getState() {
     return this.state_;
+  }
+
+  /** @param {boolean} isEnabled */
+  setEnabled(isEnabled) {
+    this.mutator_.mutateElement(this.element, () => {
+      this.element.classList.toggle(
+        'i-amphtml-story-button-hidden',
+        !isEnabled
+      );
+      this.element
+        .querySelector('button')
+        ?.toggleAttribute('disabled', !isEnabled);
+    });
   }
 
   /**
@@ -159,7 +172,7 @@ export class PaginationButtons {
     /** @private @const {!PaginationButton} */
     this.forwardButton_ = new PaginationButton(
       doc,
-      ForwardButtonStates.NEXT_PAGE,
+      ButtonStates.NEXT_PAGE,
       this.storeService_,
       win
     );
@@ -167,19 +180,13 @@ export class PaginationButtons {
     /** @private @const {!PaginationButton} */
     this.backButton_ = new PaginationButton(
       doc,
-      BackButtonStates.HIDDEN,
+      ButtonStates.PREVIOUS_PAGE,
       this.storeService_,
       win
     );
 
     this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
-
-    /** @private {?PaginationButtonStateDef} */
-    this.backButtonStateToRestore_ = null;
-
-    /** @private {?PaginationButtonStateDef} */
-    this.forwardButtonStateToRestore_ = null;
 
     this.initializeListeners_();
 
@@ -209,9 +216,7 @@ export class PaginationButtons {
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
-      (isVisible) => {
-        this.onSystemUiIsVisibleStateUpdate_(isVisible);
-      }
+      (isVisible) => this.onSystemUiIsVisibleStateUpdate_(isVisible)
     );
   }
 
@@ -222,24 +227,17 @@ export class PaginationButtons {
   onCurrentPageIndexUpdate_(pageIndex) {
     const totalPages = this.storeService_.get(StateProperty.PAGE_IDS).length;
 
-    if (pageIndex === 0) {
-      this.backButton_.updateState(BackButtonStates.HIDDEN);
-    }
-
-    if (pageIndex > 0) {
-      this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
-    }
+    // Hide back button if no previous page.
+    this.backButton_.setEnabled(pageIndex > 0);
 
     if (pageIndex < totalPages - 1) {
-      this.forwardButton_.updateState(ForwardButtonStates.NEXT_PAGE);
-    }
-
-    if (pageIndex === totalPages - 1) {
+      this.forwardButton_.updateState(ButtonStates.NEXT_PAGE);
+    } else {
       const viewer = Services.viewerForDoc(this.ampStory_.element);
       if (viewer.hasCapability('swipe')) {
-        this.forwardButton_.updateState(ForwardButtonStates.NEXT_STORY);
+        this.forwardButton_.updateState(ButtonStates.NEXT_STORY);
       } else {
-        this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
+        this.forwardButton_.updateState(ButtonStates.REPLAY);
       }
     }
   }
@@ -250,22 +248,7 @@ export class PaginationButtons {
    * @private
    */
   onSystemUiIsVisibleStateUpdate_(isVisible) {
-    if (isVisible) {
-      this.backButton_.updateState(
-        /** @type {!PaginationButtonStateDef} */ (
-          devAssert(this.backButtonStateToRestore_)
-        )
-      );
-      this.forwardButton_.updateState(
-        /** @type {!PaginationButtonStateDef} */ (
-          devAssert(this.forwardButtonStateToRestore_)
-        )
-      );
-    } else {
-      this.backButtonStateToRestore_ = this.backButton_.getState();
-      this.backButton_.updateState(BackButtonStates.HIDDEN);
-      this.forwardButtonStateToRestore_ = this.forwardButton_.getState();
-      this.forwardButton_.updateState(ForwardButtonStates.HIDDEN);
-    }
+    this.backButton_.setEnabled(isVisible);
+    this.forwardButton_.setEnabled(isVisible);
   }
 }

@@ -133,9 +133,6 @@ exports.rules = [
   },
 
   // Rules for extensions.
-  // Note: For the multipass build to correctly include depended on code, you
-  // need to add the depended on code to `CLOSURE_SRC_GLOBS` in
-  // build-system/compile/sources.js.
   {
     // Extensions can't depend on other extensions.
     filesMatching: 'extensions/**/*.js',
@@ -152,6 +149,7 @@ exports.rules = [
       'extensions/amp-ad-network-oblivki-impl/0.1/amp-ad-network-oblivki-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-dianomi-impl/0.1/amp-ad-network-dianomi-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-smartadserver-impl/0.1/amp-ad-network-smartadserver-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // A4A impls importing amp fast fetch header name
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
@@ -265,12 +263,11 @@ exports.rules = [
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-localization-service.js',
 
       // Story share menu
-      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/utils.js',
-      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/amp-story-share.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-social-share/0.1/amp-social-share.js',
       'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/amp-story-store-service.js',
-      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/story-analytics.js',
-      'extensions/amp-story/1.0/amp-story.js->extensions/amp-story-share-menu/0.1/amp-story-share-menu.js',
-      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/request-utils.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/toast.js',
 
       // Story Shopping
       'extensions/amp-story-shopping/0.1/amp-story-shopping-config.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -303,6 +300,16 @@ exports.rules = [
       // amp-smartlinks depends on amp-skimlinks/link-rewriter
       'extensions/amp-smartlinks/0.1/amp-smartlinks.js->extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js',
       'extensions/amp-smartlinks/0.1/linkmate.js->extensions/amp-skimlinks/0.1/link-rewriter/two-steps-response.js',
+
+      'extensions/amp-story-page-attachment/0.1/amp-story-draggable-drawer.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-draggable-drawer.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/loading-spinner.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-open-page-attachment.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/history.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/utils.js',
     ],
   },
   {

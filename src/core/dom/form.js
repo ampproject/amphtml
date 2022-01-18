@@ -1,9 +1,7 @@
 import {iterateCursor} from '#core/dom';
 import {ancestorElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
-/** @const {string} */
 const FORM_PROP_ = '__AMP_FORM';
 
 /**
@@ -30,7 +28,7 @@ export function setFormForElement(element, form) {
  */
 export function getFormAsObject(form) {
   const {elements} = form;
-  const data = dict();
+  const data = /** @type {!JsonObject} */ ({});
   // <button> is handled separately
   const submittableTagsRegex = /^(?:input|select|textarea)$/i;
   // type=submit is handled separately

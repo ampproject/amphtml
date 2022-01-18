@@ -6,19 +6,20 @@ const path = require('path');
 // name. This aids in writing lint rules for these imports.
 //
 // GOOD
-// import { dict } from 'src/core/types/object';
-// dict();
+// import { setStyle } from 'src/core/dom/style';
+// setStyle();
 //
 // BAD
-// import * as obj from 'src/core/types/object';
-// obj.dict()
+// import * as obj from 'src/core/dom/style';
+// obj.setStyle()
 //
 // Bad
-// import { dict as otherName } from 'src/core/types/object';
+// import { setStyle as otherName } from 'src/core/dom/style';
 // otherName()
 
+// TODO(wg-infra): None of these paths match! They've since been aliased
+// (#core/dom instead of src/core/dom) and or/moved. Update them.
 const imports = {
-  'src/core/types/object': ['dict'],
   'src/core/dom/css': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
   'src/core/dom/query': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
   'src/core/dom/static-template': ['htmlFor'],

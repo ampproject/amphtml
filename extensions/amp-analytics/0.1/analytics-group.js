@@ -1,9 +1,12 @@
-import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {Deferred} from '#core/data-structures/promise';
-import {dev, userAssert} from '#utils/log';
-import {getMode} from '../../../src/mode';
-import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
 import {getWin} from '#core/window';
+
+import {dev, userAssert} from '#utils/log';
+
+import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
+
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
+import {getMode} from '../../../src/mode';
 
 /**
  * @const {number}

@@ -7,7 +7,7 @@ import {
   // The LocalizedStringId_Enum type is imported even though it is not used because
   // the compiler does not output types for enums, but we want to distinguish
   // between LocalizedStringId_Enum enum values and any other strings.
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   LocalizedStringId_Enum,
 } from './strings';
 
@@ -94,9 +94,8 @@ export class LocalizationService {
   /**
    * @param {!Element} element
    * @return {!Array<string>}
-   * @private
    */
-  getLanguageCodesForElement_(element) {
+  getLanguageCodesForElement(element) {
     const languageEl = closest(element, (el) => el.hasAttribute('lang'));
     const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
     const languageCodesToUse = getLanguageCodesFromString(languageCode || '');
@@ -137,7 +136,7 @@ export class LocalizationService {
    * @return {?string}
    */
   getLocalizedString(localizedStringId, elementToUse = this.element_) {
-    const languageCodes = this.getLanguageCodesForElement_(elementToUse);
+    const languageCodes = this.getLanguageCodesForElement(elementToUse);
 
     return findLocalizedString(
       this.localizedStringBundles_,

@@ -1,32 +1,35 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {CSS} from '../../../build/amp-sidebar-0.1.css';
-import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
-import {Gestures} from '../../../src/gesture';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {Toolbar} from './toolbar';
-import {
-  closestAncestorElementBySelector,
-  realChildElements,
-} from '#core/dom/query';
-import {createCustomEvent} from '#utils/event-helper';
-import {debounce} from '#core/types/function';
-import {descendsFromStory} from '#utils/story';
-import {dev, devAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {handleAutoscroll} from './autoscroll';
 import {isRTL, tryFocus} from '#core/dom';
 import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
-import {removeFragment} from '../../../src/url';
 import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
+import {
+  closestAncestorElementBySelector,
+  realChildElements,
+} from '#core/dom/query';
+import {unmountAll} from '#core/dom/resource-container-helper';
 import {setStyles, toggle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
-import {unmountAll} from '#core/dom/resource-container-helper';
+import {debounce} from '#core/types/function';
+
+import {Services} from '#service';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+import {descendsFromStory} from '#utils/story';
+
+import {handleAutoscroll} from './autoscroll';
+import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
+import {Toolbar} from './toolbar';
+
+import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {Gestures} from '../../../src/gesture';
+import {SwipeDef, SwipeXRecognizer} from '../../../src/gesture-recognizers';
+import {removeFragment} from '../../../src/url';
 
 /** @private @const {string} */
 const TAG = 'amp-sidebar toolbar';
@@ -725,7 +728,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(name, trust) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
     this.action_.trigger(this.element, name, event, trust);
   }
 

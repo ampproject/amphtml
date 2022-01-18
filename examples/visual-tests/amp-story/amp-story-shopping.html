@@ -25,18 +25,30 @@
         top: 33%;
         left: 7%;
       }
+      [data-tag-id="hat-rtl"] {
+        top: 33%;
+        left: 7%;
+      }
+      [data-tag-id="sunglasses-rtl"] {
+        top: 28%;
+        left: 43%;
+      }
+      [data-tag-id="backpack-rtl"] {
+        top: 33%;
+        left: 80%;
+      }
     </style>
   </head>
   <body>
     <amp-story
         standalone
-        title="Story Shopping Component Visual Diff Test"
+        title="Story Shopping Component"
         publisher="AMP Story Shopping"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
       <amp-story-page id="inline-light-theme">
         <!--
-          Example of:
+          Example of
           Inline config.
           Multiple product tags with icon defined.
         -->
@@ -47,19 +59,22 @@
                    {
                     "product-tag-id": "hat",
                     "product-title": "Hootenanny Hat",
-                    "product-price": "799",
+                    "product-price": 799.00,
+                    "product-price-currency": "USD",
                     "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
                    },
                    {
                     "product-tag-id": "sunglasses",
                     "product-title": "Spectacular Spectacles",
-                    "product-price": "400",
+                    "product-price": 400.00,
+                    "product-price-currency": "INR",
                     "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
                    },
                    {
                     "product-tag-id": "backpack",
                     "product-title": "Beastly Backpack",
-                    "product-price": "1000",
+                    "product-price": 1000.00,
+                    "product-price-currency": "BRL",
                     "product-tag-text": "Beastly Backpack",
                     "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
                    }
@@ -72,6 +87,8 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag data-tag-id="hat" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="sunglasses" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="backpack" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
@@ -88,7 +105,8 @@
                    {
                     "product-tag-id": "city-pop",
                     "product-title": "Plastic Love",
-                    "product-price": "799"
+                    "product-price": 19.00,
+                    "product-price-currency": "JPY",
                    }
                 ]
               }
@@ -99,8 +117,6 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="k-pop" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="eurodance" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
       </amp-story-page>
@@ -142,6 +158,49 @@
           <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="inline-light-theme-two" dir="rtl">
+        <!--
+          RTL example
+        -->
+        <amp-story-shopping-config layout="nodisplay">
+          <script type="application/json">
+            {
+              "items" : [
+                 {
+                  "product-tag-id": "hat-rtl",
+                  "product-title": "Hootenanny Hat",
+                  "product-price": "799",
+                  "product-tag-text": " حبا حبا حبا سعادةا سعادة",
+                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
+                 },
+                 {
+                  "product-tag-id": "sunglasses-rtl",
+                  "product-title": "Spectacular Spectacles",
+                  "product-price": "400",
+                  "product-tag-text": "حبا حب سعادة قط حبا حب سعادة قط ",
+                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
+                 },
+                 {
+                  "product-tag-id": "backpack-rtl",
+                  "product-title": "Beastly Backpack",
+                  "product-price": "500",
+                  "product-tag-text": "حبا",
+                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
+                 }
+              ]
+            }
+          </script>
+        </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-tag-id="hat-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="sunglasses-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-tag-id="backpack-rtl" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
     </amp-story>
   </body>
