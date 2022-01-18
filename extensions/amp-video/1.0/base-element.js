@@ -21,9 +21,9 @@ BentoVideoBaseElement['layoutSizeDefined'] = true;
  * Defaults to `{component: 'video'}` from `BentoVideo` component.
  * Subclasses may set:
  * ```
- *   AmpMyPlayer['staticProps'] = dict({
+ *   AmpMyPlayer['staticProps'] = {
  *     'component': MyPlayerComponent,
- *   });
+ *   };
  * ```
  * @override
  */

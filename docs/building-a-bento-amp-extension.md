@@ -272,7 +272,7 @@ actionServiceForDoc(doc.documentElement).trigger(
   createCustomEvent(
     win,
     `amp-base-carousel.${name}`,
-    dict({'index': index})
+    {'index': index}
   ),
   ActionTrust.DEFAULT
 );
@@ -373,10 +373,10 @@ class AmpMyElement extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     this.registerApiAction('close', (api) => api.close());
 
     const processedProp = parseInt(element.getAttribute('data-binary'), 2);
-    return dict({
+    return {
       'processedProp': processedProp,
-      'onClose': (event) => fireAmpEvent(event)}
-    );
+      'onClose': (event) => fireAmpEvent(event)
+    };
   }
 
   /** @override */
