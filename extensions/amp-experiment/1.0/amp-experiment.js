@@ -1,5 +1,4 @@
 import {Layout_Enum} from '#core/dom/layout';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {isExperimentOn} from '#experiments';
@@ -53,7 +52,7 @@ export class AmpExperiment extends AMP.BaseElement {
       const variantsService = responses[0];
       const enabled = responses[1];
 
-      let config = dict({});
+      let config = {};
 
       try {
         config = this.getConfig_();

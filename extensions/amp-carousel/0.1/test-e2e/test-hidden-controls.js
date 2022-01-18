@@ -10,7 +10,7 @@ describes.endtoend(
      * A helper function for expecting an error from an async function since we
      * don't have ChaiAsExpected and we cannot wait for errors from
      * @param {function()} fn A function to run
-     * @param {!RegExp} regExp A regular expression to match the error message.
+     * @param {RegExp} regExp A regular expression to match the error message.
      */
     async function expectAysncError(fn, regExp) {
       let error;

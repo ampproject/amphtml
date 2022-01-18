@@ -1,10 +1,12 @@
 import '../amp-lightbox';
-import * as dom from '#core/dom';
-import {ActionService} from '#service/action-impl';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {Services} from '#service';
-import {whenCalled} from '#testing/helpers/service';
+import * as dom from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-lightbox component',

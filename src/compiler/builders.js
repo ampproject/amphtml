@@ -2,7 +2,6 @@ import {buildDom as ampLayoutClassic} from '#builtins/amp-layout/build-dom';
 
 import {applyStaticLayout} from '#core/static-layout';
 
-import {buildDom as ampCarouselClassic1} from '../../extensions/amp-carousel/0.1/build-dom';
 import {buildDom as ampFitTextClassic} from '../../extensions/amp-fit-text/0.1/build-dom';
 
 const versionedBuilderMap = {
@@ -11,7 +10,6 @@ const versionedBuilderMap = {
   },
   '0.1': {
     'amp-fit-text': ampFitTextClassic,
-    'amp-carousel': ampCarouselClassic1,
   },
 };
 

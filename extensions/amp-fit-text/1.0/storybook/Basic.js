@@ -1,4 +1,5 @@
 import * as Preact from '#preact';
+
 import {BentoFitText} from '../component';
 
 export default {

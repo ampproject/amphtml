@@ -1,6 +1,5 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
@@ -104,10 +103,10 @@ export class FirstImpressionIoConfig {
 
   /** @override */
   getAttributes() {
-    const attributes = dict({
+    const attributes = {
       'type': 'firstimpression',
       'data-pvid64': this.pvid64,
-    });
+    };
     return attributes;
   }
 

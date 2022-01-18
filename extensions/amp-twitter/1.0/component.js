@@ -1,9 +1,10 @@
-import * as Preact from '#preact';
-import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
-import {forwardRef} from '#preact/compat';
+
+import * as Preact from '#preact';
 import {useCallback, useMemo, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
 import {useValueRef} from '#preact/component';
+import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 
 /** @const {string} */
 const TYPE = 'twitter';

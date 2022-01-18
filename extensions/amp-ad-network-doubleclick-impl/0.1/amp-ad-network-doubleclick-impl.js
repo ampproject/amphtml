@@ -55,7 +55,7 @@ import {
   setStyles,
 } from '#core/dom/style';
 import {isArray} from '#core/types';
-import {deepMerge, dict} from '#core/types/object';
+import {deepMerge} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 import {stringHash32} from '#core/types/string';
 import {getCryptoRandomBytesArray, utf8Decode} from '#core/types/string/bytes';
@@ -101,7 +101,7 @@ import {
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
-  RefreshManager, // eslint-disable-line no-unused-vars
+  RefreshManager, // eslint-disable-line @typescript-eslint/no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
@@ -1601,15 +1601,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getAmpDoc()
             .getBody()
             .appendChild(
-              createElementWithAttributes(
-                this.win.document,
-                'amp-pixel',
-                dict({
-                  'src':
-                    'https://pagead2.googlesyndication.com/pagead/gen_204?' +
-                    `id=${encodeURIComponent('a4a::sra')}&ifi=${this.ifi_}`,
-                })
-              )
+              createElementWithAttributes(this.win.document, 'amp-pixel', {
+                'src':
+                  'https://pagead2.googlesyndication.com/pagead/gen_204?' +
+                  `id=${encodeURIComponent('a4a::sra')}&ifi=${this.ifi_}`,
+              })
             );
         }
       }
@@ -1643,14 +1639,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.getAmpDoc()
           .getBody()
           .appendChild(
-            createElementWithAttributes(
-              this.win.document,
-              'amp-pixel',
-              dict({
-                'src': url,
-                'referrerpolicy': scrubReferer ? 'no-referrer' : '',
-              })
-            )
+            createElementWithAttributes(this.win.document, 'amp-pixel', {
+              'src': url,
+              'referrerpolicy': scrubReferer ? 'no-referrer' : '',
+            })
           );
       } catch (unusedError) {}
     });
@@ -1942,32 +1934,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return this.troubleshootData_.adUrl.then((adUrl) => {
       const slotId =
         this.troubleshootData_.slotId + '_' + this.troubleshootData_.slotIndex;
-      const payload = dict({
-        'gutData': JSON.stringify(
-          dict({
-            'events': [
-              {
-                'timestamp': Date.now(),
-                'slotid': slotId,
-                'messageId': 4,
-              },
-            ],
-            'slots': [
-              {
-                'contentUrl': adUrl || '',
-                'id': slotId,
-                'leafAdUnitName': this.troubleshootData_.slotId,
-                'domId': slotId,
-                'lineItemId': this.troubleshootData_.lineItemId,
-                'creativeId': this.troubleshootData_.creativeId,
-              },
-            ],
-          })
-        ),
+      const payload = {
+        'gutData': JSON.stringify({
+          'events': [
+            {
+              'timestamp': Date.now(),
+              'slotid': slotId,
+              'messageId': 4,
+            },
+          ],
+          'slots': [
+            {
+              'contentUrl': adUrl || '',
+              'id': slotId,
+              'leafAdUnitName': this.troubleshootData_.slotId,
+              'domId': slotId,
+              'lineItemId': this.troubleshootData_.lineItemId,
+              'creativeId': this.troubleshootData_.creativeId,
+            },
+          ],
+        }),
         'userAgent': navigator.userAgent,
         'referrer': this.win.location.href,
         'messageType': 'LOAD',
-      });
+      };
       this.win.opener./*OK*/ postMessage(payload, '*');
     });
   }

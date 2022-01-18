@@ -25,7 +25,10 @@ import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+import {
+  createShadowRootWithStyle,
+  dependsOnStoryServices,
+} from '../../amp-story/1.0/utils';
 
 import '../../amp-social-share/0.1/amp-social-share';
 
@@ -370,5 +373,8 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
  */
 
 AMP.extension('amp-story-share-menu', '0.1', (AMP) => {
-  AMP.registerElement('amp-story-share-menu', AmpStoryShareMenu);
+  AMP.registerElement(
+    'amp-story-share-menu',
+    dependsOnStoryServices(AmpStoryShareMenu)
+  );
 });

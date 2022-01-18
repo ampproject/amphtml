@@ -1,8 +1,11 @@
 import * as Preact from '#core/dom/jsx';
-import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
+
 import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {createShadowRootWithStyle} from './utils';
+
 import {localize} from './amp-story-localization-service';
+import {createShadowRootWithStyle} from './utils';
+
+import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
 
 /**
  * Full viewport black layer indicating browser is not supported.

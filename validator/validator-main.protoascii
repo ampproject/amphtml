@@ -1852,6 +1852,9 @@ tags: {
     name: "decoding"
     value_casei: "async"
   }
+  attrs: {
+    name: "sizes"
+  }
   attr_lists: "img-attrs"
   attr_lists: "mandatory-src-or-srcset"
 }
@@ -1901,6 +1904,9 @@ tags: {
   attrs: {
     name: "decoding"
     value_casei: "async"
+  }
+  attrs: {
+    name: "sizes"
   }
   attr_lists: "img-attrs"
   attr_lists: "mandatory-src-or-srcset"
