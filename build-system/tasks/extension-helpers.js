@@ -97,6 +97,8 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
  *   wrapper?: string,
+ *   ssr?: boolean,
+ *   destName?: string
  * }}
  */
 const ExtensionOptionDef = {};
@@ -132,6 +134,11 @@ function declareExtension(name, version, options, extensionsObject) {
   const defaultOptions = {hasCss: false, npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach((v) => {
+    // If a destName is given, make it as a part of the key as it is
+    // most likely needed to make the entry unique for instances where
+    // multiple entries share the same "entryPoint/name"  but have different
+    // destination name. This allows for a 1 to many relationship between
+    // entryPoint and output (1 -> *).
     const key = options ? options.destName ?? name : name;
     extensionsObject[`${key}-${v}`] = {
       name,

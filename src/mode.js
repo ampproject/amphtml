@@ -55,7 +55,7 @@ function getMode_(win) {
     esm: coreMode.isEsm(),
     test: coreMode.isTest(win),
     rtvVersion: getRtvVersion(win),
-    ssr: coreMode.isSsr(win),
+    ssr: coreMode.isSsr(),
   };
 }
 
