@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.199 */
+/** Version: 0.1.22.200 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -125,6 +125,8 @@ const AnalyticsEvent = {
   ACTION_REGWALL_ALREADY_OPTED_IN_CLICK: 1055,
   ACTION_NEWSLETTER_OPT_IN_BUTTON_CLICK: 1056,
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
+  ACTION_REGWALL_OPT_IN_CLOSE: 1058,
+  ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
@@ -2091,7 +2093,7 @@ const FilterResult = {
  */
 let ClientEvent;
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 /**
  * @interface
  */
@@ -4906,7 +4908,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.199',
+    '_client': 'SwG 0.1.22.200',
   });
 }
 
@@ -6224,7 +6226,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.199',
+        '_client': 'SwG 0.1.22.200',
         'supportsEventManager': true,
       },
       args || {}
@@ -7114,7 +7116,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.199');
+    context.setClientVersion('SwG 0.1.22.200');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7133,16 +7135,23 @@ class AnalyticsService {
   }
 
   /**
+   * @param {?string=} swgUserToken
    * @return {!Promise<!../components/activities.ActivityIframePort>}
    */
-  start() {
+  start(swgUserToken = '') {
     if (!this.serviceReady_) {
       // Please note that currently openIframe reads the current analytics
       // context and that it may not contain experiments activated late during
       // the publishers code lifecycle.
       this.addLabels(getOnExperiments(this.doc_.getWin()));
+      const urlParams = swgUserToken ? {sut: swgUserToken} : {};
       this.serviceReady_ = this.activityPorts_
-        .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
+        .openIframe(
+          this.iframe_,
+          feUrl('/serviceiframe', urlParams),
+          null,
+          true
+        )
         .then(
           (port) => {
             // Register a listener for the logging to code indicate it is

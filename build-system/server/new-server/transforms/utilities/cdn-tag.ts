@@ -1,6 +1,7 @@
+import {extname, format, parse} from 'path';
 import posthtml from 'posthtml';
 import {URL} from 'url';
-import {extname, format, parse} from 'path';
+
 import {VALID_CDN_ORIGIN} from './cdn';
 
 export interface ScriptNode extends posthtml.Node {

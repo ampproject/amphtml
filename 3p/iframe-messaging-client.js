@@ -5,7 +5,7 @@ import {
   serializeMessage,
 } from '#core/3p-frame-messaging';
 import {Observable} from '#core/data-structures/observable';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 
 import {getData} from '#utils/event-helper';
 import {dev} from '#utils/log';
@@ -55,7 +55,7 @@ export class IframeMessagingClient {
         callback(result[CONSTANTS.contentFieldName]);
       }
     });
-    const data = dict();
+    const data = {};
     data[CONSTANTS.payloadFieldName] = payload;
     data[CONSTANTS.messageIdFieldName] = messageId;
     this.sendMessage(requestType, data);
@@ -159,13 +159,10 @@ export class IframeMessagingClient {
    * @suppress {checkTypes} // Can be removed after closure compiler update their externs.
    */
   postMessageWithUserActivation_(win, msg) {
-    win./*OK*/ postMessage(
-      msg,
-      dict({
-        'targetOrigin': '*',
-        'includeUserActivation': true,
-      })
-    );
+    win./*OK*/ postMessage(msg, {
+      'targetOrigin': '*',
+      'includeUserActivation': true,
+    });
   }
 
   /**

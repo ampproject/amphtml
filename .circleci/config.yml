@@ -39,7 +39,7 @@ experiment_job: &experiment_job
       type: enum
       enum: ['A', 'B', 'C']
   environment:
-    EXP: << parameters.exp >>
+    FLAVOR: experiment<< parameters.exp >>
 
 executors:
   base-docker-small:
@@ -463,7 +463,6 @@ jobs:
         type: enum
         enum: ['no-esm', 'esm']
     environment:
-      EXP: << parameters.flavor >>
       FLAVOR: << parameters.flavor >>
       ESM: << parameters.esm >>
     steps:

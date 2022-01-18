@@ -1,10 +1,11 @@
-import {CSS as COMPONENT_CSS} from './component.jss';
-import {BentoLightbox} from './component';
-import {PreactBaseElement} from '#preact/base-element';
-import {dict} from '#core/types/object';
-import {toggle} from '#core/dom/style';
 import {toggleAttribute} from '#core/dom';
 import {unmountAll} from '#core/dom/resource-container-helper';
+import {toggle} from '#core/dom/style';
+
+import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoLightbox} from './component';
+import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */
@@ -17,11 +18,11 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'onBeforeOpen': () => this.beforeOpen(),
       'onAfterOpen': () => this.afterOpen(),
       'onAfterClose': () => this.afterClose(),
-    });
+    };
   }
 
   /** @protected */

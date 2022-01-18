@@ -1,7 +1,10 @@
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-fit-text-1.0.css';
 import {isExperimentOn} from '#experiments';
+
 import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-fit-text-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-fit-text';

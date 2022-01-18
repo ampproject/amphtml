@@ -1,18 +1,21 @@
-import * as Preact from '#core/dom/jsx';
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
-import {LocalizedStringId_Enum} from '#service/localization/strings';
+import * as Preact from '#core/dom/jsx';
+import {scopedQuerySelector} from '#core/dom/query';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
+import {getWin} from '#core/window';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
 import {dev} from '#utils/log';
-import {localize} from './amp-story-localization-service';
+
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
   maybeMakeProxyUrl,
-} from './utils';
-import {getWin} from '#core/window';
-import {scopedQuerySelector} from '#core/dom/query';
+} from '../../amp-story/1.0/utils';
 
 /**
  * @enum {string}
@@ -94,14 +97,20 @@ const ctaLabelFromAttr = (element) =>
  * @param {?string} label
  * @return {?string}
  */
-const openLabelOrFallback = (element, attachmentEl, label) =>
-  attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT'
-    ? localize(element, LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL)
-    : label?.trim() ||
-      localize(
-        element,
-        LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-      );
+const openLabelOrFallback = (element, attachmentEl, label) => {
+  const localizationService = Services.localizationForDoc(element);
+  if (attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT') {
+    return localizationService.getLocalizedString(
+      LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+    );
+  }
+  return (
+    label?.trim() ||
+    localizationService.getLocalizedString(
+      LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
+    )
+  );
+};
 
 /**
  * Renders inline page attachment UI.

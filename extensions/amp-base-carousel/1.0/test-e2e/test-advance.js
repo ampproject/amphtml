@@ -1,5 +1,7 @@
-import {getCarousel, getNextArrow, getPrevArrow, getSlides} from './helpers';
 import {sleep} from '#testing/helpers';
+
+import {getCarousel, getNextArrow, getPrevArrow, getSlides} from './helpers';
+
 import {useStyles} from '../component.jss';
 
 const pageWidth = 500;

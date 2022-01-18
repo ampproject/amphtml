@@ -1,6 +1,6 @@
-import {addParamsToUrl} from '../../src/url';
-import {dict} from '#core/types/object';
 import {isAutoplaySupported} from '#core/dom/video';
+
+import {addParamsToUrl} from '../../src/url';
 
 /**
  *
@@ -34,22 +34,16 @@ export function getDailymotionIframeSrc(
     `https://www.dailymotion.com/embed/video/${encodeURIComponent(
       videoId
     )}?api=1&html=1&app=amp`,
-    Object.assign(
-      dict({
-        // In the dailymotion API endscreenEnable, info, sharingEnable, and uiLogo
-        // all default to true, so if the attr is not marked as false do not add it to the URL
-        'endscreen-enable': !endscreenEnable ? endscreenEnable : undefined,
-        'info': !info ? info : undefined,
-        // In order to support autoplay the video needs to be muted on load so we
-        // dont receive an unmute event which prevents the video from autoplay.
-        'mute': mute || (autoplay && isAutoplaySupported(win)) ? 1 : undefined,
-        'sharing-enable': !sharingEnable ? sharingEnable : undefined,
-        'start': start,
-        'ui-highlight': uiHighlight,
-        'ui-logo': !uiLogo ? uiLogo : undefined,
-      }),
-      implicitParams
-    )
+    {
+      'endscreen-enable': !endscreenEnable ? endscreenEnable : undefined,
+      'info': !info ? info : undefined,
+      'mute': mute || (autoplay && isAutoplaySupported(win)) ? 1 : undefined,
+      'sharing-enable': !sharingEnable ? sharingEnable : undefined,
+      'start': start,
+      'ui-highlight': uiHighlight,
+      'ui-logo': !uiLogo ? uiLogo : undefined,
+      ...implicitParams,
+    }
   );
 }
 
@@ -59,12 +53,10 @@ export function getDailymotionIframeSrc(
  * @return {string}
  */
 export function makeDailymotionMessage(command, param) {
-  return JSON.stringify(
-    dict({
-      'command': command,
-      'parameters': param,
-    })
-  );
+  return JSON.stringify({
+    'command': command,
+    'parameters': param,
+  });
 }
 
 /**

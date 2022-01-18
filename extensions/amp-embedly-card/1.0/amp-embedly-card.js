@@ -1,5 +1,4 @@
 import {Layout_Enum} from '#core/dom/layout';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -14,9 +13,9 @@ const TAG = 'amp-embedly-card';
 class AmpEmbedlyCard extends BaseElement {
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height) => this.attemptChangeHeight(height),
-    });
+    };
   }
 
   /** @override */
