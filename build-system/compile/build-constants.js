@@ -32,7 +32,7 @@ const BUILD_CONSTANTS = {
   // for conditions only true for SxG.
   IS_ESM: !!(argv.esm || argv.sxg),
   IS_SXG: !!argv.sxg,
-  // IS_SSR is always false by default and can only be overriden on a per
+  // IS_SSR_READY is always false by default and can only be overriden on a per
   // output file basis in bundles.config.extensions through `options.ssr`.
   IS_SSR_READY: false,
 };
