@@ -42,7 +42,10 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AnimationManager, hasAnimations} from './animation';
-import {upgradeBackgroundAudio, waitForElementsWithUnresolvedAudio} from './audio';
+import {
+  upgradeBackgroundAudio,
+  waitForElementsWithUnresolvedAudio
+} from './audio';
 import {EventType, dispatch} from './events';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
