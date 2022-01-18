@@ -64,7 +64,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
     this.containerEl_ = this.win.document.createElement('div');
 
     /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
+    this.localizationService_ = getLocalizationService(this.element);
 
     /** @private {?boolean} */
     this.storyPausedStateToRestore_ = null;
@@ -84,7 +84,6 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.localizationService_ = getLocalizationService(this.element);
     this.containerEl_.classList.add('i-amphtml-story-education');
     toggle(this.element, false);
     toggle(this.containerEl_, false);
@@ -171,6 +170,10 @@ export class AmpStoryEducation extends AMP.BaseElement {
         ? this.containerEl_.setAttribute('dir', 'rtl')
         : this.containerEl_.removeAttribute('dir');
     });
+  }
+
+  upgradeCallback() {
+    return this.localizationService_.whenInitialized().then(() => null);
   }
 
   /**
