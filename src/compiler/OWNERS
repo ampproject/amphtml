@@ -5,6 +5,6 @@
   rules: [
     {
       owners: [{name: 'ampproject/wg-performance'}],
-    }
-  ]
+    },
+  ],
 }
