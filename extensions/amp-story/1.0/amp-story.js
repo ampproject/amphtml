@@ -43,7 +43,7 @@ import {
 } from '#core/dom/style';
 import {devError} from '#core/error';
 import {clamp} from '#core/math';
-import {isEsm} from '#core/mode';
+import {isEsm, isSsrReady} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
 import {map} from '#core/types/object';
@@ -2787,7 +2787,7 @@ export class AmpStory extends AMP.BaseElement {
 }
 
 AMP.extension('amp-story', '1.0', (AMP) => {
-  if (IS_SSR) {
+  if (isSsrReady()) {
     AMP.registerElement('amp-story', AmpStory);
   } else {
     AMP.registerElement('amp-story', AmpStory, CSS);
