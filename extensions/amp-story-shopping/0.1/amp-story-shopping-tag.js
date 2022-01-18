@@ -69,42 +69,46 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       this.onRtlStateUpdate_(rtlState);
     });
 
-    this.storeService_.subscribe(StateProperty.PAGE_SIZE, () => {
-      this.onPageSizeStateUpdate_();
+    this.storeService_.subscribe(StateProperty.PAGE_SIZE, (pageSizeState) => {
+      this.shouldTagFlip_(pageSizeState);
     });
   }
 
   /**
    * Helper function to check if the shopping tag should flip if it's too far to the right.
+   * @param {!Object} pageSize
    * @private
    */
-  shoudTagFlip_() {
-    const {offsetLeft, offsetWidth} = this.element;
+  shouldTagFlip_(pageSize) {
     this.measureElement(() => {
       /* We only check the right hand side, as resizing only expands the border to the right. */
+      const {offsetLeft, offsetWidth} = this.element;
 
-      const storyPageWidth =
-        this.element.closest('amp-story-page')./*OK*/ offsetWidth;
+      const storyPageWidth = pageSize.width;
+
       const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
 
-      this.shoppingTagEl_.classList.toggle(
-        'amp-story-shopping-tag-inner-flipped',
-        shouldFlip
-      );
+      this.mutateElement(() => {
+        this.shoppingTagEl_.classList.toggle(
+          'i-amphtml-amp-story-shopping-tag-inner-flipped',
+          shouldFlip
+        );
 
-      this.shoppingTagEl_.classList.toggle(
-        'amp-story-shopping-tag-visible',
-        true
-      );
+        const dotEl = this.shoppingTagEl_.querySelector(
+          '.i-amphtml-amp-story-shopping-tag-dot'
+        );
+
+        dotEl.classList.toggle(
+          'i-amphtml-amp-story-shopping-tag-dot-flipped',
+          shouldFlip
+        );
+
+        this.shoppingTagEl_.classList.toggle(
+          'i-amphtml-amp-story-shopping-tag-visible',
+          true
+        );
+      });
     });
-  }
-
-  /**
-   * Reacts to PageSize state updates and triggers the UI for PageSize.
-   * @private
-   */
-  onPageSizeStateUpdate_() {
-    this.shoudTagFlip_();
   }
 
   /**
@@ -140,14 +144,14 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   renderShoppingTagTemplate_() {
     return (
       <div
-        class="amp-story-shopping-tag-inner"
+        class="i-amphtml-amp-story-shopping-tag-inner"
         role="button"
         onClick={() => this.onClick_()}
       >
-        <span class="amp-story-shopping-tag-dot"></span>
-        <span class="amp-story-shopping-tag-pill">
+        <span class="i-amphtml-amp-story-shopping-tag-dot"></span>
+        <span class="i-amphtml-amp-story-shopping-tag-pill">
           <span
-            class="amp-story-shopping-tag-pill-image"
+            class="i-amphtml-amp-story-shopping-tag-pill-image"
             style={
               this.tagData_['product-icon'] && {
                 backgroundImage:
@@ -156,9 +160,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
               }
             }
           ></span>
-          <span class="amp-story-shopping-tag-pill-text">
+          <span class="i-amphtml-amp-story-shopping-tag-pill-text">
             {(this.tagData_['product-tag-text'] && (
-              <span class="amp-story-shopping-product-tag-text">
+              <span class="i-amphtml-amp-story-shopping-product-tag-text">
                 {this.tagData_['product-tag-text']}
               </span>
             )) ||
@@ -198,7 +202,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       );
       this.hasAppendedInnerShoppingTagEl_ = true;
 
-      this.shoudTagFlip_();
+      this.shouldTagFlip_(this.storeService_.get(StateProperty.PAGE_SIZE));
     });
   }
 

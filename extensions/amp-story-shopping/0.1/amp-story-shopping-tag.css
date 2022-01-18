@@ -14,7 +14,7 @@ amp-story-shopping-tag {
   --i-amphtml-shopping-tag-backdrop-filter: blur(20px);
 }
 
-.amp-story-shopping-product-tag-text {
+.i-amphtml-amp-story-shopping-product-tag-text {
   font-weight: 600 !important;
   font-size: 11px !important;
   line-height: 15.4px !important;
@@ -23,15 +23,15 @@ amp-story-shopping-tag {
 }
 
 /* Maintains the dot position in RTL mode */
-[dir=rtl].amp-story-shopping-tag-inner {
+[dir=rtl].i-amphtml-amp-story-shopping-tag-inner {
   flex-flow: row-reverse !important;
 }
 
-[dir=rtl] .amp-story-shopping-tag-dot {
+[dir=rtl] .i-amphtml-amp-story-shopping-tag-dot {
   margin-inline-start: 4px !important;
 }
 
-.amp-story-shopping-tag-inner {
+.i-amphtml-amp-story-shopping-tag-inner {
   height: 36px !important;
   display: flex !important;
   align-items: center !important;
@@ -40,17 +40,21 @@ amp-story-shopping-tag {
   opacity: 0 !important;
 }
 
-.amp-story-shopping-tag-visible { 
+.i-amphtml-amp-story-shopping-tag-visible { 
   opacity: 1 !important;
 }
 
-.amp-story-shopping-tag-inner-flipped {
+.i-amphtml-amp-story-shopping-tag-inner-flipped {
   flex-direction: row-reverse !important;
   transform: translate(-80%) !important;
   margin-inline-start: 4px !important;
 }
 
-.amp-story-shopping-tag-dot {
+.i-amphtml-amp-story-shopping-tag-dot-flipped {
+  margin-inline-start: 4px !important;
+}
+
+.i-amphtml-amp-story-shopping-tag-dot {
   width: 16px !important;
   height: 16px !important;
   border-radius: 100% !important;
@@ -62,10 +66,9 @@ amp-story-shopping-tag {
   margin-inline-end: 4px !important;
   flex-shrink: 0 !important;
   backdrop-filter: var(--i-amphtml-shopping-tag-backdrop-filter) !important;
-
 }
 
-.amp-story-shopping-tag-dot:before {
+.i-amphtml-amp-story-shopping-tag-dot:before {
   border-radius: 100% !important;
   content: '' !important;
   width: 8px !important;
@@ -74,7 +77,7 @@ amp-story-shopping-tag {
   box-shadow: 0px 2px 8px var(--i-amphtml-shopping-tag-bg-color) !important;
 }
 
-.amp-story-shopping-tag-pill {
+.i-amphtml-amp-story-shopping-tag-pill {
   display: flex !important;
   align-items: center !important;
   border-radius: 18px !important;
@@ -84,7 +87,7 @@ amp-story-shopping-tag {
   backdrop-filter: var(--i-amphtml-shopping-tag-backdrop-filter) !important;
 }
 
-.amp-story-shopping-tag-pill-image {
+.i-amphtml-amp-story-shopping-tag-pill-image {
   width: 24px !important;
   height: 24px !important;
   display: flex !important;
@@ -98,7 +101,7 @@ amp-story-shopping-tag {
   background-position: center !important;
 }
 
-.amp-story-shopping-tag-pill-text {
+.i-amphtml-amp-story-shopping-tag-pill-text {
   font-size: 14px !important;
   padding: 0 6px 0 4px !important;
 }
