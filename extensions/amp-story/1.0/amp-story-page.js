@@ -44,7 +44,7 @@ import {
 import {AnimationManager, hasAnimations} from './animation';
 import {
   upgradeBackgroundAudio,
-  waitForElementsWithUnresolvedAudio
+  waitForElementsWithUnresolvedAudio,
 } from './audio';
 import {EventType, dispatch} from './events';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
