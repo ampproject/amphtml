@@ -356,7 +356,8 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true,
-      "bento": true
+      "bento": true,
+      "npm": true
     }
   },
   {
