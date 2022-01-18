@@ -78,6 +78,14 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       Impl['loadable'] = true;
       expect(Impl.prerenderAllowed()).to.be.false;
     });
+
+    it('by default previewAllowed is tied to the "loadable" flag', () => {
+      Impl['loadable'] = false;
+      expect(Impl.previewAllowed()).to.be.true;
+
+      Impl['loadable'] = true;
+      expect(Impl.previewAllowed()).to.be.false;
+    });
   });
 
   describe('layout mapping', () => {

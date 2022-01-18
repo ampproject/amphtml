@@ -1806,6 +1806,35 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         });
       });
 
+      describe('previewAllowed', () => {
+        it('should NOT be allowed for an upgraded element', () => {
+          const element = new StubElementClass();
+          expect(element.previewAllowed()).to.be.false;
+        });
+
+        it('should be allowed base on the upgraded class', () => {
+          const stub = env.sandbox.stub(TestElement, 'previewAllowed');
+          const element = new StubElementClass();
+          element.upgrade(TestElement);
+
+          stub.returns(false);
+          expect(element.previewAllowed()).to.be.false;
+
+          stub.returns(true);
+          expect(element.previewAllowed()).to.be.true;
+        });
+
+        it('should NOT be allowed with nopreview attribute', () => {
+          env.sandbox.stub(TestElement, 'previewAllowed').returns(true);
+          const element = new StubElementClass();
+          element.upgrade(TestElement);
+          expect(element.previewAllowed()).to.be.true;
+
+          element.setAttribute('nopreview', '');
+          expect(element.previewAllowed()).to.be.false;
+        });
+      });
+
       describe('ensureLoaded', () => {
         it('should build and load', async () => {
           const element = new ElementClass();

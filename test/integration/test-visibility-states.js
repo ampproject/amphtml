@@ -32,6 +32,7 @@ t.run('Viewer Visibility State', {}, () => {
       let docHidden;
       let docVisibilityState;
       let prerenderAllowed;
+      let previewAllowed;
 
       function visChangeEventName() {
         const hiddenName = getVendorJsPropertyName(
@@ -125,6 +126,8 @@ t.run('Viewer Visibility State', {}, () => {
         const upgradedImg = await whenUpgradedToCustomElement(ampImg);
         prerenderAllowed = env.sandbox.stub(upgradedImg, 'prerenderAllowed');
         prerenderAllowed.returns(false);
+        previewAllowed = env.sandbox.stub(upgradedImg, 'previewAllowed');
+        previewAllowed.returns(false);
 
         if (R1_IMG_DEFERRED_BUILD) {
           win.document.body.appendChild(upgradedImg);
@@ -146,6 +149,9 @@ t.run('Viewer Visibility State', {}, () => {
         unlayoutCallback.returns(true);
       });
 
+      // TODO(#37129): Add tests for transitions into (and, eventually, out of)
+      // PREVIEW state. Blocked on updates in `ampdoc-impl.js` (see TODO in that
+      // file).
       describe('from in the PRERENDER state', () => {
         describe('for prerenderable element', () => {
           beforeEach(() => {

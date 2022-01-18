@@ -159,6 +159,8 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
     viewer.setVisibilityState_(VisibilityState_Enum.PRERENDER);
     expect(root.getRootVisibility()).to.equal(0);
 
+    // TODO(#37129): Determine if/how this test should be updated for PREVIEW.
+
     // Go hidden.
     viewer.setVisibilityState_(VisibilityState_Enum.HIDDEN);
     expect(root.getRootVisibility()).to.equal(0);

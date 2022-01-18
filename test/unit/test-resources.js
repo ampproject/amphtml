@@ -1109,6 +1109,8 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource1.build).to.be.called;
   });
 
+  // TODO(#37129): Augment with tests for PREVIEW state
+
   it('should layout resource if outside viewport but idle', () => {
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     resources.documentReady_ = true;
