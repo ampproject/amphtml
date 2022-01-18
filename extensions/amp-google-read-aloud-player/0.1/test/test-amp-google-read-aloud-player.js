@@ -1,0 +1,219 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { macroTask } from '#testing/helpers';
+import { Layout_Enum } from '#core/dom/layout';
+import '../amp-google-read-aloud-player';
+import { Services } from '#service';
+import {
+  addAttributesToElement,
+  createElementWithAttributes,
+} from '#core/dom';
+import { toggleExperiment } from '../../../../src/experiments';
+import { installResizeObserverStub } from '#testing/resize-observer-stub';
+import { expect } from 'chai';
+
+const IFRAME_BASE_URL =
+  'https://www.gstatic.com/readaloud/player/web/api/iframe/index.html';
+
+const API_KEY = 'YOUR_API_KEY';
+const TRACKING_IDS = 'YOUR_TRACKING_IDS';
+const URL = 'http://www.example.com';
+const CALL_TO_ACTION_LABEL = 'Listen to this article';
+const LOCALE = 'en';
+const INTRO = 'http://www.example.com/intro.mp3';
+const OUTRO = 'http://www.example.com/outro.mp3';
+const AD_TAG_URL = 'http://www.example.com/ad';
+const VOICE = 'SOME_VOICE';
+
+const LAYOUT_ATTRS = {
+  layout: Layout_Enum.FIXED_HEIGHT,
+  height: 60,
+};
+
+describes.realWin(
+  'amp-google-read-aloud-player',
+  {
+    amp: {
+      extensions: ['amp-google-read-aloud-player'],
+    },
+  },
+  (env) => {
+    let win;
+    let doc;
+    let videoManagerStub;
+    let resizeObserverStub;
+
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+
+      videoManagerStub = {
+        register: env.sandbox.spy(),
+      };
+
+      env.sandbox
+        .stub(Services, 'videoManagerForDoc')
+        .returns(videoManagerStub);
+      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
+
+      toggleExperiment(win, 'amp-google-read-aloud-player', true);
+    });
+
+    afterEach(() => {
+      toggleExperiment(win, 'amp-google-read-aloud-player', false);
+    });
+
+    function createGoogleReadAloudPlayer(attrs = {}) {
+      const el = createElementWithAttributes(doc, 'amp-google-read-aloud-player', {
+        ...attrs,
+        ...LAYOUT_ATTRS,
+      });
+      doc.body.appendChild(el);
+      return el;
+    }
+
+    function createAndRenderGoogleReadAloudPlayer(attrs = {}) {
+      const element = createGoogleReadAloudPlayer(attrs);
+
+      return element.buildInternal()
+        .then(() => {
+          element.layoutCallback();
+        })
+        .then(() => element);
+    }
+
+    async function createAndRenderBasicGoogleReadAloudPlayer() {
+      return createAndRenderGoogleReadAloudPlayer({
+        'data-api-key': API_KEY,
+        'data-tracking-ids': TRACKING_IDS,
+        'data-voice': VOICE,
+      });
+    }
+
+    async function stubPostMessage(element) {
+      const impl = await element.getImpl(false);
+      return env.sandbox./*OK*/ stub(impl, 'postMessage_');
+    }
+
+    describe('#layoutCallback', () => {
+      it('sets required params in iframe src', async () => {
+        const canonicalUrl = 'foo.html';
+        env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+          canonicalUrl,
+        });
+
+        const element = await createAndRenderBasicGoogleReadAloudPlayer();
+
+        const iframe = element.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.contain(
+          `${IFRAME_BASE_URL}?` +
+          `apiKey=${API_KEY}&` +
+          `trackingIds=${TRACKING_IDS}&` +
+          `voice=${VOICE}`);
+      });
+
+      it('sets optional params in iframe src', async () => {
+        const element = await createAndRenderGoogleReadAloudPlayer({
+          'data-api-key': API_KEY,
+          'data-tracking-ids': TRACKING_IDS,
+          'data-voice': VOICE,
+          'data-url': URL,
+          'data-speakable': '',
+          'data-call-to-action-label': CALL_TO_ACTION_LABEL,
+          'data-locale': LOCALE,
+          'data-intro': INTRO,
+          'data-outro': OUTRO,
+          'data-ad-tag-url': AD_TAG_URL,
+        });
+
+        const iframe = element.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.contain(
+          `${IFRAME_BASE_URL}?` +
+          `apiKey=${API_KEY}&` +
+          `trackingIds=${TRACKING_IDS}&` +
+          `voice=${VOICE}&` +
+          `url=${encodeURIComponent(URL)}&` +
+          `speakable=&` +
+          `callToActionLabel=${encodeURIComponent(CALL_TO_ACTION_LABEL)}&` +
+          `locale=${LOCALE}&` +
+          `intro=${encodeURIComponent(INTRO)}&` +
+          `outro=${encodeURIComponent(OUTRO)}&` +
+          `adTagUrl=${encodeURIComponent(AD_TAG_URL)}`
+        );
+      });
+
+      it('sets metadata in iframe name — with jsonLd', async () => {
+        const canonicalUrl = 'foo.html';
+        env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+          canonicalUrl,
+        });
+
+        const jsonLd = { jsonLd: 'blah' };
+        const jsonLdScript = win.document.createElement('script');
+        jsonLdScript.type = 'application/ld+json';
+        jsonLdScript.text = JSON.stringify(jsonLd);
+
+        win.document.head.appendChild(jsonLdScript);
+
+        const element = await createAndRenderBasicGoogleReadAloudPlayer();
+
+        const iframe = element.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(JSON.parse(iframe.name)).to.deep.equal({
+          canonicalUrl,
+          jsonLd,
+        });
+      });
+
+      it('sets amp=1 fragment in src', async () => {
+        const element = await createAndRenderBasicGoogleReadAloudPlayer();
+
+        const iframe = element.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.match(/.*#amp=1$/);
+      });
+    });
+
+    const implementedVideoInterfaceMethods = [
+      'play',
+      'pause',
+      'mute',
+      'unmute',
+    ];
+
+    implementedVideoInterfaceMethods.forEach((method) => {
+      describe(`#${method}`, () => {
+        const lowercaseMethod = method.toLowerCase();
+
+        it(`should post '${lowercaseMethod}'`, async () => {
+          const element = await createAndRenderBasicGoogleReadAloudPlayer();
+
+          const postMessage = await stubPostMessage(element);
+
+          const impl = await element.getImpl(false);
+          impl[method]();
+
+          await macroTask();
+
+          expect(postMessage.withArgs(lowercaseMethod)).to.have.been.calledOnce;
+        });
+      });
+    });
+  }
+);

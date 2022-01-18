@@ -400,6 +400,10 @@
     "version": "0.1"
   },
   {
+    "name": "amp-google-reado-aloud-player",
+    "version": "0.1"
+  },
+  {
     "name": "amp-gwd-animation",
     "version": "0.1",
     "options": {
