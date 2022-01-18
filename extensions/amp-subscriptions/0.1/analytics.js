@@ -1,4 +1,3 @@
-import {dict} from '#core/types/object';
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {user} from '#utils/log';
 
@@ -87,14 +86,10 @@ export class SubscriptionAnalytics {
   serviceEvent(eventType, platformKey, opt_vars, internalVars) {
     this.event(
       eventType,
-      /** @type {!JsonObject} */ (
-        Object.assign(
-          dict({
-            'serviceId': platformKey,
-          }),
-          opt_vars
-        )
-      ),
+      /** @type {!JsonObject} */ ({
+        'serviceId': platformKey,
+        ...opt_vars,
+      }),
       internalVars
     );
   }
@@ -105,7 +100,7 @@ export class SubscriptionAnalytics {
    * @param {!JsonObject=} internalVars
    */
   event(eventType, opt_vars, internalVars) {
-    internalVars = internalVars || dict({});
+    internalVars = internalVars || {};
 
     const loggedString =
       eventType !== SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION
@@ -114,7 +109,7 @@ export class SubscriptionAnalytics {
 
     user().info(TAG, loggedString, opt_vars || '');
 
-    opt_vars = opt_vars || dict({});
+    opt_vars = opt_vars || {};
     triggerAnalyticsEvent(
       this.element_,
       loggedString,
@@ -138,10 +133,10 @@ export class SubscriptionAnalytics {
       SubscriptionAnalyticsEvents.SUBSCRIPTIONS_ACTION,
       platformKey,
       opt_vars,
-      dict({
+      {
         'action': action,
         'status': status,
-      })
+      }
     );
   }
 }

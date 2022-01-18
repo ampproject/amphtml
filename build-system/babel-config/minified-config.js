@@ -65,13 +65,14 @@ function getMinifiedConfig() {
       bugfixes: true,
       modules: false,
       targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
+      shippedProposals: true,
     },
   ];
 
   return {
     compact: false,
     plugins,
-    sourceMaps: 'inline',
+    sourceMaps: true,
     presets: [presetEnv],
     retainLines: true,
     assumptions: {

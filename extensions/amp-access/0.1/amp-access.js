@@ -4,7 +4,7 @@ import {TickLabel_Enum} from '#core/constants/enums';
 import {Observable} from '#core/data-structures/observable';
 import {isJsonScriptTag} from '#core/dom';
 import {isArray} from '#core/types';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -370,12 +370,10 @@ export class AccessService {
 
   /** @private */
   broadcastReauthorize_() {
-    this.viewer_.broadcast(
-      dict({
-        'type': 'amp-access-reauthorize',
-        'origin': this.pubOrigin_,
-      })
-    );
+    this.viewer_.broadcast({
+      'type': 'amp-access-reauthorize',
+      'origin': this.pubOrigin_,
+    });
   }
 
   /**
