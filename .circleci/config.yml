@@ -485,7 +485,6 @@ jobs:
   trigger_promote:
     executor:
       name: base-docker-small
-    # get amp version
     steps:
       - setup_vm
       - run:

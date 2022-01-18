@@ -14,7 +14,8 @@ const jobName = 'trigger-promote.js';
 const cdnConfigurationParams = {
   owner: 'ampproject',
   repo: 'cdn-configuration',
-  'workflow_id': 'promote-nightly.yml', //TODO set to promote-nightly or promote-amp-version
+  // TODO(estherkim): set to promote-nightly or promote-amp-version
+  'workflow_id': 'promote-nightly.yml',
   ref: 'main',
 };
 
