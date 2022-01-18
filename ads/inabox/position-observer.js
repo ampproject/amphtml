@@ -1,9 +1,9 @@
+import {Observable} from '#core/data-structures/observable';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
 } from '#core/dom/layout/rect';
-import {Observable} from '#core/data-structures/observable';
 import {throttle} from '#core/types/function';
 
 /**

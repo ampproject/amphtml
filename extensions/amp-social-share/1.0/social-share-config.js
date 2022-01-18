@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 /**
  * Get social share configurations by supported type.
  * @param  {string} type
@@ -40,90 +38,90 @@ let BentoSocialShareConfigDef;
 const BUILTINS = {
   'twitter': {
     shareEndpoint: 'https://twitter.com/intent/tweet',
-    defaultParams: dict({
+    defaultParams: {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
-    }),
+    },
     defaultColor: 'ffffff',
     defaultBackgroundColor: '1da1f2',
   },
   'facebook': {
     shareEndpoint: 'https://www.facebook.com/dialog/share',
-    defaultParams: dict({
+    defaultParams: {
       'href': 'CANONICAL_URL',
-    }),
+    },
     defaultColor: '1877f2',
     defaultBackgroundColor: 'ffffff',
   },
   'pinterest': {
     shareEndpoint: 'https://www.pinterest.com/pin/create/button/',
-    defaultParams: dict({
+    defaultParams: {
       'url': 'CANONICAL_URL',
       'description': 'TITLE',
-    }),
+    },
     defaultColor: 'e60023',
     defaultBackgroundColor: 'ffffff',
   },
   'linkedin': {
     shareEndpoint: 'https://www.linkedin.com/shareArticle',
-    defaultParams: dict({
+    defaultParams: {
       'url': 'CANONICAL_URL',
       'mini': 'true',
-    }),
+    },
     'defaultColor': 'ffffff',
     'defaultBackgroundColor': '0a66c2',
   },
   'email': {
     shareEndpoint: 'mailto:RECIPIENT',
-    defaultParams: dict({
+    defaultParams: {
       'subject': 'TITLE',
       'body': 'CANONICAL_URL',
       'recipient': '',
-    }),
+    },
     defaultColor: 'ffffff',
     defaultBackgroundColor: '000000',
     bindings: ['recipient'],
   },
   'tumblr': {
     shareEndpoint: 'https://www.tumblr.com/share/link',
-    defaultParams: dict({
+    defaultParams: {
       'name': 'TITLE',
       'url': 'CANONICAL_URL',
-    }),
+    },
     defaultColor: 'ffffff',
     defaultBackgroundColor: '001935',
   },
   'whatsapp': {
     shareEndpoint: 'https://api.whatsapp.com/send',
-    defaultParams: dict({
+    defaultParams: {
       'text': 'TITLE - CANONICAL_URL',
-    }),
+    },
     defaultColor: 'ffffff',
     defaultBackgroundColor: '25d366',
   },
   'line': {
     shareEndpoint: 'https://social-plugins.line.me/lineit/share',
-    defaultParams: dict({
+    defaultParams: {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
-    }),
+    },
     defaultColor: 'ffffff',
     defaultBackgroundColor: '00b900',
   },
   'sms': {
     shareEndpoint: 'sms:',
-    defaultParams: dict({
+    defaultParams: {
       'body': 'TITLE - CANONICAL_URL',
-    }),
+    },
     defaultColor: 'ffffff',
     defaultBackgroundColor: '000000',
   },
   'system': {
     shareEndpoint: 'navigator-share:',
-    defaultParams: dict({
+    defaultParams: {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
-    }),
+    },
     defaultColor: 'ffffff',
     defaultBackgroundColor: '000000',
   },

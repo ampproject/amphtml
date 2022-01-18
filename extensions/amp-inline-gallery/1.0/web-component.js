@@ -1,12 +1,12 @@
 import {BaseElement, TAG} from './base-element';
 import {
-  TAG as THUMBNAIL_TAG,
-  ThumbnailsBaseElement,
-} from './thumbnails-base-element';
-import {
   TAG as PAGINATION_TAG,
   PaginationBaseElement,
 } from './pagination-base-element';
+import {
+  TAG as THUMBNAIL_TAG,
+  ThumbnailsBaseElement,
+} from './thumbnails-base-element';
 
 /**
  * Registers `<bento-inline-gallery> component to CustomElements registry

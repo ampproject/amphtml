@@ -3,9 +3,12 @@
  * has performed on the page.
  */
 
-import {Services} from '#service';
 import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {listen} from '#utils/event-helper';
+
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 
 /**

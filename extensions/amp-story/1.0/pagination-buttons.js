@@ -1,15 +1,18 @@
 import * as Preact from '#core/dom/jsx';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {devAssert} from '#utils/log';
+
+import {localize} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
 import {EventType, dispatch} from './events';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {devAssert} from '#utils/log';
-import {localize} from './amp-story-localization-service';
+import {AdvancementMode} from './story-analytics';
 
 /** @struct @typedef {{className: string, triggers: string, label: LocalizedStringId_Enum}} */
 let PaginationButtonStateDef;
@@ -93,6 +96,7 @@ class PaginationButton {
     if (state === this.state_) {
       return;
     }
+
     this.mutator_.mutateElement(this.element, () => {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
@@ -100,9 +104,8 @@ class PaginationButton {
         'aria-label',
         localize(this.win_.document, state.label)
       );
+      this.state_ = state;
     });
-
-    this.state_ = state;
   }
 
   /**

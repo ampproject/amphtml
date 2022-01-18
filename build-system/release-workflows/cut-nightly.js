@@ -8,7 +8,14 @@ const {cyan, green, red} = require('kleur/colors');
 const {getVersion} = require('../compile/internal-version');
 const {log} = require('../common/logging');
 const {Octokit} = require('@octokit/rest');
-const params = {owner: 'ampproject', repo: 'amphtml'};
+
+const amphtmlParams = {owner: 'ampproject', repo: 'amphtml'};
+const cdnConfigurationParams = {
+  owner: 'ampproject',
+  repo: 'cdn-configuration',
+  'workflow_id': 'promote-nightly.yml',
+  ref: 'main',
+};
 
 // Permanent external ID as assigned by the GitHub Actions runner.
 const GITHUB_EXTERNAL_ID = 'be30aa50-41df-5bf3-2e88-b5215679ea95';
@@ -20,7 +27,7 @@ const GITHUB_EXTERNAL_ID = 'be30aa50-41df-5bf3-2e88-b5215679ea95';
  */
 async function getCommit(octokit) {
   const commits = await octokit.rest.repos.listCommits({
-    ...params,
+    ...amphtmlParams,
     ref: 'main',
     'per_page': 100,
   });
@@ -34,7 +41,7 @@ async function getCommit(octokit) {
   for (const {sha} of commits.data) {
     const {'check_runs': checkRuns} = (
       await octokit.rest.checks.listForRef({
-        ...params,
+        ...amphtmlParams,
         ref: sha,
       })
     ).data;
@@ -75,14 +82,14 @@ async function getCommit(octokit) {
 }
 
 /**
- * Fast forward nightly branch to given sha
+ * Fast forward nightly branch to given sha.
  * @param {Octokit} octokit
  * @param {string} sha
  * @return {Promise<void>}
  */
 async function updateBranch(octokit, sha) {
   const response = await octokit.rest.git.updateRef({
-    ...params,
+    ...amphtmlParams,
     ref: 'heads/nightly',
     sha,
   });
@@ -122,16 +129,15 @@ async function updateBranch(octokit, sha) {
 }
 
 /**
- * Create GitHub tag
+ * Create GitHub tag.
  * @param {Octokit} octokit
  * @param {string} sha
+ * @param {string} ampVersion
  * @return {Promise<void>}
  */
-async function createTag(octokit, sha) {
-  const ampVersion = getVersion(sha);
-
+async function createTag(octokit, sha, ampVersion) {
   await octokit.rest.git.createTag({
-    ...params,
+    ...amphtmlParams,
     tag: ampVersion,
     message: ampVersion,
     object: sha,
@@ -140,7 +146,7 @@ async function createTag(octokit, sha) {
 
   // once a tag object is created, create a reference
   const response = await octokit.rest.git.createRef({
-    ...params,
+    ...amphtmlParams,
     ref: `refs/tags/${ampVersion}`,
     sha,
   });
@@ -158,13 +164,44 @@ async function createTag(octokit, sha) {
       log('The tag', cyan(ampVersion), 'already exists at', cyan(sha));
       break;
     default:
-      log(
-        red('An uncaught status was returned while attempting to create a tag'),
-        cyan(ampVersion),
-        red('for commit'),
-        cyan(sha)
+      throw new Error(
+        `An unaught status returned while attempting to create a tag\n${response}`
       );
-      log('See full response:', response);
+  }
+}
+
+/**
+ * Trigger the promote workflow in ampproject/cdn-configuration.
+ * @param {Octokit} octokit
+ * @param {string} ampVersion
+ * @return {Promise<void>}
+ */
+async function promoteNightly(octokit, ampVersion) {
+  const response = await octokit.actions.createWorkflowDispatch({
+    ...cdnConfigurationParams,
+    inputs: {
+      'amp-version': ampVersion,
+    },
+  });
+
+  switch (response.status) {
+    case 204:
+      log(
+        'Workflow',
+        cyan('promote-nightly.yml'),
+        'created on',
+        cyan('ampproject/cdn-configuration')
+      );
+      break;
+
+    default:
+      log(
+        'Uncaught status',
+        cyan(response.status),
+        'returned while attempting to create a promote workflow:\n',
+        response
+      );
+      throw new Error();
   }
 }
 
@@ -190,11 +227,11 @@ async function cutNightlyBranch() {
       'Failed to cut nightly. Could not find a green commit in the last 100 commits'
     );
   }
+  const ampVersion = getVersion(sha);
 
-  await Promise.all([
-    await updateBranch(octokit, sha),
-    await createTag(octokit, sha),
-  ]);
+  await updateBranch(octokit, sha);
+  await createTag(octokit, sha, ampVersion);
+  await promoteNightly(octokit, ampVersion);
 
   log('Successfully cut nightly');
 }

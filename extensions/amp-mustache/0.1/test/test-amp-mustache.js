@@ -1,7 +1,8 @@
+import mustache from '#third_party/mustache/mustache';
+
 import * as sanitizer from '../../../../src/sanitizer';
 import * as service from '../../../../src/service-helpers';
 import {AmpMustache} from '../amp-mustache';
-import mustache from '#third_party/mustache/mustache';
 
 describes.repeated(
   'amp-mustache 0.1',

@@ -1,4 +1,5 @@
 import * as Preact from '#preact';
+
 import {BentoIframe} from '../component';
 
 export default {
@@ -79,14 +80,14 @@ export const WithSendIntersectionsPostMessage = () => {
           backgroundColor: 'blue',
         }}
       ></div>
-      <Iframe
+      <BentoIframe
         style={{width: 500, height: 500}}
         iframeStyle={{border: '1px solid black'}}
         sandbox="allow-scripts allow-same-origin"
         src="/examples/bento/amp-iframe-send-intersections-example.html"
       >
         <div placeholder>Placeholder</div>
-      </Iframe>
+      </BentoIframe>
     </div>
   );
 };

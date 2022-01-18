@@ -1,5 +1,4 @@
 import {removeChildren} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -128,13 +127,10 @@ export class LaterpayVendor {
     this.currentLocale_ = this.laterpayConfig_['locale'] || 'en';
 
     /** @private {!JsonObject} */
-    this.i18n_ = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict(),
-        DEFAULT_MESSAGES,
-        this.laterpayConfig_['localeMessages'] || dict()
-      )
-    );
+    this.i18n_ = /** @type {!JsonObject} */ ({
+      ...DEFAULT_MESSAGES,
+      ...(this.laterpayConfig_['localeMessages'] || {}),
+    });
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;

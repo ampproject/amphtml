@@ -1,8 +1,7 @@
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryInteractiveQuiz} from '../amp-story-interactive-quiz';
-import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
-import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
 import {
   MOCK_URL,
   getMockIncompleteData,
@@ -11,7 +10,10 @@ import {
   getMockScrambledData,
   populateQuiz,
 } from './helpers';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpStoryInteractiveQuiz} from '../amp-story-interactive-quiz';
 
 describes.realWin(
   'amp-story-interactive-quiz',

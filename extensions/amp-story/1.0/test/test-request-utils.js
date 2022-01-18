@@ -1,4 +1,5 @@
 import {Services} from '#service';
+
 import {CONFIG_SRC_ATTRIBUTE_NAME, getElementConfig} from '../request-utils';
 
 describes.fakeWin('request-utils', {amp: true}, (env) => {
