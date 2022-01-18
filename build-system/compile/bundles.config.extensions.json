@@ -1036,12 +1036,11 @@
     }
   },
   {
-    "name": "amp-story",
+    "name": "amp-story-ssr",
+    "originalSource": "amp-story",
     "version": "1.0",
     "options": {
-      "hasCss": true,
-      "destName": "amp-story-ssr",
-      "ssr": true
+      "hasCss": false
     }
   },
   {
@@ -1118,6 +1117,14 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-story-ssr",
+    "originalSource": "amp-story",
+    "version": "1.0",
+    "options": {
+      "hasCss": false
     }
   },
   {

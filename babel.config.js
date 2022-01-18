@@ -47,7 +47,6 @@ module.exports = function (api) {
   });
   if (callerName && babelTransforms.has(callerName)) {
     const configFunctionName = babelTransforms.get(callerName);
-    console.log('caller' ,callerName);
     return require('./build-system/babel-config')[configFunctionName]();
   } else {
     log(

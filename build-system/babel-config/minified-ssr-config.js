@@ -3,13 +3,13 @@
 const {getMinifiedConfig} = require('./minified-config');
 
 /**
- * Gets the config for minified babel transforms run, used by 3p vendors.
+ * Gets the config for minified babel transforms run, used by 3p vendors with
+ * IS_SSR set to true.
  *
  * @return {!Object}
  */
 function getMinifiedSsrConfig() {
-  const config = getMinifiedConfig();
-  return config;
+  return getMinifiedConfig({IS_SSR: true});
 }
 
 module.exports = {

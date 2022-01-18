@@ -132,7 +132,7 @@ function declareExtension(name, version, options, extensionsObject) {
   const defaultOptions = {hasCss: false, npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach((v) => {
-    const key = options ? ( options.destName ?? name) : name;
+    const key = options ? options.destName ?? name : name;
     extensionsObject[`${key}-${v}`] = {
       name,
       version: v,

@@ -349,6 +349,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   let babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
+  // We read from the current binary configuration options if it is an
+  // SSR ready binary output. (ex. removes CSS installation, etc)
   if (options.ssr) {
     babelCaller += '-ssr';
   }
@@ -377,8 +379,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    * @return {Promise<void>}
    */
   async function build(startTime) {
-    console.log('build entryPoint', entryPoint);
-    console.log('build outFile', destFile);
     if (!result) {
       result = await esbuild.build({
         entryPoints: [entryPoint],
