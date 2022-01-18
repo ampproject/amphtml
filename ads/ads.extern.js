@@ -616,7 +616,6 @@ data.section;
 // pulsepoint.js
 window.PulsePointHeaderTag;
 
-
 // r9x.js
 window.r9x = {};
 window.r9x.initAmp = function (
