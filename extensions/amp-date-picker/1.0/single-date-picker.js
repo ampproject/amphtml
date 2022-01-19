@@ -1,4 +1,3 @@
-import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
@@ -24,9 +23,9 @@ import {
   DatePickerState,
   FORM_INPUT_SELECTOR,
   TAG,
-  noop,
 } from './constants';
 import {getFormattedDate, parseDate} from './date-helpers';
+import {useDatePickerState} from './use-date-picker-state';
 
 /**
  * @param {!DateInput.Props} props
@@ -48,52 +47,18 @@ export function SingleDatePicker({
   const [date, _setDate] = useState();
 
   const containerRef = useRef();
-  const initialStateMachineState =
-    mode === DatePickerMode.OVERLAY
-      ? DatePickerState.OVERLAY_CLOSED
-      : DatePickerState.STATIC;
-
-  const stateMachineRef = useRef(
-    new FiniteStateMachine(initialStateMachineState)
-  );
 
   const initialState = {
     isOpen: mode === DatePickerMode.STATIC,
   };
-  const [state, setState] = useState(initialState);
-
-  const initializeStateMachine = useCallback(() => {
-    const sm = stateMachineRef.current;
-    const {OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, STATIC} =
-      DatePickerState;
-    sm.addTransition(STATIC, STATIC, noop);
-
-    sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, () => {
-      setState({isOpen: true, isFocused: true, focused: false});
-    });
-
-    sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, () => {
-      setState({isOpen: true, isFocused: true, focused: true});
-    });
-
-    sm.addTransition(OVERLAY_CLOSED, OVERLAY_CLOSED, noop);
-
-    sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, () => {
-      setState({
-        isOpen: true,
-        isFocused: true,
-        focused: true,
-      });
-    });
-
-    sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, () => {
-      setState({
-        isOpen: false,
-        isFocused: false,
-        focused: false,
-      });
-    });
-  }, [setState]);
+  const initialStateMachineState =
+    mode === DatePickerMode.OVERLAY
+      ? DatePickerState.OVERLAY_CLOSED
+      : DatePickerState.STATIC;
+  const {state, transitionTo} = useDatePickerState(
+    initialState,
+    initialStateMachineState
+  );
 
   const handleSetDate = useCallback(
     (date) => {
@@ -149,14 +114,6 @@ export function SingleDatePicker({
     [blockedDates, handleSetDate]
   );
 
-  /**
-   * Transition to a new state
-   * @param {!DatePickerState} state
-   */
-  const transitionTo = useCallback((state) => {
-    stateMachineRef.current.setState(state);
-  }, []);
-
   const inputElement = useMemo(() => {
     const props = {
       ...inputProps,
@@ -169,7 +126,6 @@ export function SingleDatePicker({
   }, [inputProps, children]);
 
   useEffect(() => {
-    initializeStateMachine();
     const form = closestAncestorElementBySelector(
       containerRef.current,
       FORM_INPUT_SELECTOR

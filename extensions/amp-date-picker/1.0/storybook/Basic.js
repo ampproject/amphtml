@@ -10,6 +10,7 @@ export default {
     layout: 'fixed-height',
     mode: 'static',
     height: 360,
+    initialVisibleMonth: new Date(),
   },
 };
 
@@ -27,7 +28,6 @@ export const WithSingleInput = (args) => {
 
 WithSingleInput.args = {
   type: 'single',
-  initialVisibleMonth: new Date(),
   mode: 'overlay',
 };
 
@@ -42,6 +42,7 @@ export const WithRangeInput = (args) => {
 
 WithRangeInput.args = {
   type: 'range',
+  mode: 'overlay',
 };
 
 // eslint-disable-next-line local/no-export-side-effect
