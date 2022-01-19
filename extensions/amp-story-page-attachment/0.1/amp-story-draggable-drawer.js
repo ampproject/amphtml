@@ -237,7 +237,9 @@ export class DraggableDrawer extends AMP.BaseElement {
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();
 
-    this.headerEl.toggleAttribute('desktop', !isMobile);
+    isMobile
+      ? this.headerEl.removeAttribute('desktop')
+      : this.headerEl.setAttribute('desktop', '');
   }
 
   /**
