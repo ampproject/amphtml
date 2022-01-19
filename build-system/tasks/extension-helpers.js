@@ -139,7 +139,7 @@ function declareExtension(name, version, options, extensionsObject) {
     // multiple entries share the same "entryPoint/name"  but have different
     // destination name. This allows for a 1 to many relationship between
     // entryPoint and output (1 -> *).
-    const key = options ? options.destName ?? name : name;
+    const key = options?.destName ?? name;
     extensionsObject[`${key}-${v}`] = {
       name,
       version: v,
