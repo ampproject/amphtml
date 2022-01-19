@@ -85,11 +85,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
 
     /* We only check the right hand side, as resizing only expands the border to the right. */
-    const {offsetLeft, offsetWidth} = this.element;
+    const {left, width} = this.element./*OK*/ getLayoutBox();
 
     const storyPageWidth = pageSize.width;
 
-    const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
+    const shouldFlip = left + width > storyPageWidth;
 
     this.mutateElement(() => {
       this.shoppingTagEl_.classList.toggle(
