@@ -72,15 +72,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
   constructor(element) {
     super(element);
 
-    /** @private @const {!Element} */
-    this.storyEl_ = devAssert(
-      closestAncestorElementBySelector(this.element, 'amp-story')
-    );
+    /** @private {?Element} */
+    this.storyEl_ = null;
 
-    /** @private @const {!Element} */
-    this.pageEl_ = devAssert(
-      closestAncestorElementBySelector(this.element, 'amp-story-page')
-    );
+    /** @private {?Element} */
+    this.pageEl_ = null;
 
     /** @private @const {!../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = Services.storyAnalyticsService(this.win);
@@ -97,6 +93,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   buildCallback() {
     super.buildCallback();
+    this.storyEl_ = devAssert(
+      closestAncestorElementBySelector(this.element, 'amp-story')
+    );
+    this.pageEl_ = devAssert(
+      closestAncestorElementBySelector(this.element, 'amp-story-page')
+    );
     this.buildOpenAttachmentUI_();
     this.maybeSetDarkThemeForElement_(this.headerEl);
     this.maybeSetDarkThemeForElement_(this.element);
