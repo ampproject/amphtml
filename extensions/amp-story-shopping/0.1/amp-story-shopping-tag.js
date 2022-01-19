@@ -125,11 +125,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     const numLines = Math.ceil(height / lineHeight);
 
     this.mutateElement(() => {
-      if (numLines <= 1) {
-        pillEl.classList.remove('amp-story-shopping-tag-pill-multi-line');
-      } else {
-        pillEl.classList.add('amp-story-shopping-tag-pill-multi-line');
-      }
+      pillEl.classList.toggle(
+        'amp-story-shopping-tag-pill-multi-line',
+        numLines > 1
+      );
     });
   }
 
