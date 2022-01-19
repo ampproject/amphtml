@@ -493,7 +493,7 @@ jobs:
       - setup_vm
       - run:
           name: '⭐ Trigger Promote Workflow ⭐'
-          command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js --branch=${CIRCLE_BRANCH}
+          command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js
       - teardown_vm
 
 workflows:
