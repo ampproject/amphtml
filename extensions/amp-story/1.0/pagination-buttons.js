@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
@@ -123,9 +124,7 @@ class PaginationButton {
         !isEnabled
       );
       const button = this.element.querySelector('button');
-      isEnabled
-        ? button.removeAttribute('disabled')
-        : button.setAttribute('disabled', '');
+      toggleAttribute(button, 'disabled', !isEnabled);
     });
   }
 
