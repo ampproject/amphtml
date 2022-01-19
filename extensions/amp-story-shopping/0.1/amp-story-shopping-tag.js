@@ -2,6 +2,7 @@ import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
+import {getLanguageCodeForElement} from 'extensions/amp-story/1.0/amp-story-localization-service';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
@@ -124,15 +125,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
                 {this.tagData_['product-tag-text']}
               </span>
             )) ||
-              new Intl.NumberFormat(
-                this.localizationService_.getLanguageCodesForElement(
-                  this.element_
-                )[0],
-                {
-                  style: 'currency',
-                  currency: this.tagData_['product-price-currency'],
-                }
-              ).format(this.tagData_['product-price'])}
+              new Intl.NumberFormat(getLanguageCodeForElement(this.element_), {
+                style: 'currency',
+                currency: this.tagData_['product-price-currency'],
+              }).format(this.tagData_['product-price'])}
           </span>
         </span>
       </div>

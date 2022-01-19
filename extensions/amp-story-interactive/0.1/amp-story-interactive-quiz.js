@@ -133,11 +133,10 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
       convertedOption.setAttribute('correct', 'correct');
     }
 
-    this.localizationService
-      .localizeAsync(this.localizedAnswerChoices_[index])
-      .then((translation) => {
-        answerChoiceEl.textContent = translation;
-      });
+    this.localizationService.localizeEl(
+      answerChoiceEl,
+      this.localizedAnswerChoices_[index]
+    );
     return convertedOption;
   }
 

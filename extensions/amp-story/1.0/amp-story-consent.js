@@ -28,12 +28,12 @@ import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
   getTextColorForRGB,
-  setLocalizedContentAsync,
   triggerClickFromLightDom,
 } from './utils';
 
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
+import {getLocalizationService} from './amp-story-localization-service';
 
 /** @const {string} */
 const TAG = 'amp-story-consent';
@@ -391,16 +391,15 @@ export class AmpStoryConsent extends AMP.BaseElement {
    * Adds localization to the system layer.
    */
   localize_() {
+    const localizationService = getLocalizationService(this.element);
     this.storyConsentEl_
       .querySelectorAll('[data-localized-text]')
       .forEach((el) => {
-        setLocalizedContentAsync(
-          el,
-          el.getAttribute('data-localized-text'),
-          this.element
-        ).then(() => {
-          el.removeAttribute('data-localized-text');
-        });
+        localizationService
+          .localizeEl(el, el.getAttribute('data-localized-text'), 'aria-label')
+          .then(() => {
+            el.removeAttribute('data-localized-text');
+          });
       });
   }
 }

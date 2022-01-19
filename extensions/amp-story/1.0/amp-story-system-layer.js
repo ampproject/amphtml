@@ -21,7 +21,6 @@ import {ProgressBar} from './progress-bar';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
-  setLocalizedAriaAsync,
   setLocalizedContentAsync,
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
@@ -30,6 +29,7 @@ import {
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
 import {getSourceOrigin} from '../../../src/url';
+import {getLocalizationService} from './amp-story-localization-service';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -899,19 +899,17 @@ export class SystemLayer {
    * Adds localization to the system layer.
    */
   localize_() {
+    const localizationService = getLocalizationService(this.parentEl_);
     this.systemLayerEl_
       .querySelectorAll('[data-localized-label]')
       .forEach((el) => {
-        setLocalizedAriaAsync(
-          el,
-          el.getAttribute('data-localized-label'),
-          this.parentEl_
-        ).then(() => el.removeAttribute('data-localized-label'));
+        localizationService
+          .localizeEl(el, el.getAttribute('data-localized-label'), 'aria-label')
+          .then(() => el.removeAttribute('data-localized-label'));
       });
-    setLocalizedContentAsync(
+    localizationService.localizeEl(
       this.systemLayerEl_.querySelector('.i-amphtml-story-has-new-page-text'),
-      LocalizedStringId_Enum.AMP_STORY_HAS_NEW_PAGE_TEXT,
-      this.parentEl_
+      LocalizedStringId_Enum.AMP_STORY_HAS_NEW_PAGE_TEXT
     );
   }
 }

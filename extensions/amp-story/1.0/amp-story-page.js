@@ -50,10 +50,11 @@ import {MediaPool} from './media-pool';
 import {AdvancementConfig} from './page-advancement';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {renderPageDescription} from './semantic-render';
-import {setLocalizedContentAsync, setTextBackgroundColor} from './utils';
+import {setTextBackgroundColor} from './utils';
 
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
+import {getLocalizationService} from './amp-story-localization-service';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -1451,10 +1452,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         .then(() => this.playAllMedia_());
     });
 
-    setLocalizedContentAsync(
+    getLocalizationService(this.element).localizeEl(
       this.playMessageEl_.querySelector('.i-amphtml-story-page-play-label'),
-      LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO,
-      this.element
+      LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO
     );
 
     this.mutateElement(() => this.element.appendChild(this.playMessageEl_));
@@ -1493,13 +1493,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       '.i-amphtml-story-page-error-label'
     );
 
-    setLocalizedContentAsync(
-      labelEl,
-      LocalizedStringId_Enum.AMP_STORY_PAGE_ERROR_VIDEO,
-      this.element
-    ).then(() =>
-      this.mutateElement(() => this.element.appendChild(this.errorMessageEl_))
-    );
+    getLocalizationService(this.element)
+      .localizeEl(labelEl, LocalizedStringId_Enum.AMP_STORY_PAGE_ERROR_VIDEO)
+      .then(() =>
+        this.mutateElement(() => this.element.appendChild(this.errorMessageEl_))
+      );
   }
 
   /**

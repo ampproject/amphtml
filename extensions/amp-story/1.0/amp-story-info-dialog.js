@@ -20,6 +20,7 @@ import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
+import {getLocalizationService} from './amp-story-localization-service';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
@@ -205,12 +206,11 @@ export class InfoDialog {
    * @private
    */
   localize_() {
+    const localizationService = getLocalizationService(this.parentEl_);
     this.element_.querySelectorAll('[data-localized-text]').forEach((el) => {
-      setLocalizedContentAsync(
-        el,
-        el.getAttribute('data-localized-text'),
-        this.parentEl_
-      ).then(() => el.removeAttribute('data-localized-text'));
+      localizationService
+        .localizeEl(el, el.getAttribute('data-localized-text'), 'aria-label')
+        .then(() => el.removeAttribute('data-localized-text'));
     });
   }
 }

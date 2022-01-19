@@ -9,9 +9,10 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {createShadowRootWithStyle, setLocalizedContentAsync} from './utils';
+import {createShadowRootWithStyle} from './utils';
 
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
+import {getLocalizationService} from './amp-story-localization-service';
 
 /**
  * @return {!Element}
@@ -262,14 +263,13 @@ export class AmpStoryHint {
    * @private
    */
   localize_() {
+    const localizationService = getLocalizationService(this.parentEl_);
     this.hintContainer_
       .querySelectorAll('[data-localized-text]')
       .forEach((el) => {
-        setLocalizedContentAsync(
-          el,
-          el.getAttribute('data-localized-text'),
-          this.parentEl_
-        ).then(() => el.removeAttribute('data-localized-text'));
+        localizationService
+          .localizeEl(el, el.getAttribute('data-localized-text'), 'aria-label')
+          .then(() => el.removeAttribute('data-localized-text'));
       });
   }
 }

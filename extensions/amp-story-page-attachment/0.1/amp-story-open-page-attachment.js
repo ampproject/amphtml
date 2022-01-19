@@ -101,14 +101,16 @@ const openLabelOrFallback = (element, attachmentEl, label) => {
   const isShopping = attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT';
   if (isShopping) {
     return Services.localizationServiceForOrNull(element).then((service) =>
-      service.localizeAsync(LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL)
+      service.getLocalizedStringAsync(
+        LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+      )
     );
   }
   if (label) {
     return Promise.resolve(label.trim());
   }
   return Services.localizationServiceForOrNull(element).then((service) =>
-    service.localizeAsync(
+    service.getLocalizedStringAsync(
       LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
     )
   );

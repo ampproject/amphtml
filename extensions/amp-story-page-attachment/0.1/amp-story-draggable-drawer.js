@@ -147,11 +147,11 @@ export class DraggableDrawer extends AMP.BaseElement {
       ></button>
     );
 
-    this.localizationService
-      .localizeAsync(LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL)
-      .then((translation) => {
-        spacerEl.setAttribute('aria-label', translation);
-      });
+    this.localizationService.localizeEl(
+      spacerEl,
+      LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL,
+      'aria-label'
+    );
 
     this.containerEl.insertBefore(spacerEl, this.contentEl);
     this.contentEl.appendChild(

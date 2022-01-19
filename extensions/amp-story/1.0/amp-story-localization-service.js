@@ -1,10 +1,22 @@
-import { getWin } from '#core/window';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 
-const testUrl = 'https://gist.githubusercontent.com/mszylkowski/3ed540186b18f4da4083e087bff36122/raw/a46b0204d5a7e12615a924b4ae192d9d77128bff/amp-story.es.json';
+/**
+ * Language code used if there is no language code specified by the document.
+ * @const {string}
+ */
+const FALLBACK_LANGUAGE_CODE = 'en';
+
+/**
+ * @const {!RegExp}
+ */
+const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
+
+const testUrl =
+  'https://gist.githubusercontent.com/mszylkowski/3ed540186b18f4da4083e087bff36122/raw/a46b0204d5a7e12615a924b4ae192d9d77128bff/amp-story.es.json';
 
 /**
  * Util function to retrieve the localization service. Ensures we can retrieve
@@ -24,4 +36,39 @@ export function getLocalizationService(element) {
   }
 
   return localizationService;
+}
+
+/**
+ * Finds the closest lang attribute in a parent element, or defaults to `en`.
+ * @param {!Element} element
+ * @returns {string}
+ */
+export function getLanguageCodeForElement(element) {
+  return (
+    closestAncestorElementBySelector(element, '[lang]')?.getAttribute('lang') ||
+    FALLBACK_LANGUAGE_CODE
+  );
+}
+
+/**
+ * @param {string} languageCode
+ * @return {!Array<string>} A list of language codes.
+ * @visibleForTesting
+ */
+export function getLanguageCodesFromString(languageCode) {
+  if (!languageCode) {
+    return [FALLBACK_LANGUAGE_CODE];
+  }
+  const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
+  return matches.reduce(
+    (fallbackLanguageCodeList, chunk, index) => {
+      const fallbackLanguageCode = matches
+        .slice(0, index + 1)
+        .join('-')
+        .toLowerCase();
+      fallbackLanguageCodeList.unshift(fallbackLanguageCode);
+      return fallbackLanguageCodeList;
+    },
+    [FALLBACK_LANGUAGE_CODE]
+  );
 }

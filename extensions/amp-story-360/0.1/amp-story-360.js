@@ -549,16 +549,17 @@ export class AmpStory360 extends AMP.BaseElement {
     ) {
       const page = this.getPage_();
       const discoveryTemplate = page && renderDiscoveryTemplate();
+      const discoveryText = discoveryTemplate.querySelector(
+        '.i-amphtml-story-360-discovery-text'
+      );
       // Support translation of discovery dialogue text.
       this.localizationService_
-        .localizeAsync(LocalizedStringId_Enum.AMP_STORY_DISCOVERY_DIALOG_TEXT)
-        .then((translation) => {
-          this.mutateElement(() => {
-            discoveryTemplate.querySelector(
-              '.i-amphtml-story-360-discovery-text'
-            ).textContent = translation;
-            page.appendChild(discoveryTemplate);
-          });
+        .localizeEl(
+          discoveryText,
+          LocalizedStringId_Enum.AMP_STORY_DISCOVERY_DIALOG_TEXT
+        )
+        .then(() => {
+          page.appendChild(discoveryTemplate);
         });
     }
   }

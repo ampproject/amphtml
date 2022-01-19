@@ -1,3 +1,4 @@
+import {Observable} from '#core/data-structures/observable';
 import {closest} from '#core/dom/query';
 import {getWin} from '#core/window';
 
@@ -13,114 +14,96 @@ import {
 } from './strings';
 
 /**
- * Language code used if there is no language code specified by the document.
- * @const {string}
- */
-const FALLBACK_LANGUAGE_CODE = 'default';
-
-/**
- * @const {!RegExp}
- */
-const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
-
-/**
- * @param {string} languageCode
- * @return {!Array<string>} A list of language codes.
- * @visibleForTesting
- */
-export function getLanguageCodesFromString(languageCode) {
-  if (!languageCode) {
-    return ['en', FALLBACK_LANGUAGE_CODE];
-  }
-  const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
-  return matches.reduce(
-    (fallbackLanguageCodeList, chunk, index) => {
-      const fallbackLanguageCode = matches
-        .slice(0, index + 1)
-        .join('-')
-        .toLowerCase();
-      fallbackLanguageCodeList.unshift(fallbackLanguageCode);
-      return fallbackLanguageCodeList;
-    },
-    [FALLBACK_LANGUAGE_CODE]
-  );
-}
-
-/**
  * Localization service.
  */
 export class LocalizationService {
   /**
    * @param {!Element} element
-   * @param {?string} remoteBundleUrl
    */
-  constructor(element, remoteBundleUrl) {
+  constructor(element) {
     this.element_ = element;
 
     this.language_ =
       getWin(element).document.querySelector('[lang]')?.getAttribute('lang') ||
       'en';
-    
-    this.fetchedRemote_ = Promise.resolve();
+
+    /** Informs when new strings are available.
+     * @private @const {!Observable}
+     * */
+    this.newBundleObserver_ = new Observable();
 
     /**
-     * A mapping of language code to localized string bundle.
-     * @private @const {!Object<string, !LocalizedStringBundleDef>}
+     * A mapping of codes to localized strings.
+     * @private @const {!LocalizedStringBundleDef}
      */
-    this.localizedStringBundles_ = {};
-
-    if (remoteBundleUrl) {
-      this.fetchedRemote_ = Services.xhrFor(getWin(element)).fetchJson(remoteBundleUrl).then((res) => this.registerLocalizedStringBundle(this.language_, res.json()));
-    }
-  }
-
-  getLocalizedString(code) {
-    const languageDict = this.localizedStringBundles_[this.language_];
-    if (languageDict && languageDict[code]) {
-      console.log('should not be localizing', code, languageDict[code]);
-      return languageDict[code];
-    }
-    console.log('should not be localizing', code, 'NOT WORKING');
-    return 'NOT WORKING';
+    this.localizedStrings_ = {};
   }
 
   /**
-   * @param {!Element} element
-   * @return {!Array<string>}
+   * Synchronously gets the string if available.
+   * Useful for bundles that are registered synchronously (and not fetched async).
+   * @param {string} code
+   * @returns {?string}
    */
-  getLanguageCodesForElement(element) {
-    const languageEl = closest(element, (el) => el.hasAttribute('lang'));
-    const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
-    const languageCodesToUse = getLanguageCodesFromString(languageCode || '');
-
-    if (this.viewerLanguageCode_) {
-      languageCodesToUse.unshift(this.viewerLanguageCode_);
-    }
-
-    return languageCodesToUse;
+  getLocalizedString(code) {
+    return this.localizedStrings_[code];
   }
 
   /**
-   * @param {string} languageCode The language code to associate with the
-   *     specified localized string bundle.
    * @param {!LocalizedStringBundleDef} localizedStringBundle
    *     The localized string bundle to register.
    * @return {!LocalizationService} For chaining.
    */
-  registerLocalizedStringBundle(languageCode, localizedStringBundle) {
-    const normalizedLangCode = languageCode.toLowerCase();
-    if (!this.localizedStringBundles_[normalizedLangCode]) {
-      this.localizedStringBundles_[normalizedLangCode] = {};
-    }
-
-    Object.assign(
-      this.localizedStringBundles_[normalizedLangCode],
-      localizedStringBundle
-    );
+  registerLocalizedStringBundle(localizedStringBundle) {
+    this.localizedStrings_ = {
+      ...this.localizedStrings_,
+      ...localizedStringBundle,
+    };
     return this;
   }
 
-  whenInitialized() {
-    return this.fetchedRemote_;
+  /**
+   * Fetches and registers the localization bundle from the given URL.
+   * @param {string} url
+   */
+  registerFromUrl(url) {
+    Services.xhrFor(getWin(this.element_))
+      .fetchJson(url)
+      .then((res) => {
+        this.registerLocalizedStringBundle(res.json());
+        this.newBundleObserver_.fire();
+      });
+  }
+
+  getLocalizedStringAsync(code) {
+    if (this.localizedStrings_[code]) {
+      return Promise.resolve(this.localizedStrings_[code]);
+    }
+    return new Promise((res) => {
+      const remove = this.newBundleObserver_.add(() => {
+        if (this.localizedStrings_[code]) {
+          res(this.localizedStrings_[code]);
+          remove();
+        }
+      });
+    });
+  }
+
+  /**
+   * Localizes the element textContent or attribute (if present) asynchromously.
+   * Useful for localization bundles that are fetched asynchronously.
+   * @param {!Element} el
+   * @param {!LocalizedStringId_Enum} code
+   * @param {?string} attribute
+   * @returns {!Promise}
+   */
+  localizeEl(el, code, attribute = null) {
+    return this.getLocalizedStringAsync(code).then((val) => {
+      if (attribute == null) {
+        el.textContent = val;
+      } else {
+        el.setAttribute(attribute, val);
+      }
+    });
   }
 }
