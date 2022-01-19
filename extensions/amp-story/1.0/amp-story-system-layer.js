@@ -22,7 +22,6 @@ import {ProgressBar} from './progress-bar';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
-  setLocalizedContentAsync,
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
 } from './utils';

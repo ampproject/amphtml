@@ -3,7 +3,7 @@ import * as Preact from '#core/dom/jsx';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {getLocalizationService} from './amp-story-localization-service';
-import {createShadowRootWithStyle, setLocalizedContentAsync} from './utils';
+import {createShadowRootWithStyle} from './utils';
 
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
 
