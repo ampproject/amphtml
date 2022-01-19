@@ -2,6 +2,7 @@ import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
+
 import {getLanguageCodeForElement} from 'extensions/amp-story/1.0/amp-story-localization-service';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
@@ -33,9 +34,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
-
     /** @param {boolean} element */
     this.hasAppendedInnerShoppingTagEl_ = false;
 
@@ -48,13 +46,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.loadFonts_();
     this.element.setAttribute('role', 'button');
 
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win),
-      Services.localizationServiceForOrNull(this.element),
-    ]).then(([storeService, localizationService]) => {
-      this.storeService_ = storeService;
-      this.localizationService_ = localizationService;
-    });
+    return Services.storyStoreServiceForOrNull(this.win).then(
+      (storeService) => {
+        this.storeService_ = storeService;
+      }
+    );
   }
 
   /** @override */

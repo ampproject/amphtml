@@ -19,6 +19,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev, user, userAssert} from '#utils/log';
 
+import {getLocalizationService} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -33,7 +34,6 @@ import {
 
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
 import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
-import {getLocalizationService} from './amp-story-localization-service';
 
 /** @const {string} */
 const TAG = 'amp-story-consent';

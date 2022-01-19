@@ -172,10 +172,6 @@ export class AmpStoryEducation extends AMP.BaseElement {
     });
   }
 
-  upgradeCallback() {
-    return this.localizationService_.whenInitialized().then(() => null);
-  }
-
   /**
    * @param {!State} state
    * @private

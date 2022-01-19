@@ -1,5 +1,4 @@
 import {Observable} from '#core/data-structures/observable';
-import {closest} from '#core/dom/query';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -23,10 +22,6 @@ export class LocalizationService {
   constructor(element) {
     this.element_ = element;
 
-    this.language_ =
-      getWin(element).document.querySelector('[lang]')?.getAttribute('lang') ||
-      'en';
-
     /** Informs when new strings are available.
      * @private @const {!Observable}
      * */
@@ -43,7 +38,7 @@ export class LocalizationService {
    * Synchronously gets the string if available.
    * Useful for bundles that are registered synchronously (and not fetched async).
    * @param {string} code
-   * @returns {?string}
+   * @return {?string}
    */
   getLocalizedString(code) {
     return this.localizedStrings_[code];
@@ -75,6 +70,11 @@ export class LocalizationService {
       });
   }
 
+  /**
+   * Returns the localized string when available.
+   * @param {string} code
+   * @return {!Promise<string>}
+   */
   getLocalizedStringAsync(code) {
     if (this.localizedStrings_[code]) {
       return Promise.resolve(this.localizedStrings_[code]);
@@ -95,7 +95,7 @@ export class LocalizationService {
    * @param {!Element} el
    * @param {!LocalizedStringId_Enum} code
    * @param {?string} attribute
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   localizeEl(el, code, attribute = null) {
     return this.getLocalizedStringAsync(code).then((val) => {

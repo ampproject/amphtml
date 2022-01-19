@@ -6,6 +6,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
 
+import {getLocalizationService} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -20,7 +21,6 @@ import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {getLocalizationService} from './amp-story-localization-service';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';

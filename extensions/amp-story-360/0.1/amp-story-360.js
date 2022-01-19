@@ -22,10 +22,7 @@ import {
   Action,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {
-  setLocalizedContentAsync,
-  timeStrToMillis,
-} from '../../amp-story/1.0/utils';
+import {timeStrToMillis} from '../../amp-story/1.0/utils';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -597,13 +594,16 @@ export class AmpStory360 extends AMP.BaseElement {
       this.requestGyroscopePermissions_()
     );
 
-    setLocalizedContentAsync(
-      this.activateButton_.querySelector('.i-amphtml-story-360-activate-text'),
-      LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT,
-      this.element
-    ).then(() =>
-      this.mutateElement(() => ampStoryPage.appendChild(this.activateButton_))
-    );
+    this.localizationService_
+      .localizeEl(
+        this.activateButton_.querySelector(
+          '.i-amphtml-story-360-activate-text'
+        ),
+        LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
+      )
+      .then(() =>
+        this.mutateElement(() => ampStoryPage.appendChild(this.activateButton_))
+      );
   }
 
   /** @private */

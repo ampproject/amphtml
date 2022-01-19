@@ -2,6 +2,7 @@ import * as Preact from '#core/dom/jsx';
 
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
+import {getLocalizationService} from './amp-story-localization-service';
 import {createShadowRootWithStyle, setLocalizedContentAsync} from './utils';
 
 import {CSS} from '../../../build/amp-story-unsupported-browser-layer-1.0.css';
@@ -41,10 +42,9 @@ const renderContent = (continueAnyway) => (
 export function renderUnsupportedBrowserLayer(context, continueAnyway) {
   const content = renderContent(continueAnyway);
   content.querySelectorAll('[data-localized-text]').forEach((el) => {
-    setLocalizedContentAsync(
+    getLocalizationService(context).localizeEl(
       el,
-      el.getAttribute('data-localized-text'),
-      context
+      el.getAttribute('data-localized-text')
     );
   });
   return createShadowRootWithStyle(<div />, content, CSS);

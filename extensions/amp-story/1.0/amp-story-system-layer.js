@@ -10,6 +10,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
 
+import {getLocalizationService} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -29,7 +30,6 @@ import {
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
 import {getSourceOrigin} from '../../../src/url';
-import {getLocalizationService} from './amp-story-localization-service';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';

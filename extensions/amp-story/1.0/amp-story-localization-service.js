@@ -1,4 +1,5 @@
 import {closestAncestorElementBySelector} from '#core/dom/query';
+
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
@@ -41,7 +42,7 @@ export function getLocalizationService(element) {
 /**
  * Finds the closest lang attribute in a parent element, or defaults to `en`.
  * @param {!Element} element
- * @returns {string}
+ * @return {string}
  */
 export function getLanguageCodeForElement(element) {
   return (

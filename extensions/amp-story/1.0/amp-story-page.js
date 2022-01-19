@@ -35,6 +35,7 @@ import {listen, listenOnce} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
 import {embeddedElementsSelectors} from './amp-story-embedded-component';
+import {getLocalizationService} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -54,7 +55,6 @@ import {setTextBackgroundColor} from './utils';
 
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
-import {getLocalizationService} from './amp-story-localization-service';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
