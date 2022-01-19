@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { macroTask } from '#testing/helpers';
-import { Layout_Enum } from '#core/dom/layout';
 import '../amp-google-read-aloud-player';
-import { Services } from '#service';
-import {
-  addAttributesToElement,
-  createElementWithAttributes,
-} from '#core/dom';
-import { toggleExperiment } from '../../../../src/experiments';
-import { installResizeObserverStub } from '#testing/resize-observer-stub';
-import { expect } from 'chai';
+
+import {expect} from 'chai';
+
+import {createElementWithAttributes} from '#core/dom';
+import {Layout_Enum} from '#core/dom/layout';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/helpers';
 
 const IFRAME_BASE_URL =
   'https://www.gstatic.com/readaloud/player/web/api/iframe/index.html';
@@ -55,7 +56,6 @@ describes.realWin(
     let win;
     let doc;
     let videoManagerStub;
-    let resizeObserverStub;
 
     beforeEach(() => {
       win = env.win;
@@ -68,7 +68,6 @@ describes.realWin(
       env.sandbox
         .stub(Services, 'videoManagerForDoc')
         .returns(videoManagerStub);
-      resizeObserverStub = installResizeObserverStub(env.sandbox, win);
 
       toggleExperiment(win, 'amp-google-read-aloud-player', true);
     });
@@ -78,10 +77,14 @@ describes.realWin(
     });
 
     function createGoogleReadAloudPlayer(attrs = {}) {
-      const el = createElementWithAttributes(doc, 'amp-google-read-aloud-player', {
-        ...attrs,
-        ...LAYOUT_ATTRS,
-      });
+      const el = createElementWithAttributes(
+        doc,
+        'amp-google-read-aloud-player',
+        {
+          ...attrs,
+          ...LAYOUT_ATTRS,
+        }
+      );
       doc.body.appendChild(el);
       return el;
     }
@@ -89,7 +92,8 @@ describes.realWin(
     function createAndRenderGoogleReadAloudPlayer(attrs = {}) {
       const element = createGoogleReadAloudPlayer(attrs);
 
-      return element.buildInternal()
+      return element
+        .buildInternal()
         .then(() => {
           element.layoutCallback();
         })
@@ -122,9 +126,10 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.contain(
           `${IFRAME_BASE_URL}?` +
-          `apiKey=${API_KEY}&` +
-          `trackingIds=${TRACKING_IDS}&` +
-          `voice=${VOICE}`);
+            `apiKey=${API_KEY}&` +
+            `trackingIds=${TRACKING_IDS}&` +
+            `voice=${VOICE}`
+        );
       });
 
       it('sets optional params in iframe src', async () => {
@@ -145,16 +150,16 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.contain(
           `${IFRAME_BASE_URL}?` +
-          `apiKey=${API_KEY}&` +
-          `trackingIds=${TRACKING_IDS}&` +
-          `voice=${VOICE}&` +
-          `url=${encodeURIComponent(URL)}&` +
-          `speakable=&` +
-          `callToActionLabel=${encodeURIComponent(CALL_TO_ACTION_LABEL)}&` +
-          `locale=${LOCALE}&` +
-          `intro=${encodeURIComponent(INTRO)}&` +
-          `outro=${encodeURIComponent(OUTRO)}&` +
-          `adTagUrl=${encodeURIComponent(AD_TAG_URL)}`
+            `apiKey=${API_KEY}&` +
+            `trackingIds=${TRACKING_IDS}&` +
+            `voice=${VOICE}&` +
+            `url=${encodeURIComponent(URL)}&` +
+            `speakable=&` +
+            `callToActionLabel=${encodeURIComponent(CALL_TO_ACTION_LABEL)}&` +
+            `locale=${LOCALE}&` +
+            `intro=${encodeURIComponent(INTRO)}&` +
+            `outro=${encodeURIComponent(OUTRO)}&` +
+            `adTagUrl=${encodeURIComponent(AD_TAG_URL)}`
         );
       });
 
@@ -164,7 +169,7 @@ describes.realWin(
           canonicalUrl,
         });
 
-        const jsonLd = { jsonLd: 'blah' };
+        const jsonLd = {jsonLd: 'blah'};
         const jsonLdScript = win.document.createElement('script');
         jsonLdScript.type = 'application/ld+json';
         jsonLdScript.text = JSON.stringify(jsonLd);

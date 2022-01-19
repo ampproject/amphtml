@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import { Layout_Enum } from '#core/dom/layout';
-import { Services } from '#service';
-import { addParamsToUrl } from '../../../src/url';
+import {getDataParamsFromAttributes, removeElement} from '#core/dom';
+import {Layout_Enum} from '#core/dom/layout';
+import {tryParseJson} from '#core/types/object/json';
 
-import { SandboxOptions_Enum, createFrameFor } from '../../../src/iframe-video';
-import { disableScrollingOnIframe } from '../../../src/iframe-helper';
-import { getDataParamsFromAttributes, removeElement } from '#core/dom';
-import { installVideoManagerForDoc } from '#service/video-manager-impl';
-import { isExperimentOn } from '../../../src/experiments';
-import { userAssert } from '#utils/log';
-import { tryParseJson } from '#core/types/object/json';
-import { dict } from '#core/types/object';
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {userAssert} from '#utils/log';
+
+import {disableScrollingOnIframe} from '../../../src/iframe-helper';
+import {SandboxOptions_Enum, createFrameFor} from '../../../src/iframe-video';
+import {addParamsToUrl} from '../../../src/url';
 
 /** @private @const */
 const EXPERIMENT = 'amp-google-read-aloud-player';
@@ -144,23 +146,23 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
   }
 
   /**
- * @return {!JsonObject}
- * @private
- */
+   * @return {!JsonObject}
+   * @private
+   */
   getMetadata_() {
-    const { canonicalUrl } = Services.documentInfoForDoc(this.element);
+    const {canonicalUrl} = Services.documentInfoForDoc(this.element);
     const rootNode = this.getAmpDoc().getRootNode();
 
-    return dict({
-     'canonicalUrl': canonicalUrl,
+    return {
+      'canonicalUrl': canonicalUrl,
       'jsonLd': this.getJsonLd_(rootNode),
-    });
+    };
   }
 
   /**
-* @param {!Node} root
-* @return {?JsonObject}
-*/
+   * @param {!Node} root
+   * @return {?JsonObject}
+   */
   getJsonLd_(root) {
     const scriptTag = root.querySelector('script[type="application/ld+json"]');
     return scriptTag && tryParseJson(scriptTag.textContent);
@@ -169,13 +171,12 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
   /**
    * Posts a message to the iframe.
    * @param {string} action
-   * @param {Object=} payload
    * @private
    */
   postMessage_(action) {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/ postMessage(
-        JSON.stringify(/** @type {JsonObject} */({ action })),
+        JSON.stringify(/** @type {JsonObject} */ ({action})),
         '*'
       );
     }

@@ -121,6 +121,7 @@ with parameters for playing pre-roll audio ads. When present, audio ads will be 
 reading aloud page contents, after the user clicks on the play button for the first time. If not 
 present, only page content will be played.<br/>
 The ad tag URL must include the following parameters:
+
 <ul>
   <li>iu=[Ad unit code]</li>
   <li>sz=1x1</li>
@@ -134,6 +135,7 @@ The ad tag URL must include the following parameters:
 </table>
 
 ## Usage
+
 Include an `amp-google-read-aloud-player` on your AMP document:
 
 ```html
@@ -146,5 +148,6 @@ Include an `amp-google-read-aloud-player` on your AMP document:
 ```
 
 ## Validation
+
 See [amp-google-read-aloud-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-google-read-aloud-player/validator-amp-google-read-aloud-player.protoascii)
 in the AMP validator specification.
