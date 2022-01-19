@@ -1,4 +1,8 @@
+import {dict} from '#core/types/object';
+
 import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
 
@@ -10,6 +14,17 @@ import {CSS} from '../../../build/amp-list-1.0.css';
 const TAG = 'amp-list';
 
 class AmpList extends BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?../../../src/service/template-impl.Templates} */
+    this.templates_ = null;
+
+    /** @private {?Element} */
+    this.template_ = null;
+  }
+
   /** @override */
   init() {
     this.registerApiAction('refresh', (api) => api./*OK*/ refresh());
@@ -26,6 +41,43 @@ class AmpList extends BaseElement {
       'expected global "bento" or specific "bento-list" experiment to be enabled'
     );
     return super.isLayoutSupported(layout);
+  }
+
+  /** @override */
+  checkPropsPostMutations() {
+    const templates =
+      this.templates_ ||
+      (this.templates_ = Services.templatesForDoc(this.element));
+    const template = templates.maybeFindTemplate(this.element);
+    if (template === this.template_) {
+      return;
+    }
+    this.template_ = template;
+    if (template) {
+      // Only overwrite `render` when template is ready to minimize FOUC.
+      templates.getTemplateRenderer(template).then((renderer) => {
+        if (template != this.template_) {
+          // A new template has been set while the old one was initializing.
+          return;
+        }
+        const renderAsString = (data) => {
+          const html = renderer.renderAsString(data);
+          return dict({'__html': html});
+        };
+        this.mutateProps(dict({'template': renderAsString}));
+      });
+    } else {
+      this.mutateProps(dict({'template': null}));
+    }
+  }
+
+  /** @override */
+  isReady(props) {
+    if (this.template_ && !('template' in props)) {
+      // The template is specified, but not available yet.
+      return false;
+    }
+    return true;
   }
 }
 

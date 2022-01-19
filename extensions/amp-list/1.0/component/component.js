@@ -97,9 +97,9 @@ export function BentoListWithRef(
     loadMoreBookmark = 'load-more-src',
     viewportBuffer = 2.0, // When loadMore === 'auto', keep loading up to 2 pages-worth of data
     template: itemTemplate = defaultItemTemplate,
-    wrapper: wrapperTemplate = defaultWrapperTemplate,
-    loading: loadingTemplate = defaultLoadingTemplate,
-    error: errorTemplate = defaultErrorTemplate,
+    wrapperTemplate = defaultWrapperTemplate,
+    loadingTemplate = defaultLoadingTemplate,
+    errorTemplate = defaultErrorTemplate,
     loadMoreTemplate: loadMoreTemplate = defaultLoadMoreTemplate,
     ...rest
   },
@@ -161,9 +161,20 @@ export function BentoListWithRef(
       items = items.slice(0, maxItems);
     }
 
-    return items.map((item, i) =>
-      augment(itemTemplate(item), {'key': i, 'role': 'listitem'})
-    );
+    return items.map((item, i) => {
+      let renderedItem = itemTemplate(item);
+
+      // The template engine outputs raw HTML:
+      if (
+        renderedItem &&
+        typeof renderedItem === 'object' &&
+        typeof renderedItem.__html === 'string'
+      ) {
+        renderedItem = <span dangerouslySetInnerHTML={renderedItem} />;
+      }
+
+      return augment(renderedItem, {'key': i, 'role': 'listitem'});
+    });
   }, [pages, itemsKey, maxItems, itemTemplate]);
 
   const showLoading = loading && (pages.length === 0 || resetOnRefresh);
