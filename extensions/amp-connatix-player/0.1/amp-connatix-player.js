@@ -10,7 +10,6 @@ import {
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -107,13 +106,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
       if (iframe.contentWindow) {
         iframe.contentWindow./*OK*/ postMessage(
-          JSON.stringify(
-            dict({
-              'event': 'command',
-              'func': command,
-              'args': opt_args || '',
-            })
-          ),
+          JSON.stringify({
+            'event': 'command',
+            'func': command,
+            'args': opt_args || '',
+          }),
           this.iframeDomain_
         );
       }
@@ -271,11 +268,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   layoutCallback() {
     const {element} = this;
     // Url Params for iframe source
-    const urlParams = dict({
+    const urlParams = {
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
       'url': Services.documentInfoForDoc(element).sourceUrl,
-    });
+    };
     const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
 

@@ -1,12 +1,13 @@
-import {Services} from '#service';
-import {ancestorElementsByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
-import {dict} from '#core/types/object';
+import {ancestorElementsByTag} from '#core/dom/query';
+import {setStyle, setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {listen} from '#utils/event-helper';
 import {user, userAssert} from '#utils/log';
 
 import {getAdContainer} from '../../../src/ad-helper';
-import {listen} from '#utils/event-helper';
-import {setStyle, setStyles} from '#core/dom/style';
 
 const TAG = 'amp-ad-ui';
 
@@ -326,11 +327,11 @@ export class AmpAdUIHandler {
     const closeButton = createElementWithAttributes(
       /** @type {!Document} */ (this.element_.ownerDocument),
       'button',
-      dict({
+      {
         'aria-label':
           this.element_.getAttribute('data-close-button-aria-label') ||
           'Close this ad',
-      })
+      }
     );
 
     this.unlisteners_.push(

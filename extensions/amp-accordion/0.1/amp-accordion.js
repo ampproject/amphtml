@@ -11,7 +11,6 @@ import {
   setStyles as setStylesTransition,
 } from '#core/dom/transition';
 import {clamp} from '#core/math';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -223,7 +222,7 @@ class AmpAccordion extends AMP.BaseElement {
    */
   getSessionState_() {
     if (this.sessionOptOut_) {
-      return dict();
+      return {};
     }
     try {
       const sessionStr = this.win./*OK*/ sessionStorage.getItem(
@@ -233,7 +232,7 @@ class AmpAccordion extends AMP.BaseElement {
         ? /** @type {!JsonObject} */ (
             devAssert(parseJson(dev().assertString(sessionStr)))
           )
-        : dict();
+        : {};
     } catch (e) {
       dev().fine(
         'AMP-ACCORDION',
@@ -241,7 +240,7 @@ class AmpAccordion extends AMP.BaseElement {
         e.message,
         e.stack
       );
-      return dict();
+      return {};
     }
   }
 
@@ -276,11 +275,7 @@ class AmpAccordion extends AMP.BaseElement {
    * @param {!ActionTrust_Enum} trust
    */
   triggerEvent_(name, section, trust) {
-    const event = createCustomEvent(
-      this.win,
-      `accordionSection.${name}`,
-      dict({})
-    );
+    const event = createCustomEvent(this.win, `accordionSection.${name}`, {});
     this.action_.trigger(section, name, event, trust);
 
     dispatchCustomEvent(this.element, name);

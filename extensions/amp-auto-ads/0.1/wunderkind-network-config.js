@@ -1,7 +1,5 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 /**
@@ -49,13 +47,13 @@ export class WunderkindNetworkConfig {
 
   /** @override */
   getAttributes() {
-    const attributes = dict({
+    const attributes = {
       'type': 'wunderkind',
       'data-ad': 'wunderkind',
       'layout': 'responsive',
       'height': '75vw',
       'width': '100vw',
-    });
+    };
     return attributes;
   }
 

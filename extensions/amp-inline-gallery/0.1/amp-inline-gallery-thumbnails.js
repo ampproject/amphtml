@@ -1,12 +1,14 @@
-import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
-import {InlineGalleryEvents} from './inline-gallery-events';
-import {createCustomEvent} from '#utils/event-helper';
-import {dict} from '#core/types/object';
-import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {matches, scopedQuerySelector} from '#core/dom/query';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {matches, scopedQuerySelector} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
+
+import {createCustomEvent} from '#utils/event-helper';
+
+import {InlineGalleryEvents} from './inline-gallery-events';
+
+import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 
 /**
  * Renders a carousel of thumbnails for an inline gallery.
@@ -122,9 +124,9 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
         createCustomEvent(
           this.win,
           InlineGalleryEvents.GO_TO_SLIDE,
-          dict({
+          {
             'index': index,
-          }),
+          },
           {
             bubbles: true,
           }

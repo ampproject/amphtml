@@ -1,9 +1,11 @@
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
+
 import * as Preact from '#preact';
+
 import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {BentoInlineGallery} from '../component';
 import {BentoInlineGalleryPagination} from '../pagination';
 import {BentoInlineGalleryThumbnails} from '../thumbnails';
-import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 export default {
   title: 'InlineGallery',

@@ -1,6 +1,5 @@
 import {devAssert} from '#core/assert';
 import {Deferred} from '#core/data-structures/promise';
-import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {layoutRectFromDomRect} from './rect';
@@ -80,13 +79,13 @@ export function measureIntersection(el) {
  * @return {JsonObject}
  */
 export function intersectionEntryToJson(entry) {
-  return dict({
+  return {
     'time': entry.time,
     'rootBounds': safeLayoutRectFromDomRect(entry.rootBounds),
     'boundingClientRect': safeLayoutRectFromDomRect(entry.boundingClientRect),
     'intersectionRect': safeLayoutRectFromDomRect(entry.intersectionRect),
     'intersectionRatio': entry.intersectionRatio,
-  });
+  };
 }
 
 /**

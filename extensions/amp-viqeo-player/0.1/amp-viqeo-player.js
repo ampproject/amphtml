@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';

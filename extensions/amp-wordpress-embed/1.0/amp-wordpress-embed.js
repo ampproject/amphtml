@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {BaseElement} from './base-element';
 
 /** @const {string} */
@@ -13,12 +11,12 @@ class AmpWordPressEmbed extends BaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height) =>
         this.attemptChangeHeight(height).catch(() => {
           /* ignore failures */
         }),
-    });
+    };
   }
 }
 

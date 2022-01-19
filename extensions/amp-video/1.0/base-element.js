@@ -1,7 +1,8 @@
-import {CSS} from './component.jss';
-import {CSS as CSS_AUTOPLAY} from './autoplay.jss';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {CSS as CSS_AUTOPLAY} from './autoplay.jss';
 import {BentoVideo} from './component';
+import {CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 

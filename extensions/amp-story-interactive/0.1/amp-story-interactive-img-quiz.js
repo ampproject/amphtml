@@ -1,19 +1,24 @@
+import objstr from 'obj-str';
+
+import {htmlFor} from '#core/dom/static-template';
+import {computedStyle, setImportantStyles} from '#core/dom/style';
+
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {dev} from '#utils/log';
+
 import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
-import {CSS} from '../../../build/amp-story-interactive-img-quiz-0.1.css';
-import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {buildImgTemplate} from './utils';
-import {dev} from '#utils/log';
+
+import {CSS as ImgCSS} from '../../../build/amp-story-interactive-img-0.1.css';
+import {CSS} from '../../../build/amp-story-interactive-img-quiz-0.1.css';
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
 } from '../../amp-story/1.0/utils';
-import {htmlFor} from '#core/dom/static-template';
-import {computedStyle, setImportantStyles} from '#core/dom/style';
-import objstr from 'obj-str';
 
 /**
  * Generates the template for each option.
