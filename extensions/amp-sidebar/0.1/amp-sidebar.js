@@ -15,7 +15,6 @@ import {unmountAll} from '#core/dom/resource-container-helper';
 import {setStyles, toggle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -729,7 +728,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   triggerEvent_(name, trust) {
-    const event = createCustomEvent(this.win, `${TAG}.${name}`, dict({}));
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
     this.action_.trigger(this.element, name, event, trust);
   }
 

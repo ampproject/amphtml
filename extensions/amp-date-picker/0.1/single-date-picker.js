@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {withDatePickerCommon} from './date-picker-common';
 import {DayPickerPhrases} from './defaultPhrases';
 
@@ -20,7 +18,7 @@ function createSingleDatePickerBase() {
     requireExternal('react-dates')['DayPickerSingleDateController']
   );
 
-  const defaultProps = dict({
+  const defaultProps = {
     'date': null,
     'onDateChange': function () {},
 
@@ -68,7 +66,7 @@ function createSingleDatePickerBase() {
     'phrases': DayPickerPhrases,
 
     'isRTL': false,
-  });
+  };
 
   const WrappedDayPickerSingleDateController = withFocusedTrueHack(
     withDatePickerCommon(DayPickerSingleDateController)
@@ -104,7 +102,7 @@ function withFocusedTrueHack(WrappedComponent) {
 
   /** @override */
   FocusedTrueHack.prototype.render = function () {
-    const props = {...this.props, ...dict({'focused': true})};
+    const props = {...this.props, 'focused': true};
     return react.createElement(WrappedComponent, props);
   };
 

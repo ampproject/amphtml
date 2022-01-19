@@ -1,7 +1,6 @@
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {ancestorElementsByTag} from '#core/dom/query';
 import {setStyle, setStyles} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -328,11 +327,11 @@ export class AmpAdUIHandler {
     const closeButton = createElementWithAttributes(
       /** @type {!Document} */ (this.element_.ownerDocument),
       'button',
-      dict({
+      {
         'aria-label':
           this.element_.getAttribute('data-close-button-aria-label') ||
           'Close this ad',
-      })
+      }
     );
 
     this.unlisteners_.push(

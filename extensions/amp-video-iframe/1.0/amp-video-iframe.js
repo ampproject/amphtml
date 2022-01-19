@@ -1,5 +1,4 @@
 import {measureIntersection} from '#core/dom/layout/intersection';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -56,12 +55,10 @@ function onMessage(e) {
         (intersectionRatio) => {
           postMessageWhenAvailable(
             currentTarget,
-            JSON.stringify(
-              dict({
-                'id': messageId,
-                'intersectionRatio': intersectionRatio,
-              })
-            )
+            JSON.stringify({
+              'id': messageId,
+              'intersectionRatio': intersectionRatio,
+            })
           );
         }
       );
@@ -105,10 +102,10 @@ const makeMethodMessage = (method) =>
     'method': method.toLowerCase(),
   });
 
-AmpVideoIframe['staticProps'] = dict({
+AmpVideoIframe['staticProps'] = {
   'onMessage': onMessage,
   'makeMethodMessage': makeMethodMessage,
-});
+};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpVideoIframe, CSS);

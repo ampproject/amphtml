@@ -2,7 +2,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {realChildElements} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {isArray, isEnumValue, isObject} from '#core/types';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 import {
@@ -161,7 +161,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ = new ConsentUI(
         this,
-        dict({}),
+        {},
         this.consentConfig_['postPromptUI']
       );
     }
@@ -183,7 +183,7 @@ export class AmpConsent extends AMP.BaseElement {
      *   'postPromptUI': ...
      * }
      */
-    const policyConfig = this.consentConfig_['policy'] || dict({});
+    const policyConfig = this.consentConfig_['policy'] || {};
 
     this.policyConfig_ = expandPolicyConfig(
       policyConfig,
@@ -730,7 +730,7 @@ export class AmpConsent extends AMP.BaseElement {
         this.consentStateManager_.getLastConsentInstanceInfo();
       this.remoteConfigPromise_ = storeConsentPromise.then((storedInfo) => {
         // Note: Expect the request to look different in following versions.
-        const body = dict({
+        const body = {
           'consentInstanceId': this.consentId_,
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentMetadata': storedInfo['consentMetadata'],
@@ -739,7 +739,7 @@ export class AmpConsent extends AMP.BaseElement {
           'matchedGeoGroup': this.matchedGeoGroup_,
           'purposeConsents': storedInfo['purposeConsents'],
           'clientConfig': this.consentConfig_['clientConfig'],
-        });
+        };
         const init = {
           credentials: 'include',
           method: 'POST',

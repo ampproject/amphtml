@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {isExperimentOn} from '#experiments';
 
 import {userAssert} from '#utils/log';
@@ -23,13 +21,13 @@ class AmpDailymotion extends BaseElement {
       'uiLogo': uiLogo,
     } = this.element.dataset;
 
-    return dict({
+    return {
       'endscreenEnable': endscreenEnable !== 'false',
       'info': info !== 'false',
       'mute': mute === 'true',
       'sharingEnable': sharingEnable !== 'false',
       'uiLogo': uiLogo !== 'false',
-    });
+    };
   }
 
   /** @override */

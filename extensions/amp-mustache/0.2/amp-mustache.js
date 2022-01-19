@@ -1,5 +1,4 @@
 import {iterateCursor, templateContentClone} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {Purifier} from '#purifier';
 
@@ -28,7 +27,7 @@ export class AmpMustache extends BaseTemplate {
     super(element, win);
 
     registerServiceBuilder(win, 'purifier', function () {
-      return new Purifier(win.document, dict(), rewriteAttributeValue);
+      return new Purifier(win.document, {}, rewriteAttributeValue);
     });
     /** @private @const {!Purifier} */
     this.purifier_ = getService(win, 'purifier');
@@ -48,7 +47,7 @@ export class AmpMustache extends BaseTemplate {
       return;
     }
     /** @private @const {!JsonObject} */
-    this.nestedTemplates_ = dict();
+    this.nestedTemplates_ = {};
 
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();

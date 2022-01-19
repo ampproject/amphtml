@@ -1,4 +1,3 @@
-import {dict} from '#core/types/object';
 import {dashToUnderline} from '#core/types/string';
 
 import {isExperimentOn} from '#experiments';
@@ -54,9 +53,9 @@ function AmpFacebookMixin(clazz1) {
 
     /** @override */
     init() {
-      return dict({
+      return {
         'requestResize': (height) => this.attemptChangeHeight(height),
-      });
+      };
     }
 
     /** @override */

@@ -1,6 +1,5 @@
 import {userAssert} from '#core/assert';
 import {htmlFor} from '#core/dom/static-template';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -60,9 +59,9 @@ class AmpTwitter extends BaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height) => this.attemptChangeHeight(height),
-    });
+    };
   }
 
   /** @override */

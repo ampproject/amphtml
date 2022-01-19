@@ -1,5 +1,4 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {dict} from '#core/types/object';
 
 import {dev} from '#utils/log';
 
@@ -47,10 +46,10 @@ export function getConsentData(apesterElement) {
       const gdprString = consentDataResponse[1];
       switch (consentStatus) {
         case CONSENT_POLICY_STATE.SUFFICIENT:
-          return dict({'gdpr': 1, 'user_consent': 1, 'gdprString': gdprString});
+          return {'gdpr': 1, 'user_consent': 1, 'gdprString': gdprString};
         case CONSENT_POLICY_STATE.INSUFFICIENT:
         case CONSENT_POLICY_STATE.UNKNOWN:
-          return dict({'gdpr': 1, 'user_consent': 0, 'gdprString': gdprString});
+          return {'gdpr': 1, 'user_consent': 0, 'gdprString': gdprString};
         case CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED:
         default:
           return {};
