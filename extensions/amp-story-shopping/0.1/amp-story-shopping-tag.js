@@ -98,7 +98,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * This function counts the number of lines in the shopping tag
+   * This funct ion counts the number of lines in the shopping tag
    * and sets the styling properties dynamically based on the number of lines.
    * @private
    */
