@@ -51,8 +51,8 @@ export function BentoDatePicker({
     return new DatesList(highlighted);
   }, [highlighted]);
 
-  const datePicker = useMemo(() => {
-    const commonProps = {
+  const datePickerProps = useMemo(() => {
+    return {
       blockedDates,
       children,
       format,
@@ -62,25 +62,12 @@ export function BentoDatePicker({
       mode,
       onError,
       weekDayFormat,
+      inputSelector,
+      startInputSelector,
+      endInputSelector,
+      allowBlockedEndDate,
+      allowBlockedRanges,
     };
-    if (type === DatePickerType.SINGLE) {
-      const props = {
-        ...commonProps,
-        inputSelector,
-      };
-      return <SingleDatePicker {...props} />;
-    } else if (type === DatePickerType.RANGE) {
-      const props = {
-        ...commonProps,
-        startInputSelector,
-        endInputSelector,
-        allowBlockedEndDate,
-        allowBlockedRanges,
-      };
-      return <DateRangePicker {...props} />;
-    } else {
-      onError('Invalid date picker type');
-    }
   }, [
     blockedDates,
     format,
@@ -88,7 +75,6 @@ export function BentoDatePicker({
     initialVisibleMonth,
     mode,
     onError,
-    type,
     allowBlockedEndDate,
     allowBlockedRanges,
     startInputSelector,
@@ -99,11 +85,25 @@ export function BentoDatePicker({
     weekDayFormat,
   ]);
 
+  const DatePicker = useMemo(() => {
+    switch (type) {
+      case DatePickerType.SINGLE: {
+        return SingleDatePicker;
+      }
+      case DatePickerType.RANGE: {
+        return DateRangePicker;
+      }
+      default: {
+        onError('Invalid date picker type');
+      }
+    }
+  }, [type, onError]);
+
   return (
     <AttributesContext.Provider
       value={{blockedDates, highlightedDates, allowBlockedEndDate, min, max}}
     >
-      {datePicker}
+      <DatePicker {...datePickerProps} />
     </AttributesContext.Provider>
   );
 }
