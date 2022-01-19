@@ -2,7 +2,6 @@ import {toggleAttribute} from '#core/dom';
 import {realChildNodes} from '#core/dom/query';
 import {pauseAll} from '#core/dom/resource-container-helper';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
@@ -28,11 +27,11 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'onBeforeOpen': () => this.beforeOpen(),
       'onAfterOpen': () => this.afterOpen(),
       'onAfterClose': () => this.afterClose(),
-    });
+    };
   }
 
   /** @override */

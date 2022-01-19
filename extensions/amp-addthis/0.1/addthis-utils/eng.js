@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 import {pixelDrop} from './pixel';
@@ -44,7 +42,7 @@ const getEngData = (params) => {
  */
 export const callEng = (props) => {
   const object = getEngData(props);
-  const data = dict({
+  const data = {
     'al': object.al,
     'amp': object.amp,
     'dc': object.dc,
@@ -59,7 +57,7 @@ export const callEng = (props) => {
     'pub': object.pub,
     'sh': object.sh,
     'sid': object.sid,
-  });
+  };
   const url = addParamsToUrl(`${API_SERVER}/live/red_lojson/100eng.json`, data);
   const {ampDoc} = props;
 

@@ -43,7 +43,7 @@ import {
 import {isEsm} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {parseQueryString} from '#core/types/string/url';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
@@ -1026,7 +1026,7 @@ export class AmpStory extends AMP.BaseElement {
       {bubbles: true}
     );
     this.viewerMessagingHandler_ &&
-      this.viewerMessagingHandler_.send('storyContentLoaded', dict({}));
+      this.viewerMessagingHandler_.send('storyContentLoaded', {});
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.STORY_CONTENT_LOADED
     );
@@ -1152,10 +1152,10 @@ export class AmpStory extends AMP.BaseElement {
       const advancementMode = this.storeService_.get(
         StateProperty.ADVANCEMENT_MODE
       );
-      this.viewerMessagingHandler_.send(
-        'selectDocument',
-        dict({'next': true, 'advancementMode': advancementMode})
-      );
+      this.viewerMessagingHandler_.send('selectDocument', {
+        'next': true,
+        'advancementMode': advancementMode,
+      });
       return;
     }
   }
@@ -1181,10 +1181,10 @@ export class AmpStory extends AMP.BaseElement {
       const advancementMode = this.storeService_.get(
         StateProperty.ADVANCEMENT_MODE
       );
-      this.viewerMessagingHandler_.send(
-        'selectDocument',
-        dict({'previous': true, 'advancementMode': advancementMode})
-      );
+      this.viewerMessagingHandler_.send('selectDocument', {
+        'previous': true,
+        'advancementMode': advancementMode,
+      });
       return;
     }
 

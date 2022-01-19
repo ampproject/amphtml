@@ -1,5 +1,4 @@
 import {isArray, isFiniteNumber, isObject} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -155,11 +154,11 @@ export class RequestHandler {
       this.element_,
       this.allowlist_
     ).then((params) => {
-      return dict({
+      return {
         'trigger': trigger['on'],
         'timestamp': timestamp,
         'extraUrlParams': params,
-      });
+      };
     });
     this.batchSegmentPromises_.push(batchSegmentPromise);
     this.trigger_(isImportant || !this.batchInterval_);
@@ -425,7 +424,7 @@ export function expandPostMessage(
       element
     ).then((extraUrlParams) => {
       return defaultSerializer(expandedMsg, [
-        dict({'extraUrlParams': extraUrlParams}),
+        {'extraUrlParams': extraUrlParams},
       ]);
     });
   });

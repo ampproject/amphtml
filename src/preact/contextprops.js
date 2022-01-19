@@ -12,10 +12,11 @@ import {contextProp} from '#core/context/prop';
  *
  * Default is `true`.
  *
- * @const {ContextPropDef<boolean>}
+ * @type {import('#core/context/prop').IContextProp<boolean, boolean>}
+ * @const
  */
 const CanRender = contextProp('CanRender', {
-  defaultValue: true,
+  defaultValue: /** @type {boolean} */ (true),
   recursive: (inputs) => inputs.reduce(andReducer),
   compute: (contextNode, inputs, parentValue) =>
     (parentValue && inputs.reduce(andReducer, true)) || false,
@@ -29,10 +30,11 @@ const CanRender = contextProp('CanRender', {
  *
  * Default is `true`.
  *
- * @const {ContextPropDef<boolean, boolean>}
+ * @type {import('#core/context/prop').IContextProp<boolean, boolean>}
+ * @const
  */
 const CanPlay = contextProp('CanPlay', {
-  defaultValue: true,
+  defaultValue: /** @type {boolean} */ (true),
   recursive: (inputs) => inputs.reduce(andReducer),
   deps: [CanRender],
   compute: (contextNode, inputs, parentValue, canRender) =>
@@ -46,10 +48,11 @@ const CanPlay = contextProp('CanPlay', {
  *
  * Default is "auto".
  *
- * @const {ContextPropDef<Loading_Enum, boolean>}
+ * @type {import('#core/context/prop').IContextProp<Loading_Enum, boolean>}
+ * @const
  */
 const LoadingProp = contextProp('Loading', {
-  defaultValue: Loading_Enum.AUTO,
+  defaultValue: /** @type {Loading_Enum} */ Loading_Enum.AUTO,
   recursive: true,
   deps: [CanRender],
   compute: (contextNode, inputs, parentValue, canRender) =>

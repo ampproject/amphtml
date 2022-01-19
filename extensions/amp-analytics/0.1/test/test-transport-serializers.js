@@ -1,5 +1,4 @@
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {TransportSerializers} from '../transport-serializer';
 
@@ -115,11 +114,11 @@ describes.sandboxed('Transport serializers', {}, () => {
       });
 
       it('should handler extraUrlParams with value null', () => {
-        const batchSegment = dict({
+        const batchSegment = {
           'trigger': 'click',
           'timestamp': 0,
           'extraUrlParams': null,
-        });
+        };
         try {
           const output = serializer.generateBatchRequest('base', [
             batchSegment,
@@ -131,11 +130,11 @@ describes.sandboxed('Transport serializers', {}, () => {
       });
 
       it('should properly encode segments', () => {
-        const batchSegment = dict({
+        const batchSegment = {
           'trigger': 'click',
           'timestamp': 0,
           'extraUrlParams': '12?3',
-        });
+        };
         try {
           const output = serializer.generateBatchRequest('base', [
             batchSegment,
@@ -147,11 +146,11 @@ describes.sandboxed('Transport serializers', {}, () => {
       });
 
       it('should return a string', () => {
-        const batchSegment = dict({
+        const batchSegment = {
           'trigger': 'click',
           'timestamp': 0,
           'extraUrlParams': '123',
-        });
+        };
         try {
           const output = serializer.generateBatchRequest('base', [
             batchSegment,

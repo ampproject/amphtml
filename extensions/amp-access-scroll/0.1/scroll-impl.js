@@ -1,5 +1,4 @@
 import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
@@ -272,7 +271,7 @@ function addAnalytics(ampdoc, vendorConfig) {
 
   // Create analytics element
   const doc = /** @type {!Document} */ (ampdoc.win.document);
-  const attributes = dict({'trigger': 'immediate'});
+  const attributes = {'trigger': 'immediate'};
   if (vendorConfig['dataConsentId']) {
     attributes['data-block-on-consent'] = '';
   }
@@ -281,13 +280,9 @@ function addAnalytics(ampdoc, vendorConfig) {
     'amp-analytics',
     attributes
   );
-  const scriptElem = createElementWithAttributes(
-    doc,
-    'script',
-    dict({
-      'type': 'application/json',
-    })
-  );
+  const scriptElem = createElementWithAttributes(doc, 'script', {
+    'type': 'application/json',
+  });
   const ANALYTICS_CONFIG = analyticsConfig(connectHostname(vendorConfig));
   scriptElem.textContent = JSON.stringify(ANALYTICS_CONFIG);
   analyticsElem.appendChild(scriptElem);

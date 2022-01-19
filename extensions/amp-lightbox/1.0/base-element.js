@@ -1,7 +1,6 @@
 import {toggleAttribute} from '#core/dom';
 import {unmountAll} from '#core/dom/resource-container-helper';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {PreactBaseElement} from '#preact/base-element';
 
@@ -19,11 +18,11 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'onBeforeOpen': () => this.beforeOpen(),
       'onAfterOpen': () => this.afterOpen(),
       'onAfterClose': () => this.afterClose(),
-    });
+    };
   }
 
   /** @protected */

@@ -17,7 +17,6 @@ import {moveLayoutRect} from '#core/dom/layout/rect';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {computedStyle, setStyle} from '#core/dom/style';
 import {clamp} from '#core/math';
-import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -384,7 +383,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // perserved name to extern. We are doing both right now.
         // Please also add new introduced variable
         // name to the extern list.
-        const opt_context = dict({
+        const opt_context = {
           'clientId': consents[0] || null,
           'container': this.container_,
           'initialConsentState': consents[1],
@@ -392,7 +391,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           'initialConsentValue': consents[3],
           'initialConsentMetadata': consents[4],
           'pageViewId64': consents[6],
-        });
+        };
 
         // In this path, the request and render start events are entangled,
         // because both happen inside a cross-domain iframe.  Separating them

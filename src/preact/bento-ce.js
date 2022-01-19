@@ -4,7 +4,7 @@ import {getWin} from '#core/window';
 /**
  * @param {T} klass
  * @return {T}
- * @template T
+ * @template {Function} T
  */
 function maybeWrapNativeSuper(klass) {
   if (isEsm() || typeof Reflect !== 'object' || !Reflect.construct) {
@@ -33,21 +33,21 @@ let BaseElement;
 if (typeof AMP !== 'undefined' && AMP.BaseElement) {
   BaseElement = AMP.BaseElement;
 } else {
+  /** @type {typeof HTMLElement} */
   let ExtendableHTMLElement;
   class CeBaseElement {
     /**
      * @param {Element} element
      */
     constructor(element) {
-      /** @const {Element} */
       this.element = element;
 
-      /** @const {Window} */
+      /** @type {Window} */
       this.win = getWin(element);
     }
 
     /**
-     * @param {typeof CeBaseElement} BaseElement
+     * @param {typeof import('./base-element').PreactBaseElement} BaseElement
      * @return {typeof HTMLElement}
      */
     static 'CustomElement'(BaseElement) {
@@ -59,8 +59,13 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
         constructor() {
           super();
 
-          /** @const {CeBaseElement} */
-          this.implementation = new BaseElement(this);
+          /**
+           * @type {import('./base-element').PreactBaseElement<T>}
+           * @template T
+           */
+          this.implementation = new BaseElement(
+            /** @type {AmpElement} */ (/** @type {?} */ (this))
+          );
         }
 
         /** */
@@ -104,7 +109,9 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
     buildCallback() {}
   }
 
-  BaseElement = /** @type {typeof AMP.BaseElement} */ (CeBaseElement);
+  BaseElement = /** @type {typeof AMP.BaseElement} */ (
+    /** @type {?} */ (CeBaseElement)
+  );
 }
 
 export {BaseElement};

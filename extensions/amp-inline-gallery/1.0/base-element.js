@@ -1,5 +1,4 @@
 import {setProp} from '#core/context';
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {useContext, useLayoutEffect} from '#preact';
@@ -14,9 +13,9 @@ export const TAG = 'bento-inline-gallery';
 export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
-    return dict({
+    return {
       'children': <ContextExporter shimDomElement={this.element} />,
-    });
+    };
   }
 }
 

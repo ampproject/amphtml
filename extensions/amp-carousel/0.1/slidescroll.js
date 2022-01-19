@@ -12,7 +12,6 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {getStyle, setStyle} from '#core/dom/style';
 import {numeric} from '#core/dom/transition';
 import {isFiniteNumber} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -891,11 +890,9 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
     if (slideChanged) {
       const name = 'slideChange';
-      const event = createCustomEvent(
-        this.win,
-        `slidescroll.${name}`,
-        dict({'index': newIndex})
-      );
+      const event = createCustomEvent(this.win, `slidescroll.${name}`, {
+        'index': newIndex,
+      });
       this.action_.trigger(this.element, name, event, opt_trust);
 
       dispatchCustomEvent(this.element, name, {
@@ -1016,10 +1013,10 @@ export class AmpSlideScroll extends AMP.BaseElement {
         ? 'null'
         : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
 
-    const vars = dict({
+    const vars = {
       'fromSlide': fromSlide,
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
-    });
+    };
     this.analyticsEvent_('amp-carousel-change', vars);
     // At this point direction can be only +1 or -1.
     if (direction == 1) {

@@ -3,7 +3,6 @@ import * as Preact from '#core/dom/jsx';
 import {closest, matches, scopedQuerySelector} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -777,13 +776,10 @@ export class SystemLayer {
     const eventName = element[VIEWER_CONTROL_EVENT_NAME];
 
     this.viewerMessagingHandler_ &&
-      this.viewerMessagingHandler_.send(
-        'documentStateUpdate',
-        dict({
-          'state': AMP_STORY_PLAYER_EVENT,
-          'value': eventName,
-        })
-      );
+      this.viewerMessagingHandler_.send('documentStateUpdate', {
+        'state': AMP_STORY_PLAYER_EVENT,
+        'value': eventName,
+      });
   }
 
   /**

@@ -1,6 +1,6 @@
 import {loadScript, validateData, writeScript} from '#3p/3p';
 
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 
 import {addParamsToUrl} from '../../src/url';
@@ -143,11 +143,11 @@ function reduceSearch(ns, placementId, click, referrer) {
 
   return !needsRequest
     ? null
-    : dict({
+    : {
         'click': click,
         'referrer': referrer,
         'isAmp': '1',
         'lib': !ns.isLibLoaded ? '1' : '', // may be prefetchable via _config
         'pid': needsRequest ? placementId : '',
-      });
+      };
 }

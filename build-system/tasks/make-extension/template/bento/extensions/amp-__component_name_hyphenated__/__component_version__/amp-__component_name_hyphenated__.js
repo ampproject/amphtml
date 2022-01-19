@@ -1,6 +1,5 @@
 import {BaseElement} from './base-element';
 __css_import__;
-import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
 import {userAssert} from '#utils/log';
 
@@ -13,10 +12,10 @@ class Amp__component_name_pascalcase__ extends BaseElement {
     // __do_not_submit__: This is example code only.
     this.registerApiAction('exampleToggle', (api) => api./*OK*/exampleToggle());
 
-    return dict({
+    return {
       // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
-    });
+      exampleTagNameProp: this.element.tagName,
+    };
   }
 
   /** @override */

@@ -1,5 +1,5 @@
 import {createElementWithAttributes, iterateCursor} from '#core/dom';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 
 import {getExperimentBranch} from '#experiments';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
@@ -152,23 +152,15 @@ export function maybeCreateAttribution(win, metadata, container) {
       'amp-story-auto-ads attribution icon'
     );
 
-    const root = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'role': 'button',
-        'class': 'i-amphtml-attribution-host',
-      })
-    );
+    const root = createElementWithAttributes(doc, 'div', {
+      'role': 'button',
+      'class': 'i-amphtml-attribution-host',
+    });
 
-    const adChoicesIcon = createElementWithAttributes(
-      doc,
-      'img',
-      dict({
-        'class': 'i-amphtml-story-ad-attribution',
-        'src': src,
-      })
-    );
+    const adChoicesIcon = createElementWithAttributes(doc, 'img', {
+      'class': 'i-amphtml-story-ad-attribution',
+      'src': src,
+    });
 
     adChoicesIcon.addEventListener('click', (unusedEvent) =>
       handleAttributionClick(win, href)
@@ -205,15 +197,11 @@ function createPageOutlink_(doc, uiMetadata, container) {
   const pageOutlink = doc.createElement('amp-story-page-outlink');
   pageOutlink.setAttribute('layout', 'nodisplay');
 
-  const pageAnchorTag = createElementWithAttributes(
-    doc,
-    'a',
-    dict({
-      'class': 'i-amphtml-story-ad-link',
-      'target': '_top',
-      'href': uiMetadata[A4AVarNames.CTA_URL],
-    })
-  );
+  const pageAnchorTag = createElementWithAttributes(doc, 'a', {
+    'class': 'i-amphtml-story-ad-link',
+    'target': '_top',
+    'href': uiMetadata[A4AVarNames.CTA_URL],
+  });
   pageAnchorTag.textContent = uiMetadata[A4AVarNames.CTA_TYPE];
 
   pageOutlink.appendChild(pageAnchorTag);
@@ -244,14 +232,10 @@ function createCtaLayer_(a, doc, container) {
   const ctaLayer = doc.createElement('amp-story-cta-layer');
   ctaLayer.className = 'i-amphtml-cta-container';
 
-  const linkRoot = createElementWithAttributes(
-    doc,
-    'div',
-    dict({
-      'class': 'i-amphtml-story-ad-link-root',
-      'role': 'button',
-    })
-  );
+  const linkRoot = createElementWithAttributes(doc, 'div', {
+    'class': 'i-amphtml-story-ad-link-root',
+    'role': 'button',
+  });
 
   createShadowRootWithStyle(linkRoot, a, ctaButtonCSS);
 
@@ -273,15 +257,11 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
 
   // TODO(#36035): we should be using this element in createPageOutlink_
   // instead of creating it and dropping.
-  const a = createElementWithAttributes(
-    doc,
-    'a',
-    dict({
-      'class': 'i-amphtml-story-ad-link',
-      'target': '_blank',
-      'href': ctaUrl,
-    })
-  );
+  const a = createElementWithAttributes(doc, 'a', {
+    'class': 'i-amphtml-story-ad-link',
+    'target': '_blank',
+    'href': ctaUrl,
+  });
 
   const fitPromise = buttonFitter.fit(
     dev().assertElement(container),

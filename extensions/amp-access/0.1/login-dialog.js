@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 import {getData, listen} from '#utils/event-helper';
@@ -92,12 +90,9 @@ class ViewerLoginDialog {
   open() {
     return this.getLoginUrl().then((loginUrl) => {
       dev().fine(TAG, 'Open viewer dialog: ', loginUrl);
-      return this.viewer.sendMessageAwaitResponse(
-        'openDialog',
-        dict({
-          'url': loginUrl,
-        })
-      );
+      return this.viewer.sendMessageAwaitResponse('openDialog', {
+        'url': loginUrl,
+      });
     });
   }
 }
@@ -286,10 +281,10 @@ export class WebLoginDialog {
       if (getData(e)['type'] == 'result') {
         if (this.dialog_) {
           this.dialog_./*OK*/ postMessage(
-            dict({
+            {
               'sentinel': 'amp',
               'type': 'result-ack',
-            }),
+            },
             returnOrigin
           );
         }

@@ -1,5 +1,4 @@
 import {isIframed} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {FixedLayer} from '#service/fixed-layer';
@@ -175,10 +174,10 @@ export class AmpViewerIntegration {
     return messaging
       .sendRequest(
         RequestNames.CHANNEL_OPEN,
-        dict({
+        {
           'url': ampdocUrl,
           'sourceUrl': srcUrl,
-        }),
+        },
         true /* awaitResponse */
       )
       .then(() => {
@@ -236,7 +235,7 @@ export class AmpViewerIntegration {
    * @private
    */
   handleUnload_(messaging) {
-    return messaging.sendRequest(RequestNames.UNLOADED, dict(), true);
+    return messaging.sendRequest(RequestNames.UNLOADED, {}, true);
   }
 
   /**

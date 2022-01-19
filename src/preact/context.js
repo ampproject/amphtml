@@ -6,7 +6,26 @@ import {
 import * as Preact from '#preact';
 import {createContext, useContext, useMemo} from '#preact';
 
-/** @type {PreactDef.Context} */
+/**
+ * @typedef {{
+ *   renderable: boolean;
+ *   playable: boolean;
+ *   loading: Loading_Enum;
+ *   notify?: () => {};
+ * }} AmpContext
+ */
+
+/**
+ * @typedef {{
+ *   renderable: boolean | undefined;
+ *   playable: boolean | undefined;
+ *   loading: string | undefined;
+ *   notify?: () => {} | undefined;
+ *   children?: import('preact').ComponentChildren;
+ * }} ProviderProps
+ */
+
+/** @type {import('preact').Context<AmpContext>} */
 let context;
 
 /**
@@ -18,7 +37,7 @@ let context;
  * - playable: whether the playback is allowed in this vDOM area. If playback
  *   is not allow, the component must immediately stop the playback.
  *
- * @return {PreactDef.Context<AmpContextDef.ContextType>}
+ * @return {import('preact').Context<AmpContext>}
  */
 function getAmpContext() {
   return (
@@ -34,8 +53,8 @@ function getAmpContext() {
 /**
  * A wrapper-component that recalculates and propagates AmpContext properties.
  *
- * @param {AmpContextDef.ProviderProps} props
- * @return {PreactDef.VNode}
+ * @param {ProviderProps} props
+ * @return {import('preact').VNode}
  */
 export function WithAmpContext({
   children,
@@ -54,7 +73,7 @@ export function WithAmpContext({
   const notify = notifyProp || parent.notify;
   const current = useMemo(
     () =>
-      /** @type {AmpContextDef.ContextType} */ ({
+      /** @type {AmpContext} */ ({
         renderable,
         playable,
         loading,
@@ -67,7 +86,7 @@ export function WithAmpContext({
 }
 
 /**
- * @return {AmpContextDef.ContextType}
+ * @return {AmpContext}
  */
 export function useAmpContext() {
   const AmpContext = getAmpContext();
@@ -78,7 +97,7 @@ export function useAmpContext() {
  * Whether the calling component should currently be in the loaded state.
  *
  * @param {Loading_Enum|string} loadingProp
- * @return {boolean}
+ * @return {Loading_Enum}
  */
 export function useLoading(loadingProp) {
   const {loading: loadingContext} = useAmpContext();

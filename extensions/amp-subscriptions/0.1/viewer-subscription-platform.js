@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 import {devAssert, user, userAssert} from '#utils/log';
@@ -74,11 +72,11 @@ export class ViewerSubscriptionPlatform {
     devAssert(this.currentProductId_, 'Current product is not set');
 
     /** @type {JsonObject} */
-    const authRequest = dict({
+    const authRequest = {
       'publicationId': this.publicationId_,
       'productId': this.currentProductId_,
       'origin': this.origin_,
-    });
+    };
 
     // Defaulting to google.com for now.
     // TODO(@elijahsoria): Remove google.com and only rely on what is returned
@@ -213,12 +211,9 @@ export class ViewerSubscriptionPlatform {
    * @private
    */
   sendAuthTokenErrorToViewer_(errorString) {
-    this.viewer_.sendMessage(
-      'auth-rejected',
-      dict({
-        'reason': errorString,
-      })
-    );
+    this.viewer_.sendMessage('auth-rejected', {
+      'reason': errorString,
+    });
   }
 
   /** @override */
