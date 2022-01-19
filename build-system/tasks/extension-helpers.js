@@ -97,7 +97,7 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
  *   wrapper?: string,
- *   ssr?: boolean,
+ *   ssrReady?: boolean,
  *   destName?: string
  * }}
  */

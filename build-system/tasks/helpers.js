@@ -30,7 +30,7 @@ const {
 /**
  * @typedef {{
  *   babelCaller?: string,
- *   ssr?: boolean,
+ *   ssrReady?: boolean,
  *   includePolyfills?: boolean,
  *   watch?: boolean,
  *   esbuild?: boolean,
@@ -382,8 +382,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
   // We read from the current binary configuration options if it is an
   // SSR ready binary output. (ex. removes CSS installation, etc)
-  if (options.ssr) {
-    babelCaller += '-ssr';
+  if (options.ssrReady) {
+    babelCaller += '-ssr-ready';
   }
 
   const babelMaps = new Map();
@@ -790,8 +790,8 @@ async function getDependencies(entryPoint, options) {
   let caller = options.minify ? 'minified' : 'unminified';
   // We read from the current binary configuration options if it is an
   // SSR ready binary output. (ex. removes CSS installation, etc)
-  if (options.ssr) {
-    caller += '-ssr';
+  if (options.ssrReady) {
+    caller += '-ssr-ready';
   }
   const babelPlugin = getEsbuildBabelPlugin(caller, /* enableCache */ true);
   const result = await esbuild.build({

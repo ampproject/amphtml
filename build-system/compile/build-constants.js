@@ -34,7 +34,7 @@ const BUILD_CONSTANTS = {
   IS_SXG: !!argv.sxg,
   // IS_SSR is always false by default and can only be overriden on a per
   // output file basis in bundles.config.extensions through `options.ssr`.
-  IS_SSR: false,
+  IS_SSR_READY: false,
 };
 
 module.exports = {BUILD_CONSTANTS};

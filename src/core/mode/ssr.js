@@ -7,10 +7,10 @@ import {isProd} from './prod';
  *
  * @return {boolean}
  */
-export function isSsr() {
+export function isSsrReady() {
   if (isProd()) {
-    return IS_SSR;
+    return IS_SSR_READY;
   }
 
-  return self?.__AMP_MODE?.ssr ?? IS_SSR;
+  return self?.__AMP_MODE?.ssrReady ?? IS_SSR_READY;
 }

@@ -8,10 +8,10 @@ const {getMinifiedConfig} = require('./minified-config');
  *
  * @return {!Object}
  */
-function getMinifiedSsrConfig() {
+function getMinifiedSsrReadyConfig() {
   return getMinifiedConfig({IS_SSR: true});
 }
 
 module.exports = {
-  getMinifiedSsrConfig,
+  getMinifiedSsrReadyConfig,
 };
