@@ -10,12 +10,14 @@ push_and_pr_builds: &push_and_pr_builds
       ignore:
         - nightly
 
+# TODO(estherkim): remove amp-release-* branches in favor of cherry-pick-*
 push_builds_only: &push_builds_only
   filters:
     branches:
       only:
         - main
         - /^amp-release-.*$/
+        - /^cherry-pick-.*$/
 
 release_builds_only: &release_builds_only
   filters:
@@ -23,6 +25,7 @@ release_builds_only: &release_builds_only
       only:
         - nightly
         - /^amp-release-.*$/
+        - /^cherry-pick-.*$/
 
 pr_builds_only: &pr_builds_only
   filters:
@@ -30,6 +33,7 @@ pr_builds_only: &pr_builds_only
       ignore:
         - main
         - /^amp-release-.*$/
+        - /^cherry-pick-.*$/
         - nightly
 
 experiment_job: &experiment_job
@@ -489,7 +493,7 @@ jobs:
       - setup_vm
       - run:
           name: '⭐ Trigger Promote Workflow ⭐'
-          command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js
+          command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js --branch=${CIRCLE_BRANCH}
       - teardown_vm
 
 workflows:
