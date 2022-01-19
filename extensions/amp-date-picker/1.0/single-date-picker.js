@@ -21,13 +21,12 @@ import {
   DateFieldNameByType,
   DateFieldType,
   DatePickerMode,
+  DatePickerState,
   FORM_INPUT_SELECTOR,
   TAG,
   noop,
 } from './constants';
 import {getFormattedDate, parseDate} from './date-helpers';
-
-import {DatePickerState} from '../0.1/amp-date-picker';
 
 /**
  * @param {!DateInput.Props} props
@@ -224,7 +223,7 @@ export function SingleDatePicker({
       document.addEventListener('click', handleClick);
       inputEl.removeEventListener('focus', handleFocus);
     };
-  }, [transitionTo, inputElement, mode]);
+  }, [transitionTo, mode]);
 
   return (
     <ContainWrapper

@@ -465,6 +465,24 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
     });
+
+    it('shows the calendar on input focus', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          mode="overlay"
+          startInputSelector="[name=start-date]"
+          endInputSelector="[name=end-date]"
+        >
+          <input type="text" name="start-date" />
+          <input type="text" name="end-date" />
+        </DatePicker>
+      );
+
+      wrapper.find('input[name="start-date"]').simulate('focus');
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+    });
   });
 
   describe('blocked dates for a single date picker', () => {
