@@ -170,7 +170,7 @@ commands:
       - when:
           condition:
             matches:
-              pattern: ^main|amp-release-.*$
+              pattern: ^main|amp-release-.*$|cherry-pick-.*$
               value: << pipeline.git.branch >>
           steps:
             - run:
