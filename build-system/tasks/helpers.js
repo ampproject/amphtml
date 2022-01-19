@@ -28,6 +28,30 @@ const {
 } = require('./remap-dependencies-plugin/remap-dependencies');
 
 /**
+ * @typedef {{
+ *   babelCaller?: string,
+ *   ssr?: boolean,
+ *   includePolyfills?: boolean,
+ *   watch?: boolean,
+ *   esbuild?: boolean,
+ *   minify?: boolean,
+ *   aliasName?: string,
+ *   extraGlobs?: string[],
+ *   toName?: string,
+ *   minifiedName?: string,
+ *   remapDependencies?: !Record<string, string>,
+ *   outputFormat?: esbuild.Format,
+ *   externalDependencies?: string[],
+ *   onWatchBuild?: function(Promise): void,
+ *   wrapper?: string
+ * }}
+ */
+const CompileOptionsDef = {};
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
+
+/**
  * Tasks that should print the `--nobuild` help text.
  * @private @const {!Set<string>}
  */
@@ -63,7 +87,7 @@ const watchedTargets = new Map();
 /**
  * @param {!Object} jsBundles
  * @param {string} name
- * @param {?Object} extraOptions
+ * @param {!CompileOptionsDef} extraOptions
  * @return {!Promise}
  */
 function doBuildJs(jsBundles, name, extraOptions) {
@@ -124,12 +148,16 @@ async function compileCoreRuntime(options) {
 }
 
 /**
+<<<<<<< HEAD
  * Compiles the "core" utilies used by all bento extensions
  *
  * Outputs 2 scripts:
  * 1) for direct consumption in the browser
  * 2) for consumption by npm package users
  * @param {Object} options
+=======
+ * @param {!CompileOptionsDef} options
+>>>>>>> df25bce1b0 (add CompileOptionsDef)
  * @return {Promise<void>}
  */
 async function compileBentoRuntimeAndCore(options) {
@@ -179,13 +207,12 @@ async function compileBentoRuntimeAndCore(options) {
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  *
- * @param {!Object} options
+ * @param {!CompileOptionsDef} options
  * @return {!Promise}
  */
 async function compileAllJs(options) {
-  log(`Compiling ${cyan(options.minified ? 'minified' : 'unminified')} JS...`);
-
   const {minify} = options;
+  log(`Compiling ${cyan(minify ? 'minified' : 'unminified')} JS...`);
 
   const startTime = Date.now();
   await Promise.all([
@@ -312,7 +339,7 @@ async function finishBundle(destDir, destFilename, options, startTime) {
  * @param {string} srcDir
  * @param {string} srcFilename
  * @param {string} destDir
- * @param {?Object} options
+ * @param {!CompileOptionsDef} options
  * @return {!Promise}
  */
 async function esbuildCompile(srcDir, srcFilename, destDir, options) {
@@ -321,6 +348,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const filename = options.minify
     ? options.minifiedName
     : options.toName ?? srcFilename;
+  // This guards against someone passing `minify: true` but no `minifiedName`.
+  if (!filename) {
+    throw new Error('No minifiedName provided for ' + srcFilename);
+  }
   const destFilename = maybeToEsmName(filename);
   const destFile = path.join(destDir, destFilename);
 
@@ -459,6 +490,38 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     await finishBundle(destDir, destFilename, options, startTime);
   }
 
+  /**
+   * Generates a plugin to remap the dependencies of a JS bundle.
+   * @return {Object}
+   */
+  function remapDependenciesPlugin() {
+    const remaps = Object.entries(
+      /** @type {!Record<string, string>} */ (options.remapDependencies)
+    ).map(([path, value]) => ({regex: new RegExp(`^${path}$`), value}));
+    const external = options.externalDependencies;
+    return {
+      name: 'remap-dependencies',
+      setup(build) {
+        build.onResolve({filter: /.*/}, (args) => {
+          const {path: importPath, resolveDir} = args;
+          const dep = importPath.startsWith('.')
+            ? path.posix.join(resolveDir, importPath)
+            : importPath;
+          for (const {regex, value} of remaps) {
+            if (!regex.test(dep)) {
+              continue;
+            }
+            const isExternal = external?.includes(value);
+            return {
+              path: isExternal ? value : require.resolve(value),
+              external: isExternal,
+            };
+          }
+        });
+      },
+    };
+  }
+
   await build(startTime).catch((err) =>
     handleBundleError(err, !!options.watch, destFilename)
   );
@@ -563,7 +626,7 @@ const watchedEntryPoints = new Set();
  * @param {string} srcDir Path to the src directory
  * @param {string} srcFilename Name of the JS source file
  * @param {string} destDir Destination folder for output script
- * @param {?Object} options
+ * @param {?CompileOptionsDef} options
  * @return {!Promise}
  */
 async function compileJs(srcDir, srcFilename, destDir, options) {
@@ -720,11 +783,16 @@ async function thirdPartyBootstrap(input, outputName, options) {
  * used to compile the entrypoint.
  *
  * @param {string} entryPoint
- * @param {!Object} options
+ * @param {!CompileOptionsDef} options
  * @return {Promise<Array<string>>}
  */
 async function getDependencies(entryPoint, options) {
-  const caller = options.minify ? 'minified' : 'unminified';
+  let caller = options.minify ? 'minified' : 'unminified';
+  // We read from the current binary configuration options if it is an
+  // SSR ready binary output. (ex. removes CSS installation, etc)
+  if (options.ssr) {
+    caller += '-ssr';
+  }
   const babelPlugin = getEsbuildBabelPlugin(caller, /* enableCache */ true);
   const result = await esbuild.build({
     entryPoints: [entryPoint],
