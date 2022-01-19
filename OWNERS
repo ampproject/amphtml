@@ -52,6 +52,10 @@
       owners: [{name: 'ampproject/wg-performance', required: true}],
     },
     {
+      pattern: '**/tsconfig.json',
+      owners: [{name: 'ampproject/wg-performance'}],
+    },
+    {
       pattern: '**/*.d.ts',
       owners: [
         {name: 'ampproject/wg-infra'},

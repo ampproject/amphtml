@@ -7,11 +7,9 @@
  * @fileoverview
  */
 
-const globalObject = /** @type {any} */ (globalThis);
+globalThis.self = globalThis as any;
 
-globalObject['self'] = globalThis;
-
-globalObject['Node'] = {
+globalThis.Node = {
   ELEMENT_NODE: 1,
   ATTRIBUTE_NODE: 2,
   TEXT_NODE: 3,
@@ -21,6 +19,6 @@ globalObject['Node'] = {
   DOCUMENT_NODE: 9,
   DOCUMENT_TYPE_NODE: 10,
   DOCUMENT_FRAGMENT_NODE: 11,
-};
+} as any;
 
 export {};
