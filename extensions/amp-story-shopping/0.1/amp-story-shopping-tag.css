@@ -46,7 +46,7 @@ amp-story-shopping-tag {
 
 .i-amphtml-amp-story-shopping-tag-inner-flipped {
   flex-direction: row-reverse !important;
-  transform: translate(-80%) !important;
+  transform: translate(-80%)  !important;
   margin-inline-start: 4px !important;
 }
 

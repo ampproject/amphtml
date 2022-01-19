@@ -80,22 +80,25 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   shouldTagFlip_(pageSize) {
-    const dotEl = this.shoppingTagEl_.querySelector(
-      '.i-amphtml-amp-story-shopping-tag-dot'
-    );
-
+    pageSize = this.element.closest('amp-story-page')./*OK*/ offsetWidth;
     /* We only check the right hand side, as resizing only expands the border to the right. */
+
     const {left, width} = this.element./*OK*/ getLayoutBox();
 
     const storyPageWidth = pageSize.width;
 
     const shouldFlip = left + width > storyPageWidth;
 
+    const dotEl = this.shoppingTagEl_.querySelector(
+      '.i-amphtml-amp-story-shopping-tag-dot'
+    );
+
     this.mutateElement(() => {
       this.shoppingTagEl_.classList.toggle(
         'i-amphtml-amp-story-shopping-tag-inner-flipped',
         shouldFlip
       );
+
       dotEl.classList.toggle(
         'i-amphtml-amp-story-shopping-tag-dot-flipped',
         shouldFlip
