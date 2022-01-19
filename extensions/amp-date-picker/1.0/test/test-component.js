@@ -1,4 +1,3 @@
-import {expect} from 'chai';
 import {format} from 'date-fns';
 import {mount} from 'enzyme';
 import {RRule} from 'rrule';
