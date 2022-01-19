@@ -5,7 +5,6 @@ import {
   scopedQuerySelector,
 } from '#core/dom/query';
 
-import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import * as Preact from '#preact';
 import {
   cloneElement,
@@ -58,17 +57,8 @@ export function DateRangePicker({
   const [endInputProps, setEndInputProps] = useState();
 
   const containerRef = useRef();
-  const initialStateMachineState =
-    mode === DatePickerMode.OVERLAY
-      ? DatePickerState.OVERLAY_CLOSED
-      : DatePickerState.STATIC;
-  const initialState = {
-    isOpen: mode === DatePickerMode.STATIC,
-  };
-  const {state, transitionTo} = useDatePickerState(
-    initialState,
-    initialStateMachineState
-  );
+
+  const {state, transitionTo} = useDatePickerState(mode);
 
   /**
    * Generate a name for a hidden input.

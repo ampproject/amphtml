@@ -2,18 +2,22 @@ import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 
 import {useCallback, useEffect, useRef, useState} from '#preact';
 
-import {DatePickerState, noop} from './constants';
+import {DatePickerMode, DatePickerState, noop} from './constants';
 
 /**
  *
- * @param {Object} initialState
- * @param {DatePickerState} initialStateMachineState
+ * @param {DatePickerMode} mode
  * @return {{state: object, transitionTo: function}}
  */
-export function useDatePickerState(
-  initialState = {},
-  initialStateMachineState
-) {
+export function useDatePickerState(mode) {
+  const initialState = {
+    isOpen: mode === DatePickerMode.STATIC,
+  };
+  const initialStateMachineState =
+    mode === DatePickerMode.OVERLAY
+      ? DatePickerState.OVERLAY_CLOSED
+      : DatePickerState.STATIC;
+
   const [state, setState] = useState(initialState);
   const stateMachineRef = useRef(
     new FiniteStateMachine(initialStateMachineState)

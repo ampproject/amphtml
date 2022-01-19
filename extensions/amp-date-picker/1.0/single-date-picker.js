@@ -48,17 +48,7 @@ export function SingleDatePicker({
 
   const containerRef = useRef();
 
-  const initialState = {
-    isOpen: mode === DatePickerMode.STATIC,
-  };
-  const initialStateMachineState =
-    mode === DatePickerMode.OVERLAY
-      ? DatePickerState.OVERLAY_CLOSED
-      : DatePickerState.STATIC;
-  const {state, transitionTo} = useDatePickerState(
-    initialState,
-    initialStateMachineState
-  );
+  const {state, transitionTo} = useDatePickerState(mode);
 
   const handleSetDate = useCallback(
     (date) => {
