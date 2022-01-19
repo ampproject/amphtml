@@ -43,7 +43,6 @@ export function DateRangePicker({
   const [startInputAttributes, setStartInputAttributes] = useState();
   const [endInputAttributes, setEndInputAttributes] = useState();
 
-  const onErrorRef = useRef(onError);
   const containerRef = useRef();
 
   const [isOpen] = useState(mode === DatePickerMode.STATIC);
@@ -72,13 +71,13 @@ export function DateRangePicker({
         return alternativeName;
       }
 
-      onErrorRef.current(
+      onError(
         `Multiple date-pickers with implicit ${TAG} fields need to have IDs`
       );
 
       return '';
     },
-    [id]
+    [id, onError]
   );
 
   /**
@@ -229,7 +228,7 @@ export function DateRangePicker({
         name: getHiddenInputId(form, DateFieldType.END_DATE),
       });
     } else if (mode === DatePickerMode.OVERLAY) {
-      onErrorRef.current(
+      onError(
         `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
       );
     }
@@ -237,7 +236,7 @@ export function DateRangePicker({
     containerRef,
     getHiddenInputId,
     mode,
-    onErrorRef,
+    onError,
     startInputSelector,
     endInputSelector,
     format,

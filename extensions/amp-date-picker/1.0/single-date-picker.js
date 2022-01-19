@@ -48,7 +48,6 @@ export function SingleDatePicker({
   const [inputProps, setInputProps] = useState({});
   const [date, _setDate] = useState();
 
-  const onErrorRef = useRef(onError);
   const containerRef = useRef();
   const initialStateMachineState =
     mode === DatePickerMode.OVERLAY
@@ -132,13 +131,13 @@ export function SingleDatePicker({
         return alternativeName;
       }
 
-      onErrorRef.current(
+      onError(
         `Multiple date-pickers with implicit ${TAG} fields need to have IDs`
       );
 
       return '';
     },
-    [id]
+    [id, onError]
   );
 
   const setDate = useCallback(
@@ -192,7 +191,7 @@ export function SingleDatePicker({
         name: getHiddenInputId(form),
       });
     } else if (mode === DatePickerMode.OVERLAY) {
-      onErrorRef.current(`Overlay single pickers must specify "inputSelector"`);
+      onError(`Overlay single pickers must specify "inputSelector"`);
     }
     // This should only be called on first render
     // eslint-disable-next-line react-hooks/exhaustive-deps
