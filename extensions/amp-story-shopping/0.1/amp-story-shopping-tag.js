@@ -80,34 +80,31 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   shouldTagFlip_(pageSize) {
-    this.measureElement(() => {
-      /* We only check the right hand side, as resizing only expands the border to the right. */
-      const {offsetLeft, offsetWidth} = this.element;
+    const dotEl = this.shoppingTagEl_.querySelector(
+      '.i-amphtml-amp-story-shopping-tag-dot'
+    );
 
-      const storyPageWidth = pageSize.width;
+    /* We only check the right hand side, as resizing only expands the border to the right. */
+    const {offsetLeft, offsetWidth} = this.element;
 
-      const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
+    const storyPageWidth = pageSize.width;
 
-      this.mutateElement(() => {
-        this.shoppingTagEl_.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-inner-flipped',
-          shouldFlip
-        );
+    const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
 
-        const dotEl = this.shoppingTagEl_.querySelector(
-          '.i-amphtml-amp-story-shopping-tag-dot'
-        );
+    this.mutateElement(() => {
+      this.shoppingTagEl_.classList.toggle(
+        'i-amphtml-amp-story-shopping-tag-inner-flipped',
+        shouldFlip
+      );
+      dotEl.classList.toggle(
+        'i-amphtml-amp-story-shopping-tag-dot-flipped',
+        shouldFlip
+      );
 
-        dotEl.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-dot-flipped',
-          shouldFlip
-        );
-
-        this.shoppingTagEl_.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-visible',
-          true
-        );
-      });
+      this.shoppingTagEl_.classList.toggle(
+        'i-amphtml-amp-story-shopping-tag-visible',
+        true
+      );
     });
   }
 
