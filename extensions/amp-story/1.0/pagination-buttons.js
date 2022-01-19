@@ -122,9 +122,10 @@ class PaginationButton {
         'i-amphtml-story-button-hidden',
         !isEnabled
       );
-      this.element
-        .querySelector('button')
-        ?.toggleAttribute('disabled', !isEnabled);
+      const button = this.element.querySelector('button');
+      isEnabled
+        ? button.removeAttribute('disabled')
+        : button.setAttribute('disabled', '');
     });
   }
 
