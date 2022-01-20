@@ -1491,26 +1491,26 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   polyfillDvh_(size, pageId) {
-    let pageSize = size;
+    const {height, width} = size;
+
+    if (height === 0 && width === 0) {
+      return;
+    }
+
+    setImportantStyles(this.win.document.documentElement, {
+      '--story-dvh': px(height / 100),
+    });
+
     if (pageId) {
       const page = this.element.querySelector(
         `amp-story-page#${escapeCssSelectorIdent(pageId)}`
       );
-
-      pageSize = {
+      const pageSize = {
         'width': page./*OK*/ getLayoutBox().width,
         'height': page./*OK*/ getLayoutBox().height,
       };
+      this.storeService_.dispatch(Action.SET_PAGE_SIZE, pageSize);
     }
-
-    const {height, width} = pageSize;
-    if (height === 0 && width === 0) {
-      return;
-    }
-    this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
-    setImportantStyles(this.win.document.documentElement, {
-      '--story-dvh': px(size.height / 100),
-    });
   }
 
   /**
