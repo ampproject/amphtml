@@ -348,13 +348,15 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {});
 
     const pageId = this.getInitialPageId_();
-    if (
+
+    const needsDvhPolyfill =
       !this.win.CSS?.supports?.('height: 1dvh') &&
-      !getStyle(this.win.document.documentElement, '--story-dvh')
-    ) {
-      this.getViewport().onResize((size) => this.polyfillDvh_(size, pageId));
-      this.polyfillDvh_(this.getViewport().getSize(), pageId);
-    }
+      !getStyle(this.win.document.documentElement, '--story-dvh');
+
+    const onResize = (size) => {
+      needsDvhPolyfill && this.polyfillDvh_(size);
+      this.onViewportResize_();
+    };
 
     if (pageId) {
       const page = this.element.querySelector(
@@ -448,6 +450,9 @@ export class AmpStory extends AMP.BaseElement {
     if (this.maybeLoadStoryDevTools_()) {
       return;
     }
+
+    this.getViewport().onResize(onResize);
+    onResize(this.getViewport().getSize());
   }
 
   /**
@@ -1489,7 +1494,7 @@ export class AmpStory extends AMP.BaseElement {
    * @param {!Object} size including new width and height
    * @private
    */
-  polyfillDvh_(size, pageId) {
+  polyfillDvh_(size) {
     const {height, width} = size;
     if (height === 0 && width === 0) {
       return;
@@ -1497,18 +1502,21 @@ export class AmpStory extends AMP.BaseElement {
     setImportantStyles(this.win.document.documentElement, {
       '--story-dvh': px(height / 100),
     });
-    if (pageId) {
-      const page = this.element.querySelector(
-        `amp-story-page#${escapeCssSelectorIdent(pageId)}`
-      );
-      const pageSize = {
-        'width': page./*OK*/ getLayoutBox().width,
-        'height': page./*OK*/ getLayoutBox().height,
-      };
-      this.storeService_.dispatch(Action.SET_PAGE_SIZE, pageSize);
-    } else {
-      this.storeService_.dispatch(Action.SET_PAGE_SIZE, size);
-    }
+  }
+
+  /**
+   * Handles resize events and sets CSS variables.
+   * including new width and height
+   * @private
+   */
+  onViewportResize_() {
+    const page = this.element.querySelector(`amp-story-page[active]`);
+
+    const pageSize = {
+      'width': page./*OK*/ getLayoutBox().width,
+      'height': page./*OK*/ getLayoutBox().height,
+    };
+    this.storeService_.dispatch(Action.SET_PAGE_SIZE, pageSize);
   }
 
   /**
