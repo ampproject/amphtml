@@ -57,9 +57,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
     this.element.appendChild(this.attachmentEl_);
     this.attachmentEl_.appendChild(this.plpContainer_);
-    this.shoppingTags_ = this.element
-      .closest('amp-story-page')
-      .querySelectorAll('amp-story-shopping-tag');
+    this.shoppingTags_ = Array.from(
+      this.element
+        .closest('amp-story-page')
+        .querySelectorAll('amp-story-shopping-tag')
+    );
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -98,17 +100,16 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @private */
   populatePlp_() {
-    console.log('populate PLP');
     if (this.plpContainer_.querySelector('.amp-story-shopping-plp')) {
       return;
     }
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
-    const shoppingDataForPage = Array.from(this.shoppingTags_).map(
+    const shoppingDataForPage = this.shoppingTags_.map(
       (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-tag-id')]
     );
-    this.plpContainer_.appendChild(
-      this.renderPlpTemplate_(shoppingDataForPage)
-    );
+
+    const plp = this.renderPlpTemplate_(shoppingDataForPage);
+    this.mutateElement(() => this.plpContainer_.appendChild(plp));
   }
 
   /**
@@ -118,27 +119,27 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    */
   renderPlpTemplate_(shoppingDataForPage) {
     return (
-      <div class="amp-story-shopping-plp">
-        <div class="amp-story-shopping-plp-header">
+      <div class="i-amphtml-amp-story-shopping-plp">
+        <div class="i-amphtml-amp-story-shopping-plp-header">
           {this.localizationService_.getLocalizedString(
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER,
             this.element
           )}
         </div>
-        <div class="amp-story-shopping-plp-cards">
+        <div class="i-amphtml-amp-story-shopping-plp-cards">
           {shoppingDataForPage.map((data) => (
-            <div class="amp-story-shopping-plp-card">
+            <div class="i-amphtml-amp-story-shopping-plp-card">
               <img
-                class="amp-story-shopping-plp-card-image"
+                class="i-amphtml-amp-story-shopping-plp-card-image"
                 src={data['product-images'][0]}
               ></img>
-              <div class="amp-story-shopping-plp-card-brand">
+              <div class="i-amphtml-amp-story-shopping-plp-card-brand">
                 {data['product-brand']}
               </div>
-              <div class="amp-story-shopping-plp-card-title">
+              <div class="i-amphtml-amp-story-shopping-plp-card-title">
                 {data['product-title']}
               </div>
-              <div class="amp-story-shopping-plp-card-price">
+              <div class="i-amphtml-amp-story-shopping-plp-card-price">
                 {formatI18nNumber(
                   this.localizationService_,
                   this.element,

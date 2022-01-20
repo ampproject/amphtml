@@ -10,48 +10,48 @@ amp-story-shopping-attachment a {
   text-decoration: none !important;
 }
 
-.amp-story-shopping-plp {
+.i-amphtml-amp-story-shopping-plp {
   padding: 0 var(--shopping-attachment-horizontal-padding) !important;
 }
 
-.amp-story-shopping-plp-header {
+.i-amphtml-amp-story-shopping-plp-header {
   font-weight: 600 !important;
   font-size: 1.5em !important;
   margin-bottom: 1.2em !important;
 }
 
-.amp-story-shopping-plp-cards {
+.i-amphtml-amp-story-shopping-plp-cards {
   justify-content: space-between !important;
   display: flex !important;
   flex-wrap: wrap !important;
 }
 
-.amp-story-shopping-plp-card {
+.i-amphtml-amp-story-shopping-plp-card {
   width: calc(50% - var(--shopping-attachment-horizontal-padding) / 2) !important;
   margin-bottom: 3em !important;
 }
 
-.amp-story-shopping-plp-card-image {
+.i-amphtml-amp-story-shopping-plp-card-image {
   width: 100% !important;
   margin-bottom: 0.75em !important;
   border-radius: 2em !important;
 }
 
-.amp-story-shopping-plp-card-brand {
+.i-amphtml-amp-story-shopping-plp-card-brand {
   font-weight: 500 !important;
   margin-bottom: 0.7em !important;
   line-height: .75em !important;
   font-size: .9em !important;
 }
 
-.amp-story-shopping-plp-card-title {
+.i-amphtml-amp-story-shopping-plp-card-title {
   font-weight: 600 !important;
   margin-bottom: 0.4em !important;
   line-height: 1.2em !important;
   font-size: 1.25em !important;
 }
 
-.amp-story-shopping-plp-card-price {
+.i-amphtml-amp-story-shopping-plp-card-price {
   font-weight: 500 !important;
   margin-bottom: .33em !important;
   line-height: 1em !important;
