@@ -37,7 +37,7 @@ module.exports = {
     function* removeFromArray(fixer, node) {
       const {text} = context.getSourceCode();
       let [start] = node.range;
-      const [end] = node.range;
+      const [, end] = node.range;
       while (/\s/.test(text[start - 1])) {
         start--;
       }
