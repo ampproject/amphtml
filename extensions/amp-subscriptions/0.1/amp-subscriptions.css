@@ -70,6 +70,9 @@ amp-subscriptions-dialog {
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2);
   margin-bottom: 0;
   transition: transform 0.3s ease-in;
+}
+
+amp-subscriptions-dialog.i-amphtml-subs-amp-story-dialog {
   border-radius: 16px 16px 0px 0px;
 }
 

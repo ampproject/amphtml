@@ -163,7 +163,11 @@ export class SubscriptionService {
       isStoryDocument(this.ampdoc_).then((isStory) => {
         // Delegates the platform selection and activation call if is story.
         if (isStory) {
+          // Make the dialog with round corners for AMP Story.
           console.log('is story document so dont activate platform');
+          const doc = this.ampdoc_.getRootNode();
+          const dialogWrapperEl = doc.querySelector('amp-subscriptions-dialog');
+          dialogWrapperEl.classList.add('i-amphtml-subs-amp-story-dialog');
         }
         this.startAuthorizationFlow_(!isStory /** shouldActivatePlatform */);
       });
@@ -384,19 +388,19 @@ export class SubscriptionService {
     this.renderer_.setGrantState(grantState);
   }
 
-  /**
-   * @param {!./entitlement.Entitlement} entitlement
-   */
-  resolveEntitlement(entitlement) {
-    this.platformStore_.resolveEntitlement('local', entitlement);
-    this.platformConfig_['services'][0]['authorizationUrl'] =
-      '//localhost:8000/subscription/1/entitlements';
-    /** @type {!Array} */ (this.platformConfig_['services']).forEach(
-      (service) => {
-        this.initializeLocalPlatforms_(service);
-      }
-    );
-  }
+  // /**
+  //  * @param {!./entitlement.Entitlement} entitlement
+  //  */
+  // resolveEntitlement(entitlement) {
+  //   this.platformStore_.resolveEntitlement('local', entitlement);
+  //   this.platformConfig_['services'][0]['authorizationUrl'] =
+  //     '//localhost:8000/subscription/1/entitlements';
+  //   /** @type {!Array} */ (this.platformConfig_['services']).forEach(
+  //     (service) => {
+  //       this.initializeLocalPlatforms_(service);
+  //     }
+  //   );
+  // }
 
   /**
    * @param {string} platformKey
@@ -425,7 +429,6 @@ export class SubscriptionService {
    */
   getEntitlements_(platform) {
     return platform.getEntitlements().then((entitlements) => {
-      // debugger;
       if (
         entitlements &&
         entitlements.granted &&
@@ -668,7 +671,13 @@ export class SubscriptionService {
    * @return {!Promise}
    */
   selectAndActivatePlatform() {
-    this.selectAndActivatePlatform_();
+    return this.initialize_().then(() => {
+      if (this.doesViewerProvideAuth_ || this.platformConfig_['alwaysGrant']) {
+        return;
+      }
+
+      return this.selectAndActivatePlatform_();
+    });
   }
 
   /**

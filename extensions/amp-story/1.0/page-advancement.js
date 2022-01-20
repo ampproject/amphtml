@@ -193,6 +193,7 @@ export class AdvancementConfig {
    * @protected
    */
   onTapNavigation(navigationDirection) {
+    console.log('performing callbacks for tap navigation');
     this.tapNavigationListeners_.forEach((navigationListener) => {
       navigationListener(navigationDirection);
     });
@@ -346,8 +347,10 @@ export class ManualAdvancement extends AdvancementConfig {
     // touchend was fired, since it'd reset the touchstartTimestamp (ie: user
     // touches the screen with a second finger).
     if (this.touchstartTimestamp_ || !this.shouldHandleEvent_(event)) {
+      console.log('touch start should not be handled.');
       return;
     }
+    console.log('touch start event being handled');
     this.touchstartTimestamp_ = Date.now();
     this.pausedState_ = /** @type {boolean} */ (
       this.storeService_.get(StateProperty.PAUSED_STATE)
@@ -453,6 +456,8 @@ export class ManualAdvancement extends AdvancementConfig {
       (el) => {
         tagName = el.tagName.toLowerCase();
 
+        // debugger;
+
         // Prevents navigation when clicking inside of draggable drawer elements,
         // such as <amp-story-page-attachment> and <amp-story-page-outlink>.
         if (el.classList.contains('amp-story-draggable-drawer-root')) {
@@ -460,9 +465,10 @@ export class ManualAdvancement extends AdvancementConfig {
           return true;
         }
 
+        const pageRect = this.getStoryPageRect_();
         if (
           tagName.startsWith('amp-story-interactive-') &&
-          (!this.isInStoryPageSideEdge_(event, this.getStoryPageRect_()) ||
+          (!this.isInStoryPageSideEdge_(event, pageRect) ||
             event.path[0].classList.contains(
               'i-amphtml-story-interactive-disclaimer-icon'
             ))
@@ -481,6 +487,36 @@ export class ManualAdvancement extends AdvancementConfig {
 
         if (tagName === 'amp-story-page') {
           shouldHandleEvent = true;
+          return true;
+        }
+
+        // debugger;
+        // console.log('tag name in should handle: ' + tagName);
+        if (
+          tagName === 'amp-story-subscription'
+          // &&
+          // !(
+          //   this.getTapDirection_(event, pageRect) ===
+          //   this.sections_.right.direction
+          // )
+        ) {
+          if (
+            this.getTapDirection_(event, pageRect) ===
+            this.sections_.right.direction
+          ) {
+            console.log(
+              'trigger paywall hint. shouldnt handle paywall tap: ' +
+                this.getTapDirection_(event, pageRect)
+            );
+            this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION_HINT, true);
+            shouldHandleEvent = false;
+          } else {
+            console.log(
+              'should handle paywall tap: ' +
+                this.getTapDirection_(event, pageRect)
+            );
+            shouldHandleEvent = true;
+          }
           return true;
         }
 
@@ -665,6 +701,8 @@ export class ManualAdvancement extends AdvancementConfig {
    * @private
    */
   maybePerformNavigation_(event) {
+    // debugger;
+    // console.log('maybe perform navigation in page-advancement');
     const target = dev().assertElement(event.target);
 
     const pageRect = this.getStoryPageRect_();
@@ -702,6 +740,7 @@ export class ManualAdvancement extends AdvancementConfig {
       this.isProtectedTarget_(event) ||
       !this.shouldHandleEvent_(event)
     ) {
+      console.log('should not perform navigation for tap events');
       // If the system doesn't need to handle this click, then we can simply
       // return and let the event propagate as it would have otherwise.
       return;
@@ -714,18 +753,16 @@ export class ManualAdvancement extends AdvancementConfig {
       AdvancementMode.MANUAL_ADVANCE
     );
 
-    // Using `left` as a fallback since Safari returns a ClientRect in some
-    // cases.
-    const offsetLeft = 'x' in pageRect ? pageRect.x : pageRect.left;
+    // debugger;
+    // if (
+    //   this.getTapDirection_(page) === this.sections_.right.direction &&
+    //   event.target.tagName.toLowerCase() === 'amp-story-subscription'
+    // ) {
+    //   console.log('tap right when paywall is triggered');
+    //   return;
+    // }
 
-    const page = {
-      // Offset starting left of the page.
-      offset: offsetLeft,
-      width: pageRect.width,
-      clickEventX: event.pageX,
-    };
-
-    this.onTapNavigation(this.getTapDirection_(page));
+    this.onTapNavigation(this.getTapDirection_(event, pageRect));
   }
 
   /**
@@ -751,17 +788,32 @@ export class ManualAdvancement extends AdvancementConfig {
    * section of the page was there a click. The navigation direction of each
    * individual section has been previously defined depending on the language
    * settings.
-   * @param {!Object} page
+   * @param {!Event} event
+   * @param {!ClientRect} pageRect
    * @return {number}
    * @private
    */
-  getTapDirection_(page) {
+  getTapDirection_(event, pageRect) {
+    // debugger;
     const {left, right} = this.sections_;
 
+    // Using `left` as a fallback since Safari returns a ClientRect in some
+    // cases.
+    const offsetLeft = 'x' in pageRect ? pageRect.x : pageRect.left;
+
+    const page = {
+      // Offset starting left of the page.
+      offset: offsetLeft,
+      width: pageRect.width,
+      clickEventX: event.pageX,
+    };
+
     if (page.clickEventX <= page.offset + left.widthRatio * page.width) {
+      console.log('left direction');
       return left.direction;
     }
 
+    console.log('right direction');
     return right.direction;
   }
 
@@ -857,7 +909,6 @@ export class TimeBasedAdvancement extends AdvancementConfig {
 
   /** @override */
   stop(canResume = false) {
-    console.log('stop in time based advancement. canResume: ' + canResume);
     super.stop();
 
     if (this.timeoutId_ !== null) {

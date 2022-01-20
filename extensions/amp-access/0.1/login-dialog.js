@@ -324,17 +324,17 @@ export class WebLoginDialog {
    */
   getReturnUrl_() {
     const currentUrl = this.viewer.getResolvedViewerUrl();
-    let returnUrl;
-    const loc = this.win.location;
-    if (getMode().localDev && loc.host !== 'localhost:8000') {
-      returnUrl =
-        loc.protocol +
-        '//' +
-        loc.host +
-        '/extensions/amp-access/0.1/amp-login-done.html';
-    } else {
-      returnUrl = `${urls.cdn}/v0/amp-login-done-0.1.html`;
-    }
+    // let returnUrl;
+    // const loc = this.win.location;
+    // if (getMode().localDev && loc.host !== 'localhost:8000') {
+    //   returnUrl =
+    //     loc.protocol +
+    //     '//' +
+    //     loc.host +
+    //     '/extensions/amp-access/0.1/amp-login-done.html';
+    // } else {
+    const returnUrl = `${urls.cdn}/v0/amp-login-done-0.1.html`;
+    // }
     console.log('return url: ' + returnUrl);
     return returnUrl + '?url=' + encodeURIComponent(currentUrl);
   }

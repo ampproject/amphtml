@@ -149,6 +149,7 @@ export const StateProperty = {
   // App States.
   ACCESS_STATE: 'accessState', // amp-access paywall.
   SUBSCRIPTION_STATE: 'subscriptionState', // amp-subscriptions paywall.
+  SUBSCRIPTION_HINT_STATE: 'subscriptionHintState', // amp-subscriptions paywall hint.
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
@@ -199,6 +200,7 @@ export const Action = {
   SET_PAGE_IDS: 'setPageIds',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_SUBSCRIPTION: 'toggleSubscription',
+  TOGGLE_SUBSCRIPTION_HINT: 'toggleSubscriptionHint',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_EDUCATION: 'toggleEducation',
@@ -317,7 +319,7 @@ const actions = (state, action, data) => {
       console.log(
         'received toggle subscrition action in store service: ' + data
       );
-      // Don't change the PAUSED_STATE if SUBSCRIPTION_STATE is not changed.
+      // Don't change the SUBSCRIPTION_STATE if SUBSCRIPTION_STATE is not changed.
       if (state[StateProperty.SUBSCRIPTION_STATE] === data) {
         return state;
       }
@@ -325,7 +327,20 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.SUBSCRIPTION_STATE]: !!data,
-        // [StateProperty.PAUSED_STATE]: !!data,
+      });
+    // Triggers the amp-subscriptions paywall hint
+    case Action.TOGGLE_SUBSCRIPTION_HINT:
+      console.log(
+        'received toggle subscrition hint action in store service: ' + data
+      );
+      // Don't change the SUBSCRIPTION_HINT_STATE if SUBSCRIPTION_HINT_STATE is not changed.
+      if (state[StateProperty.SUBSCRIPTION_HINT_STATE] === data) {
+        return state;
+      }
+
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SUBSCRIPTION_HINT_STATE]: !!data,
       });
     case Action.TOGGLE_PAGE_ATTACHMENT_STATE:
       return /** @type {!State} */ ({
@@ -571,6 +586,7 @@ export class AmpStoryStoreService {
       [StateProperty.VIEWER_CUSTOM_CONTROLS]: [],
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.SUBSCRIPTION_STATE]: false,
+      [StateProperty.SUBSCRIPTION_HINT_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.EDUCATION_STATE]: false,

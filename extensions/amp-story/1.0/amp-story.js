@@ -36,7 +36,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
-// import {AmpStorySubscription} from './amp-story-subscription';
+// import {AmpStorySubscription} from '../../amp-story-subscription/0.1/amp-story-subscription';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
@@ -277,14 +277,14 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {boolean} */
     this.areAccessAuthorizationsCompleted_ = false;
 
-    /** @private {boolean} */
-    this.areSubscriptionsAuthorizationsCompleted_ = false;
-
     /** @private */
     this.navigateToPageAfterAccess_ = null;
 
     /** @private */
     this.navigateToPageAfterSubscriptionsAreGranted_ = null;
+
+    /** @private */
+    this.paywallTimeout_ = null;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
@@ -354,14 +354,16 @@ export class AmpStory extends AMP.BaseElement {
         createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
       );
 
-    Services.subscriptionsServiceForDoc(this.element).then(
-      (subscriptionService) => {
-        this.subscriptionService_ = subscriptionService;
-        this.subscriptionService_.getGrantStatus().then((granted) => {
-          this.granted_ = granted;
-        });
-      }
-    );
+    if (this.element.hasAttribute('paywall')) {
+      Services.subscriptionsServiceForDoc(this.element).then(
+        (subscriptionService) => {
+          this.subscriptionService_ = subscriptionService;
+          this.subscriptionService_.getGrantStatus().then((granted) => {
+            this.granted_ = granted;
+          });
+        }
+      );
+    }
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
@@ -669,7 +671,10 @@ export class AmpStory extends AMP.BaseElement {
 
     this.element.addEventListener(EventType.SWITCH_PAGE, (e) => {
       this.switchTo_(getDetail(e)['targetPageId'], getDetail(e)['direction']);
-      this.ampStoryHint_.hideAllNavigationHint();
+      if (!this.navigateToPageAfterSubscriptionsAreGranted_) {
+        this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION_HINT, false);
+        // this.ampStoryHint_.hideAllNavigationHint();
+      }
     });
 
     this.element.addEventListener(EventType.PAGE_PROGRESS, (e) => {
@@ -962,6 +967,14 @@ export class AmpStory extends AMP.BaseElement {
         this.initializeStoryAccess_();
 
         this.pages_.forEach((page, index) => {
+          if (this.element.hasAttribute('paywall')) {
+            if (index == 2) {
+              page.setSubscriptionsSection('limited-content');
+            }
+            if (index >= 3) {
+              page.setSubscriptionsSection('content');
+            }
+          }
           page.setState(PageState.NOT_ACTIVE);
           this.upgradeCtaAnchorTagsForTracking_(page, index);
         });
@@ -1315,6 +1328,18 @@ export class AmpStory extends AMP.BaseElement {
       this.activePage_,
       'No active page set when navigating to previous page.'
     );
+    if (this.storeService_.get(StateProperty.SUBSCRIPTION_STATE) == true) {
+      this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, false);
+      // this.ampStoryHint_.hideAllNavigationHint();
+      this.navigateToPageAfterSubscriptionsAreGranted_ = null;
+    }
+    if (this.storeService_.get(StateProperty.SUBSCRIPTION_HINT_STATE) == true) {
+      this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION_HINT, false);
+    }
+    if (this.paywallTimeout_) {
+      this.timer_.cancel(this.paywallTimeout_);
+      this.paywallTimeout_ = null;
+    }
     activePage.previous();
   }
 
@@ -1392,70 +1417,79 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    // Do we need this?
-    if (this.subscriptionService_) {
-      this.subscriptionService_.getGrantStatus().then((granted) => {
-        this.granted_ = granted;
-      });
-    }
-
+    const subscriptionsSection = targetPage.element.getAttribute(
+      'subscriptions-section'
+    );
     if (
       !this.granted_ &&
-      this.activePage_.element.hasAttribute('subscriptions-section') &&
-      this.activePage_.element.getAttribute('subscriptions-section') ==
-        'content'
-      // !this.areSubscriptionsAuthorizationsCompleted_
+      (subscriptionsSection == 'content' ||
+        subscriptionsSection == 'limited-content')
     ) {
-      if (this.navigateToPageAfterSubscriptionsAreGranted_) {
-        console.log('dialog should already be there and this page is locked!');
+      const triggerPaywall = () => {
+        if (this.navigateToPageAfterSubscriptionsAreGranted_) {
+          console.log(
+            'dialog should already be there and this page is locked!'
+          );
+          // this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION_HINT, true);
+          return Promise.resolve();
+        }
+        this.navigateToPageAfterSubscriptionsAreGranted_ = this.activePage_;
+
+        this.activePage_.setState(PageState.PAUSED);
+
+        this.subscriptionService_.selectAndActivatePlatform().then(() => {
+          // this.ampStoryHint_.showPaywallHintOverlay();
+        }); // activate any working platform.
+
+        this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, true);
+        this.subscriptionService_.addOnEntitlementResolvedCallback((e) => {
+          const {entitlement} = e;
+          console.log(
+            'amp-story onEntitlement callback is called. entitlement: ' +
+              entitlement.granted
+          );
+          if (
+            this.navigateToPageAfterSubscriptionsAreGranted_ &&
+            entitlement.granted
+          ) {
+            console.log('new entitlement resolves to true!');
+
+            this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, false);
+            this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION_HINT, false);
+            // this.ampStoryHint_.hideAllNavigationHint();
+
+            this.switchTo_(
+              this.navigateToPageAfterSubscriptionsAreGranted_.element.id,
+              NavigationDirection.NEXT
+            );
+
+            this.granted_ = true;
+            this.navigateToPageAfterSubscriptionsAreGranted_.setState(
+              PageState.PLAYING
+            );
+            this.navigateToPageAfterSubscriptionsAreGranted_ = null;
+          }
+        });
+      };
+      if (targetPage.getSubscriptionsSection() == 'limited-content') {
+        // debugger;
+        console.log('assigning paywall timeout');
+        // this.paywallTimeout_ = setTimeout(() => {
+        //   console.log('executing paywall timeout');
+        //   triggerPaywall();
+        // }, 2000);
+        this.paywallTimeout_ = this.timer_.delay(() => {
+          console.log('executing paywall timeout');
+          triggerPaywall();
+        }, 1000);
+      } else if (targetPage.getSubscriptionsSection() == 'content') {
+        triggerPaywall();
         return Promise.resolve();
       }
-      this.navigateToPageAfterSubscriptionsAreGranted_ = this.activePage_;
-
-      console.log(
-        'click base trigger: current page has subscription-section with content'
-      );
-      this.subscriptionService_.selectAndActivatePlatform(); // activate any working platform.
-      this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, true);
-
-      this.subscriptionService_.addOnEntitlementResolvedCallback((e) => {
-        const {entitlement} = e;
-        console.log(
-          'amp-story onEntitlement callback is called. entitlement: ' +
-            entitlement.granted
-        );
-        if (
-          this.navigateToPageAfterSubscriptionsAreGranted_ &&
-          entitlement.granted
-        ) {
-          console.log('new entitlement resolves to true!');
-          // this parameter should be removed and use granted_ instead.
-          // this.areSubscriptionsAuthorizationsCompleted_ = true;
-          this.granted_ = true;
-          this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, false);
-          this.switchTo_(
-            this.navigateToPageAfterSubscriptionsAreGranted_.element.id,
-            NavigationDirection.NEXT
-          );
-          this.navigateToPageAfterSubscriptionsAreGranted_ = null;
-        }
-      });
-      return Promise.resolve();
     }
 
     console.log('should only execute this when content not blocked!');
-
-    // if (this.win.document.body.hasAttribute('i-amphtml-subs-grant-no')) {
-    //   console.log('next page is grant no');
-    //   this.navigateToPageAfterSubscriptionsAreGranted_ = targetPage;
-    //   return Promise.resolve();
-    // }
-
     const oldPage = this.activePage_;
-    // console.log(
-    //   'updating the current active page: ' + JSON.stringify(this.activePage_)
-    // );
-    console.log('updating the current active page');
     this.activePage_ = targetPage;
     if (!targetPage.isAd()) {
       this.updateNavigationPath_(targetPageId, direction);
@@ -1469,7 +1503,6 @@ export class AmpStory extends AMP.BaseElement {
       // First step contains the minimum amount of code to display and play the
       // target page as fast as possible.
       () => {
-        console.log('switch to step 1');
         oldPage && oldPage.element.removeAttribute('active');
 
         // Starts playing the page, if the story is not paused.
@@ -1488,7 +1521,6 @@ export class AmpStory extends AMP.BaseElement {
       // Second step does all the operations that impact the UI/UX: media sound,
       // progress bar, ...
       () => {
-        console.log('switch to step 2');
         if (oldPage) {
           oldPage.setState(PageState.NOT_ACTIVE);
 
@@ -1544,7 +1576,6 @@ export class AmpStory extends AMP.BaseElement {
       // the navigation happened, like preloading the following pages, or
       // sending analytics events.
       () => {
-        console.log('switch to step 3');
         this.preloadPagesByDistance_(/* prioritizeActivePage */ !oldPage);
         this.triggerActiveEventForPage_();
 
@@ -1567,53 +1598,6 @@ export class AmpStory extends AMP.BaseElement {
         };
 
         unqueueStepInRAF();
-
-        // if (
-        //   !this.granted_ &&
-        //   this.activePage_.element.hasAttribute('subscriptions-section') &&
-        //   this.activePage_.element.getAttribute('subscriptions-section') ==
-        //     'content'
-        // ) {
-        //   this.timer_.delay(() => {
-        //     console.log('time triggering paywall because this page is locked!');
-        //     if (this.navigateToPageAfterSubscriptionsAreGranted_) {
-        //       console.log(
-        //         'dialog should already be there and this page is locked!'
-        //       );
-        //       return Promise.resolve();
-        //     }
-        //     this.navigateToPageAfterSubscriptionsAreGranted_ = this.activePage_;
-
-        //     console.log(
-        //       'time base trigger: current page has subscription-section with content'
-        //     );
-        //     this.subscriptionService_.selectAndActivatePlatform(); // activate any working platform.
-        //     this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, true);
-
-        //     this.subscriptionService_.addOnEntitlementResolvedCallback((e) => {
-        //       const {entitlement} = e;
-        //       console.log(
-        //         'amp-story onEntitlement callback is called. entitlement: ' +
-        //           entitlement.granted
-        //       );
-        //       if (
-        //         this.navigateToPageAfterSubscriptionsAreGranted_ &&
-        //         entitlement.granted
-        //       ) {
-        //         console.log('new entitlement resolves to true!');
-        //         // this parameter should be removed and use granted_ instead.
-        //         // this.areSubscriptionsAuthorizationsCompleted_ = true;
-        //         this.granted_ = true;
-        //         this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTION, false);
-        //         this.switchTo_(
-        //           this.navigateToPageAfterSubscriptionsAreGranted_.element.id,
-        //           NavigationDirection.NEXT
-        //         );
-        //         this.navigateToPageAfterSubscriptionsAreGranted_ = null;
-        //       }
-        //     });
-        //   }, 5000);
-        // }
       });
     });
   }

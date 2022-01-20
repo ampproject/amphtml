@@ -2,30 +2,23 @@
 <html amp lang="en">
   <head>
     <meta charset="utf-8">
+    <link rel="canonical" href="amp-story-paywall.html">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-subscriptions" src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"></script>
-    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
 
-    <!-- <script async custom-element="amp-story"
-        src="http://localhost:8000/dist/v0/amp-story-0.1.max.js"></script> -->
     <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <!-- <script
-        async
-        custom-element="amp-subscriptions-google"
-        src="http://localhost:8000/dist/v0/amp-subscriptions-google-0.1.max.js">
-    </script> -->
     <script
       async
       custom-element="amp-subscriptions-google"
       src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"
     ></script>
-    <!-- <script async custom-element="amp-story-subscription" src="http://localhost:8000/dist/v0/amp-story-subscription-0.1.max.js"></script> -->
-    <script async custom-element="amp-story-subscription" src="https://cdn.ampproject.org/v0/amp-story-subscription-0.1.js"></script>
-
+    <script
+      async
+      custom-element="amp-story-subscription"
+      src="https://cdn.ampproject.org/v0/amp-story-subscription-0.1.js">
+    </script>
     
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com"> -->
-    <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700" rel="stylesheet">
 
@@ -60,7 +53,7 @@
       }
     </script> -->
     
-    <!-- <script type="application/json" id="amp-subscriptions">
+    <script type="application/json" id="amp-subscriptions">
       {
         "services": [
           {
@@ -76,9 +69,9 @@
           }
         ]
       }
-    </script> -->
+    </script>
 
-    <script type="application/json" id="amp-subscriptions">
+    <!-- <script type="application/json" id="amp-subscriptions">
       {
         "services": [
           {
@@ -94,7 +87,7 @@
           }
         ]
       }
-    </script>
+    </script> -->
 
     <!-- "authorizationUrl": "//localhost:8000/subscription/0/entitlements", -->
     <!-- "login": "https://scenic-2017.appspot.com/signin?rid=READER_ID", -->
@@ -116,7 +109,6 @@
     <title>My Story</title>
     <meta name="viewport"
           content="width=device-width,minimum-scale=1,initial-scale=1">
-    <link rel="canonical" href="helloworld.html">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <style amp-custom>
       body {
@@ -252,8 +244,7 @@
   </head>
 
   <body>
-    <amp-story standalone>
-
+    <amp-story paywall>
       <amp-story-page id="cover" auto-advance-after="5s">
         <amp-story-grid-layer template="fill">
           <amp-img src="img/story-cover.jpeg"
@@ -262,18 +253,13 @@
               alt="">
           </amp-img>
         </amp-story-grid-layer>
-        <!-- <amp-story-grid-layer template="vertical">
-          <h1>Cover</h1>
-          <p>This is the cover page of this story.</p>   
-        </amp-story-grid-layer> -->
         <amp-story-grid-layer class="box" aspect-ratio="9:16">
-          <!-- <div class="top"></div> -->
           <div class="cover-title"><p>Amazing</p><p>Kyoto</p></div>
           <div class="cover-subtitle"><p>Modern culture meets ancient traditions and beauty</p></div>
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-1" auto-advance-after="5s" subscriptions-section="content">
+      <amp-story-page id="page-1" auto-advance-after="5s">
         <amp-story-grid-layer template="fill">
           <amp-img src="img/story-page1.jpeg"
               width="720" height="1280"
@@ -281,13 +267,6 @@
               alt="">
           </amp-img>
         </amp-story-grid-layer>
-        <!-- <amp-story-grid-layer template="vertical">
-          <h1>First Page</h1>
-          <p>This is the first page of this story.</p>
-          <amp-img src="https://picsum.photos/1600/900?image=110"
-              width="400"
-              height="225"></amp-img>
-        </amp-story-grid-layer> -->
         <amp-story-grid-layer aspect-ratio="9:16">
           <div class="text-section">
             <h3>Amazing Kyoto</h3>
@@ -297,7 +276,7 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-2" auto-advance-after="5s" subscriptions-section="content">
+      <amp-story-page id="page-2" auto-advance-after="5s">
         <amp-story-grid-layer template="fill">
           <amp-img src="img/story-page2.jpeg"
               width="720" height="1280"
@@ -305,11 +284,6 @@
               alt="">
           </amp-img>
         </amp-story-grid-layer>
-        <!-- <amp-story-grid-layer template="vertical">
-          <h1>[Locked]</h1>
-          <h1>Second Page</h1>
-          <p>This is a locked content. You have to subscribe to see this.</p>
-        </amp-story-grid-layer> -->
         <amp-story-grid-layer aspect-ratio="9:16">
           <div class="text-section">
             <h3>arashiyama</h3>
@@ -318,7 +292,7 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-3" subscriptions-section="content">
+      <amp-story-page id="page-3">
         <amp-story-grid-layer template="fill">
           <amp-img src="img/story-page3.jpeg"
               width="720" height="1280"
@@ -326,11 +300,6 @@
               alt="">
           </amp-img>
         </amp-story-grid-layer>
-        <!-- <amp-story-grid-layer template="vertical">
-          <h1>[Locked]</h1>
-          <h1>Thrid Page</h1>
-          <p>This is a locked content. You have to subscribe to see this</p>
-        </amp-story-grid-layer> -->
         <amp-story-grid-layer aspect-ratio="9:16">
           <div class="text-section">
             <h3>Cultral Experiences</h3>
@@ -338,27 +307,9 @@
           </div>
         </amp-story-grid-layer>
       </amp-story-page>
+      <amp-story-subscription banner-text='$0.50/week' title='Culture at your fingertips' subtitle-first='Subscribe for unlimited access.'
+        subtitle-second='Cancel anytime.' publisher-logo-url='img/story-3p-icon.png' publisher-button-text='Subscribe'>
+      </amp-story-subscription>
     </amp-story>
-
-    <amp-story-subscription>
-        <div subscriptions-dialog subscriptions-display="NOT granted">
-          <div class="i-amphtml-story-subscription-header"><div class="i-amphtml-story-subscription-header-title"><span style="text-decoration-line: line-through; margin-right: 10px;">$2</span>$0.50/week</div></div>
-          <div class="i-amphtml-story-subscription-desc-title">Culture at your fingertips</div>
-          <div class="i-amphtml-story-subscription-desc-content">Subscribe for unlimited access.<br>Cancel anytime.</div>
-          <div class="i-ampthml-story-subscription-button-container"> 
-            <div class="i-ampthml-story-subscription-button-google" subscriptions-action="subscribe"
-              subscriptions-display="NOT granted"
-              subscriptions-service="subscribe.google.com"
-              subscriptions-decorate>
-                Subscribe
-            </div>
-            <div class="i-amphtml-story-subscription-button-publisher" subscriptions-action="subscribe" subscriptions-display="NOT granted" class="i-amphtml-subs-display">
-                 <div class="publisher-button-text">Subscribe</div>
-                <img src="img/story-3p-icon.png" style="width: 27px; height: 27px;">
-            </div>
-          </div>
-          <div class="i-amphtml-story-subscription-signin">Already a subscriber? <a subscriptions-action="login" subscriptions-display="NOT granted">Sign in.</a></div>
-        </div>
-    </amp-story-subscription>
   </body>
 </html>
