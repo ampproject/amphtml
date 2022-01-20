@@ -1135,18 +1135,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
 
     /**
      * Called when the element is first connected to the DOM.
-     * Immediately calls internal version of the function.
-     * This extra layer of indirection exists because connectedCallback
-     * cannot be mocked by spec. The function is saved by the browser on initialization.
-     * The indirection allows us to mock out connectedCallbackInternal_ when necessary.
-     *
-     */
-    connectedCallback() {
-      this.connectedCallbackInternal_();
-    }
-
-    /**
-     * Called when the element is first connected to the DOM.
      *
      * This callback is guarded by checks to see if the element is still
      * connected.  Chrome and Safari can trigger connectedCallback even when
@@ -1155,8 +1143,9 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * connectedCallback will later be called when the disconnected root is
      * connected to the document tree.
      *
+     * @final
      */
-    connectedCallbackInternal_() {
+    connectedCallback() {
       if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
         this.isInTemplate_ = !!query.closestAncestorElementBySelector(
           this,

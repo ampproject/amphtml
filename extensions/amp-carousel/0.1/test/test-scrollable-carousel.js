@@ -289,12 +289,6 @@ describes.realWin(
           .stub(Services, 'inputFor')
           .returns({onMouseDetected: () => {}});
 
-        // Disables runtime bootstrapping of a component
-        const carouselCe = env.win.customElements.get('amp-carousel');
-        const imgCe = env.win.customElements.get('amp-img');
-        env.sandbox.stub(carouselCe.prototype, 'connectedCallbackInternal_');
-        env.sandbox.stub(imgCe.prototype, 'connectedCallbackInternal_');
-
         const el1 = await getAmpScrollableCarousel(/* addToDom */ false);
         const el2 = el1.cloneNode(/* deep */ true);
         const impl1 = new AmpScrollableCarousel(el1);
@@ -304,9 +298,9 @@ describes.realWin(
         await impl1.buildCallback();
 
         // impl2 server render + hydrate
+        doc.body.appendChild(el2);
         buildDom(el2);
         el2.setAttribute('i-amphtml-ssr', '');
-        doc.body.appendChild(el2);
         await impl2.buildCallback();
         el2.removeAttribute('i-amphtml-ssr');
 
