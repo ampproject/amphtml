@@ -62,7 +62,6 @@ const JSS = {
   backdrop,
   defaultBackdropStyles,
   backdropOverscrollBlocker,
-  unmounted,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
