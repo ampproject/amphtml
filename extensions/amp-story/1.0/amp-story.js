@@ -951,13 +951,11 @@ export class AmpStory extends AMP.BaseElement {
           );
 
           if (attachmentEl) {
-            whenUpgradedToCustomElement(attachmentEl).then(() => {
-              attachmentEl
-                .getImpl()
-                .then((attachment) =>
-                  attachment.open(false /** shouldAnimate */)
-                );
-            });
+            whenUpgradedToCustomElement(attachmentEl)
+              .then(() => attachmentEl.getImpl())
+              .then((attachmentImpl) =>
+                attachmentImpl.open(false /** shouldAnimate */)
+              );
           }
         }
 
