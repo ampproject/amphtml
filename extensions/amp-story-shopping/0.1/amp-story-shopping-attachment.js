@@ -33,8 +33,13 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {?Element} */
     this.attachmentEl_ = null;
 
-    /** @private {?Array<!Element>} */
-    this.shoppingTags_ = null;
+    /** @private {!Element} */
+    this.pageEl_ = this.element.closest('amp-story-page');
+
+    /** @private {!Array<!Element>} */
+    this.shoppingTags_ = Array.from(
+      this.pageEl_.querySelectorAll('amp-story-shopping-tag')
+    );
 
     /** @private @const {!Element} */
     this.plpContainer_ = <div></div>;
@@ -57,11 +62,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
     this.element.appendChild(this.attachmentEl_);
     this.attachmentEl_.appendChild(this.plpContainer_);
-    this.shoppingTags_ = Array.from(
-      this.element
-        .closest('amp-story-page')
-        .querySelectorAll('amp-story-shopping-tag')
-    );
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -76,31 +76,26 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   layoutCallback() {
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
-      (isOpen) => {
-        if (isOpen) {
-          this.populatePlp_();
-        }
-      }
+      (isOpen) => this.onPageAttachmentStateUpdate_(isOpen)
     );
   }
 
   /**
-   * Fully opens the drawer from its current position.
-   * @param {boolean=} shouldAnimate
-   * @return {!Promise}
+   * On attachment state update, check if on active page and populate plp.
+   * @param {boolean} isOpen
+   * @private
    */
-  // open(shouldAnimate = true) {
-  // console.log('opening');
-  // this.populatePlp_();
-
-  // return this.attachmentEl_
-  //   .getImpl()
-  //   .then((impl) => impl.open(shouldAnimate));
-  // }
+  onPageAttachmentStateUpdate_(isOpen) {
+    const isOnActivePage =
+      this.pageEl_.id === this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
+    if (isOpen && isOnActivePage) {
+      this.populatePlp_();
+    }
+  }
 
   /** @private */
   populatePlp_() {
-    if (this.plpContainer_.querySelector('.amp-story-shopping-plp')) {
+    if (this.plpContainer_.querySelector('.i-amphtml-amp-story-shopping-plp')) {
       return;
     }
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
