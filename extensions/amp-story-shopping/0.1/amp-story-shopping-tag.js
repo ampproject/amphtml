@@ -1,5 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
@@ -85,9 +86,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     const {left, width} = this.element./*OK*/ getLayoutBox();
 
-    const storyPageWidth = pageSize.width;
+    const storyPageWidth = pageSize;
 
-    const shouldFlip = left + width > storyPageWidth;
+    const {offsetLeft, offsetWidth} = this.element;
+
+    const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
 
     const dotEl = this.shoppingTagEl_.querySelector(
       '.i-amphtml-amp-story-shopping-tag-dot'
@@ -139,7 +142,43 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
+   * This function counts the number of lines in the shopping tag
+   * and sets the styling properties dynamically based on the number of lines.
+   * @private
+   */
+  styleTagText_() {
+    const pillEl = this.element.shadowRoot?.querySelector(
+      '.amp-story-shopping-tag-pill'
+    );
+
+    const textEl = this.element.shadowRoot?.querySelector(
+      '.amp-story-shopping-tag-pill-text'
+    );
+
+    if (!pillEl || !textEl) {
+      return;
+    }
+
+    const fontSize = parseInt(
+      computedStyle(window, textEl).getPropertyValue('font-size'),
+      10
+    );
+    const ratioOfLineHeightToFontSize = 1.5;
+    const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
+    const height = textEl./*OK*/ clientHeight;
+    const numLines = Math.ceil(height / lineHeight);
+
+    this.mutateElement(() => {
+      pillEl.classList.toggle(
+        'i-amphtml-amp-story-shopping-tag-pill-multi-line',
+        numLines > 1
+      );
+    });
+  }
+
+  /**
    * @return {!Element}
+   * @private
    */
   renderShoppingTagTemplate_() {
     return (
@@ -192,18 +231,22 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     }
 
     this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
-
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
-    this.mutateElement(() => {
-      createShadowRootWithStyle(
-        this.element,
-        this.shoppingTagEl_,
-        shoppingTagCSS
-      );
-      this.hasAppendedInnerShoppingTagEl_ = true;
 
-      this.shouldTagFlip_(this.storeService_.get(StateProperty.PAGE_SIZE));
-    });
+    this.measureMutateElement(
+      () => {
+        createShadowRootWithStyle(
+          this.element,
+          this.shoppingTagEl_,
+          shoppingTagCSS
+        );
+        this.hasAppendedInnerShoppingTagEl_ = true;
+      },
+      () => {
+        this.styleTagText_();
+        this.shouldTagFlip_(this.storeService_.get(StateProperty.PAGE_SIZE));
+      }
+    );
   }
 
   /** @private */

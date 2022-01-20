@@ -48,9 +48,7 @@
         poster-portrait-src="example.com/poster.jpg">
       <amp-story-page id="inline-light-theme">
         <!--
-          Example of
-          Inline config.
-          Multiple product tags with icon defined.
+          Example of Inline config. Multiple product tags with icon defined.
         -->
         <amp-story-shopping-config layout="nodisplay">
           <script type="application/json">
@@ -75,7 +73,7 @@
                     "product-title": "Beastly Backpack",
                     "product-price": 1000.00,
                     "product-price-currency": "BRL",
-                    "product-tag-text": "Beastly Backpack",
+                    "product-tag-text": "Beastly Backpack Brews Beastly Beverages",
                     "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
                    }
                 ]
@@ -94,9 +92,7 @@
       </amp-story-page>
       <amp-story-page id="remote-dark-theme">
         <!--
-          Example of:
-          Remote JSON with inline fallback.
-          Single product tag without icon.
+          Example of Remote JSON with inline fallback. Single product tag without icon.
         -->
         <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
           <script type="application/json">
@@ -119,25 +115,6 @@
           <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
-      </amp-story-page>
-      <amp-story-page id="inline-no-product">
-          <!--
-            Example of:
-            CTA Button not rendering due to no product tags.
-          -->
-        <amp-story-shopping-config layout="nodisplay">
-          <script type="application/json">
-            {
-                "items" : []
-            }
-          </script>
-        </amp-story-shopping-config>
-        <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="vertical">
-        </amp-story-grid-layer>
-        <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
       <amp-story-page id="remote-with-product">
         <!--
@@ -186,6 +163,7 @@
                   "product-title": "Beastly Backpack",
                   "product-price": 500.00,
                   "product-tag-text": "حبا",
+                  "product-price-currency": "AED",
                   "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
                  }
               ]
@@ -201,6 +179,24 @@
           <amp-story-shopping-tag data-tag-id="backpack-rtl" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment></amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="inline-no-product">
+        <!--
+          Example of:
+          CTA Button not rendering due to no product tags.
+        -->
+      <amp-story-shopping-config layout="nodisplay">
+        <script type="application/json">
+          {
+              "items" : []
+          }
+        </script>
+      </amp-story-shopping-config>
+
+      <amp-story-grid-layer template="fill">
+        <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+      </amp-story-grid-layer>
+      <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
     </amp-story>
   </body>
