@@ -946,12 +946,21 @@ export class AmpStory extends AMP.BaseElement {
         );
 
         if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
-          this.activePage_.element
-            .querySelector(
-              'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
-            )
-            ?.getImpl()
-            .then((attachment) => attachment.open(false /** shouldAnimate */));
+          const attachmentEl = this.activePage_.element.querySelector(
+            'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
+          );
+
+          if (!attachmentEl) {
+            return;
+          }
+
+          whenUpgradedToCustomElement(attachmentEl).then(() => {
+            attachmentEl
+              .getImpl()
+              .then((attachment) =>
+                attachment.open(false /** shouldAnimate */)
+              );
+          });
         }
 
         if (
