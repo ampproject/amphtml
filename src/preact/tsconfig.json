@@ -2,8 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "include": [
     "*.js",
-    "**/*.d.ts",
+    "**/*.ts",
     "../core/**/globals.d.ts",
-    "../**/base-element.d.ts"
+    "../**/base-element.d.ts",
+    "amp-base-element.ts"
   ]
 }

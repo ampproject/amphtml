@@ -4,14 +4,12 @@ import {ActionTrust_Enum} from '#core/constants/action-constants';
 
 import {PreactBaseElement} from './base-element';
 
-/**
- * @template {{
- *  readyState?: import('#core/constants/ready-state').ReadyState_Enum,
- *  pause?: function():void
- * }} API_TYPE
- * @extends PreactBaseElement<API_TYPE>
- */
-export class AmpPreactBaseElement extends PreactBaseElement {
+interface API_TYPE {
+  readyState?: import('#core/constants/ready-state').ReadyState_Enum;
+  pause?: () => void;
+}
+
+export class AmpPreactBaseElement extends PreactBaseElement<API_TYPE> {
   /**
    * todo(kvchari): confirm this can be safely moved
    * @override
@@ -24,10 +22,9 @@ export class AmpPreactBaseElement extends PreactBaseElement {
 
   /**
    * todo(kvchari): confirm this can be safely moved
-   * @param {number} newHeight
    * @override
    */
-  attemptChangeHeight(newHeight) {
+  attemptChangeHeight(newHeight: number) {
     return super.attemptChangeHeight(newHeight).catch((e) => {
       // It's okay to disable this lint rule since we check that the restricted
       // method exists.
@@ -100,16 +97,16 @@ export class AmpPreactBaseElement extends PreactBaseElement {
    *
    * This has no effect on Bento documents, since they lack an Actions system.
    * Instead, they should use `(await element.getApi()).action()`
-   * @param {string} alias
-   * @param {function(API_TYPE, *):void} handler
-   * @param {ActionTrust_Enum} minTrust
    * @protected
    */
-  registerApiAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
+  registerApiAction(
+    alias: string,
+    handler: (t: API_TYPE, invocation: any) => void,
+    minTrust: ActionTrust_Enum = ActionTrust_Enum.DEFAULT
+  ) {
     this.registerAction?.(
       alias,
-      /** @param {*} invocation */
-      (invocation) => {
+      (invocation: any) => {
         handler(this.api(), invocation);
       },
       minTrust
@@ -121,11 +118,8 @@ export class AmpPreactBaseElement extends PreactBaseElement {
  * Changes the inheritance hierarchy of clazz such that it now extends from superClazz.
  * If clazz previously inherited from a previousSuperClazz, it now no longer does so.
  * Dangerous, use sparingly!
- * @param {*} clazz
- * @param {*} superClazz
- * @return {*}
  */
-export function setSuperClass(clazz, superClazz) {
+export function setSuperClass(clazz: any, superClazz: any): typeof clazz {
   Object.setPrototypeOf(clazz, superClazz);
   Object.setPrototypeOf(clazz.prototype, superClazz.prototype);
   return clazz;
