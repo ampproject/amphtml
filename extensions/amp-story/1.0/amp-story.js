@@ -946,7 +946,12 @@ export class AmpStory extends AMP.BaseElement {
         );
 
         if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
-          this.activePage_.openAttachment(false /** shouldAnimate */);
+          this.activePage_.element
+            .querySelector(
+              'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
+            )
+            ?.getImpl()
+            .then((attachment) => attachment.open(false /** shouldAnimate */));
         }
 
         if (
