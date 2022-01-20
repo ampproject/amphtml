@@ -71,12 +71,4 @@ export const buildGtagConfig = (gtagId) => ({
       },
     },
   },
-  // CookieWriter config is used to extract the url params and store them into
-  // cookies.
-  'cookies': {
-    'ampStoryAutoAnalyticsCookies': {
-      // Reads URL linker params and stores them as cookies.
-      'value': 'LINKER_PARAM(ampStoryAutoAnalyticsLinker, cid)',
-    },
-  },
 });
