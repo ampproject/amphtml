@@ -18,6 +18,7 @@ import {
   getTimingDataSync,
 } from './variable-source';
 
+import {getPawSignal} from '../gma-sdk';
 import {getTrackImpressionPromise} from '../impression';
 import {
   installServiceInEmbedDoc,
@@ -636,6 +637,15 @@ export class GlobalVariableSource extends VariableSource {
         return bind.getStateValue(/** @type {string} */ (key)) || '';
       });
     });
+
+    this.setAsync('GMA_SDK_VIEW', (maxDelayMs) =>
+      Services.timerFor(win)
+        .timeoutPromise(maxDelayMs ?? 5000, getPawSignal(win, maxDelayMs))
+        .catch(() => {
+          dev().expectedError('AMP-A4A', 'PAW timeout!');
+          return '';
+        })
+    );
   }
 
   /**

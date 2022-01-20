@@ -28,6 +28,7 @@ import {parseUrlDeprecated} from '../../src/url';
 describes.sandboxed('UrlReplacements', {}, (env) => {
   let canonical;
   let loadObservable;
+  let messageObservable;
   let replacements;
   let viewerService;
   let userErrorStub;
@@ -112,9 +113,17 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
 
       function getFakeWindow() {
         loadObservable = new Observable();
+        messageObservable = new Observable();
         const win = {
           addEventListener(type, callback) {
-            loadObservable.add(callback);
+            switch (type) {
+              case 'load':
+                loadObservable.add(callback);
+                break;
+              case 'message':
+                messageObservable.add(callback);
+                break;
+            }
           },
           Object,
           performance: {
@@ -124,7 +133,14 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             },
           },
           removeEventListener(type, callback) {
-            loadObservable.remove(callback);
+            switch (type) {
+              case 'load':
+                loadObservable.remove(callback);
+                break;
+              case 'message':
+                messageObservable.remove(callback);
+                break;
+            }
           },
           document: {
             nodeType: /* document */ 9,
@@ -161,6 +177,11 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
               }),
             },
           },
+          postMessage: (msg) => {
+            messageObservable.fire({data: msg});
+          },
+          setTimeout: () => undefined,
+          clearTimeout: () => undefined,
         };
         win.document.defaultView = win;
         win.document.documentElement.ownerDocument = win.document;
@@ -1118,6 +1139,68 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
             )
           ).to.equal('?geo=unknown,country=unknown')
         );
+      });
+      describe('GMA_SDK_VIEW', () => {
+        let win;
+
+        beforeEach(() => {
+          win = getFakeWindow();
+          env.sandbox.stub(Services, 'timerFor').returns({
+            timeoutPromise: (delay, promise) => {
+              if (delay > 5000) {
+                return promise;
+              } else {
+                return Promise.reject();
+              }
+            },
+          });
+        });
+
+        it('should replace GMA_SDK_VIEW - signal in window.gmaSdk', () => {
+          win.gmaSdk = {
+            getViewSignals: () => 'test',
+          };
+          return Services.urlReplacementsForDoc(win.document.documentElement)
+            .expandUrlAsync('?ms=GMA_SDK_VIEW(10000)')
+            .then((res) => {
+              expect(res).to.equal('?ms=test');
+            });
+        });
+
+        it('should replace GMA_SDK_VIEW - signal in window.webkit', () => {
+          const win = getFakeWindow();
+          // Use the main window as the postMessage mock target.
+          win.webkit = {
+            messageHandlers: {
+              getGmaViewSignals: window,
+            },
+          };
+          window.addEventListener(
+            'message',
+            (e) => {
+              if (e.data.paw_id) {
+                win.postMessage({'paw_id': e.data.paw_id, 'signal': 'test'});
+              }
+            },
+            {once: true}
+          );
+          return Services.urlReplacementsForDoc(win.document.documentElement)
+            .expandUrlAsync('?ms=GMA_SDK_VIEW(10000)')
+            .then((res) => {
+              expect(res).to.equal('?ms=test');
+            });
+        });
+
+        it('should not replace GMA_SDK_VIEW if after timeout', () => {
+          win.gmaSdk = {
+            getViewSignals: () => 'test',
+          };
+          return Services.urlReplacementsForDoc(win.document.documentElement)
+            .expandUrlAsync('?ms=GMA_SDK_VIEW(1000)')
+            .then((res) => {
+              expect(res).to.equal('?ms=');
+            });
+        });
       });
 
       it.configure()
