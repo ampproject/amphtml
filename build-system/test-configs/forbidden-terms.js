@@ -810,6 +810,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.pageXOffset(?!_)': bannedTermsHelpString,
   '\\.pageYOffset(?!_)': bannedTermsHelpString,
   '\\.innerWidth(?!_)': bannedTermsHelpString,
+  '\\.toggleAttribute(?!_)': 'please use `toggleAttribute()` from core/dom',
   '\\.innerHeight(?!_)': bannedTermsHelpString,
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,
