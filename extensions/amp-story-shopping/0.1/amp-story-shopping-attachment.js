@@ -33,7 +33,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {?Element} */
     this.attachmentEl_ = null;
 
-    /** @private {?NodeList<!Element>} */
+    /** @private {?Array<!Element>} */
     this.shoppingTags_ = null;
 
     /** @private @const {!Element} */
