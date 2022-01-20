@@ -21,6 +21,11 @@
 export const buildGtagConfig = (gtagId) => ({
   'vars': {
     'gtag_id': gtagId,
+    'config': {
+      [gtagId]: {
+        'groups': 'default',
+      },
+    },
   },
   'triggers': {
     'storyPageCount': {
