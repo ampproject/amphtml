@@ -124,7 +124,7 @@ function BentoSidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div class={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+    <div class={objstr({[classes.unmounted]: !mounted})} style={{display: mounted ? 'contents' : 'none'}} part="wrapper">
       <ContainWrapper
         as={Comp}
         ref={sidebarRef}

@@ -54,10 +54,6 @@ const backdropOverscrollBlocker = {
   width: '0 !important',
 };
 
-const unmounted = {
-  display: 'none',
-};
-
 const JSS = {
   sidebar,
   defaultSidebarStyles,

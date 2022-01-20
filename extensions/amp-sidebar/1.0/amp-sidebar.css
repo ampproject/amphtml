@@ -12,6 +12,14 @@ amp-sidebar {
   top: 0;
   outline: none;
   z-index: 2147483647;
+  max-height: 100vh !important; 
+  /**
+   * Max width allowed to be configurable by user.  If user wants width to be
+   * controlled by content size and max-width, then this property needs to be
+   * configurable.
+   */
+  max-width: 80vw;
+  min-width: 45px !important;
 }
 
 amp-sidebar::part(c),
@@ -28,18 +36,12 @@ amp-sidebar::part(sidebar) {
   width: inherit;
   padding: inherit;
   border: inherit;
+
+  max-width: inherit;
+  max-height: inherit;
+  min-width: inherit;
 }
 
-amp-sidebar::part(sidebar) {
-  max-height: 100vh !important;
-  /**
-   * Max width allowed to be configurable by user.  If user wants width to be
-   * controlled by content size and max-width, then this property needs to be
-   * configurable.
-   */
-  max-width: 80vw;
-  min-width: 45px !important;
-}
 
 /**
  * Hide the amp-sidebar and remove from the flow of the page so user applied

@@ -12,6 +12,19 @@
     type="text/css"
     href="https://cdn.ampproject.org/v0/bento-sidebar-1.0.css"
   />
+  <style>
+    bento-sidebar::part(sidebar) {
+       height: 300px;
+       width: 300px;
+       padding: 25px;
+       border: solid 1px black;
+       top: 50px;
+       max-height: 500px !important;
+       max-width: 600px !important;
+       min-width: 200px !important;
+       outline: solid 8px rgb(96, 1, 1);
+     }
+  </style>
 </head>
 <body>
     <div class="container">
