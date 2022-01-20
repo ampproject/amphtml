@@ -347,28 +347,22 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
+    const pageId = this.getInitialPageId_();
+
     if (
       !this.win.CSS?.supports?.('height: 1dvh') &&
       !getStyle(this.win.document.documentElement, '--story-dvh')
     ) {
-      this.getViewport().onResize((size) => this.polyfillDvh_(size));
+      this.getViewport().onResize((size) => this.polyfillDvh_(size, pageId));
+      this.polyfillDvh_(this.getViewport().getSize(), pageId);
     }
 
-    const pageId = this.getInitialPageId_();
-    let pageSize = this.getViewport().getSize();
     if (pageId) {
       const page = this.element.querySelector(
         `amp-story-page#${escapeCssSelectorIdent(pageId)}`
       );
       page.setAttribute('active', '');
-
-      pageSize = {
-        'width': page./*OK*/ offsetWidth,
-        'height': page./*OK*/ offsetHeight,
-      };
     }
-
-    this.polyfillDvh_(pageSize);
 
     this.initializeListeners_();
     this.initializePageIds_();
@@ -1496,14 +1490,27 @@ export class AmpStory extends AMP.BaseElement {
    * @param {!Object} size including new width and height
    * @private
    */
-  polyfillDvh_(size) {
-    const {height, width} = size;
+  polyfillDvh_(size, pageId) {
+    let pageSize = size;
+    if (pageId) {
+      const page = this.element.querySelector(
+        `amp-story-page#${escapeCssSelectorIdent(pageId)}`
+      );
+      page.setAttribute('active', '');
+
+      pageSize = {
+        'width': page./*OK*/ getLayoutBox().width,
+        'height': page./*OK*/ getLayoutBox().height,
+      };
+    }
+
+    const {height, width} = pageSize;
     if (height === 0 && width === 0) {
       return;
     }
     this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
     setImportantStyles(this.win.document.documentElement, {
-      '--story-dvh': px(height / 100),
+      '--story-dvh': px(size.height / 100),
     });
   }
 
