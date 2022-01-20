@@ -1,5 +1,4 @@
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -51,18 +50,18 @@ class AmpDateCountdown extends BaseElement {
           // A new template has been set while the old one was initializing.
           return;
         }
-        this.mutateProps(
-          dict({
-            'render': (data) => {
-              return templates
-                .renderTemplateAsString(dev().assertElement(template), data)
-                .then((html) => dict({'__html': html}));
-            },
-          })
-        );
+        this.mutateProps({
+          'render': (data) => {
+            return templates
+              .renderTemplateAsString(dev().assertElement(template), data)
+              .then((html) => ({
+                '__html': html,
+              }));
+          },
+        });
       });
     } else {
-      this.mutateProps(dict({'render': null}));
+      this.mutateProps({'render': null});
     }
   }
 

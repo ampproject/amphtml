@@ -8,7 +8,6 @@ import {getHtml} from '#core/dom/get-html';
 import {applyFillContent} from '#core/dom/layout';
 import {setStyle} from '#core/dom/style';
 import {throttle} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -348,7 +347,7 @@ export class AmpAdXOriginIframeHandler {
           const payload = info[CONSTANTS.payloadFieldName];
 
           getter(payload).then((content) => {
-            const result = dict();
+            const result = {};
             result[CONSTANTS.messageIdFieldName] = messageId;
             result[CONSTANTS.contentFieldName] = content;
             postMessageToWindows(
@@ -506,11 +505,11 @@ export class AmpAdXOriginIframeHandler {
       this.iframe,
       [{win: source, origin}],
       success ? 'embed-size-changed' : 'embed-size-denied',
-      dict({
+      {
         'id': id,
         'requestedWidth': requestedWidth,
         'requestedHeight': requestedHeight,
-      }),
+      },
       true
     );
   }
@@ -523,13 +522,10 @@ export class AmpAdXOriginIframeHandler {
     if (!this.embedStateApi_) {
       return;
     }
-    this.embedStateApi_.send(
-      'embed-state',
-      dict({
-        'inViewport': inViewport,
-        'pageHidden': !this.baseInstance_.getAmpDoc().isVisible(),
-      })
-    );
+    this.embedStateApi_.send('embed-state', {
+      'inViewport': inViewport,
+      'pageHidden': !this.baseInstance_.getAmpDoc().isVisible(),
+    });
   }
 
   /**
@@ -546,10 +542,10 @@ export class AmpAdXOriginIframeHandler {
           'element clientRect should intersects with root clientRect'
         );
         const viewport = this.viewport_.getRect();
-        return dict({
+        return {
           'targetRect': position,
           'viewportRect': viewport,
-        });
+        };
       });
   }
 

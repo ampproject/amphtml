@@ -11,7 +11,6 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {setStyle} from '#core/dom/style';
 import {playIgnoringError} from '#core/dom/video';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
 import {base64EncodeFromBytes} from '#core/types/string/base64';
@@ -495,17 +494,11 @@ export class AmpIframe extends AMP.BaseElement {
   sendConsentData_(source, origin) {
     getConsentDataToForward(this.element, this.getConsentPolicy()).then(
       (consents) => {
-        this.sendConsentDataToIframe_(
-          source,
-          origin,
-          Object.assign(
-            dict({
-              'sentinel': 'amp',
-              'type': MessageType_Enum.CONSENT_DATA,
-            }),
-            consents
-          )
-        );
+        this.sendConsentDataToIframe_(source, origin, {
+          'sentinel': 'amp',
+          'type': MessageType_Enum.CONSENT_DATA,
+          ...consents,
+        });
       }
     );
   }
@@ -778,11 +771,9 @@ export class AmpIframe extends AMP.BaseElement {
         user().error(TAG_, 'Data from "message" event must be JSON.');
         return;
       }
-      const event = createCustomEvent(
-        this.win,
-        'amp-iframe:message',
-        dict({'data': sanitized})
-      );
+      const event = createCustomEvent(this.win, 'amp-iframe:message', {
+        'data': sanitized,
+      });
       const actionService = Services.actionServiceForDoc(this.element);
       actionService.trigger(
         this.element,

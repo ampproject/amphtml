@@ -9,13 +9,7 @@ const {getVersion} = require('../compile/internal-version');
 const {log} = require('../common/logging');
 const {Octokit} = require('@octokit/rest');
 
-const amphtmlParams = {owner: 'ampproject', repo: 'amphtml'};
-const cdnConfigurationParams = {
-  owner: 'ampproject',
-  repo: 'cdn-configuration',
-  'workflow_id': 'promote-nightly.yml',
-  ref: 'main',
-};
+const params = {owner: 'ampproject', repo: 'amphtml'};
 
 // Permanent external ID as assigned by the GitHub Actions runner.
 const GITHUB_EXTERNAL_ID = 'be30aa50-41df-5bf3-2e88-b5215679ea95';
@@ -27,7 +21,7 @@ const GITHUB_EXTERNAL_ID = 'be30aa50-41df-5bf3-2e88-b5215679ea95';
  */
 async function getCommit(octokit) {
   const commits = await octokit.rest.repos.listCommits({
-    ...amphtmlParams,
+    ...params,
     ref: 'main',
     'per_page': 100,
   });
@@ -41,7 +35,7 @@ async function getCommit(octokit) {
   for (const {sha} of commits.data) {
     const {'check_runs': checkRuns} = (
       await octokit.rest.checks.listForRef({
-        ...amphtmlParams,
+        ...params,
         ref: sha,
       })
     ).data;
@@ -89,7 +83,7 @@ async function getCommit(octokit) {
  */
 async function updateBranch(octokit, sha) {
   const response = await octokit.rest.git.updateRef({
-    ...amphtmlParams,
+    ...params,
     ref: 'heads/nightly',
     sha,
   });
@@ -137,7 +131,7 @@ async function updateBranch(octokit, sha) {
  */
 async function createTag(octokit, sha, ampVersion) {
   await octokit.rest.git.createTag({
-    ...amphtmlParams,
+    ...params,
     tag: ampVersion,
     message: ampVersion,
     object: sha,
@@ -146,7 +140,7 @@ async function createTag(octokit, sha, ampVersion) {
 
   // once a tag object is created, create a reference
   const response = await octokit.rest.git.createRef({
-    ...amphtmlParams,
+    ...params,
     ref: `refs/tags/${ampVersion}`,
     sha,
   });
@@ -167,41 +161,6 @@ async function createTag(octokit, sha, ampVersion) {
       throw new Error(
         `An unaught status returned while attempting to create a tag\n${response}`
       );
-  }
-}
-
-/**
- * Trigger the promote workflow in ampproject/cdn-configuration.
- * @param {Octokit} octokit
- * @param {string} ampVersion
- * @return {Promise<void>}
- */
-async function promoteNightly(octokit, ampVersion) {
-  const response = await octokit.actions.createWorkflowDispatch({
-    ...cdnConfigurationParams,
-    inputs: {
-      'amp-version': ampVersion,
-    },
-  });
-
-  switch (response.status) {
-    case 204:
-      log(
-        'Workflow',
-        cyan('promote-nightly.yml'),
-        'created on',
-        cyan('ampproject/cdn-configuration')
-      );
-      break;
-
-    default:
-      log(
-        'Uncaught status',
-        cyan(response.status),
-        'returned while attempting to create a promote workflow:\n',
-        response
-      );
-      throw new Error();
   }
 }
 
@@ -231,7 +190,6 @@ async function cutNightlyBranch() {
 
   await updateBranch(octokit, sha);
   await createTag(octokit, sha, ampVersion);
-  await promoteNightly(octokit, ampVersion);
 
   log('Successfully cut nightly');
 }

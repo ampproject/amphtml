@@ -2,7 +2,6 @@ import {closest} from '#core/dom/query';
 import {assertDoesNotContainDisplay, setImportantStyles} from '#core/dom/style';
 import {clamp} from '#core/math';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
 
 import {isExperimentOn} from '#experiments/';
@@ -701,10 +700,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     return this.getClientId_().then((clientId) => {
       const requestOptions = {'method': method};
-      const requestParams = dict({
+      const requestParams = {
         'type': this.interactiveType_,
         'client': clientId,
-      });
+      };
       url = appendPathToUrl(
         this.urlService_.parse(url),
         this.getInteractiveId_()

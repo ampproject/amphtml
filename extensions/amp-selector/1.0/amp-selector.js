@@ -1,5 +1,4 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
@@ -22,7 +21,7 @@ class AmpSelector extends BaseElement {
     // Set up API
     this.registerApiAction('clear', (api) => {
       api./*OK*/ clear();
-      this.mutateProps(dict({'value': []}));
+      this.mutateProps({'value': []});
     });
 
     this.registerApiAction('selectUp', (api, invocation) => {

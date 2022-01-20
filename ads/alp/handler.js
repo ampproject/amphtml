@@ -1,5 +1,4 @@
 import {closest} from '#core/dom/query';
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import {dev} from '#utils/log';
@@ -146,11 +145,9 @@ function navigateTo(win, a, url) {
   if (a2aAncestor) {
     a2aAncestor.win./*OK*/ postMessage(
       'a2a;' +
-        JSON.stringify(
-          dict({
-            'url': url,
-          })
-        ),
+        JSON.stringify({
+          'url': url,
+        }),
       a2aAncestor.origin
     );
     return;

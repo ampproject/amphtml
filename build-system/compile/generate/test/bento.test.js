@@ -12,7 +12,6 @@ test('generateBentoRuntimeEntrypoint', (t) => {
       '#baz/bar': ['car'],
     }),
     dedent(`
-      import {dict} from '#core/types/object';
       import {isEsm} from '#core/mode';
       import {install as installCustomElements} from '#polyfills/custom-elements';
 
@@ -25,13 +24,13 @@ test('generateBentoRuntimeEntrypoint', (t) => {
 
       const bento = self.BENTO || [];
 
-      bento['_'] = dict({
+      bento['_'] = {
       // #foo
       'bar': bar,
       'baz': baz,
       // #baz/bar
       'car': car,
-      });
+      };
 
       bento.push = (fn) => {
         fn();

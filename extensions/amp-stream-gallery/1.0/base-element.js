@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {PreactBaseElement} from '#preact/base-element';
 
 import {BentoStreamGallery} from './component';
@@ -11,11 +9,11 @@ export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
     const {element} = this;
-    return dict({
+    return {
       'onSlideChange': (index) => {
-        this.triggerEvent(element, 'slideChange', dict({'index': index}));
+        this.triggerEvent(element, 'slideChange', {'index': index});
       },
-    });
+    };
   }
 }
 

@@ -23,7 +23,7 @@ import {installShadowStyle} from '#core/dom/shadow-embed';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import * as mode from '#core/mode';
 import {isElement} from '#core/types';
-import {dict, hasOwn, map} from '#core/types/object';
+import {hasOwn, map} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {hydrate, render} from '#preact';
@@ -52,22 +52,22 @@ const TEMPLATES_MUTATION_INIT = {
 };
 
 /** @const {JsonObject<string, string>} */
-const SHADOW_CONTAINER_ATTRS = dict({
+const SHADOW_CONTAINER_ATTRS = {
   'style': 'display: contents; background: inherit;',
   'part': 'c',
-});
+};
 
 /** @const {string} */
 const SERVICE_SLOT_NAME = 'i-amphtml-svc';
 
 /** @const {JsonObject<string, string>} */
-const SERVICE_SLOT_ATTRS = dict({'name': SERVICE_SLOT_NAME});
+const SERVICE_SLOT_ATTRS = {'name': SERVICE_SLOT_NAME};
 
 /** @const {string} */
 const RENDERED_ATTR = 'i-amphtml-rendered';
 
 /** @const {JsonObject<string, string>} */
-const RENDERED_ATTRS = dict({'i-amphtml-rendered': ''});
+const RENDERED_ATTRS = {'i-amphtml-rendered': ''};
 
 /**
  * This is an internal property that marks light DOM nodes that were rendered
@@ -236,7 +236,7 @@ export class PreactBaseElement extends BaseElement {
     super(element);
 
     /** @private {JsonObject} */
-    this.defaultProps_ = dict({
+    this.defaultProps_ = /** @type {JsonObject} */ ({
       'loading': Loading_Enum.AUTO,
 
       /**
@@ -464,7 +464,7 @@ export class PreactBaseElement extends BaseElement {
     if (!Ctor.loadable) {
       return;
     }
-    this.mutateProps(dict({'loading': Loading_Enum.EAGER}));
+    this.mutateProps({'loading': Loading_Enum.EAGER});
     this.resetLoading_ = true;
   }
 
@@ -976,7 +976,7 @@ export class PreactBaseElement extends BaseElement {
       /** @type {?} */ (this.constructor)
     );
     if (Ctor.unloadOnPause) {
-      this.mutateProps(dict({'loading': Loading_Enum.UNLOAD}));
+      this.mutateProps({'loading': Loading_Enum.UNLOAD});
       this.resetLoading_ = true;
     } else {
       const {currentRef_: api} = this;

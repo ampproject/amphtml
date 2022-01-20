@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
@@ -46,13 +44,11 @@ class AmpBrightcove extends BaseElement {
       const {0: consentState, 1: consentString, 2: consentSharedData} = arr;
       const urlParams = {
         ...this.getProp('urlParams'),
-        ...dict({
-          'ampInitialConsentState': consentState,
-          'ampInitialConsentValue': consentString,
-          'ampConsentSharedData': JSON.stringify(consentSharedData),
-        }),
+        'ampInitialConsentState': consentState,
+        'ampInitialConsentValue': consentString,
+        'ampConsentSharedData': JSON.stringify(consentSharedData),
       };
-      this.mutateProps(dict({'urlParams': urlParams}));
+      this.mutateProps({'urlParams': urlParams});
     });
   }
 

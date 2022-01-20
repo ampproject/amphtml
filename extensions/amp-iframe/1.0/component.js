@@ -1,6 +1,5 @@
 import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {setStyle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import * as Preact from '#preact';
@@ -50,7 +49,7 @@ export function BentoIframe({
     postMessage(
       iframe,
       MessageType_Enum.INTERSECTION,
-      dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
+      {'changes': entries.map(cloneEntryForCrossOrigin)},
       targetOrigin
     );
   };

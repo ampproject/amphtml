@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 import {AnalyticsGroup} from './analytics-group';
@@ -83,12 +81,7 @@ export class InstrumentationService {
    * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
    * attribute value from target element should be included.
    */
-  triggerEventForTarget(
-    target,
-    eventType,
-    vars = dict(),
-    enableDataVars = true
-  ) {
+  triggerEventForTarget(target, eventType, vars = {}, enableDataVars = true) {
     const event = new AnalyticsEvent(target, eventType, vars, enableDataVars);
     const root = this.findRoot_(target);
     const trackerName = getTrackerKeyName(eventType);
