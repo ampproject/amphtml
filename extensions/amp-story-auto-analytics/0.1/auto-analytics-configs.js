@@ -66,18 +66,6 @@ export const buildGtagConfig = (gtagId) => ({
       },
     },
   },
-  // Linkers stitch sessions between cache and origin together using cid.
-  'linkers': {
-    'ampStoryAutoAnalyticsLinker': {
-      'ids': {
-        'cid': '${clientId}',
-      },
-      'enabled': true,
-      // Makes sure URL is decorated from origin to cache. (Default is cache to
-      // origin only).
-      'proxyOnly': false,
-    },
-  },
   // CookieWriter config is used to extract the url params and store them into
   // cookies.
   'cookies': {
