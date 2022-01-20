@@ -348,7 +348,6 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {});
 
     const pageId = this.getInitialPageId_();
-
     if (
       !this.win.CSS?.supports?.('height: 1dvh') &&
       !getStyle(this.win.document.documentElement, '--story-dvh')
@@ -1492,15 +1491,12 @@ export class AmpStory extends AMP.BaseElement {
    */
   polyfillDvh_(size, pageId) {
     const {height, width} = size;
-
     if (height === 0 && width === 0) {
       return;
     }
-
     setImportantStyles(this.win.document.documentElement, {
       '--story-dvh': px(height / 100),
     });
-
     if (pageId) {
       const page = this.element.querySelector(
         `amp-story-page#${escapeCssSelectorIdent(pageId)}`
