@@ -1506,6 +1506,8 @@ export class AmpStory extends AMP.BaseElement {
         'height': page./*OK*/ getLayoutBox().height,
       };
       this.storeService_.dispatch(Action.SET_PAGE_SIZE, pageSize);
+    } else {
+      this.storeService_.dispatch(Action.SET_PAGE_SIZE, size);
     }
   }
 
