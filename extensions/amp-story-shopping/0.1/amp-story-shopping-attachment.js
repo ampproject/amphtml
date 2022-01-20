@@ -70,21 +70,35 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     });
   }
 
+  /** @override */
+  layoutCallback() {
+    this.storeService_.subscribe(
+      StateProperty.PAGE_ATTACHMENT_STATE,
+      (isOpen) => {
+        if (isOpen) {
+          this.populatePlp_();
+        }
+      }
+    );
+  }
+
   /**
    * Fully opens the drawer from its current position.
    * @param {boolean=} shouldAnimate
    * @return {!Promise}
    */
-  open(shouldAnimate = true) {
-    this.populatePlp_();
+  // open(shouldAnimate = true) {
+  // console.log('opening');
+  // this.populatePlp_();
 
-    return this.attachmentEl_
-      .getImpl()
-      .then((impl) => impl.open(shouldAnimate));
-  }
+  // return this.attachmentEl_
+  //   .getImpl()
+  //   .then((impl) => impl.open(shouldAnimate));
+  // }
 
   /** @private */
   populatePlp_() {
+    console.log('populate PLP');
     if (this.plpContainer_.querySelector('.amp-story-shopping-plp')) {
       return;
     }
