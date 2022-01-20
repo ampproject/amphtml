@@ -1,10 +1,12 @@
+import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+
 import {Action} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
 import {LocalSubscriptionPlatformRenderer} from '../local-subscription-platform-renderer';
 import {ServiceAdapter} from '../service-adapter';
-import {Services} from '#service';
-import {createElementWithAttributes} from '#core/dom';
 
 describes.realWin('local-subscriptions-rendering', {amp: true}, (env) => {
   let win, doc, ampdoc;

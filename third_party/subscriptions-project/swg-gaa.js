@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.199 */
+/** Version: 0.1.22.200 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -313,6 +313,8 @@ const AnalyticsEvent = {
   ACTION_REGWALL_ALREADY_OPTED_IN_CLICK: 1055,
   ACTION_NEWSLETTER_OPT_IN_BUTTON_CLICK: 1056,
   ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
+  ACTION_REGWALL_OPT_IN_CLOSE: 1058,
+  ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_REGWALL_OPT_IN_FAILED: 2001,
   EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,

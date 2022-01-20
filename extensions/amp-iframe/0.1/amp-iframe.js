@@ -1,35 +1,38 @@
-import {playIgnoringError} from '#core/dom/video';
-import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
+import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
+import {removeElement} from '#core/dom';
 import {
   LayoutPriority_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {setStyle} from '#core/dom/style';
+import {playIgnoringError} from '#core/dom/video';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {base64EncodeFromBytes} from '#core/types/string/base64';
-import {createCustomEvent, getData, listen} from '#utils/event-helper';
-import {user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
+import {base64EncodeFromBytes} from '#core/types/string/base64';
+import {utf8Encode} from '#core/types/string/bytes';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {createCustomEvent, getData, listen} from '#utils/event-helper';
+import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
+import {user, userAssert} from '#utils/log';
+
+import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {urls} from '../../../src/config';
 import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,
   listenFor,
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isExperimentOn} from '#experiments';
-import {parseJson} from '#core/types/object/json';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {removeElement} from '#core/dom';
 import {removeFragment} from '../../../src/url';
-import {setStyle} from '#core/dom/style';
-import {urls} from '../../../src/config';
-import {utf8Encode} from '#core/types/string/bytes';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -491,17 +494,11 @@ export class AmpIframe extends AMP.BaseElement {
   sendConsentData_(source, origin) {
     getConsentDataToForward(this.element, this.getConsentPolicy()).then(
       (consents) => {
-        this.sendConsentDataToIframe_(
-          source,
-          origin,
-          Object.assign(
-            dict({
-              'sentinel': 'amp',
-              'type': MessageType_Enum.CONSENT_DATA,
-            }),
-            consents
-          )
-        );
+        this.sendConsentDataToIframe_(source, origin, {
+          'sentinel': 'amp',
+          'type': MessageType_Enum.CONSENT_DATA,
+          ...consents,
+        });
       }
     );
   }
@@ -774,11 +771,9 @@ export class AmpIframe extends AMP.BaseElement {
         user().error(TAG_, 'Data from "message" event must be JSON.');
         return;
       }
-      const event = createCustomEvent(
-        this.win,
-        'amp-iframe:message',
-        dict({'data': sanitized})
-      );
+      const event = createCustomEvent(this.win, 'amp-iframe:message', {
+        'data': sanitized,
+      });
       const actionService = Services.actionServiceForDoc(this.element);
       actionService.trigger(
         this.element,

@@ -1,5 +1,4 @@
 import {getDataParamsFromAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
@@ -12,7 +11,7 @@ export class BaseElement extends VideoBaseElement {
   init() {
     super.init();
 
-    return dict({
+    return {
       'queryParams': this.mergeQueryParams(
         getDataParamsFromAttributes(this.element, null, /^playerParam(.+)/),
         this.element.getAttribute('data-player-querystring')
@@ -20,7 +19,7 @@ export class BaseElement extends VideoBaseElement {
       'contentSearch': this.getContextualSearch(
         this.element.getAttribute('data-content-search')
       ),
-    });
+    };
   }
 
   /**

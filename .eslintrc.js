@@ -1,12 +1,12 @@
 const fs = require('fs');
 
 const {
+  getImportResolver,
+} = require('./build-system/babel-config/import-resolver');
+const {
   forbiddenTermsGlobal,
   forbiddenTermsSrcInclusive,
 } = require('./build-system/test-configs/forbidden-terms');
-const {
-  getImportResolver,
-} = require('./build-system/babel-config/import-resolver');
 
 const importAliases = getImportResolver().alias;
 
@@ -165,7 +165,6 @@ module.exports = {
     'local/camelcase': 2,
     'local/closure-type-primitives': 2,
     'local/core-dom-jsx': 2,
-    'local/dict-string-keys': 2,
     'local/enums': 2,
     'local/get-mode-usage': 2,
     'local/html-template': 2,
@@ -299,9 +298,7 @@ module.exports = {
     ],
     'sort-destructure-keys/sort-destructure-keys': 2,
     'import/order': [
-      // Disabled for now, so individual folders can opt-in one PR at a time and
-      // minimize disruption/merge conflicts
-      0,
+      2,
       {
         // Split up imports groups with exactly one newline
         'newlines-between': 'always',
@@ -350,6 +347,8 @@ module.exports = {
         'jsdoc/require-param': 0,
         'jsdoc/require-param-type': 0,
         'jsdoc/require-returns': 0,
+        'no-undef': 0,
+        'import/no-unresolved': 0
       },
     },
     {
@@ -460,8 +459,8 @@ module.exports = {
       },
     },
     {
-      'files': ['3p/**/*.js', 'src/**/*.js', 'test/**/*.js', 'testing/**/*.js'],
-      'rules': {'import/order': 2},
+      'files': ['build-system/**/*.js'],
+      'rules': {'import/order': 0},
     },
     {
       'files': ['src/preact/**', 'extensions/**/1.0/**', '**/storybook/**'],

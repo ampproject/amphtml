@@ -3,7 +3,6 @@ import {addAttributesToElement} from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
 import {remove} from '#core/types/array';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {getData} from '#utils/event-helper';
@@ -153,7 +152,7 @@ function isDescendantWindow(ancestor, descendant) {
  * @param {!Array<!WindowEventsDef>} listenSentinel
  */
 function dropListenSentinel(listenSentinel) {
-  const noopData = dict({'sentinel': UNLISTEN_SENTINEL});
+  const noopData = {'sentinel': UNLISTEN_SENTINEL};
 
   for (let i = listenSentinel.length - 1; i >= 0; i--) {
     const windowEvents = listenSentinel[i];
@@ -546,7 +545,7 @@ export function isAdLike(element) {
  * @return {!Element}
  */
 export function disableScrollingOnIframe(iframe) {
-  addAttributesToElement(iframe, dict({'scrolling': 'no'}));
+  addAttributesToElement(iframe, {'scrolling': 'no'});
 
   // This shouldn't work, but it does on Firefox.
   // https://stackoverflow.com/a/15494969

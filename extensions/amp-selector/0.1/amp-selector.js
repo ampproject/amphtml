@@ -6,7 +6,6 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {mod} from '#core/math';
 import {isEnumValue} from '#core/types';
 import {areEqualOrdered, toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -444,14 +443,10 @@ export class AmpSelector extends AMP.BaseElement {
    */
   fireSelectEvent_(el, trust) {
     const name = 'select';
-    const selectEvent = createCustomEvent(
-      this.win,
-      `amp-selector.${name}`,
-      dict({
-        'targetOption': el.getAttribute('option'),
-        'selectedOptions': this.selectedOptions_(),
-      })
-    );
+    const selectEvent = createCustomEvent(this.win, `amp-selector.${name}`, {
+      'targetOption': el.getAttribute('option'),
+      'selectedOptions': this.selectedOptions_(),
+    });
     this.action_.trigger(this.element, name, selectEvent, trust);
   }
 

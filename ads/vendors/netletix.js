@@ -1,7 +1,8 @@
-import {addParamsToUrl, assertHttpsUrl} from '../../src/url';
-import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
 import {loadScript, validateData, writeScript} from '#3p/3p';
+
+import {dev} from '#utils/log';
+
+import {addParamsToUrl, assertHttpsUrl} from '../../src/url';
 
 const NX_URL_HOST = 'https://call.adadapter.netzathleten-media.de';
 const NX_URL_PATHPREFIX = '/pb/';
@@ -36,14 +37,14 @@ export function netletix(global, data) {
   const url = assertHttpsUrl(
     addParamsToUrl(
       NX_URL_FULL + encodeURIComponent(data.nxkey || DEFAULT_NX_KEY),
-      dict({
+      {
         'unit': data.nxunit || DEFAULT_NX_UNIT,
         'width': data.nxwidth || DEFAULT_NX_WIDTH,
         'height': data.nxheight || DEFAULT_NX_HEIGHT,
         'v': data.nxv || DEFAULT_NX_V,
         'site': data.nxsite || DEFAULT_NX_SITE,
         'ord': Math.round(Math.random() * 100000000),
-      })
+      }
     ),
     data.ampSlotIndex
   );

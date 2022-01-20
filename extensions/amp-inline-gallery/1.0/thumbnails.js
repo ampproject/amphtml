@@ -1,7 +1,6 @@
-import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {px} from '#core/dom/style';
+
+import * as Preact from '#preact';
 import {
   useContext,
   useEffect,
@@ -9,8 +8,12 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {useStyles} from './thumbnails.jss';
 import {propName} from '#preact/utils';
+
+import {useStyles} from './thumbnails.jss';
+
+import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
+import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
 
 /**
  * @param {!BentoInlineGalleryDef.BentoThumbnailProps} props

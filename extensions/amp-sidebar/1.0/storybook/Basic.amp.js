@@ -1,4 +1,4 @@
-import * as Preact from '#preact';
+import {withAmp} from '@ampproject/storybook-addon';
 import {
   boolean,
   color,
@@ -7,7 +7,8 @@ import {
   text,
   withKnobs,
 } from '@storybook/addon-knobs';
-import {withAmp} from '@ampproject/storybook-addon';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-sidebar-1_0',

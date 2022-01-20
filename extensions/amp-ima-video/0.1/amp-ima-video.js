@@ -11,7 +11,6 @@ import {childElementsByTag} from '#core/dom/query';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {isEnumValue, isObject} from '#core/types';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -274,13 +273,11 @@ class AmpImaVideo extends AMP.BaseElement {
       this.playerReadyPromise_.then(() => {
         if (this.iframe_ && this.iframe_.contentWindow) {
           this.iframe_.contentWindow./*OK*/ postMessage(
-            JSON.stringify(
-              dict({
-                'event': 'command',
-                'func': command,
-                'args': opt_args || '',
-              })
-            ),
+            JSON.stringify({
+              'event': 'command',
+              'func': command,
+              'args': opt_args || '',
+            }),
             '*'
           );
         }

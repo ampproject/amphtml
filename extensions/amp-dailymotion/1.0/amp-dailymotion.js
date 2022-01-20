@@ -1,8 +1,10 @@
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-dailymotion-1.0.css';
-import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
+
 import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-dailymotion-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-dailymotion';
@@ -19,13 +21,13 @@ class AmpDailymotion extends BaseElement {
       'uiLogo': uiLogo,
     } = this.element.dataset;
 
-    return dict({
+    return {
       'endscreenEnable': endscreenEnable !== 'false',
       'info': info !== 'false',
       'mute': mute === 'true',
       'sharingEnable': sharingEnable !== 'false',
       'uiLogo': uiLogo !== 'false',
-    });
+    };
   }
 
   /** @override */

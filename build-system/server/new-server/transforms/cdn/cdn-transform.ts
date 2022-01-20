@@ -1,13 +1,14 @@
+import {parse} from 'path';
 import posthtml from 'posthtml';
+
+import {CDNURLToLocalHostRelativeAbsoluteDist} from '../utilities/cdn';
 import {
   getCdnUrlAttr,
   isJsonScript,
   isValidOrigin,
   tryGetUrl,
 } from '../utilities/cdn-tag';
-import {CDNURLToLocalHostRelativeAbsoluteDist} from '../utilities/cdn';
 import {OptionSet} from '../utilities/option-set';
-import {parse} from 'path';
 
 function maybeModifyCdnUrl(
   node: posthtml.Node,
