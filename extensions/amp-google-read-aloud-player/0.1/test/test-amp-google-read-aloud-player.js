@@ -25,6 +25,8 @@ import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
+import * as log from '#utils/log';
+
 import {macroTask} from '#testing/helpers';
 
 const IFRAME_BASE_URL =
@@ -219,6 +221,16 @@ describes.realWin(
           expect(postMessage.withArgs(lowercaseMethod)).to.have.been.calledOnce;
         });
       });
+    });
+
+    it('asserts when experiment is off', async () => {
+      const errorSpy = env.sandbox.stub(log, 'userAssert');
+      toggleExperiment(win, 'amp-google-read-aloud-player', false);
+      await createAndRenderBasicGoogleReadAloudPlayer();
+
+      expect(errorSpy.getCall(0).args[1]).to.match(
+        /Experiment amp-google-read-aloud-player is not turned on./
+      );
     });
   }
 );

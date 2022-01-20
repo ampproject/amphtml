@@ -61,8 +61,6 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.assertExperimentIsOn_();
-
     Services.preconnectFor(this.win).url(
       this.getAmpDoc(),
       IFRAME_BASE_URL,
@@ -77,8 +75,6 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.assertExperimentIsOn_();
-
     const name = JSON.stringify(this.getMetadata_());
 
     this.iframe_ = disableScrollingOnIframe(
@@ -99,8 +95,6 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    this.assertExperimentIsOn_();
-
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -111,15 +105,11 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.assertExperimentIsOn_();
-
     this.pause();
   }
 
   /** @override */
   resumeCallback() {
-    this.assertExperimentIsOn_();
-
     this.play(false /** unusedIsAutoplay */);
   }
 
