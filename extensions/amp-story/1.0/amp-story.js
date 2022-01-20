@@ -347,8 +347,6 @@ export class AmpStory extends AMP.BaseElement {
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
 
-    const pageId = this.getInitialPageId_();
-
     const needsDvhPolyfill =
       !this.win.CSS?.supports?.('height: 1dvh') &&
       !getStyle(this.win.document.documentElement, '--story-dvh');
@@ -357,6 +355,8 @@ export class AmpStory extends AMP.BaseElement {
       needsDvhPolyfill && this.polyfillDvh_(size);
       this.onViewportResize_();
     };
+
+    const pageId = this.getInitialPageId_();
 
     if (pageId) {
       const page = this.element.querySelector(
