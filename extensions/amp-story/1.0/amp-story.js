@@ -1496,7 +1496,6 @@ export class AmpStory extends AMP.BaseElement {
       const page = this.element.querySelector(
         `amp-story-page#${escapeCssSelectorIdent(pageId)}`
       );
-      page.setAttribute('active', '');
 
       pageSize = {
         'width': page./*OK*/ getLayoutBox().width,
