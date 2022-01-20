@@ -2,6 +2,10 @@ import '../amp-carousel';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {
+  disableEventListenerSerialization,
+  enableEventListenerSerialization,
+} from '#core/dom/serialized-event-listener';
 
 import {Services} from '#service';
 import {ActionService} from '#service/action-impl';
@@ -1530,6 +1534,35 @@ describes.realWin(
         const after = carousel.outerHTML;
 
         expect(before).equal(after);
+      });
+
+      it('hydration should add the same event listeners as client-render', async () => {
+        enableEventListenerSerialization();
+        const el1 = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        const el2 = el1.cloneNode(/* deep */ true);
+        const impl1 = new AmpSlideScroll(el1);
+        const impl2 = new AmpSlideScroll(el2);
+
+        // impl1 client render
+        doc.body.appendChild(el1);
+        await impl1.buildCallback();
+
+        // impl2 server render
+        doc.body.appendChild(el2);
+        buildDom(el2);
+        el2.setAttribute('i-amphtml-ssr', '');
+        await impl2.buildCallback();
+        el2.removeAttribute('i-amphtml-ssr');
+
+        expect(el2.outerHTML).equal(el1.outerHTML);
+      });
+
+      afterEach(() => {
+        disableEventListenerSerialization();
       });
     });
   }

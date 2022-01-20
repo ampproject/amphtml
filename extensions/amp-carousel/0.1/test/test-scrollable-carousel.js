@@ -293,6 +293,7 @@ describes.realWin(
         const el2 = el1.cloneNode(/* deep */ true);
         const impl1 = new AmpScrollableCarousel(el1);
         const impl2 = new AmpScrollableCarousel(el2);
+
         // impl1 client render
         doc.body.appendChild(el1);
         await impl1.buildCallback();
