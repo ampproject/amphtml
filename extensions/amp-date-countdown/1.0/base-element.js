@@ -1,10 +1,41 @@
+import {html} from 'htm/preact';
+// import {html, render} from 'lit';
+
 import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attributes';
 
 import {PreactBaseElement} from '#preact/base-element';
 
+import {
+  getTemplateElement,
+  // getTemplateFunction,
+  makeTemplateObject,
+} from '#utils/template-utils';
+
+import {render} from 'src/preact';
+
 import {BentoDateCountdown} from './component';
 
-export class BaseElement extends PreactBaseElement {}
+export class BaseElement extends PreactBaseElement {
+  /** @override */
+  checkPropsPostMutations() {
+    const template = getTemplateElement(this.element);
+    if (!template) {
+      return;
+    }
+    this.mutateProps({
+      'render': (data) => {
+        const templateObj = makeTemplateObject(template);
+        console.log(templateObj);
+        render(html(templateObj, data), this.element);
+        // return {'__html': html(templateObj, data)};
+
+        // const templateFn = getTemplateFunction(data, template);
+        // makeTemplateObject();
+        // return {'__html': 'lorem ipsum'};
+      },
+    });
+  }
+}
 
 /** @override */
 BaseElement['Component'] = BentoDateCountdown;
