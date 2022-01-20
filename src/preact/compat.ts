@@ -1,4 +1,6 @@
-import {options, toChildArray} from /*OK*/ 'preact';
+import type {ComponentChildren} from 'preact';
+import {options, toChildArray} from 'preact';
+import type {forwardRef as forwardRefType} from 'preact/compat';
 
 import * as mode from '#core/mode';
 
@@ -13,18 +15,16 @@ const REACT_FORWARD_SYMBOL =
  *
  */
 const diffKey = '__b';
-const oldDiff = /** @type {*} */ (options)[diffKey];
-/** @type {*} */ (options)[diffKey] = newDiff;
+const oldDiff = (options as any)[diffKey];
+(options as any)[diffKey] = newDiff;
 
 /**
  * Checks if our VNode type has a `forwardRef_` sigil, in which case it was created by our forwardRef implementation.
  * If so, we move the VNode's ref to it's props, which will be passed to the Component as its props.
  *
  * See VNode type at https://github.com/preactjs/preact/blob/55ee4bc069f84cf5e3af8f2e2f338f4e74aca4d8/src/create-element.js#L58-L76
- *
- * @param {*} vnode
  */
-function newDiff(vnode) {
+function newDiff(vnode: any) {
   if (vnode['type']?.forwardRef_ && vnode['ref']) {
     vnode['props']['ref'] = vnode['ref'];
     vnode['ref'] = null;
@@ -36,15 +36,9 @@ function newDiff(vnode) {
  * Reimplements forwardRef without dragging in everything from preact/compat.
  * See https://github.com/preactjs/preact/issues/3295
  *
- * @param {*} Component
- * @return {ReturnType<import('preact/compat').forwardRef>}
  */
-export function forwardRef(Component) {
-  /**
-   * @param {JsonObject} props
-   * @return {*}
-   */
-  function Forward(props) {
+export function forwardRef(Component: any): ReturnType<typeof forwardRefType> {
+  function Forward(props: any): any {
     const {ref, ...clone} = props;
     return Component(clone, ref);
   }
@@ -69,31 +63,21 @@ export function forwardRef(Component) {
     })`;
   }
 
-  return /** @type {*} */ (Forward);
+  return /** @type {*} */ Forward;
 }
 
-/**
- * @type {typeof import('preact').toChildArray} children
- */
-function toArray(children) {
+function toArray(children: ComponentChildren): ReturnType<typeof toChildArray> {
   return toChildArray(children);
 }
 
-/**
- * @param {import('preact').ComponentChildren} children
- * @param {function(import('preact').ComponentChildren):R} fn
- * @return {Array<R>}
- * @template R
- */
-function map(children, fn) {
+function map<T>(
+  children: ComponentChildren,
+  fn: (children: ComponentChildren) => T[]
+) {
   return toChildArray(children).map(fn);
 }
 
-/**
- * @param {import('preact').ComponentChildren} children
- * @return {number}
- */
-function count(children) {
+function count(children: ComponentChildren): number {
   return toChildArray(children).length;
 }
 

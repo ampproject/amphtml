@@ -1,3 +1,5 @@
+import type {FunctionComponent, RefObject, VNode} from 'preact';
+
 import {devAssert} from '#core/assert';
 import {Loading_Enum} from '#core/constants/loading-instructions';
 import {rediscoverChildren, removeProp, setProp} from '#core/context';
@@ -17,20 +19,17 @@ import {CanPlay, CanRender, LoadingProp} from './contextprops';
 
 const EMPTY = {};
 
-/** @const {WeakMap<Element, {oldDefaults: (Object|undefined), component: Component}>} */
-const cache = new WeakMap();
+const cache: WeakMap<
+  Element,
+  {oldProps: Object | undefined; component: FunctionComponent}
+> = new WeakMap();
 
-/** @typedef {import('preact').VNode} VNode */
-/** @typedef {import('preact').FunctionComponent} FunctionComponent */
-
-/**
- * @param {Element} element
- * @param {string} name
- * @param {Object=} defaultProps
- * @param {boolean=} as
- * @return {VNode|FunctionComponent}
- */
-export function createSlot(element, name, defaultProps, as = false) {
+export function createSlot(
+  element: Element,
+  name: string,
+  defaultProps?: Object,
+  as: boolean = false
+): VNode | FunctionComponent {
   element.setAttribute('slot', name);
   if (!as) {
     return <Slot {...(defaultProps || EMPTY)} name={name} />;
@@ -41,11 +40,7 @@ export function createSlot(element, name, defaultProps, as = false) {
     return cached.component;
   }
 
-  /**
-   * @param {Object=} props
-   * @return {VNode}
-   */
-  function SlotWithProps(props) {
+  function SlotWithProps(props?: Object): VNode {
     return <Slot {...(defaultProps || EMPTY)} name={name} {...props} />;
   }
   cache.set(element, {oldProps: defaultProps, component: SlotWithProps});
@@ -55,12 +50,9 @@ export function createSlot(element, name, defaultProps, as = false) {
 
 /**
  * Slot component.
- *
- * @param {JsonObject} props
- * @return {VNode}
  */
-export function Slot(props) {
-  const ref = useRef(/** @type {HTMLSlotElement|null} */ (null));
+export function Slot(props: JsonObject): VNode {
+  const ref: RefObject<HTMLSlotElement> = useRef(null);
 
   useSlotContext(ref, props);
 
@@ -74,11 +66,10 @@ export function Slot(props) {
   return <slot {...props} ref={ref} />;
 }
 
-/**
- * @param {{current: HTMLSlotElement?}} ref
- * @param {JsonObject=} opt_props
- */
-export function useSlotContext(ref, opt_props) {
+export function useSlotContext(
+  ref: RefObject<HTMLSlotElement>,
+  opt_props?: JsonObject
+) {
   const loading = opt_props?.loading;
   const context = useAmpContext();
 
@@ -89,14 +80,7 @@ export function useSlotContext(ref, opt_props) {
 
     setProp(slot, CanRender, Slot, context.renderable);
     setProp(slot, CanPlay, Slot, context.playable);
-    setProp(
-      slot,
-      LoadingProp,
-      Slot,
-      /** @type {import('#core/constants/loading-instructions').Loading_Enum} */ (
-        context.loading
-      )
-    );
+    setProp(slot, LoadingProp, Slot, context.loading);
 
     if (!context.playable) {
       execute(slot, pauseAll, true);
@@ -131,12 +115,11 @@ export function useSlotContext(ref, opt_props) {
   }, [ref, loading]);
 }
 
-/**
- * @param {HTMLSlotElement} slot
- * @param {function(Element|Element[]):void} action
- * @param {boolean} schedule
- */
-function execute(slot, action, schedule) {
+function execute(
+  slot: HTMLSlotElement,
+  action: (e: Element | Element[]) => void,
+  schedule: boolean
+) {
   const assignedElements = slot.assignedElements
     ? slot.assignedElements()
     : slot;

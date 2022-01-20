@@ -7,6 +7,8 @@
  * @fileoverview
  */
 
+import type {ComponentChildren} from 'preact';
+
 // Importing directly from preact/dom is a hack to allow us to mimic the structure of react.
 export {hydrate, render} from 'preact/dom';
 
@@ -22,10 +24,6 @@ export {
   useImperativeHandle,
 } from 'preact/hooks';
 
-/**
- * @param {*} props
- * @return {import('preact').ComponentChildren}
- */
-export function Fragment(props) {
+export function Fragment(props: any): ComponentChildren {
   return props.children;
 }

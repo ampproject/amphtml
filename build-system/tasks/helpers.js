@@ -716,7 +716,8 @@ function massageSourcemaps(sourcemaps, babelMaps, options) {
       // We perform some manual path mangling to destingish the babel files
       // (which have a sourcemap) from the actual source file by pretending the
       // source file exists in the '__SOURCE__' root directory.
-      const map = babelMaps.get(file);
+      const map =
+        babelMaps.get(file) ?? babelMaps.get(file.replace('.js', '.ts'));
       if (!map) {
         throw new Error(`failed to find sourcemap for babel file "${f}"`);
       }

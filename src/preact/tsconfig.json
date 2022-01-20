@@ -3,8 +3,10 @@
   "include": [
     "*.js",
     "**/*.ts",
+    "**/*.tsx",
     "../core/**/globals.d.ts",
     "../**/base-element.d.ts",
-    "amp-base-element.ts"
+    "amp-base-element.ts",
+    "base-element.ts"
   ]
 }

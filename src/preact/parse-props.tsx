@@ -1,18 +1,20 @@
+import type {Ref, VNode} from 'preact';
+
 import {devAssert} from '#core/assert';
 import {Loading_Enum} from '#core/constants/loading-instructions';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {parseBooleanAttribute} from '#core/dom';
 import {matches, realChildElements, realChildNodes} from '#core/dom/query';
+import type {MediaQueryProps} from '#core/dom/media-query-props';
 import {getDate} from '#core/types/date';
 import {dashToCamelCase} from '#core/types/string';
 
 import * as Preact from '#preact';
 
+import type {PreactBaseElement} from './base-element';
 import {Slot, createSlot} from './slot';
 
-/** @typedef {import('#core/dom/media-query-props').MediaQueryProps} MediaQueryProps */
-
-/** @typedef {Object<string, AmpElementProp>} AmpElementProps */
+type AmpElementProps = {[k: string]: AmpElementProp};
 
 /**
  * The following combinations are allowed.
@@ -31,25 +33,24 @@ import {Slot, createSlot} from './slot';
  *   are no children elements, the returned value will be null instead of the
  *   unnamed `<slot>`. This allows the Preact environment to have conditional
  *   behavior depending on whether or not there are children.
- *
- * @typedef {{
- *   attr?: string,
- *   type?: string,
- *   attrMatches?: function(string):boolean,
- *   attrs: string[],
- *   parseAttrs?: function(Element):*,
- *   passthrough: boolean,
- *   passthroughNonEmpty: boolean,
- *   media?: boolean,
- *   default: *,
- *   name?: string,
- *   as?: boolean,
- *   selector?: string,
- *   single?: boolean,
- *   clone?: boolean,
- *   props?: JsonObject,
- * }} AmpElementProp
  */
+export interface AmpElementProp {
+  attr?: string;
+  type?: string;
+  attrMatches?: (s: string) => boolean;
+  attrs: string[];
+  parseAttrs?: (e: Element) => any;
+  passthrough: boolean;
+  passthroughNonEmpty: boolean;
+  media?: boolean;
+  default: any;
+  name?: string;
+  as?: boolean;
+  selector?: string;
+  single?: boolean;
+  clone?: boolean;
+  props?: JsonObject;
+}
 
 const RENDERED_ATTR = 'i-amphtml-rendered';
 
@@ -78,43 +79,25 @@ const childIdGenerator = sequentialIdGenerator();
 const ONE_OF_ERROR_MESSAGE =
   'Only one of "attr", "attrs", "attrMatches", "passthrough", "passthroughNonEmpty", or "selector" must be given';
 
-/**
- * @param {AmpElementProps} propDefs
- * @param {function(AmpElementProp):boolean} cb
- * @return {boolean}
- */
-export function checkPropsFor(propDefs, cb) {
+export function checkPropsFor(
+  propDefs: AmpElementProps,
+  cb: (p: AmpElementProp) => boolean
+): boolean {
   return Object.values(propDefs).some(cb);
 }
 
-/**
- * @param {AmpElementProp} def
- * @return {boolean}
- */
-export const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
+export const HAS_SELECTOR = (def: AmpElementProp): boolean =>
+  typeof def === 'string' || !!def.selector;
 
-/**
- * @param {Node} node
- * @return {boolean}
- */
-const IS_EMPTY_TEXT_NODE = (node) =>
+const IS_EMPTY_TEXT_NODE = (node: Node): boolean =>
   node.nodeType === /* TEXT_NODE */ 3 && node.nodeValue?.trim().length === 0;
 
-/**
- * @param {typeof import('./base-element').PreactBaseElement} Ctor
- * @param {AmpElement} element
- * @param {import('preact').Ref<T>} ref
- * @param {JsonObject|null|undefined} defaultProps
- * @param {?MediaQueryProps} mediaQueryProps
- * @return {JsonObject}
- * @template T
- */
-export function collectProps(
-  Ctor,
-  element,
-  ref,
-  defaultProps,
-  mediaQueryProps
+export function collectProps<T>(
+  Ctor: typeof PreactBaseElement,
+  element: AmpElement,
+  ref: Ref<T>,
+  defaultProps: JsonObject,
+  mediaQueryProps: MediaQueryProps
 ) {
   const {
     'layoutSizeDefined': layoutSizeDefined,
@@ -126,7 +109,7 @@ export function collectProps(
     mediaQueryProps.start();
   }
 
-  const props = /** @type {JsonObject} */ ({...defaultProps, ref});
+  const props = {...defaultProps, ref} as JsonObject;
 
   // Light DOM.
   if (lightDomTag) {
@@ -154,14 +137,13 @@ export function collectProps(
   return props;
 }
 
-/**
- * @param {typeof import('./base-element').PreactBaseElement} Ctor
- * @param {JsonObject} props
- * @param {AmpElementProps} propDefs
- * @param {Element} element
- * @param {?MediaQueryProps} mediaQueryProps
- */
-function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
+function parsePropDefs(
+  Ctor: typeof PreactBaseElement,
+  props: JsonObject,
+  propDefs: AmpElementProps,
+  element: Element,
+  mediaQueryProps?: MediaQueryProps
+) {
   // Match all children defined with "selector".
   if (checkPropsFor(propDefs, HAS_SELECTOR)) {
     // There are plain "children" and there're slotted children assigned
@@ -170,7 +152,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     // property.
     const elements = realChildElements(element);
     for (let i = 0; i < elements.length; i++) {
-      const childElement = /** @type {HTMLElement} */ (elements[i]);
+      const childElement = elements[i] as HTMLElement;
       const match = matchChild(childElement, propDefs);
       if (!match) {
         continue;
@@ -219,7 +201,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
   }
 
   for (const name in propDefs) {
-    const def = /** @type {AmpElementProp} */ (propDefs[name]);
+    const def = propDefs[name] as AmpElementProp;
     devAssert(
       [
         def.attr,
@@ -263,7 +245,7 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
         def.type == 'number'
           ? parseFloat(value)
           : def.type == 'boolean'
-          ? parseBooleanAttribute(/** @type {string} */ (value))
+          ? parseBooleanAttribute(value as string)
           : value;
       props[name] = v;
     }
@@ -273,12 +255,9 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
 /**
  * Copies an Element into a VNode representation.
  * (Interpretation into VNode is not recursive, so it excludes children.)
- * @param {Element} element
- * @return {import('preact').VNode}
  */
-function createShallowVNodeCopy(element) {
-  /** @type {JsonObject} */
-  const props = {
+function createShallowVNodeCopy(element: Element): VNode {
+  const props: JsonObject = {
     // Setting `key` to an object is fine in Preact, but not React.
     'key': element,
   };
@@ -293,12 +272,10 @@ function createShallowVNodeCopy(element) {
   return Preact.createElement(localName, props);
 }
 
-/**
- * @param {HTMLElement} element
- * @param {Object<string, AmpElementProp>} defs
- * @return {string|null}
- */
-function matchChild(element, defs) {
+function matchChild(
+  element: HTMLElement,
+  defs: {[k: string]: AmpElementProp}
+): string | null {
   // TODO: a little slow to do this repeatedly.
   for (const match in defs) {
     const def = defs[match];
@@ -310,33 +287,21 @@ function matchChild(element, defs) {
   return null;
 }
 
-/**
- * @param {string} name
- * @param {function(string): T} parse
- * @return {{
- *   attrs: Array<string>,
- *   parseAttrs: function(Element):(T|''|null)
- * }}
- * @template T
- */
-export function createParseAttr(name, parse) {
+export function createParseAttr<T>(
+  name: string,
+  parse: (s: string) => T
+): {attrs: string[]; parseAttrs: (e: Element) => T | '' | null} {
   const attrs = [name];
-  /** @type {function(Element):T|''|null} */
-  const parseAttrs = (element) => {
+  const parseAttrs = (element: Element) => {
     const attr = element.getAttribute(name);
     return attr && parse(attr);
   };
-  return {
-    'attrs': attrs,
-    'parseAttrs': parseAttrs,
-  };
+  return {attrs, parseAttrs};
 }
 
-/**
- * @param {string} name
- * @return {ReturnType<typeof createParseAttr>}
- */
-export function createParseDateAttr(name) {
+export function createParseDateAttr(
+  name: string
+): ReturnType<typeof createParseAttr> {
   return createParseAttr(name, getDate);
 }
 
@@ -349,20 +314,15 @@ export function createParseDateAttr(name) {
  *   parseAttrs: function(Element):(undefined|Object<string, string>)
  * }}
  */
-export function createParseAttrsWithPrefix(prefix) {
-  /**
-   * @param {string} name
-   * @return {boolean}
-   */
-  const attrMatches = (name) => name?.startsWith(prefix) && name !== prefix;
+export function createParseAttrsWithPrefix(prefix: string): {
+  attrMatches: (str?: string) => boolean;
+  parseAttrs: (e: Element) => undefined | JsonObject;
+} {
+  const attrMatches = (name: string): boolean =>
+    name?.startsWith(prefix) && name !== prefix;
 
-  /**
-   * @param {Element} element
-   * @return {JsonObject|undefined}
-   */
-  const parseAttrs = (element) => {
-    /** @type {JsonObject|undefined} */
-    let currObj = undefined;
+  const parseAttrs = (element: Element): JsonObject | undefined => {
+    let currObj: JsonObject | undefined = undefined;
     const attrs = element.attributes;
     for (let i = 0; i < attrs.length; i++) {
       const attrib = attrs[i];
@@ -377,8 +337,5 @@ export function createParseAttrsWithPrefix(prefix) {
     return currObj;
   };
 
-  return {
-    'attrMatches': attrMatches,
-    'parseAttrs': parseAttrs,
-  };
+  return {attrMatches, parseAttrs};
 }

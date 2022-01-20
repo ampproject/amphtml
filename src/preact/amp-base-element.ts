@@ -1,11 +1,12 @@
 /* eslint-disable local/restrict-this-access */
 
 import {ActionTrust_Enum} from '#core/constants/action-constants';
+import type {ReadyState_Enum} from '#core/constants/ready-state';
 
 import {PreactBaseElement} from './base-element';
 
 interface API_TYPE {
-  readyState?: import('#core/constants/ready-state').ReadyState_Enum;
+  readyState?: ReadyState_Enum;
   pause?: () => void;
 }
 
@@ -58,9 +59,8 @@ export class AmpPreactBaseElement extends PreactBaseElement<API_TYPE> {
   /**
    * Default handler for onLoad event
    * Displays loader. Override to customize.
-   * @protected
    */
-  handleOnLoad() {
+  protected handleOnLoad() {
     this.toggleLoading?.(false);
     this.toggleFallback?.(false);
     this.togglePlaceholder?.(false);
@@ -69,18 +69,16 @@ export class AmpPreactBaseElement extends PreactBaseElement<API_TYPE> {
   /**
    * Default handler for onLoading event
    * Reveals loader. Override to customize.
-   * @protected
    */
-  handleOnLoading() {
+  protected handleOnLoading() {
     this.toggleLoading?.(true);
   }
 
   /**
    * Default handler for onError event
    * Displays Fallback / Placeholder. Override to customize.
-   * @protected
    */
-  handleOnError() {
+  protected handleOnError() {
     this.toggleLoading?.(false);
     // If the content fails to load and there's a fallback element, display the fallback.
     // Otherwise, continue displaying the placeholder.
@@ -97,9 +95,8 @@ export class AmpPreactBaseElement extends PreactBaseElement<API_TYPE> {
    *
    * This has no effect on Bento documents, since they lack an Actions system.
    * Instead, they should use `(await element.getApi()).action()`
-   * @protected
    */
-  registerApiAction(
+  protected registerApiAction(
     alias: string,
     handler: (t: API_TYPE, invocation: any) => void,
     minTrust: ActionTrust_Enum = ActionTrust_Enum.DEFAULT

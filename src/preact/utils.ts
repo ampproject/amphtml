@@ -1,3 +1,5 @@
+import type {Ref} from 'preact';
+
 import {useCallback, useLayoutEffect} from '#preact';
 
 import {useAmpContext} from './context';
@@ -15,12 +17,7 @@ export function useResourcesNotify() {
   });
 }
 
-/**
- * @param {import('preact').Ref<T>} ref
- * @param {T} value
- * @template T
- */
-function setRef(ref, value) {
+function setRef<T>(ref: Ref<T>, value: T) {
   if (typeof ref === 'function') {
     ref(value);
   } else if (ref) {
@@ -30,11 +27,8 @@ function setRef(ref, value) {
 
 /**
  * Combines refs to pass into `ref` prop.
- * @param {import('preact').Ref<T>[]} refs
- * @return {function(T):void}
- * @template T
  */
-export function useMergeRefs(refs) {
+export function useMergeRefs<T>(refs: Ref<T>[]): (t: T) => void {
   return useCallback(
     (element) => {
       for (let i = 0; i < refs.length; i++) {
@@ -53,10 +47,8 @@ export function useMergeRefs(refs) {
  * This passes through the value during development, because we render on Preact.
  * It's an annotation so that we can convert these values when we transform the
  * React build.
- * @param {string} name
- * @return {string}
  */
-export function propName(name) {
+export function propName(name: string): string {
   return name;
 }
 
