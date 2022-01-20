@@ -20,7 +20,6 @@ import {createElementWithAttributes, removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {setStyle} from '#core/dom/style';
 import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -218,9 +217,9 @@ class AmpAddThis extends AMP.BaseElement {
         const closeButton = createElementWithAttributes(
           this.win.document,
           'button',
-          dict({
+          {
             'class': 'i-amphtml-addthis-close',
-          })
+          }
         );
         closeButton.onclick = () => removeElement(this.element);
         this.element.appendChild(closeButton);
@@ -253,27 +252,19 @@ class AmpAddThis extends AMP.BaseElement {
    * @return {Element}
    */
   createPlaceholderCallback() {
-    const placeholder = createElementWithAttributes(
-      this.win.document,
-      'div',
-      dict({
-        'placeholder': '',
-      })
-    );
+    const placeholder = createElementWithAttributes(this.win.document, 'div', {
+      'placeholder': '',
+    });
     setStyle(placeholder, 'background-color', '#fff');
 
-    const image = createElementWithAttributes(
-      this.win.document,
-      'amp-img',
-      dict({
-        'src': `https://cache.addthiscdn.com/icons/v3/thumbs/${ICON_SIZE}x${ICON_SIZE}/addthis.png`,
-        'layout': 'fixed',
-        'width': ICON_SIZE,
-        'height': ICON_SIZE,
-        'referrerpolicy': 'origin',
-        'alt': ALT_TEXT,
-      })
-    );
+    const image = createElementWithAttributes(this.win.document, 'amp-img', {
+      'src': `https://cache.addthiscdn.com/icons/v3/thumbs/${ICON_SIZE}x${ICON_SIZE}/addthis.png`,
+      'layout': 'fixed',
+      'width': ICON_SIZE,
+      'height': ICON_SIZE,
+      'referrerpolicy': 'origin',
+      'alt': ALT_TEXT,
+    });
 
     placeholder.appendChild(image);
     return placeholder;
@@ -284,7 +275,7 @@ class AmpAddThis extends AMP.BaseElement {
     const iframe = createElementWithAttributes(
       /** @type {!Document} */ (this.element.ownerDocument),
       'iframe',
-      dict({
+      {
         'frameborder': 0,
         'title': ALT_TEXT,
         // Document has overly long cache age: go.amp.dev/issue/24848
@@ -294,7 +285,7 @@ class AmpAddThis extends AMP.BaseElement {
         'id': this.widgetId_,
         'pco': this.productCode_,
         'containerClassName': this.containerClassName_,
-      })
+      }
     );
     const iframeLoadPromise = this.loadPromise(iframe);
 
@@ -347,7 +338,7 @@ class AmpAddThis extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   getShareConfigAsJsonObject_() {
-    const params = dict();
+    const params = {};
     SHARE_CONFIG_KEYS.map((key) => {
       const value = this.element.getAttribute(`data-${key}`);
       if (value) {

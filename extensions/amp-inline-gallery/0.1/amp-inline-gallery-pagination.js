@@ -3,7 +3,6 @@ import {scopedQuerySelectorAll} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {devAssert} from '#utils/log';
@@ -131,9 +130,9 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
       const event = createCustomEvent(
         this.win,
         InlineGalleryEvents.GO_TO_SLIDE,
-        dict({
+        {
           'index': index,
-        }),
+        },
         {
           bubbles: true,
         }

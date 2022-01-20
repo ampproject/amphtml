@@ -1,4 +1,4 @@
-import {tryFocus} from '#core/dom';
+import {toggleAttribute, tryFocus} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {closest, matches} from '#core/dom/query';
 import {resetStyles, setImportantStyles} from '#core/dom/style';
@@ -398,7 +398,7 @@ export class AmpStoryEmbeddedComponent {
           UIType.DESKTOP_FULLBLEED,
           UIType.DESKTOP_ONE_PANEL,
         ].includes(uiState);
-        this.focusedStateOverlay_.toggleAttribute('desktop', isDesktop);
+        toggleAttribute(this.focusedStateOverlay_, 'desktop', isDesktop);
       }
     );
   }

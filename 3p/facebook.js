@@ -1,6 +1,5 @@
 import {setStyle} from '#core/dom/style';
 import {isEnumValue} from '#core/types/enum';
-import {dict} from '#core/types/object';
 import {dashToUnderline} from '#core/types/string';
 
 import {devAssert} from '#utils/log';
@@ -235,11 +234,9 @@ export function facebook(global, data) {
       FB.init({xfbml: true, version: 'v2.5'});
 
       // Report to parent that the SDK has loaded and is ready to paint
-      const message = JSON.stringify(
-        dict({
-          'action': 'ready',
-        })
-      );
+      const message = JSON.stringify({
+        'action': 'ready',
+      });
       global.parent./*OK*/ postMessage(message, '*');
     },
     data.locale ? data.locale : dashToUnderline(window.navigator.language)

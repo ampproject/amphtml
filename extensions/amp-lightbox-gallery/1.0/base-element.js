@@ -7,7 +7,6 @@ import {
 import {srcsetFromElement} from '#core/dom/srcset';
 import {toggle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
@@ -71,14 +70,14 @@ export class BaseElement extends PreactBaseElement {
       this.element.ownerDocument,
       (opt_index, opt_group) => this.api().open(opt_index, opt_group)
     );
-    return dict({
+    return {
       'onBeforeOpen': () => this.beforeOpen(),
       'onAfterOpen': () => this.afterOpen(),
       'onAfterClose': () => this.afterClose(),
       'onViewGrid': () => this.onViewGrid(),
       'onToggleCaption': () => this.onToggleCaption(),
       'render': () => lightboxElements,
-    });
+    };
   }
 
   /** @override */

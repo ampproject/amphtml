@@ -1,5 +1,4 @@
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {
   classifyPage,
@@ -89,7 +88,7 @@ export function getLojsonData(jsonData) {
     win.navigator.doNotTrack !== 'no' &&
     win.navigator.doNotTrack !== '0';
 
-  return dict({
+  return {
     'amp': 1,
     'bl':
       0 |
@@ -124,7 +123,7 @@ export function getLojsonData(jsonData) {
     'sid': getSessionId(),
     'skipb': 1,
     'sr': service,
-  });
+  };
 }
 
 /**

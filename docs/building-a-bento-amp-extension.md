@@ -272,7 +272,7 @@ actionServiceForDoc(doc.documentElement).trigger(
   createCustomEvent(
     win,
     `amp-base-carousel.${name}`,
-    dict({'index': index})
+    {'index': index}
   ),
   ActionTrust.DEFAULT
 );
@@ -351,6 +351,8 @@ You must document your element's actions and events in its own reference documen
 The following shows the overall structure of your element implementation file (`extensions/amp-my-element/1.0/amp-my-element.js`). See [Experiments](#experiments) to make sure your component is experimentally gated if necessary.
 
 ```js
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {func1, func2} from '../../../src/module';
 import {BaseElement} from './base-element'; // Preact base element.
 import {CSS} from '../../../build/amp-my-element-1.0.css';
@@ -362,7 +364,7 @@ const EXPERIMENT = 'amp-my-element';
 /** @const */
 const TAG = 'amp-my-element';
 
-class AmpMyElement extends BaseElement {
+class AmpMyElement extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     // Perform any additional processing of prop values that are not
@@ -371,10 +373,10 @@ class AmpMyElement extends BaseElement {
     this.registerApiAction('close', (api) => api.close());
 
     const processedProp = parseInt(element.getAttribute('data-binary'), 2);
-    return dict({
+    return {
       'processedProp': processedProp,
-      'onClose': (event) => fireAmpEvent(event)}
-    );
+      'onClose': (event) => fireAmpEvent(event)
+    };
   }
 
   /** @override */

@@ -5,7 +5,6 @@ import {ReadyState_Enum} from '#core/constants/ready-state';
 import {Deferred} from '#core/data-structures/promise';
 import {tryPlay} from '#core/dom/video';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {
@@ -40,27 +39,25 @@ import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
  * @return {!MetadataDef}
  */
 const getMetadata = (player, props) =>
-  /** @type {!MetadataDef} */ (
-    Object.assign(
-      dict({
-        'title': props.title || props['aria-label'] || document.title,
-        'artist': props.artist || '',
-        'album': props.album || '',
-        'artwork': [
-          {
-            'src':
-              props.artwork ||
-              props.poster ||
-              parseSchemaImage(document) ||
-              parseOgImage(document) ||
-              parseFavicon(document) ||
-              '',
-          },
-        ],
-      }),
-      player && player.getMetadata ? player.getMetadata() : Object.create(null)
-    )
-  );
+  /** @type {!MetadataDef} */ ({
+    'title': props.title || props['aria-label'] || document.title,
+    'artist': props.artist || '',
+    'album': props.album || '',
+    'artwork': [
+      {
+        'src':
+          props.artwork ||
+          props.poster ||
+          parseSchemaImage(document) ||
+          parseOgImage(document) ||
+          parseFavicon(document) ||
+          '',
+      },
+    ],
+    ...(player && player.getMetadata
+      ? player.getMetadata()
+      : Object.create(null)),
+  });
 
 /**
  * @param {!VideoWrapperDef.Props} props

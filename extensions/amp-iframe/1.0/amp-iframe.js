@@ -1,7 +1,8 @@
 import {measureIntersection} from '#core/dom/layout/intersection';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
 
@@ -14,7 +15,7 @@ const MINIMUM_DISTANCE_FROM_TOP_PX = 600;
 /** @const {number} */
 const MINIMUM_VIEWPORT_PROPORTION = 0.75;
 
-class AmpIframe extends BaseElement {
+class AmpIframe extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -84,11 +85,11 @@ class AmpIframe extends BaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height, width) => {
         return this.updateSize_(height, width);
       },
-    });
+    };
   }
 }
 

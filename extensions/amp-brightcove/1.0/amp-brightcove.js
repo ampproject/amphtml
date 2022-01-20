@@ -1,6 +1,6 @@
-import {dict} from '#core/types/object';
-
 import {isExperimentOn} from '#experiments';
+
+import {setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
 
@@ -14,11 +14,12 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
+import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 /** @const {string} */
 const TAG = 'amp-brightcove';
 
-class AmpBrightcove extends BaseElement {
+class AmpBrightcove extends setSuperClass(BaseElement, AmpVideoBaseElement) {
   /** @override @nocollapse */
   static getPreconnects() {
     return ['https://players.brightcove.net'];
@@ -46,13 +47,11 @@ class AmpBrightcove extends BaseElement {
       const {0: consentState, 1: consentString, 2: consentSharedData} = arr;
       const urlParams = {
         ...this.getProp('urlParams'),
-        ...dict({
-          'ampInitialConsentState': consentState,
-          'ampInitialConsentValue': consentString,
-          'ampConsentSharedData': JSON.stringify(consentSharedData),
-        }),
+        'ampInitialConsentState': consentState,
+        'ampInitialConsentValue': consentString,
+        'ampConsentSharedData': JSON.stringify(consentSharedData),
       };
-      this.mutateProps(dict({'urlParams': urlParams}));
+      this.mutateProps({'urlParams': urlParams});
     });
   }
 

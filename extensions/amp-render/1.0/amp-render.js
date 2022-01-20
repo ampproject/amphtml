@@ -1,7 +1,8 @@
 import {Layout_Enum} from '#core/dom/layout';
 import {computedStyle, setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
 
@@ -117,7 +118,10 @@ function getTemplateNonEmptyNodeCount(doc, template) {
   );
 }
 
-export class AmpRender extends BaseElement {
+export class AmpRender extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -274,12 +278,12 @@ export class AmpRender extends BaseElement {
       this.handleResizeToContentsAction_();
     });
 
-    return dict({
+    return {
       'ariaLiveValue': hasAriaLive
         ? this.element.getAttribute('aria-live')
         : 'polite',
       'getJson': this.getFetchJsonFn(),
-    });
+    };
   }
 
   /** @override */
@@ -329,7 +333,7 @@ export class AmpRender extends BaseElement {
       return;
     }
     this.src_ = src;
-    this.mutateProps(dict({'getJson': this.getFetchJsonFn()}));
+    this.mutateProps({'getJson': this.getFetchJsonFn()});
   }
 
   /**
@@ -340,7 +344,9 @@ export class AmpRender extends BaseElement {
   renderTemplateAsString_(data) {
     return this.templates_
       .renderTemplateAsString(dev().assertElement(this.template_), data)
-      .then((html) => dict({'__html': html}));
+      .then((html) => ({
+        '__html': html,
+      }));
   }
 
   /** @override */
@@ -354,7 +360,7 @@ export class AmpRender extends BaseElement {
     }
     this.template_ = template;
     if (!template) {
-      this.mutateProps(dict({'render': null}));
+      this.mutateProps({'render': null});
       return;
     }
 
@@ -364,50 +370,46 @@ export class AmpRender extends BaseElement {
         // A new template has been set while the old one was initializing.
         return;
       }
-      this.mutateProps(
-        dict({
-          'render': (data) => {
-            const bindingValue = this.element.getAttribute('binding');
-            if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
+      this.mutateProps({
+        'render': (data) => {
+          const bindingValue = this.element.getAttribute('binding');
+          if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
+            return this.renderTemplateAsString_(data);
+          }
+          return Services.bindForDocOrNull(this.element).then((bind) => {
+            if (!bind) {
               return this.renderTemplateAsString_(data);
             }
-            return Services.bindForDocOrNull(this.element).then((bind) => {
-              if (!bind) {
-                return this.renderTemplateAsString_(data);
-              }
-              const nonEmptyNodeCount = getTemplateNonEmptyNodeCount(
-                this.element.ownerDocument,
-                template
-              );
-              return templates
-                .renderTemplate(dev().assertElement(template), data)
-                .then((element) => {
-                  return bind
-                    .rescan([element], [], {
-                      'fast': true,
-                      'update': getUpdateValue(
-                        bindingValue,
-                        // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
-                        // mutation occured, which is null for the initial render
-                        bind.signals().get('FIRST_MUTATE') === null
-                      ),
-                    })
-                    .then(() =>
-                      dict({
-                        // We should use innerHTML when the template lacks a wrapper
-                        // element, outerHTML otherwise in order to include the wrapper
-                        // element itself.
-                        '__html':
-                          nonEmptyNodeCount === 1
-                            ? element./* OK */ outerHTML
-                            : element./* OK */ innerHTML,
-                      })
-                    );
-                });
-            });
-          },
-        })
-      );
+            const nonEmptyNodeCount = getTemplateNonEmptyNodeCount(
+              this.element.ownerDocument,
+              template
+            );
+            return templates
+              .renderTemplate(dev().assertElement(template), data)
+              .then((element) => {
+                return bind
+                  .rescan([element], [], {
+                    'fast': true,
+                    'update': getUpdateValue(
+                      bindingValue,
+                      // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
+                      // mutation occured, which is null for the initial render
+                      bind.signals().get('FIRST_MUTATE') === null
+                    ),
+                  })
+                  .then(() => ({
+                    // We should use innerHTML when the template lacks a wrapper
+                    // element, outerHTML otherwise in order to include the wrapper
+                    // element itself.
+                    '__html':
+                      nonEmptyNodeCount === 1
+                        ? element./* OK */ outerHTML
+                        : element./* OK */ innerHTML,
+                  }));
+              });
+          });
+        },
+      });
     });
   }
 
