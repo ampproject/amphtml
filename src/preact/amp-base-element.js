@@ -121,12 +121,12 @@ export class AmpPreactBaseElement extends PreactBaseElement {
  * Changes the inheritance hierarchy of X such that it now extends from Y.
  * If X previously inherited from Z, it now no longer does so.
  * Dangerous, use sparingly!
- * @param {*} X
- * @param {*} Y
+ * @param {*} clazz
+ * @param {*} superClazz
  * @return {*}
  */
-export function setSuperClass(X, Y) {
-  Object.setPrototypeOf(X, Y);
-  Object.setPrototypeOf(X.prototype, Y.prototype);
-  return X;
+export function setSuperClass(clazz, superClazz) {
+  Object.setPrototypeOf(clazz, superClazz);
+  Object.setPrototypeOf(clazz.prototype, superClazz.prototype);
+  return clazz;
 }
