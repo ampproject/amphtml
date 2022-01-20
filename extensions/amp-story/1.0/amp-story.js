@@ -1504,8 +1504,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Handles resize events and sets CSS variables.
-   * including new width and height
+   * Handles resize events and sets the store service's width and height.
    * @private
    */
   onViewportResize_() {
