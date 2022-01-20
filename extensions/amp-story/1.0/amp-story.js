@@ -357,7 +357,6 @@ export class AmpStory extends AMP.BaseElement {
     };
 
     const pageId = this.getInitialPageId_();
-
     if (pageId) {
       const page = this.element.querySelector(
         `amp-story-page#${escapeCssSelectorIdent(pageId)}`
