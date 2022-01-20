@@ -5,7 +5,7 @@ import {Messaging} from '@ampproject/viewer-messaging';
 import {devAssertElement} from '#core/assert';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
-import {isJsonScriptTag, tryFocus} from '#core/dom';
+import {isJsonScriptTag, toggleAttribute, tryFocus} from '#core/dom';
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {findIndex, toArray} from '#core/types/array';
 import {isEnumValue} from '#core/types/enum';
@@ -773,12 +773,14 @@ export class AmpStoryPlayer {
    * @private
    */
   checkButtonsDisabled_() {
-    this.prevButton_.toggleAttribute(
+    toggleAttribute(
+      this.prevButton_,
       'disabled',
       this.isIndexOutofBounds_(this.currentIdx_ - 1) &&
         !this.isCircularWrappingEnabled_
     );
-    this.nextButton_.toggleAttribute(
+    toggleAttribute(
+      this.nextButton_,
       'disabled',
       this.isIndexOutofBounds_(this.currentIdx_ + 1) &&
         !this.isCircularWrappingEnabled_
