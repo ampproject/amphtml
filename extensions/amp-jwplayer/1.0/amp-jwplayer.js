@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {isExperimentOn} from '#experiments';
 
 import {userAssert} from '#utils/log';
@@ -25,15 +23,13 @@ class AmpJwplayer extends BaseElement {
         const policyState = consentInfo[0];
         const policyInfo = consentInfo[1];
         const policyMetadata = consentInfo[2];
-        this.mutateProps(
-          dict({
-            'consentParams': {
-              'policyState': policyState,
-              'policyInfo': policyInfo,
-              'policyMetadata': policyMetadata,
-            },
-          })
-        );
+        this.mutateProps({
+          'consentParams': {
+            'policyState': policyState,
+            'policyInfo': policyInfo,
+            'policyMetadata': policyMetadata,
+          },
+        });
       });
     }
 

@@ -1,14 +1,14 @@
+import {expect} from 'chai';
+
 import {Services} from '#service';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryShare} from '../amp-story-share';
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-
-import {AmpStoryShare} from '../amp-story-share';
-import {expect} from 'chai';
 
 describes.realWin('amp-story-share', {amp: true}, (env) => {
   let ampStoryShare;

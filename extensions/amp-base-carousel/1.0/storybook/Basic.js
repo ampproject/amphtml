@@ -1,4 +1,5 @@
 import * as Preact from '#preact';
+
 import {BentoBaseCarousel} from '../component';
 
 export default {

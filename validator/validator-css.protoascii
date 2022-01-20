@@ -1364,6 +1364,7 @@ tags: {  # <style amp-noscript>, [AMP]
     "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
 
     css_spec: {
+      allow_important: true
       at_rule_spec: {
          name: 'media'
          media_query_spec: {

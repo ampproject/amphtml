@@ -1,5 +1,6 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {computeInMasterFrame, validateData, writeScript} from '#3p/3p';
+
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {parseJson} from '#core/types/object/json';
 
 /**

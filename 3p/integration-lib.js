@@ -1,5 +1,4 @@
 import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
 
@@ -314,7 +313,7 @@ export function parseFragment(fragment) {
     if (json.startsWith('{%22')) {
       json = decodeURIComponent(json);
     }
-    return /** @type {!JsonObject} */ (json ? parseJson(json) : dict());
+    return /** @type {!JsonObject} */ (json ? parseJson(json) : {});
   } catch (err) {
     return null;
   }

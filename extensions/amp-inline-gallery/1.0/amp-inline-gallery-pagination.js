@@ -1,5 +1,7 @@
 import {isExperimentOn} from '#experiments';
+
 import {userAssert} from '#utils/log';
+
 import {PaginationBaseElement} from './pagination-base-element';
 
 /** @const {string} */

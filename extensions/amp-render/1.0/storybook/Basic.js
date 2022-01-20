@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
-import {Render} from '../component';
 import {withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
+
+import {Render} from '../component';
 
 export default {
   title: 'Render',

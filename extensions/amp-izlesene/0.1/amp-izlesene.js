@@ -1,7 +1,6 @@
 import {getDataParamsFromAttributes} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -114,9 +113,9 @@ class AmpIzlesene extends AMP.BaseElement {
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/ postMessage(
-        dict({
+        {
           'command': 'pause',
-        }),
+        },
         '*'
       );
     }

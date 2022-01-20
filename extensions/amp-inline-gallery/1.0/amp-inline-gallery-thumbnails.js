@@ -1,5 +1,7 @@
 import {isExperimentOn} from '#experiments';
+
 import {userAssert} from '#utils/log';
+
 import {ThumbnailsBaseElement} from './thumbnails-base-element';
 
 /** @const {string} */

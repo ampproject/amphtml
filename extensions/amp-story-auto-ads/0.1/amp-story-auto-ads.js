@@ -1,7 +1,6 @@
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {toggleAttribute} from '#core/dom';
 import {setStyle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 import {
@@ -86,7 +85,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.visibleAdPage_ = null;
 
     /** @private {!JsonObject} */
-    this.config_ = dict();
+    this.config_ = {};
 
     /** @private {?Promise} */
     this.analytics_ = null;
@@ -233,10 +232,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const firstAdPageElement = adPage.getPageElement();
     // Setting distance manually to avoid flash of next page.
     firstAdPageElement.setAttribute('distance', '1');
-    const payload = dict({
+    const payload = {
       'targetPageId': 'i-amphtml-ad-page-1',
       'direction': 'next',
-    });
+    };
     const eventInit = {bubbles: true};
     dispatch(
       this.win,

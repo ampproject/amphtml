@@ -31,7 +31,6 @@ import {removeElement} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 import {px, setStyle, toggle} from '#core/dom/style';
 import {isObject} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -122,11 +121,11 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         }
         this.postMessage_(
           event.source,
-          dict({
+          {
             'sentinel': SENTINEL,
             'command': 'parent_frame_ready',
             'nonce': nonce,
-          }),
+          },
           event.origin
         );
         break;

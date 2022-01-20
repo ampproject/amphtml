@@ -1,4 +1,5 @@
 import posthtml from 'posthtml';
+
 import {
   ScriptNode,
   isJsonScript,

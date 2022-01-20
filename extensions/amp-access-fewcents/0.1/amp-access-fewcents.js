@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2022 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ AMP.extension(TAG, '0.1', function (AMP) {
         const source = accessService.getVendorSource('fewcents');
         const vendor = new AmpAccessFewcents(accessService, source);
         const adapter = /** @type {
-             !../../amp-access/0.1/amp-access-vendor.AccessVendorAdapter
-           } */ (source.getAdapter());
+              !../../amp-access/0.1/amp-access-vendor.AccessVendorAdapter
+            } */ (source.getAdapter());
         adapter.registerVendor(vendor);
         return vendor;
       });

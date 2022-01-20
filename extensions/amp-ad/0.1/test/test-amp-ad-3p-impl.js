@@ -1,18 +1,23 @@
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import '../amp-ad';
-import * as adCid from '../../../../src/ad-cid';
-import * as consent from '../../../../src/consent';
-import * as mode from '#core/mode';
 import * as fakeTimers from '@sinonjs/fake-timers';
-import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {AmpAdUIHandler} from '../amp-ad-ui';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {LayoutPriority_Enum} from '#core/dom/layout';
-import {Services} from '#service';
+
 import {adConfig} from '#ads/_config';
+
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {createElementWithAttributes} from '#core/dom';
+import {LayoutPriority_Enum} from '#core/dom/layout';
+import * as mode from '#core/mode';
+
+import {Services} from '#service';
+
 import {macroTask} from '#testing/helpers';
 import {stubServiceForDoc} from '#testing/helpers/service';
+
+import * as adCid from '../../../../src/ad-cid';
+import * as consent from '../../../../src/consent';
+import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {AmpAdUIHandler} from '../amp-ad-ui';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
