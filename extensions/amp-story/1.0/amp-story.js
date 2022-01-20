@@ -950,17 +950,15 @@ export class AmpStory extends AMP.BaseElement {
             'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
           );
 
-          if (!attachmentEl) {
-            return;
+          if (attachmentEl) {
+            whenUpgradedToCustomElement(attachmentEl).then(() => {
+              attachmentEl
+                .getImpl()
+                .then((attachment) =>
+                  attachment.open(false /** shouldAnimate */)
+                );
+            });
           }
-
-          whenUpgradedToCustomElement(attachmentEl).then(() => {
-            attachmentEl
-              .getImpl()
-              .then((attachment) =>
-                attachment.open(false /** shouldAnimate */)
-              );
-          });
         }
 
         if (
