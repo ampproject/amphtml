@@ -1,1 +1,19 @@
-# Don't add any validator rules yet until the extension is ready to use.
+tags: {  # amp-story-subscription
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-story-subscription"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-story-subscription>
+  html_format: AMP
+  tag_name: "AMP-STORY-SUBSCRIPTION"
+  requires_extension: "amp-story-subscription"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+}
