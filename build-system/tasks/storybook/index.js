@@ -28,23 +28,13 @@ const repoDir = path.join(__dirname, '../../..');
  * @param {StorybookEnv} env
  * @return {string}
  */
-const envConfigDir = (env) => path.join(__dirname, 'env', env);
+const envDir = (env) => path.join(__dirname, 'env', env);
 
 /**
  * @param {StorybookEnv} env
  */
-function launchEnv(env) {
-  if (env === 'amp') {
-    log(
-      yellow('AMP environment for storybook is temporarily disabled.\n') +
-        'See https://github.com/ampproject/storybook-addon-amp/issues/57'
-    );
-    return;
-  }
+function startStorybook(env) {
   const {'storybook_port': port = ENV_PORTS[env]} = argv;
-  const envDir = envConfigDir(env);
-
-  updateSubpackages(envDir);
 
   log(`Launching storybook for the ${cyan(env)} environment...`);
 
@@ -56,7 +46,7 @@ function launchEnv(env) {
       '--quiet',
       isCiBuild() ? '--ci' : '',
     ].join(' '),
-    {cwd: envDir, stdio: 'inherit'}
+    {cwd: envDir(env), stdio: 'inherit'}
   ).on('error', () => {
     throw new Error('Launch failed');
   });
@@ -65,34 +55,23 @@ function launchEnv(env) {
 /**
  * @param {StorybookEnv} env
  */
-function buildEnv(env) {
-  if (env === 'amp') {
-    log(
-      yellow('AMP environment for storybook is temporarily disabled.\n') +
-        'See https://github.com/ampproject/storybook-addon-amp/issues/57'
-    );
-    return;
-    if (env === 'amp' && isPullRequestBuild()) {
-      // Allows PR deploys to reference built binaries.
-      const parameters = {
-        ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
-      };
-      const previewFileContents = [
-        // eslint-disable-next-line local/no-forbidden-terms
-        '// DO NOT SUBMIT',
-        '// This preview.js file was generated for a specific PR build.',
-        // JSON.stringify here. prevents XSS and other types of garbling.
-        `export const parameters = (${JSON.stringify(parameters)});`,
-      ].join('\n');
-      writeFileSync(`${envConfigDir(env)}/preview.js`, previewFileContents);
-    }
-  }
-
-  const envDir = envConfigDir(env);
-
-  updateSubpackages(envDir);
-
+function buildStorybook(env) {
   log(`Building storybook for the ${cyan(env)} environment...`);
+
+  if (env === 'amp' && isPullRequestBuild()) {
+    // Allows PR deploys to reference built binaries.
+    const parameters = {
+      ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
+    };
+    const previewFileContents = [
+      // eslint-disable-next-line local/no-forbidden-terms
+      '// DO NOT SUBMIT',
+      '// This preview.js file was generated for a specific PR build.',
+      // JSON.stringify here. prevents XSS and other types of garbling.
+      `export const parameters = (${JSON.stringify(parameters)});`,
+    ].join('\n');
+    writeFileSync(`${envDir(env)}/preview.js`, previewFileContents);
+  }
 
   const result = exec(
     [
@@ -102,7 +81,7 @@ function buildEnv(env) {
       '--quiet',
       `--loglevel ${isCiBuild() ? 'warn' : 'info'}`,
     ].join(' '),
-    {cwd: envDir, stdio: 'inherit'}
+    {cwd: envDir(env), stdio: 'inherit'}
   );
   if (result.status != 0) {
     throw new Error('Build failed');
@@ -110,18 +89,44 @@ function buildEnv(env) {
 }
 
 /**
+ * @param {string} env
+ * @return {StorybookEnv[]}
+ */
+function parseEnvs(env) {
+  return /** @type {StorybookEnv[]} */ (
+    env.split(',').filter((env) => {
+      if (env === 'amp') {
+        log(
+          yellow('AMP environment for storybook is temporarily disabled.\n') +
+            'See https://github.com/ampproject/storybook-addon-amp/issues/57'
+        );
+        return false;
+      }
+      return env === 'amp' || env === 'preact' || env === 'react';
+    })
+  );
+}
+
+/**
  * @return {Promise<void>}
  */
 async function storybook() {
-  const {build = false, 'storybook_env': env = 'preact'} = argv;
-  const envs = env.split(',');
+  const {build = false, 'storybook_env': storybookEnv = 'preact'} = argv;
+  const envs = parseEnvs(storybookEnv);
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
   if (!build) {
     createCtrlcHandler('storybook');
   }
-  envs.map(build ? buildEnv : launchEnv);
+  for (const env of envs) {
+    updateSubpackages(envDir(env));
+    if (build) {
+      buildStorybook(env);
+    } else {
+      startStorybook(env);
+    }
+  }
 }
 
 module.exports = {
