@@ -44,5 +44,13 @@ describes.realWin(
       );
       expect(formattedNumber).to.equal('¥10,000');
     });
+
+    it('should throw if invalid currency code', () => {
+      expect(() => {
+        allowConsoleError(() => {
+          formatI18nNumber(localizationService, storyPageEl, '111', 10000);
+        });
+      }).to.throw();
+    });
   }
 );
