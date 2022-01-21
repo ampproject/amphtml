@@ -3,6 +3,8 @@ import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
@@ -16,7 +18,7 @@ import {CSS} from '../../../build/amp-accordion-1.0.css';
 const TAG = 'amp-accordion';
 
 /** @extends {PreactBaseElement<BentoAccordionDef.AccordionApi>} */
-class AmpAccordion extends BaseElement {
+class AmpAccordion extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     this.registerApiAction('toggle', (api, invocation) =>

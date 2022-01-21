@@ -3,6 +3,8 @@ import {select, withKnobs} from '@storybook/addon-knobs';
 import * as Preact from '#preact';
 import {useRef, useState} from '#preact';
 
+import '../component.jss';
+
 import {BentoSelector, BentoSelectorOption} from '../component';
 export default {
   title: 'Selector',
