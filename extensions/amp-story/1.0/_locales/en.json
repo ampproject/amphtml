@@ -220,7 +220,7 @@
     "description": "Label for the shopping CTA button."
   },
   "102": {
-    "string": "Also in this story",
+    "string": "Featured in this story",
     "description": "Label for a list of products that are featured in the story."
   }
 }
