@@ -2,6 +2,8 @@ import {isLayoutSizeDefined} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {dev, userAssert} from '#utils/log';
@@ -11,7 +13,10 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-date-countdown';
 
-class AmpDateCountdown extends BaseElement {
+class AmpDateCountdown extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

@@ -1,12 +1,13 @@
 import {BaseElement} from './base-element';
 __css_import__;
 import {isExperimentOn} from '#experiments';
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-__component_name_hyphenated__';
 
-class Amp__component_name_pascalcase__ extends BaseElement {
+class Amp__component_name_pascalcase__ extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     // __do_not_submit__: This is example code only.
