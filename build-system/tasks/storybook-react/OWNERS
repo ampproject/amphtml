@@ -5,10 +5,12 @@
   rules: [
     {
       owners: [
-        {name: 'chrisantaki'},
-        {name: 'jpettitt'},
-        {name: 'mmmicedcoffee'},
+        {name: 'ampproject/working-groups'},
+        {name: 'alanorozco', notify: true},
       ],
+    },
+    {
+      owners: [{name: 'ampproject/working-groups'}],
     },
   ],
 }

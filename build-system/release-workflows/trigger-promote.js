@@ -24,7 +24,7 @@ const cdnConfigurationParams = {
  * @return {Promise}
  */
 async function trigger_() {
-  const ampVersion = readFileSync('/tmp/workspace/AMP_VERSION', 'utf8')
+  const ampVersion = readFileSync('/tmp/restored-workspace/AMP_VERSION', 'utf8')
     .toString()
     .trim();
 

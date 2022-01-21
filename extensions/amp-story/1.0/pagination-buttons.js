@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
@@ -122,9 +123,8 @@ class PaginationButton {
         'i-amphtml-story-button-hidden',
         !isEnabled
       );
-      this.element
-        .querySelector('button')
-        ?.toggleAttribute('disabled', !isEnabled);
+      const button = this.element.querySelector('button');
+      toggleAttribute(button, 'disabled', !isEnabled);
     });
   }
 

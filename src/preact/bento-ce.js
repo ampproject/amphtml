@@ -33,8 +33,6 @@ let BaseElement;
 if (typeof AMP !== 'undefined' && AMP.BaseElement) {
   BaseElement = AMP.BaseElement;
 } else {
-  /** @type {typeof HTMLElement} */
-  let ExtendableHTMLElement;
   class CeBaseElement {
     /**
      * @param {Element} element
@@ -44,47 +42,6 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
 
       /** @type {Window} */
       this.win = getWin(element);
-    }
-
-    /**
-     * @param {typeof import('./base-element').PreactBaseElement} BaseElement
-     * @return {typeof HTMLElement}
-     */
-    static 'CustomElement'(BaseElement) {
-      if (!ExtendableHTMLElement) {
-        ExtendableHTMLElement = maybeWrapNativeSuper(HTMLElement);
-      }
-      return class CustomElement extends ExtendableHTMLElement {
-        /** */
-        constructor() {
-          super();
-
-          /**
-           * @type {import('./base-element').PreactBaseElement<T>}
-           * @template T
-           */
-          this.implementation = new BaseElement(
-            /** @type {AmpElement} */ (/** @type {?} */ (this))
-          );
-        }
-
-        /** */
-        connectedCallback() {
-          this.classList.add('i-amphtml-built');
-          this.implementation.mountCallback();
-          this.implementation.buildCallback();
-        }
-
-        /** */
-        disconnectedCallback() {
-          this.implementation.unmountCallback();
-        }
-
-        /** @return {Promise<*>} */
-        getApi() {
-          return this.implementation.getApi();
-        }
-      };
     }
 
     /**
@@ -115,3 +72,61 @@ if (typeof AMP !== 'undefined' && AMP.BaseElement) {
 }
 
 export {BaseElement};
+
+/** @type {typeof HTMLElement} */
+let ExtendableHTMLElement;
+/** @type {typeof globalThis} */
+let win;
+
+/**
+ * @param {typeof import('./base-element').PreactBaseElement} BaseElement
+ * @param {typeof globalThis} _win
+ * @return {typeof HTMLElement}
+ */
+function createBentoElementClass(BaseElement, _win = self) {
+  if (!ExtendableHTMLElement || win !== _win) {
+    win = _win;
+    ExtendableHTMLElement = maybeWrapNativeSuper(win.HTMLElement);
+  }
+
+  return class CustomElement extends ExtendableHTMLElement {
+    /** @override */
+    constructor() {
+      super();
+
+      /**
+       * @type {import('./base-element').PreactBaseElement<T>}
+       * @template T
+       */
+      this.implementation = new BaseElement(
+        /** @type {AmpElement} */ (/** @type {?} */ (this))
+      );
+    }
+
+    /** */
+    connectedCallback() {
+      this.classList.add('i-amphtml-built');
+      this.implementation.mountCallback();
+      this.implementation.buildCallback();
+    }
+
+    /** */
+    disconnectedCallback() {
+      this.implementation.unmountCallback();
+    }
+
+    /** @return {Promise<*>} */
+    getApi() {
+      return this.implementation.getApi();
+    }
+  };
+}
+
+/**
+ * @param {string} tag
+ * @param {typeof import('./base-element').PreactBaseElement} BaseElement
+ * @param {typeof globalThis} _win
+ */
+export function defineBentoElement(tag, BaseElement, _win = self) {
+  _win.customElements.define(tag, createBentoElementClass(BaseElement, _win));
+}
