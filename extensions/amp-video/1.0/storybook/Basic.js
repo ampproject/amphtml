@@ -10,6 +10,8 @@ import {
 } from '../../../amp-accordion/1.0/component';
 import {BentoVideo} from '../component';
 
+import '../component.jss';
+
 export default {
   title: 'Video',
   component: BentoVideo,
