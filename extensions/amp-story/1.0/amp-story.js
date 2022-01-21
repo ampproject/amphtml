@@ -1509,10 +1509,13 @@ export class AmpStory extends AMP.BaseElement {
    */
   onViewportResize_() {
     const page = this.element.querySelector(`amp-story-page[active]`);
-    this.storeService_.dispatch(
-      Action.SET_PAGE_SIZE,
-      ({height, width} = page./*OK*/ getLayoutBox())
-    );
+
+    const pageSize = {
+      'width': page./*OK*/ getLayoutBox().width,
+      'height': page./*OK*/ getLayoutBox().height,
+    };
+
+    this.storeService_.dispatch(Action.SET_PAGE_SIZE, pageSize);
   }
 
   /**
