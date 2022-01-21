@@ -37,11 +37,11 @@ class ReactBuildImportResolver {
       'ReactBuildImportResolverPlugin',
       (request, _, callback) => {
         const mappedRequestPath = mapToReactBuild(request.path);
-        if (!existsSync(mappedRequestPath)) {
+        if (mappedRequestPath === request.path) {
           callback();
           return;
         }
-        if (mappedRequestPath === request.path) {
+        if (!existsSync(mappedRequestPath)) {
           callback();
           return;
         }
