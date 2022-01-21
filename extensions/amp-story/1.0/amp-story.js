@@ -1511,8 +1511,8 @@ export class AmpStory extends AMP.BaseElement {
     const page = this.element.querySelector(`amp-story-page[active]`);
 
     const pageSize = {
-      'width': page./*OK*/ getLayoutBox().width,
-      'height': page./*OK*/ getLayoutBox().height,
+      'width': page?./*OK*/ getLayoutBox().width,
+      'height': page?./*OK*/ getLayoutBox().height,
     };
 
     this.storeService_.dispatch(Action.SET_PAGE_SIZE, pageSize);
