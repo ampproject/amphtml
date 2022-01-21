@@ -118,8 +118,8 @@ export class AmpPreactBaseElement extends PreactBaseElement {
 }
 
 /**
- * Changes the inheritance hierarchy of X such that it now extends from Y.
- * If X previously inherited from Z, it now no longer does so.
+ * Changes the inheritance hierarchy of clazz such that it now extends from superClazz.
+ * If clazz previously inherited from a previousSuperClazz, it now no longer does so.
  * Dangerous, use sparingly!
  * @param {*} clazz
  * @param {*} superClazz
