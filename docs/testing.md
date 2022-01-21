@@ -278,39 +278,47 @@ Stories can show configuration controls for manual testing of component paramete
 
 ### Launching Storybook
 
-You may launch Storybook by running:
+You may launch the `preact` Storybook by running:
 
 ```sh
 amp storybook
 ```
 
-We have separate Storybooks for different environments. You may specify the environment by providing `--storybook_env`:
+You may launch a specific environment by providing `--storybook_env`:
 
-```sh
-amp storybook --storybook_env=preact
-```
+-   **`preact`**
 
-The possible environments are:
-
--   **`preact`** (default)
+    ```sh
+    amp storybook --storybook_env=preact
+    ```
 
 -   **`react`**
 
+    ```sh
+    amp storybook --storybook_env=react
+    ```
+
+    > Launching the **`react`** environment requires component bundles. You should ensure that they're present in `extensions/**/dist` directories beforehand, by running `amp build --extensions=...` for all Bento components.
+
 -   **`amp`**
 
-> Launching the `amp` environment also initiates the build-and-serve task that's normally launched using the [`amp` command](#testing-commands). This provides an additional server on `localhost:8000`.
+    ```sh
+    amp storybook --storybook_env=amp
+    ```
 
-> The `react` environment uses component builds instead of their source. You should ensure that the bundles in `extensions/**/dist` directories have been created beforehand, by running `amp build --extensions=...` for all Bento components.
+    > Launching the **`amp`** environment also initiates the build-and-serve task that's normally launched using the [`amp` command](#testing-commands). This provides an additional server on `localhost:8000`.
 
 ### Writing test scenarios
 
 Test scenarios (stories) are located inside a component's directory. Their filename suffix determines whether they run on the `amp` environment, or on the `preact` and `react` environments:
 
--   **Preact** and **React** Stories end with `.js`:
+-   **`preact`** Stories end with `.js`:
 
     `extensions/amp-example/0.1/storybook/Basic.js`
 
--   **AMP** Stories end with `.amp.js`:
+-   **`react`** Stories use the same files as **`preact`**.
+
+-   **`amp`** Stories end with `.amp.js`:
 
     `extensions/amp-example/0.1/storybook/Basic.amp.js`
 
