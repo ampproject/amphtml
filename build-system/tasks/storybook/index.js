@@ -90,7 +90,10 @@ function buildEnv(env) {
 
   const envDir = envConfigDir(env);
 
+  updateSubpackages(envDir);
+
   log(`Building storybook for the ${cyan(env)} environment...`);
+
   const result = exec(
     [
       './node_modules/.bin/build-storybook',
