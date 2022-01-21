@@ -125,8 +125,10 @@ function BentoSidebarWithRef(
 
   return (
     <div
-      class={objstr({[classes.unmounted]: !mounted})}
-      style={{display: mounted ? 'contents' : 'none'}}
+      class={objstr({
+        [classes.mounted]: mounted,
+        [classes.unmounted]: !mounted,
+      })}
       part="wrapper"
     >
       <ContainWrapper

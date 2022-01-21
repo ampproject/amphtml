@@ -54,6 +54,14 @@ const backdropOverscrollBlocker = {
   width: '0 !important',
 };
 
+const unmounted = {
+  display: 'none',
+};
+
+const mounted = {
+  display: 'contents',
+};
+
 const JSS = {
   sidebar,
   defaultSidebarStyles,
@@ -62,6 +70,8 @@ const JSS = {
   backdrop,
   defaultBackdropStyles,
   backdropOverscrollBlocker,
+  mounted,
+  unmounted,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
