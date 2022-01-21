@@ -48,10 +48,16 @@ function BentoDatePickerWithRef(
   },
   ref
 ) {
+  /**
+   * @return {DatesList} blockedDates
+   */
   const blockedDates = useMemo(() => {
     return new DatesList(blocked);
   }, [blocked]);
 
+  /**
+   * @return {DatesList} highlightedDates
+   */
   const highlightedDates = useMemo(() => {
     return new DatesList(highlighted);
   }, [highlighted]);
@@ -92,6 +98,10 @@ function BentoDatePickerWithRef(
     ref,
   ]);
 
+  /**
+   * Date picker component
+   * @return {PreactDef.Renderable|void}
+   */
   const DatePicker = useMemo(() => {
     switch (type) {
       case DatePickerType.SINGLE: {

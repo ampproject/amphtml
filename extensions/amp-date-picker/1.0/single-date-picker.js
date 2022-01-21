@@ -31,8 +31,8 @@ import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
 import {useDatePickerState} from './use-date-picker-state';
 
 /**
- * @param {!DateInput.Props} props
- * @param {*} ref
+ * @param {!BentoDatePickerDef.SingleDatePickerProps} props
+ * @param {{current: ?BentoDatePickerDef.BentoDatePickerApi}} ref
  * @return {PreactDef.Renderable}
  */
 function SingleDatePickerWithRef(
@@ -73,11 +73,12 @@ function SingleDatePickerWithRef(
 
   useImperativeHandle(
     ref,
-    () => ({
-      clear,
-      today,
-      setDate: handleSetDate,
-    }),
+    () =>
+      /** @type {!BentoDatePickerDef.BentoDatePickerApi} */ ({
+        clear,
+        today,
+        setDate: handleSetDate,
+      }),
     [clear, today, handleSetDate]
   );
 

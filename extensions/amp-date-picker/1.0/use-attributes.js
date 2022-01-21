@@ -10,9 +10,10 @@ const DATE_FORMAT = 'cccc, LLLL d, yyyy';
 
 /**
  *
- * @return {{ isAvailable: boolean, label: string }} label
+ * @return {BentoDatePickerDef.AttributesContextFunctions} values
  */
 export function useAttributes() {
+  /** @const {?BentoDatePickerDef.AttributesContext} context */
   const context = useContext(AttributesContext);
   if (!context) {
     throw new Error('Must be wrapped in LabelContext.Provider component');
