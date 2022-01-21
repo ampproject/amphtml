@@ -292,11 +292,11 @@ amp storybook --storybook_env=preact
 
 The possible environments are:
 
--   **`preact`** (default) uses Story files whose names match `**/storybook/*.js` (without `.amp.js`).
+-   **`preact`** (default)
 
--   **`react`** uses the same Story files as `preact`, except the components render using React rather than Preact.
+-   **`react`**
 
--   **`amp`** uses story files whose names match `**/storybook/*.amp.js`.
+-   **`amp`**
 
 > Launching the `amp` environment also initiates the build-and-serve task that's normally launched using the [`amp` command](#testing-commands). This provides an additional server on `localhost:8000`.
 
@@ -304,9 +304,9 @@ The possible environments are:
 
 ### Writing test scenarios
 
-Test scenarios (stories) are located inside a component's directory. Their filename suffix determines whether they run on an `amp` or `preact` environment:
+Test scenarios (stories) are located inside a component's directory. Their filename suffix determines whether they run on the `amp` environment, or on the `preact` and `react` environments:
 
--   **Preact** Stories end with `.js`:
+-   **Preact** and **React** Stories end with `.js`:
 
     `extensions/amp-example/0.1/storybook/Basic.js`
 
