@@ -1,3 +1,11 @@
+import {Layout_Enum} from '#core/dom/layout';
+
+import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {userAssert} from '#utils/log';
+
 import {
   AmpInlineGalleryPagination,
   TAG as PAGINATION_TAG,
@@ -7,15 +15,16 @@ import {
   TAG as THUMBNAILS_TAG,
 } from './amp-inline-gallery-thumbnails';
 import {BaseElement} from './base-element';
-import {Layout_Enum} from '#core/dom/layout';
+
 import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
-import {isExperimentOn} from '#experiments';
-import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-inline-gallery';
 
-class AmpInlineGallery extends BaseElement {
+class AmpInlineGallery extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

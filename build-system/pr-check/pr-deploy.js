@@ -29,6 +29,7 @@ async function prBuildWorkflow() {
     )
   ) {
     timedExecOrDie('amp storybook --build');
+    timedExecOrDie('amp storybook-react --build');
     await processAndStoreBuildToArtifacts();
     await signalPrDeployUpload('success');
   } else {

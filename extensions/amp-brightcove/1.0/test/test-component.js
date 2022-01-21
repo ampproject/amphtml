@@ -1,7 +1,9 @@
-import * as Preact from '#preact';
-import {BentoBrightcove} from '../component';
 import {mount} from 'enzyme';
+
+import * as Preact from '#preact';
+
 import {parseUrlDeprecated} from '../../../../src/url';
+import {BentoBrightcove} from '../component';
 
 describes.sandboxed('Brightcove preact component v1.0', {}, () => {
   it('renders', async () => {

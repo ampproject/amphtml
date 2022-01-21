@@ -3,7 +3,7 @@
 
 #include <filesystem>
 
-#include "glog/logging.h"
+#include "cpp/htmlparser/logging.h"
 #include "cpp/engine/testing-utils.h"
 #include "cpp/engine/error-formatter.h"
 #include "absl/strings/substitute.h"

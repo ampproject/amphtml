@@ -1,25 +1,30 @@
+import {isGoogleAdsA4AValidEnvironment} from '#ads/google/a4a/utils';
+
 import {CONSTANTS, MessageType_Enum} from '#core/3p-frame-messaging';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
-import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
+import {removeElement} from '#core/dom';
+import {getHtml} from '#core/dom/get-html';
+import {applyFillContent} from '#core/dom/layout';
+import {setStyle} from '#core/dom/style';
+import {throttle} from '#core/types/function';
+
+import {isExperimentOn} from '#experiments';
+
 import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
+import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
+
+import {reportErrorToAnalytics} from '../../../src/error-reporting';
 import {
   SubscriptionApi,
   listenFor,
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {applyFillContent} from '#core/dom/layout';
-import {dev, devAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {getData} from '#utils/event-helper';
-import {getHtml} from '#core/dom/get-html';
-import {isExperimentOn} from '#experiments';
-import {isGoogleAdsA4AValidEnvironment} from '#ads/google/a4a/utils';
-import {removeElement} from '#core/dom';
-import {reportErrorToAnalytics} from '../../../src/error-reporting';
-import {setStyle} from '#core/dom/style';
-import {throttle} from '#core/types/function';
 
 const VISIBILITY_TIMEOUT = 10000;
 
@@ -342,7 +347,7 @@ export class AmpAdXOriginIframeHandler {
           const payload = info[CONSTANTS.payloadFieldName];
 
           getter(payload).then((content) => {
-            const result = dict();
+            const result = {};
             result[CONSTANTS.messageIdFieldName] = messageId;
             result[CONSTANTS.contentFieldName] = content;
             postMessageToWindows(
@@ -500,11 +505,11 @@ export class AmpAdXOriginIframeHandler {
       this.iframe,
       [{win: source, origin}],
       success ? 'embed-size-changed' : 'embed-size-denied',
-      dict({
+      {
         'id': id,
         'requestedWidth': requestedWidth,
         'requestedHeight': requestedHeight,
-      }),
+      },
       true
     );
   }
@@ -517,13 +522,10 @@ export class AmpAdXOriginIframeHandler {
     if (!this.embedStateApi_) {
       return;
     }
-    this.embedStateApi_.send(
-      'embed-state',
-      dict({
-        'inViewport': inViewport,
-        'pageHidden': !this.baseInstance_.getAmpDoc().isVisible(),
-      })
-    );
+    this.embedStateApi_.send('embed-state', {
+      'inViewport': inViewport,
+      'pageHidden': !this.baseInstance_.getAmpDoc().isVisible(),
+    });
   }
 
   /**
@@ -540,10 +542,10 @@ export class AmpAdXOriginIframeHandler {
           'element clientRect should intersects with root clientRect'
         );
         const viewport = this.viewport_.getRect();
-        return dict({
+        return {
           'targetRect': position,
           'viewportRect': viewport,
-        });
+        };
       });
   }
 

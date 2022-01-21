@@ -205,8 +205,8 @@ cc_library(
     copts = ["-std=c++17"],
     deps = [
         ":validator_pb",
-        "@com_github_glog//:glog",
         "@com_googlesource_code_re2//:re2",
+        "//cpp/htmlparser:logging",
         "//cpp/htmlparser:strings",
         "//:validator_cc_proto",
     ],

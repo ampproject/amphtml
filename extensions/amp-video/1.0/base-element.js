@@ -1,33 +1,36 @@
-import {CSS} from './component.jss';
-import {CSS as CSS_AUTOPLAY} from './autoplay.jss';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {CSS as CSS_AUTOPLAY} from './autoplay.jss';
 import {BentoVideo} from './component';
+import {CSS} from './component.jss';
 
-export class BaseElement extends PreactBaseElement {}
-
-/** @override */
-BaseElement['Component'] = BentoVideo;
-
-/** @override */
-BaseElement['loadable'] = true;
+export class BentoVideoBaseElement extends PreactBaseElement {}
+// export with alias for bento builds
+export {BentoVideoBaseElement as BaseElement};
 
 /** @override */
-BaseElement['layoutSizeDefined'] = true;
+BentoVideoBaseElement['Component'] = BentoVideo;
+
+/** @override */
+BentoVideoBaseElement['loadable'] = true;
+
+/** @override */
+BentoVideoBaseElement['layoutSizeDefined'] = true;
 
 /**
  * Defaults to `{component: 'video'}` from `BentoVideo` component.
  * Subclasses may set:
  * ```
- *   AmpMyPlayer['staticProps'] = dict({
+ *   AmpMyPlayer['staticProps'] = {
  *     'component': MyPlayerComponent,
- *   });
+ *   };
  * ```
  * @override
  */
-BaseElement['staticProps'];
+BentoVideoBaseElement['staticProps'];
 
 /** @override */
-BaseElement['props'] = {
+BentoVideoBaseElement['props'] = {
   'album': {attr: 'album'},
   'alt': {attr: 'alt'},
   'artist': {attr: 'artist'},
@@ -59,7 +62,7 @@ BaseElement['props'] = {
 };
 
 /** @override */
-BaseElement['shadowCss'] = CSS + CSS_AUTOPLAY;
+BentoVideoBaseElement['shadowCss'] = CSS + CSS_AUTOPLAY;
 
 /** @override */
-BaseElement['usesShadowDom'] = true;
+BentoVideoBaseElement['usesShadowDom'] = true;

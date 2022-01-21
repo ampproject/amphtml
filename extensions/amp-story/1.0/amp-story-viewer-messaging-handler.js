@@ -1,11 +1,11 @@
+import {dev, user} from '#utils/log';
+
 import {
   Action,
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
-import {dev, user} from '#utils/log';
-import {dict} from '#core/types/object';
 
 /** @type {string} */
 const TAG = 'amp-story-viewer-messaging-handler';
@@ -155,10 +155,10 @@ export class AmpStoryViewerMessagingHandler {
     }
 
     this.storeService_.subscribe(config.property, (value) => {
-      this.viewer_.sendMessage(
-        'documentStateUpdate',
-        dict({'state': state, 'value': value})
-      );
+      this.viewer_.sendMessage('documentStateUpdate', {
+        'state': state,
+        'value': value,
+      });
     });
   }
 

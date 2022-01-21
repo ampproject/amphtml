@@ -36,11 +36,12 @@ module.exports = {
      */
     function* removeFromArray(fixer, node) {
       const {text} = context.getSourceCode();
-      let {start} = node;
+      let [start] = node.range;
+      const [, end] = node.range;
       while (/\s/.test(text[start - 1])) {
         start--;
       }
-      yield fixer.removeRange([start, node.end]);
+      yield fixer.removeRange([start, end]);
 
       const after = context.getTokenAfter(node);
       if (after.type === 'Punctuator' && after.value === ',') {
@@ -51,7 +52,7 @@ module.exports = {
       const [nextComment] = context.getCommentsAfter(node);
       if (
         nextComment &&
-        text.substr(node.end, nextComment.start - node.end).indexOf('\n') < 0
+        text.substr(end, nextComment.start - end).indexOf('\n') < 0
       ) {
         yield fixer.remove(nextComment);
       }

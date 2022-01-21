@@ -4,7 +4,6 @@ import {
   moveLayoutRect,
   rectIntersection,
 } from '#core/dom/layout/rect';
-import {dict} from '#core/types/object';
 
 import {SubscriptionApi} from '../iframe-helper';
 
@@ -84,10 +83,9 @@ export class IntersectionObserver3pHost {
 
     this.intersectionObserver_ = new IntersectionObserver(
       (entries) => {
-        this.subscriptionApi_.send(
-          MessageType_Enum.INTERSECTION,
-          dict({'changes': entries.map(cloneEntryForCrossOrigin)})
-        );
+        this.subscriptionApi_.send(MessageType_Enum.INTERSECTION, {
+          'changes': entries.map(cloneEntryForCrossOrigin),
+        });
       },
       {threshold: DEFAULT_THRESHOLD}
     );

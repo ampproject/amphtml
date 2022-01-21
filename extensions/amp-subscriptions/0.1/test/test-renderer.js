@@ -1,9 +1,11 @@
-import {Action} from '../analytics';
-import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
-import {Renderer} from '../renderer';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+
+import {CSS} from '../../../../build/amp-subscriptions-0.1.css';
 import {installStylesForDoc} from '../../../../src/style-installer';
+import {Action} from '../analytics';
+import {Renderer} from '../renderer';
 
 function isDisplayed(el) {
   const win = el.ownerDocument.defaultView;

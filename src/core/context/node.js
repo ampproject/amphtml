@@ -238,7 +238,7 @@ export class ContextNode {
 
     /**
      * @package
-     * @type {!Values}
+     * @type {Values}
      */
     this.values = new Values(this);
 
@@ -267,7 +267,7 @@ export class ContextNode {
     // Shadow root: track slot changes.
     if (node.nodeType == FRAGMENT_NODE) {
       node.addEventListener('slotchange', (e) => {
-        const slot = /** @type {!HTMLSlotElement} */ (e.target);
+        const slot = /** @type {HTMLSlotElement} */ (e.target);
         // Rediscover newly assigned nodes.
         slot.assignedNodes().forEach(discoverContained);
         // Rediscover unassigned nodes.
@@ -308,7 +308,7 @@ export class ContextNode {
    */
   setParent(parent) {
     const parentContext = /** @type {*} */ (parent)?.nodeType
-      ? ContextNode.get(/** @type {!Node} */ (parent))
+      ? ContextNode.get(/** @type {Node} */ (parent))
       : /** @type {?ContextNode<?>} */ (parent);
     this.updateTree_(parentContext, /* parentOverridden */ parent != null);
   }

@@ -1,9 +1,10 @@
-import {ConsentPolicyManager} from './consent-policy-manager'; // eslint-disable-line no-unused-vars
-import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
-import {hasOwn, map} from '#core/types/object';
 import {isEnumValue, isObject} from '#core/types';
+import {hasOwn, map} from '#core/types/object';
 
 import {user} from '#utils/log';
+
+import {TCF_POST_MESSAGE_API_COMMANDS} from './consent-info';
+import {ConsentPolicyManager} from './consent-policy-manager'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 /**
  * Event status is only defined for addEventListener command.
