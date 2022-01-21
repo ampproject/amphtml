@@ -1,9 +1,12 @@
-const {webpackConfigNoChunkTilde} = require('../env-utils');
+const {webpackConfigNoChunkTilde} = require('../../env-utils');
+
+const rootDir = '../../../../..';
 
 module.exports = {
+  staticDirs: [rootDir],
   stories: [
-    '../../../../src/**/storybook/!(*.amp).js',
-    '../../../../extensions/**/*.*/storybook/!(*.amp).js',
+    `${rootDir}/src/**/storybook/!(*.amp).js`,
+    `${rootDir}/extensions/**/*.*/storybook/!(*.amp).js`,
   ],
   addons: [
     '@storybook/addon-a11y',

@@ -12,6 +12,9 @@ const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {writeFileSync} = require('fs-extra');
 const {yellow} = require('kleur/colors');
+const {updateSubpackages} = require('../../common/update-packages');
+
+/** @typedef {'amp'|'preact'|'react'} StorybookEnv */
 
 const ENV_PORTS = {
   amp: 9001,
@@ -21,13 +24,11 @@ const ENV_PORTS = {
 
 const repoDir = path.join(__dirname, '../../..');
 
-/** @typedef {'amp'|'preact'|'react'} StorybookEnv */
-
 /**
  * @param {StorybookEnv} env
  * @return {string}
  */
-const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
+const envConfigDir = (env) => path.join(__dirname, 'env', env);
 
 /**
  * @param {StorybookEnv} env
@@ -40,18 +41,22 @@ function launchEnv(env) {
     );
     return;
   }
-  log(`Launching storybook for the ${cyan(env)} environment...`);
   const {'storybook_port': port = ENV_PORTS[env]} = argv;
+  const envDir = envConfigDir(env);
+
+  updateSubpackages(envDir);
+
+  log(`Launching storybook for the ${cyan(env)} environment...`);
+
   execScriptAsync(
     [
-      './node_modules/.bin/start-storybook',
-      `--config-dir ${envConfigDir(env)}`,
-      `--static-dir ${repoDir}/`,
+      `./node_modules/.bin/start-storybook`,
+      `--config-dir .`,
       `--port ${port}`,
       '--quiet',
       isCiBuild() ? '--ci' : '',
     ].join(' '),
-    {cwd: __dirname, stdio: 'inherit'}
+    {cwd: envDir, stdio: 'inherit'}
   ).on('error', () => {
     throw new Error('Launch failed');
   });
@@ -83,18 +88,18 @@ function buildEnv(env) {
     }
   }
 
-  const configDir = envConfigDir(env);
+  const envDir = envConfigDir(env);
 
   log(`Building storybook for the ${cyan(env)} environment...`);
   const result = exec(
     [
       './node_modules/.bin/build-storybook',
-      `--config-dir ${configDir}`,
+      `--config-dir .`,
       `--output-dir ${repoDir}/examples/storybook/${env}`,
       '--quiet',
       `--loglevel ${isCiBuild() ? 'warn' : 'info'}`,
     ].join(' '),
-    {cwd: __dirname, stdio: 'inherit'}
+    {cwd: envDir, stdio: 'inherit'}
   );
   if (result.status != 0) {
     throw new Error('Build failed');
@@ -105,7 +110,7 @@ function buildEnv(env) {
  * @return {Promise<void>}
  */
 async function storybook() {
-  const {build = false, 'storybook_env': env = 'amp,preact'} = argv;
+  const {build = false, 'storybook_env': env = 'preact'} = argv;
   const envs = env.split(',');
   if (!build && envs.includes('amp')) {
     await runAmpDevBuildServer();
@@ -126,6 +131,6 @@ storybook.description =
 storybook.flags = {
   'build': 'Build a static web application (see https://storybook.js.org/docs)',
   'storybook_env':
-    "Environment(s) to run Storybook (either 'amp', 'preact' or a list as 'amp,preact')",
+    "Environment(s) to run Storybook. Either 'amp', 'preact' or 'react', or a list as 'amp,preact'. Defaults to 'preact'",
   'storybook_port': 'Port from which to run the Storybook dashboard',
 };

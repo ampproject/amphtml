@@ -61,7 +61,6 @@ createTask('release');
 createTask('serve');
 createTask('server-tests', 'serverTests');
 createTask('storybook');
-createTask('storybook-react');
 createTask('sweep-experiments', 'sweepExperiments');
 createTask('test-report-upload', 'testReportUpload');
 createTask('unit');

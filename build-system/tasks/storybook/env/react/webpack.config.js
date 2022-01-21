@@ -1,0 +1,110 @@
+const path = require('path');
+const {BUILD_CONSTANTS} = require('../../../../compile/build-constants');
+const {DefinePlugin} = require('webpack');
+const {
+  getRelativeAliasMap,
+} = require('../../../../babel-config/import-resolver');
+const {webpackConfigNoChunkTilde} = require('../../../storybook/env-utils');
+const {existsSync} = require('fs-extra');
+
+const rootDir = path.join(__dirname, '../../../../..');
+
+/**
+ * @param {string} requestPath
+ * @return {string}
+ */
+function mapToReactBuild(requestPath) {
+  // Only handle extension paths because they have React build output.
+  if (!requestPath.includes('extensions/')) {
+    return requestPath;
+  }
+  return requestPath
+    .replace(/\/component\.jss$/, '/dist/styles.css')
+    .replace(/\/component\.js$/, '/dist/component-react.max.js');
+}
+
+/**
+ * Webpack ResolverPlugin that maps relative imports in source to their React
+ * bundle.
+ * import '../component.js' to import '../dist/component-react.max.js'
+ */
+class ReactBuildImportResolver {
+  /**
+   * @param {*} resolver
+   */
+  apply(resolver) {
+    resolver.hooks.file.tapAsync(
+      'ReactBuildImportResolverPlugin',
+      (request, _, callback) => {
+        const mappedRequestPath = mapToReactBuild(request.path);
+        if (!existsSync(mappedRequestPath)) {
+          callback();
+          return;
+        }
+        if (mappedRequestPath === request.path) {
+          callback();
+          return;
+        }
+        callback(null, {
+          ...request,
+          path: mappedRequestPath,
+          request: mappedRequestPath,
+        });
+      }
+    );
+  }
+}
+
+module.exports = ({config}) => {
+  config.resolveLoader = {
+    modules: [
+      path.join(__dirname, 'node_modules'),
+      path.join(rootDir, 'node_modules'),
+    ],
+  };
+  config.resolve = {
+    modules: [
+      path.join(__dirname, 'node_modules'),
+      path.join(rootDir, 'node_modules'),
+    ],
+    plugins: [new ReactBuildImportResolver()],
+    alias: {
+      ...getRelativeAliasMap(rootDir),
+      // Alias preact to react
+      'preact/dom': 'react-dom',
+      'preact/hooks': 'react',
+      'preact/compat': 'react',
+      'preact': 'react',
+    },
+  };
+  config.module = {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/,
+        query: {
+          presets: [
+            [
+              '@babel/preset-env',
+              {
+                bugfixes: true,
+                targets: {'browsers': ['Last 2 versions']},
+              },
+            ],
+            ['@babel/preset-react', {'runtime': 'automatic'}],
+          ],
+        },
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
+    ],
+  };
+  // Replaced by minify-replace (babel) in the usual build pipeline
+  // build-system/babel-config/helpers.js#getReplacePlugin
+  config.plugins.push(new DefinePlugin(BUILD_CONSTANTS));
+
+  return webpackConfigNoChunkTilde(config);
+};
