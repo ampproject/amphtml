@@ -1,3 +1,4 @@
+import {expect} from 'chai';
 import {format} from 'date-fns';
 import {mount} from 'enzyme';
 import {RRule} from 'rrule';
@@ -7,6 +8,7 @@ import * as Preact from '#preact';
 import {
   DATE_FORMAT,
   getDateButton,
+  getSelectedDate,
   isSelectedDate,
   isSelectedEndDate,
   isSelectedStartDate,
@@ -30,7 +32,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   it('should render', () => {
     const wrapper = mount(<DatePicker />);
 
-    const component = wrapper.find(BentoDatePicker.name);
+    const component = wrapper.find(BentoDatePicker);
     expect(component).to.have.lengthOf(1);
   });
 
@@ -959,6 +961,34 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(wrapper.find('[aria-label="Calendar"]').last().text()).to.contain(
         'Jan 22'
       );
+    });
+  });
+
+  describe('imperative api', () => {
+    let ref;
+    let wrapper;
+
+    describe('single date picker', () => {
+      beforeEach(() => {
+        ref = Preact.createRef();
+        wrapper = mount(
+          <BentoDatePicker
+            ref={ref}
+            initialVisibleMonth={new Date(2022, 0)}
+            inputSelector="[name=date]"
+          >
+            <input name="date" value="2022-01-01" />
+          </BentoDatePicker>
+        );
+      });
+
+      it('can clear the date for a single date picker', () => {
+        ref.current.clear();
+        wrapper.update();
+
+        expect(wrapper.exists('[data-date="2022-01-01"]')).to.be.false;
+        expect(wrapper.find('input').prop('value')).to.equal('');
+      });
     });
   });
 });

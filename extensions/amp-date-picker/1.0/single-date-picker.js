@@ -8,11 +8,12 @@ import {
   cloneElement,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
 } from '#preact';
-import {Children} from '#preact/compat';
+import {Children, forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
 import {BaseDatePicker} from './base-date-picker';
@@ -29,18 +30,13 @@ import {useDatePickerState} from './use-date-picker-state';
 
 /**
  * @param {!DateInput.Props} props
+ * @param {*} ref
  * @return {PreactDef.Renderable}
  */
-export function SingleDatePicker({
-  blockedDates,
-  children,
-  format,
-  id,
-  inputSelector,
-  mode,
-  onError,
-  ...rest
-}) {
+function SingleDatePickerWithRef(
+  {blockedDates, children, format, id, inputSelector, mode, onError, ...rest},
+  ref
+) {
   const inputElementRef = useRef();
   const calendarRef = useRef();
   const [inputProps, setInputProps] = useState({});
@@ -59,6 +55,18 @@ export function SingleDatePicker({
       }));
     },
     [format]
+  );
+
+  const clear = useCallback(() => {
+    handleSetDate(undefined);
+  }, [handleSetDate]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      clear,
+    }),
+    [clear]
   );
 
   /**
@@ -189,3 +197,6 @@ export function SingleDatePicker({
     </ContainWrapper>
   );
 }
+
+const SingleDatePicker = forwardRef(SingleDatePickerWithRef);
+export {SingleDatePicker};

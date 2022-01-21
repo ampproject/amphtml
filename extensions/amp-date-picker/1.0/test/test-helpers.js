@@ -33,3 +33,7 @@ export function selectDate(wrapper, date, formatDate) {
 
   wrapper.update();
 }
+
+export function getSelectedDate(wrapper) {
+  return wrapper.find('[aria-label="Calendar"]').last().prop('data-date');
+}

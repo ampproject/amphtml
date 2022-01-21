@@ -1,5 +1,6 @@
 import * as Preact from '#preact';
 import {useMemo} from '#preact';
+import {forwardRef} from '#preact/compat';
 
 import './amp-date-picker.css';
 import {
@@ -21,28 +22,32 @@ import {AttributesContext} from './use-attributes';
 
 /**
  * @param {!BentoDatePicker.Props} props
+ * @param {*} ref
  * @return {PreactDef.Renderable}
  */
-export function BentoDatePicker({
-  children,
-  type = DatePickerType.SINGLE,
-  mode = DatePickerMode.STATIC,
-  inputSelector = DEFAULT_INPUT_SELECTOR,
-  startInputSelector = DEFAULT_START_INPUT_SELECTOR,
-  endInputSelector = DEFAULT_END_INPUT_SELECTOR,
-  format = ISO_8601,
-  id,
-  onError = DEFAULT_ON_ERROR,
-  initialVisibleMonth,
-  blocked,
-  allowBlockedRanges,
-  allowBlockedEndDate,
-  highlighted,
-  min = getCurrentDate(),
-  max,
-  monthFormat = DEFAULT_MONTH_FORMAT,
-  weekDayFormat = DEFAULT_WEEK_DAY_FORMAT,
-}) {
+function BentoDatePickerWithRef(
+  {
+    children,
+    type = DatePickerType.SINGLE,
+    mode = DatePickerMode.STATIC,
+    inputSelector = DEFAULT_INPUT_SELECTOR,
+    startInputSelector = DEFAULT_START_INPUT_SELECTOR,
+    endInputSelector = DEFAULT_END_INPUT_SELECTOR,
+    format = ISO_8601,
+    id,
+    onError = DEFAULT_ON_ERROR,
+    initialVisibleMonth,
+    blocked,
+    allowBlockedRanges,
+    allowBlockedEndDate,
+    highlighted,
+    min = getCurrentDate(),
+    max,
+    monthFormat = DEFAULT_MONTH_FORMAT,
+    weekDayFormat = DEFAULT_WEEK_DAY_FORMAT,
+  },
+  ref
+) {
   const blockedDates = useMemo(() => {
     return new DatesList(blocked);
   }, [blocked]);
@@ -67,6 +72,7 @@ export function BentoDatePicker({
       endInputSelector,
       allowBlockedEndDate,
       allowBlockedRanges,
+      ref,
     };
   }, [
     blockedDates,
@@ -83,6 +89,7 @@ export function BentoDatePicker({
     children,
     monthFormat,
     weekDayFormat,
+    ref,
   ]);
 
   const DatePicker = useMemo(() => {
@@ -107,3 +114,7 @@ export function BentoDatePicker({
     </AttributesContext.Provider>
   );
 }
+
+const BentoDatePicker = forwardRef(BentoDatePickerWithRef);
+BentoDatePicker.displayName = 'DatePicker';
+export {BentoDatePicker};

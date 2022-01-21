@@ -25,7 +25,6 @@ import {
   DatePickerState,
   FORM_INPUT_SELECTOR,
   TAG,
-  noop,
 } from './constants';
 import {getFormattedDate, parseDate} from './date-helpers';
 import {useDatePickerState} from './use-date-picker-state';
