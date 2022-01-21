@@ -276,25 +276,31 @@ Stories can show configuration controls for manual testing of component paramete
 
 > 📖 Storybook documentation: [What's a Story?](https://storybook.js.org/docs/react/get-started/whats-a-story)
 
-This repository has two separate Storybooks for different evironments: **`amp`** and **`preact`**. They list either AMP elements or Preact components respectively.
-
 ### Launching Storybook
 
-You may launch Storybooks for both environments by running:
+You may launch Storybook by running:
 
 ```sh
 amp storybook
 ```
 
-This command launches a separate browser tab for each Storybook, on `localhost:9001` and `:9002`.
-
-You may launch a single environment by specifying `--storybook_env`:
+We have separate Storybooks for different environments. You may specify the environment by providing `--storybook_env`:
 
 ```sh
 amp storybook --storybook_env=preact
 ```
 
+The possible environments are:
+
+-   **`preact`** (default) uses Story files whose names match `**/storybook/*.js` (without `.amp.js`).
+
+-   **`react`** uses the same Story files as `preact`, except the components render using React rather than Preact.
+
+-   **`amp`** uses story files whose names match `**/storybook/*.amp.js`.
+
 > Launching the `amp` environment also initiates the build-and-serve task that's normally launched using the [`amp` command](#testing-commands). This provides an additional server on `localhost:8000`.
+
+> The `react` environment uses component builds instead of their source. You should ensure that the bundles in `extensions/**/dist` directories have been created beforehand, by running `amp build --extensions=...` for all Bento components.
 
 ### Writing test scenarios
 
