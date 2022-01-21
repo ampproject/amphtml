@@ -56,14 +56,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // Do not build experience if no shopping tags are on page.
-    if (this.shoppingTags_.length === 0) {
-      user().error(
-        TAG,
-        'Page must contain at least one amp-story-shopping-tag.'
-      );
-      return;
-    }
     loadFonts(this.win, FONTS_TO_LOAD);
     this.attachmentEl_ = (
       <amp-story-page-attachment
@@ -85,10 +77,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // Do not set listeners if no shopping tags are on page.
-    if (this.shoppingTags_.length === 0) {
-      return;
-    }
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
       (isOpen) => this.onPageAttachmentStateUpdate_(isOpen)
