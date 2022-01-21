@@ -211,7 +211,7 @@ export {VideoIframeInternal};
 
 /**
  * VideoWrapper using an <iframe> for implementation.
- * Usable on the AMP layer through VideoBaseElement.
+ * Usable on the AMP layer through AmpVideoBaseElement.
  * @param {VideoIframeDef.Props} props
  * @param {{current: (?T)}} ref
  * @return {PreactDef.Renderable}
@@ -223,7 +223,7 @@ function VideoIframeWithRef(props, ref) {
 
 /**
  * VideoWrapper using an <iframe> for implementation.
- * Usable on the AMP layer through VideoBaseElement.
+ * Usable on the AMP layer through AmpVideoBaseElement.
  * @param {VideoIframeDef.Props} props
  * @return {PreactDef.Renderable}=
  */

@@ -1,6 +1,10 @@
 import {isExperimentOn} from '#experiments';
 
+import {setSuperClass} from '#preact/amp-base-element';
+
 import {userAssert} from '#utils/log';
+
+import {AmpVideoBaseElement} from 'extensions/amp-video/1.0/video-base-element';
 
 import {BaseElement} from './base-element';
 
@@ -9,7 +13,7 @@ import {CSS} from '../../../build/amp-dailymotion-1.0.css';
 /** @const {string} */
 const TAG = 'amp-dailymotion';
 
-class AmpDailymotion extends BaseElement {
+class AmpDailymotion extends setSuperClass(BaseElement, AmpVideoBaseElement) {
   /** @override */
   init() {
     super.init();

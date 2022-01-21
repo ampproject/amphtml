@@ -1,5 +1,7 @@
 import {isExperimentOn} from '#experiments';
 
+import {setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
@@ -12,11 +14,12 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
+import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 /** @const {string} */
 const TAG = 'amp-brightcove';
 
-class AmpBrightcove extends BaseElement {
+class AmpBrightcove extends setSuperClass(BaseElement, AmpVideoBaseElement) {
   /** @override @nocollapse */
   static getPreconnects() {
     return ['https://players.brightcove.net'];

@@ -16,18 +16,21 @@ const {yellow} = require('kleur/colors');
 const ENV_PORTS = {
   amp: 9001,
   preact: 9002,
+  react: 9003,
 };
 
 const repoDir = path.join(__dirname, '../../..');
 
+/** @typedef {'amp'|'preact'|'react'} StorybookEnv */
+
 /**
- * @param {string} env 'amp' or 'preact'
+ * @param {StorybookEnv} env
  * @return {string}
  */
 const envConfigDir = (env) => path.join(__dirname, `${env}-env`);
 
 /**
- * @param {string} env 'amp' or 'preact'
+ * @param {StorybookEnv} env
  */
 function launchEnv(env) {
   if (env === 'amp') {
@@ -55,7 +58,7 @@ function launchEnv(env) {
 }
 
 /**
- * @param {string} env 'amp' or 'preact'
+ * @param {StorybookEnv} env
  */
 function buildEnv(env) {
   if (env === 'amp') {
@@ -64,23 +67,24 @@ function buildEnv(env) {
         'See https://github.com/ampproject/storybook-addon-amp/issues/57'
     );
     return;
+    if (env === 'amp' && isPullRequestBuild()) {
+      // Allows PR deploys to reference built binaries.
+      const parameters = {
+        ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
+      };
+      const previewFileContents = [
+        // eslint-disable-next-line local/no-forbidden-terms
+        '// DO NOT SUBMIT',
+        '// This preview.js file was generated for a specific PR build.',
+        // JSON.stringify here. prevents XSS and other types of garbling.
+        `export const parameters = (${JSON.stringify(parameters)});`,
+      ].join('\n');
+      writeFileSync(`${envConfigDir(env)}/preview.js`, previewFileContents);
+    }
   }
 
   const configDir = envConfigDir(env);
 
-  if (env === 'amp' && isPullRequestBuild()) {
-    // Allows PR deploys to reference built binaries.
-    writeFileSync(
-      `${configDir}/preview.js`,
-      // If you change this JS template, make sure to JSON.stringify every
-      // dynamic value. This prevents XSS and other types of garbling.
-      `// DO NOT${' '}SUBMIT.
-       // This preview.js file was generated for a specific PR build.
-       export const parameters = (${JSON.stringify({
-         ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
-       })});`
-    );
-  }
   log(`Building storybook for the ${cyan(env)} environment...`);
   const result = exec(
     [

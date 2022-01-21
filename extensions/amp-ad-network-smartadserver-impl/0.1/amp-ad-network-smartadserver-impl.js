@@ -26,7 +26,7 @@ import {dev} from '#utils/log';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getConsentPolicyInfo} from '../../../src/consent';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-smartadserver-impl';
@@ -102,6 +102,13 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
         );
       });
     });
+  }
+
+  /** @override */
+  getNonAmpCreativeRenderingMethod(headerValue) {
+    return Services.platformFor(this.win).isIos()
+      ? XORIGIN_MODE.IFRAME_GET
+      : super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
   /** @override */
