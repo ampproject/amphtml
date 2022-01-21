@@ -33,8 +33,12 @@ amp-story-shopping-attachment a {
 
 .i-amphtml-amp-story-shopping-plp-card-image {
   width: 100% !important;
+  height: 14.5em !important;
   margin-bottom: 0.75em !important;
   border-radius: 2em !important;
+  background-position: center !important;
+  background-repeat: none !important;
+  background-size: cover !important;
 }
 
 .i-amphtml-amp-story-shopping-plp-card-brand {
