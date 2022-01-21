@@ -980,6 +980,10 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
             <input name="date" value="2022-01-01" />
           </BentoDatePicker>
         );
+
+        env.sandbox
+          .stub(helpers, 'getCurrentDate')
+          .callsFake(() => new Date(2022, 0, 21));
       });
 
       it('can clear the date for a single date picker', () => {
@@ -988,6 +992,30 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
         expect(wrapper.exists('[data-date="2022-01-01"]')).to.be.false;
         expect(wrapper.find('input').prop('value')).to.equal('');
+      });
+
+      it('can set the date', () => {
+        ref.current.setDate(new Date(2022, 0, 21));
+        wrapper.update();
+
+        expect(wrapper.exists('[data-date="2022-01-21"]')).to.be.true;
+        expect(wrapper.find('input').prop('value')).to.equal('2022-01-21');
+      });
+
+      it('can set the date to today', () => {
+        ref.current.today();
+        wrapper.update();
+
+        expect(wrapper.exists('[data-date="2022-01-21"]')).to.be.true;
+        expect(wrapper.find('input').prop('value')).to.equal('2022-01-21');
+      });
+
+      it('can use the offset argment to add or subtract days today', () => {
+        ref.current.today({offset: -1});
+        wrapper.update();
+
+        expect(wrapper.exists('[data-date="2022-01-20"]')).to.be.true;
+        expect(wrapper.find('input').prop('value')).to.equal('2022-01-20');
       });
     });
   });

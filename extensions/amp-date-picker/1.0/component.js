@@ -21,8 +21,8 @@ import {SingleDatePicker} from './single-date-picker';
 import {AttributesContext} from './use-attributes';
 
 /**
- * @param {!BentoDatePicker.Props} props
- * @param {*} ref
+ * @param {!BentoDatePickerDef.Props} props
+ * @param {{current: ?BentoDatePickerDef.BentoDatePickerApi}} ref
  * @return {PreactDef.Renderable}
  */
 function BentoDatePickerWithRef(

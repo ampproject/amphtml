@@ -1,3 +1,5 @@
+import {addDays} from 'date-fns/esm';
+
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
@@ -25,7 +27,7 @@ import {
   FORM_INPUT_SELECTOR,
   TAG,
 } from './constants';
-import {getFormattedDate, parseDate} from './date-helpers';
+import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
 import {useDatePickerState} from './use-date-picker-state';
 
 /**
@@ -61,12 +63,22 @@ function SingleDatePickerWithRef(
     handleSetDate(undefined);
   }, [handleSetDate]);
 
+  const today = useCallback(
+    ({offset = 0} = {}) => {
+      const date = addDays(getCurrentDate(), offset);
+      handleSetDate(date);
+    },
+    [handleSetDate]
+  );
+
   useImperativeHandle(
     ref,
     () => ({
       clear,
+      today,
+      setDate: handleSetDate,
     }),
-    [clear]
+    [clear, today, handleSetDate]
   );
 
   /**
