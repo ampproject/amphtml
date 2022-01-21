@@ -6,18 +6,18 @@ const {webpackConfigNoChunkTilde} = require('../../env-utils');
 
 const rootDir = path.join(__dirname, '../../../../..');
 
+const modules = [
+  path.join(__dirname, 'node_modules'),
+  path.join(__dirname, '../../node_modules'),
+  path.join(rootDir, 'node_modules'),
+];
+
 module.exports = ({config}) => {
   config.resolveLoader = {
-    modules: [
-      path.join(__dirname, 'node_modules'),
-      path.join(rootDir, 'node_modules'),
-    ],
+    modules,
   };
   config.resolve = {
-    modules: [
-      path.join(__dirname, 'node_modules'),
-      path.join(rootDir, 'node_modules'),
-    ],
+    modules,
     alias: getRelativeAliasMap(rootDir),
   };
   config.module = {

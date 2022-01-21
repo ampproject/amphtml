@@ -67,11 +67,11 @@ function launchEnv(env) {
  */
 function buildEnv(env) {
   if (env === 'amp') {
-    log(
-      yellow('AMP environment for storybook is temporarily disabled.\n') +
-        'See https://github.com/ampproject/storybook-addon-amp/issues/57'
-    );
-    return;
+    // log(
+    //   yellow('AMP environment for storybook is temporarily disabled.\n') +
+    //     'See https://github.com/ampproject/storybook-addon-amp/issues/57'
+    // );
+    // return;
     if (env === 'amp' && isPullRequestBuild()) {
       // Allows PR deploys to reference built binaries.
       const parameters = {

@@ -55,18 +55,18 @@ class ReactBuildImportResolver {
   }
 }
 
+const modules = [
+  path.join(__dirname, 'node_modules'),
+  path.join(__dirname, '../../node_modules'),
+  path.join(rootDir, 'node_modules'),
+];
+
 module.exports = ({config}) => {
   config.resolveLoader = {
-    modules: [
-      path.join(__dirname, 'node_modules'),
-      path.join(rootDir, 'node_modules'),
-    ],
+    modules,
   };
   config.resolve = {
-    modules: [
-      path.join(__dirname, 'node_modules'),
-      path.join(rootDir, 'node_modules'),
-    ],
+    modules,
     plugins: [new ReactBuildImportResolver()],
     alias: {
       ...getRelativeAliasMap(rootDir),
