@@ -23,8 +23,7 @@ export const DEFAULT_MESSAGES = {
   fcTitleText: 'Instant Access With Fewcents.',
   fcPromptText: 'I already bought this',
   fcButtonText: 'Unlock',
-  fcPoweredImageRef:
-    'https://dev.fewcents.co/static/media/powered-fewcents.5c8ee304.png',
+  fcPoweredImageRef: 'https://images.fewcents.co/paywall/powered-fewcents.png',
   fcTermsRef: 'https://www.fewcents.co/terms',
   fcPrivacyRef: 'https://www.fewcents.co/privacy',
   fcContactUsRef: 'mailto:support@fewcents.co',
