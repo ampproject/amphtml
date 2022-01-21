@@ -1494,8 +1494,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   polyfillDvh_(size) {
-    const {height, width} = size;
-    if (height === 0 && width === 0) {
+    const {height} = size;
+    if (height === 0) {
       return;
     }
     setImportantStyles(this.win.document.documentElement, {
