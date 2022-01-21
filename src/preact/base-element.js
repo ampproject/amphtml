@@ -113,19 +113,16 @@ export class PreactBaseElement extends BaseElement {
 
   /** @override @nocollapse */
   static requiresShadowDom() {
-    // eslint-disable-next-line local/no-static-this
     return this['usesShadowDom'];
   }
 
   /** @override @nocollapse */
   static usesLoading() {
-    // eslint-disable-next-line local/no-static-this
     return this['loadable'];
   }
 
   /** @override @nocollapse */
   static prerenderAllowed() {
-    // eslint-disable-next-line local/no-static-this
     return !this.usesLoading();
   }
 
