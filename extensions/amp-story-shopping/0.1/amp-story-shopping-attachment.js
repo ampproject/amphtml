@@ -1,6 +1,7 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
+import {user} from '#utils/log';
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
@@ -24,6 +25,8 @@ const FONTS_TO_LOAD = [
     src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
+
+const TAG = 'amp-story-shopping-attachment';
 
 export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -53,6 +56,14 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // Do not build experience if no shopping tags are on page.
+    if (this.shoppingTags_.length === 0) {
+      user().error(
+        TAG,
+        'Page must contain at least one amp-story-shopping-tag.'
+      );
+      return;
+    }
     loadFonts(this.win, FONTS_TO_LOAD);
     this.attachmentEl_ = (
       <amp-story-page-attachment
@@ -74,6 +85,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    // Do not set listeners if no shopping tags are on page.
+    if (this.shoppingTags_.length === 0) {
+      return;
+    }
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
       (isOpen) => this.onPageAttachmentStateUpdate_(isOpen)
