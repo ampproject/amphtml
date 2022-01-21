@@ -10,11 +10,12 @@ import {
   cloneElement,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
 } from '#preact';
-import {Children} from '#preact/compat';
+import {Children, forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
 import {BaseDatePicker} from './base-date-picker';
@@ -26,26 +27,30 @@ import {
   FORM_INPUT_SELECTOR,
   TAG,
 } from './constants';
-import {getFormattedDate, parseDate} from './date-helpers';
+import {getFormattedDate, parseDate, getCurrentDate} from './date-helpers';
 import {useDatePickerState} from './use-date-picker-state';
 
 /**
- * @param {!DateInput.Props} props
+ * @param {!BentoDatePickerDef.DateRangePickerProps} props
+ * @param {{current: ?BentoDatePickerDef.BentoDatePickerApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function DateRangePicker({
-  allowBlockedEndDate,
-  allowBlockedRanges,
-  blockedDates,
-  children,
-  endInputSelector,
-  format,
-  id,
-  mode,
-  onError,
-  startInputSelector,
-  ...rest
-}) {
+function DateRangePickerWithRef(
+  {
+    allowBlockedEndDate,
+    allowBlockedRanges,
+    blockedDates,
+    children,
+    endInputSelector,
+    format,
+    id,
+    mode,
+    onError,
+    startInputSelector,
+    ...rest
+  },
+  ref
+) {
   const startInputElementRef = useRef();
   const endInputElementRef = useRef();
 
@@ -199,6 +204,39 @@ export function DateRangePicker({
     [handleSetStartDate, handleSetEndDate, isBlockedRange]
   );
 
+  const clear = useCallback(() => {
+    handleSetStartDate(undefined);
+    handleSetEndDate(undefined);
+  }, [handleSetStartDate, handleSetEndDate]);
+
+  const startToday = useCallback(
+    ({offset = 0} = {}) => {
+      const date = addDays(getCurrentDate(), offset);
+      handleSetStartDate(date);
+    },
+    [handleSetStartDate]
+  );
+
+  const endToday = useCallback(
+    ({offset = 0} = {}) => {
+      const date = addDays(getCurrentDate(), offset);
+      handleSetEndDate(date);
+    },
+    [handleSetEndDate]
+  );
+
+  useImperativeHandle(
+    ref,
+    () =>
+      /** @type {!BentoDatePickerDef.BentoDatePickerApi} */ ({
+        clear,
+        setDates: ({start, end}) => setDateRange({from: start, to: end}),
+        startToday,
+        endToday,
+      }),
+    [clear, setDateRange]
+  );
+
   const inputElements = useMemo(() => {
     const startInputPropsWithRef = {
       ...startInputProps,
@@ -320,3 +358,7 @@ export function DateRangePicker({
     </ContainWrapper>
   );
 }
+
+const DateRangePicker = forwardRef(DateRangePickerWithRef);
+DateRangePicker.displayName = 'DateRangePicker';
+export {DateRangePicker};

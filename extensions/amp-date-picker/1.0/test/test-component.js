@@ -1018,5 +1018,98 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         expect(wrapper.find('input').prop('value')).to.equal('2022-01-20');
       });
     });
+
+    describe('date range picker', () => {
+      beforeEach(() => {
+        ref = Preact.createRef();
+        wrapper = mount(
+          <BentoDatePicker
+            ref={ref}
+            type="range"
+            initialVisibleMonth={new Date(2022, 0)}
+            startInputSelector="[name=startdate]"
+            endInputSelector="[name=enddate]"
+          >
+            <input name="startdate" value="2022-01-01" />
+            <input name="enddate" value="2022-01-02" />
+          </BentoDatePicker>
+        );
+
+        env.sandbox
+          .stub(helpers, 'getCurrentDate')
+          .callsFake(() => new Date(2022, 0, 21));
+      });
+
+      it('can clear the start and end dates', () => {
+        ref.current.clear();
+        wrapper.update();
+
+        expect(wrapper.exists('[data-startdate="2022-01-01"]')).to.be.false;
+        expect(wrapper.exists('[data-enddate="2022-01-01"]')).to.be.false;
+        expect(wrapper.find('input[name="startdate"]').prop('value')).to.equal(
+          ''
+        );
+        expect(wrapper.find('input[name="enddate"]').prop('value')).to.equal(
+          ''
+        );
+      });
+
+      it('can set the start and end dates', () => {
+        ref.current.setDates({
+          start: new Date(2022, 0, 21),
+          end: new Date(2022, 0, 22),
+        });
+        wrapper.update();
+
+        expect(wrapper.exists('[data-startdate="2022-01-21"]')).to.be.true;
+        expect(wrapper.exists('[data-enddate="2022-01-22"]')).to.be.true;
+        expect(wrapper.find('input[name="startdate"]').prop('value')).to.equal(
+          '2022-01-21'
+        );
+        expect(wrapper.find('input[name="enddate"]').prop('value')).to.equal(
+          '2022-01-22'
+        );
+      });
+
+      it('can set the start date to today', () => {
+        ref.current.startToday();
+        wrapper.update();
+
+        expect(wrapper.exists('[data-startdate="2022-01-21"]')).to.be.true;
+        expect(wrapper.find('input[name="startdate"]').prop('value')).to.equal(
+          '2022-01-21'
+        );
+      });
+
+      it('can use the offset argment to add or subtract days from start today', () => {
+        ref.current.startToday({offset: -1});
+        wrapper.update();
+
+        expect(wrapper.exists('[data-startdate="2022-01-20"]')).to.be.true;
+        expect(wrapper.find('input[name="startdate"]').prop('value')).to.equal(
+          '2022-01-20'
+        );
+      });
+
+      it('can set the end date to today', () => {
+        ref.current.endToday();
+        wrapper.update();
+
+        expect(wrapper.exists('[data-enddate="2022-01-21"]')).to.be.true;
+        expect(wrapper.find('input[name="enddate"]').prop('value')).to.equal(
+          '2022-01-21'
+        );
+      });
+
+      it('can use the offset argment to add or subtract days from end today', () => {
+        ref.current.endToday({offset: -1});
+        wrapper.update();
+
+        expect(wrapper.exists('[data-enddate="2022-01-20"]')).to.be.true;
+        expect(wrapper.find('input[name="enddate"]').prop('value')).to.equal(
+          '2022-01-20'
+        );
+      });
+    });
   });
 });

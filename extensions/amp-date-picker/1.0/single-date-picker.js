@@ -212,4 +212,5 @@ function SingleDatePickerWithRef(
 }
 
 const SingleDatePicker = forwardRef(SingleDatePickerWithRef);
+SingleDatePicker.displayName = 'SingleDatePicker';
 export {SingleDatePicker};
