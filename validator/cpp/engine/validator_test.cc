@@ -1237,27 +1237,9 @@ TEST(ValidatorTest, RulesMakeSense) {
     }
 
     if (tag_spec.tag_name() == "$REFERENCE_POINT") {
-      // TODO(b/215742073): Remove this allowlist by
-      // adding descriptive name to every tag in this list.
-      const absl::flat_hash_set<std::string_view> allowlist = {
-          "AMP-BASE-CAROUSEL lightbox [child]",
-          "AMP-BASE-CAROUSEL lightbox [lightbox-exclude]",
-          "AMP-CAROUSEL lightbox [child]",
-          "AMP-CAROUSEL lightbox [lightbox-exclude]",
-          "AMP-NEXT-PAGE > [footer]",
-          "AMP-NEXT-PAGE > [recommendation-box]",
-          "AMP-NEXT-PAGE > [separator]",
-          "AMP-SELECTOR child",
-          "AMP-SELECTOR option",
-          "AMP-STORY-CTA-LAYER animate-in",
-          "AMP-STORY-GRID-LAYER animate-in",
-          "AMP-STORY-GRID-LAYER default",
-      };
-      if (!allowlist.contains(tag_spec.spec_name())) {
-        EXPECT_TRUE(tag_spec.has_descriptive_name())
-            << tag_spec_name
-            << " needs a descriptive_name because it is a reference point";
-      }
+      EXPECT_TRUE(tag_spec.has_descriptive_name())
+          << tag_spec_name
+          << " needs a descriptive_name because it is a reference point";
     }
     if (tag_spec.enabled_by_size() > 0 || tag_spec.disabled_by_size() > 0) {
       TypeIdentifiersShouldMakeSense(tag_spec, "tag_spec", tag_spec_name);
