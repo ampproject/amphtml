@@ -1,23 +1,25 @@
 const path = require('path');
-const {BUILD_CONSTANTS} = require('../../../compile/build-constants');
+const {BUILD_CONSTANTS} = require('../../../../compile/build-constants');
 const {DefinePlugin} = require('webpack');
-const {getRelativeAliasMap} = require('../../../babel-config/import-resolver');
-const {webpackConfigNoChunkTilde} = require('../env-utils');
+const {
+  getRelativeAliasMap,
+} = require('../../../../babel-config/import-resolver');
+const {webpackConfigNoChunkTilde} = require('../../env-utils');
 
-const rootDir = path.join(__dirname, '../../../..');
+const rootDir = path.join(__dirname, '../../../../..');
+
+const modules = [
+  path.join(__dirname, 'node_modules'),
+  path.join(__dirname, '../../node_modules'),
+  path.join(rootDir, 'node_modules'),
+];
 
 module.exports = ({config}) => {
   config.resolveLoader = {
-    modules: [
-      path.join(__dirname, '../node_modules'),
-      path.join(rootDir, 'node_modules'),
-    ],
+    modules,
   };
   config.resolve = {
-    modules: [
-      path.join(__dirname, '../node_modules'),
-      path.join(rootDir, 'node_modules'),
-    ],
+    modules,
     alias: {
       'react': 'preact/compat',
       'react-dom': 'preact/compat',

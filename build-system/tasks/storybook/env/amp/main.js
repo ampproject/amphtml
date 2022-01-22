@@ -1,9 +1,12 @@
-const {webpackConfigNoChunkTilde} = require('../env-utils');
+const {webpackConfigNoChunkTilde} = require('../../env-utils');
+
+const rootDir = '../../../../..';
 
 module.exports = {
+  staticDirs: [rootDir],
   stories: [
-    '../../../../src/builtins/storybook/*.amp.js',
-    '../../../../extensions/**/*.*/storybook/*.amp.js',
+    `${rootDir}/src/builtins/storybook/*.amp.js`,
+    `${rootDir}/extensions/**/*.*/storybook/*.amp.js`,
   ],
   addons: [
     // TODO(alanorozco): AMP previews are loaded inside an iframe, so the a11y
