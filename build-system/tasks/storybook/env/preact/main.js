@@ -1,5 +1,3 @@
-const {webpackConfigNoChunkTilde} = require('../../env-utils');
-
 const rootDir = '../../../../..';
 
 module.exports = {
@@ -16,9 +14,6 @@ module.exports = {
     // addon-controls (args/argTypes).
     '@storybook/addon-knobs',
   ],
-  managerWebpack: (config) => {
-    return webpackConfigNoChunkTilde(config);
-  },
   webpackFinal: async (config) => {
     // Disable entry point size warnings.
     config.performance.hints = false;
