@@ -36,7 +36,17 @@ import {useDatePickerState} from './use-date-picker-state';
  * @return {PreactDef.Renderable}
  */
 function SingleDatePickerWithRef(
-  {blockedDates, children, format, id, inputSelector, mode, onError, ...rest},
+  {
+    blockedDates,
+    children,
+    format,
+    id,
+    inputSelector,
+    mode,
+    onError,
+    locale,
+    ...rest
+  },
   ref
 ) {
   const inputElementRef = useRef();
@@ -53,7 +63,7 @@ function SingleDatePickerWithRef(
       _setDate(date);
       setInputProps((props) => ({
         ...props,
-        value: getFormattedDate(date, format),
+        value: getFormattedDate(date, format, locale),
       }));
     },
     [format]
@@ -146,7 +156,8 @@ function SingleDatePickerWithRef(
       inputSelector
     );
     if (inputElement) {
-      inputElement.value && _setDate(parseDate(inputElement.value, format));
+      inputElement.value &&
+        _setDate(parseDate(inputElement.value, format, locale));
       setInputProps({
         name: inputElement.name,
         value: inputElement.value,
@@ -195,7 +206,7 @@ function SingleDatePickerWithRef(
   return (
     <ContainWrapper
       ref={containerRef}
-      data-date={getFormattedDate(date, format)}
+      data-date={getFormattedDate(date, format, locale)}
     >
       {inputElement}
       {state.isOpen && (
@@ -204,6 +215,7 @@ function SingleDatePickerWithRef(
           mode="single"
           selected={date}
           onSelect={setDate}
+          locale={locale}
           {...rest}
         />
       )}

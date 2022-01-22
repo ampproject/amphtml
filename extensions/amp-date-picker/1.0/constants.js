@@ -2,6 +2,7 @@ export const DEFAULT_INPUT_SELECTOR = '#date';
 export const DEFAULT_START_INPUT_SELECTOR = '#startdate';
 export const DEFAULT_END_INPUT_SELECTOR = '#enddate';
 export const FORM_INPUT_SELECTOR = 'form';
+export const DEFAULT_LOCALE = 'en';
 
 // Default formatters
 // Documentation: https://date-fns.org/v2.28.0/docs/format

@@ -27,7 +27,7 @@ import {
   FORM_INPUT_SELECTOR,
   TAG,
 } from './constants';
-import {getFormattedDate, parseDate, getCurrentDate} from './date-helpers';
+import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
 import {useDatePickerState} from './use-date-picker-state';
 
 /**
@@ -44,6 +44,7 @@ function DateRangePickerWithRef(
     endInputSelector,
     format,
     id,
+    locale,
     mode,
     onError,
     startInputSelector,
@@ -176,10 +177,10 @@ function DateRangePickerWithRef(
       setStartDate(date);
       setStartInputProps((props) => ({
         ...props,
-        value: getFormattedDate(date, format),
+        value: getFormattedDate(date, format, locale),
       }));
     },
-    [format]
+    [format, locale]
   );
 
   const handleSetEndDate = useCallback(
@@ -187,10 +188,10 @@ function DateRangePickerWithRef(
       setEndDate(date);
       setEndInputProps((props) => ({
         ...props,
-        value: getFormattedDate(date, format),
+        value: getFormattedDate(date, format, locale),
       }));
     },
-    [format]
+    [format, locale]
   );
 
   const setDateRange = useCallback(
@@ -230,11 +231,11 @@ function DateRangePickerWithRef(
     () =>
       /** @type {!BentoDatePickerDef.BentoDatePickerApi} */ ({
         clear,
-        setDates: ({start, end}) => setDateRange({from: start, to: end}),
+        setDates: ({end, start}) => setDateRange({from: start, to: end}),
         startToday,
         endToday,
       }),
-    [clear, setDateRange]
+    [clear, setDateRange, startToday, endToday]
   );
 
   const inputElements = useMemo(() => {
@@ -277,7 +278,7 @@ function DateRangePickerWithRef(
       endInputSelector
     );
     if (startDateInputElement) {
-      setStartDate(parseDate(startDateInputElement.value, format));
+      setStartDate(parseDate(startDateInputElement.value, format, locale));
       setStartInputProps({
         name: startDateInputElement.name,
       });
@@ -288,7 +289,7 @@ function DateRangePickerWithRef(
       });
     }
     if (endDateInputElement) {
-      setEndDate(parseDate(endDateInputElement.value, format));
+      setEndDate(parseDate(endDateInputElement.value, format, locale));
       setEndInputProps({
         name: endDateInputElement.name,
       });
@@ -343,8 +344,8 @@ function DateRangePickerWithRef(
   return (
     <ContainWrapper
       ref={containerRef}
-      data-startdate={getFormattedDate(startDate, format)}
-      data-enddate={getFormattedDate(endDate, format)}
+      data-startdate={getFormattedDate(startDate, format, locale)}
+      data-enddate={getFormattedDate(endDate, format, locale)}
     >
       {inputElements}
       {state.isOpen && (
@@ -352,6 +353,7 @@ function DateRangePickerWithRef(
           mode="range"
           selected={dateRange}
           onSelect={setDateRange}
+          locale={locale}
           {...rest}
         />
       )}

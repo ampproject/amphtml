@@ -6,6 +6,7 @@ import './amp-date-picker.css';
 import {
   DEFAULT_END_INPUT_SELECTOR,
   DEFAULT_INPUT_SELECTOR,
+  DEFAULT_LOCALE,
   DEFAULT_MONTH_FORMAT,
   DEFAULT_ON_ERROR,
   DEFAULT_START_INPUT_SELECTOR,
@@ -45,6 +46,7 @@ function BentoDatePickerWithRef(
     max,
     monthFormat = DEFAULT_MONTH_FORMAT,
     weekDayFormat = DEFAULT_WEEK_DAY_FORMAT,
+    locale = DEFAULT_LOCALE,
   },
   ref
 ) {
@@ -79,6 +81,7 @@ function BentoDatePickerWithRef(
       allowBlockedEndDate,
       allowBlockedRanges,
       ref,
+      locale,
     };
   }, [
     blockedDates,
@@ -96,6 +99,7 @@ function BentoDatePickerWithRef(
     monthFormat,
     weekDayFormat,
     ref,
+    locale,
   ]);
 
   /**

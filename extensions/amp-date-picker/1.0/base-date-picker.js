@@ -14,6 +14,7 @@ import {useAttributes} from './use-attributes';
  */
 export function BaseDatePicker({
   initialVisibleMonth,
+  locale,
   monthFormat,
   weekDayFormat,
   ...rest
@@ -22,16 +23,16 @@ export function BaseDatePicker({
 
   const formatMonth = useCallback(
     (date) => {
-      return getFormattedDate(date, monthFormat);
+      return getFormattedDate(date, monthFormat, locale);
     },
-    [monthFormat]
+    [monthFormat, locale]
   );
 
   const formatWeekday = useCallback(
     (date) => {
-      return getFormattedDate(date, weekDayFormat);
+      return getFormattedDate(date, weekDayFormat, locale);
     },
-    [weekDayFormat]
+    [weekDayFormat, locale]
   );
 
   return (

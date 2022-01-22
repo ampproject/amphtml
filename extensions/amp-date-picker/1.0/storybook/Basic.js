@@ -1,6 +1,8 @@
+import {date, number, select, text, withKnobs} from '@storybook/addon-knobs';
 import * as Preact from '#preact';
 
 import {BentoDatePicker} from '../component';
+import {localeMap} from '../date-helpers';
 
 export default {
   title: 'DatePicker',
@@ -8,10 +10,12 @@ export default {
   args: {
     type: 'single',
     layout: 'fixed-height',
-    mode: 'static',
     height: 360,
     initialVisibleMonth: new Date(),
+    locale: select('Locale', Object.keys(localeMap)),
+    mode: select('Mode', ['static', 'overlay']),
   },
+  decorators: [withKnobs],
 };
 
 export const _default = (args) => {
@@ -28,7 +32,6 @@ export const WithSingleInput = (args) => {
 
 WithSingleInput.args = {
   type: 'single',
-  mode: 'overlay',
 };
 
 export const WithRangeInput = (args) => {
