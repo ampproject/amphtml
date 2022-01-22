@@ -40,7 +40,8 @@ function startStorybook(env) {
 
   execScriptAsync(
     [
-      `./node_modules/.bin/start-storybook`,
+      'npx',
+      'start-storybook',
       `--config-dir .`,
       `--port ${port}`,
       '--quiet',
@@ -75,7 +76,8 @@ function buildStorybook(env) {
 
   const result = exec(
     [
-      './node_modules/.bin/build-storybook',
+      'npx',
+      'build-storybook',
       `--config-dir .`,
       `--output-dir ${repoDir}/examples/storybook/${env}`,
       '--quiet',
