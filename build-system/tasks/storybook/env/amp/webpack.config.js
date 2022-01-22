@@ -2,7 +2,6 @@ const path = require('path');
 const {
   getRelativeAliasMap,
 } = require('../../../../babel-config/import-resolver');
-const {webpackConfigNoChunkTilde} = require('../../env-utils');
 
 const rootDir = path.join(__dirname, '../../../../..');
 
@@ -49,5 +48,5 @@ module.exports = ({config}) => {
     ],
   };
 
-  return webpackConfigNoChunkTilde(config);
+  return config;
 };

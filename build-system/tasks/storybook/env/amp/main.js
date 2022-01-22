@@ -1,5 +1,3 @@
-const {webpackConfigNoChunkTilde} = require('../../env-utils');
-
 const rootDir = '../../../../..';
 
 module.exports = {
@@ -21,9 +19,6 @@ module.exports = {
     '@storybook/addon-knobs',
     '@ampproject/storybook-addon',
   ],
-  managerWebpack: (config) => {
-    return webpackConfigNoChunkTilde(config);
-  },
   webpackFinal: (config) => {
     // Disable entry point size warnings.
     config.performance.hints = false;

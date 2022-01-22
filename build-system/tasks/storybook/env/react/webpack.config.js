@@ -4,7 +4,6 @@ const {DefinePlugin} = require('webpack');
 const {
   getRelativeAliasMap,
 } = require('../../../../babel-config/import-resolver');
-const {webpackConfigNoChunkTilde} = require('../../../storybook/env-utils');
 const {existsSync} = require('fs-extra');
 
 const rootDir = path.join(__dirname, '../../../../..');
@@ -106,5 +105,5 @@ module.exports = ({config}) => {
   // build-system/babel-config/helpers.js#getReplacePlugin
   config.plugins.push(new DefinePlugin(BUILD_CONSTANTS));
 
-  return webpackConfigNoChunkTilde(config);
+  return config;
 };
