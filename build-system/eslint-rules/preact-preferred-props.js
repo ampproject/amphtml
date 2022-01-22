@@ -174,8 +174,9 @@ module.exports = {
               const replacement = `'${name}'`;
               if (node.parent.type === 'Property') {
                 // Remove brackets around ['computed'] prop keys
+                const [start, end] = node.parent.key.range;
                 return fixer.replaceTextRange(
-                  [node.parent.key.start - 1, node.parent.key.end + 1],
+                  [start - 1, end + 1],
                   replacement
                 );
               }
