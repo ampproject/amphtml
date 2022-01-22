@@ -59,7 +59,7 @@ export function BentoSocialShare({
     <Wrapper
       {...rest}
       role="button"
-      tabIndex={tabIndex}
+      tabindex={tabIndex}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       wrapperStyle={{

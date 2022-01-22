@@ -245,7 +245,7 @@ function SelectorWithRef(
       multiple={multiple}
       name={name}
       onKeyDown={onKeyDown}
-      tabIndex={
+      tabindex={
         tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1
       }
       value={selected}
@@ -361,7 +361,7 @@ export function BentoSelectorOption({
       ref={ref}
       role={role}
       selected={isSelected}
-      tabIndex={
+      tabindex={
         tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
       }
       value={option}
