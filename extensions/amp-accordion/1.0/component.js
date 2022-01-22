@@ -342,7 +342,6 @@ export function BentoAccordionHeader({
   children,
   id,
   role = 'button',
-  tabindex: foo,
   [propName('class')]: className = '',
   ...rest
 }) {
