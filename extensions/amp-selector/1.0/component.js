@@ -277,10 +277,6 @@ export function BentoSelectorOption({
   [propName('class')]: className = '',
   ...rest
 }) {
-  const tabindex = tabindexFromProps(
-    rest,
-    keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
-  );
   const classes = useStyles();
   const ref = useRef(null);
   const {
@@ -292,6 +288,11 @@ export function BentoSelectorOption({
     selectOption,
     selected,
   } = useContext(SelectorContext);
+
+  const tabindex = tabindexFromProps(
+    rest,
+    keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
+  );
 
   const focus = useCallback(() => {
     customFocus?.();
