@@ -16,7 +16,7 @@ import {
   useState,
 } from '#preact';
 import {forwardRef} from '#preact/compat';
-import {propName} from '#preact/utils';
+import {propName, tabindexFromProps} from '#preact/utils';
 
 import {useStyles} from './component.jss';
 
@@ -52,12 +52,15 @@ function SelectorWithRef(
     name,
     onChange,
     role = 'listbox',
-    [propName('tabIndex')]: tabIndex,
     children,
     ...rest
   },
   ref
 ) {
+  const tabindex = tabindexFromProps(
+    rest,
+    keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1
+  );
   const [selectedState, setSelectedState] = useState(value ?? defaultValue);
   const optionsRef = useRef([]);
   const focusRef = useRef({active: null, focusMap: {}});
@@ -245,9 +248,7 @@ function SelectorWithRef(
       multiple={multiple}
       name={name}
       onKeyDown={onKeyDown}
-      tabindex={
-        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1
-      }
+      tabindex={tabindex}
       value={selected}
     >
       <input hidden defaultValue={selected} name={name} form={form} />
@@ -274,9 +275,12 @@ export function BentoSelectorOption({
   option,
   role = 'option',
   [propName('class')]: className = '',
-  [propName('tabIndex')]: tabIndex,
   ...rest
 }) {
+  const tabindex = tabindexFromProps(
+    rest,
+    keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
+  );
   const classes = useStyles();
   const ref = useRef(null);
   const {
@@ -361,9 +365,7 @@ export function BentoSelectorOption({
       ref={ref}
       role={role}
       selected={isSelected}
-      tabindex={
-        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
-      }
+      tabindex={tabindex}
       value={option}
     />
   );
