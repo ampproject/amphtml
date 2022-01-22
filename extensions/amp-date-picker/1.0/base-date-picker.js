@@ -3,7 +3,7 @@ import {DayPicker} from 'react-day-picker';
 import * as Preact from '#preact';
 import {useCallback} from '#preact';
 
-import {getFormattedDate} from './date-helpers';
+import {getFormattedDate, getLocale} from './date-helpers';
 import {DayButton} from './day-button';
 import {useAttributes} from './use-attributes';
 
@@ -45,6 +45,7 @@ export function BaseDatePicker({
         formatCaption: formatMonth,
         formatWeekdayName: formatWeekday,
       }}
+      locale={getLocale(locale)}
       {...rest}
     />
   );

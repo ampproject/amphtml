@@ -1,12 +1,11 @@
 import {format, isValid, parse, startOfToday} from 'date-fns';
 import {
-  enUS,
   af,
+  ar,
   arDZ,
-  arTN,
   arMA,
   arSA,
-  ar,
+  arTN,
   az,
   be,
   bg,
@@ -16,25 +15,25 @@ import {
   cs,
   cy,
   da,
-  deAT,
   de,
+  deAT,
   el,
   enAU,
   enCA,
   enGB,
   enIE,
   enNZ,
+  enUS,
   eo,
   es,
   et,
   eu,
   fi,
+  fr,
   frCA,
   frCH,
-  fr,
   gd,
   gl,
-  srLatn,
   gu,
   he,
   hi,
@@ -57,18 +56,19 @@ import {
   ms,
   mt,
   nb,
-  nlBE,
   nl,
+  nlBE,
   nn,
   pl,
-  ptBR,
   pt,
+  ptBR,
   ro,
   ru,
   sk,
   sl,
   sq,
   sr,
+  srLatn,
   sv,
   ta,
   te,
@@ -82,7 +82,7 @@ import {
   zhTW,
 } from 'date-fns/locale';
 
-import {ISO_8601, DEFAULT_LOCALE} from './constants';
+import {DEFAULT_LOCALE, ISO_8601} from './constants';
 
 export const localeMap = {
   'en': enUS,
@@ -171,9 +171,9 @@ export const localeMap = {
  * Convert a moment locale string to a date-fns locale object
  * If the string does not exist in the map, falls back to default locale
  * @param {string} localeString
- * @returns {Locale}
+ * @return {Locale} locale
  */
-function getLocale(localeString) {
+export function getLocale(localeString) {
   return localeMap[localeString] || localeMap[DEFAULT_LOCALE];
 }
 
