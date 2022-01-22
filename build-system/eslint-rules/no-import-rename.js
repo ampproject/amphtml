@@ -75,7 +75,9 @@ module.exports = function (context) {
 
     for (let i = 0; i < references.length; i++) {
       const ref = references[i];
-      const node = context.getNodeByRangeIndex(ref.identifier.start);
+      const [start] = ref.identifier.range;
+      const node = context.getNodeByRangeIndex(start);
+
       const {parent} = node;
 
       if (parent.type !== 'MemberExpression') {
