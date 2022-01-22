@@ -51,7 +51,7 @@ module.exports = {
         }
         const property = prop.key.name || prop.key.value;
 
-        if (property?.toLowerCase() === 'tabindex') {
+        if (property?.toLowerCase?.() === 'tabindex') {
           context.report({
             node: prop,
             message:
@@ -118,7 +118,7 @@ module.exports = {
       MemberExpression(node) {
         const property = node.property.name || node.property.value;
 
-        if (property?.toLowerCase() === 'tabindex') {
+        if (property?.toLowerCase?.() === 'tabindex') {
           context.report({
             node: node.property,
             message:
