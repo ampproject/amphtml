@@ -6,9 +6,14 @@ import {xhrUtils} from '#preact/utils/xhr';
 
 import {waitFor} from '#testing/helpers/service';
 
+import {cleanHtml} from './utils';
+
 import {BentoList} from '../component/component';
 
 const CONTENTS = '[test-id="contents"]';
+function snapshot(component) {
+  return cleanHtml(component.find(CONTENTS).html());
+}
 
 describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
   let dataStub;
@@ -45,7 +50,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
 
       expect(xhrUtils.fetchJson).calledWith('TEST.json');
 
-      expect(snapshot(component.find(CONTENTS))).to.equal(
+      expect(snapshot(component)).to.equal(
         `<div><p>one</p><p>two</p><p>three</p></div>`
       );
     });
@@ -65,7 +70,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       expect(component.text()).to.equal('Loading...');
 
       await waitForData(component);
-      expect(snapshot(component.find(CONTENTS))).to.equal(
+      expect(snapshot(component)).to.equal(
         `<div><p>one</p><p>two</p><p>three</p></div>`
       );
 
@@ -74,7 +79,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       // Prop doesn't change, no fetch:
       component.setProps({src: 'TEST.json'});
       expect(xhrUtils.fetchJson).callCount(1);
-      expect(snapshot(component.find(CONTENTS))).to.equal(
+      expect(snapshot(component)).to.equal(
         `<div><p>one</p><p>two</p><p>three</p></div>`
       );
 
@@ -82,7 +87,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       component.setProps({src: 'TEST2.json'});
       expect(xhrUtils.fetchJson).callCount(2).calledWith('TEST2.json');
       await waitForData(component, 2);
-      expect(snapshot(component.find(CONTENTS))).to.equal(
+      expect(snapshot(component)).to.equal(
         `<div><p>second</p><p>request</p></div>`
       );
     });
@@ -104,7 +109,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         const component = mount(<BentoList src="" itemsKey="" />);
         await waitForData(component);
 
-        expect(snapshot(component.find(CONTENTS))).to.equal(
+        expect(snapshot(component)).to.equal(
           '<div><p>flat</p><p>array</p></div>'
         );
       });
@@ -112,7 +117,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         const component = mount(<BentoList src="" itemsKey="." />);
         await waitForData(component);
 
-        expect(snapshot(component.find(CONTENTS))).to.equal(
+        expect(snapshot(component)).to.equal(
           '<div><p>flat</p><p>array</p></div>'
         );
       });
@@ -134,7 +139,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         const component = mount(<BentoList src="" itemsKey="NUMBERS" />);
         await waitForData(component);
 
-        expect(snapshot(component.find(CONTENTS))).to.equal(
+        expect(snapshot(component)).to.equal(
           '<div><p>1</p><p>2</p><p>3</p></div>'
         );
       });
@@ -142,17 +147,17 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         const component = mount(<BentoList src="" itemsKey="NUMBERS" />);
         await waitForData(component);
 
-        expect(snapshot(component.find(CONTENTS))).to.equal(
+        expect(snapshot(component)).to.equal(
           '<div><p>1</p><p>2</p><p>3</p></div>'
         );
 
         component.setProps({itemsKey: 'LETTERS'});
-        expect(snapshot(component.find(CONTENTS))).to.equal(
+        expect(snapshot(component)).to.equal(
           '<div><p>A</p><p>B</p><p>C</p></div>'
         );
 
         component.setProps({itemsKey: 'NUMBERS'});
-        expect(snapshot(component.find(CONTENTS))).to.equal(
+        expect(snapshot(component)).to.equal(
           '<div><p>1</p><p>2</p><p>3</p></div>'
         );
 
@@ -166,7 +171,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
           );
           await waitForData(component);
 
-          expect(snapshot(component.find(CONTENTS))).to.equal(
+          expect(snapshot(component)).to.equal(
             '<div><p>ONE</p><p>TWO</p><p>THREE</p></div>'
           );
         });
@@ -203,14 +208,12 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
     it('should limit the max number of items', async () => {
       const component = mount(<BentoList src="TEST.json" maxItems={1} />);
       await waitForData(component);
-      expect(snapshot(component.find(CONTENTS))).to.equal(
-        `<div><p>one</p></div>`
-      );
+      expect(snapshot(component)).to.equal(`<div><p>one</p></div>`);
     });
     it('should do nothing if there are already fewer items', async () => {
       const component = mount(<BentoList src="TEST.json" maxItems={99} />);
       await waitForData(component);
-      expect(snapshot(component.find(CONTENTS))).to.equal(
+      expect(snapshot(component)).to.equal(
         `<div><p>one</p><p>two</p><p>three</p></div>`
       );
     });
@@ -222,19 +225,17 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       const component = mount(render({ref}));
       await waitForData(component);
 
-      expect(snapshot(component.find(CONTENTS))).to.equal(
+      expect(snapshot(component)).to.equal(
         `<div><p>one</p><p>two</p><p>three</p></div>`
       );
 
       dataStub.resolves({items: ['a', 'b', 'c']});
       ref.current.refresh();
       component.update();
-      expect(snapshot(component.find(CONTENTS))).to.equal(
-        expectedWhileRefreshing
-      );
+      expect(snapshot(component)).to.equal(expectedWhileRefreshing);
 
       await waitForData(component, 2);
-      expect(snapshot(component.find(CONTENTS))).to.equal(
+      expect(snapshot(component)).to.equal(
         `<div><p>a</p><p>b</p><p>c</p></div>`
       );
     }
@@ -263,9 +264,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         />
       );
       await waitForData(component);
-      expect(
-        snapshot(component.find(CONTENTS), {keepAttributes: true})
-      ).to.equal(
+      expect(component.find(CONTENTS).html()).to.equal(
         `<ul role="list"><li role="listitem">one</li><li role="listitem">two</li><li role="listitem">three</li></ul>`
       );
     });
@@ -306,26 +305,26 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         expect(component.find('button').html()).to.equal(
           `<button>Load more</button>`
         );
-        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage1);
+        expect(snapshot(component)).to.equal(expectedPage1);
       });
 
       it('clicking the button should keep loading more data', async () => {
         // Check page 1:
-        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage1);
+        expect(snapshot(component)).to.equal(expectedPage1);
 
         // Load page 2:
         component.find('button').simulate('click');
         expect(xhrUtils.fetchJson).callCount(2).calledWith('page-2.json');
-        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage1);
+        expect(snapshot(component)).to.equal(expectedPage1);
         await waitForData(component, 2);
-        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage2);
+        expect(snapshot(component)).to.equal(expectedPage2);
 
         // Load page 3:
         component.find('button').simulate('click');
         expect(xhrUtils.fetchJson).callCount(3).calledWith('page-3.json');
-        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage2);
+        expect(snapshot(component)).to.equal(expectedPage2);
         await waitForData(component, 3);
-        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage3);
+        expect(snapshot(component)).to.equal(expectedPage3);
       });
 
       describe('loadMoreBookmark', () => {
@@ -354,13 +353,11 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         component = mount(<BentoList src="" loadMore="auto" />);
       });
       it('should automatically load the first page', async () => {
-        expect(snapshot(component.find(CONTENTS))).to.equal(
-          'Loading...<span></span>'
-        );
+        expect(snapshot(component)).to.equal('Loading...<span></span>');
 
         await waitForData(component, 1);
 
-        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage1);
+        expect(snapshot(component)).to.equal(expectedPage1);
       });
       it('should only load the first page when not in viewport', async () => {
         await waitForData(component, 1);
@@ -374,14 +371,14 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         simulateViewportVisible(component, false);
 
         await waitForData(component, 2);
-        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage2);
+        expect(snapshot(component)).to.equal(expectedPage2);
 
         // Bring it into view for 1 render again:
         simulateViewportVisible(component, true);
         simulateViewportVisible(component, false);
 
         await waitForData(component, 3);
-        expect(snapshot(component.find(CONTENTS))).to.equal(expectedPage3);
+        expect(snapshot(component)).to.equal(expectedPage3);
       });
     });
   });
@@ -400,7 +397,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       });
       it('should refresh the data', async () => {
         expect(dataStub).to.have.callCount(1);
-        expect(snapshot(component.find(CONTENTS))).to.equal(
+        expect(snapshot(component)).to.equal(
           `<div><p>one</p><p>two</p><p>three</p></div>`
         );
 
@@ -408,19 +405,10 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         ref.current.refresh();
 
         await waitForData(component, 2);
-        expect(snapshot(component.find(CONTENTS))).to.equal(
+        expect(snapshot(component)).to.equal(
           `<div><p>1</p><p>2</p><p>3</p></div>`
         );
       });
     });
   });
 });
-
-function snapshot(component, {keepAttributes = false} = {}) {
-  let html = component.html();
-  if (!keepAttributes) {
-    // Simple logic to clean attributes from HTML:
-    html = html.replace(/\s([-\w]+)(="[^"]*")/g, '');
-  }
-  return html;
-}
