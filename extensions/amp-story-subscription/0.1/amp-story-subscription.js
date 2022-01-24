@@ -1,16 +1,9 @@
-import {CSS} from '../../../build/amp-story-subscription-0.1.css';
+import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
-import {htmlFor} from '#core/dom/static-template';
+
+import {CSS} from '../../../build/amp-story-subscription-0.1.css';
 
 const TAG = 'amp-story-subscription';
-
-// Create a paywall dialog element that have required attributes to be able to be
-// rendered by amp-subscriptions.
-// TODO: complete the rest of paywall dialog UI based on the publisher-provided attributes.
-const getPaywallDialogTemplate = (element) => {
-  return htmlFor(element)`
-  <div subscriptions-dialog subscriptions-display="NOT granted"></div>`;
-};
 
 export class AmpStorySubscription extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -20,7 +13,12 @@ export class AmpStorySubscription extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const dialogEl = getPaywallDialogTemplate(this.element);
+    // Create a paywall dialog element that have required attributes to be able to be
+    // rendered by amp-subscriptions.
+    // TODO(#37285): complete the rest of paywall dialog UI based on the publisher-provided attributes.
+    const dialogEl = (
+      <div subscriptions-dialog subscriptions-display="NOT granted"></div>
+    );
     this.element.appendChild(dialogEl);
   }
 
