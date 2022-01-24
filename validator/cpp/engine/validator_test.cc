@@ -1146,7 +1146,7 @@ void TypeIdentifiersAreValidAndUnique(
     std::string_view field_name, std::string_view spec_type,
     std::string_view spec_name) {
   absl::flat_hash_set<std::string_view> encountered_type_identifiers;
-  for (const auto type_identifier : type_identifiers) {
+  for (const std::string& type_identifier : type_identifiers) {
     EXPECT_TRUE(valid_type_identifiers.contains(type_identifier))
         << spec_type << " '" << spec_name << "' has " << field_name
         << " set to an invalid type identifier: '" << type_identifier << "'";
@@ -1184,17 +1184,17 @@ TEST(ValidatorTest, RulesMakeSense) {
   // For verifying that all ReferencePoint::tag_spec_names will resolve to a
   // generated.TagSpec that's marked REFERENCE_POINT.
   absl::flat_hash_set<std::string_view> all_reference_points;
-  for (const auto tag_spec : rules.tags()) {
+  for (const TagSpec& tag_spec : rules.tags()) {
     all_reference_points.insert(tag_spec.spec_name());
   }
 
-  absl::flat_hash_set<std::string_view> encountered_spec_name;
+  absl::flat_hash_set<std::string> encountered_spec_name;
   absl::flat_hash_set<int> encountered_name_id;
   absl::flat_hash_set<std::string_view> encountered_tag_without_spec_name;
   const RE2 tag_name_regex("(!DOCTYPE|O:P|[A-Z0-9-]+|\\$REFERENCE_POINT)");
   const RE2 disallowed_ancestor_regex("[A-Z0-9-]+");
 
-  for (const auto& tag_spec : rules.tags()) {
+  for (const TagSpec& tag_spec : rules.tags()) {
     // Helper for message output, set a tagspec_name in this order:
     // 1. tagSpec.specName, 2. tagSpec.tagName, 3. UNKNOWN_TAGSPEC.
     std::string_view tag_spec_name;
@@ -1221,7 +1221,7 @@ TEST(ValidatorTest, RulesMakeSense) {
 
     // spec_name can't be empty and must be unique.
     if (tag_spec.has_spec_name()) {
-      const std::string_view spec_name = tag_spec.spec_name();
+      const std::string spec_name = tag_spec.spec_name();
       EXPECT_FALSE(encountered_spec_name.contains(spec_name));
       encountered_spec_name.insert(spec_name);
     } else if (tag_spec.has_extension_spec()) {
@@ -1292,7 +1292,7 @@ TEST(ValidatorTest, RulesMakeSense) {
           << " for AMP4ADS";
       const absl::flat_hash_set<absl::string_view>& approved_versions =
           approved_amp4ads_extensions.at(extension_name);
-      for (const auto& version : tag_spec.extension_spec().version()) {
+      for (const std::string& version : tag_spec.extension_spec().version()) {
         EXPECT_TRUE(approved_versions.contains(version))
             << extension_name
             << " has html_format either explicitly or implicitly set"
@@ -1336,7 +1336,7 @@ TEST(ValidatorTest, RulesMakeSense) {
           tag_spec.has_extension_spec()) {
         const absl::string_view extension_name =
             tag_spec.extension_spec().name();
-        for (const auto& version : tag_spec.extension_spec().version()) {
+        for (const std::string& version : tag_spec.extension_spec().version()) {
           EXPECT_TRUE(approved_versions.contains(version))
               << extension_name
               << " has html_format either explicitly or implicitly"
@@ -1351,7 +1351,8 @@ TEST(ValidatorTest, RulesMakeSense) {
       }
     }
 
-    for (const auto& disallowed_ancestor : tag_spec.disallowed_ancestor()) {
+    for (const std::string& disallowed_ancestor :
+         tag_spec.disallowed_ancestor()) {
       EXPECT_TRUE(
           RE2::PartialMatch(disallowed_ancestor, disallowed_ancestor_regex))
           << "disallowed_ancestor defined and not equal to mandatory parent";
@@ -1373,7 +1374,7 @@ TEST(ValidatorTest, RulesMakeSense) {
 
     // attr_specs within tag.
     absl::flat_hash_set<std::string_view> encountered_attr_name;
-    for (const auto& attr_spec : tag_spec.attrs()) {
+    for (const AttrSpec& attr_spec : tag_spec.attrs()) {
       const std::string_view attr_name = attr_spec.name();
       EXPECT_FALSE(encountered_attr_name.contains(attr_name))
           << "attr_name within tag_spec '" << tag_spec_name
@@ -1406,7 +1407,7 @@ TEST(ValidatorTest, RulesMakeSense) {
       }
 
       if (tag_spec.has_extension_spec()) {
-        const auto& extension_spec = tag_spec.extension_spec();
+        const ExtensionSpec& extension_spec = tag_spec.extension_spec();
         const RE2 version_regexp("^(latest|[0-9]+[.][0-9]+)$");
         EXPECT_TRUE(extension_spec.has_name())
             << "extension must have a name field value";
@@ -1417,12 +1418,13 @@ TEST(ValidatorTest, RulesMakeSense) {
               << "extension " << extension_spec.name()
               << " must have at least one version";
         }
-        for (const auto& version_string : extension_spec.version()) {
+        for (const std::string& version_string : extension_spec.version()) {
           EXPECT_TRUE(RE2::PartialMatch(version_string, version_regexp))
               << "extension " << extension_spec.name()
               << " versions must be 'latest' or a numeric value";
         }
-        for (const auto& version_string : extension_spec.deprecated_version()) {
+        for (const std::string& version_string :
+             extension_spec.deprecated_version()) {
           EXPECT_TRUE(RE2::PartialMatch(version_string, version_regexp))
               << "extension " << extension_spec.name()
               << " versions must be 'latest' or a numeric value";
@@ -1442,7 +1444,7 @@ TEST(ValidatorTest, RulesMakeSense) {
           EXPECT_TRUE(tag_spec.cdata().has_max_bytes_spec_url())
               << "max_bytes >= 0 must have max_bytes_spec_url defined";
         }
-        for (const auto& disallowed_cdata_regex :
+        for (const DisallowedCDataRegex& disallowed_cdata_regex :
              tag_spec.cdata().disallowed_cdata_regex()) {
           useful_cdata_spec = true;
           EXPECT_TRUE(disallowed_cdata_regex.has_regex());
@@ -1455,8 +1457,10 @@ TEST(ValidatorTest, RulesMakeSense) {
           useful_cdata_spec = true;
           absl::flat_hash_set<std::string_view> encountered_at_rule_spec_name;
           const RE2 at_rule_spec_regex("[a-z-_]*");
-          const auto parsing_spec = GenCssParsingConfig().at_rule_spec;
-          for (const auto& at_rule_spec :
+          const std::unordered_map<std::string,
+                                   htmlparser::css::BlockType::Code>
+              parsing_spec = GenCssParsingConfig().at_rule_spec;
+          for (const AtRuleSpec& at_rule_spec :
                tag_spec.cdata().css_spec().at_rule_spec()) {
             EXPECT_TRUE(RE2::FullMatch(at_rule_spec.name(), at_rule_spec_regex))
                 << "at_rule_spec must be lower case alphabetic";
@@ -1495,7 +1499,7 @@ TEST(ValidatorTest, RulesMakeSense) {
           bool has_ciphertext = false;
           bool has_amp_onerror = false;
           bool has_amp_story_dvh_polyfill = false;
-          for (const auto& attr_spec : tag_spec.attrs()) {
+          for (const AttrSpec& attr_spec : tag_spec.attrs()) {
             if (attr_spec.name() == "src") {
               has_src = true;
             }
@@ -1504,7 +1508,7 @@ TEST(ValidatorTest, RulesMakeSense) {
             }
             if (attr_spec.name() == "type" &&
                 attr_spec.value_casei_size() > 0) {
-              for (const auto& value : attr_spec.value_casei()) {
+              for (const std::string& value : attr_spec.value_casei()) {
                 if (value == "application/ld+json" ||
                     value == "application/json") {
                   has_json = true;
@@ -1552,7 +1556,8 @@ TEST(ValidatorTest, RulesMakeSense) {
           }
         }
         EXPECT_TRUE(RE2(tag_spec.cdata().cdata_regex()).ok());
-        for (const auto& reference_point : tag_spec.reference_points()) {
+        for (const ReferencePoint& reference_point :
+             tag_spec.reference_points()) {
           EXPECT_TRUE(
               all_reference_points.contains(reference_point.tag_spec_name()))
               << "reference_point '" << reference_point.tag_spec_name()
