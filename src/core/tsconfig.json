@@ -1,18 +1,4 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "noEmit": true,
-    "downlevelIteration": true,
-    "target": "es5",
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "lib": ["dom", "esnext", "es6"],
-    "paths": {
-      "#core": ["."],
-      "#core/*": ["./*"]
-    }
-  },
-  "include": ["**/*.js", "**/*.d.ts"],
-  "exclude": ["**/*.extern.js"]
+  "extends": "../../tsconfig.base.json",
+  "include": ["**/*.js", "**/*.d.ts"]
 }

@@ -162,6 +162,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-BASE-CAROUSEL lightbox [lightbox-exclude]"
+  descriptive_name: "amp-base-carousel [lightbox-exclude] child"
   attrs: {
     name: "lightbox-exclude"
     mandatory: true
@@ -171,6 +172,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-BASE-CAROUSEL lightbox [child]"
+  descriptive_name: "amp-base-carousel [lightbox-thumbnail-id] child"
   attrs: {
     name: "lightbox-thumbnail-id"
     value_regex_casei: "^[a-z][a-z\\d_-]*"

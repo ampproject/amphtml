@@ -47,7 +47,7 @@ const viewportCallbacks = new WeakMap();
  * @param {Element} element
  * @param {function(IntersectionObserverEntry):void} callback
  * @param {IOOptions} [opts]
- * @return {UnlistenCallback} clean up closure to unobserve the element
+ * @return {import('#core/types/function/types').UnlistenCallback} clean up closure to unobserve the element
  */
 export function observeIntersections(element, callback, opts = {}) {
   const win = getWin(element);

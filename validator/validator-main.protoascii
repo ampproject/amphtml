@@ -1377,6 +1377,8 @@ tags: {
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
       protocol: "line"
+      # (https://docs.microsoft.com/en-us/windows/uwp/launch-resume/launch-default-app#microsoft-edge-uri-scheme)
+      protocol: "microsoft-edge"
       protocol: "skype"
       protocol: "sms"
       protocol: "snapchat"
@@ -1850,6 +1852,9 @@ tags: {
     name: "decoding"
     value_casei: "async"
   }
+  attrs: {
+    name: "sizes"
+  }
   attr_lists: "img-attrs"
   attr_lists: "mandatory-src-or-srcset"
 }
@@ -1899,6 +1904,9 @@ tags: {
   attrs: {
     name: "decoding"
     value_casei: "async"
+  }
+  attrs: {
+    name: "sizes"
   }
   attr_lists: "img-attrs"
   attr_lists: "mandatory-src-or-srcset"
@@ -5160,6 +5168,7 @@ attr_lists: {
   attrs: { name: "aria-labelledby" }
   attrs: { name: "aria-level" }
   attrs: { name: "aria-live" }
+  attrs: { name: "aria-modal" }
   attrs: { name: "aria-multiline" }
   attrs: { name: "aria-multiselectable" }
   attrs: { name: "aria-orientation" }

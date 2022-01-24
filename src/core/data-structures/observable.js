@@ -17,7 +17,7 @@ export class Observable {
   /**
    * Adds the observer to this instance.
    * @param {function(TYPE=):void} handler Observer's handler.
-   * @return {UnlistenCallback}
+   * @return {import('#core/types/function/types').UnlistenCallback}
    */
   add(handler) {
     if (!this.handlers_) {

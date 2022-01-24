@@ -41,18 +41,8 @@
       "url": "./build-system/json-schemas/caches.json"
     },
     {
-      "fileMatch": [
-        "build-system/global-configs/client-side-experiments-config.json"
-      ],
-      "url": "./build-system/json-schemas/client-side-experiments-config.json"
-    },
-    {
       "fileMatch": ["build-system/tasks/bundle-size/filesize.json"],
       "url": "./build-system/json-schemas/filesize.json"
-    },
-    {
-      "fileMatch": ["build-system/global-configs/versioning.json"],
-      "url": "./build-system/json-schemas/versioning.json"
     },
     {
       "fileMatch": ["test/visual-diff/visual-tests.jsonc"],

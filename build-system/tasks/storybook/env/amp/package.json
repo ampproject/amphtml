@@ -1,0 +1,6 @@
+{
+  "name": "amp-storybook-amp",
+  "version": "0.1.0",
+  "description": "packages specific to the amp storybook env",
+  "devDependencies": {}
+}

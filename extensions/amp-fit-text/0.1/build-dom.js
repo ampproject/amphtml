@@ -1,7 +1,7 @@
-import {realChildNodes} from '#core/dom/query';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {copyChildren, isServerRendered, removeChildren} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {applyFillContent} from '#core/dom/layout';
+import {realChildNodes} from '#core/dom/query';
 
 const MEASURER_CLASS = 'i-amphtml-fit-text-measurer';
 const CONTENT_CLASS = 'i-amphtml-fit-text-content';
@@ -10,8 +10,8 @@ const CONTENT_WRAPPER_CLASS = 'i-amphtml-fit-text-content-wrapper';
 /**
  * @see amphtml/compiler/types.js for full description
  *
- * @param {!Element} element
- * @return {{content: !Element, contentWrapper: !Element, measurer: !Element}}
+ * @param {HTMLElement} element
+ * @return {{content: Element, contentWrapper: Element, measurer: Element}}
  */
 export function buildDom(element) {
   if (isServerRendered(element)) {
@@ -40,8 +40,8 @@ export function buildDom(element) {
 
 /**
  * Returns all of the needed ivars from a server rendered element.
- * @param {!Element} element
- * @return {{content: !Element, contentWrapper: !Element, measurer: !Element}}
+ * @param {HTMLElement} element
+ * @return {{content: Element, contentWrapper: Element, measurer: Element}}
  */
 export function queryDom(element) {
   const content = element.querySelector(
@@ -64,8 +64,8 @@ export function queryDom(element) {
 /**
  * Make a destination node a clone of the source.
  *
- * @param {!Node} from
- * @param {!Node} to
+ * @param {Node} from
+ * @param {Node} to
  */
 export function mirrorNode(from, to) {
   // First clear out the destination node.

@@ -6,7 +6,6 @@ import {expandLayoutRect} from '#core/dom/layout/rect';
 import * as mode from '#core/mode';
 import {remove} from '#core/types/array';
 import {throttle} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -591,7 +590,7 @@ export class ResourcesImpl {
       // data.metaTags.viewport from 'documentLoaded' message.
       this.viewer_.sendMessage(
         'documentLoaded',
-        dict({
+        {
           'title': doc.title,
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
           'isStory': doc.body.firstElementChild?.tagName === 'AMP-STORY',
@@ -599,14 +598,14 @@ export class ResourcesImpl {
           'linkRels': documentInfo.linkRels,
           'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
           'viewport': documentInfo.viewport,
-        }),
+        },
         /* cancelUnsent */ true
       );
 
       this.contentHeight_ = this.viewport_.getContentHeight();
       this.viewer_.sendMessage(
         'documentHeight',
-        dict({'height': this.contentHeight_}),
+        {'height': this.contentHeight_},
         /* cancelUnsent */ true
       );
       dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
@@ -651,7 +650,7 @@ export class ResourcesImpl {
         if (measuredContentHeight != this.contentHeight_) {
           this.viewer_.sendMessage(
             'documentHeight',
-            dict({'height': measuredContentHeight}),
+            {'height': measuredContentHeight},
             /* cancelUnsent */ true
           );
           this.contentHeight_ = measuredContentHeight;

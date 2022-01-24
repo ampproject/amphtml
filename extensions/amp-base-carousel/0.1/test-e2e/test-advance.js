@@ -1,5 +1,6 @@
-import {getNextArrow, getPrevArrow, getSlides} from './helpers';
 import {sleep} from '#testing/helpers';
+
+import {getNextArrow, getPrevArrow, getSlides} from './helpers';
 
 const pageWidth = 500;
 const pageHeight = 800;

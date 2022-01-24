@@ -1,10 +1,12 @@
-import {WindowInterface} from '#core/window/interface';
 import {
   base64UrlDecodeFromString,
   base64UrlEncodeFromString,
 } from '#core/types/string/base64';
-import {crc32} from './crc32';
+import {WindowInterface} from '#core/window/interface';
+
 import {user} from '#utils/log';
+
+import {crc32} from './crc32';
 
 /** @const {string} */
 const DELIMITER = '*';

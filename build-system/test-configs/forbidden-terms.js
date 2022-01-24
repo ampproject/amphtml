@@ -144,6 +144,7 @@ const forbiddenTermsGlobal = {
       'build-system/compile/build-compiler.js',
       'build-system/compile/build-constants.js',
       'src/core/mode/esm.js',
+      'src/core/mode/globals.d.ts',
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
       'src/core/mode/version.js',
@@ -607,10 +608,7 @@ const forbiddenTermsGlobal = {
   '\\b(__)?AMP_EXP\\b': {
     message:
       'Do not access AMP_EXP directly. Use isExperimentOn() to access config',
-    allowlist: [
-      'src/experiments/index.js',
-      'src/experiments/experiments.extern.js',
-    ],
+    allowlist: ['src/experiments/index.js', 'src/experiments/amp-globals.d.ts'],
   },
   'AMP_CONFIG': {
     message:
@@ -632,7 +630,6 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/dist.js',
       'src/config.js',
       'src/experiments/index.js',
-      'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/core/mode/test.js',
       'src/core/mode/local-dev.js',
@@ -724,8 +721,9 @@ const forbiddenTermsGlobal = {
       'The @storybook/addon-knobs package has been deprecated. Use Controls instead (`args` and `argTypes`). https://storybook.js.org/docs/react/essentials/controls',
     allowlist: [
       // TODO(#35923): Update existing files to use Controls instead.
-      'build-system/tasks/storybook/amp-env/main.js',
-      'build-system/tasks/storybook/preact-env/main.js',
+      'build-system/tasks/storybook/env/amp/main.js',
+      'build-system/tasks/storybook/env/preact/main.js',
+      'build-system/tasks/storybook/env/react/main.js',
       'extensions/amp-animation/0.1/storybook/template.js',
       'extensions/amp-date-display/1.0/storybook/Basic.amp.js',
       'extensions/amp-date-display/1.0/storybook/Basic.js',
@@ -737,7 +735,6 @@ const forbiddenTermsGlobal = {
       'extensions/amp-lightbox/1.0/storybook/Basic.js',
       'extensions/amp-lightbox-gallery/1.0/storybook/Basic.amp.js',
       'extensions/amp-lightbox-gallery/1.0/storybook/Basic.js',
-      'extensions/amp-render/1.0/storybook/Basic.js',
       'extensions/amp-selector/1.0/storybook/Basic.amp.js',
       'extensions/amp-selector/1.0/storybook/Basic.js',
       'extensions/amp-sidebar/0.1/storybook/Basic.amp.js',
@@ -813,6 +810,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.pageXOffset(?!_)': bannedTermsHelpString,
   '\\.pageYOffset(?!_)': bannedTermsHelpString,
   '\\.innerWidth(?!_)': bannedTermsHelpString,
+  '\\.toggleAttribute(?!_)': 'please use `toggleAttribute()` from core/dom',
   '\\.innerHeight(?!_)': bannedTermsHelpString,
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,

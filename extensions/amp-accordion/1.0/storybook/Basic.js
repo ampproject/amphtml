@@ -7,6 +7,8 @@ import {
   BentoAccordionSection,
 } from '../component';
 
+import '../component.jss';
+
 export default {
   title: 'Accordion',
   component: BentoAccordion,

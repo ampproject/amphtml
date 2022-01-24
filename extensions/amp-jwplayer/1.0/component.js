@@ -1,5 +1,4 @@
 import {dispatchCustomEvent} from '#core/dom';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import * as Preact from '#preact';
@@ -282,12 +281,10 @@ function postCommandMessage(iframe, method, optParams) {
   }
 
   iframe.contentWindow./*OK*/ postMessage(
-    JSON.stringify(
-      dict({
-        'method': method,
-        'optParams': optParams,
-      })
-    ),
+    JSON.stringify({
+      'method': method,
+      'optParams': optParams,
+    }),
     '*'
   );
 }

@@ -1,10 +1,14 @@
-import * as consent from '../../../../src/consent';
 import '../amp-brightcove';
-import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/helpers/service';
-import {createElementWithAttributes} from '#core/dom';
-import {parseUrlDeprecated} from '../../../../src/url';
+
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {createElementWithAttributes} from '#core/dom';
+
+import {toggleExperiment} from '#experiments';
+
+import {waitFor} from '#testing/helpers/service';
+
+import * as consent from '../../../../src/consent';
+import {parseUrlDeprecated} from '../../../../src/url';
 
 describes.realWin(
   'amp-brightcove-v1.0',
