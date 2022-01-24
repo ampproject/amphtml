@@ -254,6 +254,7 @@ const htmlFixtureGlobs = [
   '!examples/amp-script/vue-todomvc.amp.html',
   '!examples/amp-skimlinks.html',
   '!examples/amp-smartlinks.html',
+  '!examples/amp-story-subscription/amp-story-subscription.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-iframe.provider.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-metering-laa.amp.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-metering-registration-widget.html',
