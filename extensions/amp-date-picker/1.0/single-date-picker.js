@@ -42,9 +42,9 @@ function SingleDatePickerWithRef(
     format,
     id,
     inputSelector,
+    locale,
     mode,
     onError,
-    locale,
     ...rest
   },
   ref
@@ -66,7 +66,7 @@ function SingleDatePickerWithRef(
         value: getFormattedDate(date, format, locale),
       }));
     },
-    [format]
+    [format, locale]
   );
 
   const clear = useCallback(() => {

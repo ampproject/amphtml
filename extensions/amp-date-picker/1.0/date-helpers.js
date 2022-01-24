@@ -68,7 +68,6 @@ import {
   sl,
   sq,
   sr,
-  srLatn,
   sv,
   ta,
   te,
@@ -214,7 +213,9 @@ export function getFormattedDate(
     return '';
   }
   const isUnixTimestamp = dateFormat.match(/[Xx]/);
-  const _locale = isUnixTimestamp ? enUS : getLocale(locale);
+  const _locale = isUnixTimestamp
+    ? getLocale(DEFAULT_LOCALE)
+    : getLocale(locale);
   return format(date, dateFormat, {locale: _locale});
 }
 
