@@ -10,6 +10,7 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
+const {buildBentoComponents} = require('./build-bento');
 const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
@@ -52,9 +53,7 @@ async function build() {
   } else {
     await compileAllJs(options);
   }
-
-  // This step internally parses the various extension* flags.
-  await buildExtensions(options);
+  await Promise.all([buildExtensions(options), buildBentoComponents(options)]);
 
   // This step is to be run only during a full `amp build`.
   if (!argv.core_runtime_only && !argv.bento_runtime_only) {
