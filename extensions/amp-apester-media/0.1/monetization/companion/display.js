@@ -1,6 +1,7 @@
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
+
+import {Services} from '#service';
 const ALLOWED_AD_PROVIDER = 'gdt';
 
 /**
@@ -69,7 +70,7 @@ function constructCompanionDisplayAd(
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    dict({
+    {
       'width': `${maxWidth}`,
       'height': '0',
       'type': 'doubleclick',
@@ -78,7 +79,7 @@ function constructCompanionDisplayAd(
       'data-multi-size-validation': 'false',
       'data-multi-size': multiSizeData,
       'data-enable-refresh': `${refreshInterval}`,
-    })
+    }
   );
   ampAd.classList.add('i-amphtml-amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);

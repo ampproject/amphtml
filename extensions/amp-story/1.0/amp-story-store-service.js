@@ -1,9 +1,13 @@
-import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '#core/data-structures/observable';
-import {Services} from '#service';
-import {deepEquals} from '#core/types/object/json';
-import {dev} from '#utils/log';
 import {hasOwn} from '#core/types/object';
+import {deepEquals} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
+
+import {EmbedMode, parseEmbedMode} from './embed-mode';
+
 import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /** @type {string} */
@@ -72,7 +76,8 @@ export let InteractiveReactData;
  * @typedef {{
  *   product-tag-id: string,
  *   product-title: string,
- *   product-price: string,
+ *   product-price: number,
+ *   product-price-currency: string,
  *   product-icon: string,
  *   product-tag-text: ?string,
  * }}
@@ -81,6 +86,7 @@ export let ShoppingConfigDataDef;
 
 /**
  * @typedef {{
+ *  activeProductData: ShoppingConfigDataDef,
  *  items: !Map<string, !ShoppingConfigDataDef>,
  * }}
  */
@@ -97,10 +103,8 @@ export let ShoppingDataDef;
  *    canShowStoryUrlInfo: boolean,
  *    canShowSystemLayerButtons: boolean,
  *    viewerCustomControls: !Array<!Object>,
- *    accessState: boolean,
  *    adState: boolean,
  *    pageAttachmentState: boolean,
- *    affiliateLinkState: !Element,
  *    desktopState: boolean,
  *    educationState: boolean,
  *    gyroscopeEnabledState: string,
@@ -116,7 +120,6 @@ export let ShoppingDataDef;
  *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
- *    storyHasAudioState: boolean,
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
  *    systemUiIsVisibleState: boolean,
@@ -147,10 +150,8 @@ export const StateProperty = {
   VIEWER_CUSTOM_CONTROLS: 'viewerCustomControls',
 
   // App States.
-  ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
   PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
-  AFFILIATE_LINK_STATE: 'affiliateLinkState',
   EDUCATION_STATE: 'educationState',
   GYROSCOPE_PERMISSION_STATE: 'gyroscopePermissionState',
   INFO_DIALOG_STATE: 'infoDialogState',
@@ -168,8 +169,6 @@ export const StateProperty = {
   RTL_STATE: 'rtlState',
   SHARE_MENU_STATE: 'shareMenuState',
   SHOPPING_DATA: 'shoppingData',
-  // Any page has audio, or amp-story has a `background-audio` attribute.
-  STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
   // Any page has elements with playback.
@@ -198,9 +197,7 @@ export const Action = {
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   SET_NAVIGATION_PATH: 'setNavigationPath',
   SET_PAGE_IDS: 'setPageIds',
-  TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
-  TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
@@ -213,9 +210,8 @@ export const Action = {
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   ADD_SHOPPING_DATA: 'addShoppingData',
-  TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
-  TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
+  TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
@@ -302,18 +298,6 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.ACTIONS_ALLOWLIST]: newActionsAllowlist,
       });
-    // Triggers the amp-acess paywall.
-    case Action.TOGGLE_ACCESS:
-      // Don't change the PAUSED_STATE if ACCESS_STATE is not changed.
-      if (state[StateProperty.ACCESS_STATE] === data) {
-        return state;
-      }
-
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.ACCESS_STATE]: !!data,
-        [StateProperty.PAUSED_STATE]: !!data,
-      });
     case Action.TOGGLE_PAGE_ATTACHMENT_STATE:
       return /** @type {!State} */ ({
         ...state,
@@ -324,12 +308,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.AD_STATE]: !!data,
-      });
-    // Expands or collapses the affiliate link.
-    case Action.TOGGLE_AFFILIATE_LINK:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.AFFILIATE_LINK_STATE]: data,
       });
     case Action.TOGGLE_EDUCATION:
       return /** @type {!State} */ ({
@@ -352,22 +330,16 @@ const actions = (state, action, data) => {
         [StateProperty.INFO_DIALOG_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
       });
-    // Shows or hides the audio controls.
-    case Action.TOGGLE_STORY_HAS_AUDIO:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.STORY_HAS_AUDIO_STATE]: !!data,
-      });
-    case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
-      });
     // Shows or hides the play/pause controls.
     case Action.TOGGLE_STORY_HAS_PLAYBACK_UI:
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: !!data,
+      });
+    case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
       });
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
@@ -567,9 +539,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_STORY_URL_INFO]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.VIEWER_CUSTOM_CONTROLS]: [],
-      [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
-      [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
       [StateProperty.INFO_DIALOG_STATE]: false,
@@ -587,7 +557,6 @@ export class AmpStoryStoreService {
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
       [StateProperty.SHOPPING_DATA]: {},
-      [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,

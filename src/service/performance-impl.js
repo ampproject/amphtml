@@ -5,7 +5,7 @@ import {whenDocumentComplete, whenDocumentReady} from '#core/document/ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
 import {debounce} from '#core/types/function';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
@@ -751,7 +751,7 @@ export class Performance {
       'You may not set both opt_delta and opt_value.'
     );
 
-    const data = dict({'label': label});
+    const data = {'label': label};
     let delta;
 
     if (opt_delta != undefined) {
@@ -832,11 +832,11 @@ export class Performance {
       }
       this.viewer_.sendMessage(
         'sendCsi',
-        dict({
+        {
           'ampexp': this.ampexp_,
           'canonicalUrl': this.documentInfo_.canonicalUrl,
           'eventid': this.eventid_,
-        }),
+        },
         /* cancelUnsent */ true
       );
     }
@@ -895,7 +895,7 @@ export class Performance {
     if (this.viewer_) {
       this.viewer_.sendMessage(
         'prerenderComplete',
-        dict({'value': value}),
+        {'value': value},
         /* cancelUnsent */ true
       );
     }

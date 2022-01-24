@@ -6,7 +6,7 @@ import {getEffectiveLayout} from '#core/static-layout';
 /**
  * @see amphtml/compiler/types.js for full description
  *
- * @param {!Element} element
+ * @param {HTMLElement} element
  */
 export function buildDom(element) {
   if (isServerRendered(element)) {

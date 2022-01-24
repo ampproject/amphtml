@@ -29,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Mai mult"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Trebuie să activați experimentul amp-story pentru a vizualiza acest conținut."
   },
   "21": {
     "string": "Ne pare rău, se pare că browserul dvs. nu acceptă această experiență"
@@ -62,23 +56,11 @@
   "27": {
     "string": "Continuați oricum"
   },
-  "31": {
-    "string": "Fără sunet"
-  },
-  "32": {
-    "string": "Cu sunet"
-  },
-  "33": {
-    "string": "Această pagină nu are sunet"
-  },
   "34": {
     "string": "Redați videoclipul"
   },
   "35": {
     "string": "Glisați în sus"
-  },
-  "62": {
-    "string": "Distribuiți începând cu această pagină"
   },
   "63": {
     "string": "Line"
@@ -100,9 +82,6 @@
   },
   "69": {
     "string": "Distribuiți relatarea"
-  },
-  "70": {
-    "string": "Alternați meniul relatării"
   },
   "71": {
     "string": "A"
@@ -136,9 +115,6 @@
   },
   "81": {
     "string": "Sugestie"
-  },
-  "82": {
-    "string": "Pagina precedentă"
   },
   "83": {
     "string": "Activați"

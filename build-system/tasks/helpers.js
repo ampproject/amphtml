@@ -4,7 +4,6 @@ const esbuild = require('esbuild');
 /** @type {Object} */
 const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
-const magicstring = require('magic-string');
 const open = require('open');
 const path = require('path');
 const Remapping = require('@ampproject/remapping');
@@ -13,7 +12,6 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const {closureCompile} = require('../compile/compile');
 const {cyan, green, red} = require('kleur/colors');
 const {generateBentoRuntimeEntrypoint} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
@@ -28,19 +26,11 @@ const {watch} = require('chokidar');
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
 
-/** @type {magicstring.default} */
-const MagicString = /** @type {*} */ (magicstring);
-
 /**
  * Tasks that should print the `--nobuild` help text.
  * @private @const {!Set<string>}
  */
 const NOBUILD_HELP_TASKS = new Set(['e2e', 'integration', 'visual-diff']);
-
-/**
- * Used during minification to concatenate modules
- */
-const MODULE_SEPARATOR = ';';
 
 /**
  * Used during minification to concatenate extension bundles
@@ -157,12 +147,10 @@ async function compileBentoRuntime(options) {
  * @return {!Promise}
  */
 async function compileAllJs(options) {
+  log(`Compiling ${cyan(options.minified ? 'minified' : 'unminified')} JS...`);
+
   const {minify} = options;
-  if (minify) {
-    log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
-  } else {
-    log('Compiling JS with', cyan('esbuild'), 'and', cyan('babel') + '...');
-  }
+
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
@@ -206,82 +194,6 @@ async function getCompiledFile(srcFilename) {
 }
 
 /**
- * Allows pending inside the compile wrapper to the already minified JS file.
- * @param {string} srcFilename Name of the JS source file
- * @param {string} destFilePath File path to the minified JS file
- * @param {?Object} options
- */
-function combineWithCompiledFile(srcFilename, destFilePath, options) {
-  const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
-  if (!bundleFiles) {
-    return;
-  }
-  const bundle = new MagicString.Bundle({
-    separator: '\n',
-  });
-  // We need to inject the code _inside_ the extension wrapper
-  const destFileName = path.basename(destFilePath);
-  /**
-   * TODO (rileyajones) This should be import('magic-string').MagicStringOptions but
-   * is invalid until https://github.com/Rich-Harris/magic-string/pull/183
-   * is merged.
-   * @type {Object}
-   */
-  const mapMagicStringOptions = {filename: destFileName};
-  const contents = new MagicString(
-    fs.readFileSync(destFilePath, 'utf8'),
-    mapMagicStringOptions
-  );
-  const map = JSON.parse(fs.readFileSync(`${destFilePath}.map`, 'utf8'));
-  const {sourceRoot} = map;
-  map.sourceRoot = undefined;
-
-  // The wrapper may have been minified further. Search backwards from the
-  // expected <%=contents%> location to find the start of the `{` in the
-  // wrapping function.
-  const wrapperIndex = options.wrapper.indexOf('<%= contents %>');
-  const index = contents.original.lastIndexOf('{', wrapperIndex) + 1;
-
-  const wrapperOpen = contents.snip(0, index);
-  const remainingContents = contents.snip(index, contents.length());
-
-  bundle.addSource(wrapperOpen);
-  for (const bundleFile of bundleFiles) {
-    const contents = fs.readFileSync(bundleFile, 'utf8');
-    /**
-     * TODO (rileyajones) This should be import('magic-string').MagicStringOptions but
-     * is invalid until https://github.com/Rich-Harris/magic-string/pull/183
-     * is merged.
-     * @type {Object}
-     */
-    const bundleMagicStringOptions = {filename: bundleFile};
-    bundle.addSource(new MagicString(contents, bundleMagicStringOptions));
-    bundle.append(MODULE_SEPARATOR);
-  }
-  bundle.addSource(remainingContents);
-
-  const bundledMap = bundle.generateDecodedMap({
-    file: destFileName,
-    hires: true,
-  });
-
-  const remapped = remapping(
-    bundledMap,
-    (file) => {
-      if (file === destFileName) {
-        return map;
-      }
-      return null;
-    },
-    !argv.full_sourcemaps
-  );
-  remapped.sourceRoot = sourceRoot;
-
-  fs.writeFileSync(destFilePath, bundle.toString(), 'utf8');
-  fs.writeFileSync(`${destFilePath}.map`, remapped.toString(), 'utf8');
-}
-
-/**
  * @param {string} name
  * @return {string}
  */
@@ -307,42 +219,6 @@ function maybeToEsmName(name) {
  */
 function maybeToNpmEsmName(name) {
   return argv.esm ? name.replace(/\.js$/, '.module.js') : name;
-}
-
-/**
- * Minifies a given JavaScript file entry point.
- * @param {string} srcDir
- * @param {string} srcFilename
- * @param {string} destDir
- * @param {?Object} options
- * @return {!Promise}
- */
-async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
-  const timeInfo = {};
-  const entryPoint = path.join(srcDir, srcFilename);
-  const minifiedName = maybeToEsmName(options.minifiedName);
-
-  options.errored = false;
-  await closureCompile(entryPoint, destDir, minifiedName, options, timeInfo);
-  // If an incremental watch build fails, simply return.
-  if (options.watch && options.errored) {
-    return;
-  }
-
-  const destPath = path.join(destDir, minifiedName);
-  combineWithCompiledFile(srcFilename, destPath, options);
-  if (options.aliasName) {
-    fs.copySync(
-      destPath,
-      path.join(destDir, maybeToEsmName(options.aliasName))
-    );
-  }
-
-  let name = minifiedName;
-  if (options.aliasName) {
-    name += ` → ${maybeToEsmName(options.aliasName)}`;
-  }
-  endBuildStep('Minified', name, timeInfo.startTime);
 }
 
 /**
@@ -441,9 +317,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
+  const babelMaps = new Map();
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
-    /* enableCache */ true
+    /* enableCache */ true,
+    {babelMaps}
   );
   const plugins = [babelPlugin];
 
@@ -463,6 +341,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: true,
+        sourceRoot: path.dirname(destFile),
+        sourcesContent: !!argv.full_sourcemaps,
         outfile: destFile,
         define: experimentDefines,
         plugins,
@@ -484,8 +364,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
 
     if (options.minify) {
-      ({code, map} = await minify(code, map));
-      map = await massageSourcemaps(map, options);
+      const {code: minified, map: minifiedMap} = await minify(code);
+      code = minified;
+      map = await massageSourcemaps([minifiedMap, map], babelMaps, options);
+    } else {
+      map = await massageSourcemaps([map], babelMaps, options);
     }
 
     await Promise.all([
@@ -578,10 +461,9 @@ const mangleIdentifier = {
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
- * @param {string} map
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code, map) {
+async function minify(code) {
   /* eslint-disable local/camelcase */
   const terserOptions = {
     mangle: {
@@ -599,7 +481,7 @@ async function minify(code, map) {
       beautify: !!argv.pretty_print,
       keep_quoted_props: true,
     },
-    sourceMap: {content: map},
+    sourceMap: true,
     toplevel: true,
     module: !!argv.esm,
     nameCache: argv.nomanglecache ? undefined : nameCache,
@@ -651,10 +533,7 @@ async function compileJs(srcDir, srcFilename, destDir, options) {
    * @return {Promise<void>}
    */
   async function doCompileJs(options) {
-    const buildResult =
-      options.minify && shouldUseClosure()
-        ? compileMinifiedJs(srcDir, srcFilename, destDir, options)
-        : esbuildCompile(srcDir, srcFilename, destDir, options);
+    const buildResult = esbuildCompile(srcDir, srcFilename, destDir, options);
     if (options.onWatchBuild) {
       options.onWatchBuild(buildResult);
     }
@@ -818,37 +697,49 @@ async function getDependencies(entryPoint, options) {
 }
 
 /**
- * @param {*} sourcemapsFile
+ * @param {!Array<string|object>} sourcemaps
+ * @param {Map<string, string|object>} babelMaps
  * @param {*} options
- * @return {*}
+ * @return {string}
  */
-function massageSourcemaps(sourcemapsFile, options) {
-  const sourcemaps = JSON.parse(sourcemapsFile);
-  sourcemaps.sources = sourcemaps.sources.map((source) => {
-    if (source.startsWith('../')) {
-      return source.slice('../'.length);
+function massageSourcemaps(sourcemaps, babelMaps, options) {
+  const root = process.cwd();
+  const remapped = remapping(
+    sourcemaps,
+    (f) => {
+      if (f.includes('__SOURCE__')) {
+        return null;
+      }
+      const file = path.join(root, f);
+      // The Babel tranformed file and the original file have the same path,
+      // which makes it difficult to distinguish during remapping's load phase.
+      // We perform some manual path mangling to destingish the babel files
+      // (which have a sourcemap) from the actual source file by pretending the
+      // source file exists in the '__SOURCE__' root directory.
+      const map = babelMaps.get(file);
+      if (!map) {
+        throw new Error(`failed to find sourcemap for babel file "${f}"`);
+      }
+      return {
+        ...map,
+        sourceRoot: path.posix.join('/__SOURCE__/', path.dirname(f)),
+      };
+    },
+    !argv.full_sourcemaps
+  );
+
+  remapped.sources = remapped.sources.map((source) => {
+    if (source?.startsWith('/__SOURCE__/')) {
+      return source.slice('/__SOURCE__/'.length);
     }
     return source;
   });
-  sourcemaps.sourceRoot = getSourceRoot(options);
-  if (sourcemaps.file) {
-    sourcemaps.file = path.basename(sourcemaps.file);
-  }
-  if (!argv.full_sourcemaps) {
-    delete sourcemaps.sourcesContent;
+  remapped.sourceRoot = getSourceRoot(options);
+  if (remapped.file) {
+    remapped.file = path.basename(remapped.file);
   }
 
-  return JSON.stringify(sourcemaps);
-}
-
-/**
- * Returns whether or not we should compile with Closure Compiler.
- * @return {boolean}
- */
-function shouldUseClosure() {
-  // TODO(samouri): cleanup closure build pipeline.
-  // If restoring, ensure that it continues returning false if options.bento
-  return false;
+  return remapped.toString();
 }
 
 module.exports = {
@@ -867,6 +758,5 @@ module.exports = {
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,
-  shouldUseClosure,
   mangleIdentifier,
 };

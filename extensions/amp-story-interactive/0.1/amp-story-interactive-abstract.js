@@ -1,38 +1,43 @@
-import {
-  ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
-} from '../../amp-story/1.0/story-analytics';
+import {closest} from '#core/dom/query';
+import {assertDoesNotContainDisplay, setImportantStyles} from '#core/dom/style';
 import {clamp} from '#core/math';
-import {
-  Action,
-  StateProperty,
-} from '../../amp-story/1.0/amp-story-store-service';
-import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
-import {CSS} from '../../../build/amp-story-interactive-0.1.css';
+import {toArray} from '#core/types/array';
+import {base64UrlEncodeFromString} from '#core/types/string/base64';
+
+import {isExperimentOn} from '#experiments/';
+
 import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
+
+import {executeRequest} from 'extensions/amp-story/1.0/request-utils';
+
+import {emojiConfetti} from './interactive-confetti';
+import {
+  buildInteractiveDisclaimer,
+  buildInteractiveDisclaimerIcon,
+} from './interactive-disclaimer';
+import {deduplicateInteractiveIds} from './utils';
+
+import {CSS} from '../../../build/amp-story-interactive-0.1.css';
 import {
   addParamsToUrl,
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
-import {base64UrlEncodeFromString} from '#core/types/string/base64';
-import {assertDoesNotContainDisplay, setImportantStyles} from '#core/dom/style';
 import {
-  buildInteractiveDisclaimer,
-  buildInteractiveDisclaimerIcon,
-} from './interactive-disclaimer';
-import {closest} from '#core/dom/query';
+  Action,
+  StateProperty,
+} from '../../amp-story/1.0/amp-story-store-service';
+import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+} from '../../amp-story/1.0/story-analytics';
 import {
   createShadowRootWithStyle,
   maybeMakeProxyUrl,
 } from '../../amp-story/1.0/utils';
-import {deduplicateInteractiveIds} from './utils';
-import {dev, devAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {emojiConfetti} from './interactive-confetti';
-import {toArray} from '#core/types/array';
-import {isExperimentOn} from '#experiments/';
-import {executeRequest} from 'extensions/amp-story/1.0/request-utils';
+import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
@@ -695,10 +700,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     return this.getClientId_().then((clientId) => {
       const requestOptions = {'method': method};
-      const requestParams = dict({
+      const requestParams = {
         'type': this.interactiveType_,
         'client': clientId,
-      });
+      };
       url = appendPathToUrl(
         this.urlService_.parse(url),
         this.getInteractiveId_()

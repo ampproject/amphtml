@@ -1,19 +1,21 @@
-import * as Preact from '#preact';
-import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {BentoInlineGallery} from './component';
-import {PreactBaseElement} from '#preact/base-element';
-import {dict} from '#core/types/object';
 import {setProp} from '#core/context';
+
+import * as Preact from '#preact';
 import {useContext, useLayoutEffect} from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoInlineGallery} from './component';
+
+import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 
 export const TAG = 'bento-inline-gallery';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
-    return dict({
+    return {
       'children': <ContextExporter shimDomElement={this.element} />,
-    });
+    };
   }
 }
 

@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.json');
+const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.base.json');
 let tsConfigPaths = null;
 
 /**
@@ -42,12 +42,13 @@ function readJsconfigPaths() {
 
 /**
  * Import map configuration.
- * @return {!Object}
+ * @return {Object}
  */
 function getImportResolver() {
   return {
     root: ['.'],
     alias: readJsconfigPaths(),
+    extensions: ['.js', '.jsx', '.ts', 'tsx'],
     babelOptions: {
       caller: {
         name: 'import-resolver',

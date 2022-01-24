@@ -488,19 +488,19 @@ async function buildNpmCss(extDir, options) {
   endBuildStep('Wrote CSS', `${options.name} → styles.css`, startCssTime);
 }
 
-/** @type {TransformCache} */
+/** @type {TransformCache<string>} */
 let jssCache;
 
 /**
  * Returns the minified CSS for a .jss.js file.
  *
  * @param {string} jssFile
- * @return {Promise<string|Buffer>}
+ * @return {Promise<string>}
  */
 async function getCssForJssFile(jssFile) {
   // Lazily instantiate the TransformCache
   if (!jssCache) {
-    jssCache = new TransformCache('.jss-cache', '.css');
+    jssCache = new TransformCache('.jss-cache');
   }
 
   const {contents, hash} = await batchedRead(jssFile);
@@ -742,12 +742,10 @@ async function getBentoBuildFilename(dir, name, mode, options) {
 function generateBentoEntryPointSource(name, toExport) {
   return dedent(`
     import {BaseElement} from '../base-element';
+    import {defineBentoElement} from '../../../../src/preact/bento-ce';
 
     function defineElement() {
-      customElements.define(
-        __name__,
-        BaseElement.CustomElement(BaseElement)
-      );
+      defineBentoElement(__name__, BaseElement);
     }
 
     ${toExport ? 'export {defineElement};' : 'defineElement();'}

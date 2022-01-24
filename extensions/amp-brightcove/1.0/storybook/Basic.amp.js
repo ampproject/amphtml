@@ -1,5 +1,7 @@
-import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
+
+import * as Preact from '#preact';
+
 import {VideoElementWithActions} from '../../../amp-video/1.0/storybook/_helpers';
 
 export default {

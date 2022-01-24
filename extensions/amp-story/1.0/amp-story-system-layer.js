@@ -1,5 +1,15 @@
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
-import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
+import {closest, matches, scopedQuerySelector} from '#core/dom/query';
+import {setImportantStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {dev} from '#utils/log';
+
+import {localize} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -7,30 +17,17 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
-import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
-import {
-  DevelopmentModeLog,
-  DevelopmentModeLogButtonSet,
-} from './development-ui';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
-import {Services} from '#service';
-import {closest, matches, scopedQuerySelector} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
 } from './utils';
-import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getMode} from '../../../src/mode';
-import {getSourceOrigin} from '../../../src/url';
 
-import {setImportantStyles} from '#core/dom/style';
-import {toArray} from '#core/types/array';
-import {localize} from './amp-story-localization-service';
+import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
+import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
+import {getSourceOrigin} from '../../../src/url';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -250,12 +247,6 @@ export class SystemLayer {
     /** @private @const {!ProgressBar} */
     this.progressBar_ = ProgressBar.create(win, this.parentEl_);
 
-    /** @private {!DevelopmentModeLog} */
-    this.developerLog_ = DevelopmentModeLog.create(win);
-
-    /** @private {!DevelopmentModeLogButtonSet} */
-    this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
-
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
@@ -303,8 +294,6 @@ export class SystemLayer {
     this.buttonsContainer_ = this.systemLayerEl_.querySelector(
       '.i-amphtml-story-system-layer-buttons'
     );
-
-    this.buildForDevelopmentMode_();
 
     this.initializeListeners_();
 
@@ -371,22 +360,6 @@ export class SystemLayer {
   /**
    * @private
    */
-  buildForDevelopmentMode_() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.buttonsContainer_.appendChild(
-      this.developerButtons_.build(
-        this.developerLog_.toggle.bind(this.developerLog_)
-      )
-    );
-    this.getShadowRoot().appendChild(this.developerLog_.build());
-  }
-
-  /**
-   * @private
-   */
   initializeListeners_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
     this.getShadowRoot().addEventListener('click', (event) => {
@@ -435,14 +408,6 @@ export class SystemLayer {
       StateProperty.CAN_SHOW_SHARING_UIS,
       (show) => {
         this.onCanShowSharingUisUpdate_(show);
-      },
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.STORY_HAS_AUDIO_STATE,
-      (hasAudio) => {
-        this.onStoryHasAudioStateUpdate_(hasAudio);
       },
       true /** callToInitialize */
     );
@@ -584,21 +549,6 @@ export class SystemLayer {
       this.getShadowRoot().classList.toggle(
         'i-amphtml-story-no-sharing',
         !canShowSharingUis
-      );
-    });
-  }
-
-  /**
-   * Reacts to has audio state updates, determining if the story has a global
-   * audio track playing, or if any page has audio.
-   * @param {boolean} hasAudio
-   * @private
-   */
-  onStoryHasAudioStateUpdate_(hasAudio) {
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().classList.toggle(
-        'i-amphtml-story-has-audio',
-        hasAudio
       );
     });
   }
@@ -839,13 +789,10 @@ export class SystemLayer {
     const eventName = element[VIEWER_CONTROL_EVENT_NAME];
 
     this.viewerMessagingHandler_ &&
-      this.viewerMessagingHandler_.send(
-        'documentStateUpdate',
-        dict({
-          'state': AMP_STORY_PLAYER_EVENT,
-          'value': eventName,
-        })
-      );
+      this.viewerMessagingHandler_.send('documentStateUpdate', {
+        'state': AMP_STORY_PLAYER_EVENT,
+        'value': eventName,
+      });
   }
 
   /**
@@ -954,76 +901,5 @@ export class SystemLayer {
   updateProgress(pageId, progress) {
     // TODO(newmuis) avoid passing progress logic through system-layer
     this.progressBar_.updateProgress(pageId, progress);
-  }
-
-  /**
-   * @param {!./logging.AmpStoryLogEntryDef} logEntry
-   * @private
-   */
-  logInternal_(logEntry) {
-    this.developerButtons_.log(logEntry);
-    this.developerLog_.log(logEntry);
-  }
-
-  /**
-   * Logs an array of entries to the developer logs.
-   * @param {!Array<!./logging.AmpStoryLogEntryDef>} logEntries
-   */
-  logAll(logEntries) {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.vsync_.mutate(() => {
-      logEntries.forEach((logEntry) => this.logInternal_(logEntry));
-    });
-  }
-
-  /**
-   * Logs a single entry to the developer logs.
-   * @param {!./logging.AmpStoryLogEntryDef} logEntry
-   */
-  log(logEntry) {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.logInternal_(logEntry);
-  }
-
-  /**
-   * Clears any state held by the developer log or buttons.
-   */
-  resetDeveloperLogs() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerButtons_.clear();
-    this.developerLog_.clear();
-  }
-
-  /**
-   * Sets the string providing context for the developer logs window.  This is
-   * often the name or ID of the element that all logs are for (e.g. the page).
-   * @param {string} contextString
-   */
-  setDeveloperLogContextString(contextString) {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerLog_.setContextString(contextString);
-  }
-
-  /**
-   * Hides the developer log in the UI.
-   */
-  hideDeveloperLog() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerLog_.hide();
   }
 }

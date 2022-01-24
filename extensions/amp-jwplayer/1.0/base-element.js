@@ -1,18 +1,17 @@
 import {getDataParamsFromAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoJwplayer} from './component';
 
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
+import {BentoVideoBaseElement} from '../../amp-video/1.0/base-element';
 
-export class BaseElement extends VideoBaseElement {
+export class BaseElement extends BentoVideoBaseElement {
   /** @override */
   init() {
     super.init();
 
-    return dict({
+    return {
       'queryParams': this.mergeQueryParams(
         getDataParamsFromAttributes(this.element, null, /^playerParam(.+)/),
         this.element.getAttribute('data-player-querystring')
@@ -20,7 +19,7 @@ export class BaseElement extends VideoBaseElement {
       'contentSearch': this.getContextualSearch(
         this.element.getAttribute('data-content-search')
       ),
-    });
+    };
   }
 
   /**

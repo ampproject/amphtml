@@ -13,6 +13,7 @@ import {
   BIND_PREFIX,
   DENYLISTED_TAGS,
   EMAIL_ALLOWLISTED_AMP_TAGS,
+  EMAIL_TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   isValidAttr,
   markElementForDiffing,
@@ -103,7 +104,9 @@ export class Purifier {
     // RETURN_DOM_FRAGMENT to keep the <template> and FORCE_BODY to prevent
     // reparenting. See https://github.com/cure53/DOMPurify/issues/285#issuecomment-397810671
     const fragment = this.domPurifyTriple_.sanitize(dirty, {
-      'ALLOWED_TAGS': TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
+      'ALLOWED_TAGS': isAmp4Email(this.doc_)
+        ? EMAIL_TRIPLE_MUSTACHE_ALLOWLISTED_TAGS
+        : TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
       'FORCE_BODY': true,
       'RETURN_DOM_FRAGMENT': true,
     });

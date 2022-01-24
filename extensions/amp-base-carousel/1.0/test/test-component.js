@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../component';
 import {mount} from 'enzyme';
+
+import * as Preact from '#preact';
+
+import {BentoBaseCarousel} from '../component';
 import {useStyles} from '../component.jss';
 
 describes.sandboxed('BentoBaseCarousel preact component', {}, () => {

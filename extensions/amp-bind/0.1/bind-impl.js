@@ -10,7 +10,7 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {isFiniteNumber, isObject} from '#core/types';
 import {findIndex, isArray, remove, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
-import {deepMerge, dict, getValueForExpr, map} from '#core/types/object';
+import {deepMerge, getValueForExpr, map} from '#core/types/object';
 import {deepEquals, parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -292,7 +292,7 @@ export class Bind {
 
       this.signals_.signal('FIRST_MUTATE');
 
-      const scope = dict();
+      const scope = {};
       if (event && getDetail(/** @type {!Event} */ (event))) {
         scope['event'] = getDetail(/** @type {!Event} */ (event));
       }
@@ -400,10 +400,10 @@ export class Bind {
    * @return {!Promise<?JsonObject>}
    */
   getDataForHistory_() {
-    const data = dict({
-      'data': dict({'amp-bind': this.state_}),
+    const data = {
+      'data': {'amp-bind': this.state_},
       'title': this.localWin_.document.title,
-    });
+    };
     if (!this.viewer_.isEmbedded()) {
       // CC doesn't recognize !JsonObject as a subtype of (JsonObject|null).
       return /** @type {!Promise<?JsonObject>} */ (Promise.resolve(data));
