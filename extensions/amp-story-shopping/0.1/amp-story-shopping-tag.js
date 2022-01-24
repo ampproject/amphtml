@@ -89,7 +89,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       /*
        * We are using offsetLeft and offsetWidth instead of getLayoutBox() because
        * the correct measurements are not taken into account when using a CSS transform (such as translate),
-       * which we are using in thei-amphtml-amp-story-shopping-tag-inner-flipped class.
+       * which we are using in the i-amphtml-amp-story-shopping-tag-inner-flipped class.
        */
       const {offsetLeft, offsetWidth} = this.element;
 
