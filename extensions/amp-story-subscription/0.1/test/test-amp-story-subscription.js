@@ -22,13 +22,16 @@ describes.realWin(
 
     it('should contain amp-subscriptions attributes', async () => {
       const element = html`
-        <amp-story-subscription layout="container">
-        </amp-story-subscription>
+        <amp-story-subscription layout="container"> </amp-story-subscription>
       `;
       doc.body.appendChild(element);
       await element.whenBuilt();
-      expect(element.querySelector('div').hasAttribute('subscriptions-dialog')).to.equal(true);
-      expect(element.querySelector('div').getAttribute('subscriptions-display')).to.equal('NOT granted');
+      expect(
+        element.querySelector('div').hasAttribute('subscriptions-dialog')
+      ).to.equal(true);
+      expect(
+        element.querySelector('div').getAttribute('subscriptions-display')
+      ).to.equal('NOT granted');
     });
   }
 );
