@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const moduleResolver = require('babel-plugin-module-resolver');
 
 const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.base.json');
 let tsConfigPaths = null;
@@ -48,7 +49,8 @@ function getImportResolver() {
   return {
     root: ['.'],
     alias: readJsconfigPaths(),
-    extensions: ['.js', '.jsx', '.ts', 'tsx'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    stripExtensions: [],
     babelOptions: {
       caller: {
         name: 'import-resolver',
@@ -79,8 +81,20 @@ function getImportResolverPlugin() {
   return ['module-resolver', getImportResolver()];
 }
 
+/**
+ * Resolves a filepath using the same logic as the rest of our build pipeline (babel module-resolver).
+ * @param {string} filepath
+ * @return {string}
+ */
+function resolvePath(filepath) {
+  return moduleResolver
+    .resolvePath(filepath, '/', getImportResolver())
+    .slice(1);
+}
+
 module.exports = {
   getImportResolver,
   getImportResolverPlugin,
   getRelativeAliasMap,
+  resolvePath,
 };

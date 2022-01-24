@@ -10,6 +10,7 @@
     "noImplicitAny": true,
     "isolatedModules": true,
     "lib": ["dom", "esnext", "es6"],
+    "jsx": "preserve",
 
     "paths": {
       "#3p/*": ["./3p/*"],
