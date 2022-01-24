@@ -27,7 +27,7 @@ const defaultLoadMoreTemplate = () => <button>Load more</button>;
  * @return {Promise<any>}
  */
 async function fetchItemsDefault(src) {
-  return await xhrUtils.fetchJson(src).then((res) => res.json());
+  return await xhrUtils.fetchJson(src);
 }
 
 /**

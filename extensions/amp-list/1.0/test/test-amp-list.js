@@ -49,12 +49,12 @@ describes.realWin(
       return element;
     }
 
-    let dataStub;
+    let fetchJson;
     beforeEach(() => {
-      dataStub = env.sandbox.stub().resolves({items: ['one', 'two', 'three']});
-      env.sandbox.stub(xhrUtils, 'fetchJson').callsFake(async () => {
+      fetchJson = env.sandbox.stub().resolves({items: ['one', 'two', 'three']});
+      env.sandbox.stub(xhrUtils, 'fetchJson').callsFake(async (...args) => {
         await delay(); // Ensure enough time to catch the "Loading" state
-        return {json: dataStub};
+        return fetchJson(...args);
       });
     });
 
@@ -70,12 +70,12 @@ describes.realWin(
 
       expect(snapshot(element)).to.equal(expectedLoading);
 
-      await whenCalled(dataStub);
+      await whenCalled(fetchJson);
 
       expect(snapshot(element)).to.equal(expectedPage1);
     });
     it('renders the template for each item', async () => {
-      dataStub.resolves({
+      fetchJson.resolves({
         items: [
           {first: 'A', second: 'B', third: 'C'},
           {first: '1', second: '2', third: '3'},
@@ -91,7 +91,7 @@ describes.realWin(
           </template>
         </amp-list>`
       );
-      await whenCalled(dataStub);
+      await whenCalled(fetchJson);
 
       expect(snapshot(element)).to.equal(
         cleanHtml(`

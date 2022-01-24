@@ -16,15 +16,16 @@ function snapshot(component) {
 }
 
 describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
-  let dataStub;
+  let fetchJson;
   beforeEach(() => {
-    dataStub = env.sandbox.stub().resolves({items: ['one', 'two', 'three']});
-    env.sandbox.stub(xhrUtils, 'fetchJson').resolves({json: dataStub});
+    fetchJson = env.sandbox
+      .stub(xhrUtils, 'fetchJson')
+      .resolves({items: ['one', 'two', 'three']});
   });
 
   async function waitForData(component, callCount = 1) {
     await waitFor(
-      () => dataStub.callCount === callCount,
+      () => fetchJson.callCount === callCount,
       'expected fetchJson to have been called' +
         (callCount > 1 ? ` ${callCount} times` : '')
     );
@@ -48,7 +49,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
 
       await waitForData(component);
 
-      expect(xhrUtils.fetchJson).calledWith('TEST.json');
+      expect(fetchJson).calledWith('TEST.json');
 
       expect(snapshot(component)).to.equal(
         `<div><p>one</p><p>two</p><p>three</p></div>`
@@ -74,18 +75,18 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         `<div><p>one</p><p>two</p><p>three</p></div>`
       );
 
-      dataStub.resolves({items: ['second', 'request']});
+      fetchJson.resolves({items: ['second', 'request']});
 
       // Prop doesn't change, no fetch:
       component.setProps({src: 'TEST.json'});
-      expect(xhrUtils.fetchJson).callCount(1);
+      expect(fetchJson).callCount(1);
       expect(snapshot(component)).to.equal(
         `<div><p>one</p><p>two</p><p>three</p></div>`
       );
 
       // Prop changes, new fetch:
       component.setProps({src: 'TEST2.json'});
-      expect(xhrUtils.fetchJson).callCount(2).calledWith('TEST2.json');
+      expect(fetchJson).callCount(2).calledWith('TEST2.json');
       await waitForData(component, 2);
       expect(snapshot(component)).to.equal(
         `<div><p>second</p><p>request</p></div>`
@@ -97,7 +98,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
     describe('with a flat array payload', () => {
       const results = ['flat', 'array'];
       beforeEach(() => {
-        dataStub.resolves(results);
+        fetchJson.resolves(results);
       });
       it('by default, it should not render the data', async () => {
         const component = mount(<BentoList src="" />);
@@ -125,7 +126,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
 
     describe('when a custom itemsKey is supplied', () => {
       beforeEach(() => {
-        dataStub.resolves({
+        fetchJson.resolves({
           NUMBERS: [1, 2, 3],
           LETTERS: ['A', 'B', 'C'],
           NESTED: {
@@ -162,7 +163,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         );
 
         // Ensure data was only fetched once!
-        expect(dataStub).callCount(1);
+        expect(fetchJson).callCount(1);
       });
       describe('dot-separated lists', () => {
         it('should access dot-separated property lists', async () => {
@@ -229,7 +230,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         `<div><p>one</p><p>two</p><p>three</p></div>`
       );
 
-      dataStub.resolves({items: ['a', 'b', 'c']});
+      fetchJson.resolves({items: ['a', 'b', 'c']});
       ref.current.refresh();
       component.update();
       expect(snapshot(component)).to.equal(expectedWhileRefreshing);
@@ -260,7 +261,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         <BentoList
           src=""
           template={(item) => <li>{item}</li>}
-          wrapper={(list) => <ul>{list}</ul>}
+          wrapperTemplate={(list) => <ul>{list}</ul>}
         />
       );
       await waitForData(component);
@@ -287,7 +288,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
     ];
     beforeEach(() => {
       mockData.forEach((page, index) => {
-        dataStub.onCall(index).resolves(page);
+        fetchJson.onCall(index).resolves(page);
       });
     });
     describe('manual', () => {
@@ -314,14 +315,14 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
 
         // Load page 2:
         component.find('button').simulate('click');
-        expect(xhrUtils.fetchJson).callCount(2).calledWith('page-2.json');
+        expect(fetchJson).callCount(2).calledWith('page-2.json');
         expect(snapshot(component)).to.equal(expectedPage1);
         await waitForData(component, 2);
         expect(snapshot(component)).to.equal(expectedPage2);
 
         // Load page 3:
         component.find('button').simulate('click');
-        expect(xhrUtils.fetchJson).callCount(3).calledWith('page-3.json');
+        expect(fetchJson).callCount(3).calledWith('page-3.json');
         expect(snapshot(component)).to.equal(expectedPage2);
         await waitForData(component, 3);
         expect(snapshot(component)).to.equal(expectedPage3);
@@ -396,12 +397,12 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         expect(ref.current.refresh).to.be.a('function');
       });
       it('should refresh the data', async () => {
-        expect(dataStub).to.have.callCount(1);
+        expect(fetchJson).to.have.callCount(1);
         expect(snapshot(component)).to.equal(
           `<div><p>one</p><p>two</p><p>three</p></div>`
         );
 
-        dataStub.resolves({items: [1, 2, 3]});
+        fetchJson.resolves({items: [1, 2, 3]});
         ref.current.refresh();
 
         await waitForData(component, 2);
