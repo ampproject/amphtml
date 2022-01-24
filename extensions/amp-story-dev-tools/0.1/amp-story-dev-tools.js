@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 import {toggle} from '#core/dom/style';
 import {parseQueryString} from '#core/types/string/url';
@@ -215,12 +216,13 @@ export class AmpStoryDevTools extends AMP.BaseElement {
     this.mutateElement(() => {
       toggle(this.tabContents_[this.currentTab_], false);
       toggle(this.tabContents_[tab], true);
-      this.tabSelectors_.forEach((tabSelector) => {
-        return tabSelector.toggleAttribute(
+      this.tabSelectors_.forEach((tabSelector) =>
+        toggleAttribute(
+          tabSelector,
           'active',
           tabSelector.getAttribute('data-tab') === tab
-        );
-      });
+        )
+      );
       this.currentTab_ = tab;
     });
   }
