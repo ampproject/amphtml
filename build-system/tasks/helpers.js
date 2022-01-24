@@ -131,12 +131,7 @@ async function compileBentoRuntime(options) {
   const filename = `${srcDir}/${srcFilename}`;
   const fileSource = generateBentoRuntimeEntrypoint();
   await fs.outputFile(filename, fileSource);
-  await doBuildJs(jsBundles, 'bento.js', {
-    ...options,
-    // The pre-closure babel step wants the entry file to be generated earlier.
-    // Much simpler to generate it here and use esbuild instead.
-    esbuild: true,
-  });
+  await doBuildJs(jsBundles, 'bento.js', options);
 }
 
 /**
