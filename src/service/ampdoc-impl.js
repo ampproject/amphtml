@@ -619,10 +619,6 @@ export class AmpDoc {
       visibilityState = VisibilityState_Enum.HIDDEN;
     }
 
-    // TODO(#37129): Trigger some portion of this condition when in PREVIEW mode
-    // so that `lastVisibleTime_` is updated, which will result in calls to
-    // `hasBeenVisible` returning `true`, which in turn will allow PREVIEW mode
-    // to avoid the build quota.
     if (this.visibilityState_ != visibilityState) {
       if (visibilityState == VisibilityState_Enum.VISIBLE) {
         const {performance} = this.win;

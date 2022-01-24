@@ -332,7 +332,12 @@ export class ResourcesImpl {
     // Most documents have 10 or less AMP tags. By building 20 we should not
     // change the behavior for the vast majority of docs, and almost always
     // catch everything in the first viewport.
-    return this.buildAttemptsCount_ < 20 || this.ampdoc.hasBeenVisible();
+    return (
+      this.buildAttemptsCount_ < 20 ||
+      // Ignore build quote for previews.
+      this.ampdoc.getVisibilityState() == VisibilityState_Enum.PREVIEW ||
+      this.ampdoc.hasBeenVisible()
+    );
   }
 
   /**
