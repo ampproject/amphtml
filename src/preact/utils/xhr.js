@@ -1,10 +1,25 @@
 export const xhrUtils = {
   /**
-   * Simply calls `fetch(url).then(r => r.json())`
+   * Wrapper around `fetch` that returns the parsed JSON result
+   *
+   * @param {RequestInfo} url
+   * @return {Promise<*>}
+   */
+  async fetchJson(url) {
+    return (await this.fetch(url)).json();
+  },
+
+  /**
+   * Wrapper around `fetch` that checks the status code
+   *
    * @param {RequestInfo} url
    * @return {Promise<Response>}
    */
-  fetchJson(url) {
-    return self.fetch(url).then((r) => r.json());
+  async fetch(url) {
+    const response = await self.fetch(url);
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    return response;
   },
 };
