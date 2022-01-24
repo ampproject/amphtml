@@ -728,21 +728,32 @@ async function getBentoBuildFilename(dir, name, mode, options) {
   if (await fs.pathExists(`${dir}/${filename}`)) {
     return filename;
   }
-  const generatedSource = generateBentoEntryPointSource(name, toExport);
   const generatedFilename = `build/${filename}`;
-  fs.outputFileSync(`${dir}/${generatedFilename}`, generatedSource);
+  const generatedOutputFilename = `${dir}/${generatedFilename}`;
+  const generatedSource = generateBentoEntryPointSource(
+    name,
+    toExport,
+    generatedOutputFilename
+  );
+  fs.outputFileSync(generatedOutputFilename, generatedSource);
   return generatedFilename;
 }
 
 /**
  * @param {string} name
  * @param {string} toExport
+ * @param {string} outputFilename
  * @return {string}
  */
-function generateBentoEntryPointSource(name, toExport) {
+function generateBentoEntryPointSource(name, toExport, outputFilename) {
+  const bentoCePath = path.relative(
+    path.dirname(outputFilename),
+    'src/preact/bento-ce'
+  );
+
   return dedent(`
     import {BaseElement} from '../base-element';
-    import {defineBentoElement} from '../../../../src/preact/bento-ce';
+    import {defineBentoElement} from '${bentoCePath}';
 
     function defineElement() {
       defineBentoElement(__name__, BaseElement);
