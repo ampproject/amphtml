@@ -81,36 +81,40 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   shouldTagFlip_(pageSize) {
-    pageSize = this.element.closest('amp-story-page')./*OK*/ offsetWidth;
     /* We only check the right hand side, as resizing only expands the border to the right. */
 
-    const {left, width} = this.element./*OK*/ getLayoutBox();
+    const storyPageWidth = pageSize.width;
 
-    const storyPageWidth = pageSize;
+    this.measureElement(() => {
+      /*
+       * We are using offsetLeft and offsetWidth instead of getLayoutBox() because
+       * the correct measurements are not taken into account when using a CSS transform (such as translate),
+       * which we are using in thei-amphtml-amp-story-shopping-tag-inner-flipped class.
+       */
+      const {offsetLeft, offsetWidth} = this.element;
 
-    const {offsetLeft, offsetWidth} = this.element;
+      const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
 
-    const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
-
-    const dotEl = this.shoppingTagEl_.querySelector(
-      '.i-amphtml-amp-story-shopping-tag-dot'
-    );
-
-    this.mutateElement(() => {
-      this.shoppingTagEl_.classList.toggle(
-        'i-amphtml-amp-story-shopping-tag-inner-flipped',
-        shouldFlip
+      const dotEl = this.shoppingTagEl_.querySelector(
+        '.i-amphtml-amp-story-shopping-tag-dot'
       );
 
-      dotEl.classList.toggle(
-        'i-amphtml-amp-story-shopping-tag-dot-flipped',
-        shouldFlip
-      );
+      this.mutateElement(() => {
+        this.shoppingTagEl_.classList.toggle(
+          'i-amphtml-amp-story-shopping-tag-inner-flipped',
+          shouldFlip
+        );
 
-      this.shoppingTagEl_.classList.toggle(
-        'i-amphtml-amp-story-shopping-tag-visible',
-        true
-      );
+        dotEl.classList.toggle(
+          'i-amphtml-amp-story-shopping-tag-dot-flipped',
+          shouldFlip
+        );
+
+        this.shoppingTagEl_.classList.toggle(
+          'i-amphtml-amp-story-shopping-tag-visible',
+          true
+        );
+      });
     });
   }
 
