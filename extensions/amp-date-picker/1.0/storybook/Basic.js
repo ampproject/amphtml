@@ -27,6 +27,7 @@ export default {
     initialVisibleMonth: today,
     locale: 'en',
     mode: 'static',
+    maximumNights: 0,
   },
 };
 
@@ -64,7 +65,7 @@ WithRangeInput.args = {
 export const SingleWithBlockedDates = _default.bind({});
 
 SingleWithBlockedDates.args = {
-  blocked: [addDays(today, 5)],
+  blocked: [addDays(today, 4), addDays(today, 5)],
 };
 
 // eslint-disable-next-line local/no-export-side-effect
@@ -72,5 +73,5 @@ export const RangeWithBlockedDates = _default.bind({});
 
 RangeWithBlockedDates.args = {
   type: 'range',
-  blocked: [addDays(today, 5)],
+  blocked: [addDays(today, 4), addDays(today, 5)],
 };

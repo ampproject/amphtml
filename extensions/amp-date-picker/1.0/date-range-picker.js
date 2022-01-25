@@ -28,6 +28,7 @@ import {
   TAG,
 } from './constants';
 import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
+import {useAttributes} from './use-attributes';
 import {useDatePickerState} from './use-date-picker-state';
 
 /**
@@ -57,13 +58,14 @@ function DateRangePickerWithRef(
 
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
-
   const [startInputProps, setStartInputProps] = useState();
   const [endInputProps, setEndInputProps] = useState();
 
   const containerRef = useRef();
 
   const {state, transitionTo} = useDatePickerState(mode);
+
+  const {getDisabledAfter, isDisabled} = useAttributes();
 
   /**
    * Generate a name for a hidden input.
@@ -180,7 +182,7 @@ function DateRangePickerWithRef(
         value: getFormattedDate(date, format, locale),
       }));
     },
-    [format, locale]
+    [format, locale, setStartDate]
   );
 
   const handleSetEndDate = useCallback(
@@ -191,18 +193,22 @@ function DateRangePickerWithRef(
         value: getFormattedDate(date, format, locale),
       }));
     },
-    [format, locale]
+    [format, locale, setEndDate]
   );
 
   const setDateRange = useCallback(
-    ({from, to}) => {
-      if (isBlockedRange(from, to)) {
+    ({from: startDate, to: endDate}) => {
+      const firstDisabledDate = getDisabledAfter(startDate);
+      const isOutsideRange =
+        isSameDay(endDate, firstDisabledDate) ||
+        isAfter(endDate, firstDisabledDate);
+      if (isBlockedRange(startDate, endDate) || isOutsideRange) {
         return;
       }
-      handleSetStartDate(from);
-      handleSetEndDate(to);
+      handleSetStartDate(startDate);
+      handleSetEndDate(endDate);
     },
-    [handleSetStartDate, handleSetEndDate, isBlockedRange]
+    [handleSetStartDate, handleSetEndDate, isBlockedRange, getDisabledAfter]
   );
 
   const clear = useCallback(() => {
@@ -354,6 +360,7 @@ function DateRangePickerWithRef(
           selected={dateRange}
           onSelect={setDateRange}
           locale={locale}
+          disabled={[isDisabled, {after: getDisabledAfter(startDate)}]}
           {...rest}
         />
       )}

@@ -47,6 +47,7 @@ function BentoDatePickerWithRef(
     monthFormat = DEFAULT_MONTH_FORMAT,
     weekDayFormat = DEFAULT_WEEK_DAY_FORMAT,
     locale = DEFAULT_LOCALE,
+    maximumNights = 0,
   },
   ref
 ) {
@@ -82,6 +83,7 @@ function BentoDatePickerWithRef(
       allowBlockedRanges,
       ref,
       locale,
+      maximumNights,
     };
   }, [
     blockedDates,
@@ -100,6 +102,7 @@ function BentoDatePickerWithRef(
     weekDayFormat,
     ref,
     locale,
+    maximumNights,
   ]);
 
   /**
@@ -122,7 +125,14 @@ function BentoDatePickerWithRef(
 
   return (
     <AttributesContext.Provider
-      value={{blockedDates, highlightedDates, allowBlockedEndDate, min, max}}
+      value={{
+        blockedDates,
+        highlightedDates,
+        allowBlockedEndDate,
+        min,
+        max,
+        maximumNights,
+      }}
     >
       <DatePicker {...datePickerProps} />
     </AttributesContext.Provider>

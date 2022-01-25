@@ -1,4 +1,4 @@
-import {format, isAfter, isBefore, subDays} from 'date-fns';
+import {addDays, format, isAfter, isBefore, subDays} from 'date-fns';
 
 import {createContext, useCallback, useContext} from '#preact';
 
@@ -18,37 +18,59 @@ export function useAttributes() {
   if (!context) {
     throw new Error('Must be wrapped in LabelContext.Provider component');
   }
-  const {allowBlockedEndDate, blockedDates, highlightedDates, max, min} =
-    context;
+  const {
+    allowBlockedEndDate,
+    blockedDates,
+    highlightedDates,
+    max,
+    maximumNights,
+    min,
+  } = context;
 
   const getFormattedDate = useCallback((date) => {
     return format(date, DATE_FORMAT);
   }, []);
 
-  const isBeforeMin = useCallback(
+  const isOutsideRange = useCallback(
     (date) => {
-      return isBefore(date, min);
+      return isBefore(date, min) || isAfter(date, max);
     },
-    [min]
+    [min, max]
   );
 
-  const isAfterMax = useCallback(
-    (date) => {
-      return isAfter(date, max);
+  // const isAfterFirstDisabledDate = useCallback(
+  //   (date) => {
+  //     return firstDisabledDate && isAfter(date, firstDisabledDate);
+  //   },
+  //   [firstDisabledDate]
+  // );
+
+  // This disable days based on the maximumNights prop and
+  // the selected start date
+  // https://react-day-picker-next.netlify.app/api/types/DateAfter
+  const getDisabledAfter = useCallback(
+    (startDate) => {
+      if (!maximumNights || !startDate) {
+        return;
+      }
+      const firstDisabledDate = addDays(startDate, maximumNights);
+      return firstDisabledDate;
     },
-    [max]
+    [maximumNights]
   );
 
+  // https://react-day-picker-next.netlify.app/api/types/matcher
   const isDisabled = useCallback(
     (date) => {
-      if (isBeforeMin(date) || isAfterMax(date)) {
+      if (isOutsideRange(date)) {
         return true;
       }
+
       const allowBlocked =
         allowBlockedEndDate && !blockedDates.contains(subDays(date, 1));
       return blockedDates.contains(date) && !allowBlocked;
     },
-    [blockedDates, allowBlockedEndDate, isBeforeMin, isAfterMax]
+    [blockedDates, allowBlockedEndDate, isOutsideRange]
   );
 
   const isHighlighted = useCallback(
@@ -70,5 +92,10 @@ export function useAttributes() {
     [isDisabled, getFormattedDate]
   );
 
-  return {getLabel, isDisabled, isHighlighted};
+  return {
+    getLabel,
+    isDisabled,
+    isHighlighted,
+    getDisabledAfter,
+  };
 }

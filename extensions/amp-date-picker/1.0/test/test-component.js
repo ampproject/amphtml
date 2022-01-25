@@ -8,7 +8,6 @@ import * as Preact from '#preact';
 import {
   DATE_FORMAT,
   getDateButton,
-  getSelectedDate,
   isSelectedDate,
   isSelectedEndDate,
   isSelectedStartDate,
@@ -19,6 +18,7 @@ import {BentoDatePicker} from '../component';
 import * as helpers from '../date-helpers';
 
 const DEFAULT_PROPS = {
+  mode: 'static',
   layout: 'fixed-height',
   height: 360,
 };
@@ -415,29 +415,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       wrapper.find('input[name="date"]').simulate('focus');
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
-    });
-
-    // TODO: Figure out how to test this
-    xit('hides the calendar on click outside the input', () => {
-      const wrapper = mount(
-        <form>
-          <DatePicker
-            type="single"
-            mode="overlay"
-            layout="container"
-            inputSelector="[name=date]"
-          >
-            <input type="text" name="date" />
-          </DatePicker>
-          <input type="text" name="other-input"></input>
-        </form>
-      );
-
-      wrapper.find('input[name="date"]').simulate('focus');
-
-      wrapper.find('input[name="other-input"]').simulate('click');
-
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
     });
   });
 
@@ -873,6 +850,32 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
             .prop('aria-disabled')
         ).to.be.true;
       });
+    });
+
+    it('blocks all subsequent dates if maximum nights is specified', () => {
+      env.sandbox
+        .stub(helpers, 'getCurrentDate')
+        .callsFake(() => new Date(2022, 0, 1));
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+          initialVisibleMonth={new Date(2022, 0)}
+          maximumNights={1}
+          startInputSelector="[name=startdate]"
+        >
+          <input type="text" name="startdate" value="2022-01-01"></input>
+          <input type="text" name="enddate"></input>
+        </DatePicker>
+      );
+
+      // TODO: This label should start with Not Available
+      selectDate(wrapper, new Date(2022, 0, 3));
+
+      expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2022, 0, 3))).to.be.false;
     });
   });
 
