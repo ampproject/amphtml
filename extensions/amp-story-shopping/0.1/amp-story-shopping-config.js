@@ -84,7 +84,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
    * @param {?number} maxLen
    * @private
    */
-  validateStringLength_(str, maxLen = 12) {
+  validateStringLength_(str, maxLen = 100) {
     if (str.length > maxLen) {
       console.log(
         str + ' length exceeds max length: ' + str.length + ' > ' + maxLen
