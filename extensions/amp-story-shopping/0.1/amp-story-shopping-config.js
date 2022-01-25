@@ -45,25 +45,29 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
+    const validateStringLength = [this.validateStringLength_];
+    const validateNumber = [this.validateNumber_];
+    const validateURL = [this.validateURL_];
+
     /** @private @const {!Object<Array<Function>>} */
     this.productValidationConfig_ = {
       /* Required Attrs */
-      'productTagId': [this.validateStringLength_], // Required. String. Keys to amp-story-shopping-tag nodes.
-      'brandLabel': [this.validateStringLength_], // Required. String.
-      'productTitle': [this.validateStringLength_], // Required. String.
-      'productPrice': [this.validateNumber_], // Required. Number.
-      'productImages': [this.validateURL_], // Required. String or array of strings.
-      'productDetails': [this.validateStringLength_], // Required. String.
-      'reviewsPage': [this.validateURL_], // Required if reviews-data. Links to a page where reviews can be read.
-      'productPriceCurrency': [this.validateStringLength_], // Required. String. ISO 4217 currency code used to display the correct currency symbol.
+      'productTagId': validateStringLength, // Required. String. Keys to amp-story-shopping-tag nodes.
+      'brandLabel': validateStringLength, // Required. String.
+      'productTitle': validateStringLength, // Required. String.
+      'productPrice': validateNumber, // Required. Number.
+      'productImages': validateURL, // Required. String or array of strings.
+      'productDetails': validateStringLength, // Required. String.
+      'reviewsPage': validateURL, // Required if reviews-data. Links to a page where reviews can be read.
+      'productPriceCurrency': validateStringLength, // Required. String. ISO 4217 currency code used to display the correct currency symbol.
       /* Optional Attrs */
-      'productColor': [this.validateStringLength_],
-      'productSize': [this.validateStringLength_],
-      'productIcon': [this.validateURL_], // Optional. Links to an image. Defaults to a shopping bag icon.
-      'productTagText': [this.validateStringLength_], // Optional. String.
-      'reviewsData': [this.validateURL_], // Optional. Links to review data.
-      'ctaText': [this.validateNumber_], // Optional. Number. Defaults to “Buy now”. Keys to a CTA text option for i18n.
-      'shippingText': [this.validateNumber_], // Optional. Number. Keys to a shipping text option for i18n. Shipping text will not be rendered if the string is omitted.
+      'productColor': validateStringLength,
+      'productSize': validateStringLength,
+      'productIcon': validateURL, // Optional. Links to an image. Defaults to a shopping bag icon.
+      'productTagText': validateStringLength, // Optional. String.
+      'reviewsData': validateURL, // Optional. Links to review data.
+      'ctaText': validateNumber, // Optional. Number. Defaults to “Buy now”. Keys to a CTA text option for i18n.
+      'shippingText': validateNumber, // Optional. Number. Keys to a shipping text option for i18n. Shipping text will not be rendered if the string is omitted.
     };
   }
 
@@ -115,7 +119,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
    * @private
    */
   validateURL_(url) {
-    //TODO
+    //TODO (need to check if string or araay of strings (use typeof?) for 'productImages' )
   }
 
   /**
