@@ -5,12 +5,12 @@ const imports = [
   {
     import: 'preact',
     message:
-      "Please import preact from 'src/preact'. This allows us to support React too.",
+      "Please import preact from '#preact'. This allows us to support React too.",
   },
   {
     import: 'preact/hooks',
     message:
-      "Please import preact/hooks from 'src/preact'. This allows us to support React too.",
+      "Please import preact/hooks from '#preact'. This allows us to support React too.",
   },
 ];
 

@@ -108,8 +108,8 @@ const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 const jisonPath = 'extensions/**/*.jison';
 
 const lintGlobs = [
-  '**/*.js{,x}',
-  '**/*.ts{,x}',
+  '**/*.{js,jsx}',
+  '**/*.{ts,tsx}',
   '!**/*.d.ts',
   // To ignore a file / directory, add it to .eslintignore.
 ];
