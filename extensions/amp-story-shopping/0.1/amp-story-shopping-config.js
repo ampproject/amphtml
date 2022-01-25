@@ -17,7 +17,7 @@ import {
 let ShoppingConfigDef;
 
 const attributeValidators = {
-  'requiredAttributes': new Set([
+  'required': new Set([
     'productTagId',
     'brandLabel',
     'productTitle',
@@ -27,7 +27,7 @@ const attributeValidators = {
     'productPriceCurrency',
     'reviewsPage',
   ]),
-  'optionalAttributes': new Set([
+  'optional': new Set([
     'productColor',
     'productSize',
     'productIcon',
@@ -61,8 +61,8 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       'reviewsPage': validateURL, // Required if reviews-data. Links to a page where reviews can be read.
       'productPriceCurrency': validateStringLength, // Required. String. ISO 4217 currency code used to display the correct currency symbol.
       /* Optional Attrs */
-      'productColor': validateStringLength,
-      'productSize': validateStringLength,
+      'productColor': validateStringLength, // Optional. String.
+      'productSize': validateStringLength, // Optional. String.
       'productIcon': validateURL, // Optional. Links to an image. Defaults to a shopping bag icon.
       'productTagText': validateStringLength, // Optional. String.
       'reviewsData': validateURL, // Optional. Links to review data.
@@ -77,13 +77,10 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
    * @param {?string} attribValidatorType
    * @private
    */
-  validateAttributes_(
-    prouductAttrs,
-    attribValidatorType = 'requiredAttributes'
-  ) {
+  validateAttributes_(prouductAttrs, attribValidatorType = 'required') {
     for (const attrib of attributeValidators[attribValidatorType]) {
       if (!prouductAttrs[attrib]) {
-        console.log('missing attribute ' + attrib);
+        console.log('missing ' + attribValidatorType + ' attribute ' + attrib);
       }
     }
   }
