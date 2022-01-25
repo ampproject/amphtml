@@ -30,3 +30,13 @@ export function enumValues(enumObj) {
   }
   return Object.freeze(Object.values(enumObj));
 }
+
+/**
+ * No effect on runtime. Merely an annotation for the compiler to shorten the
+ * property values of large, common enums during production.
+ * See babel-plugin-mangle-object-values.
+ * @param {T} obj
+ * @return {T}
+ * @template T
+ */
+export const mangleObjectValues = (obj) => obj;
