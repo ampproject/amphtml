@@ -84,13 +84,14 @@ Configuration is similar to `amp-access`, but no authorization, pingback and log
 ```
 
 ### Keys summary:
-- `vendor` : This is mandatory to pass and its value is "fewcents"
-- `publisherLogoUrl` : Url of image of the publisher logo in the format of png.
-- `contentSelector` : Id of div element where paywall will be rendered
-- `primaryColor` : Background colour of the unlock button, else default colour will be used
-- `accessKey` : This will be provided by fewcents to the publisher
-- `categoty` : Represent catetory of paywall and will be provided by fewcents
-- `articleIdentifier` : This lets fewcents to uniquely identify each article, and publisher should share this data with fewcents
+
+-   `vendor` : This is mandatory to pass and its value is "fewcents"
+-   `publisherLogoUrl` : Url of image of the publisher logo in the format of png.
+-   `contentSelector` : Id of div element where paywall will be rendered
+-   `primaryColor` : Background colour of the unlock button, else default colour will be used
+-   `accessKey` : This will be provided by fewcents to the publisher
+-   `categoty` : Represent catetory of paywall and will be provided by fewcents
+-   `articleIdentifier` : This lets fewcents to uniquely identify each article, and publisher should share this data with fewcents
 
 ## Analytics
 
