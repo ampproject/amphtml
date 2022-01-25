@@ -1,5 +1,6 @@
 import posthtml from 'posthtml';
 import {URL} from 'url';
+
 import {isJsonScript, isValidScript} from '../utilities/cdn-tag';
 import {OptionSet} from '../utilities/option-set';
 

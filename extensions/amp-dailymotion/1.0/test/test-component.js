@@ -1,7 +1,9 @@
-import * as Preact from '#preact';
-import {BentoDailymotion} from '../component';
-import {mount} from 'enzyme';
 import {expect} from 'chai';
+import {mount} from 'enzyme';
+
+import * as Preact from '#preact';
+
+import {BentoDailymotion} from '../component';
 
 describes.sandboxed('Dailymotion preact component v1.0', {}, () => {
   it('Renders', () => {

@@ -11,7 +11,6 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle, setStyle} from '#core/dom/style';
 import {numeric} from '#core/dom/transition';
 import {clamp} from '#core/math';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -650,11 +649,7 @@ export class ViewportImpl {
 
   /** @override */
   enterLightboxMode(opt_requestingElement, opt_onComplete) {
-    this.viewer_.sendMessage(
-      'requestFullOverlay',
-      dict(),
-      /* cancelUnsent */ true
-    );
+    this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */ true);
 
     this.enterOverlayMode();
     if (this.fixedLayer_) {
@@ -672,11 +667,7 @@ export class ViewportImpl {
 
   /** @override */
   leaveLightboxMode(opt_requestingElement) {
-    this.viewer_.sendMessage(
-      'cancelFullOverlay',
-      dict(),
-      /* cancelUnsent */ true
-    );
+    this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */ true);
 
     if (this.fixedLayer_) {
       this.fixedLayer_.leaveLightbox();
@@ -1073,7 +1064,7 @@ export class ViewportImpl {
         this.scrollAnimationFrameThrottled_ = false;
         this.viewer_.sendMessage(
           'scroll',
-          dict({'scrollTop': this.getScrollTop()}),
+          {'scrollTop': this.getScrollTop()},
           /* cancelUnsent */ true
         );
       });

@@ -8,6 +8,10 @@ import {
   WithBentoLightboxGallery,
 } from '../component';
 
+import '../component.jss';
+
+import '../../../amp-base-carousel/1.0/component.jss';
+
 export default {
   title: 'LightboxGallery',
   component: BentoLightboxGalleryProvider,

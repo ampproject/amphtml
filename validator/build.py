@@ -273,7 +273,7 @@ def CompileWithClosure(js_files, definitions, entry_points, output_file):
 
   cmd = [
       'java', '-jar',
-      '../node_modules/@ampproject/google-closure-compiler-java/compiler.jar',
+      './node_modules/google-closure-compiler-java/compiler.jar',
       '--language_out=ES5_STRICT', '--dependency_mode=PRUNE',
       '--js_output_file=%s' % output_file
   ]

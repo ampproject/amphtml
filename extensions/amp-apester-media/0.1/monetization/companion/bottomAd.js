@@ -1,6 +1,7 @@
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
+
+import {Services} from '#service';
 const ALLOWED_AD_PROVIDER = 'gpt';
 
 /**
@@ -42,7 +43,7 @@ function constructCompanionBottomAd(slot, bannerSizes, apesterElement) {
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    dict({
+    {
       'width': `${width}`,
       'height': `${height}`,
       'type': 'doubleclick',
@@ -50,7 +51,7 @@ function constructCompanionBottomAd(slot, bannerSizes, apesterElement) {
       'data-slot': `${slot}`,
       'data-multi-size-validation': 'false',
       'data-enable-refresh': `${refreshInterval}`,
-    })
+    }
   );
   ampAd.classList.add('i-amphtml-amp-apester-bottom-ad');
   apesterElement.appendChild(ampAd);

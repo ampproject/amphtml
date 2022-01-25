@@ -1,6 +1,6 @@
-import {dict} from '#core/types/object';
-
 import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
 
@@ -11,7 +11,7 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-date-display';
 
-class AmpDateDisplay extends BaseElement {
+class AmpDateDisplay extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -48,18 +48,18 @@ class AmpDateDisplay extends BaseElement {
             // A new template has been set while the old one was initializing.
             return;
           }
-          this.mutateProps(
-            dict({
-              'render': (data) => {
-                return templates
-                  .renderTemplateAsString(dev().assertElement(template), data)
-                  .then((html) => dict({'__html': html}));
-              },
-            })
-          );
+          this.mutateProps({
+            'render': (data) => {
+              return templates
+                .renderTemplateAsString(dev().assertElement(template), data)
+                .then((html) => ({
+                  '__html': html,
+                }));
+            },
+          });
         });
       } else {
-        this.mutateProps(dict({'render': null}));
+        this.mutateProps({'render': null});
       }
     }
   }

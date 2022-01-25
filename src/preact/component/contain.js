@@ -31,7 +31,7 @@ const SIZE_CONTENT_STYLE = {
  * - layout: nothing outside the element may affect its internal layout and
  * vice versa.
  * - paint: the element's content doesn't display outside the element's bounds.
- * @param {!ContainWrapperComponentProps} props
+ * @param {ContainWrapperComponentProps} props
  * @param {{current: ?Element}} ref
  * @return {PreactDef.Renderable}
  */

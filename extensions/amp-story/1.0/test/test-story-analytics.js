@@ -1,4 +1,5 @@
 import * as analytics from '#utils/analytics';
+
 import {Action, getStoreService} from '../amp-story-store-service';
 import {StoryAnalyticsService} from '../story-analytics';
 

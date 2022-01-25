@@ -1,10 +1,11 @@
+import {awaitFrameAfter} from '#testing/helpers';
+
 import {
   findElements,
   resetAllElements,
   verifyElementsBuilt,
   verifyPromptsHidden,
 } from './common';
-import {awaitFrameAfter} from '#testing/helpers';
 
 describes.endtoend(
   'amp-consent',

@@ -1,10 +1,12 @@
-import * as Preact from '#preact';
-import {ContainWrapper, useValueRef} from '#preact/component';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {forwardRef} from '#preact/compat';
-import {setStyle} from '#core/dom/style';
 import {tryFocus} from '#core/dom';
+import {setStyle} from '#core/dom/style';
+
+import * as Preact from '#preact';
 import {useImperativeHandle, useLayoutEffect, useRef, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {ContainWrapper, useValueRef} from '#preact/component';
+
 import {useStyles} from './component.jss';
 
 const ANIMATION_DURATION = 200;

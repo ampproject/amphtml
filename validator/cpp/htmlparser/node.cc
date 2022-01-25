@@ -22,7 +22,7 @@ void Node::AddAttribute(const Attribute& attr) {
 }
 
 void Node::SortAttributes(bool remove_duplicates) {
-  std::sort(attributes_.begin(), attributes_.end(),
+  std::stable_sort(attributes_.begin(), attributes_.end(),
             [](const Attribute& left, const Attribute& right) -> bool {
               return left.KeyPart() < right.KeyPart();
             });

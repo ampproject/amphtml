@@ -1,6 +1,8 @@
 import * as Preact from '#preact';
 import {Bento__component_name_pascalcase__} from '../component'
 
+__jss_import_storybook__
+
 export default {
   title: '__component_name_pascalcase__',
   component: Bento__component_name_pascalcase__,
