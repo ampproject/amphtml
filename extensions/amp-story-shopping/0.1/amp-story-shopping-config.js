@@ -32,6 +32,9 @@ const attributeValidators = {
     'productSize',
     'productIcon',
     'productTagText',
+    'reviewsData',
+    'ctaText',
+    'shippingText',
   ]),
 };
 
@@ -45,19 +48,22 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     /** @private @const {!Object<Array<Function>>} */
     this.productValidationConfig_ = {
       /* Required Attrs */
-      'productTagId': [this.validateStringLength_],
-      'brandLabel': [this.validateStringLength_],
-      'productTitle': [this.validateStringLength_],
-      'productPrice': [this.validateStringLength_],
-      'productImages': [this.validateURL_],
-      'productDetails': [this.validateStringLength_],
-      'reviewsPage': [this.validateURL_],
-      'productPriceCurrency': [this.validateStringLength_],
+      'productTagId': [this.validateStringLength_], // Required. String. Keys to amp-story-shopping-tag nodes.
+      'brandLabel': [this.validateStringLength_], // Required. String.
+      'productTitle': [this.validateStringLength_], // Required. String.
+      'productPrice': [this.validateNumber_], // Required. Number.
+      'productImages': [this.validateURL_], // Required. String or array of strings.
+      'productDetails': [this.validateStringLength_], // Required. String.
+      'reviewsPage': [this.validateURL_], // Required if reviews-data. Links to a page where reviews can be read.
+      'productPriceCurrency': [this.validateStringLength_], // Required. String. ISO 4217 currency code used to display the correct currency symbol.
       /* Optional Attrs */
       'productColor': [this.validateStringLength_],
       'productSize': [this.validateStringLength_],
-      'productIcon': [this.validateURL_],
-      'productTagText': [this.validateStringLength_],
+      'productIcon': [this.validateURL_], // Optional. Links to an image. Defaults to a shopping bag icon.
+      'productTagText': [this.validateStringLength_], // Optional. String.
+      'reviewsData': [this.validateURL_], // Optional. Links to review data.
+      'ctaText': [this.validateNumber_], // Optional. Number. Defaults to “Buy now”. Keys to a CTA text option for i18n.
+      'shippingText': [this.validateNumber_], // Optional. Number. Keys to a shipping text option for i18n. Shipping text will not be rendered if the string is omitted.
     };
   }
 
@@ -89,6 +95,17 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       console.log(
         str + ' length exceeds max length: ' + str.length + ' > ' + maxLen
       );
+    }
+  }
+
+  /**
+   * Validates number in shopping config attributes
+   * @param {number} number
+   * @private
+   */
+  validateNumber_(number) {
+    if (isNaN(number)) {
+      console.log(number + ' is not a number ');
     }
   }
 
