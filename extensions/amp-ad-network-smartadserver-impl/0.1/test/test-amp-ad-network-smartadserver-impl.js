@@ -19,6 +19,7 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
 
+import {XORIGIN_MODE} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAdNetworkSmartadserverImpl} from '../amp-ad-network-smartadserver-impl';
 
 const realWinConfig = {
@@ -293,6 +294,24 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
             /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
           );
         });
+    });
+  });
+
+  describe('getNonAmpCreativeRenderingMethod', () => {
+    it('should return iframe get if iOS browser', () => {
+      win.navigator.__defineGetter__('userAgent', () => {
+        return 'Mozilla/5.0 (iPod; CPU iPhone OS 12_0 like macOS) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/12.0 Mobile/14A5335d Safari/602.1.50';
+      });
+
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        type: 'smartadserver',
+      });
+
+      expect(
+        new AmpAdNetworkSmartadserverImpl(
+          element
+        ).getNonAmpCreativeRenderingMethod()
+      ).to.equal(XORIGIN_MODE.IFRAME_GET);
     });
   });
 
