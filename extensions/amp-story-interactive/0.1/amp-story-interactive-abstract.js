@@ -19,7 +19,8 @@ import {
 } from './interactive-disclaimer';
 import {deduplicateInteractiveIds} from './utils';
 
-import {CSS} from '../../../build/amp-story-interactive-0.1.css';
+import {CSS as hostCss} from '../../../build/amp-story-interactive-host-0.1.css';
+import {CSS as shadowCss} from '../../../build/amp-story-interactive-shadow-0.1.css';
 import {
   addParamsToUrl,
   appendPathToUrl,
@@ -38,6 +39,7 @@ import {
   maybeMakeProxyUrl,
 } from '../../amp-story/1.0/utils';
 import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
+import {installStylesForDoc} from 'src/style-installer';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
@@ -188,6 +190,20 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
     this.variableService_ = null;
+
+    // We install host CSS directly instead of during `registerElement` since
+    // components with different names extend from this class. As such, we'd
+    // unnnecessarily install the same styles once for each type of inheriting
+    // component present on the page.
+    // Instead, we ensure that we only install once by preserving the extension
+    // name "amp-story-interactive".
+    installStylesForDoc(
+      this.getAmpDoc(),
+      hostCss,
+      /* whenReady */ null,
+      /* isRuntimeCss */ false,
+      /* ext */ TAG
+    );
   }
 
   /**
@@ -278,7 +294,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       createShadowRootWithStyle(
         this.element,
         dev().assertElement(this.rootEl_),
-        CSS + concreteCSS
+        shadowCss + concreteCSS
       );
       return Promise.resolve();
     });
