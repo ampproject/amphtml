@@ -11,6 +11,7 @@ export const CONFIG_BASE_PATH = {
   production: 'https://api.fewcents.co/',
 };
 
+/** @const {string} Path params for authorize url */
 export const CONFIG_PATH_PARAMS =
   'v1/amp/authorizeBid?articleUrl=SOURCE_URL&ampReaderId=READER_ID&returnUrl=RETURN_URL';
 
