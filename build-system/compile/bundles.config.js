@@ -1,4 +1,5 @@
 'use strict';
+const bentoBundles = require('./bundles.config.bento.json');
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
 const {cyan, red} = require('kleur/colors');
@@ -207,6 +208,11 @@ exports.jsBundles = {
 exports.extensionBundles = extensionBundles;
 
 /**
+ * Used to generate component build targets
+ */
+exports.bentoBundles = bentoBundles;
+
+/**
  * Used to alias a version of an extension to an older deprecated version.
  */
 exports.extensionAliasBundles = {
@@ -248,6 +254,33 @@ exports.verifyExtensionBundles = function () {
       i === 0 || bundle.name.localeCompare(extensionBundles[i - 1].name) >= 0,
       'name',
       'is out of order. extensionBundles should be alphabetically sorted by name.',
+      bundle.name,
+      bundleString
+    );
+    verifyBundle_(
+      'version' in bundle,
+      'version',
+      'is missing from',
+      bundle.name,
+      bundleString
+    );
+  });
+};
+
+exports.verifyBentoBundles = function () {
+  bentoBundles.forEach((bundle, i) => {
+    const bundleString = JSON.stringify(bundle, null, 2);
+    verifyBundle_(
+      'name' in bundle,
+      'name',
+      'is missing from',
+      '',
+      bundleString
+    );
+    verifyBundle_(
+      i === 0 || bundle.name.localeCompare(bentoBundles[i - 1].name) >= 0,
+      'name',
+      'is out of order. bentoBundles should be alphabetically sorted by name.',
       bundle.name,
       bundleString
     );
