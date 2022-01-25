@@ -7,17 +7,15 @@ export const docInfo = {
    */
   getMetaByName(metaName) {
     const metas = self.document.head.querySelectorAll('meta[name]');
-    for (let i = 0; i < metas.length; i++) {
-      const meta = metas[i];
-      const name = meta.getAttribute('name');
-      if (name === metaName) {
-        const content = meta.getAttribute('content');
-        if (content !== undefined) {
-          return content;
-        }
-      }
-    }
-    return null;
+    return (
+      Array.from(metas.values())
+        .find(
+          (meta) =>
+            meta.getAttribute('name') === metaName &&
+            meta.getAttribute('content')
+        )
+        ?.getAttribute('content') || null
+    );
   },
 
   /**
@@ -33,14 +31,16 @@ export const docInfo = {
   get canonicalUrl() {
     const rootNode = self.document;
 
-    let canonicalUrl = rootNode?.AMP?.canonicalUrl;
-    if (!canonicalUrl) {
-      const canonicalTag = rootNode.querySelector('link[rel=canonical]');
-      canonicalUrl = canonicalTag
-        ? urlUtils.parse(canonicalTag.href).href
-        : this.sourceUrl;
+    const canonicalUrl = rootNode?.AMP?.canonicalUrl;
+    if (canonicalUrl) {
+      return canonicalUrl;
     }
 
-    return canonicalUrl;
+    const canonicalTag = rootNode.querySelector('link[rel=canonical]');
+    if (canonicalTag) {
+      return urlUtils.parse(canonicalTag.href).href;
+    }
+
+    return this.sourceUrl;
   },
 };

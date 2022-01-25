@@ -1,6 +1,6 @@
 export const platformUtils = {
   /**
-   * Whether the current platform an Android device.
+   * Whether the current platform is an Android device.
    * @return {boolean}
    */
   isAndroid() {
@@ -8,7 +8,7 @@ export const platformUtils = {
   },
 
   /**
-   * Whether the current platform an iOS device.
+   * Whether the current platform is an iOS device.
    * @return {boolean}
    */
   isIos() {
@@ -86,7 +86,7 @@ export const platformUtils = {
   },
 
   /**
-   * Whether the current browser is isStandalone.
+   * Whether the current browser is standalone.
    * @return {boolean}
    */
   isStandalone() {
