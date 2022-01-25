@@ -12,12 +12,12 @@ For example:
 Using AMP Classic services:
 
 ```js
-import { Services } from '#service';
+import {Services} from '#service';
 ///...
 
 const platform = Services.platformFor(this.win);
 if (platform.isIos()) {
-  // do Apple stuff
+  // do iOS stuff
 } else if (platform.isAndroid()) {
   // do Android stuff
 }
@@ -26,11 +26,11 @@ if (platform.isIos()) {
 Using Bento services:
 
 ```js
-import { platformUtils } from "#preact/services/platform";
+import {platformUtils} from '#preact/utils/platform';
 ///...
 
 if (platformUtils.isIos()) {
-  // do Apple stuff
+  // do iOS stuff
 } else if (platformUtils.isAndroid()) {
   // do Android stuff
 }
