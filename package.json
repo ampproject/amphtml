@@ -27,6 +27,7 @@
     "jss": "10.8.2",
     "jss-preset-default": "10.8.2",
     "moment": "2.29.1",
+    "mustache": "4.2.0",
     "obj-str": "1.1.0",
     "preact": "10.5.15",
     "react-dates": "21.8.0",
