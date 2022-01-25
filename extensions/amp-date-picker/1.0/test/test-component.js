@@ -877,6 +877,32 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
       expect(isSelectedEndDate(wrapper, new Date(2022, 0, 3))).to.be.false;
     });
+
+    it('does not allow the user to select an end date that is before the minimumNights threshhold', () => {
+      env.sandbox
+        .stub(helpers, 'getCurrentDate')
+        .callsFake(() => new Date(2022, 0, 1));
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+          initialVisibleMonth={new Date(2022, 0)}
+          minimumNights={2}
+          startInputSelector="[name=startdate]"
+        >
+          <input type="text" name="startdate" value="2022-01-01"></input>
+          <input type="text" name="enddate"></input>
+        </DatePicker>
+      );
+
+      // TODO: This label should start with Not Available
+      selectDate(wrapper, new Date(2022, 0, 2));
+
+      expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2022, 0, 2))).to.be.false;
+    });
   });
 
   describe('date formatting for a single day picker', () => {

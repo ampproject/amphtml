@@ -25,6 +25,7 @@ export function useAttributes() {
     max,
     maximumNights,
     min,
+    minimumNights,
   } = context;
 
   const getFormattedDate = useCallback((date) => {
@@ -38,13 +39,6 @@ export function useAttributes() {
     [min, max]
   );
 
-  // const isAfterFirstDisabledDate = useCallback(
-  //   (date) => {
-  //     return firstDisabledDate && isAfter(date, firstDisabledDate);
-  //   },
-  //   [firstDisabledDate]
-  // );
-
   // This disable days based on the maximumNights prop and
   // the selected start date
   // https://react-day-picker-next.netlify.app/api/types/DateAfter
@@ -53,10 +47,22 @@ export function useAttributes() {
       if (!maximumNights || !startDate) {
         return;
       }
-      const firstDisabledDate = addDays(startDate, maximumNights);
-      return firstDisabledDate;
+      return addDays(startDate, maximumNights);
     },
     [maximumNights]
+  );
+
+  // This disable days based on the maximumNights prop and
+  // the selected start date
+  // https://react-day-picker-next.netlify.app/api/types/DateAfter
+  const getDisabledBefore = useCallback(
+    (startDate) => {
+      if (!startDate) {
+        return;
+      }
+      return addDays(startDate, minimumNights);
+    },
+    [minimumNights]
   );
 
   // https://react-day-picker-next.netlify.app/api/types/matcher
@@ -97,5 +103,6 @@ export function useAttributes() {
     isDisabled,
     isHighlighted,
     getDisabledAfter,
+    getDisabledBefore,
   };
 }

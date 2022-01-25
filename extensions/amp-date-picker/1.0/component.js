@@ -48,6 +48,7 @@ function BentoDatePickerWithRef(
     weekDayFormat = DEFAULT_WEEK_DAY_FORMAT,
     locale = DEFAULT_LOCALE,
     maximumNights = 0,
+    minimumNights = 1,
   },
   ref
 ) {
@@ -84,6 +85,7 @@ function BentoDatePickerWithRef(
       ref,
       locale,
       maximumNights,
+      minimumNights,
     };
   }, [
     blockedDates,
@@ -103,6 +105,7 @@ function BentoDatePickerWithRef(
     ref,
     locale,
     maximumNights,
+    minimumNights,
   ]);
 
   /**
@@ -132,6 +135,7 @@ function BentoDatePickerWithRef(
         min,
         max,
         maximumNights,
+        minimumNights,
       }}
     >
       <DatePicker {...datePickerProps} />

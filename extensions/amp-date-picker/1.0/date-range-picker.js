@@ -1,4 +1,10 @@
-import {addDays, differenceInDays, isAfter, isSameDay} from 'date-fns';
+import {
+  addDays,
+  differenceInDays,
+  isAfter,
+  isBefore,
+  isSameDay,
+} from 'date-fns';
 
 import {
   closestAncestorElementBySelector,
@@ -65,7 +71,7 @@ function DateRangePickerWithRef(
 
   const {state, transitionTo} = useDatePickerState(mode);
 
-  const {getDisabledAfter, isDisabled} = useAttributes();
+  const {getDisabledAfter, getDisabledBefore, isDisabled} = useAttributes();
 
   /**
    * Generate a name for a hidden input.
@@ -198,17 +204,24 @@ function DateRangePickerWithRef(
 
   const setDateRange = useCallback(
     ({from: startDate, to: endDate}) => {
-      const firstDisabledDate = getDisabledAfter(startDate);
+      const disabledAfter = getDisabledAfter(startDate);
+      const disabledBefore = getDisabledBefore(startDate);
       const isOutsideRange =
-        isSameDay(endDate, firstDisabledDate) ||
-        isAfter(endDate, firstDisabledDate);
+        isAfter(endDate, disabledAfter) ||
+        (!isSameDay(startDate, endDate) && isBefore(endDate, disabledBefore));
       if (isBlockedRange(startDate, endDate) || isOutsideRange) {
         return;
       }
       handleSetStartDate(startDate);
       handleSetEndDate(endDate);
     },
-    [handleSetStartDate, handleSetEndDate, isBlockedRange, getDisabledAfter]
+    [
+      handleSetStartDate,
+      handleSetEndDate,
+      isBlockedRange,
+      getDisabledAfter,
+      getDisabledBefore,
+    ]
   );
 
   const clear = useCallback(() => {
