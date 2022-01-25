@@ -7,7 +7,7 @@ import {
 
 import * as Preact from '#preact';
 
-import '#bento/components/accordion/1.0/component.jss';
+import '../component.jss';
 
 export default {
   title: 'Accordion',
