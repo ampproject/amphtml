@@ -1,7 +1,6 @@
 import {Keys_Enum} from '#core/constants/key-codes';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
@@ -29,7 +28,7 @@ class AmpSocialShare extends AMP.BaseElement {
     this.shareEndpoint_ = null;
 
     /** @private @const {!JsonObject} */
-    this.params_ = dict();
+    this.params_ = {};
 
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
@@ -84,7 +83,7 @@ class AmpSocialShare extends AMP.BaseElement {
         return;
       }
     }
-    const typeConfig = getSocialConfig(typeAttr) || dict();
+    const typeConfig = getSocialConfig(typeAttr) || {};
     if (typeConfig['obsolete']) {
       toggle(element, false);
       user().warn(TAG, `Skipping obsolete share button ${typeAttr}`);

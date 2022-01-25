@@ -8,6 +8,7 @@
     "moduleResolution": "node",
     "strictNullChecks": true,
     "noImplicitAny": true,
+    "isolatedModules": true,
     "lib": ["dom", "esnext", "es6"],
 
     "paths": {
@@ -15,6 +16,7 @@
       "#ads/*": ["./ads/*"],
       "#build/*": ["./build/*"],
 
+      "#bento/*": ["./src/bento/*"],
       "#builtins/*": ["./src/builtins/*"],
       "#compiler": ["./src/compiler"],
       "#compiler/*": ["./src/compiler/*"],

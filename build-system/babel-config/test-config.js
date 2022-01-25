@@ -17,6 +17,7 @@ function getTestConfig() {
         'ads/**/*.js',
         'build-system/**/*.js',
         'extensions/**/test/**/*.js',
+        'src/bento/components/**/test/**/*.js',
         'third_party/**/*.js',
         'test/**/*.js',
         'testing/**/*.js',
@@ -38,6 +39,7 @@ function getTestConfig() {
       modules: 'commonjs',
       loose: true,
       targets: {'browsers': ['Last 2 versions']},
+      shippedProposals: true,
     },
   ];
   const replacePlugin = getReplacePlugin();
@@ -52,7 +54,6 @@ function getTestConfig() {
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
-    '@babel/plugin-transform-classes',
     './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);

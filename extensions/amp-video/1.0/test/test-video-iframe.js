@@ -1,7 +1,9 @@
-import * as Preact from '#preact';
-import {VideoIframeInternal} from '../video-iframe';
-import {createRef} from '#preact';
 import {mount} from 'enzyme';
+
+import * as Preact from '#preact';
+import {createRef} from '#preact';
+
+import {VideoIframeInternal} from '../video-iframe';
 
 function dispatchMessage(window, opt_event) {
   const event = window.document.createEvent('Event');

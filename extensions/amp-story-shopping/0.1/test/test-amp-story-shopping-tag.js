@@ -1,6 +1,10 @@
 import {createElementWithAttributes} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
+
 import '../amp-story-shopping';
+
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
@@ -22,6 +26,7 @@ describes.realWin(
     let element;
     let shoppingTag;
     let storeService;
+    let localizationService;
 
     beforeEach(async () => {
       win = env.win;
@@ -29,6 +34,12 @@ describes.realWin(
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
+
+      localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationServiceForOrNull')
+        .returns(Promise.resolve(localizationService));
+
       await createAmpStoryShoppingTag();
     });
 
@@ -59,7 +70,7 @@ describes.realWin(
     it('should process config data and set text container content if data not null', async () => {
       shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
       await shoppingDataDispatchStoreService();
-      env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
+      env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
         expect(shoppingTag.element.textContent).to.equal(
           'Spectacular Spectacles'
         );

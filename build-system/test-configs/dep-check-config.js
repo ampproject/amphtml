@@ -133,9 +133,6 @@ exports.rules = [
   },
 
   // Rules for extensions.
-  // Note: For the multipass build to correctly include depended on code, you
-  // need to add the depended on code to `CLOSURE_SRC_GLOBS` in
-  // build-system/compile/sources.js.
   {
     // Extensions can't depend on other extensions.
     filesMatching: 'extensions/**/*.js',
@@ -152,6 +149,7 @@ exports.rules = [
       'extensions/amp-ad-network-oblivki-impl/0.1/amp-ad-network-oblivki-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-dianomi-impl/0.1/amp-ad-network-dianomi-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-smartadserver-impl/0.1/amp-ad-network-smartadserver-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // A4A impls importing amp fast fetch header name
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
@@ -225,8 +223,9 @@ exports.rules = [
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
-      // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
+      // AmpVideoBaseElement, BentoVideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
       'extensions/**->extensions/amp-video/1.0/video-base-element.js',
+      'extensions/**->extensions/amp-video/1.0/base-element.js',
       'extensions/**->extensions/amp-video/1.0/video-iframe.js',
 
       // <amp-video-iframe> versions share this message API definition.
@@ -307,7 +306,7 @@ exports.rules = [
       'extensions/amp-story-page-attachment/0.1/amp-story-draggable-drawer.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/loading-spinner.js',
-      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-open-page-attachment.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-open-page-attachment.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/history.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/story-analytics.js',
@@ -333,6 +332,8 @@ exports.rules = [
         'src/service/extension-script.js',
       'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/extension-script.js',
+      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
@@ -350,8 +351,6 @@ exports.rules = [
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
-        'src/service/video-manager-impl.js',
-      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
         'src/service/video-manager-impl.js',
@@ -496,6 +495,12 @@ exports.rules = [
   {
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'extensions/**/*.js',
+    allowlist: [
+      // Do not add to this allowlist.
+      // These files are here temporarily while all the bento components are moved out of extensions.
+      'src/bento/components/jwplayer/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      'src/bento/components/jwplayer/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+    ],
   },
   {
     filesMatching: 'src/**/*.js',

@@ -11,7 +11,7 @@ const {
   getRef,
 } = require('./utils');
 const {getExtensions, getSemver} = require('../npm-publish/utils');
-const {GraphQlQueryResponseData} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
+const {GraphQlQueryResponseData} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
 
 const prereleaseConfig = {
   'beta-opt-in': true,

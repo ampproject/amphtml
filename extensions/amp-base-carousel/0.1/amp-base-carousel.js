@@ -1,28 +1,31 @@
-import {ActionSource} from './action-source';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {CSS} from '../../../build/amp-base-carousel-0.1.css';
-import {Carousel} from './carousel';
-import {CarouselEvents} from './carousel-events';
-import {ChildLayoutManager} from './child-layout-manager';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {
-  ResponsiveAttributes,
-  getResponsiveAttributeValue,
-} from './responsive-attributes';
-import {Services} from '#service';
-import {createCustomEvent, getDetail} from '#utils/event-helper';
-import {dev, devAssert} from '#utils/log';
-import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
   isRTL,
   iterateCursor,
   toggleAttribute,
 } from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {scopedQuerySelectorAll} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {createCustomEvent, getDetail} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
+import {ActionSource} from './action-source';
+import {Carousel} from './carousel';
+import {CarouselEvents} from './carousel-events';
+import {ChildLayoutManager} from './child-layout-manager';
+import {
+  ResponsiveAttributes,
+  getResponsiveAttributeValue,
+} from './responsive-attributes';
+
+import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 
 /**
  * @enum {number}
@@ -620,7 +623,7 @@ export class AmpCarousel extends AMP.BaseElement {
     const detail = getDetail(event);
     const index = detail['index'];
     const actionSource = detail['actionSource'];
-    const data = dict({'index': index});
+    const data = {'index': index};
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
     const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;

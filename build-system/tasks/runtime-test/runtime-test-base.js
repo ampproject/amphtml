@@ -226,11 +226,13 @@ class RuntimeTestConfig {
     const babelPlugin = getEsbuildBabelPlugin(
       /* callerName */ 'test',
       /* enableCache */ true,
-      /* preSetup */ this.logBabelStart,
-      /* postLoad */ this.printBabelDot
+      {
+        preSetup: this.logBabelStart,
+        postLoad: this.printBabelDot,
+      }
     );
     this.esbuild = {
-      target: 'es5',
+      target: 'esnext', // We use babel for transpilation.
       define: {
         'process.env.NODE_DEBUG': 'false',
         'process.env.NODE_ENV': '"test"',
