@@ -83,13 +83,13 @@ function getImportResolverPlugin() {
 
 /**
  * Resolves a filepath using the same logic as the rest of our build pipeline (babel module-resolver).
+ * The return value is a relative path from the amphtml folder.
+ *
  * @param {string} filepath
  * @return {string}
  */
 function resolvePath(filepath) {
-  return moduleResolver
-    .resolvePath(filepath, '/', getImportResolver())
-    .slice(1);
+  return moduleResolver.resolvePath(filepath, 'amphtml', getImportResolver());
 }
 
 module.exports = {
