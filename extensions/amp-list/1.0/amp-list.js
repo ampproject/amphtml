@@ -2,6 +2,8 @@ import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
@@ -13,7 +15,8 @@ import {CSS} from '../../../build/amp-list-1.0.css';
 /** @const {string} */
 const TAG = 'amp-list';
 
-class AmpList extends BaseElement {
+/** @extends {PreactBaseElement<BentoListDef.BentoListApi>} */
+class AmpList extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
