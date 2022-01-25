@@ -199,6 +199,9 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story-player/!(*.amp.html)',
   '!test/fixtures/e2e/amp-story-player/!(*.amp.html)',
 
+  // Remove this from the list after TODO(#37467) gets closed.
+  '!examples/amp-access-fewcents.html',
+
   // TODO(#25149): Fix these invalid files and remove them from this list.
   '!examples/accordion.amp.html',
   '!examples/ad-lightbox.amp.html',
