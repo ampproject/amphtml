@@ -73,7 +73,7 @@ describes.realWin(
       element.setAttribute('src', exampleURL);
 
       const expectedRemoteResult = JSON.parse(
-        '{"city-pop":{"product-tag-id":"city-pop","product-title":"Plastic Love","product-price": 19, "product-price-currency": "JPY"}}'
+        '{"city-pop":{"productTagId":"city-pop","productTitle":"Plastic Love","productPrice": 19, "productPriceCurrency": "JPY"}}'
       );
 
       expect(storeService.get(StateProperty.SHOPPING_DATA)).to.deep.eql(

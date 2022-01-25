@@ -148,17 +148,17 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
           <span
             class="amp-story-shopping-tag-pill-image"
             style={
-              this.tagData_['product-icon'] && {
+              this.tagData_['productIcon'] && {
                 backgroundImage:
-                  'url(' + this.tagData_['product-icon'] + ') !important',
+                  'url(' + this.tagData_['productIcon'] + ') !important',
                 backgroundSize: 'cover !important',
               }
             }
           ></span>
           <span class="amp-story-shopping-tag-pill-text">
-            {(this.tagData_['product-tag-text'] && (
+            {(this.tagData_['productTagText'] && (
               <span class="amp-story-shopping-product-tag-text">
-                {this.tagData_['product-tag-text']}
+                {this.tagData_['productTagText']}
               </span>
             )) ||
               new Intl.NumberFormat(
@@ -167,9 +167,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
                 )[0],
                 {
                   style: 'currency',
-                  currency: this.tagData_['product-price-currency'],
+                  currency: this.tagData_['productPriceCurrency'],
                 }
-              ).format(this.tagData_['product-price'])}
+              ).format(this.tagData_['productPrice'])}
           </span>
         </span>
       </div>

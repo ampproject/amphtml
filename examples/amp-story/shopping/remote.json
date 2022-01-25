@@ -1,10 +1,10 @@
 {
   "items": [
     {
-      "product-tag-id": "city-pop",
-      "product-title": "Plastic Love",
-      "product-price": 19,
-      "product-price-currency": "JPY"
+      "productTagId": "city-pop",
+      "productTitle": "Plastic Love",
+      "productPrice": 19,
+      "productPriceCurrency": "JPY"
     }
   ]
 }
