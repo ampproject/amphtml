@@ -168,9 +168,9 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     // as separate properties. Thus in a carousel the plain "children" are
     // slides, and the "arrowNext" children are passed via a "arrowNext"
     // property.
-    const nodes = realChildElements(element);
-    for (let i = 0; i < nodes.length; i++) {
-      const childElement = /** @type {HTMLElement} */ (nodes[i]);
+    const elements = realChildElements(element);
+    for (let i = 0; i < elements.length; i++) {
+      const childElement = /** @type {HTMLElement} */ (elements[i]);
       const match = matchChild(childElement, propDefs);
       if (!match) {
         continue;
