@@ -171,20 +171,14 @@ export class Platform {
    * @return {string}
    */
   getIosVersionString() {
-    if (!this.navigator_.userAgent) {
-      return '';
-    }
     if (!this.isIos()) {
       return '';
     }
-    let version = this.navigator_.userAgent.match(
-      /OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/
+    return (
+      this.navigator_.userAgent
+        ?.match(/OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/)?.[1]
+        ?.replace(/_/g, '.') || ''
     );
-    if (!version) {
-      return '';
-    }
-    version = version[1].replace(/_/g, '.');
-    return version;
   }
 
   /**
