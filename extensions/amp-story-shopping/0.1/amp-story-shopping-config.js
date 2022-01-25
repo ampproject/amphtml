@@ -59,7 +59,7 @@ function validateStringLength(field, str, maxLen = 100) {
  * @return {!Array<string>}
  */
 function validateNumber(field, number) {
-  if (isNaN(number)) {
+  if (number != null && isNaN(number)) {
     return ['Value for field ' + field + ' is not a number '];
   }
 }
@@ -72,6 +72,11 @@ function validateNumber(field, number) {
  * @return {!Array<string>}
  */
 function validateURL(field, url) {
+  if (url == null) {
+    /* Not a Required Attribute, return.*/
+    return;
+  }
+
   const urls = Array.isArray(url) ? url : [url];
   return urls.map((url) => {
     try {
@@ -100,7 +105,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       'reviewsPage': [validateRequired, validateURL], // Required if reviews-data. Links to a page where reviews can be read.
       'productPriceCurrency': [validateRequired, validateStringLength], // Required. String. ISO 4217 currency code used to display the correct currency symbol.
       /* Optional Attrs */
-      'productColor': [validateRequired, validateStringLength], // Optional. String.
+      'productColor': [validateStringLength], // Optional. String.
       'productSize': [validateStringLength], // Optional. String.
       'productIcon': [validateURL], // Optional. Links to an image. Defaults to a shopping bag icon.
       'productTagText': [validateStringLength], // Optional. String.
@@ -119,6 +124,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       .reduce((errors, k) => {
         const value = shoppingConfig[k];
         const fns = this.productValidationConfig_[k];
+
         errors.push(
           ...fns.reduce((errors, fn) => {
             const localErrors = fn(k, value) || [];
@@ -131,7 +137,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       .filter(Boolean);
 
     for (const error of errors) {
-      this.user().warn(error);
+      this.user().warn('ERROR', error);
     }
   }
 
