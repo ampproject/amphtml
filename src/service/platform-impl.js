@@ -17,7 +17,7 @@ export class Platform {
   }
 
   /**
-   * Whether the current platform an Android device.
+   * Whether the current platform is an Android device.
    * @return {boolean}
    */
   isAndroid() {
@@ -25,7 +25,7 @@ export class Platform {
   }
 
   /**
-   * Whether the current platform an iOS device.
+   * Whether the current platform is an iOS device.
    * @return {boolean}
    */
   isIos() {
@@ -103,7 +103,7 @@ export class Platform {
   }
 
   /**
-   * Whether the current browser is isStandalone.
+   * Whether the current browser is standalone.
    * @return {boolean}
    */
   isStandalone() {
