@@ -1,11 +1,11 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
-import {CSS} from '../../../build/amp-story-subscription-0.1.css';
+import {CSS} from '../../../build/amp-story-subscriptions-0.1.css';
 
-const TAG = 'amp-story-subscription';
+const TAG = 'amp-story-subscriptions';
 
-export class AmpStorySubscription extends AMP.BaseElement {
+export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -29,5 +29,5 @@ export class AmpStorySubscription extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
-  AMP.registerElement(TAG, AmpStorySubscription, CSS);
+  AMP.registerElement(TAG, AmpStorySubscriptions, CSS);
 });

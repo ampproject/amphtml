@@ -1,12 +1,12 @@
-import '../amp-story-subscription';
+import '../amp-story-subscriptions';
 import {htmlFor} from '#core/dom/static-template';
 
 describes.realWin(
-  'amp-story-subscription-v0.1',
+  'amp-story-subscriptions-v0.1',
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story-subscription:0.1'],
+      extensions: ['amp-story-subscriptions:0.1'],
     },
   },
   (env) => {
@@ -22,7 +22,7 @@ describes.realWin(
 
     it('should contain amp-subscriptions attributes', async () => {
       const element = html`
-        <amp-story-subscription layout="container"> </amp-story-subscription>
+        <amp-story-subscriptions layout="container"> </amp-story-subscriptions>
       `;
       doc.body.appendChild(element);
       await element.whenBuilt();

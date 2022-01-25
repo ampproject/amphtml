@@ -1085,7 +1085,7 @@
     }
   },
   {
-    "name": "amp-story-subscription",
+    "name": "amp-story-subscriptions",
     "version": "0.1",
     "options": {
       "hasCss": true
