@@ -11,6 +11,7 @@ import {Services} from '#service';
 import {dev, devAssert} from '#utils/log';
 
 import {executeRequest} from 'extensions/amp-story/1.0/request-utils';
+import {installStylesForDoc} from 'src/style-installer';
 
 import {emojiConfetti} from './interactive-confetti';
 import {
@@ -39,7 +40,6 @@ import {
   maybeMakeProxyUrl,
 } from '../../amp-story/1.0/utils';
 import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
-import {installStylesForDoc} from 'src/style-installer';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
