@@ -1668,6 +1668,25 @@ TEST(ValidatorTest, RulesMakeSense) {
       }
     }
   }
+
+  // satisfies needs to match up with requires and excludes
+  absl::flat_hash_set<std::string> all_satisfies;
+  absl::flat_hash_set<std::string> all_requires_and_excludes;
+  for (const TagSpec& tag_spec : rules.tags()) {
+    all_satisfies.insert(tag_spec.satisfies().cbegin(),
+                         tag_spec.satisfies().cend());
+    all_requires_and_excludes.insert(tag_spec.requires().cbegin(),
+                                     tag_spec.requires().cend());
+    all_requires_and_excludes.insert(tag_spec.excludes().cbegin(),
+                                     tag_spec.excludes().cend());
+  }
+  for (const std::string& satisfy : all_satisfies) {
+    EXPECT_TRUE(all_requires_and_excludes.contains(satisfy)) << satisfy;
+  }
+  for (const std::string& require_or_exclude : all_requires_and_excludes) {
+    EXPECT_TRUE(all_satisfies.contains(require_or_exclude))
+        << require_or_exclude;
+  }
 }
 
 }  // namespace
