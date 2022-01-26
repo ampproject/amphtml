@@ -366,9 +366,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     if (options.minify) {
       const {code: minified, map: minifiedMap} = await minify(code);
       code = minified;
-      map = await massageSourcemaps([minifiedMap, map], babelMaps);
+      map = await massageSourcemaps([minifiedMap, map], babelMaps, options);
     } else {
-      map = await massageSourcemaps([map], babelMaps);
+      map = await massageSourcemaps([map], babelMaps, options);
     }
 
     await Promise.all([
@@ -699,9 +699,10 @@ async function getDependencies(entryPoint, options) {
 /**
  * @param {!Array<string|object>} sourcemaps
  * @param {Map<string, string|object>} babelMaps
+ * @param {*} options
  * @return {string}
  */
-function massageSourcemaps(sourcemaps, babelMaps) {
+function massageSourcemaps(sourcemaps, babelMaps, options) {
   const root = process.cwd();
   const remapped = remapping(
     sourcemaps,
@@ -733,7 +734,7 @@ function massageSourcemaps(sourcemaps, babelMaps) {
     }
     return source;
   });
-  remapped.sourceRoot = getSourceRoot();
+  remapped.sourceRoot = getSourceRoot(options);
   if (remapped.file) {
     remapped.file = path.basename(remapped.file);
   }
