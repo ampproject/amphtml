@@ -1687,6 +1687,23 @@ TEST(ValidatorTest, RulesMakeSense) {
     EXPECT_TRUE(all_satisfies.contains(require_or_exclude))
         << require_or_exclude;
   }
+
+  absl::flat_hash_set<ValidationError_Code> encountered_error_specificity_code;
+  for (const ErrorSpecificity& error_specificity : rules.error_specificity()) {
+    EXPECT_FALSE(
+        encountered_error_specificity_code.contains(error_specificity.code()))
+        << "Error specificity code should be unique "
+        << error_specificity.code();
+    encountered_error_specificity_code.insert(error_specificity.code());
+  }
+
+  absl::flat_hash_set<ValidationError_Code> encountered_error_format_code;
+  for (const ErrorFormat& error_format : rules.error_formats()) {
+    EXPECT_FALSE(
+        encountered_error_format_code.contains(error_format.code()))
+        << "Error format code should be unique " << error_format.code();
+    encountered_error_format_code.insert(error_format.code());
+  }
 }
 
 }  // namespace
