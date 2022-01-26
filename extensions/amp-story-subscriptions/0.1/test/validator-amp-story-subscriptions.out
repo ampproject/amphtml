@@ -13,7 +13,7 @@ PASS
 |          color: red;
 |        }
 |      </style>
-|      <script async custom-element="amp-story-subscriptionss" src="https://cdn.ampproject.org/v0/amp-story-subscriptions-0.1.js"></script>
+|      <script async custom-element="amp-story-subscriptions" src="https://cdn.ampproject.org/v0/amp-story-subscriptions-0.1.js"></script>
 |      <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    </head>
 |    <body>
