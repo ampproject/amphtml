@@ -650,7 +650,7 @@ function liveListInsert(liveList, node) {
      */
     const child = /** @type {*} */ (node.cloneNode(true));
     child.setAttribute('id', `list-item-${itemCtr++}`);
-    child.setAttribute('data-sort-time', Date.now());
+    child.setAttribute('data-sort-time', Date.now().toString());
     liveList.querySelector('[items]')?.appendChild(child);
   }
 }

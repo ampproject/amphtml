@@ -1,6 +1,5 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -51,10 +50,10 @@ export class AdSenseNetworkConfig {
 
   /** @override */
   getAttributes() {
-    const attributesObj = dict({
+    const attributesObj = {
       'type': 'adsense',
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-    });
+    };
     const dataAdHost = this.autoAmpAdsElement_.getAttribute('data-ad-host');
     const dataAdHostChannel = this.autoAmpAdsElement_.getAttribute(
       'data-ad-host-channel'

@@ -8,7 +8,7 @@ const os = require('os');
 const path = require('path');
 const Percy = require('@percy/core');
 const percySnapshot = require('@percy/puppeteer');
-const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
+const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {
   createCtrlcHandler,
   exitCtrlcHandler,

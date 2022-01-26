@@ -1,4 +1,9 @@
 // See src/base-element.js for method documentation.
+
+type Layout_Enum = import('#core/dom/layout').Layout_Enum;
+type LayoutSize = import('#core/dom/layout/rect').LayoutSizeDef;
+type LayoutRect = import('#core/dom/layout/rect').LayoutRectDef;
+
 declare namespace AMP {
   class BaseElement {
     static R1(): boolean;
@@ -23,18 +28,18 @@ declare namespace AMP {
     getDefaultActionAlias(): string | undefined;
     getLayoutPriority(): number;
     updateLayoutPriority(pri: number): void;
-    getLayout(): Layout;
+    getLayout(): Layout_Enum;
     getLayoutBox(): LayoutRect;
     getLayoutSize(): LayoutSize;
     getWin(): Window;
     getAmpDoc(): any;
     getVsync(): any;
     getConsentPolicy(): string | undefined;
-    isLayoutSupported(layout: Layout): boolean;
+    isLayoutSupported(layout: Layout_Enum): boolean;
     isAlwaysFixed(): boolean;
     upgradeCallback(): null | BaseElement | Promise<BaseElement>;
     buildCallback(): void | Promise<void>;
-    preconnectCallback(onLayout?: boolean);
+    preconnectCallback(onLayout?: boolean): void;
     attachedCallback(): void;
     detachedCallback(): void;
     setAsContainer(scroller?: Element): void;
@@ -56,14 +61,14 @@ declare namespace AMP {
     unlayoutOnPause(): boolean;
     reconstructWhenReparented(): boolean;
     loadPromise<T>(element: T): Promise<T>;
-    registerAction(alias: string, handler: any, minTrust: any);
-    registerDefaultAction(handler: any, alias: string, minTrust: any);
+    registerAction(alias: string, handler: any, minTrust: any): void;
+    registerDefaultAction(handler: any, alias: string, minTrust: any): void;
     executeAction(invocation: any, deferred?: boolean): any;
     forwardEvents(events: string | string[], element: Element): any;
     getPlaceholder(): Element;
     togglePlaceholder(state: boolean): void;
     getFallback(): Element | undefined;
-    toggleFallback(state: boolean);
+    toggleFallback(state: boolean): void;
     toggleLoading(state: boolean, force?: boolean): void;
     getOverflowElement(): Element | undefined;
     renderStarted(): void;
@@ -107,35 +112,6 @@ declare namespace AMP {
   ) => void;
 }
 
-// TODO(samouri): Move the types below to better locations.
-declare type AmpElement = HTMLElement;
-
-declare type Layout =
-  | 'nodisplay'
-  | 'fixed'
-  | 'fixed-height'
-  | 'responsive'
-  | 'container'
-  | 'fill'
-  | 'flex-item'
-  | 'fluid'
-  | 'intrinsic';
-
-declare type LayoutSize = {height: number; width: number};
-declare type LayoutRect = {
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-  width: number;
-  height: number;
-  x: number;
-  y: number;
-};
-
 type Mutations = {
   [key: string]: null | boolean | string | number | Array<any> | Object;
 };
-
-// TODO:(samouri): correctly type this within src/core/types/object/json
-declare type JsonObject = any;

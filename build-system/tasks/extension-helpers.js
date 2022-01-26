@@ -109,7 +109,7 @@ const ExtensionOptionDef = {};
 const ExtensionBinaryDef = {};
 
 // All declared extensions.
-const extensions = {};
+const EXTENSIONS = {};
 
 // All extensions to build
 let extensionsToBuild = null;
@@ -145,9 +145,9 @@ function declareExtension(name, version, options, extensionsObject) {
 /**
  * Initializes all extensions from build-system/compile/bundles.config.extensions.json
  * if not already done and populates the given extensions object.
- * @param {?Object} extensionsObject
+ * @param {Object} extensionsObject
  */
-function maybeInitializeExtensions(extensionsObject = extensions) {
+function maybeInitializeExtensions(extensionsObject) {
   if (Object.keys(extensionsObject).length === 0) {
     verifyExtensionBundles();
     extensionBundles.forEach((c) => {
@@ -203,8 +203,8 @@ function getExtensionsToBuild(preBuild = false) {
     !argv.core_runtime_only
   ) {
     const allExtensions = [];
-    for (const extension in extensions) {
-      allExtensions.push(extensions[extension].name);
+    for (const extension in EXTENSIONS) {
+      allExtensions.push(EXTENSIONS[extension].name);
     }
     extensionsToBuild = dedupe(extensionsToBuild.concat(allExtensions));
   }
@@ -333,15 +333,15 @@ function dedupe(arr) {
  */
 async function buildExtensions(options) {
   const startTime = Date.now();
-  maybeInitializeExtensions(extensions);
+  maybeInitializeExtensions(EXTENSIONS);
   const extensionsToBuild = getExtensionsToBuild();
   const results = [];
-  for (const extension in extensions) {
+  for (const extension in EXTENSIONS) {
     if (
       options.compileOnlyCss ||
-      extensionsToBuild.includes(extensions[extension].name)
+      extensionsToBuild.includes(EXTENSIONS[extension].name)
     ) {
-      results.push(doBuildExtension(extensions, extension, options));
+      results.push(doBuildExtension(EXTENSIONS, extension, options));
     }
   }
   await Promise.all(results);
@@ -488,19 +488,19 @@ async function buildNpmCss(extDir, options) {
   endBuildStep('Wrote CSS', `${options.name} → styles.css`, startCssTime);
 }
 
-/** @type {TransformCache} */
+/** @type {TransformCache<string>} */
 let jssCache;
 
 /**
  * Returns the minified CSS for a .jss.js file.
  *
  * @param {string} jssFile
- * @return {Promise<string|Buffer>}
+ * @return {Promise<string>}
  */
 async function getCssForJssFile(jssFile) {
   // Lazily instantiate the TransformCache
   if (!jssCache) {
-    jssCache = new TransformCache('.jss-cache', '.css');
+    jssCache = new TransformCache('.jss-cache');
   }
 
   const {contents, hash} = await batchedRead(jssFile);
@@ -728,26 +728,35 @@ async function getBentoBuildFilename(dir, name, mode, options) {
   if (await fs.pathExists(`${dir}/${filename}`)) {
     return filename;
   }
-  const generatedSource = generateBentoEntryPointSource(name, toExport);
   const generatedFilename = `build/${filename}`;
-  fs.outputFileSync(`${dir}/${generatedFilename}`, generatedSource);
+  const generatedOutputFilename = `${dir}/${generatedFilename}`;
+  const generatedSource = generateBentoEntryPointSource(
+    name,
+    toExport,
+    generatedOutputFilename
+  );
+  fs.outputFileSync(generatedOutputFilename, generatedSource);
   return generatedFilename;
 }
 
 /**
  * @param {string} name
  * @param {string} toExport
+ * @param {string} outputFilename
  * @return {string}
  */
-function generateBentoEntryPointSource(name, toExport) {
+function generateBentoEntryPointSource(name, toExport, outputFilename) {
+  const bentoCePath = path.relative(
+    path.dirname(outputFilename),
+    'src/preact/bento-ce'
+  );
+
   return dedent(`
     import {BaseElement} from '../base-element';
+    import {defineBentoElement} from '${bentoCePath}';
 
     function defineElement() {
-      customElements.define(
-        __name__,
-        BaseElement.CustomElement(BaseElement)
-      );
+      defineBentoElement(__name__, BaseElement);
     }
 
     ${toExport ? 'export {defineElement};' : 'defineElement();'}
@@ -908,11 +917,21 @@ async function copyWorkerDomResources(version) {
 }
 
 module.exports = {
+  buildBinaries,
+  buildExtensionCss,
+  buildExtensionJs,
   buildExtensions,
+  buildNpmBinaries,
+  buildNpmCss,
+  declareExtension,
+  dedupe,
   doBuildExtension,
-  extensions,
+  EXTENSIONS,
+  getBentoBuildFilename,
+  getExtensionsFromArg,
   getExtensionsToBuild,
   maybeInitializeExtensions,
   parseExtensionFlags,
   setExtensionsToBuildFromDocuments,
+  INABOX_EXTENSION_SET,
 };

@@ -43,7 +43,7 @@ function assertDomQueryResults() {
  * Builds a carousel button for next/prev.
  * @param {Element} element
  * @param {{className: string, title: string, enabled: boolean}} options
- * @return {?HTMLDivElement}
+ * @return {HTMLDivElement}
  */
 function buildButton(element, {className, enabled, title}) {
   /*
@@ -141,7 +141,7 @@ export function queryCarouselControls(element) {
  * @param {Element} element
  * @return {{
  *   container: HTMLDivElement
- *   cells: HTMLDivElement[]
+ *   cells: HTMLElement[]
  * }}
  */
 function buildScrollableCarousel(element) {
@@ -150,7 +150,7 @@ function buildScrollableCarousel(element) {
   }
 
   const doc = element.ownerDocument;
-  const cells = realChildElements(element);
+  const cells = /** @type {HTMLElement[]} */ (realChildElements(element));
   const container = doc.createElement('div');
 
   container.classList.add(ClassNames.SCROLLABLE_CONTAINER);
@@ -170,7 +170,7 @@ function buildScrollableCarousel(element) {
  * @param {Element} element
  * @return {{
  *   container: HTMLDivElement
- *   cells: HTMLDivElement[]
+ *   cells: HTMLElement[]
  * }}
  */
 function queryScrollableCarousel(element) {
@@ -179,7 +179,7 @@ function queryScrollableCarousel(element) {
       `.${escapeCssSelectorIdent(ClassNames.SCROLLABLE_CONTAINER)}`
     )
   );
-  const cells = /** @type {HTMLDivElement[]} */ (
+  const cells = /** @type {HTMLElement[]} */ (
     Array.from(
       element.querySelectorAll(`.${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
     )
@@ -192,7 +192,7 @@ function queryScrollableCarousel(element) {
  * Builds the DOM necessary for slidescroll carousel.
  * @param {Element} element
  * @return {{
- *   slides: HTMLDivElement[]
+ *   slides: Element[]
  *   slidesContainer: HTMLDivElement
  *   slideWrappers: HTMLDivElement[]
  * }}
@@ -218,6 +218,7 @@ function buildSlideScrollCarousel(element) {
   slidesContainer.setAttribute('aria-live', 'polite');
   element.appendChild(slidesContainer);
 
+  /** @type {HTMLDivElement[]} */
   const slideWrappers = [];
   slides.forEach((slide) => {
     slide.classList.add(ClassNames.SLIDE);
@@ -236,7 +237,7 @@ function buildSlideScrollCarousel(element) {
  * Queries for ivars for slidescroll.
  * @param {Element} element
  * @return {{
- *   slides: HTMLDivElement[]
+ *   slides: Element[]
  *   slidesContainer: HTMLDivElement
  *   slideWrappers: HTMLDivElement[]
  * }}
@@ -254,10 +255,8 @@ function querySlideScrollCarousel(element) {
       )
     )
   );
-  const slides = /** @type {HTMLDivElement[]} */ (
-    Array.from(
-      element.querySelectorAll(`.${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
-    )
+  const slides = Array.from(
+    element.querySelectorAll(`.${escapeCssSelectorIdent(ClassNames.SLIDE)}`)
   );
   assertDomQueryResults(slidesContainer, slideWrappers, slides);
   return {slides, slidesContainer, slideWrappers};
@@ -270,8 +269,8 @@ function querySlideScrollCarousel(element) {
  *   prevButton: HTMLDivElement,
  *   nextButton: HTMLDivElement
  *   container?: HTMLDivElement
- *   cells?: HTMLDivElement[]
- *   slides?: HTMLDivElement[]
+ *   cells?: HTMLElement[]
+ *   slides?: Element[]
  *   slidesContainer?: HTMLDivElement
  *   slideWrappers?: HTMLDivElement[]
  * }}
@@ -289,9 +288,9 @@ export function buildDom(element) {
 /**
  * @param {Element} element
  * @return {string} The default title to use for the next button.
- * @param {{index?: string, total?: string}} options - The default title to use for the previous button.
+ * @param {{index: string, total: string}} options - The default title to use for the previous button.
  */
-export function getNextButtonTitle(element, options = {}) {
+export function getNextButtonTitle(element, options) {
   const prefix =
     element.getAttribute('data-next-button-aria-label') ||
     'Next item in carousel';
@@ -301,10 +300,10 @@ export function getNextButtonTitle(element, options = {}) {
 
 /**
  * @param {Element} element
- * @param {{index?: string, total?: string}} options - The default title to use for the previous button.
+ * @param {{index: string, total: string}} options - The default title to use for the previous button.
  * @return {string} The default title to use for the previous button.
  */
-export function getPrevButtonTitle(element, options = {}) {
+export function getPrevButtonTitle(element, options) {
   const prefix =
     element.getAttribute('data-prev-button-aria-label') ||
     'Previous item in carousel';
@@ -318,8 +317,8 @@ export function getPrevButtonTitle(element, options = {}) {
  * - Scrollable: "Next item in carousel"
  * - Slides    : "Next item in carousel (X of Y)"
  *
- * @param {*} element
- * @param {{prefix: string, index: string, total:string}} param1
+ * @param {Element} element
+ * @param {{prefix: string, index: string, total:string}} opts
  * @return {string}
  */
 function getButtonTitle(element, {index, prefix, total}) {
