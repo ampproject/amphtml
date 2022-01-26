@@ -1,5 +1,5 @@
+import {logger} from '#preact/logger';
 import {docInfo} from '#preact/utils/docInfo';
-import {logger} from '#preact/utils/logger';
 import {platformUtils} from '#preact/utils/platform';
 import {urlUtils} from '#preact/utils/url';
 

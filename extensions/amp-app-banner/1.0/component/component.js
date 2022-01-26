@@ -4,7 +4,7 @@ import * as Preact from '#preact';
 import {useEffect, useMemo, useRef} from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {useLocalStorage} from '#preact/hooks/useLocalStorage';
-import {logger} from '#preact/utils/logger';
+import {logger} from '#preact/logger';
 import {platformUtils} from '#preact/utils/platform';
 
 import {getAndroidAppInfo} from './android';
