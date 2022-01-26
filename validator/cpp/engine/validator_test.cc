@@ -1565,6 +1565,108 @@ TEST(ValidatorTest, RulesMakeSense) {
         }
       }
     }
+
+    for (const auto& attr_spec : tag_spec.attrs()) {
+      EXPECT_TRUE(attr_spec.has_name()) << attr_spec.DebugString();
+      // Attribute Spec names are matched against lowercased attributes,
+      // so the rules *must* also be lower case or non-cased.
+      EXPECT_TRUE(RE2::FullMatch(attr_spec.name(), RE2("[^A-Z]+")))
+          << attr_spec.DebugString();
+      EXPECT_NE(attr_spec.name(), "[style]") << attr_spec.DebugString();
+      if (attr_spec.has_value_url()) {
+        for (const std::string& protocol : attr_spec.value_url().protocol()) {
+          // UrlSpec protocol is matched against lowercased protocol names,
+          // so the rules *must* also be lower case.
+          EXPECT_TRUE(RE2::FullMatch(protocol, RE2("[a-z+-]+"))) << protocol;
+        }
+        if (!absl::StartsWith(attr_spec.name(), "data-") &&
+            !absl::c_linear_search(
+                tag_spec.html_format(),
+                HtmlFormat_Code::HtmlFormat_Code_AMP4EMAIL)) {
+          for (const std::string& protocol : attr_spec.value_url().protocol()) {
+            if (protocol == "http" &&
+                attr_spec.value_url().has_allow_relative()) {
+              EXPECT_TRUE(attr_spec.value_url().allow_relative())
+                  << attr_spec.value_url().DebugString();
+            }
+          }
+        }
+      }
+      if (attr_spec.has_value_regex()) {
+        EXPECT_TRUE(RE2(attr_spec.value_regex()).ok())
+            << attr_spec.DebugString();
+      }
+      if (attr_spec.has_value_regex_casei()) {
+        EXPECT_TRUE(RE2(attr_spec.value_regex_casei()).ok())
+            << attr_spec.DebugString();
+      }
+      if (attr_spec.has_disallowed_value_regex()) {
+        EXPECT_TRUE(RE2(attr_spec.disallowed_value_regex()).ok())
+            << attr_spec.DebugString();
+      }
+      if (attr_spec.has_value_url()) {
+        EXPECT_GT(attr_spec.value_url().protocol().size(), 0)
+            << "value_url must have at least one protocol\n"
+            << attr_spec.DebugString();
+      }
+      int num_values = 0;
+      if (!attr_spec.value().empty()) {
+        num_values += 1;
+      }
+      if (!attr_spec.value_casei().empty()) {
+        num_values += 1;
+      }
+      if (attr_spec.has_value_regex()) {
+        num_values += 1;
+      }
+      if (attr_spec.has_value_regex_casei()) {
+        num_values += 1;
+      }
+      if (attr_spec.has_value_url()) {
+        num_values += 1;
+      }
+      if (attr_spec.has_value_properties()) {
+        num_values += 1;
+      }
+      EXPECT_LT(num_values, 2) << "attr_spec should only have one value set";
+      if (attr_spec.name() == "id" && num_values == 0) {
+        EXPECT_TRUE(attr_spec.has_disallowed_value_regex())
+            << "'id' attribute must have 'disallowed_value_regex' set\n"
+            << attr_spec.DebugString();
+      }
+      if (attr_spec.name() == "name" && num_values == 0) {
+        EXPECT_TRUE(attr_spec.has_disallowed_value_regex())
+            << "'name' attribute must have 'disallowed_value_regex' set\n"
+            << attr_spec.DebugString();
+      }
+      if (attr_spec.has_deprecation()) {
+        EXPECT_TRUE(attr_spec.has_deprecation_url());
+      }
+      if (attr_spec.has_deprecation_url()) {
+        EXPECT_TRUE(attr_spec.has_deprecation());
+      }
+      if (attr_spec.has_dispatch_key()) {
+        EXPECT_TRUE(attr_spec.mandatory() || attr_spec.has_mandatory_oneof());
+      }
+      if (attr_spec.has_value_properties()) {
+        absl::flat_hash_set<std::string_view> encountered_property_spec_names;
+        for (const PropertySpec& property_spec :
+             attr_spec.value_properties().properties()) {
+          EXPECT_FALSE(
+              encountered_property_spec_names.contains(property_spec.name()))
+              << "value_properties within attr_spec '" << attr_spec.name()
+              << "' should be unique";
+          encountered_property_spec_names.insert(property_spec.name());
+        }
+      }
+      // Transformed AMP does not allow `nonce` attributes, so it must have
+      // disabled_by: "transformed".
+      if (attr_spec.name() == "nonce" &&
+          absl::c_linear_search(tag_spec.html_format(), HtmlFormat_Code_AMP)) {
+        EXPECT_TRUE(
+            absl::c_linear_search(attr_spec.disabled_by(), "transformed"));
+      }
+    }
   }
 }
 
