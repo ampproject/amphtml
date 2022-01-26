@@ -32,7 +32,7 @@ const DEFAULT_DATETIME_OPTIONS = {
  * @param {!JsonObject} data
  * @return {string}
  */
-const DEFAULT_RENDER = (data) => /** @type {string} */ (JSON.stringify(data));
+const DEFAULT_RENDER = (data) => /** @type {string} */ (data['localeString']);
 
 /** @typedef {{
   year: number,

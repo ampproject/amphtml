@@ -3,6 +3,7 @@ import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attribu
 import {PreactBaseElement} from '#preact/base-element';
 import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
+// this should come from including bento-mustache-1.0.js
 import {AmpMustache} from 'extensions/amp-mustache/1.0/amp-mustache';
 
 import {BentoDateDisplay} from './component';
