@@ -525,9 +525,6 @@ export class ViewerImpl {
     // being pre-rendered, or the user swiped to another doc (or closed the
     // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
     // INACTIVE, though we know better.
-    // TODO(#37129): Determine if this needs to be modified for PREVIEW mode.
-    // Current impression: PREVIEW is *not* hidden, so it shouldn't be relevant
-    // here.
     if (state === VisibilityState_Enum.HIDDEN) {
       state =
         this.ampdoc.getLastVisibleTime() != null
