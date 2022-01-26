@@ -2,8 +2,6 @@ import {dashToUnderline} from '#core/types/string';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
-import {userAssert} from '#utils/log';
-
 import {
   BaseElement,
   CommentsBaseElement,

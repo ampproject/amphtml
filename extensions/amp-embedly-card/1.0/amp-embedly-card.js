@@ -2,8 +2,6 @@ import {Layout_Enum} from '#core/dom/layout';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
-import {userAssert} from '#utils/log';
-
 import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
 import {BaseElement} from './base-element';
 

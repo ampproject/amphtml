@@ -1,7 +1,5 @@
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
-import {userAssert} from '#utils/log';
-
 import {BaseElement} from './base-element';
 import {TYPE} from './utils';
 

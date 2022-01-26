@@ -2,8 +2,6 @@ import {BaseElement} from '#bento/components/jwplayer/1.0/base-element';
 
 import {setSuperClass} from '#preact/amp-base-element';
 
-import {userAssert} from '#utils/log';
-
 import {
   getConsentMetadata,
   getConsentPolicyInfo,

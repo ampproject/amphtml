@@ -3,7 +3,6 @@ import {measureIntersection} from '#core/dom/layout/intersection';
 import {setSuperClass} from '#preact/amp-base-element';
 
 import {createCustomEvent} from '#utils/event-helper';
-import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 

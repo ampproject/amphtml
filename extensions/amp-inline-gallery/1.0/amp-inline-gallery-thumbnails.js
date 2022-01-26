@@ -1,7 +1,5 @@
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
-import {userAssert} from '#utils/log';
-
 import {ThumbnailsBaseElement} from './thumbnails-base-element';
 
 /** @const {string} */

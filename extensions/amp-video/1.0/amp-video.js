@@ -1,5 +1,3 @@
-import {userAssert} from '#utils/log';
-
 import {AmpVideoBaseElement} from './video-base-element';
 
 import {CSS} from '../../../build/amp-video-1.0.css';

@@ -1,7 +1,5 @@
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
-import {userAssert} from '#utils/log';
-
 import {PaginationBaseElement} from './pagination-base-element';
 
 /** @const {string} */

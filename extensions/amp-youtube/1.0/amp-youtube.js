@@ -1,7 +1,5 @@
 import {setSuperClass} from '#preact/amp-base-element';
 
-import {userAssert} from '#utils/log';
-
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-youtube-1.0.css';
