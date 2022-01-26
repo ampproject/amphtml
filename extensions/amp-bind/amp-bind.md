@@ -239,6 +239,7 @@ it with an object, as above, or with a constant.
   </script>
 </amp-state>
 ```
+
 [/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
