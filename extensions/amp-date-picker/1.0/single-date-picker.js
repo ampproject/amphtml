@@ -1,3 +1,4 @@
+import {isValid} from 'date-fns';
 import {addDays} from 'date-fns/esm';
 
 import {
@@ -48,7 +49,7 @@ function SingleDatePickerWithRef(
   ref
 ) {
   const calendarRef = useRef();
-  const inputEl = useRef();
+  const inputRef = useRef();
 
   const [date, _setDate] = useState();
   const [hiddenInputAttributes, setHiddenInputAttributes] = useState();
@@ -60,8 +61,8 @@ function SingleDatePickerWithRef(
   const handleSetDate = useCallback(
     (date) => {
       _setDate(date);
-      if (inputEl.current) {
-        inputEl.current.value = getFormattedDate(date, format, locale);
+      if (inputRef.current) {
+        inputRef.current.value = getFormattedDate(date, format, locale);
       }
     },
     [format, locale]
@@ -143,7 +144,7 @@ function SingleDatePickerWithRef(
       inputSelector
     );
     if (inputElement) {
-      inputEl.current = inputElement;
+      inputRef.current = inputElement;
       inputElement.value &&
         _setDate(parseDate(inputElement.value, format, locale));
     } else if (mode === DatePickerMode.STATIC && !!form) {
@@ -158,20 +159,42 @@ function SingleDatePickerWithRef(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * For inputs that are valid dates, update the date-picker value.
+   * @param {!Event} e
+   * @private
+   */
+  const handleInput = useCallback(
+    (e) => {
+      const {target} = e;
+      if (target.type === 'hidden') {
+        return;
+      }
+
+      const date = parseDate(target.value, format, locale);
+      if (isValid(date)) {
+        setDate(date);
+      }
+    },
+    [format, locale, setDate]
+  );
+
   useEffect(() => {
     const document = containerRef.current.ownerDocument;
     const containerEl = containerRef.current;
+    const inputEl = inputRef.current;
+
     if (!document) {
       return;
     }
     const handleFocus = (event) => {
-      if (event.target === inputEl.current) {
+      if (event.target === inputRef.current) {
         transitionTo(DatePickerState.OVERLAY_OPEN_INPUT);
       }
     };
     const handleClick = (event) => {
       const clickWasInDatePicker =
-        event.target === inputEl.current || containerEl.contains(event.target);
+        event.target === inputEl || containerEl.contains(event.target);
       if (!clickWasInDatePicker) {
         transitionTo(DatePickerState.OVERLAY_CLOSED);
       }
@@ -179,12 +202,14 @@ function SingleDatePickerWithRef(
     if (mode === DatePickerMode.OVERLAY) {
       document.addEventListener('click', handleClick);
     }
-    inputEl.current?.addEventListener('focus', handleFocus);
+    inputEl?.addEventListener('focus', handleFocus);
+    inputEl?.addEventListener('change', handleInput);
     return () => {
       document.addEventListener('click', handleClick);
-      inputEl.current?.removeEventListener('focus', handleFocus);
+      inputEl?.removeEventListener('focus', handleFocus);
+      inputEl?.removeEventListener('change', handleInput);
     };
-  }, [transitionTo, mode]);
+  }, [transitionTo, mode, handleInput]);
 
   return (
     <ContainWrapper
@@ -193,7 +218,7 @@ function SingleDatePickerWithRef(
     >
       {children}
       {hiddenInputAttributes && (
-        <input ref={inputEl} {...hiddenInputAttributes} />
+        <input ref={inputRef} {...hiddenInputAttributes} />
       )}
       {state.isOpen && (
         <BaseDatePicker
