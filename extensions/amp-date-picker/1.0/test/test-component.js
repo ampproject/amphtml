@@ -78,6 +78,8 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         </form>
       );
 
+      wrapper.update();
+
       expect(wrapper.exists('input[type="hidden"]')).to.be.true;
       expect(wrapper.find('input[type="hidden"]').prop('name')).to.equal(
         'date'
@@ -227,7 +229,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       const input = wrapper.find('input[type="hidden"]');
 
-      expect(input.prop('value')).to.equal('2021-01-01');
+      expect(input.getDOMNode().value).to.equal('2021-01-01');
     });
 
     it('sets the selected date in the calendar state', () => {
@@ -1020,7 +1022,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         wrapper.update();
 
         expect(wrapper.exists('[data-date="2022-01-01"]')).to.be.false;
-        expect(wrapper.find('input').prop('value')).to.equal('');
+        expect(wrapper.find('input').getDOMNode().value).to.equal('');
       });
 
       it('can set the date', () => {
@@ -1028,7 +1030,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         wrapper.update();
 
         expect(wrapper.exists('[data-date="2022-01-21"]')).to.be.true;
-        expect(wrapper.find('input').prop('value')).to.equal('2022-01-21');
+        expect(wrapper.find('input').getDOMNode().value).to.equal('2022-01-21');
       });
 
       it('can set the date to today', () => {
@@ -1036,7 +1038,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         wrapper.update();
 
         expect(wrapper.exists('[data-date="2022-01-21"]')).to.be.true;
-        expect(wrapper.find('input').prop('value')).to.equal('2022-01-21');
+        expect(wrapper.find('input').getDOMNode().value).to.equal('2022-01-21');
       });
 
       it('can use the offset argment to add or subtract days today', () => {
@@ -1044,7 +1046,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         wrapper.update();
 
         expect(wrapper.exists('[data-date="2022-01-20"]')).to.be.true;
-        expect(wrapper.find('input').prop('value')).to.equal('2022-01-20');
+        expect(wrapper.find('input').getDOMNode().value).to.equal('2022-01-20');
       });
     });
 

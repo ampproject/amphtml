@@ -7,15 +7,13 @@ import {
 
 import * as Preact from '#preact';
 import {
-  cloneElement,
   useCallback,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from '#preact';
-import {Children, forwardRef} from '#preact/compat';
+import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
 import {BaseDatePicker} from './base-date-picker';
@@ -49,10 +47,11 @@ function SingleDatePickerWithRef(
   },
   ref
 ) {
-  const inputElementRef = useRef();
   const calendarRef = useRef();
-  const [inputProps, setInputProps] = useState({});
+  const inputEl = useRef();
+
   const [date, _setDate] = useState();
+  const [hiddenInputAttributes, setHiddenInputAttributes] = useState();
 
   const containerRef = useRef();
 
@@ -61,10 +60,9 @@ function SingleDatePickerWithRef(
   const handleSetDate = useCallback(
     (date) => {
       _setDate(date);
-      setInputProps((props) => ({
-        ...props,
-        value: getFormattedDate(date, format, locale),
-      }));
+      if (inputEl.current) {
+        inputEl.current.value = getFormattedDate(date, format, locale);
+      }
     },
     [format, locale]
   );
@@ -81,15 +79,25 @@ function SingleDatePickerWithRef(
     [handleSetDate]
   );
 
+  const setDate = useCallback(
+    (date) => {
+      if (blockedDates.contains(date)) {
+        return;
+      }
+      handleSetDate(date);
+    },
+    [blockedDates, handleSetDate]
+  );
+
   useImperativeHandle(
     ref,
     () =>
       /** @type {!BentoDatePickerDef.BentoDatePickerApi} */ ({
         clear,
         today,
-        setDate: handleSetDate,
+        setDate,
       }),
-    [clear, today, handleSetDate]
+    [clear, today, setDate]
   );
 
   /**
@@ -125,27 +133,6 @@ function SingleDatePickerWithRef(
     [id, onError]
   );
 
-  const setDate = useCallback(
-    (date) => {
-      if (blockedDates.contains(date)) {
-        return;
-      }
-      handleSetDate(date);
-    },
-    [blockedDates, handleSetDate]
-  );
-
-  const inputElement = useMemo(() => {
-    const props = {
-      ...inputProps,
-      ref: inputElementRef,
-    };
-    if (Children.toArray(children).length > 0) {
-      return Children.map(children, (element) => cloneElement(element, props));
-    }
-    return <input {...props} />;
-  }, [inputProps, children]);
-
   useEffect(() => {
     const form = closestAncestorElementBySelector(
       containerRef.current,
@@ -156,14 +143,11 @@ function SingleDatePickerWithRef(
       inputSelector
     );
     if (inputElement) {
+      inputEl.current = inputElement;
       inputElement.value &&
         _setDate(parseDate(inputElement.value, format, locale));
-      setInputProps({
-        name: inputElement.name,
-        value: inputElement.value,
-      });
     } else if (mode === DatePickerMode.STATIC && !!form) {
-      setInputProps({
+      setHiddenInputAttributes({
         type: 'hidden',
         name: getHiddenInputId(form),
       });
@@ -176,19 +160,18 @@ function SingleDatePickerWithRef(
 
   useEffect(() => {
     const document = containerRef.current.ownerDocument;
-    const inputEl = inputElementRef.current;
     const containerEl = containerRef.current;
     if (!document) {
       return;
     }
     const handleFocus = (event) => {
-      if (event.target === inputEl) {
+      if (event.target === inputEl.current) {
         transitionTo(DatePickerState.OVERLAY_OPEN_INPUT);
       }
     };
     const handleClick = (event) => {
       const clickWasInDatePicker =
-        event.target === inputEl || containerEl.contains(event.target);
+        event.target === inputEl.current || containerEl.contains(event.target);
       if (!clickWasInDatePicker) {
         transitionTo(DatePickerState.OVERLAY_CLOSED);
       }
@@ -196,10 +179,10 @@ function SingleDatePickerWithRef(
     if (mode === DatePickerMode.OVERLAY) {
       document.addEventListener('click', handleClick);
     }
-    inputEl.addEventListener('focus', handleFocus);
+    inputEl.current?.addEventListener('focus', handleFocus);
     return () => {
       document.addEventListener('click', handleClick);
-      inputEl.removeEventListener('focus', handleFocus);
+      inputEl.current?.removeEventListener('focus', handleFocus);
     };
   }, [transitionTo, mode]);
 
@@ -208,7 +191,10 @@ function SingleDatePickerWithRef(
       ref={containerRef}
       data-date={getFormattedDate(date, format, locale)}
     >
-      {inputElement}
+      {children}
+      {hiddenInputAttributes && (
+        <input ref={inputEl} {...hiddenInputAttributes} />
+      )}
       {state.isOpen && (
         <BaseDatePicker
           ref={calendarRef}
