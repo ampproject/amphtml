@@ -928,6 +928,14 @@ export class AmpStory extends AMP.BaseElement {
         this.handleConsentExtension_();
 
         this.pages_.forEach((page, index) => {
+          if (this.isPaywallStory_()) {
+            if (index == 2) {
+              page.setSubscriptionsSection('limited-content');
+            }
+            if (index >= 3) {
+              page.setSubscriptionsSection('content');
+            }
+          }
           page.setState(PageState.NOT_ACTIVE);
           this.upgradeCtaAnchorTagsForTracking_(page, index);
         });
@@ -1275,6 +1283,20 @@ export class AmpStory extends AMP.BaseElement {
     // Step out if trying to navigate to the currently active page.
     if (this.activePage_ && this.activePage_.element.id === targetPageId) {
       return Promise.resolve();
+    }
+
+    // TODO(#37285): add SubscriptionService to actually trigger the subscription dialog.
+    const subscriptionsSection = targetPage.element.getAttribute(
+      'subscriptions-section'
+    );
+    if (
+      subscriptionsSection == 'content' ||
+      subscriptionsSection == 'limited-content'
+    ) {
+      this.storeService_.dispatch(
+        Action.TOGGLE_SUBSCRIPTION_DIALOG_IS_VISIBLE,
+        true
+      );
     }
 
     const oldPage = this.activePage_;
@@ -2446,6 +2468,14 @@ export class AmpStory extends AMP.BaseElement {
       (e) => matches(e, 'a.i-amphtml-story-page-open-attachment[href]'),
       this.element
     );
+  }
+
+  /**
+   * @private
+   * @return {boolean}
+   */
+  isPaywallStory_() {
+    return this.element.querySelector('amp-story-subscriptions') != null;
   }
 }
 

@@ -132,6 +132,7 @@ export let ShoppingDataDef;
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
  *    pageSize: {width: number, height: number},
+ *    subscriptionDialogIsVisibleState: boolean,
  * }}
  */
 export let State;
@@ -186,6 +187,9 @@ export const StateProperty = {
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
   PAGE_IDS: 'pageIds',
   PAGE_SIZE: 'pageSize',
+
+  // AMP Story paywall states.
+  SUBSCRIPTION_DIALOG_IS_VISIBLE_STATE: 'subscriptionDialogIsVisibleState',
 };
 
 /** @const @enum {string} */
@@ -219,6 +223,7 @@ export const Action = {
   SET_PAGE_SIZE: 'updatePageSize',
   ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
+  TOGGLE_SUBSCRIPTION_DIALOG_IS_VISIBLE: 'toggleSubscriptionDialogIsVisible',
 };
 
 /**
@@ -436,6 +441,15 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.VIEWER_CUSTOM_CONTROLS]: data,
       });
+    case Action.TOGGLE_SUBSCRIPTION_DIALOG_IS_VISIBLE:
+      // Don't change the state if the new state is equal to the current state.
+      if (state[StateProperty.SUBSCRIPTION_DIALOG_IS_VISIBLE_STATE] === data) {
+        return state;
+      }
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SUBSCRIPTION_DIALOG_IS_VISIBLE_STATE]: !!data,
+      });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -573,6 +587,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
       [StateProperty.PREVIEW_STATE]: false,
+      [StateProperty.SUBSCRIPTION_DIALOG_IS_VISIBLE_STATE]: false,
     });
   }
 
