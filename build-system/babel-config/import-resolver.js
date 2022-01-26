@@ -89,7 +89,9 @@ function getImportResolverPlugin() {
  * @return {string}
  */
 function resolvePath(filepath) {
-  return moduleResolver.resolvePath(filepath, 'amphtml', getImportResolver());
+  // 2nd arg is a file from which to make a relative path.
+  // The actual file doesn't need to exist. In this case it is process.cwd()/anything
+  return moduleResolver.resolvePath(filepath, 'anything', getImportResolver());
 }
 
 module.exports = {
