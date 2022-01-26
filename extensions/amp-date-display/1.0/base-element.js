@@ -1,27 +1,50 @@
-import Mustache from 'mustache';
-
 import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attributes';
 
 import {PreactBaseElement} from '#preact/base-element';
 import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
+import {AmpMustache} from 'extensions/amp-mustache/1.0/amp-mustache';
+
 import {BentoDateDisplay} from './component';
 
 export class BaseElement extends PreactBaseElement {
+  /**
+   * @param element
+   */
+  constructor(element) {
+    super(element);
+
+    this.templateService_ = null;
+
+    element.addEventListener('templateServiceLoaded', (event) => {
+      const {mustache} = event;
+      if (mustache) {
+        this.templateService_ = Promise.resolve(event.mustache);
+      }
+    });
+  }
+
   /** @override */
   checkPropsPostMutations() {
     const template = this.element.querySelector('template')./*OK*/ innerHTML;
+    if (!template) {
+      // show error
+      return;
+    }
 
-    this.mutateProps({
-      'render': (data) => {
-        const output = Mustache.render(template, {
-          year: data.year,
-          month: data.month,
-          day: data.day,
-        });
-        console.log(template, data, output);
-        return {'__html': output};
-      },
+    this.templateService_ = this.templateService_ ?? AmpMustache.getService();
+    if (!this.templateService_) {
+      return;
+    }
+
+    this.templateService_.then((mustache) => {
+      this.mutateProps({
+        'render': (data) => {
+          console.log(data);
+          const output = mustache.render(template, data);
+          return {'__html': output};
+        },
+      });
     });
   }
 }
