@@ -233,9 +233,7 @@ it with an object, as above, or with a constant.
 ```html
 <amp-state id="singleton">
   <script type="application/json">
-    {
-      'I am a string'
-    }
+    'I am a string'
   </script>
 </amp-state>
 ```
