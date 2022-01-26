@@ -1,9 +1,8 @@
 import {
-  Loading,
+  Loading_Enum,
   reducer as loadingReducer,
 } from '#core/constants/loading-instructions';
 import {contextProp} from '#core/context/prop';
-import {ContextPropDef} from '#core/context/prop.type';
 
 /**
  * Defines whether a DOM subtree can be currently seen by the user. A subtree
@@ -13,10 +12,11 @@ import {ContextPropDef} from '#core/context/prop.type';
  *
  * Default is `true`.
  *
- * @const {!ContextPropDef<boolean>}
+ * @type {import('#core/context/prop').IContextProp<boolean, boolean>}
+ * @const
  */
 const CanRender = contextProp('CanRender', {
-  defaultValue: true,
+  defaultValue: /** @type {boolean} */ (true),
   recursive: (inputs) => inputs.reduce(andReducer),
   compute: (contextNode, inputs, parentValue) =>
     (parentValue && inputs.reduce(andReducer, true)) || false,
@@ -30,10 +30,11 @@ const CanRender = contextProp('CanRender', {
  *
  * Default is `true`.
  *
- * @const {!ContextPropDef<boolean, boolean>}
+ * @type {import('#core/context/prop').IContextProp<boolean, boolean>}
+ * @const
  */
 const CanPlay = contextProp('CanPlay', {
-  defaultValue: true,
+  defaultValue: /** @type {boolean} */ (true),
   recursive: (inputs) => inputs.reduce(andReducer),
   deps: [CanRender],
   compute: (contextNode, inputs, parentValue, canRender) =>
@@ -41,24 +42,25 @@ const CanPlay = contextProp('CanPlay', {
 });
 
 /**
- * The default `Loading` instruction for a subtree. See `Loading` for the set
+ * The default `Loading_Enum` instruction for a subtree. See `Loading_Enum` for the set
  * of possible values. Non-renderable subtrees automatically get a value of
  * "lazy".
  *
  * Default is "auto".
  *
- * @const {!ContextPropDef<!Loading, boolean>}
+ * @type {import('#core/context/prop').IContextProp<Loading_Enum, boolean>}
+ * @const
  */
 const LoadingProp = contextProp('Loading', {
-  defaultValue: Loading.AUTO,
+  defaultValue: /** @type {Loading_Enum} */ Loading_Enum.AUTO,
   recursive: true,
   deps: [CanRender],
   compute: (contextNode, inputs, parentValue, canRender) =>
     loadingReducer(
-      canRender ? Loading.AUTO : Loading.LAZY,
+      canRender ? Loading_Enum.AUTO : Loading_Enum.LAZY,
       loadingReducer(
-        parentValue || Loading.AUTO,
-        inputs.reduce(loadingReducer, Loading.AUTO)
+        parentValue || Loading_Enum.AUTO,
+        inputs.reduce(loadingReducer, Loading_Enum.AUTO)
       )
     ),
 });

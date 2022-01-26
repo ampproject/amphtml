@@ -1,8 +1,14 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {BentoVideoBaseElement} from './base-element';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
-export class VideoBaseElement extends BaseElement {
+export class AmpVideoBaseElement extends setSuperClass(
+  BentoVideoBaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   init() {
     this.registerApiAction_('play', (api) => api.play());
@@ -22,14 +28,14 @@ export class VideoBaseElement extends BaseElement {
   /**
    * @param {string} alias
    * @param {function(!VideoWrapperDef.Api, !../../../src/service/action-impl.ActionInvocation)} handler
-   * @param {!../../../src/core/constants/action-constants.ActionTrust=} minTrust
+   * @param {!../../../src/core/constants/action-constants.ActionTrust_Enum=} minTrust
    * @private
    */
-  registerApiAction_(alias, handler, minTrust = ActionTrust.HIGH) {
+  registerApiAction_(alias, handler, minTrust = ActionTrust_Enum.HIGH) {
     this.registerApiAction(
       alias,
       (api, invocation) => {
-        if (invocation.trust >= ActionTrust.HIGH) {
+        if (invocation.trust >= ActionTrust_Enum.HIGH) {
           // TODO(alanorozco): There may be a better solution that doesn't
           // require this method which is not standard in HTMLMediaElement, like
           // potentially toggling `autoplay` instead.

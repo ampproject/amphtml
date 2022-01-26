@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {Deferred} from '#core/data-structures/promise';
 import {hasNextNodeInDocumentOrder} from '#core/dom';
@@ -6,14 +6,13 @@ import {expandLayoutRect} from '#core/dom/layout/rect';
 import * as mode from '#core/mode';
 import {remove} from '#core/types/array';
 import {throttle} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
 import {listen, loadPromise} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';
 
-import {Resource, ResourceState} from './resource';
+import {Resource, ResourceState_Enum} from './resource';
 import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {TaskQueue} from './task-queue';
 
@@ -172,7 +171,7 @@ export class ResourcesImpl {
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
-    /** @private @const {!FiniteStateMachine<!VisibilityState>} */
+    /** @private @const {!FiniteStateMachine<!VisibilityState_Enum>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.ampdoc.getVisibilityState()
     );
@@ -305,7 +304,7 @@ export class ResourcesImpl {
     let resource = Resource.forElementOptional(element);
     if (
       resource &&
-      resource.getState() != ResourceState.NOT_BUILT &&
+      resource.getState() != ResourceState_Enum.NOT_BUILT &&
       !element.reconstructWhenReparented()
     ) {
       resource.requestMeasure();
@@ -358,7 +357,7 @@ export class ResourcesImpl {
     // prerendered. This avoids wasting our prerender build quota.
     // See isUnderBuildQuota_() for more details.
     const shouldBuildResource =
-      this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
+      this.ampdoc.getVisibilityState() != VisibilityState_Enum.PRERENDER ||
       resource.prerenderAllowed();
     if (!shouldBuildResource) {
       return;
@@ -473,7 +472,7 @@ export class ResourcesImpl {
       resource.pauseOnRemove();
     }
 
-    if (resource.getState() === ResourceState.LAYOUT_SCHEDULED) {
+    if (resource.getState() === ResourceState_Enum.LAYOUT_SCHEDULED) {
       resource.layoutCanceled();
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
@@ -591,7 +590,7 @@ export class ResourcesImpl {
       // data.metaTags.viewport from 'documentLoaded' message.
       this.viewer_.sendMessage(
         'documentLoaded',
-        dict({
+        {
           'title': doc.title,
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
           'isStory': doc.body.firstElementChild?.tagName === 'AMP-STORY',
@@ -599,14 +598,14 @@ export class ResourcesImpl {
           'linkRels': documentInfo.linkRels,
           'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
           'viewport': documentInfo.viewport,
-        }),
+        },
         /* cancelUnsent */ true
       );
 
       this.contentHeight_ = this.viewport_.getContentHeight();
       this.viewer_.sendMessage(
         'documentHeight',
-        dict({'height': this.contentHeight_}),
+        {'height': this.contentHeight_},
         /* cancelUnsent */ true
       );
       dev().fine(TAG_, 'document height on load: %s', this.contentHeight_);
@@ -651,7 +650,7 @@ export class ResourcesImpl {
         if (measuredContentHeight != this.contentHeight_) {
           this.viewer_.sendMessage(
             'documentHeight',
-            dict({'height': measuredContentHeight}),
+            {'height': measuredContentHeight},
             /* cancelUnsent */ true
           );
           this.contentHeight_ = measuredContentHeight;
@@ -1058,7 +1057,7 @@ export class ResourcesImpl {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (
-        r.getState() == ResourceState.NOT_BUILT &&
+        r.getState() == ResourceState_Enum.NOT_BUILT &&
         !r.isBuilding() &&
         !r.element.R1()
       ) {
@@ -1069,7 +1068,7 @@ export class ResourcesImpl {
         relayoutAll ||
         !r.hasBeenMeasured() ||
         // NOT_LAID_OUT is the state after build() but before measure().
-        r.getState() == ResourceState.NOT_LAID_OUT
+        r.getState() == ResourceState_Enum.NOT_LAID_OUT
       ) {
         relayoutCount++;
       }
@@ -1096,7 +1095,7 @@ export class ResourcesImpl {
         }
         let needsMeasure =
           relayoutAll ||
-          r.getState() == ResourceState.NOT_LAID_OUT ||
+          r.getState() == ResourceState_Enum.NOT_LAID_OUT ||
           !r.hasBeenMeasured() ||
           r.isMeasureRequested() ||
           (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop);
@@ -1152,7 +1151,7 @@ export class ResourcesImpl {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (
-        r.getState() == ResourceState.NOT_BUILT ||
+        r.getState() == ResourceState_Enum.NOT_BUILT ||
         r.hasOwner() ||
         r.element.R1()
       ) {
@@ -1191,7 +1190,10 @@ export class ResourcesImpl {
             /* ignoreQuota */ true
           );
         }
-        if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
+        if (
+          r.getState() != ResourceState_Enum.READY_FOR_LAYOUT ||
+          r.hasOwner()
+        ) {
           continue;
         }
         // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
@@ -1214,7 +1216,7 @@ export class ResourcesImpl {
       ) {
         const r = this.resources_[i];
         if (
-          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          r.getState() == ResourceState_Enum.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
           !r.element.R1() &&
           r.isDisplayed() &&
@@ -1234,7 +1236,7 @@ export class ResourcesImpl {
       ) {
         const r = this.resources_[i];
         if (
-          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          r.getState() == ResourceState_Enum.READY_FOR_LAYOUT &&
           !r.hasOwner() &&
           !r.element.R1() &&
           r.isDisplayed()
@@ -1489,7 +1491,7 @@ export class ResourcesImpl {
   isLayoutAllowed_(resource, forceOutsideViewport) {
     // Only built and displayed elements can be loaded.
     if (
-      resource.getState() == ResourceState.NOT_BUILT ||
+      resource.getState() == ResourceState_Enum.NOT_BUILT ||
       !resource.isDisplayed()
     ) {
       return false;
@@ -1499,7 +1501,7 @@ export class ResourcesImpl {
     // (and they can't prerender).
     if (!this.visible_) {
       if (
-        this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
+        this.ampdoc.getVisibilityState() != VisibilityState_Enum.PRERENDER ||
         !resource.prerenderAllowed()
       ) {
         return false;
@@ -1529,7 +1531,7 @@ export class ResourcesImpl {
     if (resource.element.R1()) {
       return;
     }
-    const isBuilt = resource.getState() != ResourceState.NOT_BUILT;
+    const isBuilt = resource.getState() != ResourceState_Enum.NOT_BUILT;
     const isDisplayed = resource.isDisplayed();
     if (!isBuilt || !isDisplayed) {
       devAssert(
@@ -1620,7 +1622,7 @@ export class ResourcesImpl {
 
   /**
    * Calls iterator on each sub-resource
-   * @param {!FiniteStateMachine<!VisibilityState>} vsm
+   * @param {!FiniteStateMachine<!VisibilityState_Enum>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
     const {
@@ -1629,7 +1631,7 @@ export class ResourcesImpl {
       PAUSED: paused,
       PRERENDER: prerender,
       VISIBLE: visible,
-    } = VisibilityState;
+    } = VisibilityState_Enum;
     const doWork = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
@@ -1723,8 +1725,8 @@ export class ResourcesImpl {
    */
   cleanupTasks_(resource, opt_removePending) {
     if (
-      resource.getState() == ResourceState.NOT_LAID_OUT ||
-      resource.getState() == ResourceState.READY_FOR_LAYOUT
+      resource.getState() == ResourceState_Enum.NOT_LAID_OUT ||
+      resource.getState() == ResourceState_Enum.READY_FOR_LAYOUT
     ) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
@@ -1743,7 +1745,7 @@ export class ResourcesImpl {
     }
 
     if (
-      resource.getState() == ResourceState.NOT_BUILT &&
+      resource.getState() == ResourceState_Enum.NOT_BUILT &&
       opt_removePending &&
       this.pendingBuildResources_
     ) {

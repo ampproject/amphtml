@@ -1,6 +1,7 @@
-import {CommonSignals} from '#core/constants/common-signals';
-import {Services} from '#service';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
 
 /**
  * Maximum milliseconds to wait for service to load.
@@ -39,7 +40,7 @@ export class AmpStoryRenderService {
       }
 
       return whenUpgradedToCustomElement(storyEl).then(() => {
-        return storyEl.signals().whenSignal(CommonSignals.LOAD_END);
+        return storyEl.signals().whenSignal(CommonSignals_Enum.LOAD_END);
       });
     });
 

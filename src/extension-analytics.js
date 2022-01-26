@@ -1,7 +1,6 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {createElementWithAttributes, removeElement} from '#core/dom';
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -25,21 +24,13 @@ export function insertAnalyticsElement(
   disableImmediate = false
 ) {
   const doc = /** @type {!Document} */ (parentElement.ownerDocument);
-  const analyticsElem = createElementWithAttributes(
-    doc,
-    'amp-analytics',
-    dict({
-      'sandbox': 'true',
-      'trigger': disableImmediate ? '' : 'immediate',
-    })
-  );
-  const scriptElem = createElementWithAttributes(
-    doc,
-    'script',
-    dict({
-      'type': 'application/json',
-    })
-  );
+  const analyticsElem = createElementWithAttributes(doc, 'amp-analytics', {
+    'sandbox': 'true',
+    'trigger': disableImmediate ? '' : 'immediate',
+  });
+  const scriptElem = createElementWithAttributes(doc, 'script', {
+    'type': 'application/json',
+  });
   scriptElem.textContent = JSON.stringify(config);
   analyticsElem.appendChild(scriptElem);
   analyticsElem.CONFIG = config;
@@ -93,7 +84,7 @@ class CustomEventReporter {
 
     this.parent_
       .signals()
-      .whenSignal(CommonSignals.LOAD_START)
+      .whenSignal(CommonSignals_Enum.LOAD_START)
       .then(() => {
         insertAnalyticsElement(this.parent_, config, true);
       });
@@ -215,7 +206,7 @@ export function useAnalyticsInSandbox(element, promise) {
   // Listener to LOAD_START signal. Insert analytics element on LOAD_START
   element
     .signals()
-    .whenSignal(CommonSignals.LOAD_START)
+    .whenSignal(CommonSignals_Enum.LOAD_START)
     .then(() => {
       if (analyticsElement || !configPromise) {
         return;
@@ -233,7 +224,7 @@ export function useAnalyticsInSandbox(element, promise) {
   // Listener to UNLOAD signal. Destroy remove element on UNLOAD
   element
     .signals()
-    .whenSignal(CommonSignals.UNLOAD)
+    .whenSignal(CommonSignals_Enum.UNLOAD)
     .then(() => {
       configPromise = null;
       if (analyticsElement) {

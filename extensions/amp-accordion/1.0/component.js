@@ -19,6 +19,7 @@ import {
 } from '#preact';
 import {forwardRef} from '#preact/compat';
 import {WithAmpContext} from '#preact/context';
+import {propName, tabindexFromProps} from '#preact/utils';
 
 import {animateCollapse, animateExpand} from './animations';
 import {useStyles} from './component.jss';
@@ -339,10 +340,9 @@ export function BentoAccordionSection({
 export function BentoAccordionHeader({
   as: Comp = 'div',
   children,
-  'class': className = '',
   id,
   role = 'button',
-  tabIndex = 0,
+  [propName('class')]: className = '',
   ...rest
 }) {
   const {contentId, expanded, headerId, setHeaderId, toggleHandler} =
@@ -361,7 +361,7 @@ export function BentoAccordionHeader({
       id={headerId}
       role={role}
       class={`${className} ${classes.sectionChild} ${classes.header}`}
-      tabIndex={tabIndex}
+      tabindex={tabindexFromProps(rest)}
       aria-controls={contentId}
       onClick={() => toggleHandler()}
       aria-expanded={String(expanded)}
@@ -378,9 +378,9 @@ export function BentoAccordionHeader({
 export function BentoAccordionContent({
   as: Comp = 'div',
   children,
-  'class': className = '',
   id,
   role = 'region',
+  [propName('class')]: className = '',
   ...rest
 }) {
   const ref = useRef(null);

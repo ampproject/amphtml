@@ -1,10 +1,10 @@
-#ifndef HTMLPARSER__FOREIGN_H_
-#define HTMLPARSER__FOREIGN_H_
+#ifndef CPP_HTMLPARSER_FOREIGN_H_
+#define CPP_HTMLPARSER_FOREIGN_H_
 
 #include <string>
 #include <string_view>
 
-#include "node.h"
+#include "cpp/htmlparser/node.h"
 
 namespace htmlparser {
 
@@ -177,4 +177,4 @@ inline constexpr std::pair<std::string_view, std::string_view>
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__FOREIGN_H_
+#endif  // CPP_HTMLPARSER_FOREIGN_H_

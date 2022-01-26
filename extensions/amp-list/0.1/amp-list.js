@@ -1,10 +1,10 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {isAmp4Email} from '#core/document/format';
 import {removeChildren, tryFocus} from '#core/dom';
 import {
-  Layout,
+  Layout_Enum,
   applyFillContent,
   getLayoutClass,
   isLayoutSizeDefined,
@@ -17,7 +17,7 @@ import {
 } from '#core/dom/query';
 import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
 import {isArray, toArray} from '#core/types/array';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -177,7 +177,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    if (layout === Layout.CONTAINER) {
+    if (layout === Layout_Enum.CONTAINER) {
       const doc = this.element.ownerDocument;
       const isEmail = doc && isAmp4Email(doc);
       const hasPlaceholder =
@@ -695,13 +695,16 @@ export class AmpList extends AMP.BaseElement {
    */
   triggerFetchErrorEvent_(error) {
     const event = error
-      ? createCustomEvent(
-          this.win,
-          `${TAG}.error`,
-          dict({'response': error.response})
-        )
+      ? createCustomEvent(this.win, `${TAG}.error`, {
+          'response': error.response,
+        })
       : null;
-    this.action_.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
+    this.action_.trigger(
+      this.element,
+      'fetch-error',
+      event,
+      ActionTrust_Enum.LOW
+    );
   }
 
   /**
@@ -805,13 +808,13 @@ export class AmpList extends AMP.BaseElement {
         );
         setupJsonFetchInit(r.fetchOpt);
 
-        const attributes = dict({
+        const attributes = {
           'ampListAttributes': {
             'items': this.element.getAttribute('items') || 'items',
             'singleItem': this.element.hasAttribute('single-item'),
             'maxItems': this.element.getAttribute('max-items'),
           },
-        });
+        };
         return this.ssrTemplateHelper_.ssr(
           this.element,
           request,
@@ -1141,7 +1144,7 @@ export class AmpList extends AMP.BaseElement {
 
       const event = createCustomEvent(
         this.win,
-        AmpEvents.DOM_UPDATE,
+        AmpEvents_Enum.DOM_UPDATE,
         /* detail */ null,
         {bubbles: true}
       );
@@ -1324,7 +1327,7 @@ export class AmpList extends AMP.BaseElement {
    */
   attemptToFit_(target) {
     if (
-      this.element.getAttribute('layout') == Layout.CONTAINER &&
+      this.element.getAttribute('layout') == Layout_Enum.CONTAINER &&
       !this.enableManagedResizing_
     ) {
       return Promise.resolve(true);
@@ -1360,7 +1363,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFitLoadMoreElement_(element, target) {
-    if (this.element.getAttribute('layout') == Layout.CONTAINER) {
+    if (this.element.getAttribute('layout') == Layout_Enum.CONTAINER) {
       return;
     }
     this.measureElement(() => {
@@ -1401,15 +1404,15 @@ export class AmpList extends AMP.BaseElement {
     // TODO(amphtml): Remove [width] and [height] attributes too?
     if (
       [
-        Layout.FIXED,
-        Layout.FLEX_ITEM,
-        Layout.FLUID,
-        Layout.INTRINSIC,
-        Layout.RESPONSIVE,
+        Layout_Enum.FIXED,
+        Layout_Enum.FLEX_ITEM,
+        Layout_Enum.FLUID,
+        Layout_Enum.INTRINSIC,
+        Layout_Enum.RESPONSIVE,
       ].includes(layout)
     ) {
       setStyles(this.element, {width: '', height: ''});
-    } else if (layout == Layout.FIXED_HEIGHT) {
+    } else if (layout == Layout_Enum.FIXED_HEIGHT) {
       setStyles(this.element, {height: ''});
     }
 
@@ -1437,7 +1440,7 @@ export class AmpList extends AMP.BaseElement {
     }
     const previousLayout = this.element.getAttribute('i-amphtml-layout');
     // If we have already changed to layout container, no need to run again.
-    if (previousLayout == Layout.CONTAINER) {
+    if (previousLayout == Layout_Enum.CONTAINER) {
       return Promise.resolve();
     }
     return this.mutateElement(() => {

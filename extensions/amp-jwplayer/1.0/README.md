@@ -6,9 +6,7 @@ Displays a cloud-hosted JW Player in an iframe.
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-jwplayer>` web component.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/jwplayer
@@ -19,55 +17,119 @@ import {defineElement as defineBentoJwplayer} from '@bentoproject/jwplayer';
 defineBentoJwplayer();
 ```
 
-### Example: Include via `<script>`
-
-The example below contains an `bento-jwplayer` with three sections. The
-`expanded` attribute on the third section expands it on page load.
+### Include via `<script>`
 
 ```html
-<head>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
-  ></script>
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
-  />
-</head>
-<body>
-  <bento-jwplayer
-    id="jwplayer"
-    data-player-id="BjcwyK37"
-    data-media-id="CtaIzmFs"
-    style="width: 480px; height: 270px"
-  ></bento-jwplayer>
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css" crossorigin="anonymous">
+```
 
-  <script>
-    (async () => {
-      const twitter = document.querySelector('#jwplayer');
-      await customElements.whenDefined('bento-twitter');
+### Example
 
-      const api = player.getApi();
-      api.play();
-      api.pause();
-      api.mute();
-      api.unmute();
-      api.requestFullscreen();
-    })();
-  </script>
-</body>
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-jwplayer
+      id="jwplayer"
+      data-player-id="BjcwyK37"
+      data-media-id="CtaIzmFs"
+      style="width: 480px; height: 270px"
+    ></bento-jwplayer>
+  </body>
+</html>
 ```
 
 ### Interactivity and API usage
 
-Bento enabled components in standalone use are highly interactive through their API. The `bento-jwplayer` component API is accessible by including the following script tag in your document:
+Bento components are highly interactive through their API. The `bento-jwplayer` component API is accessible by including the following script tag in your document:
 
 ```javascript
-await customElements.whenDefined('bento-accordion');
-const api = await document.querySelector('bento-accordion').getApi();
+await customElements.whenDefined('bento-jwplayer');
+const jwplayerApi = await document.querySelector('bento-jwplayer').getApi();
+```
+
+You can use the API to trigger the available actions (`play`, `pause`, `mute`, `unmute`, `requestFullscreen`):
+
+<!--% example %-->
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-jwplayer-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-jwplayer
+      id="jwplayer"
+      data-player-id="BjcwyK37"
+      data-media-id="CtaIzmFs"
+      style="width: 480px; height: 270px"
+    ></bento-jwplayer>
+
+    <script>
+      (async () => {
+        const player = document.querySelector('#jwplayer');
+        await customElements.whenDefined('bento-jwplayer');
+
+        const api = player.getApi();
+        api.play();
+        api.pause();
+        api.mute();
+        api.unmute();
+        api.requestFullscreen();
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Layout and style
@@ -213,9 +275,7 @@ You may use the `bento-jwplayer` element selector to style the accordion freely.
 
 ## Preact/React Component
 
-The examples below demonstrates use of the `<BentoMathml>` as a functional component usable with the Preact or React libraries.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/jwplayer

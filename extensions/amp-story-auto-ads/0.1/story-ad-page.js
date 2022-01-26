@@ -1,4 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {
   createElementWithAttributes,
   isJsonScriptTag,
@@ -6,7 +6,7 @@ import {
 } from '#core/dom';
 import {elementByTag} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {getExperimentBranch} from '#experiments';
@@ -299,12 +299,12 @@ export class StoryAdPage {
    * @private
    */
   createPageElement_() {
-    const attributes = dict({
+    const attributes = {
       'ad': '',
       'distance': '2',
       'i-amphtml-loading': '',
       'id': this.id_,
-    });
+    };
 
     const segmentExpBranch = getExperimentBranch(
       this.win_,
@@ -351,7 +351,7 @@ export class StoryAdPage {
     this.adElement_
       .signals()
       // TODO(ccordry): Investigate using a better signal waiting for video loads.
-      .whenSignal(CommonSignals.INI_LOAD)
+      .whenSignal(CommonSignals_Enum.INI_LOAD)
       .then(() => this.onAdLoaded_());
 
     // Inabox custom event.

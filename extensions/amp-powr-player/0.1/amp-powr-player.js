@@ -11,7 +11,6 @@ import {
 } from '#core/dom/fullscreen';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -27,19 +26,19 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @private @const {string} */
 const TAG = 'amp-powr-player';
 
 /** @private @const {!Object.<string,string>} */
 const PLAYER_EVENT_MAP = {
-  'ready': VideoEvents.LOAD,
-  'playing': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'ended': VideoEvents.ENDED,
-  'ads-ad-started': VideoEvents.AD_START,
-  'ads-ad-ended': VideoEvents.AD_END,
+  'ready': VideoEvents_Enum.LOAD,
+  'playing': VideoEvents_Enum.PLAYING,
+  'pause': VideoEvents_Enum.PAUSE,
+  'ended': VideoEvents_Enum.ENDED,
+  'ads-ad-started': VideoEvents_Enum.AD_START,
+  'ads-ad-ended': VideoEvents_Enum.AD_END,
 };
 
 /** @implements {../../../src/video-interface.VideoInterface} */
@@ -128,12 +127,10 @@ class AmpPowrPlayer extends AMP.BaseElement {
       // been unlaid out by now.
       if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/ postMessage(
-          JSON.stringify(
-            dict({
-              'command': command,
-              'args': arg,
-            })
-          ),
+          JSON.stringify({
+            'command': command,
+            'args': arg,
+          }),
           'https://player.powr.com'
         );
       }
@@ -246,10 +243,10 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
     const srcPrefix = 'https://player.powr.com/iframe.html';
 
-    const srcParams = dict({
+    const srcParams = {
       'account': account,
       'player': this.playerId_,
-    });
+    };
 
     if (video) {
       srcParams['video'] = video;

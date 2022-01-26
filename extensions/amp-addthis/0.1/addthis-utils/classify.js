@@ -1,6 +1,7 @@
-import {RE_NONALPHA, RE_WHITESPACE} from '../constants';
 import {getDetailsForMeta} from './meta';
 import {rot13Array} from './rot13';
+
+import {RE_NONALPHA, RE_WHITESPACE} from '../constants';
 
 const MAX_KEYWORD_LENGTH = 200;
 const PORN_BIT = 0x1;

@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
 import {useCallback, useState} from '#preact';
-import {useIntersectionObserver} from '#preact/component';
+import {useIntersectionObserver} from '#preact/component/intersection-observer';
 import {useMergeRefs} from '#preact/utils';
 
 export default {

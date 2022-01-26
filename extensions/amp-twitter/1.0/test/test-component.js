@@ -1,10 +1,14 @@
-import * as Preact from '#preact';
-import {BentoTwitter} from '../component';
-import {WithAmpContext} from '#preact/context';
-import {createRef} from '#preact';
 import {mount} from 'enzyme';
+
 import {serializeMessage} from '#core/3p-frame-messaging';
+
+import {createRef} from '#preact';
+import * as Preact from '#preact';
+import {WithAmpContext} from '#preact/context';
+
 import {waitFor} from '#testing/helpers/service';
+
+import {BentoTwitter} from '../component';
 
 describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
   it('should render', () => {
@@ -187,5 +191,36 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
 
     expect(onErrorSpy).to.have.been.calledOnce;
     expect(onLoadSpy).not.to.have.been.called;
+  });
+
+  it('should pass the loading attribute to the underlying iframe', () => {
+    const wrapper = mount(
+      <BentoTwitter
+        tweetid="00000000111111"
+        style={{
+          'width': '500px',
+          'height': '600px',
+        }}
+        loading="lazy"
+      ></BentoTwitter>
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    expect(iframe.getAttribute('loading')).to.equal('lazy');
+  });
+
+  it('should set data-loading="auto" if no value is specified', () => {
+    const wrapper = mount(
+      <BentoTwitter
+        tweetid="00000000111111"
+        style={{
+          'width': '500px',
+          'height': '600px',
+        }}
+      ></BentoTwitter>
+    );
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    expect(iframe.getAttribute('loading')).to.equal('auto');
   });
 });

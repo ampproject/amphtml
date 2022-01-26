@@ -5,7 +5,7 @@ import {Services} from '#service';
 import {dev} from '#utils/log';
 
 import {
-  PositionObserverFidelity, // eslint-disable-line no-unused-vars
+  PositionObserverFidelity_Enum, // eslint-disable-line @typescript-eslint/no-unused-vars
   PositionObserverWorker,
 } from './position-observer-worker';
 
@@ -61,7 +61,7 @@ export class PositionObserver {
 
   /**
    * @param {!Element} element
-   * @param {!PositionObserverFidelity} fidelity
+   * @param {!PositionObserverFidelity_Enum} fidelity
    * @param {function(?./position-observer-worker.PositionInViewportEntryDef)} handler
    * @return {!UnlistenDef}
    */

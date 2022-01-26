@@ -1,5 +1,4 @@
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
@@ -27,7 +26,7 @@ const sandboxVals =
   'allow-top-navigation';
 
 const TOKEN_VALUE_1P =
-  'AzKSXqpxJ3GJ4xUcmPM97hZVJG1MQdsBvJDfIuF7mkjVveoiTyt11U3+HIw4U2VdqQ3CNKMUoohEGtHUnS3h8wAAAACBeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2MzQwODMxOTksImlzU3ViZG9tYWluIjp0cnVlLCJ1c2FnZSI6InN1YnNldCJ9';
+  'AlbC5LKqHkvdIY45O3/1Js/EyRmwSjb4wyp3XZy8KbMWhfMknydD4Wx9K9GyEIdG3ojUlZOdpdbX340wPHpYfQoAAABweyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2NDMxNTUxOTksImlzU3ViZG9tYWluIjp0cnVlfQ==';
 
 /**
  * Create the starting html for all FIE ads. If streaming is supported body will be
@@ -71,25 +70,21 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
 export function createSecureFrame(win, title, height, width) {
   const {document} = win;
   const iframe = /** @type {!HTMLIFrameElement} */ (
-    createElementWithAttributes(
-      document,
-      'iframe',
-      dict({
-        // NOTE: It is possible for either width or height to be 'auto',
-        // a non-numeric value.
-        'height': height,
-        'width': width,
-        'title': title,
-        'frameborder': '0',
-        'allowfullscreen': '',
-        'allowtransparency': '',
-        'scrolling': 'no',
-        'sandbox': sandboxVals,
-        'role': 'region',
-        'aria-label': 'Advertisement',
-        'tabindex': '0',
-      })
-    )
+    createElementWithAttributes(document, 'iframe', {
+      // NOTE: It is possible for either width or height to be 'auto',
+      // a non-numeric value.
+      'height': height,
+      'width': width,
+      'title': title,
+      'frameborder': '0',
+      'allowfullscreen': '',
+      'allowtransparency': '',
+      'scrolling': 'no',
+      'sandbox': sandboxVals,
+      'role': 'region',
+      'aria-label': 'Advertisement',
+      'tabindex': '0',
+    })
   );
 
   if (isAttributionReportingSupported(document)) {

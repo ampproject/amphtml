@@ -1,10 +1,12 @@
-import * as Preact from '#preact';
-import {ContainWrapper, useValueRef} from '#preact/component';
-import {Keys} from '#core/constants/key-codes';
-import {forwardRef} from '#preact/compat';
-import {setStyle} from '#core/dom/style';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';
+import {setStyle} from '#core/dom/style';
+
+import * as Preact from '#preact';
 import {useImperativeHandle, useLayoutEffect, useRef, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {ContainWrapper, useValueRef} from '#preact/component';
+
 import {useStyles} from './component.jss';
 
 const ANIMATION_DURATION = 200;
@@ -143,9 +145,9 @@ function BentoLightboxWithRef(
         wrapperClassName={classes.wrapper}
         contentProps={CONTENT_PROPS}
         role="dialog"
-        tabIndex="0"
+        tabindex="0"
         onKeyDown={(event) => {
-          if (event.key === Keys.ESCAPE) {
+          if (event.key === Keys_Enum.ESCAPE) {
             setVisible(false);
           }
         }}
@@ -190,7 +192,7 @@ function ScreenReaderCloseButton({'aria-label': ariaLabel, onClick}) {
       aria-label={ariaLabel}
       class={classes.closeButton}
       onClick={onClick}
-      tabIndex={-1}
+      tabindex={-1}
     />
   );
 }

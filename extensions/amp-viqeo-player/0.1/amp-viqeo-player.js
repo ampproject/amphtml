@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
@@ -7,7 +7,11 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  Layout_Enum,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 
 import {Services} from '#service';
@@ -18,19 +22,22 @@ import {dev, userAssert} from '#utils/log';
 
 import {getIframe} from '../../../src/3p-frame';
 import {redispatch} from '../../../src/iframe-video';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
+} from '../../../src/video-interface';
 
 const TAG = 'amp-viqeo-player';
 
 const EVENTS = {
-  'ready': VideoEvents.LOAD,
-  'play': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'mute': VideoEvents.MUTED,
-  'unmute': VideoEvents.UNMUTED,
-  'end': VideoEvents.ENDED,
-  'startAdvert': VideoEvents.AD_START,
-  'endAdvert': VideoEvents.AD_END,
+  'ready': VideoEvents_Enum.LOAD,
+  'play': VideoEvents_Enum.PLAYING,
+  'pause': VideoEvents_Enum.PAUSE,
+  'mute': VideoEvents_Enum.MUTED,
+  'unmute': VideoEvents_Enum.UNMUTED,
+  'end': VideoEvents_Enum.ENDED,
+  'startAdvert': VideoEvents_Enum.AD_START,
+  'endAdvert': VideoEvents_Enum.AD_END,
 };
 
 /**
@@ -81,7 +88,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Layout} layout
+   * @param {!Layout_Enum} layout
    * @return {boolean}
    * @override
    */
@@ -103,7 +110,9 @@ class AmpViqeoPlayer extends AMP.BaseElement {
       this.element
     );
 
-    this.hasAutoplay_ = this.element.hasAttribute(VideoAttributes.AUTOPLAY);
+    this.hasAutoplay_ = this.element.hasAttribute(
+      VideoAttributes_Enum.AUTOPLAY
+    );
 
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;

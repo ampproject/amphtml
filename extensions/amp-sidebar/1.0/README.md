@@ -6,9 +6,7 @@ Provides a way to display meta content intended for temporary access such as nav
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-The examples below demonstrate use of the `<bento-sidebar>` web component.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/sidebar
@@ -19,54 +17,79 @@ import {defineElement as defineBentoSidebar} from '@bentoproject/sidebar';
 defineBentoSidebar();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
 
 ```html
-<head>
-  <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
-  <style>
-    bento-sidebar:not([open]) {
-      display: none !important;
-    }
-  </style>
-  <script src="https://cdn.ampproject.org/bento.js"></script>
-  <script
-    async
-    src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js"
-  ></script>
-</head>
-<body>
-  <bento-sidebar id="sidebar1" side="right">
-    <ul>
-      <li>Nav item 1</li>
-      <li>Nav item 2</li>
-      <li>Nav item 3</li>
-      <li>Nav item 4</li>
-      <li>Nav item 5</li>
-      <li>Nav item 6</li>
-    </ul>
-  </bento-sidebar>
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-sidebar-1.0.css" crossorigin="anonymous">
+```
 
-  <div class="buttons" style="margin-top: 8px">
-    <button id="open-sidebar">Open sidebar</button>
-  </div>
+### Example
 
-  <script>
-    (async () => {
-      const sidebar = document.querySelector('#sidebar1');
-      await customElements.whenDefined('bento-sidebar');
-      const api = await sidebar.getApi();
+<!--% example %-->
 
-      // set up button actions
-      document.querySelector('#open-sidebar').onclick = () => api.open();
-    })();
-  </script>
-</body>
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-sidebar-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-sidebar-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-sidebar id="sidebar1" side="right" hidden>
+      <ul>
+        <li>Nav item 1</li>
+        <li>Nav item 2</li>
+        <li>Nav item 3</li>
+        <li>Nav item 4</li>
+        <li>Nav item 5</li>
+        <li>Nav item 6</li>
+      </ul>
+    </bento-sidebar>
+
+    <div class="buttons" style="margin-top: 8px">
+      <button id="open-sidebar">Open sidebar</button>
+    </div>
+
+    <script>
+      (async () => {
+        const sidebar = document.querySelector('#sidebar1');
+        await customElements.whenDefined('bento-sidebar');
+        const api = await sidebar.getApi();
+
+        // set up button actions
+        document.querySelector('#open-sidebar').onclick = () => api.open();
+      })();
+    </script>
+  </body>
+</html>
 ```
 
 ### Interactivity and API usage
 
-Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-sidebar` component API is accessible by including the following script tag in your document:
+Bento components are highly interactive through their API. The `bento-sidebar` component API is accessible by including the following script tag in your document:
 
 ```javascript
 await customElements.whenDefined('bento-sidebar');
@@ -163,9 +186,7 @@ This attribute is present when the sidebar is open.
 
 ## Preact/React Component
 
-The examples below demonstrate use of the `<BentoSidebar>` as a functional component usable with the Preact or React libraries.
-
-### Example: Import via npm
+### Import via npm
 
 ```sh
 npm install @bentoproject/sidebar

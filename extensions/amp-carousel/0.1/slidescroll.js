@@ -1,28 +1,34 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {Animation} from '#utils/animation';
-import {dev, user, userAssert} from '#utils/log';
-import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {CarouselControls} from './carousel-controls';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {bezierCurve} from '#core/data-structures/curve';
-import {
-  closestAncestorElementBySelector,
-  realChildElements,
-} from '#core/dom/query';
-import {createCustomEvent, listen} from '#utils/event-helper';
-import {dict} from '#core/types/object';
 import {dispatchCustomEvent} from '#core/dom';
-import {getStyle, setStyle} from '#core/dom/style';
-import {isExperimentOn} from '#experiments';
-import {isFiniteNumber} from '#core/types';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {numeric} from '#core/dom/transition';
 import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {closestAncestorElementBySelector} from '#core/dom/query';
+import {getStyle, setStyle} from '#core/dom/style';
+import {numeric} from '#core/dom/transition';
+import {isFiniteNumber} from '#core/types';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
 import {triggerAnalyticsEvent} from '#utils/analytics';
+import {Animation} from '#utils/animation';
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
+import {
+  ClassNames,
+  buildDom,
+  getNextButtonTitle,
+  getPrevButtonTitle,
+} from './build-dom';
+import {CarouselControls} from './carousel-controls';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
@@ -45,7 +51,7 @@ const CUSTOM_SNAP_TIMEOUT = 100;
 const TAG = 'AMP-CAROUSEL';
 
 export class AmpSlideScroll extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
+  /** @param {AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -55,7 +61,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     /** @private {boolean} */
     this.hasNativeSnapPoints_ = false;
 
-    /** @private {!Array<!Element>} */
+    /** @private {Array<Element>} */
     this.slides_ = [];
 
     /** @private {number} */
@@ -64,7 +70,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     /** @private {?Element} */
     this.slidesContainer_ = null;
 
-    /** @private {!Array<!Element>} */
+    /** @private {Array<Element>} */
     this.slideWrappers_ = [];
 
     /** @private {boolean} */
@@ -91,14 +97,14 @@ export class AmpSlideScroll extends AMP.BaseElement {
     /** @private {number} */
     this.autoplayDelay_ = 5000;
 
-    /** @protected {?number} */
+    /** @private {?number} */
     this.autoplayLoops_ = null;
 
-    /** @protected {number} */
+    /** @private {number} */
     this.loopsMade_ = 0;
 
-    /** @protected {boolean} */
-    this.shouldLoop = false;
+    /** @private {boolean} */
+    this.shouldLoop_ = false;
 
     /** @private {boolean} */
     this.shouldAutoplay_ = false;
@@ -129,7 +135,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     /** @private {number} */
     this.previousScrollLeft_ = 0;
 
-    /** @private {!Array<?string>} */
+    /** @private {Array<?string>} */
     this.dataSlideIdArr_ = [];
 
     const platform = Services.platformFor(this.win);
@@ -167,13 +173,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     this.unobserveIntersections_ = null;
 
     /** @private {CarouselControls} */
-    this.controls_ = new CarouselControls({
-      element,
-      go: this.go.bind(this),
-      ariaRole: 'button',
-      hasPrev: () => this.hasPrev(),
-      hasNext: () => this.hasNext(),
-    });
+    this.controls_ = null;
   }
 
   /** @override */
@@ -186,22 +186,16 @@ export class AmpSlideScroll extends AMP.BaseElement {
     return true;
   }
 
-  /** Build carousel elements */
-  buildCarousel() {
-    this.hasLoop_ = this.element.hasAttribute('loop');
-
-    this.hasAutoplay_ = this.element.hasAttribute('autoplay');
+  /**
+   * Attaches event handlers
+   * @private
+   */
+  setupBehavior_() {
     const autoplayVal = this.element.getAttribute('autoplay');
     if (autoplayVal) {
       this.autoplayLoops_ = parseInt(autoplayVal, 10);
       userAssert(isFiniteNumber(this.autoplayLoops_));
     }
-    this.buildSlides();
-
-    this.shouldLoop = this.hasLoop_ && this.isLoopingEligible();
-
-    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
-
     if (this.shouldAutoplay_ && this.autoplayLoops_ != 0) {
       this.setupAutoplay_();
     }
@@ -216,14 +210,15 @@ export class AmpSlideScroll extends AMP.BaseElement {
           this.toggleAutoplay_(!this.hasAutoplay_);
         }
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
   /**
-   * Builds slides
+   * Attaches event listeners for slides.
+   * Also creates client-specific DOM for various bugfixes.
    */
-  buildSlides() {
+  setupSlideBehavior_() {
     this.vsync_ = this.getVsync();
     this.action_ = Services.actionServiceForDoc(this.element);
     /** If the element is in an email document, allow its `goToSlide` action. */
@@ -236,25 +231,13 @@ export class AmpSlideScroll extends AMP.BaseElement {
       this.hasNativeSnapPoints_ = false;
     }
 
-    this.element.classList.add('i-amphtml-slidescroll');
-
-    this.slides_ = realChildElements(this.element);
-
-    this.noOfSlides_ = this.slides_.length;
-
-    this.slidesContainer_ = this.win.document.createElement('div');
-    // Focusable container makes it possible to fully consume Arrow key events.
-    this.slidesContainer_.setAttribute('tabindex', '-1');
-    this.slidesContainer_.classList.add('i-amphtml-slides-container');
-    // Let screen reader know that this is a live area and changes
-    // to it (such after pressing next) should be announced to the
-    // user.
-    this.slidesContainer_.setAttribute('aria-live', 'polite');
     // Snap point is buggy in IOS 10.3 (beta), so it is disabled in beta.
     // https://bugs.webkit.org/show_bug.cgi?id=169800
-    if (this.shouldDisableCssSnap_) {
-      this.slidesContainer_.classList.add('i-amphtml-slidescroll-no-snap');
-    }
+    this.slidesContainer_.classList.toggle(
+      ClassNames.SLIDES_CONTAINER_NOSNAP,
+      this.shouldDisableCssSnap_
+    );
+
     // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
       const start = this.win.document.createElement('div');
@@ -265,22 +248,11 @@ export class AmpSlideScroll extends AMP.BaseElement {
       end.classList.add('i-amphtml-carousel-end-marker');
       this.slidesContainer_.appendChild(end);
     }
-    this.element.appendChild(this.slidesContainer_);
 
     this.slides_.forEach((slide, index) => {
-      this.dataSlideIdArr_.push(
-        slide.getAttribute('data-slide-id') || index.toString()
-      );
+      const id = slide.getAttribute('data-slide-id') || index.toString();
+      this.dataSlideIdArr_.push(id);
       Services.ownersForDoc(this.element).setOwner(slide, this.element);
-      slide.classList.add('amp-carousel-slide');
-
-      const slideWrapper = this.win.document.createElement('div');
-      slideWrapper.classList.add('i-amphtml-slide-item');
-      this.slidesContainer_.appendChild(slideWrapper);
-
-      slideWrapper.appendChild(slide);
-
-      this.slideWrappers_.push(slideWrapper);
     });
 
     this.cancelTouchEvents_();
@@ -313,10 +285,10 @@ export class AmpSlideScroll extends AMP.BaseElement {
       (invocation) => {
         const {args} = invocation;
         if (args) {
-          this.goToSlide(args['index'], ActionTrust.HIGH);
+          this.goToSlide(args['index'], ActionTrust_Enum.HIGH);
         }
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
@@ -342,7 +314,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const slide = mutations['slide'];
     if (slide !== undefined) {
-      this.goToSlide(slide, ActionTrust.HIGH);
+      this.goToSlide(slide, ActionTrust_Enum.HIGH);
     }
   }
 
@@ -362,10 +334,31 @@ export class AmpSlideScroll extends AMP.BaseElement {
   viewportCallback(inViewport) {
     if (inViewport) {
       this.autoplay_();
-      this.controls_.hintControls();
+      this.controls_?.hintControls();
     } else {
       this.clearAutoplayTimer_();
     }
+  }
+
+  /** Used by amp-lightbox-gallery */
+  interactionNext() {
+    this.controls_.handleNext();
+  }
+
+  /** Used by amp-lightbox-gallery */
+  interactionPrev() {
+    this.controls_.handlePrev();
+  }
+
+  /**
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   * @param {boolean} animate
+   * @param {boolean=} opt_autoplay
+   */
+  goCallback(dir, animate, opt_autoplay) {
+    this.go(dir, animate, opt_autoplay);
   }
 
   /**
@@ -376,7 +369,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * @param {boolean=} opt_autoplay
    */
   go(dir, animate, opt_autoplay) {
-    const trust = opt_autoplay ? ActionTrust.LOW : ActionTrust.HIGH;
+    const trust = opt_autoplay ? ActionTrust_Enum.LOW : ActionTrust_Enum.HIGH;
     this.moveSlide(dir, animate, trust);
     if (opt_autoplay) {
       this.autoplay_();
@@ -406,9 +399,9 @@ export class AmpSlideScroll extends AMP.BaseElement {
         const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
         if (this.hasNativeSnapPoints_) {
-          this.updateOnScroll_(currentScrollLeft, ActionTrust.LOW);
+          this.updateOnScroll_(currentScrollLeft, ActionTrust_Enum.LOW);
         } else {
-          this.customSnap_(currentScrollLeft, undefined, ActionTrust.LOW);
+          this.customSnap_(currentScrollLeft, undefined, ActionTrust_Enum.LOW);
         }
       }, timeout)
     );
@@ -427,7 +420,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   }
 
   /**
-   * @param {!LayoutSize} size
+   * @param {import('#core/dom/layout/rect').LayoutSizeDef} size
    * @private
    */
   onResized_(size) {
@@ -437,9 +430,29 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.buildCarousel();
-    this.controls_.buildDom();
-    this.controls_.initialize();
+    const {nextButton, prevButton, slideWrappers, slides, slidesContainer} =
+      buildDom(this.element);
+    this.slides_ = slides;
+    this.slidesContainer_ = slidesContainer;
+    this.slideWrappers_ = slideWrappers;
+    this.noOfSlides_ = this.slides_.length;
+    this.hasLoop_ = this.element.hasAttribute('loop');
+    this.hasAutoplay_ = this.element.hasAttribute('autoplay');
+    this.shouldLoop_ = this.hasLoop_ && this.isLoopingEligible();
+    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
+
+    this.controls_ = new CarouselControls({
+      element: this.element,
+      go: this.go.bind(this),
+      nextButton,
+      prevButton,
+    });
+    this.controls_.updateButtonTitles(
+      this.getPrevButtonTitle(),
+      this.getNextButtonTitle()
+    );
+    this.setupBehavior_();
+    this.setupSlideBehavior_();
   }
 
   /** @override */
@@ -497,26 +510,32 @@ export class AmpSlideScroll extends AMP.BaseElement {
     return true;
   }
 
-  /** @return  {boolean} */
-  hasPrev() {
-    return this.shouldLoop || this.slideIndex_ > 0;
+  /**
+   * @return  {boolean}
+   * @private
+   */
+  hasPrev_() {
+    return this.shouldLoop_ || this.slideIndex_ > 0;
   }
 
-  /** @return {boolean} */
-  hasNext() {
-    return this.shouldLoop || this.slideIndex_ < this.slides_.length - 1;
+  /**
+   * @return  {boolean}
+   * @private
+   */
+  hasNext_() {
+    return this.shouldLoop_ || this.slideIndex_ < this.slides_.length - 1;
   }
 
   /**
    * Proceeds to the next slide in the desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
-   * @param {!ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    */
   moveSlide(dir, animate, trust) {
     if (this.slideIndex_ !== null) {
-      const hasNext = this.hasNext();
-      const hasPrev = this.hasPrev();
+      const hasNext = this.hasNext_();
+      const hasPrev = this.hasPrev_();
       if ((dir == 1 && hasNext) || (dir == -1 && hasPrev)) {
         let newIndex = dev().assertNumber(this.slideIndex_) + dir;
         if (newIndex == -1) {
@@ -536,7 +555,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
   /**
    * Handles scroll on the slides container.
-   * @param {!Event} unusedEvent Event object.
+   * @param {Event} unusedEvent Event object.
    * @private
    */
   scrollHandler_(unusedEvent) {
@@ -561,12 +580,12 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * Escapes Left and Right arrow key events on the carousel container.
    * This is to prevent them from doubly interacting with surrounding viewer
    * contexts such as email clients when interacting with the amp-carousel.
-   * @param {!KeyboardEvent} event
+   * @param {KeyboardEvent} event
    * @private
    */
   keydownHandler_(event) {
     const {key} = event;
-    if (key == Keys.LEFT_ARROW || key == Keys.RIGHT_ARROW) {
+    if (key == Keys_Enum.LEFT_ARROW || key == Keys_Enum.RIGHT_ARROW) {
       event.stopPropagation();
     }
   }
@@ -609,15 +628,15 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    * @param {number=} opt_forceDir if a valid direction is given force it to
    * move 1 slide in that direction.
-   * @param {ActionTrust=} opt_trust
-   * @return {!Promise}
+   * @param {ActionTrust_Enum=} opt_trust
+   * @return {Promise}
    */
   customSnap_(currentScrollLeft, opt_forceDir, opt_trust) {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     // Default behavior should be stays on current slide
     let diff = newIndex - this.slideIndex_;
-    const hasPrev = this.hasPrev();
+    const hasPrev = this.hasPrev_();
     let toScrollLeft = hasPrev ? this.slideWidth_ : 0;
 
     if (diff == 0 && (opt_forceDir == 1 || opt_forceDir == -1)) {
@@ -655,8 +674,8 @@ export class AmpSlideScroll extends AMP.BaseElement {
     // shown slide.
     let updateValue = 0;
 
-    const hasPrev = this.hasPrev();
-    const hasNext = this.hasNext();
+    const hasPrev = this.hasPrev_();
+    const hasNext = this.hasNext_();
 
     if (hasPrev && hasNext) {
       updateValue = scrolledSlideIndex - 1;
@@ -670,7 +689,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
     let newIndex = this.slideIndex_ + updateValue;
 
-    if (this.shouldLoop) {
+    if (this.shouldLoop_) {
       newIndex =
         newIndex < 0
           ? this.noOfSlides_ - 1
@@ -688,54 +707,30 @@ export class AmpSlideScroll extends AMP.BaseElement {
     return newIndex;
   }
 
-  /**
-   * A format string for the button label. Should be a string, containing two
-   * placeholders of "%s", where the index and total count will go.
-   * @return {string}
-   * @private
-   */
-  getButtonSuffixFormat_() {
-    return (
-      this.element.getAttribute('data-button-count-format') || '(%s of %s)'
-    );
-  }
-
-  /**
-   * @param {number} buttonIndex The index that the button will take the user
-   *    to.
-   * @return {string} The formatted suffix for the button title.
-   */
-  getButtonTitleSuffix_(buttonIndex) {
-    const index = String(buttonIndex + 1);
-    const count = String(this.noOfSlides_);
-    return (
-      ' ' +
-      this.getButtonSuffixFormat_().replace('%s', index).replace('%s', count)
-    );
-  }
-
   /** @return {string} */
   getPrevButtonTitle() {
     const prevIndex = this.getPrevIndex_(this.slideIndex_);
-    const index = prevIndex == null ? 0 : prevIndex;
-    return (
-      this.controls_.getPrevButtonTitle() + this.getButtonTitleSuffix_(index)
-    );
+    const index = (prevIndex == null ? 0 : prevIndex) + 1;
+    return getPrevButtonTitle(this.element, {
+      index: String(index),
+      total: String(this.noOfSlides_),
+    });
   }
 
   /** @return {string} */
   getNextButtonTitle() {
     const nextIndex = this.getNextIndex_(this.slideIndex_);
-    const index = nextIndex == null ? this.noOfSlides_ - 1 : nextIndex;
-    return (
-      this.controls_.getNextButtonTitle() + this.getButtonTitleSuffix_(index)
-    );
+    const index = (nextIndex == null ? this.noOfSlides_ - 1 : nextIndex) + 1;
+    return getNextButtonTitle(this.element, {
+      index: String(index),
+      total: String(this.noOfSlides_),
+    });
   }
 
   /**
    * Updates to the right state of the new index on scroll.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
-   * @param {ActionTrust=} opt_trust
+   * @param {ActionTrust_Enum=} opt_trust
    */
   updateOnScroll_(currentScrollLeft, opt_trust) {
     if (!isFiniteNumber(currentScrollLeft) || this.slideIndex_ === null) {
@@ -756,7 +751,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * Parses given value as integer and shows the slide with that index value
    * when element has been laid out.
    * @param {*} value
-   * @param {!ActionTrust} trust
+   * @param {ActionTrust_Enum} trust
    */
   goToSlide(value, trust) {
     const index = parseInt(value, 10);
@@ -784,7 +779,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   getPrevIndex_(currentIndex) {
     return currentIndex - 1 >= 0
       ? currentIndex - 1
-      : this.shouldLoop
+      : this.shouldLoop_
       ? this.noOfSlides_ - 1
       : null;
   }
@@ -798,7 +793,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
   getNextIndex_(currentIndex) {
     return currentIndex + 1 < this.noOfSlides_
       ? currentIndex + 1
-      : this.shouldLoop
+      : this.shouldLoop_
       ? 0
       : null;
   }
@@ -844,7 +839,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
       return false;
     }
     showIndexArr.forEach((showIndex, loopIndex) => {
-      if (this.shouldLoop) {
+      if (this.shouldLoop_) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
       }
       this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
@@ -873,8 +868,11 @@ export class AmpSlideScroll extends AMP.BaseElement {
       }
     }
     this.hideRestOfTheSlides_(showIndexArr);
-    this.controls_.setControlsState();
-    this.controls_.updateButtonTitles(
+    this.controls_?.setControlsState({
+      prev: this.hasPrev_(),
+      next: this.hasNext_(),
+    });
+    this.controls_?.updateButtonTitles(
       this.getPrevButtonTitle(),
       this.getNextButtonTitle()
     );
@@ -884,19 +882,17 @@ export class AmpSlideScroll extends AMP.BaseElement {
   /**
    * Shows the slide at the given index and triggers a `slideChange` event.
    * @param {number} newIndex
-   * @param {ActionTrust=} opt_trust LOW by default.
+   * @param {ActionTrust_Enum=} opt_trust LOW by default.
    * @private
    */
-  showSlideAndTriggerAction_(newIndex, opt_trust = ActionTrust.LOW) {
+  showSlideAndTriggerAction_(newIndex, opt_trust = ActionTrust_Enum.LOW) {
     const slideChanged = this.showSlide_(newIndex);
 
     if (slideChanged) {
       const name = 'slideChange';
-      const event = createCustomEvent(
-        this.win,
-        `slidescroll.${name}`,
-        dict({'index': newIndex})
-      );
+      const event = createCustomEvent(this.win, `slidescroll.${name}`, {
+        'index': newIndex,
+      });
       this.action_.trigger(this.element, name, event, opt_trust);
 
       dispatchCustomEvent(this.element, name, {
@@ -918,7 +914,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
     let newScrollLeft = this.slideWidth_;
-    if ((!this.shouldLoop && index == 0) || this.slides_.length <= 1) {
+    if ((!this.shouldLoop_ && index == 0) || this.slides_.length <= 1) {
       newScrollLeft = 0;
     }
     return newScrollLeft;
@@ -926,7 +922,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
   /**
    * Given an index, hides rest of the slides that are not needed.
-   * @param {!Array<number>} indexArr Array of indices that
+   * @param {Array<number>} indexArr Array of indices that
    *    should not be hidden.
    * @private
    */
@@ -938,7 +934,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
       }
       // Hide if not shown anymore
       if (!indexArr.includes(i)) {
-        if (this.shouldLoop) {
+        if (this.shouldLoop_) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
         dev()
@@ -960,14 +956,14 @@ export class AmpSlideScroll extends AMP.BaseElement {
    * Animate scrollLeft of the container.
    * @param {number} fromScrollLeft
    * @param {number} toScrollLeft
-   * @return {!Promise}
+   * @return {Promise}
    * @private
    */
   animateScrollLeft_(fromScrollLeft, toScrollLeft) {
     if (fromScrollLeft == toScrollLeft) {
       return Promise.resolve();
     }
-    /** @const {!TransitionDef<number>} */
+    /** @const {TransitionDef<number>} */
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
     const curve = bezierCurve(0.8, 0, 0.6, 1); // ease-in
     const duration = 80;
@@ -1017,10 +1013,10 @@ export class AmpSlideScroll extends AMP.BaseElement {
         ? 'null'
         : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
 
-    const vars = dict({
+    const vars = {
       'fromSlide': fromSlide,
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
-    });
+    };
     this.analyticsEvent_('amp-carousel-change', vars);
     // At this point direction can be only +1 or -1.
     if (direction == 1) {
@@ -1032,7 +1028,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
   /**
    * @param {string} eventType
-   * @param {!JsonObject} vars A map of vars and their values.
+   * @param {JsonObject} vars A map of vars and their values.
    * @private
    */
   analyticsEvent_(eventType, vars) {
@@ -1059,7 +1055,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
       this.element.setAttribute('loop', '');
       this.loopAdded_ = true;
       this.hasLoop_ = true;
-      this.shouldLoop = true;
+      this.shouldLoop_ = true;
     }
   }
 
@@ -1133,7 +1129,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
       this.element.removeAttribute('loop');
       this.loopAdded_ = false;
       this.hasLoop_ = false;
-      this.shouldLoop = false;
+      this.shouldLoop_ = false;
     }
     this.hasAutoplay_ = false;
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();

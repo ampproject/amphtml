@@ -3,19 +3,19 @@ import {Messaging} from '@ampproject/viewer-messaging';
 
 // Source for this constant is css/amp-story-player-shadow.css
 import {devAssertElement} from '#core/assert';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
-import {isJsonScriptTag, tryFocus} from '#core/dom';
+import {isJsonScriptTag, toggleAttribute, tryFocus} from '#core/dom';
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
 import {findIndex, toArray} from '#core/types/array';
 import {isEnumValue} from '#core/types/enum';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 
 import {createCustomEvent, listenOnce} from '#utils/event-helper';
 
 import {AmpStoryPlayerViewportObserver} from './amp-story-player-viewport-observer';
+import {AMP_STORY_PLAYER_EVENT} from './event';
 import {PageScroller} from './page-scroller';
 
 import {cssText} from '../../build/amp-story-player-shadow.css';
@@ -102,9 +102,6 @@ const STORY_MESSAGE_STATE_TYPE_ENUM = {
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
 };
-
-/** @const {string} */
-export const AMP_STORY_PLAYER_EVENT = 'AMP_STORY_PLAYER_EVENT';
 
 /** @const {string} */
 const CLASS_NO_NAVIGATION_TRANSITION =
@@ -366,7 +363,7 @@ export class AmpStoryPlayer {
 
     this.updateVisibilityState_(
       currentStory,
-      paused ? VisibilityState.PAUSED : VisibilityState.VISIBLE
+      paused ? VisibilityState_Enum.PAUSED : VisibilityState_Enum.VISIBLE
     );
   }
 
@@ -433,9 +430,7 @@ export class AmpStoryPlayer {
 
   /** @private */
   signalReady_() {
-    this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'ready', dict({}))
-    );
+    this.element_.dispatchEvent(createCustomEvent(this.win_, 'ready', {}));
     this.element_.isReady = true;
   }
 
@@ -502,7 +497,7 @@ export class AmpStoryPlayer {
           isBack
             ? DEPRECATED_EVENT_NAMES_ENUM.BACK
             : DEPRECATED_EVENT_NAMES_ENUM.CLOSE,
-          dict({})
+          {}
         )
       );
     });
@@ -621,27 +616,25 @@ export class AmpStoryPlayer {
 
           messaging.sendRequest(
             'onDocumentState',
-            dict({
+            {
               'state': STORY_MESSAGE_STATE_TYPE_ENUM.PAGE_ATTACHMENT_STATE,
-            }),
+            },
             false
           );
 
           messaging.sendRequest(
             'onDocumentState',
-            dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.CURRENT_PAGE_ID}),
+            {'state': STORY_MESSAGE_STATE_TYPE_ENUM.CURRENT_PAGE_ID},
             false
           );
 
-          messaging.sendRequest(
-            'onDocumentState',
-            dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.MUTED_STATE})
-          );
+          messaging.sendRequest('onDocumentState', {
+            'state': STORY_MESSAGE_STATE_TYPE_ENUM.MUTED_STATE,
+          });
 
-          messaging.sendRequest(
-            'onDocumentState',
-            dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.UI_STATE})
-          );
+          messaging.sendRequest('onDocumentState', {
+            'state': STORY_MESSAGE_STATE_TYPE_ENUM.UI_STATE,
+          });
 
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(
@@ -655,7 +648,7 @@ export class AmpStoryPlayer {
 
             messaging.sendRequest(
               'customDocumentUI',
-              dict({'controls': this.playerConfig_.controls}),
+              {'controls': this.playerConfig_.controls},
               false
             );
           }
@@ -780,12 +773,14 @@ export class AmpStoryPlayer {
    * @private
    */
   checkButtonsDisabled_() {
-    this.prevButton_.toggleAttribute(
+    toggleAttribute(
+      this.prevButton_,
       'disabled',
       this.isIndexOutofBounds_(this.currentIdx_ - 1) &&
         !this.isCircularWrappingEnabled_
     );
-    this.nextButton_.toggleAttribute(
+    toggleAttribute(
+      this.nextButton_,
       'disabled',
       this.isIndexOutofBounds_(this.currentIdx_ + 1) &&
         !this.isCircularWrappingEnabled_
@@ -1239,11 +1234,11 @@ export class AmpStoryPlayer {
           // 4. Update the visibility state of the story.
           .then(() => {
             if (story.distance === 0 && this.playing_) {
-              this.updateVisibilityState_(story, VisibilityState.VISIBLE);
+              this.updateVisibilityState_(story, VisibilityState_Enum.VISIBLE);
             }
 
             if (oldDistance === 0 && story.distance === 1) {
-              this.updateVisibilityState_(story, VisibilityState.INACTIVE);
+              this.updateVisibilityState_(story, VisibilityState_Enum.INACTIVE);
             }
           })
           // 5. Finally update the story position.
@@ -1297,7 +1292,10 @@ export class AmpStoryPlayer {
    */
   setSrc_(story, url) {
     const {iframe} = story;
-    const {href} = this.getEncodedLocation_(url, VisibilityState.PRERENDER);
+    const {href} = this.getEncodedLocation_(
+      url,
+      VisibilityState_Enum.PRERENDER
+    );
 
     iframe.setAttribute('src', href);
     if (story.title) {
@@ -1356,11 +1354,11 @@ export class AmpStoryPlayer {
   /**
    * Gets encoded url for player usage.
    * @param {string} href
-   * @param {VisibilityState=} visibilityState
+   * @param {VisibilityState_Enum=} visibilityState
    * @return {!Location}
    * @private
    */
-  getEncodedLocation_(href, visibilityState = VisibilityState.INACTIVE) {
+  getEncodedLocation_(href, visibilityState = VisibilityState_Enum.INACTIVE) {
     const playerFragmentParams = {
       'visibilityState': visibilityState,
       'origin': this.win_.origin,
@@ -1383,9 +1381,9 @@ export class AmpStoryPlayer {
 
     let noFragmentUrl = removeFragment(href);
     if (isProxyOrigin(href)) {
-      const ampJsQueryParam = dict({
+      const ampJsQueryParam = {
         'amp_js_v': '0.1',
-      });
+      };
       noFragmentUrl = addParamsToUrl(noFragmentUrl, ampJsQueryParam);
     }
     const inputUrl = noFragmentUrl + '#' + serializeQueryString(fragmentParams);
@@ -1399,7 +1397,7 @@ export class AmpStoryPlayer {
   /**
    * Updates the visibility state of the story inside the iframe.
    * @param {!StoryDef} story
-   * @param {!VisibilityState} visibilityState
+   * @param {!VisibilityState_Enum} visibilityState
    * @private
    */
   updateVisibilityState_(story, visibilityState) {
@@ -1578,9 +1576,7 @@ export class AmpStoryPlayer {
         this.next_();
         break;
       default:
-        this.element_.dispatchEvent(
-          createCustomEvent(this.win_, value, dict({}))
-        );
+        this.element_.dispatchEvent(createCustomEvent(this.win_, value, {}));
         break;
     }
   }
@@ -1606,19 +1602,15 @@ export class AmpStoryPlayer {
     messaging
       .sendRequest(
         'getDocumentState',
-        dict({'state': STORY_MESSAGE_STATE_TYPE_ENUM.STORY_PROGRESS}),
+        {'state': STORY_MESSAGE_STATE_TYPE_ENUM.STORY_PROGRESS},
         true
       )
       .then((progress) => {
         this.element_.dispatchEvent(
-          createCustomEvent(
-            this.win_,
-            'storyNavigation',
-            dict({
-              'pageId': pageId,
-              'progress': progress.value,
-            })
-          )
+          createCustomEvent(this.win_, 'storyNavigation', {
+            'pageId': pageId,
+            'progress': progress.value,
+          })
         );
       });
   }
@@ -1662,7 +1654,7 @@ export class AmpStoryPlayer {
       createCustomEvent(
         this.win_,
         isPageAttachmentOpen ? 'page-attachment-open' : 'page-attachment-close',
-        dict({})
+        {}
       )
     );
   }
@@ -1701,7 +1693,7 @@ export class AmpStoryPlayer {
     }
 
     if (endOfStories) {
-      this.element_.dispatchEvent(createCustomEvent(this.win_, name, dict({})));
+      this.element_.dispatchEvent(createCustomEvent(this.win_, name, {}));
     }
   }
 
@@ -1723,13 +1715,9 @@ export class AmpStoryPlayer {
       this.pageScroller_.onTouchStart(event.timeStamp, coordinates.clientY);
 
     this.element_.dispatchEvent(
-      createCustomEvent(
-        this.win_,
-        'amp-story-player-touchstart',
-        dict({
-          'touches': event.touches,
-        })
-      )
+      createCustomEvent(this.win_, 'amp-story-player-touchstart', {
+        'touches': event.touches,
+      })
     );
   }
 
@@ -1745,14 +1733,10 @@ export class AmpStoryPlayer {
     }
 
     this.element_.dispatchEvent(
-      createCustomEvent(
-        this.win_,
-        'amp-story-player-touchmove',
-        dict({
-          'touches': event.touches,
-          'isNavigationalSwipe': this.touchEventState_.isSwipeX,
-        })
-      )
+      createCustomEvent(this.win_, 'amp-story-player-touchmove', {
+        'touches': event.touches,
+        'isNavigationalSwipe': this.touchEventState_.isSwipeX,
+      })
     );
 
     if (this.touchEventState_.isSwipeX === false) {
@@ -1786,14 +1770,10 @@ export class AmpStoryPlayer {
    */
   onTouchEnd_(event) {
     this.element_.dispatchEvent(
-      createCustomEvent(
-        this.win_,
-        'amp-story-player-touchend',
-        dict({
-          'touches': event.touches,
-          'isNavigationalSwipe': this.touchEventState_.isSwipeX,
-        })
-      )
+      createCustomEvent(this.win_, 'amp-story-player-touchend', {
+        'touches': event.touches,
+        'isNavigationalSwipe': this.touchEventState_.isSwipeX,
+      })
     );
 
     if (this.touchEventState_.isSwipeX === true) {

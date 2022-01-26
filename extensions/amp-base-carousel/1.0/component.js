@@ -1,21 +1,9 @@
-import * as Preact from '#preact';
-import {
-  Alignment,
-  Axis,
-  Orientation,
-  getDimension,
-  getOffsetPosition,
-  getScrollEnd,
-} from './dimensions';
-import {Arrow} from './arrow';
-import {CarouselContext} from './carousel-context';
-import {ContainWrapper} from '#preact/component';
-import {Scroller} from './scroller';
-import {WithAmpContext} from '#preact/context';
-import {forwardRef, toChildArray} from '#preact/compat';
-import {isRTL} from '#core/dom';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+import {isRTL} from '#core/dom';
+import {mod} from '#core/math';
 import {getWin} from '#core/window';
+
+import * as Preact from '#preact';
 import {
   cloneElement,
   useCallback,
@@ -27,8 +15,22 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {Children, forwardRef} from '#preact/compat';
+import {ContainWrapper} from '#preact/component';
+import {WithAmpContext} from '#preact/context';
+
+import {Arrow} from './arrow';
+import {CarouselContext} from './carousel-context';
 import {useStyles} from './component.jss';
-import {mod} from '#core/math';
+import {
+  Alignment,
+  Axis,
+  Orientation,
+  getDimension,
+  getOffsetPosition,
+  getScrollEnd,
+} from './dimensions';
+import {Scroller} from './scroller';
 
 /**
  * @enum {string}
@@ -101,7 +103,7 @@ function BentoBaseCarouselWithRef(
   ref
 ) {
   const classes = useStyles();
-  const childrenArray = useMemo(() => toChildArray(children), [children]);
+  const childrenArray = useMemo(() => Children.toArray(children), [children]);
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
   const [currentSlideState, setCurrentSlideState] = useState(
@@ -309,7 +311,7 @@ function BentoBaseCarouselWithRef(
         }
         interaction.current = Interaction.TOUCH;
       }}
-      tabIndex="0"
+      tabindex="0"
       wrapperClassName={classes.carousel}
       contentRef={contentRef}
       {...rest}

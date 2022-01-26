@@ -1,10 +1,8 @@
-import * as Preact from '#core/dom/jsx';
-import {Services} from '#service';
 import {removeElement} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {getWin} from '#core/window';
 
-/** @private @const {string} */
-const TOAST_CLASSNAME = 'i-amphtml-story-toast';
+import {Services} from '#service';
 
 /**
  * The 'alert' role assertively announces toast content to screen readers.
@@ -31,7 +29,7 @@ export class Toast {
     const win = getWin(storyEl);
 
     const toast = (
-      <div class={TOAST_CLASSNAME} role={TOAST_ROLE}>
+      <div class="i-amphtml-story-toast" role={TOAST_ROLE}>
         {childNodeOrText}
       </div>
     );

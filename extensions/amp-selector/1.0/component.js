@@ -1,6 +1,6 @@
 import objstr from 'obj-str';
 
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {tryFocus} from '#core/dom';
 import {mod} from '#core/math';
 
@@ -16,6 +16,7 @@ import {
   useState,
 } from '#preact';
 import {forwardRef} from '#preact/compat';
+import {propName, tabindexFromProps} from '#preact/utils';
 
 import {useStyles} from './component.jss';
 
@@ -51,12 +52,15 @@ function SelectorWithRef(
     name,
     onChange,
     role = 'listbox',
-    tabIndex,
     children,
     ...rest
   },
   ref
 ) {
+  const tabindex = tabindexFromProps(
+    rest,
+    keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1
+  );
   const [selectedState, setSelectedState] = useState(value ?? defaultValue);
   const optionsRef = useRef([]);
   const focusRef = useRef({active: null, focusMap: {}});
@@ -211,12 +215,12 @@ function SelectorWithRef(
       const {key} = e;
       let dir;
       switch (key) {
-        case Keys.LEFT_ARROW: // Fallthrough.
-        case Keys.UP_ARROW:
+        case Keys_Enum.LEFT_ARROW: // Fallthrough.
+        case Keys_Enum.UP_ARROW:
           dir = -1;
           break;
-        case Keys.RIGHT_ARROW: // Fallthrough.
-        case Keys.DOWN_ARROW:
+        case Keys_Enum.RIGHT_ARROW: // Fallthrough.
+        case Keys_Enum.DOWN_ARROW:
           dir = 1;
           break;
         default:
@@ -244,9 +248,7 @@ function SelectorWithRef(
       multiple={multiple}
       name={name}
       onKeyDown={onKeyDown}
-      tabIndex={
-        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? 0 : -1
-      }
+      tabindex={tabindex}
       value={selected}
     >
       <input hidden defaultValue={selected} name={name} form={form} />
@@ -267,13 +269,12 @@ export {BentoSelector};
  */
 export function BentoSelectorOption({
   as: Comp = 'div',
-  'class': className = '',
   disabled = false,
   focus: customFocus,
   index,
   option,
   role = 'option',
-  tabIndex,
+  [propName('class')]: className = '',
   ...rest
 }) {
   const classes = useStyles();
@@ -287,6 +288,11 @@ export function BentoSelectorOption({
     selectOption,
     selected,
   } = useContext(SelectorContext);
+
+  const tabindex = tabindexFromProps(
+    rest,
+    keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
+  );
 
   const focus = useCallback(() => {
     customFocus?.();
@@ -333,7 +339,7 @@ export function BentoSelectorOption({
 
   const onKeyDown = useCallback(
     (e) => {
-      if (e.key === Keys.ENTER || e.key === Keys.SPACE) {
+      if (e.key === Keys_Enum.ENTER || e.key === Keys_Enum.SPACE) {
         trySelect();
       }
     },
@@ -360,9 +366,7 @@ export function BentoSelectorOption({
       ref={ref}
       role={role}
       selected={isSelected}
-      tabIndex={
-        tabIndex ?? keyboardSelectMode === KEYBOARD_SELECT_MODE.SELECT ? -1 : 0
-      }
+      tabindex={tabindex}
       value={option}
     />
   );

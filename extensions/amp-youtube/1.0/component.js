@@ -1,5 +1,4 @@
 import {dispatchCustomEvent} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {useRef} from '#preact';
@@ -7,7 +6,7 @@ import {forwardRef} from '#preact/compat';
 
 import {mutedOrUnmutedEvent, objOrParseJson} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 import {VideoIframe} from '../../amp-video/1.0/video-iframe';
 
 // Correct PlayerStates taken from
@@ -54,10 +53,10 @@ const VIDEO_EVENT_OPTIONS = {bubbles: false, cancelable: false};
  * @return {!JsonObject}
  */
 function createDefaultInfo() {
-  return dict({
+  return {
     'currentTime': 0,
     'duration': NaN,
-  });
+  };
 }
 
 /**
@@ -136,7 +135,7 @@ function BentoYoutubeWithRef(
     const {'event': event, 'info': parsedInfo} = parsedData;
 
     if (event == 'initialDelivery') {
-      dispatchVideoEvent(currentTarget, VideoEvents.LOADEDMETADATA);
+      dispatchVideoEvent(currentTarget, VideoEvents_Enum.LOADEDMETADATA);
       onLoad?.();
       return;
     }
@@ -155,12 +154,10 @@ function BentoYoutubeWithRef(
     const playerState = parsedInfo['playerState'];
     if (event == 'infoDelivery' && playerState == 0 && loop) {
       currentTarget.contentWindow./*OK*/ postMessage(
-        JSON.stringify(
-          dict({
-            'event': 'command',
-            'func': 'playVideo',
-          })
-        ),
+        JSON.stringify({
+          'event': 'command',
+          'func': 'playVideo',
+        }),
         '*'
       );
     }
@@ -188,11 +185,9 @@ function BentoYoutubeWithRef(
         const {currentTarget} = event;
         dispatchVideoEvent(currentTarget, 'canplay');
         currentTarget.contentWindow./*OK*/ postMessage(
-          JSON.stringify(
-            dict({
-              'event': 'listening',
-            })
-          ),
+          JSON.stringify({
+            'event': 'listening',
+          }),
           '*'
         );
       }}
@@ -239,12 +234,10 @@ function dispatchVideoEvent(currentTarget, name) {
  * @return {!Object|string}
  */
 function makeMethodMessage(method) {
-  return JSON.stringify(
-    dict({
-      'event': 'command',
-      'func': methods[method],
-    })
-  );
+  return JSON.stringify({
+    'event': 'command',
+    'func': methods[method],
+  });
 }
 
 const BentoYoutube = forwardRef(BentoYoutubeWithRef);

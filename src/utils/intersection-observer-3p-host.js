@@ -1,10 +1,9 @@
-import {MessageType} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {
   layoutRectLtwh,
   moveLayoutRect,
   rectIntersection,
 } from '#core/dom/layout/rect';
-import {dict} from '#core/types/object';
 
 import {SubscriptionApi} from '../iframe-helper';
 
@@ -75,7 +74,7 @@ export class IntersectionObserver3pHost {
     /** @private {?SubscriptionApi} */
     this.subscriptionApi_ = new SubscriptionApi(
       iframe,
-      MessageType.SEND_INTERSECTIONS,
+      MessageType_Enum.SEND_INTERSECTIONS,
       false, // is3P
       () => {
         this.startSendingIntersection_();
@@ -84,10 +83,9 @@ export class IntersectionObserver3pHost {
 
     this.intersectionObserver_ = new IntersectionObserver(
       (entries) => {
-        this.subscriptionApi_.send(
-          MessageType.INTERSECTION,
-          dict({'changes': entries.map(cloneEntryForCrossOrigin)})
-        );
+        this.subscriptionApi_.send(MessageType_Enum.INTERSECTION, {
+          'changes': entries.map(cloneEntryForCrossOrigin),
+        });
       },
       {threshold: DEFAULT_THRESHOLD}
     );

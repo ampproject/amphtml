@@ -1,12 +1,16 @@
 import '../amp-facebook';
-import {createElementWithAttributes} from '#core/dom';
-import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {facebook} from '#3p/facebook';
-import {resetServiceForTesting} from '../../../../src/service-helpers';
+
 import {serializeMessage} from '#core/3p-frame-messaging';
-import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
+import {createElementWithAttributes} from '#core/dom';
+
 import {toggleExperiment} from '#experiments';
+
 import {waitFor} from '#testing/helpers/service';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+
+import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-facebook',
@@ -287,6 +291,35 @@ describes.realWin(
         element.shadowRoot.querySelector('iframe').contentWindow;
       win.dispatchEvent(mockEvent);
       expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
+    });
+
+    it('should pass the data-loading attribute to the underlying iframe', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-loading': 'lazy',
+        'data-href': fbPostHref,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('lazy');
+    });
+
+    it('should set data-loading="auto" if no value is specified', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-href': fbPostHref,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('auto');
     });
   }
 );

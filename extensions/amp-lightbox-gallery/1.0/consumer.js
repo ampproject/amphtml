@@ -9,7 +9,7 @@ import {
   useMemo,
   useState,
 } from '#preact';
-import {toChildArray} from '#preact/compat';
+import {Children} from '#preact/compat';
 
 import {BentoLightboxGalleryContext} from './context';
 
@@ -56,10 +56,10 @@ export function WithBentoLightboxGallery({
       return renderProp();
     }
     if (children) {
-      return toChildArray(children).map(CLONE_CHILD);
+      return Children.map(children, CLONE_CHILD);
     }
     return <Comp srcset={srcset} />;
-  }, [children, renderProp, srcset]);
+  }, [children, renderProp, srcset, Comp]);
 
   const caption = useMemo(
     () => captionProp || alt || ariaLabel,

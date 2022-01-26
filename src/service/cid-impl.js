@@ -9,7 +9,6 @@
 import {tryResolve} from '#core/data-structures/promise';
 import {isIframed} from '#core/dom';
 import {rethrowAsync} from '#core/error';
-import {dict} from '#core/types/object';
 import {parseJson, tryParseJson} from '#core/types/object/json';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
@@ -21,7 +20,7 @@ import {Services} from '#service';
 import {dev, user, userAssert} from '#utils/log';
 
 import {CacheCidApi} from './cache-cid-api';
-import {GoogleCidApi, TokenStatus} from './cid-api';
+import {GoogleCidApi, TokenStatus_Enum} from './cid-api';
 import {ViewerCidApi} from './viewer-cid-api';
 
 import {getCookie, setCookie} from '../cookies';
@@ -237,7 +236,7 @@ class Cid {
       const apiKey = this.isScopeOptedIn_(scope);
       if (apiKey) {
         return this.cidApi_.getScopedCid(apiKey, scope).then((scopedCid) => {
-          if (scopedCid == TokenStatus.OPT_OUT) {
+          if (scopedCid == TokenStatus_Enum.OPT_OUT) {
             return null;
           }
           if (scopedCid) {
@@ -344,7 +343,7 @@ export function optOutOfCid(ampdoc) {
   // Tell the viewer that user has opted out.
   Services.viewerForDoc(ampdoc)./*OK*/ sendMessage(
     CID_OPTOUT_VIEWER_MESSAGE,
-    dict()
+    {}
   );
 
   // Store the optout bit in storage
@@ -603,12 +602,10 @@ export function viewerBaseCid(ampdoc, opt_data) {
       if (data && !tryParseJson(data)) {
         // TODO(lannka, #11060): clean up when all Viewers get migrated
         dev().expectedError('CID', 'invalid cid format');
-        return JSON.stringify(
-          dict({
-            'time': Date.now(), // CID returned from old API is always fresh
-            'cid': data,
-          })
-        );
+        return JSON.stringify({
+          'time': Date.now(), // CID returned from old API is always fresh
+          'cid': data,
+        });
       }
       return data;
     });
@@ -622,12 +619,10 @@ export function viewerBaseCid(ampdoc, opt_data) {
  * @return {string}
  */
 function createCidData(cidString) {
-  return JSON.stringify(
-    dict({
-      'time': Date.now(),
-      'cid': cidString,
-    })
-  );
+  return JSON.stringify({
+    'time': Date.now(),
+    'cid': cidString,
+  });
 }
 
 /**

@@ -5,7 +5,6 @@ import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -26,7 +25,10 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
+} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-delight-player';
@@ -191,7 +193,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (this.element.hasAttribute(VideoAttributes.DOCK)) {
+    if (this.element.hasAttribute(VideoAttributes_Enum.DOCK)) {
       return false; // do nothing, do not relayout
     }
 
@@ -291,13 +293,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
     }
 
     const redispatched = redispatch(element, data['type'], {
-      [DelightEvent.PLAYING]: VideoEvents.PLAYING,
-      [DelightEvent.PAUSED]: VideoEvents.PAUSE,
-      [DelightEvent.ENDED]: VideoEvents.ENDED,
-      [DelightEvent.MUTED]: VideoEvents.MUTED,
-      [DelightEvent.UNMUTED]: VideoEvents.UNMUTED,
-      [DelightEvent.AD_START]: VideoEvents.AD_START,
-      [DelightEvent.AD_END]: VideoEvents.AD_END,
+      [DelightEvent.PLAYING]: VideoEvents_Enum.PLAYING,
+      [DelightEvent.PAUSED]: VideoEvents_Enum.PAUSE,
+      [DelightEvent.ENDED]: VideoEvents_Enum.ENDED,
+      [DelightEvent.MUTED]: VideoEvents_Enum.MUTED,
+      [DelightEvent.UNMUTED]: VideoEvents_Enum.UNMUTED,
+      [DelightEvent.AD_START]: VideoEvents_Enum.AD_START,
+      [DelightEvent.AD_END]: VideoEvents_Enum.AD_END,
     });
 
     if (redispatched) {
@@ -322,7 +324,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
         break;
       }
       case DelightEvent.READY: {
-        dispatchCustomEvent(element, VideoEvents.LOAD);
+        dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
         this.playerReadyResolver_(this.iframe_);
         break;
       }
@@ -370,14 +372,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @param {!Object<string, string>=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars) {
-    dispatchCustomEvent(
-      this.element,
-      VideoEvents.CUSTOM_TICK,
-      dict({
-        'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
-        'vars': vars,
-      })
-    );
+    dispatchCustomEvent(this.element, VideoEvents_Enum.CUSTOM_TICK, {
+      'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
+      'vars': vars,
+    });
   }
 
   /**

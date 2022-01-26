@@ -1,12 +1,12 @@
 import {isServerRendered} from '#core/dom';
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
 import {realChildNodes} from '#core/dom/query';
 import {getEffectiveLayout} from '#core/static-layout';
 
 /**
  * @see amphtml/compiler/types.js for full description
  *
- * @param {!Element} element
+ * @param {HTMLElement} element
  */
 export function buildDom(element) {
   if (isServerRendered(element)) {
@@ -14,7 +14,7 @@ export function buildDom(element) {
   }
 
   const layout = getEffectiveLayout(element);
-  if (layout == Layout.CONTAINER) {
+  if (layout == Layout_Enum.CONTAINER) {
     return;
   }
 

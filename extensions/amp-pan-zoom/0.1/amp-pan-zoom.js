@@ -1,7 +1,7 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {bezierCurve} from '#core/data-structures/curve';
 import {dispatchCustomEvent} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {layoutRectFromDomRect, layoutRectLtwh} from '#core/dom/layout/rect';
 import {
   observeContentSize,
@@ -12,7 +12,6 @@ import {htmlFor} from '#core/dom/static-template';
 import {px, scale, setStyles, translate} from '#core/dom/style';
 import {numeric} from '#core/dom/transition';
 import {boundValue, distance, magnitude} from '#core/math';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -241,10 +240,10 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return (
-      layout == Layout.FIXED ||
-      layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.FILL ||
-      layout == Layout.RESPONSIVE
+      layout == Layout_Enum.FIXED ||
+      layout == Layout_Enum.FIXED_HEIGHT ||
+      layout == Layout_Enum.FILL ||
+      layout == Layout_Enum.RESPONSIVE
     );
   }
 
@@ -753,16 +752,17 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   triggerTransformEnd_(scale, x, y) {
-    const event = createCustomEvent(
-      this.win,
-      `${TAG}.transformEnd`,
-      dict({
-        'scale': scale,
-        'x': x,
-        'y': y,
-      })
+    const event = createCustomEvent(this.win, `${TAG}.transformEnd`, {
+      'scale': scale,
+      'x': x,
+      'y': y,
+    });
+    this.action_.trigger(
+      this.element,
+      'transformEnd',
+      event,
+      ActionTrust_Enum.HIGH
     );
-    this.action_.trigger(this.element, 'transformEnd', event, ActionTrust.HIGH);
     dispatchCustomEvent(this.element, 'transformEnd');
   }
 

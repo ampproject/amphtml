@@ -1,14 +1,56 @@
+import {BaseElement} from '#bento/components/jwplayer/1.0/base-element';
+
 import {isExperimentOn} from '#experiments';
+
+import {setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
 
-import {BaseElement} from './base-element';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
+import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 /** @const {string} */
 const TAG = 'amp-jwplayer';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
-class AmpJwplayer extends BaseElement {
+class AmpJwplayer extends setSuperClass(BaseElement, AmpVideoBaseElement) {
+  /** @override */
+  init() {
+    const consentPolicy = this.getConsentPolicy();
+    if (consentPolicy) {
+      this.getConsentInfo().then((consentInfo) => {
+        const policyState = consentInfo[0];
+        const policyInfo = consentInfo[1];
+        const policyMetadata = consentInfo[2];
+        this.mutateProps({
+          'consentParams': {
+            'policyState': policyState,
+            'policyInfo': policyInfo,
+            'policyMetadata': policyMetadata,
+          },
+        });
+      });
+    }
+
+    return super.init();
+  }
+
+  /**
+   * @param {string} policy
+   * @return {Promise}
+   */
+  getConsentInfo(policy) {
+    return Promise.all([
+      getConsentPolicyState(this.element, policy),
+      getConsentPolicyInfo(this.element, policy),
+      getConsentMetadata(this.element, policy),
+    ]);
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

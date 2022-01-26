@@ -1,4 +1,3 @@
-import {dict} from '#core/types/object';
 import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
@@ -15,7 +14,7 @@ const TAG = 'GoogleCidApi';
 const AMP_TOKEN = 'AMP_TOKEN';
 
 /** @enum {string} */
-export const TokenStatus = {
+export const TokenStatus_Enum = {
   RETRIEVING: '$RETRIEVING',
   OPT_OUT: '$OPT_OUT',
   NOT_FOUND: '$NOT_FOUND',
@@ -70,16 +69,16 @@ export class GoogleCidApi {
     return (this.cidPromise_[scope] = this.timer_
       .poll(200, () => {
         token = getCookie(this.win_, AMP_TOKEN);
-        return token !== TokenStatus.RETRIEVING;
+        return token !== TokenStatus_Enum.RETRIEVING;
       })
       .then(() => {
-        if (token === TokenStatus.OPT_OUT) {
-          return TokenStatus.OPT_OUT;
+        if (token === TokenStatus_Enum.OPT_OUT) {
+          return TokenStatus_Enum.OPT_OUT;
         }
         // If the page referrer is proxy origin, we force to use API even the
         // token indicates a previous fetch returned nothing
         const forceFetch =
-          token === TokenStatus.NOT_FOUND && this.isReferrerProxyOrigin_();
+          token === TokenStatus_Enum.NOT_FOUND && this.isReferrerProxyOrigin_();
 
         // Token is in a special state, fallback to existing cookie
         if (!forceFetch && this.isStatusToken_(token)) {
@@ -87,7 +86,7 @@ export class GoogleCidApi {
         }
 
         if (!token || this.isStatusToken_(token)) {
-          this.persistToken_(TokenStatus.RETRIEVING, TIMEOUT);
+          this.persistToken_(TokenStatus_Enum.RETRIEVING, TIMEOUT);
         }
 
         const url = GOOGLE_API_URL + apiKey;
@@ -108,7 +107,7 @@ export class GoogleCidApi {
             return cid;
           })
           .catch((e) => {
-            this.persistToken_(TokenStatus.ERROR, TIMEOUT);
+            this.persistToken_(TokenStatus_Enum.ERROR, TIMEOUT);
             if (e && e.response) {
               e.response.json().then((res) => {
                 dev().error(TAG, JSON.stringify(res));
@@ -128,10 +127,10 @@ export class GoogleCidApi {
    * @return {!Promise<!JsonObject>}
    */
   fetchCid_(url, scope, token) {
-    const payload = dict({
+    const payload = {
       'originScope': scope,
       'canonicalOrigin': this.canonicalOrigin_,
-    });
+    };
     if (token) {
       payload['securityToken'] = token;
     }
@@ -155,8 +154,8 @@ export class GoogleCidApi {
    */
   handleResponse_(res) {
     if (res['optOut']) {
-      this.persistToken_(TokenStatus.OPT_OUT, YEAR);
-      return TokenStatus.OPT_OUT;
+      this.persistToken_(TokenStatus_Enum.OPT_OUT, YEAR);
+      return TokenStatus_Enum.OPT_OUT;
     }
     if (res['clientId']) {
       this.persistToken_(res['securityToken'], YEAR);
@@ -165,7 +164,7 @@ export class GoogleCidApi {
     if (res['alternateUrl']) {
       return null;
     }
-    this.persistToken_(TokenStatus.NOT_FOUND, HOUR);
+    this.persistToken_(TokenStatus_Enum.NOT_FOUND, HOUR);
     return null;
   }
 

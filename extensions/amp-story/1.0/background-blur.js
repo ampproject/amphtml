@@ -1,8 +1,9 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
+
 import {user} from '#utils/log';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /** @const {number} */
 const CANVAS_SIZE = 3;
@@ -181,7 +182,7 @@ export class BackgroundBlur {
   ensureMediaLoaded_(mediaEl) {
     return new Promise((resolve) => {
       whenUpgradedToCustomElement(mediaEl)
-        .then(() => mediaEl.signals().whenSignal(CommonSignals.LOAD_END))
+        .then(() => mediaEl.signals().whenSignal(CommonSignals_Enum.LOAD_END))
         .then(() => {
           resolve(mediaEl);
         })

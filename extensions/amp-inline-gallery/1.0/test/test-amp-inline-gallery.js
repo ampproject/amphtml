@@ -1,13 +1,17 @@
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-inline-gallery';
-import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
-import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {subscribe} from '#core/context';
 import {createElementWithAttributes} from '#core/dom';
 import {setStyles} from '#core/dom/style';
-import {subscribe} from '#core/context';
+
 import {toggleExperiment} from '#experiments';
+
+import {ActionInvocation} from '#service/action-impl';
+
 import {waitFor} from '#testing/helpers/service';
+
+import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
 
 describes.realWin(
   'amp-inline-gallery',
@@ -111,7 +115,7 @@ describes.realWin(
       const source = null;
       const caller = null;
       const event = null;
-      const trust = ActionTrust.DEFAULT;
+      const trust = ActionTrust_Enum.DEFAULT;
       return new ActionInvocation(
         element,
         method,

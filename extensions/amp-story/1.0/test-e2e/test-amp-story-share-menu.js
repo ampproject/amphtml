@@ -1,5 +1,5 @@
-import {Key} from '#testing/helpers/types';
 import {sleep} from '#testing/helpers';
+import {Key} from '#testing/helpers/types';
 
 describes.endtoend(
   'amp story share menu',
@@ -30,7 +30,7 @@ describes.endtoend(
       await controller.switchToLight();
 
       const shareMenuHost = await controller.findElement(
-        '.i-amphtml-story-share-menu-host'
+        'amp-story-share-menu'
       );
       await controller.switchToShadowRoot(shareMenuHost);
       const getLinkButton = await controller.findElement(

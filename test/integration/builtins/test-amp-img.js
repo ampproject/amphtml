@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 import {createCustomEvent} from '#utils/event-helper';
 
@@ -20,7 +20,7 @@ describes.sandboxed('Rendering of amp-img', {}, () => {
     expect(fixture.doc.querySelectorAll('amp-img')).to.have.length(16);
     // 5 image visible in 500 pixel height. Note that there will be no load
     // event for the inabox image.
-    await fixture.awaitEvent(AmpEvents.LOAD_START, 3);
+    await fixture.awaitEvent(AmpEvents_Enum.LOAD_START, 3);
     expect(fixture.doc.querySelectorAll('amp-img img[src]')).to.have.length(4);
   });
 
@@ -28,17 +28,17 @@ describes.sandboxed('Rendering of amp-img', {}, () => {
     // Note that there will be no load event for the inabox image.
     fixture.iframe.height = 1500;
     fixture.win.dispatchEvent(createCustomEvent(fixture.win, 'resize', null));
-    await fixture.awaitEvent(AmpEvents.LOAD_START, 11);
+    await fixture.awaitEvent(AmpEvents_Enum.LOAD_START, 11);
     expect(fixture.doc.querySelectorAll('amp-img img[src]')).to.have.length(12);
 
     fixture.iframe.height = 2000;
     fixture.win.dispatchEvent(createCustomEvent(fixture.win, 'resize', null));
-    await fixture.awaitEvent(AmpEvents.LOAD_START, 13);
+    await fixture.awaitEvent(AmpEvents_Enum.LOAD_START, 13);
     expect(fixture.doc.querySelectorAll('amp-img img[src]')).to.have.length(14);
   });
 
   it('should respect media queries', async () => {
-    await fixture.awaitEvent(AmpEvents.LOAD_START, 3);
+    await fixture.awaitEvent(AmpEvents_Enum.LOAD_START, 3);
     await new Promise((res) => setTimeout(res, 1));
 
     const smallScreen = fixture.doc.getElementById('img3');
@@ -68,7 +68,7 @@ describes.sandboxed('Rendering of amp-img', {}, () => {
   });
 
   it('should not load image if already present (inabox)', async () => {
-    await fixture.awaitEvent(AmpEvents.LOAD_START, 3);
+    await fixture.awaitEvent(AmpEvents_Enum.LOAD_START, 3);
 
     const ampImage = fixture.doc.getElementById('img8');
     expect(ampImage).is.ok;

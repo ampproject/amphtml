@@ -1,7 +1,9 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
 
@@ -16,7 +18,7 @@ import {CSS} from '../../../build/amp-accordion-1.0.css';
 const TAG = 'amp-accordion';
 
 /** @extends {PreactBaseElement<BentoAccordionDef.AccordionApi>} */
-class AmpAccordion extends BaseElement {
+class AmpAccordion extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     this.registerApiAction('toggle', (api, invocation) =>
@@ -43,7 +45,7 @@ class AmpAccordion extends BaseElement {
       section,
       eventName,
       event,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
 
     super.triggerEvent(section, eventName, detail);

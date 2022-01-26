@@ -1,10 +1,12 @@
-import {MessageType} from '#core/3p-frame-messaging';
-import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {htmlFor} from '#core/dom/static-template';
-import {listenFor} from '../../../src/iframe-helper';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {htmlFor} from '#core/dom/static-template';
+
+import {Services} from '#service';
+
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {listenFor} from '../../../src/iframe-helper';
 
 const TYPE = 'twitter';
 
@@ -89,7 +91,7 @@ class AmpTwitter extends AMP.BaseElement {
     this.updateForLoadingState_();
     listenFor(
       iframe,
-      MessageType.EMBED_SIZE,
+      MessageType_Enum.EMBED_SIZE,
       (data) => {
         this.updateForSuccessState_(data['height']);
       },
@@ -97,7 +99,7 @@ class AmpTwitter extends AMP.BaseElement {
     );
     listenFor(
       iframe,
-      MessageType.NO_CONTENT,
+      MessageType_Enum.NO_CONTENT,
       () => {
         this.updateForFailureState_();
       },

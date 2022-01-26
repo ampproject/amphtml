@@ -1,40 +1,48 @@
 import '../amp-next-page';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 
 import {Services} from '#service';
+import {installCidService} from '#service/cid-impl';
+
+import {getAmpdoc} from 'src/service-helpers';
+import * as url from 'src/url';
 
 import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 
-const MOCK_NEXT_PAGE = `<header>Header</header>
-    <div style="height:1000px"></div>
-    <footer>Footer</footer>`;
-const MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS = `<header>Header</header>
-    <div style="height:1000px"></div>
-    <amp-next-page>
-        <script type="application/json">
-        [
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 3",
-            "url": "./document3"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 4",
-            "url": "./document4"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 2",
-            "url": "./document2"
-          }
-        ]
-      </script>
-    </amp-next-page>
-    <footer>Footer</footer>`;
+const MOCK_NEXT_PAGE = /* HTML */ `
+  <header>Header</header>
+  <div style="height:1000px"></div>
+  <footer>Footer</footer>
+`;
+const MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS = /* HTML */ `
+  <header>Header</header>
+  <div style="height:1000px"></div>
+  <amp-next-page>
+    <script type="application/json">
+      [
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 3",
+          "url": "./document3"
+        },
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 4",
+          "url": "./document4"
+        },
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 2",
+          "url": "./document2"
+        }
+      ]
+    </script>
+  </amp-next-page>
+  <footer>Footer</footer>
+`;
 const VALID_CONFIG = [
   {
     'image': '/examples/img/hero@1x.jpg',
@@ -312,7 +320,7 @@ describes.realWin(
         expect(service.pages_[0].url).to.include('about:srcdoc');
         expect(service.pages_[0].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[0].visibilityState_).to.equal(
-          VisibilityState.VISIBLE
+          VisibilityState_Enum.VISIBLE
         );
       });
 
@@ -320,7 +328,7 @@ describes.realWin(
         [1, 2].forEach((i) => {
           expect(service.pages_[i].state_).to.equal(PageState.QUEUED);
           expect(service.pages_[i].visibilityState_).to.equal(
-            VisibilityState.PRERENDER
+            VisibilityState_Enum.PRERENDER
           );
         });
       });
@@ -334,13 +342,13 @@ describes.realWin(
         expect(firstPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[1].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
 
         expect(secondPageFetchSpy).to.not.be.called;
         expect(service.pages_[2].state_).to.equal(PageState.QUEUED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
       });
 
@@ -353,13 +361,13 @@ describes.realWin(
         expect(firstPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[1].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
 
         expect(secondPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[2].state_).to.equal(PageState.INSERTED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
       });
 
@@ -378,7 +386,7 @@ describes.realWin(
 
         expect(service.pages_[1].state_).to.equal(PageState.FAILED);
         expect(service.pages_[1].visibilityState_).to.equal(
-          VisibilityState.PRERENDER
+          VisibilityState_Enum.PRERENDER
         );
       });
 
@@ -399,7 +407,7 @@ describes.realWin(
           `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="1" />`,
           '/document1'
         );
-        service.pages_[1].setVisibility(VisibilityState.VISIBLE);
+        service.pages_[1].setVisibility(VisibilityState_Enum.VISIBLE);
 
         await fetchDocuments(
           service,
@@ -444,7 +452,7 @@ describes.realWin(
             img: '/img.jpg',
           },
           PageState.INSERTED /** initState */,
-          VisibilityState.VISIBLE /** initVisibility */,
+          VisibilityState_Enum.VISIBLE /** initVisibility */,
           {} /* Document */
         );
 
@@ -520,7 +528,7 @@ describes.realWin(
         expect(container.querySelector('.i-amphtml-next-page-shadow-root')).to
           .be.ok;
 
-        service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
+        service.pages_[2].visibilityState_ = VisibilityState_Enum.VISIBLE;
         service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
 
         await service.hidePreviousPages_(
@@ -532,7 +540,7 @@ describes.realWin(
         expect(secondPagePauseSpy).to.be.calledOnce;
         expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.HIDDEN
+          VisibilityState_Enum.HIDDEN
         );
 
         // Replaces the inserted shadow doc with a placeholder of equal height
@@ -557,7 +565,7 @@ describes.realWin(
 
         const {container} = service.pages_[2];
         expect(container).to.be.ok;
-        service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
+        service.pages_[2].visibilityState_ = VisibilityState_Enum.VISIBLE;
         service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
         await service.hidePreviousPages_(
           0 /** index */,
@@ -565,7 +573,7 @@ describes.realWin(
         );
         expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
         expect(service.pages_[2].visibilityState_).to.equal(
-          VisibilityState.HIDDEN
+          VisibilityState_Enum.HIDDEN
         );
 
         service.visibilityObserver_.scrollDirection_ = ScrollDirection.DOWN;
@@ -665,6 +673,48 @@ describes.realWin(
             expect(initialMessageDeliverer.withArgs(...args)).to.not.have.been
               .called;
           }
+        }
+      });
+
+      it('replaces CLIENT_ID from propagated message', async () => {
+        const expectedCid = 'myCid123';
+
+        installCidService(ampdoc);
+
+        // Only Proxy Origin URLs enable the Viewer CID API
+        env.sandbox.stub(url, 'isProxyOrigin').returns(true);
+
+        const messageDeliverer = (type) => {
+          if (type === 'cid') {
+            return expectedCid;
+          }
+        };
+        Services.viewerForDoc(ampdoc).setMessageDeliverer(messageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const page of service.pages_) {
+          const ampdoc = getAmpdoc(page.document);
+
+          // CID API is bound to doc visibility
+          env.sandbox.stub(ampdoc, 'whenFirstVisible').resolves();
+
+          const viewer = Services.viewerForDoc(page.document);
+
+          // Mock hasCapability and isTrustedViewer to enable Viewer CID API
+          env.sandbox
+            .stub(viewer, 'hasCapability')
+            .callsFake((capability) => capability === 'cid');
+
+          env.sandbox.stub(viewer, 'isTrustedViewer').resolves(true);
+        }
+
+        for (const page of service.pages_) {
+          const cidStruct = {scope: 'foo', cookie: 'bar'};
+          const cidConsent = Promise.resolve();
+          const cidService = await Services.cidForDoc(page.document);
+          const cid = await cidService.get(cidStruct, cidConsent);
+          expect(cid).to.equal(expectedCid);
         }
       });
     });

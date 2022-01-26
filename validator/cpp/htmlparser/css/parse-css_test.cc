@@ -1,4 +1,4 @@
-#include "css/parse-css.h"
+#include "cpp/htmlparser/css/parse-css.h"
 
 #include <memory>
 #include <vector>
@@ -7,9 +7,9 @@
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#include "css/parse-css.pb.h"
-#include "logging.h"
-#include "strings.h"
+#include "cpp/htmlparser/css/parse-css.pb.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/htmlparser/strings.h"
 
 using std::unique_ptr;
 using std::vector;
@@ -2845,7 +2845,7 @@ vector<unique_ptr<Token>> ParseSelectorForTest(const std::string& selector) {
   EXPECT_EQ(JsonFromList(errors), "[]");
   EXPECT_EQ(1, sheet->rules().size());
   Rule* rule = (*sheet->mutable_rules()).front().get();
-  CHECK(TokenType::QUALIFIED_RULE == rule->Type(), "");
+  CHECK(TokenType::QUALIFIED_RULE == rule->Type());
   QualifiedRule* qualified = static_cast<QualifiedRule*>(rule);
   vector<unique_ptr<Token>> selector_tokens;
   qualified->mutable_prelude()->swap(selector_tokens);

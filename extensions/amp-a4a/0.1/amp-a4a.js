@@ -4,8 +4,8 @@ import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
 import {
-  Layout,
-  LayoutPriority,
+  LayoutPriority_Enum,
+  Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
@@ -15,7 +15,6 @@ import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
 import {setStyle} from '#core/dom/style';
 import {duplicateErrorIfNecessary} from '#core/error';
 import {isArray, isEnumValue, isObject} from '#core/types';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {padStart} from '#core/types/string';
 import {utf8Decode} from '#core/types/string/bytes';
@@ -120,14 +119,14 @@ export const XORIGIN_MODE = {
 };
 
 /** @type {!Object} @private */
-const SHARED_IFRAME_PROPERTIES = dict({
+const SHARED_IFRAME_PROPERTIES = {
   'frameborder': '0',
   'allowfullscreen': '',
   'allowtransparency': '',
   'scrolling': 'no',
   'marginwidth': '0',
   'marginheight': '0',
-});
+};
 
 /** @typedef {{width: number, height: number}} */
 export let SizeInfoDef;
@@ -379,7 +378,7 @@ export class AmpA4A extends AMP.BaseElement {
     // therefore we want this to match the 3p priority.
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
+    return isPWA ? LayoutPriority_Enum.METADATA : LayoutPriority_Enum.ADS;
   }
 
   /** @override */
@@ -594,7 +593,7 @@ export class AmpA4A extends AMP.BaseElement {
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
     const fixedSizeZeroHeightOrWidth =
-      this.getLayout() != Layout.FLUID &&
+      this.getLayout() != Layout_Enum.FLUID &&
       (slotRect.height == 0 || slotRect.width == 0);
     if (
       fixedSizeZeroHeightOrWidth ||
@@ -993,7 +992,7 @@ export class AmpA4A extends AMP.BaseElement {
         if (!sanitizedHeadElement) {
           return this.handleFallback_(fallbackHttpResponse, checkStillCurrent);
         }
-        this.updateLayoutPriority(LayoutPriority.CONTENT);
+        this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
         this.isVerifiedAmpCreative_ = true;
         return sanitizedHeadElement;
       });
@@ -1011,7 +1010,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Experiment to give non-AMP creatives same benefits as AMP so
     // update priority.
     if (this.inNonAmpPreferenceExp()) {
-      this.updateLayoutPriority(LayoutPriority.CONTENT);
+      this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
     }
     return fallbackHttpResponse.arrayBuffer().then((domTextContent) => {
       checkStillCurrent();
@@ -1111,13 +1110,13 @@ export class AmpA4A extends AMP.BaseElement {
             if (this.inNonAmpPreferenceExp()) {
               // Experiment to give non-AMP creatives same benefits as AMP so
               // update priority.
-              this.updateLayoutPriority(LayoutPriority.CONTENT);
+              this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
             }
             return null;
           }
 
           // Update priority.
-          this.updateLayoutPriority(LayoutPriority.CONTENT);
+          this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
 
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
@@ -1878,7 +1877,7 @@ export class AmpA4A extends AMP.BaseElement {
       createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe',
-        dict({
+        {
           // NOTE: It is possible for either width or height to be 'auto',
           // a non-numeric value.
           'height': this.creativeSize_.height,
@@ -1891,7 +1890,7 @@ export class AmpA4A extends AMP.BaseElement {
           'role': 'region',
           'aria-label': 'Advertisement',
           'tabindex': '0',
-        })
+        }
       )
     );
     if (!this.uiHandler.isStickyAd()) {
@@ -2010,17 +2009,14 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   iframeRenderHelper_(attributes) {
-    const mergedAttributes = Object.assign(
-      attributes,
-      dict({
-        'height': this.creativeSize_.height,
-        'width': this.creativeSize_.width,
-        'title': this.getIframeTitle(),
-        'role': 'region',
-        'aria-label': 'Advertisement',
-        'tabindex': '0',
-      })
-    );
+    const mergedAttributes = Object.assign(attributes, {
+      'height': this.creativeSize_.height,
+      'width': this.creativeSize_.width,
+      'title': this.getIframeTitle(),
+      'role': 'region',
+      'aria-label': 'Advertisement',
+      'tabindex': '0',
+    });
 
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
@@ -2100,12 +2096,10 @@ export class AmpA4A extends AMP.BaseElement {
     const intersection = this.element.getIntersectionChangeEntry();
     contextMetadata['_context']['initialIntersection'] =
       intersectionEntryToJson(intersection);
-    return this.iframeRenderHelper_(
-      dict({
-        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-        'name': JSON.stringify(contextMetadata),
-      })
-    );
+    return this.iframeRenderHelper_({
+      'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+      'name': JSON.stringify(contextMetadata),
+    });
   }
 
   /**
@@ -2185,7 +2179,7 @@ export class AmpA4A extends AMP.BaseElement {
           `${contextMetadata}`;
       }
 
-      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
+      return this.iframeRenderHelper_({'src': srcPath, 'name': name});
     });
   }
 
@@ -2342,12 +2336,10 @@ export class AmpA4A extends AMP.BaseElement {
     const analyticsEvent = devAssert(
       LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]
     );
-    const analyticsVars = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict({'time': Math.round(this.getNow_())}),
-        this.getA4aAnalyticsVars(analyticsEvent)
-      )
-    );
+    const analyticsVars = /** @type {!JsonObject} */ ({
+      'time': Math.round(this.getNow_()),
+      ...this.getA4aAnalyticsVars(analyticsEvent),
+    });
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 
@@ -2360,7 +2352,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   getA4aAnalyticsVars(unusedAnalyticsEvent) {
-    return dict({});
+    return {};
   }
 
   /**

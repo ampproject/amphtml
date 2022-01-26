@@ -1,13 +1,17 @@
 import '../amp-base-carousel';
-import {ActionInvocation} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
-import {mod} from '#core/math';
 import {setStyles} from '#core/dom/style';
+import {mod} from '#core/math';
 import {toArray} from '#core/types/array';
+
 import {toggleExperiment} from '#experiments';
-import {useStyles} from '../component.jss';
+
+import {ActionInvocation} from '#service/action-impl';
+
 import {waitFor, whenCalled} from '#testing/helpers/service';
+
+import {useStyles} from '../component.jss';
 
 describes.realWin(
   'amp-base-carousel:1.0',
@@ -268,7 +272,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ActionTrust.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,
@@ -344,7 +348,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ActionTrust.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,

@@ -1,12 +1,16 @@
-import {IframeTransportEventDef, MessageType} from '#core/3p-frame-messaging';
-import {SubscriptionApi} from '../../../src/iframe-helper';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+
 import {dev, devAssert} from '#utils/log';
+
+import {SubscriptionApi} from '../../../src/iframe-helper';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics/iframe-transport-message-queue';
 
 /** @private @const {number} */
 const MAX_QUEUE_SIZE_ = 100;
+
+/** @typedef {import('#core/3p-frame-messaging').IframeTransportEventDef} IframeTransportDef */
 
 /**
  * @visibleForTesting
@@ -31,7 +35,7 @@ export class IframeTransportMessageQueue {
     /** @private {!../../../src/iframe-helper.SubscriptionApi} */
     this.postMessageApi_ = new SubscriptionApi(
       this.frame_,
-      MessageType.SEND_IFRAME_TRANSPORT_EVENTS,
+      MessageType_Enum.SEND_IFRAME_TRANSPORT_EVENTS,
       true,
       () => {
         this.setIsReady();
@@ -96,7 +100,7 @@ export class IframeTransportMessageQueue {
   flushQueue_() {
     if (this.isReady() && this.queueSize()) {
       this.postMessageApi_.send(
-        MessageType.IFRAME_TRANSPORT_EVENTS,
+        MessageType_Enum.IFRAME_TRANSPORT_EVENTS,
         /** @type {!JsonObject} */
         ({events: this.pendingEvents_})
       );

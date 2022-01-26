@@ -1,7 +1,6 @@
-import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {px} from '#core/dom/style';
+
+import * as Preact from '#preact';
 import {
   useContext,
   useEffect,
@@ -9,7 +8,12 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {propName} from '#preact/utils';
+
 import {useStyles} from './thumbnails.jss';
+
+import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
+import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
 
 /**
  * @param {!BentoInlineGalleryDef.BentoThumbnailProps} props
@@ -18,8 +22,8 @@ import {useStyles} from './thumbnails.jss';
 export function BentoInlineGalleryThumbnails({
   aspectRatio,
   children,
-  'class': className = '',
   loop = false,
+  [propName('class')]: className = '',
   ...rest
 }) {
   const classes = useStyles();
@@ -78,7 +82,7 @@ export function BentoInlineGalleryThumbnails({
                 height: px(height),
                 width: aspectRatio ? px(aspectRatio * height) : '',
               }}
-              tabIndex="0"
+              tabindex="0"
             />
           );
         })}

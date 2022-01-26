@@ -1,9 +1,9 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag} from '#core/dom';
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {toggle} from '#core/dom/style';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -39,7 +39,7 @@ export class AmpState extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Loads after other content.
-    return LayoutPriority.METADATA;
+    return LayoutPriority_Enum.METADATA;
   }
 
   /** @override */
@@ -178,15 +178,13 @@ export class AmpState extends AMP.BaseElement {
 
     return this.fetch_(ampdoc, policy, opt_refresh).catch((error) => {
       const event = error
-        ? createCustomEvent(
-            this.win,
-            'amp-state.error',
-            dict({'response': error.response})
-          )
+        ? createCustomEvent(this.win, 'amp-state.error', {
+            'response': error.response,
+          })
         : null;
       // Trigger "fetch-error" event on fetch failure.
       const actions = Services.actionServiceForDoc(element);
-      actions.trigger(element, 'fetch-error', event, ActionTrust.LOW);
+      actions.trigger(element, 'fetch-error', event, ActionTrust_Enum.LOW);
     });
   }
 

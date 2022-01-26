@@ -25,6 +25,7 @@ function getMinifiedConfig() {
 
   const plugins = [
     'optimize-objstr',
+    './build-system/babel-plugins/babel-plugin-jsx-style-object',
     getImportResolverPlugin(),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-imported-helpers',
@@ -64,13 +65,14 @@ function getMinifiedConfig() {
       bugfixes: true,
       modules: false,
       targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
+      shippedProposals: true,
     },
   ];
 
   return {
     compact: false,
     plugins,
-    sourceMaps: 'inline',
+    sourceMaps: true,
     presets: [presetEnv],
     retainLines: true,
     assumptions: {

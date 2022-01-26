@@ -163,4 +163,10 @@ runReleaseJob(jobName, async () => {
 
   log('Archiving releases to', cyan(ARTIFACT_FILE_NAME));
   timedExecOrDie(`cd ${DEST_DIR} && tar -czf ${ARTIFACT_FILE_NAME} *`);
+
+  log('Persisting AMP version number to workspace');
+  const [versionsFile] = fastGlob.sync(
+    path.join(DEST_DIR, 'org-cdn/rtv/01*/version.txt')
+  );
+  fs.copySync(versionsFile, '/tmp/workspace/AMP_VERSION');
 });

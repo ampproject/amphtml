@@ -1,10 +1,26 @@
 import {Deferred} from '#core/data-structures/promise';
+import {getChildJsonConfig} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
+import {
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
+import {map, omit} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {
   PRESET_OPTION_ATTRIBUTES,
   presets,
   setStyleForPreset,
 } from './animation-presets';
-import {Services} from '#service';
 import {
   StoryAnimationConfigDef,
   StoryAnimationDimsDef,
@@ -16,19 +32,8 @@ import {
   WebKeyframesCreateFnDef,
   WebKeyframesDef,
 } from './animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
-import {dev, devAssert, user, userAssert} from '#utils/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getChildJsonConfig} from '#core/dom';
-import {map, omit} from '#core/types/object';
-import {prefersReducedMotion} from '#core/dom/media-query-props';
-import {
-  matches,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {timeStrToMillis, unscaledClientRect} from './utils';
-import {isExperimentOn} from '#experiments';
+import {isPreviewMode} from './embed-mode';
+import {isTransformed, timeStrToMillis, unscaledClientRect} from './utils';
 
 const TAG = 'AMP-STORY';
 
@@ -545,10 +550,15 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
+    const firstPageAnimationDisabled =
+      isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') ||
+      isPreviewMode(ampdoc.win) ||
+      isTransformed(ampdoc);
+
     /** @private @const {bool} */
     this.skipAnimations_ =
       prefersReducedMotion(ampdoc.win) ||
-      (isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') &&
+      (firstPageAnimationDisabled &&
         matches(page, 'amp-story-page:first-of-type'));
 
     /** @private {?Array<!AnimationRunner>} */

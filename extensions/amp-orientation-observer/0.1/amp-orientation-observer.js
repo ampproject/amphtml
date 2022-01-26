@@ -1,6 +1,5 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {clamp, sum} from '#core/math';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -212,15 +211,11 @@ export class AmpOrientationObserver extends AMP.BaseElement {
       eventRange[0] < 0
         ? eventValue.toFixed() - eventRange[0]
         : eventValue.toFixed();
-    const event = createCustomEvent(
-      this.win,
-      `${TAG}.${eventName}`,
-      dict({
-        'angle': clamp(eventValue, eventRange[0], eventRange[1]).toFixed(),
-        'percent': percentValue / (eventRange[1] - eventRange[0]),
-      })
-    );
-    this.action_.trigger(this.element, eventName, event, ActionTrust.LOW);
+    const event = createCustomEvent(this.win, `${TAG}.${eventName}`, {
+      'angle': clamp(eventValue, eventRange[0], eventRange[1]).toFixed(),
+      'percent': percentValue / (eventRange[1] - eventRange[0]),
+    });
+    this.action_.trigger(this.element, eventName, event, ActionTrust_Enum.LOW);
   }
 }
 AMP.extension(TAG, '0.1', (AMP) => {

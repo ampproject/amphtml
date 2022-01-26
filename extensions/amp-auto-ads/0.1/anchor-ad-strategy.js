@@ -1,5 +1,4 @@
 import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -87,16 +86,11 @@ export class AnchorAdStrategy {
    */
   placeAmpAdStickyAd_() {
     const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
-    const attributes = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict(),
-        this.baseAttributes_,
-        dict({
-          'width': String(viewportWidth),
-          'height': this.baseAttributes_.height || '100',
-        })
-      )
-    );
+    const attributes = /** @type {!JsonObject} */ ({
+      ...this.baseAttributes_,
+      'width': String(viewportWidth),
+      'height': this.baseAttributes_.height || '100',
+    });
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
     const body = this.ampdoc.getBody();
@@ -109,25 +103,17 @@ export class AnchorAdStrategy {
   placeStickyAd_() {
     const baseAttributes = this.baseAttributes_;
     const viewportWidth = Services.viewportForDoc(this.ampdoc).getWidth();
-    const attributes = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict(),
-        baseAttributes,
-        dict({
-          'width': String(viewportWidth),
-          'height': baseAttributes.height || '100',
-        })
-      )
-    );
+    const attributes = /** @type {!JsonObject} */ ({
+      ...baseAttributes,
+      'width': String(viewportWidth),
+      'height': baseAttributes.height || '100',
+    });
+    delete attributes.sticky; // To ensure that no sticky attribute will be wrapped inside an amp-sticky-ad element.
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
-    const stickyAd = createElementWithAttributes(
-      doc,
-      'amp-sticky-ad',
-      dict({
-        'layout': 'nodisplay',
-      })
-    );
+    const stickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
+      'layout': 'nodisplay',
+    });
     stickyAd.appendChild(ampAd);
     const body = this.ampdoc.getBody();
     body.insertBefore(stickyAd, body.firstChild);

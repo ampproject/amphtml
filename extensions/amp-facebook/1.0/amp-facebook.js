@@ -1,10 +1,20 @@
-import {BaseElement} from './base-element';
-import {createLoaderLogo} from '../0.1/facebook-loader';
 import {dashToUnderline} from '#core/types/string';
-import {dict} from '#core/types/object';
-import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
+
 import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {userAssert} from '#utils/log';
+
+import {
+  BaseElement,
+  CommentsBaseElement,
+  LikeBaseElement,
+  PageBaseElement,
+} from './base-element';
+
+import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
+import {createLoaderLogo} from '../0.1/facebook-loader';
 
 /** @const {string} */
 const TAG = 'amp-facebook';
@@ -13,7 +23,7 @@ const LIKE_TAG = 'amp-facebook-like';
 const PAGE_TAG = 'amp-facebook-page';
 const TYPE = 'facebook';
 
-class AmpFacebook extends BaseElement {
+class AmpFacebookBase extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override @nocollapse */
   static createLoaderLogoCallback(element) {
     return createLoaderLogo(element);
@@ -39,9 +49,9 @@ class AmpFacebook extends BaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height) => this.attemptChangeHeight(height),
-    });
+    };
   }
 
   /** @override */
@@ -55,48 +65,16 @@ class AmpFacebook extends BaseElement {
   }
 }
 
-/**
- * Checks for valid data-embed-as attribute when given.
- * @param {!Element} element
- * @return {string}
- */
-function parseEmbed(element) {
-  const embedAs = element.getAttribute('data-embed-as');
-  userAssert(
-    !embedAs ||
-      ['post', 'video', 'comment', 'comments', 'like', 'page'].indexOf(
-        embedAs
-      ) !== -1,
-    'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
-      ' "post", "video", "comment", "comments", "like", or "page", but was: %s',
-    embedAs
-  );
-  return embedAs;
-}
+class AmpFacebook extends AmpFacebookBase {}
 
-/** @override */
-AmpFacebook['props'] = {
-  ...BaseElement['props'],
-  'embedAs': {
-    attrs: ['data-embed-as'],
-    parseAttrs: parseEmbed,
-  },
-};
+class AmpFacebookComments extends setSuperClass(
+  CommentsBaseElement,
+  AmpFacebookBase
+) {}
 
-class AmpFacebookComments extends AmpFacebook {}
+class AmpFacebookLike extends setSuperClass(LikeBaseElement, AmpFacebookBase) {}
 
-/** @override */
-AmpFacebookComments['staticProps'] = {'embedAs': 'comments'};
-
-class AmpFacebookLike extends AmpFacebook {}
-
-/** @override */
-AmpFacebookLike['staticProps'] = {'embedAs': 'like'};
-
-class AmpFacebookPage extends AmpFacebook {}
-
-/** @override */
-AmpFacebookPage['staticProps'] = {'embedAs': 'page'};
+class AmpFacebookPage extends setSuperClass(PageBaseElement, AmpFacebookBase) {}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFacebook);

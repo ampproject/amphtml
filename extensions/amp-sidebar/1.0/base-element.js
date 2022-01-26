@@ -1,14 +1,15 @@
-import * as Preact from '#preact';
-import {CSS as COMPONENT_CSS} from './component.jss';
-import {PreactBaseElement} from '#preact/base-element';
-import {BentoSidebar} from './component';
-import {dict} from '#core/types/object';
-import {pauseAll} from '#core/dom/resource-container-helper';
-import {realChildNodes} from '#core/dom/query';
-import {toggle} from '#core/dom/style';
 import {toggleAttribute} from '#core/dom';
-import {useToolbarHook} from './sidebar-toolbar-hook';
+import {realChildNodes} from '#core/dom/query';
+import {pauseAll} from '#core/dom/resource-container-helper';
+import {toggle} from '#core/dom/style';
+
+import * as Preact from '#preact';
+import {PreactBaseElement} from '#preact/base-element';
 import {useValueRef} from '#preact/component';
+
+import {BentoSidebar} from './component';
+import {CSS as COMPONENT_CSS} from './component.jss';
+import {useToolbarHook} from './sidebar-toolbar-hook';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -26,11 +27,11 @@ export class BaseElement extends PreactBaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'onBeforeOpen': () => this.beforeOpen(),
       'onAfterOpen': () => this.afterOpen(),
       'onAfterClose': () => this.afterClose(),
-    });
+    };
   }
 
   /** @override */
@@ -94,7 +95,7 @@ BaseElement['shadowCss'] = COMPONENT_CSS;
 /** @override */
 BaseElement['props'] = {
   'children': {passthrough: true},
-  'side': {attr: 'side', type: 'string'},
+  'side': {attr: 'side'},
 };
 
 /**

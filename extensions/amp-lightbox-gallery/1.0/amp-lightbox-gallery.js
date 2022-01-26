@@ -1,8 +1,13 @@
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {elementByTag} from '#core/dom/query';
 
 import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
 
@@ -19,7 +24,10 @@ const TAG = 'amp-lightbox-gallery';
 /** @const {string} */
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
-class AmpLightboxGallery extends BaseElement {
+class AmpLightboxGallery extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   constructor(element) {
     super(element);
@@ -38,12 +46,12 @@ class AmpLightboxGallery extends BaseElement {
     this.registerApiAction(
       DEFAULT_ACTION,
       (api, invocation) => this.openAction(api, invocation),
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
     this.registerApiAction(
       'open',
       (api, invocation) => this.openAction(api, invocation),
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
     return super.init();
   }

@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 import {createCustomEvent} from '#utils/event-helper';
 
@@ -67,7 +67,9 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, (env) => {
 
   describe('When starting service', () => {
     it('Should listen for DOM_UPDATE', () => {
-      const spy = rootDocument.addEventListener.withArgs(AmpEvents.DOM_UPDATE);
+      const spy = rootDocument.addEventListener.withArgs(
+        AmpEvents_Enum.DOM_UPDATE
+      );
       expect(spy.calledOnce).to.be.true;
     });
 
@@ -189,7 +191,7 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, (env) => {
       const linkRewriterVendor2 = registerLinkRewriterHelper('vendor2');
       const linkRewriterVendor3 = registerLinkRewriterHelper('vendor3');
 
-      sendEventHelper(AmpEvents.DOM_UPDATE);
+      sendEventHelper(AmpEvents_Enum.DOM_UPDATE);
 
       expect(linkRewriterVendor1.onDomUpdated.calledOnce).to.be.true;
       expect(linkRewriterVendor2.onDomUpdated.calledOnce).to.be.true;

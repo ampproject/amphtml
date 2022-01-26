@@ -1,8 +1,8 @@
 import {devAssert} from '#core/assert';
-import {Loading} from '#core/constants/loading-instructions';
+import {Loading_Enum} from '#core/constants/loading-instructions';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {parseBooleanAttribute} from '#core/dom';
-import {matches, realChildNodes} from '#core/dom/query';
+import {matches, realChildElements, realChildNodes} from '#core/dom/query';
 import {getDate} from '#core/types/date';
 import {dashToCamelCase} from '#core/types/string';
 
@@ -10,14 +10,18 @@ import * as Preact from '#preact';
 
 import {Slot, createSlot} from './slot';
 
+/** @typedef {import('#core/dom/media-query-props').MediaQueryProps} MediaQueryProps */
+
+/** @typedef {Object<string, AmpElementProp>} AmpElementProps */
+
 /**
  * The following combinations are allowed.
  * - `attr`, (optionally) `type`, and (optionally) `media` can be specified when
  *   an attribute maps to a component prop 1:1.
  * - `attrs` and `parseAttrs` can be specified when multiple attributes map
  *   to a single prop.
- * - `attrPrefix` can be specified when multiple attributes with the same prefix
- *   map to a single prop object. The prefix cannot equal the attribute name.
+ * - `attrMatches` and `parseAttrs` can be specified when multiple attributes
+ *   map to a single prop.
  * - `selector` can be specified for children of a certain shape and structure
  *   according to ChildDef.
  * - `passthrough` can be specified to slot children using a single
@@ -29,34 +33,28 @@ import {Slot, createSlot} from './slot';
  *   behavior depending on whether or not there are children.
  *
  * @typedef {{
- *   attr: (string|undefined),
- *   type: (string|undefined),
- *   attrPrefix: (string|undefined),
- *   attrs: (!Array<string>|undefined),
- *   parseAttrs: ((function(!Element):*)|undefined),
- *   media: (boolean|undefined),
+ *   attr?: string,
+ *   type?: string,
+ *   attrMatches?: function(string):boolean,
+ *   attrs: string[],
+ *   parseAttrs?: function(Element):*,
+ *   passthrough: boolean,
+ *   passthroughNonEmpty: boolean,
+ *   media?: boolean,
  *   default: *,
- * }|string}
+ *   name?: string,
+ *   as?: boolean,
+ *   selector?: string,
+ *   single?: boolean,
+ *   clone?: boolean,
+ *   props?: JsonObject,
+ * }} AmpElementProp
  */
-export let AmpElementPropDef;
 
-/**
- * @typedef {{
- *   name: string,
- *   selector: string,
- *   single: (boolean|undefined),
- *   clone: (boolean|undefined),
- *   props: (!JsonObject|undefined),
- * }}
- */
-let ChildDef;
-
-/** @const {string} */
 const RENDERED_ATTR = 'i-amphtml-rendered';
 
 /**
  * The same as `applyFillContent`, but inside the shadow.
- * @const {!Object}
  */
 const SIZE_DEFINED_STYLE = {
   'position': 'absolute',
@@ -66,7 +64,6 @@ const SIZE_DEFINED_STYLE = {
   'height': '100%',
 };
 
-/** @const {string} */
 const FILL_CONTENT_CLASS = 'i-amphtml-fill-content';
 
 /**
@@ -79,52 +76,38 @@ const RENDERED_PROP = '__AMP_RENDERED';
 const childIdGenerator = sequentialIdGenerator();
 
 const ONE_OF_ERROR_MESSAGE =
-  'Only one of "attr", "attrs", "attrPrefix", "passthrough", ' +
-  '"passthroughNonEmpty", or "selector" must be given';
+  'Only one of "attr", "attrs", "attrMatches", "passthrough", "passthroughNonEmpty", or "selector" must be given';
 
 /**
- * @param {!Object<string, !AmpElementPropDef>} propDefs
- * @param {function(!AmpElementPropDef):boolean} cb
+ * @param {AmpElementProps} propDefs
+ * @param {function(AmpElementProp):boolean} cb
  * @return {boolean}
  */
-function checkPropsFor(propDefs, cb) {
+export function checkPropsFor(propDefs, cb) {
   return Object.values(propDefs).some(cb);
 }
 
 /**
- * @param {!AmpElementPropDef} def
+ * @param {AmpElementProp} def
  * @return {boolean}
  */
-const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
+export const HAS_SELECTOR = (def) => typeof def === 'string' || !!def.selector;
 
 /**
  * @param {Node} node
  * @return {boolean}
  */
 const IS_EMPTY_TEXT_NODE = (node) =>
-  node.nodeType === /* TEXT_NODE */ 3 && node.nodeValue.trim().length === 0;
+  node.nodeType === /* TEXT_NODE */ 3 && node.nodeValue?.trim().length === 0;
 
 /**
- * @param {null|string} attributeName
- * @param {string|undefined} attributePrefix
- * @return {boolean}
- */
-function matchesAttrPrefix(attributeName, attributePrefix) {
-  return (
-    attributeName !== null &&
-    attributePrefix !== undefined &&
-    attributeName.startsWith(attributePrefix) &&
-    attributeName !== attributePrefix
-  );
-}
-
-/**
- * @param {typeof PreactBaseElement} Ctor
- * @param {!AmpElement} element
- * @param {{current: ?}} ref
- * @param {!JsonObject|null|undefined} defaultProps
+ * @param {typeof import('./base-element').PreactBaseElement} Ctor
+ * @param {AmpElement} element
+ * @param {import('preact').Ref<T>} ref
+ * @param {JsonObject|null|undefined} defaultProps
  * @param {?MediaQueryProps} mediaQueryProps
- * @return {!JsonObject}
+ * @return {JsonObject}
+ * @template T
  */
 export function collectProps(
   Ctor,
@@ -143,7 +126,7 @@ export function collectProps(
     mediaQueryProps.start();
   }
 
-  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
+  const props = /** @type {JsonObject} */ ({...defaultProps, ref});
 
   // Light DOM.
   if (lightDomTag) {
@@ -172,10 +155,10 @@ export function collectProps(
 }
 
 /**
- * @param {typeof PreactBaseElement} Ctor
- * @param {!Object} props
- * @param {!Object} propDefs
- * @param {!Element} element
+ * @param {typeof import('./base-element').PreactBaseElement} Ctor
+ * @param {JsonObject} props
+ * @param {AmpElementProps} propDefs
+ * @param {Element} element
  * @param {?MediaQueryProps} mediaQueryProps
  */
 function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
@@ -185,9 +168,9 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     // as separate properties. Thus in a carousel the plain "children" are
     // slides, and the "arrowNext" children are passed via a "arrowNext"
     // property.
-    const nodes = realChildNodes(element);
-    for (let i = 0; i < nodes.length; i++) {
-      const childElement = nodes[i];
+    const elements = realChildElements(element);
+    for (let i = 0; i < elements.length; i++) {
+      const childElement = /** @type {HTMLElement} */ (elements[i]);
       const match = matchChild(childElement, propDefs);
       if (!match) {
         continue;
@@ -236,15 +219,16 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
   }
 
   for (const name in propDefs) {
-    const def = /** @type {!AmpElementPropDef} */ (propDefs[name]);
+    const def = /** @type {AmpElementProp} */ (propDefs[name]);
     devAssert(
-      !!def.attr +
-        !!def.attrs +
-        !!def.attrPrefix +
-        !!def.selector +
-        !!def.passthrough +
-        !!def.passthroughNonEmpty <=
-        1,
+      [
+        def.attr,
+        def.attrs,
+        def.attrMatches,
+        def.selector,
+        def.passthrough,
+        def.passthroughNonEmpty,
+      ].filter(Boolean).length <= 1,
       ONE_OF_ERROR_MESSAGE
     );
     let value;
@@ -252,37 +236,23 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
-      value = [<Slot loading={Loading.LAZY} />];
+      value = [<Slot loading={Loading_Enum.LAZY} />];
     } else if (def.passthroughNonEmpty) {
       devAssert(Ctor['usesShadowDom']);
       // Use lazy loading inside the passthrough by default due to too many
       // elements.
       value = realChildNodes(element).every(IS_EMPTY_TEXT_NODE)
         ? null
-        : [<Slot loading={Loading.LAZY} />];
+        : [<Slot loading={Loading_Enum.LAZY} />];
     } else if (def.attr) {
       value = element.getAttribute(def.attr);
       if (def.media && value != null) {
+        devAssert(mediaQueryProps);
         value = mediaQueryProps.resolveListQuery(String(value));
       }
     } else if (def.parseAttrs) {
-      devAssert(def.attrs);
+      devAssert(def.attrs || def.attrMatches);
       value = def.parseAttrs(element);
-    } else if (def.attrPrefix) {
-      const currObj = {};
-      let objContains = false;
-      const attrs = element.attributes;
-      for (let i = 0; i < attrs.length; i++) {
-        const attrib = attrs[i];
-        if (matchesAttrPrefix(attrib.name, def.attrPrefix)) {
-          currObj[dashToCamelCase(attrib.name.slice(def.attrPrefix.length))] =
-            attrib.value;
-          objContains = true;
-        }
-      }
-      if (objContains) {
-        value = currObj;
-      }
     }
     if (value == null) {
       if (def.default != null) {
@@ -294,8 +264,6 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
           ? parseFloat(value)
           : def.type == 'boolean'
           ? parseBooleanAttribute(/** @type {string} */ (value))
-          : def.type == 'date'
-          ? getDate(value)
           : value;
       props[name] = v;
     }
@@ -305,10 +273,11 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
 /**
  * Copies an Element into a VNode representation.
  * (Interpretation into VNode is not recursive, so it excludes children.)
- * @param {!Element} element
- * @return {!PreactDef.Renderable}
+ * @param {Element} element
+ * @return {import('preact').VNode}
  */
 function createShallowVNodeCopy(element) {
+  /** @type {JsonObject} */
   const props = {
     // Setting `key` to an object is fine in Preact, but not React.
     'key': element,
@@ -325,18 +294,91 @@ function createShallowVNodeCopy(element) {
 }
 
 /**
- * @param {!Element} element
- * @param {!Object} defs
- * @return {?ChildDef}
+ * @param {HTMLElement} element
+ * @param {Object<string, AmpElementProp>} defs
+ * @return {string|null}
  */
 function matchChild(element, defs) {
   // TODO: a little slow to do this repeatedly.
   for (const match in defs) {
     const def = defs[match];
     const selector = typeof def == 'string' ? def : def.selector;
-    if (matches(element, selector)) {
+    if (selector && matches(element, selector)) {
       return match;
     }
   }
   return null;
+}
+
+/**
+ * @param {string} name
+ * @param {function(string): T} parse
+ * @return {{
+ *   attrs: Array<string>,
+ *   parseAttrs: function(Element):(T|''|null)
+ * }}
+ * @template T
+ */
+export function createParseAttr(name, parse) {
+  const attrs = [name];
+  /** @type {function(Element):T|''|null} */
+  const parseAttrs = (element) => {
+    const attr = element.getAttribute(name);
+    return attr && parse(attr);
+  };
+  return {
+    'attrs': attrs,
+    'parseAttrs': parseAttrs,
+  };
+}
+
+/**
+ * @param {string} name
+ * @return {ReturnType<typeof createParseAttr>}
+ */
+export function createParseDateAttr(name) {
+  return createParseAttr(name, getDate);
+}
+
+/**
+ * Maps multiple attributes with the same prefix to a single prop object.
+ * The prefix cannot equal the attribute name.
+ * @param {string} prefix
+ * @return {{
+ *   attrMatches: function(?string=):boolean,
+ *   parseAttrs: function(Element):(undefined|Object<string, string>)
+ * }}
+ */
+export function createParseAttrsWithPrefix(prefix) {
+  /**
+   * @param {string} name
+   * @return {boolean}
+   */
+  const attrMatches = (name) => name?.startsWith(prefix) && name !== prefix;
+
+  /**
+   * @param {Element} element
+   * @return {JsonObject|undefined}
+   */
+  const parseAttrs = (element) => {
+    /** @type {JsonObject|undefined} */
+    let currObj = undefined;
+    const attrs = element.attributes;
+    for (let i = 0; i < attrs.length; i++) {
+      const attrib = attrs[i];
+      if (attrMatches(attrib.name)) {
+        if (!currObj) {
+          currObj = {};
+        }
+        currObj[dashToCamelCase(attrib.name.slice(prefix.length))] =
+          attrib.value;
+      }
+    }
+    return currObj;
+  };
+
+  return {
+    'attrMatches': attrMatches,
+    'parseAttrs': parseAttrs,
+  };
 }

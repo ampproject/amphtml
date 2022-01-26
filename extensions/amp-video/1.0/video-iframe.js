@@ -1,7 +1,6 @@
-import * as Preact from '#preact';
 import {Deferred} from '#core/data-structures/promise';
-import {VideoWrapper} from './component';
-import {forwardRef} from '#preact/compat';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useImperativeHandle,
@@ -9,6 +8,9 @@ import {
   useMemo,
   useRef,
 } from '#preact';
+import {forwardRef} from '#preact/compat';
+
+import {VideoWrapper} from './component';
 
 const DEFAULT_SANDBOX = [
   'allow-scripts',
@@ -196,9 +198,7 @@ function VideoIframeInternalWithRef(
         readyDeferred.resolve();
       }}
       onLoad={(event) => {
-        if (onIframeLoad) {
-          onIframeLoad(event);
-        }
+        onIframeLoad?.(event);
       }}
     />
   );
@@ -211,7 +211,7 @@ export {VideoIframeInternal};
 
 /**
  * VideoWrapper using an <iframe> for implementation.
- * Usable on the AMP layer through VideoBaseElement.
+ * Usable on the AMP layer through AmpVideoBaseElement.
  * @param {VideoIframeDef.Props} props
  * @param {{current: (?T)}} ref
  * @return {PreactDef.Renderable}
@@ -223,7 +223,7 @@ function VideoIframeWithRef(props, ref) {
 
 /**
  * VideoWrapper using an <iframe> for implementation.
- * Usable on the AMP layer through VideoBaseElement.
+ * Usable on the AMP layer through AmpVideoBaseElement.
  * @param {VideoIframeDef.Props} props
  * @return {PreactDef.Renderable}=
  */

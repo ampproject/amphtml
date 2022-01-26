@@ -2,6 +2,11 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
+  buildComponent,
+  getBentoComponentsToBuild,
+  maybeInitializeBentoComponents,
+} = require('../tasks/build-bento');
+const {
   doBuild3pVendor,
   generateBundles,
 } = require('../tasks/3p-vendor-helpers');
@@ -15,7 +20,10 @@ const {jsBundles} = require('../compile/bundles.config');
 const {VERSION} = require('../compile/internal-version');
 
 const extensionBundles = {};
-maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
+maybeInitializeExtensions(extensionBundles);
+
+const bentoBundles = {};
+maybeInitializeBentoComponents(bentoBundles);
 
 const vendorBundles = generateBundles();
 
@@ -168,10 +176,44 @@ async function preBuildExtensions() {
   }
 }
 
+/**
+ * Normalized the callback from "build" and use it to build the inputted component.
+ *
+ * @param {!Object} components
+ * @param {string} name
+ * @param {?Object} options
+ * @return {Promise<void|void[]>}
+ */
+function doBuildBentoComponent(components, name, options) {
+  const component = components[name];
+  return buildComponent(
+    component.name,
+    component.version,
+    component.hasCss,
+    {...options, ...component},
+    component.extraGlobs
+  );
+}
+
+/**
+ * Pre-builds default components and ones requested via command line flags.
+ * @return {Promise<void>}
+ */
+async function preBuildBentoComponents() {
+  const components = getBentoComponentsToBuild(/* preBuild */ true);
+  for (const componentBundle in bentoBundles) {
+    const component = bentoBundles[componentBundle].name;
+    if (components.includes(component) && !componentBundle.endsWith('latest')) {
+      await build(bentoBundles, componentBundle, doBuildBentoComponent);
+    }
+  }
+}
+
 module.exports = {
   lazyBuildExtensions,
   lazyBuildJs,
   lazyBuild3pVendor,
   preBuildExtensions,
+  preBuildBentoComponents,
   preBuildRuntimeFiles,
 };

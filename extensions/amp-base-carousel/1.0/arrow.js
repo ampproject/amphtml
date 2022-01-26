@@ -1,7 +1,10 @@
+import objstr from 'obj-str';
+
 import * as Preact from '#preact';
 import {useCallback} from '#preact';
+import {propName} from '#preact/utils';
+
 import {useStyles} from './component.jss';
-import objstr from 'obj-str';
 
 /**
  * @param {!BentoBaseCarouselDef.ArrowProps} props
@@ -50,9 +53,9 @@ export function Arrow({
 function DefaultArrow({
   'aria-disabled': ariaDisabled,
   by,
-  'class': className,
   disabled,
   onClick,
+  [propName('class')]: className,
 }) {
   const classes = useStyles();
   return (

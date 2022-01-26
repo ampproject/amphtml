@@ -73,10 +73,7 @@ app.use(bodyParser.text());
 // Middleware is executed in order, so this must be at the top.
 // TODO(#24333): Migrate all server URL handlers to new-server/router and
 // deprecate app.js.
-// TODO(erwinmombay, #32865): Make visual diff tests use the new server
-if (!argv._.includes('visual-diff')) {
-  app.use(require('./new-server/router'));
-}
+app.use(require('./new-server/router'));
 
 app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
@@ -653,7 +650,7 @@ function liveListInsert(liveList, node) {
      */
     const child = /** @type {*} */ (node.cloneNode(true));
     child.setAttribute('id', `list-item-${itemCtr++}`);
-    child.setAttribute('data-sort-time', Date.now());
+    child.setAttribute('data-sort-time', Date.now().toString());
     liveList.querySelector('[items]')?.appendChild(child);
   }
 }

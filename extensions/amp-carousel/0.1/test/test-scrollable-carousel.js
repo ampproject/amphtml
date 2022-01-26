@@ -1,10 +1,16 @@
 import '../amp-carousel';
-import {ActionService} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
-import {Services} from '#service';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
-import {user} from '#utils/log';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {user} from '#utils/log';
+
+import {buildDom} from '../build-dom';
+import {AmpScrollableCarousel} from '../scrollable-carousel';
+
 describes.realWin(
   'test-scrollable-carousel',
   {
@@ -33,7 +39,7 @@ describes.realWin(
       schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
     });
 
-    function getAmpScrollableCarousel() {
+    function getAmpScrollableCarousel(addToDom = true) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
         'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
@@ -52,6 +58,10 @@ describes.realWin(
         img.style.height = '100px';
         img.id = 'img-' + i;
         carouselElement.appendChild(img);
+      }
+
+      if (!addToDom) {
+        return Promise.resolve(carouselElement);
       }
 
       doc.body.appendChild(carouselElement);
@@ -103,8 +113,6 @@ describes.realWin(
 
         // show control buttons correctly
         const {nextButton_: nextBtn, prevButton_: prevBtn} = impl.controls_;
-        expect(impl.hasPrev()).to.be.false;
-        expect(impl.hasNext()).to.be.true;
         expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
         expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         // Controls are hidden from screen readers as they do not provide
@@ -226,6 +234,53 @@ describes.realWin(
         expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
       }
     );
+
+    describe('buildDom', () => {
+      it('buildDom and buildCallback should result in the same outerHTML', async () => {
+        env.sandbox
+          .stub(Services, 'inputFor')
+          .returns({onMouseDetected: () => {}});
+
+        const el1 = await getAmpScrollableCarousel(/* addToDom */ false);
+        const el2 = el1.cloneNode(/* deep */ true);
+        const impl = new AmpScrollableCarousel(el1);
+        impl.setupBehavior_ = () => {};
+        await impl.buildCallback();
+        buildDom(el2);
+
+        expect(el2.outerHTML).equal(el1.outerHTML);
+      });
+
+      it('buildCallback should assign ivars even when server rendered', async () => {
+        const el1 = await getAmpScrollableCarousel(/* addToDom */ false);
+        buildDom(el1);
+        el1.setAttribute('i-amphtml-ssr', '');
+        const impl = new AmpScrollableCarousel(el1);
+        impl.setupBehavior_ = () => {};
+        await impl.buildCallback();
+
+        expect(impl.cells_).length(7);
+        expect(impl.container_).ok;
+      });
+
+      it('buildDom should throw if invalid server rendered dom', async () => {
+        const carousel = await getAmpScrollableCarousel(/* addToDom */ false);
+        carousel.setAttribute('i-amphtml-ssr', '');
+        expect(() => buildDom(carousel)).throws(/Invalid server render/);
+      });
+
+      it('buildDom should not modify dom for server rendered element', async () => {
+        const carousel = await getAmpScrollableCarousel(/* addToDom */ false);
+        buildDom(carousel);
+        carousel.setAttribute('i-amphtml-ssr', '');
+
+        const before = carousel.outerHTML;
+        buildDom(carousel);
+        const after = carousel.outerHTML;
+
+        expect(before).equal(after);
+      });
+    });
 
     // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
     it.skip(
@@ -427,7 +482,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       );
       expect(element.enqueAction).to.be.calledWith(
         env.sandbox.match({
@@ -438,7 +493,7 @@ describes.realWin(
           method: 'goToSlide',
           node: element,
           source: 'source',
-          trust: ActionTrust.HIGH,
+          trust: ActionTrust_Enum.HIGH,
         })
       );
 
@@ -450,7 +505,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       );
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.match(

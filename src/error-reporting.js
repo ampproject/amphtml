@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {duplicateErrorIfNecessary} from '#core/error';
 import {
   USER_ERROR_SENTINEL,
@@ -8,7 +8,6 @@ import {
 import * as mode from '#core/mode';
 import {findIndex} from '#core/types/array';
 import {exponentialBackoff} from '#core/types/function/exponential-backoff';
-import {dict} from '#core/types/object';
 
 import {experimentTogglesOrNull, getBinaryType, isCanary} from '#experiments';
 
@@ -208,7 +207,10 @@ export function reportError(error, opt_associatedElement) {
       }
     }
     if (element && element.dispatchCustomEventForTesting) {
-      element.dispatchCustomEventForTesting(AmpEvents.ERROR, error.message);
+      element.dispatchCustomEventForTesting(
+        AmpEvents_Enum.ERROR,
+        error.message
+      );
     }
 
     // 'call' to make linter happy. And .call to make compiler happy
@@ -431,7 +433,7 @@ export function maybeReportErrorToViewer(win, data) {
  * @visibleForTesting
  */
 export function errorReportingDataForViewer(errorReportData) {
-  return dict({
+  return {
     'm': errorReportData['m'], // message
     'a': errorReportData['a'], // isUserError
     's': errorReportData['s'], // error stack
@@ -439,7 +441,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
     'pt': errorReportData['pt'], // is pre-throttled
-  });
+  };
 }
 
 /**
@@ -671,10 +673,10 @@ export function reportErrorToAnalytics(error, win) {
   // Currently this can only be executed in a single-doc mode. Otherwise,
   // it's not clear which ampdoc the event would belong too.
   if (Services.ampdocServiceFor(win).isSingleDoc()) {
-    const vars = dict({
+    const vars = {
       'errorName': error.name,
       'errorMessage': error.message,
-    });
+    };
     triggerAnalyticsEvent(
       getRootElement_(win),
       'user-error',

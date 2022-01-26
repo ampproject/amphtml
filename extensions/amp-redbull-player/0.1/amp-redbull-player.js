@@ -4,7 +4,6 @@ import {
   removeElement,
 } from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -14,14 +13,14 @@ import {userAssert} from '#utils/log';
 
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
-  SandboxOptions,
+  SandboxOptions_Enum,
   createFrameFor,
   isJsonOrObj,
   objOrParseJson,
   originMatches,
 } from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @private @const */
 const TAG = 'amp-redbull-player';
@@ -31,11 +30,11 @@ const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @private @const */
 const SANDBOX = [
-  SandboxOptions.ALLOW_SCRIPTS,
-  SandboxOptions.ALLOW_SAME_ORIGIN,
-  SandboxOptions.ALLOW_POPUPS,
-  SandboxOptions.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
-  SandboxOptions.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
+  SandboxOptions_Enum.ALLOW_SCRIPTS,
+  SandboxOptions_Enum.ALLOW_SAME_ORIGIN,
+  SandboxOptions_Enum.ALLOW_POPUPS,
+  SandboxOptions_Enum.ALLOW_POPUPS_TO_ESCAPE_SANDBOX,
+  SandboxOptions_Enum.ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION,
 ];
 
 /** @implements {../../../src/video-interface.VideoInterface} */
@@ -96,15 +95,12 @@ class AmpRedBullPlayer extends AMP.BaseElement {
 
     const origin = 'https://player.redbull.com/amp/amp-iframe.html';
 
-    const src = addParamsToUrl(
-      origin,
-      dict({
-        'videoId': videoId,
-        'skinId': skinId,
-        'ampTagId': this.tagId_,
-        'locale': locale,
-      })
-    );
+    const src = addParamsToUrl(origin, {
+      'videoId': videoId,
+      'skinId': skinId,
+      'ampTagId': this.tagId_,
+      'locale': locale,
+    });
 
     this.iframe_ = disableScrollingOnIframe(
       createFrameFor(this, src, '', SANDBOX)
@@ -120,12 +116,10 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   onReady_() {
     Services.videoManagerForDoc(this.element).register(this);
     this.iframe_.contentWindow./*OK*/ postMessage(
-      JSON.stringify(
-        dict({
-          'msg': 'amp-loaded',
-          'id': `${TAG}-${this.tagId_}`,
-        })
-      ),
+      JSON.stringify({
+        'msg': 'amp-loaded',
+        'id': `${TAG}-${this.tagId_}`,
+      }),
       '*'
     );
   }
@@ -191,14 +185,10 @@ class AmpRedBullPlayer extends AMP.BaseElement {
    * @param {!Object<string, string>=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars) {
-    dispatchCustomEvent(
-      this.element,
-      VideoEvents.CUSTOM_TICK,
-      dict({
-        'eventType': `video-custom-tracking-${this.tagId_}`,
-        'vars': vars,
-      })
-    );
+    dispatchCustomEvent(this.element, VideoEvents_Enum.CUSTOM_TICK, {
+      'eventType': `video-custom-tracking-${this.tagId_}`,
+      'vars': vars,
+    });
   }
 
   /** @override */

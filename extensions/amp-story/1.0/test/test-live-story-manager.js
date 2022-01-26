@@ -1,12 +1,14 @@
-import {Action} from '../amp-story-store-service';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {addAttributesToElement} from '#core/dom';
+
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
-import {CommonSignals} from '#core/constants/common-signals';
+import {Action} from '../amp-story-store-service';
 import {LiveStoryManager} from '../live-story-manager';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
-import {addAttributesToElement} from '#core/dom';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
   'LiveStoryManager',
@@ -82,7 +84,7 @@ describes.realWin(
       liveStoryManager.build();
 
       await ampStory.layoutCallback();
-      await ampStory.element.signals().signal(CommonSignals.LOAD_END);
+      await ampStory.element.signals().signal(CommonSignals_Enum.LOAD_END);
       const liveListEl = ampStory.element.querySelector('amp-live-list');
       expect(liveListEl).to.exist;
     });
@@ -94,7 +96,7 @@ describes.realWin(
       liveStoryManager.build();
 
       await ampStory.layoutCallback();
-      await ampStory.element.signals().signal(CommonSignals.LOAD_END);
+      await ampStory.element.signals().signal(CommonSignals_Enum.LOAD_END);
       const liveListEl = ampStory.element.querySelector('amp-live-list');
       expect(liveListEl.id).to.equal(
         'i-amphtml-' + ampStory.element.id + '-dynamic-list'
@@ -126,7 +128,7 @@ describes.realWin(
       liveStoryManager.build();
 
       await ampStory.layoutCallback();
-      await ampStory.element.signals().signal(CommonSignals.LOAD_END);
+      await ampStory.element.signals().signal(CommonSignals_Enum.LOAD_END);
       const dispatchSpy = env.sandbox.spy(ampStory.storeService_, 'dispatch');
 
       const newPage = win.document.createElement('amp-story-page');

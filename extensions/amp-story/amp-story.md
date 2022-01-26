@@ -383,7 +383,7 @@ Use 720p videos or higher to take advantage of all the video transcodes and adap
 Example:
 
 ```html
-<amp-video layout="fill" poster="img.png" cache="google">
+<amp-video layout="fill" poster="img.png" cache="google" autoplay>
   <source src="video.mp4" type="video/mp4">
 </amp-video>
 ```
@@ -426,18 +426,11 @@ Example:
 </amp-story-grid-layer>
 ```
 
-#### Interactive components
+#### Embedded components
 
-We support embedding components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will not have any effect), but by using the `interactive` attribute, you can make them be fully interactive.
+We support embedding some components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will advance to the next page), but by using the `interactive` attribute, you can show a tooltip linking to original source (i.e. opening the tweet on a new tab).
 
-When clicked, the component will be shown in a lightbox-like mode. Here, a user can choose to further interact with the embed, or close the lightbox and go back to the story.
-
-<figure class="centered-fig">
-  <span class="special-char">Example:</span>
-  <amp-anim alt="Embedded component example" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/amp-story-tooltip.gif" width="300" height="553">
-  <noscript><img width="300"  alt="Embedded component example" src="https://raw.githubusercontent.com/ampproject/amphtml/main/extensions/amp-story/img/amp-story-tooltip.gif" /></noscript>
-  </amp-anim>
-</figure>
+Example:
 
 ```html
 <amp-twitter

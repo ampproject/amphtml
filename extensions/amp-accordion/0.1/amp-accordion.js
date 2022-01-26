@@ -1,8 +1,8 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {Keys} from '#core/constants/key-codes';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {bezierCurve} from '#core/data-structures/curve';
 import {dispatchCustomEvent, tryFocus} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {closest, realChildElements} from '#core/dom/query';
 import {getStyle, setImportantStyles, setStyles} from '#core/dom/style';
 import {
@@ -11,7 +11,6 @@ import {
   setStyles as setStylesTransition,
 } from '#core/dom/transition';
 import {clamp} from '#core/math';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -63,7 +62,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
@@ -123,7 +122,7 @@ class AmpAccordion extends AMP.BaseElement {
       const expandObserver = new this.win.MutationObserver((mutations) => {
         // [data-expand] mutations can only be triggered by AMP.setState which
         // requires "default" trust.
-        this.toggleExpandMutations_(mutations, ActionTrust.DEFAULT);
+        this.toggleExpandMutations_(mutations, ActionTrust_Enum.DEFAULT);
       });
       expandObserver.observe(section, {
         attributes: true,
@@ -223,7 +222,7 @@ class AmpAccordion extends AMP.BaseElement {
    */
   getSessionState_() {
     if (this.sessionOptOut_) {
-      return dict();
+      return {};
     }
     try {
       const sessionStr = this.win./*OK*/ sessionStorage.getItem(
@@ -233,7 +232,7 @@ class AmpAccordion extends AMP.BaseElement {
         ? /** @type {!JsonObject} */ (
             devAssert(parseJson(dev().assertString(sessionStr)))
           )
-        : dict();
+        : {};
     } catch (e) {
       dev().fine(
         'AMP-ACCORDION',
@@ -241,7 +240,7 @@ class AmpAccordion extends AMP.BaseElement {
         e.message,
         e.stack
       );
-      return dict();
+      return {};
     }
   }
 
@@ -273,14 +272,10 @@ class AmpAccordion extends AMP.BaseElement {
    * Triggers event given name
    * @param {string} name
    * @param {!Element} section
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    */
   triggerEvent_(name, section, trust) {
-    const event = createCustomEvent(
-      this.win,
-      `accordionSection.${name}`,
-      dict({})
-    );
+    const event = createCustomEvent(this.win, `accordionSection.${name}`, {});
     this.action_.trigger(section, name, event, trust);
 
     dispatchCustomEvent(this.element, name);
@@ -289,7 +284,7 @@ class AmpAccordion extends AMP.BaseElement {
   /**
    * Toggles section between expanded or collapsed.
    * @param {!Element} section
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @param {(boolean|undefined)=} opt_forceExpand
    * @private
    */
@@ -364,7 +359,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * @param {!Element} section
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -456,7 +451,7 @@ class AmpAccordion extends AMP.BaseElement {
 
   /**
    * @param {!Element} section
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    * @return {!Promise}
    * @private
    */
@@ -533,7 +528,7 @@ class AmpAccordion extends AMP.BaseElement {
     const header = dev().assertElement(event.currentTarget);
     const section = dev().assertElement(header.parentElement);
     // Click or keypress gestures are high trust.
-    this.toggle_(section, ActionTrust.HIGH);
+    this.toggle_(section, ActionTrust_Enum.HIGH);
   }
 
   /**
@@ -574,12 +569,12 @@ class AmpAccordion extends AMP.BaseElement {
     }
     const {key} = event;
     switch (key) {
-      case Keys.UP_ARROW: /* fallthrough */
-      case Keys.DOWN_ARROW:
+      case Keys_Enum.UP_ARROW: /* fallthrough */
+      case Keys_Enum.DOWN_ARROW:
         this.navigationKeyDownHandler_(event);
         return;
-      case Keys.ENTER: /* fallthrough */
-      case Keys.SPACE:
+      case Keys_Enum.ENTER: /* fallthrough */
+      case Keys_Enum.SPACE:
         if (event.target == event.currentTarget) {
           // Only activate if header element was activated directly.
           // Do not respond to key presses on its children.
@@ -601,7 +596,7 @@ class AmpAccordion extends AMP.BaseElement {
     if (index !== -1) {
       event.preventDefault();
       // Up and down are the same regardless of locale direction.
-      const diff = event.key == Keys.UP_ARROW ? -1 : 1;
+      const diff = event.key == Keys_Enum.UP_ARROW ? -1 : 1;
       // If user navigates one past the beginning or end, wrap around.
       let newFocusIndex = (index + diff) % this.headers_.length;
       if (newFocusIndex < 0) {
@@ -615,7 +610,7 @@ class AmpAccordion extends AMP.BaseElement {
   /**
    * Callback function to execute when mutations are observed on "data-expand".
    * @param {!Array<!MutationRecord>} mutations
-   * @param {!ActionTrust} trust
+   * @param {!ActionTrust_Enum} trust
    */
   toggleExpandMutations_(mutations, trust) {
     mutations.forEach((mutation) => {

@@ -1,9 +1,11 @@
-import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {fetchCachedSources} from '../video-cache';
+
+import {Services} from '#service';
 import {installPerformanceService} from '#service/performance-impl';
 import {xhrServiceForTesting} from '#service/xhr-impl';
+
+import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
+import {fetchCachedSources} from '../video-cache';
 
 describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
   let cacheUrlService;
@@ -115,6 +117,18 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
       expect(xhrSpy).to.have.been.calledWith(
         'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+    });
+
+    it('should add the ACAO queryparam if the video is crossorigin', async () => {
+      const videoEl = createVideo([{'src': 'video.html'}]);
+      videoEl.setAttribute('crossorigin', '');
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
   });
@@ -428,6 +442,55 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const source = videoEl.querySelector('source:not(source[data-bitrate])');
       expect(source).to.exist;
       expect(source).to.not.have.attribute('i-amphtml-video-cached-source');
+    });
+  });
+
+  describe('has_audio field', async () => {
+    it('should set noaudio if the cache responds with has_audio: false', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'has_audio': false,
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(videoEl).to.have.attribute('noaudio');
+    });
+
+    it('should not set noaudio if the cache responds with has_audio: true', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'has_audio': true,
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(videoEl).to.not.have.attribute('noaudio');
+    });
+
+    it('should not set noaudio if the cache responds without has_audio', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(videoEl).to.not.have.attribute('noaudio');
     });
   });
 

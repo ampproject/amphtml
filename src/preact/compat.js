@@ -1,27 +1,104 @@
-import * as compat from /*OK*/ 'preact/compat';
+import {options, toChildArray} from /*OK*/ 'preact';
+
+import * as mode from '#core/mode';
+
+const REACT_FORWARD_SYMBOL =
+  (typeof Symbol !== 'undefined' && Symbol.for?.('react.forward_ref')) || 0xf47;
 
 /**
- * @param {function(T, {current: (R|null)}):PreactDef.Renderable} fn
- * @return {function(T):PreactDef.Renderable}
- * @template T, R
+ * @type {*}
+ * `__b` is the known mangled name exported by preact. This is called during
+ * the diffing algorithm with the constructed VNode, before the vnode is
+ * actually used to diff.
+ *
  */
-export function forwardRef(fn) {
-  return compat.forwardRef(fn);
+const diffKey = '__b';
+const oldDiff = /** @type {*} */ (options)[diffKey];
+/** @type {*} */ (options)[diffKey] = newDiff;
+
+/**
+ * Checks if our VNode type has a `forwardRef_` sigil, in which case it was created by our forwardRef implementation.
+ * If so, we move the VNode's ref to it's props, which will be passed to the Component as its props.
+ *
+ * See VNode type at https://github.com/preactjs/preact/blob/55ee4bc069f84cf5e3af8f2e2f338f4e74aca4d8/src/create-element.js#L58-L76
+ *
+ * @param {*} vnode
+ */
+function newDiff(vnode) {
+  if (vnode['type']?.forwardRef_ && vnode['ref']) {
+    vnode['props']['ref'] = vnode['ref'];
+    vnode['ref'] = null;
+  }
+  oldDiff?.(vnode);
 }
 
 /**
- * @param {PreactDef.VNode} vnode
- * @param {HTMLElement} container
- * @return {PreactDef.VNode}
+ * Reimplements forwardRef without dragging in everything from preact/compat.
+ * See https://github.com/preactjs/preact/issues/3295
+ *
+ * @param {*} Component
+ * @return {ReturnType<import('preact/compat').forwardRef>}
  */
-export function createPortal(vnode, container) {
-  return compat.createPortal(vnode, container);
+export function forwardRef(Component) {
+  /**
+   * @param {JsonObject} props
+   * @return {*}
+   */
+  function Forward(props) {
+    const {ref, ...clone} = props;
+    return Component(clone, ref);
+  }
+
+  // Is faithful react support necessary? This file should only be used in Preact mode,
+  // importers will directly import `React.forwardRef` in React builds.
+  Forward.$$typeof = REACT_FORWARD_SYMBOL;
+
+  // Preact pretends functional components are classical component instances,
+  // which are expected to have a render method.
+  Forward.render = Forward;
+
+  // https://github.com/preactjs/preact/blob/d78746c96245b70a83514a69ba4047e5dd0c7f54/compat/src/render.js#L26-L27
+  // Some libraries like `react-virtualized` explicitly check for this.
+  Forward.prototype.isReactComponent = true;
+
+  Forward.forwardRef_ = true;
+
+  if (!mode.isProd()) {
+    Forward.displayName = `ForwardRef(${
+      Component.displayName || Component.name
+    })`;
+  }
+
+  return /** @type {*} */ (Forward);
 }
 
 /**
- * @param {...PreactDef.Renderable} unusedChildren
- * @return {!Array<PreactDef.Renderable>}
+ * @type {typeof import('preact').toChildArray} children
  */
-export function toChildArray(unusedChildren) {
-  return compat.Children.toArray.apply(undefined, arguments);
+function toArray(children) {
+  return toChildArray(children);
 }
+
+/**
+ * @param {import('preact').ComponentChildren} children
+ * @param {function(import('preact').ComponentChildren):R} fn
+ * @return {Array<R>}
+ * @template R
+ */
+function map(children, fn) {
+  return toChildArray(children).map(fn);
+}
+
+/**
+ * @param {import('preact').ComponentChildren} children
+ * @return {number}
+ */
+function count(children) {
+  return toChildArray(children).length;
+}
+
+export const Children = {
+  toArray,
+  map,
+  count,
+};

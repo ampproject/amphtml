@@ -1,5 +1,4 @@
-import {CommonSignals} from '#core/constants/common-signals';
-import {dict} from '#core/types/object';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 
 import {Services} from '#service';
 
@@ -141,21 +140,19 @@ export class AmpSmartlinks extends AMP.BaseElement {
    */
   postPageImpression_() {
     // When using layout='nodisplay' manually trigger CustomEventReporterBuilder
-    this.signals().signal(CommonSignals.LOAD_START);
+    this.signals().signal(CommonSignals_Enum.LOAD_START);
     const payload = this.buildPageImpressionPayload_();
 
     const builder = new CustomEventReporterBuilder(this.element);
 
     builder.track('page-impression', ENDPOINTS.PAGE_IMPRESSION_ENDPOINT);
 
-    builder.setTransportConfig(
-      dict({
-        'beacon': true,
-        'image': false,
-        'xhrpost': true,
-        'useBody': true,
-      })
-    );
+    builder.setTransportConfig({
+      'beacon': true,
+      'image': false,
+      'xhrpost': true,
+      'useBody': true,
+    });
 
     builder.setExtraUrlParams(payload);
     const reporter = builder.build();
@@ -186,19 +183,17 @@ export class AmpSmartlinks extends AMP.BaseElement {
    * @private
    */
   buildPageImpressionPayload_() {
-    return /** @type {!JsonObject} */ (
-      dict({
-        'events': [{'is_amp': true}],
-        'organization_id': this.linkmateOptions_.publisherID,
-        'organization_type': 'publisher',
-        'user': {
-          'page_session_uuid': this.generateUUID_(),
-          'source_url': this.getLocationHref_(),
-          'previous_url': this.referrer_,
-          'user_agent': this.ampDoc_.win.navigator.userAgent,
-        },
-      })
-    );
+    return {
+      'events': [{'is_amp': true}],
+      'organization_id': this.linkmateOptions_.publisherID,
+      'organization_type': 'publisher',
+      'user': {
+        'page_session_uuid': this.generateUUID_(),
+        'source_url': this.getLocationHref_(),
+        'previous_url': this.referrer_,
+        'user_agent': this.ampDoc_.win.navigator.userAgent,
+      },
+    };
   }
 
   /**

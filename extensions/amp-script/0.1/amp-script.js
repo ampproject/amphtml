@@ -1,10 +1,14 @@
 import {upgrade} from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 
 import {Deferred} from '#core/data-structures/promise';
-import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  Layout_Enum,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {realChildElements} from '#core/dom/query';
 import * as mode from '#core/mode';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 import {utf8Encode} from '#core/types/string/bytes';
 
@@ -138,7 +142,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
+    return layout == Layout_Enum.CONTAINER || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -692,7 +696,7 @@ export class SanitizerImpl {
     registerServiceBuilder(this.win_, 'purifier-inplace', function () {
       return new Purifier(
         ampScript.win.document,
-        dict({'IN_PLACE': true}),
+        {'IN_PLACE': true},
         rewriteAttributeValue
       );
     });

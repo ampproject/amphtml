@@ -1,8 +1,6 @@
-import {dict} from '#core/types/object';
-
 import {postMessageWhenAvailable} from '../../src/iframe-video';
 import {addParamsToUrl} from '../../src/url';
-import {VideoEvents} from '../../src/video-interface';
+import {VideoEvents_Enum} from '../../src/video-interface';
 
 /**
  * @fileoverview
@@ -25,9 +23,9 @@ export const getVimeoOriginRegExp = () =>
  * @const {!Object<string, ?string>}
  */
 export const VIMEO_EVENTS = {
-  'play': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'ended': VideoEvents.ENDED,
+  'play': VideoEvents_Enum.PLAYING,
+  'pause': VideoEvents_Enum.PAUSE,
+  'ended': VideoEvents_Enum.ENDED,
   'volumechange': null,
 };
 
@@ -40,10 +38,10 @@ export const VIMEO_EVENTS = {
 export function getVimeoIframeSrc(videoid, autoplay, doNotTrack) {
   return addParamsToUrl(
     `https://player.vimeo.com/video/${encodeURIComponent(videoid)}`,
-    dict({
+    {
       'dnt': doNotTrack ? '1' : undefined,
       'muted': autoplay ? '1' : undefined,
-    })
+    }
   );
 }
 
@@ -53,12 +51,10 @@ export function getVimeoIframeSrc(videoid, autoplay, doNotTrack) {
  * @return {string}
  */
 export function makeVimeoMessage(method, params = '') {
-  return JSON.stringify(
-    dict({
-      'method': method,
-      'value': params,
-    })
-  );
+  return JSON.stringify({
+    'method': method,
+    'value': params,
+  });
 }
 
 /**

@@ -1,7 +1,8 @@
-import {Layout} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+import {Layout_Enum} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
 
@@ -11,12 +12,12 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-embedly-card';
 
-class AmpEmbedlyCard extends BaseElement {
+class AmpEmbedlyCard extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height) => this.attemptChangeHeight(height),
-    });
+    };
   }
 
   /** @override */
@@ -31,7 +32,7 @@ class AmpEmbedlyCard extends BaseElement {
         isExperimentOn(this.win, 'bento-embedly-card'),
       'expected global "bento" or specific "bento-embedly-card" experiment to be enabled'
     );
-    return layout == Layout.RESPONSIVE;
+    return layout == Layout_Enum.RESPONSIVE;
   }
 }
 

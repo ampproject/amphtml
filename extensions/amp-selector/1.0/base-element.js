@@ -6,11 +6,11 @@ import {
 } from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
+import {tabindexFromProps} from '#preact/utils';
 
 import {BentoSelector, BentoSelectorOption} from './component';
 
@@ -40,30 +40,26 @@ export class BaseElement extends PreactBaseElement {
     // See https://github.com/ampproject/amp-react-prototype/issues/40.
     const onChangeHandler = (event) => {
       const {option, value} = event;
-      this.triggerEvent(
-        this.element,
-        'select',
-        dict({
-          'targetOption': option,
-          'selectedOptions': value,
-        })
-      );
+      this.triggerEvent(this.element, 'select', {
+        'targetOption': option,
+        'selectedOptions': value,
+      });
 
       this.isExpectedMutation = true;
-      this.mutateProps(dict({'value': value}));
+      this.mutateProps({'value': value});
     };
 
     // Return props
     const {children, options, value} = getOptions(element, mu);
     this.optionState = options;
-    return dict({
+    return {
       'as': SelectorShim,
       'shimDomElement': element,
       'children': children,
       'value': value,
       'options': options,
       'onChange': onChangeHandler,
-    });
+    };
   }
 }
 
@@ -90,7 +86,6 @@ function getOptions(element, mu) {
       const option = child.getAttribute('option') || index.toString();
       const selected = child.hasAttribute('selected');
       const disabled = child.hasAttribute('disabled');
-      const tabIndex = child.getAttribute('tabindex');
       const props = {
         as: OptionShim,
         option,
@@ -106,12 +101,16 @@ function getOptions(element, mu) {
           mu.takeRecords();
         },
         selected,
-        tabIndex,
       };
       if (selected) {
         value.push(option);
       }
-      const optionChild = <BentoSelectorOption {...props} />;
+      const optionChild = (
+        <BentoSelectorOption
+          {...props}
+          tabindex={child.getAttribute('tabindex')}
+        />
+      );
       options.push(option);
       children.push(optionChild);
     });
@@ -130,8 +129,9 @@ export function OptionShim({
   role = 'option',
   selected,
   shimDomElement,
-  tabIndex,
+  ...rest
 }) {
+  const tabindex = tabindexFromProps(rest);
   const syncEvent = useCallback(
     (type, handler) => {
       if (!handler) {
@@ -164,10 +164,10 @@ export function OptionShim({
   }, [shimDomElement, role]);
 
   useLayoutEffect(() => {
-    if (tabIndex != undefined) {
-      shimDomElement.tabIndex = tabIndex;
+    if (tabindex != undefined) {
+      shimDomElement.setAttribute('tabindex', tabindex);
     }
-  }, [shimDomElement, tabIndex]);
+  }, [shimDomElement, tabindex]);
 
   return <div></div>;
 }
@@ -185,9 +185,10 @@ function SelectorShim({
   onKeyDown,
   role = 'listbox',
   shimDomElement,
-  tabIndex,
   value,
+  ...rest
 }) {
+  const tabindex = tabindexFromProps(rest);
   const input = useRef(null);
   if (!input.current) {
     input.current = createElementWithAttributes(
@@ -241,10 +242,10 @@ function SelectorShim({
   }, [shimDomElement, role]);
 
   useLayoutEffect(() => {
-    if (tabIndex != undefined) {
-      shimDomElement.tabIndex = tabIndex;
+    if (tabindex != undefined) {
+      shimDomElement.setAttribute('tabindex', tabindex);
     }
-  }, [shimDomElement, tabIndex]);
+  }, [shimDomElement, tabindex]);
 
   return <div children={children} />;
 }
@@ -262,6 +263,6 @@ BaseElement['props'] = {
   'multiple': {attr: 'multiple', type: 'boolean'},
   'name': {attr: 'name'},
   'role': {attr: 'role'},
-  'tabIndex': {attr: 'tabindex'},
+  'tabindex': {attr: 'tabindex'},
   'keyboardSelectMode': {attr: 'keyboard-select-mode', media: true},
 };

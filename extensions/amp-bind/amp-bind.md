@@ -227,6 +227,17 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 <amp-state id="myRemoteState" src="https://data.com/articles.json"> </amp-state>
 ```
 
+As an `amp-state` element stores a JSON object literal, you can also initialize
+it with an object, as above, or with a constant.
+
+```html
+<amp-state id="singleton">
+  <script type="application/json">
+    'I am a string'
+  </script>
+</amp-state>
+```
+
 [/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
@@ -532,7 +543,7 @@ Using `AMP.pushState()` sets the current state to the most recent pushed state.
 -   Only `amp-bind` [allowlisted functions](#allowlisted-functions) and operators are usable. are usable. Use of arrow functions are allowed as function parameters, e.g. `[1, 2, 3].map(x => x + 1)`.
     -   Custom functions, classes and loops are disallowed.
 -   Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
--   A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new/choose) if this is insufficient for your use case.
+-   A single expression is currently capped at 250 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new/choose) if this is insufficient for your use case.
 
 The following are all valid expressions:
 
