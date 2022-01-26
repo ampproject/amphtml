@@ -4,7 +4,6 @@ tags: {  # amp-story-subscriptions
   extension_spec: {
     name: "amp-story-subscriptions"
     version: "0.1"
-    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
