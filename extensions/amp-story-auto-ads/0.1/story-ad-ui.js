@@ -1,5 +1,6 @@
 import {createElementWithAttributes, iterateCursor} from '#core/dom';
 import {map} from '#core/types/object';
+import {getWin} from '#core/window';
 
 import {getExperimentBranch} from '#experiments';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
@@ -214,6 +215,12 @@ function createPageOutlink_(doc, uiMetadata, container) {
       );
     }
   }
+
+  Services.extensionsFor(getWin(doc)).installExtensionForDoc(
+    doc,
+    'amp-story-page-attachment',
+    '0.1'
+  );
 
   pageOutlink.className = 'i-amphtml-story-page-outlink-container';
 
