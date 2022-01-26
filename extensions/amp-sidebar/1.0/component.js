@@ -145,7 +145,7 @@ function BentoSidebarWithRef(
           [classes.right]: side !== Side.LEFT,
         })}
         role="menu"
-        tabIndex="-1"
+        tabindex="-1"
         hidden={!side}
         {...rest}
       >

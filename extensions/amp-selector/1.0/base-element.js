@@ -10,7 +10,7 @@ import {toArray} from '#core/types/array';
 import * as Preact from '#preact';
 import {useCallback, useLayoutEffect, useRef} from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
-import {propName} from '#preact/utils';
+import {tabindexFromProps} from '#preact/utils';
 
 import {BentoSelector, BentoSelectorOption} from './component';
 
@@ -86,7 +86,6 @@ function getOptions(element, mu) {
       const option = child.getAttribute('option') || index.toString();
       const selected = child.hasAttribute('selected');
       const disabled = child.hasAttribute('disabled');
-      const tabIndex = child.getAttribute('tabindex');
       const props = {
         as: OptionShim,
         option,
@@ -102,12 +101,16 @@ function getOptions(element, mu) {
           mu.takeRecords();
         },
         selected,
-        tabIndex,
       };
       if (selected) {
         value.push(option);
       }
-      const optionChild = <BentoSelectorOption {...props} />;
+      const optionChild = (
+        <BentoSelectorOption
+          {...props}
+          tabindex={child.getAttribute('tabindex')}
+        />
+      );
       options.push(option);
       children.push(optionChild);
     });
@@ -126,8 +129,9 @@ export function OptionShim({
   role = 'option',
   selected,
   shimDomElement,
-  [propName('tabIndex')]: tabIndex,
+  ...rest
 }) {
+  const tabindex = tabindexFromProps(rest);
   const syncEvent = useCallback(
     (type, handler) => {
       if (!handler) {
@@ -160,10 +164,10 @@ export function OptionShim({
   }, [shimDomElement, role]);
 
   useLayoutEffect(() => {
-    if (tabIndex != undefined) {
-      shimDomElement.tabIndex = tabIndex;
+    if (tabindex != undefined) {
+      shimDomElement.setAttribute('tabindex', tabindex);
     }
-  }, [shimDomElement, tabIndex]);
+  }, [shimDomElement, tabindex]);
 
   return <div></div>;
 }
@@ -182,8 +186,9 @@ function SelectorShim({
   role = 'listbox',
   shimDomElement,
   value,
-  [propName('tabIndex')]: tabIndex,
+  ...rest
 }) {
+  const tabindex = tabindexFromProps(rest);
   const input = useRef(null);
   if (!input.current) {
     input.current = createElementWithAttributes(
@@ -237,10 +242,10 @@ function SelectorShim({
   }, [shimDomElement, role]);
 
   useLayoutEffect(() => {
-    if (tabIndex != undefined) {
-      shimDomElement.tabIndex = tabIndex;
+    if (tabindex != undefined) {
+      shimDomElement.setAttribute('tabindex', tabindex);
     }
-  }, [shimDomElement, tabIndex]);
+  }, [shimDomElement, tabindex]);
 
   return <div children={children} />;
 }
@@ -258,6 +263,6 @@ BaseElement['props'] = {
   'multiple': {attr: 'multiple', type: 'boolean'},
   'name': {attr: 'name'},
   'role': {attr: 'role'},
-  'tabIndex': {attr: 'tabindex'},
+  'tabindex': {attr: 'tabindex'},
   'keyboardSelectMode': {attr: 'keyboard-select-mode', media: true},
 };

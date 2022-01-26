@@ -1083,6 +1083,13 @@
     }
   },
   {
+    "name": "amp-story-subscriptions",
+    "version": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-stream-gallery",
     "version": "0.1",
     "latestVersion": "0.1",
