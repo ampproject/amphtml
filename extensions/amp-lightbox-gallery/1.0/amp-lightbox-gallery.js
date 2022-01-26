@@ -5,8 +5,6 @@ import {
 import {createElementWithAttributes} from '#core/dom';
 import {elementByTag} from '#core/dom/query';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
@@ -67,16 +65,6 @@ class AmpLightboxGallery extends setSuperClass(
     } else {
       api.open();
     }
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-lightbox-gallery'),
-      'expected global "bento" or specific "bento-lightbox-gallery" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 
   /** @override */

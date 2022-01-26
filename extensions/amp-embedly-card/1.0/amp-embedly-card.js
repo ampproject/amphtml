@@ -1,7 +1,5 @@
 import {Layout_Enum} from '#core/dom/layout';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
@@ -27,11 +25,6 @@ class AmpEmbedlyCard extends setSuperClass(BaseElement, AmpPreactBaseElement) {
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-embedly-card'),
-      'expected global "bento" or specific "bento-embedly-card" experiment to be enabled'
-    );
     return layout == Layout_Enum.RESPONSIVE;
   }
 }

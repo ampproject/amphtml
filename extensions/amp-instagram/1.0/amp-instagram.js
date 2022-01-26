@@ -1,5 +1,3 @@
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
@@ -12,16 +10,6 @@ import {CSS} from '../../../build/amp-instagram-1.0.css';
 const TAG = 'amp-instagram';
 
 class AmpInstagram extends setSuperClass(BaseElement, AmpPreactBaseElement) {
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-instagram'),
-      'expected global "bento" or specific "bento-instagram" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
-  }
-
   /** @override */
   init() {
     return {

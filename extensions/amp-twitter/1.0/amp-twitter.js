@@ -1,8 +1,6 @@
 import {userAssert} from '#core/assert';
 import {htmlFor} from '#core/dom/static-template';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {BaseElement} from './base-element';
@@ -64,16 +62,6 @@ class AmpTwitter extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     return {
       'requestResize': (height) => this.attemptChangeHeight(height),
     };
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-twitter'),
-      'expected global "bento" or specific "bento-twitter" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 }
 

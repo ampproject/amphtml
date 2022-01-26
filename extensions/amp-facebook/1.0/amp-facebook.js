@@ -1,7 +1,5 @@
 import {dashToUnderline} from '#core/types/string';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
@@ -52,16 +50,6 @@ class AmpFacebookBase extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     return {
       'requestResize': (height) => this.attemptChangeHeight(height),
     };
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-facebook'),
-      'expected global "bento" or specific "bento-facebook" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 }
 

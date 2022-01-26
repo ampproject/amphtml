@@ -1,5 +1,3 @@
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service/';
@@ -53,11 +51,6 @@ class AmpSidebar extends setSuperClass(BaseElement, AmpPreactBaseElement) {
 
   /** @override */
   isLayoutSupported(unusedLayout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-sidebar'),
-      'expected global "bento" or specific "bento-sidbar" experiment to be enabled'
-    );
     return true;
   }
 

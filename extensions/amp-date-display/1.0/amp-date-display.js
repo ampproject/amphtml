@@ -1,5 +1,3 @@
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
@@ -21,16 +19,6 @@ class AmpDateDisplay extends setSuperClass(BaseElement, AmpPreactBaseElement) {
 
     /** @private {?Element} */
     this.template_ = null;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-date-display'),
-      'expected global "bento" or specific "bento-date-display" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 
   /** @override */

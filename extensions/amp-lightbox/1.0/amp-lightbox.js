@@ -4,8 +4,6 @@ import {
 } from '#core/constants/action-constants';
 import {getWin} from '#core/window';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
@@ -63,16 +61,6 @@ class AmpLightbox extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     );
 
     super.triggerEvent(element, eventName, detail);
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-lightbox'),
-      'expected global "bento" or specific "bento-lightbox" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 
   /** @override */

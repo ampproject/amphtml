@@ -4,8 +4,6 @@ import {toggle} from '#core/dom/style';
 import {parseQueryString} from '#core/types/string/url';
 import {getWin} from '#core/window';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
@@ -157,11 +155,6 @@ class AmpSocialShare extends setSuperClass(BaseElement, AmpPreactBaseElement) {
 
   /** @override */
   isLayoutSupported() {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-social-share'),
-      'expected global "bento" or specific "bento-social-share" experiment to be enabled'
-    );
     return true;
   }
 

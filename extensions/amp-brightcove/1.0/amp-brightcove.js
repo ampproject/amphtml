@@ -1,5 +1,3 @@
-import {isExperimentOn} from '#experiments';
-
 import {setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
@@ -53,16 +51,6 @@ class AmpBrightcove extends setSuperClass(BaseElement, AmpVideoBaseElement) {
       };
       this.mutateProps({'urlParams': urlParams});
     });
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-brightcove'),
-      'expected global "bento" or specific "bento-brightcove" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 }
 

@@ -1,7 +1,5 @@
 import {measureIntersection} from '#core/dom/layout/intersection';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
@@ -16,16 +14,6 @@ const MINIMUM_DISTANCE_FROM_TOP_PX = 600;
 const MINIMUM_VIEWPORT_PROPORTION = 0.75;
 
 class AmpIframe extends setSuperClass(BaseElement, AmpPreactBaseElement) {
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-iframe'),
-      'expected global "bento" or specific "bento-iframe" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
-  }
-
   /**
    * Callback for onload event of iframe. Checks if the component has a placeholder
    * element and hides it if it does. Also checks the position of the iframe on the

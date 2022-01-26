@@ -1,7 +1,5 @@
 import {BaseElement} from '#bento/components/jwplayer/1.0/base-element';
 
-import {isExperimentOn} from '#experiments';
-
 import {setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
@@ -49,16 +47,6 @@ class AmpJwplayer extends setSuperClass(BaseElement, AmpVideoBaseElement) {
       getConsentPolicyInfo(this.element, policy),
       getConsentMetadata(this.element, policy),
     ]);
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-jwplayer'),
-      'expected global "bento" or specific "bento-jwplayer" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 }
 

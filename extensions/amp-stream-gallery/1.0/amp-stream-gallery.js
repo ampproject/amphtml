@@ -1,8 +1,6 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {getWin} from '#core/window';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
@@ -35,16 +33,6 @@ class AmpStreamGallery extends setSuperClass(
     );
 
     return super.init();
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento-stream-gallery') ||
-        isExperimentOn(this.win, 'bento'),
-      'expected global "bento" or specific "bento-stream-gallery" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 
   /** @override */

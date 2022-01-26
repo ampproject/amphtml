@@ -1,5 +1,3 @@
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
@@ -25,16 +23,6 @@ class AmpMathml extends setSuperClass(BaseElement, AmpPreactBaseElement) {
       getBootstrapUrl(TYPE),
     ];
     return urls;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-mathml'),
-      'expected global "bento" or specific "bento-mathml" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 }
 

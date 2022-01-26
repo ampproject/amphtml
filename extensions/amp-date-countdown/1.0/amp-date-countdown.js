@@ -1,7 +1,5 @@
 import {isLayoutSizeDefined} from '#core/dom/layout';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
@@ -30,11 +28,6 @@ class AmpDateCountdown extends setSuperClass(
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-date-countdown'),
-      'expected global "bento" or specific "bento-date-countdown" experiment to be enabled'
-    );
     return isLayoutSizeDefined(layout);
   }
 

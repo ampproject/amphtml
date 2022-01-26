@@ -1,7 +1,5 @@
 import {measureIntersection} from '#core/dom/layout/intersection';
 
-import {isExperimentOn} from '#experiments';
-
 import {setSuperClass} from '#preact/amp-base-element';
 
 import {createCustomEvent} from '#utils/event-helper';
@@ -32,17 +30,7 @@ function getIntersectionRatioMinAutoplay(element) {
   );
 }
 
-class AmpVideoIframe extends setSuperClass(BaseElement, AmpVideoBaseElement) {
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-video-iframe'),
-      'expected global "bento" or specific "bento-video-iframe" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
-  }
-}
+class AmpVideoIframe extends setSuperClass(BaseElement, AmpVideoBaseElement) {}
 
 /**
  * @param {!MessageEvent} e

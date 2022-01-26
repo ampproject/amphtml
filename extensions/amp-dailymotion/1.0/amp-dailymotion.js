@@ -1,5 +1,3 @@
-import {isExperimentOn} from '#experiments';
-
 import {setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
@@ -32,16 +30,6 @@ class AmpDailymotion extends setSuperClass(BaseElement, AmpVideoBaseElement) {
       'sharingEnable': sharingEnable !== 'false',
       'uiLogo': uiLogo !== 'false',
     };
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-dailymotion'),
-      'expected global "bento" or specific "bento-dailymotion" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 }
 

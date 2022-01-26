@@ -1,8 +1,6 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {getWin} from '#core/window';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
@@ -69,11 +67,6 @@ class AmpSelector extends setSuperClass(BaseElement, AmpPreactBaseElement) {
 
   /** @override */
   isLayoutSupported(unusedLayout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-selector'),
-      'expected global "bento" or specific "bento-selector" experiment to be enabled'
-    );
     return true;
   }
 }

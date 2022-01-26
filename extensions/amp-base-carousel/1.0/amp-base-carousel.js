@@ -1,8 +1,6 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {getWin} from '#core/window';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
@@ -33,16 +31,6 @@ class AmpBaseCarousel extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     );
 
     return super.init();
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-carousel'),
-      'expected global "bento" or specific "bento-carousel" experiment to be enabled'
-    );
-    return super.isLayoutSupported(layout);
   }
 
   /** @override */

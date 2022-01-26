@@ -1,7 +1,5 @@
 import {Layout_Enum} from '#core/dom/layout';
 
-import {isExperimentOn} from '#experiments';
-
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
@@ -27,11 +25,6 @@ class AmpInlineGallery extends setSuperClass(
 ) {
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-inline-gallery'),
-      'expected global "bento" or specific "bento-inline-gallery" experiment to be enabled'
-    );
     return layout == Layout_Enum.CONTAINER;
   }
 }
