@@ -47,31 +47,38 @@ export function fetchCachedSources(
 
   Services.performanceFor(ampdoc.win).addEnabledExperiment('video-cache');
 
-  const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
-  maybeReplaceSrcWithSourceElement(videoEl, win);
-  const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
-  return getCacheUrlService(videoEl, ampdoc)
-    .then((service) => service.createCacheUrl(videoUrl))
-    .then((cacheUrl) => {
-      const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
-        'amp_video_host_url':
-          /* document url that contains the video */ canonicalUrl,
-        'amp_video_require_acao_header': videoEl.hasAttribute('crossorigin')
-          ? 1
-          : null,
-      });
-
-      if (shouldUseCachedVideoResponse(videoEl)) {
-        const cachedResponseEl = win.document.getElementById(
-          'amp-google-video-cache-response'
+  let jsonResponsePromise;
+  if (shouldUseInlineVideoResponse(videoEl)) {
+    const inlineResponseEl = win.document.getElementById(
+      'amp-google-video-cache-response'
+    );
+    const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
+    jsonResponsePromise = Promise.resolve(inlineResponseJson);
+  } else {
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
+    maybeReplaceSrcWithSourceElement(videoEl, win);
+    const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
+    jsonResponsePromise = getCacheUrlService(videoEl, ampdoc)
+      .then((service) => service.createCacheUrl(videoUrl))
+      .then((cacheUrl) => {
+        const requestUrl = addParamsToUrl(
+          cacheUrl.replace(/\/[ic]\//, '/mbv/'),
+          {
+            'amp_video_host_url':
+              /* document url that contains the video */ canonicalUrl,
+            'amp_video_require_acao_header': videoEl.hasAttribute('crossorigin')
+              ? 1
+              : null,
+          }
         );
-        const cachedResponseJson = JSON.parse(cachedResponseEl.textContent);
-        return cachedResponseJson;
-      }
-      return Services.xhrFor(win)
-        .fetch(requestUrl, {prerenderSafe: true})
-        .then((response) => response.json());
-    })
+        const responsePromise = Services.xhrFor(win).fetch(requestUrl, {
+          prerenderSafe: true,
+        });
+        jsonResponsePromise = responsePromise.json();
+      });
+  }
+
+  return jsonResponsePromise
     .then((jsonResponse) => {
       applySourcesToVideo(videoEl, jsonResponse['sources'], maxBitrate);
       applyAudioInfoToVideo(videoEl, jsonResponse['has_audio']);
@@ -226,12 +233,12 @@ function getCacheUrlService(videoEl, ampdoc) {
 }
 
 /**
- * Returns `true` if the video's cached response should be used instead of
+ * Returns `true` if the video's inline response should be used instead of
  * issuing an XHR request.
  * @param {!Element} videoEl
  * @return {boolean}
  */
-function shouldUseCachedVideoResponse(videoEl) {
+function shouldUseInlineVideoResponse(videoEl) {
   // Monti only inlines the first video of the first web story page.
   const isFirstVideoOnFirstStoryPage = matches(
     videoEl,
