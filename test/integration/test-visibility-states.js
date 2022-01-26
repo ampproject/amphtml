@@ -157,6 +157,7 @@ t.run('Viewer Visibility State', {}, () => {
               state: VisibilityState_Enum.PRERENDER,
             });
             await waitForNextPass();
+
             expect(layoutCallback).to.have.been.called;
             expect(unlayoutCallback).not.to.have.been.called;
             expect(pauseCallback).not.to.have.been.called;
@@ -168,6 +169,7 @@ t.run('Viewer Visibility State', {}, () => {
               state: VisibilityState_Enum.VISIBLE,
             });
             await waitForNextPass();
+
             expect(layoutCallback).to.have.been.called;
             expect(unlayoutCallback).not.to.have.been.called;
             expect(pauseCallback).not.to.have.been.called;
@@ -180,33 +182,34 @@ t.run('Viewer Visibility State', {}, () => {
             });
             changeVisibility('hidden');
             await waitForNextPass();
+
             expect(unlayoutCallback).not.to.have.been.called;
             expect(pauseCallback).not.to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
           });
 
-          it('does not call callbacks when going to INACTIVE', () => {
+          it('does not call callbacks when going to INACTIVE', async () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState_Enum.INACTIVE,
             });
-            return waitForNextPass().then(() => {
-              expect(layoutCallback).not.to.have.been.called;
-              expect(unlayoutCallback).not.to.have.been.called;
-              expect(pauseCallback).not.to.have.been.called;
-              expect(resumeCallback).not.to.have.been.called;
-            });
+            await waitForNextPass();
+
+            expect(layoutCallback).not.to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
           });
 
-          it('does not call callbacks when going to PAUSED', () => {
+          it('does not call callbacks when going to PAUSED', async () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState_Enum.PAUSED,
             });
-            return waitForNextPass().then(() => {
-              expect(layoutCallback).not.to.have.been.called;
-              expect(unlayoutCallback).not.to.have.been.called;
-              expect(pauseCallback).not.to.have.been.called;
-              expect(resumeCallback).not.to.have.been.called;
-            });
+            await waitForNextPass();
+
+            expect(layoutCallback).not.to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
           });
         });
 
@@ -215,66 +218,66 @@ t.run('Viewer Visibility State', {}, () => {
             setupSpys();
           });
 
-          it('does not call callbacks when going to PRERENDER', () => {
-            return waitForNextPass().then(() => {
-              expect(layoutCallback).not.to.have.been.called;
-              expect(unlayoutCallback).not.to.have.been.called;
-              expect(pauseCallback).not.to.have.been.called;
-              expect(resumeCallback).not.to.have.been.called;
-            });
+          it('does not call callbacks when going to PRERENDER', async () => {
+            await waitForNextPass();
+
+            expect(layoutCallback).not.to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
           });
 
-          it('calls layout when going to VISIBLE', () => {
+          it('calls layout when going to VISIBLE', async () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState_Enum.VISIBLE,
             });
-            return waitForNextPass().then(() => {
-              expect(layoutCallback).to.have.been.called;
-              expect(unlayoutCallback).not.to.have.been.called;
-              expect(pauseCallback).not.to.have.been.called;
-              expect(resumeCallback).not.to.have.been.called;
-            });
+            await waitForNextPass();
+
+            expect(layoutCallback).to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
           });
 
-          it('calls callbacks when going to HIDDEN', () => {
+          it('calls callbacks when going to HIDDEN', async () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState_Enum.VISIBLE,
             });
             changeVisibility('hidden');
-            return waitForNextPass().then(() => {
-              if (R1_IMG_DEFERRED_BUILD) {
-                expect(layoutCallback).to.have.been.called;
-              } else {
-                expect(layoutCallback).not.to.have.been.called;
-              }
-              expect(unlayoutCallback).not.to.have.been.called;
-              expect(pauseCallback).not.to.have.been.called;
-              expect(resumeCallback).not.to.have.been.called;
-            });
+            await waitForNextPass();
+
+            if (R1_IMG_DEFERRED_BUILD) {
+              expect(layoutCallback).to.have.been.called;
+            } else {
+              expect(layoutCallback).not.to.have.been.called;
+            }
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
           });
 
-          it('does not call callbacks when going to INACTIVE', () => {
+          it('does not call callbacks when going to INACTIVE', async () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState_Enum.INACTIVE,
             });
-            return waitForNextPass().then(() => {
-              expect(layoutCallback).not.to.have.been.called;
-              expect(unlayoutCallback).not.to.have.been.called;
-              expect(pauseCallback).not.to.have.been.called;
-              expect(resumeCallback).not.to.have.been.called;
-            });
+            await waitForNextPass();
+
+            expect(layoutCallback).not.to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
           });
 
-          it('does not call callbacks when going to PAUSED', () => {
+          it('does not call callbacks when going to PAUSED', async () => {
             viewer.receiveMessage('visibilitychange', {
               state: VisibilityState_Enum.PAUSED,
             });
-            return waitForNextPass().then(() => {
-              expect(layoutCallback).not.to.have.been.called;
-              expect(unlayoutCallback).not.to.have.been.called;
-              expect(pauseCallback).not.to.have.been.called;
-              expect(resumeCallback).not.to.have.been.called;
-            });
+            await waitForNextPass();
+
+            expect(layoutCallback).not.to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
           });
         });
       });
@@ -287,46 +290,46 @@ t.run('Viewer Visibility State', {}, () => {
           return waitForNextPass().then(setupSpys);
         });
 
-        it('does not call callbacks when going to VISIBLE', () => {
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+        it('does not call callbacks when going to VISIBLE', async () => {
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).not.to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
 
-        it('does not call callbacks when going to HIDDEN', () => {
+        it('does not call callbacks when going to HIDDEN', async () => {
           changeVisibility('hidden');
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).not.to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
 
-        it('calls unload when going to INACTIVE', () => {
+        it('calls unload when going to INACTIVE', async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.INACTIVE,
           });
-          return waitForNextPass().then(() => {
-            expect(unlayoutCallback).to.have.been.called;
-            expect(pauseCallback).to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(unlayoutCallback).to.have.been.called;
+          expect(pauseCallback).to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
 
-        it('calls pause when going to PAUSED', () => {
+        it('calls pause when going to PAUSED', async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.PAUSED,
           });
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
       });
 
@@ -343,48 +346,48 @@ t.run('Viewer Visibility State', {}, () => {
             .then(setupSpys);
         });
 
-        it('does not call callbacks going to VISIBLE', () => {
+        it('does not call callbacks going to VISIBLE', async () => {
           changeVisibility('visible');
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).not.to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
 
-        it('does not call callbacks when going to HIDDEN', () => {
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+        it('does not call callbacks when going to HIDDEN', async () => {
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).not.to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
 
-        it('calls unload when going to INACTIVE', () => {
+        it('calls unload when going to INACTIVE', async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.INACTIVE,
           });
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).to.have.been.called;
-            expect(pauseCallback).to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).to.have.been.called;
+          expect(pauseCallback).to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
 
-        it('calls pause when going to PAUSED', () => {
+        it('calls pause when going to PAUSED', async () => {
           changeVisibility('visible');
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.PAUSED,
           });
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
       });
 
@@ -403,45 +406,45 @@ t.run('Viewer Visibility State', {}, () => {
             .then(setupSpys);
         });
 
-        it('calls layout and resume when going to VISIBLE', () => {
+        it('calls layout and resume when going to VISIBLE', async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.VISIBLE,
           });
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(layoutCallback).to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).not.to.have.been.called;
+          expect(resumeCallback).to.have.been.called;
         });
 
-        it('calls resume when going to HIDDEN', () => {
+        it('calls resume when going to HIDDEN', async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.VISIBLE,
           });
           changeVisibility('hidden');
-          return waitForNextPass().then(() => {
-            if (R1_IMG_DEFERRED_BUILD) {
-              expect(layoutCallback).to.have.been.called;
-            } else {
-              expect(layoutCallback).not.to.have.been.called;
-            }
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).to.have.been.called;
-          });
+          await waitForNextPass();
+
+          if (R1_IMG_DEFERRED_BUILD) {
+            expect(layoutCallback).to.have.been.called;
+          } else {
+            expect(layoutCallback).not.to.have.been.called;
+          }
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).not.to.have.been.called;
+          expect(resumeCallback).to.have.been.called;
         });
 
-        it('does not call callbacks when going to PAUSED', () => {
+        it('does not call callbacks when going to PAUSED', async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.PAUSED,
           });
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).not.to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
       });
 
@@ -460,47 +463,47 @@ t.run('Viewer Visibility State', {}, () => {
             .then(setupSpys);
         });
 
-        it('calls resume when going to VISIBLE', () => {
+        it('calls resume when going to VISIBLE', async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.VISIBLE,
           });
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).not.to.have.been.called;
+          expect(resumeCallback).to.have.been.called;
         });
 
-        it('calls unlayout when going to HIDDEN', () => {
+        it('calls unlayout when going to HIDDEN', async () => {
           changeVisibility('hidden');
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).not.to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
 
-        it('calls unlayout when going to INACTIVE', () => {
+        it('calls unlayout when going to INACTIVE', async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.INACTIVE,
           });
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).to.have.been.called;
-            expect(pauseCallback).to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).to.have.been.called;
+          expect(pauseCallback).to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
 
-        it('does not call callbacks when going to PAUSED', () => {
-          return waitForNextPass().then(() => {
-            expect(layoutCallback).not.to.have.been.called;
-            expect(unlayoutCallback).not.to.have.been.called;
-            expect(pauseCallback).not.to.have.been.called;
-            expect(resumeCallback).not.to.have.been.called;
-          });
+        it('does not call callbacks when going to PAUSED', async () => {
+          await waitForNextPass();
+
+          expect(layoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
+          expect(pauseCallback).not.to.have.been.called;
+          expect(resumeCallback).not.to.have.been.called;
         });
       });
     }
