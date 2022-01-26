@@ -283,7 +283,7 @@ function CloseButtonIcon({onClick}) {
       })}
       onClick={onClick}
       role="button"
-      tabIndex="0"
+      tabindex="0"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -315,7 +315,7 @@ function NavButtonIcon({'aria-disabled': ariaDisabled, by, disabled, onClick}) {
       disabled={disabled}
       onClick={onClick}
       role="button"
-      tabIndex="0"
+      tabindex="0"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -348,7 +348,7 @@ function ToggleViewIcon({onClick, showCarousel}) {
       })}
       onClick={onClick}
       role="button"
-      tabIndex="0"
+      tabindex="0"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -394,7 +394,7 @@ function Thumbnail({onClick, render}) {
       class={classes.thumbnail}
       onClick={onClick}
       role="button"
-      tabIndex="0"
+      tabindex="0"
     >
       {render()}
     </div>

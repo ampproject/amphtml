@@ -311,7 +311,7 @@ function BentoBaseCarouselWithRef(
         }
         interaction.current = Interaction.TOUCH;
       }}
-      tabIndex="0"
+      tabindex="0"
       wrapperClassName={classes.carousel}
       contentRef={contentRef}
       {...rest}

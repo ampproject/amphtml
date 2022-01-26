@@ -59,3 +59,18 @@ export function useMergeRefs(refs) {
 export function propName(name) {
   return name;
 }
+
+/**
+ * Required to consume `tabindex` from props.
+ * We support taking both `tabIndex` and `tabindex` for backwards compatibility,
+ * so this takes either form.
+ * @param {{tabindex: string|number, tabIndex: string|number}} props
+ * @param {number=} fallback
+ * @return {string|number}
+ */
+export function tabindexFromProps(props, fallback = 0) {
+  // This tabindex property access is okay. Tabindex property access elsewhere
+  //  must use this function.
+  // eslint-disable-next-line local/preact-preferred-props
+  return props.tabindex ?? props.tabIndex ?? fallback;
+}
