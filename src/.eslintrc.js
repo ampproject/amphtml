@@ -54,6 +54,7 @@ module.exports = {
       'files': [
         './polyfills/custom-elements.extern.js',
         './experiments/shame.extern.js',
+        './bento/components/**/*.js',
       ],
       'rules': {'local/no-global': 0},
     },

@@ -50,10 +50,10 @@ html > body div#pagewrap ul#summer-drinks > li.favorite
 #summer-drinks::after
 ```
 
-A selector can contain a class, id, pseudo elements, psuedo classes , :not(), and a combination
+A selector can contain a class, id, pseudo elements, pseudo classes, :not(), and a combination
 of any of these and many more. For a comprehensive list of all CSS selectors, see https://developer.mozilla.org/en-US/docs/Web/CSS/Reference#Selectors.
 
-In general, the order of the CSS selectors do not affect which rules get applied to your CSS,
+In general, the order of the CSS selectors does not affect which rules get applied to your CSS,
 unless the selectors have the same specificity and apply to at least one element in common.
 Well-written CSS will work perfectly fine even when the selectors are re-ordered (for example, when reordering imports in a css file). In the real world, it's hard to achieve this, especially
 when we import third-party CSS (which can change at any time).
@@ -81,7 +81,7 @@ To compute specificity, use this online calculator: https://specificity.keegan.s
 
 ### Modifying an existing Selector
 
-This is a bit more tricky than creating a new selector (with completely new properties).
+This is a bit trickier than creating a new selector (with completely new properties).
 
 AMP is a versioned library that a lot of websites use. You might ask yourself, "But I am only changing CSS, how can
 this break AMP?". Well, you can! All it takes to break backwards compatibility is replacing a selector with another

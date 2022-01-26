@@ -1,3 +1,5 @@
+import {defineBentoElement} from '#preact/bento-ce';
+
 import {
   BaseElement,
   COMMENTS_TAG,
@@ -13,7 +15,7 @@ import {
  *Register BentoFacebook component to CustomElements registry
  */
 export function defineElement() {
-  customElements.define(TAG, BaseElement.CustomElement(BaseElement));
+  defineBentoElement(TAG, BaseElement);
 
   defineCommentsElement();
   defineLikeElement();
@@ -24,28 +26,19 @@ export function defineElement() {
  * Register BentoFacebookComments component to CustomElements registry
  */
 export function defineCommentsElement() {
-  customElements.define(
-    COMMENTS_TAG,
-    CommentsBaseElement.CustomElement(CommentsBaseElement)
-  );
+  defineBentoElement(COMMENTS_TAG, CommentsBaseElement);
 }
 
 /**
  * Register BentoFacebook component to CustomElements registry
  */
 export function defineLikeElement() {
-  customElements.define(
-    LIKE_TAG,
-    LikeBaseElement.CustomElement(LikeBaseElement)
-  );
+  defineBentoElement(LIKE_TAG, LikeBaseElement);
 }
 
 /**
  * Register BentoFacebook component to CustomElements registry
  */
 export function definePageElement() {
-  customElements.define(
-    PAGE_TAG,
-    PageBaseElement.CustomElement(PageBaseElement)
-  );
+  defineBentoElement(PAGE_TAG, PageBaseElement);
 }

@@ -2,6 +2,8 @@ import {Layout_Enum} from '#core/dom/layout';
 import {computedStyle, setStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {dev, user, userAssert} from '#utils/log';
@@ -116,7 +118,10 @@ function getTemplateNonEmptyNodeCount(doc, template) {
   );
 }
 
-export class AmpRender extends BaseElement {
+export class AmpRender extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

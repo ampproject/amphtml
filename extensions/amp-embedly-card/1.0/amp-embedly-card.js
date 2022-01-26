@@ -2,6 +2,8 @@ import {Layout_Enum} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {userAssert} from '#utils/log';
 
 import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
@@ -10,7 +12,7 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-embedly-card';
 
-class AmpEmbedlyCard extends BaseElement {
+class AmpEmbedlyCard extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     return {

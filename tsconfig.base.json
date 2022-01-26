@@ -16,6 +16,7 @@
       "#ads/*": ["./ads/*"],
       "#build/*": ["./build/*"],
 
+      "#bento/*": ["./src/bento/*"],
       "#builtins/*": ["./src/builtins/*"],
       "#compiler": ["./src/compiler"],
       "#compiler/*": ["./src/compiler/*"],
