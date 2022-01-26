@@ -7,6 +7,7 @@ import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 import {Services} from '#service';
 
 import {dev, user} from '#utils/log';
+import {getAmpdoc} from 'src/service-helpers';
 
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
@@ -218,7 +219,7 @@ function createPageOutlink_(doc, uiMetadata, container) {
   }
 
   Services.extensionsFor(getWin(doc)).installExtensionForDoc(
-    doc,
+    getAmpdoc(doc),
     'amp-story-page-attachment',
     '0.1'
   );
