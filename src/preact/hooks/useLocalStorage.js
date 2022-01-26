@@ -1,4 +1,5 @@
 import {useCallback, useState} from '#preact';
+import {logger} from '#preact/logger';
 
 /**
  * @param {string} key
@@ -23,7 +24,12 @@ export function useLocalStorage(key, defaultValue = null) {
         const json = JSON.stringify(newValue);
         self.localStorage?.setItem(key, json);
       } catch (err) {
-        // warning: could not write to local storage
+        logger.warn(
+          'useLocalStorage',
+          'Could not write value to local storage',
+          key,
+          err
+        );
       }
       setValue(newValue);
     },
