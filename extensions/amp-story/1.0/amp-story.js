@@ -1370,18 +1370,16 @@ export class AmpStory extends AMP.BaseElement {
     ];
 
     return new Promise((resolve) => {
-      targetPage.beforeVisible().then(() => {
-        // Recursively executes one step per frame.
-        const unqueueStepInRAF = () => {
-          steps.shift().call(this);
-          if (!steps.length) {
-            return resolve();
-          }
-          this.win.requestAnimationFrame(() => unqueueStepInRAF());
-        };
+      // Recursively executes one step per frame.
+      const unqueueStepInRAF = () => {
+        steps.shift().call(this);
+        if (!steps.length) {
+          return resolve();
+        }
+        this.win.requestAnimationFrame(() => unqueueStepInRAF());
+      };
 
-        unqueueStepInRAF();
-      });
+      unqueueStepInRAF();
     });
   }
 

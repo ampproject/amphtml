@@ -72,9 +72,10 @@ export function fetchCachedSources(
         .fetch(requestUrl, {prerenderSafe: true})
         .then((response) => response.json());
     })
-    .then((jsonResponse) =>
-      applySourcesToVideo(videoEl, jsonResponse['sources'], maxBitrate)
-    )
+    .then((jsonResponse) => {
+      applySourcesToVideo(videoEl, jsonResponse['sources'], maxBitrate);
+      applyAudioInfoToVideo(videoEl, jsonResponse['has_audio']);
+    })
     .catch(() => {
       // If cache fails, video should still load properly.
     });
@@ -169,6 +170,16 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
       );
       videoEl.insertBefore(sourceEl, videoEl.firstChild);
     });
+}
+
+/**
+ * @param {!Element} videoEl
+ * @param {boolean|undefined} hasAudio
+ */
+function applyAudioInfoToVideo(videoEl, hasAudio) {
+  if (hasAudio === false) {
+    videoEl.setAttribute('noaudio', '');
+  }
 }
 
 /**

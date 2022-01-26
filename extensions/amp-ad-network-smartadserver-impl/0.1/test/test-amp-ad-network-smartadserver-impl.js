@@ -181,7 +181,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=appnexus&hb_cpm=1.7&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=111&pgid=121&fmtid=222&tag=sas_222&out=amp-hb&hb_bid=appnexus&hb_cpm=1.7&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&hb_width=300&hb_height=250&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
           );
         });
     });
@@ -217,7 +217,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.4&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.4&hb_ccy=USD&hb_cache_id=0cb22b3e-aa2d-4936-9039-0ec93ff67de5&hb_cache_host=prebid.ams1.adnxs-simple.com&hb_cache_path=%2Fpbc%2Fv1%2Fcache&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
           );
         });
     });
@@ -249,7 +249,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve(rtcResponseArray))
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.8&hb_ccy=USD&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=11&fmtid=23&tag=sas_23&out=amp-hb&hb_cpm=0.8&hb_ccy=USD&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
           );
         });
     });
@@ -272,7 +272,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, Promise.resolve())
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/ww7\.smartadserver\.com\/ac\?siteid=1&fmtid=33&tag=sas_33&out=amp-hb&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
+            /^https:\/\/ww7\.smartadserver\.com\/ac\?siteid=1&fmtid=33&tag=sas_33&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
           );
         });
     });
@@ -291,7 +291,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, null)
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.-]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=2&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
           );
         });
     });
