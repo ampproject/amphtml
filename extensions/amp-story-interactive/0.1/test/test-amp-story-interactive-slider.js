@@ -29,6 +29,10 @@ describes.realWin(
       const ampStorySliderEl = win.document.createElement(
         'amp-story-interactive-slider'
       );
+
+      ampStorySliderEl.getAmpDoc = () => new AmpDocSingle(win);
+      ampStorySliderEl.getResources = () => win.__AMP_SERVICES.resources.obj;
+
       ampStorySlider = new AmpStoryInteractiveSlider(ampStorySliderEl);
 
       env.sandbox
@@ -45,8 +49,6 @@ describes.realWin(
       win.document.body.appendChild(storyEl);
       ampStorySlider = new AmpStoryInteractiveSlider(ampStorySliderEl);
 
-      ampStorySliderEl.getAmpDoc = () => new AmpDocSingle(win);
-      ampStorySliderEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       const xhr = Services.xhrFor(env.win);
       xhrMock = env.sandbox.mock(xhr);
       xhrMock.expects('fetchJson').resolves({
