@@ -2,6 +2,8 @@ import {expect} from 'chai';
 
 import {Services} from '#service';
 
+import * as analyticsApi from '#utils/analytics';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpStoryShare} from '../amp-story-share';
 import {
@@ -9,8 +11,7 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../amp-story-store-service';
-import {getAnalyticsService, StoryAnalyticsEvent} from '../story-analytics';
-import * as analyticsApi from '#utils/analytics';
+import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 
 describes.realWin('amp-story-share', {amp: true}, (env) => {
   let ampStoryShare;
