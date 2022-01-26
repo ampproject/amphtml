@@ -166,6 +166,7 @@ export class MediaPool {
      * @private {?AudioContext}
      */
     this.audioContext_ = null;
+
     /**
      * Maps a media element's ID to its audio source.
      * @private @const {!Object<string, !MediaElementAudioSourceNode>}

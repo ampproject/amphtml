@@ -34,13 +34,13 @@
     </amp-story-page>
     <amp-story-page id="2" background-audio="path/to/my.mp3" auto-advance-after="any-value">
       <amp-story-grid-layer template="horizontal">
-        <!-- This should fail because amp-video volume should be within [0, 1]. -->
+        <!-- This should fail because amp-video volume should be within [0.1, 1]. -->
         <amp-video width="480"
                    height="270"
                    poster="/foo.jpg"
                    src="/video/tokyo.mp4"
                    layout="responsive"
-                   volume="1.5">
+                   volume="0">
              <div fallback>
                <p>Your browser doesn't support HTML5 video.</p>
              </div>
@@ -51,13 +51,13 @@
     </amp-story-page>
     <amp-story-page id="3" background-audio="path/to/my.mp3" auto-advance-after="any-value">
       <amp-story-grid-layer template="horizontal">
-        <!-- This should fail because amp-video volume should be within [0, 1]. -->
+        <!-- This should fail because amp-video volume should be within [0.1, 1]. -->
         <amp-video width="480"
                    height="270"
                    poster="/foo.jpg"
                    src="/video/tokyo.mp4"
                    layout="responsive"
-                   volume="-0.5">
+                   volume="1.01">
              <div fallback>
                <p>Your browser doesn't support HTML5 video.</p>
              </div>

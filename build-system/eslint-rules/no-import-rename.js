@@ -31,6 +31,7 @@ const imports = {
   ],
   '#experiments': ['isExperimentOn'],
   '#utils/log': ['user', 'dev'],
+  '#preact/utils': ['propName', 'tabindexFromProps'],
   'src/mode': ['getMode'],
 };
 
