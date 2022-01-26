@@ -708,7 +708,10 @@ export class AmpDoc {
    * @return {boolean}
    */
   isVisible() {
-    return this.visibilityState_ == VisibilityState_Enum.VISIBLE;
+    return (
+      this.visibilityState_ == VisibilityState_Enum.VISIBLE ||
+      this.visibilityState_ == VisibilityState_Enum.PREVIEW
+    );
   }
 
   /**

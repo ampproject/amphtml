@@ -1641,6 +1641,7 @@ export class ResourcesImpl {
       INACTIVE: inactive,
       PAUSED: paused,
       PRERENDER: prerender,
+      PREVIEW: preview,
       VISIBLE: visible,
     } = VisibilityState_Enum;
     const doWork = () => {
@@ -1689,10 +1690,17 @@ export class ResourcesImpl {
     };
 
     vsm.addTransition(prerender, prerender, doWork);
+    vsm.addTransition(prerender, preview, doWork);
     vsm.addTransition(prerender, visible, doWork);
     vsm.addTransition(prerender, hidden, doWork);
     vsm.addTransition(prerender, inactive, doWork);
     vsm.addTransition(prerender, paused, doWork);
+
+    vsm.addTransition(preview, preview, doWork);
+    vsm.addTransition(preview, visible, doWork);
+    vsm.addTransition(preview, hidden, doWork);
+    vsm.addTransition(preview, inactive, doWork);
+    vsm.addTransition(preview, paused, doWork);
 
     vsm.addTransition(visible, visible, doWork);
     vsm.addTransition(visible, hidden, doWork);
