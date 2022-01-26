@@ -149,9 +149,6 @@ t.run('Viewer Visibility State', {}, () => {
         unlayoutCallback.returns(true);
       });
 
-      // TODO(#37129): Add tests for transitions into (and, eventually, out of)
-      // PREVIEW state. Blocked on updates in `ampdoc-impl.js` (see TODO in that
-      // file).
       describe('from in the PRERENDER state', () => {
         describe('for prerenderable element', () => {
           beforeEach(() => {
@@ -162,6 +159,17 @@ t.run('Viewer Visibility State', {}, () => {
           it('does layout when going to PRERENDER', async () => {
             changeViewerVisibilityState(VisibilityState_Enum.PAUSED);
             changeViewerVisibilityState(VisibilityState_Enum.PRERENDER);
+            await waitForNextPass();
+
+            expect(layoutCallback).to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
+          });
+
+          it('calls layout when going to PREVIEW', async () => {
+            previewAllowed.returns(true);
+            changeViewerVisibilityState(VisibilityState_Enum.PREVIEW);
             await waitForNextPass();
 
             expect(layoutCallback).to.have.been.called;
@@ -220,6 +228,17 @@ t.run('Viewer Visibility State', {}, () => {
             await waitForNextPass();
 
             expect(layoutCallback).not.to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
+          });
+
+          it('calls layout when going to PREVIEW', async () => {
+            previewAllowed.returns(true);
+            changeViewerVisibilityState(VisibilityState_Enum.PREVIEW);
+            await waitForNextPass();
+
+            expect(layoutCallback).to.have.been.called;
             expect(unlayoutCallback).not.to.have.been.called;
             expect(pauseCallback).not.to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
