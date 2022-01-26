@@ -19,7 +19,6 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
   let storeService;
   let win;
   let installExtensionForDoc;
-  let analytics;
   let analyticsTriggerStub;
 
   beforeEach(() => {
@@ -47,7 +46,7 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
     ampStory = win.document.createElement('amp-story');
     win.document.body.appendChild(ampStory);
     ampStoryShare = new AmpStoryShare(win, ampStory);
-    analytics = getAnalyticsService(win, ampStory);
+    getAnalyticsService(win, ampStory);
   });
 
   it('should build the sharing menu if native sharing is unsupported', () => {
@@ -95,7 +94,7 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
     });
   });
 
-  it.only('should send correct analytics tagName and eventType when opening the share menu', () => {
+  it('should send correct analytics tagName and eventType when opening the share menu', () => {
     analyticsTriggerStub = env.sandbox.stub(
       analyticsApi,
       'triggerAnalyticsEvent'
