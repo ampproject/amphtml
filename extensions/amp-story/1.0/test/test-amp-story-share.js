@@ -103,6 +103,7 @@ describes.realWin('amp-story-share', {amp: true}, (env) => {
 
     storeService.dispatch(Action.TOGGLE_SHARE_MENU, true);
 
+    // tagName should be amp-story-share-menu as per extensions/amp-story/amp-story-analytics.md
     expect(analyticsTriggerStub).to.be.calledWith(
       ampStory,
       StoryAnalyticsEvent.OPEN,
