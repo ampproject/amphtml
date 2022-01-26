@@ -283,11 +283,12 @@ t.run('Viewer Visibility State', {}, () => {
       });
 
       describe('from in the VISIBLE state', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.VISIBLE,
           });
-          return waitForNextPass().then(setupSpys);
+          await waitForNextPass();
+          setupSpys();
         });
 
         it('does not call callbacks when going to VISIBLE', async () => {
@@ -334,16 +335,14 @@ t.run('Viewer Visibility State', {}, () => {
       });
 
       describe('from in the HIDDEN state', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.VISIBLE,
           });
-          return waitForNextPass()
-            .then(() => {
-              changeVisibility('hidden');
-              return waitForNextPass();
-            })
-            .then(setupSpys);
+          await waitForNextPass();
+          changeVisibility('hidden');
+          await waitForNextPass();
+          setupSpys();
         });
 
         it('does not call callbacks going to VISIBLE', async () => {
@@ -392,18 +391,16 @@ t.run('Viewer Visibility State', {}, () => {
       });
 
       describe('from in the INACTIVE state', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.VISIBLE,
           });
-          return waitForNextPass()
-            .then(() => {
-              viewer.receiveMessage('visibilitychange', {
-                state: VisibilityState_Enum.INACTIVE,
-              });
-              return waitForNextPass();
-            })
-            .then(setupSpys);
+          await waitForNextPass();
+          viewer.receiveMessage('visibilitychange', {
+            state: VisibilityState_Enum.INACTIVE,
+          });
+          await waitForNextPass();
+          setupSpys();
         });
 
         it('calls layout and resume when going to VISIBLE', async () => {
@@ -449,18 +446,16 @@ t.run('Viewer Visibility State', {}, () => {
       });
 
       describe('from in the PAUSED state', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           viewer.receiveMessage('visibilitychange', {
             state: VisibilityState_Enum.VISIBLE,
           });
-          return waitForNextPass()
-            .then(() => {
-              viewer.receiveMessage('visibilitychange', {
-                state: VisibilityState_Enum.PAUSED,
-              });
-              return waitForNextPass();
-            })
-            .then(setupSpys);
+          await waitForNextPass();
+          viewer.receiveMessage('visibilitychange', {
+            state: VisibilityState_Enum.PAUSED,
+          });
+          await waitForNextPass();
+          setupSpys();
         });
 
         it('calls resume when going to VISIBLE', async () => {
