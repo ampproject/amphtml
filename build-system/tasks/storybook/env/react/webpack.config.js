@@ -5,6 +5,9 @@ const {
   getRelativeAliasMap,
 } = require('../../../../babel-config/import-resolver');
 const {existsSync} = require('fs-extra');
+const {
+  mergeReactBabelConfig,
+} = require('../../../../babel-config/react-config');
 
 const rootDir = path.join(__dirname, '../../../../..');
 
@@ -82,7 +85,7 @@ module.exports = ({config}) => {
         test: /\.jsx?$/,
         loader: 'babel-loader',
         exclude: /node_modules/,
-        query: {
+        query: mergeReactBabelConfig({
           presets: [
             [
               '@babel/preset-env',
@@ -93,7 +96,7 @@ module.exports = ({config}) => {
             ],
             ['@babel/preset-react', {'runtime': 'automatic'}],
           ],
-        },
+        }),
       },
       {
         test: /\.css$/i,
