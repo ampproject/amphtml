@@ -270,6 +270,7 @@ t.run('Viewer Visibility State', {}, () => {
         beforeEach(async () => {
           changeViewerVisibilityState(VisibilityState_Enum.VISIBLE);
           await waitForNextPass();
+
           setupSpys();
         });
 
@@ -316,8 +317,10 @@ t.run('Viewer Visibility State', {}, () => {
         beforeEach(async () => {
           changeViewerVisibilityState(VisibilityState_Enum.VISIBLE);
           await waitForNextPass();
+
           changeVisibility('hidden');
           await waitForNextPass();
+
           setupSpys();
         });
 
@@ -366,8 +369,10 @@ t.run('Viewer Visibility State', {}, () => {
         beforeEach(async () => {
           changeViewerVisibilityState(VisibilityState_Enum.VISIBLE);
           await waitForNextPass();
+
           changeViewerVisibilityState(VisibilityState_Enum.INACTIVE);
           await waitForNextPass();
+
           setupSpys();
         });
 
@@ -411,8 +416,10 @@ t.run('Viewer Visibility State', {}, () => {
         beforeEach(async () => {
           changeViewerVisibilityState(VisibilityState_Enum.VISIBLE);
           await waitForNextPass();
+
           changeViewerVisibilityState(VisibilityState_Enum.PAUSED);
           await waitForNextPass();
+
           setupSpys();
         });
 
