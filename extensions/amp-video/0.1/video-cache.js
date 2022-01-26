@@ -74,7 +74,7 @@ export function fetchCachedSources(
         const responsePromise = Services.xhrFor(win).fetch(requestUrl, {
           prerenderSafe: true,
         });
-        jsonResponsePromise = responsePromise.json();
+        return responsePromise.json();
       });
   }
 
