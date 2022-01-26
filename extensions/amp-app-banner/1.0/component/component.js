@@ -4,9 +4,8 @@ import * as Preact from '#preact';
 import {useEffect, useMemo, useRef} from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {useLocalStorage} from '#preact/hooks/useLocalStorage';
+import {logger} from '#preact/utils/logger';
 import {platformUtils} from '#preact/utils/platform';
-
-import {user, userAssert} from '#utils/log';
 
 import {getAndroidAppInfo} from './android';
 import {useStyles} from './component.jss';
@@ -28,6 +27,7 @@ export function AppBanner({
   const styles = useStyles();
 
   const bannerRef = useRef(null);
+
   useEffect(() => {
     // We expect the children to include an open-button, like: <button open-button>Install App</button>
     let button = bannerRef.current.querySelector('button[open-button]');
@@ -41,9 +41,9 @@ export function AppBanner({
     }
 
     if (!button) {
-      user().error(
+      logger.error(
         'BENTO-APP-BANNER',
-        'bento-app-banner should contain a <button open-button> child'
+        'Component children should contain a <button open-button>'
       );
       return;
     }
@@ -100,6 +100,9 @@ function AppBannerAndroid(props) {
  * @return {PreactDef.Renderable}
  */
 export function BentoAppBanner(props) {
+  if (!props.id) {
+    logger.warn('BENTO-APP-BANNER', 'component should have an id');
+  }
   const [isDismissed, setDismissed] = useLocalStorage(
     getStorageKey(props.id),
     false
@@ -115,6 +118,11 @@ export function BentoAppBanner(props) {
     : null;
 
   if (!AppBannerForCurrentPlatform) {
+    logger.info(
+      'BENTO-APP-BANNER',
+      'Component not rendered:',
+      'OS not supported'
+    );
     return null;
   }
 
@@ -131,6 +139,5 @@ export function BentoAppBanner(props) {
  * @return {string}
  */
 function getStorageKey(id) {
-  userAssert(id, 'bento-app-banner should have an id.');
   return 'bento-app-banner:' + id;
 }

@@ -1,11 +1,10 @@
 import {WindowInterface} from '#core/window/interface';
 
 import {docInfo} from '#preact/utils/docInfo';
+import {logger} from '#preact/utils/logger';
 import {platformUtils} from '#preact/utils/platform';
 import {urlUtils} from '#preact/utils/url';
 import {xhrUtils} from '#preact/utils/xhr';
-
-import {user} from '#utils/log';
 
 import {openWindowDialog} from '../../../../src/open-window-dialog';
 
@@ -20,9 +19,10 @@ export function getAndroidAppInfo() {
     platformUtils.isAndroid() && platformUtils.isChrome();
 
   if (canShowBuiltinBanner) {
-    user().info(
+    logger.info(
       'BENTO-APP-BANNER',
-      'Browser supports builtin banners. Not rendering amp-app-banner.'
+      'Not rendering bento-app-banner:',
+      'Browser supports builtin banners.'
     );
     return null;
   }
@@ -65,18 +65,20 @@ export function getAndroidAppInfo() {
 function parseManifest(manifestJson) {
   const apps = manifestJson['related_applications'];
   if (!apps) {
-    user().warn(
+    logger.error(
       'BENTO-APP-BANNER',
-      'related_applications is missing from manifest.json file: %s'
+      'Invalid manifest:',
+      'related_applications is missing from manifest.json file'
     );
     return null;
   }
 
   const playApp = apps.find((a) => a['platform'] === 'play');
   if (!playApp) {
-    user().warn(
+    logger.error(
       'BENTO-APP-BANNER',
-      'Could not find a platform=play app in manifest: %s'
+      'Invalid manifest:',
+      'Could not find a platform=play app in manifest'
     );
     return null;
   }
