@@ -87,7 +87,7 @@ t.run('Viewer Visibility State', {}, () => {
         resumeCallback.reset();
       }
 
-      beforeEach(() => {
+      beforeEach(async () => {
         win = env.win;
         notifyPass = noop;
         shouldPass = false;
@@ -96,57 +96,50 @@ t.run('Viewer Visibility State', {}, () => {
         env.sandbox.stub(vsync, 'mutate').callsFake((mutator) => {
           mutator();
         });
+        viewer = await Services.viewerPromiseForDoc(win.document);
 
-        return Services.viewerPromiseForDoc(win.document)
-          .then((v) => {
-            viewer = v;
+        docHidden = env.sandbox.stub(win.document, 'hidden').value(false);
+        if ('visibilityState' in win.document) {
+          docVisibilityState = env.sandbox
+            .stub(win.document, 'visibilityState')
+            .value('visible');
+        }
 
-            docHidden = env.sandbox.stub(win.document, 'hidden').value(false);
-            if ('visibilityState' in win.document) {
-              docVisibilityState = env.sandbox
-                .stub(win.document, 'visibilityState')
-                .value('visible');
-            }
+        resources = Services.resourcesForDoc(win.document);
+        doPass_ = resources.doPass;
+        env.sandbox.stub(resources, 'doPass').callsFake(doPass);
 
-            resources = Services.resourcesForDoc(win.document);
-            doPass_ = resources.doPass;
-            env.sandbox.stub(resources, 'doPass').callsFake(doPass);
+        const ampImg = win.document.createElement('amp-img');
+        ampImg.setAttribute('width', 100);
+        ampImg.setAttribute('height', 100);
+        ampImg.setAttribute('layout', 'fixed');
+        // TODO(#31915): Cleanup when R1_IMG_DEFERRED_BUILD is complete.
+        if (!R1_IMG_DEFERRED_BUILD) {
+          win.document.body.appendChild(ampImg);
+        }
 
-            const img = win.document.createElement('amp-img');
-            img.setAttribute('width', 100);
-            img.setAttribute('height', 100);
-            img.setAttribute('layout', 'fixed');
-            // TODO(#31915): Cleanup when R1_IMG_DEFERRED_BUILD is complete.
-            if (!R1_IMG_DEFERRED_BUILD) {
-              win.document.body.appendChild(img);
-            }
+        const upgradedImg = await whenUpgradedToCustomElement(ampImg);
+        prerenderAllowed = env.sandbox.stub(upgradedImg, 'prerenderAllowed');
+        prerenderAllowed.returns(false);
 
-            return whenUpgradedToCustomElement(img);
-          })
-          .then((img) => {
-            prerenderAllowed = env.sandbox.stub(img, 'prerenderAllowed');
-            prerenderAllowed.returns(false);
+        if (R1_IMG_DEFERRED_BUILD) {
+          win.document.body.appendChild(upgradedImg);
+        }
 
-            if (R1_IMG_DEFERRED_BUILD) {
-              win.document.body.appendChild(img);
-            }
-            return img.getImpl(false);
-          })
-          .then((impl) => {
-            layoutCallback = R1_IMG_DEFERRED_BUILD
-              ? env.sandbox.stub(impl, 'mountCallback')
-              : env.sandbox.stub(impl, 'layoutCallback');
-            unlayoutCallback = R1_IMG_DEFERRED_BUILD
-              ? env.sandbox.stub(impl, 'unmountCallback')
-              : env.sandbox.stub(impl, 'unlayoutCallback');
-            pauseCallback = env.sandbox.stub(impl, 'pauseCallback');
-            resumeCallback = env.sandbox.stub(impl, 'resumeCallback');
-            env.sandbox.stub(impl, 'isRelayoutNeeded').callsFake(() => true);
-            env.sandbox.stub(impl, 'isLayoutSupported').callsFake(() => true);
+        const impl = await upgradedImg.getImpl(false);
+        layoutCallback = R1_IMG_DEFERRED_BUILD
+          ? env.sandbox.stub(impl, 'mountCallback')
+          : env.sandbox.stub(impl, 'layoutCallback');
+        unlayoutCallback = R1_IMG_DEFERRED_BUILD
+          ? env.sandbox.stub(impl, 'unmountCallback')
+          : env.sandbox.stub(impl, 'unlayoutCallback');
+        pauseCallback = env.sandbox.stub(impl, 'pauseCallback');
+        resumeCallback = env.sandbox.stub(impl, 'resumeCallback');
+        env.sandbox.stub(impl, 'isRelayoutNeeded').callsFake(() => true);
+        env.sandbox.stub(impl, 'isLayoutSupported').callsFake(() => true);
 
-            layoutCallback.returns(Promise.resolve());
-            unlayoutCallback.returns(true);
-          });
+        layoutCallback.returns(Promise.resolve());
+        unlayoutCallback.returns(true);
       });
 
       describe('from in the PRERENDER state', () => {
