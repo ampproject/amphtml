@@ -94,7 +94,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             'out': 'amp-hb',
             ...urlParams,
             'gdpr_consent': consentString,
-            'pgDomain': this.win.top.location.hostname,
+            'pgDomain': Services.documentInfoForDoc(this.element).canonicalUrl,
             'tmstp': Date.now(),
           },
           MAX_URL_LENGTH,
