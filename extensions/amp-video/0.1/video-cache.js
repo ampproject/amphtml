@@ -60,9 +60,18 @@ export function fetchCachedSources(
           ? 1
           : null,
       });
-      return Services.xhrFor(win).fetch(requestUrl, {prerenderSafe: true});
+
+      if (shouldUseCachedVideoResponse(videoEl)) {
+        const cachedResponseEl = win.document.getElementById(
+          'amp-google-video-cache-response'
+        );
+        const cachedResponseJson = JSON.parse(cachedResponseEl.textContent);
+        return cachedResponseJson;
+      }
+      return Services.xhrFor(win)
+        .fetch(requestUrl, {prerenderSafe: true})
+        .then((response) => response.json());
     })
-    .then((response) => response.json())
     .then((jsonResponse) =>
       applySourcesToVideo(videoEl, jsonResponse['sources'], maxBitrate)
     )
@@ -203,4 +212,19 @@ function getCacheUrlService(videoEl, ampdoc) {
   return Services.extensionsFor(ampdoc.win)
     .installExtensionForDoc(ampdoc, 'amp-cache-url')
     .then(() => Services.cacheUrlServicePromiseForDoc(videoEl));
+}
+
+/**
+ * Returns `true` if the video's cached response should be used instead of
+ * issuing an XHR request.
+ * @param {!Element} videoEl
+ * @return {boolean}
+ */
+function shouldUseCachedVideoResponse(videoEl) {
+  // Monti only inlines the first video of the first web story page.
+  const isFirstVideoOnFirstStoryPage = matches(
+    videoEl,
+    `amp-story-page:first-of-type amp-video:first-of-type`
+  );
+  return isFirstVideoOnFirstStoryPage;
 }
