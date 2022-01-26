@@ -1,6 +1,10 @@
 import './amp-globals.d';
 
 declare global {
+  interface Window {
+    CSSStyleSheet: typeof CSSStyleSheet;
+  }
+
   interface HTMLElement {
     nonce?: string;
 
@@ -11,6 +15,14 @@ declare global {
 
   interface Element {
     createShadowRoot: () => ShadowRoot;
+  }
+
+  interface ShadowRoot {
+    adoptedStyleSheets?: CSSStyleSheet[];
+  }
+
+  interface CSSStyleSheet {
+    replaceSync?: (text: string) => void;
   }
 
   interface Event {
@@ -36,13 +48,13 @@ declare global {
   }
 
   interface Document {
-    cancelFullScreen:any;
-    webkitCancelFullScreen:any;
-    webkitExitFullscreen:any;
-    webkitFullscreenElement:any;
-    webkitCurrentFullScreenElement:any;
-    msExitFullscreen:any;
-    mozFullScreenElement:any;
-    mozCancelFullScreen:any;
+    cancelFullScreen: any;
+    webkitCancelFullScreen: any;
+    webkitExitFullscreen: any;
+    webkitFullscreenElement: any;
+    webkitCurrentFullScreenElement: any;
+    msExitFullscreen: any;
+    mozFullScreenElement: any;
+    mozCancelFullScreen: any;
   }
 }

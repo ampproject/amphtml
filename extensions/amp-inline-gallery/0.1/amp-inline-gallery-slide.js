@@ -1,8 +1,11 @@
 import {Layout_Enum} from '#core/dom/layout';
-import {Services} from '#service';
 import {htmlFor} from '#core/dom/static-template';
-import {isExperimentOn} from '#experiments';
 import {toArray} from '#core/types/array';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
 import {userAssert} from '#utils/log';
 
 export class AmpInlineGallerySlide extends AMP.BaseElement {

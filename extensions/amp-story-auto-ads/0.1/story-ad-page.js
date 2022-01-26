@@ -6,7 +6,7 @@ import {
 } from '#core/dom';
 import {elementByTag} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {getExperimentBranch} from '#experiments';
@@ -299,12 +299,12 @@ export class StoryAdPage {
    * @private
    */
   createPageElement_() {
-    const attributes = dict({
+    const attributes = {
       'ad': '',
       'distance': '2',
       'i-amphtml-loading': '',
       'id': this.id_,
-    });
+    };
 
     const segmentExpBranch = getExperimentBranch(
       this.win_,

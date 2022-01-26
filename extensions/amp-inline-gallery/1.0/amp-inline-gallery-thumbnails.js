@@ -1,11 +1,18 @@
 import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {userAssert} from '#utils/log';
+
 import {ThumbnailsBaseElement} from './thumbnails-base-element';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-thumbnails';
 
-export class AmpInlineGalleryThumbnails extends ThumbnailsBaseElement {
+export class AmpInlineGalleryThumbnails extends setSuperClass(
+  ThumbnailsBaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

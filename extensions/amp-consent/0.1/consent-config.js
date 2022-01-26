@@ -1,12 +1,16 @@
-import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
-import {Services} from '#service';
+import {getChildJsonConfig} from '#core/dom';
 import {childElementByTag} from '#core/dom/query';
 import {deepMerge, hasOwn, map} from '#core/types/object';
+
+import {Services} from '#service';
+
 import {devAssert, user, userAssert} from '#utils/log';
-import {getChildJsonConfig} from '#core/dom';
+
+import {CMP_CONFIG} from './cmps';
 import {getConsentStateManager} from './consent-state-manager';
+
+import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 
 const TAG = 'amp-consent/consent-config';
 const AMP_STORY_CONSENT_TAG = 'amp-story-consent';

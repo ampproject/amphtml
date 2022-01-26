@@ -1,8 +1,9 @@
 import '../amp-autocomplete';
-import {AmpAutocomplete} from '../amp-autocomplete';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
+
+import {AmpAutocomplete} from '../amp-autocomplete';
 
 describes.realWin(
   'amp-autocomplete unit tests',

@@ -1,6 +1,6 @@
 'use strict';
 
-const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
+const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {cyan} = require('kleur/colors');
 const {log} = require('./log');
 const {sleep} = require('./helpers');

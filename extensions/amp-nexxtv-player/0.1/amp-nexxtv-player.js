@@ -7,7 +7,6 @@ import {
 } from '#core/dom/fullscreen';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
@@ -123,17 +122,14 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       [clientId, streamtype, mediaid].map(encodeURIComponent).join('/');
 
     return assertAbsoluteHttpOrHttpsUrl(
-      addParamsToUrl(
-        url,
-        dict({
-          'dataMode': mode,
-          'platform': 'amp',
-          'disableAds': disableAds,
-          'streamingFilter': streamingFilter,
-          'exitMode': exitMode,
-          'consentString': consentString,
-        })
-      )
+      addParamsToUrl(url, {
+        'dataMode': mode,
+        'platform': 'amp',
+        'disableAds': disableAds,
+        'streamingFilter': streamingFilter,
+        'exitMode': exitMode,
+        'consentString': consentString,
+      })
     );
   }
 
@@ -195,9 +191,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/ postMessage(
-          dict({
+          {
             'cmd': command,
-          }),
+          },
           '*'
         );
       }
