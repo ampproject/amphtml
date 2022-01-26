@@ -67,7 +67,6 @@ import {
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '#experiments';
-import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
@@ -496,14 +495,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     );
     if (storyAdPlacementsExpId) {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
-    }
-
-    const autoAdvanceExpBranch = getExperimentBranch(
-      this.win,
-      StoryAdAutoAdvance.ID
-    );
-    if (autoAdvanceExpBranch) {
-      addExperimentIdToElement(autoAdvanceExpBranch, this.element);
     }
 
     const storyAdSegmentBranch = getExperimentBranch(
