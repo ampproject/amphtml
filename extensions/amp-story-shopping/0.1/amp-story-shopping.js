@@ -15,9 +15,14 @@ import {dependsOnStoryServices} from '../../amp-story/1.0/utils';
  */
 export const formatI18nNumber = (localizationService, el, currency, price) => {
   const langCode = localizationService.getLanguageCodesForElement(el)[0];
-  return new Intl.NumberFormat(langCode, {style: 'currency', currency}).format(
-    price
-  );
+  try {
+    return new Intl.NumberFormat(langCode, {
+      style: 'currency',
+      currency,
+    }).format(price);
+  } catch {
+    return price.toString();
+  }
 };
 
 /**
