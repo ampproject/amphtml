@@ -5,7 +5,6 @@ tags: {  # amp-access-fewcents
   extension_spec: {
     name: "amp-access-fewcents"
     version: "0.1"
-    version: "latest"
     requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
