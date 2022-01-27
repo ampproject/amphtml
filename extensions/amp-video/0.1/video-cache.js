@@ -52,9 +52,13 @@ export function fetchCachedSources(
     const inlineResponseEl = win.document.getElementById(
       'amp-google-video-cache-response'
     );
-    const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
-    jsonResponsePromise = Promise.resolve(inlineResponseJson);
-  } else {
+    if (inlineResponseEl?.textContent) {
+      const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
+      jsonResponsePromise = Promise.resolve(inlineResponseJson);
+    }
+  }
+  
+  if (!jsonResponsePromise) {
     const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
     maybeReplaceSrcWithSourceElement(videoEl, win);
     const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
