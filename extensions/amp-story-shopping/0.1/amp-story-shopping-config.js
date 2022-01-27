@@ -44,7 +44,7 @@ function getShoppingConfigUncached(pageElement) {
   return getElementConfig(element).then((config) => {
     //TODO(#36412): Add call to validate config here.
     const keyed = keyByProductTagId(config);
-    return storeShoppingConfig(element, keyed);
+    return storeShoppingConfig(pageElement, keyed);
   });
 }
 
@@ -66,7 +66,8 @@ function keyByProductTagId(config) {
  * @return {!Promise<!ShoppingConfigResponseDef>}
  */
 function storeShoppingConfig(element, config) {
-  const storeService = Services.storyStoreServiceForOrNull(element);
+  const win = element.ownerDocument.defaultView;
+  const storeService = Services.storyStoreServiceForOrNull(win);
   return storeService.then((storeService) => {
     storeService?.dispatch(Action.ADD_SHOPPING_DATA, config);
     return config;
