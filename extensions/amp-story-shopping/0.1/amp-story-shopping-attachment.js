@@ -1,5 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {closest} from '#core/dom/query';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -33,27 +34,20 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {?Element} */
     this.attachmentEl_ = null;
 
-    /** @private {!Element} */
-    this.pageEl_ = this.element.closest('amp-story-page');
-
     /** @private {!Array<!Element>} */
     this.shoppingTags_ = Array.from(
-      this.pageEl_.querySelectorAll('amp-story-shopping-tag')
+      closest(
+        element,
+        (el) => el.tagName === 'AMP-STORY-PAGE'
+      ).querySelectorAll('amp-story-shopping-tag')
     );
-
-    /** @private @const {!Element} */
-    this.plpContainer_ = <div></div>;
-
-    /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
-
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
   }
 
   /** @override */
   buildCallback() {
-    loadFonts(this.win, FONTS_TO_LOAD);
+    if (this.shoppingTags_.length === 0) {
+      return;
+    }
     this.attachmentEl_ = (
       <amp-story-page-attachment
         layout="nodisplay"
