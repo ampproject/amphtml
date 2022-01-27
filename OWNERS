@@ -8,8 +8,7 @@
       owners: [
         {name: 'cramforce', requestReviews: false},
         {name: 'dvoytenko', requestReviews: false},
-        {name: 'jridgewell', requestReviews: false},
-        {name: 'kristoferbaxter', requestReviews: false},
+        {name: 'jridgewell', requestReviews: false}
       ],
     },
     {
