@@ -1,5 +1,5 @@
+import * as Preact from '#core/dom/jsx';
 import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
@@ -26,13 +26,16 @@ export function createTabDebugElement(win, storyUrl) {
  * @return {!Element} the layout
  */
 const buildSuccessMessageTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`<div class="i-amphtml-story-dev-tools-debug-success">
-    <div class="i-amphtml-story-dev-tools-debug-success-image"></div>
-    <h1 class="i-amphtml-story-dev-tools-debug-success-message">
-      Great Job!<br />No issues found
-    </h1>
-  </div>`;
+  return (
+    <div class="i-amphtml-story-dev-tools-debug-success">
+      <div class="i-amphtml-story-dev-tools-debug-success-image"></div>
+      <h1 class="i-amphtml-story-dev-tools-debug-success-message">
+        Great Job!
+        <br />
+        No issues found
+      </h1>
+    </div>
+  );
 };
 
 /**
@@ -42,10 +45,7 @@ const buildSuccessMessageTemplate = (element) => {
  * @return {!Element}
  */
 function buildStatusIcon(element, statusPassed) {
-  const html = htmlFor(element);
-  const iconEl = html`<div
-    class="i-amphtml-story-dev-tools-log-status-icon"
-  ></div>`;
+  const iconEl = <div class="i-amphtml-story-dev-tools-log-status-icon"></div>;
   iconEl.classList.add(
     'i-amphtml-story-dev-tools-log-status-icon-' +
       (statusPassed ? 'passed' : 'failed')
@@ -54,17 +54,20 @@ function buildStatusIcon(element, statusPassed) {
 }
 
 const buildLogMessageTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`<div class="i-amphtml-story-dev-tools-log-message">
-    <div>
-      <span class="i-amphtml-story-dev-tools-log-type"></span>
-      <span> at </span>
-      <span class="i-amphtml-story-dev-tools-log-position"></span>
+  return (
+    <div class="i-amphtml-story-dev-tools-log-message">
+      <div>
+        <span class="i-amphtml-story-dev-tools-log-type"></span>
+        <span> at </span>
+        <span class="i-amphtml-story-dev-tools-log-position"></span>
+      </div>
+      <span class="i-amphtml-story-dev-tools-log-description"></span>
+      <a class="i-amphtml-story-dev-tools-log-spec" target="_blank">
+        Learn more
+      </a>
+      <pre class="i-amphtml-story-dev-tools-log-code"></pre>
     </div>
-    <span class="i-amphtml-story-dev-tools-log-description"></span>
-    <a class="i-amphtml-story-dev-tools-log-spec" target="_blank">Learn more</a>
-    <pre class="i-amphtml-story-dev-tools-log-code"></pre>
-  </div>`;
+  );
 };
 
 export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
@@ -162,10 +165,10 @@ export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
   buildDebugTitle_(errorCount) {
     const statusIcon = buildStatusIcon(this.element, errorCount == 0);
     statusIcon.classList.add('i-amphtml-story-dev-tools-log-status-icon');
-    const title = htmlFor(
-      this.element
-    )`<div class="i-amphtml-story-dev-tools-log-status-title"></div>`;
-    const statusText = htmlFor(this.element)`<span></span>`;
+    const title = (
+      <div class="i-amphtml-story-dev-tools-log-status-title"></div>
+    );
+    const statusText = <span></span>;
     statusText.textContent = errorCount
       ? `Failed - ${errorCount} errors`
       : 'Passed';

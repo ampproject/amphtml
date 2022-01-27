@@ -1,4 +1,4 @@
-import {htmlFor} from '#core/dom/static-template';
+import * as Preact from '#core/dom/jsx';
 import {computedStyle, setStyle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 
@@ -32,15 +32,12 @@ const MIN_HORIZONTAL_TRANSFORM = -20;
  * @return {!Element}
  */
 const buildBinaryPollTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div class="i-amphtml-story-interactive-binary-poll-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
-      <div
-        class="i-amphtml-story-interactive-binary-poll-option-container"
-      ></div>
+      <div class="i-amphtml-story-interactive-binary-poll-option-container"></div>
     </div>
-  `;
+  );
 };
 
 /**
@@ -50,22 +47,22 @@ const buildBinaryPollTemplate = (element) => {
  * @return {!Element}
  */
 const buildOptionTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <button class="i-amphtml-story-interactive-option" aria-live="polite">
       <span class="i-amphtml-story-interactive-option-percent-bar"></span>
       <span class="i-amphtml-story-interactive-option-text-container">
-        <span class="i-amphtml-story-interactive-option-title"
-          ><span class="i-amphtml-story-interactive-option-title-text"></span
-        ></span>
+        <span class="i-amphtml-story-interactive-option-title">
+          <span class="i-amphtml-story-interactive-option-title-text"></span>
+        </span>
         <span
           class="i-amphtml-story-interactive-option-percentage-text"
           aria-hidden="true"
-          >0%</span
         >
+          0%
+        </span>
       </span>
     </button>
-  `;
+  );
 };
 
 /**
@@ -75,10 +72,7 @@ const buildOptionTemplate = (element) => {
  * @return {!Element}
  */
 const buildBinaryOptionDividerTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
-    <span class="i-amphtml-story-interactive-option-divider"></span>
-  `;
+  return <span class="i-amphtml-story-interactive-option-divider"></span>;
 };
 
 export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {

@@ -1,4 +1,4 @@
-import {htmlFor} from '#core/dom/static-template';
+import * as Preact from '#core/dom/jsx';
 import {setImportantStyles} from '#core/dom/style';
 
 import {
@@ -17,19 +17,16 @@ import {CSS} from '../../../build/amp-story-interactive-img-poll-0.1.css';
  * @return {!Element}
  */
 const buildOptionTemplate = (option) => {
-  const html = htmlFor(option);
-  return html`
+  return (
     <button
       class="i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
       <div class="i-amphtml-story-interactive-img-option-img">
-        <span
-          class="i-amphtml-story-interactive-img-option-percentage-text"
-        ></span>
+        <span class="i-amphtml-story-interactive-img-option-percentage-text"></span>
       </div>
     </button>
-  `;
+  );
 };
 
 export class AmpStoryInteractiveImgPoll extends AmpStoryInteractive {

@@ -1,6 +1,6 @@
+import * as Preact from '#core/dom/jsx';
 import objstr from 'obj-str';
 
-import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -19,13 +19,12 @@ import {CSS} from '../../../build/amp-story-interactive-quiz-0.1.css';
  * @return {!Element}
  */
 const buildQuizTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div class="i-amphtml-story-interactive-quiz-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-quiz-option-container"></div>
     </div>
-  `;
+  );
 };
 
 /**
@@ -35,17 +34,14 @@ const buildQuizTemplate = (element) => {
  * @return {!Element}
  */
 const buildOptionTemplate = (option) => {
-  const html = htmlFor(option);
-  return html`
+  return (
     <button
       class="i-amphtml-story-interactive-quiz-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
-      <span
-        class="i-amphtml-story-interactive-quiz-answer-choice notranslate"
-      ></span>
+      <span class="i-amphtml-story-interactive-quiz-answer-choice notranslate"></span>
     </button>
-  `;
+  );
 };
 
 export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {

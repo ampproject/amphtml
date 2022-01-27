@@ -5,9 +5,9 @@
  * In order to add a "Learn more" link or entity name ("Your response will be sent to <Organization>"),
  * submit a PR with a new entry on the DisclaimerBackendList and tag @ampproject/wg-stories to review it.
  */
+import * as Preact from '#core/dom/jsx';
 
 import {addAttributesToElement} from '#core/dom';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
 
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
@@ -18,97 +18,84 @@ import DisclaimerBackendsList from './disclaimer-backends-list.json' assert {typ
 import {CSS} from '../../../build/amp-story-interactive-disclaimer-0.1.css';
 
 /**
- * Creates a disclaimer icon and dialog.
- * @param {!Element} element
- * @return {!Element}
- */
-function buildDisclaimerLayout(element) {
-  const html = htmlFor(element);
-  return html`<div
-    class="i-amphtml-story-interactive-disclaimer-dialog"
-    role="alertdialog"
-  >
-    <div
-      class="i-amphtml-story-interactive-disclaimer-description"
-      ref="descriptionEl"
-    >
-      <span class="i-amphtml-story-interactive-disclaimer-note" ref="noteEl"
-        >Your response will be sent to
-      </span>
-      <span
-        class="i-amphtml-story-interactive-disclaimer-entity"
-        ref="entityEl"
-      ></span>
-      <div class="i-amphtml-story-interactive-disclaimer-url" ref="urlEl"></div>
-    </div>
-    <a
-      target="_blank"
-      class="i-amphtml-story-interactive-disclaimer-link"
-      ref="linkEl"
-      >Learn more</a
-    >
-    <button
-      class="i-amphtml-story-interactive-disclaimer-close"
-      aria-label="Close disclaimer"
-    ></button>
-  </div>`;
-}
-
-/**
  * Creates a disclaimer dialog from the interactive element passed in.
  * @param {!AmpStoryInteractive} interactive the interactive element.
  * @param {JsonObject<string, string>=} attrs optional attributes for the disclaimer.
  * @return {!Element} the container for the shadow root that has the disclaimer.
  */
 export function buildInteractiveDisclaimer(interactive, attrs = {}) {
-  const disclaimer = buildDisclaimerLayout(interactive.element);
-  addAttributesToElement(disclaimer, attrs);
-
-  // Fill information
-  const {descriptionEl, entityEl, linkEl, noteEl, urlEl} = htmlRefs(disclaimer);
-  const backendUrl = interactive.element
-    .getAttribute('endpoint')
-    .replace('https://', '');
   const backendSpecs = getBackendSpecs(backendUrl, DisclaimerBackendsList);
-  if (backendSpecs) {
-    entityEl.textContent = backendSpecs[1].entityName;
-    urlEl.textContent = backendSpecs[0];
-    backendSpecs[1].learnMoreUrl
-      ? (linkEl.href = backendSpecs[1].learnMoreUrl)
-      : linkEl.remove();
-  } else {
-    entityEl.remove();
-    urlEl.textContent = backendUrl;
-    linkEl.remove();
-  }
-  noteEl.textContent = interactive.localizationService.getLocalizedString(
-    LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
+
+  const backendUrl =
+    backendSpecs?.[0] ??
+    interactive.element.getAttribute('endpoint').replace('https://', '');
+  const learnMoreUrl = backendSpecs?.[1]?.learnMoreUrl;
+  const entityName = backendSpecs?.[1].entityName;
+
+  const descriptionId = `i-amphtml-story-disclaimer-${interactive.element.id}-description`;
+
+  const disclaimer = (
+    <div
+      class="i-amphtml-story-interactive-disclaimer-dialog"
+      role="alertdialog"
+      aria-describedby={descriptionId}
+    >
+      <div
+        class="i-amphtml-story-interactive-disclaimer-description"
+        id={descriptionId}
+      >
+        <span class="i-amphtml-story-interactive-disclaimer-note">
+          {interactive.localizationService.getLocalizedString(
+            LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
+          )}
+        </span>
+        {entityName && (
+          <span class="i-amphtml-story-interactive-disclaimer-entity">
+            {entityName}
+          </span>
+        )}
+        <div class="i-amphtml-story-interactive-disclaimer-url">
+          {backendUrl}
+        </div>
+      </div>
+      {learnMoreUrl && (
+        <a
+          target="_blank"
+          class="i-amphtml-story-interactive-disclaimer-link"
+          href={learnMoreUrl}
+        >
+          {/* TODO(wg-stories): localize label */}
+          Learn more
+        </a>
+      )}
+      {/* TODO(wg-stories): Receive onClick handler instead of setting after render */}
+      <button
+        class="i-amphtml-story-interactive-disclaimer-close"
+        aria-label="Close disclaimer"
+      ></button>
+    </div>
   );
 
-  // Set the described-by for a11y.
-  const disclaimerDescriptionId = `i-amphtml-story-disclaimer-${interactive.element.id}-description`;
-  descriptionEl.id = disclaimerDescriptionId;
-  disclaimer.setAttribute('aria-describedby', disclaimerDescriptionId);
+  addAttributesToElement(disclaimer, attrs);
 
-  // Create container and return.
-  const disclaimerContainer = htmlFor(
-    interactive.element
-  )`<div class="i-amphtml-story-interactive-disclaimer-dialog-container"></div>`;
-  createShadowRootWithStyle(disclaimerContainer, disclaimer, CSS);
-  return disclaimerContainer;
+  return createShadowRootWithStyle(
+    <div class="i-amphtml-story-interactive-disclaimer-dialog-container"></div>,
+    disclaimer,
+    CSS
+  );
 }
 
 /**
  * Creates a disclaimer icon from the interactive element passed in.
- * @param {!AmpStoryInteractive} interactive the interactive element.
  * @return {!Element} the icon with the dialog that should be added to the shadowRoot.
  */
-export function buildInteractiveDisclaimerIcon(interactive) {
-  const html = htmlFor(interactive.element);
-  return html`<button
-    class="i-amphtml-story-interactive-disclaimer-icon"
-    aria-label="Open disclaimer"
-  ></button>`;
+export function buildInteractiveDisclaimerIcon() {
+  return (
+    <button
+      class="i-amphtml-story-interactive-disclaimer-icon"
+      aria-label="Open disclaimer"
+    ></button>
+  );
 }
 
 /**
@@ -118,7 +105,5 @@ export function buildInteractiveDisclaimerIcon(interactive) {
  * @return {?Array<string|Object<string, string>>} array that contains: base url of backend, {learnMoreUrl, entity}.
  */
 export function getBackendSpecs(backendUrl, backendsList) {
-  return Object.entries(backendsList).find((element) => {
-    return element[0] === backendUrl.substring(0, element[0].length);
-  });
+  return Object.values(backendsList).find((url) => backendUrl.startsWith(url));
 }

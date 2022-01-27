@@ -1,4 +1,4 @@
-import {htmlFor} from '#core/dom/static-template';
+import * as Preact from '#core/dom/jsx';
 import {setImportantStyles} from '#core/dom/style';
 
 import {StateProperty} from 'extensions/amp-story/1.0/amp-story-store-service';
@@ -19,8 +19,7 @@ import {CSS} from '../../../build/amp-story-interactive-slider-0.1.css';
  * @return {!Element}
  */
 const buildSliderTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div class="i-amphtml-story-interactive-slider-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-slider-input-container">
@@ -37,7 +36,9 @@ const buildSliderTemplate = (element) => {
             <div class="i-amphtml-story-interactive-slider-bubble"></div>
           </div>
           <div class="i-amphtml-story-interactive-slider-average-indicator">
-            <span></span><span></span><span></span>
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
           <div class="i-amphtml-story-interactive-slider-average-text">
             Average answer
@@ -45,7 +46,7 @@ const buildSliderTemplate = (element) => {
         </div>
       </div>
     </div>
-  `;
+  );
 };
 
 const easeInOutCubic = (t) =>

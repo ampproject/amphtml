@@ -1,4 +1,4 @@
-import {htmlFor} from '#core/dom/static-template';
+import * as Preact from '#core/dom/jsx';
 import {setStyles} from '#core/dom/style';
 
 import {Services} from '#service';
@@ -10,13 +10,12 @@ import {Services} from '#service';
  * @return {!Element}
  */
 const buildConfettiWrapperTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div
       class="i-amphtml-story-interactive-confetti-wrapper"
       aria-hidden="true"
     ></div>
-  `;
+  );
 };
 
 /**
@@ -26,8 +25,7 @@ const buildConfettiWrapperTemplate = (element) => {
  * @return {!Element}
  */
 const buildconfettiTemplate = (element) => {
-  const html = htmlFor(element);
-  return html` <div class="i-amphtml-story-interactive-confetti"></div> `;
+  return <div class="i-amphtml-story-interactive-confetti"></div>;
 };
 
 /**

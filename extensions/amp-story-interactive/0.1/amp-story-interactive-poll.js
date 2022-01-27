@@ -1,4 +1,4 @@
-import {htmlFor} from '#core/dom/static-template';
+import * as Preact from '#core/dom/jsx';
 import {computedStyle, setStyle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 
@@ -18,13 +18,12 @@ import {CSS} from '../../../build/amp-story-interactive-poll-0.1.css';
  * @return {!Element}
  */
 const buildPollTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div class="i-amphtml-story-interactive-poll-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-option-container"></div>
     </div>
-  `;
+  );
 };
 
 /**
@@ -34,18 +33,17 @@ const buildPollTemplate = (element) => {
  * @return {!Element}
  */
 const buildOptionTemplate = (option) => {
-  const html = htmlFor(option);
-  return html`
+  return (
     <button class="i-amphtml-story-interactive-option" aria-live="polite">
       <span class="i-amphtml-story-interactive-option-text"></span>
       <span class="i-amphtml-story-interactive-option-percentage">
         <span class="i-amphtml-story-interactive-option-percentage-text"></span>
-        <span class="i-amphtml-story-interactive-option-percentage-sign"
-          >%</span
-        >
+        <span class="i-amphtml-story-interactive-option-percentage-sign">
+          %
+        </span>
       </span>
     </button>
-  `;
+  );
 };
 
 export class AmpStoryInteractivePoll extends AmpStoryInteractive {

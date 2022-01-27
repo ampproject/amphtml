@@ -1,5 +1,4 @@
-import {htmlFor} from '#core/dom/static-template';
-
+import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
 
 import {devAssert} from '#utils/log';
@@ -7,10 +6,11 @@ import {devAssert} from '#utils/log';
 import {buildGtagConfig} from './auto-analytics-configs';
 
 const buildAutoAnalyticsTemplate = (element) => {
-  const html = htmlFor(element);
-  return html` <amp-analytics data-credentials="include" type="gtag">
-    <script type="application/json"></script>
-  </amp-analytics>`;
+  return (
+    <amp-analytics data-credentials="include" type="gtag">
+      <script type="application/json"></script>
+    </amp-analytics>
+  );
 };
 
 export class AmpStoryAutoAnalytics extends AMP.BaseElement {

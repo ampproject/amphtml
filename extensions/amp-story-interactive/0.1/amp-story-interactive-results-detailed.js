@@ -1,4 +1,4 @@
-import {htmlFor} from '#core/dom/static-template';
+import * as Preact from '#core/dom/jsx';
 import {setImportantStyles} from '#core/dom/style';
 
 import {InteractiveType} from './amp-story-interactive-abstract';
@@ -23,8 +23,7 @@ import {CSS} from '../../../build/amp-story-interactive-results-detailed-0.1.css
  * @return {!Element}
  */
 const buildResultsDetailedTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div class="i-amphtml-story-interactive-results-container">
       <div class="i-amphtml-story-interactive-results-prompt"></div>
       <div class="i-amphtml-story-interactive-results-title"></div>
@@ -33,7 +32,7 @@ const buildResultsDetailedTemplate = (element) => {
       </div>
       <div class="i-amphtml-story-interactive-results-description"></div>
     </div>
-  `;
+  );
 };
 
 export class AmpStoryInteractiveResultsDetailed extends AmpStoryInteractiveResults {

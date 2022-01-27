@@ -1,6 +1,6 @@
+import * as Preact from '#core/dom/jsx';
 import objstr from 'obj-str';
 
-import {htmlFor} from '#core/dom/static-template';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -27,22 +27,17 @@ import {
  * @return {!Element}
  */
 const buildOptionTemplate = (option) => {
-  const html = htmlFor(option);
-  return html`
+  return (
     <button
       class="i-amphtml-story-interactive-img-option i-amphtml-story-interactive-option"
       aria-live="polite"
     >
       <div class="i-amphtml-story-interactive-img-option-img">
-        <span
-          class="i-amphtml-story-interactive-img-option-percentage-text"
-        ></span>
+        <span class="i-amphtml-story-interactive-img-option-percentage-text"></span>
       </div>
-      <div
-        class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"
-      ></div>
+      <div class="i-amphtml-story-interactive-img-quiz-answer-choice notranslate"></div>
     </button>
-  `;
+  );
 };
 
 export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {

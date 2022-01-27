@@ -1,7 +1,7 @@
+import * as Preact from '#core/dom/jsx';
 import {removeChildren} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
-import {htmlFor} from '#core/dom/static-template';
 import {toggle} from '#core/dom/style';
 
 import {Services} from '#service';
@@ -27,8 +27,7 @@ const TAG = 'amp-story-education';
  * @return {!Element}
  */
 const buildNavigationEl = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div class="i-amphtml-story-education-navigation">
       <div class="i-amphtml-story-education-navigation-gesture">
         <div class="i-amphtml-story-education-navigation-gesture-outer"></div>
@@ -38,7 +37,7 @@ const buildNavigationEl = (element) => {
       <div class="i-amphtml-story-education-navigation-instructions"></div>
       <button class="i-amphtml-story-education-navigation-button"></button>
     </div>
-  `;
+  );
 };
 
 /** @enum {string} */

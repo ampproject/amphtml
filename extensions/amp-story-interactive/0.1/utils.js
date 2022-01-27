@@ -1,4 +1,4 @@
-import {htmlFor} from '#core/dom/static-template';
+import * as Preact from '#core/dom/jsx';
 import {map} from '#core/types/object';
 
 import {user} from '#utils/log';
@@ -41,13 +41,10 @@ export const deduplicateInteractiveIds = (doc) => {
  * @return {!Element}
  */
 export const buildImgTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
-    <div
-      class="i-amphtml-story-interactive-img-container i-amphtml-story-interactive-container"
-    >
+  return (
+    <div class="i-amphtml-story-interactive-img-container i-amphtml-story-interactive-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-img-option-container"></div>
     </div>
-  `;
+  );
 };

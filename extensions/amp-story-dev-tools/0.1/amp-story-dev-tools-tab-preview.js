@@ -1,8 +1,8 @@
+import * as Preact from '#core/dom/jsx';
 import {toggleAttribute} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {observeContentSize} from '#core/dom/layout/size-observer';
 import {closest} from '#core/dom/query';
-import {htmlFor} from '#core/dom/static-template';
 import {setStyles} from '#core/dom/style';
 
 import {
@@ -33,8 +33,7 @@ export function createTabPreviewElement(win, storyUrl, devices) {
  * @return {!Element}
  */
 const buildDeviceTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div class="i-amphtml-story-dev-tools-device">
       <div class="i-amphtml-story-dev-tools-device-screen">
         <div class="i-amphtml-story-dev-tools-device-statusbar">
@@ -60,7 +59,7 @@ const buildDeviceTemplate = (element) => {
         <div class="i-amphtml-story-dev-tools-device-navigation"></div>
       </div>
     </div>
-  `;
+  );
 };
 
 /**
@@ -69,8 +68,7 @@ const buildDeviceTemplate = (element) => {
  * @return {!Element}
  */
 const buildDeviceChipTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <button
       class="i-amphtml-story-dev-tools-device-chip"
       data-action="toggleDeviceChip"
@@ -94,7 +92,7 @@ const buildDeviceChipTemplate = (element) => {
         ></rect>
       </svg>
     </button>
-  `;
+  );
 };
 
 /**
@@ -103,17 +101,12 @@ const buildDeviceChipTemplate = (element) => {
  * @return {!Element}
  */
 const buildHelpButtonTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
-    <button
-      class="i-amphtml-story-dev-tools-button i-amphtml-story-dev-tools-button-help"
-    >
+  return (
+    <button class="i-amphtml-story-dev-tools-button i-amphtml-story-dev-tools-button-help">
       <span>HELP</span>
-      <div
-        class="i-amphtml-story-dev-tools-button-icon i-amphtml-story-dev-tools-button-help-icon"
-      ></div>
+      <div class="i-amphtml-story-dev-tools-button-icon i-amphtml-story-dev-tools-button-help-icon"></div>
     </button>
-  `;
+  );
 };
 
 /**
@@ -122,8 +115,7 @@ const buildHelpButtonTemplate = (element) => {
  * @return {!Element}
  */
 const buildHelpDialogTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div
       class="i-amphtml-story-dev-tools-device-dialog-bg"
       data-action="closeDialog"
@@ -138,46 +130,50 @@ const buildHelpDialogTemplate = (element) => {
             You can simply add #development=1 to the end of your Web Story URL
             to access the Web Stories Dev-Tools.
           </p>
-          <span class="i-amphtml-story-dev-tools-device-dialog-help-hint"
-            >https://yourstory.com<b>#development=1</b></span
-          >
+          <span class="i-amphtml-story-dev-tools-device-dialog-help-hint">
+            https://yourstory.com<b>#development=1</b>
+          </span>
         </div>
         <h1>Helpful links</h1>
         <a
           class="i-amphtml-story-dev-tools-device-dialog-link i-amphtml-story-dev-tools-help-page-experience-link"
           target="_blank"
           href="https://amp.dev/page-experience/"
-          ><span>Analyze the Page Experience</span>
-          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div
-        ></a>
+        >
+          <span>Analyze the Page Experience</span>
+          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div>
+        </a>
         <a
           class="i-amphtml-story-dev-tools-device-dialog-link"
           target="_blank"
           href="https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/"
-          ><span>Best practices for creating a successful Web Story</span>
-          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div
-        ></a>
+        >
+          <span>Best practices for creating a successful Web Story</span>
+          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div>
+        </a>
         <a
           class="i-amphtml-story-dev-tools-device-dialog-link"
           target="_blank"
           href="https://amp.dev/about/stories/"
-          ><span>Learn more about Web Stories</span>
-          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div
-        ></a>
+        >
+          <span>Learn more about Web Stories</span>
+          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div>
+        </a>
         <a
           class="i-amphtml-story-dev-tools-device-dialog-link i-amphtml-story-dev-tools-help-search-preview-link"
           target="_blank"
           href="https://search.google.com/test/amp?url="
-          ><span>Web Stories Google Search Preview Tool</span>
-          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div
-        ></a>
+        >
+          <span>Web Stories Google Search Preview Tool</span>
+          <div class="i-amphtml-story-dev-tools-device-dialog-arrow"></div>
+        </a>
         <button
           data-action="closeDialog"
           class="i-amphtml-story-dev-tools-device-dialog-close"
         ></button>
       </div>
     </div>
-  `;
+  );
 };
 
 /**
@@ -186,8 +182,7 @@ const buildHelpDialogTemplate = (element) => {
  * @return {!Element}
  */
 const buildAddDeviceDialogTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div
       class="i-amphtml-story-dev-tools-device-dialog-bg"
       data-action="closeDialog"
@@ -208,7 +203,7 @@ const buildAddDeviceDialogTemplate = (element) => {
         ></button>
       </div>
     </div>
-  `;
+  );
 };
 
 const MAX_DEVICE_SPACES = 4;
@@ -414,9 +409,9 @@ export class AmpStoryDevToolsTabPreview extends AMP.BaseElement {
     this.storyUrl_ = this.element.getAttribute('data-story-url');
     this.element.classList.add('i-amphtml-story-dev-tools-tab');
 
-    this.devicesContainer_ = htmlFor(
-      this.element
-    )`<div class="i-amphtml-story-dev-tools-devices-container"></div>`;
+    this.devicesContainer_ = (
+      <div class="i-amphtml-story-dev-tools-devices-container"></div>
+    );
     this.element.appendChild(this.devicesContainer_);
 
     const chipListContainer = this.element.ownerDocument.createElement('div');

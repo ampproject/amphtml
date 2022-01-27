@@ -1,5 +1,5 @@
+import * as Preact from '#core/dom/jsx';
 import {toggleAttribute} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
 import {toggle} from '#core/dom/style';
 import {parseQueryString} from '#core/types/string/url';
 
@@ -35,8 +35,7 @@ const fontsToLoad = [
  * @return {!Element}
  */
 const buildContainerTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div class="i-amphtml-story-dev-tools-container">
       <div class="i-amphtml-story-dev-tools-header">
         <span class="i-amphtml-story-dev-tools-brand">
@@ -59,9 +58,7 @@ const buildContainerTemplate = (element) => {
           </span>
         </span>
         <div class="i-amphtml-story-dev-tools-tabs"></div>
-        <a
-          class="i-amphtml-story-dev-tools-button i-amphtml-story-dev-tools-close"
-        >
+        <a class="i-amphtml-story-dev-tools-button i-amphtml-story-dev-tools-close">
           <span>OPEN STORY</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -78,7 +75,7 @@ const buildContainerTemplate = (element) => {
         </a>
       </div>
     </div>
-  `;
+  );
 };
 
 /** @enum {string} */

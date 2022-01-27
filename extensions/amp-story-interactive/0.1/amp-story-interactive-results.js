@@ -1,4 +1,4 @@
-import {htmlFor} from '#core/dom/static-template';
+import * as Preact from '#core/dom/jsx';
 import {computedStyle, setStyle} from '#core/dom/style';
 
 import {dev} from '#utils/log';
@@ -34,8 +34,7 @@ export let InteractiveStateEntryType;
  * @return {!Element}
  */
 const buildResultsTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div class="i-amphtml-story-interactive-results-container">
       <div class="i-amphtml-story-interactive-results-image-border">
         <div class="i-amphtml-story-interactive-results-image"></div>
@@ -44,7 +43,7 @@ const buildResultsTemplate = (element) => {
       <div class="i-amphtml-story-interactive-results-title"></div>
       <div class="i-amphtml-story-interactive-results-description"></div>
     </div>
-  `;
+  );
 };
 
 /**
@@ -54,17 +53,17 @@ const buildResultsTemplate = (element) => {
  * @return {!Element}
  */
 const buildResultsTopTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
+  return (
     <div class="i-amphtml-story-interactive-results-top">
       <div class="i-amphtml-story-interactive-results-top-score">SCORE:</div>
       <div class="i-amphtml-story-interactive-results-top-value">
-        <span class="i-amphtml-story-interactive-results-top-value-number"
-          >100</span
-        ><span>%</span>
+        <span class="i-amphtml-story-interactive-results-top-value-number">
+          100
+        </span>
+        <span>%</span>
       </div>
     </div>
-  `;
+  );
 };
 
 const HAS_IMAGE_CLASS = 'i-amphtml-story-interactive-has-image';
