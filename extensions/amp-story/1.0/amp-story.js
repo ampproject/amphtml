@@ -949,13 +949,9 @@ export class AmpStory extends AMP.BaseElement {
           HistoryState.ATTACHMENT_PAGE_ID
         );
 
-        // if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
-        //   this.activePage_.openAttachment(false /** shouldAnimate */);
-        // }
-
         if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
           const attachmentEl = this.activePage_.element.querySelector(
-            'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
+            'amp-story-page-attachment, amp-story-page-outlink'
           );
 
           if (attachmentEl) {
