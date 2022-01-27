@@ -53,6 +53,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.localizationService_ = null;
 
     /** @private {?Promise<!KeyedShoppingConfigDef>}  */
+    // TODO(wg-stories): Remove temporary disable once private is used.
+    // eslint-disable-next-line local/unused-private-field
     this.shoppingConfig_ = null;
   }
 
