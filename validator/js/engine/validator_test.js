@@ -1768,8 +1768,8 @@ describe('ValidatorRulesMakeSense', () => {
       }
       // disallowed_cdata_regex
       for (const disallowedCdataRegex of tagSpec.cdata.disallowedCdataRegex) {
+        usefulCdataSpec = true;
         it('disallowed_cdata_regex valid and error_message defined', () => {
-          usefulCdataSpec = true;
 
           expect(disallowedCdataRegex.regex).toBeDefined();
           expect(isValidRegex(disallowedCdataRegex.regex)).toBe(true);
@@ -1882,8 +1882,20 @@ describe('ValidatorRulesMakeSense', () => {
           (tagSpec.cdata.mandatoryCdata !== null)) {
         usefulCdataSpec = true;
       }
-      it('a cdata spec must be defined', () => {
-        expect(usefulCdataSpec).toBeDefined();
+      it(`Tag spec '${tagSpec.specName}' must define a useful cdata spec`, () => {
+        // The list of tag specs whose `usefulCdataSpec` is false.
+        // TODO(b/215586283): Remove this allowlist by using `if` statements
+        // setting variable `usefulCdataSpec` to be true.
+        const allowlist = [
+          'amphtml module LTS engine script',
+          'amphtml module engine script',
+          'amphtml nomodule LTS engine script',
+          'amphtml nomodule engine script',
+          'style amp-custom-length-check',
+        ];
+        if (!allowlist.includes(tagSpec.specName)) {
+          expect(usefulCdataSpec).toBe(true);
+        }
       });
       it('cdata_regex must have unicode named groups', () => {
         const regex = rules.internedStrings[-1 - tagSpec.cdata.cdataRegex];
