@@ -1,9 +1,9 @@
-import * as Preact from '#preact';
-import {ContainWrapper, useValueRef} from '#preact/component';
+import objstr from 'obj-str';
+
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Side} from './sidebar-config';
-import {forwardRef} from '#preact/compat';
 import {isRTL} from '#core/dom';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useEffect,
@@ -12,10 +12,13 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {useSidebarAnimation} from './sidebar-animations-hook';
+import {forwardRef} from '#preact/compat';
+import {ContainWrapper, useValueRef} from '#preact/component';
+
 import {useStyles} from './component.jss';
+import {useSidebarAnimation} from './sidebar-animations-hook';
+import {Side} from './sidebar-config';
 import {useToolbarHook} from './sidebar-toolbar-hook';
-import objstr from 'obj-str';
 
 /**
  * @param {!BentoSidebarDef.Props} props
@@ -121,7 +124,13 @@ function BentoSidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div class={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+    <div
+      class={objstr({
+        [classes.mounted]: mounted,
+        [classes.unmounted]: !mounted,
+      })}
+      part="wrapper"
+    >
       <ContainWrapper
         as={Comp}
         ref={sidebarRef}
@@ -136,7 +145,7 @@ function BentoSidebarWithRef(
           [classes.right]: side !== Side.LEFT,
         })}
         role="menu"
-        tabIndex="-1"
+        tabindex="-1"
         hidden={!side}
         {...rest}
       >

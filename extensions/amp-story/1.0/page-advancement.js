@@ -1,3 +1,13 @@
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {closest, matches} from '#core/dom/query';
+
+import {Services} from '#service';
+import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
+
+import {listenOnce} from '#utils/event-helper';
+import {dev, user} from '#utils/log';
+
+import {interactiveElementsSelectors} from './amp-story-embedded-component';
 import {
   Action,
   EmbeddedComponentState,
@@ -7,16 +17,10 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {Services} from '#service';
-import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
-import {VideoEvents_Enum} from '../../../src/video-interface';
-import {closest, matches} from '#core/dom/query';
-import {dev, user} from '#utils/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';
-import {listenOnce} from '#utils/event-helper';
-import {interactiveElementsSelectors} from './amp-story-embedded-component';
+
+import {getAmpdoc} from '../../../src/service-helpers';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;

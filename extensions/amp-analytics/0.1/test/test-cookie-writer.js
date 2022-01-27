@@ -1,11 +1,12 @@
-import * as cookie from '../../../../src/cookies';
 import * as fakeTimers from '@sinonjs/fake-timers';
+
+import {stubService} from '#testing/helpers/service';
+
+import * as cookie from '../../../../src/cookies';
 import {CookieWriter} from '../cookie-writer';
-import {dict} from '#core/types/object';
 import {installLinkerReaderService} from '../linker-reader';
 import {installSessionServiceForTesting} from '../session-manager';
 import {installVariableServiceForTesting} from '../variables';
-import {stubService} from '#testing/helpers/service';
 
 const TAG = '[amp-analytics/cookie-writer]';
 
@@ -39,7 +40,7 @@ describes.realWin(
       let expandAndWriteSpy;
 
       it('Resolve when no config', () => {
-        const config = dict({});
+        const config = {};
         const cookieWriter = new CookieWriter(win, element, config);
         expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
@@ -48,9 +49,9 @@ describes.realWin(
       });
 
       it('Resovle when config is invalid', () => {
-        const config = dict({
+        const config = {
           'cookies': 'invalid',
-        });
+        };
         expectAsyncConsoleError(TAG + ' cookies config must be an object');
         const cookieWriter = new CookieWriter(win, element, config);
         expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
@@ -60,13 +61,13 @@ describes.realWin(
       });
 
       it('Resolve when element is in FIE', () => {
-        const config = dict({
+        const config = {
           'cookies': {
             'testId': {
               'value': 'QUERY_PARAM(test)',
             },
           },
-        });
+        };
         const parent = doc.createElement('div');
         parent.classList.add('i-amphtml-fie');
         doc.body.appendChild(parent);
@@ -79,13 +80,13 @@ describes.realWin(
       });
 
       it('Resolve when in viewer', () => {
-        const config = dict({
+        const config = {
           'cookies': {
             'testId': {
               'value': 'QUERY_PARAM(test)',
             },
           },
-        });
+        };
         const mockWin = {
           location: 'https://www-example-com.cdn.ampproject.org',
         };
@@ -101,13 +102,13 @@ describes.realWin(
 
       it('Resolve when in inabox ad', () => {
         env.win.__AMP_MODE.runtime = 'inabox';
-        const config = dict({
+        const config = {
           'cookies': {
             'testId': {
               'value': 'QUERY_PARAM(test)',
             },
           },
-        });
+        };
         const cookieWriter = new CookieWriter(win, element, config);
         expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
@@ -116,14 +117,14 @@ describes.realWin(
       });
 
       it('Resolve when disabled', () => {
-        const config = dict({
+        const config = {
           'cookies': {
             'testId': {
               'value': 'QUERY_PARAM(test)',
             },
             'enabled': false,
           },
-        });
+        };
         const cookieWriter = new CookieWriter(win, element, config);
         expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
@@ -132,9 +133,9 @@ describes.realWin(
       });
 
       it('Resolve with nothing to write', () => {
-        const config = dict({
+        const config = {
           'cookies': {},
-        });
+        };
         const cookieWriter = new CookieWriter(win, element, config);
         expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
@@ -143,11 +144,11 @@ describes.realWin(
       });
 
       it('Resolve with invalid cookieValue (not object)', () => {
-        const config = dict({
+        const config = {
           'cookies': {
             'testId': 'QUERY_PARAM(test)',
           },
-        });
+        };
         expectAsyncConsoleError(
           TAG + ' cookieValue must be configured in an object'
         );
@@ -159,13 +160,13 @@ describes.realWin(
       });
 
       it('Resolve when no value in cookieValue object', () => {
-        const config = dict({
+        const config = {
           'cookies': {
             'testId': {
               'novalue': 'QUERY_PARAM(test)',
             },
           },
-        });
+        };
         expectAsyncConsoleError(
           TAG + ' value is required in the cookieValue object'
         );
@@ -177,13 +178,13 @@ describes.realWin(
       });
 
       it('Ignore reserved keys', () => {
-        const config = dict({
+        const config = {
           'cookies': {
             'cookiePath': {
               'value': 'QUERY_PARAM(test)',
             },
           },
-        });
+        };
         const cookieWriter = new CookieWriter(win, element, config);
         expandAndWriteSpy = env.sandbox.spy(cookieWriter, 'expandAndWrite_');
         return cookieWriter.write().then(() => {
@@ -223,29 +224,25 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
       return `${name}-${id}`;
     });
     win.location = 'https://example.test/?a=123&b=567';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'aCookie': {
-            'value': 'QUERY_PARAM(a)',
-          },
-          'bCookie': {
-            'value': 'LINKER_PARAM(b,c)',
-          },
-          'testId1': {
-            'value': 'static',
-          },
-          'testId2': {
-            'value': '$SUBSTR(QUERY_PARAM(a),1)-suf',
-          },
-          'testId3': {
-            'value': 'pre-TIMESTAMPQUERY_PARAM(abc)',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'aCookie': {
+          'value': 'QUERY_PARAM(a)',
         },
-      })
-    );
+        'bCookie': {
+          'value': 'LINKER_PARAM(b,c)',
+        },
+        'testId1': {
+          'value': 'static',
+        },
+        'testId2': {
+          'value': '$SUBSTR(QUERY_PARAM(a),1)-suf',
+        },
+        'testId3': {
+          'value': 'pre-TIMESTAMPQUERY_PARAM(abc)',
+        },
+      },
+    });
     return cookieWriter.write().then(() => {
       const cookies = win.document.cookie.split(';');
       expect(cookies).to.include('aCookie=123');
@@ -258,17 +255,13 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should write cookie under eTLD+1 domain with right exp.', () => {
     win.location = 'https://www.example.test/?a=123&b=567';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'aCookie': {
-            'value': 'QUERY_PARAM(a)',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'aCookie': {
+          'value': 'QUERY_PARAM(a)',
         },
-      })
-    );
+      },
+    });
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=123; path=/; domain=example.test; ' +
@@ -279,18 +272,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should write cookie with custom expiration (number value) and default to SameSite=Lax', () => {
     win.location = 'https://www.example.test/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': 604800, // 1 week in seconds
-          'aCookie': {
-            'value': 'testValue',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cookieMaxAge': 604800, // 1 week in seconds
+        'aCookie': {
+          'value': 'testValue',
         },
-      })
-    );
+      },
+    });
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
@@ -301,19 +290,15 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should write cookie with the specified sameSite (lowercase S) value', () => {
     win.location = 'https://www.example.test/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': 604800, // 1 week in seconds
-          'sameSite': 'Lax',
-          'aCookie': {
-            'value': '123',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cookieMaxAge': 604800, // 1 week in seconds
+        'sameSite': 'Lax',
+        'aCookie': {
+          'value': '123',
         },
-      })
-    );
+      },
+    });
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=123; path=/; domain=example.test; ' +
@@ -324,19 +309,15 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should write cookie with the specified SameSite (capital S) value', () => {
     win.location = 'https://www.example.test/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': 604800, // 1 week in seconds
-          'SameSite': 'Strict',
-          'aCookie': {
-            'value': '123',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cookieMaxAge': 604800, // 1 week in seconds
+        'SameSite': 'Strict',
+        'aCookie': {
+          'value': '123',
         },
-      })
-    );
+      },
+    });
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=123; path=/; domain=example.test; ' +
@@ -347,20 +328,16 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should override the sameSite value', () => {
     win.location = 'https://www.example.test/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': 604800, // 1 week in seconds
-          'sameSite': 'Lax',
-          'aCookie': {
-            'value': '123',
-            'sameSite': 'Strict',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cookieMaxAge': 604800, // 1 week in seconds
+        'sameSite': 'Lax',
+        'aCookie': {
+          'value': '123',
+          'sameSite': 'Strict',
         },
-      })
-    );
+      },
+    });
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=123; path=/; domain=example.test; ' +
@@ -371,19 +348,15 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should append Secure for when sameSite value is "None"', () => {
     win.location = 'https://www.example.test/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': 604800, // 1 week in seconds
-          'aCookie': {
-            'value': 'testValue',
-            'sameSite': 'None',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cookieMaxAge': 604800, // 1 week in seconds
+        'aCookie': {
+          'value': 'testValue',
+          'sameSite': 'None',
         },
-      })
-    );
+      },
+    });
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
@@ -394,18 +367,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should write cookie with custom expiration (string value)', () => {
     win.location = 'https://www.example.test/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': '604800', // 1 week in seconds
-          'aCookie': {
-            'value': 'testValue',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cookieMaxAge': '604800', // 1 week in seconds
+        'aCookie': {
+          'value': 'testValue',
         },
-      })
-    );
+      },
+    });
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
@@ -416,18 +385,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should write cookie with custom expiration (decimal value)', () => {
     win.location = 'https://www.example.test/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': 604800.000123,
-          'aCookie': {
-            'value': 'testValue',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cookieMaxAge': 604800.000123,
+        'aCookie': {
+          'value': 'testValue',
         },
-      })
-    );
+      },
+    });
 
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
@@ -439,18 +404,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should write cookie with custom expiration (zero value)', () => {
     win.location = 'https://www.example.test/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': 0,
-          'aCookie': {
-            'value': 'testValue',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cookieMaxAge': 0,
+        'aCookie': {
+          'value': 'testValue',
         },
-      })
-    );
+      },
+    });
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
@@ -461,18 +422,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should write cookie with custom expiration (negative value)', () => {
     win.location = 'https://www.example.test/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': -604800,
-          'aCookie': {
-            'value': 'testValue',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cookieMaxAge': -604800,
+        'aCookie': {
+          'value': 'testValue',
         },
-      })
-    );
+      },
+    });
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
         'aCookie=testValue; path=/; domain=example.test; ' +
@@ -483,18 +440,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should write cookie with default expiration (invalid string value)', () => {
     win.location = 'https://www.example.test/';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cookieMaxAge': 'invalid',
-          'aCookie': {
-            'value': 'testValue',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cookieMaxAge': 'invalid',
+        'aCookie': {
+          'value': 'testValue',
         },
-      })
-    );
+      },
+    });
     return allowConsoleError(() => {
       return cookieWriter.write().then(() => {
         expect(win.document.lastSetCookieRaw).to.equal(
@@ -507,17 +460,13 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should not write empty cookie', () => {
     win.location = 'https://www.example.test/?a=123&b=567';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'cCookie': {
-            'value': 'QUERY_PARAM(c)',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'cCookie': {
+          'value': 'QUERY_PARAM(c)',
         },
-      })
-    );
+      },
+    });
     return cookieWriter.write().then(() => {
       expect(win.document.cookie).to.equal('');
       expect(win.document.lastSetCookieRaw).to.be.undefined;
@@ -526,17 +475,13 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, (env) => {
 
   it('should not write cookie if macro is mal-formatted', () => {
     win.location = 'https://www.example.test/?a=123&b=567';
-    const cookieWriter = new CookieWriter(
-      win,
-      win.document.body,
-      dict({
-        'cookies': {
-          'aCookie': {
-            'value': 'LINKER_PARAM(b)',
-          },
+    const cookieWriter = new CookieWriter(win, win.document.body, {
+      'cookies': {
+        'aCookie': {
+          'value': 'LINKER_PARAM(b)',
         },
-      })
-    );
+      },
+    });
     expectAsyncConsoleError(/LINKER_PARAM requires two params, name and id/);
     return cookieWriter.write().then(() => {
       expect(win.document.cookie).to.equal('');

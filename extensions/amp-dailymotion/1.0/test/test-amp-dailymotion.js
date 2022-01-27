@@ -1,8 +1,11 @@
 import '../amp-dailymotion';
-import {htmlFor} from '#core/dom/static-template';
-import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/helpers/service';
 import {expect} from 'chai';
+
+import {htmlFor} from '#core/dom/static-template';
+
+import {toggleExperiment} from '#experiments';
+
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-dailymotion-v1.0',

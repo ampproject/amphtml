@@ -1,9 +1,10 @@
 import fs from 'fs';
 import minimist from 'minimist';
 import posthtml from 'posthtml';
-import transformModules from './modules/modules-transform';
+
 import transformCdnSrcs from './cdn/cdn-transform';
 import transformCss from './css/css-transform';
+import transformModules from './modules/modules-transform';
 
 const argv = minimist(process.argv.slice(2));
 const FOR_TESTING = argv._.includes('integration');

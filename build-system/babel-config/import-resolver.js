@@ -42,12 +42,13 @@ function readJsconfigPaths() {
 
 /**
  * Import map configuration.
- * @return {!Object}
+ * @return {Object}
  */
 function getImportResolver() {
   return {
     root: ['.'],
     alias: readJsconfigPaths(),
+    extensions: ['.js', '.jsx', '.ts', 'tsx'],
     babelOptions: {
       caller: {
         name: 'import-resolver',

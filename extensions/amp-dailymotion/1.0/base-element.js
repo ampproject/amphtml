@@ -1,7 +1,8 @@
 import {BentoDailymotion} from './component';
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
-export class BaseElement extends VideoBaseElement {}
+import {BentoVideoBaseElement} from '../../amp-video/1.0/base-element';
+
+export class BaseElement extends BentoVideoBaseElement {}
 
 /** @override */
 BaseElement['Component'] = BentoDailymotion;

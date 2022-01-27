@@ -3,7 +3,6 @@ import {Layout_Enum} from '#core/dom/layout';
 import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
 import {htmlFor} from '#core/dom/static-template';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -289,10 +288,9 @@ export class AmpStoryEducation extends AMP.BaseElement {
         // TODO(gmajoulet): update this method to support showing multiple
         // screens, if/when needed.
         this.viewer_
-          .sendMessageAwaitResponse(
-            'canShowScreens',
-            dict({'screens': [{'screen': screen}]})
-          )
+          .sendMessageAwaitResponse('canShowScreens', {
+            'screens': [{'screen': screen}],
+          })
           .then((response) => {
             const shouldShow = !!(
               response &&

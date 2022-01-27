@@ -2,16 +2,17 @@
  * @fileoverview Tests full-bleed animations like panning and zooming.
  */
 
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpStory} from '../amp-story';
 import {AmpStoryStoreService} from '../amp-story-store-service';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
+import {presets} from '../animation-presets';
 import {
   calculateTargetScalingFactor,
   targetFitsWithinPage,
 } from '../animation-presets-utils';
-import {presets} from '../animation-presets';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-story-full-bleed-animations',

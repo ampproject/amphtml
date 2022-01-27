@@ -1,10 +1,9 @@
 import {Keys_Enum} from '#core/constants/key-codes';
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import * as Preact from '#preact';
 import {Wrapper} from '#preact/component';
-import {propName, useResourcesNotify} from '#preact/utils';
+import {tabindexFromProps, useResourcesNotify} from '#preact/utils';
 
 import {useStyles} from './component.jss';
 import {getSocialConfig} from './social-share-config';
@@ -34,7 +33,6 @@ export function BentoSocialShare({
   target,
   type,
   width,
-  [propName('tabIndex')]: tabIndex = 0,
   ...rest
 }) {
   useResourcesNotify();
@@ -60,7 +58,7 @@ export function BentoSocialShare({
     <Wrapper
       {...rest}
       role="button"
-      tabIndex={tabIndex}
+      tabindex={tabindexFromProps(rest)}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       wrapperStyle={{
@@ -96,10 +94,10 @@ function processChildren(type, children, color, background) {
     return children;
   } else {
     const typeConfig = getSocialConfig(type) || {};
-    const iconStyle = dict({
+    const iconStyle = {
       'color': color || typeConfig.defaultColor,
       'backgroundColor': background || typeConfig.defaultBackgroundColor,
-    });
+    };
     return (
       <BentoSocialShareIcon
         style={{
@@ -247,11 +245,11 @@ function getQueryString(endpoint) {
  * @return {boolean}
  */
 function isIos() {
-  return /** @type {boolean} */ (
-    window &&
-      window.navigator &&
-      window.navigator.userAgent &&
-      window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0
+  return (
+    /** @type {boolean} */ window &&
+    window.navigator &&
+    window.navigator.userAgent &&
+    window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0
   );
 }
 

@@ -1,7 +1,9 @@
-import {CSS} from './pagination.jss';
-import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {BentoInlineGalleryPagination} from './pagination';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoInlineGalleryPagination} from './pagination';
+import {CSS} from './pagination.jss';
+
+import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
 
 export const TAG = 'bento-inline-gallery-pagination';
 

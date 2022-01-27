@@ -2,6 +2,8 @@ import * as Preact from '#preact';
 
 import {BentoSocialShare} from '../component';
 
+import '../component.jss';
+
 const types = [
   'email',
   'facebook',
