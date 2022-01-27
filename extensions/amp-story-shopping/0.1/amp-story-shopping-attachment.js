@@ -96,7 +96,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     }
   }
 
-  /** @private */
+  /**
+   * Renders a list of the products on the page, knows as a "Product Listing Page" or PLP.
+   * @private
+   */
   populatePlp_() {
     if (this.plpContainer_.querySelector('.i-amphtml-amp-story-shopping-plp')) {
       return;
