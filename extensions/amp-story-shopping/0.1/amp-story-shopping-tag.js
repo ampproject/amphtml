@@ -70,9 +70,13 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       this.onRtlStateUpdate_(rtlState);
     });
 
-    this.storeService_.subscribe(StateProperty.PAGE_SIZE, (pageSizeState) => {
-      this.shouldTagFlip_(pageSizeState);
-    });
+    this.storeService_.subscribe(
+      StateProperty.PAGE_SIZE,
+      (pageSizeState) => {
+        this.flipTagIfOffscreen_(pageSizeState);
+      },
+      true /** callToInitialize */
+    );
   }
 
   /**
@@ -80,7 +84,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @param {!Object} pageSize
    * @private
    */
-  shouldTagFlip_(pageSize) {
+  flipTagIfOffscreen_(pageSize) {
     /* We only check the right hand side, as resizing only expands the border to the right. */
 
     const storyPageWidth = pageSize.width;
@@ -95,14 +99,14 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
       const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
 
-      const dotEl = this.shoppingTagEl_.querySelector(
-        '.i-amphtml-amp-story-shopping-tag-dot'
-      );
-
       this.mutateElement(() => {
         this.shoppingTagEl_.classList.toggle(
           'i-amphtml-amp-story-shopping-tag-inner-flipped',
           shouldFlip
+        );
+
+        const dotEl = this.shoppingTagEl_.querySelector(
+          '.i-amphtml-amp-story-shopping-tag-dot'
         );
 
         dotEl.classList.toggle(
@@ -248,7 +252,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       },
       () => {
         this.styleTagText_();
-        this.shouldTagFlip_(this.storeService_.get(StateProperty.PAGE_SIZE));
       }
     );
   }
