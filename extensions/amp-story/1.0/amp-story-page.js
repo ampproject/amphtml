@@ -1527,12 +1527,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   installPageAttachmentExtension_() {
-    // AttachmentEl can be any component that extends draggable drawer.
-    const attachmentEl = this.element.querySelector(
+    const elementsThatRequireExtension = this.element.querySelector(
       'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
     );
 
-    if (!attachmentEl) {
+    if (!elementsThatRequireExtension) {
       return;
     }
 
