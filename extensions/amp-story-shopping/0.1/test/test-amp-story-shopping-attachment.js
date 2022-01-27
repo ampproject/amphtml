@@ -30,6 +30,7 @@ describes.realWin(
     let shoppingEl;
     let shoppingImpl;
     let storeService;
+    let shoppingTag;
 
     beforeEach(async () => {
       win = env.win;
@@ -62,7 +63,9 @@ describes.realWin(
 
       shoppingEl = win.document.createElement('amp-story-shopping-attachment');
       pageEl.appendChild(shoppingEl);
-
+      shoppingTag = win.document.createElement('amp-story-shopping-tag');
+      pageEl.appendChild(shoppingTag);
+      story.appendChild(pageEl);
       shoppingImpl = await shoppingEl.getImpl();
     });
 
