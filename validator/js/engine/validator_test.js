@@ -1209,7 +1209,7 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
     expect(attrSpec.name).not.toEqual('[style]');
   });
   if (attrSpec.valueUrl !== null) {
-    const protocolRegex = new RegExp('[a-z-]+');
+    const protocolRegex = new RegExp('^[a-z+-]+$');
     // UrlSpec protocol is matched against lowercased protocol names
     // so the rules *must* also be lower case.
     it('protocol must be lower case', () => {
