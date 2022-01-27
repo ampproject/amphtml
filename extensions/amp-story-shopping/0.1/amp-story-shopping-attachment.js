@@ -1,7 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
-import {user} from '#utils/log';
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
@@ -25,8 +24,6 @@ const FONTS_TO_LOAD = [
     src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
-
-const TAG = 'amp-story-shopping-attachment';
 
 export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @param {!AmpElement} element */
