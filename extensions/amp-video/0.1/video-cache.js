@@ -57,7 +57,7 @@ export function fetchCachedSources(
       jsonResponsePromise = Promise.resolve(inlineResponseJson);
     }
   }
-  
+
   if (!jsonResponsePromise) {
     const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
     maybeReplaceSrcWithSourceElement(videoEl, win);
