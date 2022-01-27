@@ -97,28 +97,33 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
        */
       const {offsetLeft, offsetWidth} = this.element;
 
-      const shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
+      let shouldFlip;
 
-      this.mutateElement(() => {
-        this.shoppingTagEl_.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-inner-flipped',
-          shouldFlip
-        );
+      this.measureMutateElement(
+        () => {
+          shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
+        },
+        () => {
+          this.shoppingTagEl_.classList.toggle(
+            'i-amphtml-amp-story-shopping-tag-inner-flipped',
+            shouldFlip
+          );
 
-        const dotEl = this.shoppingTagEl_.querySelector(
-          '.i-amphtml-amp-story-shopping-tag-dot'
-        );
+          const dotEl = this.shoppingTagEl_.querySelector(
+            '.i-amphtml-amp-story-shopping-tag-dot'
+          );
 
-        dotEl.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-dot-flipped',
-          shouldFlip
-        );
+          dotEl.classList.toggle(
+            'i-amphtml-amp-story-shopping-tag-dot-flipped',
+            shouldFlip
+          );
 
-        this.shoppingTagEl_.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-visible',
-          true
-        );
-      });
+          this.shoppingTagEl_.classList.toggle(
+            'i-amphtml-amp-story-shopping-tag-visible',
+            true
+          );
+        }
+      );
     });
   }
 
