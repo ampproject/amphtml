@@ -4,6 +4,8 @@ import * as Preact from '#preact';
 
 import {BentoSidebar, BentoSidebarToolbar} from '../component';
 
+import '../component.jss';
+
 export default {
   title: 'Sidebar',
   component: BentoSidebar,

@@ -7,5 +7,6 @@
     "checkJs": false
   },
 
-  "include": ["src", "3p", "ads", "extensions", "test", "testing"]
+  "include": ["src", "3p", "ads", "extensions", "test", "testing"],
+  "exclude": ["**/*shame.d.ts"]
 }

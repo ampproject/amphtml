@@ -124,7 +124,13 @@ function BentoSidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div class={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+    <div
+      class={objstr({
+        [classes.mounted]: mounted,
+        [classes.unmounted]: !mounted,
+      })}
+      part="wrapper"
+    >
       <ContainWrapper
         as={Comp}
         ref={sidebarRef}
@@ -139,7 +145,7 @@ function BentoSidebarWithRef(
           [classes.right]: side !== Side.LEFT,
         })}
         role="menu"
-        tabIndex="-1"
+        tabindex="-1"
         hidden={!side}
         {...rest}
       >
