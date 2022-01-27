@@ -5,7 +5,10 @@ import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
-import {getShoppingConfig} from './amp-story-shopping-config';
+import {
+  KeyedShoppingConfigDef,
+  getShoppingConfig,
+} from './amp-story-shopping-config';
 
 import {
   ShoppingConfigDataDef,
@@ -49,7 +52,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
-    /** @private {?Promise<Object<!ShoppingConfigDataDef>>}  */
+    /** @private {?Promise<!KeyedShoppingConfigDef>}  */
     this.shoppingConfig_ = null;
   }
 

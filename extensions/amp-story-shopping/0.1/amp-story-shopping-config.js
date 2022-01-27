@@ -12,9 +12,12 @@ import {
  *  items: !Array<!ShoppingConfigDataDef>,
  * }}
  */
-let ShoppingConfigDef;
+let ShoppingConfigResponseDef;
 
-/** @type {!WeakMap<!Element, !Promise<!ShoppingConfigDef>>} */
+/** @typedef {!Object<string, !ShoppingConfigDataDef> */
+export let KeyedShoppingConfigDef;
+
+/** @type {!WeakMap<!Element, !Promise<!KeyedShoppingConfigDef>>} */
 const cache = new WeakMap();
 
 /**
@@ -23,7 +26,7 @@ const cache = new WeakMap();
  * During the initial fetch, the config is: validated, keyed by 'product-tag-id',
  * and stored in service.
  * @param {!Element} pageElement <amp-story-page>
- * @return {!Promise<!ShoppingConfigDef>}
+ * @return {!Promise<!KeyedShoppingConfigDef>}
  */
 export function getShoppingConfig(pageElement) {
   if (!cache.has(pageElement)) {
@@ -34,7 +37,7 @@ export function getShoppingConfig(pageElement) {
 
 /**
  * @param {!Element} pageElement <amp-story-page>
- * @return {!Promise<!Object<string, ShoppingConfigDataDef>>}
+ * @return {!Promise<!KeyedShoppingConfigDef>>}
  */
 function getShoppingConfigUncached(pageElement) {
   const element = pageElement.querySelector('amp-story-shopping-config');
@@ -46,8 +49,8 @@ function getShoppingConfigUncached(pageElement) {
 }
 
 /**
- * @param {!ShoppingConfigDef} config
- * @return {!Object<string, ShoppingConfigDataDef>}
+ * @param {!ShoppingConfigResponseDef} config
+ * @return {!KeyedShoppingConfigDef}
  */
 function keyByProductTagId(config) {
   const keyed = {};
@@ -59,8 +62,8 @@ function keyByProductTagId(config) {
 
 /**
  * @param {!Element} element
- * @param {!Object<string, ShoppingConfigDataDef>} config
- * @return {!Promise<!ShoppingConfigDef>}
+ * @param {!KeyedShoppingConfigDef} config
+ * @return {!Promise<!ShoppingConfigResponseDef>}
  */
 function storeShoppingConfig(element, config) {
   const storeService = Services.storyStoreServiceForOrNull(element);
