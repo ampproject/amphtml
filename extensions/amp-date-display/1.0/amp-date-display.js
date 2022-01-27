@@ -2,7 +2,7 @@ import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
 
-import {dev, userAssert} from '#utils/log';
+import {dev} from '#utils/log';
 
 import {BaseElement} from './base-element';
 

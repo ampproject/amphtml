@@ -13,7 +13,6 @@ export default {
   decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-mathml', version: '1.0'}],
-    experiments: ['bento'],
   },
   args: {
     formulas,

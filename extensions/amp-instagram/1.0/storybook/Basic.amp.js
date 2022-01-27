@@ -10,7 +10,6 @@ export default {
       {name: 'amp-instagram', version: '1.0'},
       {name: 'amp-accordion', version: '1.0'},
     ],
-    experiments: ['bento'],
   },
   args: {
     width: 500,

@@ -13,7 +13,6 @@ export default {
       {name: 'amp-youtube', version: '1.0'},
       {name: 'amp-accordion', version: '1.0'},
     ],
-    experiments: ['bento'],
   },
 };
 

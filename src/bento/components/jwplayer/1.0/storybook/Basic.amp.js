@@ -7,7 +7,6 @@ export default {
   decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-jwplayer', version: '1.0'}],
-    experiments: ['bento'],
   },
   args: {
     'data-example-property': 'example string property argument',

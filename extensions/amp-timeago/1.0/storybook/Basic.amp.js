@@ -7,7 +7,6 @@ export default {
   decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-timeago', version: '1.0'}],
-    experiments: ['bento'],
   },
   argTypes: {
     datetime: {control: {type: 'date'}},

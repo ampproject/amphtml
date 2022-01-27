@@ -10,7 +10,6 @@ export default {
       {name: 'amp-inline-gallery', version: '1.0'},
       {name: 'amp-base-carousel', version: '1.0'},
     ],
-    experiments: ['bento'],
   },
   argTypes: {
     orientation: {

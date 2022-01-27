@@ -1,4 +1,3 @@
-import {userAssert} from '#core/assert';
 import {htmlFor} from '#core/dom/static-template';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
