@@ -1174,9 +1174,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       );
 
       await platform.getEntitlements();
-      expect(fetchStub).to.be.calledWith(
-        'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements'
+      expect(fetchStub.args[0][0]).to.match(
+        /https:\/\/news.google.com\/swg\/_\/api\/v1\/publication\/example\.org\/entitlements(.)*/
       );
+      expect(fetchStub.args[0][0]).not.contain('crypt=');
     });
 
     it('should add encryptedDocumentKey parameter to url', async () => {
@@ -1189,8 +1190,8 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       getEncryptedDocumentKeyStub.callsFake(() => 'encryptedDocumentKey');
 
       await platform.getEntitlements();
-      expect(fetchStub).to.be.calledWith(
-        'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?crypt=encryptedDocumentKey'
+      expect(fetchStub.args[0][0]).to.match(
+        /https:\/\/news\.google\.com\/swg\/_\/api\/v1\/publication\/example\.org\/entitlements(.)*\?crypt=encryptedDocumentKey/
       );
     });
   });
