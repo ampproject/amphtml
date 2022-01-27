@@ -27,13 +27,13 @@ function parseTimestamp(timestamp) {
 export class TrackRenderer {
   /**
    *
-   * @param {!HTMLVideoElement} video
+   * @param {!HTMLMediaElement} mediaEl
    * @param {!TextTrack} track
    * @param {!Element} container
    */
-  constructor(video, track, container) {
-    /** @private {!HTMLVideoElement} */
-    this.video_ = video;
+  constructor(mediaEl, track, container) {
+    /** @private {!HTMLMediaElement} */
+    this.mediaEl_ = mediaEl;
 
     /** @private {?TextTrack} */
     this.track_ = track;
@@ -49,7 +49,7 @@ export class TrackRenderer {
     this.cueChangeUnlistener_ = listen(track, 'cuechange', () => {
       this.render_();
     });
-    this.timeUpdateUnlistener_ = listen(video, 'timeupdate', () => {
+    this.timeUpdateUnlistener_ = listen(mediaEl, 'timeupdate', () => {
       this.updateTime_();
     });
   }
@@ -61,7 +61,7 @@ export class TrackRenderer {
     this.cueChangeUnlistener_();
     this.timeUpdateUnlistener_();
     removeElement(this.element_);
-    this.video_ = null;
+    this.mediaEl_ = null;
     this.track_ = null;
   }
 
@@ -104,7 +104,7 @@ export class TrackRenderer {
    * @private
    */
   updateTime_() {
-    const videoTime = this.video_.currentTime;
+    const videoTime = this.mediaEl_.currentTime;
     toArray(this.element_.childNodes).forEach((cue, i) => {
       toArray(cue.childNodes).forEach((section, j) => {
         // The first section always has implicit timestamp 0, so it's never in

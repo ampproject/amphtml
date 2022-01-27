@@ -1,3 +1,4 @@
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   Layout_Enum,
   applyFillContent,
@@ -53,15 +54,17 @@ export class AmpAudio extends AMP.BaseElement {
   buildCallback() {
     // If layout="nodisplay" force autoplay to off
     const layout = this.getLayout();
+    this.buildAudioElement();
     if (layout === Layout_Enum.NODISPLAY) {
       this.element.removeAttribute('autoplay');
-      this.buildAudioElement();
     }
 
     setIsMediaComponent(this.element);
 
     this.registerAction('play', this.play_.bind(this));
     this.registerAction('pause', this.pause_.bind(this));
+
+    this.setUpCaptions_();
   }
 
   /** @override */
@@ -110,17 +113,6 @@ export class AmpAudio extends AMP.BaseElement {
       return;
     }
 
-    // Force controls otherwise there is no player UI.
-    audio.controls = true;
-
-    // TODO(https://go.amp.dev/issue/36303): We explicitly set width 100% to workaround
-    // an issue where `<audio>` does not fill the parent container on iOS
-    // (https://go.amp.dev/issue/36292).
-    // This is required since global styles for `.i-amphtml-fill-content` set width to 0 in
-    // order to address a separate bug. Re-assess whether that workaround is needed, and
-    // remove this style if so.
-    setStyle(audio, 'width', '100%');
-
     const src = this.getElementAttribute_('src');
     if (src) {
       assertHttpsUrl(src, this.element);
@@ -141,7 +133,22 @@ export class AmpAudio extends AMP.BaseElement {
       audio
     );
 
-    applyFillContent(audio);
+    const layout = this.getLayout();
+    if (layout !== Layout_Enum.NODISPLAY) {
+      // Force controls otherwise there is no player UI.
+      audio.controls = true;
+
+      // TODO(https://go.amp.dev/issue/36303): We explicitly set width 100% to workaround
+      // an issue where `<audio>` does not fill the parent container on iOS
+      // (https://go.amp.dev/issue/36292).
+      // This is required since global styles for `.i-amphtml-fill-content` set width to 0 in
+      // order to address a separate bug. Re-assess whether that workaround is needed, and
+      // remove this style if so.
+      setStyle(audio, 'width', '100%');
+
+      applyFillContent(audio);
+    }
+
     realChildNodes(this.element).forEach((child) => {
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'), dev().assertElement(child));
@@ -153,9 +160,10 @@ export class AmpAudio extends AMP.BaseElement {
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
 
-    listen(this.audio_, 'play', () =>
-      triggerAnalyticsEvent(this.element, 'audio-play')
-    );
+    listen(this.audio_, 'play', () => {
+      this.setUpCaptions_();
+      return triggerAnalyticsEvent(this.element, 'audio-play');
+    });
     listen(this.audio_, 'pause', () =>
       triggerAnalyticsEvent(this.element, 'audio-pause')
     );
@@ -214,6 +222,37 @@ export class AmpAudio extends AMP.BaseElement {
    */
   getElementAttribute_(attr) {
     return this.element.getAttribute(attr);
+  }
+
+  /**
+   * Resets the component if the underlying <audio> was changed.
+   * This should only be used in cases when a higher-level component manages
+   * this element's DOM.
+   */
+  resetOnDomChange() {
+    this.setUpCaptions_();
+  }
+
+  /**
+   * Connects to amp-story-captions component.
+   * @private
+   */
+  setUpCaptions_() {
+    const captionsId = this.element.getAttribute('captions-id');
+    if (!captionsId) {
+      return;
+    }
+    const captionsElement = this.win.document.querySelector(
+      `amp-story-captions#${escapeCssSelectorIdent(captionsId)}`
+    );
+    if (!captionsElement) {
+      return;
+    }
+    captionsElement.getImpl().then((impl) => {
+      if (impl.setMediaElement) {
+        impl.setMediaElement(this.audio_);
+      }
+    });
   }
 
   /** @override */

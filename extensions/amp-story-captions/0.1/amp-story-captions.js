@@ -15,8 +15,8 @@ export class AmpStoryCaptions extends AMP.BaseElement {
     /** @private {?Element} */
     this.container_ = null;
 
-    /** @private {?HTMLVideoElement} */
-    this.video_ = null;
+    /** @private {?HTMLMediaElement} */
+    this.mediaElement_ = null;
 
     /** @private {?UnlistenDef} */
     this.textTracksChangeUnlistener_ = null;
@@ -38,18 +38,18 @@ export class AmpStoryCaptions extends AMP.BaseElement {
 
   /**
    * Attaches caption rendering to a video element. Called from amp-video.
-   * @param {!HTMLVideoElement} video
+   * @param {!HTMLMediaElement} mediaEl
    */
-  setVideoElement(video) {
+  setMediaElement(mediaEl) {
     if (this.textTracksChangeUnlistener_) {
       this.textTracksChangeUnlistener_();
     }
 
-    this.video_ = video;
+    this.mediaElement_ = mediaEl;
 
     this.updateTracks_();
     this.textTracksChangeUnlistener_ = listen(
-      video.textTracks,
+      mediaEl.textTracks,
       'change',
       () => {
         this.updateTracks_();
@@ -63,13 +63,13 @@ export class AmpStoryCaptions extends AMP.BaseElement {
       this.trackRenderers_.pop().dispose();
     }
 
-    toArray(this.video_.textTracks).forEach((track) => {
+    toArray(this.mediaElement_.textTracks).forEach((track) => {
       // Render both showing and hidden, because otherwise we would need to remember when we set it to hidden.
       // Disabled tracks are ignored.
       if (track.mode === 'showing' || track.mode === 'hidden') {
         track.mode = 'hidden';
         this.trackRenderers_.push(
-          new TrackRenderer(this.video_, track, this.container_)
+          new TrackRenderer(this.mediaElement_, track, this.container_)
         );
       }
     });

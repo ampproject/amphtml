@@ -532,11 +532,6 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    if (componentEl.tagName.toLowerCase() == 'amp-audio') {
-      // TODO(alanorozco): Implement reset for amp-audio
-      return Promise.resolve();
-    }
-
     return componentEl.getImpl().then((impl) => {
       if (impl.resetOnDomChange) {
         impl.resetOnDomChange();

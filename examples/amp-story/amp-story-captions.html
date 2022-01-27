@@ -90,6 +90,23 @@
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
+
+    <amp-story-page id="page2" auto-advance-after="audio-nolayout">
+      <amp-story-grid-layer template="vertical">
+        <amp-audio id="audio-nolayout"
+            src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+            layout="nodisplay" autoplay captions-id="captions-audio">
+          <track kind="subtitles" src="captions.vtt" srclang="en" default id="audio-track">
+        </amp-audio>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical" class="bottom">
+        <div class="scrim">
+          <div class="static-text">This element is always above captions.</div>
+          <amp-story-captions id="captions-audio" layout="fixed-height" height="100"></amp-story-captions>
+          <div class="static-text">This element is always below captions and never overlaps.</div>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
   </amp-story>
 </body>
 

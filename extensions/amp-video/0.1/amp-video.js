@@ -774,8 +774,8 @@ export class AmpVideo extends AMP.BaseElement {
       return;
     }
     captionsElement.getImpl().then((impl) => {
-      if (impl.setVideoElement) {
-        impl.setVideoElement(this.video_);
+      if (impl.setMediaElement) {
+        impl.setMediaElement(this.video_);
       }
     });
   }
