@@ -50,9 +50,10 @@ module.exports = {
       }
 
       const [nextComment] = context.getCommentsAfter(node);
+      const [nextCommentStart] = nextComment.range;
       if (
         nextComment &&
-        text.substr(end, nextComment.start - end).indexOf('\n') < 0
+        text.substr(end, nextCommentStart - end).indexOf('\n') < 0
       ) {
         yield fixer.remove(nextComment);
       }

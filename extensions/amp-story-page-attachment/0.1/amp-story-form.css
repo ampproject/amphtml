@@ -24,8 +24,16 @@
     color: #0F8514 !important;
   }
 
+  [theme="dark"] [submit-success] .i-amphtml-story-page-attachment-form-submission-status {
+    color: #8BDC8F !important;
+  }
+
   [submit-error] .i-amphtml-story-page-attachment-form-submission-status {
     color: #DE3333 !important;
+  }
+
+  [theme="dark"] [submit-error] .i-amphtml-story-page-attachment-form-submission-status {
+    color: #FF5C5C !important;
   }
 
   @keyframes submission-status-fade-in {

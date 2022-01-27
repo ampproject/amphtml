@@ -332,6 +332,8 @@ exports.rules = [
         'src/service/extension-script.js',
       'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/extension-script.js',
+      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
@@ -349,8 +351,6 @@ exports.rules = [
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
-        'src/service/video-manager-impl.js',
-      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
         'src/service/video-manager-impl.js',
@@ -495,6 +495,12 @@ exports.rules = [
   {
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'extensions/**/*.js',
+    allowlist: [
+      // Do not add to this allowlist.
+      // These files are here temporarily while all the bento components are moved out of extensions.
+      'src/bento/components/jwplayer/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      'src/bento/components/jwplayer/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+    ],
   },
   {
     filesMatching: 'src/**/*.js',
