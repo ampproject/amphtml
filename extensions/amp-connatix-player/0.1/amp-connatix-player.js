@@ -268,14 +268,12 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   layoutCallback() {
     const {element} = this;
     // Url Params for iframe source
-    const urlParams = Object.assign(
-      {
-        'playerId': this.playerId_ || undefined,
-        'mediaId': this.mediaId_ || undefined,
-        'url': Services.documentInfoForDoc(element).sourceUrl,
-      },
-      getDataParamsFromAttributes(element)
-    );
+    const urlParams = {
+      'playerId': this.playerId_ || undefined,
+      'mediaId': this.mediaId_ || undefined,
+      'url': Services.documentInfoForDoc(element).sourceUrl,
+      ...getDataParamsFromAttributes(element),
+    };
     const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
 
