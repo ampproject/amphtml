@@ -4,10 +4,6 @@ import {platformUtils} from '#preact/utils/platform';
 import {getIOSAppInfo} from '../component/ios';
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
-  beforeEach(() => {
-    env.sandbox.stub(logger, 'info');
-    env.sandbox.stub(logger, 'warn');
-  });
   describe('getIOSAppInfo', () => {
     describe('when no meta header is present', () => {
       it('should return null when no meta header is present', () => {

@@ -1,6 +1,5 @@
 import {WindowInterface} from '#core/window/interface';
 
-import {logger} from '#preact/logger';
 import {docInfo} from '#preact/utils/docInfo';
 import {platformUtils} from '#preact/utils/platform';
 import {xhrUtils} from '#preact/utils/xhr';
@@ -14,8 +13,6 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
     env.sandbox
       .stub(docInfo, 'canonicalUrl')
       .get(() => 'https://test.com/canonicalUrl');
-    env.sandbox.stub(logger, 'info');
-    env.sandbox.stub(logger, 'warn');
   });
 
   describe('getAndroidAppInfo', () => {

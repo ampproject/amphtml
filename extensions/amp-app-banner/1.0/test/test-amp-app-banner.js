@@ -37,10 +37,6 @@ describes.realWin(
         'app-id=11111111,app-argument=https://test.com/deep-link'
       );
       document.head.appendChild(meta);
-
-      // Mock our logger, so we can check for warnings:
-      env.sandbox.stub(logger, 'info');
-      env.sandbox.stub(logger, 'warn');
     });
     afterEach(() => {
       // Remove the injected <meta> tag:
