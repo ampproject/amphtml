@@ -1,11 +1,17 @@
 import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
+import {logger} from '#preact/logger';
 import {platformUtils} from '#preact/utils/platform';
 
 import {AppBanner, BentoAppBanner} from '../component/component';
 
 describes.realWin('BentoAppBanner preact component v1.0', {}, (env) => {
+  beforeEach(() => {
+    env.sandbox.stub(logger, 'info');
+    env.sandbox.stub(logger, 'warn');
+  });
+
   describe('raw AppBanner', () => {
     let wrapper;
     let onInstall;
