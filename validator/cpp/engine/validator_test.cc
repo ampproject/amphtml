@@ -4,6 +4,7 @@
 
 #include "cpp/engine/validator_pb.h"
 #include "gtest/gtest.h"
+#include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
 #include "absl/status/status.h"
 #include "absl/strings/cord.h"
@@ -18,6 +19,7 @@
 #include "cpp/htmlparser/css/parse-css.pb.h"
 #include "cpp/htmlparser/logging.h"
 #include "validator.pb.h"
+#include "re2/re2.h"
 
 using absl::StartsWith;
 using absl::StrAppend;
@@ -1142,7 +1144,7 @@ TEST(ValidatorTest, InvalidHyphenCharacter) {
 // every item of `type_identifiers` is in `valid_type_identifiers`.
 void TypeIdentifiersAreValidAndUnique(
     const absl::flat_hash_set<std::string_view>& valid_type_identifiers,
-    const proto2::RepeatedPtrField<std::string>& type_identifiers,
+    const google::protobuf::RepeatedPtrField<std::string>& type_identifiers,
     std::string_view field_name, std::string_view spec_type,
     std::string_view spec_name) {
   absl::flat_hash_set<std::string_view> encountered_type_identifiers;
