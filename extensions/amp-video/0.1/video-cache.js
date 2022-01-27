@@ -71,10 +71,9 @@ export function fetchCachedSources(
               : null,
           }
         );
-        const responsePromise = Services.xhrFor(win).fetch(requestUrl, {
-          prerenderSafe: true,
-        });
-        return responsePromise.json();
+        return Services.xhrFor(win)
+          .fetch(requestUrl, {prerenderSafe: true})
+          .then((xhrResponse) => xhrResponse.json());
       });
   }
 
