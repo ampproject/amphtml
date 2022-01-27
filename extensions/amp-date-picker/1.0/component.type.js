@@ -87,7 +87,6 @@ BentoDatePickerDef.DateRangePickerProps;
  * min: (Date|undefined)
  * max: (Date|undefined)
  * }}
- * }}
  */
 BentoDatePickerDef.AttributesContext;
 
@@ -97,9 +96,17 @@ BentoDatePickerDef.AttributesContext;
  * isDisabled: function(Date!): boolean
  * isHighlighted: function(Date!): boolean
  * }}
- * }}
  */
 BentoDatePickerDef.AttributesContextFunctions;
+
+/**
+ * @typedef {{
+ * selectedDate: (Date|undefined)
+ * selectedStartDate: (Date|undefined)
+ * selectedEndDate: (Date|undefined)
+ * }}
+ */
+BentoDatePickerDef.DatePickerContext;
 
 /** @interface */
 BentoDatePickerDef.BentoDatePickerApi = class {

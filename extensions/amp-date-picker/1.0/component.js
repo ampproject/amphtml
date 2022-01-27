@@ -19,7 +19,7 @@ import {getCurrentDate} from './date-helpers';
 import {DateRangePicker} from './date-range-picker';
 import {DatesList} from './dates-list';
 import {SingleDatePicker} from './single-date-picker';
-import {AttributesContext} from './use-attributes';
+import {AttributesContext} from './use-day-attributes';
 
 /**
  * @param {!BentoDatePickerDef.Props} props

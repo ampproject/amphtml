@@ -27,6 +27,7 @@ import {
   TAG,
 } from './constants';
 import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
+import {DatePickerContext} from './use-date-picker';
 import {useDatePickerState} from './use-date-picker-state';
 
 /**
@@ -216,18 +217,20 @@ function SingleDatePickerWithRef(
       ref={containerRef}
       data-date={getFormattedDate(date, format, locale)}
     >
-      {children}
-      {hiddenInputProps && <input ref={inputRef} {...hiddenInputProps} />}
-      {state.isOpen && (
-        <BaseDatePicker
-          ref={calendarRef}
-          mode="single"
-          selected={date}
-          onSelect={setDate}
-          locale={locale}
-          {...rest}
-        />
-      )}
+      <DatePickerContext.Provider value={{selectedDate: date}}>
+        {children}
+        {hiddenInputProps && <input ref={inputRef} {...hiddenInputProps} />}
+        {state.isOpen && (
+          <BaseDatePicker
+            ref={calendarRef}
+            mode="single"
+            selected={date}
+            onSelect={setDate}
+            locale={locale}
+            {...rest}
+          />
+        )}
+      </DatePickerContext.Provider>
     </ContainWrapper>
   );
 }

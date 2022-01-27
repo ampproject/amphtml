@@ -12,7 +12,7 @@ const DATE_FORMAT = 'cccc, LLLL d, yyyy';
  *
  * @return {BentoDatePickerDef.AttributesContextFunctions} values
  */
-export function useAttributes() {
+export function useDayAttributes() {
   /** @const {?BentoDatePickerDef.AttributesContext} context */
   const context = useContext(AttributesContext);
   if (!context) {

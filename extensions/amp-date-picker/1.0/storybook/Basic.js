@@ -1,9 +1,11 @@
 import {addDays} from 'date-fns';
 
 import * as Preact from '#preact';
+import {useRef} from '#preact';
 
 import {BentoDatePicker} from '../component';
 import {getFormattedDate, localeMap} from '../date-helpers';
+import {useDatePicker} from '../use-date-picker';
 
 const today = new Date();
 
@@ -31,20 +33,28 @@ export default {
   },
 };
 
-export const _default = (args) => {
-  return <BentoDatePicker {...args}></BentoDatePicker>;
-};
-
-export const WithSingleInput = (args) => {
+const DateDisplay = () => {
+  const {selectedDate} = useDatePicker();
   return (
-    <BentoDatePicker {...args}>
-      <input id="date" value={getFormattedDate(today)} />
-    </BentoDatePicker>
+    <p>
+      The selected date is {getFormattedDate(selectedDate, 'MMMM dd, yyyy')}
+    </p>
   );
 };
 
-WithSingleInput.args = {
-  type: 'single',
+export const _default = (args) => {
+  const datePickerRef = useRef();
+  return (
+    <BentoDatePicker ref={datePickerRef} {...args}>
+      <input id="date" placeholder="Pick a date" />
+      <button onClick={() => datePickerRef.current?.clear()}>Clear</button>
+      <button onClick={() => datePickerRef.current?.today()}>Today</button>
+      <button onClick={() => datePickerRef.current?.today({offset: 1})}>
+        Tomorrow
+      </button>
+      <DateDisplay />
+    </BentoDatePicker>
+  );
 };
 
 export const WithRangeInput = (args) => {
@@ -59,19 +69,4 @@ export const WithRangeInput = (args) => {
 WithRangeInput.args = {
   type: 'range',
   mode: 'overlay',
-};
-
-// eslint-disable-next-line local/no-export-side-effect
-export const SingleWithBlockedDates = _default.bind({});
-
-SingleWithBlockedDates.args = {
-  blocked: [addDays(today, 4), addDays(today, 5)],
-};
-
-// eslint-disable-next-line local/no-export-side-effect
-export const RangeWithBlockedDates = _default.bind({});
-
-RangeWithBlockedDates.args = {
-  type: 'range',
-  blocked: [addDays(today, 4), addDays(today, 5)],
 };

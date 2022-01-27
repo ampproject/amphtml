@@ -33,8 +33,9 @@ import {
   TAG,
 } from './constants';
 import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
-import {useAttributes} from './use-attributes';
+import {DatePickerContext} from './use-date-picker';
 import {useDatePickerState} from './use-date-picker-state';
+import {useDayAttributes} from './use-day-attributes';
 
 /**
  * @param {!BentoDatePickerDef.DateRangePickerProps} props
@@ -70,7 +71,7 @@ function DateRangePickerWithRef(
 
   const {state, transitionTo} = useDatePickerState(mode);
 
-  const {getDisabledAfter, getDisabledBefore, isDisabled} = useAttributes();
+  const {getDisabledAfter, getDisabledBefore, isDisabled} = useDayAttributes();
 
   /**
    * Generate a name for a hidden input.
@@ -329,23 +330,31 @@ function DateRangePickerWithRef(
       data-startdate={getFormattedDate(startDate, format, locale)}
       data-enddate={getFormattedDate(endDate, format, locale)}
     >
-      {children}
-      {startHiddenInputName && (
-        <input ref={startInputRef} name={startHiddenInputName} type="hidden" />
-      )}
-      {endHiddenInputName && (
-        <input ref={endInputRef} name={endHiddenInputName} type="hidden" />
-      )}
-      {state.isOpen && (
-        <BaseDatePicker
-          mode="range"
-          selected={dateRange}
-          onSelect={setDateRange}
-          locale={locale}
-          disabled={[isDisabled, {after: getDisabledAfter(startDate)}]}
-          {...rest}
-        />
-      )}
+      <DatePickerContext.Provider
+        value={{selectedStartDate: startDate, selectedEndDate: endDate}}
+      >
+        {children}
+        {startHiddenInputName && (
+          <input
+            ref={startInputRef}
+            name={startHiddenInputName}
+            type="hidden"
+          />
+        )}
+        {endHiddenInputName && (
+          <input ref={endInputRef} name={endHiddenInputName} type="hidden" />
+        )}
+        {state.isOpen && (
+          <BaseDatePicker
+            mode="range"
+            selected={dateRange}
+            onSelect={setDateRange}
+            locale={locale}
+            disabled={[isDisabled, {after: getDisabledAfter(startDate)}]}
+            {...rest}
+          />
+        )}
+      </DatePickerContext.Provider>
     </ContainWrapper>
   );
 }
