@@ -1,4 +1,4 @@
-import {INVALID_PROTOCOLS} from '#core/url';
+import {INVALID_PROTOCOLS} from '#core/types/string/url';
 
 export const urlUtils = {
   /**
