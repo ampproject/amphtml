@@ -1515,7 +1515,25 @@ describe('ValidatorRulesMakeSense', () => {
     });
     it('reference points must set descriptive_name', () => {
       if (tagSpec.tagName == '$REFERENCE_POINT') {
-        expect(tagSpec.descriptiveName !== null);
+        // TODO(b/215742073): Remove this allowlist by
+        // adding descriptive name to every tag in this list.
+        const allowlist = [
+            'AMP-BASE-CAROUSEL lightbox [child]',
+            'AMP-BASE-CAROUSEL lightbox [lightbox-exclude]',
+            'AMP-CAROUSEL lightbox [child]',
+            'AMP-CAROUSEL lightbox [lightbox-exclude]',
+            'AMP-NEXT-PAGE > [footer]',
+            'AMP-NEXT-PAGE > [recommendation-box]',
+            'AMP-NEXT-PAGE > [separator]',
+            'AMP-SELECTOR child',
+            'AMP-SELECTOR option',
+            'AMP-STORY-CTA-LAYER animate-in',
+            'AMP-STORY-GRID-LAYER animate-in',
+            'AMP-STORY-GRID-LAYER default',
+        ];
+        if (!allowlist.includes(tagSpec.specName)) {
+          expect(tagSpec.descriptiveName).not.toBeNull();
+        }
       }
     });
     if ((tagSpec.enabledBy.length > 0) || (tagSpec.disabledBy.length > 0)) {
