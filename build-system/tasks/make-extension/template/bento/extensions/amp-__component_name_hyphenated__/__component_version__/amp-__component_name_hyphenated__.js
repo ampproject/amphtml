@@ -1,8 +1,6 @@
 import {BaseElement} from './base-element';
 __css_import__;
-import {isExperimentOn} from '#experiments';
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
-import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-__component_name_hyphenated__';
@@ -21,11 +19,6 @@ class Amp__component_name_pascalcase__ extends setSuperClass(BaseElement, AmpPre
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'bento') ||
-        isExperimentOn(this.win, 'bento-__component_name_hyphenated__'),
-      'expected global "bento" or specific "bento-__component_name_hyphenated__" experiment to be enabled'
-    );
     return super.isLayoutSupported(layout);
   }
 }

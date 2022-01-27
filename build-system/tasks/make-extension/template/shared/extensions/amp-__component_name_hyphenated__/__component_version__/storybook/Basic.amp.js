@@ -8,7 +8,6 @@ export default {
     extensions: [
       {name: 'amp-__component_name_hyphenated__', version: '__component_version__'},
     ],
-    __storybook_experiments_do_not_add_trailing_comma__
   },
   args: {
     'data-example-property': 'example string property argument'
