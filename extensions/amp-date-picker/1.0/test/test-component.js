@@ -323,8 +323,8 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       const startDateInput = wrapper.find('input[name="start-date"]');
       const endDateInput = wrapper.find('input[name="end-date"]');
 
-      expect(startDateInput.prop('value')).to.equal('2021-01-01');
-      expect(endDateInput.prop('value')).to.equal('2021-01-02');
+      expect(startDateInput.getDOMNode().value).to.equal('2021-01-01');
+      expect(endDateInput.getDOMNode().value).to.equal('2021-01-02');
     });
 
     it('sets the selected date in the calendar state', () => {
@@ -1077,12 +1077,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
         expect(wrapper.exists('[data-startdate="2022-01-01"]')).to.be.false;
         expect(wrapper.exists('[data-enddate="2022-01-01"]')).to.be.false;
-        expect(wrapper.find('input[name="startdate"]').prop('value')).to.equal(
-          ''
-        );
-        expect(wrapper.find('input[name="enddate"]').prop('value')).to.equal(
-          ''
-        );
+        expect(
+          wrapper.find('input[name="startdate"]').getDOMNode().value
+        ).to.equal('');
+        expect(
+          wrapper.find('input[name="enddate"]').getDOMNode().value
+        ).to.equal('');
       });
 
       it('can set the start and end dates', () => {
@@ -1094,12 +1094,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
         expect(wrapper.exists('[data-startdate="2022-01-21"]')).to.be.true;
         expect(wrapper.exists('[data-enddate="2022-01-22"]')).to.be.true;
-        expect(wrapper.find('input[name="startdate"]').prop('value')).to.equal(
-          '2022-01-21'
-        );
-        expect(wrapper.find('input[name="enddate"]').prop('value')).to.equal(
-          '2022-01-22'
-        );
+        expect(
+          wrapper.find('input[name="startdate"]').getDOMNode().value
+        ).to.equal('2022-01-21');
+        expect(
+          wrapper.find('input[name="enddate"]').getDOMNode().value
+        ).to.equal('2022-01-22');
       });
 
       it('can set the start date to today', () => {
@@ -1107,9 +1107,9 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         wrapper.update();
 
         expect(wrapper.exists('[data-startdate="2022-01-21"]')).to.be.true;
-        expect(wrapper.find('input[name="startdate"]').prop('value')).to.equal(
-          '2022-01-21'
-        );
+        expect(
+          wrapper.find('input[name="startdate"]').getDOMNode().value
+        ).to.equal('2022-01-21');
       });
 
       it('can use the offset argment to add or subtract days from start today', () => {
@@ -1117,9 +1117,9 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         wrapper.update();
 
         expect(wrapper.exists('[data-startdate="2022-01-20"]')).to.be.true;
-        expect(wrapper.find('input[name="startdate"]').prop('value')).to.equal(
-          '2022-01-20'
-        );
+        expect(
+          wrapper.find('input[name="startdate"]').getDOMNode().value
+        ).to.equal('2022-01-20');
       });
 
       it('can set the end date to today', () => {
@@ -1127,9 +1127,9 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         wrapper.update();
 
         expect(wrapper.exists('[data-enddate="2022-01-21"]')).to.be.true;
-        expect(wrapper.find('input[name="enddate"]').prop('value')).to.equal(
-          '2022-01-21'
-        );
+        expect(
+          wrapper.find('input[name="enddate"]').getDOMNode().value
+        ).to.equal('2022-01-21');
       });
 
       it('can use the offset argment to add or subtract days from end today', () => {
@@ -1137,9 +1137,9 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         wrapper.update();
 
         expect(wrapper.exists('[data-enddate="2022-01-20"]')).to.be.true;
-        expect(wrapper.find('input[name="enddate"]').prop('value')).to.equal(
-          '2022-01-20'
-        );
+        expect(
+          wrapper.find('input[name="enddate"]').getDOMNode().value
+        ).to.equal('2022-01-20');
       });
     });
   });

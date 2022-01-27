@@ -13,7 +13,6 @@ import {
 
 import * as Preact from '#preact';
 import {
-  cloneElement,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -21,7 +20,7 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {Children, forwardRef} from '#preact/compat';
+import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
 import {BaseDatePicker} from './base-date-picker';
@@ -59,13 +58,13 @@ function DateRangePickerWithRef(
   },
   ref
 ) {
-  const startInputElementRef = useRef();
-  const endInputElementRef = useRef();
+  const startInputRef = useRef();
+  const endInputRef = useRef();
 
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
-  const [startInputProps, setStartInputProps] = useState();
-  const [endInputProps, setEndInputProps] = useState();
+  const [startHiddenInputName, setStartHiddenInputName] = useState();
+  const [endHiddenInputName, setEndHiddenInputName] = useState();
 
   const containerRef = useRef();
 
@@ -183,10 +182,9 @@ function DateRangePickerWithRef(
   const handleSetStartDate = useCallback(
     (date) => {
       setStartDate(date);
-      setStartInputProps((props) => ({
-        ...props,
-        value: getFormattedDate(date, format, locale),
-      }));
+      if (startInputRef.current) {
+        startInputRef.current.value = getFormattedDate(date, format, locale);
+      }
     },
     [format, locale, setStartDate]
   );
@@ -194,10 +192,9 @@ function DateRangePickerWithRef(
   const handleSetEndDate = useCallback(
     (date) => {
       setEndDate(date);
-      setEndInputProps((props) => ({
-        ...props,
-        value: getFormattedDate(date, format, locale),
-      }));
+      if (endInputRef.current) {
+        endInputRef.current.value = getFormattedDate(date, format, locale);
+      }
     },
     [format, locale, setEndDate]
   );
@@ -257,32 +254,6 @@ function DateRangePickerWithRef(
     [clear, setDateRange, startToday, endToday]
   );
 
-  const inputElements = useMemo(() => {
-    const startInputPropsWithRef = {
-      ...startInputProps,
-      ref: startInputElementRef,
-    };
-    const endInputPropsWithRef = {
-      ...endInputProps,
-      ref: endInputElementRef,
-    };
-    if (Children.toArray(children).length > 0) {
-      // TODO: This should be determined based on the selectors, but
-      // I'm not sure how to do that using React children
-      const [startDateComponent, endDateComponent] = children;
-      return [
-        cloneElement(startDateComponent, startInputPropsWithRef),
-        cloneElement(endDateComponent, endInputPropsWithRef),
-      ];
-    }
-    return (
-      <>
-        <input {...startInputPropsWithRef} />;
-        <input {...endInputPropsWithRef} />;
-      </>
-    );
-  }, [children, endInputProps, startInputProps]);
-
   useEffect(() => {
     const form = closestAncestorElementBySelector(
       containerRef.current,
@@ -297,26 +268,18 @@ function DateRangePickerWithRef(
       endInputSelector
     );
     if (startDateInputElement) {
-      setStartDate(parseDate(startDateInputElement.value, format, locale));
-      setStartInputProps({
-        name: startDateInputElement.name,
-      });
+      startInputRef.current = startDateInputElement;
+      startDateInputElement.value &&
+        setStartDate(parseDate(startDateInputElement.value, format, locale));
     } else if (mode === DatePickerMode.STATIC && !!form) {
-      setStartInputProps({
-        type: 'hidden',
-        name: getHiddenInputId(form, DateFieldType.START_DATE),
-      });
+      setStartHiddenInputName(getHiddenInputId(form, DateFieldType.START_DATE));
     }
     if (endDateInputElement) {
-      setEndDate(parseDate(endDateInputElement.value, format, locale));
-      setEndInputProps({
-        name: endDateInputElement.name,
-      });
+      endInputRef.current = endDateInputElement;
+      endDateInputElement.value &&
+        setEndDate(parseDate(endDateInputElement.value, format, locale));
     } else if (mode === DatePickerMode.STATIC && !!form) {
-      setEndInputProps({
-        type: 'hidden',
-        name: getHiddenInputId(form, DateFieldType.END_DATE),
-      });
+      setEndHiddenInputName(getHiddenInputId(form, DateFieldType.END_DATE));
     } else if (mode === DatePickerMode.OVERLAY) {
       onError(
         `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
@@ -328,8 +291,8 @@ function DateRangePickerWithRef(
 
   useEffect(() => {
     const document = containerRef.current.ownerDocument;
-    const startInputEl = startInputElementRef.current;
-    const endInputEl = endInputElementRef.current;
+    const startInputEl = startInputRef.current;
+    const endInputEl = endInputRef.current;
     const containerEl = containerRef.current;
     if (!document) {
       return;
@@ -366,7 +329,13 @@ function DateRangePickerWithRef(
       data-startdate={getFormattedDate(startDate, format, locale)}
       data-enddate={getFormattedDate(endDate, format, locale)}
     >
-      {inputElements}
+      {children}
+      {startHiddenInputName && (
+        <input ref={startInputRef} name={startHiddenInputName} type="hidden" />
+      )}
+      {endHiddenInputName && (
+        <input ref={endInputRef} name={endHiddenInputName} type="hidden" />
+      )}
       {state.isOpen && (
         <BaseDatePicker
           mode="range"

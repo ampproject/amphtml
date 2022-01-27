@@ -52,7 +52,7 @@ function SingleDatePickerWithRef(
   const inputRef = useRef();
 
   const [date, _setDate] = useState();
-  const [hiddenInputAttributes, setHiddenInputAttributes] = useState();
+  const [hiddenInputProps, setHiddenInputProps] = useState();
 
   const containerRef = useRef();
 
@@ -148,7 +148,7 @@ function SingleDatePickerWithRef(
       inputElement.value &&
         _setDate(parseDate(inputElement.value, format, locale));
     } else if (mode === DatePickerMode.STATIC && !!form) {
-      setHiddenInputAttributes({
+      setHiddenInputProps({
         type: 'hidden',
         name: getHiddenInputId(form),
       });
@@ -217,9 +217,7 @@ function SingleDatePickerWithRef(
       data-date={getFormattedDate(date, format, locale)}
     >
       {children}
-      {hiddenInputAttributes && (
-        <input ref={inputRef} {...hiddenInputAttributes} />
-      )}
+      {hiddenInputProps && <input ref={inputRef} {...hiddenInputProps} />}
       {state.isOpen && (
         <BaseDatePicker
           ref={calendarRef}
