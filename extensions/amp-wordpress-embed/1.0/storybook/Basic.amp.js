@@ -9,7 +9,6 @@ export default {
 
   parameters: {
     extensions: [{name: 'amp-wordpress-embed', version: '1.0'}],
-    experiments: ['bento'],
   },
 };
 

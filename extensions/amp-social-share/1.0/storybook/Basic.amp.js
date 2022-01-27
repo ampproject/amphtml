@@ -51,7 +51,6 @@ export default {
   decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-social-share', version: '1.0'}],
-    experiments: ['bento'],
   },
   argTypes: {
     type: {control: {type: 'select'}, options: types},

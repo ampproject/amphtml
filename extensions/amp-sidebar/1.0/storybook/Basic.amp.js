@@ -16,7 +16,6 @@ export default {
 
   parameters: {
     extensions: [{name: 'amp-sidebar', version: '1.0'}],
-    experiments: ['bento'],
   },
 };
 

@@ -11,8 +11,6 @@ export default {
 
   parameters: {
     extensions: [{name: 'amp-stream-gallery', version: '1.0'}],
-
-    experiments: ['bento'],
   },
 };
 

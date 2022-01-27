@@ -9,7 +9,6 @@ export default {
   decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-brightcove', version: '1.0'}],
-    experiments: ['bento'],
   },
   args: {
     autoplay: false,

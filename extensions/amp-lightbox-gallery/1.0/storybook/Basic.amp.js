@@ -13,7 +13,6 @@ export default {
       {name: 'amp-stream-gallery', version: '1.0'},
       {name: 'amp-lightbox-gallery', version: '1.0'},
     ],
-    experiments: ['bento'],
   },
 };
 

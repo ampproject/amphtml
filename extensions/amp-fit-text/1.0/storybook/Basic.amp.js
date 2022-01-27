@@ -7,7 +7,6 @@ export default {
   decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-fit-text', version: '1.0'}],
-    experiments: ['bento'],
   },
 };
 

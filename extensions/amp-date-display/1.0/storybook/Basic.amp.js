@@ -15,8 +15,6 @@ export default {
       {name: 'amp-date-display', version: '1.0'},
       {name: 'amp-mustache', version: '0.2'},
     ],
-
-    experiments: ['bento'],
   },
 };
 

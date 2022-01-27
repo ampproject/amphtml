@@ -10,7 +10,6 @@ export default {
       {name: 'amp-bind', version: '0.1'},
       {name: 'amp-accordion', version: '1.0'},
     ],
-    experiments: ['bento'],
   },
   args: {
     'expand-single-section': false,

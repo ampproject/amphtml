@@ -11,7 +11,6 @@ export default {
 
   parameters: {
     extensions: [{name: 'amp-soundcloud', version: '1.0'}],
-    experiments: ['bento'],
   },
 };
 

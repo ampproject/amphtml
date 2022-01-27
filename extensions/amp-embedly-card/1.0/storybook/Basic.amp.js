@@ -7,7 +7,6 @@ export default {
   decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-embedly-card', version: '1.0'}],
-    experiments: ['bento'],
   },
   args: {
     apiKey: 'valid-api-key',

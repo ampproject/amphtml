@@ -8,7 +8,6 @@ export default {
   decorators: [withKnobs, withAmp],
   parameters: {
     extensions: [{name: 'amp-video-iframe', version: '1.0'}],
-    experiments: ['bento'],
   },
 };
 
