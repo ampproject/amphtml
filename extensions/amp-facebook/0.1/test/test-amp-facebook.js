@@ -76,32 +76,29 @@ describes.realWin(
       expect(context.attributes.embedAs).to.equal('video');
     });
 
-    it('renders iframe in amp-facebook with comment', async () => {
+    it('warns unsupported data-embed-as value: comment, and does not render', async () => {
+      const warnSpy = env.sandbox.stub(user(),'warn');
       const ampFB = await getAmpFacebook(fbVideoHref, 'comment');
-      const iframe = ampFB.firstChild;
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
 
-      const context = JSON.parse(iframe.getAttribute('name'));
-      expect(context.attributes.embedAs).to.equal('comment');
+      expect(warnSpy).to.be.calledOnce;
+      expect(warnSpy.args[0][1]).to.match(/Embedded Comments have been deprecated: https:\/\/developers.facebook.com\/docs\/plugins\/embedded-comments/);
     });
 
     it('rejects other supported and unsupported data-embed-as types', async () => {
       expectAsyncConsoleError(/.*/);
       await expect(getAmpFacebook(fbVideoHref, 'comments')).to.be.rejectedWith(
-        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: comments/
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post" or "video" but was: comments/
       );
       await expect(getAmpFacebook(fbVideoHref, 'like')).to.be.rejectedWith(
-        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: like/
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post" or "video" but was: like/
       );
       await expect(getAmpFacebook(fbVideoHref, 'page')).to.be.rejectedWith(
-        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: page/
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post" or "video" but was: page/
       );
       await expect(
         getAmpFacebook(fbVideoHref, 'unsupported')
       ).to.be.rejectedWith(
-        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: unsupported/
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post" or "video" but was: unsupported/
       );
     });
 
