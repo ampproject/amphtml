@@ -17,34 +17,17 @@ let ShoppingConfigResponseDef;
 /** @typedef {!Object<string, !ShoppingConfigDataDef> */
 export let KeyedShoppingConfigDef;
 
-/** @type {!WeakMap<!Element, !Promise<!KeyedShoppingConfigDef>>} */
-const cache = new WeakMap();
-
 /**
  * Gets Shopping config from an <amp-story-page> element.
- * It caches the result so that this can be used many times.
- * During the initial fetch, the config is: validated, keyed by 'product-tag-id',
- * and stored in service.
+ * The config is validated and keyed by 'product-tag-id'.
  * @param {!Element} pageElement <amp-story-page>
  * @return {!Promise<!KeyedShoppingConfigDef>}
  */
 export function getShoppingConfig(pageElement) {
-  if (!cache.has(pageElement)) {
-    cache.set(pageElement, getShoppingConfigUncached(pageElement));
-  }
-  return cache.get(pageElement);
-}
-
-/**
- * @param {!Element} pageElement <amp-story-page>
- * @return {!Promise<!KeyedShoppingConfigDef>>}
- */
-function getShoppingConfigUncached(pageElement) {
   const element = pageElement.querySelector('amp-story-shopping-config');
   return getElementConfig(element).then((config) => {
     //TODO(#36412): Add call to validate config here.
-    const keyed = keyByProductTagId(config);
-    return storeShoppingConfig(pageElement, keyed);
+    return keyByProductTagId(config);
   });
 }
 
@@ -61,14 +44,20 @@ function keyByProductTagId(config) {
 }
 
 /**
- * @param {!Element} element
+ * @param {!Element} pageElement
  * @param {!KeyedShoppingConfigDef} config
  * @return {!Promise<!ShoppingConfigResponseDef>}
  */
-function storeShoppingConfig(element, config) {
-  const win = element.ownerDocument.defaultView;
-  const storeService = Services.storyStoreServiceForOrNull(win);
-  return storeService.then((storeService) => {
+export function storeShoppingConfig(pageElement, config) {
+  const win = pageElement.ownerDocument.defaultView;
+  return Services.storyStoreServiceForOrNull(win).then((storeService) => {
+    // TODO(wg-stories): Scope shopping data to page id:
+    // storeService?.dispatch(
+    //     Action.ADD_SHOPPING_DATA,
+    // -   config
+    // +   {[pageElement.id]: config}
+    //   )
+    // Consumer in AmpStoryShoppingTag must be updated symmetrically.
     storeService?.dispatch(Action.ADD_SHOPPING_DATA, config);
     return config;
   });

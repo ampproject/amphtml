@@ -8,6 +8,7 @@ import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 import {
   KeyedShoppingConfigDef,
   getShoppingConfig,
+  storeShoppingConfig,
 } from './amp-story-shopping-config';
 
 import {
@@ -51,11 +52,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
-
-    /** @private {?Promise<!KeyedShoppingConfigDef>}  */
-    // TODO(wg-stories): Remove temporary disable once private is used.
-    // eslint-disable-next-line local/unused-private-field
-    this.shoppingConfig_ = null;
   }
 
   /** @override */
@@ -65,7 +61,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
     loadFonts(this.win, FONTS_TO_LOAD);
-    this.shoppingConfig_ = getShoppingConfig(this.element.parentElement);
+
+    const pageElement = this.element.parentElement;
+    storeShoppingConfig(pageElement, getShoppingConfig(pageElement));
 
     this.attachmentEl_ = (
       <amp-story-page-attachment

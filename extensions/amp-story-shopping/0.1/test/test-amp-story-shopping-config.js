@@ -4,7 +4,10 @@ import {Services} from '#service';
 
 import * as defaultConfig from '../../../../examples/amp-story/shopping/remote.json';
 import {Action} from '../../../amp-story/1.0/amp-story-store-service';
-import {getShoppingConfig} from '../amp-story-shopping-config';
+import {
+  getShoppingConfig,
+  storeShoppingConfig,
+} from '../amp-story-shopping-config';
 
 describes.realWin(
   'amp-story-shopping-config-v0.1',
@@ -16,14 +19,8 @@ describes.realWin(
   },
   (env) => {
     let pageElement;
-    let storeService;
 
     beforeEach(async () => {
-      storeService = {dispatch: env.sandbox.spy()};
-      env.sandbox
-        .stub(Services, 'storyStoreServiceForOrNull')
-        .resolves(storeService);
-
       pageElement = <amp-story-page id="page1"></amp-story-page>;
       env.win.document.body.appendChild(pageElement);
     });
@@ -59,13 +56,6 @@ describes.realWin(
       );
 
       expect(result).to.deep.eql(expectedRemoteResult);
-
-      expect(
-        storeService.dispatch.withArgs(
-          Action.ADD_SHOPPING_DATA,
-          expectedRemoteResult
-        )
-      ).to.have.been.calledOnce;
     });
 
     it('does use remote config when src attribute is provided', async () => {
@@ -78,13 +68,6 @@ describes.realWin(
       );
 
       expect(result).to.deep.eql(expectedRemoteResult);
-
-      expect(
-        storeService.dispatch.withArgs(
-          Action.ADD_SHOPPING_DATA,
-          expectedRemoteResult
-        )
-      ).to.have.been.calledOnce;
     });
 
     it('does use inline config when remote src is invalid', async () => {
@@ -105,6 +88,27 @@ describes.realWin(
         expect(() => createAmpStoryShoppingConfig(exampleURL)).to.throw(
           /error determining if remote config is valid json: bad url or bad json/
         );
+      });
+    });
+
+    describe('storeShoppingConfig', () => {
+      let storeService;
+      let pageElement;
+
+      beforeEach(async () => {
+        storeService = {dispatch: env.sandbox.spy()};
+        env.sandbox
+          .stub(Services, 'storyStoreServiceForOrNull')
+          .resolves(storeService);
+      });
+
+      it('dispatches ADD_SHOPPING_DATA', async () => {
+        const config = {foo: {bar: true}};
+
+        await storeShoppingConfig(pageElement, config);
+
+        expect(storeService.dispatch.withArgs(Action.ADD_SHOPPING_DATA, config))
+          .to.have.been.calledOnce;
       });
     });
   }
