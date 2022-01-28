@@ -21,7 +21,7 @@ export const formatI18nNumber = (localizationService, el, currency, price) => {
       currency,
     }).format(price);
   } catch {
-    return price.toString();
+    return `${price} ${currency}`;
   }
 };
 
