@@ -47,66 +47,34 @@ describes.realWin(
       const story = win.document.createElement('amp-story');
       win.document.body.appendChild(story);
       pageEl = win.document.createElement('amp-story-page');
-
       pageEl.id = 'page1';
+      story.appendChild(pageEl);
 
       const tagEl = createElementWithAttributes(
         win.document,
         'amp-story-shopping-tag',
         {
           'layout': 'container',
-          'data-tag-id': 'sunglasses',
+          'data-tag-id': 'lamp',
         }
       );
       pageEl.appendChild(tagEl);
+
       shoppingEl = win.document.createElement('amp-story-shopping-attachment');
       pageEl.appendChild(shoppingEl);
-      story.appendChild(pageEl);
-
-      const pageEl2 = win.document.createElement('amp-story-page');
-      pageEl2.id = 'page2';
-      const tagEl2 = createElementWithAttributes(
-        win.document,
-        'amp-story-shopping-tag',
-        {
-          'layout': 'container',
-          'data-tag-id': 'backpack',
-        }
-      );
-      pageEl2.appendChild(tagEl2);
-      story.appendChild(pageEl2);
 
       shoppingImpl = await shoppingEl.getImpl();
-      // await shoppingImpl.buildCallback();
-      await shoppingImpl.layoutCallback();
     });
 
     async function dispatchTestShoppingData() {
       const shoppingData = {
-        'sunglasses': {
-          'product-tag-id': 'sunglasses',
-          'product-title': 'Spectacular Spectacles',
-          'product-brand': 'Nest',
-          'product-price': '400.00',
-          'product-price-currency': 'INR',
-          'product-icon':
-            '/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png',
-          'product-images': [
-            '/examples/visual-tests/amp-story/img/shopping/product-2.png',
-          ],
-        },
-        'backpack': {
-          'product-tag-id': 'backpack',
-          'product-title': 'Beastly Backpack',
-          'product-brand': 'Nest',
-          'product-price': '1000.00',
-          'product-price-currency': 'BRL',
-          'product-tag-text': 'Beastly Backpack',
-          'product-icon':
-            '/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png',
-          'product-images': [
-            '/examples/visual-tests/amp-story/img/shopping/product-3.png',
-          ],
+        'lamp': {
+          'product-tag-id': 'lamp',
+          'product-title': 'Brass Lamp',
+          'product-brand': 'Lamp Co',
+          'product-price': 799.0,
+          'product-price-currency': 'USD',
+          'product-images': ['https://source.unsplash.com/Ry9WBo3qmoc/500x500'],
         },
       };
       storeService.dispatch(Action.CHANGE_PAGE, {
