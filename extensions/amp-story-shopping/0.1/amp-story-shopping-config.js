@@ -60,7 +60,7 @@ function validateStringLength(field, str, maxLen = 100) {
  */
 function validateNumber(field, number) {
   if (number != null && isNaN(number)) {
-    return ['Value for field ' + field + ' is not a number '];
+    return ['Value for field ' + field + ' is not a number'];
   }
 }
 
@@ -78,6 +78,7 @@ function validateURL(field, url) {
   }
 
   const urls = Array.isArray(url) ? url : [url];
+
   return urls.map((url) => {
     try {
       assertHttpsUrl(url, 'amp-story-shopping-config ' + field);
