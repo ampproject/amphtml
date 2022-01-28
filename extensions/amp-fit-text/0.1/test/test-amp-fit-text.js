@@ -1,4 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
+
 import {AmpFitText, calculateFontSize_, updateOverflow_} from '../amp-fit-text';
 import {buildDom} from '../build-dom';
 

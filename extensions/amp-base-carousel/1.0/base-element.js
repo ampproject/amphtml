@@ -1,8 +1,8 @@
+import {PreactBaseElement} from '#preact/base-element';
+
+import {CarouselContextProp} from './carousel-props';
 import {BentoBaseCarousel} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
-import {CarouselContextProp} from './carousel-props';
-import {PreactBaseElement} from '#preact/base-element';
-import {dict} from '#core/types/object';
 
 export class BaseElement extends PreactBaseElement {
   /** @param {!AmpElement} element */
@@ -17,12 +17,12 @@ export class BaseElement extends PreactBaseElement {
   init() {
     const {element} = this;
     this.slide_ = parseInt(element.getAttribute('slide'), 10);
-    return dict({
+    return {
       'defaultSlide': this.slide_ || 0,
       'onSlideChange': (index) => {
-        this.triggerEvent(element, 'slideChange', dict({'index': index}));
+        this.triggerEvent(element, 'slideChange', {'index': index});
       },
-    });
+    };
   }
 
   /** @override */

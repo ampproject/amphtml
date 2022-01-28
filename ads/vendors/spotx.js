@@ -1,5 +1,6 @@
-import {hasOwn} from '#core/types/object';
 import {validateData} from '#3p/3p';
+
+import {hasOwn} from '#core/types/object';
 
 /**
  * @param {!Window} global

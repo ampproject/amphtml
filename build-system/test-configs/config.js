@@ -109,6 +109,8 @@ const jisonPath = 'extensions/**/*.jison';
 
 const lintGlobs = [
   '**/*.js',
+  '**/*.ts',
+  '!**/*.d.ts',
   // To ignore a file / directory, add it to .eslintignore.
 ];
 
@@ -252,6 +254,8 @@ const htmlFixtureGlobs = [
   '!examples/amp-script/vue-todomvc.amp.html',
   '!examples/amp-skimlinks.html',
   '!examples/amp-smartlinks.html',
+  // TODO(#37285): remove after the new validator rules are pushed with the new npm.
+  '!examples/amp-story-subscriptions/amp-story-subscriptions.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-iframe.provider.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-metering-laa.amp.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-metering-registration-widget.html',

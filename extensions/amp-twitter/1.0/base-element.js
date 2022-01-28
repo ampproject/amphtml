@@ -1,5 +1,6 @@
 import {PreactBaseElement} from '#preact/base-element';
 import {createParseAttrsWithPrefix} from '#preact/parse-props';
+
 import {BentoTwitter} from './component';
 
 export class BaseElement extends PreactBaseElement {}

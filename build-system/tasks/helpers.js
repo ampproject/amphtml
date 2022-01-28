@@ -729,7 +729,7 @@ function massageSourcemaps(sourcemaps, babelMaps, options) {
   );
 
   remapped.sources = remapped.sources.map((source) => {
-    if (source.startsWith('/__SOURCE__/')) {
+    if (source?.startsWith('/__SOURCE__/')) {
       return source.slice('/__SOURCE__/'.length);
     }
     return source;

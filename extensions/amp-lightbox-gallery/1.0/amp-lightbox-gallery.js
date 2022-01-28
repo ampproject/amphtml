@@ -7,6 +7,8 @@ import {elementByTag} from '#core/dom/query';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {triggerAnalyticsEvent} from '#utils/analytics';
@@ -22,7 +24,10 @@ const TAG = 'amp-lightbox-gallery';
 /** @const {string} */
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
-class AmpLightboxGallery extends BaseElement {
+class AmpLightboxGallery extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   constructor(element) {
     super(element);
