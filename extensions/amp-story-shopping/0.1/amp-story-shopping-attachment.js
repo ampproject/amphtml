@@ -63,7 +63,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     loadFonts(this.win, FONTS_TO_LOAD);
 
     const pageElement = this.element.parentElement;
-    storeShoppingConfig(pageElement, getShoppingConfig(pageElement));
+    getShoppingConfig(pageElement).then((config) =>
+      storeShoppingConfig(pageElement, config)
+    );
 
     this.attachmentEl_ = (
       <amp-story-page-attachment
