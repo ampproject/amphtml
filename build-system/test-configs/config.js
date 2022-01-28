@@ -66,6 +66,7 @@ const karmaJsPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
+  'src/bento/components/**/test/*.js',
   'testing/**/*.js',
 ];
 
@@ -80,6 +81,7 @@ const testPaths = commonIntegrationTestPaths.concat([
   'test/*/!(e2e)/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
+  'src/bento/components/**/test/*.js',
 ]);
 
 const unitTestPaths = [
@@ -88,6 +90,8 @@ const unitTestPaths = [
   'ads/**/test/unit/test-*.js',
   'extensions/**/test/*.js',
   'extensions/**/test/unit/*.js',
+  'src/bento/components/**/test/*.js',
+  'src/bento/components/**/test/unit/*.js',
 ];
 
 // TODO(amphtml): Opt-in more unit tests to run on Safari / FF / Edge.
@@ -99,9 +103,14 @@ const unitTestCrossBrowserPaths = [
 const integrationTestPaths = [
   'test/integration/**/*.js',
   'extensions/**/test/integration/**/*.js',
+  'src/bento/components/**/test/integration/*.js',
 ];
 
-const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/*.js'];
+const e2eTestPaths = [
+  'test/e2e/*.js',
+  'extensions/**/test-e2e/*.js',
+  'src/bento/components/**/test-e2e/*.js',
+];
 
 const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 
@@ -131,6 +140,7 @@ const presubmitGlobs = [
   '!third_party/**/*.*',
   '!**/node_modules/**/*.*',
   '!extensions/**/dist/*',
+  '!src/bento/components/**/dist/*',
   '!examples/**/*',
   '!examples/visual-tests/**/*',
   '!test/coverage/**/*.*',
