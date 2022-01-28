@@ -46,17 +46,15 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.element.querySelectorAll('amp-story-page'),
       (pageEl, index) => {
         if (index == FIRST_PAYWALL_STORY_PAGE_INDEX) {
-          pageEl
-            .getImpl()
-            .then((page) =>
-              page.setSubscriptionsSection(SubscriptionsSection.LIMITED_CONTENT)
-            );
+          pageEl.setAttribute(
+            SUBSCRIPTIONS_SECTION_ATTRIBUTE_NAME,
+            SubscriptionsSection.LIMITED_CONTENT
+          );
         } else if (index > FIRST_PAYWALL_STORY_PAGE_INDEX) {
-          pageEl
-            .getImpl()
-            .then((page) =>
-              page.setSubscriptionsSection(SubscriptionsSection.CONTENT)
-            );
+          pageEl.setAttribute(
+            SUBSCRIPTIONS_SECTION_ATTRIBUTE_NAME,
+            SubscriptionsSection.CONTENT
+          );
         }
       }
     );
@@ -82,7 +80,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.SUBSCRIPTION_DIALOG_IS_VISIBLE_STATE,
+      StateProperty.SUBSCRIPTIONS_DIALOG_STATE,
       (isDialogVisible) => {
         this.onSubscriptionStateChange_(isDialogVisible);
       }

@@ -1285,10 +1285,7 @@ export class AmpStory extends AMP.BaseElement {
         // Subscription dialog is already triggered.
         return Promise.resolve();
       }
-      this.storeService_.dispatch(
-        Action.TOGGLE_SUBSCRIPTION_DIALOG_IS_VISIBLE,
-        true
-      );
+      this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
       this.navigateToPageAfterSubscriptionsAreGranted_ = targetPage;
 
       // TODO(#37285): add SubscriptionService to actually trigger the subscription dialog.

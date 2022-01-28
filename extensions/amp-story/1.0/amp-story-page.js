@@ -423,22 +423,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Updates the subscriptions-section attribute for subscriptions dialog setup.
-   * @param {string} contentType
-   */
-  setSubscriptionsSection(contentType) {
-    this.element.setAttribute('subscriptions-section', contentType);
-  }
-
-  /**
-   * Gets the subscriptions-section attribute for subscriptions dialog setup.
-   * @return {string}
-   */
-  getSubscriptionsSection() {
-    return this.element.getAttribute('subscriptions-section');
-  }
-
-  /**
    * Return true if the current AmpStoryPage is protected by a paywall.
    * @return {boolean}
    */
