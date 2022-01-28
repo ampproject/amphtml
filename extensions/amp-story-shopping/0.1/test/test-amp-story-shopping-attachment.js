@@ -2,6 +2,7 @@ import {expect} from 'chai';
 
 import {createElementWithAttributes} from '#core/dom';
 import '../../../amp-story/1.0/amp-story';
+import '../../../amp-story/1.0/amp-story-page';
 import '../amp-story-shopping';
 import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
 
@@ -46,7 +47,9 @@ describes.realWin(
       const story = win.document.createElement('amp-story');
       win.document.body.appendChild(story);
       pageEl = win.document.createElement('amp-story-page');
+
       pageEl.id = 'page1';
+
       const tagEl = createElementWithAttributes(
         win.document,
         'amp-story-shopping-tag',
@@ -74,6 +77,8 @@ describes.realWin(
       story.appendChild(pageEl2);
 
       shoppingImpl = await shoppingEl.getImpl();
+      // await shoppingImpl.buildCallback();
+      await shoppingImpl.layoutCallback();
     });
 
     async function dispatchTestShoppingData() {
@@ -104,7 +109,12 @@ describes.realWin(
           ],
         },
       };
+      storeService.dispatch(Action.CHANGE_PAGE, {
+        id: 'page1',
+        index: 1,
+      });
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
     }
 
     it('should build shopping attachment component', () => {
@@ -117,9 +127,10 @@ describes.realWin(
         'amp-story-page-attachment'
       );
       const attachmentChildImpl = await attachmentChildEl.getImpl();
-      env.sandbox.stub(attachmentChildImpl, 'open');
-      await shoppingImpl.open(true);
-      expect(attachmentChildImpl.open).to.be.calledOnce;
+      env.sandbox.stub(attachmentChildImpl, 'mutateElement').callsFake(() => {
+        expect(pageEl.querySelector('.i-amphtml-story-draggable-drawer-open'))
+          .to.not.be.null;
+      });
     });
 
     it('should build PLP on CTA click', async () => {
@@ -128,9 +139,9 @@ describes.realWin(
         'amp-story-page-attachment'
       );
       const attachmentChildImpl = await attachmentChildEl.getImpl();
-      env.sandbox.stub(attachmentChildImpl, 'open');
-      await shoppingImpl.open(true);
-      expect(pageEl.querySelector('.amp-story-shopping-plp')).to.not.be.null;
+      env.sandbox.stub(attachmentChildImpl, 'mutateElement').callsFake(() => {
+        expect(pageEl.querySelector('.amp-story-shopping-plp')).to.not.be.null;
+      });
     });
 
     it('should build PLP with data from tag on page', async () => {
@@ -139,13 +150,13 @@ describes.realWin(
         'amp-story-page-attachment'
       );
       const attachmentChildImpl = await attachmentChildEl.getImpl();
-      env.sandbox.stub(attachmentChildImpl, 'open');
-      await shoppingImpl.open(true);
-      expect(
-        pageEl.querySelector(
-          '.amp-story-shopping-plp-card .amp-story-shopping-plp-card-title'
-        ).textContent
-      ).to.equal('Spectacular Spectacles');
+      env.sandbox.stub(attachmentChildImpl, 'mutateElement').callsFake(() => {
+        expect(
+          pageEl.querySelector(
+            '.amp-story-shopping-plp-card .amp-story-shopping-plp-card-title'
+          ).textContent
+        ).to.equal('Spectacular Spectacles');
+      });
     });
   }
 );

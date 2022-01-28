@@ -88,6 +88,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   onPageAttachmentStateUpdate_(isOpen) {
     const isOnActivePage =
       this.pageEl_.id === this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
+
     if (isOpen && isOnActivePage) {
       this.populatePlp_();
     }
@@ -107,7 +108,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
 
     const plp = this.renderPlpTemplate_(shoppingDataForPage);
-    this.mutateElement(() => this.plpContainer_.appendChild(plp));
+    this.mutateElement(() => {
+      this.plpContainer_.appendChild(plp);
+    });
   }
 
   /**
