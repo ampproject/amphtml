@@ -2,11 +2,7 @@ import {PreactBaseElement} from '#preact/base-element';
 
 import {BentoList} from './component/component';
 
-export class BaseElement extends PreactBaseElement {
-  refresh() {
-    this.api().refresh();
-  }
-}
+export class BaseElement extends PreactBaseElement {}
 
 /** @override */
 BaseElement['Component'] = BentoList;

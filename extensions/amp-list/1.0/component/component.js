@@ -95,12 +95,12 @@ export function BentoListWithRef(
     resetOnRefresh = false,
     loadMore: loadMoreMode = 'none',
     loadMoreBookmark = 'load-more-src',
-    viewportBuffer = 2.0, // When loadMore === 'auto', keep loading up to 2 pages-worth of data
+    viewportBuffer = 2.0, // When loadMore === 'auto', keep loading up to 2 viewports of data
     template: itemTemplate = defaultItemTemplate,
     wrapperTemplate = defaultWrapperTemplate,
     loadingTemplate = defaultLoadingTemplate,
     errorTemplate = defaultErrorTemplate,
-    loadMoreTemplate: loadMoreTemplate = defaultLoadMoreTemplate,
+    loadMoreTemplate = defaultLoadMoreTemplate,
     ...rest
   },
   ref

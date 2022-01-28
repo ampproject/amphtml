@@ -1,7 +1,9 @@
 import {useCallback, useEffect, useRef, useState} from '#preact';
 
 /**
+ * Same as useState, but ignores setState once the component is unmounted.
  *
+ * This avoids React's "called setState() on an unmounted component" console error
  * @param {S|function():S} initial
  * @return {{0: S, 1: function((S|function(S):S)):undefined}}
  * @template S

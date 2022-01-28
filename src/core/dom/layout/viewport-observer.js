@@ -53,7 +53,7 @@ export function observeIntersections(element, callback, opts = {}) {
   const win = getWin(element);
 
   if (opts) {
-    // If there are opts, we can't reuse the IntersectionObserver
+    // If there are opts, the IntersectionObserver isn't reusable
     const viewportObserverNoCache = createViewportObserver(
       (entries) => {
         callback(entries[0]);
