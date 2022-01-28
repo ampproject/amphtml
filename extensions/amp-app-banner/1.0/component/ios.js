@@ -1,8 +1,7 @@
+import {logger} from '#preact/logger';
 import {docInfo} from '#preact/utils/docInfo';
 import {platformUtils} from '#preact/utils/platform';
 import {urlUtils} from '#preact/utils/url';
-
-import {user, userAssert} from '#utils/log';
 
 import {openWindowDialog} from '../../../../src/open-window-dialog';
 
@@ -18,15 +17,21 @@ const OPEN_LINK_TIMEOUT = 1500;
 export function getIOSAppInfo() {
   const canShowBuiltinBanner = platformUtils.isSafari();
   if (canShowBuiltinBanner) {
-    user().info(
+    logger.info(
       'BENTO-APP-BANNER',
-      'Browser supports builtin banners. Not rendering amp-app-banner.'
+      'Not rendering bento-app-banner:',
+      'Browser supports builtin banners.'
     );
     return null;
   }
 
   const metaContent = docInfo.getMetaByName('apple-itunes-app');
   if (!metaContent) {
+    logger.error(
+      'BENTO-APP-BANNER',
+      'Not rendering bento-app-banner:',
+      'could not find a <meta name="apple-itunes-app" /> tag'
+    );
     return null;
   }
   const {installAppUrl, openInAppUrl} = parseIOSMetaContent(metaContent);
@@ -51,21 +56,21 @@ export function parseIOSMetaContent(metaContent) {
   const config = parseKeyValues(metaContent);
 
   const appId = config['app-id'];
-  const openUrl = config['app-argument'];
+  let openUrl = config['app-argument'];
 
-  if (openUrl) {
-    userAssert(
-      urlUtils.isProtocolValid(openUrl),
-      'The url in app-argument has invalid protocol: %s',
-      openUrl
-    );
-  } else {
-    user().error(
+  if (!openUrl) {
+    logger.warn(
       'BENTO-APP-BANNER',
       '<meta name="apple-itunes-app">\'s content should contain ' +
         'app-argument to allow opening an already installed application ' +
         'on iOS.'
     );
+  } else if (!urlUtils.isProtocolValid(openUrl)) {
+    logger.warn(
+      'BENTO-APP-BANNER',
+      `The url in app-argument has invalid protocol: ${openUrl}`
+    );
+    openUrl = '';
   }
 
   const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;

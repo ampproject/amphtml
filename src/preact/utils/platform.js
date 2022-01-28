@@ -1,6 +1,6 @@
 export const platformUtils = {
   /**
-   * Whether the current platform an Android device.
+   * Whether the current platform is an Android device.
    * @return {boolean}
    */
   isAndroid() {
@@ -8,7 +8,7 @@ export const platformUtils = {
   },
 
   /**
-   * Whether the current platform an iOS device.
+   * Whether the current platform is an iOS device.
    * @return {boolean}
    */
   isIos() {
@@ -86,7 +86,7 @@ export const platformUtils = {
   },
 
   /**
-   * Whether the current browser is isStandalone.
+   * Whether the current browser is standalone.
    * @return {boolean}
    */
   isStandalone() {
@@ -153,20 +153,14 @@ export const platformUtils = {
    * @return {string}
    */
   getIosVersionString() {
-    if (!self.navigator.userAgent) {
-      return '';
-    }
     if (!this.isIos()) {
       return '';
     }
-    let version = self.navigator.userAgent.match(
-      /OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/
+    return (
+      self.navigator.userAgent
+        ?.match(/OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/)?.[1]
+        ?.replace(/_/g, '.') || ''
     );
-    if (!version) {
-      return '';
-    }
-    version = version[1].replace(/_/g, '.');
-    return version;
   },
 
   /**

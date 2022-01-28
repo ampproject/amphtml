@@ -1,3 +1,4 @@
+import {logger} from '#preact/logger';
 import {platformUtils} from '#preact/utils/platform';
 
 import {getIOSAppInfo} from '../component/ios';
@@ -6,8 +7,15 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   describe('getIOSAppInfo', () => {
     describe('when no meta header is present', () => {
       it('should return null when no meta header is present', () => {
-        const iosInfo = getIOSAppInfo();
-        expect(iosInfo).to.be.null;
+        allowConsoleError(() => {
+          const iosInfo = getIOSAppInfo();
+          expect(iosInfo).to.be.null;
+        });
+        expect(logger.error).calledWith(
+          'BENTO-APP-BANNER',
+          'Not rendering bento-app-banner:',
+          'could not find a <meta name="apple-itunes-app" /> tag'
+        );
       });
     });
 
@@ -45,6 +53,11 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
       it('should not show the banner if the built-in banner can be shown', () => {
         env.sandbox.stub(platformUtils, 'isSafari').returns(true);
         expect(getIOSAppInfo()).to.be.null;
+        expect(logger.info).calledWith(
+          'BENTO-APP-BANNER',
+          'Not rendering bento-app-banner:',
+          'Browser supports builtin banners.'
+        );
       });
 
       it('should load the app when clicked', () => {
@@ -63,12 +76,15 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
         document
           .getElementById('TEST_META')
           .setAttribute('content', 'app-id=11111111');
-        expectAsyncConsoleError(/... should contain app-argument to allow .../);
         const appInfo = getIOSAppInfo();
         expect(appInfo?.installAppUrl).to.equal(
           'https://itunes.apple.com/us/app/id11111111'
         );
         expect(appInfo.openInAppUrl).to.equal(appInfo.installAppUrl);
+        expect(logger.warn).calledWith(
+          'BENTO-APP-BANNER',
+          '<meta name="apple-itunes-app">\'s content should contain app-argument to allow opening an already installed application on iOS.'
+        );
       });
     });
   });

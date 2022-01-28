@@ -2,7 +2,7 @@ import {devAssert} from '#core/assert';
 import {Loading_Enum} from '#core/constants/loading-instructions';
 import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import {parseBooleanAttribute} from '#core/dom';
-import {matches, realChildNodes} from '#core/dom/query';
+import {matches, realChildElements, realChildNodes} from '#core/dom/query';
 import {getDate} from '#core/types/date';
 import {dashToCamelCase} from '#core/types/string';
 
@@ -168,9 +168,9 @@ function parsePropDefs(Ctor, props, propDefs, element, mediaQueryProps) {
     // as separate properties. Thus in a carousel the plain "children" are
     // slides, and the "arrowNext" children are passed via a "arrowNext"
     // property.
-    const nodes = realChildNodes(element); // TODO(37352): change to realChildElements
-    for (let i = 0; i < nodes.length; i++) {
-      const childElement = /** @type {HTMLElement} */ (nodes[i]);
+    const elements = realChildElements(element);
+    for (let i = 0; i < elements.length; i++) {
+      const childElement = /** @type {HTMLElement} */ (elements[i]);
       const match = matchChild(childElement, propDefs);
       if (!match) {
         continue;

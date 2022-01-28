@@ -85,10 +85,15 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
           .calledWith(manifest.installAppUrl);
       });
 
+      const invalidManifest1 = `BENTO-APP-BANNER Invalid manifest: related_applications is missing from manifest.json file`;
+      const invalidManifest2 = `BENTO-APP-BANNER Invalid manifest: Could not find a platform=play app in manifest`;
+
       it('should not show a banner if the manifest is missing data', async () => {
+        expectAsyncConsoleError(invalidManifest1);
         xhrServiceStub.fetchJson.resolves({});
         expect(await getAndroidAppInfo().promise).to.be.null;
 
+        expectAsyncConsoleError(invalidManifest2);
         xhrServiceStub.fetchJson.resolves({
           'related_applications': [{platform: 'INVALID'}],
         });

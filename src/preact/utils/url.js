@@ -1,10 +1,4 @@
-import {
-  assertHttpsUrl,
-  isProtocolValid,
-  // eslint-disable-next-line local/no-forbidden-terms
-  parseUrlWithA,
-  // eslint-disable-next-line import/no-restricted-paths
-} from '../../url';
+import {INVALID_PROTOCOLS} from '#core/types/string/url';
 
 export const urlUtils = {
   /**
@@ -20,28 +14,53 @@ export const urlUtils = {
 
   /**
    * @param {string} url
-   * @return {!Location}
+   * @return {!URL}
    */
   parse(url) {
-    // eslint-disable-next-line local/no-forbidden-terms
-    return parseUrlWithA(this.getAnchor_(), url);
+    const anchor = this.getAnchor_();
+    anchor.href = '';
+    return new URL(url, anchor.href);
   },
 
   /**
-   * @param {string} url
+   * Returns whether the URL has valid protocol.
+   * Deep link protocol is valid, but not javascript etc.
+   * @param {string|!URL} url
    * @return {boolean}
    */
   isProtocolValid(url) {
-    return isProtocolValid(url);
+    const parsed = this.parse(url);
+    return !INVALID_PROTOCOLS.includes(parsed.protocol);
   },
 
   /**
-   * @param {?string|undefined} urlString
-   * @param {!Element|string} elementContext Element where the url was found.
+   * Asserts that a given url is HTTPS or protocol relative.
+   *
+   * @param {?string|URL} url
    * @param {string=} sourceName Used for error messages.
    * @return {string}
    */
-  assertHttpsUrl(urlString, elementContext, sourceName) {
-    return assertHttpsUrl(urlString, elementContext, sourceName);
+  assertHttpsUrl(url, sourceName = 'url') {
+    if (!this.isSecureUrl(url)) {
+      throw new Error(
+        `${sourceName} must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${url}`
+      );
+    }
+  },
+
+  /**
+   * Returns `true` if the URL is secure: either HTTPS or localhost (for testing).
+   * @param {string|!URL} url
+   * @return {boolean}
+   */
+  isSecureUrl(url) {
+    const parsed = this.parse(url);
+
+    return (
+      parsed.protocol === 'https:' ||
+      parsed.hostname === 'localhost' ||
+      parsed.hostname === '127.0.0.1' ||
+      parsed.hostname?.endsWith('.localhost')
+    );
   },
 };

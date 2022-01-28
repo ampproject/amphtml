@@ -3,20 +3,22 @@ export const xhrUtils = {
    * Wrapper around `fetch` that returns the parsed JSON result
    *
    * @param {RequestInfo} url
+   * @param {RequestInit} [init]
    * @return {Promise<*>}
    */
-  async fetchJson(url) {
-    return (await this.fetch(url)).json();
+  fetchJson(url, init) {
+    return this.fetch(url, init).then((res) => res.json());
   },
 
   /**
    * Wrapper around `fetch` that checks the status code
    *
    * @param {RequestInfo} url
+   * @param {RequestInit} [init]
    * @return {Promise<Response>}
    */
-  async fetch(url) {
-    const response = await self.fetch(url);
+  async fetch(url, init) {
+    const response = await self.fetch(url, init);
     if (!response.ok) {
       throw new Error(response.statusText);
     }

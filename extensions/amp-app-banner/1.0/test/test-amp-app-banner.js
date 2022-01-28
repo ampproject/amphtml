@@ -2,6 +2,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 
+import {logger} from '#preact/logger';
 import {platformUtils} from '#preact/utils/platform';
 
 import {waitFor} from '#testing/helpers/service';
@@ -49,18 +50,19 @@ describes.realWin(
       return element;
     }
 
-    it('should not render an element without an id', async () => {
-      const err = /bento-app-banner should have an id/;
-      expectAsyncConsoleError(err, 2);
-      await expect(
-        mountElement(html`<amp-app-banner></amp-app-banner>`)
-      ).to.be.rejectedWith(err);
+    const missingButtonError = `BENTO-APP-BANNER Component children should contain a <button open-button>`;
+
+    it('should warn when id is missing', async () => {
+      expectAsyncConsoleError(missingButtonError);
+      await mountElement(html`<amp-app-banner></amp-app-banner>`);
+      expect(logger.warn).calledWith(
+        'BENTO-APP-BANNER',
+        'component should have an id'
+      );
     });
 
     it('should log an error if <button open-button> is missing', async () => {
-      const err =
-        /bento-app-banner should contain a <button open-button> child/;
-      expectAsyncConsoleError(err, 2);
+      expectAsyncConsoleError(missingButtonError);
       await mountElement(html`<amp-app-banner id="TEST"></amp-app-banner>`);
     });
 
