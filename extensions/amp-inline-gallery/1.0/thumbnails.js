@@ -82,7 +82,7 @@ export function BentoInlineGalleryThumbnails({
                 height: px(height),
                 width: aspectRatio ? px(aspectRatio * height) : '',
               }}
-              tabIndex="0"
+              tabindex="0"
             />
           );
         })}
