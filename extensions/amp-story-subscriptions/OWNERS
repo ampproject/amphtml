@@ -5,10 +5,11 @@
   rules: [
     {
       owners: [
-        {name: 'rsimha'},
-        {name: 'erwinmombay'},
-        {name: 'choumx'},
-        {name: 'jridgewell'},
+        {name: 'ychsieh'},
+        {name: 'calebcordry'},
+        {name: 'mszylkowski'},
+        {name: 'newmuis', notify: true},
+        {name: 'gmajoulet', notify: true},
       ],
     },
   ],

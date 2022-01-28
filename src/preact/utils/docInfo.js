@@ -8,7 +8,7 @@ export const docInfo = {
   getMetaByName(metaName) {
     const metas = self.document.head.querySelectorAll('meta[name]');
     return (
-      Array.from(metas.values())
+      Array.from(metas)
         .find(
           (meta) =>
             meta.getAttribute('name') === metaName &&
