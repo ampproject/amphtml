@@ -56,6 +56,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (this.shoppingTags_.length === 0) {
       return;
     }
+    Services.extensionsFor(this.win).installExtensionForDoc(
+      this.getAmpDoc(),
+      'amp-story-page-attachment',
+      '0.1'
+    );
     loadFonts(this.win, FONTS_TO_LOAD);
     this.attachmentEl_ = (
       <amp-story-page-attachment
