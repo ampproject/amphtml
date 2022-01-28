@@ -82,6 +82,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.shoppingTags_.length === 0) {
+      return;
+    }
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
       (isOpen) => this.onPageAttachmentStateUpdate_(isOpen)
