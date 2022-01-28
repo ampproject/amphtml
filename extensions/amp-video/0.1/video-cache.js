@@ -53,8 +53,14 @@ export function fetchCachedSources(
       'amp-google-video-cache-response'
     );
     if (inlineResponseEl?.textContent) {
-      const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
-      jsonResponsePromise = Promise.resolve(inlineResponseJson);
+      try {
+        const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
+        jsonResponsePromise = Promise.resolve(inlineResponseJson);
+      } catch (err) {
+        // If JSON parsing of the inline response fails, then
+        // `jsonResponsePromise` will remain undefined and an XHR request will
+        // be made below.
+      }
     }
   }
 
