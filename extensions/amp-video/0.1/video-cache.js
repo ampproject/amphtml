@@ -35,12 +35,10 @@ export function fetchCachedSources(
   if (Services.platformFor(win).isBot()) {
     return Promise.resolve();
   }
-  if (
-    !(
-      videoEl.getAttribute('src') ||
-      videoEl.querySelector('source[src]')?.getAttribute('src')
-    )
-  ) {
+
+  const videoSrc = videoEl.getAttribute('src');
+  const sourceSrc = videoEl.querySelector('source[src]')?.getAttribute('src');
+  if (!videoSrc && !sourceSrc) {
     user().error('AMP-VIDEO', 'Video cache not properly configured');
     return Promise.resolve();
   }
