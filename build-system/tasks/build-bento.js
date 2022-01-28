@@ -164,7 +164,10 @@ async function buildBentoComponent(
     return Promise.all(promises);
   }
 
-  const bentoName = getBentoName(name);
+  let bentoName = getBentoName(name);
+  if (!bentoName.startsWith('bento-')) {
+    bentoName = `bento-${bentoName}`;
+  }
   promises.push(
     buildExtensionJs(componentsDir, bentoName, {
       ...options,
