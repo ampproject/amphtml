@@ -93,7 +93,6 @@ describes.realWin(
 
     describe('storeShoppingConfig', () => {
       let storeService;
-      let pageElement;
 
       beforeEach(async () => {
         storeService = {dispatch: env.sandbox.spy()};
