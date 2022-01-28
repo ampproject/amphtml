@@ -298,6 +298,9 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {boolean} whether the styles were rewritten */
     this.didRewriteStyles_ = false;
+
+    /** @private {!./amp-story-page.AmpStoryPage} the page to navigate to after subscriptions are granted */
+    this.navigateToPageAfterSubscriptionsAreGranted_ = null;
   }
 
   /** @override */
@@ -928,14 +931,6 @@ export class AmpStory extends AMP.BaseElement {
         this.handleConsentExtension_();
 
         this.pages_.forEach((page, index) => {
-          if (this.isPaywallStory_()) {
-            if (index == 2) {
-              page.setSubscriptionsSection('limited-content');
-            }
-            if (index >= 3) {
-              page.setSubscriptionsSection('content');
-            }
-          }
           page.setState(PageState.NOT_ACTIVE);
           this.upgradeCtaAnchorTagsForTracking_(page, index);
         });
@@ -1285,18 +1280,18 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    // TODO(#37285): add SubscriptionService to actually trigger the subscription dialog.
-    const subscriptionsSection = targetPage.element.getAttribute(
-      'subscriptions-section'
-    );
-    if (
-      subscriptionsSection == 'content' ||
-      subscriptionsSection == 'limited-content'
-    ) {
+    if (targetPage.isPaywallProtected()) {
+      if (this.navigateToPageAfterSubscriptionsAreGranted_) {
+        // Subscription dialog is already triggered.
+        return Promise.resolve();
+      }
       this.storeService_.dispatch(
         Action.TOGGLE_SUBSCRIPTION_DIALOG_IS_VISIBLE,
         true
       );
+      this.navigateToPageAfterSubscriptionsAreGranted_ = targetPage;
+
+      // TODO(#37285): add SubscriptionService to actually trigger the subscription dialog.
     }
 
     const oldPage = this.activePage_;
@@ -2468,14 +2463,6 @@ export class AmpStory extends AMP.BaseElement {
       (e) => matches(e, 'a.i-amphtml-story-page-open-attachment[href]'),
       this.element
     );
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
-  isPaywallStory_() {
-    return this.element.querySelector('amp-story-subscriptions') != null;
   }
 }
 

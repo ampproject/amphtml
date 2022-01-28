@@ -57,6 +57,10 @@ import {setTextBackgroundColor} from './utils';
 
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
+import {
+  SUBSCRIPTIONS_SECTION_ATTRIBUTE_NAME,
+  SubscriptionsSection,
+} from '../../amp-story-subscriptions/0.1/amp-story-subscriptions';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -432,6 +436,19 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   getSubscriptionsSection() {
     return this.element.getAttribute('subscriptions-section');
+  }
+
+  /**
+   * Return true if the current AmpStoryPage is protected by a paywall.
+   * @return {boolean}
+   */
+  isPaywallProtected() {
+    return (
+      this.element.getAttribute(SUBSCRIPTIONS_SECTION_ATTRIBUTE_NAME) ===
+        SubscriptionsSection.CONTENT ||
+      this.element.getAttribute(SUBSCRIPTIONS_SECTION_ATTRIBUTE_NAME) ===
+        SubscriptionsSection.LIMITED_CONTENT
+    );
   }
 
   /**
