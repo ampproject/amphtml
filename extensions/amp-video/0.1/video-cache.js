@@ -47,50 +47,10 @@ export function fetchCachedSources(
 
   Services.performanceFor(ampdoc.win).addEnabledExperiment('video-cache');
 
-  let jsonResponsePromise;
-  if (shouldUseInlineVideoResponse(videoEl)) {
-    const inlineResponseEl = win.document.getElementById(
-      'amp-google-video-cache-response'
-    );
-    if (inlineResponseEl?.textContent) {
-      try {
-        const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
-        jsonResponsePromise = Promise.resolve(inlineResponseJson);
-      } catch (err) {
-        // If JSON parsing of the inline response fails, then
-        // `jsonResponsePromise` will remain undefined and an XHR request will
-        // be made below.
-      }
-    }
-  }
-
-  if (!jsonResponsePromise) {
-    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
-    maybeReplaceSrcWithSourceElement(videoEl, win);
-    const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
-    jsonResponsePromise = getCacheUrlService(videoEl, ampdoc)
-      .then((service) => service.createCacheUrl(videoUrl))
-      .then((cacheUrl) => {
-        const requestUrl = addParamsToUrl(
-          cacheUrl.replace(/\/[ic]\//, '/mbv/'),
-          {
-            'amp_video_host_url':
-              /* document url that contains the video */ canonicalUrl,
-            'amp_video_require_acao_header': videoEl.hasAttribute('crossorigin')
-              ? 1
-              : null,
-          }
-        );
-        return Services.xhrFor(win)
-          .fetch(requestUrl, {prerenderSafe: true})
-          .then((xhrResponse) => xhrResponse.json());
-      });
-  }
-
-  return jsonResponsePromise
-    .then((jsonResponse) => {
-      applySourcesToVideo(videoEl, jsonResponse['sources'], maxBitrate);
-      applyAudioInfoToVideo(videoEl, jsonResponse['has_audio']);
+  return requestCachedVideoSources(videoEl, ampdoc)
+    .then((response) => {
+      applySourcesToVideo(videoEl, response['sources'], maxBitrate);
+      applyAudioInfoToVideo(videoEl, response['has_audio']);
     })
     .catch(() => {
       // If cache fails, video should still load properly.
@@ -239,6 +199,47 @@ function getCacheUrlService(videoEl, ampdoc) {
   return Services.extensionsFor(ampdoc.win)
     .installExtensionForDoc(ampdoc, 'amp-cache-url')
     .then(() => Services.cacheUrlServicePromiseForDoc(videoEl));
+}
+
+/**
+ * Fetch the sources for the given video element.
+ * @param {!Element} videoEl
+ * @param {!AmpDoc} ampdoc
+ * @return {!Promise<!Object>} JSON representing AMP's cached video sources.
+ */
+function requestCachedVideoSources(videoEl, ampdoc) {
+  const {win} = ampdoc;
+  if (shouldUseInlineVideoResponse(videoEl)) {
+    const inlineResponseEl = win.document.getElementById(
+      'amp-google-video-cache-response'
+    );
+    if (inlineResponseEl?.textContent) {
+      try {
+        const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
+        return Promise.resolve(inlineResponseJson);
+      } catch (err) {
+        // If parsing the response fails, an XHR request will be made below.
+      }
+    }
+  }
+
+  const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
+  maybeReplaceSrcWithSourceElement(videoEl, win);
+  const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
+  return getCacheUrlService(videoEl, ampdoc)
+    .then((service) => service.createCacheUrl(videoUrl))
+    .then((cacheUrl) => {
+      const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
+        'amp_video_host_url':
+          /* document url that contains the video */ canonicalUrl,
+        'amp_video_require_acao_header': videoEl.hasAttribute('crossorigin')
+          ? 1
+          : null,
+      });
+      return Services.xhrFor(win)
+        .fetch(requestUrl, {prerenderSafe: true})
+        .then((xhrResponse) => xhrResponse.json());
+    });
 }
 
 /**
