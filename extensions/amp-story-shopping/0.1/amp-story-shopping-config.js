@@ -1,5 +1,3 @@
-import {Layout_Enum} from '#core/dom/layout';
-
 import {Services} from '#service';
 
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
@@ -16,42 +14,58 @@ import {
  */
 let ShoppingConfigDef;
 
-export class AmpStoryShoppingConfig extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-    /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
-  }
+/** @type {!WeakMap<!Element, !Promise<!ShoppingConfigDef>>} */
+const cache = new WeakMap();
 
-  /**
-   * Keys product data to productIds and adds them to the store service.
-   * @param {!ShoppingConfigDef} shoppingConfig
-   * @private
-   */
-  addShoppingDataFromConfig_(shoppingConfig) {
-    const productIDtoProduct = {};
-    for (const item of shoppingConfig['items']) {
-      productIDtoProduct[item['productId']] = item;
-    }
-    this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, productIDtoProduct);
+/**
+ * Gets Shopping config from an <amp-story-page> element.
+ * It caches the result so that this can be used many times.
+ * During the initial fetch, the config is: validated, keyed by 'product-tag-id',
+ * and stored in service.
+ * @param {!Element} pageElement <amp-story-page>
+ * @return {!Promise<!ShoppingConfigDef>}
+ */
+export function getShoppingConfig(pageElement) {
+  if (!cache.has(pageElement)) {
+    cache.set(pageElement, getShoppingConfigUncached(pageElement));
+  }
+  return cache.get(pageElement);
+}
+
+/**
+ * @param {!Element} pageElement <amp-story-page>
+ * @return {!Promise<!Object<string, ShoppingConfigDataDef>>}
+ */
+function getShoppingConfigUncached(pageElement) {
+  const element = pageElement.querySelector('amp-story-shopping-config');
+  return getElementConfig(element).then((config) => {
     //TODO(#36412): Add call to validate config here.
-  }
+    const keyed = keyByProductTagId(config);
+    return storeShoppingConfig(element, keyed);
+  });
+}
 
-  /** @override */
-  buildCallback() {
-    super.buildCallback();
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win),
-      getElementConfig(this.element),
-    ]).then(([storeService, storyConfig]) => {
-      this.storeService_ = storeService;
-      this.addShoppingDataFromConfig_(storyConfig);
-    });
+/**
+ * @param {!ShoppingConfigDef} config
+ * @return {!Object<string, ShoppingConfigDataDef>}
+ */
+function keyByProductTagId(config) {
+  const keyed = {};
+  for (const item of config['items']) {
+    keyed[item['productId']] = item;
   }
+  return keyed;
+}
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout === Layout_Enum.NODISPLAY;
-  }
+/**
+ * @param {!Element} element
+ * @param {!Object<string, ShoppingConfigDataDef>} config
+ * @return {!Promise<!ShoppingConfigDef>}
+ */
+function storeShoppingConfig(element, config) {
+  const storeService = Services.storyStoreServiceForOrNull(element);
+  return storeService.then((storeService) => {
+    storeService?.dispatch(Action.ADD_SHOPPING_DATA, config);
+    return config;
+  });
 }

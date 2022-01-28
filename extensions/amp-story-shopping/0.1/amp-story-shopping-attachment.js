@@ -5,6 +5,7 @@ import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
+import {getShoppingConfig} from './amp-story-shopping-config';
 
 import {
   ShoppingConfigDataDef,
@@ -47,6 +48,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
+
+    /** @private {?Promise<Object<!ShoppingConfigDataDef>>}  */
+    this.shoppingConfig_ = null;
   }
 
   /** @override */
@@ -54,6 +58,15 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.pageEl_ = this.element.closest('amp-story-page');
     this.shoppingTags_ = Array.from(
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
+    );
+    loadFonts(this.win, FONTS_TO_LOAD);
+    this.shoppingConfig_ = getShoppingConfig(this.element.parentElement);
+
+    this.attachmentEl_ = (
+      <amp-story-page-attachment
+        layout="nodisplay"
+        theme={this.element.getAttribute('theme')}
+      ></amp-story-page-attachment>
     );
     if (this.shoppingTags_.length === 0) {
       return;
