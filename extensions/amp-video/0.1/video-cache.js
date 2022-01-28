@@ -242,10 +242,9 @@ function getCacheUrlService(videoEl, ampdoc) {
  * @return {boolean}
  */
 function shouldUseInlineVideoResponse(videoEl) {
-  // Monti only inlines the first video of the first web story page.
-  const isFirstVideoOnFirstStoryPage = matches(
+  // Google video cache inlines the first video of the first web story page.
+  return matches(
     videoEl,
     `amp-story-page:first-of-type amp-video:first-of-type`
   );
-  return isFirstVideoOnFirstStoryPage;
 }
