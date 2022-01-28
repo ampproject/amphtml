@@ -51,13 +51,6 @@ function keyByProductTagId(config) {
 export function storeShoppingConfig(pageElement, config) {
   const win = pageElement.ownerDocument.defaultView;
   return Services.storyStoreServiceForOrNull(win).then((storeService) => {
-    // TODO(wg-stories): Scope shopping data to page id:
-    // storeService?.dispatch(
-    //     Action.ADD_SHOPPING_DATA,
-    // -   config
-    // +   {[pageElement.id]: config}
-    //   )
-    // Consumer in AmpStoryShoppingTag must be updated symmetrically.
     storeService?.dispatch(Action.ADD_SHOPPING_DATA, config);
     return config;
   });
