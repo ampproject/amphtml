@@ -1,5 +1,4 @@
 import {Layout_Enum} from '#core/dom/layout';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -15,9 +14,9 @@ const TAG = 'amp-gist';
 class AmpGist extends BaseElement {
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height) => this.attemptChangeHeight(height),
-    });
+    };
   }
 
   /** @override @nocollapse */
