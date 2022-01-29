@@ -31,10 +31,12 @@ BentoAccordionDef.BentoAccordionSectionProps;
  *   as: (string|PreactDef.FunctionalComponent|undefined),
  *   role: (string|undefined),
  *   class: (string|undefined),
+ *   tabindex: (number|string|undefined),
  *   tabIndex: (number|string|undefined),
  *   id: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
+ * (We support tabindex and tabIndex equally, see tabindexFromProps())
  */
 BentoAccordionDef.BentoAccordionHeaderProps;
 

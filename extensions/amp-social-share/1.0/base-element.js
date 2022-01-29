@@ -18,7 +18,7 @@ BaseElement['delegatesFocus'] = true;
 BaseElement['props'] = {
   'children': {passthroughNonEmpty: true},
   'height': {attr: 'height'},
-  'tabIndex': {attr: 'tabindex'},
+  'tabindex': {attr: 'tabindex'},
   'type': {attr: 'type'},
   'width': {attr: 'width'},
 };
