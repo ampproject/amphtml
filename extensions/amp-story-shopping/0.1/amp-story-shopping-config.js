@@ -125,7 +125,6 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       .reduce((errors, k) => {
         const value = shoppingConfig[k];
         const fns = this.productValidationConfig_[k];
-
         errors.push(
           ...fns.reduce((errors, fn) => {
             const localErrors = fn(k, value) || [];
@@ -136,7 +135,6 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
         return errors;
       }, [])
       .filter(Boolean);
-
     for (const error of errors) {
       this.user().warn('ERROR', error);
     }
