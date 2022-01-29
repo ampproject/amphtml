@@ -301,6 +301,7 @@ export class StoryAdPage {
   createPageElement_() {
     const attributes = {
       'ad': '',
+      'aria-hidden': true,
       'distance': '2',
       'i-amphtml-loading': '',
       'id': this.id_,

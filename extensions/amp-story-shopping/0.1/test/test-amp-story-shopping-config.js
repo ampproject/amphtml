@@ -78,7 +78,7 @@ describes.realWin(
       element.setAttribute('src', exampleURL);
 
       const expectedRemoteResult = JSON.parse(
-        '{"city-pop":{"productTagId":"city-pop","productTitle":"Plastic Love","productPrice": 19, "productPriceCurrency": "JPY", "productImages": ["/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png","/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"], "reviewsPage": "https://store.google.com/jp/?hl=ja", "brandLabel": "Google", "productDetails": "Vinyl for the hit J-Pop song Plastic Love."}}'
+        '{"art":{"product-tag-id": "art","product-title": "Abstract Art","product-brand": "V. Artsy","product-price": 1200.0,"product-price-currency": "JPY","product-images": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]}}'
       );
 
       expect(storeService.get(StateProperty.SHOPPING_DATA)).to.deep.eql(

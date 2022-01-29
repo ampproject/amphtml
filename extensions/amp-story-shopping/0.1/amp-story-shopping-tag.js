@@ -4,6 +4,8 @@ import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
+import {formatI18nNumber, loadFonts} from './amp-story-shopping';
+
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
   Action,
@@ -13,7 +15,7 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
-/** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+/** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
   {
     family: 'Poppins',
@@ -45,7 +47,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.loadFonts_();
+    loadFonts(this.win, FONTS_TO_LOAD);
     this.element.setAttribute('role', 'button');
 
     return Promise.all([
@@ -161,15 +163,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
                 {this.tagData_['productTagText']}
               </span>
             )) ||
-              new Intl.NumberFormat(
-                this.localizationService_.getLanguageCodesForElement(
-                  this.element_
-                )[0],
-                {
-                  style: 'currency',
-                  currency: this.tagData_['productPriceCurrency'],
-                }
-              ).format(this.tagData_['productPrice'])}
+              formatI18nNumber(
+                this.localizationService_,
+                this.element,
+                this.tagData_['product-price-currency'],
+                this.tagData_['product-price']
+              )}
           </span>
         </span>
       </div>
@@ -202,16 +201,5 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         this.styleTagText_();
       }
     );
-  }
-
-  /** @private */
-  loadFonts_() {
-    if (this.win.document.fonts && FontFace) {
-      FONTS_TO_LOAD.forEach(({family, src, style = 'normal', weight}) =>
-        new FontFace(family, src, {weight, style})
-          .load()
-          .then((font) => this.win.document.fonts.add(font))
-      );
-    }
   }
 }
