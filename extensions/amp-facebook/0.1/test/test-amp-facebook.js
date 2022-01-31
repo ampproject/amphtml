@@ -2,7 +2,7 @@ import '../amp-facebook';
 import {expect} from 'chai';
 
 import {facebook} from '#3p/facebook';
-import * as log '#utils/log';
+import * as log from '#utils/log';
 
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {resetServiceForTesting} from '../../../../src/service-helpers';
@@ -79,17 +79,12 @@ describes.realWin(
       expect(context.attributes.embedAs).to.equal('video');
     });
 
-    it('warns unsupported data-embed-as value: comment, and does not render', async () => {
-      
-      // const warnSpy = env.sandbox.stub(user(),'warn');
-      // const ampFB = await getAmpFacebook(fbCommentHref, 'comment');
-      // expect(warnSpy).to.be.calledOnce;
-      // expect(warnSpy.args[0][1]).to.match(/Embedded Comments have been deprecated: https:\/\/developers.facebook.com\/docs\/plugins\/embedded-comments/);
+    it('warns unsupported data-embed-as value: comment', async () => {
       const warn = env.sandbox.spy();
       env.sandbox.stub(log, 'user').returns({warn});
+      expect(warn).not.to.be.called;
       const ampFB = await getAmpFacebook(fbCommentHref, 'comment');
       expect(warn).to.be.calledOnce;
-
     });
 
     it('rejects other supported and unsupported data-embed-as types', async () => {
