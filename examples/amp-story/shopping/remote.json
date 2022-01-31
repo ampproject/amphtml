@@ -1,7 +1,7 @@
 {
   "items": [
     {
-      "productTagId": "art",
+      "productId": "art",
       "productTitle": "Abstract Art",
       "productBrand": "V. Artsy",
       "productPrice": 1200.0,

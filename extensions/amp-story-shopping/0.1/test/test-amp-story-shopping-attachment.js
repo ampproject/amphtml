@@ -69,7 +69,7 @@ describes.realWin(
     async function dispatchTestShoppingData() {
       const shoppingData = {
         'lamp': {
-          'productTagId': 'lamp',
+          'productId': 'lamp',
           'productTitle': 'Brass Lamp',
           'productBrand': 'Lamp Co',
           'productPrice': 799.0,

@@ -97,7 +97,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     /** @private @const {!Object<Array<Function>>} */
     this.productValidationConfig_ = {
       /* Required Attrs */
-      'productTagId': [validateRequired, validateStringLength], // Required. String. Keys to amp-story-shopping-tag nodes.
+      'productId': [validateRequired, validateStringLength], // Required. String. Keys to amp-story-shopping-tag nodes.
       'brandLabel': [validateRequired, validateStringLength], // Required. String.
       'productTitle': [validateRequired, validateStringLength], // Required. String.
       'productPrice': [validateRequired, validateNumber], // Required. Number.
@@ -149,7 +149,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     const productIDtoProduct = {};
     for (const item of shoppingConfig['items']) {
       this.validateConfig_(item);
-      productIDtoProduct[item['productTagId']] = item;
+      productIDtoProduct[item['productId']] = item;
     }
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, productIDtoProduct);
   }

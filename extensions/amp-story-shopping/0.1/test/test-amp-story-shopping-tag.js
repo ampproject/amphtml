@@ -86,7 +86,7 @@ describes.realWin(
 
     it('should set active product in store service when shopping tag is clicked', async () => {
       const tagData = {
-        'productTagId': 'sunglasses',
+        'productId': 'sunglasses',
         'productTitle': 'Spectacular Spectacles',
         'productPrice': '400',
         'productIcon':
