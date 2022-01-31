@@ -32,21 +32,26 @@ limitations under the License.
 </table>
 
 # Behavior
+
 Smartadserver supports the Real Time Config (RTC) to preload configuration settings for ad placements. The RTC setup is optional.
 
 # Supported parameters
+
 Smartadserver largely uses the same tags as `<amp-ad>`. The following are required tags for special behaviors of existing ones:
+
 -   `data-site`: Site ID
 -   `data-page`: Page ID
 -   `data-format`: Format ID
 -   `data-domain`: Ad call domain
 
 These attributes are optional:
+
 -   `data-target`: Targeting string
 -   `data-schain`: SupplyChain Object string
 -   `rtc-config`: Please refer to [RTC Documentation](https://github.com/ampproject/amphtml/blob/main/extensions/amp-a4a/rtc-documentation.md) for details
 
 ## Example configuration
+
 ```html
 <amp-ad width="300" height="250" type="smartadserver"
   data-site="38877"
