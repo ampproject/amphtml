@@ -1,10 +1,5 @@
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {
-  addAttributesToElement,
-  dispatchCustomEvent,
-  insertAfterOrAtStart,
-  removeElement,
-} from '#core/dom';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   fullscreenEnter,
@@ -45,7 +40,6 @@ import {fetchCachedSources} from './video-cache';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
 import {getMode} from '../../../src/mode';
-import {addParamsToUrl} from '../../../src/url';
 import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-video';
@@ -61,13 +55,6 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'controlsList',
   'title',
 ];
-
-/** @private {!Map<string, number>} the bitrate in Kb/s of amp_video_quality for videos in the ampproject cdn */
-const AMP_VIDEO_QUALITY_BITRATES = {
-  'high': 2000,
-  'medium': 720,
-  'low': 400,
-};
 
 /**
  * Do not propagate `autoplay`. Autoplay behavior is managed by
@@ -86,60 +73,12 @@ const ATTRS_TO_PROPAGATE = ATTRS_TO_PROPAGATE_ON_BUILD.concat(
  */
 export class AmpVideo extends AMP.BaseElement {
   /**
-   * AMP Cache may selectively cache certain video sources (based on various
-   * heuristics such as video type, extensions, etc...).
-   * When AMP Cache does so, it rewrites the `src` for `amp-video` and
-   * `source` children that are cached and adds a `amp-orig-src` attribute
-   * pointing to the original source.
-   *
-   * There are two separate runtime concerns that we handle here:
-   *
-   * 1) Handling 404s
-   * Eventhough AMP Cache rewrites the `src` to point to the CDN, the actual
-   * video may not be ready in the cache yet, in those cases the CDN will
-   * return a 404.
-   * AMP Cache also rewrites Urls for all sources and returns 404 for types
-   * that are not supported to be cached.
-   *
-   * Runtime handles this situation by appending an additional
-   * <source> pointing to the original src AFTER the cached source so browser
-   * will automatically proceed to the next source if one fails.
-   * Original sources are added only when page becomes visible and not during
-   * prerender mode.
-   *
-   * 2) Prerendering
-   * Now that some sources might be cached, we can preload them during prerender
-   * phase. Runtime handles this by adding any cached sources to the <video>
-   * element during prerender and automatically sets the `preload` to `auto`
-   * so browsers (based on their own heuristics) can start fetching the cached
-   * videos. If `preload` is specified by the author, then it takes precedence.
-   *
-   * Note that this flag does not impact prerendering of the `poster` as poster
-   * is fetched (and is always cached) during `buildCallback` which is not
-   * dependent on the value of `prerenderAllowed()`.
-   *
    * @override
    * @nocollapse
    */
   static prerenderAllowed(element) {
-    // Only allow prerender if video sources are cached on CDN or remote video
-    // cache, or if video has a poster image.
-
-    // Poster is available, or cache is configured.
-    if (element.getAttribute('poster') || element.hasAttribute('cache')) {
-      return true;
-    }
-
-    // Look for sources.
-    const sources = toArray(childElementsByTag(element, 'source'));
-    sources.push(element);
-    for (let i = 0; i < sources.length; i++) {
-      if (isCachedByCdn(sources[i], element)) {
-        return true;
-      }
-    }
-
-    return false;
+    // Only allow prerender if video sources are cached, or if video has a poster image.
+    return element.getAttribute('poster') || element.hasAttribute('cache');
   }
 
   /**
@@ -198,11 +137,6 @@ export class AmpVideo extends AMP.BaseElement {
       const src = source.getAttribute('src');
       if (src) {
         srcs.push(src);
-      }
-      // We also want to preconnect to the origin src to make fallback faster.
-      const origSrc = source.getAttribute('amp-orig-src');
-      if (origSrc) {
-        srcs.push(origSrc);
       }
     });
     return srcs;
@@ -268,9 +202,6 @@ export class AmpVideo extends AMP.BaseElement {
     Services.videoManagerForDoc(element).register(this);
 
     if (this.element.hasAttribute('cache')) {
-      // If enabled, disables AMP Cache video caching (cdn.ampproject.org),
-      // opted-in through the "amp-orig-src" attribute.
-      this.removeCachedSources_();
       // Fetch new sources from remote video cache, opted-in through the "cache"
       // attribute.
       return fetchCachedSources(
@@ -487,87 +418,6 @@ export class AmpVideo extends AMP.BaseElement {
   }
 
   /**
-   * Disables AMP Cache video caching (cdn.ampproject.org), opted-in through
-   * amp-orig-src.
-   * @private
-   */
-  removeCachedSources_() {
-    this.getCachedSources_().forEach((cachedSource) => {
-      cachedSource.setAttribute(
-        'src',
-        cachedSource.getAttribute('amp-orig-src')
-      );
-      cachedSource.removeAttribute('amp-orig-src');
-    });
-  }
-
-  /**
-   * @private
-   * Propagate sources that are cached by the CDN.
-   */
-  propagateCachedSources_() {
-    devAssert(this.video_);
-
-    const sources = toArray(childElementsByTag(this.element, 'source'));
-
-    // if the `src` of `amp-video` itself is cached, move it to <source>
-    if (this.element.hasAttribute('src') && isCachedByCdn(this.element)) {
-      const src = this.element.getAttribute('src');
-      const type = this.element.getAttribute('type');
-      const srcSource = this.createSourceElement_(src, type);
-      const ampOrigSrc = this.element.getAttribute('amp-orig-src');
-      srcSource.setAttribute('amp-orig-src', ampOrigSrc);
-      // Also make sure src is removed from amp-video since Stories media-pool
-      // may copy it back from amp-video.
-      this.element.removeAttribute('src');
-      this.element.removeAttribute('type');
-      sources.unshift(srcSource);
-    }
-
-    // Only cached sources are added during prerender, with all the available
-    // transcodes generated by the cache.
-    // Origin sources will only be added when document becomes visible.
-    sources.forEach((source) => {
-      // Cached by the AMP Cache (amp-video[amp-orig-src]).
-      if (isCachedByCdn(source, this.element)) {
-        source.remove();
-        const qualities = Object.keys(AMP_VIDEO_QUALITY_BITRATES);
-        const origType = source.getAttribute('type');
-        const origSrc = source.getAttribute('amp-orig-src');
-        const maxBitrate = this.getMaxBitrate_();
-        qualities.forEach((quality, index) => {
-          if (maxBitrate < AMP_VIDEO_QUALITY_BITRATES[quality]) {
-            return;
-          }
-          const cachedSource = addParamsToUrl(source.src, {
-            'amp_video_quality': quality,
-          });
-          const currSource = this.createSourceElement_(cachedSource, origType, {
-            'data-bitrate': AMP_VIDEO_QUALITY_BITRATES[quality],
-            'i-amphtml-video-cached-source': '',
-          });
-          // Keep src of amp-orig only in last one so it adds the orig source after it.
-          if (index === qualities.length - 1) {
-            currSource.setAttribute('amp-orig-src', origSrc);
-          }
-          this.video_.appendChild(currSource);
-        });
-
-        return;
-      }
-
-      // Cached by the remote video caching (amp-video[cache=*]).
-      if (source.hasAttribute('i-amphtml-video-cached-source')) {
-        this.video_.appendChild(source);
-      }
-    });
-
-    if (this.video_.changedSources) {
-      this.video_.changedSources();
-    }
-  }
-
-  /**
    * Propagate origin sources and tracks
    * @private
    */
@@ -580,7 +430,7 @@ export class AmpVideo extends AMP.BaseElement {
     const urlService = this.getUrlService_();
 
     // If the `src` of `amp-video` itself is NOT cached, set it on video
-    if (element.hasAttribute('src') && !isCachedByCdn(element)) {
+    if (element.hasAttribute('src')) {
       urlService.assertHttpsUrl(element.getAttribute('src'), element);
       propagateAttributes(
         ['src'],
@@ -591,23 +441,8 @@ export class AmpVideo extends AMP.BaseElement {
 
     sources.forEach((source) => {
       // Cached sources should have been moved from <amp-video> to <video>.
-      devAssert(!isCachedByCdn(source, element));
       urlService.assertHttpsUrl(source.getAttribute('src'), source);
       this.video_.appendChild(source);
-    });
-
-    // To handle cases where cached source may 404 if not primed yet,
-    // duplicate the `origin` Urls for cached sources and insert them after each
-    const cached = toArray(this.video_.querySelectorAll('[amp-orig-src]'));
-    cached.forEach((cachedSource) => {
-      const origSrc = cachedSource.getAttribute('amp-orig-src');
-      const origType = cachedSource.getAttribute('type');
-      const origSource = this.createSourceElement_(origSrc, origType);
-      insertAfterOrAtStart(
-        dev().assertElement(this.video_),
-        origSource,
-        cachedSource
-      );
     });
 
     const tracks = toArray(childElementsByTag(element, 'track'));
@@ -619,50 +454,6 @@ export class AmpVideo extends AMP.BaseElement {
     if (this.video_.changedSources) {
       this.video_.changedSources();
     }
-  }
-
-  /**
-   * @param {string} src
-   * @param {?string} type
-   * @param {Object=} attributes
-   * @return {!Element} source element
-   * @private
-   */
-  createSourceElement_(src, type, attributes = {}) {
-    const {element} = this;
-    this.getUrlService_().assertHttpsUrl(src, element);
-    const source = element.ownerDocument.createElement('source');
-    source.setAttribute('src', src);
-    if (type) {
-      source.setAttribute('type', type);
-    }
-    addAttributesToElement(source, attributes);
-    return source;
-  }
-
-  /**
-   * @private
-   * @return {!Array<!Element>}
-   */
-  getCachedSources_() {
-    const {element} = this;
-    const sources = toArray(childElementsByTag(element, 'source'));
-    const cachedSources = [];
-    sources.push(element);
-    for (let i = 0; i < sources.length; i++) {
-      if (isCachedByCdn(sources[i])) {
-        cachedSources.push(sources[i]);
-      }
-    }
-    return cachedSources;
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
-  hasAnyCachedSources_() {
-    return !!this.getCachedSources_().length;
   }
 
   /**
@@ -1033,22 +824,6 @@ export class AmpVideo extends AMP.BaseElement {
   seekTo(timeSeconds) {
     this.video_.currentTime = timeSeconds;
   }
-}
-
-/**
- * @param {!Element} element
- * @param {!Element=} opt_videoElement
- * @return {boolean}
- * @visibleForTesting
- */
-export function isCachedByCdn(element, opt_videoElement) {
-  const src = element.getAttribute('src');
-  const hasOrigSrcAttr = element.hasAttribute('amp-orig-src');
-  if (!hasOrigSrcAttr) {
-    return false;
-  }
-  const urlService = Services.urlForDoc(opt_videoElement || element);
-  return urlService.isProxyOrigin(src);
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
