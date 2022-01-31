@@ -1525,7 +1525,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Adds an orientation=landscape|portrait attribute.
+   * Adds an orientation=landscape|portrait attribute.  This is used to
    * If the story doesn't explicitly support landscape via the opt-in attribute,
    * it is always in a portrait orientation.
    * @param {boolean} isLandscape Whether the viewport is landscape or portrait
