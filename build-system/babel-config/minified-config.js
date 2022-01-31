@@ -68,17 +68,22 @@ function getMinifiedConfig() {
       shippedProposals: true,
     },
   ];
+  const presetTypescript = [
+    '@babel/preset-typescript',
+    {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
+  ];
 
   return {
     compact: false,
     plugins,
     sourceMaps: true,
-    presets: [presetEnv],
+    presets: [presetTypescript, presetEnv],
     retainLines: true,
     assumptions: {
       constantSuper: true,
       noClassCalls: true,
       setClassMethods: true,
+      setPublicClassFields: true,
     },
   };
 }
