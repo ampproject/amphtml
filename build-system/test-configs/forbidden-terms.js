@@ -462,6 +462,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments/index.js',
+      'src/preact/hooks/useLocalStorage.js',
       'src/service/cid-impl.js',
       'src/service/standard-actions-impl.js',
       'src/service/storage-impl.js',

@@ -175,6 +175,14 @@
     }
   },
   {
+    "name": "amp-app-banner",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-audio",
     "version": "0.1",
     "latestVersion": "0.1"

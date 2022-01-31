@@ -1,6 +1,7 @@
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import '../amp-ad';
 import * as fakeTimers from '@sinonjs/fake-timers';
+import {expect} from 'chai';
 
 import {adConfig} from '#ads/_config';
 
@@ -287,20 +288,17 @@ describes.realWin(
 
       describe('during layout', () => {
         it('sticky ad: should not layout w/o scroll', () => {
-          ad3p.uiHandler.stickyAdPosition_ = 'bottom';
-          expect(ad3p.xOriginIframeHandler_).to.be.null;
-          const layoutPromise = ad3p.layoutCallback();
-          return Promise.race([macroTask(), layoutPromise])
-            .then(() => {
-              expect(ad3p.xOriginIframeHandler_).to.be.null;
-            })
-            .then(() => {
-              Services.viewportForDoc(env.ampdoc).scrollObservable_.fire();
-              return layoutPromise;
-            })
-            .then(() => {
-              expect(ad3p.xOriginIframeHandler_).to.not.be.null;
-            });
+          ad3p.element.setAttribute('sticky', 'bottom');
+          ad3p.buildCallback();
+          const maybeInitStickyAdSpy = env.sandbox.spy(
+            ad3p.uiHandler,
+            'maybeInitStickyAd'
+          );
+          expect(maybeInitStickyAdSpy).to.not.be.called;
+          Services.viewportForDoc(env.ampdoc).scrollObservable_.fire();
+          return Promise.resolve().then(() => {
+            expect(maybeInitStickyAdSpy).to.be.called;
+          });
         });
       });
 
