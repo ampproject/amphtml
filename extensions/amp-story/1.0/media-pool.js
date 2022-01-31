@@ -896,12 +896,25 @@ export class MediaPool {
       if (ampVideoEl) {
         const volume = ampVideoEl.getAttribute('volume');
         if (volume) {
-          this.audioContext_ = this.audioContext_ || new AudioContext();
-          const audioSource = this.audioSources_[domMediaEl.id] || this.audioContext_.createMediaElementSource(domMediaEl);
-          this.audioSources_[domMediaEl.id] = audioSource;
-          const gainNode = this.audioContext_.createGain();
-          gainNode.gain.value = parseFloat(volume);
-          audioSource.connect(gainNode).connect(this.audioContext_.destination);
+          // Handle cross-browser differences (see https://googlechrome.github.io/samples/webaudio-method-chaining/).
+          if (typeof AudioContext === 'function') {
+            this.audioContext_ = this.audioContext_ || new AudioContext();
+          } else if (typeof webkitAudioContext === 'function') {
+            this.audioContext_ =
+              this.audioContext_ || new global.webkitAudioContext();
+          }
+
+          if (this.audioContext_) {
+            const audioSource =
+              this.audioSources_[domMediaEl.id] ||
+              this.audioContext_.createMediaElementSource(domMediaEl);
+            this.audioSources_[domMediaEl.id] = audioSource;
+            const gainNode = this.audioContext_.createGain();
+            gainNode.gain.value = parseFloat(volume);
+            audioSource
+              .connect(gainNode)
+              .connect(this.audioContext_.destination);
+          }
         }
       }
     }
