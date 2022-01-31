@@ -55,7 +55,7 @@ describes.realWin(
         'amp-story-shopping-tag',
         {
           'layout': 'container',
-          'data-tag-id': 'lamp',
+          'data-product-id': 'lamp',
         }
       );
       pageEl.appendChild(tagEl);
@@ -69,7 +69,7 @@ describes.realWin(
     async function dispatchTestShoppingData() {
       const shoppingData = {
         'lamp': {
-          'product-tag-id': 'lamp',
+          'product-id': 'lamp',
           'product-title': 'Brass Lamp',
           'product-brand': 'Lamp Co',
           'product-price': 799.0,
