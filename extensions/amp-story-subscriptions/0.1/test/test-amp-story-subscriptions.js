@@ -7,7 +7,6 @@ import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   AmpStoryStoreService,
-  StateProperty,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStorySubscriptions} from '../amp-story-subscriptions';
 
