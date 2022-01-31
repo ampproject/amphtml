@@ -1528,7 +1528,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   installPageAttachmentExtension_() {
     const elementsThatRequireExtension = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink'
+      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
     );
 
     if (!elementsThatRequireExtension) {
