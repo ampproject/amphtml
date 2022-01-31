@@ -3,7 +3,7 @@ import * as mode from '#core/mode';
 import {arrayOrSingleItemToArray} from '#core/types/array';
 import {hasOwn} from '#core/types/object';
 import {endsWith} from '#core/types/string';
-import {parseQueryString} from '#core/types/string/url';
+import {INVALID_PROTOCOLS, parseQueryString} from '#core/types/string/url';
 
 import {userAssert} from '#utils/log';
 
@@ -33,9 +33,6 @@ let cachedAnchorEl;
  * @type {LruCache}
  */
 let urlCache;
-
-// eslint-disable-next-line no-script-url
-const INVALID_PROTOCOLS = ['javascript:', 'data:', 'vbscript:'];
 
 /** @const {string} */
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
