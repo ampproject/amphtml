@@ -76,10 +76,12 @@ export let InteractiveReactData;
  * @typedef {{
  *   product-tag-id: string,
  *   product-title: string,
+ *   product-brand: string,
  *   product-price: number,
  *   product-price-currency: string,
  *   product-icon: string,
  *   product-tag-text: ?string,
+ *   product-images: !Array<string>,
  * }}
  */
 export let ShoppingConfigDataDef;

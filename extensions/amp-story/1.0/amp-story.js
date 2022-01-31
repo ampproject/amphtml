@@ -440,18 +440,6 @@ export class AmpStory extends AMP.BaseElement {
     if (this.maybeLoadStoryDevTools_()) {
       return;
     }
-
-    const needsDvhPolyfill =
-      !this.win.CSS?.supports?.('height: 1dvh') &&
-      !getStyle(this.win.document.documentElement, '--story-dvh');
-
-    const onResize = (size) => {
-      needsDvhPolyfill && this.polyfillDvh_(size);
-      this.onViewportResize_();
-    };
-
-    this.getViewport().onResize(onResize);
-    onResize(this.getViewport().getSize());
   }
 
   /**
@@ -915,6 +903,18 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   layoutStory_() {
+    const needsDvhPolyfill =
+      !this.win.CSS?.supports?.('height: 1dvh') &&
+      !getStyle(this.win.document.documentElement, '--story-dvh');
+
+    const onResize = (size) => {
+      needsDvhPolyfill && this.polyfillDvh_(size);
+      this.onViewportResize_();
+    };
+
+    this.getViewport().onResize(onResize);
+
+    onResize(this.getViewport().getSize());
     const initialPageId = this.getInitialPageId_();
 
     this.buildSystemLayer_(initialPageId);
@@ -950,7 +950,17 @@ export class AmpStory extends AMP.BaseElement {
         );
 
         if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
-          this.activePage_.openAttachment(false /** shouldAnimate */);
+          const attachmentEl = this.activePage_.element.querySelector(
+            'amp-story-page-attachment, amp-story-page-outlink'
+          );
+
+          if (attachmentEl) {
+            whenUpgradedToCustomElement(attachmentEl)
+              .then(() => attachmentEl.getImpl())
+              .then((attachmentImpl) =>
+                attachmentImpl.open(false /** shouldAnimate */)
+              );
+          }
         }
 
         if (
@@ -1370,18 +1380,16 @@ export class AmpStory extends AMP.BaseElement {
     ];
 
     return new Promise((resolve) => {
-      targetPage.beforeVisible().then(() => {
-        // Recursively executes one step per frame.
-        const unqueueStepInRAF = () => {
-          steps.shift().call(this);
-          if (!steps.length) {
-            return resolve();
-          }
-          this.win.requestAnimationFrame(() => unqueueStepInRAF());
-        };
+      // Recursively executes one step per frame.
+      const unqueueStepInRAF = () => {
+        steps.shift().call(this);
+        if (!steps.length) {
+          return resolve();
+        }
+        this.win.requestAnimationFrame(() => unqueueStepInRAF());
+      };
 
-        unqueueStepInRAF();
-      });
+      unqueueStepInRAF();
     });
   }
 
