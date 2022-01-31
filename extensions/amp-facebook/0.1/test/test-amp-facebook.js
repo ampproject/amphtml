@@ -2,6 +2,7 @@ import '../amp-facebook';
 import {expect} from 'chai';
 
 import {facebook} from '#3p/facebook';
+import * as log '#utils/log';
 
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {resetServiceForTesting} from '../../../../src/service-helpers';
@@ -20,6 +21,8 @@ describes.realWin(
     const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
     const fbVideoHref =
       'https://www.facebook.com/zuck/videos/10102509264909801/';
+    const fbCommentHref = 
+      'https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185';
     let win, doc;
 
     beforeEach(() => {
@@ -77,11 +80,16 @@ describes.realWin(
     });
 
     it('warns unsupported data-embed-as value: comment, and does not render', async () => {
-      const warnSpy = env.sandbox.stub(user(),'warn');
-      const ampFB = await getAmpFacebook(fbVideoHref, 'comment');
+      
+      // const warnSpy = env.sandbox.stub(user(),'warn');
+      // const ampFB = await getAmpFacebook(fbCommentHref, 'comment');
+      // expect(warnSpy).to.be.calledOnce;
+      // expect(warnSpy.args[0][1]).to.match(/Embedded Comments have been deprecated: https:\/\/developers.facebook.com\/docs\/plugins\/embedded-comments/);
+      const warn = env.sandbox.spy();
+      env.sandbox.stub(log, 'user').returns({warn});
+      const ampFB = await getAmpFacebook(fbCommentHref, 'comment');
+      expect(warn).to.be.calledOnce;
 
-      expect(warnSpy).to.be.calledOnce;
-      expect(warnSpy.args[0][1]).to.match(/Embedded Comments have been deprecated: https:\/\/developers.facebook.com\/docs\/plugins\/embedded-comments/);
     });
 
     it('rejects other supported and unsupported data-embed-as types', async () => {
