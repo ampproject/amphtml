@@ -1,4 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["index.js", "**/*.d.ts", "../core/**/globals.d.ts"]
+  "compilerOptions": {"jsx": "preserve"},
+  "include": [
+    "*.js",
+    "**/*.d.ts",
+    "../core/**/globals.d.ts",
+    "../**/base-element.d.ts"
+  ]
 }

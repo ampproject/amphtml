@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
@@ -115,13 +113,10 @@ export class AmpAutoAds extends AMP.BaseElement {
       }
 
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
-      const attributes = /** @type {!JsonObject} */ (
-        Object.assign(
-          dict({}),
-          this.adNetwork_.getAttributes(),
-          getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
-        )
-      );
+      const attributes = /** @type {!JsonObject} */ ({
+        ...this.adNetwork_.getAttributes(),
+        ...getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES),
+      });
       const sizing = this.adNetwork_.getSizing();
       const adConstraints =
         getAdConstraintsFromConfigObj(ampdoc, configObj) ||
@@ -134,13 +129,13 @@ export class AmpAutoAds extends AMP.BaseElement {
         adTracker,
         this.adNetwork_.isResponsiveEnabled()
       ).run();
-      const stickyAdAttributes = /** @type {!JsonObject} */ (
-        Object.assign(
-          dict({}),
-          attributes,
-          getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
-        )
-      );
+      const stickyAdAttributes = /** @type {!JsonObject} */ ({
+        ...attributes,
+        ...getAttributesFromConfigObj(
+          configObj,
+          Attributes.STICKY_AD_ATTRIBUTES
+        ),
+      });
       new AnchorAdStrategy(ampdoc, stickyAdAttributes, configObj).run();
     });
   }

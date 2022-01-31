@@ -1,3 +1,5 @@
+import {defineBentoElement} from '#preact/bento-ce';
+
 import {BENTO_TAG, BaseElement} from './base-element';
 import {
   BENTO_TAG as EMBEDLY_KEY_BENTO_TAG,
@@ -8,7 +10,7 @@ import {
  * Registers `<bento-embedly-card> component to CustomElements registry
  */
 export function defineElement() {
-  customElements.define(BENTO_TAG, BaseElement.CustomElement(BaseElement));
+  defineBentoElement(BENTO_TAG, BaseElement);
   defineElementEmbedlyKey();
 }
 
@@ -16,8 +18,5 @@ export function defineElement() {
  * Registers <bento-embedly-key>` component to CustomElements registry
  */
 export function defineElementEmbedlyKey() {
-  customElements.define(
-    EMBEDLY_KEY_BENTO_TAG,
-    EmbedlyKeyBaseElement.CustomElement(EmbedlyKeyBaseElement)
-  );
+  defineBentoElement(EMBEDLY_KEY_BENTO_TAG, EmbedlyKeyBaseElement);
 }

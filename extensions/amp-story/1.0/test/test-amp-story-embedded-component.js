@@ -1,16 +1,19 @@
+import {addAttributesToElement} from '#core/dom';
+
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
 import * as analyticsApi from '#utils/analytics';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {
   Action,
   EmbeddedComponentState,
   getStoreService,
 } from '../amp-story-store-service';
-import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {EventType} from '../events';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
 import {StoryAnalyticsEvent} from '../story-analytics';
-import {addAttributesToElement} from '#core/dom';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
   let component;

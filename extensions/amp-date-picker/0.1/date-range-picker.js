@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {withDatePickerCommon} from './date-picker-common';
 import {DayPickerPhrases} from './defaultPhrases';
 import {wrap as withMaximumNights} from './wrappers/maximum-nights';
@@ -20,7 +18,7 @@ function createDateRangePickerBase() {
     requireExternal('react-dates')['DayPickerRangeController']
   );
 
-  const defaultProps = dict({
+  const defaultProps = {
     'startDate': null, // TODO: use null
     'endDate': null, // TODO: use null
     'onDatesChange': function () {},
@@ -70,7 +68,7 @@ function createDateRangePickerBase() {
     'phrases': DayPickerPhrases,
 
     'isRTL': false,
-  });
+  };
 
   const WrappedDayPickerRangeController = withDatePickerCommon(
     withMaximumNights(DayPickerRangeController)

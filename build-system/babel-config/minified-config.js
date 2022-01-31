@@ -65,6 +65,7 @@ function getMinifiedConfig() {
       bugfixes: true,
       modules: false,
       targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
+      shippedProposals: true,
     },
   ];
 

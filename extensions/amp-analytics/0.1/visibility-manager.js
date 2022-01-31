@@ -1,18 +1,21 @@
-import {Services} from '#service';
-import {VisibilityModel} from './visibility-model';
-import {dev, user} from '#utils/log';
-import {dict, map} from '#core/types/object';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {getMinOpacity} from './opacity';
-import {getMode} from '../../../src/mode';
-import {getParentWindowFrameElement} from '../../../src/service-helpers';
-import {isArray, isFiniteNumber} from '#core/types';
-
+import {rootNodeFor} from '#core/dom';
 import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
 } from '#core/dom/layout/rect';
-import {rootNodeFor} from '#core/dom';
+import {isArray, isFiniteNumber} from '#core/types';
+import {map} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {dev, user} from '#utils/log';
+
+import {getMinOpacity} from './opacity';
+import {VisibilityModel} from './visibility-model';
+
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {getMode} from '../../../src/mode';
+import {getParentWindowFrameElement} from '../../../src/service-helpers';
 
 const TAG = 'amp-analytics/visibility-manager';
 
@@ -465,13 +468,10 @@ export class VisibilityManager {
         layoutBox = viewport.getLayoutRect(opt_element);
         const intersectionRatio = this.getElementVisibility(opt_element);
         const intersectionRect = this.getElementIntersectionRect(opt_element);
-        Object.assign(
-          state,
-          dict({
-            'intersectionRatio': intersectionRatio,
-            'intersectionRect': JSON.stringify(intersectionRect),
-          })
-        );
+        Object.assign(state, {
+          'intersectionRatio': intersectionRatio,
+          'intersectionRect': JSON.stringify(intersectionRect),
+        });
       } else {
         state['opacity'] = this.getRootMinOpacity();
         state['intersectionRatio'] = this.getRootVisibility();
@@ -480,15 +480,12 @@ export class VisibilityManager {
       model.maybeDispose();
 
       if (layoutBox) {
-        Object.assign(
-          state,
-          dict({
-            'elementX': layoutBox.left,
-            'elementY': layoutBox.top,
-            'elementWidth': layoutBox.width,
-            'elementHeight': layoutBox.height,
-          })
-        );
+        Object.assign(state, {
+          'elementX': layoutBox.left,
+          'elementY': layoutBox.top,
+          'elementWidth': layoutBox.width,
+          'elementHeight': layoutBox.height,
+        });
         state['initialScrollDepth'] = layoutPositionRelativeToScrolledViewport(
           layoutBox,
           viewport,

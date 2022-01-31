@@ -3,8 +3,9 @@
  * presets.
  */
 
-import {StoryAnimationDimsDef, WebKeyframesDef} from './animation-types';
 import {rotate, scale, translate} from '#core/dom/style';
+
+import {StoryAnimationDimsDef, WebKeyframesDef} from './animation-types';
 
 /**
  * Translates the element on the 2d plane according to the given points.
