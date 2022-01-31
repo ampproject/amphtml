@@ -26,6 +26,7 @@ import {parseUrlDeprecated} from 'src/url';
 import {
   AUTHORIZATION_TIMEOUT,
   CONFIG_BASE_PATH,
+  CONFIG_PATH_PARAMS,
   DEFAULT_MESSAGES,
   TAG,
   TAG_SHORTHAND,
@@ -96,7 +97,10 @@ export class AmpAccessFewcents {
         (response) => {
           // removing the paywall if shown and showing the content
           this.emptyContainer_();
-          return {access: response.data.access, data: JSON.stringify(response)};
+          return {
+            access: response.data.access,
+            data: JSON.stringify(response),
+          };
         },
         (err) => {
           // showing the paywall
@@ -143,9 +147,10 @@ export class AmpAccessFewcents {
     const category = this.fewcentsConfig_['category'];
 
     const {hostname} = parseUrlDeprecated();
+    const basePath = this.getConfigBasePath_() + CONFIG_PATH_PARAMS;
 
     const url =
-      CONFIG_BASE_PATH +
+      basePath +
       '&accessKey=' +
       encodeURIComponent(accessKey) +
       '&category=' +
@@ -156,6 +161,22 @@ export class AmpAccessFewcents {
       encodeURIComponent(hostname);
 
     return url;
+  }
+
+  /**
+   * Returns the base path for authorize endpoint
+   * @private
+   * @return {string}
+   */
+  getConfigBasePath_() {
+    const env = this.fewcentsConfig_['environment'];
+    if (env === 'development') {
+      return CONFIG_BASE_PATH.development;
+    } else if (env === 'demo') {
+      return CONFIG_BASE_PATH.demo;
+    } else {
+      return CONFIG_BASE_PATH.production;
+    }
   }
 
   /**
