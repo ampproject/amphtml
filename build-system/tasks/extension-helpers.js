@@ -38,6 +38,7 @@ const {parse: pathParse} = require('path');
 const {renameSelectorsToBentoTagNames} = require('./css/bento-css');
 const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
+const {resolvePath} = require('../babel-config/import-resolver');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -730,11 +731,7 @@ async function getBentoBuildFilename(dir, name, mode, options) {
   }
   const generatedFilename = `build/${filename}`;
   const generatedOutputFilename = `${dir}/${generatedFilename}`;
-  const generatedSource = generateBentoEntryPointSource(
-    name,
-    toExport,
-    generatedOutputFilename
-  );
+  const generatedSource = generateBentoEntryPointSource(name, toExport);
   fs.outputFileSync(generatedOutputFilename, generatedSource);
   return generatedFilename;
 }
@@ -742,14 +739,10 @@ async function getBentoBuildFilename(dir, name, mode, options) {
 /**
  * @param {string} name
  * @param {string} toExport
- * @param {string} outputFilename
  * @return {string}
  */
-function generateBentoEntryPointSource(name, toExport, outputFilename) {
-  const bentoCePath = path.relative(
-    path.dirname(outputFilename),
-    'src/preact/bento-ce'
-  );
+function generateBentoEntryPointSource(name, toExport) {
+  const bentoCePath = resolvePath('src/preact/bento-ce');
 
   return dedent(`
     import {BaseElement} from '../base-element';
