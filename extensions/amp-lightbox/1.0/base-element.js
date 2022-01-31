@@ -8,6 +8,11 @@ import {BentoLightbox} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {
+  /** @override */
+  static deferredMount(unusedElement) {
+    return false;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

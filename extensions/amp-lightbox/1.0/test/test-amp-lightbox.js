@@ -12,6 +12,8 @@ import {ActionInvocation} from '#service/action-impl';
 
 import {whenCalled} from '#testing/helpers/service';
 import {poll} from '#testing/iframe';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {macroTask} from '#testing/helpers';
 
 describes.realWin(
   'amp-lightbox:1.0',
@@ -24,6 +26,7 @@ describes.realWin(
     let win;
     let html;
     let element;
+    let container;
     let historyPopSpy;
     let historyPushSpy;
 
@@ -63,11 +66,33 @@ describes.realWin(
         </amp-lightbox>
       `;
       win.document.body.appendChild(element);
-      await element.buildInternal();
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
     });
 
     afterEach(() => {
       win.document.body.removeChild(element);
+    });
+
+    it('should open when `open` attribute is present', async () => {
+      const {shadowRoot} = element;
+      const firstElementChild = shadowRoot.firstElementChild;
+      expect(firstElementChild.firstElementChild).to.be.null;
+
+      element.setAttribute('open', '');
+      await poll('element open updated', () => {
+       return element.getAttribute('hidden') == null; 
+      }, undefined, 500);
+
+      expect(firstElementChild.firstElementChild).to.not.be.null;
+
+      element.removeAttribute('open');
+
+      await poll('element open updated', () => {
+       return element.getAttribute('hidden') != null; 
+      }, undefined, 500);
+      
+      expect(firstElementChild.firstElementChild).to.be.null;
     });
 
     it('should render closed', async () => {
