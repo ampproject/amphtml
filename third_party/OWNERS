@@ -5,7 +5,6 @@
   rules: [
     {
       owners: [
-        {name: 'kristoferbaxter'},
         {name: 'rsimha'},
         {name: 'erwinmombay'},
         {name: 'choumx'},

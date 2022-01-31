@@ -279,6 +279,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.element.setAttribute('role', 'region');
     this.initializeImgAltTags_();
     this.initializeTabbableElements_();
+    this.maybeApplyFirstAnimationFrameOrFinish();
   }
 
   /** @private */
@@ -522,7 +523,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.renderOpenAttachmentUI_();
 
     return Promise.all([
-      this.beforeVisible(),
       this.waitForMediaLayout_().then(() => this.markPageAsLoaded_()),
       this.mediaPoolPromise_,
     ]);
@@ -538,14 +538,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (uiState === UIType.VERTICAL) {
       this.maybeFinishAnimations_();
     }
-  }
-
-  /** @return {!Promise} */
-  beforeVisible() {
-    // Ensures a dynamically added page-attachment or page-outlink element is built.
-    // This happens by amp-story-ads.
-    this.renderOpenAttachmentUI_();
-    return this.maybeApplyFirstAnimationFrameOrFinish();
   }
 
   /**
@@ -1039,6 +1031,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * Apply first or last frame of animations if page should play them or not.
    * @return {!Promise}
    */
   maybeApplyFirstAnimationFrameOrFinish() {
