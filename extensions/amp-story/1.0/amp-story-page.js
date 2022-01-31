@@ -19,7 +19,7 @@ import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {toggle} from '#core/dom/style';
+import {px, toggle} from '#core/dom/style';
 import {isAutoplaySupported, tryPlay} from '#core/dom/video';
 import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
@@ -57,7 +57,6 @@ import {setTextBackgroundColor} from './utils';
 
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
-import {stat} from 'fs';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
