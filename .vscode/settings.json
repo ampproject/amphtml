@@ -7,11 +7,8 @@
 
     // Enable JSON auto-formatting for these files.
     ".prettierrc": "json",
-    ".renovaterc.json": "json",
-    "git.path": "/usr/local/git/current/bin/git",
+    ".renovaterc.json": "json"
   },
-
-
 
   // Auto-fix JS files with ESLint using amphtml's custom settings. Needs
   // https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
