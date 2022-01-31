@@ -22,10 +22,13 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
+  }
 
+  /** @override */
+  buildCallback() {
     // Mark pages with required attributes to be treated as paywall protected pages.
     Array.prototype.map.call(
-      this.element.querySelectorAll('amp-story-page'),
+      document.querySelectorAll('amp-story-page'),
       (pageEl, index) => {
         if (index == FIRST_PAYWALL_STORY_PAGE_INDEX) {
           pageEl.setAttribute('subscriptions-section', 'limited-content');
@@ -34,10 +37,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         }
       }
     );
-  }
 
-  /** @override */
-  buildCallback() {
     // Create a paywall dialog element that have required attributes to be able to be
     // rendered by amp-subscriptions.
     // TODO(#37285): complete the rest of paywall dialog UI based on the publisher-provided attributes.
