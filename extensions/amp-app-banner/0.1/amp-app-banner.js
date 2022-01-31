@@ -295,12 +295,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
    * @private
    */
   parseIosMetaContent_(metaContent) {
-    const parts = metaContent.replace(/\s/, '').split(',');
-    const config = {};
-    parts.forEach((part) => {
-      const keyValuePair = part.split('=');
-      config[keyValuePair[0]] = keyValuePair[1];
-    });
+    const config = this.parseKeyValues(metaContent);
 
     const appId = config['app-id'];
     const openUrl = config['app-argument'];
@@ -327,6 +322,22 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       openInAppUrl,
       installAppUrl
     );
+  }
+
+  /**
+   * Parses a string like "key1=value1,key2=value2" into { key1: "value1", key2: "value2" }
+   * @param {string} metaContent
+   * @return {*}
+   */
+  parseKeyValues(metaContent) {
+    return metaContent
+      .replace(/\s/, '')
+      .split(',')
+      .reduce((result, keyValue) => {
+        const [key, value] = keyValue.split('=');
+        result[key] = value;
+        return result;
+      }, {});
   }
 }
 
@@ -471,18 +482,16 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       return;
     }
 
-    for (let i = 0; i < apps.length; i++) {
-      const app = apps[i];
-      if (app['platform'] == 'play') {
-        const installAppUrl = `https://play.google.com/store/apps/details?id=${app['id']}`;
-        const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-        this.setupOpenButton_(
-          dev().assertElement(this.openButton_),
-          openInAppUrl,
-          installAppUrl
-        );
-        return;
-      }
+    const playApp = apps.find((a) => a['platform'] === 'play');
+    if (playApp) {
+      const installAppUrl = `https://play.google.com/store/apps/details?id=${playApp['id']}`;
+      const openInAppUrl = this.getAndroidIntentForUrl_(playApp['id']);
+      this.setupOpenButton_(
+        dev().assertElement(this.openButton_),
+        openInAppUrl,
+        installAppUrl
+      );
+      return;
     }
 
     user().warn(

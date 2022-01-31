@@ -75,31 +75,34 @@ function getEsbuildBabelPlugin(
     async setup(build) {
       preSetup();
 
-      const babelOptions =
-        babel.loadOptions({caller: {name: callerName}}) || {};
+      build.onLoad(
+        {filter: /\.(cjs|mjs|js|jsx|ts|tsx)$/, namespace: ''},
+        async (file) => {
+          const filename = file.path;
+          const babelOptions =
+            babel.loadOptions({caller: {name: callerName}, filename}) || {};
 
-      build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
-        const filename = file.path;
-        const {contents, hash} = await batchedRead(filename);
-        const rehash = md5(
-          JSON.stringify({
-            callerName,
+          const {contents, hash} = await batchedRead(filename);
+          const rehash = md5(
+            JSON.stringify({
+              callerName,
+              filename,
+              hash,
+              babelOptions,
+              argv: process.argv.slice(2),
+            })
+          );
+
+          const transformed = await transformContents(
             filename,
-            hash,
-            babelOptions,
-            argv: process.argv.slice(2),
-          })
-        );
-
-        const transformed = await transformContents(
-          filename,
-          contents,
-          rehash,
-          getFileBabelOptions(babelOptions, filename)
-        );
-        babelMaps?.set(filename, transformed.map);
-        return {contents: transformed.code};
-      });
+            contents,
+            rehash,
+            getFileBabelOptions(babelOptions, filename)
+          );
+          babelMaps?.set(filename, transformed.map);
+          return {contents: transformed.code};
+        }
+      );
     },
   };
 }
