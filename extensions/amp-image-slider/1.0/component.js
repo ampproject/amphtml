@@ -133,9 +133,9 @@ export function BentoImageSliderWithRef(
    * @private
    */
   const unlisten = useCallback((unlistenHandle) => {
-    if (unlistenHandle) {
-      unlistenHandle();
-      unlistenHandle = null;
+    if (unlistenHandle?.current) {
+      unlistenHandle.current?.();
+      unlistenHandle.current = null;
     }
   }, []);
 
@@ -189,8 +189,7 @@ export function BentoImageSliderWithRef(
       // pointer down after scrolling away and back 3+ slides
       // layoutBox is not updated correctly when first landed on page
 
-      const rect = containerRef.current./*OK*/ getBoundingClientRect();
-      const {left, right, width} = rect;
+      const {left, right, width} = containerRef.current./*OK*/ getBoundingClientRect();;
 
       const newPos = clamp(pointerX, left, right);
       const newPercentage = (newPos - left) / width;
@@ -357,8 +356,8 @@ export function BentoImageSliderWithRef(
   const onMouseUp = useCallback(
     (e) => {
       e.preventDefault();
-      unlisten(unlistenMouseMove?.current);
-      unlisten(unlistenMouseUp?.current);
+      unlisten(unlistenMouseMove);
+      unlisten(unlistenMouseUp);
     },
     [unlisten]
   );
@@ -372,12 +371,12 @@ export function BentoImageSliderWithRef(
       e.preventDefault();
       pointerMoveX(e.pageX);
 
-      // In case, clear up remnants
-      // This is to prevent right mouse button down when left still down
-      unlisten(unlistenMouseMove?.current);
-      unlisten(unlistenMouseUp?.current);
-      unlistenMouseMove.current = listen(window, 'mousemove', onMouseMove);
-      unlistenMouseUp.current = listen(window, 'mouseup', onMouseUp);
+      if ( unlistenMouseMove.current === null ) {
+        unlistenMouseMove.current = listen(window, 'mousemove', onMouseMove);
+      }
+      if ( unlistenMouseUp.current === null ) {
+        unlistenMouseUp.current = listen(window, 'mouseup', onMouseUp);
+      }
 
       animateHideHint();
     },
