@@ -308,8 +308,10 @@ export class AmpStory extends AMP.BaseElement {
       !this.win.CSS?.supports?.('height: 1dvh') &&
       !getStyle(this.win.document.documentElement, '--story-dvh');
 
-    this.getViewport().onResize(() => this.updateViewportUnits_(needsDvhPolyfill));
-    this.updateViewportUnits_(needsDvhPolyfill);
+    if (needsDvhPolyfill) {
+      this.polyfillDvh_(this.getViewport().getSize());
+      this.getViewport().onResize(() => this.polyfillDvh_());
+    }
 
     this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
@@ -910,9 +912,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   layoutStory_() {
-    // In case story had height=0 in buildCallback, we update viewport units again.
-    this.updateViewportUnits_();
-
     const initialPageId = this.getInitialPageId_();
 
     this.buildSystemLayer_(initialPageId);
@@ -1506,26 +1505,6 @@ export class AmpStory extends AMP.BaseElement {
     }
     setImportantStyles(this.win.document.documentElement, {
       '--story-dvh': px(height / 100),
-    });
-  }
-
-  /**
-   * Handles resize events and sets the store service's width and height.
-   * @param {=bool} needsDvhPolyfill
-   * @private
-   */
-  updateViewportUnits_(needsDvhPolyfill = false) {
-    if (needsDvhPolyfill) {
-      this.polyfillDvh_(this.getViewport().getSize());
-    }
-    const page = this.element.querySelector(`amp-story-page[active]`);
-    const layoutBox = page?./*OK*/ getLayoutBox();
-    if (!layoutBox?.height) {
-      return;
-    }
-    this.storeService_.dispatch(Action.SET_PAGE_SIZE, {
-      width: layoutBox.width,
-      height: layoutBox.height,
     });
   }
 

@@ -57,6 +57,7 @@ import {setTextBackgroundColor} from './utils';
 
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {VideoEvents_Enum, delegateAutoplay} from '../../../src/video-interface';
+import {stat} from 'fs';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -526,6 +527,43 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.waitForMediaLayout_().then(() => this.markPageAsLoaded_()),
       this.mediaPoolPromise_,
     ]);
+  }
+
+  /* @override */
+  onLayoutMeasure() {
+    const layoutBox = this.getLayoutSize();
+    if (
+      !isPrerenderActivePage(this.element) ||
+      (this.layoutBox_ &&
+        this.layoutBox_.width === layoutBox.width &&
+        this.layoutBox_.height === layoutBox.height)
+    ) {
+      return;
+    }
+    this.getVsync().runPromise({
+      measure: (state) => {
+        const {height, width} = layoutBox;
+        state.height = height;
+        state.width = width;
+        state.vh = height / 100;
+      },
+      mutate: (state) => {
+        const {height, width} = state;
+        if (state.height === 0 && state.width === 0) {
+          return;
+        }
+        this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
+        if (!this.cssVariablesStyleEl_) {
+          const doc = this.win.document;
+          this.cssVariablesStyleEl_ = doc.createElement('style');
+          this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
+          doc.head.appendChild(this.cssVariablesStyleEl_);
+        }
+        this.cssVariablesStyleEl_.textContent = `:root {--story-page-vh: ${px(
+          state.vh
+        )} !important}`;
+      },
+    });
   }
 
   /**
