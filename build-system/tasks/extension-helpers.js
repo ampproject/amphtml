@@ -746,7 +746,7 @@ async function getBentoBuildFilename(dir, name, mode, options) {
  * @return {string}
  */
 function generateBentoEntryPointSource(name, toExport, outputFilename) {
-  const bentoCePath = path.relative(
+  const bentoCePath = path.posix.relative(
     path.join(process.cwd(), path.dirname(outputFilename)),
     path.join(process.cwd(), 'src/preact/bento-ce')
   );
