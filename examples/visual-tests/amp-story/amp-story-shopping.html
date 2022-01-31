@@ -9,23 +9,23 @@
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-shopping" src="https://cdn.ampproject.org/v0/amp-story-shopping-0.1.js"></script>
     <style amp-custom>
-      [data-tag-id="lamp"],
-      [data-tag-id="lamp-rtl"] {
+      [data-product-id="lamp"],
+      [data-product-id="lamp-rtl"] {
         top: 31%;
         left: 1%;
       }
-      [data-tag-id="art"],
-      [data-tag-id="art-rtl"] {
+      [data-product-id="art"],
+      [data-product-id="art-rtl"] {
         top: 15%;
         left: 40%;
       }
-      [data-tag-id="chair"],
-      [data-tag-id="chair-rtl"] {
+      [data-product-id="chair"],
+      [data-product-id="chair-rtl"] {
         top: 53%;
         left: 30%;
       }
-      [data-tag-id="flowers"],
-      [data-tag-id="flowers-rtl"] {
+      [data-product-id="flowers"],
+      [data-product-id="flowers-rtl"] {
         top: 46%;
         left: 83%;
       }
@@ -47,7 +47,7 @@
             {
                 "items" : [
                    {
-                    "product-tag-id": "lamp",
+                    "product-id": "lamp",
                     "product-title": "Brass Lamp",
                     "product-brand": "Lamp Co",
                     "product-price": 799.00,
@@ -55,7 +55,7 @@
                     "product-images": ["https://source.unsplash.com/Ry9WBo3qmoc/500x500"]
                    },
                    {
-                    "product-tag-id": "art",
+                    "product-id": "art",
                     "product-title": "Abstract Art",
                     "product-brand": "V. Artsy",
                     "product-price": 1200.00,
@@ -63,7 +63,7 @@
                     "product-images": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
                    },
                    {
-                    "product-tag-id": "chair",
+                    "product-id": "chair",
                     "product-title": "Yellow chair",
                     "product-brand": "Chair Co.",
                     "product-price": 1000.00,
@@ -72,7 +72,7 @@
                     "product-images": ["https://source.unsplash.com/DgQGKKLaVhY/500x500"]
                    },
                    {
-                    "product-tag-id": "flowers",
+                    "product-id": "flowers",
                     "product-title": "Flowers",
                     "product-brand": "Very Long Flower Company Name",
                     "product-price": 10.00,
@@ -88,10 +88,10 @@
           <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="lamp" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="art" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="chair" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="flowers" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="chair" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="flowers" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
@@ -104,7 +104,7 @@
             {
                 "items" : [
                    {
-                    "product-tag-id": "art",
+                    "product-id": "art",
                     "product-title": "Abstract Art",
                     "product-brand": "V. Artsy",
                     "product-price": 1200.00,
@@ -120,7 +120,7 @@
           <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="art" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
       </amp-story-page>
@@ -140,7 +140,7 @@
           <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="art" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
       </amp-story-page>
@@ -153,7 +153,7 @@
             {
               "items" : [
                 {
-                  "product-tag-id": "lamp-rtl",
+                  "product-id": "lamp-rtl",
                   "product-title": "Brass Lamp",
                   "product-brand": "Lamp Co",
                   "product-price": 799.00,
@@ -162,7 +162,7 @@
                   "product-images": ["https://source.unsplash.com/Ry9WBo3qmoc/500x500"]
                 },
                 {
-                  "product-tag-id": "art-rtl",
+                  "product-id": "art-rtl",
                   "product-title": "Abstract Art",
                   "product-brand": "V. Artsy",
                   "product-price-currency": "AED",
@@ -171,7 +171,7 @@
                   "product-images": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
                 },
                 {
-                  "product-tag-id": "chair-rtl",
+                  "product-id": "chair-rtl",
                   "product-title": "Yellow chair",
                   "product-brand": "Chair Co.",
                   "product-price": 1000.00,
@@ -180,7 +180,7 @@
                   "product-images": ["https://source.unsplash.com/DgQGKKLaVhY/500x500"]
                  },
                  {
-                  "product-tag-id": "flowers-rtl",
+                  "product-id": "flowers-rtl",
                   "product-title": "Flowers",
                   "product-brand": "Very Long Flower Company Name",
                   "product-price": 10.00,
@@ -196,10 +196,10 @@
           <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="lamp-rtl" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="art-rtl" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="chair-rtl" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="flowers-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="lamp-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="chair-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="flowers-rtl" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>

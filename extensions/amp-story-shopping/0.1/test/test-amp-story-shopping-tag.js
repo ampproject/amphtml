@@ -68,7 +68,7 @@ describes.realWin(
     });
 
     it('should process config data and set text container content if data not null', async () => {
-      shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
+      shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
       await shoppingDataDispatchStoreService();
       env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
         expect(shoppingTag.element.textContent).to.equal(
@@ -78,7 +78,7 @@ describes.realWin(
     });
 
     it('should not process config data and set text container content if id not found', async () => {
-      shoppingTag.element.setAttribute('data-tag-id', 'hat');
+      shoppingTag.element.setAttribute('data-product-id', 'hat');
       await shoppingDataDispatchStoreService();
       expect(shoppingTag.element.textContent).to.be.empty;
       expect(shoppingTag.isLayoutSupported(Layout_Enum.CONTAINER)).to.be.true;
@@ -86,7 +86,7 @@ describes.realWin(
 
     it('should set active product in store service when shopping tag is clicked', async () => {
       const tagData = {
-        'product-tag-id': 'sunglasses',
+        'product-id': 'sunglasses',
         'product-title': 'Spectacular Spectacles',
         'product-price': '400',
         'product-icon':
