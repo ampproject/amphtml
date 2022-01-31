@@ -1501,7 +1501,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   polyfillDvh_(size) {
     const {height} = size;
-    console.log('polyfillDvh', height);
     if (height === 0) {
       return;
     }
