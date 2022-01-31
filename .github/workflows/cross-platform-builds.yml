@@ -1,11 +1,6 @@
 name: Cross-Platform Builds
 
-on:
-  push:
-    branches:
-      - main
-    pull_request:
-      - main
+on: [pull_request]
 
 jobs:
   compile:
