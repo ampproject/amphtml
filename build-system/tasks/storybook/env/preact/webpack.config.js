@@ -19,6 +19,7 @@ module.exports = ({config}) => {
   };
   config.resolve = {
     modules,
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     alias: {
       'react': 'preact/compat',
       'react-dom': 'preact/compat',
@@ -28,11 +29,15 @@ module.exports = ({config}) => {
   config.module = {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.jsx?|tsx?$/,
         loader: 'babel-loader',
         exclude: /node_modules/,
         query: {
           presets: [
+            [
+              '@babel/preset-typescript',
+              {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
+            ],
             [
               '@babel/preset-env',
               {
