@@ -83,12 +83,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    // Gets reference to page attachment impl for opening attachment.
-    this.element
-      .closest('amp-story-page')
-      .querySelector('amp-story-page-attachment')
-      .getImpl()
-      .then((impl) => (this.pageAttachmentImpl_ = impl));
+    this.setPageAttachmentImpl_();
   }
 
   /**
@@ -146,6 +141,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         ? this.shoppingTagEl_.setAttribute('dir', 'rtl')
         : this.shoppingTagEl_.removeAttribute('dir');
     });
+  }
+
+  /** @private */
+  setPageAttachmentImpl_() {
+    this.element
+      .closest('amp-story-page')
+      .querySelector('amp-story-page-attachment')
+      .getImpl()
+      .then((impl) => (this.pageAttachmentImpl_ = impl));
   }
 
   /** @private */
