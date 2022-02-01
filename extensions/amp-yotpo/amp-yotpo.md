@@ -53,8 +53,8 @@ _Example: Display the reviews widget_
   </tr>
   <tr>
     <td width="40%"><strong>data-** (optional)</strong></td>
-    <td>Each Yotpo widget has optional data attributes. For example, the reviews widget has an optional attribute named <code>productId</code>. Refer to <a href="https://support.yotpo.com/en/on-site">Yottpo's documentation</a> for which attributes to specify.<br>
-When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo attribute prepend <code>data</code> to the attribute. For example, the <code>productId</code> attribute becomes <code>data-product-id</code>.</td>
+    <td>Each Yotpo widget has optional data attributes. For example, the reviews widget has an optional attribute named <code>product-id</code>. Refer to <a href="https://support.yotpo.com/en/on-site">Yottpo's documentation</a> for which attributes to specify.<br>
+When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo attribute prepend <code>data</code> to the attribute. For example, the <code>product-id</code> attribute becomes <code>data-product-id</code>.</td>
   </tr>
    <tr>
     <td width="40%"><strong>title (optional)</strong></td>
