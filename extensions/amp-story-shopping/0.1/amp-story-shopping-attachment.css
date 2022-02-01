@@ -4,6 +4,11 @@ amp-story-shopping-attachment {
   font-family: 'Poppins', sans-serif !important;
   font-size: calc(var(--story-page-vmin) * 3) !important; /* override with ems for pixel perfect layout */
   --shopping-attachment-horizontal-padding: 1.5em;
+  --three-percent-overlay: rgba(0,0,0,.03);
+}
+
+amp-story-shopping-attachment[theme="dark"] {
+  --three-percent-overlay: rgba(255, 255, 255, .03);
 }
 
 amp-story-shopping-attachment a {
@@ -70,6 +75,14 @@ amp-story-shopping-attachment a {
 
 /* PDP (Product Description Page). */
 
+.i-amphtml-amp-story-shopping-pdp:after {
+  content: '' !important;
+  display: block !important;
+  width: 100% !important;
+  height: .75em !important;
+  background-color: var(--three-percent-overlay) !important;
+}
+
 .i-amphtml-amp-story-shopping-pdp-header {
   padding: 0 var(--shopping-attachment-horizontal-padding) !important;
   display: flex !important;
@@ -79,6 +92,7 @@ amp-story-shopping-attachment a {
 .i-amphtml-amp-story-shopping-pdp-header-brand {
   font-weight: 500 !important;
   font-size: 1.1em !important;
+  line-height: 0.9em !important;
   display: block !important;
 }
 

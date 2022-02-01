@@ -149,20 +149,22 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
     const {activeProductData} = shoppingData;
-    const shoppingDataForPage = this.shoppingTags_.map(
-      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
+    const shoppingDataForPage = this.shoppingTags_
+      .map(
+        (shoppingTag) =>
+          shoppingData[shoppingTag.getAttribute('data-product-id')]
+      )
+      .filter((item) => item !== activeProductData);
+
+    const template = (
+      <div>
+        {activeProductData && this.renderPdpTemplate_(activeProductData)}
+        {shoppingDataForPage.length > 0 &&
+          this.renderPlpTemplate_(shoppingDataForPage)}
+      </div>
     );
 
-    if (activeProductData) {
-      const pdp = this.renderPdpTemplate_(
-        activeProductData,
-        shoppingDataForPage
-      );
-      this.mutateElement(() => this.templateContainer_.replaceChildren(pdp));
-    } else {
-      const plp = this.renderPlpTemplate_(shoppingDataForPage);
-      this.mutateElement(() => this.templateContainer_.replaceChildren(plp));
-    }
+    this.mutateElement(() => this.templateContainer_.replaceChildren(template));
   }
 
   /**
@@ -187,13 +189,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * @param {!ShoppingConfigDataDef} activeProductData
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingDataForPage
    * @return {Element}
    * @private
    */
-  renderPdpTemplate_(activeProductData, shoppingDataForPage) {
+  renderPdpTemplate_(activeProductData) {
     return (
-      <div>
+      <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
           <div>
             <span class="i-amphtml-amp-story-shopping-pdp-header-brand">
@@ -211,11 +212,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               activeProductData.productPrice
             )}
           </span>
-        </div>
-        <div>
-          {this.renderPlpTemplate_(
-            shoppingDataForPage.filter((item) => item !== activeProductData)
-          )}
         </div>
       </div>
     );
