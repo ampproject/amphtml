@@ -792,7 +792,7 @@ class MetaParser {
     // Try to find product id.
     const productId = getMetaTag(
       this.doc_.getRootNode(),
-      'subscriptions-product-id'
+      'subscriptions-productId'
     );
     if (!productId) {
       return null;

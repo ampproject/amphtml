@@ -58,7 +58,7 @@ describes.realWin(
 
     async function shoppingDataDispatchStoreService() {
       const shoppingData = {
-        'sunglasses': {'product-title': 'Spectacular Spectacles'},
+        'sunglasses': {'productTitle': 'Spectacular Spectacles'},
       };
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
     }
@@ -68,7 +68,7 @@ describes.realWin(
     });
 
     it('should process config data and set text container content if data not null', async () => {
-      shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
+      shoppingTag.element.setAttribute('data-productId', 'sunglasses');
       await shoppingDataDispatchStoreService();
       env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
         expect(shoppingTag.element.textContent).to.equal(
@@ -78,7 +78,7 @@ describes.realWin(
     });
 
     it('should not process config data and set text container content if id not found', async () => {
-      shoppingTag.element.setAttribute('data-product-id', 'hat');
+      shoppingTag.element.setAttribute('data-productId', 'hat');
       await shoppingDataDispatchStoreService();
       expect(shoppingTag.element.textContent).to.be.empty;
       expect(shoppingTag.isLayoutSupported(Layout_Enum.CONTAINER)).to.be.true;
@@ -86,10 +86,10 @@ describes.realWin(
 
     it('should set active product in store service when shopping tag is clicked', async () => {
       const tagData = {
-        'product-id': 'sunglasses',
-        'product-title': 'Spectacular Spectacles',
-        'product-price': '400',
-        'product-icon':
+        'productId': 'sunglasses',
+        'productTitle': 'Spectacular Spectacles',
+        'productPrice': '400',
+        'productIcon':
           '/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png',
       };
 

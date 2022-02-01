@@ -150,24 +150,24 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
           <span
             class="amp-story-shopping-tag-pill-image"
             style={
-              this.tagData_['product-icon'] && {
+              this.tagData_['productIcon'] && {
                 backgroundImage:
-                  'url(' + this.tagData_['product-icon'] + ') !important',
+                  'url(' + this.tagData_['productIcon'] + ') !important',
                 backgroundSize: 'cover !important',
               }
             }
           ></span>
           <span class="amp-story-shopping-tag-pill-text">
-            {(this.tagData_['product-tag-text'] && (
-              <span class="amp-story-shopping-product-tag-text">
-                {this.tagData_['product-tag-text']}
+            {(this.tagData_['productTagText'] && (
+              <span class="amp-story-shopping-productTagText">
+                {this.tagData_['productTagText']}
               </span>
             )) ||
               formatI18nNumber(
                 this.localizationService_,
                 this.element,
-                this.tagData_['product-price-currency'],
-                this.tagData_['product-price']
+                this.tagData_['productPriceCurrency'],
+                this.tagData_['productPrice']
               )}
           </span>
         </span>
@@ -180,7 +180,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
-    this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
+    this.tagData_ = shoppingData[this.element.getAttribute('data-productId')];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
