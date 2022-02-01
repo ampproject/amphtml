@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {isExperimentOn} from '#experiments';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
