@@ -205,6 +205,25 @@ describes.realWin(
       expect(openAttachmentLabelEl.textContent).to.equal('Custom text');
     });
 
+    it.only('should use the correct outlink text', () => {
+      const firstPage = win.document.createElement('amp-story-page');
+      storyEl.insertBefore(firstPage, page);
+      const otherOutlink = document.createElement('amp-story-page-outlink');
+      otherOutlink.appendChild(win.document.createElement('a'));
+      firstPage.appendChild(otherOutlink);
+
+      outlinkEl.querySelector('a').textContent = 'Custom text';
+      otherOutlink.querySelector('a').textContent = 'Wrong text';
+
+      outlink.buildCallback();
+      outlink.layoutCallback();
+
+      const openOutlinkLabelEl = page.querySelector(
+        '.i-amphtml-story-page-attachment-label'
+      );
+      expect(openOutlinkLabelEl.textContent).to.equal('Custom text');
+    });
+
     it('should use cta-text attribute when data-cta-text also exist', () => {
       attachmentEl.setAttribute('layout', 'nodisplay');
       attachmentEl.setAttribute('cta-text', 'CTA text');
