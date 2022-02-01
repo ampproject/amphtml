@@ -1,4 +1,3 @@
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import * as Preact from '#preact';
@@ -9,7 +8,7 @@ import {IframeEmbed} from '#preact/component/iframe';
 
 import {getData} from '#utils/event-helper';
 
-const NO_HEIGHT_STYLE = dict();
+const NO_HEIGHT_STYLE = {};
 const MATCHES_MESSAGING_ORIGIN = (origin) =>
   origin === 'https://www.instagram.com';
 
@@ -34,7 +33,7 @@ function BentoInstagramWithRef(
         if (requestResize) {
           requestResize(height);
         }
-        setHeightStyle(dict({'height': height}));
+        setHeightStyle({'height': height});
         setOpacity(1);
 
         onLoadRef.current?.();

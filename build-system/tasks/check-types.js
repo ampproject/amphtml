@@ -3,16 +3,11 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
-const {
-  displayLifecycleDebugging,
-} = require('../compile/debug-compilation-lifecycle');
-const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green} = require('kleur/colors');
 const {execOrThrow} = require('../common/exec');
 const {log} = require('../common/logging');
-const {typecheckNewServer} = require('../server/typescript-compile');
 
 /**
  * Object of targets to check with TypeScript.
@@ -20,10 +15,12 @@ const {typecheckNewServer} = require('../server/typescript-compile');
  * @type {Object<string, string>}
  */
 const TSC_TYPECHECK_TARGETS = {
-  'compiler': 'src/compiler',
   'carousel': 'extensions/amp-carousel/0.1',
+  'compiler': 'src/compiler',
   'core': 'src/core',
   'experiments': 'src/experiments',
+  'preact': 'src/preact',
+  'new-server': 'build-system/server/new-server/transforms',
 };
 
 /**
@@ -48,8 +45,6 @@ async function checkTypes() {
 
   // Prepare build environment
   process.env.NODE_ENV = 'production';
-  cleanupBuildDir();
-  typecheckNewServer();
   await Promise.all([compileCss(), compileJison()]);
 
   // Use the list of targets if provided, otherwise check all targets
@@ -58,7 +53,6 @@ async function checkTypes() {
     : Object.keys(TSC_TYPECHECK_TARGETS);
 
   log(`Checking types for targets: ${targets.map(cyan).join(', ')}`);
-  displayLifecycleDebugging();
 
   await Promise.all(targets.map(typeCheck));
   exitCtrlcHandler(handlerProcess);
@@ -71,6 +65,5 @@ module.exports = {
 /* eslint "local/camelcase": 0 */
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
-  debug: 'Output the file contents during compilation lifecycles',
   targets: 'Comma-delimited list of targets to type-check',
 };

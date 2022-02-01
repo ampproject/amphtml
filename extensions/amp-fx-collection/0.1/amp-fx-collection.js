@@ -8,7 +8,7 @@ import {devAssert} from '#utils/log';
 import {
   FxBindings,
   FxObservesSignal,
-  FxType, // eslint-disable-line no-unused-vars
+  FxType, // eslint-disable-line @typescript-eslint/no-unused-vars
   getFxTypes,
 } from './fx-type';
 import {

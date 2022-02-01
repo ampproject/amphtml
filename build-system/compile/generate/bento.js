@@ -18,7 +18,6 @@ function generateBentoRuntimeEntrypoint(
 ) {
   assertNoDupes(Object.values(packageSymbols).flat());
   return dedent(`
-    import {dict} from '#core/types/object';
     import {isEsm} from '#core/mode';
     import {install as installCustomElements} from '#polyfills/custom-elements';
 
@@ -34,7 +33,7 @@ function generateBentoRuntimeEntrypoint(
 
     const bento = self.BENTO || [];
 
-    bento['_'] = dict({
+    bento['_'] = {
     ${Object.entries(packageSymbols)
       .map(([name, symbols]) => [
         `// ${name}`,
@@ -42,7 +41,7 @@ function generateBentoRuntimeEntrypoint(
       ])
       .flat()
       .join('\n')}
-    });
+    };
 
     bento.push = (fn) => {
       fn();

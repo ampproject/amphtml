@@ -14,10 +14,6 @@ const {
   printNobuildHelp,
 } = require('./helpers');
 const {
-  cleanupBuildDir,
-  printClosureConcurrency,
-} = require('../compile/compile');
-const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
@@ -27,6 +23,7 @@ const {
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
+const {buildBentoComponents} = require('./build-bento');
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
@@ -90,7 +87,6 @@ function printDistHelp(options) {
  * @return {Promise<void>}
  */
 async function runPreDistSteps(options) {
-  cleanupBuildDir();
   await prebuild();
   await compileCss(options);
   await copyCss();
@@ -112,7 +108,6 @@ async function dist() {
     minify: true,
     watch: argv.watch,
   };
-  printClosureConcurrency();
   printNobuildHelp();
   printDistHelp(options);
   await runPreDistSteps(options);
@@ -134,7 +129,7 @@ async function dist() {
   }
 
   // This step internally parses the various extension* flags.
-  await buildExtensions(options);
+  await Promise.all([buildExtensions(options), buildBentoComponents(options)]);
 
   // This step is to be run only during a full `amp dist`.
   if (

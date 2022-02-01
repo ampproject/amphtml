@@ -1,5 +1,6 @@
-import {tryParseJson} from '#core/types/object/json';
 import {validateData, writeScript} from '#3p/3p';
+
+import {tryParseJson} from '#core/types/object/json';
 
 /**
  * @param {!Window} global

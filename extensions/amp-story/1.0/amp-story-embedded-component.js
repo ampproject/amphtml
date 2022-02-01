@@ -1,4 +1,12 @@
+import {toggleAttribute, tryFocus} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
+import {closest, matches} from '#core/dom/query';
+import {resetStyles, setImportantStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {
   Action,
   EmbeddedComponentState,
@@ -7,26 +15,21 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
+import {EventType, dispatch} from './events';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
-import {EventType, dispatch} from './events';
-import {Services} from '#service';
-import {tryFocus} from '#core/dom';
-import {closest, matches} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getSourceOriginForElement,
   triggerClickFromLightDom,
 } from './utils';
-import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {getAmpdoc} from '../../../src/service-helpers';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
-
-import {resetStyles, setImportantStyles} from '#core/dom/style';
 
 /** @private @const {string} */
 const LAUNCH_ICON_CLASS = 'i-amphtml-tooltip-action-icon-launch';
@@ -62,7 +65,7 @@ const EMBEDDED_COMPONENTS_SELECTORS = {
 const LAUNCHABLE_COMPONENTS = {
   'a': {
     actionIcon: LAUNCH_ICON_CLASS,
-    selector: 'a[href]:not([affiliate-link-icon])',
+    selector: 'a[href]',
   },
   ...EMBEDDED_COMPONENTS_SELECTORS,
 };
@@ -395,7 +398,7 @@ export class AmpStoryEmbeddedComponent {
           UIType.DESKTOP_FULLBLEED,
           UIType.DESKTOP_ONE_PANEL,
         ].includes(uiState);
-        this.focusedStateOverlay_.toggleAttribute('desktop', isDesktop);
+        toggleAttribute(this.focusedStateOverlay_, 'desktop', isDesktop);
       }
     );
   }

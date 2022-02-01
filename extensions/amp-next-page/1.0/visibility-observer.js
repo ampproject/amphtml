@@ -3,7 +3,7 @@ import {throttle} from '#core/types/function';
 
 import {Services} from '#service';
 import {
-  PositionObserver, // eslint-disable-line no-unused-vars
+  PositionObserver, // eslint-disable-line @typescript-eslint/no-unused-vars
   installPositionObserverServiceForDoc,
 } from '#service/position-observer/position-observer-impl';
 import {

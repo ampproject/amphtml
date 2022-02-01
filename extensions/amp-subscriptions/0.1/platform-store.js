@@ -1,9 +1,11 @@
-import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants';
-import {Deferred} from '#core/data-structures/promise';
-import {Entitlement} from './entitlement';
 import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+import {hasOwn} from '#core/types/object';
+
 import {devAssert, user} from '#utils/log';
-import {dict, hasOwn} from '#core/types/object';
+
+import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants';
+import {Entitlement} from './entitlement';
 
 /** @typedef {{platformKey: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
@@ -31,7 +33,7 @@ export class PlatformStore {
    */
   constructor(platformKeys, scoreConfig, fallbackEntitlement, opt_Platforms) {
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
-    this.subscriptionPlatforms_ = opt_Platforms || dict();
+    this.subscriptionPlatforms_ = opt_Platforms || {};
 
     /** @private @const {!Array<string>} */
     this.platformKeys_ = platformKeys;
@@ -267,10 +269,10 @@ export class PlatformStore {
    * }
    */
   getScoreFactorStates() {
-    const states = dict({});
+    const states = {};
     return Promise.all(
       this.platformKeys_.map((platformId) => {
-        states[platformId] = dict();
+        states[platformId] = {};
         return Promise.all(
           Object.values(SubscriptionsScoreFactor).map((scoreFactor) =>
             this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(

@@ -1,7 +1,10 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
+
+import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
@@ -12,7 +15,7 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
-/** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+/** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
   {
     family: 'Poppins',
@@ -25,36 +28,6 @@ const FONTS_TO_LOAD = [
     src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
-
-/**
- * @param {!ShoppingConfigDataDef} tagData
- * @param {function(!ShoppingConfigDataDef): undefined} onClick
- * @return {!Element}
- */
-const renderShoppingTagTemplate = (tagData, onClick) => (
-  <div
-    class="amp-story-shopping-tag-inner"
-    role="button"
-    onClick={() => onClick(tagData)}
-  >
-    <span class="amp-story-shopping-tag-dot"></span>
-    <span class="amp-story-shopping-tag-pill">
-      <span
-        class="amp-story-shopping-tag-pill-image"
-        style={
-          tagData['product-icon'] && {
-            backgroundImage: 'url(' + tagData['product-icon'] + ') !important',
-            backgroundSize: 'cover !important',
-          }
-        }
-      ></span>
-      <span class="amp-story-shopping-tag-pill-text">
-        {tagData['product-tag-text'] || '$' + tagData['product-price']}
-      </span>
-    </span>
-  </div>
-);
-
 export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -62,17 +35,28 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
+
     /** @param {boolean} element */
     this.hasAppendedInnerShoppingTagEl_ = false;
+
+    /** @param {!ShoppingConfigDataDef} tagData */
+    this.tagData_ = null;
   }
 
   /** @override */
   buildCallback() {
-    this.loadFonts_();
+    loadFonts(this.win, FONTS_TO_LOAD);
     this.element.setAttribute('role', 'button');
-    return Services.storyStoreServiceForOrNull(this.win).then(
-      (storeService) => (this.storeService_ = storeService)
-    );
+
+    return Promise.all([
+      Services.storyStoreServiceForOrNull(this.win),
+      Services.localizationServiceForOrNull(this.element),
+    ]).then(([storeService, localizationService]) => {
+      this.storeService_ = storeService;
+      this.localizationService_ = localizationService;
+    });
   }
 
   /** @override */
@@ -82,15 +66,31 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
+
+    this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) => {
+      this.onRtlStateUpdate_(rtlState);
+    });
   }
 
   /**
-   * @param {!ShoppingConfigDataDef} tagData
+   * Reacts to RTL state updates and triggers the UI for RTL.
+   * @param {boolean} rtlState
    * @private
    */
-  onClick_(tagData) {
+  onRtlStateUpdate_(rtlState) {
+    this.mutateElement(() => {
+      rtlState
+        ? this.shoppingTagEl_.setAttribute('dir', 'rtl')
+        : this.shoppingTagEl_.removeAttribute('dir');
+    });
+  }
+
+  /**
+   * @private
+   */
+  onClick_() {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-      'activeProductData': tagData,
+      'activeProductData': this.tagData_,
     });
   }
 
@@ -100,32 +100,106 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
+   * This function counts the number of lines in the shopping tag
+   * and sets the styling properties dynamically based on the number of lines.
+   * @private
+   */
+  styleTagText_() {
+    const pillEl = this.element.shadowRoot?.querySelector(
+      '.amp-story-shopping-tag-pill'
+    );
+
+    const textEl = this.element.shadowRoot?.querySelector(
+      '.amp-story-shopping-tag-pill-text'
+    );
+
+    if (!pillEl || !textEl) {
+      return;
+    }
+
+    const fontSize = parseInt(
+      computedStyle(window, textEl).getPropertyValue('font-size'),
+      10
+    );
+    const ratioOfLineHeightToFontSize = 1.5;
+    const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
+    const height = textEl./*OK*/ clientHeight;
+    const numLines = Math.ceil(height / lineHeight);
+
+    this.mutateElement(() => {
+      pillEl.classList.toggle(
+        'amp-story-shopping-tag-pill-multi-line',
+        numLines > 1
+      );
+    });
+  }
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  renderShoppingTagTemplate_() {
+    return (
+      <div
+        class="amp-story-shopping-tag-inner"
+        role="button"
+        onClick={() => this.onClick_()}
+      >
+        <span class="amp-story-shopping-tag-dot"></span>
+        <span class="amp-story-shopping-tag-pill">
+          <span
+            class="amp-story-shopping-tag-pill-image"
+            style={
+              this.tagData_['product-icon'] && {
+                backgroundImage:
+                  'url(' + this.tagData_['product-icon'] + ') !important',
+                backgroundSize: 'cover !important',
+              }
+            }
+          ></span>
+          <span class="amp-story-shopping-tag-pill-text">
+            {(this.tagData_['product-tag-text'] && (
+              <span class="amp-story-shopping-product-tag-text">
+                {this.tagData_['product-tag-text']}
+              </span>
+            )) ||
+              formatI18nNumber(
+                this.localizationService_,
+                this.element,
+                this.tagData_['product-price-currency'],
+                this.tagData_['product-price']
+              )}
+          </span>
+        </span>
+      </div>
+    );
+  }
+
+  /**
    * @param {!ShoppingDataDef} shoppingData
    * @private
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
-    const tagData = shoppingData[this.element.getAttribute('data-tag-id')];
-    if (this.hasAppendedInnerShoppingTagEl_ || !tagData) {
+    this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
+    if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
-    this.mutateElement(() => {
-      createShadowRootWithStyle(
-        this.element,
-        renderShoppingTagTemplate(tagData, (tagData) => this.onClick_(tagData)),
-        shoppingTagCSS
-      );
-      this.hasAppendedInnerShoppingTagEl_ = true;
-    });
-  }
 
-  /** @private */
-  loadFonts_() {
-    if (this.win.document.fonts && FontFace) {
-      FONTS_TO_LOAD.forEach(({family, src, style = 'normal', weight}) =>
-        new FontFace(family, src, {weight, style})
-          .load()
-          .then((font) => this.win.document.fonts.add(font))
-      );
-    }
+    this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
+    this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
+
+    this.measureMutateElement(
+      () => {
+        createShadowRootWithStyle(
+          this.element,
+          this.shoppingTagEl_,
+          shoppingTagCSS
+        );
+        this.hasAppendedInnerShoppingTagEl_ = true;
+      },
+      () => {
+        this.styleTagText_();
+      }
+    );
   }
 }

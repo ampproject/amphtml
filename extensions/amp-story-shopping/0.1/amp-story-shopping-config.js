@@ -32,7 +32,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   addShoppingDataFromConfig_(shoppingConfig) {
     const productIDtoProduct = {};
     for (const item of shoppingConfig['items']) {
-      productIDtoProduct[item['product-tag-id']] = item;
+      productIDtoProduct[item['product-id']] = item;
     }
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, productIDtoProduct);
     //TODO(#36412): Add call to validate config here.

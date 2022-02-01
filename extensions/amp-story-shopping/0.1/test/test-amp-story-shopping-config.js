@@ -73,7 +73,7 @@ describes.realWin(
       element.setAttribute('src', exampleURL);
 
       const expectedRemoteResult = JSON.parse(
-        '{"city-pop":{"product-tag-id":"city-pop","product-title":"Plastic Love","product-price": "19"}}'
+        '{"art":{"product-id": "art","product-title": "Abstract Art","product-brand": "V. Artsy","product-price": 1200.0,"product-price-currency": "JPY","product-images": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]}}'
       );
 
       expect(storeService.get(StateProperty.SHOPPING_DATA)).to.deep.eql(
