@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.203 */
+/** Version: 0.1.22.201 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5020,7 +5020,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.203',
+    '_client': 'SwG 0.1.22.201',
   });
 }
 
@@ -5562,11 +5562,6 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
         productType =
           (data['paymentRequest']['i'] || {})['productType'] ||
           ProductType.SUBSCRIPTION;
-      }
-      // Set productType if paymentRequest is not present, which happens
-      // if the pay flow was opened in redirect mode.
-      else if ('productType' in data) {
-        productType = data['productType'];
       }
     }
   }
@@ -6343,7 +6338,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.203',
+        '_client': 'SwG 0.1.22.201',
         'supportsEventManager': true,
       },
       args || {}
@@ -7233,7 +7228,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.203');
+    context.setClientVersion('SwG 0.1.22.201');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7556,7 +7551,7 @@ const SWG_I18N_STRINGS = {
     'no': 'Bidra med Google',
     'pl': 'Wesprzyj publikację przez Google',
     'pt': 'Contribuir com o Google',
-    'pt-br': 'Contribua usando o Google',
+    'pt-br': 'Contribua com o Google',
     'ru': 'Внести средства через Google',
     'se': 'Bidra med Google',
     'th': 'มีส่วนร่วมผ่าน Google',
@@ -10650,7 +10645,7 @@ class MeterToastApi {
             this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
           ];
         const iframeUrlParams = {
-          'publicationId': this.deps_.pageConfig().getPublicationId(),
+          'publication_id': this.deps_.pageConfig().getPublicationId(),
           'origin': parseUrl(this.win_.location.href).origin,
         };
         if (swgUserToken) {
@@ -11789,9 +11784,6 @@ class EntitlementsManager {
     const signedData = json['signedEntitlements'];
     const decryptedDocumentKey = json['decryptedDocumentKey'];
     const swgUserToken = json['swgUserToken'];
-    if (swgUserToken) {
-      this.saveSwgUserToken_(swgUserToken);
-    }
     if (signedData) {
       const entitlements = this.getValidJwtEntitlements_(
         signedData,
@@ -11800,11 +11792,13 @@ class EntitlementsManager {
         decryptedDocumentKey
       );
       if (entitlements) {
+        this.saveSwgUserToken_(swgUserToken);
         return entitlements;
       }
     } else {
       const plainEntitlements = json['entitlements'];
       if (plainEntitlements) {
+        this.saveSwgUserToken_(swgUserToken);
         return this.createEntitlements_(
           '',
           plainEntitlements,
@@ -12029,8 +12023,12 @@ class EntitlementsManager {
    * @private
    */
   fetch_(params) {
-    // Get swgUserToken from local storage
-    const swgUserTokenPromise = this.storage_.get(Constants$1.USER_TOKEN, true);
+    // Get swgUserToken from getEntitlements params
+    const swgUserTokenParam = params?.encryption?.swgUserToken;
+    // Get swgUserToken from local storage if it is not in getEntitlements params
+    const swgUserTokenPromise = swgUserTokenParam
+      ? Promise.resolve(swgUserTokenParam)
+      : this.storage_.get(Constants$1.USER_TOKEN, true);
 
     let url =
       '/publication/' + encodeURIComponent(this.publicationId_) + this.action_;
@@ -12059,17 +12057,6 @@ class EntitlementsManager {
           url = addQueryParam(url, 'sut', swgUserToken);
         }
 
-        /** @type {!GetEntitlementsParamsInternalDef} */
-        const encodableParams = {
-          metering: {
-            clientTypes: [MeterClientTypes.METERED_BY_GOOGLE],
-            owner: this.publicationId_,
-            resource: {
-              hashedCanonicalUrl,
-            },
-          },
-        };
-
         // Add metering params.
         if (
           this.publicationId_ &&
@@ -12081,15 +12068,22 @@ class EntitlementsManager {
             typeof meteringStateId === 'string' &&
             meteringStateId.length > 0
           ) {
-            // Add publisher provided state and additional fields.
-            encodableParams.metering.state = {
-              id: meteringStateId,
-              attributes: [],
+            /** @type {!GetEntitlementsParamsInternalDef} */
+            const encodableParams = {
+              metering: {
+                clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
+                owner: this.publicationId_,
+                resource: {
+                  hashedCanonicalUrl,
+                },
+                // Publisher provided state.
+                state: {
+                  id: meteringStateId,
+                  attributes: [],
+                },
+                token: this.getGaaToken_(),
+              },
             };
-            encodableParams.metering.clientTypes.push(
-              MeterClientTypes.LICENSED_BY_GOOGLE
-            );
-            encodableParams.metering.token = this.getGaaToken_();
 
             // Collect attributes.
             function collectAttributes({attributes, category}) {
@@ -12126,18 +12120,22 @@ class EntitlementsManager {
               attributes: params.metering.state.customAttributes,
               category: 'custom',
             });
+
+            // Encode params.
+            this.encodedParams_ = base64UrlEncodeFromBytes(
+              utf8EncodeSync(JSON.stringify(encodableParams))
+            );
+            url = addQueryParam(
+              url,
+              this.encodedParamName_,
+              this.encodedParams_
+            );
           } else {
             warn(
               `SwG Entitlements: Please specify a metering state ID string, ideally a hash to avoid PII.`
             );
           }
         }
-
-        // Encode params.
-        this.encodedParams_ = base64UrlEncodeFromBytes(
-          utf8EncodeSync(JSON.stringify(encodableParams))
-        );
-        url = addQueryParam(url, this.encodedParamName_, this.encodedParams_);
 
         // Build URL.
         return serviceUrl(url);
