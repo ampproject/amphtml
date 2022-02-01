@@ -69,12 +69,12 @@ describes.realWin(
     async function dispatchTestShoppingData() {
       const shoppingData = {
         'lamp': {
-          'product-id': 'lamp',
-          'product-title': 'Brass Lamp',
-          'product-brand': 'Lamp Co',
-          'product-price': 799.0,
-          'product-price-currency': 'USD',
-          'product-images': ['https://source.unsplash.com/Ry9WBo3qmoc/500x500'],
+          'productId': 'lamp',
+          'productTitle': 'Brass Lamp',
+          'productBrand': 'Lamp Co',
+          'productPrice': 799.0,
+          'productPriceCurrency': 'USD',
+          'productImages': ['https://source.unsplash.com/Ry9WBo3qmoc/500x500'],
         },
       };
       storeService.dispatch(Action.CHANGE_PAGE, {
