@@ -40,7 +40,7 @@ function getBottomLineContainer(global, data) {
 
   const bottomLine = global.document.createElement('div');
   bottomLine.className = 'yotpo bottomLine';
-  bottomLine.setAttribute('data-productId', data.productId);
+  bottomLine.setAttribute('data-product-id', data.productId);
 
   childDiv.appendChild(bottomLine);
 
@@ -56,7 +56,7 @@ function getBottomLineContainer(global, data) {
 function getMainWidgetContainer(global, data) {
   const container = global.document.createElement('div');
   container.className = 'yotpo yotpo-main-widget';
-  container.setAttribute('data-productId', data.productId);
+  container.setAttribute('data-product-id', data.productId);
   container.setAttribute('data-name', data.name);
   container.setAttribute('data-url', data.url);
   container.setAttribute('data-image-url', data.imageUrl);
@@ -141,7 +141,7 @@ function getProductGalleryContainer(global, data) {
   const container = global.document.createElement('div');
   container.className =
     'yotpo yotpo-pictures-gallery yotpo-product-gallery yotpo-size-6';
-  container.setAttribute('data-productId', data.productId);
+  container.setAttribute('data-product-id', data.productId);
   container.setAttribute('data-demo', data.demo);
   container.setAttribute('data-layout-rows', data.layoutRows);
   container.setAttribute('data-layout-scroll', data.layoutScroll);
@@ -191,7 +191,7 @@ function getEmbeddedWidgetContainer(global, data) {
   embeddedWidget.className = 'yotpo embedded-widget';
   cellCentered.appendChild(embeddedWidget);
 
-  embeddedWidget.setAttribute('data-productId', data.productId);
+  embeddedWidget.setAttribute('data-product-id', data.productId);
   embeddedWidget.setAttribute('data-demo', data.demo);
   embeddedWidget.setAttribute('data-layout', data.layout);
   embeddedWidget.setAttribute('data-width', data.width);
@@ -226,7 +226,7 @@ function getPhotosCarouselContainer(global, data) {
   photosCarousel.className = 'yotpo yotpo-slider';
   container.appendChild(photosCarousel);
 
-  photosCarousel.setAttribute('data-productId', data.productId);
+  photosCarousel.setAttribute('data-product-id', data.productId);
   photosCarousel.setAttribute('data-demo', data.demo);
 
   return container;
@@ -246,7 +246,7 @@ function getPromotedProductsContainer(global, data) {
 
   container.setAttribute('id', 'widget-div-id');
   container.setAttribute('data-demo', data.demo);
-  container.setAttribute('data-productId', data.productId);
+  container.setAttribute('data-product-id', data.productId);
 
   return container;
 }

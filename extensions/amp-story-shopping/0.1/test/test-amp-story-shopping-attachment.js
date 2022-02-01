@@ -55,7 +55,7 @@ describes.realWin(
         'amp-story-shopping-tag',
         {
           'layout': 'container',
-          'data-productId': 'lamp',
+          'data-product-id': 'lamp',
         }
       );
       pageEl.appendChild(tagEl);

@@ -20,7 +20,7 @@ _Example: Display the Yotpo bottom line widget_
   height="100"
   data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
   data-widget-type="BottomLine"
-  data-productId="9408616206"
+  data-product-id="9408616206"
 >
 </amp-yotpo>
 ```
@@ -34,7 +34,7 @@ _Example: Display the reviews widget_
   layout="responsive"
   data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5"
   data-widget-type="MainWidget"
-  data-productId="9408616206"
+  data-product-id="9408616206"
   data-name="hockey skates"
   data-url="https://ranabram.myshopify.com/products/hockey-skates"
   data-image-url="https://ichef.bbci.co.uk/news/320/media/images/83351000/jpg/_83351965_explorer273lincolnshirewoldssouthpicturebynicholassilkstone.jpg"
@@ -54,7 +54,7 @@ _Example: Display the reviews widget_
   <tr>
     <td width="40%"><strong>data-** (optional)</strong></td>
     <td>Each Yotpo widget has optional data attributes. For example, the reviews widget has an optional attribute named <code>productId</code>. Refer to <a href="https://support.yotpo.com/en/on-site">Yottpo's documentation</a> for which attributes to specify.<br>
-When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo attribute prepend <code>data</code> to the attribute. For example, the <code>productId</code> attribute becomes <code>data-productId</code>.</td>
+When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo attribute prepend <code>data</code> to the attribute. For example, the <code>productId</code> attribute becomes <code>data-product-id</code>.</td>
   </tr>
    <tr>
     <td width="40%"><strong>title (optional)</strong></td>
