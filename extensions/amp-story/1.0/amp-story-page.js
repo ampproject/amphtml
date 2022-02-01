@@ -536,39 +536,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /* @override */
   onLayoutMeasure() {
-    const layoutBox = this.getLayoutSize();
-    if (
-      !isPrerenderActivePage(this.element) ||
-      (this.layoutBox_ &&
-        this.layoutBox_.width === layoutBox.width &&
-        this.layoutBox_.height === layoutBox.height)
-    ) {
+    const {width, height} = this.getLayoutSize();
+    if (!isPrerenderActivePage(this.element) || width === 0 || height === 0) {
       return;
     }
-    this.getVsync().runPromise({
-      measure: (state) => {
-        const {height, width} = layoutBox;
-        state.height = height;
-        state.width = width;
-        state.vh = height / 100;
-      },
-      mutate: (state) => {
-        const {height, width} = state;
-        if (state.height === 0 && state.width === 0) {
-          return;
-        }
-        this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
-        if (!this.cssVariablesStyleEl_) {
-          const doc = this.win.document;
-          this.cssVariablesStyleEl_ = doc.createElement('style');
-          this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
-          doc.head.appendChild(this.cssVariablesStyleEl_);
-        }
-        this.cssVariablesStyleEl_.textContent = `:root {--story-page-vh: ${px(
-          state.vh
-        )} !important}`;
-      },
-    });
+    this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
   }
 
   /**
