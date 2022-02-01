@@ -13,7 +13,7 @@ import {useIsInViewport} from '#preact/component/intersection-observer';
 import {useAmpContext} from '#preact/context';
 import {xhrUtils} from '#preact/utils/xhr';
 
-import {useInfiniteQuery} from './hooks/useInfiniteQuery';
+import {useInfiniteQuery} from '#preact/hooks/useInfiniteQuery';
 
 const defaultItemTemplate = (item) => <p>{String(item)}</p>;
 const defaultWrapperTemplate = (list) => <div>{list}</div>;
