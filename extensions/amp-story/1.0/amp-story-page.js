@@ -52,10 +52,7 @@ import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {MediaPool} from './media-pool';
 import {AdvancementConfig} from './page-advancement';
-import {
-  getPrerenderActivePage,
-  isPrerenderActivePage,
-} from './prerender-active-page';
+import {isPrerenderActivePage} from './prerender-active-page';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
 
