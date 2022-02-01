@@ -70,6 +70,7 @@ module.exports = ({config}) => {
   config.resolve = {
     modules,
     plugins: [new ReactBuildImportResolver()],
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     alias: {
       ...getRelativeAliasMap(rootDir),
       // Alias preact to react
@@ -82,7 +83,7 @@ module.exports = ({config}) => {
   config.module = {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.jsx?|tsx?$/,
         loader: 'babel-loader',
         exclude: /node_modules/,
         query: mergeReactBabelConfig({
