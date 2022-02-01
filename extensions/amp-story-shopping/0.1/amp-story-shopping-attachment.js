@@ -106,31 +106,77 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     }
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
-      (isOpen) => this.onPageAttachmentStateUpdate_(isOpen)
+      (isOpen) => {
+        const shoppingData = this.storeService_.get(
+          StateProperty.SHOPPING_DATA
+        );
+        this.checkClearActiveProductData_(isOpen, shoppingData);
+        this.updateTemplate_(isOpen, shoppingData);
+      }
     );
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
       (shoppingData) => {
-        console.log(shoppingData);
+        const isOpen = this.storeService_.get(
+          StateProperty.PAGE_ATTACHMENT_STATE
+        );
+        this.updateTemplate_(isOpen, shoppingData);
       }
     );
   }
 
   /**
-   * On attachment state update, check if on active page and populate plp.
    * @param {boolean} isOpen
+   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
-  onPageAttachmentStateUpdate_(isOpen) {
-    const isOnActivePage =
-      this.pageEl_.id === this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
-
-    if (isOpen && isOnActivePage) {
-      this.populatePlp_();
+  checkClearActiveProductData_(isOpen, shoppingData) {
+    const {activeProductData} = shoppingData;
+    if (activeProductData && !isOpen && this.isOnActivePage_()) {
+      this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+        'activeProductData': null,
+      });
     }
   }
 
   /**
+   * @param {boolean} isOpen
+   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * @private
+   */
+  updateTemplate_(isOpen, shoppingData) {
+    if (!isOpen && !this.isOnActivePage_()) {
+      return;
+    }
+    const {activeProductData} = shoppingData;
+    const shoppingDataForPage = this.shoppingTags_.map(
+      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
+    );
+
+    if (activeProductData) {
+      const pdp = this.renderPdpTemplate_(
+        activeProductData,
+        shoppingDataForPage
+      );
+      this.mutateElement(() => this.templateContainer_.replaceChildren(pdp));
+    } else {
+      const plp = this.renderPlpTemplate_(shoppingDataForPage);
+      this.mutateElement(() => this.templateContainer_.replaceChildren(plp));
+    }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isOnActivePage_() {
+    return (
+      this.pageEl_.id === this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
+    );
+  }
+
+  /**
+   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
   onClick_(shoppingData) {
@@ -140,28 +186,17 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
-   * Renders a list of the products on the page, knows as a "Product Listing Page" or PLP.
+   * @param {!ShoppingConfigDataDef} activeProductData
+   * @param {!Array<!ShoppingConfigDataDef>} shoppingDataForPage
+   * @return {Element}
    * @private
    */
-  populatePlp_() {
-    if (
-      this.templateContainer_.querySelector('.i-amphtml-amp-story-shopping-plp')
-    ) {
-      return;
-    }
-    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
-    const shoppingDataForPage = this.shoppingTags_.map(
-      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
-    );
-
-    const plp = this.renderPlpTemplate_(shoppingDataForPage);
-    this.mutateElement(() => {
-      this.templateContainer_.appendChild(plp);
-    });
+  renderPdpTemplate_(activeProductData, shoppingDataForPage) {
+    return <div>{activeProductData.productTitle}</div>;
   }
 
   /**
-   * @param {!Array<!ShoppingConfigDataDef} shoppingDataForPage
+   * @param {!Array<!ShoppingConfigDataDef>} shoppingDataForPage
    * @return {Element}
    * @private
    */
