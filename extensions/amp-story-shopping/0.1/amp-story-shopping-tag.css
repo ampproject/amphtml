@@ -14,7 +14,7 @@ amp-story-shopping-tag {
   --i-amphtml-shopping-tag-backdrop-filter: blur(20px);
 }
 
-.amp-story-shopping-productTagText {
+.amp-story-shopping-product-tag-text {
   font-weight: 600 !important;
   font-size: 11px !important;
   line-height: 15.4px !important;
