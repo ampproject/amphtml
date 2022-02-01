@@ -3,6 +3,7 @@ import {
   ActionTrust_Enum,
   DEFAULT_ACTION,
 } from '#core/constants/action-constants';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
@@ -12,8 +13,6 @@ import {ActionInvocation} from '#service/action-impl';
 
 import {whenCalled} from '#testing/helpers/service';
 import {poll} from '#testing/iframe';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {macroTask} from '#testing/helpers';
 
 describes.realWin(
   'amp-lightbox:1.0',
@@ -26,7 +25,6 @@ describes.realWin(
     let win;
     let html;
     let element;
-    let container;
     let historyPopSpy;
     let historyPushSpy;
 
@@ -76,22 +74,32 @@ describes.realWin(
 
     it('should open when `open` attribute is present', async () => {
       const {shadowRoot} = element;
-      const firstElementChild = shadowRoot.firstElementChild;
+      const {firstElementChild} = shadowRoot;
       expect(firstElementChild.firstElementChild).to.be.null;
 
       element.setAttribute('open', '');
-      await poll('element open updated', () => {
-       return element.getAttribute('hidden') == null; 
-      }, undefined, 500);
+      await poll(
+        'element open updated',
+        () => {
+          return element.getAttribute('hidden') == null;
+        },
+        undefined,
+        500
+      );
 
       expect(firstElementChild.firstElementChild).to.not.be.null;
 
       element.removeAttribute('open');
 
-      await poll('element open updated', () => {
-       return element.getAttribute('hidden') != null; 
-      }, undefined, 500);
-      
+      await poll(
+        'element open updated',
+        () => {
+          return element.getAttribute('hidden') != null;
+        },
+        undefined,
+        500
+      );
+
       expect(firstElementChild.firstElementChild).to.be.null;
     });
 
