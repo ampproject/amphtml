@@ -1,38 +1,12 @@
 {
+  "extends": "./tsconfig.base.json",
+
   "compilerOptions": {
-    "allowJs": true,
     "baseUrl": ".",
     "outDir": "dist",
-    "noEmit": true,
-    "paths": {
-      "#3p/*": ["./3p/*"],
-      "#ads/*": ["./ads/*"],
-      "#build/*": ["./build/*"],
-
-      "#builtins/*": ["./src/builtins/*"],
-      "#compiler": ["./src/compiler"],
-      "#compiler/*": ["./src/compiler/*"],
-      "#core/*": ["./src/core/*"],
-      "#experiments": ["./src/experiments"],
-      "#experiments/*": ["./src/experiments/*"],
-      "#inabox/*": ["./src/inabox/*"],
-      "#polyfills": ["./src/polyfills"],
-      "#polyfills/*": ["./src/polyfills/*"],
-      "#preact": ["./src/preact"],
-      "#preact/*": ["./src/preact/*"],
-      "#purifier": ["./src/purifier"],
-      "#purifier/*": ["./src/purifier/*"],
-      "#service": ["./src/service"],
-      "#service/*": ["./src/service/*"],
-      "#utils": ["./src/utils"],
-      "#utils/*": ["./src/utils/*"],
-
-      "#test/*": ["./test/*"],
-      "#testing/*": ["./testing/*"],
-
-      "#third_party/*": ["./third_party/*"]
-    }
+    "checkJs": false
   },
+
   "include": ["src", "3p", "ads", "extensions", "test", "testing"],
-  "exclude": ["build", "dist", "dist.*", "node_modules"]
+  "exclude": ["**/*shame.d.ts"]
 }

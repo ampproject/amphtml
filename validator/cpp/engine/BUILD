@@ -45,7 +45,7 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
         "@com_googlesource_code_re2//:re2",
-        "@validator//:validator_cc_proto",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -68,7 +68,7 @@ cc_library(
     deps = [
         "@com_google_absl//absl/strings",
         "@com_googlesource_code_re2//:re2",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:strings",
     ],
 )
 
@@ -91,7 +91,7 @@ cc_library(
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_googlesource_code_re2//:re2",
-        "@validator//:validator_cc_proto",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -114,7 +114,7 @@ cc_library(
         ":utf8-util",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:strings",
     ],
 )
 
@@ -137,7 +137,7 @@ cc_library(
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:cord",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:strings",
     ],
 )
 
@@ -148,7 +148,7 @@ cc_test(
     deps = [
         ":utf8-util",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:strings",
     ],
 )
 
@@ -161,7 +161,7 @@ cc_library(
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
-        "@htmlparser//css:parse-css",
+        "//cpp/htmlparser/css:parse-css",
     ],
 )
 
@@ -172,8 +172,8 @@ cc_test(
         ":keyframes-parse-css",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//:strings",
-        "@htmlparser//css:parse-css",
+        "//cpp/htmlparser:strings",
+        "//cpp/htmlparser/css:parse-css",
     ],
 )
 
@@ -184,7 +184,7 @@ cc_library(
     copts = ["-std=c++17"],
     deps = [
         "@com_google_absl//absl/strings",
-        "@validator//:validator_cc_proto",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -194,7 +194,7 @@ cc_test(
     deps = [
         ":type-identifier",
         "@com_google_googletest//:gtest_main",
-        "@validator//:validator_cc_proto",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -205,10 +205,10 @@ cc_library(
     copts = ["-std=c++17"],
     deps = [
         ":validator_pb",
-        "@com_github_glog//:glog",
         "@com_googlesource_code_re2//:re2",
-        "@htmlparser//:strings",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:logging",
+        "//cpp/htmlparser:strings",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -228,15 +228,15 @@ cc_binary(
     copts = ["-std=c++17"],
     deps = [
         "@com_google_protobuf//:protobuf",
-        "@htmlparser//:defer",
-        "@htmlparser//:fileutil",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:defer",
+        "//cpp/htmlparser:fileutil",
+        "//:validator_cc_proto",
     ],
 )
 
 genrule(
     name = "validator-pb",
-    srcs = ["@validator//:validator.protoascii"],
+    srcs = ["//:validator.protoascii"],
     outs = ["validator.pb"],
     cmd = "$(location :validator-convert) " +
           "$(SRCS) $@",
@@ -271,18 +271,18 @@ cc_library(
         "@com_google_absl//absl/strings:cord",
         "@com_google_absl//absl/synchronization",
         "@com_googlesource_code_re2//:re2",
-        "@htmlparser//:atom",
-        "@htmlparser//:atomutil",
-        "@htmlparser//:defer",
-        "@htmlparser//:node",
-        "@htmlparser//:parser",
-        "@htmlparser//:strings",
-        "@htmlparser//:url",
-        "@htmlparser//css:amp4ads-parse-css",
-        "@htmlparser//css:parse-css",
-        "@htmlparser//css:parse_css_cc_proto",
-        "@htmlparser//json:parser",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:atom",
+        "//cpp/htmlparser:atomutil",
+        "//cpp/htmlparser:defer",
+        "//cpp/htmlparser:node",
+        "//cpp/htmlparser:parser",
+        "//cpp/htmlparser:strings",
+        "//cpp/htmlparser:url",
+        "//cpp/htmlparser/css:amp4ads-parse-css",
+        "//cpp/htmlparser/css:parse-css",
+        "//cpp/htmlparser/css:parse_css_cc_proto",
+        "//cpp/htmlparser/json:parser",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -294,7 +294,8 @@ cc_library(
     copts = ["-std=c++17"],
     deps = [
         ":validator-internal",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser/css:parse-css",
+        "//:validator_cc_proto",
     ],
     alwayslink = 1,
 )
@@ -310,14 +311,14 @@ cc_library(
     copts = ["-std=c++17"],
     data = [
         "@amphtml-extensions//:testdata_files",
-        "@validator//:testdata_files",
+        "//:testdata_files",
     ],
     deps = [
         ":error-formatter",
         "@com_google_absl//absl/strings",
-        "@htmlparser//:fileutil",
-        "@htmlparser//:strings",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:fileutil",
+        "//cpp/htmlparser:strings",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -329,10 +330,12 @@ cc_test(
         ":testing-utils",
         ":validator",
         ":validator_pb",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//css:parse_css_cc_proto",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser/css:parse_css_cc_proto",
+        "//:validator_cc_proto",
     ],
 )
 

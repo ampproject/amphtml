@@ -65,19 +65,25 @@ function getMinifiedConfig() {
       bugfixes: true,
       modules: false,
       targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
+      shippedProposals: true,
     },
+  ];
+  const presetTypescript = [
+    '@babel/preset-typescript',
+    {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
   ];
 
   return {
     compact: false,
     plugins,
-    sourceMaps: 'inline',
-    presets: [presetEnv],
+    sourceMaps: true,
+    presets: [presetTypescript, presetEnv],
     retainLines: true,
     assumptions: {
       constantSuper: true,
       noClassCalls: true,
       setClassMethods: true,
+      setPublicClassFields: true,
     },
   };
 }

@@ -97,7 +97,7 @@ function removeFromExperimentsConfig(id, removedFromConfig) {
     const reportLine = getJscodeshiftReport(line);
     if (reportLine) {
       const [
-        // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         _,
         report,
       ] = reportLine;

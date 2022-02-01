@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.194 */
+/** Version: 0.1.22.203 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -747,20 +747,18 @@ class TypeChecker {
   }
 
   /**
-   * @param {Array<?string>} typeArray
+   * @param {!Array<?string>} typeArray
    * @param {Array<string>} expectedTypes
    * @return {boolean}
    */
   checkArray(typeArray, expectedTypes) {
-    let found = false;
-    typeArray.forEach((candidateType) => {
-      found =
-        found ||
-        expectedTypes.includes(
-          candidateType.replace(/^http:\/\/schema.org\//i, '')
-        );
-    });
-    return found;
+    for (const schemaTypeUrl of typeArray) {
+      const schemaType = schemaTypeUrl.replace(/^http:\/\/schema.org\//i, '');
+      if (expectedTypes.includes(schemaType)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /*

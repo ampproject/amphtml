@@ -1,15 +1,18 @@
 import * as Preact from '#core/dom/jsx';
-import {CSS} from '../../../build/amp-story-hint-1.0.css';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {localize} from './amp-story-localization-service';
 import {
   EmbeddedComponentState,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
-import {localize} from './amp-story-localization-service';
+
+import {CSS} from '../../../build/amp-story-hint-1.0.css';
 
 /**
  * @param {!Element} element
@@ -77,12 +80,6 @@ export class AmpStoryHint {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {boolean} Whether the component is built. */
-    this.isBuilt_ = false;
-
-    /** @private {!Document} */
-    this.document_ = this.win_.document;
-
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
 
@@ -106,15 +103,13 @@ export class AmpStoryHint {
    * Builds the hint layer DOM.
    */
   build() {
-    if (this.isBuilt()) {
+    if (this.hintContainer_) {
       return;
     }
 
-    this.isBuilt_ = true;
-
-    const root = this.document_.createElement('div');
     this.hintContainer_ = renderHintElement(this.parentEl_);
-    createShadowRootWithStyle(root, this.hintContainer_, CSS);
+
+    const root = createShadowRootWithStyle(<div />, this.hintContainer_, CSS);
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
@@ -145,14 +140,6 @@ export class AmpStoryHint {
     this.vsync_.mutate(() => {
       this.parentEl_.appendChild(root);
     });
-  }
-
-  /**
-   * Whether the component is built.
-   * @return {boolean}
-   */
-  isBuilt() {
-    return this.isBuilt_;
   }
 
   /**
@@ -227,7 +214,7 @@ export class AmpStoryHint {
 
   /** @private */
   hideInternal_() {
-    if (!this.isBuilt()) {
+    if (!this.hintContainer_) {
       return;
     }
 

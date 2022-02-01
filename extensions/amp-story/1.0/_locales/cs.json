@@ -29,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Více"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Pokud chcete zobrazit tento obsah, musíte povolit experiment s příběhem amp-story."
   },
   "21": {
     "string": "Je nám líto, zdá se, že váš prohlížeč toto tento prvek nepodporuje"
@@ -62,23 +56,11 @@
   "27": {
     "string": "Přesto pokračovat"
   },
-  "31": {
-    "string": "Zvuk je vypnutý"
-  },
-  "32": {
-    "string": "Zvuk je zapnutý"
-  },
-  "33": {
-    "string": "Tato stránka je bez zvuku"
-  },
   "34": {
     "string": "Přehrát video"
   },
   "35": {
     "string": "Potáhněte nahoru"
-  },
-  "62": {
-    "string": "Sdílet od této stránky"
   },
   "63": {
     "string": "Line"
@@ -100,9 +82,6 @@
   },
   "69": {
     "string": "Sdílet příběh"
-  },
-  "70": {
-    "string": "Přepnout nabídku příběhu"
   },
   "71": {
     "string": "A"
@@ -136,9 +115,6 @@
   },
   "81": {
     "string": "Tip"
-  },
-  "82": {
-    "string": "Předchozí stránka"
   },
   "83": {
     "string": "Aktivovat"

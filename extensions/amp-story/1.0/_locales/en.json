@@ -39,10 +39,6 @@
     "string": "SMS",
     "description": "Button label for the share target that shares a link via SMS."
   },
-  "13": {
-    "string": "More",
-    "description": "Button label for the share target that shares a link via deferral to the operating system's native sharing handler."
-  },
   "14": {
     "string": "Tumblr",
     "description": "Button label for the share target that shares a link via Tumblr."
@@ -54,10 +50,6 @@
   "16": {
     "string": "WhatsApp",
     "description": "Button label for the share target that shares a link via WhatsApp."
-  },
-  "19": {
-    "string": "You must enable the amp-story experiment to view this content.",
-    "description": "Text for a warning screen that informs the user that they must enable an experiment to use stories."
   },
   "21": {
     "string": "We're sorry, it looks like your browser doesn't support this experience",
@@ -83,18 +75,6 @@
     "string": "Continue Anyway",
     "description": "Button label to allow the user to continue even if they are not using a supportive browser."
   },
-  "31": {
-    "string": "Sound off",
-    "description": "Text that informs users that the sound is off after they click the mute button"
-  },
-  "32": {
-    "string": "Sound on",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page with sound"
-  },
-  "33": {
-    "string": "This page has no sound",
-    "description": "Text that informs users that the sound is on after they click the unmute button on a page without sound"
-  },
   "34": {
     "string": "Play video",
     "description": "Label for a button to play the video visible on the page."
@@ -102,10 +82,6 @@
   "35": {
     "string": "Swipe up",
     "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
-  },
-  "62": {
-    "string": "Share starting from this page",
-    "description": "Checkbox label when the branching experiment is turned on  and the story is in landscape mode; checking the checkbox lets the user share the story from the current page."
   },
   "63": {
     "string": "Line",
@@ -134,10 +110,6 @@
   "69": {
     "string": "Share story",
     "description": "Label for the share button that pulls up a panel of options for sharing the story"
-  },
-  "70": {
-    "string": "Toggle story menu",
-    "description": "Label for the sidebar button that pulls up a menu of options for interacting with the story"
   },
   "71": {
     "string": "A",
@@ -182,10 +154,6 @@
   "81": {
     "string": "Tip",
     "description": "Label for a hint in the context of an onboarding user education tutorial."
-  },
-  "82": {
-    "string": "Previous page",
-    "description": "Label indicating that users can navigate to the previous page."
   },
   "83": {
     "string": "Activate",
@@ -247,8 +215,12 @@
     "string": "Form successfully submitted",
     "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
   },
-  "100": {
-    "string": "Read more",
-    "description": "Label for a button to open a drawer containing additional content."
+  "101": {
+    "string": "Shop Now",
+    "description": "Label for the shopping CTA button."
+  },
+  "102": {
+    "string": "Featured in this story",
+    "description": "Label for a list of products that are featured in the story."
   }
 }

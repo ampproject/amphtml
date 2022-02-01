@@ -1,9 +1,12 @@
+import {expect} from 'chai';
+
+import {forceExperimentBranch} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+
+import {Services} from '#service';
+
 import {Action, getStoreService} from '../amp-story-store-service';
 import {ProgressBar} from '../progress-bar';
-import {Services} from '#service';
-import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
-import {expect} from 'chai';
-import {forceExperimentBranch} from '#experiments';
 
 describes.realWin('amp-story-progress-bar', {amp: true}, (env) => {
   let win;

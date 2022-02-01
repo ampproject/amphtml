@@ -17,6 +17,7 @@ function getTestConfig() {
         'ads/**/*.js',
         'build-system/**/*.js',
         'extensions/**/test/**/*.js',
+        'src/bento/components/**/test/**/*.js',
         'third_party/**/*.js',
         'test/**/*.js',
         'testing/**/*.js',
@@ -38,7 +39,12 @@ function getTestConfig() {
       modules: 'commonjs',
       loose: true,
       targets: {'browsers': ['Last 2 versions']},
+      shippedProposals: true,
     },
+  ];
+  const presetTypescript = [
+    '@babel/preset-typescript',
+    {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
   ];
   const replacePlugin = getReplacePlugin();
   const replaceGlobalsPlugin = getReplaceGlobalsPlugin();
@@ -52,16 +58,21 @@ function getTestConfig() {
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
-    '@babel/plugin-transform-classes',
     './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);
-  const testPresets = [presetEnv];
+  const testPresets = [presetTypescript, presetEnv];
   return {
     compact: false,
     plugins: testPlugins,
     presets: testPresets,
     sourceMaps: 'inline',
+    assumptions: {
+      constantSuper: true,
+      noClassCalls: true,
+      setClassMethods: true,
+      setPublicClassFields: true,
+    },
   };
 }
 

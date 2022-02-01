@@ -145,7 +145,13 @@ export class GoogleSubscriptionsPlatform {
       )
       .map((exp) => exp.substring(4));
 
-    const swgConfig = {'experiments': ampExperimentsForSwg};
+    // Force skipping the account creation screen in the buyflow
+    const swgConfig = {
+      'experiments': ampExperimentsForSwg,
+    };
+    const clientOptions = {
+      'skipAccountCreationScreen': true,
+    };
     let resolver = null;
     /** @private @const {!ConfiguredRuntime} */
     this.runtime_ = new ConfiguredRuntime(
@@ -155,7 +161,8 @@ export class GoogleSubscriptionsPlatform {
         fetcher: new AmpFetcher(ampdoc.win),
         configPromise: new Promise((resolve) => (resolver = resolve)),
       },
-      swgConfig
+      swgConfig,
+      clientOptions
     );
 
     /** @private @const {!../../../third_party/subscriptions-project/swg.ClientEventManagerApi} */

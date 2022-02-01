@@ -3,13 +3,13 @@ import {sequentialIdGenerator} from '#core/data-structures/id-generator';
 import * as Preact from '#preact';
 import {
   cloneElement,
-  toChildArray,
   useCallback,
   useContext,
   useLayoutEffect,
   useMemo,
   useState,
 } from '#preact';
+import {Children} from '#preact/compat';
 
 import {BentoLightboxGalleryContext} from './context';
 
@@ -56,10 +56,10 @@ export function WithBentoLightboxGallery({
       return renderProp();
     }
     if (children) {
-      return toChildArray(children).map(CLONE_CHILD);
+      return Children.map(children, CLONE_CHILD);
     }
     return <Comp srcset={srcset} />;
-  }, [children, renderProp, srcset]);
+  }, [children, renderProp, srcset, Comp]);
 
   const caption = useMemo(
     () => captionProp || alt || ariaLabel,

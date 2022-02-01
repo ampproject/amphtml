@@ -1,7 +1,7 @@
-#include "atomutil.h"
+#include "cpp/htmlparser/atomutil.h"
 
 #include "gtest/gtest.h"
-#include "hash.h"
+#include "cpp/htmlparser/hash.h"
 
 TEST(AtomUtilTest, StringToAtom) {
   // String to atom.

@@ -951,3 +951,105 @@ describes.sandboxed('StandardActions', {}, (env) => {
     });
   });
 });
+
+describes.realWin('toggleTheme action', {amp: true}, (env) => {
+  let invocation, win, body, standardActions;
+  let matchMediaStub, getItemStub, setItemStub;
+
+  beforeEach(() => {
+    win = env.win;
+    body = win.document.body;
+    standardActions = new StandardActions(env.ampdoc);
+
+    getItemStub = env.sandbox.stub(win.localStorage, 'getItem');
+    setItemStub = env.sandbox.stub(win.localStorage, 'setItem');
+
+    matchMediaStub = env.sandbox.stub(win, 'matchMedia');
+
+    invocation = {
+      node: {
+        ownerDocument: {
+          defaultView: env.win,
+        },
+      },
+      satisfiesTrust: () => true,
+    };
+
+    invocation.method = 'toggleTheme';
+  });
+
+  it('should set amp-dark-mode property in localStorage with yes', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns('no');
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned('no');
+
+    expect(body).to.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'yes');
+  });
+
+  it('should set amp-dark-mode property in localStorage with no', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns('yes');
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned('yes');
+
+    expect(body).to.not.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'no');
+  });
+
+  it('should set amp-dark-mode property in localStorage with yes if it is null and user prefers light mode', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns(null);
+
+    matchMediaStub
+      .withArgs('(prefers-color-scheme: dark)')
+      .returns({matches: false});
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned(null);
+
+    expect(body).to.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'yes');
+  });
+
+  it('should set amp-dark-mode property in localStorage with no if it is null and user prefers dark mode', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns(null);
+
+    matchMediaStub
+      .withArgs('(prefers-color-scheme: dark)')
+      .returns({matches: true});
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned(null);
+
+    expect(body).to.not.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'no');
+  });
+
+  it('should add custom dark mode class to the body', async () => {
+    body.setAttribute('data-prefers-dark-mode-class', 'is-dark-mode');
+    getItemStub.withArgs('amp-dark-mode').returns('no');
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(body).to.have.class('is-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'yes');
+  });
+});

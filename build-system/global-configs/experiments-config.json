@@ -7,11 +7,5 @@
     "expiration_date_utc": "2021-06-30",
     "define_experiment_constant": "R1_IMG_DEFERRED_BUILD"
   },
-  "experimentC": {
-    "name": "EsbuildCompilation",
-    "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/35264",
-    "expiration_date_utc": "2021-10-30",
-    "define_experiment_constant": "ESBUILD_COMPILATION"
-  }
+  "experimentC": {}
 }

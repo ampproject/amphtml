@@ -1,14 +1,17 @@
-import {CSS} from '../../../build/amp-tiktok-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
-import {debounce} from '#core/types/function';
-import {getData, listen} from '#utils/event-helper';
-import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
+import {childElementByAttr, childElementByTag} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {px, resetStyles, setStyles} from '#core/dom/style';
+import {debounce} from '#core/types/function';
 import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {getData, listen} from '#utils/event-helper';
+
+import {CSS} from '../../../build/amp-tiktok-0.1.css';
 
 let id = 0;
 const NAME_PREFIX = '__tt_embed__v';

@@ -1,7 +1,7 @@
-#include "utf8-util.h"
+#include "cpp/engine/utf8-util.h"
 
 #include "gtest/gtest.h"
-#include "strings.h"
+#include "cpp/htmlparser/strings.h"
 
 using ::testing::Eq;
 

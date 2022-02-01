@@ -6,6 +6,7 @@
     <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
     <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js"></script>
     <title>My Story</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
@@ -28,6 +29,48 @@
   </head>
 
   <body>
+    <amp-analytics>
+      <script type="application/json">
+        {
+          "transport": {
+            "beacon": false,
+            "xhrpost": false,
+            "image": true
+          },
+          "requests": {
+            "endpoint": "https://www.cool.example",
+            "base": "${endpoint}?id=${adId}&zx=${timestamp}"
+          },
+          "triggers": {
+            "storyAdView": {
+              "on": "story-ad-view",
+              "request": "base",
+              "extraUrlParams": {"amp_stads": "view", "type": "${METATAG_AD_amp-cta-type}"}
+            },
+            "storyAdSwipe": {
+              "on": "story-ad-swipe",
+              "request": "base",
+              "extraUrlParams": {"amp_stads": "swipe"}
+            },
+            "storyAdClick": {
+              "on": "story-ad-click",
+              "request": "base",
+              "extraUrlParams": {"amp_stads": "click"}
+            },
+            "storyAdExit": {
+              "on": "story-ad-exit",
+              "request": "base",
+              "extraUrlParams": {"amp_stads": "exit"}
+            },
+            "storyAdDestroy": {
+              "on": "story-ad-discard",
+              "request": "base",
+              "extraUrlParams": {"amp_stads": "discard"}
+            }
+          }
+        }
+      </script>
+    </amp-analytics>
     <amp-story
       title="Amp-story-doubleclick"
       publisher="The AMP Team"

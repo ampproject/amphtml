@@ -4,7 +4,6 @@ import '../amp-story-shopping';
 
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {getRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {
   StateProperty,
   getStoreService,
@@ -23,18 +22,12 @@ describes.realWin(
     let element;
     let shoppingConfig;
     let storeService;
-    let requestService;
 
     beforeEach(async () => {
       win = env.win;
       storeService = getStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
-      });
-
-      requestService = getRequestService(win);
-      registerServiceBuilder(win, 'story-store', function () {
-        return requestService;
       });
 
       await createAmpStoryShoppingConfig();
@@ -80,7 +73,7 @@ describes.realWin(
       element.setAttribute('src', exampleURL);
 
       const expectedRemoteResult = JSON.parse(
-        '{"city-pop":{"product-tag-id":"city-pop","product-title":"Plastic Love"},"k-pop":{"product-tag-id":"k-pop","product-title":"Gangnam Style"},"eurodance":{"product-tag-id":"eurodance","product-title":"Crystal King Battle"}}'
+        '{"art":{"product-id": "art","product-title": "Abstract Art","product-brand": "V. Artsy","product-price": 1200.0,"product-price-currency": "JPY","product-images": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]}}'
       );
 
       expect(storeService.get(StateProperty.SHOPPING_DATA)).to.deep.eql(

@@ -13,10 +13,12 @@
  * ...
  */
 
-import {AmpStoryBaseLayer} from './amp-story-base-layer';
 import {removeElement} from '#core/dom';
 import {matches} from '#core/dom/query';
+
 import {user} from '#utils/log';
+
+import {AmpStoryBaseLayer} from './amp-story-base-layer';
 
 /**
  * @type {string}
