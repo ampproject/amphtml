@@ -11,25 +11,25 @@
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-shopping" src="https://cdn.ampproject.org/v0/amp-story-shopping-0.1.js"></script>
     <style amp-custom>
-      [data-tag-id="hat"] {
-        top: 33%;
-        left: 7%;
+      [data-product-id="lamp"],
+      [data-product-id="lamp-rtl"] {
+        top: 31%;
+        left: 1%;
       }
-      [data-tag-id="sunglasses"] {
-        top: 28%;
-        left: 43%;
+      [data-product-id="art"],
+      [data-product-id="art-rtl"] {
+        top: 15%;
+        left: 40%;
       }
-      [data-tag-id="backpack"] {
-        top: 33%;
-        left: 80%;
+      [data-product-id="chair"],
+      [data-product-id="chair-rtl"] {
+        top: 53%;
+        left: 30%;
       }
-      [data-tag-id=city-pop] {
-        top: 33%;
-        left: 7%;
-      }
-      [data-tag-id=euro-dance] {
-        top: 43%;
-        left: 57%;
+      [data-product-id="flowers"],
+      [data-product-id="flowers-rtl"] {
+        top: 46%;
+        left: 83%;
       }
     </style>
   </head>
@@ -42,103 +42,89 @@
         poster-portrait-src="example.com/poster.jpg">
       <amp-story-page id="inline-light-theme">
         <!--
-          Example of
-          Inline config.
-          Multiple product tags with icon defined.
+          Example of Inline config. Multiple product tags with icon defined.
         -->
         <amp-story-shopping-config layout="nodisplay">
           <script type="application/json">
             {
                 "items" : [
                    {
-                    "product-tag-id": "hat",
-                    "product-title": "Hootenanny Hat",
-                    "product-price": 123456.789,
+                    "product-id": "lamp",
+                    "product-title": "Brass Lamp",
+                    "product-brand": "Lamp Co",
+                    "product-price": 799.00,
                     "product-price-currency": "USD",
-                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
+                    "product-images": ["https://source.unsplash.com/Ry9WBo3qmoc/500x500"]
                    },
                    {
-                    "product-tag-id": "sunglasses",
-                    "product-title": "Spectacular Spectacles",
-                    "product-price": 123456.789,
+                    "product-id": "art",
+                    "product-title": "Abstract Art",
+                    "product-brand": "V. Artsy",
+                    "product-price": 1200.00,
                     "product-price-currency": "INR",
-                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
+                    "product-images": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
                    },
                    {
-                    "product-tag-id": "backpack",
-                    "product-title": "Beastly Backpack",
-                    "product-price": 123456.789,
+                    "product-id": "chair",
+                    "product-title": "Yellow chair",
+                    "product-brand": "Chair Co.",
+                    "product-price": 1000.00,
                     "product-price-currency": "BRL",
-                    "product-tag-text": "Beastly Backpack",
-                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
+                    "product-tag-text": "The perfectly imperfect yellow chair",
+                    "product-images": ["https://source.unsplash.com/DgQGKKLaVhY/500x500"]
                    },
                    {
-                    "product-tag-id": "euro-dance",
-                    "product-title": "Dolphin Dance",
-                    "product-price": 123456.789,
-                    "product-price-currency": "EUR"
+                    "product-id": "flowers",
+                    "product-title": "Flowers",
+                    "product-brand": "Very Long Flower Company Name",
+                    "product-price": 10.00,
+                    "product-price-currency": "USD",
+                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
+                    "product-images": ["https://source.unsplash.com/SavQfLRm4Do/500x500"]
                    }
                 ]
               }
           </script>
         </amp-story-shopping-config>
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="hat" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="sunglasses" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="backpack" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="euro-dance" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="chair" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="flowers" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
       <amp-story-page id="remote-dark-theme">
         <!--
-          Example of:
-          Remote JSON with inline fallback.
-          Single product tag without icon.
+          Example of Remote JSON with inline fallback. Single product tag without icon.
         -->
         <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
           <script type="application/json">
             {
                 "items" : [
                    {
-                    "product-tag-id": "city-pop",
-                    "product-title": "Plastic Love",
-                    "product-price": 19,
+                    "product-id": "art",
+                    "product-title": "Abstract Art",
+                    "product-brand": "V. Artsy",
+                    "product-price": 1200.00,
                     "product-price-currency": "JPY",
-                   }
+                    "product-images": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
+                   },
                 ]
               }
           </script>
         </amp-story-shopping-config>
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
-      </amp-story-page>
-      <amp-story-page id="inline-no-product">
-          <!--
-            Example of:
-            CTA Button not rendering due to no product tags.
-          -->
-        <amp-story-shopping-config layout="nodisplay">
-          <script type="application/json">
-            {
-                "items" : []
-            }
-          </script>
-        </amp-story-shopping-config>
-        <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="vertical">
-        </amp-story-grid-layer>
-        <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
       <amp-story-page id="remote-with-product">
         <!--
@@ -148,17 +134,94 @@
         <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
           <script type="application/json">
             {
-                "items" : []
-              }
+              "items" : []
+            }
           </script>
         </amp-story-shopping-config>
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="inline-light-theme-two" dir="rtl">
+        <!--
+          RTL example
+        -->
+        <amp-story-shopping-config layout="nodisplay">
+          <script type="application/json">
+            {
+              "items" : [
+                {
+                  "product-id": "lamp-rtl",
+                  "product-title": "Brass Lamp",
+                  "product-brand": "Lamp Co",
+                  "product-price": 799.00,
+                  "product-price-currency": "AED",
+                  "product-tag-text": " حبا حبا حبا سعادةا سعادة",
+                  "product-images": ["https://source.unsplash.com/Ry9WBo3qmoc/500x500"]
+                },
+                {
+                  "product-id": "art-rtl",
+                  "product-title": "Abstract Art",
+                  "product-brand": "V. Artsy",
+                  "product-price-currency": "AED",
+                  "product-price": 1200.00,
+                  "product-tag-text": "حبا حب سعادة قط حبا حب سعادة قط ",
+                  "product-images": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
+                },
+                {
+                  "product-id": "chair-rtl",
+                  "product-title": "Yellow chair",
+                  "product-brand": "Chair Co.",
+                  "product-price": 1000.00,
+                  "product-price-currency": "AED",
+                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png",
+                  "product-images": ["https://source.unsplash.com/DgQGKKLaVhY/500x500"]
+                 },
+                 {
+                  "product-id": "flowers-rtl",
+                  "product-title": "Flowers",
+                  "product-brand": "Very Long Flower Company Name",
+                  "product-price": 10.00,
+                  "product-price-currency": "AED",
+                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
+                  "product-images": ["https://source.unsplash.com/SavQfLRm4Do/500x500"]
+                 }
+              ]
+            }
+          </script>
+        </amp-story-shopping-config>
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-product-id="lamp-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="chair-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="flowers-rtl" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment></amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="inline-no-product">
+        <!--
+          Example of:
+          CTA Button not rendering due to no product tags.
+        -->
+      <amp-story-shopping-config layout="nodisplay">
+        <script type="application/json">
+          {
+              "items" : []
+          }
+        </script>
+      </amp-story-shopping-config>
+
+      <amp-story-grid-layer template="fill">
+        <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
+      </amp-story-grid-layer>
+      <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
     </amp-story>
   </body>

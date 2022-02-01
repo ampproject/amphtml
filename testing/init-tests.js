@@ -25,8 +25,10 @@ import {
   maybeStubConsoleInfoLogWarn,
   restoreConsoleError,
   restoreConsoleSandbox,
+  restoreLogger,
   setTestName,
   setTestRunner,
+  stubLogger,
   warnForConsoleError,
 } from './console-logging-setup';
 import * as describes from './describes';
@@ -123,6 +125,7 @@ function setupTestcase() {
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
+  stubLogger();
 }
 
 /**
@@ -163,8 +166,9 @@ async function cleanupTestcase() {
   await flushPreactEffects();
   setTestRunner(this);
   restoreConsoleSandbox();
-  restoreConsoleError();
   restoreAsyncErrorThrows();
+  restoreConsoleError();
+  restoreLogger();
   cleanupTestPageElements();
   resetWindowState();
   setDefaultBootstrapBaseUrlForTesting(null);

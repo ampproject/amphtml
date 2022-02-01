@@ -6,7 +6,7 @@ import {propName} from '#preact/utils';
  * The wrapper component provides the canonical wrapper for components whose
  * size depends on the children. This is often the opposite of the
  * `ContainWrapper`.
- * @param {!WrapperComponentProps} props
+ * @param {WrapperComponentProps} props
  * @param {{current: ?Element}} ref
  * @return {PreactDef.Renderable}
  */

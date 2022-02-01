@@ -1,5 +1,4 @@
 import {getDate} from '#core/types/date';
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {useEffect, useMemo, useRef, useState} from '#preact';
@@ -148,14 +147,14 @@ function getLocaleWord(locale) {
     locale = DEFAULT_LOCALE;
   }
   const localeWordList = getLocaleStrings(locale);
-  return dict({
+  return {
     'years': localeWordList[0],
     'months': localeWordList[1],
     'days': localeWordList[2],
     'hours': localeWordList[3],
     'minutes': localeWordList[4],
     'seconds': localeWordList[5],
-  });
+  };
 }
 
 /**
@@ -202,7 +201,7 @@ function getYDHMSFromMs(ms, biggestUnit, countUp) {
           Math.floor((ms % MILLISECONDS_IN_MINUTE) / MILLISECONDS_IN_SECOND)
         );
 
-  return dict({
+  return {
     'd': d,
     'dd': padStart(d),
     'h': h,
@@ -211,7 +210,7 @@ function getYDHMSFromMs(ms, biggestUnit, countUp) {
     'mm': padStart(m),
     's': s,
     'ss': padStart(s),
-  });
+  };
 }
 
 /**

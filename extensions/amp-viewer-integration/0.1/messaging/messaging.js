@@ -14,7 +14,7 @@ const MessageType_Enum = {
 /**
  * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
  */
-let RequestHandler; // eslint-disable-line no-unused-vars
+let RequestHandler; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 /**
  * @param {*} message

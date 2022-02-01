@@ -2,7 +2,7 @@ import {devAssert} from '#core/assert';
 import {toggleAttribute} from '#core/dom';
 import {childElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {dict, memo} from '#core/types/object';
+import {memo} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {useLayoutEffect, useRef} from '#preact';
@@ -44,9 +44,9 @@ export class BaseElement extends PreactBaseElement {
     });
 
     const {'children': children} = getState(element, mu, getExpandStateTrigger);
-    return dict({
+    return {
       'children': children,
-    });
+    };
   }
 }
 
@@ -77,12 +77,12 @@ function getState(element, mu, getExpandStateTrigger) {
       EXPAND_STATE_SHIM_PROP,
       getExpandStateTrigger
     );
-    const sectionProps = dict({
+    const sectionProps = {
       'key': section,
       'expanded': section.hasAttribute('expanded'),
       'id': section.getAttribute('id'),
       'onExpandStateChange': expandStateShim,
-    });
+    };
     // For headerProps and contentProps:
     // || undefined needed for the `role` attribute since an element w/o
     // role results in `null`.  When `null` is passed into Preact, the
@@ -90,16 +90,16 @@ function getState(element, mu, getExpandStateTrigger) {
     // value.  This is not needed for `id` since this is handled with
     // explicit logic (not default prop value) and all falsy values are
     // handled the same.
-    const headerProps = dict({
+    const headerProps = {
       'as': headerShim,
       'id': section.firstElementChild.getAttribute('id'),
       'role': section.firstElementChild.getAttribute('role') || undefined,
-    });
-    const contentProps = dict({
+    };
+    const contentProps = {
       'as': contentShim,
       'id': section.lastElementChild.getAttribute('id'),
       'role': section.lastElementChild.getAttribute('role') || undefined,
-    });
+    };
     return (
       <BentoAccordionSection {...sectionProps}>
         <BentoAccordionHeader {...headerProps}></BentoAccordionHeader>
@@ -107,7 +107,7 @@ function getState(element, mu, getExpandStateTrigger) {
       </BentoAccordionSection>
     );
   });
-  return dict({'children': children});
+  return {'children': children};
 }
 
 /**

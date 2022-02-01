@@ -1,7 +1,10 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
+
+import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
@@ -12,7 +15,7 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
-/** @const {!Array<!Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+/** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
   {
     family: 'Poppins',
@@ -44,7 +47,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.loadFonts_();
+    loadFonts(this.win, FONTS_TO_LOAD);
     this.element.setAttribute('role', 'button');
 
     return Promise.all([
@@ -97,7 +100,43 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
+   * This function counts the number of lines in the shopping tag
+   * and sets the styling properties dynamically based on the number of lines.
+   * @private
+   */
+  styleTagText_() {
+    const pillEl = this.element.shadowRoot?.querySelector(
+      '.amp-story-shopping-tag-pill'
+    );
+
+    const textEl = this.element.shadowRoot?.querySelector(
+      '.amp-story-shopping-tag-pill-text'
+    );
+
+    if (!pillEl || !textEl) {
+      return;
+    }
+
+    const fontSize = parseInt(
+      computedStyle(window, textEl).getPropertyValue('font-size'),
+      10
+    );
+    const ratioOfLineHeightToFontSize = 1.5;
+    const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
+    const height = textEl./*OK*/ clientHeight;
+    const numLines = Math.ceil(height / lineHeight);
+
+    this.mutateElement(() => {
+      pillEl.classList.toggle(
+        'amp-story-shopping-tag-pill-multi-line',
+        numLines > 1
+      );
+    });
+  }
+
+  /**
    * @return {!Element}
+   * @private
    */
   renderShoppingTagTemplate_() {
     return (
@@ -124,15 +163,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
                 {this.tagData_['product-tag-text']}
               </span>
             )) ||
-              new Intl.NumberFormat(
-                this.localizationService_.getLanguageCodesForElement(
-                  this.element_
-                )[0],
-                {
-                  style: 'currency',
-                  currency: this.tagData_['product-price-currency'],
-                }
-              ).format(this.tagData_['product-price'])}
+              formatI18nNumber(
+                this.localizationService_,
+                this.element,
+                this.tagData_['product-price-currency'],
+                this.tagData_['product-price']
+              )}
           </span>
         </span>
       </div>
@@ -144,31 +180,26 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
-    this.tagData_ = shoppingData[this.element.getAttribute('data-tag-id')];
+    this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
 
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
     this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
-    this.mutateElement(() => {
-      createShadowRootWithStyle(
-        this.element,
-        this.shoppingTagEl_,
-        shoppingTagCSS
-      );
-      this.hasAppendedInnerShoppingTagEl_ = true;
-    });
-  }
 
-  /** @private */
-  loadFonts_() {
-    if (this.win.document.fonts && FontFace) {
-      FONTS_TO_LOAD.forEach(({family, src, style = 'normal', weight}) =>
-        new FontFace(family, src, {weight, style})
-          .load()
-          .then((font) => this.win.document.fonts.add(font))
-      );
-    }
+    this.measureMutateElement(
+      () => {
+        createShadowRootWithStyle(
+          this.element,
+          this.shoppingTagEl_,
+          shoppingTagCSS
+        );
+        this.hasAppendedInnerShoppingTagEl_ = true;
+      },
+      () => {
+        this.styleTagText_();
+      }
+    );
   }
 }

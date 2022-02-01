@@ -242,9 +242,9 @@ In your AMP element implementation, you will use `requestResize` to pass in the 
 class AmpFantasticEmbed extends BaseElement {
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height) => this.attemptChangeHeight(height),
-    });
+    };
   }
 }
 ```

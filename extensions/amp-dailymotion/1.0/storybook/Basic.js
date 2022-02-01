@@ -1,4 +1,5 @@
 import * as Preact from '#preact';
+
 import {BentoDailymotion} from '../component';
 
 export default {

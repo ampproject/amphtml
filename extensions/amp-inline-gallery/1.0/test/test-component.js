@@ -1,6 +1,8 @@
-import * as Preact from '#preact';
-import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {mount} from 'enzyme';
+
+import * as Preact from '#preact';
+
+import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
 import {BentoInlineGallery} from '../component';
 import {BentoInlineGalleryPagination} from '../pagination';
 import {BentoInlineGalleryThumbnails} from '../thumbnails';
