@@ -54,14 +54,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     loadFonts(this.win, FONTS_TO_LOAD);
-    this.attachmentEl_ = (
-      <amp-story-page-attachment
-        layout="nodisplay"
-        theme={this.element.getAttribute('theme')}
-      ></amp-story-page-attachment>
-    );
-    this.element.appendChild(this.attachmentEl_);
-    this.attachmentEl_.appendChild(this.plpContainer_);
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -69,6 +61,18 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     ]).then(([storeService, localizationService]) => {
       this.storeService_ = storeService;
       this.localizationService_ = localizationService;
+
+      this.attachmentEl_ = (
+        <amp-story-page-attachment
+          layout="nodisplay"
+          theme={this.element.getAttribute('theme')}
+          cta-text={this.localizationService_.getLocalizedString(
+            LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+          )}
+        ></amp-story-page-attachment>
+      );
+      this.element.appendChild(this.attachmentEl_);
+      this.attachmentEl_.appendChild(this.plpContainer_);
     });
   }
 
@@ -104,7 +108,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     }
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
     const shoppingDataForPage = this.shoppingTags_.map(
-      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-tag-id')]
+      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
     );
 
     const plp = this.renderPlpTemplate_(shoppingDataForPage);

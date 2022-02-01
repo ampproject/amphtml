@@ -141,7 +141,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   }
 
   /**
-   * Keys product data to product-ids and adds them to the store service.
+   * Keys product data to productIds and adds them to the store service.
    * @param {!ShoppingConfigDef} shoppingConfig
    * @private
    */

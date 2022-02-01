@@ -340,14 +340,14 @@ module.exports = {
   },
   'overrides': [
     {
-      'files': ['**/*.ts'],
+      'files': ['**/*.ts', '**/*.tsx'],
       'rules': {
         'require-jsdoc': 0,
         'jsdoc/require-param': 0,
         'jsdoc/require-param-type': 0,
         'jsdoc/require-returns': 0,
         'no-undef': 0,
-        'import/no-unresolved': 0
+        'import/no-unresolved': 0,
       },
     },
     {
@@ -471,6 +471,11 @@ module.exports = {
         '**/storybook/**',
       ],
       'rules': {'local/preact-preferred-props': 2},
+    },
+    {
+      // src/preact can directly import from 'preact' without issue.
+      'files': ['src/preact/**'],
+      'rules': {'local/no-import': 0},
     },
     {
       // Files that use JSX for plain DOM nodes instead of Preact

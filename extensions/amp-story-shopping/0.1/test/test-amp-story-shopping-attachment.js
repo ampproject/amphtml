@@ -55,7 +55,7 @@ describes.realWin(
         'amp-story-shopping-tag',
         {
           'layout': 'container',
-          'data-tag-id': 'lamp',
+          'data-product-id': 'lamp',
         }
       );
       pageEl.appendChild(tagEl);
@@ -87,6 +87,14 @@ describes.realWin(
 
     it('should build shopping attachment component', () => {
       expect(() => shoppingImpl.layoutCallback()).to.not.throw();
+    });
+
+    it('should build CTA with i18n shopping label text', async () => {
+      await dispatchTestShoppingData();
+      const attachmentChildEl = shoppingEl.querySelector(
+        'amp-story-page-attachment'
+      );
+      expect(attachmentChildEl.getAttribute('cta-text')).to.equal('Shop Now');
     });
 
     it('should open attachment', async () => {

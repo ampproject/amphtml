@@ -1,3 +1,5 @@
+import type {ComponentChildren, Context, VNode} from 'preact';
+
 import {
   Loading_Enum,
   reducer as loadingReducer,
@@ -6,27 +8,22 @@ import {
 import * as Preact from '#preact';
 import {createContext, useContext, useMemo} from '#preact';
 
-/**
- * @typedef {{
- *   renderable: boolean;
- *   playable: boolean;
- *   loading: Loading_Enum;
- *   notify?: () => {};
- * }} AmpContext
- */
+export interface AmpContext {
+  renderable: boolean;
+  playable: boolean;
+  loading: Loading_Enum;
+  notify?: () => {};
+}
 
-/**
- * @typedef {{
- *   renderable: boolean | undefined;
- *   playable: boolean | undefined;
- *   loading: string | undefined;
- *   notify?: () => {} | undefined;
- *   children?: import('preact').ComponentChildren;
- * }} ProviderProps
- */
+export interface ProviderProps {
+  renderable: boolean | undefined;
+  playable: boolean | undefined;
+  loading: string | undefined;
+  notify?: () => {} | undefined;
+  children?: ComponentChildren;
+}
 
-/** @type {import('preact').Context<AmpContext>} */
-let context;
+let context: Context<AmpContext>;
 
 /**
  * The external context given to React components to control whether they can
@@ -36,10 +33,8 @@ let context;
  *   `display-locking` CSS.
  * - playable: whether the playback is allowed in this vDOM area. If playback
  *   is not allow, the component must immediately stop the playback.
- *
- * @return {import('preact').Context<AmpContext>}
  */
-function getAmpContext() {
+function getAmpContext(): Context<AmpContext> {
   return (
     context ||
     (context = createContext({
@@ -52,9 +47,6 @@ function getAmpContext() {
 
 /**
  * A wrapper-component that recalculates and propagates AmpContext properties.
- *
- * @param {ProviderProps} props
- * @return {import('preact').VNode}
  */
 export function WithAmpContext({
   children,
@@ -62,7 +54,7 @@ export function WithAmpContext({
   notify: notifyProp,
   playable: playableProp = true,
   renderable: renderableProp = true,
-}) {
+}: ProviderProps): VNode {
   const parent = useAmpContext();
   const renderable = renderableProp && parent.renderable;
   const playable = renderable && playableProp && parent.playable;
@@ -73,33 +65,27 @@ export function WithAmpContext({
   const notify = notifyProp || parent.notify;
   const current = useMemo(
     () =>
-      /** @type {AmpContext} */ ({
+      ({
         renderable,
         playable,
         loading,
         notify,
-      }),
+      } as AmpContext),
     [renderable, playable, loading, notify]
   );
   const AmpContext = getAmpContext();
   return <AmpContext.Provider children={children} value={current} />;
 }
 
-/**
- * @return {AmpContext}
- */
-export function useAmpContext() {
+export function useAmpContext(): AmpContext {
   const AmpContext = getAmpContext();
   return useContext(AmpContext);
 }
 
 /**
  * Whether the calling component should currently be in the loaded state.
- *
- * @param {Loading_Enum|string} loadingProp
- * @return {Loading_Enum}
  */
-export function useLoading(loadingProp) {
+export function useLoading(loadingProp: Loading_Enum | string): Loading_Enum {
   const {loading: loadingContext} = useAmpContext();
   return loadingReducer(loadingProp, loadingContext);
 }
