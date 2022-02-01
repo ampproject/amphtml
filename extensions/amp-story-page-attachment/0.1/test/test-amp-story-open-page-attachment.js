@@ -42,6 +42,8 @@ describes.realWin(
       attachmentEl = win.document.createElement('amp-story-page-attachment');
       attachmentEl.getAmpDoc = () => new AmpDocSingle(win);
       page.appendChild(attachmentEl);
+      page.getAmpDoc = () => new AmpDocSingle(win);
+
       attachment = new AmpStoryPageAttachment(attachmentEl);
       env.sandbox.stub(attachment, 'mutateElement').callsFake((fn) => fn());
 
