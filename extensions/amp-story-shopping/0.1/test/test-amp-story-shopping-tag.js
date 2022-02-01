@@ -4,6 +4,7 @@ import {Layout_Enum} from '#core/dom/layout';
 import '../amp-story-shopping';
 
 import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -12,24 +13,37 @@ import {
   StateProperty,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpStoryShoppingAttachment} from '../amp-story-shopping-attachment';
+import '../amp-story-shopping-tag';
+import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
 
 describes.realWin(
   'amp-story-shopping-tag-v0.1',
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story-shopping:0.1'],
+      extensions: ['amp-story-shopping:0.1', 'amp-story-page-attachment:0.1'],
     },
   },
   (env) => {
     let win;
-    let shoppingTagElement;
-    let shoppingTagImpl;
+    let shoppingTagEl;
+    let shoppingTag;
     let storeService;
     let localizationService;
+    let shoppingAttachmentEl;
+    let shoppingAttachment;
 
     beforeEach(async () => {
       win = env.win;
+
+      // Set up the story.
+      const storyEl = win.document.createElement('amp-story');
+      const pageEl = win.document.createElement('amp-story-page');
+      storyEl.getAmpDoc = () => new AmpDocSingle(win);
+      win.document.body.appendChild(storyEl);
+      storyEl.appendChild(pageEl);
+
       storeService = getStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
@@ -42,21 +56,24 @@ describes.realWin(
         .stub(Services, 'localizationServiceForOrNull')
         .returns(Promise.resolve(localizationService));
 
-      await createAmpStoryShoppingTag();
-    });
-
-    async function createAmpStoryShoppingTag() {
-      const pageEl = win.document.createElement('amp-story-page');
-      pageEl.id = 'page1';
-      shoppingTagElement = createElementWithAttributes(
+      // Set up shopping tag
+      shoppingTagEl = createElementWithAttributes(
         win.document,
         'amp-story-shopping-tag',
         {'layout': 'container'}
       );
-      pageEl.appendChild(shoppingTagElement);
-      win.document.body.appendChild(pageEl);
-      shoppingTagImpl = await shoppingTagElement.getImpl();
-    }
+      pageEl.appendChild(shoppingTagEl);
+      shoppingTag = await shoppingTagEl.getImpl();
+
+      // Set up the shopping attachment.
+      shoppingAttachmentEl = win.document.createElement(
+        'amp-story-shopping-attachment'
+      );
+      shoppingAttachmentEl.getAmpDoc = () => new AmpDocSingle(win);
+      pageEl.appendChild(shoppingAttachmentEl);
+      shoppingAttachment = new AmpStoryShoppingAttachment(shoppingAttachmentEl);
+      await shoppingAttachment.buildCallback();
+    });
 
     async function shoppingDataDispatchStoreService() {
       const shoppingData = {
@@ -66,27 +83,22 @@ describes.realWin(
     }
 
     it('should build and layout shopping tag component', () => {
-      expect(() => shoppingTagImpl.layoutCallback()).to.not.throw();
+      expect(() => shoppingTag.layoutCallback()).to.not.throw();
     });
 
     it('should process config data and set text container content if data not null', async () => {
-      shoppingTagElement.setAttribute('data-product-id', 'sunglasses');
+      shoppingTagEl.setAttribute('data-product-id', 'sunglasses');
       await shoppingDataDispatchStoreService();
-      env.sandbox
-        .stub(shoppingTagImpl, 'measureMutateElement')
-        .callsFake(() => {
-          expect(shoppingTagElement.textContent).to.equal(
-            'Spectacular Spectacles'
-          );
-        });
+      env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
+        expect(shoppingTagEl.textContent).to.equal('Spectacular Spectacles');
+      });
     });
 
     it('should not process config data and set text container content if id not found', async () => {
-      shoppingTagElement.setAttribute('data-product-id', 'hat');
+      shoppingTagEl.setAttribute('data-product-id', 'hat');
       await shoppingDataDispatchStoreService();
-      expect(shoppingTagElement.textContent).to.be.empty;
-      expect(shoppingTagImpl.isLayoutSupported(Layout_Enum.CONTAINER)).to.be
-        .true;
+      expect(shoppingTagEl.textContent).to.be.empty;
+      expect(shoppingTag.isLayoutSupported(Layout_Enum.CONTAINER)).to.be.true;
     });
 
     it('should set active product in store service when shopping tag is clicked', async () => {
@@ -98,9 +110,9 @@ describes.realWin(
           '/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png',
       };
 
-      await shoppingTagElement.click();
+      await shoppingTagEl.click();
 
-      env.sandbox.stub(shoppingTagImpl, 'mutateElement').callsFake(() => {
+      env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
         expect(
           storeService.get(StateProperty.SHOPPING_DATA['activeProductData'])
         ).to.deep.equal(tagData);
