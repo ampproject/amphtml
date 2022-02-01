@@ -205,7 +205,7 @@ describes.realWin(
       expect(openAttachmentLabelEl.textContent).to.equal('Custom text');
     });
 
-    it.only('should use the correct outlink text', () => {
+    it('should use the correct outlink text', () => {
       const firstPage = win.document.createElement('amp-story-page');
       storyEl.insertBefore(firstPage, page);
       const otherOutlink = document.createElement('amp-story-page-outlink');
