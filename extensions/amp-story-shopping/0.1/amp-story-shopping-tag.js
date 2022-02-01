@@ -157,10 +157,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @private */
   onClick_() {
-    this.pageAttachmentImpl_.open();
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': this.tagData_,
     });
+    this.pageAttachmentImpl_.open();
   }
 
   /** @override */
