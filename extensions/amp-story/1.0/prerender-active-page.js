@@ -3,9 +3,10 @@ import {parseQueryString} from '#core/types/string/url';
 import {getWin} from '#core/window';
 
 /**
- * Retrieves the page that should be the prerender page.
- * @param {!Element} pageElement any element
- * @return {boolean} the prerendered active page
+ * Returns true if the page should be prerendered (for being an active page or
+ * first page).
+ * @param {!AmpElement} pageElement
+ * @return {boolean}
  */
 export function isPrerenderActivePage(pageElement) {
   const win = getWin(pageElement);

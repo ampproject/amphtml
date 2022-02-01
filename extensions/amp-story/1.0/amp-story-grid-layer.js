@@ -18,7 +18,7 @@ import {
 } from '#core/dom/style';
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {AmpStoryPage} from './amp-story-page';
+import {isPrerenderActivePage} from './prerender-active-page';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -61,7 +61,7 @@ export let PresetDetails;
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @override @nocollapse */
   static prerenderAllowed(element) {
-    return AmpStoryPage.prerenderAllowed(element.parentElement);
+    return isPrerenderActivePage(element.parentElement);
   }
 
   /** @param {!AmpElement} element */
