@@ -25,8 +25,8 @@ let ShoppingConfigDef;
  * @private
  */
 function validateRequired(field, value) {
-  if (value == null) {
-    return [`${field} is required.`];
+  if (value === undefined) {
+    return [`Field ${field} is required.`];
   }
 }
 
@@ -39,15 +39,8 @@ function validateRequired(field, value) {
  * @private
  */
 function validateStringLength(field, str, maxLen = 100) {
-  if (str != null && str.length > maxLen) {
-    return [
-      'Length of ' +
-        field +
-        ' exceeds max length: ' +
-        str.length +
-        ' > ' +
-        maxLen,
-    ];
+  if (str !== undefined && str.length > maxLen) {
+    return [`Length of ${field} exceeds max length: ${str.length} > ${maxLen}`];
   }
 }
 
@@ -59,20 +52,20 @@ function validateStringLength(field, str, maxLen = 100) {
  * @return {!Array<string>}
  */
 function validateNumber(field, number) {
-  if (number != null && isNaN(number)) {
-    return ['Value for field ' + field + ' is not a number'];
+  if (number !== undefined && isNaN(number)) {
+    return [`Value for field ${field} is not a number`];
   }
 }
 
 /**
  * Validates url of shopping config attributes
  * @param {?string} field
- * @param {?string} url
+ * @param {!Array<string>} url
  * @private
  * @return {!Array<string>}
  */
 function validateURL(field, url) {
-  if (url == null) {
+  if (url === undefined) {
     /* Not a Required Attribute, return.*/
     return;
   }
@@ -81,7 +74,7 @@ function validateURL(field, url) {
 
   return urls.map((url) => {
     try {
-      assertHttpsUrl(url, 'amp-story-shopping-config ' + field);
+      assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
     } catch (e) {
       return e.message;
     }
@@ -136,7 +129,7 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
       }, [])
       .filter(Boolean);
     for (const error of errors) {
-      this.user().warn('ERROR', error);
+      this.user().warn('ERROR', `amp-story-shopping-config: ${error}`);
     }
   }
 
