@@ -1,4 +1,4 @@
-import {BentoJwplayer} from '#bento/components/jwplayer/1.0/component';
+import {BentoJwplayer} from '#bento/components/bento-jwplayer/1.0/component';
 
 import * as Preact from '#preact';
 import {useRef} from '#preact';
