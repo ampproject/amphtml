@@ -39,12 +39,13 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
+import {user, userAssert} from '#utils/log';
+
 import {FollowButton} from './follow-button';
 import {PinWidget} from './pin-widget';
 import {SaveButton} from './save-button';
 
 import {CSS} from '../../../build/amp-pinterest-0.1.css';
-import {user, userAssert} from '../../../src/log';
 
 /**
  * AMP Pinterest

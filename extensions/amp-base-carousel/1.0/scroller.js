@@ -1,32 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import * as Preact from '#preact';
-import {
-  Alignment,
-  Axis,
-  findOverlappingIndex,
-  getPercentageOffsetFromAlignment,
-  scrollContainerToElement,
-} from './dimensions';
-import {WithLightbox} from '../../amp-lightbox-gallery/1.0/component';
-import {debounce} from '#core/types/function';
-import {forwardRef} from '#preact/compat';
-import {mod} from '#core/math';
 import {setStyle} from '#core/dom/style';
-import {toWin} from '#core/window';
+import {mod} from '#core/math';
+import {debounce} from '#core/types/function';
+import {getWin} from '#core/window';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useImperativeHandle,
@@ -34,7 +11,18 @@ import {
   useMemo,
   useRef,
 } from '#preact';
+import {forwardRef} from '#preact/compat';
+
 import {useStyles} from './component.jss';
+import {
+  Alignment,
+  Axis,
+  findOverlappingIndex,
+  getPercentageOffsetFromAlignment,
+  scrollContainerToElement,
+} from './dimensions';
+
+import {WithBentoLightboxGallery} from '../../amp-lightbox-gallery/1.0/component';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -62,12 +50,12 @@ function ScrollerWithRef(
     lightboxGroup,
     loop,
     mixedLength,
+    onClick,
     restingIndex,
     setRestingIndex,
     snap,
     snapBy = 1,
     visibleCount,
-    ...rest
   },
   ref
 ) {
@@ -195,7 +183,7 @@ function ScrollerWithRef(
       return;
     }
     // Use local window.
-    const win = toWin(node.ownerDocument.defaultView);
+    const win = getWin(node);
     if (!win) {
       return undefined;
     }
@@ -207,9 +195,7 @@ function ScrollerWithRef(
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(() => {
     // Use local window if possible.
-    const win = containerRef.current
-      ? toWin(containerRef.current.ownerDocument.defaultView)
-      : window;
+    const win = containerRef.current ? getWin(containerRef.current) : window;
     return debounce(
       win,
       () => {
@@ -268,12 +254,12 @@ function ScrollerWithRef(
   return (
     <div
       ref={containerRef}
+      onClick={onClick}
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${
         axis === Axis.X ? classes.horizontalScroll : classes.verticalScroll
       }`}
       tabindex={0}
-      {...rest}
     >
       {slides}
     </div>
@@ -354,7 +340,7 @@ function renderSlides(
   classes
 ) {
   const {length} = children;
-  const Comp = lightboxGroup ? WithLightbox : 'div';
+  const Comp = lightboxGroup ? WithBentoLightboxGallery : 'div';
   const slides = children.map((child, index) => {
     const key = `slide-${child.key || index}`;
     return (

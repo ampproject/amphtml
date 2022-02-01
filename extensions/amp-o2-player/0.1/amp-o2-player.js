@@ -1,33 +1,17 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {MessageType} from '#core/3p-frame-messaging';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
 
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpO2Player extends AMP.BaseElement {
@@ -137,9 +121,13 @@ class AmpO2Player extends AMP.BaseElement {
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     applyFillContent(iframe);
 
-    listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
-      this.sendConsentData_(source, origin);
-    });
+    listenFor(
+      iframe,
+      MessageType_Enum.SEND_CONSENT_DATA,
+      (data, source, origin) => {
+        this.sendConsentData_(source, origin);
+      }
+    );
 
     this.pauseHelper_.updatePlaying(true);
 
@@ -197,15 +185,11 @@ class AmpO2Player extends AMP.BaseElement {
             };
         }
 
-        this.sendConsentDataToIframe_(
-          source,
-          origin,
-          dict({
-            'sentinel': 'amp',
-            'type': MessageType.CONSENT_DATA,
-            'consentData': consentData,
-          })
-        );
+        this.sendConsentDataToIframe_(source, origin, {
+          'sentinel': 'amp',
+          'type': MessageType_Enum.CONSENT_DATA,
+          'consentData': consentData,
+        });
       }
     );
   }
@@ -245,12 +229,10 @@ class AmpO2Player extends AMP.BaseElement {
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/ postMessage(
-        JSON.stringify(
-          dict({
-            'method': 'pause',
-            'value': this.domain_,
-          })
-        ),
+        JSON.stringify({
+          'method': 'pause',
+          'value': this.domain_,
+        }),
         '*'
       );
     }

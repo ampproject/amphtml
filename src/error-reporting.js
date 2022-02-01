@@ -1,20 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {duplicateErrorIfNecessary} from '#core/error';
 import {
   USER_ERROR_SENTINEL,
@@ -24,16 +8,16 @@ import {
 import * as mode from '#core/mode';
 import {findIndex} from '#core/types/array';
 import {exponentialBackoff} from '#core/types/function/exponential-backoff';
-import {dict} from '#core/types/object';
 
 import {experimentTogglesOrNull, getBinaryType, isCanary} from '#experiments';
 
 import {Services} from '#service';
 
-import {triggerAnalyticsEvent} from './analytics';
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {isLoadErrorMessage} from '#utils/event-helper';
+import {dev, setReportError} from '#utils/log';
+
 import {urls} from './config';
-import {isLoadErrorMessage} from './event-helper';
-import {dev, setReportError} from './log';
 import {getMode} from './mode';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {isProxyOrigin} from './url';
@@ -223,7 +207,10 @@ export function reportError(error, opt_associatedElement) {
       }
     }
     if (element && element.dispatchCustomEventForTesting) {
-      element.dispatchCustomEventForTesting(AmpEvents.ERROR, error.message);
+      element.dispatchCustomEventForTesting(
+        AmpEvents_Enum.ERROR,
+        error.message
+      );
     }
 
     // 'call' to make linter happy. And .call to make compiler happy
@@ -446,7 +433,7 @@ export function maybeReportErrorToViewer(win, data) {
  * @visibleForTesting
  */
 export function errorReportingDataForViewer(errorReportData) {
-  return dict({
+  return {
     'm': errorReportData['m'], // message
     'a': errorReportData['a'], // isUserError
     's': errorReportData['s'], // error stack
@@ -454,7 +441,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
     'pt': errorReportData['pt'], // is pre-throttled
-  });
+  };
 }
 
 /**
@@ -559,7 +546,7 @@ export function getErrorReportData(
   if (IS_SXG) {
     runtime = 'sxg';
     data['sxg'] = '1';
-  } else if (IS_ESM) {
+  } else if (mode.isEsm()) {
     runtime = 'esm';
     data['esm'] = '1';
   } else if (self.context && self.context.location) {
@@ -686,10 +673,10 @@ export function reportErrorToAnalytics(error, win) {
   // Currently this can only be executed in a single-doc mode. Otherwise,
   // it's not clear which ampdoc the event would belong too.
   if (Services.ampdocServiceFor(win).isSingleDoc()) {
-    const vars = dict({
+    const vars = {
       'errorName': error.name,
       'errorMessage': error.message,
-    });
+    };
     triggerAnalyticsEvent(
       getRootElement_(win),
       'user-error',

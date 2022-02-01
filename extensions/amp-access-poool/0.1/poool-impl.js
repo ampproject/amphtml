@@ -1,25 +1,10 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {resetStyles, setStyle, setStyles} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {listenFor} from '../../../src/iframe-helper';
-import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 
@@ -196,23 +181,20 @@ export class PooolVendor {
   renderPoool_() {
     const pooolContainer = this.getContainer_();
     const urlPromise = this.accessSource_.buildUrl(
-      addParamsToUrl(
-        this.iframeUrl_,
-        dict({
-          'bi': this.pooolConfig_['bundleID'],
-          'iid': this.pooolConfig_['itemID'],
-          'ce': this.pooolConfig_['cookiesEnabled'],
-          'd':
-            typeof this.pooolConfig_['debug'] !== 'undefined' &&
-            this.pooolConfig_['debug'] !== null
-              ? this.pooolConfig_['debug']
-              : getMode().development || getMode().localDev,
-          'fw': this.pooolConfig_['forceWidget'],
-          'cs': this.pooolConfig_['customSegment'],
-          'lo': this.pooolConfig_['locale'],
-          'co': this.pooolConfig_['context'],
-        })
-      ),
+      addParamsToUrl(this.iframeUrl_, {
+        'bi': this.pooolConfig_['bundleID'],
+        'iid': this.pooolConfig_['itemID'],
+        'ce': this.pooolConfig_['cookiesEnabled'],
+        'd':
+          typeof this.pooolConfig_['debug'] !== 'undefined' &&
+          this.pooolConfig_['debug'] !== null
+            ? this.pooolConfig_['debug']
+            : getMode().development || getMode().localDev,
+        'fw': this.pooolConfig_['forceWidget'],
+        'cs': this.pooolConfig_['customSegment'],
+        'lo': this.pooolConfig_['locale'],
+        'co': this.pooolConfig_['context'],
+      }),
       false
     );
 

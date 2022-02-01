@@ -1,21 +1,5 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {devAssert} from '#core/assert';
-import {Loading} from '#core/constants/loading-instructions';
+import {Loading_Enum} from '#core/constants/loading-instructions';
 import {rediscoverChildren, removeProp, setProp} from '#core/context';
 import {
   loadAll,
@@ -33,15 +17,18 @@ import {CanPlay, CanRender, LoadingProp} from './contextprops';
 
 const EMPTY = {};
 
-/** @const {WeakMap<Element, {oldDefauls: (!Object|undefined), component: Component}>} */
+/** @const {WeakMap<Element, {oldDefaults: (Object|undefined), component: Component}>} */
 const cache = new WeakMap();
 
+/** @typedef {import('preact').VNode} VNode */
+/** @typedef {import('preact').FunctionComponent} FunctionComponent */
+
 /**
- * @param {!Element} element
+ * @param {Element} element
  * @param {string} name
- * @param {!Object|undefined} defaultProps
- * @param {boolean|undefined} as
- * @return {!PreactDef.VNode|!PreactDef.FunctionalComponent}
+ * @param {Object=} defaultProps
+ * @param {boolean=} as
+ * @return {VNode|FunctionComponent}
  */
 export function createSlot(element, name, defaultProps, as = false) {
   element.setAttribute('slot', name);
@@ -55,8 +42,8 @@ export function createSlot(element, name, defaultProps, as = false) {
   }
 
   /**
-   * @param {!Object|undefined} props
-   * @return {!PreactDef.VNode}
+   * @param {Object=} props
+   * @return {VNode}
    */
   function SlotWithProps(props) {
     return <Slot {...(defaultProps || EMPTY)} name={name} {...props} />;
@@ -69,11 +56,11 @@ export function createSlot(element, name, defaultProps, as = false) {
 /**
  * Slot component.
  *
- * @param {!JsonObject} props
- * @return {!PreactDef.VNode}
+ * @param {JsonObject} props
+ * @return {VNode}
  */
 export function Slot(props) {
-  const ref = useRef(/** @type {?Element} */ (null));
+  const ref = useRef(/** @type {HTMLSlotElement|null} */ (null));
 
   useSlotContext(ref, props);
 
@@ -88,11 +75,11 @@ export function Slot(props) {
 }
 
 /**
- * @param {{current:?}} ref
- * @param {!JsonObject=} opt_props
+ * @param {{current: HTMLSlotElement?}} ref
+ * @param {JsonObject=} opt_props
  */
 export function useSlotContext(ref, opt_props) {
-  const {'loading': loading} = opt_props || EMPTY;
+  const loading = opt_props?.loading;
   const context = useAmpContext();
 
   // Context changes.
@@ -106,13 +93,13 @@ export function useSlotContext(ref, opt_props) {
       slot,
       LoadingProp,
       Slot,
-      /** @type {!./core/constants/loading-instructions.Loading} */ (
+      /** @type {import('#core/constants/loading-instructions').Loading_Enum} */ (
         context.loading
       )
     );
 
     if (!context.playable) {
-      execute(slot, pauseAll);
+      execute(slot, pauseAll, true);
     }
 
     return () => {
@@ -133,26 +120,32 @@ export function useSlotContext(ref, opt_props) {
 
     // Mount children, unless lazy loading requested. If so the element should
     // use `BaseElement.setAsContainer`.
-    if (loading != Loading.LAZY) {
+    if (loading != Loading_Enum.LAZY) {
       // TODO(#31915): switch to `mount`.
-      execute(slot, loadAll);
+      execute(slot, loadAll, true);
     }
 
     return () => {
-      execute(slot, unmountAll);
+      execute(slot, unmountAll, false);
     };
   }, [ref, loading]);
 }
 
 /**
- * @param {!Element} slot
- * @param {function(!AmpElement):void|function(!Array<!AmpElement>):void} action
+ * @param {HTMLSlotElement} slot
+ * @param {function(Element|Element[]):void} action
+ * @param {boolean} schedule
  */
-function execute(slot, action) {
+function execute(slot, action, schedule) {
   const assignedElements = slot.assignedElements
     ? slot.assignedElements()
     : slot;
   if (Array.isArray(assignedElements) && assignedElements.length == 0) {
+    return;
+  }
+
+  if (!schedule) {
+    action(assignedElements);
     return;
   }
 

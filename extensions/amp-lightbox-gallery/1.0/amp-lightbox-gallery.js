@@ -1,32 +1,22 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {elementByTag} from '#core/dom/query';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-lightbox-gallery-1.0.css';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-lightbox-gallery';
@@ -34,7 +24,10 @@ const TAG = 'amp-lightbox-gallery';
 /** @const {string} */
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
-class AmpLightboxGallery extends BaseElement {
+class AmpLightboxGallery extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   constructor(element) {
     super(element);
@@ -53,12 +46,12 @@ class AmpLightboxGallery extends BaseElement {
     this.registerApiAction(
       DEFAULT_ACTION,
       (api, invocation) => this.openAction(api, invocation),
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
     this.registerApiAction(
       'open',
       (api, invocation) => this.openAction(api, invocation),
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
     return super.init();
   }

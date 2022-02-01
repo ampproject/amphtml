@@ -1,23 +1,8 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {loadScript, validateData, writeScript} from '#3p/3p';
+
+import {dev} from '#utils/log';
 
 import {addParamsToUrl, assertHttpsUrl} from '../../src/url';
-import {dev} from '../../src/log';
-import {dict} from '#core/types/object';
-import {loadScript, validateData, writeScript} from '#3p/3p';
 
 const NX_URL_HOST = 'https://call.adadapter.netzathleten-media.de';
 const NX_URL_PATHPREFIX = '/pb/';
@@ -34,7 +19,7 @@ const DEFAULT_NX_SITE = 'none';
  * @param {!Object} data
  */
 export function netletix(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global._netletix_amp = {
     allowed_data: ['nxasync', 'nxv', 'nxsite', 'nxid', 'nxscript'],
     mandatory_data: ['nxkey', 'nxunit', 'nxwidth', 'nxheight'],
@@ -52,14 +37,14 @@ export function netletix(global, data) {
   const url = assertHttpsUrl(
     addParamsToUrl(
       NX_URL_FULL + encodeURIComponent(data.nxkey || DEFAULT_NX_KEY),
-      dict({
+      {
         'unit': data.nxunit || DEFAULT_NX_UNIT,
         'width': data.nxwidth || DEFAULT_NX_WIDTH,
         'height': data.nxheight || DEFAULT_NX_HEIGHT,
         'v': data.nxv || DEFAULT_NX_V,
         'site': data.nxsite || DEFAULT_NX_SITE,
         'ord': Math.round(Math.random() * 100000000),
-      })
+      }
     ),
     data.ampSlotIndex
   );

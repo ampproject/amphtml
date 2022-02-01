@@ -1,35 +1,20 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {iterateCursor} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {setInitialDisplay, setStyle} from '#core/dom/style';
 import {
-  ShadowDomVersion,
+  ShadowDomVersion_Enum,
   getShadowDomSupportedVersion,
   isShadowCssSupported,
 } from '#core/dom/web-components';
 import {toArray} from '#core/types/array';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
 
-import {dev, devAssert} from './log';
 import {installCssTransformer} from './style-installer';
 import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
 
@@ -38,8 +23,6 @@ const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;
 
 /** @const {!RegExp} */
 const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
-
-const SHADOW_CSS_CACHE = '__AMP_SHADOW_CSS';
 
 /**
  * @type {boolean|undefined}
@@ -53,7 +36,7 @@ let shadowDomStreamingSupported;
  * @return {!ShadowRoot}
  */
 export function createShadowRoot(hostElement) {
-  const win = toWin(hostElement.ownerDocument.defaultView);
+  const win = getWin(hostElement);
 
   const existingRoot = hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
   if (existingRoot) {
@@ -63,7 +46,7 @@ export function createShadowRoot(hostElement) {
 
   let shadowRoot;
   const shadowDomSupported = getShadowDomSupportedVersion();
-  if (shadowDomSupported == ShadowDomVersion.V1) {
+  if (shadowDomSupported == ShadowDomVersion_Enum.V1) {
     shadowRoot = hostElement.attachShadow({mode: 'open'});
     if (!shadowRoot.styleSheets) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
@@ -78,7 +61,7 @@ export function createShadowRoot(hostElement) {
         },
       });
     }
-  } else if (shadowDomSupported == ShadowDomVersion.V0) {
+  } else if (shadowDomSupported == ShadowDomVersion_Enum.V0) {
     shadowRoot = hostElement.createShadowRoot();
   } else {
     shadowRoot = createShadowRootPolyfill(hostElement);
@@ -297,43 +280,6 @@ function getStylesheetRules(doc, css) {
       style.parentNode.removeChild(style);
     }
   }
-}
-
-/**
- * @param {!ShadowRoot} shadowRoot
- * @param {string} name
- * @param {string} cssText
- */
-export function installShadowStyle(shadowRoot, name, cssText) {
-  const doc = shadowRoot.ownerDocument;
-  const win = toWin(doc.defaultView);
-  if (
-    shadowRoot.adoptedStyleSheets !== undefined &&
-    win.CSSStyleSheet.prototype.replaceSync !== undefined
-  ) {
-    const cache = win[SHADOW_CSS_CACHE] || (win[SHADOW_CSS_CACHE] = {});
-    let styleSheet = cache[name];
-    if (!styleSheet) {
-      styleSheet = new win.CSSStyleSheet();
-      styleSheet.replaceSync(cssText);
-      cache[name] = styleSheet;
-    }
-    shadowRoot.adoptedStyleSheets =
-      shadowRoot.adoptedStyleSheets.concat(styleSheet);
-  } else {
-    const styleEl = doc.createElement('style');
-    styleEl.setAttribute('data-name', name);
-    styleEl.textContent = cssText;
-    shadowRoot.appendChild(styleEl);
-  }
-}
-
-/**
- * @param {!Window} win
- * @visibleForTesting
- */
-export function resetShadowStyleCacheForTesting(win) {
-  win[SHADOW_CSS_CACHE] = null;
 }
 
 /**

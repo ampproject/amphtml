@@ -1,21 +1,5 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {deserializeMessage, isAmpMessage} from '#core/3p-frame-messaging';
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 import {install as installCustomElements} from '#polyfills/custom-elements';
 
@@ -27,6 +11,8 @@ import {
 } from '#service/core-services';
 import {installExtensionsService} from '#service/extensions-impl';
 
+import {dev} from '#utils/log';
+
 import {FakeLocation} from './fake-dom';
 
 import {cssText as ampDocCss} from '../build/ampdoc.css';
@@ -34,7 +20,6 @@ import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
 import {FormEvents} from '../extensions/amp-form/0.1/form-events';
 import {parseIfNeeded} from '../src/iframe-helper';
-import {dev} from '../src/log';
 
 let iframeCount = 0;
 
@@ -76,13 +61,13 @@ export function createFixtureIframe(
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
-      [AmpEvents.ATTACHED]: 0,
-      [AmpEvents.DOM_UPDATE]: 0,
-      [AmpEvents.ERROR]: 0,
-      [AmpEvents.LOAD_END]: 0,
-      [AmpEvents.LOAD_START]: 0,
-      [AmpEvents.STUBBED]: 0,
-      [AmpEvents.UNLOAD]: 0,
+      [AmpEvents_Enum.ATTACHED]: 0,
+      [AmpEvents_Enum.DOM_UPDATE]: 0,
+      [AmpEvents_Enum.ERROR]: 0,
+      [AmpEvents_Enum.LOAD_END]: 0,
+      [AmpEvents_Enum.LOAD_START]: 0,
+      [AmpEvents_Enum.STUBBED]: 0,
+      [AmpEvents_Enum.UNLOAD]: 0,
       [BindEvents.INITIALIZE]: 0,
       [BindEvents.SET_STATE]: 0,
       [BindEvents.RESCAN_TEMPLATE]: 0,

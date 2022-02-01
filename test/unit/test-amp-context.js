@@ -1,21 +1,6 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {AmpContext} from '#3p/ampcontext';
 
-import {MessageType, serializeMessage} from '#core/3p-frame-messaging';
+import {MessageType_Enum, serializeMessage} from '#core/3p-frame-messaging';
 
 import {Platform} from '#service/platform-impl';
 
@@ -154,9 +139,10 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     });
   });
 
+  // TODO(35898): unskip
   it.configure()
     .skipFirefox()
-    .run('should throw error if metadata missing', () => {
+    .skip('should throw error if metadata missing', () => {
       win.name = generateIncorrectAttributes();
       const platform = new Platform(window);
       expect(() => new AmpContext(win)).to.throw(
@@ -188,7 +174,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send an intersection message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.INTERSECTION,
+      type: MessageType_Enum.INTERSECTION,
       changes: 'changes',
     };
     const messageData = 'amp-' + JSON.stringify(messagePayload);
@@ -229,7 +215,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send a page visibility message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_STATE,
+      type: MessageType_Enum.EMBED_STATE,
       pageHidden: true,
     };
     const messageData = 'amp-' + JSON.stringify(messagePayload);
@@ -286,7 +272,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send a resize success message down
     const messagePayloadSuccess = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_CHANGED,
+      type: MessageType_Enum.EMBED_SIZE_CHANGED,
       id: initialId,
       requestedHeight: 300,
       requestedWidth: 200,
@@ -299,7 +285,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send a resize failure message down
     const messagePayloadFailure = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_DENIED,
+      type: MessageType_Enum.EMBED_SIZE_DENIED,
       id: initialId + 1,
       requestedHeight: 300,
       requestedWidth: 200,
@@ -342,7 +328,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send a resize success message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_CHANGED,
+      type: MessageType_Enum.EMBED_SIZE_CHANGED,
       requestedHeight: 300,
       requestedWidth: 200,
     };
@@ -388,7 +374,7 @@ describes.sandboxed('3p ampcontext.js', {}, (env) => {
     // send a resize denied message down
     const messagePayload = {
       sentinel: '1-291921',
-      type: MessageType.EMBED_SIZE_DENIED,
+      type: MessageType_Enum.EMBED_SIZE_DENIED,
       requestedHeight: 300,
       requestedWidth: 200,
     };

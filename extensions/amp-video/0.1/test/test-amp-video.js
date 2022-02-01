@@ -1,30 +1,19 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {dispatchCustomEvent} from '#core/dom';
 
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+import {installPerformanceService} from '#service/performance-impl';
+import {xhrServiceForTesting} from '#service/xhr-impl';
+
+import {listenOncePromise} from '#utils/event-helper';
+
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
 import {AmpVideo, isCachedByCdn} from '../amp-video';
-import {Services} from '#service';
-import {VideoEvents} from '../../../../src/video-interface';
-import {VisibilityState} from '#core/constants/visibility-state';
-import {dispatchCustomEvent} from '#core/dom';
-import {installPerformanceService} from '#service/performance-impl';
-import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {listenOncePromise} from '../../../../src/event-helper';
-import {toggleExperiment} from '#experiments';
-import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin(
   'amp-video',
@@ -539,24 +528,6 @@ describes.realWin(
       expect(impl.toggleFallback).to.have.been.calledWith(true);
     });
 
-    it('play() should not log promise rejections', async () => {
-      const playPromise = Promise.reject('The play() request was interrupted');
-      const catchSpy = env.sandbox.spy(playPromise, 'catch');
-      await getVideo(
-        {
-          src: 'video.mp4',
-          width: 160,
-          height: 90,
-        },
-        null,
-        function (element, impl) {
-          env.sandbox.stub(impl.video_, 'play').returns(playPromise);
-          impl.play();
-        }
-      );
-      expect(catchSpy.called).to.be.true;
-    });
-
     it('decode error retries the next source', async () => {
       const s0 = doc.createElement('source');
       s0.setAttribute('src', './0.mp4');
@@ -712,17 +683,17 @@ describes.realWin(
       const impl = await v.getImpl(false);
       await Promise.resolve();
       impl.mute();
-      await listenOncePromise(v, VideoEvents.MUTED);
+      await listenOncePromise(v, VideoEvents_Enum.MUTED);
       impl.play();
-      const playPromise = listenOncePromise(v, VideoEvents.PLAY);
-      await listenOncePromise(v, VideoEvents.PLAYING);
+      const playPromise = listenOncePromise(v, VideoEvents_Enum.PLAY);
+      await listenOncePromise(v, VideoEvents_Enum.PLAYING);
       await playPromise;
       impl.pause();
-      await listenOncePromise(v, VideoEvents.PAUSE);
+      await listenOncePromise(v, VideoEvents_Enum.PAUSE);
       impl.unmute();
-      await listenOncePromise(v, VideoEvents.UNMUTED);
+      await listenOncePromise(v, VideoEvents_Enum.UNMUTED);
       // Should not send the unmute event twice if already sent once.
-      const p = listenOncePromise(v, VideoEvents.UNMUTED).then(() => {
+      const p = listenOncePromise(v, VideoEvents_Enum.UNMUTED).then(() => {
         assert.fail('Should not have dispatch unmute message twice');
       });
       v.querySelector('video').dispatchEvent(new Event('volumechange'));
@@ -732,8 +703,8 @@ describes.realWin(
       video.currentTime = video.duration - 0.1;
       impl.play();
       // Make sure pause and end are triggered when video ends.
-      const pEnded = listenOncePromise(v, VideoEvents.ENDED);
-      const pPause = listenOncePromise(v, VideoEvents.PAUSE);
+      const pEnded = listenOncePromise(v, VideoEvents_Enum.ENDED);
+      const pPause = listenOncePromise(v, VideoEvents_Enum.PAUSE);
       return Promise.all([pEnded, pPause]);
     });
 
@@ -834,7 +805,9 @@ describes.realWin(
             ),
             whenFirstVisible: env.sandbox.stub(env.ampdoc, 'whenFirstVisible'),
           };
-          visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
+          visibilityStubs.getVisibilityState.returns(
+            VisibilityState_Enum.PRERENDER
+          );
           const visiblePromise = new Promise((resolve) => {
             makeVisible = resolve;
           });
@@ -1140,7 +1113,9 @@ describes.realWin(
           ),
           whenFirstVisible: env.sandbox.stub(env.ampdoc, 'whenFirstVisible'),
         };
-        visibilityStubs.getVisibilityState.returns(VisibilityState.PRERENDER);
+        visibilityStubs.getVisibilityState.returns(
+          VisibilityState_Enum.PRERENDER
+        );
         visiblePromise = new Promise((resolve) => {
           makeVisible = resolve;
         });

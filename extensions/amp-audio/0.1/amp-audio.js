@@ -1,26 +1,17 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Layout, applyFillContent, isLayoutSizeFixed} from '#core/dom/layout';
+import {
+  Layout_Enum,
+  applyFillContent,
+  isLayoutSizeFixed,
+} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {realChildNodes} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {tryPlay} from '#core/dom/video';
 
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {listen} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {
   EMPTY_METADATA,
   parseFavicon,
@@ -62,7 +53,7 @@ export class AmpAudio extends AMP.BaseElement {
   buildCallback() {
     // If layout="nodisplay" force autoplay to off
     const layout = this.getLayout();
-    if (layout === Layout.NODISPLAY) {
+    if (layout === Layout_Enum.NODISPLAY) {
       this.element.removeAttribute('autoplay');
       this.buildAudioElement();
     }
@@ -121,6 +112,15 @@ export class AmpAudio extends AMP.BaseElement {
 
     // Force controls otherwise there is no player UI.
     audio.controls = true;
+
+    // TODO(https://go.amp.dev/issue/36303): We explicitly set width 100% to workaround
+    // an issue where `<audio>` does not fill the parent container on iOS
+    // (https://go.amp.dev/issue/36292).
+    // This is required since global styles for `.i-amphtml-fill-content` set width to 0 in
+    // order to address a separate bug. Re-assess whether that workaround is needed, and
+    // remove this style if so.
+    setStyle(audio, 'width', '100%');
+
     const src = this.getElementAttribute_('src');
     if (src) {
       assertHttpsUrl(src, this.element);
@@ -164,7 +164,7 @@ export class AmpAudio extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const layout = this.getLayout();
-    if (layout !== Layout.NODISPLAY) {
+    if (layout !== Layout_Enum.NODISPLAY) {
       this.buildAudioElement();
     }
     this.updateMetadata_();
@@ -251,7 +251,7 @@ export class AmpAudio extends AMP.BaseElement {
     if (!this.isInvocationValid_()) {
       return;
     }
-    this.audio_.play();
+    tryPlay(this.audio_);
     this.setPlayingStateForTesting_(true);
   }
 
@@ -269,7 +269,7 @@ export class AmpAudio extends AMP.BaseElement {
   /** @private */
   audioPlaying_() {
     const playHandler = () => {
-      this.audio_.play();
+      tryPlay(this.audio_);
       this.setPlayingStateForTesting_(true);
     };
     const pauseHandler = () => {

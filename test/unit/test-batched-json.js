@@ -1,23 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Services} from '#service';
 
-import {UrlReplacementPolicy, batchFetchJsonFor} from '../../src/batched-json';
-import {user} from '../../src/log';
+import {user} from '#utils/log';
+
+import {
+  UrlReplacementPolicy_Enum,
+  batchFetchJsonFor,
+} from '../../src/batched-json';
 
 describes.sandboxed('batchFetchJsonFor', {}, (env) => {
   // Fakes.
@@ -86,7 +74,7 @@ describes.sandboxed('batchFetchJsonFor', {}, (env) => {
           .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
         urlReplacements.collectDisallowedVarsSync.withArgs(el).returns(['BAR']);
 
-        const optIn = UrlReplacementPolicy.OPT_IN;
+        const optIn = UrlReplacementPolicy_Enum.OPT_IN;
         const rejectError =
           /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
         return batchFetchJsonFor(ampdoc, el, {
@@ -103,7 +91,7 @@ describes.sandboxed('batchFetchJsonFor', {}, (env) => {
         .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
 
       const userError = env.sandbox.stub(user(), 'error');
-      const all = UrlReplacementPolicy.ALL;
+      const all = UrlReplacementPolicy_Enum.ALL;
       return batchFetchJsonFor(ampdoc, el, {urlReplacement: all}).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
         expect(urlReplacements.collectDisallowedVarsSync).to.not.be.called;

@@ -26,18 +26,18 @@
  * </code>
  */
 
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {removeElement} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {px, setStyle, toggle} from '#core/dom/style';
 import {isObject} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {getData, listen} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+
 import {CSS} from '../../../build/amp-onetap-google-0.1.css';
-import {getData, listen} from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
 import {assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */
@@ -73,7 +73,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /** @override */
@@ -121,11 +121,11 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         }
         this.postMessage_(
           event.source,
-          dict({
+          {
             'sentinel': SENTINEL,
             'command': 'parent_frame_ready',
             'nonce': nonce,
-          }),
+          },
           event.origin
         );
         break;
@@ -207,7 +207,7 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
       /* source */ null,
       /* caller */ null,
       /* event */ null,
-      ActionTrust.DEFAULT
+      ActionTrust_Enum.DEFAULT
     );
     return true;
   }

@@ -1,25 +1,11 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+import {hasOwn} from '#core/types/object';
+
+import {devAssert, user} from '#utils/log';
 
 import {DEFAULT_SCORE_CONFIG, SubscriptionsScoreFactor} from './constants';
-import {Deferred} from '#core/data-structures/promise';
 import {Entitlement} from './entitlement';
-import {Observable} from '#core/data-structures/observable';
-import {devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '#core/types/object';
 
 /** @typedef {{platformKey: string, entitlement: (!./entitlement.Entitlement|undefined)}} */
 export let EntitlementChangeEventDef;
@@ -47,7 +33,7 @@ export class PlatformStore {
    */
   constructor(platformKeys, scoreConfig, fallbackEntitlement, opt_Platforms) {
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
-    this.subscriptionPlatforms_ = opt_Platforms || dict();
+    this.subscriptionPlatforms_ = opt_Platforms || {};
 
     /** @private @const {!Array<string>} */
     this.platformKeys_ = platformKeys;
@@ -283,10 +269,10 @@ export class PlatformStore {
    * }
    */
   getScoreFactorStates() {
-    const states = dict({});
+    const states = {};
     return Promise.all(
       this.platformKeys_.map((platformId) => {
-        states[platformId] = dict();
+        states[platformId] = {};
         return Promise.all(
           Object.values(SubscriptionsScoreFactor).map((scoreFactor) =>
             this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(

@@ -1,51 +1,38 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {isIframed} from '#core/dom';
+import {LayoutPriority_Enum} from '#core/dom/layout';
+import {rethrowAsync} from '#core/error';
+import {isArray, isEnumValue} from '#core/types';
+import {hasOwn} from '#core/types/object';
+import {expandTemplate} from '#core/types/string';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user} from '#utils/log';
 
 import {Activity} from './activity-impl';
 import {AnalyticsConfig, mergeObjects} from './config';
-import {AnalyticsEventType} from './events';
-import {ChunkPriority, chunk} from '../../../src/chunk';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '#core/data-structures/promise';
+import {AnalyticsEventType} from './events';
+import {
+  InstrumentationService,
+  instrumentationServicePromiseForDoc,
+} from './instrumentation';
+import {LinkerManager} from './linker-manager';
+import {installLinkerReaderService} from './linker-reader';
+import {RequestHandler, expandPostMessage} from './requests';
+import {SessionManager, sessionServicePromiseForDoc} from './session-manager';
+import {Transport} from './transport';
 import {
   ExpansionOptions,
   VariableService,
   stringToBool,
   variableServicePromiseForDoc,
 } from './variables';
-import {
-  InstrumentationService,
-  instrumentationServicePromiseForDoc,
-} from './instrumentation';
-import {LayoutPriority} from '#core/dom/layout';
-import {LinkerManager} from './linker-manager';
-import {RequestHandler, expandPostMessage} from './requests';
-import {Services} from '#service';
-import {SessionManager, sessionServicePromiseForDoc} from './session-manager';
-import {Transport} from './transport';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict, hasOwn} from '#core/types/object';
-import {expandTemplate} from '#core/types/string';
-import {getMode} from '../../../src/mode';
-import {installLinkerReaderService} from './linker-reader';
-import {isArray, isEnumValue} from '#core/types';
-import {rethrowAsync} from '#core/error';
 
-import {isIframed} from '#core/dom';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {isInFie} from '../../../src/iframe-helper';
+import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-analytics';
 
@@ -82,7 +69,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     /**
      * @private {!JsonObject}
      */
-    this.config_ = dict();
+    this.config_ = {};
 
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
@@ -121,7 +108,9 @@ export class AmpAnalytics extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return this.isInabox_ ? LayoutPriority.CONTENT : LayoutPriority.METADATA;
+    return this.isInabox_
+      ? LayoutPriority_Enum.CONTENT
+      : LayoutPriority_Enum.METADATA;
   }
 
   /** @override */
@@ -241,7 +230,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           // Chunk in inabox ad leads to activeview regression, handle seperately
           loadConfigTask();
         } else {
-          chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
+          chunk(this.element, loadConfigTask, ChunkPriority_Enum.HIGH);
         }
         return loadConfigDeferred.promise;
       })
@@ -344,7 +333,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (hasOwn(this.config_['triggers'], k)) {
         const trigger = this.config_['triggers'][k];
         const expansionOptions = this.expansionOptions_(
-          dict({}),
+          {},
           trigger,
           undefined /* opt_iterations */,
           true /* opt_noEncode */
@@ -616,7 +605,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       // Chunk in inabox ad leads to activeview regression, handle seperately
       linkerTask();
     } else {
-      chunk(this.element, linkerTask, ChunkPriority.LOW);
+      chunk(this.element, linkerTask, ChunkPriority_Enum.LOW);
     }
   }
 
@@ -747,7 +736,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (threshold >= 0 && threshold <= 100) {
       const sampleDeferred = new Deferred();
       const sampleInTask = () => {
-        const expansionOptions = this.expansionOptions_(dict({}), trigger);
+        const expansionOptions = this.expansionOptions_({}, trigger);
         const samplePromise = this.expandTemplateWithUrlParams_(
           sampleOn,
           expansionOptions
@@ -760,7 +749,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         // Chunk in inabox ad leads to activeview regression, handle seperately
         sampleInTask();
       } else {
-        chunk(this.element, sampleInTask, ChunkPriority.LOW);
+        chunk(this.element, sampleInTask, ChunkPriority_Enum.LOW);
       }
       return sampleDeferred.promise;
     }
@@ -858,7 +847,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!ExpansionOptions}
    */
   expansionOptions_(source1, source2, opt_iterations, opt_noEncode) {
-    const vars = dict();
+    const vars = {};
     mergeObjects(this.config_['vars'], vars);
     mergeObjects(source2['vars'], vars);
     mergeObjects(source1['vars'], vars);

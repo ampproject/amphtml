@@ -1,23 +1,6 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {dict} from '#core/types/object';
-
 import {postMessageWhenAvailable} from '../../src/iframe-video';
 import {addParamsToUrl} from '../../src/url';
-import {VideoEvents} from '../../src/video-interface';
+import {VideoEvents_Enum} from '../../src/video-interface';
 
 /**
  * @fileoverview
@@ -40,9 +23,9 @@ export const getVimeoOriginRegExp = () =>
  * @const {!Object<string, ?string>}
  */
 export const VIMEO_EVENTS = {
-  'play': VideoEvents.PLAYING,
-  'pause': VideoEvents.PAUSE,
-  'ended': VideoEvents.ENDED,
+  'play': VideoEvents_Enum.PLAYING,
+  'pause': VideoEvents_Enum.PAUSE,
+  'ended': VideoEvents_Enum.ENDED,
   'volumechange': null,
 };
 
@@ -55,10 +38,10 @@ export const VIMEO_EVENTS = {
 export function getVimeoIframeSrc(videoid, autoplay, doNotTrack) {
   return addParamsToUrl(
     `https://player.vimeo.com/video/${encodeURIComponent(videoid)}`,
-    dict({
+    {
       'dnt': doNotTrack ? '1' : undefined,
       'muted': autoplay ? '1' : undefined,
-    })
+    }
   );
 }
 
@@ -68,12 +51,10 @@ export function getVimeoIframeSrc(videoid, autoplay, doNotTrack) {
  * @return {string}
  */
 export function makeVimeoMessage(method, params = '') {
-  return JSON.stringify(
-    dict({
-      'method': method,
-      'value': params,
-    })
-  );
+  return JSON.stringify({
+    'method': method,
+    'value': params,
+  });
 }
 
 /**

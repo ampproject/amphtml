@@ -1,29 +1,14 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {Deferred} from '#core/data-structures/promise';
 import {hasNextNodeInDocumentOrder} from '#core/dom';
 
 import {Services} from '#service';
-import {Resource, ResourceState} from '#service/resource';
+import {Resource, ResourceState_Enum} from '#service/resource';
 import {READY_SCAN_SIGNAL} from '#service/resources-interface';
 
-import {dev} from '../log';
+import {dev} from '#utils/log';
+
 import {getMode} from '../mode';
 import {Pass} from '../pass';
 import {registerServiceBuilderForDoc} from '../service-helpers';
@@ -72,10 +57,10 @@ export class InaboxResources {
     if (getMode(this.win).runtime != 'inabox') {
       ampdoc.onVisibilityChanged(() => {
         switch (ampdoc.getVisibilityState()) {
-          case VisibilityState.PAUSED:
+          case VisibilityState_Enum.PAUSED:
             this.resources_.forEach((r) => r.pause());
             break;
-          case VisibilityState.VISIBLE:
+          case VisibilityState_Enum.VISIBLE:
             this.resources_.forEach((r) => r.resume());
             this./*OK*/ schedulePass();
             break;
@@ -220,7 +205,7 @@ export class InaboxResources {
     this.resources_.forEach((resource) => {
       if (
         !resource.element.R1() &&
-        resource.getState() === ResourceState.READY_FOR_LAYOUT &&
+        resource.getState() === ResourceState_Enum.READY_FOR_LAYOUT &&
         resource.isDisplayed()
       ) {
         resource.layoutScheduled(now);

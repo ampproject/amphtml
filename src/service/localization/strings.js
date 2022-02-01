@@ -1,18 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {parseJson} from '#core/types/object/json';
 
 /**
@@ -24,18 +9,15 @@ import {parseJson} from '#core/types/object/json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 98
+ * Next ID: 103
  *
  * @const @enum {string}
  */
-export const LocalizedStringId = {
+export const LocalizedStringId_Enum = {
   // amp-story
   AMP_STORY_ACTIVATE_BUTTON_TEXT: '83',
   AMP_STORY_AUDIO_MUTE_BUTTON_LABEL: '66',
-  AMP_STORY_AUDIO_MUTE_BUTTON_TEXT: '31',
   AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL: '67',
-  AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT: '33',
-  AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT: '32',
   AMP_STORY_CLOSE_BUTTON_LABEL: '87',
   AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL: '22',
   AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL: '23',
@@ -51,6 +33,8 @@ export const LocalizedStringId = {
   AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS: '76',
   AMP_STORY_EDUCATION_NAVIGATION_TAP_DISMISS: '77',
   AMP_STORY_HAS_NEW_PAGE_TEXT: '64',
+  AMP_STORY_FORM_SUBMIT_ERROR: '98',
+  AMP_STORY_FORM_SUBMIT_SUCCESS: '99',
   AMP_STORY_HINT_UI_NEXT_LABEL: '2',
   AMP_STORY_HINT_UI_PREVIOUS_LABEL: '3',
   AMP_STORY_INFO_BUTTON_LABEL: '68',
@@ -58,7 +42,6 @@ export const LocalizedStringId = {
   AMP_STORY_NEXT_STORY: '90',
   AMP_STORY_OPEN_OUTLINK_TEXT: '97',
   AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL: '35',
-  AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL: '82',
   AMP_STORY_PAGE_ERROR_VIDEO: '65',
   AMP_STORY_PAGE_PLAY_VIDEO: '34',
   AMP_STORY_PAUSE_BUTTON_LABEL: '85',
@@ -68,27 +51,17 @@ export const LocalizedStringId = {
   AMP_STORY_SHARE_BUTTON_LABEL: '69',
   AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: '4',
   AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT: '5',
-  AMP_STORY_SHARING_PAGE_LABEL: '62',
   AMP_STORY_SHARING_PROVIDER_NAME_EMAIL: '6',
   AMP_STORY_SHARING_PROVIDER_NAME_FACEBOOK: '7',
-  AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: '8',
   AMP_STORY_SHARING_PROVIDER_NAME_LINE: '63',
   AMP_STORY_SHARING_PROVIDER_NAME_LINK: '9',
   AMP_STORY_SHARING_PROVIDER_NAME_LINKEDIN: '10',
   AMP_STORY_SHARING_PROVIDER_NAME_PINTEREST: '11',
   AMP_STORY_SHARING_PROVIDER_NAME_SMS: '12',
-  AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM: '13',
   AMP_STORY_SHARING_PROVIDER_NAME_TUMBLR: '14',
   AMP_STORY_SHARING_PROVIDER_NAME_TWITTER: '15',
   AMP_STORY_SHARING_PROVIDER_NAME_WHATSAPP: '16',
-  AMP_STORY_SIDEBAR_BUTTON_LABEL: '70',
   AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL: '88',
-  AMP_STORY_TOOLTIP_EXPAND_TWEET: '36',
-  AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT: '37',
-  AMP_STORY_WARNING_DESKTOP_SIZE_TEXT: '18',
-  AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT: '38',
-  AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT: '19',
-  AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT: '20',
   AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT: '21',
 
   // amp-story-auto-ads
@@ -124,10 +97,29 @@ export const LocalizedStringId = {
   AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C: '73',
   AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D: '74',
 
+  // amp-story-shopping
+  AMP_STORY_SHOPPING_CTA_LABEL: '101',
+  AMP_STORY_SHOPPING_PLP_HEADER: '102',
+
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLE_BUTTON_LABEL: '0',
   // DEPRECATED_AMP_STORY_EXPERIMENT_ENABLED_TEXT: '1',
   // DEPRECATED_AMP_STORY_CONSENT_DISMISS_DIALOG_BUTTON_LABEL: '24',
   // DEPRECATED_AMP_STORY_SYSTEM_LAYER_SHARE_WIDGET_LABEL: '17',
+  // DEPRECATED_AMP_STORY_SHARING_PROVIDER_NAME_GOOGLE_PLUS: '8',
+  // DEPRECATED_AMP_STORY_AUDIO_MUTE_BUTTON_TEXT: '31',
+  // DEPRECATED_AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT: '32',
+  // DEPRECATED_AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT: '33',
+  // DEPRECATED_AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL: '82',
+  // DEPRECATED_AMP_STORY_READ_MORE: '100',
+  // DEPRECATED_AMP_STORY_SHARING_PAGE_LABEL: '62',
+  // DEPRECATED_AMP_STORY_SHARING_PROVIDER_NAME_SYSTEM: '13',
+  // DEPRECATED_AMP_STORY_TOOLTIP_EXPAND_TWEET: '36',
+  // DEPRECATED_AMP_STORY_WARNING_DESKTOP_HEIGHT_SIZE_TEXT: '37',
+  // DEPRECATED_AMP_STORY_WARNING_DESKTOP_SIZE_TEXT: '18',
+  // DEPRECATED_AMP_STORY_WARNING_DESKTOP_WIDTH_SIZE_TEXT: '38',
+  // DEPRECATED_AMP_STORY_WARNING_EXPERIMENT_DISABLED_TEXT: '19',
+  // DEPRECATED_AMP_STORY_WARNING_LANDSCAPE_ORIENTATION_TEXT: '20',
+  // DEPRECATED_AMP_STORY_SIDEBAR_BUTTON_LABEL: '70',
 };
 
 /**
@@ -139,7 +131,7 @@ export const LocalizedStringId = {
 export let LocalizedStringDef;
 
 /**
- * @typedef {!Object<!LocalizedStringId, !LocalizedStringDef>}
+ * @typedef {!Object<!LocalizedStringId_Enum, !LocalizedStringDef>}
  */
 export let LocalizedStringBundleDef;
 
@@ -172,14 +164,14 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
   );
 
   Object.keys(pseudoLocaleStringBundle).forEach((localizedStringIdAsStr) => {
-    const localizedStringId = /** @type {!LocalizedStringId} */ (
+    const localizedStringId = /** @type {!LocalizedStringId_Enum} */ (
       localizedStringIdAsStr
     );
-    pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
-      localizedStringBundle[localizedStringId].string
-    );
-    pseudoLocaleStringBundle[localizedStringId].fallback = localizationFn(
-      localizedStringBundle[localizedStringId].fallback
+    const entry = localizedStringBundle[localizedStringId];
+    // In unminified builds, this is an object {"string": "foo", ...}.
+    // In minified builds, this is the actual string "foo".
+    pseudoLocaleStringBundle[localizedStringId] = localizationFn(
+      entry['string'] || entry
     );
   });
 

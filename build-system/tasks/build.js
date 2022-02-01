@@ -1,22 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
+  compileBentoRuntime,
   compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
@@ -25,6 +10,7 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
+const {buildBentoComponents} = require('./build-bento');
 const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
@@ -52,6 +38,7 @@ async function build() {
   process.env.NODE_ENV = 'development';
   const options = {
     fortesting: argv.fortesting,
+    localDev: true,
     minify: false,
     watch: argv.watch,
   };
@@ -61,12 +48,15 @@ async function build() {
   await runPreBuildSteps(options);
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
+  } else if (argv.bento_runtime_only) {
+    await compileBentoRuntime(options);
   } else {
     await compileAllJs(options);
   }
-  await buildExtensions(options);
+  await Promise.all([buildExtensions(options), buildBentoComponents(options)]);
 
-  if (!argv.core_runtime_only) {
+  // This step is to be run only during a full `amp build`.
+  if (!argv.core_runtime_only && !argv.bento_runtime_only) {
     await buildVendorConfigs(options);
   }
   if (!argv.watch) {
@@ -79,7 +69,7 @@ module.exports = {
   runPreBuildSteps,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 build.description = 'Build the AMP library';
 build.flags = {
@@ -89,6 +79,7 @@ build.flags = {
   extensions_from: 'Build only the extensions from the listed AMP(s)',
   noextensions: 'Build with no extensions',
   core_runtime_only: 'Build only the core runtime',
+  bento_runtime_only: 'Build only the standalone Bento runtime',
   coverage: 'Add code coverage instrumentation to JS files using istanbul',
   version_override: 'Override the version written to AMP_CONFIG',
   watch: 'Watch for changes in files, re-builds when detected',

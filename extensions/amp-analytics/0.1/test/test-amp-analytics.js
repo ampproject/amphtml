@@ -1,39 +1,30 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpAnalytics} from '../amp-analytics';
-import {AnalyticsConfig} from '../config';
-import {ClickEventTracker, VisibilityTracker} from '../events';
-import {ImagePixelVerifier, mockWindowInterface} from '#testing/test-helper';
-import {LayoutPriority} from '#core/dom/layout';
-import {LinkerManager} from '../linker-manager';
-import {Services} from '#service';
-import {SessionManager} from '../session-manager';
-import {Transport} from '../transport';
-import {cidServiceForDocForTesting} from '#service/cid-impl';
 import {expect} from 'chai';
+
+import {LayoutPriority_Enum} from '#core/dom/layout';
+
+import {Services} from '#service';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installCryptoService} from '#service/crypto-impl';
+
+import {macroTask} from '#testing/helpers';
+import {
+  ImagePixelVerifier,
+  mockWindowInterface,
+} from '#testing/helpers/service';
+
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service-helpers';
-import {installCryptoService} from '#service/crypto-impl';
 import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
+import {AmpAnalytics} from '../amp-analytics';
+import {AnalyticsConfig} from '../config';
+import {ClickEventTracker, VisibilityTracker} from '../events';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {macroTask} from '#testing/yield';
+import {LinkerManager} from '../linker-manager';
+import {SessionManager} from '../session-manager';
+import {Transport} from '../transport';
 
 describes.realWin(
   'amp-analytics',
@@ -2108,14 +2099,14 @@ describes.realWin(
 
       it('is 1 for non-inabox', () => {
         expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
-          LayoutPriority.METADATA
+          LayoutPriority_Enum.METADATA
         );
       });
 
       it('is 0 for inabox', () => {
         env.win.__AMP_MODE.runtime = 'inabox';
         expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
-          LayoutPriority.CONTENT
+          LayoutPriority_Enum.CONTENT
         );
       });
     });

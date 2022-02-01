@@ -1,22 +1,24 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {
+  dispatchCustomEvent,
+  isRTL,
+  iterateCursor,
+  toggleAttribute,
+} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
 
-import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
-import {ActionTrust} from '#core/constants/action-constants';
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {createCustomEvent, getDetail} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-stream-gallery-0.1.css';
+import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
@@ -24,21 +26,6 @@ import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
 } from '../../amp-base-carousel/0.1/responsive-attributes';
-import {Services} from '#service';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {
-  dispatchCustomEvent,
-  isRTL,
-  iterateCursor,
-  toggleAttribute,
-} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {isExperimentOn} from '#experiments';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {setStyle} from '#core/dom/style';
-import {toArray} from '#core/types/array';
 
 /** @enum {number} */
 const InsetArrowVisibility = {
@@ -48,11 +35,11 @@ const InsetArrowVisibility = {
 };
 
 /** Maps attribute values to enum values. */
-const insetArrowVisibilityMapping = dict({
+const insetArrowVisibilityMapping = {
   'never': InsetArrowVisibility.NEVER,
   'auto': InsetArrowVisibility.AUTO,
   'always': InsetArrowVisibility.ALWAYS,
-});
+};
 
 /**
  * @param {!Element} el The Element to check.
@@ -211,7 +198,7 @@ class AmpStreamGallery extends AMP.BaseElement {
         const {trust} = invocation;
         this.carousel_.prev(this.getActionSource_(trust));
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'next',
@@ -219,7 +206,7 @@ class AmpStreamGallery extends AMP.BaseElement {
         const {trust} = invocation;
         this.carousel_.next(this.getActionSource_(trust));
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'goToSlide',
@@ -229,7 +216,7 @@ class AmpStreamGallery extends AMP.BaseElement {
           actionSource: this.getActionSource_(trust),
         });
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
@@ -450,13 +437,13 @@ class AmpStreamGallery extends AMP.BaseElement {
   }
 
   /**
-   * Gets the ActionSource to use for a given ActionTrust.
-   * @param {!ActionTrust} trust
+   * Gets the ActionSource to use for a given ActionTrust_Enum.
+   * @param {!ActionTrust_Enum} trust
    * @return {!ActionSource}
    * @private
    */
   getActionSource_(trust) {
-    return trust == ActionTrust.HIGH
+    return trust == ActionTrust_Enum.HIGH
       ? ActionSource.GENERIC_HIGH_TRUST
       : ActionSource.GENERIC_LOW_TRUST;
   }
@@ -765,10 +752,10 @@ class AmpStreamGallery extends AMP.BaseElement {
       return;
     }
 
-    const data = dict({'index': index});
+    const data = {'index': index};
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+    const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;
 
     const action = createCustomEvent(this.win, `streamGallery.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);

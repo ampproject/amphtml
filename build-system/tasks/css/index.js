@@ -1,23 +1,8 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const debounce = require('../../common/debounce');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
 const path = require('path');
+const {buildBentoComponents} = require('../build-bento');
 const {buildExtensions} = require('../extension-helpers');
 const {endBuildStep, watchDebounceDelay} = require('../helpers');
 const {jsifyCssAsync} = require('./jsify-css');
@@ -93,7 +78,7 @@ async function copyCss() {
   for (const {outCss} of cssEntryPoints) {
     await fs.copy(`build/css/${outCss}`, `dist/${outCss}`);
   }
-  const cssFiles = globby.sync('build/css/amp-*.css');
+  const cssFiles = await fastGlob('build/css/*.css');
   await Promise.all(
     cssFiles.map((cssFile) => {
       return fs.copy(cssFile, `dist/v0/${path.basename(cssFile)}`);
@@ -153,7 +138,11 @@ async function compileCss(options = {}) {
   for (const {append, outCss, outJs, path} of cssEntryPoints) {
     await writeCssEntryPoint(path, outJs, outCss, append);
   }
-  await buildExtensions({compileOnlyCss: true});
+  const buildOptions = {compileOnlyCss: true};
+  await Promise.all([
+    buildExtensions(buildOptions),
+    buildBentoComponents(buildOptions),
+  ]);
   endBuildStep('Recompiled all CSS files into', 'build/', startTime);
 }
 

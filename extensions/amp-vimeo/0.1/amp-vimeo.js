@@ -1,18 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {isAutoplaySupported} from '#core/dom/video';
@@ -22,7 +7,9 @@ import {once} from '#core/types/function';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {
   createFrameFor,
   isJsonOrObj,
@@ -32,8 +19,10 @@ import {
   postMessageWhenAvailable,
   redispatch,
 } from '../../../src/iframe-video';
-import {userAssert} from '../../../src/log';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
+} from '../../../src/video-interface';
 import {
   VIMEO_EVENTS,
   getVimeoIframeSrc,
@@ -153,7 +142,7 @@ class AmpVimeo extends AMP.BaseElement {
    * @private
    */
   isAutoplay_() {
-    if (!this.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+    if (!this.element.hasAttribute(VideoAttributes_Enum.AUTOPLAY)) {
       return Promise.resolve(false);
     }
     return isAutoplaySupported(this.win);
@@ -167,7 +156,7 @@ class AmpVimeo extends AMP.BaseElement {
 
     Services.videoManagerForDoc(element).register(this);
 
-    dispatchCustomEvent(element, VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
   }
 
   /**

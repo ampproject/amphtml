@@ -1,21 +1,6 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
+import {propName} from '#preact/utils';
 
 const CONTAIN = [
   null, // 0: none
@@ -46,7 +31,7 @@ const SIZE_CONTENT_STYLE = {
  * - layout: nothing outside the element may affect its internal layout and
  * vice versa.
  * - paint: the element's content doesn't display outside the element's bounds.
- * @param {!ContainWrapperComponentProps} props
+ * @param {ContainWrapperComponentProps} props
  * @param {{current: ?Element}} ref
  * @return {PreactDef.Renderable}
  */
@@ -54,7 +39,6 @@ function ContainWrapperWithRef(
   {
     as: Comp = 'div',
     children,
-    'className': className,
     contentAs: ContentComp = 'div',
     contentClassName,
     contentProps,
@@ -66,6 +50,7 @@ function ContainWrapperWithRef(
     'style': style,
     wrapperClassName,
     wrapperStyle,
+    [propName('class')]: className,
     ...rest
   },
   ref
@@ -76,7 +61,7 @@ function ContainWrapperWithRef(
     <Comp
       {...rest}
       ref={ref}
-      className={`${className || ''} ${wrapperClassName || ''}`.trim() || null}
+      class={`${className || ''} ${wrapperClassName || ''}`.trim() || null}
       style={{
         ...style,
         ...wrapperStyle,
@@ -86,7 +71,7 @@ function ContainWrapperWithRef(
       <ContentComp
         {...contentProps}
         ref={contentRef}
-        className={contentClassName}
+        class={contentClassName}
         style={{
           ...(size && SIZE_CONTENT_STYLE),
           'overflow': paint ? 'hidden' : 'visible',

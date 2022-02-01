@@ -1,26 +1,11 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Deferred, tryResolve} from '#core/data-structures/promise';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {getHistoryState} from '#core/window/history';
 
 import {Services} from '#service';
 
-import {dev, devAssert} from '../log';
+import {dev, devAssert} from '#utils/log';
+
 import {getMode} from '../mode';
 import {
   getService,
@@ -962,16 +947,14 @@ export class HistoryBindingVirtual_ {
     if (stackIndex > this.stackIndex_) {
       return this.get();
     }
-    const message = dict({'stackIndex': this.stackIndex_});
+    const message = {'stackIndex': this.stackIndex_};
     const pop = 'popHistory';
     return this.viewer_
       .sendMessageAwaitResponse(pop, message)
       .then((response) => {
-        const fallbackState = /** @type {!HistoryStateDef} */ (
-          dict({
-            'stackIndex': this.stackIndex_ - 1,
-          })
-        );
+        const fallbackState = /** @type {!HistoryStateDef} */ ({
+          'stackIndex': this.stackIndex_ - 1,
+        });
         const newState = this.toHistoryState_(response, fallbackState, pop);
         this.updateHistoryState_(newState);
         return newState;
@@ -991,11 +974,9 @@ export class HistoryBindingVirtual_ {
       if (!this.viewer_.hasCapability('fullReplaceHistory')) {
         // Full URL replacement requested, but not supported by the viewer.
         // Don't update, and return the current state.
-        const curState = /** @type {!HistoryStateDef} */ (
-          dict({
-            'stackIndex': this.stackIndex_,
-          })
-        );
+        const curState = /** @type {!HistoryStateDef} */ ({
+          'stackIndex': this.stackIndex_,
+        });
         return Promise.resolve(curState);
       }
 
@@ -1113,12 +1094,10 @@ export class HistoryBindingVirtual_ {
     if (!this.viewer_.hasCapability('fragment')) {
       return Promise.resolve();
     }
-    return /** @type {!Promise} */ (
-      this.viewer_.sendMessageAwaitResponse(
-        'replaceHistory',
-        dict({'fragment': fragment}),
-        /* cancelUnsent */ true
-      )
+    return /** @type {!Promise} */ this.viewer_.sendMessageAwaitResponse(
+      'replaceHistory',
+      {'fragment': fragment},
+      /* cancelUnsent */ true
     );
   }
 }

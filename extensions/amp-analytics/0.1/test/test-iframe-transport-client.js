@@ -1,24 +1,10 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   IframeTransportClient,
   IframeTransportContext,
 } from '#3p/iframe-transport-client';
-import {MessageType} from '#core/3p-frame-messaging';
+
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
@@ -56,7 +42,8 @@ describes.sandboxed('iframe-transport-client', {}, (env) => {
     window./*OK*/ postMessage(payload, '*');
   }
 
-  it('fails to create iframeTransportClient if no window.name ', () => {
+  // TODO:(35898): unskip
+  it.skip('fails to create iframeTransportClient if no window.name ', () => {
     const oldWindowName = window.name;
     expect(() => {
       window.name = '';
@@ -102,7 +89,7 @@ describes.sandboxed('iframe-transport-client', {}, (env) => {
       expect(event).to.equal('hello, world!');
     };
     send(
-      MessageType.IFRAME_TRANSPORT_EVENTS,
+      MessageType_Enum.IFRAME_TRANSPORT_EVENTS,
       /** @type {!JsonObject} */ ({
         events: [{creativeId: '101', message: 'hello, world!'}],
       })
@@ -190,7 +177,7 @@ describes.sandboxed('iframe-transport-client', {}, (env) => {
     );
     const response = {foo: 'bar', answer: '42'};
     env.sandbox.stub(imc, 'sendMessage').callsFake((type, opt_payload) => {
-      expect(type).to.equal(MessageType.IFRAME_TRANSPORT_RESPONSE);
+      expect(type).to.equal(MessageType_Enum.IFRAME_TRANSPORT_RESPONSE);
       expect(opt_payload).to.not.be.null;
       expect(opt_payload.creativeId).to.equal('my_creative');
       expect(opt_payload.vendor).to.equal('my_vendor');

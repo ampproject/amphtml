@@ -1,20 +1,4 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {useLayoutEffect} from '#preact';
+import {useCallback, useLayoutEffect} from '#preact';
 
 import {useAmpContext} from './context';
 
@@ -29,4 +13,64 @@ export function useResourcesNotify() {
       notify();
     }
   });
+}
+
+/**
+ * @param {import('preact').Ref<T>} ref
+ * @param {T} value
+ * @template T
+ */
+function setRef(ref, value) {
+  if (typeof ref === 'function') {
+    ref(value);
+  } else if (ref) {
+    ref.current = value;
+  }
+}
+
+/**
+ * Combines refs to pass into `ref` prop.
+ * @param {import('preact').Ref<T>[]} refs
+ * @return {function(T):void}
+ * @template T
+ */
+export function useMergeRefs(refs) {
+  return useCallback(
+    (element) => {
+      for (let i = 0; i < refs.length; i++) {
+        setRef(refs[i], element);
+      }
+    },
+    // refs is an array, but ESLint cannot statically verify it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    refs
+  );
+}
+
+/**
+ * Required to use `props` whose name would be usually be mapped in
+ * Preact-to-React style.
+ * This passes through the value during development, because we render on Preact.
+ * It's an annotation so that we can convert these values when we transform the
+ * React build.
+ * @param {string} name
+ * @return {string}
+ */
+export function propName(name) {
+  return name;
+}
+
+/**
+ * Required to consume `tabindex` from props.
+ * We support taking both `tabIndex` and `tabindex` for backwards compatibility,
+ * so this takes either form.
+ * @param {{tabindex: string|number, tabIndex: string|number}} props
+ * @param {number=} fallback
+ * @return {string|number}
+ */
+export function tabindexFromProps(props, fallback = 0) {
+  // This tabindex property access is okay. Tabindex property access elsewhere
+  //  must use this function.
+  // eslint-disable-next-line local/preact-preferred-props
+  return props.tabindex ?? props.tabIndex ?? fallback;
 }

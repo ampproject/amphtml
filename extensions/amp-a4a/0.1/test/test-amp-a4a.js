@@ -1,19 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
@@ -25,7 +9,7 @@ import '../../../amp-ad/0.1/amp-ad';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
 
 import {toggleExperiment} from '#experiments';
@@ -36,19 +20,20 @@ import {resetScheduledElementForTesting} from '#service/custom-element-registry'
 import {Extensions} from '#service/extensions-impl';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
 
+import * as analytics from '#utils/analytics';
+import {dev, user} from '#utils/log';
+
+import {macroTask} from '#testing/helpers';
 import {createIframePromise} from '#testing/iframe';
-import {macroTask} from '#testing/yield';
 
 import {FetchMock, networkFailure} from './fetch-mock';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
 import {MockA4AImpl, TEST_URL} from './utils';
 
-import * as analytics from '../../../../src/analytics';
 import {cancellation} from '../../../../src/error-reporting';
 import * as analyticsExtension from '../../../../src/extension-analytics';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {dev, user} from '../../../../src/log';
 import * as mode from '../../../../src/mode';
 import {AmpAdXOriginIframeHandler} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {
@@ -178,7 +163,7 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
     expect(fie.contentDocument.body.textContent).to.contain.string(
       'Hello, world.'
     );
-    expect(prioritySpy).to.be.calledWith(LayoutPriority.CONTENT);
+    expect(prioritySpy).to.be.calledWith(LayoutPriority_Enum.CONTENT);
   });
 
   it('should not throw on polyfill scripts', async () => {
@@ -1641,6 +1626,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         'allowfullscreen': '',
         'allowtransparency': '',
         'scrolling': 'no',
+        'role': 'region',
+        'aria-label': 'Advertisement',
+        'tabindex': '0',
       };
       Object.keys(expectedAttributes).forEach((key) => {
         expect(friendlyIframe.getAttribute(key)).to.equal(
@@ -1664,7 +1652,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         .calledOnce;
       expect(updateLayoutPriorityStub).to.be.calledOnce;
       expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-        LayoutPriority.CONTENT
+        LayoutPriority_Enum.CONTENT
       );
     });
 
@@ -1801,7 +1789,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         'renderNonAmpCreative_ called exactly once'
       ).to.be.true;
       expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-        LayoutPriority.CONTENT
+        LayoutPriority_Enum.CONTENT
       );
       expect(is3pThrottled(a4a.win)).to.be.false;
     });
@@ -2006,7 +1994,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           .calledOnce;
         expect(updateLayoutPriorityStub).to.be.calledOnce;
         expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-          LayoutPriority.CONTENT
+          LayoutPriority_Enum.CONTENT
         );
       } else {
         expect(iframe.getAttribute('srcdoc')).to.be.null;
@@ -2714,7 +2702,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
           const a4a = new MockA4AImpl(a4aElement);
-          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
+          expect(a4a.getLayoutPriority()).to.equal(
+            LayoutPriority_Enum.METADATA
+          );
         });
       }
     );
@@ -2731,7 +2721,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
           const a4a = new MockA4AImpl(a4aElement);
-          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority_Enum.ADS);
         });
       }
     );

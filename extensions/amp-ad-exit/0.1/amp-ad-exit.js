@@ -1,25 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
-  MessageType,
+  MessageType_Enum,
   deserializeMessage,
   listen,
 } from '#core/3p-frame-messaging';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {isJsonScriptTag} from '#core/dom';
 import {isObject} from '#core/types';
 import {parseJson} from '#core/types/object/json';
@@ -28,6 +12,9 @@ import {HostServices} from '#inabox/host-services';
 
 import {Services} from '#service';
 
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {makeClickDelaySpec} from './filters/click-delay';
 import {createFilter} from './filters/factory';
@@ -35,8 +22,6 @@ import {FilterType} from './filters/filter';
 import {makeInactiveElementSpec} from './filters/inactive-element';
 
 import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getData} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {getTopWindow} from '../../../src/service-helpers';
@@ -98,7 +83,7 @@ export class AmpAdExit extends AMP.BaseElement {
     this.registerAction(
       'setVariable',
       this.setVariable.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
 
     /** @private @const {!Object<string, !Object<string, string>>} */
@@ -450,9 +435,9 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {boolean}
    */
   detectAttributionReportingSupport() {
-    return this.win.document.featurePolicy
-      ?.features()
-      .includes('attribution-reporting');
+    return this.win.document.featurePolicy?.allowsFeature(
+      'attribution-reporting'
+    );
   }
 
   /**
@@ -534,7 +519,7 @@ export class AmpAdExit extends AMP.BaseElement {
       const responseMsg = deserializeMessage(getData(event));
       if (
         !responseMsg ||
-        responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE
+        responseMsg['type'] != MessageType_Enum.IFRAME_TRANSPORT_RESPONSE
       ) {
         return;
       }

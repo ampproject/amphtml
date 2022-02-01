@@ -1,45 +1,31 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {getDataParamsFromAttributes} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 import {getSocialConfig} from './social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-1.0.css';
-import {userAssert} from '../../../src/log';
 import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
 
 /** @const {!JsonObject<string, string>} */
-const DEFAULT_RESPONSIVE_DIMENSIONS = dict({
+const DEFAULT_RESPONSIVE_DIMENSIONS = {
   'width': '100%',
   'height': '100%',
-});
+};
 
 /**
  * @private
@@ -48,9 +34,7 @@ const DEFAULT_RESPONSIVE_DIMENSIONS = dict({
  */
 const getTypeConfigOrUndefined = (element) => {
   const viewer = Services.viewerForDoc(element);
-  const platform = Services.platformFor(
-    toWin(element.ownerDocument.defaultView)
-  );
+  const platform = Services.platformFor(getWin(element));
   const type = userAssert(
     element.getAttribute('type'),
     'The type attribute is required. %s',
@@ -72,7 +56,7 @@ const getTypeConfigOrUndefined = (element) => {
       return;
     }
   }
-  return /** @type {!JsonObject} */ (getSocialConfig(type)) || dict();
+  return /** @type {!JsonObject} */ (getSocialConfig(type)) || {};
 };
 
 /**
@@ -132,7 +116,7 @@ const updateTypeConfig = (element, mutations, prevTypeValue) => {
   return typeConfig;
 };
 
-class AmpSocialShare extends BaseElement {
+class AmpSocialShare extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -153,7 +137,7 @@ class AmpSocialShare extends BaseElement {
     this.element.classList.add(`amp-social-share-${this.ampSocialShareType_}`);
 
     this.renderWithHrefAndTarget_(typeConfig);
-    if (this.element.getAttribute('layout') === Layout.RESPONSIVE) {
+    if (this.element.getAttribute('layout') === Layout_Enum.RESPONSIVE) {
       return DEFAULT_RESPONSIVE_DIMENSIONS;
     }
   }
@@ -190,7 +174,7 @@ class AmpSocialShare extends BaseElement {
   renderWithHrefAndTarget_(typeConfig) {
     const customEndpoint = this.element.getAttribute('data-share-endpoint');
     const shareEndpoint = customEndpoint || typeConfig['shareEndpoint'] || '';
-    const urlParams = typeConfig['defaultParams'] || dict();
+    const urlParams = typeConfig['defaultParams'] || {};
     Object.assign(urlParams, getDataParamsFromAttributes(this.element));
     const hrefWithVars = addParamsToUrl(shareEndpoint, urlParams);
     const urlReplacements = Services.urlReplacementsForDoc(this.element);
@@ -209,21 +193,17 @@ class AmpSocialShare extends BaseElement {
         const target = this.element.getAttribute('data-target') || '_blank';
 
         if (customEndpoint) {
-          this.mutateProps(
-            dict({
-              'endpoint': expandedUrl,
-              'params': null,
-              'target': target,
-            })
-          );
+          this.mutateProps({
+            'endpoint': expandedUrl,
+            'params': null,
+            'target': target,
+          });
         } else {
-          this.mutateProps(
-            dict({
-              'endpoint': null,
-              'params': parseQueryString(search),
-              'target': target,
-            })
-          );
+          this.mutateProps({
+            'endpoint': null,
+            'params': parseQueryString(search),
+            'target': target,
+          });
         }
       });
   }

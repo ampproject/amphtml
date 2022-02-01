@@ -1,28 +1,12 @@
-//
-// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
 #include <fstream>
 #include <vector>
 #include <sstream>
 #include <string_view>
 
 #include "gtest/gtest.h"
-#include "defer.h"
-#include "fileutil.h"
-#include "json/parser.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/json/parser.h"
 
 void ParseAndValidateFile(std::string file_path) {
   std::ifstream fd(file_path);
@@ -43,41 +27,41 @@ void ParseAndValidateFile(std::string file_path) {
 }
 
 TEST(JSONParserTest, File1) {
-  ParseAndValidateFile("json/testdata/1.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/1.json");
 }
 
 TEST(JSONParserTest, File2) {
-  ParseAndValidateFile("json/testdata/2.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/2.json");
 }
 
 TEST(JSONParserTest, File3) {
-  ParseAndValidateFile("json/testdata/3.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/3.json");
 }
 
 TEST(JSONParserTest, File4) {
-  ParseAndValidateFile("json/testdata/4.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/4.json");
 }
 
 TEST(JSONParserTest, File5) {
-  ParseAndValidateFile("json/testdata/5.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/5.json");
 }
 
 TEST(JSONParserTest, File6) {
-  ParseAndValidateFile("json/testdata/6.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/6.json");
 }
 
 TEST(JSONParserTest, File7) {
-  ParseAndValidateFile("json/testdata/7.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/7.json");
 }
 
 TEST(JSONParserTest, File8) {
-  ParseAndValidateFile("json/testdata/8.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/8.json");
 }
 
 TEST(JSONParserTest, File9) {
-  ParseAndValidateFile("json/testdata/9.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/9.json");
 }
 
 TEST(JSONParserTest, File10) {
-  ParseAndValidateFile("json/testdata/10.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/10.json");
 }

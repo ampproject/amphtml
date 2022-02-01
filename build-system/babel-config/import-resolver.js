@@ -1,24 +1,10 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
+const moduleResolver = require('babel-plugin-module-resolver');
 
-const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.json');
+const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.base.json');
 let tsConfigPaths = null;
 
 /**
@@ -57,12 +43,19 @@ function readJsconfigPaths() {
 
 /**
  * Import map configuration.
- * @return {!Object}
+ * @return {Object}
  */
 function getImportResolver() {
   return {
-    'root': ['.'],
-    'alias': readJsconfigPaths(),
+    root: ['.'],
+    alias: readJsconfigPaths(),
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    stripExtensions: [],
+    babelOptions: {
+      caller: {
+        name: 'import-resolver',
+      },
+    },
   };
 }
 
@@ -88,8 +81,22 @@ function getImportResolverPlugin() {
   return ['module-resolver', getImportResolver()];
 }
 
+/**
+ * Resolves a filepath using the same logic as the rest of our build pipeline (babel module-resolver).
+ * The return value is a relative path from the amphtml folder.
+ *
+ * @param {string} filepath
+ * @return {string}
+ */
+function resolvePath(filepath) {
+  // 2nd arg is a file from which to make a relative path.
+  // The actual file doesn't need to exist. In this case it is process.cwd()/anything
+  return moduleResolver.resolvePath(filepath, 'anything', getImportResolver());
+}
+
 module.exports = {
   getImportResolver,
   getImportResolverPlugin,
   getRelativeAliasMap,
+  resolvePath,
 };

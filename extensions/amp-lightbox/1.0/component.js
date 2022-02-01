@@ -1,26 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Keys_Enum} from '#core/constants/key-codes';
+import {tryFocus} from '#core/dom';
+import {setStyle} from '#core/dom/style';
 
 import * as Preact from '#preact';
-import {ContainWrapper, useValueRef} from '#preact/component';
-import {Keys} from '#core/constants/key-codes';
-import {forwardRef} from '#preact/compat';
-import {setStyle} from '#core/dom/style';
-import {tryFocus} from '#core/dom';
 import {useImperativeHandle, useLayoutEffect, useRef, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {ContainWrapper, useValueRef} from '#preact/component';
+
 import {useStyles} from './component.jss';
 
 const ANIMATION_DURATION = 200;
@@ -44,11 +30,11 @@ const DEFAULT_CLOSE_LABEL = 'Close the modal';
 const CONTENT_PROPS = {'part': 'scroller'};
 
 /**
- * @param {!LightboxDef.Props} props
- * @param {{current: ?LightboxDef.LightboxApi}} ref
+ * @param {!BentoLightboxDef.Props} props
+ * @param {{current: ?BentoLightboxDef.LightboxApi}} ref
  * @return {PreactDef.Renderable}
  */
-function LightboxWithRef(
+function BentoLightboxWithRef(
   {
     animation = 'fade-in',
     children,
@@ -159,9 +145,9 @@ function LightboxWithRef(
         wrapperClassName={classes.wrapper}
         contentProps={CONTENT_PROPS}
         role="dialog"
-        tabIndex="0"
+        tabindex="0"
         onKeyDown={(event) => {
-          if (event.key === Keys.ESCAPE) {
+          if (event.key === Keys_Enum.ESCAPE) {
             setVisible(false);
           }
         }}
@@ -174,13 +160,13 @@ function LightboxWithRef(
   );
 }
 
-const Lightbox = forwardRef(LightboxWithRef);
-Lightbox.displayName = 'Lightbox';
-export {Lightbox};
+const BentoLightbox = forwardRef(BentoLightboxWithRef);
+BentoLightbox.displayName = 'Lightbox';
+export {BentoLightbox};
 
 /**
  *
- * @param {!LightboxDef.CloseButtonProps} props
+ * @param {!BentoLightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
 function CloseButton({onClick, as: Comp = ScreenReaderCloseButton}) {
@@ -196,10 +182,17 @@ function CloseButton({onClick, as: Comp = ScreenReaderCloseButton}) {
  * We do not want this in the tab order since it is not really "visible"
  * and would be confusing to tab to if not using a screen reader.
  *
- * @param {!LightboxDef.CloseButtonProps} props
+ * @param {!BentoLightboxDef.CloseButtonProps} props
  * @return {PreactDef.Renderable}
  */
-function ScreenReaderCloseButton(props) {
+function ScreenReaderCloseButton({'aria-label': ariaLabel, onClick}) {
   const classes = useStyles();
-  return <button {...props} tabIndex={-1} className={classes.closeButton} />;
+  return (
+    <button
+      aria-label={ariaLabel}
+      class={classes.closeButton}
+      onClick={onClick}
+      tabindex={-1}
+    />
+  );
 }

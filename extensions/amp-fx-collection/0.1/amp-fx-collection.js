@@ -1,36 +1,20 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {iterateCursor} from '#core/dom';
 import {tryCallback} from '#core/error';
+
+import {listen} from '#utils/event-helper';
+import {devAssert} from '#utils/log';
 
 import {
   FxBindings,
   FxObservesSignal,
-  FxType, // eslint-disable-line no-unused-vars
+  FxType, // eslint-disable-line @typescript-eslint/no-unused-vars
   getFxTypes,
 } from './fx-type';
 import {
   installPositionBoundFx,
   installScrollToggledFx,
 } from './providers/fx-provider';
-
-import {listen} from '../../../src/event-helper';
-import {devAssert} from '../../../src/log';
 
 const TAG = 'amp-fx-collection';
 
@@ -55,7 +39,7 @@ export class AmpFxCollection {
       // Scan when page becomes visible.
       this.scan_();
       // Rescan as DOM changes happen.
-      listen(root, AmpEvents.DOM_UPDATE, () => this.scan_());
+      listen(root, AmpEvents_Enum.DOM_UPDATE, () => this.scan_());
     });
   }
 

@@ -1,32 +1,19 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
+
+import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
 import {
   AnimationManager,
   AnimationRunner,
   AnimationSequence,
 } from '../animation';
-import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {presets} from '../animation-presets';
-import {scopedQuerySelectorAll} from '#core/dom/query';
-import {toArray} from '#core/types/array';
 
 const querySelectorAllAnimateIn = (element) =>
   toArray(scopedQuerySelectorAll(element, '[animate-in]'));

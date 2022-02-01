@@ -1,33 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Deferred} from '#core/data-structures/promise';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
-import {
-  createFrameFor,
-  isJsonOrObj,
-  mutedOrUnmutedEvent,
-  objOrParseJson,
-  redispatch,
-} from '../../../src/iframe-video';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {
   dispatchCustomEvent,
   getDataParamsFromAttributes,
@@ -38,14 +9,29 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
 import {
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  createFrameFor,
+  isJsonOrObj,
+  mutedOrUnmutedEvent,
+  objOrParseJson,
+  redispatch,
+} from '../../../src/iframe-video';
+import {VideoEvents_Enum} from '../../../src/video-interface';
+import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
 
 /** @private @const {string} */
 const TAG = 'amp-brightcove';
@@ -195,12 +181,10 @@ class AmpBrightcove extends AMP.BaseElement {
       // been unlaid out by now.
       if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/ postMessage(
-          JSON.stringify(
-            dict({
-              'command': command,
-              'args': arg,
-            })
-          ),
+          JSON.stringify({
+            'command': command,
+            'args': arg,
+          }),
           'https://players.brightcove.net'
         );
       }
@@ -260,7 +244,7 @@ class AmpBrightcove extends AMP.BaseElement {
 
     if (
       redispatch(element, eventType, {
-        'ready': VideoEvents.LOAD,
+        'ready': VideoEvents_Enum.LOAD,
         ...BRIGHTCOVE_EVENTS,
       })
     ) {

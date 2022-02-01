@@ -1,19 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Observable} from '#core/data-structures/observable';
 
 import {Services} from '#service';
@@ -30,13 +14,14 @@ import {
   installUrlReplacementsServiceForDoc,
 } from '#service/url-replacements-impl';
 
+import {user} from '#utils/log';
+
+import {mockWindowInterface, stubServiceForDoc} from '#testing/helpers/service';
 import {createIframePromise} from '#testing/iframe';
-import {mockWindowInterface, stubServiceForDoc} from '#testing/test-helper';
 
 import {installActivityServiceForTesting} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {setCookie} from '../../src/cookies';
 import * as trackPromise from '../../src/impression';
-import {user} from '../../src/log';
 import {registerServiceBuilder} from '../../src/service-helpers';
 import {parseUrlDeprecated} from '../../src/url';
 
@@ -1002,8 +987,14 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
       });
 
-      it('should replace UACH', () => {
+      it('should replace UACH platform', () => {
         return expandUrlAsync('?sh=UACH(platform)').then((res) => {
+          expect(res).to.match(/sh=\w?/);
+        });
+      });
+
+      it('should replace UACH brands', () => {
+        return expandUrlAsync('?sh=UACH(brands)').then((res) => {
           expect(res).to.match(/sh=\w?/);
         });
       });

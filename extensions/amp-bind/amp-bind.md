@@ -8,22 +8,6 @@ teaser:
   text: Allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.
 ---
 
-<!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-bind
 
 ## Usage
@@ -241,6 +225,17 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 </amp-state>
 
 <amp-state id="myRemoteState" src="https://data.com/articles.json"> </amp-state>
+```
+
+As an `amp-state` element stores a JSON object literal, you can also initialize
+it with an object, as above, or with a constant.
+
+```html
+<amp-state id="singleton">
+  <script type="application/json">
+    'I am a string'
+  </script>
+</amp-state>
 ```
 
 [/filter] <!-- formats="websites, ads" -->
@@ -548,7 +543,7 @@ Using `AMP.pushState()` sets the current state to the most recent pushed state.
 -   Only `amp-bind` [allowlisted functions](#allowlisted-functions) and operators are usable. are usable. Use of arrow functions are allowed as function parameters, e.g. `[1, 2, 3].map(x => x + 1)`.
     -   Custom functions, classes and loops are disallowed.
 -   Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
--   A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new/choose) if this is insufficient for your use case.
+-   A single expression is currently capped at 250 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new/choose) if this is insufficient for your use case.
 
 The following are all valid expressions:
 

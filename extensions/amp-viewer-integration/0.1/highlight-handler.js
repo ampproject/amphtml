@@ -1,32 +1,15 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {whenDocumentReady} from '#core/document-ready';
+import {whenDocumentReady} from '#core/document/ready';
 import {moveLayoutRect} from '#core/dom/layout/rect';
 import {resetStyles, setInitialDisplay, setStyles} from '#core/dom/style';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
 
-import {findSentences, markTextRangeList} from './findtext';
+import {listenOnce} from '#utils/event-helper';
 
-import {listenOnce} from '../../../src/event-helper';
+import {findSentences, markTextRangeList} from './findtext';
 
 /**
  * The message name sent by viewers to dismiss highlights.
@@ -220,7 +203,7 @@ export class HighlightHandler {
    * @private
    */
   sendHighlightState_(state, opt_params) {
-    const params = dict({'state': state});
+    const params = {'state': state};
     for (const key in opt_params) {
       params[key] = opt_params[key];
     }
@@ -282,7 +265,7 @@ export class HighlightHandler {
       return;
     }
     const scrollTop = this.calcTopToCenterHighlightedNodes_();
-    this.sendHighlightState_('found', dict({'scroll': scrollTop}));
+    this.sendHighlightState_('found', {'scroll': scrollTop});
     if (highlightInfo.skipRendering) {
       return;
     }
@@ -398,7 +381,7 @@ export class HighlightHandler {
     if (current == newTop && current == oldTop) {
       return null;
     }
-    const shownParam = dict();
+    const shownParam = {};
     if (current != newTop) {
       this.viewport_.setScrollTop(newTop);
       shownParam[PARAM_NEW_TOP_DISCREPANCY] = current - newTop;

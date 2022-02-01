@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   assertDoesNotContainDisplay,
   computedStyle,
@@ -22,7 +6,9 @@ import {
 
 import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
+import {PositionObserverFidelity_Enum} from '#service/position-observer/position-observer-worker';
+
+import {devAssert} from '#utils/log';
 
 import {Presets} from './amp-fx-presets';
 import {
@@ -35,15 +21,14 @@ import {
   resolvePercentageToNumber,
 } from './amp-fx-presets-utils';
 
-import {devAssert} from '../../../../src/log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../../src/service-helpers';
-import {FxType} from '../fx-type'; // eslint-disable-line no-unused-vars
+import {FxType} from '../fx-type'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import {
   ScrollToggleDispatch,
-  ScrollTogglePosition, // eslint-disable-line no-unused-vars
+  ScrollTogglePosition, // eslint-disable-line @typescript-eslint/no-unused-vars
   assertValidScrollToggleElement,
   getScrollToggleFloatInOffset,
   getScrollTogglePosition,
@@ -234,7 +219,7 @@ export class FxElement {
   observePositionChanges_() {
     this.positionObserver_.observe(
       this.element,
-      PositionObserverFidelity.HIGH,
+      PositionObserverFidelity_Enum.HIGH,
       Presets[this.fxType_].update.bind(this)
     );
 

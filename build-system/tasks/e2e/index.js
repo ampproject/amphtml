@@ -1,19 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific lan``guage governing permissions and
- * limitations under the License.
- */
-
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
@@ -34,7 +18,7 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
-const {cyan} = require('../../common/colors');
+const {cyan} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isCiBuild, isCircleciBuild} = require('../../common/ci');
@@ -126,7 +110,7 @@ async function fetchCoverage_(outDir) {
   // it can be accessed separately.
 
   // Clear out previous coverage data.
-  fs.rmdirSync(outDir, {recursive: true});
+  fs.rmSync(outDir, {recursive: true});
   fs.mkdirSync(outDir);
 
   const zipFilename = path.join(outDir, 'coverage.zip');
@@ -200,7 +184,7 @@ async function runWatch_() {
       ? getFilesFromArgv().concat(getFilesFromFileList())
       : config.e2eTestPaths;
 
-  log('Watching', cyan(filesToWatch), 'for changes...');
+  log('Watching', cyan(`[${filesToWatch.join(', ')}]`), 'for changes...');
   watch(filesToWatch).on('change', (file) => {
     log('Detected a change in', cyan(file));
     const mocha = createMocha_();

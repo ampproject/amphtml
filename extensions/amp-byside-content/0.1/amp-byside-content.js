@@ -1,20 +1,4 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Displays BySide placeholder content.
  * The client settings and placeholder content label should be added as
  * component attributes as seen in the following example:
@@ -36,13 +20,13 @@ import {createElementWithAttributes, removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {setStyles} from '#core/dom/style';
 import {debounce} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {listenFor} from '../../../src/iframe-helper';
-import {user, userAssert} from '../../../src/log';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */
@@ -241,7 +225,7 @@ export class AmpBysideContent extends AMP.BaseElement {
    */
   composeSrcUrl_() {
     const src = this.baseUrl_ + 'placeholder.php';
-    const params = dict({
+    const params = {
       'label': this.label_,
       'webcare_id': this.webcareId_,
       'bwch': this.channel_ || '',
@@ -263,7 +247,7 @@ export class AmpBysideContent extends AMP.BaseElement {
       'ua': 'USER_AGENT',
       'r': 'RANDOM',
       '_resize': '1',
-    });
+    };
     const url = addParamsToUrl(src, params);
 
     return Services.urlReplacementsForDoc(this.element).expandUrlAsync(url);
@@ -288,28 +272,16 @@ export class AmpBysideContent extends AMP.BaseElement {
    */
   getOverflowElement_() {
     const doc = /** @type {!Document} */ (this.element.ownerDocument);
-    const overflow = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-overflow',
-        'overflow': '',
-      })
-    );
-    const overflowContent = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-overflow-content',
-      })
-    );
-    const arrow = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-arrow-down',
-      })
-    );
+    const overflow = createElementWithAttributes(doc, 'div', {
+      'class': 'i-amphtml-byside-content-overflow',
+      'overflow': '',
+    });
+    const overflowContent = createElementWithAttributes(doc, 'div', {
+      'class': 'i-amphtml-byside-content-overflow-content',
+    });
+    const arrow = createElementWithAttributes(doc, 'div', {
+      'class': 'i-amphtml-byside-content-arrow-down',
+    });
     overflowContent.appendChild(arrow);
     overflow.appendChild(overflowContent);
 
@@ -319,20 +291,12 @@ export class AmpBysideContent extends AMP.BaseElement {
   /** @return {!Element} @private */
   createBySideLoader_() {
     const doc = /** @type {!Document} */ (this.element.ownerDocument);
-    const loadingContainer = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-loading-container',
-      })
-    );
-    const loadingAnimation = createElementWithAttributes(
-      doc,
-      'div',
-      dict({
-        'class': 'i-amphtml-byside-content-loading-animation',
-      })
-    );
+    const loadingContainer = createElementWithAttributes(doc, 'div', {
+      'class': 'i-amphtml-byside-content-loading-container',
+    });
+    const loadingAnimation = createElementWithAttributes(doc, 'div', {
+      'class': 'i-amphtml-byside-content-loading-animation',
+    });
     loadingContainer.appendChild(loadingAnimation);
 
     return loadingContainer;

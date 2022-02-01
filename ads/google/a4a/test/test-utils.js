@@ -1,23 +1,8 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as fakeTimers from '@sinonjs/fake-timers';
+
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import * as IniLoad from '../../../../src/ini-load';
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 import {
   AMP_EXPERIMENT_ATTRIBUTE,
   EXPERIMENT_ATTRIBUTE,
@@ -40,18 +25,24 @@ import {
   maybeInsertOriginTrialToken,
   mergeExperimentIds,
 } from '#ads/google/a4a/utils';
+
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {GEO_IN_GROUP} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
-import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
-import {Services} from '#service';
-import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 import {createElementWithAttributes} from '#core/dom';
-import {createIframePromise} from '#testing/iframe';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {installExtensionsService} from '#service/extensions-impl';
 import {installXhrService} from '#service/xhr-impl';
-import {toggleExperiment} from '#experiments';
-import {user} from '../../../../src/log';
+
+import {user} from '#utils/log';
+
+import {createIframePromise} from '#testing/iframe';
+
+import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
+import {GEO_IN_GROUP} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
+import * as IniLoad from '../../../../src/ini-load';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);

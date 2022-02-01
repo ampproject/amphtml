@@ -1,28 +1,16 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {loadScript} from '#3p/3p';
 
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
-import {getData} from '../../../src/event-helper';
 import {htmlFor, htmlRefs, svgFor} from '#core/dom/static-template';
+import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
 import {isArray, isObject} from '#core/types';
-import {loadScript} from '#3p/3p';
 import {throttle} from '#core/types/function';
 import {tryParseJson} from '#core/types/object/json';
+
+import {getData} from '#utils/event-helper';
+
+import {ImaPlayerData} from './ima-player-data';
+
 // Source for this constant is css/amp-ima-video-iframe.css
 import {cssText} from '../../../build/amp-ima-video-iframe.css';
 
@@ -565,7 +553,7 @@ function onImaLoadSuccess(global, data) {
     requestAds();
   } else {
     // Let amp-ima-video know that we are done set-up.
-    postMessage({event: VideoEvents.LOAD});
+    postMessage({event: VideoEvents_Enum.LOAD});
   }
 }
 
@@ -580,7 +568,7 @@ function onImaLoadFail() {
     showControlsThrottled
   );
   imaLoadAllowed = false;
-  postMessage({event: VideoEvents.LOAD});
+  postMessage({event: VideoEvents_Enum.LOAD});
 }
 
 /**
@@ -704,8 +692,8 @@ export function onContentEnded() {
     toggle(elements['overlayButton'], true);
   }
 
-  postMessage({event: VideoEvents.PAUSE});
-  postMessage({event: VideoEvents.ENDED});
+  postMessage({event: VideoEvents_Enum.PAUSE});
+  postMessage({event: VideoEvents_Enum.ENDED});
 }
 
 /**
@@ -753,7 +741,7 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
   if (muteAdsManagerOnLoaded) {
     adsManager.setVolume(0);
   }
-  postMessage({event: VideoEvents.LOAD});
+  postMessage({event: VideoEvents_Enum.LOAD});
 }
 
 /**
@@ -766,7 +754,7 @@ export function onAdsLoaderError() {
   // Send this message to trigger auto-play for failed pre-roll requests -
   // failing to load an ad is just as good as loading one as far as starting
   // playback is concerned because our content will be ready to play.
-  postMessage({event: VideoEvents.LOAD});
+  postMessage({event: VideoEvents_Enum.LOAD});
   addHoverEventToElement(
     /** @type {!Element} */ (elements['video']),
     showControlsThrottled
@@ -782,7 +770,7 @@ export function onAdsLoaderError() {
  * @visibleForTesting
  */
 export function onAdError() {
-  postMessage({event: VideoEvents.AD_END});
+  postMessage({event: VideoEvents_Enum.AD_END});
   currentAd = null;
   if (adsManager) {
     adsManager.destroy();
@@ -840,7 +828,7 @@ export function onContentPauseRequested(global) {
   }
   adsActive = true;
   playerState = PlayerStates.PLAYING;
-  postMessage({event: VideoEvents.AD_START});
+  postMessage({event: VideoEvents_Enum.AD_START});
   toggle(elements['adContainer'], true);
   showAdControls();
 
@@ -865,7 +853,7 @@ export function onContentResumeRequested() {
     /** @type {!Element} */ (video),
     showControlsThrottled
   );
-  postMessage({event: VideoEvents.AD_END});
+  postMessage({event: VideoEvents_Enum.AD_END});
   resetControlsAfterAd();
   if (!contentComplete) {
     // CONTENT_RESUME will fire after post-rolls as well, and we don't want to
@@ -1112,7 +1100,7 @@ export function playVideo() {
     video.play();
   }
   playerState = PlayerStates.PLAYING;
-  postMessage({event: VideoEvents.PLAYING});
+  postMessage({event: VideoEvents_Enum.PLAYING});
   toggleRootDataAttribute('playing', true);
 }
 
@@ -1137,7 +1125,7 @@ export function pauseVideo(event = null) {
     }
   }
   playerState = PlayerStates.PAUSED;
-  postMessage({event: VideoEvents.PAUSE});
+  postMessage({event: VideoEvents_Enum.PAUSE});
   toggleRootDataAttribute('playing', false);
 }
 
@@ -1184,7 +1172,9 @@ export function toggleMuted(video, muted) {
     muteAdsManagerOnLoaded = muted;
   }
   toggleRootDataAttribute('muted', muted);
-  postMessage({event: muted ? VideoEvents.MUTED : VideoEvents.UNMUTED});
+  postMessage({
+    event: muted ? VideoEvents_Enum.MUTED : VideoEvents_Enum.UNMUTED,
+  });
 }
 
 /**
@@ -1638,10 +1628,10 @@ export function setConsentStateForTesting(newConsentState) {
  *
  * Copied from src/video-interface.js.
  *
- * @const {!Object<string, string>}
+ * @enum {string}
  */
 // TODO(aghassemi, #9216): Use video-interface.js
-const VideoEvents = {
+const VideoEvents_Enum = {
   /**
    * load
    *

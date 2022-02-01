@@ -1,24 +1,14 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 
-import {ActionTrust} from '#core/constants/action-constants';
-import {BaseElement} from './base-element';
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {BentoVideoBaseElement} from './base-element';
 
 /** @extends {PreactBaseElement<VideoWrapperDef.Api>} */
-export class VideoBaseElement extends BaseElement {
+export class AmpVideoBaseElement extends setSuperClass(
+  BentoVideoBaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   init() {
     this.registerApiAction_('play', (api) => api.play());
@@ -38,14 +28,14 @@ export class VideoBaseElement extends BaseElement {
   /**
    * @param {string} alias
    * @param {function(!VideoWrapperDef.Api, !../../../src/service/action-impl.ActionInvocation)} handler
-   * @param {!../../../src/core/constants/action-constants.ActionTrust=} minTrust
+   * @param {!../../../src/core/constants/action-constants.ActionTrust_Enum=} minTrust
    * @private
    */
-  registerApiAction_(alias, handler, minTrust = ActionTrust.HIGH) {
+  registerApiAction_(alias, handler, minTrust = ActionTrust_Enum.HIGH) {
     this.registerApiAction(
       alias,
       (api, invocation) => {
-        if (invocation.trust >= ActionTrust.HIGH) {
+        if (invocation.trust >= ActionTrust_Enum.HIGH) {
           // TODO(alanorozco): There may be a better solution that doesn't
           // require this method which is not standard in HTMLMediaElement, like
           // potentially toggling `autoplay` instead.

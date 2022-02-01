@@ -1,35 +1,25 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isExperimentOn} from '#experiments';
 
+import {setSuperClass} from '#preact/amp-base-element';
+
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
+
+import {CSS} from '../../../build/amp-brightcove-1.0.css';
 import {
   getConsentPolicyInfo,
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-brightcove-1.0.css';
-import {dict} from '#core/types/object';
-import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
-import {Services} from '#service';
+import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
 
 /** @const {string} */
 const TAG = 'amp-brightcove';
 
-class AmpBrightcove extends BaseElement {
+class AmpBrightcove extends setSuperClass(BaseElement, AmpVideoBaseElement) {
   /** @override @nocollapse */
   static getPreconnects() {
     return ['https://players.brightcove.net'];
@@ -57,13 +47,11 @@ class AmpBrightcove extends BaseElement {
       const {0: consentState, 1: consentString, 2: consentSharedData} = arr;
       const urlParams = {
         ...this.getProp('urlParams'),
-        ...dict({
-          'ampInitialConsentState': consentState,
-          'ampInitialConsentValue': consentString,
-          'ampConsentSharedData': JSON.stringify(consentSharedData),
-        }),
+        'ampInitialConsentState': consentState,
+        'ampInitialConsentValue': consentString,
+        'ampConsentSharedData': JSON.stringify(consentSharedData),
       };
-      this.mutateProps(dict({'urlParams': urlParams}));
+      this.mutateProps({'urlParams': urlParams});
     });
   }
 

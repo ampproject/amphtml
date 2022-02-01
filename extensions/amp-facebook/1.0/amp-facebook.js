@@ -1,26 +1,20 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {BaseElement} from './base-element';
-import {createLoaderLogo} from '../0.1/facebook-loader';
 import {dashToUnderline} from '#core/types/string';
-import {dict} from '#core/types/object';
-import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
+
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {userAssert} from '#utils/log';
+
+import {
+  BaseElement,
+  CommentsBaseElement,
+  LikeBaseElement,
+  PageBaseElement,
+} from './base-element';
+
+import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
+import {createLoaderLogo} from '../0.1/facebook-loader';
 
 /** @const {string} */
 const TAG = 'amp-facebook';
@@ -29,7 +23,7 @@ const LIKE_TAG = 'amp-facebook-like';
 const PAGE_TAG = 'amp-facebook-page';
 const TYPE = 'facebook';
 
-class AmpFacebook extends BaseElement {
+class AmpFacebookBase extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override @nocollapse */
   static createLoaderLogoCallback(element) {
     return createLoaderLogo(element);
@@ -55,10 +49,9 @@ class AmpFacebook extends BaseElement {
 
   /** @override */
   init() {
-    return dict({
-      'onReady': () => this.togglePlaceholder(false),
+    return {
       'requestResize': (height) => this.attemptChangeHeight(height),
-    });
+    };
   }
 
   /** @override */
@@ -72,48 +65,16 @@ class AmpFacebook extends BaseElement {
   }
 }
 
-/**
- * Checks for valid data-embed-as attribute when given.
- * @param {!Element} element
- * @return {string}
- */
-function parseEmbed(element) {
-  const embedAs = element.getAttribute('data-embed-as');
-  userAssert(
-    !embedAs ||
-      ['post', 'video', 'comment', 'comments', 'like', 'page'].indexOf(
-        embedAs
-      ) !== -1,
-    'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
-      ' "post", "video", "comment", "comments", "like", or "page", but was: %s',
-    embedAs
-  );
-  return embedAs;
-}
+class AmpFacebook extends AmpFacebookBase {}
 
-/** @override */
-AmpFacebook['props'] = {
-  ...BaseElement['props'],
-  'embedAs': {
-    attrs: ['data-embed-as'],
-    parseAttrs: parseEmbed,
-  },
-};
+class AmpFacebookComments extends setSuperClass(
+  CommentsBaseElement,
+  AmpFacebookBase
+) {}
 
-class AmpFacebookComments extends AmpFacebook {}
+class AmpFacebookLike extends setSuperClass(LikeBaseElement, AmpFacebookBase) {}
 
-/** @override */
-AmpFacebookComments['staticProps'] = {'embedAs': 'comments'};
-
-class AmpFacebookLike extends AmpFacebook {}
-
-/** @override */
-AmpFacebookLike['staticProps'] = {'embedAs': 'like'};
-
-class AmpFacebookPage extends AmpFacebook {}
-
-/** @override */
-AmpFacebookPage['staticProps'] = {'embedAs': 'page'};
+class AmpFacebookPage extends setSuperClass(PageBaseElement, AmpFacebookBase) {}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpFacebook);

@@ -1,25 +1,9 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import objstr from 'obj-str';
+
+import {Keys_Enum} from '#core/constants/key-codes';
+import {isRTL} from '#core/dom';
 
 import * as Preact from '#preact';
-import {ContainWrapper, useValueRef} from '#preact/component';
-import {Keys} from '#core/constants/key-codes';
-import {Side} from './sidebar-config';
-import {forwardRef} from '#preact/compat';
-import {isRTL} from '#core/dom';
 import {
   useCallback,
   useEffect,
@@ -28,17 +12,20 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {useSidebarAnimation} from './sidebar-animations-hook';
+import {forwardRef} from '#preact/compat';
+import {ContainWrapper, useValueRef} from '#preact/component';
+
 import {useStyles} from './component.jss';
+import {useSidebarAnimation} from './sidebar-animations-hook';
+import {Side} from './sidebar-config';
 import {useToolbarHook} from './sidebar-toolbar-hook';
-import objstr from 'obj-str';
 
 /**
- * @param {!SidebarDef.SidebarProps} props
- * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
+ * @param {!BentoSidebarDef.Props} props
+ * @param {{current: (!BentoSidebarDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function SidebarWithRef(
+function BentoSidebarWithRef(
   {
     as: Comp = 'div',
     backdropClassName,
@@ -83,7 +70,7 @@ function SidebarWithRef(
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!SidebarDef.SidebarApi} */ ({
+      /** @type {!BentoSidebarDef.Api} */ ({
         open,
         close,
         toggle,
@@ -124,7 +111,7 @@ function SidebarWithRef(
       return;
     }
     const keydownCallback = (event) => {
-      if (event.key === Keys.ESCAPE) {
+      if (event.key === Keys_Enum.ESCAPE) {
         event.stopImmediatePropagation();
         event.preventDefault();
         close();
@@ -137,7 +124,13 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div className={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+    <div
+      class={objstr({
+        [classes.mounted]: mounted,
+        [classes.unmounted]: !mounted,
+      })}
+      part="wrapper"
+    >
       <ContainWrapper
         as={Comp}
         ref={sidebarRef}
@@ -163,28 +156,28 @@ function SidebarWithRef(
         onClick={() => close()}
         part="backdrop"
         style={backdropStyle}
-        className={objstr({
+        class={objstr({
           [classes.backdrop]: true,
           [classes.defaultBackdropStyles]: true,
           [backdropClassName]: backdropClassName,
         })}
         hidden={!side}
       >
-        <div className={classes.backdropOverscrollBlocker}></div>
+        <div class={classes.backdropOverscrollBlocker}></div>
       </div>
     </div>
   );
 }
 
-const Sidebar = forwardRef(SidebarWithRef);
-Sidebar.displayName = 'Sidebar'; // Make findable for tests.
-export {Sidebar};
+const BentoSidebar = forwardRef(BentoSidebarWithRef);
+BentoSidebar.displayName = 'BentoSidebar'; // Make findable for tests.
+export {BentoSidebar};
 
 /**
- * @param {!SidebarDef.SidebarToolbarProps} props
+ * @param {!BentoSidebarDef.BentoSidebarToolbarProps} props
  * @return {PreactDef.Renderable}
  */
-export function SidebarToolbar({
+export function BentoSidebarToolbar({
   children,
   toolbar: mediaQueryProp,
   toolbarTarget: toolbarTargetProp,

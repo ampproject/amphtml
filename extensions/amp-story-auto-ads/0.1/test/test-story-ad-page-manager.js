@@ -1,25 +1,8 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {macroTask} from '#testing/helpers';
 
-import {Action, UIType} from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStory} from '../../../amp-story/1.0/amp-story';
-import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
 import {StoryAdPage} from '../story-ad-page';
-import {getServiceForDoc} from '../../../../src/service-helpers';
-import {macroTask} from '#testing/yield';
+import {InsertionState, StoryAdPageManager} from '../story-ad-page-manager';
 
 // TODO(ccordry): add tests for analytics events.
 describes.realWin('StoryAdPageManager', {amp: true}, (env) => {
@@ -213,32 +196,6 @@ describes.realWin('StoryAdPageManager', {amp: true}, (env) => {
       const result = await pageManager.maybeInsertPageAfter('one', nextAdPage);
       expect(insertStub).to.be.calledWith('one', 'i-amphtml-ad-page-1');
       expect(pageManager.hasUnusedAdPage()).to.be.false;
-      expect(result).to.equal(InsertionState.SUCCESS);
-    });
-
-    it('successfully inserts 2 pages away on desktop', async () => {
-      const storeService = getServiceForDoc(env.ampdoc, 'story-store');
-      storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-      const pageAfterElement = {id: 'two', hasAttribute: () => false};
-      const mockPageAfter = {isAd: () => false, element: pageAfterElement};
-      const mockTwoPagesAfter = {isAd: () => false};
-      env.sandbox.stub(ampStory, 'getPageById').returns({});
-      env.sandbox
-        .stub(ampStory, 'getNextPage')
-        .onFirstCall()
-        .returns(mockPageAfter)
-        .onSecondCall()
-        .returns(mockTwoPagesAfter)
-        .returns(mockPageAfter);
-      const insertStub = env.sandbox.stub(ampStory, 'insertPage').returns(true);
-      env.sandbox.stub(ampStory, 'getPageIndexById').returns(0);
-
-      const pageManager = new StoryAdPageManager(ampStory, mockConfig);
-      pageManager.createAdPage();
-      const nextAdPage = pageManager.getUnusedAdPage();
-      env.sandbox.stub(nextAdPage, 'maybeCreateCta').resolves(true);
-      const result = await pageManager.maybeInsertPageAfter('one', nextAdPage);
-      expect(insertStub).to.be.calledWith('two', 'i-amphtml-ad-page-1');
       expect(result).to.equal(InsertionState.SUCCESS);
     });
   });

@@ -1,25 +1,10 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-import {API_SERVER} from '../constants';
 import {Services} from '#service';
 
-import {addParamsToUrl} from '../../../../src/url';
-import {dict} from '#core/types/object';
-import {getSessionId} from './session';
 import {pixelDrop} from './pixel';
+import {getSessionId} from './session';
+
+import {addParamsToUrl} from '../../../../src/url';
+import {API_SERVER} from '../constants';
 
 /**
  * Gets data to be passed along in request via params
@@ -57,7 +42,7 @@ const getEngData = (params) => {
  */
 export const callEng = (props) => {
   const object = getEngData(props);
-  const data = dict({
+  const data = {
     'al': object.al,
     'amp': object.amp,
     'dc': object.dc,
@@ -72,7 +57,7 @@ export const callEng = (props) => {
     'pub': object.pub,
     'sh': object.sh,
     'sid': object.sid,
-  });
+  };
   const url = addParamsToUrl(`${API_SERVER}/live/red_lojson/100eng.json`, data);
   const {ampDoc} = props;
 

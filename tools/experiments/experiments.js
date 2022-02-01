@@ -1,32 +1,20 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '#polyfills';
 import '#service/timer-impl';
 import {Deferred} from '#core/data-structures/promise';
-import {EXPERIMENTS} from './experiments-config';
-import {SameSite, getCookie, setCookie} from '../../src/cookies';
-import {devAssert, initLogConstructor, setReportError} from '../../src/log';
-import {getMode} from '../../src/mode';
+import {onDocumentReady} from '#core/document/ready';
+
 import {isExperimentOn, toggleExperiment} from '#experiments';
-import {listenOnce} from '../../src/event-helper';
-import {onDocumentReady} from '#core/document-ready';
+
+import {listenOnce} from '#utils/event-helper';
+import {devAssert, initLogConstructor, setReportError} from '#utils/log';
+
+import {EXPERIMENTS} from './experiments-config';
+
+import {SameSite_Enum, getCookie, setCookie} from '../../src/cookies';
+import {reportError} from '../../src/error-reporting';
+import {getMode} from '../../src/mode';
 import {parseUrlDeprecated} from '../../src/url';
 //TODO(@cramforce): For type. Replace with forward declaration.
-import {reportError} from '../../src/error-reporting';
 
 initLogConstructor();
 setReportError(reportError);
@@ -302,7 +290,7 @@ function setAmpOptInCookie_(cookieState) {
     // Make sure the cookie is available for the script loads coming from
     // other domains. Chrome's default of LAX would otherwise prevent it
     // from being sent.
-    sameSite: SameSite.NONE,
+    sameSite: SameSite_Enum.NONE,
     secure: true,
   };
   setCookie(

@@ -1,31 +1,15 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import {Services} from '#service';
 
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {getSocialConfig} from './amp-social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {addParamsToUrl} from '../../../src/url';
 
@@ -44,7 +28,7 @@ class AmpSocialShare extends AMP.BaseElement {
     this.shareEndpoint_ = null;
 
     /** @private @const {!JsonObject} */
-    this.params_ = dict();
+    this.params_ = {};
 
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
@@ -99,7 +83,7 @@ class AmpSocialShare extends AMP.BaseElement {
         return;
       }
     }
-    const typeConfig = getSocialConfig(typeAttr) || dict();
+    const typeConfig = getSocialConfig(typeAttr) || {};
     if (typeConfig['obsolete']) {
       toggle(element, false);
       user().warn(TAG, `Skipping obsolete share button ${typeAttr}`);
@@ -181,7 +165,7 @@ class AmpSocialShare extends AMP.BaseElement {
    */
   handleKeyPress_(event) {
     const {key} = event;
-    if (key == Keys.SPACE || key == Keys.ENTER) {
+    if (key == Keys_Enum.SPACE || key == Keys_Enum.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }

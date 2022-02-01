@@ -1,32 +1,21 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Layout_Enum} from '#core/dom/layout';
+import {computedStyle, setStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
+
 import {
   BatchFetchOptionsDef,
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
-import {Layout} from '#core/dom/layout';
-import {Services} from '#service';
-import {computedStyle, setStyles} from '#core/dom/style';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {toArray} from '#core/types/array';
 
 /** @const {string} */
 const TAG = 'amp-render';
@@ -129,7 +118,10 @@ function getTemplateNonEmptyNodeCount(doc, template) {
   );
 }
 
-export class AmpRender extends BaseElement {
+export class AmpRender extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -148,7 +140,7 @@ export class AmpRender extends BaseElement {
   }
 
   /**
-   * @return {!UrlReplacementPolicy}
+   * @return {!UrlReplacementPolicy_Enum}
    * @private
    */
   getPolicy_() {
@@ -157,12 +149,12 @@ export class AmpRender extends BaseElement {
     // by [src] mutation. @see spec/amp-var-substitutions.md
     // TODO(dmanek): Update spec/amp-var-substitutions.md with this information
     // and add a `Substitution` sections in this component's markdown file.
-    let policy = UrlReplacementPolicy.OPT_IN;
+    let policy = UrlReplacementPolicy_Enum.OPT_IN;
     if (
       src == this.initialSrc_ ||
       getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
     ) {
-      policy = UrlReplacementPolicy.ALL;
+      policy = UrlReplacementPolicy_Enum.ALL;
     }
     return policy;
   }
@@ -214,7 +206,7 @@ export class AmpRender extends BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    if (layout === Layout.CONTAINER) {
+    if (layout === Layout_Enum.CONTAINER) {
       userAssert(
         this.getPlaceholder(),
         'placeholder required with layout="container"'
@@ -286,63 +278,51 @@ export class AmpRender extends BaseElement {
       this.handleResizeToContentsAction_();
     });
 
-    return dict({
+    return {
       'ariaLiveValue': hasAriaLive
         ? this.element.getAttribute('aria-live')
         : 'polite',
       'getJson': this.getFetchJsonFn(),
-      'onLoading': () => {
-        this.toggleLoading(true);
-      },
-      'onReady': () => {
-        this.toggleLoading(false);
-        if (this.element.getAttribute('layout') !== Layout.CONTAINER) {
-          this.togglePlaceholder(false);
-          return;
-        }
+    };
+  }
 
-        let componentHeight, contentHeight;
-        // TODO(dmanek): Look into using measureIntersection instead
-        this.measureMutateElement(
-          () => {
-            componentHeight = computedStyle(
-              this.getAmpDoc().win,
-              this.element
-            ).getPropertyValue('height');
-            contentHeight = this.element.querySelector(
-              '[i-amphtml-rendered]'
-            )./*OK*/ scrollHeight;
-          },
-          () => {
-            setStyles(this.element, {
-              'overflow': 'hidden',
-              'height': componentHeight,
-            });
-          }
-        ).then(() => {
-          return this.attemptChangeHeight(contentHeight)
-            .then(() => {
-              this.togglePlaceholder(false);
-              setStyles(this.element, {
-                'overflow': '',
-              });
-            })
-            .catch(() => {
-              this.togglePlaceholder(false);
-            });
+  /** @override */
+  handleOnLoad() {
+    this.toggleLoading(false);
+    if (this.element.getAttribute('layout') !== Layout_Enum.CONTAINER) {
+      this.togglePlaceholder(false);
+      return;
+    }
+
+    let componentHeight, contentHeight;
+    // TODO(dmanek): Look into using measureIntersection instead
+    this.measureMutateElement(
+      () => {
+        componentHeight = computedStyle(
+          this.getAmpDoc().win,
+          this.element
+        ).getPropertyValue('height');
+        contentHeight = this.element.querySelector(
+          '[i-amphtml-rendered]'
+        )./*OK*/ scrollHeight;
+      },
+      () => {
+        setStyles(this.element, {
+          'overflow': 'hidden',
+          'height': componentHeight,
         });
-      },
-      'onError': () => {
-        this.toggleLoading(false);
-        // If the content fails to load and there's a fallback element, display the fallback.
-        // Otherwise, continue displaying the placeholder.
-        if (this.getFallback()) {
+      }
+    ).then(() => {
+      return this.attemptChangeHeight(contentHeight)
+        .then(() => {
           this.togglePlaceholder(false);
-          this.toggleFallback(true);
-        } else {
-          this.togglePlaceholder(true);
-        }
-      },
+          setStyles(this.element, {
+            'overflow': '',
+          });
+        })
+        .catch(() => {
+          this.togglePlaceholder(false);
+        });
     });
   }
 
@@ -353,7 +333,7 @@ export class AmpRender extends BaseElement {
       return;
     }
     this.src_ = src;
-    this.mutateProps(dict({'getJson': this.getFetchJsonFn()}));
+    this.mutateProps({'getJson': this.getFetchJsonFn()});
   }
 
   /**
@@ -364,7 +344,9 @@ export class AmpRender extends BaseElement {
   renderTemplateAsString_(data) {
     return this.templates_
       .renderTemplateAsString(dev().assertElement(this.template_), data)
-      .then((html) => dict({'__html': html}));
+      .then((html) => ({
+        '__html': html,
+      }));
   }
 
   /** @override */
@@ -378,7 +360,7 @@ export class AmpRender extends BaseElement {
     }
     this.template_ = template;
     if (!template) {
-      this.mutateProps(dict({'render': null}));
+      this.mutateProps({'render': null});
       return;
     }
 
@@ -388,50 +370,46 @@ export class AmpRender extends BaseElement {
         // A new template has been set while the old one was initializing.
         return;
       }
-      this.mutateProps(
-        dict({
-          'render': (data) => {
-            const bindingValue = this.element.getAttribute('binding');
-            if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
+      this.mutateProps({
+        'render': (data) => {
+          const bindingValue = this.element.getAttribute('binding');
+          if (bindingValue === Binding.NEVER || bindingValue === Binding.NO) {
+            return this.renderTemplateAsString_(data);
+          }
+          return Services.bindForDocOrNull(this.element).then((bind) => {
+            if (!bind) {
               return this.renderTemplateAsString_(data);
             }
-            return Services.bindForDocOrNull(this.element).then((bind) => {
-              if (!bind) {
-                return this.renderTemplateAsString_(data);
-              }
-              const nonEmptyNodeCount = getTemplateNonEmptyNodeCount(
-                this.element.ownerDocument,
-                template
-              );
-              return templates
-                .renderTemplate(dev().assertElement(template), data)
-                .then((element) => {
-                  return bind
-                    .rescan([element], [], {
-                      'fast': true,
-                      'update': getUpdateValue(
-                        bindingValue,
-                        // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
-                        // mutation occured, which is null for the initial render
-                        bind.signals().get('FIRST_MUTATE') === null
-                      ),
-                    })
-                    .then(() =>
-                      dict({
-                        // We should use innerHTML when the template lacks a wrapper
-                        // element, outerHTML otherwise in order to include the wrapper
-                        // element itself.
-                        '__html':
-                          nonEmptyNodeCount === 1
-                            ? element./* OK */ outerHTML
-                            : element./* OK */ innerHTML,
-                      })
-                    );
-                });
-            });
-          },
-        })
-      );
+            const nonEmptyNodeCount = getTemplateNonEmptyNodeCount(
+              this.element.ownerDocument,
+              template
+            );
+            return templates
+              .renderTemplate(dev().assertElement(template), data)
+              .then((element) => {
+                return bind
+                  .rescan([element], [], {
+                    'fast': true,
+                    'update': getUpdateValue(
+                      bindingValue,
+                      // bind.signals().get('FIRST_MUTATE') returns timestamp (in ms) when first
+                      // mutation occured, which is null for the initial render
+                      bind.signals().get('FIRST_MUTATE') === null
+                    ),
+                  })
+                  .then(() => ({
+                    // We should use innerHTML when the template lacks a wrapper
+                    // element, outerHTML otherwise in order to include the wrapper
+                    // element itself.
+                    '__html':
+                      nonEmptyNodeCount === 1
+                        ? element./* OK */ outerHTML
+                        : element./* OK */ innerHTML,
+                  }));
+              });
+          });
+        },
+      });
     });
   }
 

@@ -1,27 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-selector';
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 
 import {ActionInvocation} from '#service/action-impl';
 
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-selector:1.0',
@@ -164,7 +149,7 @@ describes.realWin(
         const source = null;
         const caller = null;
         const event = null;
-        const trust = ActionTrust.DEFAULT;
+        const trust = ActionTrust_Enum.DEFAULT;
         return new ActionInvocation(
           element,
           method,

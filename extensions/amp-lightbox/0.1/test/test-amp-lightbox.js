@@ -1,27 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-lightbox';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import * as dom from '#core/dom';
-import {ActionService} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
-import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {whenCalled} from '#testing/test-helper';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-lightbox component',
@@ -102,7 +87,7 @@ describes.realWin(
           'source',
           'caller',
           'event',
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
         expect(element.enqueAction.callCount).to.be.above(0);
         expect(element.enqueAction).to.be.calledWith(
@@ -114,29 +99,22 @@ describes.realWin(
             method,
             node: element,
             source: 'source',
-            trust: ActionTrust.HIGH,
+            trust: ActionTrust_Enum.HIGH,
           })
         );
       });
     });
 
-    it('should close on ESC', async () => {
+    it('should close on close-watcher signal', async () => {
       const lightbox = createLightbox();
       const impl = await lightbox.getImpl(true);
-      impl.getHistory_ = () => {
-        return {
-          pop: () => {},
-          push: () => Promise.resolve(11),
-        };
-      };
 
       const sourceElement = createOpeningButton('openBtn');
       const setupCloseSpy = env.sandbox.spy(impl, 'close');
 
-      impl.open_({caller: sourceElement});
-      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys.ENTER}));
-      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys.ESCAPE}));
-      expect(setupCloseSpy).to.be.calledOnce;
+      await impl.open_({caller: sourceElement});
+      impl.closeWatcher_.signalClosed();
+      expect(setupCloseSpy).to.be.called;
     });
 
     it('should not change focus or create a button if a focus has been made in the modal', async () => {

@@ -1,33 +1,13 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {setStyle} from '#core/dom/style';
 import {isEnumValue} from '#core/types/enum';
-import {dict} from '#core/types/object';
 import {dashToUnderline} from '#core/types/string';
+
+import {devAssert} from '#utils/log';
 
 import {loadScript} from './3p';
 
-import {devAssert} from '../src/log';
-
 /** @const @enum {string} */
 export const FacebookEmbedType = {
-  // Embeds a single comment or reply to a comment on a post rendered by
-  // amp-facebook.
-  COMMENT: 'comment',
   // Allows users to comment on the embedded content using their Facebook
   // accounts. Correlates to amp-facebook-comments.
   COMMENTS: 'comments',
@@ -106,25 +86,6 @@ function getVideoContainer(global, data) {
     // from the default 'false')
     container.setAttribute('data-show-text', 'true');
   }
-  return container;
-}
-
-/**
- * Create DOM element for the Facebook embedded content plugin for comments or
- * comment replies.
- * @see https://developers.facebook.com/docs/plugins/embedded-comments
- * @param {!Window} global
- * @param {!Object} data The element data
- * @return {!Element} div
- */
-function getCommentContainer(global, data) {
-  const c = global.document.getElementById('c');
-  const container = createContainer(global, 'comment-embed', data.href);
-  container.setAttribute(
-    'data-include-parent',
-    data.includeCommentParent || 'false'
-  );
-  container.setAttribute('data-width', c./*OK*/ offsetWidth);
   return container;
 }
 
@@ -213,8 +174,6 @@ function getEmbedContainer(global, data, embedAs) {
       return getLikeContainer(global, data);
     case FacebookEmbedType.COMMENTS:
       return getCommentsContainer(global, data);
-    case FacebookEmbedType.COMMENT:
-      return getCommentContainer(global, data);
     case FacebookEmbedType.VIDEO:
       return getVideoContainer(global, data);
     default:
@@ -251,11 +210,9 @@ export function facebook(global, data) {
       FB.init({xfbml: true, version: 'v2.5'});
 
       // Report to parent that the SDK has loaded and is ready to paint
-      const message = JSON.stringify(
-        dict({
-          'action': 'ready',
-        })
-      );
+      const message = JSON.stringify({
+        'action': 'ready',
+      });
       global.parent./*OK*/ postMessage(message, '*');
     },
     data.locale ? data.locale : dashToUnderline(window.navigator.language)

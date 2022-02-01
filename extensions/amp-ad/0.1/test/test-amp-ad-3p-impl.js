@@ -1,34 +1,24 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import '../amp-ad';
+import * as fakeTimers from '@sinonjs/fake-timers';
+import {expect} from 'chai';
+
+import {adConfig} from '#ads/_config';
+
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {createElementWithAttributes} from '#core/dom';
+import {LayoutPriority_Enum} from '#core/dom/layout';
+import * as mode from '#core/mode';
+
+import {Services} from '#service';
+
+import {macroTask} from '#testing/helpers';
+import {stubServiceForDoc} from '#testing/helpers/service';
+
 import * as adCid from '../../../../src/ad-cid';
 import * as consent from '../../../../src/consent';
-import * as mode from '#core/mode';
-import * as fakeTimers from '@sinonjs/fake-timers';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {AmpAdUIHandler} from '../amp-ad-ui';
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {LayoutPriority} from '#core/dom/layout';
-import {Services} from '#service';
-import {adConfig} from '#ads/_config';
-import {createElementWithAttributes} from '#core/dom';
-import {macroTask} from '#testing/yield';
-import {stubServiceForDoc} from '#testing/test-helper';
 
 function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
@@ -298,20 +288,17 @@ describes.realWin(
 
       describe('during layout', () => {
         it('sticky ad: should not layout w/o scroll', () => {
-          ad3p.uiHandler.stickyAdPosition_ = 'bottom';
-          expect(ad3p.xOriginIframeHandler_).to.be.null;
-          const layoutPromise = ad3p.layoutCallback();
-          return Promise.race([macroTask(), layoutPromise])
-            .then(() => {
-              expect(ad3p.xOriginIframeHandler_).to.be.null;
-            })
-            .then(() => {
-              Services.viewportForDoc(env.ampdoc).scrollObservable_.fire();
-              return layoutPromise;
-            })
-            .then(() => {
-              expect(ad3p.xOriginIframeHandler_).to.not.be.null;
-            });
+          ad3p.element.setAttribute('sticky', 'bottom');
+          ad3p.buildCallback();
+          const maybeInitStickyAdSpy = env.sandbox.spy(
+            ad3p.uiHandler,
+            'maybeInitStickyAd'
+          );
+          expect(maybeInitStickyAdSpy).to.not.be.called;
+          Services.viewportForDoc(env.ampdoc).scrollObservable_.fire();
+          return Promise.resolve().then(() => {
+            expect(maybeInitStickyAdSpy).to.be.called;
+          });
         });
       });
 
@@ -667,7 +654,7 @@ describes.sandboxed('#getLayoutPriority', {}, () => {
     (env) => {
       it('should return priority of 1', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
+        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority_Enum.METADATA);
       });
     }
   );
@@ -682,7 +669,7 @@ describes.sandboxed('#getLayoutPriority', {}, () => {
     (env) => {
       it('should return priority of 2', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
-        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+        expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority_Enum.ADS);
       });
     }
   );

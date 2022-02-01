@@ -1,19 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
@@ -30,20 +14,21 @@ import {PauseHelper} from '#core/dom/video/pause-helper';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
 import {
   createFrameFor,
   mutedOrUnmutedEvent,
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-brid-player';
 
@@ -367,13 +352,13 @@ class AmpBridPlayer extends AMP.BaseElement {
           break;
       }
       redispatch(element, params[3], {
-        'ready': VideoEvents.LOAD,
-        'play': VideoEvents.PLAYING,
-        'pause': VideoEvents.PAUSE,
-        'ended': VideoEvents.ENDED,
-        'adStart': VideoEvents.AD_START,
-        'adEnd': VideoEvents.AD_END,
-        'loadedmetadata': VideoEvents.LOADEDMETADATA,
+        'ready': VideoEvents_Enum.LOAD,
+        'play': VideoEvents_Enum.PLAYING,
+        'pause': VideoEvents_Enum.PAUSE,
+        'ended': VideoEvents_Enum.ENDED,
+        'adStart': VideoEvents_Enum.AD_START,
+        'adEnd': VideoEvents_Enum.AD_END,
+        'loadedmetadata': VideoEvents_Enum.LOADEDMETADATA,
       });
     }
 

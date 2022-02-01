@@ -1,30 +1,18 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import {measureIntersection} from '#core/dom/layout/intersection';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
+
+import {setSuperClass} from '#preact/amp-base-element';
+
+import {createCustomEvent} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-video-iframe-1.0.css';
-import {createCustomEvent} from '../../../src/event-helper';
 import {postMessageWhenAvailable} from '../../../src/iframe-video';
-import {userAssert} from '../../../src/log';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
+import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
 import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @const {string} */
@@ -44,7 +32,7 @@ function getIntersectionRatioMinAutoplay(element) {
   );
 }
 
-class AmpVideoIframe extends BaseElement {
+class AmpVideoIframe extends setSuperClass(BaseElement, AmpVideoBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -70,12 +58,10 @@ function onMessage(e) {
         (intersectionRatio) => {
           postMessageWhenAvailable(
             currentTarget,
-            JSON.stringify(
-              dict({
-                'id': messageId,
-                'intersectionRatio': intersectionRatio,
-              })
-            )
+            JSON.stringify({
+              'id': messageId,
+              'intersectionRatio': intersectionRatio,
+            })
           );
         }
       );
@@ -89,7 +75,7 @@ function onMessage(e) {
   }
   if (event === 'analytics') {
     // TODO(alanorozco): In classic AMP, this is an indirect chain of:
-    // VideoEvents.CUSTOM_TICK -> VideoAnalyticsEvents.CUSTOM.
+    // VideoEvents.CUSTOM_TICK -> VideoAnalyticsEvents_Enum.CUSTOM.
     // VideoManager "massages" the data for this event, adding a prefix.
     // Whatever the VideoManager does, needs to be refactored.
     return;
@@ -119,10 +105,10 @@ const makeMethodMessage = (method) =>
     'method': method.toLowerCase(),
   });
 
-AmpVideoIframe['staticProps'] = dict({
+AmpVideoIframe['staticProps'] = {
   'onMessage': onMessage,
   'makeMethodMessage': makeMethodMessage,
-});
+};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpVideoIframe, CSS);

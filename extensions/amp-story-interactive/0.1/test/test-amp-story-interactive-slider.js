@@ -1,31 +1,16 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpStoryInteractiveSlider} from '../amp-story-interactive-slider';
-import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {Services} from '#service';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
-import {LocalizationService} from '#service/localization';
-import {getSliderInteractiveData} from './helpers';
 import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {MOCK_URL, getSliderInteractiveData} from './helpers';
+
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {
   MID_SELECTION_CLASS,
   POST_SELECTION_CLASS,
 } from '../amp-story-interactive-abstract';
+import {AmpStoryInteractiveSlider} from '../amp-story-interactive-slider';
 
 describes.realWin(
   'amp-story-interactive-slider',
@@ -36,13 +21,18 @@ describes.realWin(
     let win;
     let ampStorySlider;
     let storyEl;
-    let requestService;
+    let xhrMock;
+    let xhrJson;
 
     beforeEach(() => {
       win = env.win;
       const ampStorySliderEl = win.document.createElement(
         'amp-story-interactive-slider'
       );
+
+      ampStorySliderEl.getAmpDoc = () => new AmpDocSingle(win);
+      ampStorySliderEl.getResources = () => win.__AMP_SERVICES.resources.obj;
+
       ampStorySlider = new AmpStoryInteractiveSlider(ampStorySliderEl);
 
       env.sandbox
@@ -59,11 +49,13 @@ describes.realWin(
       win.document.body.appendChild(storyEl);
       ampStorySlider = new AmpStoryInteractiveSlider(ampStorySliderEl);
 
-      ampStorySliderEl.getAmpDoc = () => new AmpDocSingle(win);
-      ampStorySliderEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-      requestService = new AmpStoryRequestService(win);
-      registerServiceBuilder(win, 'story-request', function () {
-        return requestService;
+      const xhr = Services.xhrFor(env.win);
+      xhrMock = env.sandbox.mock(xhr);
+      xhrMock.expects('fetchJson').resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(xhrJson);
+        },
       });
 
       const localizationService = new LocalizationService(win.document.body);
@@ -165,10 +157,8 @@ describes.realWin(
     });
 
     it('should show post-selection state when backend replies with user selection', async () => {
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getSliderInteractiveData());
-      ampStorySlider.element.setAttribute('endpoint', 'https://example.com');
+      xhrJson = getSliderInteractiveData();
+      ampStorySlider.element.setAttribute('endpoint', MOCK_URL);
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
       expect(ampStorySlider.getRootElement()).to.have.class(
@@ -194,10 +184,8 @@ describes.realWin(
     });
 
     it('should display the average indicator in the correct position', async () => {
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getSliderInteractiveData());
-      ampStorySlider.element.setAttribute('endpoint', 'https://example.com');
+      xhrJson = getSliderInteractiveData();
+      ampStorySlider.element.setAttribute('endpoint', MOCK_URL);
       await ampStorySlider.buildCallback();
       await ampStorySlider.layoutCallback();
       expect(

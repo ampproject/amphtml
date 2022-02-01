@@ -1,18 +1,3 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /**
@@ -123,14 +108,15 @@ const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 const jisonPath = 'extensions/**/*.jison';
 
 const lintGlobs = [
-  '**/*.js',
+  '**/*.{js,jsx}',
+  '**/*.{ts,tsx}',
+  '!**/*.d.ts',
   // To ignore a file / directory, add it to .eslintignore.
 ];
 
 /**
- * This should not include .js files, since those are handled by eslint:
- *  - required terms: notice/notice
- *  - forbidden terms: local/no-forbidden-terms
+ * This should not include .js files, since those are handled by eslint via the
+ * local/no-forbidden-terms rule.
  */
 const presubmitGlobs = [
   '**/*.{css,go,md}',
@@ -213,6 +199,9 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story-player/!(*.amp.html)',
   '!test/fixtures/e2e/amp-story-player/!(*.amp.html)',
 
+  // Remove this from the list after TODO(#37467) gets closed.
+  '!examples/amp-access-fewcents.html',
+
   // TODO(#25149): Fix these invalid files and remove them from this list.
   '!examples/accordion.amp.html',
   '!examples/ad-lightbox.amp.html',
@@ -268,6 +257,8 @@ const htmlFixtureGlobs = [
   '!examples/amp-script/vue-todomvc.amp.html',
   '!examples/amp-skimlinks.html',
   '!examples/amp-smartlinks.html',
+  // TODO(#37285): remove after the new validator rules are pushed with the new npm.
+  '!examples/amp-story-subscriptions/amp-story-subscriptions.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-iframe.provider.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-metering-laa.amp.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-metering-registration-widget.html',
@@ -427,6 +418,9 @@ const htmlFixtureGlobs = [
   '!test/fixtures/e2e/amphtml-ads/image.html',
   '!test/fixtures/e2e/amphtml-ads/lightbox-ad.a4a.html',
   '!test/fixtures/e2e/amphtml-ads/text.html',
+
+  // The following is a server-rendered file which is technically invalid.
+  '!examples/compiler-hydration.html',
 ];
 
 /**

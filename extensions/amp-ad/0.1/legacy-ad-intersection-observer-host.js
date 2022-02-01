@@ -1,24 +1,9 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {MessageType} from '#core/3p-frame-messaging';
-import {Services} from '#service';
-import {SubscriptionApi} from '../../../src/iframe-helper';
-import {dict} from '#core/types/object';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+
+import {Services} from '#service';
+
+import {SubscriptionApi} from '../../../src/iframe-helper';
 
 /**
  * LegacyAdIntersectionObserverHost exists for backward compatibility to support
@@ -81,7 +66,7 @@ export class LegacyAdIntersectionObserverHost {
      */
     this.postMessageApi_ = new SubscriptionApi(
       adIframe,
-      MessageType.SEND_INTERSECTIONS,
+      MessageType_Enum.SEND_INTERSECTIONS,
       true, // is3p
       // Each time someone subscribes we make sure that they
       // get an update.
@@ -214,12 +199,9 @@ export class LegacyAdIntersectionObserverHost {
       return;
     }
     // Note that SubscribeApi multicasts the update to all interested windows.
-    this.postMessageApi_.send(
-      MessageType.INTERSECTION,
-      dict({
-        'changes': this.pendingChanges_,
-      })
-    );
+    this.postMessageApi_.send(MessageType_Enum.INTERSECTION, {
+      'changes': this.pendingChanges_,
+    });
     this.pendingChanges_.length = 0;
   }
 

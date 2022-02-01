@@ -1,20 +1,4 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview
  * Updates Github issues for scheduled public sessions, like
  * Design Reviews (https://go.amp.dev/design-reviews). This involves:
@@ -31,8 +15,8 @@
  * ⚠️ Only use standard node modules.
  * This file cannot depend on `npm install`.
  */
-const https = require('https');
 const {readdir} = require('fs').promises;
+const https = require('https');
 const {relative} = require('path');
 const {RotationItemDef, TemplateDef} = require('./types');
 
@@ -415,7 +399,7 @@ function getSessionDateFromTitle(title) {
   }
   const [
     // @ts-ignore
-    unusedFullMatch, // eslint-disable-line no-unused-vars
+    unusedFullMatch, // eslint-disable-line @typescript-eslint/no-unused-vars
     day,
     time,
   ] = match;

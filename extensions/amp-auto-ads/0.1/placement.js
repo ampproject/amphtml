@@ -1,37 +1,18 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {createElementWithAttributes} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {
-  LayoutMarginsChangeDef,
-  cloneLayoutMarginsChangeDef,
-} from '#core/dom/layout/rect';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
+
+import {dev, user} from '#utils/log';
 
 import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {measurePageLayoutBox} from './measure-page-layout-box';
 
-import {dev, user} from '../../../src/log';
+/** @typedef {import('#core/dom/layout/rect').LayoutMarginsChangeDef} LayoutMarginsChangeDef */
 
 /** @const */
 const TAG = 'amp-auto-ads';
@@ -285,18 +266,14 @@ export class Placement {
    * @private
    */
   createAdElement_(baseAttributes, width) {
-    const attributes = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict({
-          'layout': width ? 'fixed' : 'fixed-height',
-          'height': '0',
-          'width': width ? width : 'auto',
-          'class': 'i-amphtml-layout-awaiting-size',
-        }),
-        baseAttributes,
-        this.attributes_
-      )
-    );
+    const attributes = /** @type {!JsonObject} */ ({
+      'layout': width ? 'fixed' : 'fixed-height',
+      'height': '0',
+      'width': width ? width : 'auto',
+      'class': 'i-amphtml-layout-awaiting-size',
+      ...baseAttributes,
+      ...this.attributes_,
+    });
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',
@@ -310,20 +287,16 @@ export class Placement {
    * @private
    */
   createFullWidthResponsiveAdElement_(baseAttributes) {
-    const attributes = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict({
-          'width': '100vw',
-          'height': '0',
-          'layout': 'fixed',
-          'class': 'i-amphtml-layout-awaiting-size',
-          'data-auto-format': 'rspv',
-          'data-full-width': '',
-        }),
-        baseAttributes,
-        this.attributes_
-      )
-    );
+    const attributes = /** @type {!JsonObject} */ ({
+      'width': '100vw',
+      'height': '0',
+      'layout': 'fixed',
+      'class': 'i-amphtml-layout-awaiting-size',
+      'data-auto-format': 'rspv',
+      'data-full-width': '',
+      ...baseAttributes,
+      ...this.attributes_,
+    });
     return createElementWithAttributes(
       this.ampdoc.win.document,
       'amp-ad',

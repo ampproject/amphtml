@@ -1,18 +1,3 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 /*eslint "max-len": 0*/
@@ -92,7 +77,7 @@ exports.rules = [
     filesMatching: '3p/**/*.js',
     mustNotDependOn: SRC_EXCLUDING_CORE,
     allowlist: [
-      '3p/**->src/log.js',
+      '3p/**->src/utils/log.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
       '3p/**->src/mode.js',
@@ -100,11 +85,10 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
-      '3p/polyfills.js->src/polyfills/promise.js',
-      '3p/messaging.js->src/event-helper.js',
-      '3p/bodymovinanimation.js->src/event-helper.js',
-      '3p/iframe-messaging-client.js->src/event-helper.js',
-      '3p/viqeoplayer.js->src/event-helper.js',
+      '3p/messaging.js->src/utils/event-helper.js',
+      '3p/bodymovinanimation.js->src/utils/event-helper.js',
+      '3p/iframe-messaging-client.js->src/utils/event-helper.js',
+      '3p/viqeoplayer.js->src/utils/event-helper.js',
     ],
   },
   {
@@ -116,7 +100,7 @@ exports.rules = [
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: SRC_EXCLUDING_CORE,
     allowlist: [
-      'ads/**->src/log.js',
+      'ads/**->src/utils/log.js',
       'ads/**->src/mode.js',
       'ads/**->src/url.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
@@ -128,7 +112,7 @@ exports.rules = [
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
-      'ads/google/ima/ima-video.js->src/event-helper.js',
+      'ads/google/ima/ima-video.js->src/utils/event-helper.js',
     ],
   },
   {
@@ -149,9 +133,6 @@ exports.rules = [
   },
 
   // Rules for extensions.
-  // Note: For the multipass build to correctly include depended on code, you
-  // need to add the depended on code to `CLOSURE_SRC_GLOBS` in
-  // build-system/compile/sources.js.
   {
     // Extensions can't depend on other extensions.
     filesMatching: 'extensions/**/*.js',
@@ -168,6 +149,7 @@ exports.rules = [
       'extensions/amp-ad-network-oblivki-impl/0.1/amp-ad-network-oblivki-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-dianomi-impl/0.1/amp-ad-network-dianomi-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-smartadserver-impl/0.1/amp-ad-network-smartadserver-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
 
       // A4A impls importing amp fast fetch header name
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
@@ -207,11 +189,12 @@ exports.rules = [
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-inline-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
-      'extensions/amp-inline-gallery/1.0/amp-inline-gallery-pagination.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+      'extensions/amp-inline-gallery/1.0/pagination-base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+
       'extensions/amp-inline-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/carousel-context.js',
       'extensions/amp-inline-gallery/1.0/pagination.js->extensions/amp-base-carousel/1.0/carousel-context.js',
-      'extensions/amp-inline-gallery/1.0/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/1.0/component.jss.js',
-      'extensions/amp-inline-gallery/1.0/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/1.0/carousel-props.js',
+      'extensions/amp-inline-gallery/1.0/thumbnails-base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
+      'extensions/amp-inline-gallery/1.0/thumbnails-base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
       'extensions/amp-inline-gallery/1.0/thumbnails.js->extensions/amp-base-carousel/1.0/component.js',
       'extensions/amp-inline-gallery/1.0/thumbnails.js->extensions/amp-base-carousel/1.0/carousel-context.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/action-source.js',
@@ -222,6 +205,9 @@ exports.rules = [
       'extensions/amp-stream-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
       'extensions/amp-stream-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/component.js',
 
+      // <amp-dailymotion> versions share this message API definition.
+      'extensions/amp-dailymotion/**->extensions/amp-dailymotion/dailymotion-api.js',
+
       // Autolightboxing dependencies
       'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/component.js',
       'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
@@ -229,13 +215,17 @@ exports.rules = [
       'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-lightbox/1.0/component.jss.js',
       'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
 
+      // <amp-date-display> versions share these date format helpers
+      'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
+
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
-      // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
+      // AmpVideoBaseElement, BentoVideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
       'extensions/**->extensions/amp-video/1.0/video-base-element.js',
+      'extensions/**->extensions/amp-video/1.0/base-element.js',
       'extensions/**->extensions/amp-video/1.0/video-iframe.js',
 
       // <amp-video-iframe> versions share this message API definition.
@@ -273,10 +263,26 @@ exports.rules = [
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-localization-service.js',
 
+      // Story share menu
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-social-share/0.1/amp-social-share.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/request-utils.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/toast.js',
+
+      // Story Shopping
+      'extensions/amp-story-shopping/0.1/amp-story-shopping.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-config.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-config.js->extensions/amp-story/1.0/request-utils.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-store-service.js',
+
       // Interactive components that depend on story functionality.
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/story-analytics.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/request-utils.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/variable-service.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -297,6 +303,16 @@ exports.rules = [
       // amp-smartlinks depends on amp-skimlinks/link-rewriter
       'extensions/amp-smartlinks/0.1/amp-smartlinks.js->extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js',
       'extensions/amp-smartlinks/0.1/linkmate.js->extensions/amp-skimlinks/0.1/link-rewriter/two-steps-response.js',
+
+      'extensions/amp-story-page-attachment/0.1/amp-story-draggable-drawer.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-draggable-drawer.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/loading-spinner.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-open-page-attachment.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/history.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/utils.js',
     ],
   },
   {
@@ -318,6 +334,8 @@ exports.rules = [
         'src/service/extension-script.js',
       'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/extension-script.js',
+      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
@@ -335,8 +353,6 @@ exports.rules = [
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
-        'src/service/video-manager-impl.js',
-      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
         'src/service/video-manager-impl.js',
@@ -367,6 +383,8 @@ exports.rules = [
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
         'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/cookie-writer.js->' +
+        'src/service/cid-impl.js',
+      'extensions/amp-consent/0.1/consent-state-manager.js->' +
         'src/service/cid-impl.js',
       'extensions/amp-consent/0.1/cookie-writer.js->' +
         'src/service/cid-impl.js',
@@ -433,18 +451,15 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
-      '3p/polyfills.js->src/polyfills/promise.js',
       '3p/polyfills.js->src/polyfills/string-starts-with.js',
       'src/amp.js->src/polyfills/index.js',
       'src/polyfills/index.js->src/polyfills/abort-controller.js',
-      'src/polyfills/index.js->src/polyfills/domtokenlist.js',
       'src/polyfills/index.js->src/polyfills/document-contains.js',
       'src/polyfills/index.js->src/polyfills/fetch.js',
       'src/polyfills/index.js->src/polyfills/get-bounding-client-rect.js',
       'src/polyfills/index.js->src/polyfills/math-sign.js',
       'src/polyfills/index.js->src/polyfills/object-assign.js',
       'src/polyfills/index.js->src/polyfills/object-values.js',
-      'src/polyfills/index.js->src/polyfills/promise.js',
       'src/polyfills/index.js->src/polyfills/array-includes.js',
       'src/polyfills/index.js->src/polyfills/string-starts-with.js',
       'src/polyfills/index.js->src/polyfills/custom-elements.js',
@@ -456,7 +471,6 @@ exports.rules = [
       'src/friendly-iframe-embed.js->src/polyfills/abort-controller.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
-      'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
       'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
       'src/friendly-iframe-embed.js->src/polyfills/resize-observer.js',
     ],
@@ -475,7 +489,7 @@ exports.rules = [
     allowlist: [
       'src/core/assert/dev.js->src/core/assert/base.js',
       'src/core/assert/user.js->src/core/assert/base.js',
-      'src/log.js->src/core/assert/base.js',
+      'src/utils/log.js->src/core/assert/base.js',
     ],
   },
 
@@ -483,6 +497,12 @@ exports.rules = [
   {
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'extensions/**/*.js',
+    allowlist: [
+      // Do not add to this allowlist.
+      // These files are here temporarily while all the bento components are moved out of extensions.
+      'src/bento/components/jwplayer/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      'src/bento/components/jwplayer/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+    ],
   },
   {
     filesMatching: 'src/**/*.js',

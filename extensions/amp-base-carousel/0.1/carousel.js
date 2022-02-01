@@ -1,20 +1,21 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {iterateCursor} from '#core/dom';
+import {
+  getStyle,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+} from '#core/dom/style';
+import {clamp, mod} from '#core/math';
+import {debounce} from '#core/types/function';
+
+import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
+import {dev} from '#utils/log';
 
 import {ActionSource} from './action-source';
+import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
+import {AutoAdvance} from './auto-advance';
+import {CarouselAccessibility} from './carousel-accessibility';
+import {CarouselEvents} from './carousel-events';
 import {
   Alignment,
   Axis,
@@ -26,22 +27,6 @@ import {
   updateLengthStyle,
   updateScrollPosition,
 } from './dimensions';
-import {AutoAdvance} from './auto-advance';
-import {CarouselAccessibility} from './carousel-accessibility';
-import {CarouselEvents} from './carousel-events';
-import {backwardWrappingDistance, forwardWrappingDistance} from './array-util';
-import {clamp, mod} from '#core/math';
-import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
-import {debounce} from '#core/types/function';
-import {dev} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {
-  getStyle,
-  setImportantStyles,
-  setStyle,
-  setStyles,
-} from '#core/dom/style';
-import {iterateCursor} from '#core/dom';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -725,12 +710,12 @@ export class Carousel {
       createCustomEvent(
         this.win_,
         CarouselEvents.INDEX_CHANGE,
-        dict({
+        {
           'index': restingIndex,
           'total': this.slides_.length,
           'actionSource': actionSource,
           'slides': this.slides_,
-        }),
+        },
         {
           bubbles: true,
         }
@@ -751,12 +736,12 @@ export class Carousel {
       createCustomEvent(
         this.win_,
         CarouselEvents.OFFSET_CHANGE,
-        dict({
+        {
           'index': index,
           'total': this.slides_.length,
           'offset': this.forwards_ ? -offset : offset,
           'slides': this.slides_,
-        }),
+        },
         {
           bubbles: true,
         }

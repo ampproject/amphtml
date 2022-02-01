@@ -1,20 +1,4 @@
 /**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This file contains experiment configurations that are
  * used in experiment.js. If you are launching a new feature, you should
  * add an experiment block below including a descriptive id string, a
@@ -144,14 +128,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'adsense-ad-size-optimization',
-    name:
-      'Per publisher server side settings for changing the ad size ' +
-      'to responsive.',
-    spec: 'https://github.com/ampproject/amphtml/issues/23568',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24165',
-  },
-  {
     id: 'amp-stream-gallery',
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
@@ -174,19 +150,9 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
   },
   {
-    id: 'layout-aspect-ratio-css',
-    name: 'Responsive layouts implemented via aspect-ratio CSS',
-    spec: 'https://github.com/ampproject/amphtml/issues/30291',
-  },
-  {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
-  },
-  {
-    id: 'amp-story-desktop-one-panel',
-    name: 'New desktop one-panel UI with background blur for stories.',
-    spec: 'https://github.com/ampproject/amphtml/projects/128',
   },
   {
     id: 'flexible-bitrate',
@@ -202,5 +168,30 @@ export const EXPERIMENTS = [
     id: 'story-ad-auto-advance',
     name: 'Auto advancing story ads',
     spec: 'https://github.com/ampproject/amphtml/issues/33969',
+  },
+  {
+    id: 'story-ad-page-outlink',
+    name: 'Story ad CTA page outlink',
+    spec: 'https://github.com/ampproject/amphtml/pull/35867',
+  },
+  {
+    id: 'amp-story-first-page-max-bitrate',
+    name: 'Decrease max bitrate for videos on first page',
+    spec: 'https://github.com/ampproject/amphtml/pull/35389',
+  },
+  {
+    id: 'story-disable-animations-first-page',
+    name: 'Disable animations on the first page that can artificially delay LCP reports',
+    spec: 'https://github.com/ampproject/amphtml/pull/35356',
+  },
+  {
+    id: 'story-load-first-page-only',
+    name: 'Load first page before loading inactive pages',
+    spec: 'https://github.com/ampproject/amphtml/issues/35219',
+  },
+  {
+    id: 'story-load-inactive-outside-viewport',
+    name: 'Load inactive pages outside the viewport to prevent them from counting towards LCP when invisible',
+    spec: 'https://github.com/ampproject/amphtml/pull/35323',
   },
 ];

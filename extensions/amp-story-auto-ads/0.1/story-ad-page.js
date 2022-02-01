@@ -1,62 +1,49 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {
-  A4AVarNames,
-  START_CTA_ANIMATION_ATTR,
-  createCta,
-  getStoryAdMetadataFromDoc,
-  getStoryAdMetadataFromElement,
-  maybeCreateAttribution,
-  validateCtaMetadata,
-} from './story-ad-ui';
+  createElementWithAttributes,
+  isJsonScriptTag,
+  toggleAttribute,
+} from '#core/dom';
+import {elementByTag} from '#core/dom/query';
+import {setStyle} from '#core/dom/style';
+import {map} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
+
+import {getExperimentBranch} from '#experiments';
 import {
-  AdvanceExpToTime,
-  StoryAdAutoAdvance,
-} from '#experiments/story-ad-auto-advance';
+  BranchToTimeValues,
+  StoryAdSegmentExp,
+} from '#experiments/story-ad-progress-segment';
+
+import {getData, listen} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {
   AnalyticsEvents,
   AnalyticsVars,
   STORY_AD_ANALYTICS,
 } from './story-ad-analytics';
 import {
-  BranchToTimeValues,
-  StoryAdSegmentExp,
-} from '#experiments/story-ad-progress-segment';
-import {CommonSignals} from '#core/constants/common-signals';
+  A4AVarNames,
+  START_CTA_ANIMATION_ATTR,
+  createCta,
+  getStoryAdMacroTags,
+  getStoryAdMetaTags,
+  getStoryAdMetadataFromDoc,
+  getStoryAdMetadataFromElement,
+  maybeCreateAttribution,
+  validateCtaMetadata,
+} from './story-ad-ui';
+import {getFrameDoc, localizeCtaText} from './utils';
+
 import {Gestures} from '../../../src/gesture';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
+import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {assertConfig} from '../../amp-ad-exit/0.1/config';
-import {
-  createElementWithAttributes,
-  isJsonScriptTag,
-  toggleAttribute,
-} from '#core/dom';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {dict, map} from '#core/types/object';
-import {elementByTag} from '#core/dom/query';
-import {getData, listen} from '../../../src/event-helper';
-import {getExperimentBranch} from '#experiments';
-import {getFrameDoc, localizeCtaText} from './utils';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {parseJson} from '#core/types/object/json';
-import {setStyle} from '#core/dom/style';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';
@@ -254,6 +241,7 @@ export class StoryAdPage {
       }
 
       const uiMetadata = map();
+      const metaTags = getStoryAdMetaTags(this.adDoc_ ?? this.adElement_);
 
       // Template Ads.
       if (!this.adDoc_) {
@@ -264,7 +252,7 @@ export class StoryAdPage {
       } else {
         Object.assign(
           uiMetadata,
-          getStoryAdMetadataFromDoc(this.adDoc_),
+          getStoryAdMetadataFromDoc(metaTags),
           // TODO(ccordry): Depricate when possible.
           this.readAmpAdExit_()
         );
@@ -280,14 +268,21 @@ export class StoryAdPage {
           this.localizationService_
         ) || uiMetadata[A4AVarNames.CTA_TYPE];
 
-      // Store the cta-type as an accesible var for any further pings.
-      this.analytics_.then((analytics) =>
+      this.analytics_.then((analytics) => {
+        // Store the cta-type as an accesible var for any further pings.
         analytics.setVar(
           this.index_, // adIndex
           AnalyticsVars.CTA_TYPE,
           uiMetadata[A4AVarNames.CTA_TYPE]
-        )
-      );
+        );
+
+        // Set meta tag based variables.
+        for (const [key, value] of Object.entries(
+          getStoryAdMacroTags(metaTags)
+        )) {
+          analytics.setVar(this.index_, `STORY_AD_META_${key}`, value);
+        }
+      });
 
       if (
         (this.adChoicesIcon_ = maybeCreateAttribution(
@@ -314,29 +309,26 @@ export class StoryAdPage {
    * @private
    */
   createPageElement_() {
-    const attributes = dict({
+    const attributes = {
       'ad': '',
+      'aria-hidden': true,
       'distance': '2',
       'i-amphtml-loading': '',
       'id': this.id_,
-    });
+    };
 
-    const autoAdvanceExpBranch = getExperimentBranch(
-      this.win_,
-      StoryAdAutoAdvance.ID
-    );
     const segmentExpBranch = getExperimentBranch(
       this.win_,
       StoryAdSegmentExp.ID
     );
 
-    if (segmentExpBranch && segmentExpBranch !== StoryAdSegmentExp.CONTROL) {
-      attributes['auto-advance-after'] = BranchToTimeValues[segmentExpBranch];
-    } else if (
-      autoAdvanceExpBranch &&
-      autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
+    if (
+      segmentExpBranch &&
+      segmentExpBranch !== StoryAdSegmentExp.CONTROL &&
+      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_BOTH &&
+      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_AD
     ) {
-      attributes['auto-advance-after'] = AdvanceExpToTime[autoAdvanceExpBranch];
+      attributes['auto-advance-after'] = BranchToTimeValues[segmentExpBranch];
     }
 
     const page = createElementWithAttributes(
@@ -370,7 +362,7 @@ export class StoryAdPage {
     this.adElement_
       .signals()
       // TODO(ccordry): Investigate using a better signal waiting for video loads.
-      .whenSignal(CommonSignals.INI_LOAD)
+      .whenSignal(CommonSignals_Enum.INI_LOAD)
       .then(() => this.onAdLoaded_());
 
     // Inabox custom event.

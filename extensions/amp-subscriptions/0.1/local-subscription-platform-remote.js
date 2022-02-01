@@ -1,26 +1,13 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isArray} from '#core/types';
+
+import {Services} from '#service';
+
+import {devAssert, userAssert} from '#utils/log';
 
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
-import {Services} from '#service';
+
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
-import {devAssert, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {isArray} from '#core/types';
 
 /**
  * Implments the remotel local subscriptions platform which uses
@@ -146,9 +133,9 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: dict({
+        headers: {
           'Content-Type': 'text/plain',
-        }),
+        },
         body: this.stringifyPingbackData_(selectedEntitlement),
       });
     });

@@ -1,26 +1,26 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {Deferred} from '#core/data-structures/promise';
+import {getChildJsonConfig} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {prefersReducedMotion} from '#core/dom/media-query-props';
+import {
+  matches,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
+import {map, omit} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {
   PRESET_OPTION_ATTRIBUTES,
   presets,
   setStyleForPreset,
 } from './animation-presets';
-import {Services} from '#service';
 import {
   StoryAnimationConfigDef,
   StoryAnimationDimsDef,
@@ -32,19 +32,8 @@ import {
   WebKeyframesCreateFnDef,
   WebKeyframesDef,
 } from './animation-types';
-import {assertDoesNotContainDisplay, setStyles} from '#core/dom/style';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getChildJsonConfig} from '#core/dom';
-import {map, omit} from '#core/types/object';
-import {prefersReducedMotion} from '#core/dom/media-query-props';
-import {
-  matches,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {timeStrToMillis, unscaledClientRect} from './utils';
-import {isExperimentOn} from '#experiments';
+import {isPreviewMode} from './embed-mode';
+import {isTransformed, timeStrToMillis, unscaledClientRect} from './utils';
 
 const TAG = 'AMP-STORY';
 
@@ -416,7 +405,11 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      this.runner_.resume();
+      try {
+        this.runner_.resume();
+      } catch (e) {
+        // This fails when the story animations are not initialized and resume is called. Context on #35987.
+      }
     }
   }
 
@@ -557,10 +550,15 @@ export class AnimationManager {
     /** @private @const */
     this.builderPromise_ = this.createAnimationBuilderPromise_();
 
+    const firstPageAnimationDisabled =
+      isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') ||
+      isPreviewMode(ampdoc.win) ||
+      isTransformed(ampdoc);
+
     /** @private @const {bool} */
     this.skipAnimations_ =
       prefersReducedMotion(ampdoc.win) ||
-      (isExperimentOn(ampdoc.win, 'story-disable-animations-first-page') &&
+      (firstPageAnimationDisabled &&
         matches(page, 'amp-story-page:first-of-type'));
 
     /** @private {?Array<!AnimationRunner>} */

@@ -1,25 +1,10 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
+import {isAmp4Email} from '#core/document/format';
 import {removeChildren, tryFocus} from '#core/dom';
 import {
-  Layout,
+  Layout_Enum,
   applyFillContent,
   getLayoutClass,
   isLayoutSizeDefined,
@@ -32,7 +17,7 @@ import {
 } from '#core/dom/query';
 import {px, setImportantStyles, setStyles, toggle} from '#core/dom/style';
 import {isArray, toArray} from '#core/types/array';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -45,28 +30,24 @@ import {
 
 import {Services} from '#service';
 
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+import {setupAMPCors, setupInput, setupJsonFetchInit} from '#utils/xhr-utils';
+
 import {setDOM} from '#third_party/set-dom/set-dom';
 
 import {LoadMoreService} from './service/load-more-service';
 
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {
-  UrlReplacementPolicy,
+  UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {isAmp4Email} from '../../../src/format';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {Pass} from '../../../src/pass';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
-import {
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -196,7 +177,7 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    if (layout === Layout.CONTAINER) {
+    if (layout === Layout_Enum.CONTAINER) {
       const doc = this.element.ownerDocument;
       const isEmail = doc && isAmp4Email(doc);
       const hasPlaceholder =
@@ -714,13 +695,16 @@ export class AmpList extends AMP.BaseElement {
    */
   triggerFetchErrorEvent_(error) {
     const event = error
-      ? createCustomEvent(
-          this.win,
-          `${TAG}.error`,
-          dict({'response': error.response})
-        )
+      ? createCustomEvent(this.win, `${TAG}.error`, {
+          'response': error.response,
+        })
       : null;
-    this.action_.trigger(this.element, 'fetch-error', event, ActionTrust.LOW);
+    this.action_.trigger(
+      this.element,
+      'fetch-error',
+      event,
+      ActionTrust_Enum.LOW
+    );
   }
 
   /**
@@ -824,13 +808,13 @@ export class AmpList extends AMP.BaseElement {
         );
         setupJsonFetchInit(r.fetchOpt);
 
-        const attributes = dict({
+        const attributes = {
           'ampListAttributes': {
             'items': this.element.getAttribute('items') || 'items',
             'singleItem': this.element.hasAttribute('single-item'),
             'maxItems': this.element.getAttribute('max-items'),
           },
-        });
+        };
         return this.ssrTemplateHelper_.ssr(
           this.element,
           request,
@@ -1160,7 +1144,7 @@ export class AmpList extends AMP.BaseElement {
 
       const event = createCustomEvent(
         this.win,
-        AmpEvents.DOM_UPDATE,
+        AmpEvents_Enum.DOM_UPDATE,
         /* detail */ null,
         {bubbles: true}
       );
@@ -1343,7 +1327,7 @@ export class AmpList extends AMP.BaseElement {
    */
   attemptToFit_(target) {
     if (
-      this.element.getAttribute('layout') == Layout.CONTAINER &&
+      this.element.getAttribute('layout') == Layout_Enum.CONTAINER &&
       !this.enableManagedResizing_
     ) {
       return Promise.resolve(true);
@@ -1379,7 +1363,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFitLoadMoreElement_(element, target) {
-    if (this.element.getAttribute('layout') == Layout.CONTAINER) {
+    if (this.element.getAttribute('layout') == Layout_Enum.CONTAINER) {
       return;
     }
     this.measureElement(() => {
@@ -1420,15 +1404,15 @@ export class AmpList extends AMP.BaseElement {
     // TODO(amphtml): Remove [width] and [height] attributes too?
     if (
       [
-        Layout.FIXED,
-        Layout.FLEX_ITEM,
-        Layout.FLUID,
-        Layout.INTRINSIC,
-        Layout.RESPONSIVE,
+        Layout_Enum.FIXED,
+        Layout_Enum.FLEX_ITEM,
+        Layout_Enum.FLUID,
+        Layout_Enum.INTRINSIC,
+        Layout_Enum.RESPONSIVE,
       ].includes(layout)
     ) {
       setStyles(this.element, {width: '', height: ''});
-    } else if (layout == Layout.FIXED_HEIGHT) {
+    } else if (layout == Layout_Enum.FIXED_HEIGHT) {
       setStyles(this.element, {height: ''});
     }
 
@@ -1456,7 +1440,7 @@ export class AmpList extends AMP.BaseElement {
     }
     const previousLayout = this.element.getAttribute('i-amphtml-layout');
     // If we have already changed to layout container, no need to run again.
-    if (previousLayout == Layout.CONTAINER) {
+    if (previousLayout == Layout_Enum.CONTAINER) {
       return Promise.resolve();
     }
     return this.mutateElement(() => {
@@ -1639,18 +1623,18 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @return {!UrlReplacementPolicy}
+   * @return {!UrlReplacementPolicy_Enum}
    */
   getPolicy_() {
     const src = this.element.getAttribute('src');
     // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
-    let policy = UrlReplacementPolicy.OPT_IN;
+    let policy = UrlReplacementPolicy_Enum.OPT_IN;
     if (
       src == this.initialSrc_ ||
       getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
     ) {
-      policy = UrlReplacementPolicy.ALL;
+      policy = UrlReplacementPolicy_Enum.ALL;
     }
     return policy;
   }

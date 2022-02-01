@@ -1,27 +1,23 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Facebook} from './component';
-import {PreactBaseElement} from '#preact/base-element';
+import {userAssert} from '#core/assert';
 import {dashToUnderline} from '#core/types/string';
+
+import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoFacebook} from './component';
+
+/** @const {string} */
+export const TAG = 'bento-facebook';
+export const COMMENTS_TAG = 'bento-facebook-comments';
+export const LIKE_TAG = 'bento-facebook-like';
+export const PAGE_TAG = 'bento-facebook-page';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = Facebook;
+BaseElement['Component'] = BentoFacebook;
+
+/** @override */
+BaseElement['loadable'] = true;
 
 /** @override */
 BaseElement['props'] = {
@@ -32,9 +28,12 @@ BaseElement['props'] = {
     attr: 'data-locale',
     default: dashToUnderline(window.navigator.language),
   },
+  // TODO(wg-components): Current behavior defaults to loading="auto".
+  // Refactor to make loading="lazy" as the default.
+  'loading': {attr: 'data-loading'},
   // amp-facebook
   'allowFullScreen': {attr: 'data-allowfullscreen'},
-  'embedAs': {attr: 'data-embed-as'},
+  'embedAs': {attrs: ['data-embed-as'], parseAttrs: parseEmbed},
   'includeCommentParent': {
     attr: 'data-include-comment-parent',
     type: 'boolean',
@@ -61,8 +60,38 @@ BaseElement['props'] = {
   'tabs': {attr: 'data-tabs'},
 };
 
+/**
+ * Checks for valid data-embed-as attribute when given.
+ * @param {!Element} element
+ * @return {string}
+ */
+function parseEmbed(element) {
+  const embedAs = element.getAttribute('data-embed-as');
+  userAssert(
+    !embedAs ||
+      ['post', 'video', 'comments', 'like', 'page'].indexOf(embedAs) !== -1,
+    'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
+      ' "post", "video", "comments", "like", or "page", but was: %s',
+    embedAs
+  );
+  userAssert(
+    embedAs !== 'comment',
+    'Embedded Comments have been deprecated: https://developers.facebook.com/docs/plugins/embedded-comments'
+  );
+  return embedAs;
+}
+
 /** @override */
 BaseElement['layoutSizeDefined'] = true;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;
+
+export class CommentsBaseElement extends BaseElement {}
+CommentsBaseElement['staticProps'] = {'embedAs': 'comments'};
+
+export class LikeBaseElement extends BaseElement {}
+LikeBaseElement['staticProps'] = {'embedAs': 'like'};
+
+export class PageBaseElement extends BaseElement {}
+PageBaseElement['staticProps'] = {'embedAs': 'page'};

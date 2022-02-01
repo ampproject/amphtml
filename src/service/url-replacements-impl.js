@@ -1,25 +1,11 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as mode from '#core/mode';
 import {hasOwn} from '#core/types/object';
 import {getHashParams, parseQueryString} from '#core/types/string/url';
 import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
 
 import {Expander} from './url-expander/expander';
 import {
@@ -33,7 +19,6 @@ import {
 } from './variable-source';
 
 import {getTrackImpressionPromise} from '../impression';
-import {dev, devAssert, user, userAssert} from '../log';
 import {
   installServiceInEmbedDoc,
   registerServiceBuilderForDoc,
@@ -479,7 +464,11 @@ export class GlobalVariableSource extends VariableSource {
       (variable) =>
         win.navigator?.userAgentData
           ?.getHighEntropyValues([variable])
-          ?.then((values) => values[variable]) || Promise.resolve('')
+          ?.then((values) =>
+            typeof values[variable] !== 'object'
+              ? values[variable]
+              : JSON.stringify(values[variable])
+          ) || Promise.resolve('')
     );
 
     // Returns the time it took to load the whole page. (excludes amp-* elements

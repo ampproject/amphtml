@@ -8,21 +8,28 @@ on:
       tag:
         description: 'npm package tag (latest | nightly)'
         required: true
+env:
+  SCRIPTS_REPO: 'https://raw.githubusercontent.com/ampproject/amphtml/main'
+  SCRIPTS_DIR: 'build-system/npm-publish'
 jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
       extensions: ${{ steps.get-extensions.outputs.extensions }}
     steps:
+      - name: Print inputs
+        run: |
+          echo "AMP version: ${{ github.event.inputs.ampversion }}"
+          echo "npm tag: ${{ github.event.inputs.tag }}"
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.events.inputs.ampversion }}
       - name: Get latest scripts
-        run: wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/get-extensions.js" -O ./build-system/npm-publish/get-extensions.js
+        run: wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-extensions.js" -O ${{ env.SCRIPTS_DIR }}/get-extensions.js
       - name: Get extensions to publish
         id: get-extensions
         run: |
-          EXTENSIONS=$(node ./build-system/npm-publish/get-extensions.js)
+          EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-extensions.js)
           echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
   publish:
     if: github.repository == 'ampproject/amphtml'
@@ -38,18 +45,18 @@ jobs:
           ref: ${{ github.events.inputs.ampversion }}
       - uses: actions/setup-node@v2
         with:
-          check-latest: true
           registry-url: https://registry.npmjs.org
+          node-version: 16
       - name: Get latest scripts
         run: |
-          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/utils.js" -O ./build-system/npm-publish/utils.js
-          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/build-npm-binaries.js" -O ./build-system/npm-publish/build-npm-binaries.js
-          wget -q "https://raw.githubusercontent.com/ampproject/amphtml/main/build-system/npm-publish/write-package-files.js" -O ./build-system/npm-publish/write-package-files.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/utils.js" -O ${{ env.SCRIPTS_DIR }}/utils.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/build-npm-binaries.js" -O ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/write-package-files.js" -O ${{ env.SCRIPTS_DIR }}/write-package-files.js
       - name: Build package
         run: |
-          npm install
-          node ./build-system/npm-publish/build-npm-binaries.js ${{ matrix.extension }}
-          node ./build-system/npm-publish/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }} ${{ matrix.version }}
+          npm ci
+          node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }}
+          node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }} ${{ matrix.version }}
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: npm publish ./extensions/${{ matrix.extension }}/${{ matrix.version }} --access public --tag ${{ github.event.inputs.tag }}

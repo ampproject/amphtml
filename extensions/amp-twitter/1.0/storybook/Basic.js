@@ -1,26 +1,12 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
-import {Twitter} from '../component';
-import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
+
+import {BentoTwitter} from '../component';
 
 export default {
   title: 'Twitter',
-  component: Twitter,
+  component: BentoTwitter,
   decorators: [withKnobs],
 };
 
@@ -33,7 +19,7 @@ export const _default = () => {
   const cards = boolean('show cards', true) ? undefined : 'hidden';
   const conversation = boolean('show conversation', false) ? undefined : 'none';
   return (
-    <Twitter
+    <BentoTwitter
       cards={cards}
       conversation={conversation}
       tweetid={tweetId}
@@ -45,7 +31,7 @@ export const _default = () => {
 export const moments = () => {
   const limit = number('limit to', 2);
   return (
-    <Twitter
+    <BentoTwitter
       limit={limit}
       momentid="1009149991452135424"
       style={{width: '300px', height: '200px'}}
@@ -63,7 +49,7 @@ export const timelines = () => {
   const timelineScreenName = 'amphtml';
   const timelineUserId = '3450662892';
   return (
-    <Twitter
+    <BentoTwitter
       tweetLimit={tweetLimit}
       timelineSourceType={timelineSourceType}
       timelineScreenName={timelineScreenName}

@@ -1,20 +1,4 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview Registers all known ad network factories and then executes
  * one of them.
  *
@@ -29,7 +13,7 @@ import './polyfills';
 import {draw3p, init} from './integration-lib';
 import {getMode} from '../src/mode';
 import {register} from './3p';
-import {user} from 'src/log';
+import {user} from '#utils/log';
 
 // 3P - please keep in alphabetic order
 import {beopinion} from './beopinion';
@@ -73,6 +57,7 @@ import {adplugg} from '#ads/vendors/adplugg';
 import {adpon} from '#ads/vendors/adpon';
 import {adpushup} from '#ads/vendors/adpushup';
 import {adreactor} from '#ads/vendors/adreactor';
+import {ads2bid} from '#ads/vendors/ads2bid';
 import {adsensor} from '#ads/vendors/adsensor';
 import {adservsolutions} from '#ads/vendors/adservsolutions';
 import {adsloom} from '#ads/vendors/adsloom';
@@ -99,6 +84,7 @@ import {anyclip} from '#ads/vendors/anyclip';
 import {appnexus} from '#ads/vendors/appnexus';
 import {appvador} from '#ads/vendors/appvador';
 import {atomx} from '#ads/vendors/atomx';
+import {avantisvideo} from '#ads/vendors/avantisvideo';
 import {baidu} from '#ads/vendors/baidu';
 import {beaverads} from '#ads/vendors/beaverads';
 import {bidtellect} from '#ads/vendors/bidtellect';
@@ -252,7 +238,6 @@ import {sharethrough} from '#ads/vendors/sharethrough';
 import {shemedia} from '#ads/vendors/shemedia';
 import {sklik} from '#ads/vendors/sklik';
 import {slimcutmedia} from '#ads/vendors/slimcutmedia';
-import {smartadserver} from '#ads/vendors/smartadserver';
 import {smartclip} from '#ads/vendors/smartclip';
 import {smi2} from '#ads/vendors/smi2';
 import {smilewanted} from '#ads/vendors/smilewanted';
@@ -285,7 +270,6 @@ import {unruly} from '#ads/vendors/unruly';
 import {uzou} from '#ads/vendors/uzou';
 import {valuecommerce} from '#ads/vendors/valuecommerce';
 import {vdoai} from '#ads/vendors/vdoai';
-import {verizonmedia} from '#ads/vendors/verizonmedia';
 import {videointelligence} from '#ads/vendors/videointelligence';
 import {videonow} from '#ads/vendors/videonow';
 import {viralize} from '#ads/vendors/viralize';
@@ -355,6 +339,7 @@ register('adpon', adpon);
 register('adpushup', adpushup);
 register('adreactor', adreactor);
 register('adsensor', adsensor);
+register('ads2bid', ads2bid);
 register('adservsolutions', adservsolutions);
 register('adsloom', adsloom);
 register('adsnative', adsnative);
@@ -380,6 +365,7 @@ register('anyclip', anyclip);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
+register('avantisvideo', avantisvideo);
 register('baidu', baidu);
 register('beaverads', beaverads);
 register('beopinion', beopinion);
@@ -543,7 +529,6 @@ register('shemedia', shemedia);
 register('sklik', sklik);
 register('ssp', ssp);
 register('slimcutmedia', slimcutmedia);
-register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('smi2', smi2);
 register('smilewanted', smilewanted);
@@ -576,7 +561,6 @@ register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);
 register('vdoai', vdoai);
-register('verizonmedia', verizonmedia);
 register('videointelligence', videointelligence);
 register('videonow', videonow);
 register('viqeoplayer', viqeoplayer);

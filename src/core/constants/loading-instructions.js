@@ -1,20 +1,4 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * An expanded set of loading instructions based on
  * https://developer.mozilla.org/en-US/docs/Web/Performance/Lazy_loading.
  *
@@ -23,7 +7,7 @@
  *
  * @enum {string}
  */
-export const Loading = {
+export const Loading_Enum = {
   /**
    * If parent is available, fallback to its loading strategy (e.g. based on
    * whether the document is visible or not).
@@ -47,24 +31,35 @@ export const Loading = {
   UNLOAD: 'unload',
 };
 
-/** @const {!Array<!Loading>} */
-const ORDER = [Loading.AUTO, Loading.LAZY, Loading.EAGER, Loading.UNLOAD];
+/**
+ * @type {Array<Loading_Enum>}
+ * @const
+ */
+const ORDER = [
+  Loading_Enum.AUTO,
+  Loading_Enum.LAZY,
+  Loading_Enum.EAGER,
+  Loading_Enum.UNLOAD,
+];
 
-/** @const {!Object<string, number>} */
+/**
+ * @type {Object<string, number>}
+ * @const
+ */
 const MAP = {
-  [Loading.AUTO]: 0,
-  [Loading.LAZY]: 1,
-  [Loading.EAGER]: 2,
-  [Loading.UNLOAD]: 3,
+  [Loading_Enum.AUTO]: 0,
+  [Loading_Enum.LAZY]: 1,
+  [Loading_Enum.EAGER]: 2,
+  [Loading_Enum.UNLOAD]: 3,
 };
 
 /**
  * Returns the loading instruction with a higher priority. The priority
  * order is auto -> lazy -> eager -> unload.
  *
- * @param {!Loading|string} v1
- * @param {!Loading|string} v2
- * @return {!Loading}
+ * @param {Loading_Enum|string} v1
+ * @param {Loading_Enum|string} v2
+ * @return {Loading_Enum}
  */
 export function reducer(v1, v2) {
   const ordinal1 = MAP[v1] || 0;

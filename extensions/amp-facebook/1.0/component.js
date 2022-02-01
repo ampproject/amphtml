@@ -1,26 +1,12 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
+import {tryParseJson} from '#core/types/object/json';
+import {dashToUnderline} from '#core/types/string';
 
 import * as Preact from '#preact';
-import {MessageType, ProxyIframeEmbed} from '#preact/component/3p-frame';
-import {dashToUnderline} from '#core/types/string';
-import {deserializeMessage} from '#core/3p-frame-messaging';
-import {forwardRef} from '#preact/compat';
-import {tryParseJson} from '#core/types/object/json';
 import {useCallback, useLayoutEffect, useMemo, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {useValueRef} from '#preact/component';
+import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 
 /** @const {string} */
 const TYPE = 'facebook';
@@ -29,11 +15,11 @@ const MATCHES_MESSAGING_ORIGIN = () => true;
 const DEFAULT_TITLE = 'Facebook comments';
 
 /**
- * @param {!FacebookDef.Props} props
- * @param {{current: ?FacebookDef.Api}} ref
+ * @param {!BentoFacebookDef.Props} props
+ * @param {{current: ?BentoFacebookDef.Api}} ref
  * @return {PreactDef.Renderable}
  */
-function FacebookWithRef(
+function BentoFacebookWithRef(
   {
     action,
     colorscheme,
@@ -46,7 +32,7 @@ function FacebookWithRef(
     layout,
     locale: localeProp,
     numPosts,
-    onReady,
+    onLoad,
     orderBy,
     refLabel,
     requestResize,
@@ -63,13 +49,14 @@ function FacebookWithRef(
   ref
 ) {
   const [height, setHeight] = useState(null);
+  const onLoadRef = useValueRef(onLoad);
   const messageHandler = useCallback(
     (event) => {
       const data = tryParseJson(event.data) ?? deserializeMessage(event.data);
       if (data['action'] == 'ready') {
-        onReady?.();
+        onLoadRef.current?.();
       }
-      if (data['type'] == MessageType.EMBED_SIZE) {
+      if (data['type'] == MessageType_Enum.EMBED_SIZE) {
         const height = data['height'];
         if (requestResize) {
           requestResize(height);
@@ -79,7 +66,7 @@ function FacebookWithRef(
         }
       }
     },
-    [requestResize, onReady]
+    [requestResize, onLoadRef]
   );
 
   const [locale, setLocale] = useState(localeProp);
@@ -159,6 +146,6 @@ function FacebookWithRef(
   );
 }
 
-const Facebook = forwardRef(FacebookWithRef);
-Facebook.displayName = 'Facebook'; // Make findable for tests.
-export {Facebook};
+const BentoFacebook = forwardRef(BentoFacebookWithRef);
+BentoFacebook.displayName = 'BentoFacebook'; // Make findable for tests.
+export {BentoFacebook};

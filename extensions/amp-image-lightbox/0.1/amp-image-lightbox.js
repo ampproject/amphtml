@@ -1,20 +1,4 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {bezierCurve} from '#core/data-structures/curve';
 import * as dom from '#core/dom';
 import {
@@ -33,9 +17,11 @@ import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
 
+import {Animation} from '#utils/animation';
+import {isLoaded} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
-import {Animation} from '../../../src/animation';
-import {isLoaded} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
@@ -43,7 +29,6 @@ import {
   TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
-import {dev, userAssert} from '../../../src/log';
 import {continueMotion} from '../../../src/motion';
 
 const TAG = 'amp-image-lightbox';
@@ -930,7 +915,7 @@ class AmpImageLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.key == Keys.ESCAPE) {
+    if (event.key == Keys_Enum.ESCAPE) {
       event.preventDefault();
       this.close();
     }

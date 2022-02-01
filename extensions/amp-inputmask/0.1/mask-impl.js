@@ -1,21 +1,4 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpEvents} from '#core/constants/amp-events';
-import {dict} from '#core/types/object';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
 import {factory as inputmaskCustomAliasFactory} from './inputmask-custom-alias';
@@ -24,7 +7,7 @@ import {MaskInterface} from './mask-interface';
 
 import {requireExternal} from '../../../src/module';
 
-const NamedMasksToInputmask = dict({
+const NamedMasksToInputmask = {
   [NamedMasks.PAYMENT_CARD]: 'payment-card',
   [NamedMasks.DATE_DD_MM_YYYY]: {
     'alias': 'datetime',
@@ -42,9 +25,9 @@ const NamedMasksToInputmask = dict({
     'alias': 'datetime',
     'inputFormat': 'yyyy-mm-dd',
   },
-});
+};
 
-const MaskCharsToInputmask = dict({
+const MaskCharsToInputmask = {
   [MaskChars.ALPHANUMERIC_REQUIRED]: '*',
   [MaskChars.ALPHANUMERIC_OPTIONAL]: '[*]',
   [MaskChars.ALPHABETIC_REQUIRED]: 'a',
@@ -54,7 +37,7 @@ const MaskCharsToInputmask = dict({
   [MaskChars.NUMERIC_REQUIRED]: '9',
   [MaskChars.NUMERIC_OPTIONAL]: '[9]',
   [MaskChars.ESCAPE]: '\\',
-});
+};
 
 /**
  * TODO(cvializ): allow masks to be passed as data
@@ -71,13 +54,13 @@ export class Mask {
 
     this.element_ = element;
 
-    const config = dict({
+    const config = {
       'placeholder': '\u2000',
       'showMaskOnHover': false,
       'showMaskOnFocus': false,
       'noValuePatching': true,
       'jitMasking': true,
-    });
+    };
 
     const trimmedMask = mask.trim();
     const namedFormat = NamedMasksToInputmask[trimmedMask];
@@ -99,7 +82,7 @@ export class Mask {
 
     this.controller_ = this.Inputmask_(config);
 
-    this.element_.addEventListener(AmpEvents.FORM_VALUE_CHANGE, () => {
+    this.element_.addEventListener(AmpEvents_Enum.FORM_VALUE_CHANGE, () => {
       this.mask();
     });
   }
@@ -120,18 +103,16 @@ export class Mask {
     inputmaskCustomAliasFactory(Inputmask);
     inputmaskPaymentCardAliasFactory(Inputmask);
 
-    Inputmask.extendDefaults(
-      dict({
-        // A list of supported input type attribute values
-        'supportsInputType': [
-          'text',
-          'tel',
-          'search',
-          // 'password', // use-case?
-          // 'email', // doesn't support setSelectionRange. workaround?
-        ],
-      })
-    );
+    Inputmask.extendDefaults({
+      // A list of supported input type attribute values
+      'supportsInputType': [
+        'text',
+        'tel',
+        'search',
+        // 'password', // use-case?
+        // 'email', // doesn't support setSelectionRange. workaround?
+      ],
+    });
 
     return Inputmask;
   }

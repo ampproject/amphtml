@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {toggleAttribute} from '#core/dom';
 import {
   childElement,
@@ -23,12 +7,14 @@ import {
 import {srcsetFromElement} from '#core/dom/srcset';
 import {toggle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 
-import {LightboxGalleryProvider, WithLightbox} from './component';
+import {
+  BentoLightboxGalleryProvider,
+  WithBentoLightboxGallery,
+} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 
 import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
@@ -84,14 +70,14 @@ export class BaseElement extends PreactBaseElement {
       this.element.ownerDocument,
       (opt_index, opt_group) => this.api().open(opt_index, opt_group)
     );
-    return dict({
+    return {
       'onBeforeOpen': () => this.beforeOpen(),
       'onAfterOpen': () => this.afterOpen(),
       'onAfterClose': () => this.afterClose(),
       'onViewGrid': () => this.onViewGrid(),
       'onToggleCaption': () => this.onToggleCaption(),
       'render': () => lightboxElements,
-    });
+    };
   }
 
   /** @override */
@@ -188,7 +174,7 @@ function processLightboxElement(
     ? element
     : childElement(element, isLightboxEligible);
   return (
-    <WithLightbox
+    <WithBentoLightboxGallery
       group={group}
       as="img"
       caption={getDescriptionForElement(document, img)}
@@ -245,7 +231,7 @@ function getDescriptionForElement(document, element) {
 }
 
 /** @override */
-BaseElement['Component'] = LightboxGalleryProvider;
+BaseElement['Component'] = BentoLightboxGalleryProvider;
 
 /** @override */
 BaseElement['usesShadowDom'] = true;

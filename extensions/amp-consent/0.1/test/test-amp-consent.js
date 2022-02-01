@@ -1,19 +1,17 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 
+import {xhrServiceForTesting} from '#service/xhr-impl';
+
+import {dev, user} from '#utils/log';
+
+import {macroTask} from '#testing/helpers';
+
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service-helpers';
+import {removeSearch} from '../../../../src/url';
+import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {ACTION_TYPE, AmpConsent} from '../amp-consent';
 import {
   CONSENT_ITEM_STATE,
@@ -24,18 +22,7 @@ import {
   constructMetadata,
   getConsentStateValue,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentStateManager} from '../consent-state-manager';
-import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
-import {dev, user} from '../../../../src/log';
-import {dict} from '#core/types/object';
-import {macroTask} from '#testing/yield';
-import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../../../src/service-helpers';
-import {removeSearch} from '../../../../src/url';
-import {xhrServiceForTesting} from '#service/xhr-impl';
 
 describes.realWin(
   'amp-consent',
@@ -132,7 +119,7 @@ describes.realWin(
         let consentElement;
 
         it('get consent/policy/postPromptUI config', async () => {
-          const config = dict({
+          const config = {
             'consentInstanceId': 'test',
             'checkConsentHref': '/override',
             'consentRequired': true,
@@ -140,7 +127,7 @@ describes.realWin(
               'test': 'ABC',
             },
             'postPromptUI': 'test',
-          });
+          };
           consentElement = createConsentElement(doc, config);
           const postPromptUI = document.createElement('div');
           postPromptUI.setAttribute('id', 'test');
@@ -162,13 +149,10 @@ describes.realWin(
 
         it('relative checkConsentHref is resolved', async () => {
           const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
-          consentElement = createConsentElement(
-            doc,
-            dict({
-              'checkConsentHref': '/r/1',
-              'consentInstanceId': 'XYZ',
-            })
-          );
+          consentElement = createConsentElement(doc, {
+            'checkConsentHref': '/r/1',
+            'consentInstanceId': 'XYZ',
+          });
           const ampConsent = new AmpConsent(consentElement);
           doc.body.appendChild(consentElement);
           const getUrlStub = env.sandbox.stub(ampdoc, 'getUrl');
@@ -186,13 +170,10 @@ describes.realWin(
 
         it('supports checkConsentHref expansion', async () => {
           const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
-          consentElement = createConsentElement(
-            doc,
-            dict({
-              'checkConsentHref': 'https://example.test?cid=CLIENT_ID&r=RANDOM',
-              'consentInstanceId': 'test',
-            })
-          );
+          consentElement = createConsentElement(doc, {
+            'checkConsentHref': 'https://example.test?cid=CLIENT_ID&r=RANDOM',
+            'consentInstanceId': 'test',
+          });
           const ampConsent = new AmpConsent(consentElement);
           doc.body.appendChild(consentElement);
           await ampConsent.buildCallback();
@@ -207,13 +188,13 @@ describes.realWin(
       let ampConsent;
       let consentElement;
       beforeEach(() => {
-        defaultConfig = dict({
+        defaultConfig = {
           'consents': {
             'ABC': {
               'checkConsentHref': 'https://response1',
             },
           },
-        });
+        };
         consentElement = createConsentElement(doc, defaultConfig);
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
@@ -850,13 +831,13 @@ describes.realWin(
       let ampConsent;
 
       beforeEach(() => {
-        const defaultConfig = dict({
+        const defaultConfig = {
           'consents': {
             'ABC': {
               'checkConsentHref': 'https://response1',
             },
           },
-        });
+        };
         const consentElement = createConsentElement(doc, defaultConfig);
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
@@ -939,14 +920,11 @@ describes.realWin(
 
       describe('config', () => {
         it('shoud expose if in config', async () => {
-          consentElement = createConsentElement(
-            doc,
-            dict({
-              'consentInstanceId': 'abc',
-              'checkConsentHref': 'https://response1',
-              'exposesTcfApi': true,
-            })
-          );
+          consentElement = createConsentElement(doc, {
+            'consentInstanceId': 'abc',
+            'checkConsentHref': 'https://response1',
+            'exposesTcfApi': true,
+          });
           doc.body.appendChild(consentElement);
           ampConsent = new AmpConsent(consentElement);
           await ampConsent.buildCallback();
@@ -969,14 +947,11 @@ describes.realWin(
             'https://server-test-2/':
               '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "mystring"}',
           };
-          consentElement = createConsentElement(
-            doc,
-            dict({
-              'consentInstanceId': 'abc',
-              'checkConsentHref': 'https://server-test-2/',
-              'exposesTcfApi': true,
-            })
-          );
+          consentElement = createConsentElement(doc, {
+            'consentInstanceId': 'abc',
+            'checkConsentHref': 'https://server-test-2/',
+            'exposesTcfApi': true,
+          });
           doc.body.appendChild(consentElement);
           ampConsent = new AmpConsent(consentElement);
           ampVideoIframe = document.createElement('amp-video-iframe');
@@ -1030,13 +1005,13 @@ describes.realWin(
       let ampConsent;
       let consentElement;
       beforeEach(() => {
-        defaultConfig = dict({
+        defaultConfig = {
           'consents': {
             'ABC': {
               'promptIfUnknownForGeoGroup': 'testGroup',
             },
           },
-        });
+        };
         consentElement = createConsentElement(doc, defaultConfig);
       });
 
@@ -1061,17 +1036,14 @@ describes.realWin(
 
       it('geo override promptIfUnknown', async () => {
         ISOCountryGroups = ['unknown'];
-        consentElement = createConsentElement(
-          doc,
-          dict({
-            'consents': {
-              'ABC': {
-                'checkConsentHref': 'https://response1',
-                'promptIfUnknownForGeoGroup': 'testGroup',
-              },
+        consentElement = createConsentElement(doc, {
+          'consents': {
+            'ABC': {
+              'checkConsentHref': 'https://response1',
+              'promptIfUnknownForGeoGroup': 'testGroup',
             },
-          })
-        );
+          },
+        });
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         await ampConsent.buildCallback();
@@ -1089,13 +1061,13 @@ describes.realWin(
       let iframe;
       let consentElement;
       beforeEach(() => {
-        defaultConfig = dict({
+        defaultConfig = {
           'consents': {
             'ABC': {
               'checkConsentHref': 'https://response1',
             },
           },
-        });
+        };
         consentElement = createConsentElement(doc, defaultConfig);
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
@@ -1250,7 +1222,7 @@ describes.realWin(
       let postPromptUI;
 
       beforeEach(() => {
-        defaultConfig = dict({
+        defaultConfig = {
           'consents': {
             'ABC': {
               'checkConsentHref': 'https://response1',
@@ -1258,7 +1230,7 @@ describes.realWin(
             },
           },
           'postPromptUI': 'test',
-        });
+        };
         consentElement = createConsentElement(doc, defaultConfig);
         uiElement = document.createElement('div');
         uiElement.setAttribute('id', '123');
@@ -1404,11 +1376,11 @@ describes.realWin(
 
         describe('hide/show postPromptUI with local storage', () => {
           beforeEach(() => {
-            defaultConfig = dict({
+            defaultConfig = {
               'consentInstanceId': 'ABC',
               'consentRequired': true,
               'postPromptUI': 'test2',
-            });
+            };
             consentElement = createConsentElement(doc, defaultConfig);
             postPromptUI = doc.createElement('div');
             postPromptUI.setAttribute('id', 'test2');
@@ -1449,7 +1421,7 @@ describes.realWin(
 
         describe('hide/show postPromptUI', () => {
           beforeEach(() => {
-            defaultConfig = dict({
+            defaultConfig = {
               'consents': {
                 'ABC': {
                   'checkConsentHref': 'https://response3',
@@ -1458,7 +1430,7 @@ describes.realWin(
               // There's already an amp-consent from a parent beforeEach with a
               // test postPromptUI
               'postPromptUI': 'test2',
-            });
+            };
             consentElement = createConsentElement(doc, defaultConfig);
             postPromptUI = doc.createElement('div');
             postPromptUI.setAttribute('id', 'test2');
@@ -1504,9 +1476,9 @@ describes.realWin(
           'https://server-test-3/':
             '{"consentRequired": true, "purposeConsentRequired": "verybad"}',
         };
-        defaultConfig = dict({
+        defaultConfig = {
           'consentInstanceId': 'abc',
-        });
+        };
       });
 
       describe('purposeConsentRequired', () => {

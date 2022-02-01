@@ -1,61 +1,52 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {VideoEvents} from '../../../src/video-interface';
-import {VisibilityState} from '#core/constants/visibility-state';
-import {addParamsToUrl} from '../../../src/url';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {
-  childElement,
-  childElementByTag,
-  childElementsByTag,
-  matches,
-} from '#core/dom/query';
-import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert, user} from '../../../src/log';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {
   addAttributesToElement,
   dispatchCustomEvent,
   insertAfterOrAtStart,
   removeElement,
 } from '#core/dom';
-import {fetchCachedSources} from './video-cache';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import {getBitrateManager} from './flexible-bitrate';
-import {getMode} from '../../../src/mode';
-import {htmlFor} from '#core/dom/static-template';
-import {installVideoManagerForDoc} from '#service/video-manager-impl';
-import {isExperimentOn} from '#experiments';
-import {listen, listenOncePromise} from '../../../src/event-helper';
-import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {
+  childElement,
+  childElementByTag,
+  childElementsByTag,
+  matches,
+} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {
   propagateObjectFitStyles,
   setImportantStyles,
   setInitialDisplay,
   setStyles,
 } from '#core/dom/style';
+import {tryPlay} from '#core/dom/video';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 import {toArray} from '#core/types/array';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {listen, listenOncePromise} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
+import {descendsFromStory} from '#utils/story';
+
+import {getBitrateManager} from './flexible-bitrate';
+import {fetchCachedSources} from './video-cache';
+
+import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
+import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {getMode} from '../../../src/mode';
+import {addParamsToUrl} from '../../../src/url';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-video';
 
@@ -346,7 +337,7 @@ export class AmpVideo extends AMP.BaseElement {
       /* opt_removeMissingAttrs */ true
     );
     if (mutations['src']) {
-      dispatchCustomEvent(element, VideoEvents.RELOAD);
+      dispatchCustomEvent(element, VideoEvents_Enum.RELOAD);
     }
     if (mutations['artwork'] || mutations['poster']) {
       const artwork = element.getAttribute('artwork');
@@ -395,7 +386,9 @@ export class AmpVideo extends AMP.BaseElement {
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
     let pendingOriginPromise;
-    if (this.getAmpDoc().getVisibilityState() == VisibilityState.PRERENDER) {
+    if (
+      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PRERENDER
+    ) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
@@ -621,6 +614,7 @@ export class AmpVideo extends AMP.BaseElement {
     tracks.forEach((track) => {
       this.video_.appendChild(track);
     });
+    this.setUpCaptions_();
 
     if (this.video_.changedSources) {
       this.video_.changedSources();
@@ -699,12 +693,12 @@ export class AmpVideo extends AMP.BaseElement {
     this.unlisteners_.push(
       this.forwardEvents(
         [
-          VideoEvents.ENDED,
-          VideoEvents.LOADEDMETADATA,
-          VideoEvents.LOADEDDATA,
-          VideoEvents.PAUSE,
-          VideoEvents.PLAYING,
-          VideoEvents.PLAY,
+          VideoEvents_Enum.ENDED,
+          VideoEvents_Enum.LOADEDMETADATA,
+          VideoEvents_Enum.LOADEDDATA,
+          VideoEvents_Enum.PAUSE,
+          VideoEvents_Enum.PLAYING,
+          VideoEvents_Enum.PLAY,
         ],
         video
       )
@@ -761,11 +755,34 @@ export class AmpVideo extends AMP.BaseElement {
     listenOncePromise(this.video_, 'loadedmetadata').then(() =>
       this.onVideoLoaded_()
     );
+    this.setUpCaptions_();
+  }
+
+  /**
+   * Connects to amp-story-captions component.
+   * @private
+   */
+  setUpCaptions_() {
+    const captionsId = this.element.getAttribute('captions-id');
+    if (!captionsId) {
+      return;
+    }
+    const captionsElement = this.win.document.querySelector(
+      `amp-story-captions#${escapeCssSelectorIdent(captionsId)}`
+    );
+    if (!captionsElement) {
+      return;
+    }
+    captionsElement.getImpl().then((impl) => {
+      if (impl.setVideoElement) {
+        impl.setVideoElement(this.video_);
+      }
+    });
   }
 
   /** @private */
   onVideoLoaded_() {
-    dispatchCustomEvent(this.element, VideoEvents.LOAD);
+    dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
   }
 
   /** @override */
@@ -808,17 +825,7 @@ export class AmpVideo extends AMP.BaseElement {
    * @override
    */
   play(unusedIsAutoplay) {
-    const ret = this.video_.play();
-
-    if (ret && ret.catch) {
-      ret.catch(() => {
-        // Empty catch to prevent useless unhandled promise rejection logging.
-        // Play can fail for many reasons such as video getting paused before
-        // play() is finished.
-        // We use events to know the state of the video and do not care about
-        // the success or failure of the play()'s returned promise.
-      });
-    }
+    tryPlay(this.video_);
   }
 
   /**
@@ -836,8 +843,11 @@ export class AmpVideo extends AMP.BaseElement {
     if (element.querySelector('i-amphtml-poster')) {
       return;
     }
-    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     const src = element.getAttribute('poster');
+    if (!src) {
+      return;
+    }
+    const poster = htmlFor(element)`<i-amphtml-poster></i-amphtml-poster>`;
     setInitialDisplay(poster, 'block');
     setStyles(poster, {
       'background-image': `url(${src})`,

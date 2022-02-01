@@ -1,37 +1,23 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ScrollManager} from './scroll-manager';
-import {Services} from '#service';
+import {tryResolve} from '#core/data-structures/promise';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {
   closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
 } from '#core/dom/query';
-import {dev, user, userAssert} from '../../../src/log';
-import {getDataParamsFromAttributes} from '#core/dom';
-import {getMode} from '../../../src/mode';
 import {isArray} from '#core/types';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {map} from '#core/types/object';
 
+import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {ScrollManager} from './scroll-manager';
 import {provideVisibilityManager} from './visibility-manager';
 
-import {tryResolve} from '#core/data-structures/promise';
 import {whenContentIniLoad} from '../../../src/ini-load';
+import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-analytics/analytics-root';
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
@@ -91,14 +77,6 @@ export class AnalyticsRoot {
    * @abstract
    */
   getRoot() {}
-
-  /**
-   * The viewer of analytics root
-   * @return {!../../../src/service/viewer-interface.ViewerInterface}
-   */
-  getViewer() {
-    return Services.viewerForDoc(this.ampdoc);
-  }
 
   /**
    * The root element within the analytics root.

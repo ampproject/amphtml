@@ -1,44 +1,31 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {ActionSource} from './action-source';
-import {ActionTrust} from '#core/constants/action-constants';
-import {CSS} from '../../../build/amp-base-carousel-0.1.css';
-import {Carousel} from './carousel';
-import {CarouselEvents} from './carousel-events';
-import {ChildLayoutManager} from './child-layout-manager';
-import {Keys} from '#core/constants/key-codes';
-import {
-  ResponsiveAttributes,
-  getResponsiveAttributeValue,
-} from './responsive-attributes';
-import {Services} from '#service';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {
   dispatchCustomEvent,
   isRTL,
   iterateCursor,
   toggleAttribute,
 } from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {scopedQuerySelectorAll} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {createCustomEvent, getDetail} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
+import {ActionSource} from './action-source';
+import {Carousel} from './carousel';
+import {CarouselEvents} from './carousel-events';
+import {ChildLayoutManager} from './child-layout-manager';
+import {
+  ResponsiveAttributes,
+  getResponsiveAttributeValue,
+} from './responsive-attributes';
+
+import {CSS} from '../../../build/amp-base-carousel-0.1.css';
 
 /**
  * @enum {number}
@@ -57,7 +44,7 @@ function isSizer(el) {
   return el.tagName === 'I-AMPHTML-SIZER';
 }
 
-class AmpCarousel extends AMP.BaseElement {
+export class AmpCarousel extends AMP.BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed() {
     return true;
@@ -377,12 +364,12 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Gets the ActionSource to use for a given ActionTrust.
-   * @param {!ActionTrust} trust
+   * Gets the ActionSource to use for a given ActionTrust_Enum.
+   * @param {!ActionTrust_Enum} trust
    * @return {!ActionSource}
    */
   getActionSource_(trust) {
-    return trust >= ActionTrust.DEFAULT
+    return trust >= ActionTrust_Enum.DEFAULT
       ? ActionSource.GENERIC_HIGH_TRUST
       : ActionSource.GENERIC_LOW_TRUST;
   }
@@ -436,7 +423,7 @@ class AmpCarousel extends AMP.BaseElement {
         const {trust} = actionInvocation;
         this.carousel_.prev(this.getActionSource_(trust));
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'next',
@@ -444,7 +431,7 @@ class AmpCarousel extends AMP.BaseElement {
         const {trust} = actionInvocation;
         this.carousel_.next(this.getActionSource_(trust));
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'goToSlide',
@@ -454,7 +441,7 @@ class AmpCarousel extends AMP.BaseElement {
           actionSource: this.getActionSource_(trust),
         });
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
@@ -587,8 +574,8 @@ class AmpCarousel extends AMP.BaseElement {
    * @param {!Event} event
    */
   onKeydown_(event) {
-    const isRight = event.key === Keys.RIGHT_ARROW;
-    const isLeft = event.key === Keys.LEFT_ARROW;
+    const isRight = event.key === Keys_Enum.RIGHT_ARROW;
+    const isLeft = event.key === Keys_Enum.LEFT_ARROW;
 
     if (!isRight && !isLeft) {
       return;
@@ -636,10 +623,10 @@ class AmpCarousel extends AMP.BaseElement {
     const detail = getDetail(event);
     const index = detail['index'];
     const actionSource = detail['actionSource'];
-    const data = dict({'index': index});
+    const data = {'index': index};
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
-    const trust = isHighTrust ? ActionTrust.HIGH : ActionTrust.LOW;
+    const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
@@ -655,6 +642,21 @@ class AmpCarousel extends AMP.BaseElement {
    */
   attributeMutated_(name, newValue) {
     this.responsiveAttributes_.updateAttribute(name, newValue);
+  }
+
+  /**
+   * Used by amp-lightbox-gallery
+   *
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   */
+  goCallback(dir) {
+    if (dir === 1) {
+      this.interactionNext();
+    } else {
+      this.interactionPrev();
+    }
   }
 }
 

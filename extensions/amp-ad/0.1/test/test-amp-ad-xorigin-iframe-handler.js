@@ -1,27 +1,15 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Signals} from '#core/data-structures/signals';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
 
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+
+import {createIframeWithMessageStub, expectPostMessage} from '#testing/iframe';
+
+import {BaseElement} from '../../../../src/base-element';
 import {AmpAdUIHandler} from '../amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
-import {BaseElement} from '../../../../src/base-element';
-import {Services} from '#service';
-import {Signals} from '#core/data-structures/signals';
-import {createIframeWithMessageStub, expectPostMessage} from '#testing/iframe';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
-import {toggleExperiment} from '#experiments';
 
 describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
   let ampdoc;
@@ -59,7 +47,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
     };
     document.body.appendChild(adElement);
     adImpl.uiHandler = new AmpAdUIHandler(adImpl);
-    adImpl.uiHandler.onResizeSuccess = env.sandbox.spy();
+    adImpl.uiHandler.adjustPadding = env.sandbox.spy();
     iframeHandler = new AmpAdXOriginIframeHandler(adImpl);
     testIndex++;
 
@@ -461,7 +449,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
+          expect(adImpl.uiHandler.adjustPadding).to.be.called;
         });
     });
 
@@ -487,7 +475,7 @@ describes.sandboxed('amp-ad-xorigin-iframe-handler', {}, (env) => {
             type: 'embed-size-changed',
             sentinel: 'amp3ptest' + testIndex,
           });
-          expect(adImpl.uiHandler.onResizeSuccess).to.be.called;
+          expect(adImpl.uiHandler.adjustPadding).to.be.called;
         });
     });
 

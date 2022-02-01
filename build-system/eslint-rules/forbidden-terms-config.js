@@ -1,19 +1,3 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const {readFileSync} = require('fs');
 
 /**
@@ -52,11 +36,12 @@ module.exports = {
      */
     function* removeFromArray(fixer, node) {
       const {text} = context.getSourceCode();
-      let {start} = node;
+      let [start] = node.range;
+      const [, end] = node.range;
       while (/\s/.test(text[start - 1])) {
         start--;
       }
-      yield fixer.removeRange([start, node.end]);
+      yield fixer.removeRange([start, end]);
 
       const after = context.getTokenAfter(node);
       if (after.type === 'Punctuator' && after.value === ',') {
@@ -65,9 +50,10 @@ module.exports = {
       }
 
       const [nextComment] = context.getCommentsAfter(node);
+      const [nextCommentStart] = nextComment.range;
       if (
         nextComment &&
-        text.substr(node.end, nextComment.start - node.end).indexOf('\n') < 0
+        text.substr(end, nextCommentStart - end).indexOf('\n') < 0
       ) {
         yield fixer.remove(nextComment);
       }

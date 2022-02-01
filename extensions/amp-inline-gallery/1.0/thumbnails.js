@@ -1,23 +1,6 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {px} from '#core/dom/style';
 
 import * as Preact from '#preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
-import {px} from '#core/dom/style';
 import {
   useContext,
   useEffect,
@@ -25,17 +8,22 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {propName} from '#preact/utils';
+
 import {useStyles} from './thumbnails.jss';
 
+import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
+import {BentoBaseCarousel} from '../../amp-base-carousel/1.0/component';
+
 /**
- * @param {!InlineGalleryDef.ThumbnailProps} props
+ * @param {!BentoInlineGalleryDef.BentoThumbnailProps} props
  * @return {PreactDef.Renderable}
  */
-export function Thumbnails({
+export function BentoInlineGalleryThumbnails({
   aspectRatio,
   children,
-  className = '',
   loop = false,
+  [propName('class')]: className = '',
   ...rest
 }) {
   const classes = useStyles();
@@ -68,8 +56,8 @@ export function Thumbnails({
   }, [aspectRatio, height]);
 
   return (
-    <BaseCarousel
-      className={`${className} ${classes.thumbnails}`}
+    <BentoBaseCarousel
+      class={`${className} ${classes.thumbnails}`}
       mixedLength={true}
       snap={false}
       snapAlign={loop ? 'center' : 'start'}
@@ -85,7 +73,7 @@ export function Thumbnails({
           const {thumbnailSrc} = slide.props;
           return (
             <img
-              className={classes.slide}
+              class={classes.slide}
               onClick={() => setCurrentSlide(i)}
               loading="lazy"
               role="button"
@@ -98,7 +86,7 @@ export function Thumbnails({
             />
           );
         })}
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 }
 

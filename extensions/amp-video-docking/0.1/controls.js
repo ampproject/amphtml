@@ -1,19 +1,3 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {iterateCursor} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {closestAncestorElementBySelector} from '#core/dom/query';
@@ -24,18 +8,23 @@ import {
   toggle,
   translate,
 } from '#core/dom/style';
+import {tryPlay} from '#core/dom/video';
 import {once} from '#core/types/function';
 
 import {Services} from '#service';
+
+import {createCustomEvent, listen} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
 
 import {applyBreakpointClassname} from './breakpoints';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {HtmlLiteralTagDef} from './html';
 import {Timeout} from './timeout';
 
-import {createCustomEvent, listen} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
-import {PlayingStates, VideoEvents} from '../../../src/video-interface';
+import {
+  PlayingStates_Enum,
+  VideoEvents_Enum,
+} from '../../../src/video-interface';
 
 /**
  * A single controls set can be displayed at a time on the controls layer.
@@ -287,7 +276,7 @@ export class Controls {
       }),
 
       this.listenWhenEnabled_(this.playButton_, click, () => {
-        video.play(/* auto */ false);
+        tryPlay(video, /* auto */ false);
       }),
 
       this.listenWhenEnabled_(this.pauseButton_, click, () => {
@@ -314,16 +303,16 @@ export class Controls {
         this.hideOnTimeout(TIMEOUT_AFTER_INTERACTION)
       ),
 
-      listen(element, VideoEvents.PLAYING, () => this.onPlay_()),
-      listen(element, VideoEvents.PAUSE, () => this.onPause_()),
-      listen(element, VideoEvents.MUTED, () => this.onMute_()),
-      listen(element, VideoEvents.UNMUTED, () => this.onUnmute_()),
+      listen(element, VideoEvents_Enum.PLAYING, () => this.onPlay_()),
+      listen(element, VideoEvents_Enum.PAUSE, () => this.onPause_()),
+      listen(element, VideoEvents_Enum.MUTED, () => this.onMute_()),
+      listen(element, VideoEvents_Enum.UNMUTED, () => this.onUnmute_()),
 
-      listen(element, VideoEvents.AD_START, () =>
+      listen(element, VideoEvents_Enum.AD_START, () =>
         this.useControlSet_(ControlSet.SCROLL_BACK)
       ),
 
-      listen(element, VideoEvents.AD_END, () =>
+      listen(element, VideoEvents_Enum.AD_END, () =>
         this.useControlSet_(ControlSet.PLAYBACK)
       )
     );
@@ -419,7 +408,8 @@ export class Controls {
 
     const isRollingAd = manager.isRollingAd(video);
     const isMuted = manager.isMuted(video);
-    const isPlaying = manager.getPlayingState(video) !== PlayingStates.PAUSED;
+    const isPlaying =
+      manager.getPlayingState(video) !== PlayingStates_Enum.PAUSED;
 
     const {container, overlay} = this;
 

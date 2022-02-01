@@ -1,25 +1,9 @@
-//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
-
-#include "css/amp4ads-parse-css.h"
+#include "cpp/htmlparser/css/amp4ads-parse-css.h"
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#include "css/parse-css.h"
+#include "cpp/htmlparser/css/parse-css.h"
 #include "re2/re2.h"
 
 using absl::make_unique;

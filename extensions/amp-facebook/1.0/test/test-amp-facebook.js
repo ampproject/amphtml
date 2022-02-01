@@ -1,28 +1,16 @@
-/**
- * Copyright 2021 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import '../amp-facebook';
-import {createElementWithAttributes} from '#core/dom';
-import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 import {facebook} from '#3p/facebook';
-import {resetServiceForTesting} from '../../../../src/service-helpers';
+
 import {serializeMessage} from '#core/3p-frame-messaging';
-import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
+import {createElementWithAttributes} from '#core/dom';
+
 import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/test-helper';
+
+import {waitFor} from '#testing/helpers/service';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+
+import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-facebook',
@@ -45,8 +33,8 @@ describes.realWin(
     const fbPostHref =
       'https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/';
     const fbVideoHref = 'https://www.facebook.com/NASA/videos/846648316199961/';
-    const fbCommentHref =
-      'https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/?comment_id=10159193676606772';
+    const fbCommentsHref =
+      'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html';
 
     beforeEach(() => {
       win = env.win;
@@ -216,55 +204,20 @@ describes.realWin(
       expect(fbVideo.classList.contains('fb-post')).to.be.true;
     });
 
-    it('adds fb-comment element correctly', () => {
+    it('adds fb-comments element correctly', () => {
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
       facebook(win, {
-        href: fbCommentHref,
-        embedAs: 'comment',
+        href: fbCommentsHref,
+        embedAs: 'comments',
         width: 111,
         height: 222,
       });
-      const fbComment = doc.body.getElementsByClassName('fb-comment-embed')[0];
-      expect(fbComment).not.to.be.undefined;
-      expect(fbComment.getAttribute('data-href')).to.equal(fbCommentHref);
-    });
-
-    it('adds fb-comment element with include-parent', () => {
-      const div = doc.createElement('div');
-      div.setAttribute('id', 'c');
-      doc.body.appendChild(div);
-
-      facebook(win, {
-        href: fbCommentHref,
-        embedAs: 'comment',
-        includeCommentParent: true,
-        width: 111,
-        height: 222,
-      });
-      const fbComment = doc.body.getElementsByClassName('fb-comment-embed')[0];
-      expect(fbComment).not.to.be.undefined;
-      expect(fbComment.getAttribute('data-href')).to.equal(fbCommentHref);
-      expect(fbComment.getAttribute('data-include-parent')).to.equal('true');
-    });
-
-    it('adds fb-comment element with default include-parent', () => {
-      const div = doc.createElement('div');
-      div.setAttribute('id', 'c');
-      doc.body.appendChild(div);
-
-      facebook(win, {
-        href: fbCommentHref,
-        embedAs: 'comment',
-        width: 111,
-        height: 222,
-      });
-      const fbComment = doc.body.getElementsByClassName('fb-comment-embed')[0];
-      expect(fbComment).not.to.be.undefined;
-      expect(fbComment.getAttribute('data-href')).to.equal(fbCommentHref);
-      expect(fbComment.getAttribute('data-include-parent')).to.equal('false');
+      const fbComments = doc.body.getElementsByClassName('fb-comments')[0];
+      expect(fbComments).not.to.be.undefined;
+      expect(fbComments.getAttribute('data-href')).to.equal(fbCommentsHref);
     });
 
     it("container's height is changed", async () => {
@@ -303,6 +256,35 @@ describes.realWin(
         element.shadowRoot.querySelector('iframe').contentWindow;
       win.dispatchEvent(mockEvent);
       expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
+    });
+
+    it('should pass the data-loading attribute to the underlying iframe', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-loading': 'lazy',
+        'data-href': fbPostHref,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('lazy');
+    });
+
+    it('should set data-loading="auto" if no value is specified', async () => {
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-href': fbPostHref,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('auto');
     });
   }
 );

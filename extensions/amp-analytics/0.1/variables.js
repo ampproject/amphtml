@@ -1,42 +1,29 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
-import {Services} from '#service';
-import {TickLabel} from '#core/constants/enums';
+import {TickLabel_Enum} from '#core/constants/enums';
+import {isArray, isFiniteNumber} from '#core/types';
 import {asyncStringReplace} from '#core/types/string';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
-import {cookieReader} from './cookie-reader';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+
 import {getActiveExperimentBranches, getExperimentBranch} from '#experiments';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {cookieReader} from './cookie-reader';
+import {linkerReaderServiceFor} from './linker-reader';
+import {SESSION_VALUES, sessionServicePromiseForDoc} from './session-manager';
+
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
+import {isInFie} from '../../../src/iframe-helper';
 import {
   getServiceForDoc,
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
-import {isArray, isFiniteNumber} from '#core/types';
-
-import {isInFie} from '../../../src/iframe-helper';
-import {linkerReaderServiceFor} from './linker-reader';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';
@@ -246,7 +233,7 @@ export class VariableService {
     this.ampdoc_ = ampdoc;
 
     /** @private {!JsonObject} */
-    this.macros_ = dict({});
+    this.macros_ = {};
 
     /** @const @private {!./linker-reader.LinkerReader} */
     this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
@@ -342,27 +329,27 @@ export class VariableService {
       : {
           'FIRST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+              TickLabel_Enum.FIRST_CONTENTFUL_PAINT_VISIBLE
             ),
           'FIRST_VIEWPORT_READY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_VIEWPORT_READY
+              TickLabel_Enum.FIRST_VIEWPORT_READY
             ),
           'MAKE_BODY_VISIBLE': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.MAKE_BODY_VISIBLE
+              TickLabel_Enum.MAKE_BODY_VISIBLE
             ),
           'LARGEST_CONTENTFUL_PAINT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+              TickLabel_Enum.LARGEST_CONTENTFUL_PAINT_VISIBLE
             ),
           'FIRST_INPUT_DELAY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_INPUT_DELAY
+              TickLabel_Enum.FIRST_INPUT_DELAY
             ),
           'CUMULATIVE_LAYOUT_SHIFT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.CUMULATIVE_LAYOUT_SHIFT
+              TickLabel_Enum.CUMULATIVE_LAYOUT_SHIFT
             ),
         };
     const merged = {

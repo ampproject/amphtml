@@ -1,31 +1,15 @@
-//
-// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS-IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the license.
-//
 // AMP Validator client library to validate if given html is a valid AMP
 // document.
-//
 
 #include <filesystem>
 
-#include "glog/logging.h"
-#include "testing-utils.h"
-#include "error-formatter.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/engine/testing-utils.h"
+#include "cpp/engine/error-formatter.h"
 #include "absl/strings/substitute.h"
 #include "absl/strings/str_cat.h"
-#include "fileutil.h"
-#include "strings.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/strings.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/strip.h"
 
@@ -107,7 +91,7 @@ const std::map<std::string, TestCase>& TestCases() {
     std::vector<TestCase> cases;
     std::vector<std::string> html_files;
     CHECK(htmlparser::FileUtil::Glob(
-           "external/validator/testdata/*/*.html",
+           "testdata/*/*.html",
            &html_files)) << "Test cases file pattern not found.";
     CHECK(htmlparser::FileUtil::Glob(
            "external/amphtml-extensions/*/*/test/*.html",

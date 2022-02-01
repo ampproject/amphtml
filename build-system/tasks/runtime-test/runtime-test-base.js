@@ -1,18 +1,3 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
@@ -33,7 +18,7 @@ const {
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {customLaunchers} = require('./custom-launchers');
-const {cyan, green, red, yellow} = require('../../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const {getFilesFromArgv, getFilesFromFileList} = require('../../common/utils');
@@ -125,8 +110,6 @@ class RuntimeTestConfig {
       ? 'EdgeCustom'
       : argv.firefox
       ? 'FirefoxCustom'
-      : argv.ie
-      ? 'IECustom'
       : argv.safari
       ? 'SafariCustom'
       : 'ChromeCustom';
@@ -243,16 +226,19 @@ class RuntimeTestConfig {
     const babelPlugin = getEsbuildBabelPlugin(
       /* callerName */ 'test',
       /* enableCache */ true,
-      /* preSetup */ this.logBabelStart,
-      /* postLoad */ this.printBabelDot
+      {
+        preSetup: this.logBabelStart,
+        postLoad: this.printBabelDot,
+      }
     );
     this.esbuild = {
-      target: 'es5',
+      target: 'esnext', // We use babel for transpilation.
       define: {
         'process.env.NODE_DEBUG': 'false',
         'process.env.NODE_ENV': '"test"',
       },
       plugins: [importPathPlugin, babelPlugin],
+      mainFields: ['module', 'browser', 'main'],
       sourcemap: 'inline',
     };
   }

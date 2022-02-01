@@ -1,50 +1,39 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getValueForExpr} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+import {isStoryDocument} from '#utils/story';
+
+import {
+  PageConfig as PageConfigInterface,
+  PageConfigResolver,
+} from '#third_party/subscriptions-project/config';
 
 import {
   ActionStatus,
   SubscriptionAnalytics,
   SubscriptionAnalyticsEvents,
 } from './analytics';
-import {CSS} from '../../../build/amp-subscriptions-0.1.css';
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
-import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
+import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 import {Metering} from './metering';
-import {
-  PageConfig as PageConfigInterface,
-  PageConfigResolver,
-} from '#third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
-import {Services} from '#service';
 import {SubscriptionPlatform as SubscriptionPlatformInterface} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, getValueForExpr} from '#core/types/object';
+
+import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {getMode} from '../../../src/mode';
-import {getWinOrigin} from '../../../src/url';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isStoryDocument} from '../../../src/utils/story';
-import {localSubscriptionPlatformFactory} from './local-subscription-platform';
-import {tryParseJson} from '#core/types/object/json';
+import {getWinOrigin} from '../../../src/url';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -804,14 +793,14 @@ export class SubscriptionService {
         devAssert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
           SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-          dict({
+          {
             'action': action,
             'serviceId': platformKey,
-          }),
-          dict({
+          },
+          {
             'action': action,
             'status': ActionStatus.STARTED,
-          })
+          }
         );
         resolve(platform.executeAction(action, sourceId));
       });

@@ -1,38 +1,29 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {removeChildren} from '#core/dom';
+import {escapeCssSelectorNth} from '#core/dom/css-selectors';
+import * as Preact from '#core/dom/jsx';
+import {scopedQuerySelector} from '#core/dom/query';
+import {scale, setImportantStyles} from '#core/dom/style';
+import {debounce} from '#core/types/function';
+import {hasOwn, map} from '#core/types/object';
+
 import {
   BranchToTimeValues,
   StoryAdSegmentExp,
 } from '#experiments/story-ad-progress-segment';
-import {EventType} from './events';
-import {POLL_INTERVAL_MS} from './page-advancement';
+
 import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
+
+import {getExperimentBranch} from 'src/experiments';
+
 import {
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {debounce} from '#core/types/function';
-import {dev, devAssert} from '../../../src/log';
-import {escapeCssSelectorNth} from '#core/dom/css-selectors';
-import {getExperimentBranch} from 'src/experiments';
-import {hasOwn, map} from '#core/types/object';
-import {removeChildren} from '#core/dom';
-import {scale, setImportantStyles, setStyle} from '#core/dom/style';
-import {scopedQuerySelector} from '#core/dom/query';
+import {EventType} from './events';
+import {POLL_INTERVAL_MS} from './page-advancement';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the
@@ -84,9 +75,6 @@ export class ProgressBar {
   constructor(win, storyEl) {
     /** @private @const {!Window} */
     this.win_ = win;
-
-    /** @private {boolean} */
-    this.isBuilt_ = false;
 
     /** @private {?Element} */
     this.root_ = null;
@@ -150,13 +138,15 @@ export class ProgressBar {
    * @return {!Element}
    */
   build(initialSegmentId) {
-    if (this.isBuilt_) {
-      return this.getRoot();
+    if (this.root_) {
+      return this.root_;
     }
 
-    this.root_ = this.win_.document.createElement('ol');
-    this.root_.setAttribute('aria-hidden', true);
-    this.root_.classList.add('i-amphtml-story-progress-bar');
+    const root = (
+      <ol aria-hidden="true" class="i-amphtml-story-progress-bar"></ol>
+    );
+    this.root_ = root;
+
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
       this.replay_();
     });
@@ -164,22 +154,20 @@ export class ProgressBar {
     this.storeService_.subscribe(
       StateProperty.PAGE_IDS,
       (pageIds) => {
-        if (this.isBuilt_) {
+        const attached = !!root.parentElement;
+        if (attached) {
           this.clear_();
         }
 
-        this.segmentsAddedPromise_ = this.mutator_.mutateElement(
-          this.getRoot(),
-          () => {
-            /** @type {!Array} */ (pageIds).forEach((id) => {
-              if (!(id in this.segmentIdMap_)) {
-                this.addSegment_(id);
-              }
-            });
-          }
-        );
+        this.segmentsAddedPromise_ = this.mutator_.mutateElement(root, () => {
+          /** @type {!Array} */ (pageIds).forEach((id) => {
+            if (!(id in this.segmentIdMap_)) {
+              this.addSegment_(id);
+            }
+          });
+        });
 
-        if (this.isBuilt_) {
+        if (attached) {
           this.updateProgress(
             this.activeSegmentId_,
             this.activeSegmentProgress_,
@@ -222,14 +210,13 @@ export class ProgressBar {
 
         this.render_(false /** shouldAnimate */);
       }
-      this.getRoot().classList.toggle(
+      root.classList.toggle(
         'i-amphtml-progress-bar-overflow',
         this.segmentCount_ > MAX_SEGMENTS
       );
     });
 
-    this.isBuilt_ = true;
-    return this.getRoot();
+    return root;
   }
 
   /**
@@ -254,8 +241,8 @@ export class ProgressBar {
         -(this.firstExpandedSegmentIndex_ - this.getPrevEllipsisCount_()) *
         (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
 
-      this.mutator_.mutateElement(this.getRoot(), () => {
-        this.getRoot().classList.toggle(
+      this.mutator_.mutateElement(this.getRoot_(), () => {
+        this.getRoot_().classList.toggle(
           'i-amphtml-animate-progress',
           shouldAnimate
         );
@@ -323,7 +310,7 @@ export class ProgressBar {
    */
   getBarWidth_() {
     return this.mutator_.measureElement(() => {
-      return this.getRoot()./*OK*/ getBoundingClientRect().width;
+      return this.getRoot_()./*OK*/ getBoundingClientRect().width;
     });
   }
 
@@ -388,10 +375,10 @@ export class ProgressBar {
    * @private
    */
   onRtlStateUpdate_(rtlState) {
-    this.mutator_.mutateElement(this.getRoot(), () => {
+    this.mutator_.mutateElement(this.getRoot_(), () => {
       rtlState
-        ? this.getRoot().setAttribute('dir', 'rtl')
-        : this.getRoot().removeAttribute('dir');
+        ? this.getRoot_().setAttribute('dir', 'rtl')
+        : this.getRoot_().removeAttribute('dir');
     });
   }
 
@@ -403,7 +390,7 @@ export class ProgressBar {
     // We need to take into account both conditionals since we could've switched
     // from a screen that had an overflow to one that doesn't and viceversa.
     if (
-      this.getRoot().classList.contains('i-amphtml-progress-bar-overflow') ||
+      this.getRoot_().classList.contains('i-amphtml-progress-bar-overflow') ||
       this.segmentCount_ > MAX_SEGMENTS
     ) {
       this.getInitialFirstExpandedSegmentIndex_(this.activeSegmentIndex_);
@@ -426,10 +413,6 @@ export class ProgressBar {
         MAX_SEGMENTS = 20;
         ELLIPSE_WIDTH_PX = 2;
         break;
-      case UIType.DESKTOP_PANELS:
-        MAX_SEGMENTS = 20;
-        ELLIPSE_WIDTH_PX = 3;
-        break;
       default:
         MAX_SEGMENTS = 20;
     }
@@ -445,7 +428,12 @@ export class ProgressBar {
       this.win_,
       StoryAdSegmentExp.ID
     );
-    if (!segmentExpBranch || segmentExpBranch === StoryAdSegmentExp.CONTROL) {
+    if (
+      !segmentExpBranch ||
+      segmentExpBranch === StoryAdSegmentExp.CONTROL ||
+      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE_BOTH ||
+      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE_AD
+    ) {
       return;
     }
     // Set CSS signal that we are in the experiment.
@@ -466,15 +454,18 @@ export class ProgressBar {
     const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
     // Fill in segment before ad segment.
     this.updateProgressByIndex_(index, 1, false);
-    const progressEl = this.getRoot()?.querySelector(
+    const progressEl = this.getRoot_()?.querySelector(
       `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
         // +2 because of zero-index and we want the chip after the ad.
         index + 2
       )})`
     );
-    const adSegment = this.win_.document.createElement('div');
-    adSegment.className = 'i-amphtml-story-ad-progress-value';
-    setStyle(adSegment, 'animationDuration', animationDuration);
+    const adSegment = (
+      <div
+        class="i-amphtml-story-ad-progress-value"
+        style={{animationDuration}}
+      ></div>
+    );
     this.currentAdSegment_ = adSegment;
     progressEl.appendChild(adSegment);
   }
@@ -493,12 +484,12 @@ export class ProgressBar {
    * @private
    */
   buildSegmentEl_() {
-    const segmentProgressBar = this.win_.document.createElement('li');
-    segmentProgressBar.classList.add('i-amphtml-story-page-progress-bar');
-    const segmentProgressValue = this.win_.document.createElement('div');
-    segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
-    segmentProgressBar.appendChild(segmentProgressValue);
-    this.getRoot().appendChild(segmentProgressBar);
+    const segmentProgressBar = (
+      <li class="i-amphtml-story-page-progress-bar">
+        <div class="i-amphtml-story-page-progress-value"></div>
+      </li>
+    );
+    this.getRoot_().appendChild(segmentProgressBar);
     this.segments_.push(segmentProgressBar);
   }
 
@@ -523,11 +514,10 @@ export class ProgressBar {
   }
 
   /**
-   * Gets the root element of the progress bar.
-   *
    * @return {!Element}
+   * @private
    */
-  getRoot() {
+  getRoot_() {
     return dev().assertElement(this.root_);
   }
 
@@ -669,7 +659,7 @@ export class ProgressBar {
     // JavaScript indices start at 0.
     const nthChildIndex = segmentIndex + 1;
     const progressEl = scopedQuerySelector(
-      this.getRoot(),
+      this.getRoot_(),
       `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
         nthChildIndex
       )}) .i-amphtml-story-page-progress-value`

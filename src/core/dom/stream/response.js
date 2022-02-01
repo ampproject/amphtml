@@ -1,19 +1,4 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+import {devAssert} from '#core/assert';
 import {Deferred} from '#core/data-structures/promise';
 
 /**
@@ -21,17 +6,21 @@ import {Deferred} from '#core/data-structures/promise';
  * Returns a promise that resolves when first bytes are received from the
  * response, or we learn that the response is empty.
  * This function should be replaced with transform stream when well supported.
- * @param {!Window} win
- * @param {!Response} response
- * @param {!./detached.DetachedDomStream} writer
- * @return {!Promise<boolean>} true if response has content, false if
+ * @param {Window} win
+ * @param {Response} response
+ * @param {import('./detached').DetachedDomStream} writer
+ * @return {Promise<boolean>} true if response has content, false if
  * the response is empty.
  */
 export function streamResponseToWriter(win, response, writer) {
   const hasContentDeferred = new Deferred();
   // Try native streaming first.
-  if (win.TextDecoder && win.ReadableStream) {
+  if (
+    /** @type {?} */ (win).TextDecoder &&
+    /** @type {?} */ (win).ReadableStream
+  ) {
     let firstRead = true;
+    devAssert(response.body);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
 
@@ -52,7 +41,8 @@ export function streamResponseToWriter(win, response, writer) {
       }
 
       if (!done) {
-        return reader.read().then(handleChunk);
+        reader.read().then(handleChunk);
+        return;
       }
 
       writer.close();

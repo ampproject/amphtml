@@ -1,20 +1,7 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {map} from '#core/types/object';
+
+// eslint-disable-next-line no-script-url
+export const INVALID_PROTOCOLS = ['javascript:', 'data:', 'vbscript:'];
 
 const QUERY_STRING_REGEX = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
 
@@ -39,7 +26,7 @@ export function tryDecodeUriComponent(component, fallback = '') {
  * map. If there are duplicate keys the latest value is returned.
  *
  * @param {string} queryString
- * @return {!JsonObject}
+ * @return {JsonObject}
  */
 export function parseQueryString(queryString) {
   const params = map();
@@ -60,8 +47,8 @@ export function parseQueryString(queryString) {
 
 /**
  * Parses the query # params.
- * @param {!Window=} opt_win
- * @return {!JsonObject}
+ * @param {Window=} opt_win
+ * @return {JsonObject}
  */
 export function getHashParams(opt_win) {
   const {location} = opt_win || self;

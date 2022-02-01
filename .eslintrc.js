@@ -1,28 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const fs = require('fs');
 
+const {
+  getImportResolver,
+} = require('./build-system/babel-config/import-resolver');
 const {
   forbiddenTermsGlobal,
   forbiddenTermsSrcInclusive,
 } = require('./build-system/test-configs/forbidden-terms');
-const {
-  getImportResolver,
-} = require('./build-system/babel-config/import-resolver');
 
 const importAliases = getImportResolver().alias;
 
@@ -44,27 +28,24 @@ function getExperimentGlobals() {
 
 module.exports = {
   'root': true,
-  'parser': '@babel/eslint-parser',
+  'parser': '@typescript-eslint/parser',
   'plugins': [
     'chai-expect',
-    'google-camelcase',
     'import',
     'jsdoc',
     'local',
     'module-resolver',
-    'notice',
     'prettier',
     'react',
     'react-hooks',
     'sort-destructure-keys',
-    'sort-requires',
+    '@typescript-eslint',
   ],
   'env': {
     'es6': true,
     'browser': true,
   },
   'parserOptions': {
-    'ecmaVersion': 6,
     'jsx': true,
     'sourceType': 'module',
   },
@@ -114,7 +95,6 @@ module.exports = {
     'chai-expect/no-inner-compare': 2,
     'chai-expect/terminating-properties': 2,
     'curly': 2,
-    'google-camelcase/google-camelcase': 2,
 
     // Rules restricting/standardizing import statements
     'import/no-unresolved': [
@@ -182,8 +162,10 @@ module.exports = {
 
     // Custom repo rules defined in build-system/eslint-rules
     'local/await-expect': 2,
+    'local/camelcase': 2,
     'local/closure-type-primitives': 2,
-    'local/dict-string-keys': 2,
+    'local/core-dom-jsx': 2,
+    'local/enums': 2,
     'local/get-mode-usage': 2,
     'local/html-template': 2,
     'local/is-experiment-on': 2,
@@ -193,7 +175,6 @@ module.exports = {
     'local/no-bigint': 2,
     'local/no-deep-destructuring': 2,
     'local/no-duplicate-import': 2,
-    'local/no-duplicate-name-typedef': 2,
     'local/no-dynamic-import': 2,
     'local/no-es2015-number-props': 2,
     'local/no-export-side-effect': 2,
@@ -214,9 +195,6 @@ module.exports = {
     'local/no-mixed-interpolation': 2,
     'local/no-mixed-operators': 2,
     'local/no-module-exports': 2,
-    'local/no-rest': 2,
-    'local/no-spread': 2,
-    'local/no-static-this': 2,
     'local/no-style-display': 2,
     'local/no-style-property-setting': 2,
     'local/no-swallow-return-from-allow-console-error': 2,
@@ -229,6 +207,25 @@ module.exports = {
     'local/prefer-unnested-spread-objects': 2,
     'local/private-prop-names': 2,
     'local/query-selector': 2,
+    'local/restrict-this-access': [
+      2,
+      {
+        className: 'PreactBaseElement',
+        allowed: [
+          'api',
+          'element',
+          'getProp',
+          'loadable',
+          'mutateElement',
+          'mutateProps',
+          'registerApiAction',
+          'triggerEvent',
+          'usesLoading',
+          'usesShadowDom',
+          'win',
+        ],
+      },
+    ],
     'local/todo-format': 0,
     'local/unused-private-field': 2,
     'local/vsync': 0,
@@ -260,7 +257,8 @@ module.exports = {
     'no-sequences': 2,
     'no-throw-literal': 2,
     'no-unused-expressions': 0,
-    'no-unused-vars': [
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': [
       2,
       {
         'argsIgnorePattern': '^(var_args$|opt_|unused)',
@@ -271,16 +269,6 @@ module.exports = {
     'no-useless-concat': 2,
     'no-undef': 2,
     'no-var': 2,
-    'notice/notice': [
-      2,
-      {
-        'mustMatch': 'Copyright 20\\d{2} The AMP HTML Authors\\.',
-        'templateFile': 'build-system/common/LICENSE-TEMPLATE.txt',
-        'messages': {
-          'whenFailedToMatch': 'Missing or incorrect license header',
-        },
-      },
-    ],
     'object-shorthand': [
       2,
       'properties',
@@ -309,9 +297,7 @@ module.exports = {
     ],
     'sort-destructure-keys/sort-destructure-keys': 2,
     'import/order': [
-      // Disabled for now, so individual folders can opt-in one PR at a time and
-      // minimize disruption/merge conflicts
-      0,
+      2,
       {
         // Split up imports groups with exactly one newline
         'newlines-between': 'always',
@@ -351,14 +337,26 @@ module.exports = {
         'ignoreDeclarationSort': true,
       },
     ],
-    'sort-requires/sort-requires': 2,
   },
   'overrides': [
+    {
+      'files': ['**/*.ts', '**/*.tsx'],
+      'rules': {
+        'require-jsdoc': 0,
+        'jsdoc/require-param': 0,
+        'jsdoc/require-param-type': 0,
+        'jsdoc/require-returns': 0,
+        'no-undef': 0,
+        'import/no-unresolved': 0,
+      },
+    },
     {
       'files': [
         'test/**/*.js',
         'extensions/**/test/**/*.js',
         'extensions/**/test-e2e/*.js',
+        'src/bento/components/**/test/**/*.js',
+        'src/bento/components/**/test-e2e/*.js',
         'ads/**/test/**/*.js',
         'testing/**/*.js',
         'build-system/**/test/*.js',
@@ -366,6 +364,7 @@ module.exports = {
       'rules': {
         'require-jsdoc': 0,
         'local/always-call-chai-methods': 2,
+        'local/enums': 0,
         'local/no-bigint': 0,
         'local/no-dynamic-import': 0,
         'local/no-function-async': 0,
@@ -441,13 +440,13 @@ module.exports = {
       'rules': {
         'no-var': 0,
         'no-undef': 0,
-        'no-unused-vars': 0,
+        '@typescript-eslint/no-unused-vars': 0,
         'prefer-const': 0,
         'require-jsdoc': 0,
         'jsdoc/check-tag-names': 0,
         'local/closure-type-primitives': 0,
         'local/no-duplicate-name-typedef': 0,
-        'google-camelcase/google-camelcase': 0,
+        'local/camelcase': 0,
       },
     },
     {
@@ -461,8 +460,32 @@ module.exports = {
       },
     },
     {
-      'files': ['3p/**/*.js', 'src/**/*.js', 'test/**/*.js', 'testing/**/*.js'],
-      'rules': {'import/order': 2},
+      'files': ['build-system/**/*.js'],
+      'rules': {'import/order': 0},
+    },
+    {
+      'files': [
+        'extensions/**/1.0/**',
+        'src/bento/**',
+        'src/preact/**',
+        '**/storybook/**',
+      ],
+      'rules': {'local/preact-preferred-props': 2},
+    },
+    {
+      // src/preact can directly import from 'preact' without issue.
+      'files': ['src/preact/**'],
+      'rules': {'local/no-import': 0},
+    },
+    {
+      // Files that use JSX for plain DOM nodes instead of Preact
+      'files': [
+        'extensions/amp-story/**',
+        'extensions/amp-story-*/**',
+        // Extensions whose version is lower than 1.0 do not use Preact
+        'extensions/*/0.*/**',
+      ],
+      'rules': {'local/preact': [2, '#core/dom/jsx']},
     },
   ],
 };
