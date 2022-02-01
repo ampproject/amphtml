@@ -91,42 +91,39 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     const storyPageWidth = pageSize.width;
 
-    this.measureElement(() => {
-      /*
-       * We are using offsetLeft and offsetWidth instead of getLayoutBox() because
-       * the correct measurements are not taken into account when using a CSS transform (such as translate),
-       * which we are using in the i-amphtml-amp-story-shopping-tag-inner-flipped class.
-       */
-      const {offsetLeft, offsetWidth} = this.element;
+    let shouldFlip;
 
-      let shouldFlip;
+    this.measureMutateElement(
+      () => {
+        /*
+         * We are using offsetLeft and offsetWidth instead of getLayoutBox() because
+         * the correct measurements are not taken into account when using a CSS transform (such as translate),
+         * which we are using in the i-amphtml-amp-story-shopping-tag-inner-flipped class.
+         */
+        const {offsetLeft, offsetWidth} = this.element;
+        shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
+      },
+      () => {
+        this.shoppingTagEl_.classList.toggle(
+          'i-amphtml-amp-story-shopping-tag-inner-flipped',
+          shouldFlip
+        );
 
-      this.measureMutateElement(
-        () => {
-          shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
-        },
-        () => {
-          this.shoppingTagEl_.classList.toggle(
-            'i-amphtml-amp-story-shopping-tag-inner-flipped',
-            shouldFlip
-          );
+        const dotEl = this.shoppingTagEl_.querySelector(
+          '.i-amphtml-amp-story-shopping-tag-dot'
+        );
 
-          const dotEl = this.shoppingTagEl_.querySelector(
-            '.i-amphtml-amp-story-shopping-tag-dot'
-          );
+        dotEl.classList.toggle(
+          'i-amphtml-amp-story-shopping-tag-dot-flipped',
+          shouldFlip
+        );
 
-          dotEl.classList.toggle(
-            'i-amphtml-amp-story-shopping-tag-dot-flipped',
-            shouldFlip
-          );
-
-          this.shoppingTagEl_.classList.toggle(
-            'i-amphtml-amp-story-shopping-tag-visible',
-            true
-          );
-        }
-      );
-    });
+        this.shoppingTagEl_.classList.toggle(
+          'i-amphtml-amp-story-shopping-tag-visible',
+          true
+        );
+      }
+    );
   }
 
   /**
