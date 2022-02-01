@@ -29,6 +29,7 @@ amp-story-shopping-attachment a {
 .i-amphtml-amp-story-shopping-plp-card {
   width: calc(50% - var(--shopping-attachment-horizontal-padding) / 2) !important;
   margin-bottom: 3em !important;
+  cursor: pointer !important;
 }
 
 .i-amphtml-amp-story-shopping-plp-card-image {

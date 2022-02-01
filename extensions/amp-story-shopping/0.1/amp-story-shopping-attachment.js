@@ -13,6 +13,7 @@ import {
 import {
   ShoppingConfigDataDef,
   StateProperty,
+  Action,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {!Array<!Object>} fontFaces */
@@ -44,7 +45,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.shoppingTags_ = null;
 
     /** @private @const {!Element} */
-    this.plpContainer_ = <div></div>;
+    this.templateContainer_ = <div></div>;
 
     /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
@@ -94,7 +95,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         ></amp-story-page-attachment>
       );
       this.element.appendChild(this.attachmentEl_);
-      this.attachmentEl_.appendChild(this.plpContainer_);
+      this.attachmentEl_.appendChild(this.templateContainer_);
     });
   }
 
@@ -106,6 +107,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
       (isOpen) => this.onPageAttachmentStateUpdate_(isOpen)
+    );
+    this.storeService_.subscribe(
+      StateProperty.SHOPPING_DATA,
+      (shoppingData) => {
+        console.log(shoppingData);
+      }
     );
   }
 
@@ -124,11 +131,22 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   * @private
+   */
+  onClick_(shoppingData) {
+    this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+      'activeProductData': shoppingData,
+    });
+  }
+
+  /**
    * Renders a list of the products on the page, knows as a "Product Listing Page" or PLP.
    * @private
    */
   populatePlp_() {
-    if (this.plpContainer_.querySelector('.i-amphtml-amp-story-shopping-plp')) {
+    if (
+      this.templateContainer_.querySelector('.i-amphtml-amp-story-shopping-plp')
+    ) {
       return;
     }
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
@@ -138,7 +156,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     const plp = this.renderPlpTemplate_(shoppingDataForPage);
     this.mutateElement(() => {
-      this.plpContainer_.appendChild(plp);
+      this.templateContainer_.appendChild(plp);
     });
   }
 
@@ -158,7 +176,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         </div>
         <div class="i-amphtml-amp-story-shopping-plp-cards">
           {shoppingDataForPage.map((data) => (
-            <div class="i-amphtml-amp-story-shopping-plp-card">
+            <div
+              class="i-amphtml-amp-story-shopping-plp-card"
+              role="button"
+              onClick={() => this.onClick_(data)}
+            >
               <div
                 class="i-amphtml-amp-story-shopping-plp-card-image"
                 style={{backgroundImage: `url("${data['productImages'][0]}")`}}
