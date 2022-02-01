@@ -1,0 +1,11 @@
+tags: {  # amp-access-fewcents
+  html_format: AMP
+  tag_name: "SCRIPT"
+  requires_extension: "amp-access"
+  extension_spec: {
+    name: "amp-access-fewcents"
+    version: "0.1"
+    requires_usage: NONE
+  }
+  attr_lists: "common-extension-attrs"
+}

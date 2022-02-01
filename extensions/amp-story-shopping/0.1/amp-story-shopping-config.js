@@ -25,14 +25,14 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
   }
 
   /**
-   * Keys product data to product-ids and adds them to the store service.
+   * Keys product data to productIds and adds them to the store service.
    * @param {!ShoppingConfigDef} shoppingConfig
    * @private
    */
   addShoppingDataFromConfig_(shoppingConfig) {
     const productIDtoProduct = {};
     for (const item of shoppingConfig['items']) {
-      productIDtoProduct[item['product-tag-id']] = item;
+      productIDtoProduct[item['productId']] = item;
     }
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, productIDtoProduct);
     //TODO(#36412): Add call to validate config here.

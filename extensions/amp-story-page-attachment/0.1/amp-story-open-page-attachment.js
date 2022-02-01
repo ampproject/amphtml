@@ -99,11 +99,6 @@ const ctaLabelFromAttr = (element) =>
  */
 const openLabelOrFallback = (element, attachmentEl, label) => {
   const localizationService = Services.localizationForDoc(element);
-  if (attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT') {
-    return localizationService.getLocalizedString(
-      LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
-    );
-  }
   return (
     label?.trim() ||
     localizationService.getLocalizedString(

@@ -1,6 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {"jsx": "preserve"},
   "include": [
     "*.js",
     "**/*.d.ts",
