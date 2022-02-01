@@ -45,7 +45,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     /** @param {?ShoppingConfigDataDef} */
     this.tagData_ = null;
 
-    /** @param {?../../amp-story/1.0/amp-story-page-attachment.AmpStoryPageAttachment} */
+    /**
+     * For programatically opening the attachment.
+     * @param {?../../amp-story/1.0/amp-story-page-attachment.AmpStoryPageAttachment}
+     */
     this.pageAttachmentImpl_ = null;
   }
 
