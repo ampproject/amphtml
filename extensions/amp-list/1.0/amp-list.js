@@ -59,18 +59,18 @@ class AmpList extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     if (template) {
       // Only overwrite `render` when template is ready to minimize FOUC.
       templates.getTemplateRenderer(template).then((renderer) => {
-        if (template != this.template_) {
+        if (template !== this.template_) {
           // A new template has been set while the old one was initializing.
           return;
         }
         const renderAsString = (data) => {
           const html = renderer.renderAsString(data);
-          return dict({'__html': html});
+          return {'__html': html};
         };
-        this.mutateProps(dict({'template': renderAsString}));
+        this.mutateProps({'template': renderAsString});
       });
     } else {
-      this.mutateProps(dict({'template': null}));
+      this.mutateProps({'template': null});
     }
   }
 
