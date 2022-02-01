@@ -10,6 +10,8 @@ amp-story-shopping-attachment a {
   text-decoration: none !important;
 }
 
+/* PLP (Product Listing Page). */
+
 .i-amphtml-amp-story-shopping-plp {
   padding: 0 var(--shopping-attachment-horizontal-padding) !important;
 }
@@ -64,4 +66,29 @@ amp-story-shopping-attachment a {
   margin-bottom: .33em !important;
   line-height: 1em !important;
   font-size: 1.1em !important;
+}
+
+/* PDP (Product Description Page). */
+
+.i-amphtml-amp-story-shopping-pdp-header {
+  padding: 0 var(--shopping-attachment-horizontal-padding) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-header-brand {
+  font-weight: 500 !important;
+  font-size: 1.1em !important;
+  display: block !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-header-title {
+  font-weight: 700 !important;
+  font-size: 1.8em !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-header-price {
+  font-weight: 500 !important;
+  font-size: 1.5em !important;
+  margin-top: auto !important;
 }

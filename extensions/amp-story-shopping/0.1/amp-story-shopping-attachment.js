@@ -194,7 +194,19 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   renderPdpTemplate_(activeProductData, shoppingDataForPage) {
     return (
       <div>
-        {activeProductData.productTitle}
+        <div class="i-amphtml-amp-story-shopping-pdp-header">
+          <div>
+            <span class="i-amphtml-amp-story-shopping-pdp-header-brand">
+              {activeProductData.productBrand}
+            </span>
+            <span class="i-amphtml-amp-story-shopping-pdp-header-title">
+              {activeProductData.productTitle}
+            </span>
+          </div>
+          <span class="i-amphtml-amp-story-shopping-pdp-header-price">
+            {activeProductData.productPrice}
+          </span>
+        </div>
         <div>
           {this.renderPlpTemplate_(
             shoppingDataForPage.filter((item) => item !== activeProductData)
