@@ -204,7 +204,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             </span>
           </div>
           <span class="i-amphtml-amp-story-shopping-pdp-header-price">
-            {activeProductData.productPrice}
+            {formatI18nNumber(
+              this.localizationService_,
+              this.element,
+              activeProductData.productPriceCurrency,
+              activeProductData.productPrice
+            )}
           </span>
         </div>
         <div>
