@@ -528,7 +528,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
-  /* @override */
+  /** @override */
   onLayoutMeasure() {
     const {width, height} = this.getLayoutSize();
     if (!isPrerenderActivePage(this.element) || width === 0 || height === 0) {
