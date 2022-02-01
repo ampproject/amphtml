@@ -17,6 +17,7 @@ import {Layout_Enum} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {
   closestAncestorElementBySelector,
+  matches,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {toggle} from '#core/dom/style';
@@ -51,7 +52,10 @@ import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {MediaPool} from './media-pool';
 import {AdvancementConfig} from './page-advancement';
-import {getPrerenderActivePage} from './prerender-active-page';
+import {
+  getPrerenderActivePage,
+  isPrerenderActivePage,
+} from './prerender-active-page';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
 
@@ -156,10 +160,7 @@ export const NavigationDirection = {
 export class AmpStoryPage extends AMP.BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed(element) {
-    if (!AmpStoryPage.prerenderPage) {
-      AmpStoryPage.prerenderPage = getPrerenderActivePage(element);
-    }
-    return element === AmpStoryPage.prerenderPage;
+    return isPrerenderActivePage(element);
   }
 
   /** @param {!AmpElement} element */
@@ -194,6 +195,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.errorMessageEl_ = null;
 
     const deferred = new Deferred();
+
+    /** @const {boolean} */
+    this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
 
     /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
     this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsService(
@@ -534,11 +538,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   onLayoutMeasure() {
     const {height, width} = this.getLayoutSize();
-    if (
-      !AmpStoryPage.prerenderAllowed(this.element) ||
-      height === 0 ||
-      width === 0
-    ) {
+    if (!this.isFirstPage_ || height === 0 || width === 0) {
       return;
     }
     this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});

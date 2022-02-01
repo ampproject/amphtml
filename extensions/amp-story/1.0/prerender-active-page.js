@@ -4,16 +4,16 @@ import {getWin} from '#core/window';
 
 /**
  * Retrieves the page that should be the prerender page.
- * @param {!Element} element any element
- * @return {!Element} the prerendered active page
+ * @param {!Element} pageElement any element
+ * @return {boolean} the prerendered active page
  */
-export function getPrerenderActivePage(element) {
-  const win = getWin(element);
+export function isPrerenderActivePage(pageElement) {
+  const win = getWin(pageElement);
   const hashId = parseQueryString(win.location.href)['page'];
   let selector = 'amp-story-page:first-of-type';
   if (hashId) {
     selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
   }
   const selectorNodes = win.document.querySelectorAll(selector);
-  return selectorNodes[selectorNodes.length - 1];
+  return selectorNodes[selectorNodes.length - 1] === pageElement;
 }
