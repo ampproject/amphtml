@@ -169,9 +169,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AdvancementConfig} */
     this.advancement_ = null;
 
-    /** @private {?Element} */
-    this.cssVariablesStyleEl_ = null;
-
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
       this.win,
@@ -220,9 +217,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
-
-    /** @private {?../../../src/layout-rect.LayoutSizeDef} */
-    this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
