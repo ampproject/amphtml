@@ -149,7 +149,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = renderPageAttachmentUI(
-        this.storyEl_,
+        this.pageEl_,
         this.element
       );
 

@@ -42,6 +42,8 @@ describes.realWin(
       attachmentEl = win.document.createElement('amp-story-page-attachment');
       attachmentEl.getAmpDoc = () => new AmpDocSingle(win);
       page.appendChild(attachmentEl);
+      page.getAmpDoc = () => new AmpDocSingle(win);
+
       attachment = new AmpStoryPageAttachment(attachmentEl);
       env.sandbox.stub(attachment, 'mutateElement').callsFake((fn) => fn());
 
@@ -203,6 +205,25 @@ describes.realWin(
         '.i-amphtml-story-page-attachment-label'
       );
       expect(openAttachmentLabelEl.textContent).to.equal('Custom text');
+    });
+
+    it('should use the correct outlink text', () => {
+      const firstPage = win.document.createElement('amp-story-page');
+      storyEl.insertBefore(firstPage, page);
+      const otherOutlink = document.createElement('amp-story-page-outlink');
+      otherOutlink.appendChild(win.document.createElement('a'));
+      firstPage.appendChild(otherOutlink);
+
+      outlinkEl.querySelector('a').textContent = 'Custom text';
+      otherOutlink.querySelector('a').textContent = 'Wrong text';
+
+      outlink.buildCallback();
+      outlink.layoutCallback();
+
+      const openOutlinkLabelEl = page.querySelector(
+        '.i-amphtml-story-page-attachment-label'
+      );
+      expect(openOutlinkLabelEl.textContent).to.equal('Custom text');
     });
 
     it('should use cta-text attribute when data-cta-text also exist', () => {
