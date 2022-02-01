@@ -19,7 +19,7 @@ import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {px, toggle} from '#core/dom/style';
+import {toggle} from '#core/dom/style';
 import {isAutoplaySupported, tryPlay} from '#core/dom/video';
 import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
@@ -530,8 +530,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    const {width, height} = this.getLayoutSize();
-    if (!isPrerenderActivePage(this.element) || width === 0 || height === 0) {
+    const {height, width} = this.getLayoutSize();
+    if (!isPrerenderActivePage(this.element) || height === 0 || width === 0) {
       return;
     }
     this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
