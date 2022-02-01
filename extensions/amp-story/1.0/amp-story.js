@@ -310,7 +310,7 @@ export class AmpStory extends AMP.BaseElement {
 
     if (needsDvhPolyfill) {
       this.polyfillDvh_(this.getViewport().getSize());
-      this.getViewport().onResize(() => this.polyfillDvh_());
+      this.getViewport().onResize((size) => this.polyfillDvh_(size));
     }
 
     this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
