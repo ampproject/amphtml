@@ -1,4 +1,4 @@
-import {BaseElement} from '#bento/components/accordion/1.0/base-element';
+import {BaseElement} from '#bento/components/bento-accordion/1.0/base-element';
 
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {getWin} from '#core/window';

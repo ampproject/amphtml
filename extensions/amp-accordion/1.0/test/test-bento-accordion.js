@@ -1,6 +1,6 @@
 import {CSS} from '#build/bento-accordion-1.0.css';
 
-import {BaseElement as BentoAccordion} from '#bento/components/accordion/1.0/base-element';
+import {BaseElement as BentoAccordion} from '#bento/components/bento-accordion/1.0/base-element';
 
 import {subscribe, unsubscribe} from '#core/context';
 import {htmlFor} from '#core/dom/static-template';

@@ -3,7 +3,7 @@ import {
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '#bento/components/accordion/1.0/component';
+} from '#bento/components/bento-accordion/1.0/component';
 
 import * as Preact from '#preact';
 

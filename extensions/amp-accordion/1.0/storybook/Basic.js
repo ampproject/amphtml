@@ -3,11 +3,11 @@ import {
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '#bento/components/accordion/1.0/component';
+} from '#bento/components/bento-accordion/1.0/component';
 
 import * as Preact from '#preact';
 
-import '#bento/components/accordion/1.0/component.jss';
+import '#bento/components/bento-accordion/1.0/component.jss';
 
 export default {
   title: 'Accordion',
