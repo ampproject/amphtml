@@ -23,8 +23,8 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let element;
-    let shoppingTag;
+    let shoppingTagElement;
+    let shoppingTagImpl;
     let storeService;
     let localizationService;
 
@@ -48,14 +48,14 @@ describes.realWin(
     async function createAmpStoryShoppingTag() {
       const pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
-      element = createElementWithAttributes(
+      shoppingTagElement = createElementWithAttributes(
         win.document,
         'amp-story-shopping-tag',
         {'layout': 'container'}
       );
-      pageEl.appendChild(element);
+      pageEl.appendChild(shoppingTagElement);
       win.document.body.appendChild(pageEl);
-      shoppingTag = await element.getImpl();
+      shoppingTagImpl = await shoppingTagElement.getImpl();
     }
 
     async function shoppingDataDispatchStoreService() {
@@ -66,24 +66,27 @@ describes.realWin(
     }
 
     it('should build and layout shopping tag component', () => {
-      expect(() => shoppingTag.layoutCallback()).to.not.throw();
+      expect(() => shoppingTagImpl.layoutCallback()).to.not.throw();
     });
 
     it('should process config data and set text container content if data not null', async () => {
-      shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
+      shoppingTagElement.setAttribute('data-product-id', 'sunglasses');
       await shoppingDataDispatchStoreService();
-      env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
-        expect(shoppingTag.element.textContent).to.equal(
-          'Spectacular Spectacles'
-        );
-      });
+      env.sandbox
+        .stub(shoppingTagImpl, 'measureMutateElement')
+        .callsFake(() => {
+          expect(shoppingTagElement.textContent).to.equal(
+            'Spectacular Spectacles'
+          );
+        });
     });
 
     it('should not process config data and set text container content if id not found', async () => {
-      shoppingTag.element.setAttribute('data-product-id', 'hat');
+      shoppingTagElement.setAttribute('data-product-id', 'hat');
       await shoppingDataDispatchStoreService();
-      expect(shoppingTag.element.textContent).to.be.empty;
-      expect(shoppingTag.isLayoutSupported(Layout_Enum.CONTAINER)).to.be.true;
+      expect(shoppingTagElement.textContent).to.be.empty;
+      expect(shoppingTagImpl.isLayoutSupported(Layout_Enum.CONTAINER)).to.be
+        .true;
     });
 
     it('should set active product in store service when shopping tag is clicked', async () => {
@@ -95,9 +98,9 @@ describes.realWin(
           '/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png',
       };
 
-      await shoppingTag.element.click();
+      await shoppingTagElement.click();
 
-      env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
+      env.sandbox.stub(shoppingTagImpl, 'mutateElement').callsFake(() => {
         expect(
           storeService.get(StateProperty.SHOPPING_DATA['activeProductData'])
         ).to.deep.equal(tagData);
