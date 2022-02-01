@@ -17,4 +17,4 @@ function pushBuildWorkflow() {
   timedExecOrDie(flavor == 'Build' ? 'amp build' : 'amp dist');
 }
 
-runCiJob(jobName, pushBuildWorkflow, pushBuildWorkflow);
+runCiJob(jobName, pushBuildWorkflow, () => {});
