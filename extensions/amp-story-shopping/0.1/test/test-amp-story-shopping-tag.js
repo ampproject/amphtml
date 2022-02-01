@@ -31,8 +31,6 @@ describes.realWin(
     let shoppingTag;
     let storeService;
     let localizationService;
-    let shoppingAttachmentEl;
-    let shoppingAttachment;
 
     beforeEach(async () => {
       win = env.win;
@@ -66,12 +64,14 @@ describes.realWin(
       shoppingTag = await shoppingTagEl.getImpl();
 
       // Set up the shopping attachment.
-      shoppingAttachmentEl = win.document.createElement(
+      const shoppingAttachmentEl = win.document.createElement(
         'amp-story-shopping-attachment'
       );
       shoppingAttachmentEl.getAmpDoc = () => new AmpDocSingle(win);
       pageEl.appendChild(shoppingAttachmentEl);
-      shoppingAttachment = new AmpStoryShoppingAttachment(shoppingAttachmentEl);
+      const shoppingAttachment = new AmpStoryShoppingAttachment(
+        shoppingAttachmentEl
+      );
       await shoppingAttachment.buildCallback();
     });
 
