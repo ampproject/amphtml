@@ -214,9 +214,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
               }
             }
           ></span>
-          <span class="amp-story-shopping-tag-pill-text">
+          <span class="i-amphtml-amp-story-shopping-tag-pill-text">
             {(this.tagData_['productTagText'] && (
-              <span class="amp-story-shopping-product-tag-text">
+              <span class="i-amphtml-amp-story-shopping-product-tag-text">
                 {this.tagData_['productTagText']}
               </span>
             )) ||
