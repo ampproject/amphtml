@@ -39,11 +39,14 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
-    /** @param {boolean} element */
+    /** @param {boolean} */
     this.hasAppendedInnerShoppingTagEl_ = false;
 
-    /** @param {!ShoppingConfigDataDef} tagData */
+    /** @param {?ShoppingConfigDataDef} */
     this.tagData_ = null;
+
+    /** @param {?../../amp-story/1.0/amp-story-page-attachment.AmpStoryPageAttachment} */
+    this.pageAttachmentImpl_ = null;
   }
 
   /** @override */
@@ -79,6 +82,13 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       },
       true /** callToInitialize */
     );
+
+    // Gets reference to page attachment impl for opening attachment.
+    this.element
+      .closest('amp-story-page')
+      .querySelector('amp-story-page-attachment')
+      .getImpl()
+      .then((impl) => (this.pageAttachmentImpl_ = impl));
   }
 
   /**
@@ -138,10 +148,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     });
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   onClick_() {
+    this.pageAttachmentImpl_.open();
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': this.tagData_,
     });
