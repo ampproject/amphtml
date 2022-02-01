@@ -4,8 +4,8 @@ import {getWin} from '#core/window';
 
 /**
  * Retrieves the page that should be the prerender page.
- * @param {!Element} element
- * @return
+ * @param {!Element} element any element
+ * @return {!Element} the prerendered active page
  */
 export function getPrerenderActivePage(element) {
   const win = getWin(element);
