@@ -33,9 +33,8 @@ describes.realWin(
     const fbPostHref =
       'https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/';
     const fbVideoHref = 'https://www.facebook.com/NASA/videos/846648316199961/';
-    const fbCommentsHref = 'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html';
-    const fbCommentHref =
-      'https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/?comment_id=10159193676606772';
+    const fbCommentsHref =
+      'http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html';
 
     beforeEach(() => {
       win = env.win;

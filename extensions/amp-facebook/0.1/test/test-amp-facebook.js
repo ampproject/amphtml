@@ -2,6 +2,7 @@ import '../amp-facebook';
 import {expect} from 'chai';
 
 import {facebook} from '#3p/facebook';
+
 import * as log from '#utils/log';
 
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
@@ -21,7 +22,7 @@ describes.realWin(
     const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
     const fbVideoHref =
       'https://www.facebook.com/zuck/videos/10102509264909801/';
-    const fbCommentHref = 
+    const fbCommentHref =
       'https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185';
     let win, doc;
 
@@ -83,7 +84,7 @@ describes.realWin(
       const warn = env.sandbox.spy();
       env.sandbox.stub(log, 'user').returns({warn});
       expect(warn).not.to.be.called;
-      const ampFB = await getAmpFacebook(fbCommentHref, 'comment');
+      await getAmpFacebook(fbCommentHref, 'comment');
       expect(warn).to.be.calledOnce;
     });
 

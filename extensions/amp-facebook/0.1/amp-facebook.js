@@ -74,8 +74,9 @@ class AmpFacebook extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const embedAs = this.element.getAttribute('data-embed-as');
-    if(embedAs === 'comment'){
+    if (embedAs === 'comment') {
       this.user().warn(
+        'BENTO-LIGTHBOX',
         'Embedded Comments have been deprecated: https://developers.facebook.com/docs/plugins/embedded-comments'
       );
       return;
