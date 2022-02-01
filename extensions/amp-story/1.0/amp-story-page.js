@@ -51,7 +51,7 @@ import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {MediaPool} from './media-pool';
 import {AdvancementConfig} from './page-advancement';
-import {isPrerenderActivePage} from './prerender-active-page';
+import {getPrerenderActivePage} from './prerender-active-page';
 import {renderPageDescription} from './semantic-render';
 import {setTextBackgroundColor} from './utils';
 
@@ -156,7 +156,10 @@ export const NavigationDirection = {
 export class AmpStoryPage extends AMP.BaseElement {
   /** @override @nocollapse */
   static prerenderAllowed(element) {
-    return isPrerenderActivePage(element);
+    if (!AmpStoryPage.prerenderPage) {
+      AmpStoryPage.prerenderPage = getPrerenderActivePage(element);
+    }
+    return element === AmpStoryPage.prerenderPage;
   }
 
   /** @param {!AmpElement} element */
@@ -531,7 +534,11 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   onLayoutMeasure() {
     const {height, width} = this.getLayoutSize();
-    if (!isPrerenderActivePage(this.element) || height === 0 || width === 0) {
+    if (
+      !AmpStoryPage.prerenderAllowed(this.element) ||
+      height === 0 ||
+      width === 0
+    ) {
       return;
     }
     this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});

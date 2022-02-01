@@ -2,26 +2,18 @@ import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {parseQueryString} from '#core/types/string/url';
 import {getWin} from '#core/window';
 
-/* Cached active page */
-let prerenderActivePage = null;
-
 /**
- * Returns true if the page should be prerendered (for being an active page or
- * first page).
- * @param {!AmpElement} pageElement
- * @return {boolean}
+ * Retrieves the page that should be the prerender page.
+ * @param {!Element} element
+ * @return
  */
-export function isPrerenderActivePage(pageElement) {
-  if (prerenderActivePage != null) {
-    return prerenderActivePage === pageElement;
-  }
-  const win = getWin(pageElement);
+export function getPrerenderActivePage(element) {
+  const win = getWin(element);
   const hashId = parseQueryString(win.location.href)['page'];
   let selector = 'amp-story-page:first-of-type';
   if (hashId) {
     selector += `, amp-story-page#${escapeCssSelectorIdent(hashId)}`;
   }
   const selectorNodes = win.document.querySelectorAll(selector);
-  prerenderActivePage = selectorNodes[selectorNodes.length - 1];
-  return selectorNodes[selectorNodes.length - 1] === pageElement;
+  return selectorNodes[selectorNodes.length - 1];
 }
