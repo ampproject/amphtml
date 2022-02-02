@@ -146,6 +146,10 @@ amp-story-shopping-attachment a {
   scroll-behavior: smooth;
 }
 
+.i-amphtml-amp-story-shopping-pdp-carousel::-webkit-scrollbar {
+  display: none;
+}
+
 .i-amphtml-amp-story-shopping-pdp-carousel-card {
   margin-inline-start: calc(var(--shopping-attachment-horizontal-padding) / 2) !important;
   scroll-snap-align: center !important;
@@ -154,6 +158,7 @@ amp-story-shopping-attachment a {
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
+  cursor: pointer !important;
   width: calc(var(--story-page-vw) * 80);
   height: calc(var(--story-page-vw) * 100);
 }
