@@ -147,26 +147,24 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card {
-  scroll-snap-align: center;
-  flex-shrink: 0;
-  width: 100%;
-  height: 200px;
-  margin-right: 30px;
-  background: #eee;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  width: 46vh;
-  height: 53vh;
-  margin-inline-start: calc(var(--shopping-attachment-horizontal-padding) / 2);
+  margin-inline-start: calc(var(--shopping-attachment-horizontal-padding) / 2) !important;
+  scroll-snap-align: center !important;
+  flex-shrink: 0 !important;
+  background-color: var(--three-percent-overlay) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  width: calc(var(--story-page-vw) * 80);
+  height: calc(var(--story-page-vw) * 100);
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
-  margin-inline-start: var(--shopping-attachment-horizontal-padding);
+  margin-inline-start: var(--shopping-attachment-horizontal-padding) !important;
   border-radius: 1.1em 0 0 1.1em !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:last-child {
+  margin-inline-end: var(--shopping-attachment-horizontal-padding) !important;
   border-radius: 0 1.1em 1.1em 0 !important;
 }
 

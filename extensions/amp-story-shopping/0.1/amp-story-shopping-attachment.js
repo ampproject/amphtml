@@ -220,14 +220,19 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         <div class="i-amphtml-amp-story-shopping-pdp-carousel">
           {activeProductData.productImages.map((image, i) => {
             return (
-              <a
+              <div
                 class="i-amphtml-amp-story-shopping-pdp-carousel-card"
-                href={`#slide-${i}`}
                 role="img"
-                id={`slide-${i}`}
-                aria-label="lamp-5"
+                aria-label={image.alt}
                 style={`background-image: url("${image.url}")`}
-              ></a>
+                onClick={(e) =>
+                  e.target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'center',
+                  })
+                }
+              ></div>
             );
           })}
         </div>
