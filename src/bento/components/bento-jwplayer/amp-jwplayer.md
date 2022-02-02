@@ -6,7 +6,7 @@ teaser:
   text: Displays a cloud-hosted JW Player.
 ---
 
-# bento-jwplayer
+# amp-jwplayer
 
 ## Example
 
@@ -15,14 +15,14 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 Example:
 
 ```html
-<bento-jwplayer
+<amp-jwplayer
   data-player-id="aBcD1234"
   data-media-id="5678WxYz"
   layout="responsive"
   width="16"
   height="9"
 >
-</bento-jwplayer>
+</amp-jwplayer>
 ```
 
 Non-responsive layout is also supported.
@@ -30,13 +30,13 @@ Non-responsive layout is also supported.
 Example:
 
 ```html
-<bento-jwplayer
+<amp-jwplayer
   data-player-id="aBcD1234"
   data-playlist-id="5678WxYz"
   width="160"
   height="90"
 >
-</bento-jwplayer>
+</amp-jwplayer>
 ```
 
 ## Attributes
