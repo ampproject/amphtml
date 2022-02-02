@@ -1,3 +1,4 @@
+import {iterateCursor} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
@@ -27,7 +28,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     // Mark pages with required attributes to be treated as paywall protected pages.
-    Array.prototype.map.call(
+    iterateCursor(
       document.querySelectorAll('amp-story-page'),
       (pageEl, index) => {
         if (index == FIRST_PAYWALL_STORY_PAGE_INDEX) {

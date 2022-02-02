@@ -299,7 +299,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {boolean} whether the styles were rewritten */
     this.didRewriteStyles_ = false;
 
-    /** @private {!./amp-story-page.AmpStoryPage} the page to navigate to after subscriptions are granted */
+    /** @private {?./amp-story-page.AmpStoryPage} the page to navigate to after subscriptions are granted */
     this.navigateToPageAfterSubscriptionsAreGranted_ = null;
   }
 
@@ -1280,7 +1280,10 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    if (targetPage.isPaywallProtected()) {
+    if (
+      isExperimentOn(this.win, 'amp-story-paywall-exp') &&
+      targetPage.isPaywallProtected()
+    ) {
       if (this.navigateToPageAfterSubscriptionsAreGranted_) {
         // Subscription dialog is already triggered.
         return Promise.resolve();
