@@ -222,5 +222,9 @@
   "102": {
     "string": "Featured in this story",
     "description": "Label for a list of products that are featured in the story."
+  },
+  "103": {
+    "string": "Buy now",
+    "description": "Button label prompting users to shop for something."
   }
 }

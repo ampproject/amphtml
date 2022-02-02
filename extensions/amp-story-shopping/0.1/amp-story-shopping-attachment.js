@@ -218,7 +218,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           href={activeProductData.productUrl}
           target="_top"
         >
-          <span class="i-amphtml-amp-story-shopping-pdp-cta-text">Buy now</span>
+          <span class="i-amphtml-amp-story-shopping-pdp-cta-text">
+            {this.localizationService_.getLocalizedString(
+              LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL,
+              this.element
+            )}
+          </span>
           <span class="i-amphtml-amp-story-shopping-pdp-cta-icon"></span>
         </a>
         <div class="i-amphtml-amp-story-shopping-pdp-carousel">
