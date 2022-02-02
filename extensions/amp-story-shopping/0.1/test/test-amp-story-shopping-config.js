@@ -23,10 +23,10 @@ describes.realWin(
     const defaultInlineConfig = {
       items: [
         {
-          'product-tag-id': 'city-pop',
-          'product-title': 'Plastic Love',
-          'product-price': 19,
-          'product-price-currency': 'JPY',
+          'productId': 'city-pop',
+          'productTitle': 'Plastic Love',
+          'productPrice': 19,
+          'productPriceCurrency': 'JPY',
         },
       ],
     };
@@ -72,12 +72,12 @@ describes.realWin(
         // matches remote.json
         {
           'art': {
-            'product-tag-id': 'art',
-            'product-title': 'Abstract Art',
-            'product-brand': 'V. Artsy',
-            'product-price': 1200.0,
-            'product-price-currency': 'JPY',
-            'product-images': [
+            'productId': 'art',
+            'productTitle': 'Abstract Art',
+            'productBrand': 'V. Artsy',
+            'productPrice': 1200.0,
+            'productPriceCurrency': 'JPY',
+            'productImages': [
               'https://source.unsplash.com/BdVQU-NDtA8/500x500',
             ],
           },
