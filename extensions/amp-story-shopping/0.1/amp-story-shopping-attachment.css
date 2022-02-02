@@ -4,6 +4,7 @@ amp-story-shopping-attachment {
   font-family: 'Poppins', sans-serif !important;
   font-size: calc(var(--story-page-vmin) * 3) !important; /* override with ems for pixel perfect layout */
   --shopping-attachment-horizontal-padding: 1.5em;
+  --shopping-attachment-vertical-padding: 1.2em;
   --three-percent-overlay: rgba(0,0,0,.03);
 }
 
@@ -24,7 +25,7 @@ amp-story-shopping-attachment a {
 .i-amphtml-amp-story-shopping-plp-header {
   font-weight: 600 !important;
   font-size: 1.5em !important;
-  margin-bottom: 1.2em !important;
+  margin: var(--shopping-attachment-vertical-padding) 0 var(--shopping-attachment-vertical-padding) !important;
 }
 
 .i-amphtml-amp-story-shopping-plp-cards {
@@ -140,14 +141,15 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
+  display: flex !important;
+  overflow-x: auto !important;
+  scroll-snap-type: x mandatory !important;
+  scroll-behavior: smooth !important;
+  margin-bottom: var(--shopping-attachment-vertical-padding) !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel::-webkit-scrollbar {
-  display: none;
+  display: none !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card {
