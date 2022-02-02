@@ -114,7 +114,6 @@ amp-story-shopping-attachment a {
   align-items: center !important;
   height: var(--shopping-cta-height) !important; 
   border-radius: calc(var(--shopping-cta-height) / 2) !important; 
-  color: var(--i-amphtml-draggable-drawer-background-color) !important;
   margin: 0 var(--shopping-attachment-horizontal-padding) 2em !important;
   background: var(--i-amphtml-draggable-drawer-text-color) !important;
 }
@@ -122,6 +121,7 @@ amp-story-shopping-attachment a {
 .i-amphtml-amp-story-shopping-pdp-cta-text {
   font-weight: 500 !important;
   font-size: 1.25em !important;
+  color: var(--i-amphtml-draggable-drawer-background-color) !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-cta-icon {

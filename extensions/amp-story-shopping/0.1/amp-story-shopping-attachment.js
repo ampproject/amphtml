@@ -213,10 +213,14 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             )}
           </span>
         </div>
-        <div role="button" class="i-amphtml-amp-story-shopping-pdp-cta">
-          <div class="i-amphtml-amp-story-shopping-pdp-cta-text">Buy now</div>
+        <a
+          class="i-amphtml-amp-story-shopping-pdp-cta"
+          href={activeProductData.productUrl}
+          target="_top"
+        >
+          <span class="i-amphtml-amp-story-shopping-pdp-cta-text">Buy now</span>
           <span class="i-amphtml-amp-story-shopping-pdp-cta-icon"></span>
-        </div>
+        </a>
         <div class="i-amphtml-amp-story-shopping-pdp-carousel">
           {activeProductData.productImages.map((image) => (
             <div
