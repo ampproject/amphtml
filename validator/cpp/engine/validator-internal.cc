@@ -127,6 +127,22 @@ static const LazyRE2 kRuntimeScriptPathRe = {
 static const LazyRE2 kExtensionPathRe = {
     R"re((?:lts/)?v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.(?:m)?js(?:\?f=sxg)?)re"};
 
+// Generates a htmlparser::css::CssParsingConfig.
+CssParsingConfig GenCssParsingConfig() {
+  CssParsingConfig config;
+  // If other @ rule types are added to the rules, their block parsing types
+  // will need to be added here as well.
+  config.at_rule_spec["font-face"] = BlockType::PARSE_AS_DECLARATIONS;
+  config.at_rule_spec["keyframes"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
+  config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
+  // Note that ignoring still generates an error.
+  config.default_spec = BlockType::PARSE_AS_IGNORE;
+  return config;
+}
+
 namespace {
 
 #define CHECK_NOTNULL(x) (x)
@@ -844,22 +860,6 @@ class ParsedAttrSpecs {
   vector<unique_ptr<ParsedAttrSpec>> parsed_attr_specs_;
   unordered_map<std::string, vector<const ParsedAttrSpec*>> attr_lists_by_name_;
 };
-
-// Generates a htmlparser::css::CssParsingConfig.
-CssParsingConfig GenCssParsingConfig() {
-  CssParsingConfig config;
-  // If other @ rule types are added to the rules, their block parsing types
-  // will need to be added here as well.
-  config.at_rule_spec["font-face"] = BlockType::PARSE_AS_DECLARATIONS;
-  config.at_rule_spec["keyframes"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
-  config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
-  // Note that ignoring still generates an error.
-  config.default_spec = BlockType::PARSE_AS_IGNORE;
-  return config;
-}
 
 // Instances of this class precompute the regular expressions for a particular
 // Cdata specification.

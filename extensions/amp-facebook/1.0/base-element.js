@@ -69,12 +69,14 @@ function parseEmbed(element) {
   const embedAs = element.getAttribute('data-embed-as');
   userAssert(
     !embedAs ||
-      ['post', 'video', 'comment', 'comments', 'like', 'page'].indexOf(
-        embedAs
-      ) !== -1,
+      ['post', 'video', 'comments', 'like', 'page'].indexOf(embedAs) !== -1,
     'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
-      ' "post", "video", "comment", "comments", "like", or "page", but was: %s',
+      ' "post", "video", "comments", "like", or "page", but was: %s',
     embedAs
+  );
+  userAssert(
+    embedAs !== 'comment',
+    'Embedded Comments have been deprecated: https://developers.facebook.com/docs/plugins/embedded-comments'
   );
   return embedAs;
 }

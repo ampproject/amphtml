@@ -80,6 +80,11 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           urlParams['hb_height'] = this.element.getAttribute('height');
         }
 
+        const schain = this.element.getAttribute('data-schain');
+        if (schain) {
+          urlParams['schain'] = schain;
+        }
+
         const formatId = this.element.getAttribute('data-format');
         const tagId = 'sas_' + formatId;
         return buildUrl(
