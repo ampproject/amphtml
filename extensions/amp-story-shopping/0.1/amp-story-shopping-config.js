@@ -37,8 +37,8 @@ export function getShoppingConfig(pageElement) {
  */
 function keyByProductTagId(config) {
   const keyed = {};
-  for (const item of config['items']) {
-    keyed[item['productId']] = item;
+  for (const item of config.items) {
+    keyed[item.productId] = item;
   }
   return keyed;
 }
