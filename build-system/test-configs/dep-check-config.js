@@ -500,8 +500,8 @@ exports.rules = [
     allowlist: [
       // Do not add to this allowlist.
       // These files are here temporarily while all the bento components are moved out of extensions.
-      'src/bento/components/jwplayer/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-      'src/bento/components/jwplayer/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+      'src/bento/components/bento-jwplayer/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      'src/bento/components/bento-jwplayer/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
     ],
   },
   {

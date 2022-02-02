@@ -1,6 +1,6 @@
-import {Layout_Enum} from '#core/dom/layout';
-
 import {Services} from '#service';
+
+import {user} from '#utils/log';
 
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 
@@ -15,7 +15,7 @@ import {
  *  items: !Array<!ShoppingConfigDataDef>,
  * }}
  */
-let ShoppingConfigDef;
+let ShoppingConfigResponseDef;
 
 /**
  * Validates string length of shopping config attributes
@@ -80,79 +80,89 @@ function validateURL(field, url) {
     }
   });
 }
+
+/** @private @const {!Object<Array<Function>>} */
+const productValidationConfig_ = {
+  /* Required Attrs */
+  'productId': [validateRequired, validateStringLength],
+  'productTitle': [validateRequired, validateStringLength],
+  'productPrice': [validateRequired, validateNumber],
+  'productImages': [validateRequired, validateURL],
+  'productPriceCurrency': [validateRequired, validateStringLength],
+  /* Optional Attrs */
+  'productColor': [validateStringLength],
+  'productSize': [validateStringLength],
+  'productIcon': [validateURL],
+  'productTagText': [validateStringLength],
+  'reviewsData': [validateURL],
+  'ctaText': [validateNumber],
+  'shippingText': [validateNumber],
+};
+
+/**
+ * Validates shopping config.
+ * @param {!ShoppingConfigDataDef} shoppingConfig
+ * @private
+ */
+function validateConfig_(shoppingConfig) {
+  const errors = Object.keys(productValidationConfig_)
+    .reduce((errors, k) => {
+      const value = shoppingConfig[k];
+      productValidationConfig_[k].forEach((fn) => {
+        errors.push(...(fn(k, value) || []));
+      });
+      return errors;
+    }, [])
+    .filter(Boolean);
+  for (const error of errors) {
+    user().warn('ERROR', `amp-story-shopping-config: ${error}`);
+  }
+}
+
+/** @typedef {!Object<string, !ShoppingConfigDataDef> */
+export let KeyedShoppingConfigDef;
+
+/**
+ * Gets Shopping config from an <amp-story-page> element.
+ * The config is validated and keyed by 'product-tag-id'.
+ * @param {!Element} pageElement <amp-story-page>
+ * @return {!Promise<!KeyedShoppingConfigDef>}
+ */
+export function getShoppingConfig(pageElement) {
+  const element = pageElement.querySelector('amp-story-shopping-config');
+  return getElementConfig(element).then((config) => {
+    validateConfig_(config);
+    return keyByProductTagId(config);
+  });
+}
+/**
+ * @param {!ShoppingConfigResponseDef} config
+ * @return {!KeyedShoppingConfigDef}
+ */
+function keyByProductTagId(config) {
+  const keyed = {};
+  for (const item of config.items) {
+    keyed[item.productId] = item;
+  }
+  return keyed;
+}
+
+/**
+ * @param {!Element} pageElement
+ * @param {!KeyedShoppingConfigDef} config
+ * @return {!Promise<!ShoppingConfigResponseDef>}
+ */
+export function storeShoppingConfig(pageElement, config) {
+  const win = pageElement.ownerDocument.defaultView;
+  return Services.storyStoreServiceForOrNull(win).then((storeService) => {
+    storeService?.dispatch(Action.ADD_SHOPPING_DATA, config);
+    return config;
+  });
+}
+
 export class AmpStoryShoppingConfig extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
-
-    /** @private @const {!Object<Array<Function>>} */
-    this.productValidationConfig_ = {
-      /* Required Attrs */
-      'productId': [validateRequired, validateStringLength],
-      'productTitle': [validateRequired, validateStringLength],
-      'productPrice': [validateRequired, validateNumber],
-      'productImages': [validateRequired, validateURL],
-      'productPriceCurrency': [validateRequired, validateStringLength],
-      /* Optional Attrs */
-      'productColor': [validateStringLength],
-      'productSize': [validateStringLength],
-      'productIcon': [validateURL],
-      'productTagText': [validateStringLength],
-      'reviewsData': [validateURL],
-      'ctaText': [validateNumber],
-      'shippingText': [validateNumber],
-    };
-  }
-  /**
-   * Validates shopping config.
-   * @param {!ShoppingConfigDataDef} shoppingConfig
-   * @private
-   */
-  validateConfig_(shoppingConfig) {
-    const errors = Object.keys(this.productValidationConfig_)
-      .reduce((errors, k) => {
-        const value = shoppingConfig[k];
-        this.productValidationConfig_[k].forEach((fn) => {
-          errors.push(...(fn(k, value) || []));
-        });
-        return errors;
-      }, [])
-      .filter(Boolean);
-    for (const error of errors) {
-      this.user().warn('ERROR', `amp-story-shopping-config: ${error}`);
-    }
-  }
-
-  /**
-   * Keys product data to productIds and adds them to the store service.
-   * @param {!ShoppingConfigDef} shoppingConfig
-   * @private
-   */
-  addShoppingDataFromConfig_(shoppingConfig) {
-    const productIDtoProduct = {};
-    for (const item of shoppingConfig['items']) {
-      this.validateConfig_(item);
-      productIDtoProduct[item['productId']] = item;
-    }
-    this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, productIDtoProduct);
-  }
-
-  /** @override */
-  buildCallback() {
-    super.buildCallback();
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win),
-      getElementConfig(this.element),
-    ]).then(([storeService, storyConfig]) => {
-      this.storeService_ = storeService;
-      this.addShoppingDataFromConfig_(storyConfig);
-    });
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout === Layout_Enum.NODISPLAY;
   }
 }

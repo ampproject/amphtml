@@ -1,6 +1,6 @@
 [
   {
-    "name": "jwplayer",
+    "name": "bento-jwplayer",
     "version": "1.0",
     "options": {
       "hasCss": true
