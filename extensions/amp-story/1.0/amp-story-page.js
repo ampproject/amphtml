@@ -520,7 +520,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.muteAllMedia();
 
-    this.renderOpenAttachmentUI_();
+    this.installPageAttachmentExtension_();
 
     return Promise.all([
       this.waitForMediaLayout_().then(() => this.markPageAsLoaded_()),
@@ -1523,21 +1523,15 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Renders the open attachment UI affordance.
+   * Installs the page attachment extension.
    * @private
    */
-  renderOpenAttachmentUI_() {
-    // AttachmentEl can be any component that extends draggable drawer.
-    const attachmentEl = this.element.querySelector(
+  installPageAttachmentExtension_() {
+    const elementsThatRequireExtension = this.element.querySelector(
       'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
     );
 
-    if (
-      !attachmentEl ||
-      (attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT' &&
-        this.element.getElementsByTagName('amp-story-shopping-tag').length ===
-          0)
-    ) {
+    if (!elementsThatRequireExtension) {
       return;
     }
 
