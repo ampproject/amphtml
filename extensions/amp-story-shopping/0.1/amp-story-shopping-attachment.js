@@ -6,7 +6,6 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 import {
-  KeyedShoppingConfigDef,
   getShoppingConfig,
   storeShoppingConfig,
 } from './amp-story-shopping-config';
