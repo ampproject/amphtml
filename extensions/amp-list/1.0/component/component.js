@@ -11,9 +11,8 @@ import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {useIsInViewport} from '#preact/component/intersection-observer';
 import {useAmpContext} from '#preact/context';
-import {xhrUtils} from '#preact/utils/xhr';
-
 import {useInfiniteQuery} from '#preact/hooks/useInfiniteQuery';
+import {xhrUtils} from '#preact/utils/xhr';
 
 const defaultItemTemplate = (item) => <p>{String(item)}</p>;
 const defaultWrapperTemplate = (list) => <div>{list}</div>;
