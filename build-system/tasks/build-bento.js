@@ -135,7 +135,6 @@ async function buildBentoComponent(
   extraGlobs
 ) {
   options.extraGlobs = extraGlobs;
-  options.npm = true;
   options.bento = true;
 
   if (options.compileOnlyCss && !hasCss) {
@@ -155,8 +154,10 @@ async function buildBentoComponent(
       return Promise.all(promises);
     }
   }
-  promises.push(buildNpmBinaries(componentsDir, name, options));
-  promises.push(buildNpmCss(componentsDir, options));
+  if (options.npm) {
+    promises.push(buildNpmBinaries(componentsDir, name, options));
+    promises.push(buildNpmCss(componentsDir, options));
+  }
   if (options.binaries) {
     promises.push(buildBinaries(componentsDir, options.binaries, options));
   }

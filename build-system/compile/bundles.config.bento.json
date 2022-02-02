@@ -3,7 +3,8 @@
     "name": "bento-jwplayer",
     "version": "1.0",
     "options": {
-      "hasCss": true
+      "hasCss": true,
+      "npm": true
     }
   }
 ]
