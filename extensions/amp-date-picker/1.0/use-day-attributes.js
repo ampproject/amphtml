@@ -1,6 +1,8 @@
 import {addDays, format, isAfter, isBefore, subDays} from 'date-fns';
 
-import {createContext, useCallback, useContext} from '#preact';
+import {createContext, useCallback, useContext, useMemo} from '#preact';
+
+import {DatesList} from './dates-list';
 
 // eslint-disable-next-line local/no-export-side-effect
 export const AttributesContext = createContext();
@@ -20,13 +22,21 @@ export function useDayAttributes() {
   }
   const {
     allowBlockedEndDate,
-    blockedDates,
-    highlightedDates,
+    blocked,
+    highlighted,
     max,
     maximumNights,
     min,
     minimumNights,
   } = context;
+
+  const blockedDates = useMemo(() => {
+    return new DatesList(blocked);
+  }, [blocked]);
+
+  const highlightedDates = useMemo(() => {
+    return new DatesList(highlighted);
+  }, [highlighted]);
 
   const getFormattedDate = useCallback((date) => {
     return format(date, DATE_FORMAT);
@@ -104,5 +114,7 @@ export function useDayAttributes() {
     isHighlighted,
     getDisabledAfter,
     getDisabledBefore,
+    blockedDates,
+    highlightedDates,
   };
 }

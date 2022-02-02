@@ -1,15 +1,11 @@
-import {Button, useDayRender} from 'react-day-picker';
+import {Button, DayProps, useDayRender} from 'react-day-picker';
 
 import * as Preact from '#preact';
 import {useRef} from '#preact';
 
 import {useDayAttributes} from './use-day-attributes';
 
-/**
- * @param {!DayProps} props
- * @return {PreactDef.Renderable}
- */
-export function DayButton({date, displayMonth}) {
+export function DayButton({date, displayMonth}: DayProps) {
   const buttonRef = useRef();
 
   const day = useDayRender(date, displayMonth, buttonRef);

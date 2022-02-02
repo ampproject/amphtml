@@ -25,7 +25,7 @@ import {
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
-import {BaseDatePicker} from './base-date-picker';
+import {BaseDatePicker} from './base-date-picker.tsx';
 import {
   DateFieldNameByType,
   DateFieldType,
@@ -49,7 +49,6 @@ function DateRangePickerWithRef(
   {
     allowBlockedEndDate,
     allowBlockedRanges,
-    blockedDates,
     children,
     endInputSelector,
     format,
@@ -79,6 +78,7 @@ function DateRangePickerWithRef(
   const containerRef = useRef();
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
+  const {blockedDates} = useDayAttributes();
 
   const {getDisabledAfter, getDisabledBefore, isDisabled} = useDayAttributes();
 

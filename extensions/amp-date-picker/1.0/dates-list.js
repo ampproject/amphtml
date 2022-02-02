@@ -45,7 +45,7 @@ const DateType = {
  */
 export class DatesList {
   /**
-   * @param {string|Array<string|Date>} args
+   * @param {string|Array<string|Date>|undefined} args
    */
   constructor(args) {
     let dates;
@@ -91,7 +91,7 @@ export class DatesList {
     }
 
     const rruleDates = this.rrulestrs_
-      .map((rrule) => /** @type {RRule} */ (rrule).after(date))
+      .map((rrule) => /** @type {RRule} */ rrule.after(date))
       .filter(Boolean)
       .map(normalizeRruleReturn);
 
@@ -111,7 +111,7 @@ export class DatesList {
       return DateType.DATE;
     }
 
-    const dateStr = /** @type {string} */ (date);
+    const dateStr = /** @type {string} */ date;
     if (tryParseRrulestr(dateStr)) {
       return DateType.RRULE;
     }
@@ -138,7 +138,7 @@ export class DatesList {
   matchesRrule_(date) {
     const nextDate = addDays(date, 1);
     return this.rrulestrs_.some((rrule) => {
-      const rruleUTCDate = /** @type {RRule} */ (rrule).before(nextDate);
+      const rruleUTCDate = /** @type {RRule} */ rrule.before(nextDate);
       if (!rruleUTCDate) {
         return false;
       }

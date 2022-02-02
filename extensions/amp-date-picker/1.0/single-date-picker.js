@@ -18,7 +18,7 @@ import {
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
-import {BaseDatePicker} from './base-date-picker';
+import {BaseDatePicker} from './base-date-picker.tsx';
 import {
   DateFieldNameByType,
   DateFieldType,
@@ -31,6 +31,7 @@ import {
 import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
 import {DatePickerContext} from './use-date-picker';
 import {useDatePickerState} from './use-date-picker-state';
+import {useDayAttributes} from './use-day-attributes';
 
 /**
  * @param {!BentoDatePickerDef.SingleDatePickerProps} props
@@ -39,7 +40,6 @@ import {useDatePickerState} from './use-date-picker-state';
  */
 function SingleDatePickerWithRef(
   {
-    blockedDates,
     children,
     format,
     id,
@@ -60,11 +60,12 @@ function SingleDatePickerWithRef(
   const [date, _setDate] = useState();
   const [hiddenInputProps, setHiddenInputProps] = useState();
   // This allow the calendar to navigate to a new month when the date changes
-  const [month, setMonth] = useState(initialVisibleMonth ?? getCurrentDate());
+  const [month, setMonth] = useState(initialVisibleMonth);
 
   const containerRef = useRef();
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
+  const {blockedDates} = useDayAttributes();
 
   const handleSetDate = useCallback(
     (date) => {
