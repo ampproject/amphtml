@@ -22,15 +22,6 @@ const defaultLoadMoreTemplate = () => <button>Load more</button>;
 
 /**
  *
- * @param {string} src
- * @return {Promise<any>}
- */
-async function fetchItemsDefault(src) {
-  return await xhrUtils.fetchJson(src);
-}
-
-/**
- *
  * @param {object} results
  * @param {string} itemsKey
  * @return {*}
@@ -88,7 +79,7 @@ function getNextUrl(lastPage, loadMoreBookmark) {
 export function BentoListWithRef(
   {
     src = null,
-    fetchItems = fetchItemsDefault,
+    fetchJson = xhrUtils.fetchJson,
     itemsKey = 'items',
     maxItems = 0,
     resetOnRefresh = false,
@@ -122,7 +113,7 @@ export function BentoListWithRef(
       if (!renderable) {
         return null;
       }
-      const page = await fetchItems(nextUrl);
+      const page = await fetchJson(nextUrl);
       return page;
     },
     getNextPageParam(lastPage) {

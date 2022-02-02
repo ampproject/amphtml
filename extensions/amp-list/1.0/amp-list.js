@@ -9,6 +9,7 @@ import {userAssert} from '#utils/log';
 import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-list-1.0.css';
+import {FetchJsonUtil} from '../../amp-render/1.0/shared/amp-fetch-utils';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -30,8 +31,13 @@ class AmpList extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   init() {
     this.registerApiAction('refresh', (api) => api./*OK*/ refresh());
 
-    // TODO: Handle templates, pass in fetchJson
-    return super.init();
+    const initialSrc = this.element.getAttribute('src');
+    const fetchUtil = new FetchJsonUtil(TAG, this.element, initialSrc);
+    const fetchJson = fetchUtil.getFetchJsonCallback();
+
+    return {
+      'fetchJson': fetchJson,
+    };
   }
 
   /** @override */

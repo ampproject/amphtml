@@ -13,7 +13,7 @@ export const SimpleList = (args) => {
   return (
     <BentoList
       {...args}
-      fetchItems={async () => ({items: ['one', 'two', 'three']})}
+      fetchJson={async () => ({items: ['one', 'two', 'three']})}
     />
   );
 };
@@ -21,8 +21,8 @@ export const LoadingState = (args) => {
   return (
     <BentoList
       {...args}
-      fetchItems={async () => {
-        await new Promise(() => {});
+      fetchJson={async () => {
+        await new Promise((unusedResolve) => {});
       }}
     />
   );
@@ -31,7 +31,7 @@ export const ErrorState = (args) => {
   return (
     <BentoList
       {...args}
-      fetchItems={async () => {
+      fetchJson={async () => {
         throw new Error('example error message');
       }}
     />
@@ -42,7 +42,7 @@ function delay(ms = 250) {
   return new Promise((r) => setTimeout(r, ms));
 }
 export const LoadMore = (args) => {
-  const fetchItems = async (url) => {
+  const fetchJson = async (url) => {
     if (url === 'page-1') {
       return {items: ['one', 'two', 'three'], 'load-more-src': 'page-2'};
     }
@@ -57,16 +57,11 @@ export const LoadMore = (args) => {
   };
 
   return (
-    <BentoList
-      {...args}
-      loadMore="manual"
-      src="page-1"
-      fetchItems={fetchItems}
-    />
+    <BentoList {...args} loadMore="manual" src="page-1" fetchJson={fetchJson} />
   );
 };
 
-const fetchItemsInfinite = async (url) => {
+const fetchJsonInfinite = async (url) => {
   await delay();
   // Increment the URL:
   const nextPage = url.replace(/\d+/, ($0) => String(Number($0) + 1));
@@ -98,7 +93,7 @@ export const InfiniteScrollSimple = (args) => {
         {...args}
         loadMore="auto"
         src="Page 1"
-        fetchItems={fetchItemsInfinite}
+        fetchJson={fetchJsonInfinite}
         wrapper={(list) => {
           setPages(list.length); // Track the total size
           return <div>{list}</div>;
@@ -131,7 +126,7 @@ export const InfiniteScrollTest = (args) => {
         {...args}
         loadMore="auto"
         src="Page 1"
-        fetchItems={fetchItemsInfinite}
+        fetchJson={fetchJsonInfinite}
         viewportBuffer={0}
         wrapper={(list) => {
           setPages(list.length); // Track the total size
@@ -145,7 +140,7 @@ export const InfiniteScrollTest = (args) => {
 
 export const ChangingProps = (args) => {
   // Simulate an API with a lot of options
-  const fetchItems = async (url) => {
+  const fetchJson = async (url) => {
     await delay(1000);
 
     const gen = (length, create) =>
@@ -225,7 +220,7 @@ export const ChangingProps = (args) => {
         {...args}
         src={src}
         itemsKey={itemsKey}
-        fetchItems={fetchItems}
+        fetchJson={fetchJson}
         loadMore={'auto'}
         loadMoreBookmark={loadMoreBookmark}
       />

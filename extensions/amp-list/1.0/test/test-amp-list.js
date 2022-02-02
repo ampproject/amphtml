@@ -3,7 +3,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 
-import {xhrUtils} from '#preact/utils/xhr';
+import {Services} from '#service';
 
 import {waitFor, whenCalled} from '#testing/helpers/service';
 
@@ -51,10 +51,12 @@ describes.realWin(
 
     let fetchJson;
     beforeEach(() => {
+      const xhr = Services.batchedXhrFor(env.win);
+
       fetchJson = env.sandbox.stub().resolves({items: ['one', 'two', 'three']});
-      env.sandbox.stub(xhrUtils, 'fetchJson').callsFake(async (...args) => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(async (...args) => {
         await delay(); // Ensure enough time to catch the "Loading" state
-        return fetchJson(...args);
+        return {json: () => fetchJson(...args)};
       });
     });
 
