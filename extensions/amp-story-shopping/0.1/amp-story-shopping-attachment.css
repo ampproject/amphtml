@@ -138,3 +138,31 @@ amp-story-shopping-attachment a {
 [theme="dark"] .i-amphtml-amp-story-shopping-pdp-cta-icon {
   filter: invert(1) !important;
 }
+
+.i-amphtml-amp-story-shopping-pdp-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  /* height: 200px; */
+}
+
+.i-amphtml-amp-story-shopping-pdp-carousel-card {
+  scroll-snap-align: center;
+  flex-shrink: 0;
+  width: 100%;
+  height: 200px;
+  margin-right: 30px;
+  /* border-radius: 10px; */
+  background: #eee;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 46vh;
+  height: 53vh;
+  margin-inline-start: calc(var(--shopping-attachment-horizontal-padding) / 2);
+}
+
+.i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
+  margin-inline-start: var(--shopping-attachment-horizontal-padding);
+}
