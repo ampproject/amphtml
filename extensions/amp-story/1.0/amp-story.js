@@ -440,18 +440,6 @@ export class AmpStory extends AMP.BaseElement {
     if (this.maybeLoadStoryDevTools_()) {
       return;
     }
-
-    const needsDvhPolyfill =
-      !this.win.CSS?.supports?.('height: 1dvh') &&
-      !getStyle(this.win.document.documentElement, '--story-dvh');
-
-    const onResize = (size) => {
-      needsDvhPolyfill && this.polyfillDvh_(size);
-      this.onViewportResize_();
-    };
-
-    this.getViewport().onResize(onResize);
-    onResize(this.getViewport().getSize());
   }
 
   /**
@@ -915,6 +903,18 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   layoutStory_() {
+    const needsDvhPolyfill =
+      !this.win.CSS?.supports?.('height: 1dvh') &&
+      !getStyle(this.win.document.documentElement, '--story-dvh');
+
+    const onResize = (size) => {
+      needsDvhPolyfill && this.polyfillDvh_(size);
+      this.onViewportResize_();
+    };
+
+    this.getViewport().onResize(onResize);
+
+    onResize(this.getViewport().getSize());
     const initialPageId = this.getInitialPageId_();
 
     this.buildSystemLayer_(initialPageId);
@@ -951,7 +951,7 @@ export class AmpStory extends AMP.BaseElement {
 
         if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
           const attachmentEl = this.activePage_.element.querySelector(
-            'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
+            'amp-story-page-attachment, amp-story-page-outlink'
           );
 
           if (attachmentEl) {

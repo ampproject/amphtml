@@ -108,8 +108,8 @@ const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 const jisonPath = 'extensions/**/*.jison';
 
 const lintGlobs = [
-  '**/*.js',
-  '**/*.ts',
+  '**/*.{js,jsx}',
+  '**/*.{ts,tsx}',
   '!**/*.d.ts',
   // To ignore a file / directory, add it to .eslintignore.
 ];
@@ -198,6 +198,9 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story/!(*.amp.html)',
   '!examples/visual-tests/amp-story-player/!(*.amp.html)',
   '!test/fixtures/e2e/amp-story-player/!(*.amp.html)',
+
+  // Remove this from the list after TODO(#37467) gets closed.
+  '!examples/amp-access-fewcents.html',
 
   // TODO(#25149): Fix these invalid files and remove them from this list.
   '!examples/accordion.amp.html',

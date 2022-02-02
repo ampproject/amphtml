@@ -7,35 +7,28 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-page-attachment" src="https://cdn.ampproject.org/v0/amp-story-page-attachment-0.1.js"></script>
     <script async custom-element="amp-story-shopping" src="https://cdn.ampproject.org/v0/amp-story-shopping-0.1.js"></script>
     <style amp-custom>
-      [data-tag-id="hat"] {
-        top: 33%;
-        left: 7%;
+      [data-product-id="lamp"],
+      [data-product-id="lamp-rtl"] {
+        top: 31%;
+        left: 1%;
       }
-      [data-tag-id="sunglasses"] {
-        top: 28%;
-        left: 43%;
+      [data-product-id="art"],
+      [data-product-id="art-rtl"] {
+        top: 15%;
+        left: 40%;
       }
-      [data-tag-id="backpack"] {
-        top: 33%;
-        left: 60%;
+      [data-product-id="chair"],
+      [data-product-id="chair-rtl"] {
+        top: 53%;
+        left: 30%;
       }
-      [data-tag-id=city-pop] {
-        top: 33%;
-        left: 7%;
-      }
-      [data-tag-id="hat-rtl"] {
-        top: 33%;
-        left: 7%;
-      }
-      [data-tag-id="sunglasses-rtl"] {
-        top: 28%;
-        left: 43%;
-      }
-      [data-tag-id="backpack-rtl"] {
-        top: 33%;
-        left: 80%;
+      [data-product-id="flowers"],
+      [data-product-id="flowers-rtl"] {
+        top: 46%;
+        left: 83%;
       }
     </style>
   </head>
@@ -55,38 +48,51 @@
             {
                 "items" : [
                    {
-                    "product-tag-id": "hat",
-                    "product-title": "Hootenanny Hat",
-                    "product-price": 799.00,
-                    "product-price-currency": "USD",
-                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
+                    "productId": "lamp",
+                    "productTitle": "Brass Lamp",
+                    "productBrand": "Lamp Co",
+                    "productPrice": 799.00,
+                    "productPriceCurrency": "USD",
+                    "productImages": ["https://source.unsplash.com/Ry9WBo3qmoc/500x500"]
                    },
                    {
-                    "product-tag-id": "sunglasses",
-                    "product-title": "Spectacular Spectacles",
-                    "product-price": 400.00,
-                    "product-price-currency": "INR",
-                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
+                    "productId": "art",
+                    "productTitle": "Abstract Art",
+                    "productBrand": "V. Artsy",
+                    "productPrice": 1200.00,
+                    "productPriceCurrency": "INR",
+                    "productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
                    },
                    {
-                    "product-tag-id": "backpack",
-                    "product-title": "Beastly Backpack",
-                    "product-price": 1000.00,
-                    "product-price-currency": "BRL",
-                    "product-tag-text": "Beastly Backpack Brews Beastly Beverages",
-                    "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
+                    "productId": "chair",
+                    "productTitle": "Yellow chair",
+                    "productBrand": "Chair Co.",
+                    "productPrice": 1000.00,
+                    "productPriceCurrency": "BRL",
+                    "productTagText": "The perfectly imperfect yellow chair",
+                    "productImages": ["https://source.unsplash.com/DgQGKKLaVhY/500x500"]
+                   },
+                   {
+                    "productId": "flowers",
+                    "productTitle": "Flowers",
+                    "productBrand": "Very Long Flower Company Name",
+                    "productPrice": 10.00,
+                    "productPriceCurrency": "USD",
+                    "productIcon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
+                    "productImages": ["https://source.unsplash.com/SavQfLRm4Do/500x500"]
                    }
                 ]
               }
           </script>
         </amp-story-shopping-config>
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="hat" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="sunglasses" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="backpack" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="chair" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="flowers" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
@@ -99,20 +105,23 @@
             {
                 "items" : [
                    {
-                    "product-tag-id": "city-pop",
-                    "product-title": "Plastic Love",
-                    "product-price": 19.00,
-                    "product-price-currency": "JPY",
-                   }
+                    "productId": "art",
+                    "productTitle": "Abstract Art",
+                    "productBrand": "V. Artsy",
+                    "productPrice": 1200.00,
+                    "productPriceCurrency": "JPY",
+                    "productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
+                   },
                 ]
               }
           </script>
         </amp-story-shopping-config>
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
       </amp-story-page>
@@ -124,15 +133,15 @@
         <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
           <script type="application/json">
             {
-                "items" : []
-              }
+              "items" : []
+            }
           </script>
         </amp-story-shopping-config>
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="city-pop" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
       </amp-story-page>
@@ -144,38 +153,53 @@
           <script type="application/json">
             {
               "items" : [
-                 {
-                  "product-tag-id": "hat-rtl",
-                  "product-title": "Hootenanny Hat",
-                  "product-price": 799.00,
-                  "product-tag-text": " حبا حبا حبا سعادةا سعادة",
-                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png"
+                {
+                  "productId": "lamp-rtl",
+                  "productTitle": "Brass Lamp",
+                  "productBrand": "Lamp Co",
+                  "productPrice": 799.00,
+                  "productPriceCurrency": "AED",
+                  "productTagText": " حبا حبا حبا سعادةا سعادة",
+                  "productImages": ["https://source.unsplash.com/Ry9WBo3qmoc/500x500"]
+                },
+                {
+                  "productId": "art-rtl",
+                  "productTitle": "Abstract Art",
+                  "productBrand": "V. Artsy",
+                  "productPriceCurrency": "AED",
+                  "productPrice": 1200.00,
+                  "productTagText": "حبا حب سعادة قط حبا حب سعادة قط ",
+                  "productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
+                },
+                {
+                  "productId": "chair-rtl",
+                  "productTitle": "Yellow chair",
+                  "productBrand": "Chair Co.",
+                  "productPrice": 1000.00,
+                  "productPriceCurrency": "AED",
+                  "productImages": ["https://source.unsplash.com/DgQGKKLaVhY/500x500"]
                  },
                  {
-                  "product-tag-id": "sunglasses-rtl",
-                  "product-title": "Spectacular Spectacles",
-                  "product-price": 400.00,
-                  "product-tag-text": "حبا حب سعادة قط حبا حب سعادة قط ",
-                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png"
-                 },
-                 {
-                  "product-tag-id": "backpack-rtl",
-                  "product-title": "Beastly Backpack",
-                  "product-price": 500.00,
-                  "product-price-currency": "AED",
-                  "product-icon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png"
+                  "productId": "flowers-rtl",
+                  "productTitle": "Flowers",
+                  "productBrand": "Very Long Flower Company Name",
+                  "productPrice": 10.00,
+                  "productPriceCurrency": "AED",
+                  "productIcon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
+                  "productImages": ["https://source.unsplash.com/SavQfLRm4Do/500x500"]
                  }
               ]
             }
           </script>
         </amp-story-shopping-config>
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-tag-id="hat-rtl" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="sunglasses-rtl" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-tag-id="backpack-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="lamp-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="chair-rtl" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="flowers-rtl" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
@@ -193,7 +217,7 @@
       </amp-story-shopping-config>
 
       <amp-story-grid-layer template="fill">
-        <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/shopping/bg.png"></amp-img>
+        <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
       </amp-story-grid-layer>
       <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
