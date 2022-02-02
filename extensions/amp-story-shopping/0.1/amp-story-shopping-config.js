@@ -90,22 +90,19 @@ export class AmpStoryShoppingConfig extends AMP.BaseElement {
     /** @private @const {!Object<Array<Function>>} */
     this.productValidationConfig_ = {
       /* Required Attrs */
-      'productId': [validateRequired, validateStringLength], // Required. String. Keys to amp-story-shopping-tag nodes.
-      'brandLabel': [validateRequired, validateStringLength], // Required. String.
-      'productTitle': [validateRequired, validateStringLength], // Required. String.
-      'productPrice': [validateRequired, validateNumber], // Required. Number.
-      'productImages': [validateRequired, validateURL], // Required. String or array of strings.
-      'productDetails': [validateRequired, validateStringLength], // Required. String.
-      'reviewsPage': [validateRequired, validateURL], // Required if reviews-data. Links to a page where reviews can be read.
-      'productPriceCurrency': [validateRequired, validateStringLength], // Required. String. ISO 4217 currency code used to display the correct currency symbol.
+      'productId': [validateRequired, validateStringLength],
+      'productTitle': [validateRequired, validateStringLength],
+      'productPrice': [validateRequired, validateNumber],
+      'productImages': [validateRequired, validateURL],
+      'productPriceCurrency': [validateRequired, validateStringLength],
       /* Optional Attrs */
-      'productColor': [validateStringLength], // Optional. String.
-      'productSize': [validateStringLength], // Optional. String.
-      'productIcon': [validateURL], // Optional. Links to an image. Defaults to a shopping bag icon.
-      'productTagText': [validateStringLength], // Optional. String.
-      'reviewsData': [validateURL], // Optional. Links to review data.
-      'ctaText': [validateNumber], // Optional. Number. Defaults to “Buy now”. Keys to a CTA text option for i18n.
-      'shippingText': [validateNumber], // Optional. Number. Keys to a shipping text option for i18n. Shipping text will not be rendered if the string is omitted.
+      'productColor': [validateStringLength],
+      'productSize': [validateStringLength],
+      'productIcon': [validateURL],
+      'productTagText': [validateStringLength],
+      'reviewsData': [validateURL],
+      'ctaText': [validateNumber],
+      'shippingText': [validateNumber],
     };
   }
   /**
