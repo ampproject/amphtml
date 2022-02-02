@@ -52,11 +52,11 @@ async function githubFetch(path, options) {
 async function getAllPaginated(getPagePath) {
   const result = [];
   let page = 1;
-  let lastResult = await githubFetch(getPagePath(page));
-  while (lastResult.length) {
-    result.push(...lastResult);
+  let lastResult;
+  do {
     lastResult = await githubFetch(getPagePath(++page));
-  }
+    result.push(...lastResult);
+  } while (lastResult.length);
   return result;
 }
 
