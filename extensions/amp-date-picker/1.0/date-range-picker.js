@@ -29,6 +29,7 @@ import {
   DateFieldType,
   DatePickerMode,
   DatePickerState,
+  DatePickerType,
   FORM_INPUT_SELECTOR,
   TAG,
 } from './constants';
@@ -54,6 +55,7 @@ function DateRangePickerWithRef(
     locale,
     mode,
     onError,
+    openAfterSelect,
     startInputSelector,
     ...rest
   },
@@ -66,6 +68,7 @@ function DateRangePickerWithRef(
   const [endDate, setEndDate] = useState();
   const [startHiddenInputName, setStartHiddenInputName] = useState();
   const [endHiddenInputName, setEndHiddenInputName] = useState();
+  const [focusedInput, setFocusedInput] = useState();
 
   const containerRef = useRef();
 
@@ -210,8 +213,21 @@ function DateRangePickerWithRef(
       if (isBlockedRange(startDate, endDate) || isOutsideRange) {
         return;
       }
-      handleSetStartDate(startDate);
-      handleSetEndDate(endDate);
+      // TODO: Clarify this logic
+      if (
+        focusedInput === DateFieldType.START_DATE &&
+        isSameDay(startDate, endDate)
+      ) {
+        handleSetStartDate(startDate);
+      } else if (focusedInput === DateFieldType.END_DATE) {
+        handleSetEndDate(endDate);
+      } else {
+        handleSetStartDate(startDate);
+        handleSetEndDate(endDate);
+        if (!openAfterSelect) {
+          transitionTo(DatePickerState.OVERLAY_CLOSED);
+        }
+      }
     },
     [
       handleSetStartDate,
@@ -219,6 +235,9 @@ function DateRangePickerWithRef(
       isBlockedRange,
       getDisabledAfter,
       getDisabledBefore,
+      focusedInput,
+      transitionTo,
+      openAfterSelect,
     ]
   );
 
@@ -299,9 +318,13 @@ function DateRangePickerWithRef(
       return;
     }
     const handleFocus = (event) => {
-      if (event.target === startInputEl || event.target === endInputEl) {
-        transitionTo(DatePickerState.OVERLAY_OPEN_INPUT);
+      if (event.target === startInputEl) {
+        setFocusedInput(DateFieldType.START_DATE);
       }
+      if (event.target === endInputEl) {
+        setFocusedInput(DateFieldType.END_DATE);
+      }
+      transitionTo(DatePickerState.OVERLAY_OPEN_INPUT);
     };
     const handleClick = (event) => {
       const clickWasInDatePicker =
@@ -331,7 +354,12 @@ function DateRangePickerWithRef(
       data-enddate={getFormattedDate(endDate, format, locale)}
     >
       <DatePickerContext.Provider
-        value={{selectedStartDate: startDate, selectedEndDate: endDate}}
+        value={{
+          selectedStartDate: startDate,
+          selectedEndDate: endDate,
+          type: DatePickerType.RANGE,
+          focusedInput,
+        }}
       >
         {children}
         {startHiddenInputName && (

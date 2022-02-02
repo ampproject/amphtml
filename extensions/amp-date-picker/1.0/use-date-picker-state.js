@@ -31,6 +31,15 @@ export function useDatePickerState(mode) {
     stateMachineRef.current.setState(state);
   }, []);
 
+  /**
+   * Updates a single state field without replacing the whole state object
+   * (Similar to legacy setState)
+   * @param {object} updatedStateFields
+   */
+  const updateStateFields = useCallback((updatedStateFields) => {
+    setState((state) => ({...state, ...updatedStateFields}));
+  }, []);
+
   useEffect(() => {
     /**
      * Set up the state machine
@@ -71,5 +80,5 @@ export function useDatePickerState(mode) {
     initializeStateMachine();
   }, []);
 
-  return {state, transitionTo};
+  return {state, transitionTo, updateStateFields};
 }

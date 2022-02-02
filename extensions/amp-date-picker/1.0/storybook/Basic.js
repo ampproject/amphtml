@@ -60,8 +60,8 @@ export const _default = (args) => {
 export const WithRangeInput = (args) => {
   return (
     <BentoDatePicker {...args}>
-      <input id="startdate" value={getFormattedDate(today)} />
-      <input id="enddate" value={getFormattedDate(addDays(today, 2))} />
+      <input id="startdate" />
+      <input id="enddate" />
     </BentoDatePicker>
   );
 };

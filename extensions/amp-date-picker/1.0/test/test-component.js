@@ -371,6 +371,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('showing the date picker in overlay mode for a single date', () => {
+    beforeEach(() => {
+      env.sandbox
+        .stub(helpers, 'getCurrentDate')
+        .callsFake(() => new Date(2022, 0));
+    });
+
     it('throws an error if there is no inputSelector specified', () => {
       const onErrorSpy = env.sandbox.spy();
       mount(
@@ -418,9 +424,53 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
     });
+
+    it('closes the calendar after a date has been selected by default', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          mode="overlay"
+          layout="container"
+          inputSelector="[name=date]"
+          initialVisibleMonth={new Date(2022, 0)}
+        >
+          <input type="text" name="date" />
+        </DatePicker>
+      );
+
+      wrapper.find('input[name="date"]').simulate('focus');
+      selectDate(wrapper, new Date(2022, 0, 27));
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+    });
+
+    it('leaves the calendar open after a date has been selected if openAfterSelect is true', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          mode="overlay"
+          layout="container"
+          inputSelector="[name=date]"
+          initialVisibleMonth={new Date(2022, 0)}
+          openAfterSelect
+        >
+          <input type="text" name="date" />
+        </DatePicker>
+      );
+
+      wrapper.find('input[name="date"]').simulate('focus');
+      selectDate(wrapper, new Date(2022, 0, 27));
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+    });
   });
 
   describe('showing the date picker in overlay mode for a date range', () => {
+    beforeEach(() => {
+      env.sandbox
+        .stub(helpers, 'getCurrentDate')
+        .callsFake(() => new Date(2022, 0));
+    });
     it('throws an error if there is no inputSelector specified', () => {
       const onErrorSpy = env.sandbox.spy();
       mount(<DatePicker type="range" mode="overlay" onError={onErrorSpy} />);
@@ -460,6 +510,52 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       );
 
       wrapper.find('input[name="start-date"]').simulate('focus');
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+    });
+
+    it('closes the calendar after a date has been selected by default', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          mode="overlay"
+          startInputSelector="[name=start-date]"
+          endInputSelector="[name=end-date]"
+          initialVisibleMonth={new Date(2022, 0)}
+        >
+          <input type="text" name="start-date" />
+          <input type="text" name="end-date" />
+        </DatePicker>
+      );
+
+      wrapper.find('input[name="start-date"]').simulate('focus');
+      selectDate(wrapper, new Date(2022, 0, 27));
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+
+      selectDate(wrapper, new Date(2022, 0, 28));
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+    });
+
+    it('leaves the calendar open after a date has been selected if openAfterSelect is true', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          mode="overlay"
+          startInputSelector="[name=start-date]"
+          endInputSelector="[name=end-date]"
+          initialVisibleMonth={new Date(2022, 0)}
+          openAfterSelect
+        >
+          <input type="text" name="start-date" />
+          <input type="text" name="end-date" />
+        </DatePicker>
+      );
+
+      wrapper.find('input[name="start-date"]').simulate('focus');
+      selectDate(wrapper, new Date(2022, 0, 27));
+      selectDate(wrapper, new Date(2022, 0, 28));
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
     });

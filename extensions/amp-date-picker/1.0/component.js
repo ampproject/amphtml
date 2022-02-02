@@ -49,6 +49,7 @@ function BentoDatePickerWithRef(
     locale = DEFAULT_LOCALE,
     maximumNights = 0,
     minimumNights = 1,
+    openAfterSelect,
   },
   ref
 ) {
@@ -86,6 +87,7 @@ function BentoDatePickerWithRef(
       locale,
       maximumNights,
       minimumNights,
+      openAfterSelect,
     };
   }, [
     blockedDates,
@@ -106,6 +108,7 @@ function BentoDatePickerWithRef(
     locale,
     maximumNights,
     minimumNights,
+    openAfterSelect,
   ]);
 
   /**

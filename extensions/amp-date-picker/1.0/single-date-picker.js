@@ -1,6 +1,7 @@
 import {isValid} from 'date-fns';
 import {addDays} from 'date-fns/esm';
 
+import {Keys_Enum} from '#core/constants/key-codes';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
@@ -23,6 +24,7 @@ import {
   DateFieldType,
   DatePickerMode,
   DatePickerState,
+  DatePickerType,
   FORM_INPUT_SELECTOR,
   TAG,
 } from './constants';
@@ -45,6 +47,7 @@ function SingleDatePickerWithRef(
     locale,
     mode,
     onError,
+    openAfterSelect,
     ...rest
   },
   ref
@@ -87,8 +90,11 @@ function SingleDatePickerWithRef(
         return;
       }
       handleSetDate(date);
+      if (!openAfterSelect) {
+        transitionTo(DatePickerState.OVERLAY_CLOSED);
+      }
     },
-    [blockedDates, handleSetDate]
+    [blockedDates, handleSetDate, openAfterSelect, transitionTo]
   );
 
   useImperativeHandle(
@@ -200,15 +206,37 @@ function SingleDatePickerWithRef(
         transitionTo(DatePickerState.OVERLAY_CLOSED);
       }
     };
+    const handleDocumentKeydown = (event) => {
+      if (event.key === Keys_Enum.ESCAPE) {
+        transitionTo(DatePickerState.OVERLAY_CLOSED);
+      }
+    };
+    const handleInputKeydown = (event) => {
+      const {target} = event;
+      if (!target === inputEl || target.type === 'hidden') {
+        return;
+      }
+
+      if (event.key === Keys_Enum.DOWN_ARROW) {
+        /// update field focus?
+        transitionTo(DatePickerState.OVERLAY_OPEN_PICKER);
+        // Other static mode stuff here
+      }
+    };
+
     if (mode === DatePickerMode.OVERLAY) {
       document.addEventListener('click', handleClick);
+      document.addEventListener('keydown', handleDocumentKeydown);
     }
     inputEl?.addEventListener('focus', handleFocus);
     inputEl?.addEventListener('change', handleInput);
+    inputEl?.addEventListener('keydown', handleInputKeydown);
     return () => {
-      document.addEventListener('click', handleClick);
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('keydown', handleDocumentKeydown);
       inputEl?.removeEventListener('focus', handleFocus);
       inputEl?.removeEventListener('change', handleInput);
+      inputEl?.removeEventListener('keydown', handleInputKeydown);
     };
   }, [transitionTo, mode, handleInput]);
 
@@ -217,7 +245,9 @@ function SingleDatePickerWithRef(
       ref={containerRef}
       data-date={getFormattedDate(date, format, locale)}
     >
-      <DatePickerContext.Provider value={{selectedDate: date}}>
+      <DatePickerContext.Provider
+        value={{selectedDate: date, type: DatePickerType.SINGLE}}
+      >
         {children}
         {hiddenInputProps && <input ref={inputRef} {...hiddenInputProps} />}
         {state.isOpen && (
