@@ -74,7 +74,7 @@ function DateRangePickerWithRef(
 
   const containerRef = useRef();
 
-  const {state, transitionTo} = useDatePickerState(mode);
+  const {isOpen, transitionTo} = useDatePickerState(mode);
 
   const {getDisabledAfter, getDisabledBefore, isDisabled} = useDayAttributes();
 
@@ -446,7 +446,7 @@ function DateRangePickerWithRef(
         {endHiddenInputName && (
           <input ref={endInputRef} name={endHiddenInputName} type="hidden" />
         )}
-        {state.isOpen && (
+        {isOpen && (
           <BaseDatePicker
             mode="range"
             selected={dateRange}

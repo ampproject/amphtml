@@ -10,18 +10,14 @@ import {DatePickerMode, DatePickerState, noop} from './constants';
  * @return {{state: object, transitionTo: function}}
  */
 export function useDatePickerState(mode) {
-  const initialState = {
-    isOpen: mode === DatePickerMode.STATIC,
-  };
-  const initialStateMachineState =
+  const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
+
+  const initialState =
     mode === DatePickerMode.OVERLAY
       ? DatePickerState.OVERLAY_CLOSED
       : DatePickerState.STATIC;
 
-  const [state, setState] = useState(initialState);
-  const stateMachineRef = useRef(
-    new FiniteStateMachine(initialStateMachineState)
-  );
+  const stateMachineRef = useRef(new FiniteStateMachine(initialState));
 
   /**
    * Transition to a new state
@@ -29,15 +25,6 @@ export function useDatePickerState(mode) {
    */
   const transitionTo = useCallback((state) => {
     stateMachineRef.current.setState(state);
-  }, []);
-
-  /**
-   * Updates a single state field without replacing the whole state object
-   * (Similar to legacy setState)
-   * @param {object} updatedStateFields
-   */
-  const updateStateFields = useCallback((updatedStateFields) => {
-    setState((state) => ({...state, ...updatedStateFields}));
   }, []);
 
   useEffect(() => {
@@ -51,34 +38,26 @@ export function useDatePickerState(mode) {
       sm.addTransition(STATIC, STATIC, noop);
 
       sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, () => {
-        setState({isOpen: true, isFocused: true, focused: false});
+        setIsOpen(true);
       });
 
       sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, () => {
-        setState({isOpen: true, isFocused: true, focused: true});
+        setIsOpen(true);
       });
 
       sm.addTransition(OVERLAY_CLOSED, OVERLAY_CLOSED, noop);
 
       sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, () => {
-        setState({
-          isOpen: true,
-          isFocused: true,
-          focused: true,
-        });
+        setIsOpen(true);
       });
 
       sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, () => {
-        setState({
-          isOpen: false,
-          isFocused: false,
-          focused: false,
-        });
+        setIsOpen(false);
       });
     }
 
     initializeStateMachine();
   }, []);
 
-  return {state, transitionTo, updateStateFields};
+  return {isOpen, transitionTo};
 }

@@ -60,7 +60,7 @@ function SingleDatePickerWithRef(
 
   const containerRef = useRef();
 
-  const {state, transitionTo} = useDatePickerState(mode);
+  const {isOpen, transitionTo} = useDatePickerState(mode);
 
   const handleSetDate = useCallback(
     (date) => {
@@ -250,7 +250,7 @@ function SingleDatePickerWithRef(
       >
         {children}
         {hiddenInputProps && <input ref={inputRef} {...hiddenInputProps} />}
-        {state.isOpen && (
+        {isOpen && (
           <BaseDatePicker
             ref={calendarRef}
             mode="single"
