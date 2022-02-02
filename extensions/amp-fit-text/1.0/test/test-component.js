@@ -1,9 +1,13 @@
-import * as Preact from '#preact';
-import {BentoFitText, calculateFontSize, setOverflowStyle} from '../component';
-import {computedStyle} from '#core/dom/style';
 import {mount} from 'enzyme';
-import {useStyles} from '../component.jss';
+
+import {computedStyle} from '#core/dom/style';
+
+import * as Preact from '#preact';
+
 import {waitFor} from '#testing/helpers/service';
+
+import {BentoFitText, calculateFontSize, setOverflowStyle} from '../component';
+import {useStyles} from '../component.jss';
 
 describes.realWin('BentoFitText preact component v1.0', {}, (env) => {
   let win;

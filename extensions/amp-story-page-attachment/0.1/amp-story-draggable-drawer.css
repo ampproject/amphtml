@@ -1,0 +1,169 @@
+
+
+.amp-story-draggable-drawer-root {
+  display: block !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  z-index: 4 !important; /** Over amp-story-cta-layer. */
+  transform: translate3d(0, 100%, 0) !important;
+  transition: transform 0.25s cubic-bezier(0.4, 0.0, 1, 1), visibility 0s linear 0.4s !important;
+  visibility: hidden !important;
+  --i-amphtml-draggable-drawer-background-color: #fff !important;
+  --i-amphtml-draggable-drawer-text-color: #202125 !important;
+}
+
+[theme="dark"].amp-story-draggable-drawer-root {
+  --i-amphtml-draggable-drawer-background-color: #202125 !important;
+  --i-amphtml-draggable-drawer-text-color: #fff !important;
+}
+
+[desktop] .amp-story-draggable-drawer-root {
+  background: none !important;
+}
+
+.amp-story-draggable-drawer-root[hidden] {
+  display: none !important;
+}
+
+.amp-story-draggable-drawer-root.i-amphtml-story-draggable-drawer-open {
+  transform: translate3d(0, 0, 0) !important;
+  transition: transform 0.4s cubic-bezier(0.0, 0.0, 0.2, 1), visibility 0s linear 0s !important;
+  visibility: visible !important;
+}
+
+.i-amphtml-story-draggable-drawer {
+  height: 100% !important;
+}
+
+.i-amphtml-story-draggable-drawer-container {
+  height: 100% !important;
+  background: var(--i-amphtml-draggable-drawer-background-color) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  transition: background 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+.i-amphtml-story-draggable-drawer-container[hidden] {
+  display: block !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.i-amphtml-story-draggable-drawer-content {
+  position: relative !important;
+  opacity: 1 !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  background: var(--i-amphtml-draggable-drawer-background-color) !important;
+  color: var(--i-amphtml-draggable-drawer-text-color) !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-story-draggable-drawer-content {
+  border-radius: inherit !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-story-page-attachment-remote .i-amphtml-story-draggable-drawer-spacer {
+  /* Hide spacer in remote attachment. */
+  display: none !important;
+}
+
+
+.i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
+  opacity: 0 !important;
+}
+
+.i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content > * {
+  display: none !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-story-draggable-drawer-container {
+  border-radius: 16px 16px 0 0 !important;
+  height: 100% !important;
+  background: none !important;
+  /* This makes the spacer elmement take up all available space to push content to the bottom of the screen. */
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.i-amphtml-story-draggable-drawer-spacer {
+  /* spacer is mobile only */
+  display: none !important;
+}
+
+amp-story:not([desktop]) .i-amphtml-story-draggable-drawer-spacer {
+  /* Removes default button background. */
+  background: none !important;
+  /* This placeholder element takes up all available space when drawer-content is less than 80vh. */
+  display: block !important;
+  height: calc(var(--story-page-vh) * 100) !important;
+  /* Sets the minimum size of the placeholder element */
+  min-height: calc(var(--story-page-vh) * 20) !important;
+}
+
+body:not(.amp-mode-keyboard-active) amp-story:not([desktop]) .i-amphtml-story-draggable-drawer-spacer {
+  /* Remove outline if user is not navigating via keyboard */
+  outline: none !important;
+}
+
+
+[desktop] .amp-story-draggable-drawer-root {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  opacity: 0 !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1), transform 0s linear 0.15s, visibility 0s linear 0.4s !important;
+}
+
+[desktop] .amp-story-draggable-drawer-root.i-amphtml-story-draggable-drawer-open {
+  opacity: 1 !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1), visibility 0s linear 0s !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+[desktop] .i-amphtml-story-draggable-drawer {
+  height: auto !important;
+  max-height: min(60vh, 100%) !important;
+  min-height: min(100%, 700px) !important;
+  width: 800px !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  overflow-y: auto !important;
+}
+
+/* Remote-attachment overrides. */
+
+.amp-story-draggable-drawer-root.i-amphtml-story-page-attachment-remote {
+  /* Faster duration for outlink drawer. */
+  transition-duration: .2s !important;
+}
+
+/* Opening progress bar animation. */
+
+.i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {
+  content: "" !important;
+  position: absolute !important;
+  width: 100% !important;
+  height: 4px !important;
+  color: black !important;
+  bottom: 0 !important;
+  background-color: var(--i-amphtml-outlink-cta-text-color) !important;
+  opacity: .6 !important;
+  transform-origin: left !important;
+  animation: progress-bar-animation .6s both cubic-bezier(0.4, 0.0, 1, 1) !important;
+}
+
+[dir="rtl"] .i-amphtml-story-page-attachment-remote.i-amphtml-story-draggable-drawer-open:after {
+  transform-origin: right !important;
+}
+
+@keyframes progress-bar-animation {
+  0% {
+    transform: scaleX(0)
+  }
+  100% {
+    transform: scaleX(1)
+  }
+}

@@ -1,7 +1,6 @@
 import {Deferred} from '#core/data-structures/promise';
 import {toggle} from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {
@@ -274,10 +273,10 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Object}
    */
   buildPostDismissRequest_(enctype, elementId, ampUserId) {
-    const body = dict({
+    const body = {
       'elementId': elementId,
       'ampUserId': ampUserId,
-    });
+    };
     return {
       method: 'POST',
       credentials: 'include',

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.194 */
+/** Version: 0.1.22.203 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -64,6 +64,9 @@ const AnalyticsEvent = {
   IMPRESSION_TWG_STATIC_BUTTON: 30,
   IMPRESSION_TWG_DYNAMIC_BUTTON: 31,
   IMPRESSION_TWG_STICKER_SELECTION_SCREEN: 32,
+  IMPRESSION_TWG_PUBLICATION_NOT_SET_UP: 33,
+  IMPRESSION_REGWALL_OPT_IN: 34,
+  IMPRESSION_NEWSLETTER_OPT_IN: 35,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -117,7 +120,16 @@ const AnalyticsEvent = {
   ACTION_TWG_FREE_TRANSACTION_START_NEXT_BUTTON_CLICK: 1050,
   ACTION_TWG_PAID_TRANSACTION_START_NEXT_BUTTON_CLICK: 1051,
   ACTION_TWG_STICKER_SELECTION_SCREEN_CLOSE_CLICK: 1052,
+  ACTION_TWG_ARTICLE_LEVEL_SUPPORTER_WALL_CTA_CLICK: 1053,
+  ACTION_REGWALL_OPT_IN_BUTTON_CLICK: 1054,
+  ACTION_REGWALL_ALREADY_OPTED_IN_CLICK: 1055,
+  ACTION_NEWSLETTER_OPT_IN_BUTTON_CLICK: 1056,
+  ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
+  ACTION_REGWALL_OPT_IN_CLOSE: 1058,
+  ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
   EVENT_PAYMENT_FAILED: 2000,
+  EVENT_REGWALL_OPT_IN_FAILED: 2001,
+  EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -141,6 +153,8 @@ const AnalyticsEvent = {
   EVENT_TWG_POST_TRANSACTION_SETTING_PRIVATE: 3020,
   EVENT_TWG_PRE_TRANSACTION_PRIVACY_SETTING_PUBLIC: 3021,
   EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
+  EVENT_REGWALL_OPTED_IN: 3023,
+  EVENT_NEWSLETTER_OPTED_IN: 3024,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -158,6 +172,7 @@ const EntitlementSource = {
   UNKNOWN_ENTITLEMENT_SOURCE: 0,
   GOOGLE_SUBSCRIBER_ENTITLEMENT: 1001,
   GOOGLE_SHOWCASE_METERING_SERVICE: 2001,
+  SUBSCRIBE_WITH_GOOGLE_METERING_SERVICE: 2002,
   PUBLISHER_ENTITLEMENT: 3001,
 };
 /** @enum {number} */
@@ -786,6 +801,148 @@ class AnalyticsRequest {
    */
   label() {
     return 'AnalyticsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class AudienceActivityClientLogsRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?AnalyticsEvent} */
+    this.event_ = data[base] == null ? null : data[base];
+  }
+
+  /**
+   * @return {?AnalyticsEvent}
+   */
+  getEvent() {
+    return this.event_;
+  }
+
+  /**
+   * @param {!AnalyticsEvent} value
+   */
+  setEvent(value) {
+    this.event_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.event_, // field 1 - event
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'AudienceActivityClientLogsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class CompleteAudienceActionResponse {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?string} */
+    this.swgUserToken_ = data[base] == null ? null : data[base];
+
+    /** @private {?boolean} */
+    this.actionCompleted_ = data[1 + base] == null ? null : data[1 + base];
+
+    /** @private {?string} */
+    this.userEmail_ = data[2 + base] == null ? null : data[2 + base];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSwgUserToken() {
+    return this.swgUserToken_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSwgUserToken(value) {
+    this.swgUserToken_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getActionCompleted() {
+    return this.actionCompleted_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setActionCompleted(value) {
+    this.actionCompleted_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUserEmail() {
+    return this.userEmail_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUserEmail(value) {
+    this.userEmail_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.swgUserToken_, // field 1 - swg_user_token
+        this.actionCompleted_, // field 2 - action_completed
+        this.userEmail_, // field 3 - user_email
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'CompleteAudienceActionResponse';
   }
 }
 
@@ -1940,6 +2097,8 @@ const PROTO_MAP = {
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
+  'AudienceActivityClientLogsRequest': AudienceActivityClientLogsRequest,
+  'CompleteAudienceActionResponse': CompleteAudienceActionResponse,
   'EntitlementJwt': EntitlementJwt,
   'EntitlementsRequest': EntitlementsRequest,
   'EntitlementsResponse': EntitlementsResponse,
@@ -2886,9 +3045,9 @@ function setStyles(element, styles) {
  */
 function resetStyles(element, properties) {
   const styleObj = {};
-  properties.forEach((prop) => {
-    styleObj[prop] = null;
-  });
+  for (const property of properties) {
+    styleObj[property] = null;
+  }
   setStyles(element, styleObj);
 }
 
@@ -3479,6 +3638,9 @@ class JwtHelper {
  * limitations under the License.
  */
 
+/** Source for Google-provided non-metering entitlements. */
+const GOOGLE_SOURCE = 'google';
+
 /** Source for Google-provided metering entitlements. */
 const GOOGLE_METERING_SOURCE = 'google:metering';
 
@@ -3487,6 +3649,9 @@ const PRIVILEGED_SOURCE = 'privileged';
 
 /** Subscription token for dev mode entitlements. */
 const DEV_MODE_TOKEN = 'GOOGLE_DEV_MODE_TOKEN';
+
+/** Order ID returned for dev mode entitlements. */
+const DEV_MODE_ORDER = 'GOOGLE_DEV_MODE_ORDER';
 
 /**
  * The holder of the entitlements for a service.
@@ -3570,21 +3735,40 @@ class Entitlements {
     const entitlement = this.getEntitlementForThis();
     return (
       !!entitlement &&
-      entitlement.source !== GOOGLE_METERING_SOURCE &&
-      entitlement.subscriptionToken !== DEV_MODE_TOKEN
+      !this.enablesThisWithGoogleMetering() &&
+      !this.enablesThisWithGoogleDevMode()
     );
   }
 
   /**
    * Returns true if the current article is unlocked by a
-   * Google metering entitlement. These entitlements come
+   * Google metering entitlement. These entitlements may come
    * from Google News Intiative's licensing program to support news.
    * https://www.blog.google/outreach-initiatives/google-news-initiative/licensing-program-support-news-industry-/
+   * They may also come from Google's Subscribe With Google Metering
+   * functionality.
    * @return {boolean}
    */
   enablesThisWithGoogleMetering() {
     const entitlement = this.getEntitlementForThis();
     return !!entitlement && entitlement.source === GOOGLE_METERING_SOURCE;
+  }
+
+  /**
+   * Returns true if the current article is unlocked by a Google dev mode
+   * entitlement.
+   * @return {boolean}
+   */
+  enablesThisWithGoogleDevMode() {
+    const entitlement = this.getEntitlementForThis();
+    if (!entitlement) {
+      return false;
+    }
+    const isFirstPartyToken =
+      entitlement.source === GOOGLE_SOURCE &&
+      entitlement.subscriptionToken.indexOf(DEV_MODE_ORDER) !== -1;
+    const isThirdPartyToken = entitlement.subscriptionToken === DEV_MODE_TOKEN;
+    return isFirstPartyToken || isThirdPartyToken;
   }
 
   /**
@@ -3728,14 +3912,17 @@ class Entitlement {
    * @param {string} source
    * @param {!Array<string>} products
    * @param {string} subscriptionToken
+   * @param {JsonObject|null|undefined} subscriptionTokenContents
    */
-  constructor(source, products, subscriptionToken) {
+  constructor(source, products, subscriptionToken, subscriptionTokenContents) {
     /** @const {string} */
     this.source = source;
     /** @const {!Array<string>} */
     this.products = products;
     /** @const {string} */
     this.subscriptionToken = subscriptionToken;
+    /** @const {JsonObject|null|undefined} */
+    this.subscriptionTokenContents = subscriptionTokenContents;
   }
 
   /**
@@ -3745,7 +3932,8 @@ class Entitlement {
     return new Entitlement(
       this.source,
       this.products.slice(0),
-      this.subscriptionToken
+      this.subscriptionToken,
+      this.subscriptionTokenContents
     );
   }
 
@@ -3793,16 +3981,30 @@ class Entitlement {
 
   /**
    * @param {?Object} json
+   * @param {!../utils/jwt.JwtHelper} jwtHelper
    * @return {!Entitlement}
    */
-  static parseFromJson(json) {
+  static parseFromJson(json, jwtHelper) {
     if (!json) {
       json = {};
     }
     const source = json['source'] || '';
     const products = json['products'] || [];
     const subscriptionToken = json['subscriptionToken'];
-    return new Entitlement(source, products, subscriptionToken);
+    let subscriptionTokenContents;
+    try {
+      subscriptionTokenContents = subscriptionToken
+        ? jwtHelper.decode(subscriptionToken)
+        : null;
+    } catch (e) {
+      subscriptionTokenContents = null;
+    }
+    return new Entitlement(
+      source,
+      products,
+      subscriptionToken,
+      subscriptionTokenContents
+    );
   }
 
   /**
@@ -3810,13 +4012,14 @@ class Entitlement {
    * - Single entitlement: `{products: [], ...}`.
    * - A list of entitlements: `[{products: [], ...}, {...}]`.
    * @param {!Object|!Array<!Object>} json
+   * @param {!../utils/jwt.JwtHelper} jwtHelper
    * @return {!Array<!Entitlement>}
    */
-  static parseListFromJson(json) {
+  static parseListFromJson(json, jwtHelper) {
     const jsonList = Array.isArray(json)
       ? /** @type {!Array<Object>} */ (json)
       : [json];
-    return jsonList.map((json) => Entitlement.parseFromJson(json));
+    return jsonList.map((json) => Entitlement.parseFromJson(json, jwtHelper));
   }
 
   /**
@@ -4520,12 +4723,6 @@ function parseUrl(url) {
 function parseUrlWithA(a, url) {
   a.href = url;
 
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
   /** @type {!LocationDef} */
   const info = {
     href: a.href,
@@ -4538,22 +4735,6 @@ function parseUrlWithA(a, url) {
     hash: a.hash,
     origin: '', // Set below.
   };
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if (
-    (info.protocol == 'http:' && info.port == 80) ||
-    (info.protocol == 'https:' && info.port == 443)
-  ) {
-    info.port = '';
-    info.host = info.hostname;
-  }
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
@@ -4839,7 +5020,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.194',
+    '_client': 'SwG 0.1.22.203',
   });
 }
 
@@ -5207,6 +5388,8 @@ class PayCompleteFlow {
       .getClientConfig()
       .then((clientConfig) => {
         args['useUpdatedConfirmUi'] = clientConfig.useUpdatedOfferFlows;
+        args['skipAccountCreationScreen'] =
+          clientConfig.skipAccountCreationScreen;
         return new ActivityIframeView(
           this.win_,
           this.activityPorts_,
@@ -5227,6 +5410,11 @@ class PayCompleteFlow {
         });
 
         this.readyPromise_ = this.dialogManager_.openView(activityIframeView);
+
+        this.readyPromise_.then(() => {
+          this.deps_.callbacks().triggerPayConfirmOpened(activityIframeView);
+        });
+
         return activityIframeView;
       }));
   }
@@ -5255,22 +5443,29 @@ class PayCompleteFlow {
     return Promise.all([
       this.activityIframeViewPromise_,
       this.readyPromise_,
+      this.clientConfigManager_.getClientConfig(),
     ]).then((values) => {
       const activityIframeView = values[0];
-      const accountCompletionRequest = new AccountCreationRequest();
-      accountCompletionRequest.setComplete(true);
-      activityIframeView.execute(accountCompletionRequest);
+      const clientConfig = values[2];
+      // Skip account creation screen if requested (needed for AMP)
+      if (!clientConfig.skipAccountCreationScreen) {
+        const accountCompletionRequest = new AccountCreationRequest();
+        accountCompletionRequest.setComplete(true);
+        activityIframeView.execute(accountCompletionRequest);
+      }
       return activityIframeView
         .acceptResult()
         .catch(() => {
           // Ignore errors.
         })
         .then(() => {
-          this.eventManager_.logSwgEvent(
-            AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED,
-            true,
-            getEventParams$1(this.sku_ || '')
-          );
+          if (!clientConfig.skipAccountCreationScreen) {
+            this.eventManager_.logSwgEvent(
+              AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED,
+              true,
+              getEventParams$1(this.sku_ || '')
+            );
+          }
           this.deps_.entitlementsManager().setToastShown(true);
         });
     });
@@ -5367,6 +5562,11 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
         productType =
           (data['paymentRequest']['i'] || {})['productType'] ||
           ProductType.SUBSCRIPTION;
+      }
+      // Set productType if paymentRequest is not present, which happens
+      // if the pay flow was opened in redirect mode.
+      else if ('productType' in data) {
+        productType = data['productType'];
       }
     }
   }
@@ -6143,7 +6343,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.194',
+        '_client': 'SwG 0.1.22.203',
         'supportsEventManager': true,
       },
       args || {}
@@ -6549,6 +6749,17 @@ const ExperimentFlags = {
    * Experiment flag for guarding changes to fix PayClient redirect flow.
    */
   PAY_CLIENT_REDIRECT: 'pay-client-redirect',
+
+  /**
+   * Directs basic-runtime to use the article endpoint instead of the separate
+   * entitlements and clientconfiguration endpoints.
+   */
+  USE_ARTICLE_ENDPOINT: 'use-article-endpoint',
+
+  /**
+   * Experiment flag for logging audience activity.
+   */
+  LOGGING_AUDIENCE_ACTIVITY: 'logging-audience-activity',
 };
 
 /**
@@ -6635,18 +6846,18 @@ function getExperiments(win) {
 
     // Format:
     // - experimentString = (experimentSpec,)*
-    combinedExperimentString.split(',').forEach((s) => {
-      s = s.trim();
-      if (!s) {
-        return;
+    for (let experimentString of combinedExperimentString.split(',')) {
+      experimentString = experimentString.trim();
+      if (!experimentString) {
+        continue;
       }
       try {
-        parseSetExperiment(win, experimentMap, s);
+        parseSetExperiment(win, experimentMap, experimentString);
       } catch (e) {
         // Ignore: experiment parsing cannot block runtime.
         ErrorUtils.throwAsync(e);
       }
-    });
+    }
   }
   return experimentMap;
 }
@@ -6973,11 +7184,11 @@ class AnalyticsService {
   addLabels(labels) {
     if (labels && labels.length > 0) {
       const newLabels = [].concat(this.context_.getLabelList());
-      labels.forEach((label) => {
+      for (const label of labels) {
         if (newLabels.indexOf(label) == -1) {
           newLabels.push(label);
         }
-      });
+      }
       this.context_.setLabelList(newLabels);
     }
   }
@@ -7022,7 +7233,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.194');
+    context.setClientVersion('SwG 0.1.22.203');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7041,16 +7252,23 @@ class AnalyticsService {
   }
 
   /**
+   * @param {?string=} swgUserToken
    * @return {!Promise<!../components/activities.ActivityIframePort>}
    */
-  start() {
+  start(swgUserToken = '') {
     if (!this.serviceReady_) {
       // Please note that currently openIframe reads the current analytics
       // context and that it may not contain experiments activated late during
       // the publishers code lifecycle.
       this.addLabels(getOnExperiments(this.doc_.getWin()));
+      const urlParams = swgUserToken ? {sut: swgUserToken} : {};
       this.serviceReady_ = this.activityPorts_
-        .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
+        .openIframe(
+          this.iframe_,
+          feUrl('/serviceiframe', urlParams),
+          null,
+          true
+        )
         .then(
           (port) => {
             // Register a listener for the logging to code indicate it is
@@ -7310,6 +7528,8 @@ const SWG_I18N_STRINGS = {
     'th': 'สมัครฟาน Google',
     'tr': 'Google ile Abone Ol',
     'uk': 'Підписатися через Google',
+    'zh-cn': '通过 Google 订阅',
+    'zh-hk': '透過 Google 訂閱',
     'zh-tw': '透過 Google 訂閱',
   },
   'CONTRIBUTION_TITLE_LANG_MAP': {
@@ -7336,13 +7556,79 @@ const SWG_I18N_STRINGS = {
     'no': 'Bidra med Google',
     'pl': 'Wesprzyj publikację przez Google',
     'pt': 'Contribuir com o Google',
-    'pt-br': 'Contribua com o Google',
+    'pt-br': 'Contribua usando o Google',
     'ru': 'Внести средства через Google',
     'se': 'Bidra med Google',
     'th': 'มีส่วนร่วมผ่าน Google',
     'tr': 'Google ile Katkıda Bulun',
     'uk': 'Зробити внесок через Google',
+    'zh-cn': '通过 Google 捐赠',
+    'zh-hk': '透過 Google 提供內容',
     'zh-tw': '透過 Google 捐款',
+  },
+  'REGWALL_ALREADY_REGISTERED_LANG_MAP': {
+    'en': 'You have registered before.',
+    'ar': 'لقد سبق أن تسجّلت.',
+    'de': 'Du bist bereits registriert.',
+    'en-au': 'You have registered before.',
+    'en-ca': 'You have registered before.',
+    'en-gb': 'You have registered before.',
+    'en-us': 'You have registered before.',
+    'es': 'Ya te habías registrado anteriormente.',
+    'es-419': 'Ya te registraste antes.',
+    'fr': 'Vous vous êtes déjà inscrit.',
+    'fr-ca': 'Vous vous êtes inscrit auparavant.',
+    'hi': 'आपने पहले ही इसके लिए रजिस्टर कर लिया है.',
+    'id': 'Anda telah mendaftar sebelumnya.',
+    'it': 'Registrazione già effettuata in precedenza.',
+    'jp': 'すでに登録済みです。',
+    'ko': '이전에 등록한 사용자입니다.',
+    'ms': 'Anda telah mendaftar sebelum ini.',
+    'nl': 'Je hebt je al eerder geregistreerd.',
+    'no': 'Du er allerede registrert.',
+    'pl': 'Masz już wcześniejszą rejestrację.',
+    'pt': 'Já se registou anteriormente.',
+    'pt-br': 'Você já tem um cadastro.',
+    'ru': 'Вы уже зарегистрированы.',
+    'se': 'Du har redan registrerat dig.',
+    'th': 'คุณเคยลงทะเบียนแล้ว',
+    'tr': 'Daha önce kaydolmuştunuz.',
+    'uk': 'Ви вже зареєструвалися раніше.',
+    'zh-cn': '您之前已注册。',
+    'zh-hk': '您之前已註冊。',
+    'zh-tw': '你已註冊這個出版品。',
+  },
+  'NEWSLETTER_ALREADY_SIGNED_UP_LANG_MAP': {
+    'en': 'You have signed up before.',
+    'ar': 'سبق أن اشتركت في النشرة الإخبارية.',
+    'de': 'Du hast dich bereits angemeldet.',
+    'en-au': 'You have signed up before.',
+    'en-ca': 'You have signed up before.',
+    'en-gb': 'You have signed up before.',
+    'en-us': 'You have signed up before.',
+    'es': 'Ya te has registrado anteriormente.',
+    'es-419': 'Ya te registraste antes.',
+    'fr': 'Vous vous êtes déjà inscrit.',
+    'fr-ca': 'Vous vous êtes inscrit auparavant.',
+    'hi': 'न्यूज़लेटर के लिए पहले ही साइन अप किया जा चुका है.',
+    'id': 'Anda telah mendaftar sebelumnya.',
+    'it': "Hai già effettuato l'iscrizione.",
+    'jp': 'すでに登録されています。',
+    'ko': '이전에 가입한 사용자입니다.',
+    'ms': 'Anda sudah mendaftar sebelum ini.',
+    'nl': 'Je hebt je al eerder aangemeld.',
+    'no': 'Du er allerede registrert.',
+    'pl': 'Już wcześniej się zarejestrowałeś(-aś).',
+    'pt': 'Já se inscreveu anteriormente.',
+    'pt-br': 'Você se inscreveu anteriormente.',
+    'ru': 'Вы уже зарегистрированы.',
+    'se': 'Du har redan registrerat dig.',
+    'th': 'คุณสมัครรับข้อมูลมาก่อนแล้ว',
+    'tr': 'Daha önce kaydolmuştunuz.',
+    'uk': 'Ви вже зареєструвалися.',
+    'zh-cn': '您之前已注册。',
+    'zh-hk': '您之前已訂閱。',
+    'zh-tw': '你已經訂閱了。',
   },
 };
 
@@ -7744,7 +8030,7 @@ class ButtonApi {
     options,
     attributeValueToCallback
   ) {
-    attributeValues.forEach((attributeValue) => {
+    for (const attributeValue of attributeValues) {
       const elements = this.doc_
         .getRootNode()
         .querySelectorAll(`[${attribute}="${attributeValue}"]`);
@@ -7763,7 +8049,7 @@ class ButtonApi {
           );
         }
       }
-    });
+    }
   }
 
   /**
@@ -7882,6 +8168,7 @@ const CallbackId = {
   LINK_COMPLETE: 6,
   FLOW_STARTED: 7,
   FLOW_CANCELED: 8,
+  PAY_CONFIRM_OPENED: 9,
 };
 
 /**
@@ -7976,6 +8263,21 @@ class Callbacks {
    */
   hasLinkCompletePending() {
     return !!this.resultBuffer_[CallbackId.LINK_COMPLETE];
+  }
+
+  /**
+   * @param {function(!../ui/activity-iframe-view.ActivityIframeView)} callback
+   */
+  setOnPayConfirmOpened(callback) {
+    this.setCallback_(CallbackId.PAY_CONFIRM_OPENED, callback);
+  }
+
+  /**
+   * @param {!../ui/activity-iframe-view.ActivityIframeView} activityIframeView
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerPayConfirmOpened(activityIframeView) {
+    return this.trigger_(CallbackId.PAY_CONFIRM_OPENED, activityIframeView);
   }
 
   /**
@@ -8314,6 +8616,7 @@ class ClientConfig {
     uiPredicates,
     usePrefixedHostPath,
     useUpdatedOfferFlows,
+    skipAccountCreationScreen,
   } = {}) {
     /** @const {./auto-prompt-config.AutoPromptConfig|undefined} */
     this.autoPromptConfig = autoPromptConfig;
@@ -8326,6 +8629,9 @@ class ClientConfig {
 
     /** @const {boolean} */
     this.useUpdatedOfferFlows = useUpdatedOfferFlows || false;
+
+    /** @const {boolean} */
+    this.skipAccountCreationScreen = skipAccountCreationScreen || false;
 
     /** @const {./auto-prompt-config.UiPredicates|undefined} */
     this.uiPredicates = uiPredicates;
@@ -8379,11 +8685,15 @@ const ClientTheme = {
  */
 class ClientConfigManager {
   /**
+   * @param {!./deps.DepsDef} deps
    * @param {string} publicationId
    * @param {!./fetcher.Fetcher} fetcher
    * @param {!../api/basic-subscriptions.ClientOptions=} clientOptions
    */
-  constructor(publicationId, fetcher, clientOptions) {
+  constructor(deps, publicationId, fetcher, clientOptions) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
     /** @private @const {!../api/basic-subscriptions.ClientOptions} */
     this.clientOptions_ = clientOptions || {};
 
@@ -8395,18 +8705,26 @@ class ClientConfigManager {
 
     /** @private {?Promise<!ClientConfig>} */
     this.responsePromise_ = null;
+
+    /** @private @const {ClientConfig} */
+    this.defaultConfig_ = new ClientConfig({
+      skipAccountCreationScreen: this.clientOptions_.skipAccountCreationScreen,
+    });
   }
 
   /**
    * Fetches the client config from the server.
+   * @param {Promise<void>=} readyPromise optional promise to wait on before
+   * attempting to fetch the clientConfiguration.
    * @return {!Promise<!ClientConfig>}
    */
-  fetchClientConfig() {
+  fetchClientConfig(readyPromise) {
     if (!this.publicationId_) {
       throw new Error('fetchClientConfig requires publicationId');
     }
     if (!this.responsePromise_) {
-      this.responsePromise_ = this.fetch_();
+      readyPromise = readyPromise || Promise.resolve();
+      this.responsePromise_ = readyPromise.then(() => this.fetch_());
     }
     return this.responsePromise_;
   }
@@ -8417,7 +8735,7 @@ class ClientConfigManager {
    * @return {!Promise<!ClientConfig>}
    */
   getClientConfig() {
-    return this.responsePromise_ || Promise.resolve(new ClientConfig());
+    return this.responsePromise_ || Promise.resolve(this.defaultConfig_);
   }
 
   /**
@@ -8495,19 +8813,30 @@ class ClientConfigManager {
    * @return {!Promise<!ClientConfig>}
    */
   fetch_() {
-    const url = serviceUrl(
-      '/publication/' +
-        encodeURIComponent(this.publicationId_) +
-        '/clientconfiguration'
-    );
-    return this.fetcher_.fetchCredentialedJson(url).then((json) => {
-      if (json.errorMessages && json.errorMessages.length > 0) {
-        json.errorMessages.forEach((errorMessage) => {
-          warn('SwG ClientConfigManager: ' + errorMessage);
-        });
-      }
-      return this.parseClientConfig_(json);
-    });
+    return this.deps_
+      .entitlementsManager()
+      .getArticle()
+      .then((article) => {
+        if (article) {
+          return this.parseClientConfig_(article['clientConfig']);
+        } else {
+          // If there was no article from the entitlement manager, we need
+          // to fetch our own using the internal version.
+          const url = serviceUrl(
+            '/publication/' +
+              encodeURIComponent(this.publicationId_) +
+              '/clientconfiguration'
+          );
+          return this.fetcher_.fetchCredentialedJson(url).then((json) => {
+            if (json.errorMessages && json.errorMessages.length > 0) {
+              for (const errorMessage of json.errorMessages) {
+                warn('SwG ClientConfigManager: ' + errorMessage);
+              }
+            }
+            return this.parseClientConfig_(json);
+          });
+        }
+      });
   }
 
   /**
@@ -8552,6 +8881,7 @@ class ClientConfigManager {
       paySwgVersion,
       usePrefixedHostPath: json['usePrefixedHostPath'],
       useUpdatedOfferFlows: json['useUpdatedOfferFlows'],
+      skipAccountCreationScreen: this.clientOptions_.skipAccountCreationScreen,
       uiPredicates,
       attributionParams,
     });
@@ -8902,7 +9232,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:auto!important;margin-right:auto!important;width:560px!important}swg-loading-container.centered-on-desktop{border-radius:8px!important;height:120px!important;min-height:120px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS$1 = "body{margin:0;padding:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{-ms-flex-align:center!important;-ms-flex-pack:center!important;align-items:center!important;bottom:0!important;display:-ms-flexbox!important;display:flex!important;height:100%!important;justify-content:center!important;margin-top:5px!important;min-height:148px!important;width:100%!important;z-index:2147483647!important}@media (min-height:630px),(min-width:630px){swg-loading-container{background-color:#fff!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;margin-left:auto!important;margin-right:auto!important;width:560px!important}swg-loading-container.centered-on-desktop{border-radius:8px!important;height:120px!important;min-height:120px!important}}swg-loading{animation:mspin-rotate 1568.63ms linear infinite;height:36px;overflow:hidden;width:36px;z-index:2147483647!important}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{animation:swg-loading-film 5332ms steps(324) infinite;background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;height:36px;width:11664px}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -9200,9 +9530,9 @@ class LoadingView {
       {}
     );
     if (config.additionalClasses) {
-      config.additionalClasses.forEach((additionalClass) => {
+      for (const additionalClass of config.additionalClasses) {
         this.loadingContainer_.classList.add(additionalClass);
-      });
+      }
     }
 
     /** @private @const {!Element} */
@@ -9668,16 +9998,13 @@ class Dialog {
   close(animated = true) {
     let animating;
     if (animated) {
+      const transitionStyles = this.shouldPositionCenter_()
+        ? {'opacity': 0}
+        : {'transform': 'translateY(100%)'};
+
       animating = this.animate_(() => {
         this.graypane_.hide(/* animate */ true);
-        return transition$1(
-          this.getElement(),
-          {
-            'transform': 'translateY(100%)',
-          },
-          300,
-          'ease-out'
-        );
+        return transition$1(this.getElement(), transitionStyles, 300, 'ease-out');
       });
     } else {
       animating = Promise.resolve();
@@ -10224,6 +10551,11 @@ class DialogManager {
 const MeterClientTypes = {
   /** Meter client type for content licensed by Google. */
   LICENSED_BY_GOOGLE: 1,
+  /**
+   * Meter client type for content that a publication is allowing to be
+   * metered by Google.
+   */
+  METERED_BY_GOOGLE: 2,
 };
 
 /**
@@ -10245,12 +10577,24 @@ const MeterClientTypes = {
 const IFRAME_BOX_SHADOW =
   'rgba(60, 64, 67, 0.3) 0px -2px 5px, rgba(60, 64, 67, 0.15) 0px -5px 5px';
 const MINIMIZED_IFRAME_SIZE = '420px';
+/**
+ * The iframe URLs to be used per MeterClientType
+ * @type {Object.<MeterClientTypes, string>}
+ */
+const IframeUrlByMeterClientType = {
+  [MeterClientTypes.LICENSED_BY_GOOGLE]: '/metertoastiframe',
+  [MeterClientTypes.METERED_BY_GOOGLE]: '/meteriframe',
+};
 
 class MeterToastApi {
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!MeterToastApiParams=} params
    */
-  constructor(deps) {
+  constructor(
+    deps,
+    {meterClientType = MeterClientTypes.LICENSED_BY_GOOGLE} = {}
+  ) {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
 
@@ -10263,21 +10607,12 @@ class MeterToastApi {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    const iframeArgs = this.activityPorts_.addDefaultArguments({
-      isClosable: true,
-      hasSubscriptionCallback: deps.callbacks().hasSubscribeRequestCallback(),
-    });
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/metertoastiframe'),
-      iframeArgs,
-      /* shouldFadeBody */ false
-    );
+    /** @private @const {!MeterClientTypes} */
+    this.meterClientType_ = meterClientType;
 
     /**
-     * Function this class calls when a user dismisses the toast to consume a free read.
+     * Function this class calls when a user dismisses the toast to consume a
+     * free read.
      * @private {?function()}
      */
     this.onConsumeCallback_ = null;
@@ -10290,26 +10625,6 @@ class MeterToastApi {
      */
     this.onConsumeCallbackHandled_ = false;
 
-    /** @private @const {!function()} */
-    this.sendCloseRequestFunction_ = () => {
-      const closeRequest = new ToastCloseRequest();
-      closeRequest.setClose(true);
-      this.activityIframeView_.execute(closeRequest);
-      this.removeCloseEventListener();
-
-      this.deps_
-        .eventManager()
-        .logSwgEvent(
-          AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
-          true
-        );
-
-      if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
-        this.onConsumeCallbackHandled_ = true;
-        this.onConsumeCallback_();
-      }
-    };
-
     /** @private {?function()} */
     this.scrollEventListener_ = null;
   }
@@ -10319,81 +10634,142 @@ class MeterToastApi {
    * @return {!Promise}
    */
   start() {
-    this.deps_
-      .callbacks()
-      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
-    this.activityIframeView_.on(
-      ViewSubscriptionsResponse,
-      this.startNativeFlow_.bind(this)
-    );
-    if (!this.deps_.callbacks().hasSubscribeRequestCallback()) {
-      const errorMessage =
-        '[swg.js]: `setOnNativeSubscribeRequest` has not been ' +
-        'set before starting the metering flow, so users will not be able to ' +
-        'subscribe from the metering dialog directly. Please call ' +
-        '`setOnNativeSubscribeRequest` with a subscription flow callback before ' +
-        'starting metering.';
-      warn(errorMessage);
-    }
+    return this.deps_
+      .storage()
+      .get(Constants$1.USER_TOKEN, true)
+      .then((swgUserToken) => {
+        const iframeArgs = this.activityPorts_.addDefaultArguments({
+          isClosable: true,
+          hasSubscriptionCallback: this.deps_
+            .callbacks()
+            .hasSubscribeRequestCallback(),
+        });
 
-    this.dialogManager_
-      .handleCancellations(this.activityIframeView_)
-      .catch((reason) => {
-        // Possibly call onConsumeCallback on all dialog cancellations to ensure unexpected
-        // dialog closures don't give access without a meter consumed.
-        if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
-          this.onConsumeCallbackHandled_ = true;
-          this.onConsumeCallback_();
+        const iframeUrl =
+          IframeUrlByMeterClientType[
+            this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
+          ];
+        const iframeUrlParams = {
+          'publicationId': this.deps_.pageConfig().getPublicationId(),
+          'origin': parseUrl(this.win_.location.href).origin,
+        };
+        if (swgUserToken) {
+          iframeUrlParams['sut'] = swgUserToken;
         }
-        // Don't throw on cancel errors since they happen when a user closes the toast,
-        // which is expected.
-        if (!isCancelError(reason)) {
-          // eslint-disable-next-line no-console
-          console /*OK*/
-            .error(
-              '[swg.js]: Error occurred during meter toast handling: ' + reason
-            );
-          throw reason;
-        }
-      });
-    return this.dialogManager_.openDialog().then((dialog) => {
-      this.setDialogBoxShadow_();
-      this.setLoadingViewWidth_();
-      return dialog.openView(this.activityIframeView_).then(() => {
-        // Allow closing of the iframe with any scroll or click event.
-        this.win_.addEventListener('click', this.sendCloseRequestFunction_);
-        this.win_.addEventListener(
-          'touchstart',
-          this.sendCloseRequestFunction_
+
+        /** @private @const {!ActivityIframeView} */
+        this.activityIframeView_ = new ActivityIframeView(
+          this.win_,
+          this.activityPorts_,
+          feUrl(iframeUrl, iframeUrlParams),
+          iframeArgs,
+          /* shouldFadeBody */ false
         );
-        this.win_.addEventListener('mousedown', this.sendCloseRequestFunction_);
-        // Making body's overflow property 'hidden' to prevent scrolling
-        // while swiping on the iframe only on mobile.
-        if (this.isMobile_()) {
-          const $body = this.win_.document.body;
-          setStyle($body, 'overflow', 'hidden');
-        } else {
-          let start, scrollTimeout;
-          this.scrollEventListener_ = () => {
-            start = start || this.win_./*REVIEW*/ pageYOffset;
-            this.win_.clearTimeout(scrollTimeout);
-            scrollTimeout = this.win_.setTimeout(() => {
-              // If the scroll is longer than 100, close the toast.
-              if (Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100) {
-                this.sendCloseRequestFunction_();
-              }
-            }, 100);
-          };
-          this.win_.addEventListener('scroll', this.scrollEventListener_);
+
+        /** @private @const {!function()} */
+        this.sendCloseRequestFunction_ = () => {
+          const closeRequest = new ToastCloseRequest();
+          closeRequest.setClose(true);
+          this.activityIframeView_.execute(closeRequest);
+          this.removeCloseEventListener();
+
+          this.deps_
+            .eventManager()
+            .logSwgEvent(
+              AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
+              true
+            );
+
+          if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+            this.onConsumeCallbackHandled_ = true;
+            this.onConsumeCallback_();
+          }
+        };
+
+        this.deps_
+          .callbacks()
+          .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
+        this.activityIframeView_.on(
+          ViewSubscriptionsResponse,
+          this.startNativeFlow_.bind(this)
+        );
+        if (!this.deps_.callbacks().hasSubscribeRequestCallback()) {
+          const errorMessage =
+            '[swg.js]: `setOnNativeSubscribeRequest` has not been set ' +
+            'before starting the metering flow, so users will not be able to ' +
+            'subscribe from the metering dialog directly. Please call ' +
+            '`setOnNativeSubscribeRequest` with a subscription flow callback ' +
+            'before starting metering.';
+          warn(errorMessage);
         }
-        this.deps_
-          .eventManager()
-          .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
-        this.deps_
-          .eventManager()
-          .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+
+        this.dialogManager_
+          .handleCancellations(this.activityIframeView_)
+          .catch((reason) => {
+            // Possibly call onConsumeCallback on all dialog cancellations to
+            // ensure unexpected dialog closures don't give access without a
+            // meter consumed.
+            if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+              this.onConsumeCallbackHandled_ = true;
+              this.onConsumeCallback_();
+            }
+            // Don't throw on cancel errors since they happen when a user closes
+            // the toast, which is expected.
+            if (!isCancelError(reason)) {
+              // eslint-disable-next-line no-console
+              console /*OK*/
+                .error(
+                  '[swg.js]: Error occurred during meter toast handling: ' +
+                    reason
+                );
+              throw reason;
+            }
+          });
+
+        return this.dialogManager_.openDialog().then((dialog) => {
+          this.setDialogBoxShadow_();
+          this.setLoadingViewWidth_();
+          return dialog.openView(this.activityIframeView_).then(() => {
+            // Allow closing of the iframe with any scroll or click event.
+            this.win_.addEventListener('click', this.sendCloseRequestFunction_);
+            this.win_.addEventListener(
+              'touchstart',
+              this.sendCloseRequestFunction_
+            );
+            this.win_.addEventListener(
+              'mousedown',
+              this.sendCloseRequestFunction_
+            );
+            // Making body's overflow property 'hidden' to prevent scrolling
+            // while swiping on the iframe only on mobile.
+            if (this.isMobile_()) {
+              const $body = this.win_.document.body;
+              setStyle($body, 'overflow', 'hidden');
+            } else {
+              let start, scrollTimeout;
+              this.scrollEventListener_ = () => {
+                start = start || this.win_./*REVIEW*/ pageYOffset;
+                this.win_.clearTimeout(scrollTimeout);
+                scrollTimeout = this.win_.setTimeout(() => {
+                  // If the scroll is longer than 100, close the toast.
+                  if (
+                    Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100
+                  ) {
+                    this.sendCloseRequestFunction_();
+                  }
+                }, 100);
+              };
+              this.win_.addEventListener('scroll', this.scrollEventListener_);
+            }
+            this.deps_
+              .eventManager()
+              .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
+            this.deps_
+              .eventManager()
+              .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+          });
+        });
       });
-    });
   }
 
   /**
@@ -10972,7 +11348,7 @@ class EntitlementsManager {
    * @param {!./fetcher.Fetcher} fetcher
    * @param {!./deps.DepsDef} deps
    */
-  constructor(win, pageConfig, fetcher, deps) {
+  constructor(win, pageConfig, fetcher, deps, useArticleEndpoint) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -11010,6 +11386,14 @@ class EntitlementsManager {
      */
     this.encodedParams_ = null;
 
+    /** @protected {!string} */
+    this.encodedParamName_ = useArticleEndpoint
+      ? 'encodedEntitlementsParams'
+      : 'encodedParams';
+
+    /** @protected {!string} */
+    this.action_ = useArticleEndpoint ? '/article' : '/entitlements';
+
     /** @private @const {!./storage.Storage} */
     this.storage_ = deps.storage();
 
@@ -11024,6 +11408,12 @@ class EntitlementsManager {
      * @visibleForTesting
      */
     this.entitlementsPostPromise = null;
+
+    /** @private @const {boolean} */
+    this.useArticleEndpoint_ = useArticleEndpoint;
+
+    /** @private {?Article} */
+    this.article_ = null;
 
     this.deps_
       .eventManager()
@@ -11117,33 +11507,51 @@ class EntitlementsManager {
 
   /**
    * Sends a pingback that marks a metering entitlement as used.
-   * @param {!Entitlements} entitlements
+   * @param {!Entitlement|null} entitlement
    */
-  consumeMeter_(entitlements) {
-    const entitlement = entitlements.getEntitlementForThis();
+  consumeMeter_(entitlement) {
     if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
       return;
     }
-    // Verify GAA params are present, otherwise bail since the pingback
-    // shouldn't happen on non-metering requests.
-    if (!queryStringHasFreshGaaParams(this.win_.location.search)) {
-      return;
+
+    // If GAA params are present, include them in the pingback.
+    let gaaToken;
+    let entitlementSource;
+    if (
+      entitlement.subscriptionTokenContents &&
+      entitlement.subscriptionTokenContents['metering']['clientType'] ===
+        MeterClientTypes.METERED_BY_GOOGLE
+    ) {
+      // If clientType is METERED_BY_GOOGLE, this is the appropriate
+      // EntitlementSource, and no GAA params are required.
+      entitlementSource =
+        EntitlementSource.SUBSCRIBE_WITH_GOOGLE_METERING_SERVICE;
+    } else {
+      // Expected: clientType is LICENSED_BY_GOOGLE
+      if (queryStringHasFreshGaaParams(this.win_.location.search)) {
+        // GAA params are valid. Post back as Showcase.
+        entitlementSource = EntitlementSource.GOOGLE_SHOWCASE_METERING_SERVICE;
+        gaaToken = this.getGaaToken_();
+      } else {
+        // Sanity check:
+        // If we're not METERED_BY_GOOGLE, and GAA params are not valid, do not
+        // post back.
+        return;
+      }
     }
 
     this.deps_
       .eventManager()
       .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_METER, false);
 
-    const token = this.getGaaToken_();
-
     const jwt = new EntitlementJwt();
     jwt.setSource(entitlement.source);
     jwt.setJwt(entitlement.subscriptionToken);
     return this.postEntitlementsRequest_(
-      jwt,
-      EntitlementResult.UNLOCKED_METER,
-      EntitlementSource.GOOGLE_SHOWCASE_METERING_SERVICE,
-      token
+      /* usedEntitlement */ jwt,
+      /* entitlementResult */ EntitlementResult.UNLOCKED_METER,
+      /* entitlementSource */ entitlementSource,
+      /* optionalToken */ gaaToken
     );
   }
 
@@ -11221,9 +11629,7 @@ class EntitlementsManager {
     }
 
     let url =
-      '/publication/' +
-      encodeURIComponent(this.publicationId_) +
-      '/entitlements';
+      '/publication/' + encodeURIComponent(this.publicationId_) + this.action_;
     url = addDevModeParamsToUrl(this.win_.location, url);
 
     // Promise that sets this.encodedParams_ when it resolves.
@@ -11246,7 +11652,7 @@ class EntitlementsManager {
     this.entitlementsPostPromise = encodedParamsPromise.then(() => {
       url = addQueryParam(
         url,
-        'encodedParams',
+        this.encodedParamName_,
         /** @type {!string} */ (this.encodedParams_)
       );
 
@@ -11301,6 +11707,20 @@ class EntitlementsManager {
         return ents;
       });
     });
+  }
+
+  /**
+   * If the manager is also responsible for fetching the Article, it
+   * will be accessible from here and should resolve a null promise otherwise.
+   * @returns {!Promise<?Article>}
+   */
+  getArticle() {
+    // The base manager only fetches from the entitlements endpoint, which does
+    // not contain an Article.
+    if (!this.useArticleEndpoint_ || !this.responsePromise_) {
+      return Promise.resolve();
+    }
+    return this.responsePromise_.then(() => Promise.resolve(this.article_));
   }
 
   /**
@@ -11369,6 +11789,9 @@ class EntitlementsManager {
     const signedData = json['signedEntitlements'];
     const decryptedDocumentKey = json['decryptedDocumentKey'];
     const swgUserToken = json['swgUserToken'];
+    if (swgUserToken) {
+      this.saveSwgUserToken_(swgUserToken);
+    }
     if (signedData) {
       const entitlements = this.getValidJwtEntitlements_(
         signedData,
@@ -11377,13 +11800,11 @@ class EntitlementsManager {
         decryptedDocumentKey
       );
       if (entitlements) {
-        this.saveSwgUserToken_(swgUserToken);
         return entitlements;
       }
     } else {
       const plainEntitlements = json['entitlements'];
       if (plainEntitlements) {
-        this.saveSwgUserToken_(swgUserToken);
         return this.createEntitlements_(
           '',
           plainEntitlements,
@@ -11462,7 +11883,7 @@ class EntitlementsManager {
     return new Entitlements(
       SERVICE_ID,
       raw,
-      Entitlement.parseListFromJson(json),
+      Entitlement.parseListFromJson(json, this.jwtHelper_),
       this.pageConfig_.getProductId(),
       this.ack_.bind(this),
       this.consume_.bind(this),
@@ -11567,41 +11988,38 @@ class EntitlementsManager {
    */
   consume_(entitlements, onCloseDialog) {
     if (entitlements.enablesThisWithGoogleMetering()) {
+      const entitlement = entitlements.getEntitlementForThis();
+
       const onConsumeCallback = () => {
         if (onCloseDialog) {
           onCloseDialog();
         }
-        this.consumeMeter_(entitlements);
+        this.consumeMeter_(entitlement);
       };
-      const showToast = this.getShowToastFromEntitlements_(entitlements);
-      if (showToast === false) {
-        // If showToast is explicitly false, call onConsumeCallback directly.
+
+      if (!entitlement.subscriptionTokenContents) {
+        // Ignore decoding errors. Don't show a toast, and return
+        // onConsumeCallback directly.
         return onConsumeCallback();
       }
-      const meterToastApi = new MeterToastApi(this.deps_);
-      meterToastApi.setOnConsumeCallback(onConsumeCallback);
-      return meterToastApi.start();
-    }
-  }
 
-  /**
-   * Gets the `showToast` value (or null/undefined if unavailable) from
-   * the Google metering entitlement details in the input entitlements.
-   * @param {!Entitlements} entitlements
-   * @return {boolean|undefined}
-   * @private
-   */
-  getShowToastFromEntitlements_(entitlements) {
-    const entitlement = entitlements.getEntitlementForThis();
-    if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
-      return;
-    }
-    try {
-      const meteringJwt = this.jwtHelper_.decode(entitlement.subscriptionToken);
-      return meteringJwt['metering'] && meteringJwt['metering']['showToast'];
-    } catch (e) {
-      // Ignore decoding errors.
-      return;
+      if (
+        entitlement.subscriptionTokenContents['metering'] &&
+        entitlement.subscriptionTokenContents['metering']['showToast'] === true
+      ) {
+        // Return a delegation to the meterToastApi, which will return the
+        // onConsumeCallback when the toast is dismissed.
+        const meterToastApi = new MeterToastApi(this.deps_, {
+          meterClientType:
+            entitlement.subscriptionTokenContents['metering']['clientType'],
+        });
+        meterToastApi.setOnConsumeCallback(onConsumeCallback);
+        return meterToastApi.start();
+      } else {
+        // If showToast isn't true, don't show a toast, and return
+        // onConsumeCallback directly.
+        return onConsumeCallback();
+      }
     }
   }
 
@@ -11611,17 +12029,11 @@ class EntitlementsManager {
    * @private
    */
   fetch_(params) {
-    // Get swgUserToken from getEntitlements params
-    const swgUserTokenParam = params?.encryption?.swgUserToken;
-    // Get swgUserToken from local storage if it is not in getEntitlements params
-    const swgUserTokenPromise = swgUserTokenParam
-      ? Promise.resolve(swgUserTokenParam)
-      : this.storage_.get(Constants$1.USER_TOKEN, true);
+    // Get swgUserToken from local storage
+    const swgUserTokenPromise = this.storage_.get(Constants$1.USER_TOKEN, true);
 
     let url =
-      '/publication/' +
-      encodeURIComponent(this.publicationId_) +
-      '/entitlements';
+      '/publication/' + encodeURIComponent(this.publicationId_) + this.action_;
 
     return Promise.all([
       hash(getCanonicalUrl(this.deps_.doc())),
@@ -11647,6 +12059,17 @@ class EntitlementsManager {
           url = addQueryParam(url, 'sut', swgUserToken);
         }
 
+        /** @type {!GetEntitlementsParamsInternalDef} */
+        const encodableParams = {
+          metering: {
+            clientTypes: [MeterClientTypes.METERED_BY_GOOGLE],
+            owner: this.publicationId_,
+            resource: {
+              hashedCanonicalUrl,
+            },
+          },
+        };
+
         // Add metering params.
         if (
           this.publicationId_ &&
@@ -11658,22 +12081,15 @@ class EntitlementsManager {
             typeof meteringStateId === 'string' &&
             meteringStateId.length > 0
           ) {
-            /** @type {!GetEntitlementsParamsInternalDef} */
-            const encodableParams = {
-              metering: {
-                clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
-                owner: this.publicationId_,
-                resource: {
-                  hashedCanonicalUrl,
-                },
-                // Publisher provided state.
-                state: {
-                  id: meteringStateId,
-                  attributes: [],
-                },
-                token: this.getGaaToken_(),
-              },
+            // Add publisher provided state and additional fields.
+            encodableParams.metering.state = {
+              id: meteringStateId,
+              attributes: [],
             };
+            encodableParams.metering.clientTypes.push(
+              MeterClientTypes.LICENSED_BY_GOOGLE
+            );
+            encodableParams.metering.token = this.getGaaToken_();
 
             // Collect attributes.
             function collectAttributes({attributes, category}) {
@@ -11682,7 +12098,7 @@ class EntitlementsManager {
               }
 
               const attributeNames = Object.keys(attributes);
-              attributeNames.forEach((attributeName) => {
+              for (const attributeName of attributeNames) {
                 const name = `${category}_${attributeName}`;
                 const timestamp = Number(attributes[attributeName].timestamp);
 
@@ -11700,7 +12116,7 @@ class EntitlementsManager {
                   name,
                   timestamp,
                 });
-              });
+              }
             }
             collectAttributes({
               attributes: params.metering.state.standardAttributes,
@@ -11710,18 +12126,18 @@ class EntitlementsManager {
               attributes: params.metering.state.customAttributes,
               category: 'custom',
             });
-
-            // Encode params.
-            this.encodedParams_ = base64UrlEncodeFromBytes(
-              utf8EncodeSync(JSON.stringify(encodableParams))
-            );
-            url = addQueryParam(url, 'encodedParams', this.encodedParams_);
           } else {
             warn(
               `SwG Entitlements: Please specify a metering state ID string, ideally a hash to avoid PII.`
             );
           }
         }
+
+        // Encode params.
+        this.encodedParams_ = base64UrlEncodeFromBytes(
+          utf8EncodeSync(JSON.stringify(encodableParams))
+        );
+        url = addQueryParam(url, this.encodedParamName_, this.encodedParams_);
 
         // Build URL.
         return serviceUrl(url);
@@ -11733,12 +12149,18 @@ class EntitlementsManager {
         return this.fetcher_.fetchCredentialedJson(url);
       })
       .then((json) => {
-        if (json.errorMessages && json.errorMessages.length > 0) {
-          json.errorMessages.forEach((errorMessage) => {
-            warn('SwG Entitlements: ' + errorMessage);
-          });
+        let response = json;
+        if (this.useArticleEndpoint_) {
+          this.article_ = json;
+          response = json['entitlements'];
         }
-        return this.parseEntitlements(json);
+
+        if (json.errorMessages && json.errorMessages.length > 0) {
+          for (const errorMessage of json.errorMessages) {
+            warn('SwG Entitlements: ' + errorMessage);
+          }
+        }
+        return this.parseEntitlements(response);
       });
   }
 }
@@ -11860,7 +12282,7 @@ class Xhr {
          */
         const targetOrigin = parseUrl(input).origin;
         throw new Error(
-          `XHR Failed fetching (${targetOrigin}/...): (Note: a CORS error above may indicate that this domain is not configured for Subscribe with Google)`,
+          `XHR Failed fetching (${targetOrigin}/...): (Note: a CORS error above may indicate that this publisher or domain is not configured in Publisher Center. The CORS error happens becasue 4xx responses do not set CORS headers.)`,
           reason && reason.message
         );
       })
@@ -11933,9 +12355,9 @@ function fetchPolyfill(input, init) {
     }
 
     if (init.headers) {
-      Object.keys(init.headers).forEach(function (header) {
+      for (const header of Object.keys(init.headers)) {
         xhr.setRequestHeader(header, init.headers[header]);
-      });
+      }
     }
 
     xhr.onreadystatechange = () => {
@@ -17036,7 +17458,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -17260,6 +17682,7 @@ class ConfiguredRuntime {
    *     fetcher: (!Fetcher|undefined),
    *     configPromise: (!Promise|undefined),
    *     enableGoogleAnalytics: (boolean|undefined),
+   *     useArticleEndpoint: (boolean|undefined)
    *   }=} integr
    * @param {!../api/subscriptions.Config=} config
    * @param {!{
@@ -17348,11 +17771,13 @@ class ConfiguredRuntime {
       this.win_,
       this.pageConfig_,
       this.fetcher_,
-      this // See note about 'this' above
+      this, // See note about 'this' above
+      integr.useArticleEndpoint || false
     );
 
     /** @private @const {!ClientConfigManager} */
     this.clientConfigManager_ = new ClientConfigManager(
+      this, // See note about 'this' above
       pageConfig.getPublicationId(),
       this.fetcher_,
       clientOptions
@@ -17474,39 +17899,52 @@ class ConfiguredRuntime {
   configure_(config) {
     // Validate first.
     let error = '';
-    for (const k in config) {
-      const v = config[k];
-      switch (k) {
+    for (const key in config) {
+      const value = config[key];
+      switch (key) {
         case 'windowOpenMode':
-          if (v != WindowOpenMode.AUTO && v != WindowOpenMode.REDIRECT) {
-            error = 'Unknown windowOpenMode: ' + v;
+          if (
+            value != WindowOpenMode.AUTO &&
+            value != WindowOpenMode.REDIRECT
+          ) {
+            error = 'Unknown windowOpenMode: ' + value;
           }
           break;
         case 'experiments':
-          v.forEach((experiment) => setExperiment(this.win_, experiment, true));
+          for (const experiment of value) {
+            setExperiment(this.win_, experiment, true);
+          }
           if (this.analytics()) {
             // If analytics service isn't set up yet, then it will get the
             // experiments later.
-            this.analytics().addLabels(v);
+            this.analytics().addLabels(value);
           }
           break;
         case 'analyticsMode':
-          if (v != AnalyticsMode.DEFAULT && v != AnalyticsMode.IMPRESSIONS) {
-            error = 'Unknown analytics mode: ' + v;
+          if (
+            value != AnalyticsMode.DEFAULT &&
+            value != AnalyticsMode.IMPRESSIONS
+          ) {
+            error = 'Unknown analytics mode: ' + value;
           }
           break;
         case 'enableSwgAnalytics':
-          if (!isBoolean(v)) {
-            error = 'Unknown enableSwgAnalytics value: ' + v;
+          if (!isBoolean(value)) {
+            error = 'Unknown enableSwgAnalytics value: ' + value;
           }
           break;
         case 'enablePropensity':
-          if (!isBoolean(v)) {
-            error = 'Unknown enablePropensity value: ' + v;
+          if (!isBoolean(value)) {
+            error = 'Unknown enablePropensity value: ' + value;
+          }
+          break;
+        case 'skipAccountCreationScreen':
+          if (!isBoolean(value)) {
+            error = 'Unknown skipAccountCreationScreen value: ' + value;
           }
           break;
         default:
-          error = 'Unknown config property: ' + k;
+          error = 'Unknown config property: ' + key;
       }
     }
     // Throw error string if it's not null

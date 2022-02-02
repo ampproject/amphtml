@@ -2,12 +2,15 @@ import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoYoutube} from './component';
 
-import {VideoBaseElement} from '../../amp-video/1.0/video-base-element';
+import {BentoVideoBaseElement} from '../../amp-video/1.0/base-element';
 
-export class BaseElement extends VideoBaseElement {}
+export class BaseElement extends BentoVideoBaseElement {}
 
 /** @override */
 BaseElement['Component'] = BentoYoutube;
+
+/** @override */
+BaseElement['loadable'] = true;
 
 /** @override */
 BaseElement['props'] = {
@@ -18,6 +21,9 @@ BaseElement['props'] = {
   'liveChannelid': {attr: 'data-live-channelid'},
   'dock': {attr: 'dock', media: true},
   'credentials': {attr: 'credentials'},
+  // TODO(wg-components): Current behavior defaults to loading="auto".
+  // Refactor to make loading="lazy" as the default.
+  'loading': {attr: 'data-loading'},
   'params': createParseAttrsWithPrefix('data-param-'),
 };
 

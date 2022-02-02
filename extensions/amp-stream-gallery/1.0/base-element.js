@@ -1,18 +1,19 @@
-import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
-import {CSS as GALLERY_CSS} from './component.jss';
 import {PreactBaseElement} from '#preact/base-element';
+
 import {BentoStreamGallery} from './component';
-import {dict} from '#core/types/object';
+import {CSS as GALLERY_CSS} from './component.jss';
+
+import {CSS as CAROUSEL_CSS} from '../../amp-base-carousel/1.0/component.jss';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
   init() {
     const {element} = this;
-    return dict({
+    return {
       'onSlideChange': (index) => {
-        this.triggerEvent(element, 'slideChange', dict({'index': index}));
+        this.triggerEvent(element, 'slideChange', {'index': index});
       },
-    });
+    };
   }
 }
 

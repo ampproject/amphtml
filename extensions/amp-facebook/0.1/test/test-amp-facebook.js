@@ -1,8 +1,10 @@
 import '../amp-facebook';
 import {expect} from 'chai';
+
 import {facebook} from '#3p/facebook';
-import {resetServiceForTesting} from '../../../../src/service-helpers';
+
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-facebook',

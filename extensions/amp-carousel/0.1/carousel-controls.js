@@ -1,7 +1,9 @@
 import {Keys_Enum} from '#core/constants/key-codes';
-import {Services} from '#service';
 import {toggleAttribute} from '#core/dom';
 import {getWin} from '#core/window';
+
+import {Services} from '#service';
+
 import {ClassNames, setButtonState} from './build-dom';
 
 /**
@@ -19,19 +21,19 @@ export class CarouselControls {
    * }} param0
    */
   constructor({element, go, nextButton, prevButton}) {
-    /** @private @type {!AmpElement} */
+    /** @private @type {AmpElement} */
     this.element_ = element;
 
-    /** @private @type {!GoFunctionDef} */
+    /** @private @type {GoFunctionDef} */
     this.go_ = go;
 
-    /** @private @type {!Window} */
+    /** @private @type {Window} */
     this.win_ = getWin(element);
 
-    /** @private {!HTMLDivElement} */
+    /** @private {HTMLDivElement} */
     this.prevButton_ = prevButton;
 
-    /** @private {!HTMLDivElement} */
+    /** @private {HTMLDivElement} */
     this.nextButton_ = nextButton;
 
     /** @private {boolean} */
@@ -68,19 +70,21 @@ export class CarouselControls {
   }
 
   /**
-   * @param {!HTMLDivElement} button
+   * @param {HTMLDivElement} button
    * @param {*} onInteraction
    */
   setupButtonInteraction(button, onInteraction) {
-    button.onkeydown = (event) => {
-      if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
-        if (!event.defaultPrevented) {
-          event.preventDefault();
-          onInteraction();
-        }
+    button.addEventListener('click', onInteraction);
+    button.addEventListener('keydown', (event) => {
+      if (event.defaultPrevented) {
+        return;
       }
-    };
-    button.onclick = onInteraction;
+
+      if (event.key == Keys_Enum.ENTER || event.key == Keys_Enum.SPACE) {
+        event.preventDefault();
+        onInteraction();
+      }
+    });
   }
 
   /**

@@ -26,7 +26,7 @@ import {dev} from '#utils/log';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getConsentPolicyInfo} from '../../../src/consent';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-smartadserver-impl';
@@ -53,21 +53,18 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
-    this.listen();
   }
 
   /** @override */
   getAdUrl(opt_consentTuple, opt_rtcResponsesPromise) {
-    let adUrl;
-
-    Promise.any([
+    return Promise.any([
       getConsentPolicyInfo(this.element, this.getConsentPolicy() || 'default'),
       new Promise((resolve) => setTimeout(() => resolve(), 10)),
     ]).then((consentString) => {
       opt_rtcResponsesPromise = opt_rtcResponsesPromise || Promise.resolve();
       const checkStillCurrent = this.verifyStillCurrent();
 
-      opt_rtcResponsesPromise.then((result) => {
+      return opt_rtcResponsesPromise.then((result) => {
         checkStillCurrent();
         const rtc = this.getBestRtcCallout_(result);
         const urlParams = {};
@@ -85,32 +82,33 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
 
         const formatId = this.element.getAttribute('data-format');
         const tagId = 'sas_' + formatId;
-        adUrl(
-          buildUrl(
-            (this.element.getAttribute('data-domain') ||
-              'https://www.smartadserver.com') + '/ac',
-            {
-              'siteid': this.element.getAttribute('data-site'),
-              'pgid': this.element.getAttribute('data-page'),
-              'fmtid': formatId,
-              'tgt': this.element.getAttribute('data-target'),
-              'tag': tagId,
-              'out': 'amp-hb',
-              ...urlParams,
-              'gdpr_consent': consentString,
-              'pgDomain': this.win.top.location.hostname,
-              'tmstp': Date.now(),
-            },
-            MAX_URL_LENGTH,
-            TRUNCATION_PARAM
-          )
+        return buildUrl(
+          (this.element.getAttribute('data-domain') ||
+            'https://www.smartadserver.com') + '/ac',
+          {
+            'siteid': this.element.getAttribute('data-site'),
+            'pgid': this.element.getAttribute('data-page'),
+            'fmtid': formatId,
+            'tgt': this.element.getAttribute('data-target'),
+            'tag': tagId,
+            'out': 'amp-hb',
+            ...urlParams,
+            'gdpr_consent': consentString,
+            'pgDomain': Services.documentInfoForDoc(this.element).canonicalUrl,
+            'tmstp': Date.now(),
+          },
+          MAX_URL_LENGTH,
+          TRUNCATION_PARAM
         );
       });
     });
+  }
 
-    return new Promise((resolve) => {
-      adUrl = resolve;
-    });
+  /** @override */
+  getNonAmpCreativeRenderingMethod(headerValue) {
+    return Services.platformFor(this.win).isIos()
+      ? XORIGIN_MODE.IFRAME_GET
+      : super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
   /** @override */
@@ -123,7 +121,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     return super.sendXhrRequest(adUrl).then((response) => {
       return response.text().then((responseText) => {
         if (includes(responseText, SAS_NO_AD_STR)) {
-          this.collapseIframe();
+          this./*OK*/ collapse();
         }
         return new Response(response);
       });
@@ -178,6 +176,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /**
+<<<<<<< HEAD
    * Collapses ad iframe
    */
   collapseIframe() {
@@ -199,6 +198,8 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /**
+=======
+>>>>>>> main
    * Chooses RTC callout with highest bid price
    * @param {Array<Object>} rtcResponseArray
    * @return {Object}

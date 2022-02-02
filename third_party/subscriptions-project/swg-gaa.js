@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.194 */
+/** Version: 0.1.22.203 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -35,11 +35,15 @@
 
 const I18N_STRINGS = {
   'SHOWCASE_REGWALL_TITLE': {
+    'bg': 'Получавайте повече с Google',
     'bn': 'Google-এ আরও অনেক কিছুর সুবিধা পান',
     'cs': 'Získejte s&nbsp;Googlem víc',
+    'da': 'Få adgang til mere med Google',
     'de': 'Immer gut informiert mit Google',
+    'el': 'Αποκτήστε περισσότερα με την Google',
     'en': 'Get more with Google',
     'es': 'Disfruta de más artículos con Google',
+    'es-419': 'Disfruta más artículos con Google',
     'es-ar': 'Disfruta más artículos con Google',
     'fr': 'Plus de contenus avec Google',
     'fr-ca': 'Aller plus loin avec Google',
@@ -47,20 +51,32 @@ const I18N_STRINGS = {
     'it': 'Con Google puoi avere di più',
     'ja': 'Google からのプレゼント',
     'kn': 'Google ನಿಂದ ಹೆಚ್ಚಿನ ಪ್ರಯೋಜನ ಪಡೆಯಿರಿ',
+    'lt': 'Get more with Google',
+    'lv': 'Get more with Google',
     'ml': 'Google ഉപയോഗിച്ച് കൂടുതൽ പ്രയോജനങ്ങൾ നേടൂ',
     'mr': 'Google वापरून बरेच काही मिळवा',
     'nl': 'Krijg meer met Google',
+    'pl': 'Z&nbsp;Google dostajesz więcej',
     'pt-br': 'Veja mais com o Google',
     'pt-pt': 'Obtenha mais com a Google',
+    'ro': 'Mai multe beneficii cu Google',
+    'sk': 'Získajte viac s&nbsp;Googlom',
+    'sl': 'Get more with Google',
+    'sv': 'Få mer med Google',
     'ta': 'Google மூலம் மேலும் பல கட்டுரைகளைப் படியுங்கள்',
     'te': 'Googleతో మరిన్ని ప్రయోజనాలను పొందండి',
   },
   'SHOWCASE_REGWALL_DESCRIPTION': {
+    'bg': '<strong></strong>За съдържанието обикновено се изисква плащане, но Google ви дава безплатен достъп до тази и други статии, когато се регистрирате за <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> с профила си в Google.',
     'bn': '<strong></strong>এই কন্টেন্ট অ্যাক্সেস করার জন্য সাধারণত পেমেন্ট করতে হয় কিন্তু Google আপনাকে এই নিবন্ধ ফ্রিতে অ্যাক্সেস করতে এবং সেইসাথে অনেক কিছু পেতে সাহায্য করছে। এই সুবিধা পাওয়ার জন্য Google অ্যাকাউন্ট ব্যবহার করে আপনাকে <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>-এ রেজিস্টার করতে হবে।',
     'cs': '<strong></strong>Tento obsah je obvykle zpoplatněn, ale pokud se do publikace <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> zaregistrujete pomocí účtu Google, získáte od Googlu přístup zdarma.',
+    'da': '<strong></strong>Du skal normalt betale for at få adgang til dette indhold, men hvis du tilmelder dig <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> med din Google-konto, giver Google dig gratis adgang til artiklen og andet indhold.',
     'de': '<strong></strong>Dieser Inhalt ist normalerweise kostenpflichtig. Google gewährt dir jedoch kostenlos Zugriff auf diesen Artikel und andere Inhalte, wenn du dich mit deinem Google-Konto bei <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> registrierst.',
+    'el': '<strong></strong>Συνήθως απαιτείται πληρωμή για αυτό το περιεχόμενο, αλλά η Google σας προσφέρει δωρεάν πρόσβαση σε αυτό το άρθρο και σε πολλά ακόμη, εάν εγγραφείτε στην έκδοση <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> με χρήση του Λογαριασμού σας Google.',
     'en': '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
     'es': '<strong></strong>Normalmente, es necesario pagar para ver este contenido, pero Google te ofrece acceso gratuito a este y otros artículos si te registras en <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> con tu cuenta de Google.',
+    'es-419':
+      '<strong></strong>Normalmente, es necesario pagar para ver este contenido, pero Google te ofrece acceso gratuito a este y otros artículos si te registras en <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> con tu Cuenta&nbsp;de&nbsp;Google.',
     'es-ar':
       '<strong></strong>Normalmente, es necesario pagar para ver este contenido, pero Google te ofrece acceso gratuito a este y otros artículos si te registras en <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> con tu Cuenta&nbsp;de&nbsp;Google.',
     'fr': '<strong></strong>Ce contenu est généralement payant, mais vous pouvez lire cet article et d\'autres contenus gratuitement grâce à Google en vous inscrivant sur <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> avec votre compte Google.',
@@ -70,22 +86,33 @@ const I18N_STRINGS = {
     'it': '<strong></strong>Generalmente questi contenuti sono a pagamento, ma Google ti offre accesso gratuito a questo articolo e ad altri articoli se ti registri a <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando il tuo Account Google.',
     'ja': '<strong></strong>通常、この記事をお読みいただくにはお支払いが必要ですが、お使いの Google アカウントで <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> に登録すると、この記事を無料でお読みいただけます。',
     'kn': '<strong></strong>ಸಾಮಾನ್ಯವಾಗಿ ಈ ವಿಷಯಕ್ಕಾಗಿ ಹಣ ಪಾವತಿಸಬೇಕಾಗುತ್ತದೆ, ಆದರೆ ನೀವು <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> ಗೆ ನಿಮ್ಮ Google ಖಾತೆಯ ಮೂಲಕ ನೋಂದಾಯಿಸಿಕೊಂಡಾಗ Google ಈ ಲೇಖನ ಮತ್ತು ಇನ್ನಷ್ಟು ವಿಷಯಗಳಿಗೆ ನಿಮಗೆ ಉಚಿತವಾದ ಪ್ರವೇಶವನ್ನು ನೀಡುತ್ತದೆ.',
+    'lt': '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
+    'lv': '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
     'ml': '<strong></strong>സാധാരണ ഈ ഉള്ളടക്കത്തിന് പണം നൽകേണ്ടതുണ്ട്, എന്നാൽ Google അക്കൗണ്ട് ഉപയോഗിച്ച് <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> എന്നതിൽ രജിസ്‌റ്റർ ചെയ്യുമ്പോൾ, ഈ ലേഖനത്തിലേക്കും മറ്റും Google നിങ്ങൾക്ക് സൗജന്യ ആക്‌സസ് നൽകുന്നു.',
     'mr': '<strong></strong>या आशयासाठी सामान्यतः पेमेंट आवश्यक असते पण तुम्ही तुमचे Google खाते वापरून <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> मध्ये नोंदणी करता तेव्हा, Google तुम्हाला या लेखाचा आणि आणखी बऱ्याच आशयाचा विनामूल्य ॲक्सेस देते.',
     'nl': '<strong></strong>Voor deze content moet je eigenlijk betalen. Maar Google geeft je kosteloos toegang tot dit artikel en andere content als je je registreert bij <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> via je Google-account.',
+    'pl': '<strong></strong>Te treści zazwyczaj wymagają opłaty, ale dzięki Google możesz bezpłatnie przeczytać ten artykuł i&nbsp;korzystać z&nbsp;innych materiałów po zarejestrowaniu się w&nbsp;publikacji <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> za pomocą konta Google.',
     'pt-br':
       '<strong></strong>Normalmente, é preciso pagar por este conteúdo. Porém, basta você se registrar na publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando sua Conta do Google para ter acesso gratuito a esta matéria e muito mais.',
     'pt-pt':
       '<strong></strong>Geralmente, este conteúdo requer um pagamento, mas a Google concede-lhe acesso gratuito a este artigo e muito mais ao registar-se na publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> com a sua Conta Google.',
+    'ro': '<strong></strong>Acest conținut este de obicei cu plată, dar Google vă oferă acces gratuit la acest articol și la altele când vă înregistrați la <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> folosind Contul Google.',
+    'sk': '<strong></strong>Tento obsah je obvykle platený, ale ak sa do publikácie <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> zaregistrujete účtom Google, získate od Googlu zdarma prístup k&nbsp;tomuto článku a&nbsp;ďalšie výhody.',
+    'sl': '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
+    'sv': '<strong></strong>Det krävs vanligtvis betalning för det här innehållet, men Google ger dig gratis åtkomst till artikeln och annat innehåll när du registrerar dig hos <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> med ditt Google-konto.',
     'ta': '<strong></strong>வழக்கமாக இந்த உள்ளடக்கத்தை வாசிக்க கட்டணம் செலுத்த வேண்டியிருக்கும். ஆனால் <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> இல் உங்கள் Google கணக்கைப் பயன்படுத்திப் பதிவுசெய்யும்போது இந்தக் கட்டுரைக்கும் மேலும் பலவற்றுக்கும் Google இலவச அணுகலை வழங்குகிறது.',
     'te': '<strong></strong>ఈ కంటెంట్‌కు మీరు సాధారణంగా పేమెంట్ చేయాల్సి ఉంటుంది, కానీ మీరు Google ఖాతాను ఉపయోగించి <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>తో రిజిస్టర్ చేసుకున్నప్పుడు, ఈ వార్తా కథనానికి ఇంకా మరెన్నో వాటికి Google, ఉచిత యాక్సెస్‌ను ఇస్తుంది.',
   },
   'SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON': {
+    'bg': 'Вече имате профил?',
     'bn': 'আপনার কি আগে থেকেই অ্যাকাউন্ট আছে?',
     'cs': 'Už máte účet?',
+    'da': 'Har du allerede en konto?',
     'de': 'Du hast bereits ein Konto?',
+    'el': 'Διαθέτετε ήδη λογαριασμό;',
     'en': 'Already have an account?',
     'es': '¿Ya tienes una cuenta?',
+    'es-419': '¿Ya tienes una cuenta?',
     'es-ar': '¿Ya tienes una cuenta?',
     'fr': 'Vous avez déjà un compte&nbsp;?',
     'fr-ca': 'Vous avez déjà un compte?',
@@ -93,20 +120,31 @@ const I18N_STRINGS = {
     'it': 'Hai già un account?',
     'ja': 'すでにアカウントをお持ちですか？',
     'kn': 'ಈಗಾಗಲೇ ಖಾತೆಯೊಂದನ್ನು ಹೊಂದಿದ್ದೀರಾ?',
+    'lt': 'Already have an account?',
+    'lv': 'Already have an account?',
     'ml': 'മുമ്പേ അക്കൗണ്ടുണ്ടോ?',
     'mr': 'आधीपासून खाते आहे?',
     'nl': 'Heb je al een account?',
+    'pl': 'Masz już konto?',
     'pt-br': 'Já tem uma conta?',
     'pt-pt': 'Já tem uma conta?',
+    'ro': 'Aveți deja un cont?',
+    'sk': 'Už máte účet?',
+    'sl': 'Already have an account?',
+    'sv': 'Har du redan ett konto?',
     'ta': 'ஏற்கெனவே கணக்கு உள்ளதா?',
     'te': 'ఇప్పటికే ఖాతా ఉందా?',
   },
   'SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON': {
+    'bg': 'Вход с Google',
     'bn': 'Google দিয়ে সাইন-ইন করুন',
     'cs': 'Přihlásit se přes Google',
+    'da': 'Log ind med Google',
     'de': 'Über Google anmelden',
+    'el': 'Σύνδεση μέσω Google',
     'en': 'Sign in with Google',
     'es': 'Iniciar sesión con Google',
+    'es-419': 'Acceder con Google',
     'es-ar': 'Acceder con Google',
     'fr': 'Se connecter avec Google',
     'fr-ca': 'Se connecter avec Google',
@@ -114,36 +152,55 @@ const I18N_STRINGS = {
     'it': 'Accedi con Google',
     'ja': 'Google でログイン',
     'kn': 'Google ಖಾತೆ ಬಳಸಿಕೊಂಡು ಸೈನ್ ಇನ್ ಮಾಡಿ',
+    'lt': 'Sign in with Google',
+    'lv': 'Sign in with Google',
     'ml': 'Google ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക',
     'mr': 'Google वापरून साइन इन करा',
     'nl': 'Inloggen met Google',
+    'pl': 'Zaloguj się przez Google',
     'pt-br': 'Fazer login com o Google',
     'pt-pt': 'Iniciar sessão com o Google',
+    'ro': 'Conectați-vă cu Google',
+    'sk': 'Prihlásiť sa účtom Google',
+    'sl': 'Sign in with Google',
+    'sv': 'Logga in med Google',
     'ta': 'Google மூலம் உள்நுழைக',
     'te': 'Googleతో సైన్ ఇన్ చేయండి',
   },
   'SHOWCASE_REGWALL_CASL': {
-    'bn': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'bg': 'Прегледайте <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Общите условия за канадското законодателство за борба със спама<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> на <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'bn': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>-এর <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL শর্ত<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> পর্যালোচনা করুন',
     'cs': 'Prostudujte si <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>podmínky CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> publikace <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'da': 'Gennemgå <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL-vilkårene<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> (Canadian Anti-Spam Legislation, canadisk lovgivning vedrørende antispam) for <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'de': '<ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL-Bedingungen<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> von <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> ansehen',
+    'el': 'Ελέγξτε αν τηρούνται στη δημοσίευση <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> οι <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Όροι CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
     'en': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'es': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'es': 'Consulta los <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>términos de la CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> de <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'es-419':
+      'Consulta las <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>condiciones de CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> de <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'fr': 'Consultez les <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Conditions d\'utilisation LCAP (Loi canadienne anti-pourriel)<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> de <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'fr-ca':
       'Consulter les <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>conditions d\'utilisation relatives à la Loi canadienne antipourriel (LCAP)<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> de la publication <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'hi': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> की <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>सीएएसएल (कैनेडियन एंटी-स्पैम लेजिस्लेशन) से जुड़ी शर्तों<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> के बारे में पढ़ें',
     'it': 'Rileggi i <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>termini della legge CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> di <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'ja': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> の <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL 規約<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>を見る',
-    'kn': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'ml': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'mr': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'kn': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> ನ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL ನಿಯಮಗಳು<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> ಅನ್ನು ಪರಿಶೀಲಿಸಿ',
+    'lt': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'lv': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'ml': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> എന്നതിന്റെ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL നിബന്ധനകൾ<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> അവലോകനം ചെയ്യുക',
+    'mr': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> च्या <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL अटी<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> यांचे पुनरावलोकन करा',
     'nl': 'Bekijk de <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL-voorwaarden<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> van <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'pl': 'Zapoznaj się z&nbsp;<ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>warunkami CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> publikacji <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'pt-br':
       'Confira os <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>termos da CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> da publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'pt-pt':
       'Analise os <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>termos da CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> da publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'ro': 'Examinați <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Termenii CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> ai <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'sk': 'Prečítajte si <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>podmienky CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> publikácie <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
+    'sl': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'sv': 'Läs <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>villkoren i lagstiftningen CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> för <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'ta': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> இன் <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL விதிமுறைகளைப்<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> பாருங்கள்',
-    'te': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'te': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>‌కు సంబంధించిన <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL నియమాల<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>ను రివ్యూ చేయండి',
   },
 };
 
@@ -252,6 +309,9 @@ const AnalyticsEvent = {
   IMPRESSION_TWG_STATIC_BUTTON: 30,
   IMPRESSION_TWG_DYNAMIC_BUTTON: 31,
   IMPRESSION_TWG_STICKER_SELECTION_SCREEN: 32,
+  IMPRESSION_TWG_PUBLICATION_NOT_SET_UP: 33,
+  IMPRESSION_REGWALL_OPT_IN: 34,
+  IMPRESSION_NEWSLETTER_OPT_IN: 35,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -305,7 +365,16 @@ const AnalyticsEvent = {
   ACTION_TWG_FREE_TRANSACTION_START_NEXT_BUTTON_CLICK: 1050,
   ACTION_TWG_PAID_TRANSACTION_START_NEXT_BUTTON_CLICK: 1051,
   ACTION_TWG_STICKER_SELECTION_SCREEN_CLOSE_CLICK: 1052,
+  ACTION_TWG_ARTICLE_LEVEL_SUPPORTER_WALL_CTA_CLICK: 1053,
+  ACTION_REGWALL_OPT_IN_BUTTON_CLICK: 1054,
+  ACTION_REGWALL_ALREADY_OPTED_IN_CLICK: 1055,
+  ACTION_NEWSLETTER_OPT_IN_BUTTON_CLICK: 1056,
+  ACTION_NEWSLETTER_ALREADY_OPTED_IN_CLICK: 1057,
+  ACTION_REGWALL_OPT_IN_CLOSE: 1058,
+  ACTION_NEWSLETTER_OPT_IN_CLOSE: 1059,
   EVENT_PAYMENT_FAILED: 2000,
+  EVENT_REGWALL_OPT_IN_FAILED: 2001,
+  EVENT_NEWSLETTER_OPT_IN_FAILED: 2002,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
   EVENT_CHANGED_TX_ID: 3002,
@@ -329,6 +398,8 @@ const AnalyticsEvent = {
   EVENT_TWG_POST_TRANSACTION_SETTING_PRIVATE: 3020,
   EVENT_TWG_PRE_TRANSACTION_PRIVACY_SETTING_PUBLIC: 3021,
   EVENT_TWG_POST_TRANSACTION_SETTING_PUBLIC: 3022,
+  EVENT_REGWALL_OPTED_IN: 3023,
+  EVENT_NEWSLETTER_OPTED_IN: 3024,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -500,12 +571,6 @@ function parseUrl(url) {
 function parseUrlWithA(a, url) {
   a.href = url;
 
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
   /** @type {!LocationDef} */
   const info = {
     href: a.href,
@@ -518,22 +583,6 @@ function parseUrlWithA(a, url) {
     hash: a.hash,
     origin: '', // Set below.
   };
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if (
-    (info.protocol == 'http:' && info.port == 80) ||
-    (info.protocol == 'https:' && info.port == 443)
-  ) {
-    info.port = '';
-    info.host = info.hostname;
-  }
 
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
@@ -1008,7 +1057,7 @@ const REGWALL_HTML = `
   .gaa-metering-regwall--iframe {
     border: none !important;
     display: block !important;
-    height: 36px !important;
+    height: 44px !important;
     margin: 0 0 30px !important;
     width: 100% !important;
   }
@@ -1111,6 +1160,11 @@ const GOOGLE_SIGN_IN_IFRAME_STYLES = `
   #${GOOGLE_SIGN_IN_BUTTON_ID} {
     margin: 0 auto;
   }
+
+  #${SIGN_IN_WITH_GOOGLE_BUTTON_ID}{
+    width: 220px;
+  }
+
   #${GOOGLE_3P_SIGN_IN_BUTTON_ID} > div,
   #${SIGN_IN_WITH_GOOGLE_BUTTON_ID} > div,
   #${GOOGLE_SIGN_IN_BUTTON_ID} > div {
@@ -1444,8 +1498,7 @@ class GaaMeteringRegwall {
       'script[type="application/ld+json"]'
     );
 
-    for (let i = 0; i < ldJsonElements.length; i++) {
-      const ldJsonElement = ldJsonElements[i];
+    for (const ldJsonElement of ldJsonElements) {
       let ldJson = /** @type {*} */ (parseJson(ldJsonElement.textContent));
 
       if (!Array.isArray(ldJson)) {
@@ -1474,8 +1527,7 @@ class GaaMeteringRegwall {
       '[itemscope][itemtype][itemprop="publisher"] [itemprop="name"]'
     );
 
-    for (let i = 0; i < publisherNameElements.length; i++) {
-      const publisherNameElement = publisherNameElements[i];
+    for (const publisherNameElement of publisherNameElements) {
       const publisherName = publisherNameElement.content;
       if (publisherName) {
         return publisherName;
@@ -1517,7 +1569,7 @@ class GaaMeteringRegwall {
         if (e.data.stamp === POST_MESSAGE_STAMP) {
           if (e.data.command === POST_MESSAGE_COMMAND_USER) {
             // Pass along user details.
-            resolve(e.data.gaaUser || e.data.jwtPayload);
+            resolve(e.data.gaaUser || e.data.returnedJwt);
           }
 
           if (e.data.command === POST_MESSAGE_COMMAND_ERROR) {
@@ -1624,8 +1676,7 @@ class GaaGoogleSignInButton {
     }
 
     // Validate origins.
-    for (let i = 0; i < allowedOrigins.length; i++) {
-      const allowedOrigin = allowedOrigins[i];
+    for (const allowedOrigin of allowedOrigins) {
       const url = new URL(allowedOrigin);
 
       const isOrigin = url.origin === allowedOrigin;
@@ -1901,14 +1952,14 @@ function logEvent({analyticsEvent, showcaseEvent, isFromUserAction} = {}) {
         : [analyticsEvent];
 
       // Log each analytics event.
-      eventTypes.forEach((eventType) => {
+      for (const eventType of eventTypes) {
         eventManager.logEvent({
           eventType,
           eventOriginator: EventOriginator.SWG_CLIENT,
           isFromUserAction,
           additionalParameters: null,
         });
-      });
+      }
     });
   });
 }

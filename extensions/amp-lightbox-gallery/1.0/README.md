@@ -21,6 +21,17 @@ defineBentoLightboxGallery();
 
 ### Import via `<script>`
 
+```html
+<script type="module" async src="https://cdn.ampproject.org/bento.mjs"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css"
+>
+<script type="module" async src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.mjs"></script>
+<script nomodule async src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"></script>
+```
+
+### Example
+
 <!--% example %-->
 
 ```html
@@ -107,7 +118,7 @@ In the following example, `<bento-lightbox-gallery>` displays the `alt` value as
 
 ## Interactivity and API usage
 
-Bento enabled components used as a standalone web component are highly interactive through their API. The `bento-lightbox-gallery` component API is accessible by including the following script tag in your document:
+Bento components are highly interactive through their API. The `bento-lightbox-gallery` component API is accessible by including the following script tag in your document:
 
 ```javascript
 await customElements.whenDefined('bento-lightbox-gallery');

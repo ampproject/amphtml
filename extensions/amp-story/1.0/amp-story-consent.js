@@ -1,15 +1,9 @@
-import * as Preact from '#core/dom/jsx';
-import {
-  Action,
-  StateProperty,
-  getStoreService,
-} from './amp-story-store-service';
+import objstr from 'obj-str';
+
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {CSS} from '../../../build/amp-story-consent-1.0.css';
+import {isJsonScriptTag} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
-import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 import {
   childElementByTag,
   closest,
@@ -17,19 +11,29 @@ import {
   matches,
 } from '#core/dom/query';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
+import {isArray} from '#core/types';
+import {parseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {dev, user, userAssert} from '#utils/log';
+
+import {localize} from './amp-story-localization-service';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
   getTextColorForRGB,
   triggerClickFromLightDom,
 } from './utils';
-import {dev, user, userAssert} from '#utils/log';
-import {isArray} from '#core/types';
-import {isJsonScriptTag} from '#core/dom';
 
-import {parseJson} from '#core/types/object/json';
-import {localize} from './amp-story-localization-service';
-import objstr from 'obj-str';
+import {CSS} from '../../../build/amp-story-consent-1.0.css';
+import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-story-consent';
@@ -59,9 +63,7 @@ const renderElement = (element, config, consentId, logoSrc) => (
         <div class="i-amphtml-story-consent-header">
           <div
             class="i-amphtml-story-consent-logo"
-            style={
-              logoSrc ? {backgroundImage: `url('${logoSrc}') !important`} : ''
-            }
+            style={logoSrc && {backgroundImage: `url('${logoSrc}') !important`}}
           />
         </div>
         <div class="i-amphtml-story-consent-content">

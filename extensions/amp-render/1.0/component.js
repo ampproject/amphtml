@@ -1,7 +1,8 @@
 import * as Preact from '#preact';
-import {Wrapper, useRenderer, useValueRef} from '#preact/component';
-import {forwardRef} from '#preact/compat';
 import {useCallback, useEffect, useImperativeHandle, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {Wrapper, useValueRef} from '#preact/component';
+import {useRenderer} from '#preact/component/renderer';
 import {useResourcesNotify} from '#preact/utils';
 
 /**

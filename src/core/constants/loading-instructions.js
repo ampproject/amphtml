@@ -31,7 +31,10 @@ export const Loading_Enum = {
   UNLOAD: 'unload',
 };
 
-/** @const {!Array<!Loading_Enum>} */
+/**
+ * @type {Array<Loading_Enum>}
+ * @const
+ */
 const ORDER = [
   Loading_Enum.AUTO,
   Loading_Enum.LAZY,
@@ -39,7 +42,10 @@ const ORDER = [
   Loading_Enum.UNLOAD,
 ];
 
-/** @const {!Object<string, number>} */
+/**
+ * @type {Object<string, number>}
+ * @const
+ */
 const MAP = {
   [Loading_Enum.AUTO]: 0,
   [Loading_Enum.LAZY]: 1,
@@ -51,9 +57,9 @@ const MAP = {
  * Returns the loading instruction with a higher priority. The priority
  * order is auto -> lazy -> eager -> unload.
  *
- * @param {!Loading_Enum|string} v1
- * @param {!Loading_Enum|string} v2
- * @return {!Loading_Enum}
+ * @param {Loading_Enum|string} v1
+ * @param {Loading_Enum|string} v2
+ * @return {Loading_Enum}
  */
 export function reducer(v1, v2) {
   const ordinal1 = MAP[v1] || 0;

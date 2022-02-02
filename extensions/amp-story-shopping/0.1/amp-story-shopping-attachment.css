@@ -1,2 +1,66 @@
 amp-story-shopping-attachment {
+  height: 100% !important;
+  width: 100% !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: calc(var(--story-page-vmin) * 3) !important; /* override with ems for pixel perfect layout */
+  --shopping-attachment-horizontal-padding: 1.5em;
+}
+
+amp-story-shopping-attachment a {
+  text-decoration: none !important;
+}
+
+.i-amphtml-amp-story-shopping-plp {
+  padding: 0 var(--shopping-attachment-horizontal-padding) !important;
+}
+
+.i-amphtml-amp-story-shopping-plp-header {
+  font-weight: 600 !important;
+  font-size: 1.5em !important;
+  margin-bottom: 1.2em !important;
+}
+
+.i-amphtml-amp-story-shopping-plp-cards {
+  justify-content: space-between !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+}
+
+.i-amphtml-amp-story-shopping-plp-card {
+  width: calc(50% - var(--shopping-attachment-horizontal-padding) / 2) !important;
+  margin-bottom: 3em !important;
+}
+
+.i-amphtml-amp-story-shopping-plp-card-image {
+  width: 100% !important;
+  height: 14.5em !important;
+  margin-bottom: 1em !important;
+  border-radius: 2em !important;
+  background-position: center !important;
+  background-repeat: none !important;
+  background-size: cover !important;
+}
+
+.i-amphtml-amp-story-shopping-plp-card-brand {
+  font-weight: 500 !important;
+  font-size: .9em !important;
+  margin-bottom: 0.3em !important;
+  font-size: .9em !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}
+
+.i-amphtml-amp-story-shopping-plp-card-title {
+  font-weight: 600 !important;
+  margin-bottom: 0.4em !important;
+  line-height: 1.2em !important;
+  font-size: 1.25em !important;
+}
+
+.i-amphtml-amp-story-shopping-plp-card-price {
+  font-weight: 500 !important;
+  margin-bottom: .33em !important;
+  line-height: 1em !important;
+  font-size: 1.1em !important;
 }

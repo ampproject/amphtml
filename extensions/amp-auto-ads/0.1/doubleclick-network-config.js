@@ -1,6 +1,5 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -50,11 +49,11 @@ export class DoubleclickNetworkConfig {
 
   /** @override */
   getAttributes() {
-    const attributes = dict({
+    const attributes = {
       'type': 'doubleclick',
       'data-slot': this.autoAmpAdsElement_.getAttribute('data-slot'),
       'json': this.autoAmpAdsElement_.getAttribute('data-json'),
-    });
+    };
     return attributes;
   }
 

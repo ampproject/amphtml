@@ -5,7 +5,7 @@ import {whenDocumentComplete, whenDocumentReady} from '#core/document/ready';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {computedStyle} from '#core/dom/style';
 import {debounce} from '#core/types/function';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
@@ -228,23 +228,6 @@ export class Performance {
      */
     this.supportsNavigation_ = supportedEntryTypes.includes('navigation');
 
-    /**
-     * The latest reported largest contentful paint time. Uses entry.startTime,
-     * which equates to: renderTime ?? loadTime. We can't always use one or the other
-     * because:
-     * - loadTime is 0 for non-remote resources (text)
-     * - renderTime is undefined for crossorigin resources
-     *
-     * @private {?number}
-     */
-    this.largestContentfulPaint_ = null;
-
-    /**
-     * Which type of element was chosen as the LCP.
-     * @private {ELEMENT_TYPE_ENUM}
-     */
-    this.largestContentfulPaintType_ = null;
-
     this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
@@ -434,8 +417,7 @@ export class Performance {
           this.layoutShiftSum_ += entry.value;
         }
       } else if (entry.entryType === 'largest-contentful-paint') {
-        this.largestContentfulPaint_ = entry.startTime;
-        this.largestContentfulPaintType_ = getElementType(entry.element);
+        this.tickLargestContentfulPaint_(entry);
       } else if (entry.entryType == 'navigation' && !recordedNavigation) {
         [
           'domComplete',
@@ -566,9 +548,6 @@ export class Performance {
       this.recordGoogleFontExp_();
       this.tickCumulativeLayoutShiftScore_();
     }
-    if (this.supportsLargestContentfulPaint_) {
-      this.tickLargestContentfulPaint_();
-    }
   }
 
   /**
@@ -670,23 +649,22 @@ export class Performance {
 
   /**
    * Tick the largest contentful paint metrics.
+   * Uses entry.startTime, which equates to: `renderTime ?? loadTime`. We can't
+   * always use one or the other because:
+   * - loadTime is 0 for non-remote resources (text)
+   * - renderTime is undefined for crossorigin resources
+   *
+   * @param {!LargestContentfulPaint} entry
    */
-  tickLargestContentfulPaint_() {
-    if (this.largestContentfulPaint_ == null) {
-      return;
-    }
+  tickLargestContentfulPaint_(entry) {
+    const {element, startTime} = entry;
+    const type = getElementType(element);
 
-    this.tickDelta(
-      TickLabel_Enum.LARGEST_CONTENTFUL_PAINT_TYPE,
-      this.largestContentfulPaintType_
-    );
-    this.tickDelta(
-      TickLabel_Enum.LARGEST_CONTENTFUL_PAINT,
-      this.largestContentfulPaint_
-    );
+    this.tickDelta(TickLabel_Enum.LARGEST_CONTENTFUL_PAINT_TYPE, type);
+    this.tickDelta(TickLabel_Enum.LARGEST_CONTENTFUL_PAINT, startTime);
     this.tickSinceVisible(
       TickLabel_Enum.LARGEST_CONTENTFUL_PAINT_VISIBLE,
-      this.largestContentfulPaint_
+      startTime
     );
     this.flush();
   }
@@ -773,7 +751,7 @@ export class Performance {
       'You may not set both opt_delta and opt_value.'
     );
 
-    const data = dict({'label': label});
+    const data = {'label': label};
     let delta;
 
     if (opt_delta != undefined) {
@@ -854,11 +832,11 @@ export class Performance {
       }
       this.viewer_.sendMessage(
         'sendCsi',
-        dict({
+        {
           'ampexp': this.ampexp_,
           'canonicalUrl': this.documentInfo_.canonicalUrl,
           'eventid': this.eventid_,
-        }),
+        },
         /* cancelUnsent */ true
       );
     }
@@ -917,7 +895,7 @@ export class Performance {
     if (this.viewer_) {
       this.viewer_.sendMessage(
         'prerenderComplete',
-        dict({'value': value}),
+        {'value': value},
         /* cancelUnsent */ true
       );
     }

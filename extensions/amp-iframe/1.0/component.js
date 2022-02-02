@@ -1,16 +1,19 @@
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {setStyle} from '#core/dom/style';
+import {getWin} from '#core/window';
+
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef} from '#preact';
-import {MessageType_Enum} from '#core/3p-frame-messaging';
-import {getWin} from '#core/window';
-import {ContainWrapper, useIntersectionObserver} from '#preact/component';
-import {setStyle} from '#core/dom/style';
+import {ContainWrapper} from '#preact/component';
+import {useIntersectionObserver} from '#preact/component/intersection-observer';
 import {useMergeRefs} from '#preact/utils';
+
 import {
   DEFAULT_THRESHOLD,
   cloneEntryForCrossOrigin,
 } from '#utils/intersection-observer-3p-host';
+
 import {postMessage} from '../../../src/iframe-helper';
-import {dict} from '#core/types/object';
 
 const NOOP = () => {};
 
@@ -46,7 +49,7 @@ export function BentoIframe({
     postMessage(
       iframe,
       MessageType_Enum.INTERSECTION,
-      dict({'changes': entries.map(cloneEntryForCrossOrigin)}),
+      {'changes': entries.map(cloneEntryForCrossOrigin)},
       targetOrigin
     );
   };

@@ -9,7 +9,6 @@
         {name: 'cramforce', requestReviews: false},
         {name: 'dvoytenko', requestReviews: false},
         {name: 'jridgewell', requestReviews: false},
-        {name: 'kristoferbaxter', requestReviews: false},
       ],
     },
     {
@@ -48,8 +47,23 @@
     },
     {
       // Locked down to minimize new import aliases being added
-      pattern: 'tsconfig.json',
+      pattern: 'tsconfig{,.base}.json',
       owners: [{name: 'ampproject/wg-performance', required: true}],
+    },
+    {
+      pattern: '**/tsconfig.json',
+      owners: [{name: 'ampproject/wg-performance'}],
+    },
+    {
+      pattern: '**/*.d.ts',
+      owners: [
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-performance'},
+      ],
+    },
+    {
+      pattern: '**/build-dom.js',
+      owners: [{name: 'samouri'}],
     },
   ],
 }

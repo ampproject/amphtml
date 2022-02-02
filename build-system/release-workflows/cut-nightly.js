@@ -8,6 +8,7 @@ const {cyan, green, red} = require('kleur/colors');
 const {getVersion} = require('../compile/internal-version');
 const {log} = require('../common/logging');
 const {Octokit} = require('@octokit/rest');
+
 const params = {owner: 'ampproject', repo: 'amphtml'};
 
 // Permanent external ID as assigned by the GitHub Actions runner.
@@ -75,7 +76,7 @@ async function getCommit(octokit) {
 }
 
 /**
- * Fast forward nightly branch to given sha
+ * Fast forward nightly branch to given sha.
  * @param {Octokit} octokit
  * @param {string} sha
  * @return {Promise<void>}
@@ -122,14 +123,13 @@ async function updateBranch(octokit, sha) {
 }
 
 /**
- * Create GitHub tag
+ * Create GitHub tag.
  * @param {Octokit} octokit
  * @param {string} sha
+ * @param {string} ampVersion
  * @return {Promise<void>}
  */
-async function createTag(octokit, sha) {
-  const ampVersion = getVersion(sha);
-
+async function createTag(octokit, sha, ampVersion) {
   await octokit.rest.git.createTag({
     ...params,
     tag: ampVersion,
@@ -158,13 +158,9 @@ async function createTag(octokit, sha) {
       log('The tag', cyan(ampVersion), 'already exists at', cyan(sha));
       break;
     default:
-      log(
-        red('An uncaught status was returned while attempting to create a tag'),
-        cyan(ampVersion),
-        red('for commit'),
-        cyan(sha)
+      throw new Error(
+        `An unaught status returned while attempting to create a tag\n${response}`
       );
-      log('See full response:', response);
   }
 }
 
@@ -190,11 +186,10 @@ async function cutNightlyBranch() {
       'Failed to cut nightly. Could not find a green commit in the last 100 commits'
     );
   }
+  const ampVersion = getVersion(sha);
 
-  await Promise.all([
-    await updateBranch(octokit, sha),
-    await createTag(octokit, sha),
-  ]);
+  await updateBranch(octokit, sha);
+  await createTag(octokit, sha, ampVersion);
 
   log('Successfully cut nightly');
 }

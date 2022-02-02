@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 import * as Preact from '#preact';
+import {useCallback} from '#preact';
+
+import {createCustomEvent} from '#utils/event-helper';
+
 import {
   BentoAccordion,
   BentoAccordionContent,
@@ -21,8 +25,6 @@ import {
   BentoAccordionSection,
 } from '../../../amp-accordion/1.0/component';
 import {VideoIframe} from '../video-iframe';
-import {createCustomEvent} from '#utils/event-helper';
-import {useCallback} from '#preact';
 
 export default {
   title: 'VideoIframe',

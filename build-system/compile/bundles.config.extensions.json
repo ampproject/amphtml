@@ -18,6 +18,14 @@
     }
   },
   {
+    "name": "amp-access-fewcents",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-access-laterpay",
     "version": [
       "0.1",
@@ -167,6 +175,14 @@
     }
   },
   {
+    "name": "amp-app-banner",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-audio",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -293,6 +309,16 @@
     "name": "amp-dailymotion",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-dailymotion",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "hasCss": true,
+      "bento": true
+    }
   },
   {
     "name": "amp-date-countdown",
@@ -595,9 +621,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "bento": true,
-      "npm": true
+      "hasCss": true
     }
   },
   {
@@ -1028,6 +1052,13 @@
     }
   },
   {
+    "name": "amp-story-page-attachment",
+    "version": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-story-panning-media",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -1044,9 +1075,24 @@
     }
   },
   {
+    "name": "amp-story-share-menu",
+    "version": "0.1",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-story-shopping",
     "version": "0.1",
     "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "amp-story-subscriptions",
+    "version": "0.1",
     "options": {
       "hasCss": true
     }

@@ -1,8 +1,8 @@
-import {Entitlement, GrantReason} from '../entitlement';
+import {user} from '#utils/log';
 
+import {Entitlement, GrantReason} from '../entitlement';
 import {PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
-import {user} from '#utils/log';
 
 describes.realWin('Platform store', {}, (env) => {
   let platformStore;
