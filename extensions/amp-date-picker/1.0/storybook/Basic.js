@@ -1,5 +1,3 @@
-import {addDays} from 'date-fns';
-
 import * as Preact from '#preact';
 import {useRef} from '#preact';
 

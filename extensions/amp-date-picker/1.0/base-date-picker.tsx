@@ -1,4 +1,4 @@
-import {DayPicker} from 'react-day-picker';
+import {DayPicker, DayPickerProps} from 'react-day-picker';
 
 import * as Preact from '#preact';
 import {useCallback} from '#preact';
@@ -7,23 +7,29 @@ import {getFormattedDate, getLocale} from './date-helpers';
 import {DayButton} from './day-button';
 import {useDayAttributes} from './use-day-attributes';
 
-// TODO: Prop types
-/**
- * @param {!object} props
- * @return {PreactDef.Renderable}
- */
-export function BaseDatePicker({locale, monthFormat, weekDayFormat, ...rest}) {
+interface BaseDatePickerProps extends Omit<DayPickerProps, 'locale'> {
+  locale: string;
+  monthFormat: string;
+  weekDayFormat: string;
+}
+
+export function BaseDatePicker({
+  locale,
+  monthFormat,
+  weekDayFormat,
+  ...rest
+}: BaseDatePickerProps) {
   const {isDisabled} = useDayAttributes();
 
   const formatMonth = useCallback(
-    (date) => {
+    (date: Date) => {
       return getFormattedDate(date, monthFormat, locale);
     },
     [monthFormat, locale]
   );
 
   const formatWeekday = useCallback(
-    (date) => {
+    (date: Date) => {
       return getFormattedDate(date, weekDayFormat, locale);
     },
     [weekDayFormat, locale]
