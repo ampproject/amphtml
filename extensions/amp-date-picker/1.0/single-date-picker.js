@@ -43,12 +43,14 @@ function SingleDatePickerWithRef(
     children,
     format,
     id,
+    initialVisibleMonth,
     inputSelector,
     locale,
     mode,
+    monthFormat,
     onError,
     openAfterSelect,
-    ...rest
+    weekDayFormat,
   },
   ref
 ) {
@@ -57,6 +59,8 @@ function SingleDatePickerWithRef(
 
   const [date, _setDate] = useState();
   const [hiddenInputProps, setHiddenInputProps] = useState();
+  // This allow the calendar to navigate to a new month when the date changes
+  const [month, setMonth] = useState(initialVisibleMonth ?? getCurrentDate());
 
   const containerRef = useRef();
 
@@ -65,6 +69,7 @@ function SingleDatePickerWithRef(
   const handleSetDate = useCallback(
     (date) => {
       _setDate(date);
+      setMonth(date);
       if (inputRef.current) {
         inputRef.current.value = getFormattedDate(date, format, locale);
       }
@@ -257,7 +262,10 @@ function SingleDatePickerWithRef(
             selected={date}
             onSelect={setDate}
             locale={locale}
-            {...rest}
+            month={month}
+            monthFormat={monthFormat}
+            weekDayFormat={weekDayFormat}
+            onMonthChange={setMonth}
           />
         )}
       </DatePickerContext.Provider>

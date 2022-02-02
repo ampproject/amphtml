@@ -54,12 +54,14 @@ function DateRangePickerWithRef(
     endInputSelector,
     format,
     id,
+    initialVisibleMonth,
     locale,
     mode,
+    monthFormat,
     onError,
     openAfterSelect,
     startInputSelector,
-    ...rest
+    weekDayFormat,
   },
   ref
 ) {
@@ -71,6 +73,8 @@ function DateRangePickerWithRef(
   const [startHiddenInputName, setStartHiddenInputName] = useState();
   const [endHiddenInputName, setEndHiddenInputName] = useState();
   const [focusedInput, setFocusedInput] = useState();
+  // This allow the calendar to navigate to a new month when the date changes
+  const [month, setMonth] = useState(initialVisibleMonth ?? getCurrentDate());
 
   const containerRef = useRef();
 
@@ -188,6 +192,7 @@ function DateRangePickerWithRef(
   const handleSetStartDate = useCallback(
     (date) => {
       setStartDate(date);
+      setMonth(date);
       if (startInputRef.current) {
         startInputRef.current.value = getFormattedDate(date, format, locale);
       }
@@ -198,6 +203,7 @@ function DateRangePickerWithRef(
   const handleSetEndDate = useCallback(
     (date) => {
       setEndDate(date);
+      setMonth(date);
       if (endInputRef.current) {
         endInputRef.current.value = getFormattedDate(date, format, locale);
       }
@@ -360,6 +366,7 @@ function DateRangePickerWithRef(
     if (!document) {
       return;
     }
+
     const handleFocus = (event) => {
       if (event.target === startInputEl) {
         setFocusedInput(DateFieldType.START_DATE);
@@ -369,6 +376,7 @@ function DateRangePickerWithRef(
       }
       transitionTo(DatePickerState.OVERLAY_OPEN_INPUT);
     };
+
     const handleDocumentKeydown = (event) => {
       if (event.key === Keys_Enum.ESCAPE) {
         transitionTo(DatePickerState.OVERLAY_CLOSED);
@@ -453,7 +461,10 @@ function DateRangePickerWithRef(
             onSelect={setDateRange}
             locale={locale}
             disabled={[isDisabled, {after: getDisabledAfter(startDate)}]}
-            {...rest}
+            month={month}
+            monthFormat={monthFormat}
+            weekDayFormat={weekDayFormat}
+            onMonthChange={setMonth}
           />
         )}
       </DatePickerContext.Provider>

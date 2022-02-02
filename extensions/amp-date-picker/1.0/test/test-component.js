@@ -264,6 +264,40 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       expect(wrapper.text()).to.contain('January 2021');
     });
+
+    it('can advance to the next month', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+          initialVisibleMonth={new Date(2021, 0)}
+        />
+      );
+
+      wrapper.find('button[aria-label="Go to next month"]').simulate('click');
+
+      expect(wrapper.text()).to.contain('February 2021');
+    });
+
+    it('can go back to the previous month', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+          initialVisibleMonth={new Date(2021, 0)}
+        />
+      );
+
+      wrapper
+        .find('button[aria-label="Go to previous month"]')
+        .simulate('click');
+
+      expect(wrapper.text()).to.contain('December 2020');
+    });
   });
 
   describe('showing the date picker in static mode for a date range', () => {

@@ -12,13 +12,7 @@ import {useDayAttributes} from './use-day-attributes';
  * @param {!object} props
  * @return {PreactDef.Renderable}
  */
-export function BaseDatePicker({
-  initialVisibleMonth,
-  locale,
-  monthFormat,
-  weekDayFormat,
-  ...rest
-}) {
+export function BaseDatePicker({locale, monthFormat, weekDayFormat, ...rest}) {
   const {isDisabled} = useDayAttributes();
 
   const formatMonth = useCallback(
@@ -38,7 +32,6 @@ export function BaseDatePicker({
   return (
     <DayPicker
       aria-label="Calendar"
-      defaultMonth={initialVisibleMonth}
       components={{Day: DayButton}}
       disabled={[isDisabled]}
       formatters={{
