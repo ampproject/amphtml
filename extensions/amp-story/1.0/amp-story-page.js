@@ -534,6 +534,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
+    // TODO(#37528): Replace with ResizeObserver API.
     const {height, width} = this.getLayoutSize();
     if (!this.isFirstPage_ || height === 0 || width === 0) {
       return;
