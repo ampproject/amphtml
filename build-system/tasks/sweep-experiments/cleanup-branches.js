@@ -23,7 +23,7 @@ function env(key) {
 
 /**
  * @param {string} path
- * @param {{[string: string]: string|Object}} options
+ * @param {{[string: string]: string|Object}=} options
  * @return {!Promise<Object[]|Object>}
  */
 async function githubFetch(path, options) {
