@@ -7,13 +7,13 @@ amp-story-subscriptions {
   height: 100% !important;
   width: 100% !important;
   z-index: 1 !important; /** Above the desktop navigation UI. */
-  transform: translate3d(0, 100vh, 0) !important;
+  transform: translateY(100vh) !important;
   transition-delay: 0.15s !important;
   pointer-events: none !important;
 }
 
 amp-story-subscriptions.i-amphtml-story-subscriptions-visible {
-  transform: translate3d(0, 0, 0) !important;
+  transform: translateY(0) !important;
   transition-delay: 0s !important;
 }
 

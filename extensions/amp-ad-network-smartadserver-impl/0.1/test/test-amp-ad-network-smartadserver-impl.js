@@ -295,6 +295,42 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
           );
         });
     });
+
+    it('should return proper url with schain value', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'data-site': '1',
+        'data-format': '22',
+        'data-schain': 'some-sco-string',
+      });
+      doc.body.appendChild(element);
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, null)
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=1&fmtid=22&tag=sas_22&out=amp-hb&schain=some-sco-string&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+          );
+        });
+    });
+
+    it('should not return chain parameter in url if empty value', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'data-site': 10,
+        'data-format': '3',
+        'data-schain': '',
+      });
+      doc.body.appendChild(element);
+      const viewer = Services.viewerForDoc(element);
+      env.sandbox.stub(viewer, 'getReferrerUrl');
+      return new AmpAdNetworkSmartadserverImpl(element)
+        .getAdUrl({}, null)
+        .then((url) => {
+          expect(url).to.match(
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+          );
+        });
+    });
   });
 
   describe('getNonAmpCreativeRenderingMethod', () => {

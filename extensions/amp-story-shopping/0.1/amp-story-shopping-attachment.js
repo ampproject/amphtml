@@ -5,6 +5,10 @@ import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
+import {
+  getShoppingConfig,
+  storeShoppingConfig,
+} from './amp-story-shopping-config';
 
 import {
   ShoppingConfigDataDef,
@@ -33,13 +37,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {?Element} */
     this.attachmentEl_ = null;
 
-    /** @private {!Element} */
-    this.pageEl_ = this.element.closest('amp-story-page');
+    /** @private {?Element} */
+    this.pageEl_ = null;
 
-    /** @private {!Array<!Element>} */
-    this.shoppingTags_ = Array.from(
-      this.pageEl_.querySelectorAll('amp-story-shopping-tag')
-    );
+    /** @private {?Array<!Element>} */
+    this.shoppingTags_ = null;
 
     /** @private @const {!Element} */
     this.plpContainer_ = <div></div>;
@@ -53,6 +55,26 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.pageEl_ = this.element.closest('amp-story-page');
+    this.shoppingTags_ = Array.from(
+      this.pageEl_.querySelectorAll('amp-story-shopping-tag')
+    );
+    loadFonts(this.win, FONTS_TO_LOAD);
+
+    const pageElement = this.element.parentElement;
+    getShoppingConfig(pageElement).then((config) =>
+      storeShoppingConfig(pageElement, config)
+    );
+
+    this.attachmentEl_ = (
+      <amp-story-page-attachment
+        layout="nodisplay"
+        theme={this.element.getAttribute('theme')}
+      ></amp-story-page-attachment>
+    );
+    if (this.shoppingTags_.length === 0) {
+      return;
+    }
     loadFonts(this.win, FONTS_TO_LOAD);
 
     return Promise.all([
@@ -78,6 +100,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.shoppingTags_.length === 0) {
+      return;
+    }
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
       (isOpen) => this.onPageAttachmentStateUpdate_(isOpen)
