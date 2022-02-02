@@ -90,11 +90,11 @@ function SingleDatePickerWithRef(
         return;
       }
       handleSetDate(date);
-      if (!openAfterSelect) {
+      if (!openAfterSelect && mode === DatePickerMode.OVERLAY) {
         transitionTo(DatePickerState.OVERLAY_CLOSED);
       }
     },
-    [blockedDates, handleSetDate, openAfterSelect, transitionTo]
+    [blockedDates, handleSetDate, openAfterSelect, transitionTo, mode]
   );
 
   useImperativeHandle(

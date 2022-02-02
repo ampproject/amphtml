@@ -4,8 +4,10 @@ import {
   isAfter,
   isBefore,
   isSameDay,
+  isValid,
 } from 'date-fns';
 
+import {Keys_Enum} from '#core/constants/key-codes';
 import {
   closestAncestorElementBySelector,
   scopedQuerySelector,
@@ -224,7 +226,7 @@ function DateRangePickerWithRef(
       } else {
         handleSetStartDate(startDate);
         handleSetEndDate(endDate);
-        if (!openAfterSelect) {
+        if (!openAfterSelect && mode === DatePickerMode.OVERLAY) {
           transitionTo(DatePickerState.OVERLAY_CLOSED);
         }
       }
@@ -238,6 +240,7 @@ function DateRangePickerWithRef(
       focusedInput,
       transitionTo,
       openAfterSelect,
+      mode,
     ]
   );
 
@@ -272,6 +275,46 @@ function DateRangePickerWithRef(
         endToday,
       }),
     [clear, setDateRange, startToday, endToday]
+  );
+
+  /**
+   * For inputs that are valid dates, update the date-picker value.
+   * @param {!Event} e
+   * @private
+   */
+  const handleStartInput = useCallback(
+    (e) => {
+      const {target} = e;
+      if (target.type === 'hidden') {
+        return;
+      }
+
+      const date = parseDate(target.value, format, locale);
+      if (isValid(date)) {
+        setStartDate(date);
+      }
+    },
+    [format, locale, setStartDate]
+  );
+
+  /**
+   * For inputs that are valid dates, update the date-picker value.
+   * @param {!Event} e
+   * @private
+   */
+  const handleEndInput = useCallback(
+    (e) => {
+      const {target} = e;
+      if (target.type === 'hidden') {
+        return;
+      }
+
+      const date = parseDate(target.value, format, locale);
+      if (isValid(date)) {
+        setEndDate(date);
+      }
+    },
+    [format, locale, setEndDate]
   );
 
   useEffect(() => {
@@ -326,6 +369,27 @@ function DateRangePickerWithRef(
       }
       transitionTo(DatePickerState.OVERLAY_OPEN_INPUT);
     };
+    const handleDocumentKeydown = (event) => {
+      if (event.key === Keys_Enum.ESCAPE) {
+        transitionTo(DatePickerState.OVERLAY_CLOSED);
+      }
+    };
+    const handleInputKeydown = (event) => {
+      const {target} = event;
+      if (
+        !target === startInputEl ||
+        !target === endInputEl ||
+        target.type === 'hidden'
+      ) {
+        return;
+      }
+
+      if (event.key === Keys_Enum.DOWN_ARROW) {
+        /// update field focus?
+        transitionTo(DatePickerState.OVERLAY_OPEN_PICKER);
+        // Other static mode stuff here
+      }
+    };
     const handleClick = (event) => {
       const clickWasInDatePicker =
         event.target === startInputEl ||
@@ -337,15 +401,25 @@ function DateRangePickerWithRef(
     };
     if (mode === DatePickerMode.OVERLAY) {
       document.addEventListener('click', handleClick);
+      document.addEventListener('keydown', handleDocumentKeydown);
     }
     startInputEl?.addEventListener('focus', handleFocus);
     endInputEl?.addEventListener('focus', handleFocus);
+    startInputEl?.addEventListener('change', handleStartInput);
+    endInputEl?.addEventListener('change', handleEndInput);
+    startInputEl?.addEventListener('keydown', handleInputKeydown);
+    endInputEl?.addEventListener('keydown', handleInputKeydown);
     return () => {
       document.addEventListener('click', handleClick);
+      document.removeEventListener('keydown', handleDocumentKeydown);
       startInputEl?.removeEventListener('focus', handleFocus);
       endInputEl?.removeEventListener('focus', handleFocus);
+      startInputEl?.removeEventListener('change', handleStartInput);
+      endInputEl?.removeEventListener('change', handleEndInput);
+      startInputEl?.removeEventListener('keydown', handleInputKeydown);
+      endInputEl?.removeEventListener('keydown', handleInputKeydown);
     };
-  }, [transitionTo, mode]);
+  }, [transitionTo, mode, handleStartInput, handleEndInput]);
 
   return (
     <ContainWrapper
