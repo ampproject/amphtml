@@ -78,7 +78,7 @@ describes.realWin(
       element.setAttribute('src', exampleURL);
 
       const expectedRemoteResult = JSON.parse(
-        '{"art":{"productId": "art","productTitle": "Abstract Art","productBrand": "V. Artsy","productPrice": 1200.0,"productPriceCurrency": "JPY","productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"],"reviewsPage": "https://store.google.com/jp/?hl=ja","brandLabel": "Google","productDetails": "Vinyl for the hit J-Pop song Plastic Love."}}'
+        '{"art":{"productId": "art","productTitle": "Abstract Art","productBrand": "V. Artsy","productPrice": 1200.0,"productPriceCurrency": "JPY","productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]}}'
       );
 
       expect(storeService.get(StateProperty.SHOPPING_DATA)).to.deep.eql(
@@ -126,9 +126,6 @@ describes.realWin(
               '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
               '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
             ],
-            'reviewsPage': 'https://store.google.com/jp/?hl=ja',
-            'brandLabel': 'Google',
-            'productDetails': 'Vinyl for a hit J-Pop song.',
           },
         ],
       };
@@ -150,9 +147,6 @@ describes.realWin(
               '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
               '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
             ],
-            'reviewsPage': 'https://store.google.com/jp/?hl=ja',
-            'brandLabel': 'Google',
-            'productDetails': 'Vinyl for the hit J-Pop song Plastic Love.',
           },
         ],
       };
@@ -170,9 +164,6 @@ describes.realWin(
             'productPrice': 19,
             'productPriceCurrency': 'JPY',
             'productImages': ['http://pizazz', 'http://zapp'],
-            'reviewsPage': 'http://zeppelinzero.com',
-            'brandLabel': 'Google',
-            'productDetails': 'Vinyl for the hit J-Pop song Plastic Love.',
           },
         ],
       };
