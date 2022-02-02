@@ -21,7 +21,12 @@ function env(key) {
   return /** @type {string} */ (process.env[key]);
 }
 
-const githubFetch = async (path, options) => {
+/**
+ * @param {string} path
+ * @param {{[string: string]: string|Object}} options
+ * @return {!Promise<Object[]|Object>}
+ */
+async function githubFetch(path, options) {
   const url = `https://api.github.com/repos/${org}/${repo}/${path}`;
   const response = await fetch(url, {
     method: 'GET',
@@ -38,7 +43,7 @@ const githubFetch = async (path, options) => {
     throw new Error(`${url}\n${text}`);
   }
   return response.json();
-};
+}
 
 /**
  * @param {(number) => string} getPagePath
@@ -84,13 +89,10 @@ async function getBranchPull(state, orgOrUser, branch) {
 async function closePullRequest(number) {
   const path = `pulls/${number}`;
   const method = 'PATCH';
-  const body = {state: 'closed'};
-  log(`${method} ${path} ${JSON.stringify(body)}`);
+  const body = JSON.stringify({state: 'closed'});
+  log(`${method} ${path} ${body}`);
   if (!argv.dry_run) {
-    await githubFetch(path, {
-      method,
-      body: JSON.stringify(body),
-    });
+    await githubFetch(path, {method, body});
   }
 }
 
