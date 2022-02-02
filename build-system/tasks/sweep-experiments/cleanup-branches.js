@@ -77,7 +77,7 @@ async function getOldBranches() {
  */
 async function getBranchPull(state, orgOrUser, branch) {
   const [pull] = await githubFetch(
-    `pulls?per_page=100&head=${orgOrUser}:${branch}&state=${state}`
+    `pulls?per_page=1&head=${orgOrUser}:${branch}&state=${state}`
   );
   return pull;
 }
