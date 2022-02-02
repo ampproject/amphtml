@@ -83,12 +83,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /**
    * Helper function to check if the shopping tag should flip if it's too far to the right.
+   * We only check the right hand side, as resizing only expands the border to the right.
    * @param {!Object} pageSize
    * @private
    */
   flipTagIfOffscreen_(pageSize) {
-    /* We only check the right hand side, as resizing only expands the border to the right. */
-
     const storyPageWidth = pageSize.width;
 
     let shouldFlip;
