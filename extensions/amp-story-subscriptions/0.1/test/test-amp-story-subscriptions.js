@@ -25,6 +25,8 @@ describes.realWin(
     let storeService;
     let storySubscriptions;
 
+    const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
+
     beforeEach(() => {
       win = env.win;
       doc = win.document;
@@ -60,6 +62,7 @@ describes.realWin(
 
     it('should display the blocking paywall on state update', async () => {
       storySubscriptions.buildCallback();
+      await nextTick();
 
       storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
 
