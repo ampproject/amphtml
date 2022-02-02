@@ -298,9 +298,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {boolean} whether the styles were rewritten */
     this.didRewriteStyles_ = false;
-
-    /** @private {?./amp-story-page.AmpStoryPage} the page to navigate to after subscriptions are granted */
-    this.navigateToPageAfterSubscriptionsAreGranted_ = null;
   }
 
   /** @override */
@@ -1284,12 +1281,11 @@ export class AmpStory extends AMP.BaseElement {
       isExperimentOn(this.win, 'amp-story-paywall-exp') &&
       targetPage.isPaywallProtected()
     ) {
-      if (this.navigateToPageAfterSubscriptionsAreGranted_) {
+      if (this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE)) {
         // Subscription dialog is already triggered.
         return Promise.resolve();
       }
       this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
-      this.navigateToPageAfterSubscriptionsAreGranted_ = targetPage;
 
       // TODO(#37285): add SubscriptionService to actually trigger the subscription dialog.
     }

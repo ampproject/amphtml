@@ -2,11 +2,10 @@ import {iterateCursor} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
+import {Services} from '#service';
+
 import {CSS} from '../../../build/amp-story-subscriptions-0.1.css';
-import {
-  StateProperty,
-  getStoreService,
-} from '../../amp-story/1.0/amp-story-store-service';
+import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 
 const TAG = 'amp-story-subscriptions';
 
@@ -21,13 +20,15 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win);
+    /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = null;
   }
 
   /** @override */
   buildCallback() {
     // Mark pages with required attributes to be treated as paywall protected pages.
+    // 'limited-content' is for the paywall dialog page, where a paywall would trigger based on both time advance or click events.
+    // 'content' is for all the remaining locked pages.
     iterateCursor(
       document.querySelectorAll('amp-story-page'),
       (pageEl, index) => {
@@ -47,7 +48,10 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     );
     this.element.appendChild(dialogEl);
 
-    this.initializeListeners_();
+    Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
+      this.storeService_ = storeService;
+      this.initializeListeners_();
+    });
   }
 
   /** @override */
@@ -61,9 +65,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.SUBSCRIPTIONS_DIALOG_STATE,
-      (isDialogVisible) => {
-        this.onSubscriptionStateChange_(isDialogVisible);
-      }
+      (isDialogVisible) => this.onSubscriptionStateChange_(isDialogVisible)
     );
   }
 
@@ -72,12 +74,12 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
    * @private
    */
   onSubscriptionStateChange_(isDialogVisible) {
-    this.mutateElement(() => {
+    this.mutateElement(() =>
       this.element.classList.toggle(
         'i-amphtml-story-subscriptions-visible',
         isDialogVisible
-      );
-    });
+      )
+    );
   }
 }
 
