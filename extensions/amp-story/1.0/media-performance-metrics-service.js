@@ -193,7 +193,7 @@ export class MediaPerformanceMetricsService {
 
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_CACHE_STATE,
-      this.getVideoCacheState_(media)
+      CacheState.ORIGIN
     );
     this.performanceService_.tickDelta(
       TickLabel_Enum.VIDEO_ON_FIRST_PAGE,
@@ -401,32 +401,5 @@ export class MediaPerformanceMetricsService {
 
     timeStamps.waiting = Date.now();
     mediaEntry.status = Status.WAITING;
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @return {!CacheState}
-   * @private
-   */
-  getVideoCacheState_(media) {
-    let hasCachedSource = false;
-    // All video caching mechanisms rely on HTMLSourceElements and never a src
-    // on the HTMLMediaElement as it does not allow for fallback sources.
-    const sources = toArray(media.querySelectorAll('source'));
-    for (const source of sources) {
-      const isCachedSource = source.hasAttribute(
-        'i-amphtml-video-cached-source'
-      );
-      // Playing source is cached.
-      if (isCachedSource && media.currentSrc === source.src) {
-        return CacheState.CACHE;
-      }
-      // Non playing source but is cached. Used to differentiate a cache miss
-      // (e.g. cache returned a 40x) vs no cached source at all.
-      if (isCachedSource) {
-        hasCachedSource = true;
-      }
-    }
-    return hasCachedSource ? CacheState.ORIGIN_CACHE_MISS : CacheState.ORIGIN;
   }
 }

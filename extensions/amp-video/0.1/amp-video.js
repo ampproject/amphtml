@@ -194,8 +194,7 @@ export class AmpVideo extends AMP.BaseElement {
     // Cached so mediapool operations (eg: swapping sources) don't interfere with this bool.
     this.hasBitrateSources_ =
       !!this.element.querySelector('source[data-bitrate]') ||
-      this.element.hasAttribute('cache') ||
-      this.hasAnyCachedSources_();
+      this.element.hasAttribute('cache');
 
     installVideoManagerForDoc(element);
 
@@ -310,8 +309,6 @@ export class AmpVideo extends AMP.BaseElement {
 
     this.createPosterForAndroidBug_();
     this.onPosterLoaded_(() => this.hideBlurryPlaceholder_());
-
-    this.propagateCachedSources_();
 
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
