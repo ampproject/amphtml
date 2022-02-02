@@ -136,20 +136,20 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             <div class="i-amphtml-amp-story-shopping-plp-card">
               <div
                 class="i-amphtml-amp-story-shopping-plp-card-image"
-                style={`background-image: url("${data['product-images'][0]}")`}
+                style={`background-image: url("${data['productImages'][0]}")`}
               ></div>
               <div class="i-amphtml-amp-story-shopping-plp-card-brand">
-                {data['product-brand']}
+                {data['productBrand']}
               </div>
               <div class="i-amphtml-amp-story-shopping-plp-card-title">
-                {data['product-title']}
+                {data['productTitle']}
               </div>
               <div class="i-amphtml-amp-story-shopping-plp-card-price">
                 {formatI18nNumber(
                   this.localizationService_,
                   this.element,
-                  data['product-price-currency'],
-                  data['product-price']
+                  data['productPriceCurrency'],
+                  data['productPrice']
                 )}
               </div>
             </div>

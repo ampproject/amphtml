@@ -1760,6 +1760,9 @@ describe('ValidatorRulesMakeSense', () => {
       it('max_bytes are greater than or equal to -2', () => {
         expect(tagSpec.cdata.maxBytes).toBeGreaterThan(-3);
       });
+      if (tagSpec.cdata.maxBytes === -1) {
+        usefulCdataSpec = true;
+      }
       if (tagSpec.cdata.maxBytes >= 0) {
         usefulCdataSpec = true;
         it('max_bytes > 0 must have max_bytes_spec_url defined', () => {
@@ -1879,23 +1882,12 @@ describe('ValidatorRulesMakeSense', () => {
       }
       // cdata_regex and mandatory_cdata
       if ((tagSpec.cdata.cdataRegex !== null) ||
-          (tagSpec.cdata.mandatoryCdata !== null)) {
+          (tagSpec.cdata.mandatoryCdata !== null) ||
+          (tagSpec.cdata.whitespaceOnly !== null)) {
         usefulCdataSpec = true;
       }
       it(`Tag spec '${tagSpec.specName}' must define a useful cdata spec`, () => {
-        // The list of tag specs whose `usefulCdataSpec` is false.
-        // TODO(b/215586283): Remove this allowlist by using `if` statements
-        // setting variable `usefulCdataSpec` to be true.
-        const allowlist = [
-          'amphtml module LTS engine script',
-          'amphtml module engine script',
-          'amphtml nomodule LTS engine script',
-          'amphtml nomodule engine script',
-          'style amp-custom-length-check',
-        ];
-        if (!allowlist.includes(tagSpec.specName)) {
-          expect(usefulCdataSpec).toBe(true);
-        }
+        expect(usefulCdataSpec).toBe(true);
       });
       it('cdata_regex must have unicode named groups', () => {
         const regex = rules.internedStrings[-1 - tagSpec.cdata.cdataRegex];
