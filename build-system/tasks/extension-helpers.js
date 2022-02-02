@@ -38,6 +38,9 @@ const {parse: pathParse} = require('path');
 const {renameSelectorsToBentoTagNames} = require('./css/bento-css');
 const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
+const {
+  getSharedBentoModules,
+} = require('../compile/generate/shared-bento-symbols');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -473,6 +476,20 @@ async function buildExtension(name, version, hasCss, options) {
  * @return {Promise<void>}
  */
 async function buildNpmCss(extDir, options) {
+  await Promise.all([
+    buildNpmReactCss(extDir, options),
+    buildNpmBentoWebComponentCss(extDir, options),
+  ]);
+}
+
+/**
+ * Writes an extensions's CSS to its npm dist folder.
+ *
+ * @param {string} extDir
+ * @param {Object} options
+ * @return {Promise<void>}
+ */
+async function buildNpmReactCss(extDir, options) {
   const startCssTime = Date.now();
   const filenames = await fastGlob(path.join(extDir, '**', '*.jss.js'));
   if (!filenames.length) {
@@ -483,6 +500,24 @@ async function buildNpmCss(extDir, options) {
   const outfile = path.join(extDir, 'dist', 'styles.css');
   await fs.writeFile(outfile, css);
   endBuildStep('Wrote CSS', `${options.name} → styles.css`, startCssTime);
+}
+
+/**
+ *
+ * @param {string} extDir
+ * @param {Object} options
+ * @return {Promise<void>}
+ */
+async function buildNpmBentoWebComponentCss(extDir, options) {
+  const srcFilepath = path.resolve(
+    `build/css/${getBentoName(options.name)}-${options.version}.css`
+  );
+  if (await fs.pathExists(srcFilepath)) {
+    const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
+    await fs.copyFile(srcFilepath, destFilepath);
+  } else {
+    await buildExtensionCss(extDir, options.name, options.version, options);
+  }
 }
 
 /** @type {TransformCache<string>} */
@@ -629,6 +664,11 @@ async function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
     };
+    if (options.useBentoCore) {
+      // remap all shared modules to the @bentoproject/core package and declare as external
+      npm.bento.remap = getSharedBentoPackageRemap();
+      npm.bento.external = ['@bentoproject/core'];
+    }
   }
   const binaries = Object.values(npm);
   return buildBinaries(extDir, binaries, options);
@@ -660,6 +700,19 @@ function buildBinaries(extDir, binaries, options) {
     });
   });
   return Promise.all(promises);
+}
+
+/**
+ * Creates configuration to remap shared bento modules
+ * Returns an Object of the form: `{'path/to/shared/module': '@bentoproject/core'}`.
+ * Uses require.resolve() to normalize directories to the appropriate index file
+ * @return {Object}
+ */
+function getSharedBentoPackageRemap() {
+  const remap = Object.fromEntries(
+    getSharedBentoModules().map((p) => [p, '@bentoproject/core'])
+  );
+  return remap;
 }
 
 /**
