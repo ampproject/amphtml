@@ -66,6 +66,7 @@ const karmaJsPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
+  'src/bento/components/**/test/*.js',
   'testing/**/*.js',
 ];
 
@@ -80,6 +81,7 @@ const testPaths = commonIntegrationTestPaths.concat([
   'test/*/!(e2e)/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
+  'src/bento/components/**/test/*.js',
 ]);
 
 const unitTestPaths = [
@@ -88,6 +90,8 @@ const unitTestPaths = [
   'ads/**/test/unit/test-*.js',
   'extensions/**/test/*.js',
   'extensions/**/test/unit/*.js',
+  'src/bento/components/**/test/*.js',
+  'src/bento/components/**/test/unit/*.js',
 ];
 
 // TODO(amphtml): Opt-in more unit tests to run on Safari / FF / Edge.
@@ -99,17 +103,22 @@ const unitTestCrossBrowserPaths = [
 const integrationTestPaths = [
   'test/integration/**/*.js',
   'extensions/**/test/integration/**/*.js',
+  'src/bento/components/**/test/integration/*.js',
 ];
 
-const e2eTestPaths = ['test/e2e/*.js', 'extensions/**/test-e2e/*.js'];
+const e2eTestPaths = [
+  'test/e2e/*.js',
+  'extensions/**/test-e2e/*.js',
+  'src/bento/components/**/test-e2e/*.js',
+];
 
 const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
 
 const jisonPath = 'extensions/**/*.jison';
 
 const lintGlobs = [
-  '**/*.js',
-  '**/*.ts',
+  '**/*.{js,jsx}',
+  '**/*.{ts,tsx}',
   '!**/*.d.ts',
   // To ignore a file / directory, add it to .eslintignore.
 ];
@@ -131,6 +140,7 @@ const presubmitGlobs = [
   '!third_party/**/*.*',
   '!**/node_modules/**/*.*',
   '!extensions/**/dist/*',
+  '!src/bento/components/**/dist/*',
   '!examples/**/*',
   '!examples/visual-tests/**/*',
   '!test/coverage/**/*.*',
@@ -199,6 +209,9 @@ const htmlFixtureGlobs = [
   '!examples/visual-tests/amp-story-player/!(*.amp.html)',
   '!test/fixtures/e2e/amp-story-player/!(*.amp.html)',
 
+  // Remove this from the list after TODO(#37467) gets closed.
+  '!examples/amp-access-fewcents.html',
+
   // TODO(#25149): Fix these invalid files and remove them from this list.
   '!examples/accordion.amp.html',
   '!examples/ad-lightbox.amp.html',
@@ -254,6 +267,8 @@ const htmlFixtureGlobs = [
   '!examples/amp-script/vue-todomvc.amp.html',
   '!examples/amp-skimlinks.html',
   '!examples/amp-smartlinks.html',
+  // TODO(#37285): remove after the new validator rules are pushed with the new npm.
+  '!examples/amp-story-subscriptions/amp-story-subscriptions.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-iframe.provider.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-metering-laa.amp.html',
   '!examples/amp-subscriptions-google/amp-subscriptions-metering-registration-widget.html',

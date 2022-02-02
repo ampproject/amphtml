@@ -14,8 +14,10 @@ const jobName = 'trigger-promote.js';
 const cdnConfigurationParams = {
   owner: 'ampproject',
   repo: 'cdn-configuration',
-  // TODO(estherkim): set to promote-nightly or promote-amp-version
-  'workflow_id': 'promote-nightly.yml',
+  'workflow_id':
+    process.env.CIRCLE_BRANCH == 'nightly'
+      ? 'promote-nightly.yml'
+      : 'promote-cherry-picks.yml',
   ref: 'main',
 };
 
@@ -24,13 +26,14 @@ const cdnConfigurationParams = {
  * @return {Promise}
  */
 async function trigger_() {
-  const ampVersion = readFileSync('/tmp/workspace/AMP_VERSION', 'utf8')
+  const ampVersion = readFileSync('/tmp/restored-workspace/AMP_VERSION', 'utf8')
     .toString()
     .trim();
 
   const octokit = new Octokit({auth: process.env.GITHUB_TOKEN});
   const inputs = {
-    'amp_version': ampVersion,
+    'amp-version': ampVersion,
+    'auto-merge': 'true',
   };
   await octokit.rest.actions.createWorkflowDispatch({
     ...cdnConfigurationParams,

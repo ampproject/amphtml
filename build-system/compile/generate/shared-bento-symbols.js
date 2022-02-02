@@ -11,7 +11,7 @@
 const types = require('@babel/types');
 const {parse} = require('@babel/parser');
 const {readFileSync} = require('fs-extra');
-const {relative} = require('path');
+const {resolvePath} = require('../../babel-config/import-resolver');
 
 // These must be aliased from `src/`, e.g. `#preact` to `src/preact`.
 // See tsconfig.json for the list of aliases.
@@ -32,7 +32,7 @@ const packages = [
 function getExportedSymbols(source) {
   const tree = parse(source, {
     sourceType: 'module',
-    plugins: ['jsx', 'exportDefaultFrom'],
+    plugins: ['typescript', 'jsx', 'exportDefaultFrom'],
   });
   const symbols = [];
   for (const node of tree.program.body) {
@@ -47,10 +47,14 @@ function getExportedSymbols(source) {
     }
     symbols.push(
       // @ts-ignore
-      ...(node.declaration?.declarations?.map(({id}) => id.name) ?? [])
+      ...(node.declaration?.declarations
+        ?.filter((node) => !types.isTypeScript(node))
+        .map(({id}) => id.name) ?? [])
     );
-    // @ts-ignore
-    symbols.push(node.declaration?.id?.name);
+    if (!types.isTypeScript(node.declaration)) {
+      // @ts-ignore
+      symbols.push(node.declaration?.id?.name);
+    }
     symbols.push(
       ...node.specifiers.map((node) => {
         if (types.isExportDefaultSpecifier(node)) {
@@ -82,9 +86,8 @@ let sharedBentoSymbols;
  */
 function getSharedBentoSymbols() {
   if (!sharedBentoSymbols) {
-    const backToRoot = relative(__dirname, process.cwd());
     const entries = packages.map((pkg) => {
-      const filepath = require.resolve(`${backToRoot}/src/${pkg}`);
+      const filepath = resolvePath(`src/${pkg}`);
       try {
         const source = readFileSync(filepath, 'utf8');
         const symbols = getExportedSymbols(source);

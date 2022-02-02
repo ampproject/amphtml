@@ -195,7 +195,6 @@ module.exports = {
     'local/no-mixed-interpolation': 2,
     'local/no-mixed-operators': 2,
     'local/no-module-exports': 2,
-    'local/no-static-this': 2,
     'local/no-style-display': 2,
     'local/no-style-property-setting': 2,
     'local/no-swallow-return-from-allow-console-error': 2,
@@ -341,14 +340,14 @@ module.exports = {
   },
   'overrides': [
     {
-      'files': ['**/*.ts'],
+      'files': ['**/*.ts', '**/*.tsx'],
       'rules': {
         'require-jsdoc': 0,
         'jsdoc/require-param': 0,
         'jsdoc/require-param-type': 0,
         'jsdoc/require-returns': 0,
         'no-undef': 0,
-        'import/no-unresolved': 0
+        'import/no-unresolved': 0,
       },
     },
     {
@@ -356,6 +355,8 @@ module.exports = {
         'test/**/*.js',
         'extensions/**/test/**/*.js',
         'extensions/**/test-e2e/*.js',
+        'src/bento/components/**/test/**/*.js',
+        'src/bento/components/**/test-e2e/*.js',
         'ads/**/test/**/*.js',
         'testing/**/*.js',
         'build-system/**/test/*.js',
@@ -463,8 +464,18 @@ module.exports = {
       'rules': {'import/order': 0},
     },
     {
-      'files': ['src/preact/**', 'extensions/**/1.0/**', '**/storybook/**'],
+      'files': [
+        'extensions/**/1.0/**',
+        'src/bento/**',
+        'src/preact/**',
+        '**/storybook/**',
+      ],
       'rules': {'local/preact-preferred-props': 2},
+    },
+    {
+      // src/preact can directly import from 'preact' without issue.
+      'files': ['src/preact/**'],
+      'rules': {'local/no-import': 0},
     },
     {
       // Files that use JSX for plain DOM nodes instead of Preact

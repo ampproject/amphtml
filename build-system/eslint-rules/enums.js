@@ -95,6 +95,11 @@ module.exports = function create(context) {
       return;
     }
 
+    // Types are fine
+    if (parent.type === 'TSTypeReference') {
+      return;
+    }
+
     if (parent.type === 'VariableDeclarator') {
       // const Enum = {}
       if (parent.id === node) {

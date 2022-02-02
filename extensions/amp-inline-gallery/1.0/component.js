@@ -28,3 +28,6 @@ export function BentoInlineGallery({children, ...rest}) {
     </ContainWrapper>
   );
 }
+
+export * from './pagination';
+export * from './thumbnails';
