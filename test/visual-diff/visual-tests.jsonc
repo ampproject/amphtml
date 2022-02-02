@@ -819,7 +819,7 @@
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-shopping-rtl.html",
-      "name": "amp-story-shopping UI",
+      "name": "amp-story-shopping UI RTL",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [".i-amphtml-story-loaded"],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
