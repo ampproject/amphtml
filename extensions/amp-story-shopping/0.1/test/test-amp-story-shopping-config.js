@@ -9,6 +9,8 @@ import {
   storeShoppingConfig,
 } from '../amp-story-shopping-config';
 
+import '../amp-story-shopping-attachment';
+
 describes.realWin(
   'amp-story-shopping-config-v0.1',
   {
@@ -45,9 +47,9 @@ describes.realWin(
       config = defaultInlineConfig
     ) {
       pageElement.appendChild(
-        <amp-story-shopping-config layout="nodisplay" src={src}>
+        <amp-story-shopping-attachment src={src}>
           <script type="application/json">{JSON.stringify(config)}</script>
-        </amp-story-shopping-config>
+        </amp-story-shopping-attachment>
       );
       return getShoppingConfig(pageElement);
     }
@@ -55,7 +57,7 @@ describes.realWin(
     it('throws on no config', async () => {
       expectAsyncConsoleError(async () => {
         expect(() => {
-          pageElement.appendChild(<amp-story-shopping-config />);
+          pageElement.appendChild(<amp-story-shopping-attachment />);
           return getShoppingConfig(pageElement);
         }).to.throw(/<script> tag with type=\"application\/json\"​​​/);
       });
