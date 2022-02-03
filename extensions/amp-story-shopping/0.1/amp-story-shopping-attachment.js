@@ -148,21 +148,24 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (!isOpen && !this.isOnActivePage_()) {
       return;
     }
-    const {activeProductData} = shoppingData;
     const shoppingDataForPage = this.shoppingTags_.map(
       (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
     );
 
-    const singleProductOnPage =
-      shoppingDataForPage.length > 0 ? shoppingDataForPage[0] : null;
+    // If there is only one product on the page, feature it.
+    // Otherwise feature the active product.
+    const featuredProduct =
+      shoppingData.activeProductData ||
+      (shoppingDataForPage.length === 1 && shoppingDataForPage[0]) ||
+      null;
 
+    // Construct template.
     const template = (
       <div>
-        {(activeProductData || singleProductOnPage) &&
-          this.renderPdpTemplate_(activeProductData || singleProductOnPage)}
-        {!singleProductOnPage &&
+        {featuredProduct && this.renderPdpTemplate_(featuredProduct)}
+        {shoppingDataForPage.length > 1 &&
           this.renderPlpTemplate_(
-            shoppingDataForPage.filter((item) => item !== activeProductData)
+            shoppingDataForPage.filter((item) => item !== featuredProduct)
           )}
       </div>
     );
