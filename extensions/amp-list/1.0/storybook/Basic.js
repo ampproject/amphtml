@@ -1,7 +1,7 @@
 import * as Preact from '#preact';
 import {useState} from '#preact';
 
-import {BentoList} from '../component/component';
+import {BentoList} from '../component';
 
 export default {
   title: 'List',

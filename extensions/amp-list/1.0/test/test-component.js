@@ -8,7 +8,7 @@ import {waitFor} from '#testing/helpers/service';
 
 import {cleanHtml} from './utils';
 
-import {BentoList} from '../component/component';
+import {BentoList} from '../component';
 
 const CONTENTS = '[test-id="contents"]';
 function snapshot(component) {

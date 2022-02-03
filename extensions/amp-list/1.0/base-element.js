@@ -1,6 +1,6 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {BentoList} from './component/component';
+import {BentoList} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
