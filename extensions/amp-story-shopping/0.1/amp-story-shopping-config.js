@@ -22,11 +22,10 @@ let ShoppingConfigResponseDef;
  * @param {?string} field
  * @param {?string} value
  * @return {!Array<string>}
- * @private
  */
 function validateRequired(field, value) {
   if (value === undefined) {
-    return [`Field ${field} is required.`];
+    throw Error(`Field ${field} is required.`);
   }
 }
 
@@ -36,11 +35,12 @@ function validateRequired(field, value) {
  * @param {?string} str
  * @param {?number} maxLen
  * @return {!Array<string>}
- * @private
  */
 function validateStringLength(field, str, maxLen = 100) {
   if (str !== undefined && str.length > maxLen) {
-    return [`Length of ${field} exceeds max length: ${str.length} > ${maxLen}`];
+    throw Error(
+      `Length of ${field} exceeds max length: ${str.length} > ${maxLen}`
+    );
   }
 }
 
@@ -48,12 +48,11 @@ function validateStringLength(field, str, maxLen = 100) {
  * Validates number in shopping config attributes
  * @param {?string} field
  * @param {?number} number
- * @private
  * @return {!Array<string>}
  */
 function validateNumber(field, number) {
   if (number !== undefined && isNaN(number)) {
-    return [`Value for field ${field} is not a number`];
+    throw Error(`Value for field ${field} is not a number`);
   }
 }
 
@@ -61,7 +60,6 @@ function validateNumber(field, number) {
  * Validates url of shopping config attributes
  * @param {?string} field
  * @param {!Array<string>} url
- * @private
  * @return {!Array<string>}
  */
 function validateURL(field, url) {
@@ -102,21 +100,18 @@ const productValidationConfig_ = {
 /**
  * Validates shopping config.
  * @param {!ShoppingConfigDataDef} shoppingConfig
- * @private
  */
-function validateConfig_(shoppingConfig) {
-  const errors = Object.keys(productValidationConfig_)
-    .reduce((errors, k) => {
-      const value = shoppingConfig[k];
-      productValidationConfig_[k].forEach((fn) => {
-        errors.push(...(fn(k, value) || []));
-      });
-      return errors;
-    }, [])
-    .filter(Boolean);
-  for (const error of errors) {
-    user().warn('ERROR', `amp-story-shopping-config: ${error}`);
-  }
+function validateConfig(shoppingConfig) {
+  Object.keys(productValidationConfig_).forEach((configKey) => {
+    const validationFunctions = productValidationConfig_[configKey];
+    validationFunctions.forEach((fn) => {
+      try {
+        fn(configKey, shoppingConfig[configKey]);
+      } catch (err) {
+        user().warn('ERROR', `amp-story-shopping-config: ${err}`);
+      }
+    });
+  });
 }
 
 /** @typedef {!Object<string, !ShoppingConfigDataDef> */
@@ -131,7 +126,7 @@ export let KeyedShoppingConfigDef;
 export function getShoppingConfig(pageElement) {
   const element = pageElement.querySelector('amp-story-shopping-config');
   return getElementConfig(element).then((config) => {
-    validateConfig_(config);
+    validateConfig(config);
     return keyByProductTagId(config);
   });
 }
