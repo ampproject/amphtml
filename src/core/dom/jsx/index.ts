@@ -14,8 +14,9 @@
  *   - Use standard HTML attribute names on elements (`class`, not `className`).
  *   - Dashes are ok, like `data-foo="bar"`.
  *
- * 🚫 No objects in classnames, like `class={{foo: true, bar: false}}`
- *   - Call `objstr()`, or use string interpolation instead.
+ * 🚫 No objects in attribute values, like `class={{foo: true, bar: false}}`
+ *   - Objects in `style` are ok. They're converted to strings during build time.
+ *   - For `class`, call `objstr()` or use strings instead.
  *
  * 🚫 No Fragments
  *   - Instead use a root node, or split into an array of nodes.
