@@ -307,7 +307,7 @@ export class AmpStory extends AMP.BaseElement {
     new PerformanceObserver((entryList) => {
       for (const entry of entryList.getEntries()) {
         console.log('LCP candidate:', entry.startTime, entry);
-        console.log('Story navigation start time: ' + window.performance.timing.navigationStart);
+        console.log('Story performance.timeOrigin: ' + window.performance.timeOrigin);
       }
     }).observe({type: 'largest-contentful-paint', buffered: true});
   }
