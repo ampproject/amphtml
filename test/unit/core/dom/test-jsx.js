@@ -171,9 +171,12 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
     });
 
     it('does not support objects as attribute values', () => {
-      const element = (
-        <div style={{width: 400}} class={{foo: true, bar: false}} />
-      );
+      // Using `createElement` directly since objects in `style` JSXAttributes
+      // are otherwise transformed by babel-plugin-jsx-style-object
+      const element = createElement('div', {
+        style: {width: 400},
+        class: {foo: true, bar: false},
+      });
       expect(element.outerHTML).to.equal(
         '<div style="[object Object]" class="[object Object]"></div>'
       );
