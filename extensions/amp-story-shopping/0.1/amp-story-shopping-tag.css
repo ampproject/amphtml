@@ -21,13 +21,19 @@ amp-story-shopping-tag {
   line-height: 15.4px !important;
 }
 
-/* Maintains the dot position in RTL mode */
+/* Maintains the correct image and text order inside the tag in RTL mode */
 [dir=rtl].i-amphtml-amp-story-shopping-tag-inner {
   flex-flow: row-reverse !important;
 }
 
+/* Maintains the dot position in RTL mode */
 [dir=rtl] .i-amphtml-amp-story-shopping-tag-dot {
   margin-inline-start: 4px !important;
+}
+
+/* Maintans the correct margins in RTL mode */
+[dir=rtl] .i-amphtml-amp-story-shopping-tag-pill {
+  padding: 4px 4px 4px 12px !important
 }
 
 .i-amphtml-amp-story-shopping-tag-inner {
