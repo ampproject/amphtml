@@ -1,14 +1,15 @@
 import {logger} from '#preact/logger';
 import {platformUtils} from '#preact/utils/platform';
 
-import {getIOSAppInfo} from '../component/ios';
+import {IosAppInfo} from '../component/ios';
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
+  const iosAppInfo = IosAppInfo.forDoc(env.win.document);
   describe('getIOSAppInfo', () => {
     describe('when no meta header is present', () => {
       it('should return null when no meta header is present', () => {
         allowConsoleError(() => {
-          const iosInfo = getIOSAppInfo();
+          const iosInfo = iosAppInfo.getIOSAppInfo();
           expect(iosInfo).to.be.null;
         });
         expect(logger.error).calledWith(
@@ -41,7 +42,7 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
       });
 
       it('should parse the meta header and determine appropriate urls', () => {
-        const iosInfo = getIOSAppInfo();
+        const iosInfo = iosAppInfo.getIOSAppInfo();
         expect(iosInfo).to.not.be.null;
         expect(iosInfo).to.have.property('openOrInstall');
         expect(iosInfo.installAppUrl).to.equal(
@@ -52,7 +53,7 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
 
       it('should not show the banner if the built-in banner can be shown', () => {
         env.sandbox.stub(platformUtils, 'isSafari').returns(true);
-        expect(getIOSAppInfo()).to.be.null;
+        expect(iosAppInfo.getIOSAppInfo()).to.be.null;
         expect(logger.info).calledWith(
           'BENTO-APP-BANNER',
           'Not rendering bento-app-banner:',
@@ -62,7 +63,7 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
 
       it('should load the app when clicked', () => {
         env.sandbox.stub(window, 'open');
-        const appInfo = getIOSAppInfo();
+        const appInfo = iosAppInfo.getIOSAppInfo();
         appInfo.openOrInstall();
         expect(window.open).to.have.callCount(1);
         expect(window.open).to.have.calledWith(appInfo.openInAppUrl, '_top');
@@ -76,7 +77,7 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
         document
           .getElementById('TEST_META')
           .setAttribute('content', 'app-id=11111111');
-        const appInfo = getIOSAppInfo();
+        const appInfo = iosAppInfo.getIOSAppInfo();
         expect(appInfo?.installAppUrl).to.equal(
           'https://itunes.apple.com/us/app/id11111111'
         );

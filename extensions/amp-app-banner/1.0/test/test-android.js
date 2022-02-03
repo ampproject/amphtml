@@ -1,24 +1,28 @@
 import {WindowInterface} from '#core/window/interface';
 
-import {docInfo} from '#preact/utils/docInfo';
+import {DocumentInfo} from '#preact/utils/documentInfo';
 import {platformUtils} from '#preact/utils/platform';
 import {xhrUtils} from '#preact/utils/xhr';
 
-import {getAndroidAppInfo} from '../component/android';
+import {AndroidAppInfo} from '../component/android';
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   let xhrServiceStub;
   beforeEach(() => {
     xhrServiceStub = env.sandbox.stub(xhrUtils);
+    const docInfo = DocumentInfo.forDoc(env.win.document);
     env.sandbox
       .stub(docInfo, 'canonicalUrl')
       .get(() => 'https://test.com/canonicalUrl');
+    env.sandbox.stub(DocumentInfo, 'forDoc').returns(docInfo);
   });
+
+  const androidAppInfo = AndroidAppInfo.forDoc(env.win.document);
 
   describe('getAndroidAppInfo', () => {
     describe('when no manifest link is present', () => {
       it('should return null when no meta header is present', () => {
-        const appInfo = getAndroidAppInfo();
+        const appInfo = androidAppInfo.getAndroidAppInfo();
         expect(appInfo).to.be.null;
       });
     });
@@ -48,12 +52,12 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
       it('should not show a banner if a built-in banner can be shown', async () => {
         env.sandbox.stub(platformUtils, 'isChrome').returns(true);
         env.sandbox.stub(platformUtils, 'isAndroid').returns(true);
-        const appInfo = getAndroidAppInfo();
+        const appInfo = androidAppInfo.getAndroidAppInfo();
         expect(appInfo).to.be.null;
       });
 
       it('should parse the meta header and determine appropriate urls', async () => {
-        const appInfo = getAndroidAppInfo();
+        const appInfo = androidAppInfo.getAndroidAppInfo();
         expect(appInfo).to.not.be.null;
         expect(appInfo).to.have.property('openOrInstall');
         const manifestInfo = await appInfo.promise;
@@ -71,7 +75,7 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
         env.sandbox.stub(window, 'open');
         env.sandbox.stub(WindowInterface, 'getTop').returns({location});
 
-        const appInfo = getAndroidAppInfo();
+        const appInfo = androidAppInfo.getAndroidAppInfo();
         const manifest = await appInfo.promise;
         await appInfo.openOrInstall();
         expect(window.open)
@@ -91,13 +95,13 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
       it('should not show a banner if the manifest is missing data', async () => {
         expectAsyncConsoleError(invalidManifest1);
         xhrServiceStub.fetchJson.resolves({});
-        expect(await getAndroidAppInfo().promise).to.be.null;
+        expect(await androidAppInfo.getAndroidAppInfo().promise).to.be.null;
 
         expectAsyncConsoleError(invalidManifest2);
         xhrServiceStub.fetchJson.resolves({
           'related_applications': [{platform: 'INVALID'}],
         });
-        expect(await getAndroidAppInfo().promise).to.be.null;
+        expect(await androidAppInfo.getAndroidAppInfo().promise).to.be.null;
       });
     });
   });

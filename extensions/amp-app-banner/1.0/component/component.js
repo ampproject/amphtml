@@ -5,11 +5,12 @@ import {useEffect, useMemo, useRef} from '#preact';
 import {ContainWrapper} from '#preact/component';
 import {useLocalStorage} from '#preact/hooks/useLocalStorage';
 import {logger} from '#preact/logger';
+import {useOwnerDocument} from '#preact/owner-document';
 import {platformUtils} from '#preact/utils/platform';
 
-import {getAndroidAppInfo} from './android';
+import {AndroidAppInfo} from './android';
 import {useStyles} from './component.jss';
-import {getIOSAppInfo} from './ios';
+import {IosAppInfo} from './ios';
 
 /**
  * The raw App Banner component; no platform-specific logic
@@ -73,7 +74,10 @@ export function AppBanner({
  * @constructor
  */
 function AppBannerIOS(props) {
-  const appInfo = useMemo(getIOSAppInfo, []);
+  const ownerDocument = useOwnerDocument();
+  const appInfo = useMemo(() => {
+    return IosAppInfo.forDoc(ownerDocument).getIOSAppInfo();
+  }, [ownerDocument]);
   if (!appInfo) {
     return null;
   }
@@ -87,7 +91,11 @@ function AppBannerIOS(props) {
  * @constructor
  */
 function AppBannerAndroid(props) {
-  const appInfo = useMemo(getAndroidAppInfo, []);
+  const ownerDocument = useOwnerDocument();
+  const appInfo = useMemo(() => {
+    return AndroidAppInfo.forDoc(ownerDocument).getAndroidAppInfo();
+  }, [ownerDocument]);
+
   if (!appInfo) {
     return null;
   }
