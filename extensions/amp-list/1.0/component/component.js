@@ -21,26 +21,6 @@ const defaultLoadingTemplate = () => `Loading...`;
 const defaultLoadMoreTemplate = () => <button>Load more</button>;
 
 /**
- *
- * @param {object} results
- * @param {string} itemsKey
- * @return {*}
- */
-function getItemsFromResults(results, itemsKey) {
-  if (!results) {
-    return null;
-  }
-  let items = getValue(results, itemsKey);
-  if (!items) {
-    return null;
-  }
-  if (!Array.isArray(items)) {
-    items = [items];
-  }
-  return items;
-}
-
-/**
  * Retrieves the key from the object.
  * Supports dot notation.
  * Returns undefined if any segment not found.
@@ -69,6 +49,39 @@ function getValue(object, keys) {
  */
 function getNextUrl(lastPage, loadMoreBookmark) {
   return getValue(lastPage, loadMoreBookmark);
+}
+
+/**
+ * Gathers all items from all pages of data
+ * @param {Array<any>>} pages
+ * @param {string} itemsKey
+ * @return {Array<any>}
+ */
+function collectItemsFromPages(pages, itemsKey) {
+  return pages.reduce((allItems, page) => {
+    const pageItems = getItemsFromResults(page, itemsKey);
+    return pageItems ? allItems.concat(pageItems) : allItems;
+  }, []);
+}
+
+/**
+ *
+ * @param {object} results
+ * @param {string} itemsKey
+ * @return {*}
+ */
+function getItemsFromResults(results, itemsKey) {
+  if (!results) {
+    return null;
+  }
+  let items = getValue(results, itemsKey);
+  if (!items) {
+    return null;
+  }
+  if (!Array.isArray(items)) {
+    items = [items];
+  }
+  return items;
 }
 
 /**
@@ -141,11 +154,7 @@ export function BentoListWithRef(
 
   // Rendering logic:
   const list = useMemo(() => {
-    // Gather all items from all pages of data:
-    let items = pages.reduce((allItems, page) => {
-      const pageItems = getItemsFromResults(page, itemsKey);
-      return pageItems ? allItems.concat(pageItems) : allItems;
-    }, []);
+    let items = collectItemsFromPages(pages, itemsKey);
 
     if (maxItems > 0 && items.length > maxItems) {
       items = items.slice(0, maxItems);
