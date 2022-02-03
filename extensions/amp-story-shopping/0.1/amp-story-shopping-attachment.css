@@ -176,7 +176,6 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:only-child {
-  /* margin: 0 var(--shopping-attachment-horizontal-padding) !important; */
   width: calc(100% - var(--shopping-attachment-horizontal-padding) * 2) !important; 
   border-radius: 1.1em !important;
   cursor: auto !important;

@@ -182,9 +182,20 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onClick_(shoppingData) {
+    this.scrollToTop_();
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
+  }
+
+  /** @private */
+  scrollToTop_() {
+    this.element
+      .querySelector('.i-amphtml-story-draggable-drawer-container')
+      .scroll({
+        top: 0,
+        behavior: 'smooth',
+      });
   }
 
   /**
