@@ -14,9 +14,6 @@ const {
   printNobuildHelp,
 } = require('./helpers');
 const {
-  collectMangleableSubstrings,
-} = require('../compile/mangleable-substrings');
-const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
