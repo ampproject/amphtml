@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
 
-import {AppBanner} from '../component/component';
+import {AppBanner} from '../component';
 
 // TODO: use something like storybook actions instead of console.log:
 // eslint-disable-next-line local/no-forbidden-terms
