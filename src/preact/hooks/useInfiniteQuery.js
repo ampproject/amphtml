@@ -11,20 +11,54 @@ const initialState = {
 };
 
 /**
+ * @typedef InfiniteQueryConfig
+ * @property {function({ pageParam: (TPageParam|undefined) }): Promise<TPage>} fetchPage - Fetches a page of data.  The pageParam is not provided for the first page.
+ * @property {function(page: TPage): TPageParam} getNextPageParam - Get the pageParam for fetching the next page.  If returns falsey, then "hasMore' will be false.
+ * @template TPage
+ * @template TPageParam
+ */
+
+/**
+ * @typedef InfiniteQueryResponse
+ * @property {TPage[]} pages - An array of all pages of data
+ * @property {function(): Promise<void>} loadMore - A method to load more data.  If already loading, ignored.
+ * @property {boolean} hasMore - True if there is more data that can be loaded
+ * @property {function(): Promise<void>>} refresh - Resets all data and loads the first page.  Old data remains available while loading.
+ * @property {boolean} loading - True if data is loading
+ * @property {Error|null} error - Holds any request errors.  Clears if 'loadMore' or 'refresh' is called.
+ * @template TPage
+ */
+
+/**
+ * Loads multiple pages of data.
+ * The async `fetchPage` method determines how a page is fetched.
+ * The `getNextPageParam` method determines if there is a next page.  The result is passed to `fetchPage`.
  *
- * @param {object} config
- * @param {function({ pageParam: TPageParam }): Promise<TPage>} config.fetchPage
- * @param {function(page: TPage): TPageParam} config.getNextPageParam
- * @return {{pages: *[], loadMore: ((function(*=): Promise<void>)|*), hasMore: boolean, refresh: refresh, loading: boolean, error: null}}
+ * @example
+ * const query = useInfiniteQuery({
+ *   async fetchPage({ pageParam: cursor = '' }) {
+ *     return window.fetch(`https://example.com/items?cursor=${cursor}`).then(res => res.json());
+ *   },
+ *   getNextPageParam(pageData) {
+ *     return pageData.nextCursor;
+ *   }
+ * });
+ *
+ * @param {InfiniteQueryConfig} config
+ * @return {InfiniteQueryResponse}
  * @template TPage
  * @template TPageParam
  */
 export function useInfiniteQuery({fetchPage, getNextPageParam}) {
   const [state, setState] = useStateSafe(initialState);
 
+  // Use a ref to keep these current:
   const ref = useValueRef({fetchPage, getNextPageParam, state});
+
+  // Used for ignoring outdated requests:
   const fetchIndexRef = useRef(0);
 
+  // Loads the next page of data
   const loadMore = useCallback(
     async (resetting = false) => {
       const {fetchPage, getNextPageParam, state} = ref.current;
