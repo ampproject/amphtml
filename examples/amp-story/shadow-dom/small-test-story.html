@@ -24,7 +24,8 @@
   <body>
     <div id="container"></div>
     
-    <script>    
+    <script>
+      console.log('Parent document navigation start time: ' + window.performance.timing.navigationStart);        
       (window.AMP = window.AMP || []).push((AMP) => {
         // AMP is now available.
         
