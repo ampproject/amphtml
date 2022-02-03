@@ -22,7 +22,7 @@ import {
 import {getCurrentDate} from './date-helpers';
 import {DateRangePicker} from './date-range-picker';
 import {SingleDatePicker} from './single-date-picker';
-import {BentoDatePickerProps, Mode, PickerType} from './types';
+import {BentoDatePickerProps} from './types';
 import {AttributesContext} from './use-day-attributes';
 
 type PropertiesWithDefaults =
@@ -55,11 +55,11 @@ function BentoDatePickerWithRef(
         inputSelector: DEFAULT_INPUT_SELECTOR,
         locale: DEFAULT_LOCALE,
         min: getCurrentDate(),
-        mode: DatePickerMode.STATIC as Mode,
+        mode: DatePickerMode.STATIC,
         monthFormat: DEFAULT_MONTH_FORMAT,
         onError: DEFAULT_ON_ERROR,
         startInputSelector: DEFAULT_START_INPUT_SELECTOR,
-        type: DatePickerType.SINGLE as PickerType,
+        type: DatePickerType.SINGLE,
         weekDayFormat: DEFAULT_WEEK_DAY_FORMAT,
         maximumNights: 0,
         minimumNights: 1,

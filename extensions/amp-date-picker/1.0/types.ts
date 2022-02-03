@@ -1,7 +1,5 @@
-import {DatePickerMode} from './constants';
+import {DatePickerMode, DatePickerType} from './constants';
 
-export type PickerType = 'single' | 'range';
-export type Mode = 'static' | 'overlay';
 export type DateSelector = Array<Date | string> | string;
 
 interface CommonDatePickerProps {
@@ -9,7 +7,7 @@ interface CommonDatePickerProps {
   format: string;
   highlighted: DateSelector;
   id?: string;
-  initialVisibleMonth?: Date;
+  initialVisibleMonth: Date;
   locale: string;
   max?: Date;
   min: Date;
@@ -19,10 +17,10 @@ interface CommonDatePickerProps {
   openAfterSelect: boolean;
   weekDayFormat: string;
   children?: Element;
-  type: PickerType;
+  type: DatePickerType;
 }
 
-interface DateRangePickerProps extends CommonDatePickerProps {
+export interface DateRangePickerProps extends CommonDatePickerProps {
   allowBlockedEndDate: boolean;
   allowBlockedRanges: boolean;
   endInputSelector: string;
@@ -31,8 +29,14 @@ interface DateRangePickerProps extends CommonDatePickerProps {
   minimumNights?: number;
 }
 
-interface SingleDatePickerProps extends CommonDatePickerProps {
+export interface SingleDatePickerProps extends CommonDatePickerProps {
   inputSelector: string;
 }
 
 export type BentoDatePickerProps = SingleDatePickerProps & DateRangePickerProps;
+
+export interface SingleDatePickerAPI {
+  clear(): void;
+  today(args: {offset: number}): void;
+  setDate(date: Date): void;
+}

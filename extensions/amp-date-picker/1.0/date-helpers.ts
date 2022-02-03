@@ -1,4 +1,4 @@
-import {format, isValid, parse, startOfToday} from 'date-fns';
+import {Locale, format, isValid, parse, startOfToday} from 'date-fns';
 import {
   af,
   ar,
@@ -83,7 +83,9 @@ import {
 
 import {DEFAULT_LOCALE, ISO_8601} from './constants';
 
-export const localeMap = {
+import {DEFAULT_FORMAT} from '../0.1/constants';
+
+export const localeMap: {[key: string]: Locale} = {
   'en': enUS,
   'af': af,
   'ar': ar,
@@ -172,19 +174,19 @@ export const localeMap = {
  * @param {string} localeString
  * @return {Locale} locale
  */
-export function getLocale(localeString) {
+export function getLocale(localeString: string) {
   return localeMap[localeString] || localeMap[DEFAULT_LOCALE];
 }
 
 /**
  * Forgivingly parse an ISO8601 input string into a date object,
  * preferring the date picker's configured format.
- * @param {string} value
- * @param {string=} dateFormat
- * @param {string=} locale
- * @return {?Date} date
  */
-export function parseDate(value, dateFormat, locale = DEFAULT_LOCALE) {
+export function parseDate(
+  value: string,
+  dateFormat: string,
+  locale: string = DEFAULT_LOCALE
+) {
   if (!value) {
     return null;
   }
@@ -194,7 +196,7 @@ export function parseDate(value, dateFormat, locale = DEFAULT_LOCALE) {
     return date;
   }
 
-  return parse(value);
+  return parse(value, DEFAULT_FORMAT, new Date());
 }
 
 /**
@@ -205,7 +207,7 @@ export function parseDate(value, dateFormat, locale = DEFAULT_LOCALE) {
  * @return {string}
  */
 export function getFormattedDate(
-  date,
+  date: Date,
   dateFormat = ISO_8601,
   locale = DEFAULT_LOCALE
 ) {

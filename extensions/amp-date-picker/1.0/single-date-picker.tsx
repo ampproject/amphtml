@@ -1,5 +1,8 @@
 import {isValid} from 'date-fns';
 import {addDays} from 'date-fns/esm';
+// TODO: Fix this
+// eslint-disable-next-line local/no-import
+import {ComponentProps, Ref} from 'preact';
 
 import {Keys_Enum} from '#core/constants/key-codes';
 import {
@@ -18,7 +21,7 @@ import {
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
-import {BaseDatePicker} from './base-date-picker.tsx';
+import {BaseDatePicker} from './base-date-picker';
 import {
   DateFieldNameByType,
   DateFieldType,
@@ -29,15 +32,11 @@ import {
   TAG,
 } from './constants';
 import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
+import {SingleDatePickerAPI, SingleDatePickerProps} from './types';
 import {DatePickerContext} from './use-date-picker';
 import {useDatePickerState} from './use-date-picker-state';
 import {useDayAttributes} from './use-day-attributes';
 
-/**
- * @param {!BentoDatePickerDef.SingleDatePickerProps} props
- * @param {{current: ?BentoDatePickerDef.BentoDatePickerApi}} ref
- * @return {PreactDef.Renderable}
- */
 function SingleDatePickerWithRef(
   {
     children,
@@ -51,24 +50,24 @@ function SingleDatePickerWithRef(
     onError,
     openAfterSelect,
     weekDayFormat,
-  },
-  ref
+  }: SingleDatePickerProps,
+  ref: Ref<SingleDatePickerAPI>
 ) {
-  const calendarRef = useRef();
-  const inputRef = useRef();
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const [date, _setDate] = useState();
-  const [hiddenInputProps, setHiddenInputProps] = useState();
+  const [hiddenInputProps, setHiddenInputProps] =
+    useState<ComponentProps<'input'>>();
   // This allow the calendar to navigate to a new month when the date changes
-  const [month, setMonth] = useState(initialVisibleMonth);
+  const [date, _setDate] = useState<Date>();
+  const [month, setMonth] = useState<Date>(initialVisibleMonth);
 
-  const containerRef = useRef();
+  const containerRef = useRef<HTMLElement>();
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
   const {blockedDates} = useDayAttributes();
 
   const handleSetDate = useCallback(
-    (date) => {
+    (date: Date) => {
       _setDate(date);
       setMonth(date);
       if (inputRef.current) {
@@ -79,8 +78,12 @@ function SingleDatePickerWithRef(
   );
 
   const clear = useCallback(() => {
-    handleSetDate(undefined);
-  }, [handleSetDate]);
+    _setDate(undefined);
+    setMonth(initialVisibleMonth);
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+  }, [initialVisibleMonth]);
 
   const today = useCallback(
     ({offset = 0} = {}) => {
@@ -91,7 +94,7 @@ function SingleDatePickerWithRef(
   );
 
   const setDate = useCallback(
-    (date) => {
+    (date: Date) => {
       if (blockedDates.contains(date)) {
         return;
       }
@@ -105,12 +108,11 @@ function SingleDatePickerWithRef(
 
   useImperativeHandle(
     ref,
-    () =>
-      /** @type {!BentoDatePickerDef.BentoDatePickerApi} */ ({
-        clear,
-        today,
-        setDate,
-      }),
+    () => /** @type {!BentoDatePickerDef.BentoDatePickerApi} */ ({
+      clear,
+      today,
+      setDate,
+    }),
     [clear, today, setDate]
   );
 
@@ -123,18 +125,18 @@ function SingleDatePickerWithRef(
    * @private
    */
   const getHiddenInputId = useCallback(
-    (form) => {
-      const name = DateFieldNameByType[DateFieldType.DATE];
+    (form: HTMLFormElement) => {
+      const name: string = DateFieldNameByType[DateFieldType.DATE];
       if (!form) {
         return '';
       }
 
-      if (!form.elements[name]) {
+      if (!form.elements.namedItem(name)) {
         return name;
       }
 
       const alternativeName = `${id}-${name}`;
-      if (id && !form.elements[alternativeName]) {
+      if (id && !form.elements.namedItem(alternativeName)) {
         return alternativeName;
       }
 
@@ -149,17 +151,21 @@ function SingleDatePickerWithRef(
 
   useEffect(() => {
     const form = closestAncestorElementBySelector(
-      containerRef.current,
+      containerRef.current!,
       FORM_INPUT_SELECTOR
-    );
+    ) as HTMLFormElement;
     const inputElement = scopedQuerySelector(
-      containerRef.current,
+      containerRef.current!,
       inputSelector
-    );
+    ) as HTMLInputElement;
     if (inputElement) {
       inputRef.current = inputElement;
-      inputElement.value &&
-        _setDate(parseDate(inputElement.value, format, locale));
+      if (inputElement.value) {
+        const parsedDate = parseDate(inputElement.value, format, locale);
+        if (parsedDate) {
+          _setDate(parsedDate);
+        }
+      }
     } else if (mode === DatePickerMode.STATIC && !!form) {
       setHiddenInputProps({
         type: 'hidden',
@@ -178,14 +184,18 @@ function SingleDatePickerWithRef(
    * @private
    */
   const handleInput = useCallback(
-    (e) => {
+    (e: InputEvent) => {
       const {target} = e;
-      if (target.type === 'hidden') {
+      if ((target as HTMLInputElement).type === 'hidden') {
         return;
       }
 
-      const date = parseDate(target.value, format, locale);
-      if (isValid(date)) {
+      const date = parseDate(
+        (target as HTMLInputElement).value,
+        format,
+        locale
+      );
+      if (date && isValid(date)) {
         setDate(date);
       }
     },
@@ -193,33 +203,33 @@ function SingleDatePickerWithRef(
   );
 
   useEffect(() => {
-    const document = containerRef.current.ownerDocument;
-    const containerEl = containerRef.current;
+    const containerEl = containerRef.current!;
+    const document = containerEl.ownerDocument;
     const inputEl = inputRef.current;
 
     if (!document) {
       return;
     }
-    const handleFocus = (event) => {
+    const handleFocus = (event: FocusEvent) => {
       if (event.target === inputRef.current) {
         transitionTo(DatePickerState.OVERLAY_OPEN_INPUT);
       }
     };
-    const handleClick = (event) => {
+    const handleClick = (event: MouseEvent) => {
       const clickWasInDatePicker =
-        event.target === inputEl || containerEl.contains(event.target);
+        event.target === inputEl || containerEl.contains(event.target as Node);
       if (!clickWasInDatePicker) {
         transitionTo(DatePickerState.OVERLAY_CLOSED);
       }
     };
-    const handleDocumentKeydown = (event) => {
+    const handleDocumentKeydown = (event: KeyboardEvent) => {
       if (event.key === Keys_Enum.ESCAPE) {
         transitionTo(DatePickerState.OVERLAY_CLOSED);
       }
     };
-    const handleInputKeydown = (event) => {
+    const handleInputKeydown = (event: KeyboardEvent) => {
       const {target} = event;
-      if (!target === inputEl || target.type === 'hidden') {
+      if ((target as HTMLInputElement).type === 'hidden') {
         return;
       }
 
@@ -249,7 +259,7 @@ function SingleDatePickerWithRef(
   return (
     <ContainWrapper
       ref={containerRef}
-      data-date={getFormattedDate(date, format, locale)}
+      data-date={date && getFormattedDate(date, format, locale)}
     >
       <DatePickerContext.Provider
         value={{selectedDate: date, type: DatePickerType.SINGLE}}
@@ -258,15 +268,17 @@ function SingleDatePickerWithRef(
         {hiddenInputProps && <input ref={inputRef} {...hiddenInputProps} />}
         {isOpen && (
           <BaseDatePicker
-            ref={calendarRef}
             mode="single"
             selected={date}
+            // TODO: This might be a bug in ReactDayPicker types
+            // @ts-ignore
             onSelect={setDate}
             locale={locale}
             month={month}
             monthFormat={monthFormat}
             weekDayFormat={weekDayFormat}
             onMonthChange={setMonth}
+            today={getCurrentDate()}
           />
         )}
       </DatePickerContext.Provider>

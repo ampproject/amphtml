@@ -4,12 +4,7 @@ import {useCallback, useEffect, useRef, useState} from '#preact';
 
 import {DatePickerMode, DatePickerState, noop} from './constants';
 
-/**
- *
- * @param {DatePickerMode} mode
- * @return {{state: object, transitionTo: function}}
- */
-export function useDatePickerState(mode) {
+export function useDatePickerState(mode: DatePickerMode) {
   const [isOpen, setIsOpen] = useState(mode === DatePickerMode.STATIC);
 
   const initialState =
@@ -19,11 +14,7 @@ export function useDatePickerState(mode) {
 
   const stateMachineRef = useRef(new FiniteStateMachine(initialState));
 
-  /**
-   * Transition to a new state
-   * @param {!DatePickerState} state
-   */
-  const transitionTo = useCallback((state) => {
+  const transitionTo = useCallback((state: DatePickerState) => {
     stateMachineRef.current.setState(state);
   }, []);
 
