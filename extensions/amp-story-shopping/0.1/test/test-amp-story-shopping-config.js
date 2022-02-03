@@ -126,7 +126,7 @@ describes.realWin(
       pageElement.setAttribute('src', exampleURL);
       expectAsyncConsoleError(async () => {
         expect(async () => {
-          await shoppingConfig.buildCallback();
+          await getShoppingConfig(pageElement);
         }).to.throw(
           /'amp-story-auto-ads:config error determining if remote config is valid json: bad url or bad json'​​​/
         );
