@@ -850,7 +850,6 @@ const forbiddenTermsSrcInclusive = {
       'use tryDecodeUriComponent from src/url.js',
     allowlist: [
       '3p/integration-lib.js',
-      'build-system/release-tagger/index.js',
       'examples/pwa/pwa.js',
       'validator/js/engine/parse-url.js',
       'validator/js/engine/validator.js',
