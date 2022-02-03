@@ -30,6 +30,7 @@ import {BaseElement} from '#preact/bento-ce';
 
 import {WithAmpContext} from './context';
 import {CanPlay, CanRender, LoadingProp} from './contextprops';
+import {OwnerDocumentProvider} from './owner-document';
 import {HAS_SELECTOR, checkPropsFor, collectProps} from './parse-props';
 
 /** @typedef {import('./parse-props').AmpElementProp} AmpElementProp */
@@ -746,13 +747,20 @@ export class PreactBaseElement extends BaseElement {
       }
     }
 
+    // Add ownerDocument context:
+    comp = (
+      <OwnerDocumentProvider value={this.element.ownerDocument}>
+        {comp}
+      </OwnerDocumentProvider>
+    );
+
     // Add AmpContext with renderable/playable proeprties.
-    const v = <WithAmpContext {...this.context_}>{comp}</WithAmpContext>;
+    comp = <WithAmpContext {...this.context_}>{comp}</WithAmpContext>;
 
     try {
       if (this.hydrationPending_) {
         this.hydrationPending_ = false;
-        hydrate(v, container);
+        hydrate(comp, container);
       } else {
         const replacement = lightDomTag
           ? childElementByAttr(container, RENDERED_ATTR)
@@ -760,7 +768,7 @@ export class PreactBaseElement extends BaseElement {
         if (replacement) {
           replacement[RENDERED_PROP] = true;
         }
-        render(v, container, replacement ?? undefined);
+        render(comp, container, replacement ?? undefined);
       }
     } catch (err) {
       this.renderDeferred_?.reject(err);
