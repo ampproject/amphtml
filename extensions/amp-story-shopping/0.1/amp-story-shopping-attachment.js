@@ -149,18 +149,21 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
     const {activeProductData} = shoppingData;
-    const shoppingDataForPage = this.shoppingTags_
-      .map(
-        (shoppingTag) =>
-          shoppingData[shoppingTag.getAttribute('data-product-id')]
-      )
-      .filter((item) => item !== activeProductData);
+    const shoppingDataForPage = this.shoppingTags_.map(
+      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
+    );
+
+    const singleProductOnPage =
+      shoppingDataForPage.length > 0 ? shoppingDataForPage[0] : null;
 
     const template = (
       <div>
-        {activeProductData && this.renderPdpTemplate_(activeProductData)}
-        {shoppingDataForPage.length > 0 &&
-          this.renderPlpTemplate_(shoppingDataForPage)}
+        {(activeProductData || singleProductOnPage) &&
+          this.renderPdpTemplate_(activeProductData || singleProductOnPage)}
+        {!singleProductOnPage &&
+          this.renderPlpTemplate_(
+            shoppingDataForPage.filter((item) => item !== activeProductData)
+          )}
       </div>
     );
 
