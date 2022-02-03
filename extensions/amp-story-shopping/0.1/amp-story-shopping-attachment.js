@@ -154,10 +154,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     // If there is only one product on the page, feature it.
     // Otherwise feature the active product.
+    const singleProductOnPage =
+      shoppingDataForPage.length === 1 && shoppingDataForPage[0];
     const featuredProduct =
-      shoppingData.activeProductData ||
-      (shoppingDataForPage.length === 1 && shoppingDataForPage[0]) ||
-      null;
+      shoppingData.activeProductData || singleProductOnPage || null;
 
     // Construct template.
     const template = (
