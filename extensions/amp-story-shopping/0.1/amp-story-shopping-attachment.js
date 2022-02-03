@@ -52,6 +52,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
+
+    this.builtTemplates_ = {};
   }
 
   /** @override */
@@ -145,7 +147,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   updateTemplate_(isOpen, shoppingData) {
-    if (!isOpen && !this.isOnActivePage_()) {
+    if (!isOpen || !this.isOnActivePage_()) {
       return;
     }
     const shoppingDataForPage = this.shoppingTags_.map(
@@ -157,11 +159,28 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     const singleProductOnPage =
       shoppingDataForPage.length === 1 && shoppingDataForPage[0];
     const featuredProduct =
-      shoppingData.activeProductData || singleProductOnPage || null;
+      shoppingData.activeProductData || singleProductOnPage;
 
-    // Construct template.
-    const template = (
-      <div>
+    const templateId = `pdp-${featuredProduct?.productId || 'plp'}`;
+
+    // Iterate over built templates and set active attribute.
+    // If a template is already built, return early.
+    let templateAlreadyBuilt = false;
+    Object.values(this.builtTemplates_).forEach((template) => {
+      if (template === this.builtTemplates_[templateId]) {
+        templateAlreadyBuilt = true;
+        this.mutateElement(() => template.setAttribute('active', true));
+      } else {
+        this.mutateElement(() => template.removeAttribute('active'));
+      }
+    });
+    if (templateAlreadyBuilt) {
+      return;
+    }
+
+    // Construct template and assign it to builtTemplates.
+    this.builtTemplates_[templateId] = (
+      <div class="i-amphtml-amp-story-shopping" active>
         {featuredProduct && this.renderPdpTemplate_(featuredProduct)}
         {shoppingDataForPage.length > 1 &&
           this.renderPlpTemplate_(
@@ -170,7 +189,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       </div>
     );
 
-    this.mutateElement(() => this.templateContainer_.replaceChildren(template));
+    this.mutateElement(() =>
+      this.templateContainer_.appendChild(this.builtTemplates_[templateId])
+    );
   }
 
   /**

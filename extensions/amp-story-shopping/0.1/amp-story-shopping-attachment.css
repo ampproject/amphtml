@@ -16,6 +16,14 @@ amp-story-shopping-attachment a {
   text-decoration: none !important;
 }
 
+.i-amphtml-amp-story-shopping {
+  display: none;
+}
+
+.i-amphtml-amp-story-shopping[active] {
+  display: block;
+}
+
 /* PLP (Product Listing Page). */
 
 .i-amphtml-amp-story-shopping-plp {
