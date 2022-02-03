@@ -10,7 +10,13 @@
 // Importing directly from preact/dom is a hack to allow us to mimic the structure of react.
 export {hydrate, render} from 'preact/dom';
 
-export {createElement, cloneElement, createRef, createContext} from 'preact';
+export {
+  createElement,
+  cloneElement,
+  createRef,
+  createContext,
+  isValidElement,
+} from 'preact';
 export {
   useState,
   useRef,

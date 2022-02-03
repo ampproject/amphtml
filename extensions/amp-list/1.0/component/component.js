@@ -215,17 +215,8 @@ export {BentoList};
  * @return {!PreactDef.Renderable}
  */
 function augment(component, props) {
-  if (!isComponent(component)) {
+  if (!Preact.isValidElement(component)) {
     return component;
   }
   return cloneElement(component, {...props, ...component.props});
-}
-
-/**
- * Determines if the argument is a Preact component or just a native value
- * @param {PreactDef.Renderable} component
- * @return {component is PreactDef.VNode}
- */
-function isComponent(component) {
-  return typeof component === 'object' && component !== null;
 }
