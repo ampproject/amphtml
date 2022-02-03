@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.201 */
+/** Version: 0.1.22.204 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5020,7 +5020,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.201',
+    '_client': 'SwG 0.1.22.204',
   });
 }
 
@@ -5364,10 +5364,13 @@ class PayCompleteFlow {
         publicationId: args.publicationId,
         offerId: this.sku_,
         origin: parseUrl(this.win_.location.href).origin,
+        isPaid: true,
+        checkOrderStatus: true,
       });
       if (response.requestMetadata) {
         urlParams.canonicalUrl = response.requestMetadata.contentId;
         urlParams.isAnonymous = response.requestMetadata.anonymous;
+        args['contentTitle'] = response.requestMetadata.contentTitle;
       }
 
       // Add feArgs to be passed via activities.
@@ -5562,6 +5565,11 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
         productType =
           (data['paymentRequest']['i'] || {})['productType'] ||
           ProductType.SUBSCRIPTION;
+      }
+      // Set productType if paymentRequest is not present, which happens
+      // if the pay flow was opened in redirect mode.
+      else if ('productType' in data) {
+        productType = data['productType'];
       }
     }
   }
@@ -5765,7 +5773,7 @@ class OffersFlow {
           ? new ActivityIframeView(
               this.win_,
               this.activityPorts_,
-              this.getUrl_(clientConfig),
+              this.getUrl_(clientConfig, deps.pageConfig()),
               feArgsObj,
               /* shouldFadeBody */ true
             )
@@ -5905,9 +5913,10 @@ class OffersFlow {
   /**
    * Returns the full URL that should be used for the activity iFrame view.
    * @param {!../model/client-config.ClientConfig} clientConfig
+   * @param {!../model/page-config.PageConfig} pageConfig
    * @return {string}
    */
-  getUrl_(clientConfig) {
+  getUrl_(clientConfig, pageConfig) {
     if (!clientConfig.useUpdatedOfferFlows) {
       return feUrl('/offersiframe');
     }
@@ -5915,10 +5924,13 @@ class OffersFlow {
     if (this.clientConfigManager_.shouldForceLangInIframes()) {
       return feUrl('/subscriptionoffersiframe', {
         'hl': this.clientConfigManager_.getLanguage(),
+        'publicationId': pageConfig.getPublicationId(),
       });
     }
 
-    return feUrl('/subscriptionoffersiframe');
+    return feUrl('/subscriptionoffersiframe', {
+      'publicationId': pageConfig.getPublicationId(),
+    });
   }
 
   /**
@@ -6338,7 +6350,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.201',
+        '_client': 'SwG 0.1.22.204',
         'supportsEventManager': true,
       },
       args || {}
@@ -7125,6 +7137,24 @@ class AnalyticsService {
     this.getTimestamp_ = () => {
       return toTimestamp(Date.now());
     };
+
+    // While false, we will buffer logs instead of sending them to the analytics service.
+    /** @private {boolean} */
+    this.readyForLogging_ = false;
+
+    // Stores log events while we wait to be ready for logging.
+    /** @private {Array<!../api/client-event-manager-api.ClientEvent>}*/
+    this.logs_ = [];
+  }
+
+  /**
+   * Sets ready for logging to true and logs all the client events that were previously buffered.
+   */
+  setReadyForLogging() {
+    this.readyForLogging_ = true;
+    this.logs_.forEach((event) => {
+      this.handleClientEvent_(event);
+    });
   }
 
   /**
@@ -7228,7 +7258,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.201');
+    context.setClientVersion('SwG 0.1.22.204');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7247,23 +7277,29 @@ class AnalyticsService {
   }
 
   /**
-   * @param {?string=} swgUserToken
    * @return {!Promise<!../components/activities.ActivityIframePort>}
    */
-  start(swgUserToken = '') {
+  start() {
     if (!this.serviceReady_) {
       // Please note that currently openIframe reads the current analytics
       // context and that it may not contain experiments activated late during
       // the publishers code lifecycle.
       this.addLabels(getOnExperiments(this.doc_.getWin()));
-      const urlParams = swgUserToken ? {sut: swgUserToken} : {};
-      this.serviceReady_ = this.activityPorts_
-        .openIframe(
-          this.iframe_,
-          feUrl('/serviceiframe', urlParams),
-          null,
-          true
-        )
+      this.serviceReady_ = this.deps_
+        .storage()
+        .get(Constants$1.USER_TOKEN)
+        .then((swgUserToken) => {
+          const pubId = this.deps_.pageConfig().getPublicationId();
+          const urlParams = swgUserToken
+            ? {sut: swgUserToken, publicationId: pubId}
+            : {publicationId: pubId};
+          return this.activityPorts_.openIframe(
+            this.iframe_,
+            feUrl('/serviceiframe', urlParams),
+            null,
+            true
+          );
+        })
         .then(
           (port) => {
             // Register a listener for the logging to code indicate it is
@@ -7379,15 +7415,23 @@ class AnalyticsService {
     ) {
       return;
     }
-    // Register we sent a log, the port will call this.afterLogging_ when done.
-    this.unfinishedLogs_++;
-    this.lastAction_ = this.start().then((port) => {
-      const analyticsRequest = this.createLogRequest_(event);
-      port.execute(analyticsRequest);
-      if (isExperimentOn(this.doc_.getWin(), ExperimentFlags.LOGGING_BEACON)) {
-        this.sendBeacon_(analyticsRequest);
-      }
-    });
+
+    if (this.readyForLogging_) {
+      // Register we sent a log, the port will call this.afterLogging_ when done.
+      this.unfinishedLogs_++;
+      this.lastAction_ = this.start().then((port) => {
+        const analyticsRequest = this.createLogRequest_(event);
+        port.execute(analyticsRequest);
+        if (
+          isExperimentOn(this.doc_.getWin(), ExperimentFlags.LOGGING_BEACON)
+        ) {
+          this.sendBeacon_(analyticsRequest);
+        }
+      });
+    } else {
+      // If we're not ready to log events yet, store the event so we can log it later.
+      this.logs_.push(event);
+    }
   }
 
   /**
@@ -7550,8 +7594,8 @@ const SWG_I18N_STRINGS = {
     'nl': 'Bijdragen met Google',
     'no': 'Bidra med Google',
     'pl': 'Wesprzyj publikację przez Google',
-    'pt': 'Contribuir com o Google',
-    'pt-br': 'Contribua com o Google',
+    'pt': 'Contribuir utilizando o Google',
+    'pt-br': 'Contribua usando o Google',
     'ru': 'Внести средства через Google',
     'se': 'Bidra med Google',
     'th': 'มีส่วนร่วมผ่าน Google',
@@ -8939,7 +8983,7 @@ class ContributionsFlow {
           ? new ActivityIframeView(
               this.win_,
               this.activityPorts_,
-              this.getUrl_(clientConfig),
+              this.getUrl_(clientConfig, deps.pageConfig()),
               feArgs({
                 'productId': deps.pageConfig().getProductId(),
                 'publicationId': deps.pageConfig().getPublicationId(),
@@ -9031,9 +9075,10 @@ class ContributionsFlow {
   /**
    * Gets the complete URL that should be used for the activity iFrame view.
    * @param {!../model/client-config.ClientConfig} clientConfig
+   * @param {!../model/page-config.PageConfig} pageConfig
    * @return {string}
    */
-  getUrl_(clientConfig) {
+  getUrl_(clientConfig, pageConfig) {
     if (!clientConfig.useUpdatedOfferFlows) {
       return feUrl('/contributionsiframe');
     }
@@ -9041,10 +9086,13 @@ class ContributionsFlow {
     if (this.clientConfigManager_.shouldForceLangInIframes()) {
       return feUrl('/contributionoffersiframe', {
         'hl': this.clientConfigManager_.getLanguage(),
+        'publicationId': pageConfig.getPublicationId(),
       });
     }
 
-    return feUrl('/contributionoffersiframe');
+    return feUrl('/contributionoffersiframe', {
+      'publicationId': pageConfig.getPublicationId(),
+    });
   }
 
   /**
@@ -10645,7 +10693,7 @@ class MeterToastApi {
             this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
           ];
         const iframeUrlParams = {
-          'publication_id': this.deps_.pageConfig().getPublicationId(),
+          'publicationId': this.deps_.pageConfig().getPublicationId(),
           'origin': parseUrl(this.win_.location.href).origin,
         };
         if (swgUserToken) {
@@ -11410,6 +11458,9 @@ class EntitlementsManager {
     /** @private {?Article} */
     this.article_ = null;
 
+    /** @private {boolean} */
+    this.enableMeteredByGoogle_ = false;
+
     this.deps_
       .eventManager()
       .registerEventListener(this.possiblyPingbackOnClientEvent_.bind(this));
@@ -11644,7 +11695,16 @@ class EntitlementsManager {
           );
         });
 
-    this.entitlementsPostPromise = encodedParamsPromise.then(() => {
+    // Get swgUserToken from local storage
+    const swgUserTokenPromise = this.storage_.get(Constants$1.USER_TOKEN, true);
+    this.entitlementsPostPromise = Promise.all([
+      swgUserTokenPromise,
+      encodedParamsPromise,
+    ]).then((values) => {
+      const swgUserToken = values[0];
+      if (swgUserToken) {
+        url = addQueryParam(url, 'sut', swgUserToken);
+      }
       url = addQueryParam(
         url,
         this.encodedParamName_,
@@ -11719,6 +11779,23 @@ class EntitlementsManager {
   }
 
   /**
+   * The experiment flags that are returned by the article endpoint should be accessible from here.
+   * @returns {Promise<Array<string>>}
+   */
+  getExperimentConfigFlags() {
+    return this.getArticle().then((article) => {
+      const expConfig = article['experimentConfig'];
+      if (expConfig != null) {
+        const expFlags = expConfig['experimentFlags'];
+        if (expFlags != null) {
+          return expFlags;
+        }
+      }
+      return [];
+    });
+  }
+
+  /**
    * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
@@ -11769,6 +11846,13 @@ class EntitlementsManager {
   }
 
   /**
+   * Allow Google to handle metering for the given page.
+   */
+  enableMeteredByGoogle() {
+    this.enableMeteredByGoogle_ = true;
+  }
+
+  /**
    * The JSON must either contain a "signedEntitlements" with JWT, or
    * "entitlements" field with plain JSON object.
    * @param {!Object} json
@@ -11784,6 +11868,9 @@ class EntitlementsManager {
     const signedData = json['signedEntitlements'];
     const decryptedDocumentKey = json['decryptedDocumentKey'];
     const swgUserToken = json['swgUserToken'];
+    if (swgUserToken) {
+      this.saveSwgUserToken_(swgUserToken);
+    }
     if (signedData) {
       const entitlements = this.getValidJwtEntitlements_(
         signedData,
@@ -11792,13 +11879,11 @@ class EntitlementsManager {
         decryptedDocumentKey
       );
       if (entitlements) {
-        this.saveSwgUserToken_(swgUserToken);
         return entitlements;
       }
     } else {
       const plainEntitlements = json['entitlements'];
       if (plainEntitlements) {
-        this.saveSwgUserToken_(swgUserToken);
         return this.createEntitlements_(
           '',
           plainEntitlements,
@@ -12023,12 +12108,8 @@ class EntitlementsManager {
    * @private
    */
   fetch_(params) {
-    // Get swgUserToken from getEntitlements params
-    const swgUserTokenParam = params?.encryption?.swgUserToken;
-    // Get swgUserToken from local storage if it is not in getEntitlements params
-    const swgUserTokenPromise = swgUserTokenParam
-      ? Promise.resolve(swgUserTokenParam)
-      : this.storage_.get(Constants$1.USER_TOKEN, true);
+    // Get swgUserToken from local storage
+    const swgUserTokenPromise = this.storage_.get(Constants$1.USER_TOKEN, true);
 
     let url =
       '/publication/' + encodeURIComponent(this.publicationId_) + this.action_;
@@ -12057,6 +12138,19 @@ class EntitlementsManager {
           url = addQueryParam(url, 'sut', swgUserToken);
         }
 
+        /** @type {!GetEntitlementsParamsInternalDef|undefined} */
+        let encodableParams = this.enableMeteredByGoogle_
+          ? {
+              metering: {
+                clientTypes: [MeterClientTypes.METERED_BY_GOOGLE],
+                owner: this.publicationId_,
+                resource: {
+                  hashedCanonicalUrl,
+                },
+              },
+            }
+          : undefined;
+
         // Add metering params.
         if (
           this.publicationId_ &&
@@ -12068,15 +12162,14 @@ class EntitlementsManager {
             typeof meteringStateId === 'string' &&
             meteringStateId.length > 0
           ) {
-            /** @type {!GetEntitlementsParamsInternalDef} */
-            const encodableParams = {
+            encodableParams = {
               metering: {
                 clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
                 owner: this.publicationId_,
                 resource: {
                   hashedCanonicalUrl,
                 },
-                // Publisher provided state.
+                // Add publisher provided state and additional fields.
                 state: {
                   id: meteringStateId,
                   attributes: [],
@@ -12120,21 +12213,19 @@ class EntitlementsManager {
               attributes: params.metering.state.customAttributes,
               category: 'custom',
             });
-
-            // Encode params.
-            this.encodedParams_ = base64UrlEncodeFromBytes(
-              utf8EncodeSync(JSON.stringify(encodableParams))
-            );
-            url = addQueryParam(
-              url,
-              this.encodedParamName_,
-              this.encodedParams_
-            );
           } else {
             warn(
               `SwG Entitlements: Please specify a metering state ID string, ideally a hash to avoid PII.`
             );
           }
+        }
+
+        if (encodableParams) {
+          // Encode params.
+          this.encodedParams_ = base64UrlEncodeFromBytes(
+            utf8EncodeSync(JSON.stringify(encodableParams))
+          );
+          url = addQueryParam(url, this.encodedParamName_, this.encodedParams_);
         }
 
         // Build URL.
@@ -17756,7 +17847,6 @@ class ConfiguredRuntime {
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this, this.fetcher_);
-    this.analyticsService_.start();
 
     /** @private @const {!PayClient} */
     this.payClient_ = new PayClient(this);
@@ -17987,6 +18077,9 @@ class ConfiguredRuntime {
     return this.entitlementsManager_
       .getEntitlements(params)
       .then((entitlements) => {
+        // The swg user token is stored in the entitlements flow, so the analytics service is ready for logging.
+        this.analyticsService_.setReadyForLogging();
+        this.analyticsService_.start();
         // Auto update internal things tracking the user's current SKU.
         if (entitlements) {
           try {
