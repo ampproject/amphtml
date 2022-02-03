@@ -175,6 +175,13 @@ amp-story-shopping-attachment a {
   border-radius: 0 1.1em 1.1em 0 !important;
 }
 
+.i-amphtml-amp-story-shopping-pdp-carousel-card:only-child {
+  /* margin: 0 var(--shopping-attachment-horizontal-padding) !important; */
+  width: calc(100% - var(--shopping-attachment-horizontal-padding) * 2) !important; 
+  border-radius: 1.1em !important;
+  cursor: auto !important;
+}
+
 [dir=rtl] .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
   border-radius: 0 1.1em 1.1em 0 !important;
 }
