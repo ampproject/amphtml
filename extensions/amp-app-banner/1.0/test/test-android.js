@@ -10,14 +10,18 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   let xhrServiceStub;
   beforeEach(() => {
     xhrServiceStub = env.sandbox.stub(xhrUtils);
-    const docInfo = DocumentInfo.forDoc(env.win.document);
+    const docInfo = DocumentInfo.forDoc(document);
     env.sandbox
       .stub(docInfo, 'canonicalUrl')
       .get(() => 'https://test.com/canonicalUrl');
     env.sandbox.stub(DocumentInfo, 'forDoc').returns(docInfo);
   });
 
-  const androidAppInfo = AndroidAppInfo.forDoc(env.win.document);
+  /** @type {AndroidAppInfo} */
+  let androidAppInfo;
+  beforeEach(() => {
+    androidAppInfo = AndroidAppInfo.forDoc(document);
+  });
 
   describe('getAndroidAppInfo', () => {
     describe('when no manifest link is present', () => {

@@ -4,7 +4,12 @@ import {platformUtils} from '#preact/utils/platform';
 import {IosAppInfo} from '../component/ios';
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
-  const iosAppInfo = IosAppInfo.forDoc(env.win.document);
+  /** @type {IosAppInfo} */
+  let iosAppInfo;
+  beforeEach(() => {
+    iosAppInfo = IosAppInfo.forDoc(document);
+  });
+
   describe('getIOSAppInfo', () => {
     describe('when no meta header is present', () => {
       it('should return null when no meta header is present', () => {

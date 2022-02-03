@@ -16,12 +16,12 @@ describes.realWin(
     },
   },
   (env) => {
-    let doc;
+    let document;
     let html;
 
     beforeEach(async () => {
-      doc = env.win.document;
-      html = htmlFor(doc);
+      document = env.win.document;
+      html = htmlFor(document);
       toggleExperiment(env.win, 'bento-app-banner', true, true);
 
       // Mock the platform:
@@ -44,7 +44,7 @@ describes.realWin(
     });
 
     async function mountElement(element) {
-      doc.body.appendChild(element);
+      document.body.appendChild(element);
       await element.buildInternal();
       await waitFor(() => element.isConnected, 'element connected');
       return element;
