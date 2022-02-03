@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>iframe: Small Story</title>
+    <style  media="screen">
+      html, body {
+        height: 100%;
+        margin: 0px;
+        width: 100%;
+      }
+
+      iframe {
+        border-width: 0px;
+        height: 700px;
+        width: 400px;
+      }
+
+      @media (max-width: 600px) {
+        iframe {
+          height: 100%;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      console.log('Parent document navigation start time: ' + window.performance.timing.navigationStart);    
+    </script>
+    <iframe src="./small-story-markup.html"></iframe>
+  </body>
+</html>
