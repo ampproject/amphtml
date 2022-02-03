@@ -84,3 +84,9 @@ jobs:
         if: ${{ steps.pull-request.outputs.pull-request-number }}
         run: |
           node build-system/tasks/sweep-experiments/cleanup-branches.js --except="${{ steps.sweep.outputs.branch }}"
+  create-issue-on-error:
+    needs: sweep-experiments
+    if: failure()
+    uses: ampproject/amphtml/.github/workflows/create-issue-on-error.yml@main
+    with:
+      mention: '@ampproject/build-on-duty'

@@ -33,3 +33,10 @@ jobs:
           COMMENT_AFTER: ${{ github.event.comment.body }}
           STATUS_PAGE_ID: ${{ secrets.STATUS_PAGE_ID }}
           STATUS_PAGE_TOKEN: ${{ secrets.STATUS_PAGE_TOKEN }}
+
+  create-issue-on-error:
+    needs: status-page
+    if: failure()
+    uses: ampproject/amphtml/.github/workflows/create-issue-on-error.yml@main
+    with:
+      mention: '@ampproject/wg-infra'
