@@ -62,7 +62,7 @@ class AmpTwitter extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     return {
-      'requestResize': (height) => this.attemptChangeHeight(height),
+      'requestResize': (height) => this.forceChangeHeight(height),
     };
   }
 
