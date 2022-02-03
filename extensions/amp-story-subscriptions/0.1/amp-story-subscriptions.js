@@ -48,10 +48,12 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     );
     this.element.appendChild(dialogEl);
 
-    Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
-      this.storeService_ = storeService;
-      this.initializeListeners_();
-    });
+    return Services.storyStoreServiceForOrNull(this.win).then(
+      (storeService) => {
+        this.storeService_ = storeService;
+        this.initializeListeners_();
+      }
+    );
   }
 
   /** @override */

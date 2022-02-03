@@ -61,7 +61,7 @@ describes.realWin(
     });
 
     it('should display the blocking paywall on state update', async () => {
-      storySubscriptions.buildCallback();
+      await storySubscriptions.buildCallback();
       await nextTick();
 
       storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);

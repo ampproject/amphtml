@@ -429,11 +429,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {boolean}
    */
   isPaywallProtected() {
-    return (
-      this.element.getAttribute('subscriptions-section') ===
-        'limited-content' ||
-      this.element.getAttribute('subscriptions-section') === 'content'
-    );
+    return this.element.hasAttribute('subscriptions-section');
   }
 
   /**
