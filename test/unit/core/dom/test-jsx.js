@@ -182,6 +182,12 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
       );
     });
 
+    it('supports object as style attribute value (compiled)', () => {
+      // This works because it's transformed by babel-plugin-jsx-style-object
+      const element = <div style={{width: 400, background: null}} />;
+      expect(element.outerHTML).to.equal('<div style="width:400px;"></div>');
+    });
+
     it('does not support dangerouslySetInnerHTML', () => {
       const element = <div dangerouslySetInnerHTML={{__html: '<script>'}} />;
       expect(element.outerHTML).to.equal(
