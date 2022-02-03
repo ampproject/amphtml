@@ -148,6 +148,8 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
   });
 
   it('renders with SVG namespace with props.xmlns', () => {
+    // Using `createElement` directly since `xmlns` is added during
+    // transformation by babel-plugin-dom-jsx-svg-namespace
     const xmlns = 'http://www.w3.org/2000/svg';
     const withProp = createElement('svg', {xmlns});
     expect(withProp.namespaceURI).to.equal(xmlns);
@@ -156,6 +158,8 @@ describes.sandboxed('#core/dom/jsx', {}, (env) => {
   });
 
   it('renders with SVG namespace with props.xmlns (compiled)', () => {
+    // This works because <svg> is transformed by
+    // babel-plugin-dom-jsx-svg-namespace
     const xmlns = 'http://www.w3.org/2000/svg';
     const withProp = <svg />;
     expect(withProp.namespaceURI).to.equal(xmlns);
