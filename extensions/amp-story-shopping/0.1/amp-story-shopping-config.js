@@ -126,7 +126,9 @@ export let KeyedShoppingConfigDef;
 export function getShoppingConfig(pageElement) {
   const element = pageElement.querySelector('amp-story-shopping-config');
   return getElementConfig(element).then((config) => {
-    validateConfig(config);
+    for (const configItem of config['items']) {
+      validateConfig(configItem);
+    }
     return keyByProductTagId(config);
   });
 }

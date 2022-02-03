@@ -1,13 +1,16 @@
 import * as Preact from '#core/dom/jsx';
 
+import {Services} from '#service';
+
 import {user} from '#utils/log';
 
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {Services} from '#service';
-
 import * as remoteConfig from '../../../../examples/amp-story/shopping/remote.json';
-import {Action} from '../../../amp-story/1.0/amp-story-store-service';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {
+  Action,
+  getStoreService,
+} from '../../../amp-story/1.0/amp-story-store-service';
 import {
   getShoppingConfig,
   storeShoppingConfig,
@@ -23,7 +26,6 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let element;
     let shoppingConfig;
     let storeService;
     let userWarnStub;
@@ -37,47 +39,15 @@ describes.realWin(
       });
     });
 
-    async function createAmpStoryShoppingConfig(optConfigData = configData) {
-      const pageEl = win.document.createElement('amp-story-page');
-      pageEl.id = 'page1';
-      element = createElementWithAttributes(
-        win.document,
-        'amp-story-shopping-config',
-        {'layout': 'nodisplay'}
-      );
-
-      element.innerHTML = `
-        <script type="application/json">
-          ${JSON.stringify(optConfigData)}
-        </script>
-      `;
-
-      pageEl.appendChild(element);
-      win.document.body.appendChild(pageEl);
-
-      shoppingConfig = await element.getImpl();
-    }
+    let pageElement;
 
     it('should build shopping config component', async () => {
       await createAmpStoryShoppingConfig();
-      expect(() => shoppingConfig.layoutCallback()).to.not.throw();
+      expect(() => getShoppingConfig(pageElement)).to.not.throw();
     });
 
-    let pageElement;
-
-    const defaultInlineConfig = {
-      items: [
-        {
-          'productId': 'city-pop',
-          'productTitle': 'Plastic Love',
-          'productPrice': 19,
-          'productPriceCurrency': 'JPY',
-        },
-      ],
-    };
-
     const keyedDefaultInlineConfig = {
-      'city-pop': defaultInlineConfig.items[0],
+      'art': configData.items[0],
     };
 
     beforeEach(async () => {
@@ -87,7 +57,7 @@ describes.realWin(
 
     async function createAmpStoryShoppingConfig(
       src = null,
-      config = defaultInlineConfig
+      config = configData
     ) {
       pageElement.appendChild(
         <amp-story-shopping-config layout="nodisplay" src={src}>
@@ -107,14 +77,6 @@ describes.realWin(
       });
     });
 
-    it('does use remote config when src attribute is provided', async () => {
-      await createAmpStoryShoppingConfig();
-      const exampleURL = 'foo.example';
-      element.setAttribute('src', exampleURL);
-
-      const expectedRemoteResult = JSON.parse(
-        '{"art":{"productId": "art","productTitle": "Abstract Art","productBrand": "V. Artsy","productPrice": 1200.0,"productPriceCurrency": "JPY","productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]}}'
-      );
     it('does use inline config', async () => {
       const result = await createAmpStoryShoppingConfig();
       expect(result).to.deep.eql(keyedDefaultInlineConfig);
@@ -153,15 +115,7 @@ describes.realWin(
     it('does use inline config when remote src is invalid', async () => {
       await createAmpStoryShoppingConfig();
       const exampleURL = 'invalidRemoteURL';
-      element.setAttribute('src', exampleURL);
-
-      shoppingConfig.buildCallback().then(async () => {
-        expect(await shoppingConfig.getInlineConfig_).to.be.called();
-      env.sandbox.stub(Services, 'xhrFor').returns({
-        fetchJson() {
-          throw new Error();
-        },
-      });
+      pageElement.setAttribute('src', exampleURL);
       const result = await createAmpStoryShoppingConfig('invalidRemoteUrl');
       expect(result).to.deep.eql(keyedDefaultInlineConfig);
     });
@@ -169,13 +123,16 @@ describes.realWin(
     it('test invalid remote config url', async () => {
       await createAmpStoryShoppingConfig();
       const exampleURL = 'invalidRemoteURL';
-      element.setAttribute('src', exampleURL);
+      pageElement.setAttribute('src', exampleURL);
       expectAsyncConsoleError(async () => {
         expect(async () => {
           await shoppingConfig.buildCallback();
         }).to.throw(
           /'amp-story-auto-ads:config error determining if remote config is valid json: bad url or bad json'​​​/
         );
+      });
+    });
+
     describe('storeShoppingConfig', () => {
       let storeService;
 
@@ -215,7 +172,7 @@ describes.realWin(
         ],
       };
 
-      await createAmpStoryShoppingConfig(invalidConfig);
+      await createAmpStoryShoppingConfig(null, invalidConfig);
     });
 
     it('test config not a number', async () => {
@@ -236,7 +193,7 @@ describes.realWin(
         ],
       };
 
-      await createAmpStoryShoppingConfig(invalidConfig);
+      await createAmpStoryShoppingConfig(null, invalidConfig);
     });
 
     it('test config invalid url array', async () => {
@@ -253,7 +210,7 @@ describes.realWin(
         ],
       };
 
-      await createAmpStoryShoppingConfig(invalidConfig);
+      await createAmpStoryShoppingConfig(null, invalidConfig);
     });
   }
 );
