@@ -1,12 +1,12 @@
 /**
  * Output helper for babel-plugin-jsx-style-object.
  * You should not use this directly.
- * @param {string} property
- * @param {*} value
- * @param {string=} opt_isDimensional
- * @return {string}
  */
-export function jsxStylePropertyString(property, value, opt_isDimensional) {
+export function jsxStylePropertyString(
+  property: string,
+  value: any,
+  opt_isDimensional: boolean | undefined
+) {
   if (value == null || value === '') {
     return '';
   }
