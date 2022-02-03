@@ -303,6 +303,13 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {boolean} whether the styles were rewritten */
     this.didRewriteStyles_ = false;
+
+    new PerformanceObserver((entryList) => {
+      for (const entry of entryList.getEntries()) {
+        console.log('LCP candidate:', entry.startTime, entry);
+        console.log('Story navigation start time: ' + window.performance.timing.navigationStart);
+      }
+    }).observe({type: 'largest-contentful-paint', buffered: true});
   }
 
   /** @override */
