@@ -1,16 +1,20 @@
 import {INVALID_PROTOCOLS} from '#core/types/string/url';
 
-export const urlUtils = {
+import {DocumentScopeBase} from '#preact/utils/documentScopeBase';
+
+export class UrlUtils extends DocumentScopeBase {
+  static forDoc = DocumentScopeBase.forDoc;
+
   /**
    * @return {HTMLAnchorElement}
    * @private
    */
   getAnchor_() {
     if (!this.anchor_) {
-      this.anchor_ = self.document.createElement('a');
+      this.anchor_ = this.doc_.createElement('a');
     }
     return this.anchor_;
-  },
+  }
 
   /**
    * @param {string} url
@@ -20,7 +24,7 @@ export const urlUtils = {
     const anchor = this.getAnchor_();
     anchor.href = '';
     return new URL(url, anchor.href);
-  },
+  }
 
   /**
    * Returns whether the URL has valid protocol.
@@ -31,7 +35,7 @@ export const urlUtils = {
   isProtocolValid(url) {
     const parsed = this.parse(url);
     return !INVALID_PROTOCOLS.includes(parsed.protocol);
-  },
+  }
 
   /**
    * Asserts that a given url is HTTPS or protocol relative.
@@ -46,7 +50,7 @@ export const urlUtils = {
         `${sourceName} must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${url}`
       );
     }
-  },
+  }
 
   /**
    * Returns `true` if the URL is secure: either HTTPS or localhost (for testing).
@@ -62,5 +66,5 @@ export const urlUtils = {
       parsed.hostname === '127.0.0.1' ||
       parsed.hostname?.endsWith('.localhost')
     );
-  },
-};
+  }
+}

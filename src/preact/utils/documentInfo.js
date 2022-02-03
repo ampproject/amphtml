@@ -1,12 +1,16 @@
-import {urlUtils} from './url';
+import {DocumentScopeBase} from '#preact/utils/documentScopeBase';
 
-export const docInfo = {
+import {UrlUtils} from './url';
+
+export class DocumentInfo extends DocumentScopeBase {
+  static forDoc = DocumentScopeBase.forDoc;
+
   /**
    * @param {string} metaName
    * @return {string|null}
    */
   getMetaByName(metaName) {
-    const metas = self.document.head.querySelectorAll('meta[name]');
+    const metas = this.doc_.head.querySelectorAll('meta[name]');
     return (
       Array.from(metas)
         .find(
@@ -16,31 +20,29 @@ export const docInfo = {
         )
         ?.getAttribute('content') || null
     );
-  },
+  }
 
   /**
    * @return {string}
    */
   get sourceUrl() {
-    return self.location.href;
-  },
+    return this.doc_.location.href;
+  }
 
   /**
    * @return {string}
    */
   get canonicalUrl() {
-    const rootNode = self.document;
-
-    const canonicalUrl = rootNode?.AMP?.canonicalUrl;
+    const canonicalUrl = this.doc_.AMP?.canonicalUrl;
     if (canonicalUrl) {
       return canonicalUrl;
     }
 
-    const canonicalTag = rootNode.querySelector('link[rel=canonical]');
+    const canonicalTag = this.doc_.querySelector('link[rel=canonical]');
     if (canonicalTag) {
-      return urlUtils.parse(canonicalTag.href).href;
+      return UrlUtils.forDoc(this.doc_).parse(canonicalTag.href).href;
     }
 
     return this.sourceUrl;
-  },
-};
+  }
+}
