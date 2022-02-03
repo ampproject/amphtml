@@ -3,13 +3,13 @@ import {Button, DayProps, useDayRender} from 'react-day-picker';
 import * as Preact from '#preact';
 import {useRef} from '#preact';
 
-import {useDayAttributes} from './use-day-attributes';
+import {useDay} from './use-day';
 
 export function DayButton({date, displayMonth}: DayProps) {
   const buttonRef = useRef();
 
   const day = useDayRender(date, displayMonth, buttonRef);
-  const {getLabel, isDisabled, isHighlighted} = useDayAttributes();
+  const {getLabel, isDisabled, isHighlighted} = useDay();
 
   return (
     <Button

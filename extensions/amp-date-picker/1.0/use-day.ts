@@ -3,9 +3,21 @@ import {addDays, format, isAfter, isBefore, subDays} from 'date-fns';
 import {createContext, useCallback, useContext, useMemo} from '#preact';
 
 import {DatesList} from './dates-list';
+import {BentoDatePickerProps} from './types';
 
-// eslint-disable-next-line local/no-export-side-effect
-export const AttributesContext = createContext();
+type DayContextValue = Pick<
+  BentoDatePickerProps,
+  | 'allowBlockedEndDate'
+  | 'blocked'
+  | 'min'
+  | 'max'
+  | 'maximumNights'
+  | 'minimumNights'
+  | 'highlighted'
+>;
+
+const DayContext = createContext<DayContextValue | null>(null);
+export {DayContext};
 
 // Example: Wednesday, December 1, 2021
 const DATE_FORMAT = 'cccc, LLLL d, yyyy';
@@ -14,11 +26,10 @@ const DATE_FORMAT = 'cccc, LLLL d, yyyy';
  *
  * @return {BentoDatePickerDef.AttributesContextFunctions} values
  */
-export function useDayAttributes() {
-  /** @const {?BentoDatePickerDef.AttributesContext} context */
-  const context = useContext(AttributesContext);
+export function useDay() {
+  const context = useContext(DayContext);
   if (!context) {
-    throw new Error('Must be wrapped in LabelContext.Provider component');
+    throw new Error('Must be wrapped in DayContext.Provider component');
   }
   const {
     allowBlockedEndDate,
@@ -38,13 +49,13 @@ export function useDayAttributes() {
     return new DatesList(highlighted);
   }, [highlighted]);
 
-  const getFormattedDate = useCallback((date) => {
+  const getFormattedDate = useCallback((date: Date) => {
     return format(date, DATE_FORMAT);
   }, []);
 
   const isOutsideRange = useCallback(
-    (date) => {
-      return isBefore(date, min) || isAfter(date, max);
+    (date: Date) => {
+      return isBefore(date, min) || (max && isAfter(date, max));
     },
     [min, max]
   );
@@ -53,7 +64,7 @@ export function useDayAttributes() {
   // the selected start date
   // https://react-day-picker-next.netlify.app/api/types/DateAfter
   const getDisabledAfter = useCallback(
-    (startDate) => {
+    (startDate: Date) => {
       if (!maximumNights || !startDate) {
         return;
       }
@@ -66,7 +77,7 @@ export function useDayAttributes() {
   // the selected start date
   // https://react-day-picker-next.netlify.app/api/types/DateAfter
   const getDisabledBefore = useCallback(
-    (startDate) => {
+    (startDate: Date) => {
       if (!startDate) {
         return;
       }
@@ -77,7 +88,7 @@ export function useDayAttributes() {
 
   // https://react-day-picker-next.netlify.app/api/types/matcher
   const isDisabled = useCallback(
-    (date) => {
+    (date: Date) => {
       if (isOutsideRange(date)) {
         return true;
       }
@@ -90,14 +101,14 @@ export function useDayAttributes() {
   );
 
   const isHighlighted = useCallback(
-    (date) => {
+    (date: Date) => {
       return highlightedDates.contains(date);
     },
     [highlightedDates]
   );
 
   const getLabel = useCallback(
-    (date) => {
+    (date: Date) => {
       const formattedDate = getFormattedDate(date);
       if (isDisabled(date)) {
         return `Not available. ${formattedDate}`;

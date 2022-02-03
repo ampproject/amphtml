@@ -5,7 +5,7 @@ import {useCallback} from '#preact';
 
 import {getFormattedDate, getLocale} from './date-helpers';
 import {DayButton} from './day-button';
-import {useDayAttributes} from './use-day-attributes';
+import {useDay} from './use-day';
 
 interface BaseDatePickerProps extends Omit<DayPickerProps, 'locale'> {
   locale: string;
@@ -19,7 +19,7 @@ export function BaseDatePicker({
   weekDayFormat,
   ...rest
 }: BaseDatePickerProps) {
-  const {isDisabled} = useDayAttributes();
+  const {isDisabled} = useDay();
 
   const formatMonth = useCallback(
     (date: Date) => {

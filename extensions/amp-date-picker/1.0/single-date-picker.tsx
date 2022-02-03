@@ -22,20 +22,12 @@ import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
 import {BaseDatePicker} from './base-date-picker';
-import {
-  DateFieldNameByType,
-  DateFieldType,
-  DatePickerMode,
-  DatePickerState,
-  DatePickerType,
-  FORM_INPUT_SELECTOR,
-  TAG,
-} from './constants';
+import {DateFieldNameByType, FORM_INPUT_SELECTOR, TAG} from './constants';
 import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
 import {SingleDatePickerAPI, SingleDatePickerProps} from './types';
 import {DatePickerContext} from './use-date-picker';
 import {useDatePickerState} from './use-date-picker-state';
-import {useDayAttributes} from './use-day-attributes';
+import {useDay} from './use-day';
 
 function SingleDatePickerWithRef(
   {
@@ -54,6 +46,7 @@ function SingleDatePickerWithRef(
   ref: Ref<SingleDatePickerAPI>
 ) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
 
   const [hiddenInputProps, setHiddenInputProps] =
     useState<ComponentProps<'input'>>();
@@ -61,10 +54,8 @@ function SingleDatePickerWithRef(
   const [date, _setDate] = useState<Date>();
   const [month, setMonth] = useState<Date>(initialVisibleMonth);
 
-  const containerRef = useRef<HTMLElement>();
-
   const {isOpen, transitionTo} = useDatePickerState(mode);
-  const {blockedDates} = useDayAttributes();
+  const {blockedDates} = useDay();
 
   const handleSetDate = useCallback(
     (date: Date) => {
@@ -99,8 +90,8 @@ function SingleDatePickerWithRef(
         return;
       }
       handleSetDate(date);
-      if (!openAfterSelect && mode === DatePickerMode.OVERLAY) {
-        transitionTo(DatePickerState.OVERLAY_CLOSED);
+      if (!openAfterSelect && mode === 'overlay') {
+        transitionTo('overlay-closed');
       }
     },
     [blockedDates, handleSetDate, openAfterSelect, transitionTo, mode]
@@ -108,7 +99,7 @@ function SingleDatePickerWithRef(
 
   useImperativeHandle(
     ref,
-    () => /** @type {!BentoDatePickerDef.BentoDatePickerApi} */ ({
+    () => ({
       clear,
       today,
       setDate,
@@ -119,14 +110,10 @@ function SingleDatePickerWithRef(
   /**
    * Generate a name for a hidden input.
    * Date pickers not in a form don't need named hidden inputs.
-   * @param {!Element} form
-   * @param {!DateFieldType} type
-   * @return {string}
-   * @private
    */
   const getHiddenInputId = useCallback(
     (form: HTMLFormElement) => {
-      const name: string = DateFieldNameByType[DateFieldType.DATE];
+      const name: string = DateFieldNameByType.get('input')!;
       if (!form) {
         return '';
       }
@@ -166,12 +153,12 @@ function SingleDatePickerWithRef(
           _setDate(parsedDate);
         }
       }
-    } else if (mode === DatePickerMode.STATIC && !!form) {
+    } else if (mode === 'static' && !!form) {
       setHiddenInputProps({
         type: 'hidden',
         name: getHiddenInputId(form),
       });
-    } else if (mode === DatePickerMode.OVERLAY) {
+    } else if (mode === 'overlay') {
       onError(`Overlay single pickers must specify "inputSelector"`);
     }
     // This should only be called on first render
@@ -180,8 +167,6 @@ function SingleDatePickerWithRef(
 
   /**
    * For inputs that are valid dates, update the date-picker value.
-   * @param {!Event} e
-   * @private
    */
   const handleInput = useCallback(
     (e: InputEvent) => {
@@ -203,6 +188,8 @@ function SingleDatePickerWithRef(
   );
 
   useEffect(() => {
+    // Since we are passing this ref directly into the container, we can assume
+    // that containerRef.current is defined in this case
     const containerEl = containerRef.current!;
     const document = containerEl.ownerDocument;
     const inputEl = inputRef.current;
@@ -212,19 +199,19 @@ function SingleDatePickerWithRef(
     }
     const handleFocus = (event: FocusEvent) => {
       if (event.target === inputRef.current) {
-        transitionTo(DatePickerState.OVERLAY_OPEN_INPUT);
+        transitionTo('overlay-open-input');
       }
     };
     const handleClick = (event: MouseEvent) => {
       const clickWasInDatePicker =
         event.target === inputEl || containerEl.contains(event.target as Node);
       if (!clickWasInDatePicker) {
-        transitionTo(DatePickerState.OVERLAY_CLOSED);
+        transitionTo('overlay-closed');
       }
     };
     const handleDocumentKeydown = (event: KeyboardEvent) => {
       if (event.key === Keys_Enum.ESCAPE) {
-        transitionTo(DatePickerState.OVERLAY_CLOSED);
+        transitionTo('overlay-closed');
       }
     };
     const handleInputKeydown = (event: KeyboardEvent) => {
@@ -234,13 +221,11 @@ function SingleDatePickerWithRef(
       }
 
       if (event.key === Keys_Enum.DOWN_ARROW) {
-        /// update field focus?
-        transitionTo(DatePickerState.OVERLAY_OPEN_PICKER);
-        // Other static mode stuff here
+        transitionTo('overlay-open-picker');
       }
     };
 
-    if (mode === DatePickerMode.OVERLAY) {
+    if (mode === 'overlay') {
       document.addEventListener('click', handleClick);
       document.addEventListener('keydown', handleDocumentKeydown);
     }
@@ -261,9 +246,7 @@ function SingleDatePickerWithRef(
       ref={containerRef}
       data-date={date && getFormattedDate(date, format, locale)}
     >
-      <DatePickerContext.Provider
-        value={{selectedDate: date, type: DatePickerType.SINGLE}}
-      >
+      <DatePickerContext.Provider value={{selectedDate: date, type: 'single'}}>
         {children}
         {hiddenInputProps && <input ref={inputRef} {...hiddenInputProps} />}
         {isOpen && (

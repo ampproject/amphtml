@@ -1,11 +1,18 @@
 import {createContext, useContext} from '#preact';
 
-const DatePickerContext = createContext();
+import {DateFieldType, DatePickerType} from './types';
+
+interface DatePickerContextType {
+  selectedDate?: Date;
+  selectedStartDate?: Date;
+  selectedEndDate?: Date;
+  type: DatePickerType;
+  focusedInput?: DateFieldType;
+}
+
+const DatePickerContext = createContext<DatePickerContextType | null>(null);
 export {DatePickerContext};
 
-/**
- * @return {BentoDatePickerDef.DatePickerContext}
- */
 export function useDatePicker() {
   const context = useContext(DatePickerContext);
   if (!context) {

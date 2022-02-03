@@ -15,15 +15,13 @@ import {
   DEFAULT_ON_ERROR,
   DEFAULT_START_INPUT_SELECTOR,
   DEFAULT_WEEK_DAY_FORMAT,
-  DatePickerMode,
-  DatePickerType,
   ISO_8601,
 } from './constants';
 import {getCurrentDate} from './date-helpers';
 import {DateRangePicker} from './date-range-picker';
 import {SingleDatePicker} from './single-date-picker';
 import {BentoDatePickerProps} from './types';
-import {AttributesContext} from './use-day-attributes';
+import {DayContext} from './use-day';
 
 type PropertiesWithDefaults =
   | 'endInputSelector'
@@ -55,11 +53,11 @@ function BentoDatePickerWithRef(
         inputSelector: DEFAULT_INPUT_SELECTOR,
         locale: DEFAULT_LOCALE,
         min: getCurrentDate(),
-        mode: DatePickerMode.STATIC,
+        mode: 'static',
         monthFormat: DEFAULT_MONTH_FORMAT,
         onError: DEFAULT_ON_ERROR,
         startInputSelector: DEFAULT_START_INPUT_SELECTOR,
-        type: DatePickerType.SINGLE,
+        type: 'single',
         weekDayFormat: DEFAULT_WEEK_DAY_FORMAT,
         maximumNights: 0,
         minimumNights: 1,
@@ -86,10 +84,10 @@ function BentoDatePickerWithRef(
 
   const DatePicker: FunctionalComponent = useMemo(() => {
     switch (type) {
-      case DatePickerType.SINGLE: {
+      case 'single': {
         return SingleDatePicker;
       }
-      case DatePickerType.RANGE: {
+      case 'range': {
         return DateRangePicker;
       }
       default: {
@@ -101,7 +99,7 @@ function BentoDatePickerWithRef(
   }, [type, onError]);
 
   return (
-    <AttributesContext.Provider
+    <DayContext.Provider
       value={{
         blocked,
         highlighted,
@@ -113,7 +111,7 @@ function BentoDatePickerWithRef(
       }}
     >
       <DatePicker ref={ref} {...propsWithDefaults} />
-    </AttributesContext.Provider>
+    </DayContext.Provider>
   );
 }
 

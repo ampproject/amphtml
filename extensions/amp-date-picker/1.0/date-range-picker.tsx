@@ -6,6 +6,9 @@ import {
   isSameDay,
   isValid,
 } from 'date-fns';
+// eslint-disable-next-line local/no-import
+import {ComponentProps, Ref} from 'preact';
+import {Matcher} from 'react-day-picker';
 
 import {Keys_Enum} from '#core/constants/key-codes';
 import {
@@ -25,26 +28,14 @@ import {
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
-import {BaseDatePicker} from './base-date-picker.tsx';
-import {
-  DateFieldNameByType,
-  DateFieldType,
-  DatePickerMode,
-  DatePickerState,
-  DatePickerType,
-  FORM_INPUT_SELECTOR,
-  TAG,
-} from './constants';
+import {BaseDatePicker} from './base-date-picker';
+import {DateFieldNameByType, FORM_INPUT_SELECTOR, TAG} from './constants';
 import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
+import {DateFieldType, DateRangePickerAPI, DateRangePickerProps} from './types';
 import {DatePickerContext} from './use-date-picker';
 import {useDatePickerState} from './use-date-picker-state';
-import {useDayAttributes} from './use-day-attributes';
+import {useDay} from './use-day';
 
-/**
- * @param {!BentoDatePickerDef.DateRangePickerProps} props
- * @param {{current: ?BentoDatePickerDef.BentoDatePickerApi}} ref
- * @return {PreactDef.Renderable}
- */
 function DateRangePickerWithRef(
   {
     allowBlockedEndDate,
@@ -61,48 +52,45 @@ function DateRangePickerWithRef(
     openAfterSelect,
     startInputSelector,
     weekDayFormat,
-  },
-  ref
+  }: DateRangePickerProps,
+  ref: Ref<DateRangePickerAPI>
 ) {
-  const startInputRef = useRef();
-  const endInputRef = useRef();
+  const startInputRef = useRef<HTMLInputElement>(null);
+  const endInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
 
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
-  const [startHiddenInputName, setStartHiddenInputName] = useState();
-  const [endHiddenInputName, setEndHiddenInputName] = useState();
-  const [focusedInput, setFocusedInput] = useState();
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
+  const [startHiddenInputProps, setStartHiddenInputProps] =
+    useState<ComponentProps<'input'>>();
+  const [endHiddenInputProps, setEndHiddenInputProps] =
+    useState<ComponentProps<'input'>>();
+  const [focusedInput, setFocusedInput] = useState<DateFieldType>();
   // This allow the calendar to navigate to a new month when the date changes
-  const [month, setMonth] = useState(initialVisibleMonth ?? getCurrentDate());
-
-  const containerRef = useRef();
+  const [month, setMonth] = useState<Date>(initialVisibleMonth);
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
-  const {blockedDates} = useDayAttributes();
+  const {blockedDates} = useDay();
 
-  const {getDisabledAfter, getDisabledBefore, isDisabled} = useDayAttributes();
+  const {getDisabledAfter, getDisabledBefore, isDisabled} = useDay();
 
   /**
    * Generate a name for a hidden input.
    * Date pickers not in a form don't need named hidden inputs.
-   * @param {!Element} form
-   * @param {!DateFieldType} type
-   * @return {string}
-   * @private
    */
   const getHiddenInputId = useCallback(
-    (form, type) => {
-      const name = DateFieldNameByType[type];
+    (form: HTMLFormElement, type: DateFieldType) => {
+      const name = DateFieldNameByType.get(type)!;
       if (!form) {
         return '';
       }
 
-      if (!form.elements[name]) {
+      if (!form.elements.namedItem(name)) {
         return name;
       }
 
       const alternativeName = `${id}-${name}`;
-      if (id && !form.elements[alternativeName]) {
+      if (id && !form.elements.namedItem(alternativeName)) {
         return alternativeName;
       }
 
@@ -117,41 +105,37 @@ function DateRangePickerWithRef(
 
   /**
    * Iterate over the dates between a start and end date.
-   * @param {!Date} startDate
-   * @param {?Date} endDate
-   * @param {function(!Date)} cb
-   * @private
    */
-  const iterateDateRange = useCallback((startDate, endDate, cb) => {
-    const normalizedEndDate = endDate || startDate;
-    if (
-      isSameDay(startDate, normalizedEndDate) ||
-      isAfter(startDate, normalizedEndDate)
-    ) {
-      return;
-    }
+  const iterateDateRange = useCallback(
+    (startDate: Date, endDate: Date, cb: (date: Date) => void) => {
+      const normalizedEndDate = endDate || startDate;
+      if (
+        isSameDay(startDate, normalizedEndDate) ||
+        isAfter(startDate, normalizedEndDate)
+      ) {
+        return;
+      }
 
-    if (isSameDay(startDate, endDate)) {
-      return cb(startDate);
-    }
+      if (isSameDay(startDate, endDate)) {
+        return cb(startDate);
+      }
 
-    const days = differenceInDays(normalizedEndDate, startDate);
-    cb(startDate);
+      const days = differenceInDays(normalizedEndDate, startDate);
+      cb(startDate);
 
-    for (let i = 0; i < days; i++) {
-      cb(addDays(startDate, i + 1));
-    }
-  }, []);
+      for (let i = 0; i < days; i++) {
+        cb(addDays(startDate, i + 1));
+      }
+    },
+    []
+  );
 
   /**
    * Detect if a blocked date is between the start and end date, inclusively,
    * accounting for the `allow-blocked-end-date` attribute.
-   * @param {?Date} startDate
-   * @param {?Date} endDate
-   * @return {boolean} True if the range should not be selected.
    */
   const isBlockedRange = useCallback(
-    (startDate, endDate) => {
+    (startDate: Date, endDate: Date) => {
       if (!startDate || !endDate) {
         return;
       }
@@ -190,7 +174,7 @@ function DateRangePickerWithRef(
   }, [startDate, endDate]);
 
   const handleSetStartDate = useCallback(
-    (date) => {
+    (date: Date) => {
       setStartDate(date);
       setMonth(date);
       if (startInputRef.current) {
@@ -201,7 +185,7 @@ function DateRangePickerWithRef(
   );
 
   const handleSetEndDate = useCallback(
-    (date) => {
+    (date: Date) => {
       setEndDate(date);
       setMonth(date);
       if (endInputRef.current) {
@@ -212,28 +196,29 @@ function DateRangePickerWithRef(
   );
 
   const setDateRange = useCallback(
-    ({from: startDate, to: endDate}) => {
+    ({from: startDate, to: endDate}: {from: Date; to: Date}) => {
       const disabledAfter = getDisabledAfter(startDate);
       const disabledBefore = getDisabledBefore(startDate);
-      const isOutsideRange =
-        isAfter(endDate, disabledAfter) ||
-        (!isSameDay(startDate, endDate) && isBefore(endDate, disabledBefore));
+      const isAfterDisabledDate =
+        disabledAfter && isAfter(endDate, disabledAfter);
+      const isBeforeDisabledDate =
+        disabledBefore &&
+        !isSameDay(startDate, endDate) &&
+        isBefore(endDate, disabledBefore);
+      const isOutsideRange = isAfterDisabledDate || isBeforeDisabledDate;
       if (isBlockedRange(startDate, endDate) || isOutsideRange) {
         return;
       }
       // TODO: Clarify this logic
-      if (
-        focusedInput === DateFieldType.START_DATE &&
-        isSameDay(startDate, endDate)
-      ) {
+      if (focusedInput === 'start-input' && isSameDay(startDate, endDate)) {
         handleSetStartDate(startDate);
-      } else if (focusedInput === DateFieldType.END_DATE) {
+      } else if (focusedInput === 'end-input') {
         handleSetEndDate(endDate);
       } else {
         handleSetStartDate(startDate);
         handleSetEndDate(endDate);
-        if (!openAfterSelect && mode === DatePickerMode.OVERLAY) {
-          transitionTo(DatePickerState.OVERLAY_CLOSED);
+        if (!openAfterSelect && mode === 'overlay') {
+          transitionTo('overlay-closed');
         }
       }
     },
@@ -251,9 +236,16 @@ function DateRangePickerWithRef(
   );
 
   const clear = useCallback(() => {
-    handleSetStartDate(undefined);
-    handleSetEndDate(undefined);
-  }, [handleSetStartDate, handleSetEndDate]);
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setMonth(initialVisibleMonth);
+    if (startInputRef.current) {
+      startInputRef.current.value = '';
+    }
+    if (endInputRef.current) {
+      endInputRef.current.value = '';
+    }
+  }, [initialVisibleMonth]);
 
   const startToday = useCallback(
     ({offset = 0} = {}) => {
@@ -273,30 +265,32 @@ function DateRangePickerWithRef(
 
   useImperativeHandle(
     ref,
-    () =>
-      /** @type {!BentoDatePickerDef.BentoDatePickerApi} */ ({
-        clear,
-        setDates: ({end, start}) => setDateRange({from: start, to: end}),
-        startToday,
-        endToday,
-      }),
+    () => /** @type {!BentoDatePickerDef.BentoDatePickerApi} */ ({
+      clear,
+      setDates: ({end, start}: {end: Date; start: Date}) =>
+        setDateRange({from: start, to: end}),
+      startToday,
+      endToday,
+    }),
     [clear, setDateRange, startToday, endToday]
   );
 
   /**
    * For inputs that are valid dates, update the date-picker value.
-   * @param {!Event} e
-   * @private
    */
   const handleStartInput = useCallback(
-    (e) => {
+    (e: InputEvent) => {
       const {target} = e;
-      if (target.type === 'hidden') {
+      if ((target as HTMLInputElement).type === 'hidden') {
         return;
       }
 
-      const date = parseDate(target.value, format, locale);
-      if (isValid(date)) {
+      const date = parseDate(
+        (target as HTMLInputElement).value,
+        format,
+        locale
+      );
+      if (date && isValid(date)) {
         setStartDate(date);
       }
     },
@@ -305,18 +299,20 @@ function DateRangePickerWithRef(
 
   /**
    * For inputs that are valid dates, update the date-picker value.
-   * @param {!Event} e
-   * @private
    */
   const handleEndInput = useCallback(
-    (e) => {
+    (e: InputEvent) => {
       const {target} = e;
-      if (target.type === 'hidden') {
+      if ((target as HTMLInputElement).type === 'hidden') {
         return;
       }
 
-      const date = parseDate(target.value, format, locale);
-      if (isValid(date)) {
+      const date = parseDate(
+        (target as HTMLInputElement).value,
+        format,
+        locale
+      );
+      if (date && isValid(date)) {
         setEndDate(date);
       }
     },
@@ -325,31 +321,49 @@ function DateRangePickerWithRef(
 
   useEffect(() => {
     const form = closestAncestorElementBySelector(
-      containerRef.current,
+      containerRef.current!,
       FORM_INPUT_SELECTOR
-    );
+    ) as HTMLFormElement;
     const startDateInputElement = scopedQuerySelector(
-      containerRef.current,
+      containerRef.current!,
       startInputSelector
-    );
+    ) as HTMLInputElement;
     const endDateInputElement = scopedQuerySelector(
-      containerRef.current,
+      containerRef.current!,
       endInputSelector
-    );
+    ) as HTMLInputElement;
     if (startDateInputElement) {
       startInputRef.current = startDateInputElement;
-      startDateInputElement.value &&
-        setStartDate(parseDate(startDateInputElement.value, format, locale));
-    } else if (mode === DatePickerMode.STATIC && !!form) {
-      setStartHiddenInputName(getHiddenInputId(form, DateFieldType.START_DATE));
+      if (startDateInputElement.value) {
+        const parsedDate = parseDate(
+          startDateInputElement.value,
+          format,
+          locale
+        );
+        if (parsedDate) {
+          setStartDate(parsedDate);
+        }
+      }
+    } else if (mode === 'static' && !!form) {
+      setStartHiddenInputProps({
+        type: 'hidden',
+        name: getHiddenInputId(form, 'start-input'),
+      });
     }
     if (endDateInputElement) {
       endInputRef.current = endDateInputElement;
-      endDateInputElement.value &&
-        setEndDate(parseDate(endDateInputElement.value, format, locale));
-    } else if (mode === DatePickerMode.STATIC && !!form) {
-      setEndHiddenInputName(getHiddenInputId(form, DateFieldType.END_DATE));
-    } else if (mode === DatePickerMode.OVERLAY) {
+      if (endDateInputElement.value) {
+        const parsedDate = parseDate(endDateInputElement.value, format, locale);
+        if (parsedDate) {
+          setEndDate(parsedDate);
+        }
+      }
+    } else if (mode === 'static' && !!form) {
+      setEndHiddenInputProps({
+        type: 'hidden',
+        name: getHiddenInputId(form, 'end-input'),
+      });
+    } else if (mode === 'overlay') {
       onError(
         `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
       );
@@ -359,55 +373,51 @@ function DateRangePickerWithRef(
   }, []);
 
   useEffect(() => {
-    const document = containerRef.current.ownerDocument;
+    // Since we are passing this ref directly into the container, we can assume
+    // that containerRef.current is defined in this case
+    const containerEl = containerRef.current!;
+    const document = containerEl.ownerDocument;
     const startInputEl = startInputRef.current;
     const endInputEl = endInputRef.current;
-    const containerEl = containerRef.current;
     if (!document) {
       return;
     }
 
-    const handleFocus = (event) => {
+    const handleFocus = (event: FocusEvent) => {
       if (event.target === startInputEl) {
-        setFocusedInput(DateFieldType.START_DATE);
+        setFocusedInput('start-input');
       }
       if (event.target === endInputEl) {
-        setFocusedInput(DateFieldType.END_DATE);
+        setFocusedInput('end-input');
       }
-      transitionTo(DatePickerState.OVERLAY_OPEN_INPUT);
+      transitionTo('overlay-open-input');
     };
 
-    const handleDocumentKeydown = (event) => {
+    const handleDocumentKeydown = (event: KeyboardEvent) => {
       if (event.key === Keys_Enum.ESCAPE) {
-        transitionTo(DatePickerState.OVERLAY_CLOSED);
+        transitionTo('overlay-closed');
       }
     };
-    const handleInputKeydown = (event) => {
+    const handleInputKeydown = (event: KeyboardEvent) => {
       const {target} = event;
-      if (
-        !target === startInputEl ||
-        !target === endInputEl ||
-        target.type === 'hidden'
-      ) {
+      if ((target as HTMLInputElement).type === 'hidden') {
         return;
       }
 
       if (event.key === Keys_Enum.DOWN_ARROW) {
-        /// update field focus?
-        transitionTo(DatePickerState.OVERLAY_OPEN_PICKER);
-        // Other static mode stuff here
+        transitionTo('overlay-open-picker');
       }
     };
-    const handleClick = (event) => {
+    const handleClick = (event: MouseEvent) => {
       const clickWasInDatePicker =
         event.target === startInputEl ||
         event.target === endInputEl ||
-        containerEl.contains(event.target);
+        containerEl.contains(event.target as Node);
       if (!clickWasInDatePicker) {
-        transitionTo(DatePickerState.OVERLAY_CLOSED);
+        transitionTo('overlay-closed');
       }
     };
-    if (mode === DatePickerMode.OVERLAY) {
+    if (mode === 'overlay') {
       document.addEventListener('click', handleClick);
       document.addEventListener('keydown', handleDocumentKeydown);
     }
@@ -429,38 +439,47 @@ function DateRangePickerWithRef(
     };
   }, [transitionTo, mode, handleStartInput, handleEndInput]);
 
+  const disabledMatchers = useMemo(() => {
+    const matchers: Matcher[] = [isDisabled];
+    if (startDate) {
+      const disabledAfter = getDisabledAfter(startDate);
+      if (disabledAfter) {
+        matchers.push({after: disabledAfter});
+      }
+    }
+    return matchers;
+  }, [startDate, getDisabledAfter, isDisabled]);
+
   return (
     <ContainWrapper
       ref={containerRef}
-      data-startdate={getFormattedDate(startDate, format, locale)}
-      data-enddate={getFormattedDate(endDate, format, locale)}
+      data-startdate={startDate && getFormattedDate(startDate, format, locale)}
+      data-enddate={endDate && getFormattedDate(endDate, format, locale)}
     >
       <DatePickerContext.Provider
         value={{
           selectedStartDate: startDate,
           selectedEndDate: endDate,
-          type: DatePickerType.RANGE,
+          type: 'range',
           focusedInput,
         }}
       >
         {children}
-        {startHiddenInputName && (
-          <input
-            ref={startInputRef}
-            name={startHiddenInputName}
-            type="hidden"
-          />
+        {startHiddenInputProps && (
+          <input ref={startInputRef} {...startHiddenInputProps} />
         )}
-        {endHiddenInputName && (
-          <input ref={endInputRef} name={endHiddenInputName} type="hidden" />
+        {endHiddenInputProps && (
+          <input ref={endInputRef} {...endHiddenInputProps} />
         )}
         {isOpen && (
           <BaseDatePicker
             mode="range"
             selected={dateRange}
+            // TODO: This might be a bug in ReactDayPicker types
+            // @ts-ignore
             onSelect={setDateRange}
             locale={locale}
-            disabled={[isDisabled, {after: getDisabledAfter(startDate)}]}
+            disabled={disabledMatchers}
             month={month}
             monthFormat={monthFormat}
             weekDayFormat={weekDayFormat}
