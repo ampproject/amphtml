@@ -65,7 +65,7 @@ describes.realWin(
 
     it('renders the Loading state, then renders the results', async () => {
       const element = await mountElement(
-        html`<amp-list src="">
+        html`<amp-list src="test.json">
           <template type="amp-mustache">{{.}}</template>
         </amp-list>`
       );
@@ -85,7 +85,7 @@ describes.realWin(
         ],
       });
       const element = await mountElement(
-        html`<amp-list src="">
+        html`<amp-list src="test.json">
           <template type="amp-mustache">
             <h1>{{first}}</h1>
             <h2>{{second}}</h2>

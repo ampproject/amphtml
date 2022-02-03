@@ -69,6 +69,9 @@ export class FetchJsonUtil {
   getFetchJsonCallback() {
     const {element} = this;
     const src = element.getAttribute('src');
+    if (!src) {
+      return () => Promise.resolve(null);
+    }
     if (isAmpStateSrc(src)) {
       return (src) => this.getAmpStateJson(src);
     }

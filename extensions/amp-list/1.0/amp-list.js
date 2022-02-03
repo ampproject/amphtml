@@ -25,18 +25,23 @@ class AmpList extends setSuperClass(BaseElement, AmpPreactBaseElement) {
 
     /** @private {?Element} */
     this.template_ = null;
+
+    /** @private {string} */
+    this.src_ = null;
+
+    /** @private {FetchJsonUtil} */
+    this.fetchUtil_ = null;
   }
 
   /** @override */
   init() {
     this.registerApiAction('refresh', (api) => api./*OK*/ refresh());
 
-    const initialSrc = this.element.getAttribute('src');
-    const fetchUtil = new FetchJsonUtil(TAG, this.element, initialSrc);
-    const fetchJson = fetchUtil.getFetchJsonCallback();
+    this.src_ = this.element.getAttribute('src');
+    this.fetchUtil_ = new FetchJsonUtil(TAG, this.element, this.src_);
 
     return {
-      'fetchJson': fetchJson,
+      'fetchJson': this.fetchUtil_.getFetchJsonCallback(),
     };
   }
 
@@ -76,6 +81,16 @@ class AmpList extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     } else {
       this.mutateProps({'template': null});
     }
+  }
+
+  /** @override */
+  mutationObserverCallback() {
+    const src = this.element.getAttribute('src');
+    if (src === this.src_) {
+      return;
+    }
+    this.src_ = src;
+    this.mutateProps({'fetchJson': this.fetchUtil_.getFetchJsonCallback()});
   }
 
   /** @override */

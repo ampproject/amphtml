@@ -8,8 +8,8 @@ import {Services} from '#service';
 
 import {dev, user, userAssert} from '#utils/log';
 
-import {FetchJsonUtil, isAmpStateSrc} from './shared/amp-fetch-utils';
 import {BaseElement} from './base-element';
+import {FetchJsonUtil, isAmpStateSrc} from './shared/amp-fetch-utils';
 
 import {isAmpScriptUri} from '../../../src/url';
 
@@ -138,9 +138,8 @@ export class AmpRender extends setSuperClass(
 
   /** @override */
   init() {
-    const initialSrc = this.element.getAttribute('src');
-    const fetchUtil = new FetchJsonUtil(TAG, this.element, initialSrc);
-    const getJson = fetchUtil.getFetchJsonCallback();
+    this.src_ = this.element.getAttribute('src');
+    this.fetchUtil_ = new FetchJsonUtil(TAG, this.element, this.src_);
 
     const hasAriaLive = this.element.hasAttribute('aria-live');
     if (!hasAriaLive) {
@@ -167,7 +166,7 @@ export class AmpRender extends setSuperClass(
       'ariaLiveValue': hasAriaLive
         ? this.element.getAttribute('aria-live')
         : 'polite',
-      'getJson': getJson,
+      'getJson': this.fetchUtil_.getFetchJsonCallback(),
     };
   }
 
@@ -209,6 +208,16 @@ export class AmpRender extends setSuperClass(
           this.togglePlaceholder(false);
         });
     });
+  }
+
+  /** @override */
+  mutationObserverCallback() {
+    const src = this.element.getAttribute('src');
+    if (src === this.src_) {
+      return;
+    }
+    this.src_ = src;
+    this.mutateProps({'getJson': this.fetchUtil_.getFetchJsonCallback()});
   }
 
   /**
