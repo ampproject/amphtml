@@ -13,8 +13,6 @@ import {parseJson, tryParseJson} from '#core/types/object/json';
 import {base64UrlEncodeFromBytes} from '#core/types/string/base64';
 import {getCryptoRandomBytesArray} from '#core/types/string/bytes';
 
-import {isExperimentOn} from '#experiments';
-
 import {Services} from '#service';
 
 import {dev, user, userAssert} from '#utils/log';
@@ -171,9 +169,6 @@ class Cid {
 
     /** @private {?Object<string, string>} */
     this.apiKeyMap_ = null;
-
-    /** @const {boolean} */
-    this.isBackupCidExpOn = isExperimentOn(this.ampdoc.win, 'amp-cid-backup');
   }
 
   /** @override */
@@ -415,7 +410,7 @@ function getStorageKey(cookieName) {
  * @return {!Promise<?string>}
  */
 function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
-  const {ampdoc, isBackupCidExpOn} = cid;
+  const {ampdoc} = cid;
   const {win} = ampdoc;
   const {disableBackup, scope} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
@@ -424,7 +419,7 @@ function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
   if (existingCookie) {
     return Promise.resolve(existingCookie);
   }
-  if (isBackupCidExpOn && !disableBackup) {
+  if (!disableBackup) {
     return Services.storageForDoc(ampdoc)
       .then((storage) => {
         const key = getStorageKey(cookieName);
@@ -449,7 +444,7 @@ function maybeGetCidFromCookieOrBackup(cid, getCidStruct) {
  * @return {!Promise<?string>}
  */
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
-  const {ampdoc, isBackupCidExpOn} = cid;
+  const {ampdoc} = cid;
   const {win} = ampdoc;
   const {disableBackup, scope} = getCidStruct;
   const cookieName = getCidStruct.cookieName || scope;
@@ -464,7 +459,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
         // If we created the cookie, update it's expiration time.
         if (/^amp-/.test(existingCookie)) {
           setCidCookie(win, cookieName, existingCookie);
-          if (isBackupCidExpOn && !disableBackup) {
+          if (!disableBackup) {
             setCidBackup(ampdoc, cookieName, existingCookie);
           }
         }
@@ -490,7 +485,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
         const relookup = getCookie(win, cookieName);
         if (!relookup) {
           setCidCookie(win, cookieName, newCookie);
-          if (isBackupCidExpOn && !disableBackup) {
+          if (!disableBackup) {
             setCidBackup(ampdoc, cookieName, newCookie);
           }
         }
