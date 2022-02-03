@@ -94,7 +94,7 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-pdp-header {
-  margin: 0 var(--shopping-attachment-horizontal-padding) !important;
+  margin: 1.5em var(--shopping-attachment-horizontal-padding) 0.5em !important;
   display: flex !important;
   justify-content: space-between !important;
 }
@@ -155,6 +155,9 @@ amp-story-shopping-attachment a {
   scroll-snap-type: x mandatory !important;
   scroll-behavior: smooth !important;
   margin-bottom: var(--shopping-attachment-vertical-padding) !important;
+  --carousel-height: calc(var(--story-page-vh) * 80 - var(--story-page-vw) * 60) !important;
+  height: var(--carousel-height) !important;
+  max-height: 100vw !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel::-webkit-scrollbar {
@@ -170,8 +173,8 @@ amp-story-shopping-attachment a {
   background-position: center !important;
   background-repeat: no-repeat !important;
   cursor: pointer !important;
-  width: calc(var(--story-page-vw) * 80);
-  height: calc(var(--story-page-vw) * 100);
+  width: calc(var(--story-page-vw) * 100 - 7.5em) !important;
+  max-width: calc(var(--carousel-height) * 1.25) !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {

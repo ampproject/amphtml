@@ -96,6 +96,19 @@
   box-shadow: 0px 0px 1px var(--i-amphtml-draggable-drawer-header-twenty-percent-gray) !important;
 }
 
+.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: rgba(0, 0, 0, .04);
+}
+
+[theme="dark"].i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close:after {
+  background: rgba(255, 255, 255, .04);
+}
+
 :not([desktop]).i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
   position: absolute !important;
   opacity: 0 !important;
