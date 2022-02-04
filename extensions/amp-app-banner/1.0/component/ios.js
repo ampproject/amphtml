@@ -29,7 +29,7 @@ export class IosAppInfo extends DocumentScopeBase {
       return null;
     }
 
-    const metaContent = DocumentInfo.forDoc(this.doc_).getMetaByName(
+    const metaContent = DocumentInfo.forDoc(this.ownerDocument).getMetaByName(
       'apple-itunes-app'
     );
     if (!metaContent) {
@@ -71,7 +71,7 @@ export class IosAppInfo extends DocumentScopeBase {
           'app-argument to allow opening an already installed application ' +
           'on iOS.'
       );
-    } else if (!UrlUtils.forDoc(this.doc_).isProtocolValid(openUrl)) {
+    } else if (!UrlUtils.forDoc(this.ownerDocument).isProtocolValid(openUrl)) {
       logger.warn(
         'BENTO-APP-BANNER',
         `The url in app-argument has invalid protocol: ${openUrl}`

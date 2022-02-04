@@ -11,7 +11,7 @@ export class UrlUtils extends DocumentScopeBase {
    */
   getAnchor_() {
     if (!this.anchor_) {
-      this.anchor_ = this.doc_.createElement('a');
+      this.anchor_ = this.ownerDocument.createElement('a');
     }
     return this.anchor_;
   }

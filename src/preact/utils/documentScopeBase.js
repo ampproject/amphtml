@@ -4,6 +4,8 @@
  * @example
  * class SomeUtility extends DocumentScopeBase {
  *   static forDoc = DocumentScopeBase.forDoc;
+ *   // or, to persist the instance:
+ *   static forDoc = DocumentScopeBase.forDocWithCache;
  *
  *   findMeta(name) {
  *     return this.doc_.head.querySelector(`meta[name=${name}]`);
@@ -17,10 +19,11 @@
 export class DocumentScopeBase {
   /**
    * @param {Document} ownerDocument
+   * @protected
    */
   constructor(ownerDocument) {
     /** @protected */
-    this.doc_ = ownerDocument;
+    this.ownerDocument = ownerDocument;
   }
 
   /**
@@ -30,6 +33,7 @@ export class DocumentScopeBase {
    * @return {new this}
    */
   static forDoc(ownerDocument) {
-    return new this(ownerDocument);
+    const SubClass = this;
+    return new SubClass(ownerDocument);
   }
 }

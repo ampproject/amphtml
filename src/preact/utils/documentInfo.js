@@ -10,7 +10,7 @@ export class DocumentInfo extends DocumentScopeBase {
    * @return {string|null}
    */
   getMetaByName(metaName) {
-    const metas = this.doc_.head.querySelectorAll('meta[name]');
+    const metas = this.ownerDocument.head.querySelectorAll('meta[name]');
     return (
       Array.from(metas)
         .find(
@@ -26,21 +26,23 @@ export class DocumentInfo extends DocumentScopeBase {
    * @return {string}
    */
   get sourceUrl() {
-    return this.doc_.location.href;
+    return this.ownerDocument.location.href;
   }
 
   /**
    * @return {string}
    */
   get canonicalUrl() {
-    const canonicalUrl = this.doc_.AMP?.canonicalUrl;
+    const canonicalUrl = this.ownerDocument.AMP?.canonicalUrl;
     if (canonicalUrl) {
       return canonicalUrl;
     }
 
-    const canonicalTag = this.doc_.querySelector('link[rel=canonical]');
+    const canonicalTag = this.ownerDocument.querySelector(
+      'link[rel=canonical]'
+    );
     if (canonicalTag) {
-      return UrlUtils.forDoc(this.doc_).parse(canonicalTag.href).href;
+      return UrlUtils.forDoc(this.ownerDocument).parse(canonicalTag.href).href;
     }
 
     return this.sourceUrl;

@@ -42,7 +42,10 @@ export class AndroidAppInfo extends DocumentScopeBase {
 
     const manifestHref = manifestLink.getAttribute('href');
 
-    UrlUtils.forDoc(this.doc_).assertHttpsUrl(manifestHref, 'manifest href');
+    UrlUtils.forDoc(this.ownerDocument).assertHttpsUrl(
+      manifestHref,
+      'manifest href'
+    );
 
     const promise = xhrUtils
       .fetchJson(manifestHref)
@@ -101,8 +104,8 @@ export class AndroidAppInfo extends DocumentScopeBase {
    * @return {string}
    */
   getAndroidIntentForUrl_(appId) {
-    const docInfo = DocumentInfo.forDoc(this.doc_);
-    const parsedCanonicalUrl = UrlUtils.forDoc(this.doc_).parse(
+    const docInfo = DocumentInfo.forDoc(this.ownerDocument);
+    const parsedCanonicalUrl = UrlUtils.forDoc(this.ownerDocument).parse(
       docInfo.canonicalUrl
     );
     const cleanProtocol = parsedCanonicalUrl.protocol.replace(':', '');
