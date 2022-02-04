@@ -1,9 +1,10 @@
 import '../amp-story-subscriptions';
 import * as Preact from '#core/dom/jsx';
 
+import {Services} from '#service';
+
 import {afterRenderPromise} from '#testing/helpers';
 
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   AmpStoryStoreService,
@@ -32,9 +33,9 @@ describes.realWin(
       doc = win.document;
 
       storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', function () {
-        return storeService;
-      });
+      env.sandbox
+        .stub(Services, 'storyStoreServiceForOrNull')
+        .returns(Promise.resolve(storeService));
 
       subscriptionsEl = (
         <amp-story-subscriptions layout="container"> </amp-story-subscriptions>
@@ -61,7 +62,7 @@ describes.realWin(
     });
 
     it('should display the blocking paywall on state update', async () => {
-      storySubscriptions.buildCallback();
+      await storySubscriptions.buildCallback();
       await nextTick();
 
       storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);

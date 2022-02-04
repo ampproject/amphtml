@@ -39,9 +39,9 @@ const DEFAULT_SANDBOX =
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
- * @param {IframeEmbedDef.Props} props
- * @param {{current: (IframeEmbedDef.Api|null)}} ref
- * @return {PreactDef.Renderable}
+ * @param {import('./types').IframeEmbedProps} props
+ * @param {import('preact').RefObject<import('./types').IframeEmbedApi>} ref
+ * @return {import('preact').VNode}
  */
 function ProxyIframeEmbedWithRef(
   {
@@ -143,6 +143,7 @@ function ProxyIframeEmbedWithRef(
 
   return (
     <IframeEmbed
+      {...rest}
       allow={allow}
       contentRef={contentRef}
       messageHandler={messageHandler}
@@ -152,7 +153,6 @@ function ProxyIframeEmbedWithRef(
       sandbox={excludeSandbox ? undefined : sandbox}
       src={src}
       title={title}
-      {...rest}
     />
   );
 }

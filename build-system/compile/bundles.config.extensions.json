@@ -179,6 +179,7 @@
     "version": "1.0",
     "options": {
       "hasCss": true,
+      "npm": true,
       "bento": true
     }
   },

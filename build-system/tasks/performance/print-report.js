@@ -69,9 +69,6 @@ function printReport(urls) {
  * Organizes a page's metrics for getReport()
  */
 class PageMetrics {
-  url;
-  metrics;
-
   /**
    * @param {string} url
    */
