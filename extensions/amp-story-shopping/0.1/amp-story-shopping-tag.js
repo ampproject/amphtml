@@ -87,8 +87,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       },
       true /** callToInitialize */
     );
-
-    this.setPageAttachmentImpl_();
   }
 
   /**
