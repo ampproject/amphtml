@@ -259,7 +259,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               href={reviewUrl}
               target="_top"
             >
-              {reviewCount} reviews
+              {reviewCount + ' '}
+              {this.localizationService_.getLocalizedString(
+                LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL,
+                this.element
+              )}
             </a>
             )
           </span>
