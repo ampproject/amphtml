@@ -75,7 +75,7 @@ function setAttribute(element: Element, name: string, value: any) {
 export function createElement(
   tag: Tag,
   props: Props,
-  ...children: any[]
+  ...children: Child[]
 ): Element {
   if (typeof tag !== 'string') {
     return tag({...props, children});
