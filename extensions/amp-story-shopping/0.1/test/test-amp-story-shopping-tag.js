@@ -6,8 +6,10 @@ import '../amp-story-shopping';
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
+
 import {registerServiceBuilder} from 'src/service-helpers';
 
+import {AmpStoryPageAttachment} from '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
 import {
   Action,
   StateProperty,
@@ -15,7 +17,6 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStoryShoppingAttachment} from '../amp-story-shopping-attachment';
 import '../amp-story-shopping-tag';
-import {AmpStoryPageAttachment} from '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
 
 describes.realWin(
   'amp-story-shopping-tag-v0.1',

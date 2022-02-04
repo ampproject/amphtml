@@ -1,7 +1,7 @@
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {computedStyle} from '#core/dom/style';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {Services} from '#service';
 
