@@ -45,16 +45,9 @@ const DateType = {
  */
 export class DatesList {
   /**
-   * @param {string|Array<string|Date>|undefined} args
+   * @param {Array<string|Date>|undefined} dates
    */
-  constructor(args) {
-    let dates;
-    if (typeof args === 'string') {
-      dates = [args];
-    } else {
-      dates = args || [];
-    }
-
+  constructor(dates = []) {
     /** @private @const */
     this.rrulestrs_ = dates
       .filter((d) => this.getDateType_(d) === DateType.RRULE)

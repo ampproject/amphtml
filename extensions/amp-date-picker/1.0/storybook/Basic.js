@@ -2,7 +2,8 @@ import * as Preact from '#preact';
 import {useRef} from '#preact';
 
 import {BentoDatePicker} from '../component';
-import {getFormattedDate, localeMap} from '../date-helpers';
+import {getFormattedDate} from '../date-helpers';
+import {localeMap} from '../parsers';
 import {useDatePicker} from '../use-date-picker';
 
 const today = new Date();

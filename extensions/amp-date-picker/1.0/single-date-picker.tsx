@@ -22,7 +22,8 @@ import {ContainWrapper} from '#preact/component';
 
 import {BaseDatePicker} from './base-date-picker';
 import {DateFieldNameByType, FORM_INPUT_SELECTOR, TAG} from './constants';
-import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
+import {getCurrentDate, getFormattedDate} from './date-helpers';
+import {parseDate} from './parsers';
 import {SingleDatePickerAPI, SingleDatePickerProps} from './types';
 import {DatePickerContext} from './use-date-picker';
 import {useDatePickerInput} from './use-date-picker-input';

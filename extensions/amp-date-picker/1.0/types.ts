@@ -1,4 +1,4 @@
-export type DateSelector = Array<Date | string> | string;
+export type DateSelector = Array<Date | string>;
 export type DatePickerMode = 'static' | 'overlay';
 export type DatePickerType = 'single' | 'range';
 export type DateFieldType = 'input' | 'start-input' | 'end-input';

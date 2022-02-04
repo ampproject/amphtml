@@ -1,4 +1,3 @@
-import {expect} from 'chai';
 import {format} from 'date-fns';
 import {mount} from 'enzyme';
 import {RRule} from 'rrule';
@@ -650,7 +649,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="single"
           initialVisibleMonth={new Date(2022, 0)}
-          blocked={rrule.toString()}
+          blocked={[rrule.toString()]}
         ></DatePicker>
       );
 
@@ -836,7 +835,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="single"
           initialVisibleMonth={new Date(2022, 0)}
-          highlighted={rrule.toString()}
+          highlighted={[rrule.toString()]}
         ></DatePicker>
       );
 
