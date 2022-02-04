@@ -1,6 +1,8 @@
 import '../amp-story-subscriptions';
 import * as Preact from '#core/dom/jsx';
 
+import {Services} from '#service';
+
 import {afterRenderPromise} from '#testing/helpers';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -32,9 +34,9 @@ describes.realWin(
       doc = win.document;
 
       storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', function () {
-        return storeService;
-      });
+      env.sandbox
+        .stub(Services, 'storyStoreServiceForOrNull')
+        .returns(Promise.resolve(storeService));
 
       subscriptionsEl = (
         <amp-story-subscriptions layout="container"> </amp-story-subscriptions>
