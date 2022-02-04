@@ -42,6 +42,10 @@ function getTestConfig() {
       shippedProposals: true,
     },
   ];
+  const presetTypescript = [
+    '@babel/preset-typescript',
+    {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
+  ];
   const replacePlugin = getReplacePlugin();
   const replaceGlobalsPlugin = getReplaceGlobalsPlugin();
   const testPlugins = [
@@ -49,6 +53,7 @@ function getTestConfig() {
     argv.coverage ? instanbulPlugin : null,
     replacePlugin,
     replaceGlobalsPlugin,
+    './build-system/babel-plugins/babel-plugin-mangle-object-values',
     './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
@@ -57,12 +62,18 @@ function getTestConfig() {
     './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);
-  const testPresets = [presetEnv];
+  const testPresets = [presetTypescript, presetEnv];
   return {
     compact: false,
     plugins: testPlugins,
     presets: testPresets,
     sourceMaps: 'inline',
+    assumptions: {
+      constantSuper: true,
+      noClassCalls: true,
+      setClassMethods: true,
+      setPublicClassFields: true,
+    },
   };
 }
 

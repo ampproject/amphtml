@@ -1441,6 +1441,9 @@ TEST(ValidatorTest, RulesMakeSense) {
       if (tag_spec.has_cdata()) {
         bool useful_cdata_spec = false;
         EXPECT_GE(tag_spec.cdata().max_bytes(), -2);
+        if (tag_spec.cdata().max_bytes() == -1) {
+          useful_cdata_spec = true;
+        }
         if (tag_spec.cdata().max_bytes() >= 0) {
           useful_cdata_spec = true;
           EXPECT_TRUE(tag_spec.cdata().has_max_bytes_spec_url())
@@ -1537,26 +1540,12 @@ TEST(ValidatorTest, RulesMakeSense) {
                  "octet-stream (during SwG encryption), or text/plain";
         }
         if (tag_spec.cdata().has_cdata_regex() ||
-            tag_spec.cdata().has_mandatory_cdata()) {
+            tag_spec.cdata().has_mandatory_cdata() ||
+            tag_spec.cdata().has_whitespace_only()) {
           useful_cdata_spec = true;
         }
-        {
-          // The list of tag specs whose `useful_cdata_spec` is false.
-          // TODO(b/215586283): Remove this allowlist by using `if` statements
-          // setting variable `usefulCdataSpec` to be true.
-          const absl::flat_hash_set<absl::string_view> allowlist{
-              "amphtml module LTS engine script",
-              "amphtml module engine script",
-              "amphtml nomodule LTS engine script",
-              "amphtml nomodule engine script",
-              "style amp-custom-length-check",
-          };
-          if (!allowlist.contains(tag_spec.spec_name())) {
-            EXPECT_TRUE(useful_cdata_spec)
-                << "Tag spec '" << tag_spec_name
-                << "' must define a useful cdata spec";
-          }
-        }
+        EXPECT_TRUE(useful_cdata_spec) << "Tag spec '" << tag_spec_name
+                                       << "' must define a useful cdata spec";
         EXPECT_TRUE(RE2(tag_spec.cdata().cdata_regex()).ok());
         for (const ReferencePoint& reference_point :
              tag_spec.reference_points()) {

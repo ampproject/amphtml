@@ -6,7 +6,6 @@ const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
 const open = require('open');
 const path = require('path');
-const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const wrappers = require('../compile/compile-wrappers');
 const {
@@ -16,15 +15,12 @@ const {cyan, green, red} = require('kleur/colors');
 const {generateBentoRuntimeEntrypoint} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {getSourceRoot} = require('../compile/helpers');
+const {massageSourcemaps} = require('./sourcemaps');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
-
-/** @type {Remapping.default} */
-const remapping = /** @type {*} */ (Remapping);
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -131,12 +127,7 @@ async function compileBentoRuntime(options) {
   const filename = `${srcDir}/${srcFilename}`;
   const fileSource = generateBentoRuntimeEntrypoint();
   await fs.outputFile(filename, fileSource);
-  await doBuildJs(jsBundles, 'bento.js', {
-    ...options,
-    // The pre-closure babel step wants the entry file to be generated earlier.
-    // Much simpler to generate it here and use esbuild instead.
-    esbuild: true,
-  });
+  await doBuildJs(jsBundles, 'bento.js', options);
 }
 
 /**
@@ -694,52 +685,6 @@ async function getDependencies(entryPoint, options) {
     plugins: [babelPlugin],
   });
   return Object.keys(result.metafile?.inputs ?? {});
-}
-
-/**
- * @param {!Array<string|object>} sourcemaps
- * @param {Map<string, string|object>} babelMaps
- * @param {*} options
- * @return {string}
- */
-function massageSourcemaps(sourcemaps, babelMaps, options) {
-  const root = process.cwd();
-  const remapped = remapping(
-    sourcemaps,
-    (f) => {
-      if (f.includes('__SOURCE__')) {
-        return null;
-      }
-      const file = path.join(root, f);
-      // The Babel tranformed file and the original file have the same path,
-      // which makes it difficult to distinguish during remapping's load phase.
-      // We perform some manual path mangling to destingish the babel files
-      // (which have a sourcemap) from the actual source file by pretending the
-      // source file exists in the '__SOURCE__' root directory.
-      const map = babelMaps.get(file);
-      if (!map) {
-        throw new Error(`failed to find sourcemap for babel file "${f}"`);
-      }
-      return {
-        ...map,
-        sourceRoot: path.posix.join('/__SOURCE__/', path.dirname(f)),
-      };
-    },
-    !argv.full_sourcemaps
-  );
-
-  remapped.sources = remapped.sources.map((source) => {
-    if (source?.startsWith('/__SOURCE__/')) {
-      return source.slice('/__SOURCE__/'.length);
-    }
-    return source;
-  });
-  remapped.sourceRoot = getSourceRoot(options);
-  if (remapped.file) {
-    remapped.file = path.basename(remapped.file);
-  }
-
-  return remapped.toString();
 }
 
 module.exports = {

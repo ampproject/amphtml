@@ -20,8 +20,6 @@ import {padStart} from '#core/types/string';
 import {utf8Decode} from '#core/types/string/bytes';
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
-import {isExperimentOn} from '#experiments';
-
 import {Services} from '#service';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
 import {installUrlReplacementsForEmbed} from '#service/url-replacements-impl';
@@ -48,6 +46,7 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -407,6 +406,14 @@ export class AmpA4A extends AMP.BaseElement {
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.validateStickyAd();
+
+    this.uiHandler
+      .getScrollPromiseForStickyAd()
+      .then(() => this.uiHandler.maybeInitStickyAd());
+
+    if (this.uiHandler.isStickyAd()) {
+      chunk(this.element, () => this.layoutCallback(), ChunkPriority_Enum.LOW);
+    }
 
     // Disable crypto key fetching if we are not going to use it in no-signing path.
     // TODO(ccordry): clean up with no-signing launch.
@@ -1340,15 +1347,10 @@ export class AmpA4A extends AMP.BaseElement {
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
 
-    return Promise.all([
-      this.adPromise_,
-      this.uiHandler.getScrollPromiseForStickyAd(),
-    ])
-      .then((values) => {
+    return this.adPromise_
+      .then((creativeMetaData) => {
         checkStillCurrent();
 
-        this.uiHandler.maybeInitStickyAd();
-        const creativeMetaData = values[0];
         if (this.isCollapsed_) {
           return Promise.resolve();
         }
@@ -2542,13 +2544,7 @@ export function signatureVerifierFor(win) {
  */
 export function isPlatformSupported(win) {
   // Require Shadow DOM support for a4a.
-  if (
-    !isNative(win.Element.prototype.attachShadow) &&
-    isExperimentOn(win, 'disable-a4a-non-sd')
-  ) {
-    return false;
-  }
-  return true;
+  return isNative(win.Element.prototype.attachShadow);
 }
 
 /**

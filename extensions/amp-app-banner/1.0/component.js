@@ -8,9 +8,9 @@ import {logger} from '#preact/logger';
 import {useOwnerDocument} from '#preact/owner-document';
 import {platformUtils} from '#preact/utils/platform';
 
-import {AndroidAppInfo} from './android';
 import {useStyles} from './component.jss';
-import {IosAppInfo} from './ios';
+import {AndroidAppInfo} from './utils/android';
+import {IosAppInfo} from './utils/ios';
 
 /**
  * The raw App Banner component; no platform-specific logic

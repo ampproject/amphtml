@@ -1,7 +1,7 @@
 import {logger} from '#preact/logger';
 import {platformUtils} from '#preact/utils/platform';
 
-import {IosAppInfo} from '../component/ios';
+import {IosAppInfo} from '../utils/ios';
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   /** @type {IosAppInfo} */
