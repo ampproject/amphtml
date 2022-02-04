@@ -19,7 +19,7 @@ amp-story-subscriptions.i-amphtml-story-subscriptions-visible {
 
 /** Black opacity overlay. Only on blocking subscription dialog. */
 amp-story-subscriptions::before {
-  content: "" !important;
+  content: '' !important;
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -28,10 +28,10 @@ amp-story-subscriptions::before {
   background: #000000 !important;
   opacity: 0 !important;
   pointer-events: auto !important;
-  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1) !important;
 }
 
 amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
   opacity: 0.55 !important;
-  transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: opacity 0.2s cubic-bezier(0, 0, 0.2, 1) !important;
 }
