@@ -43,11 +43,17 @@ function prBuildWorkflow() {
     timedExecOrDie('amp validator-webui');
   }
 
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
+  if (
+    buildTargetsInclude(
+      Targets.HTML_FIXTURES,
+      Targets.RUNTIME,
+      Targets.VALIDATOR
+    )
+  ) {
     timedExecOrDie('amp validator');
   }
 
-  if (buildTargetsInclude(Targets.HTML_FIXTURES, Targets.VALIDATOR)) {
+  if (buildTargetsInclude(Targets.VALIDATOR)) {
     timedExecOrDie('amp validator-cpp');
   }
 
