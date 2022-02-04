@@ -31,6 +31,10 @@ function getUnminifiedConfig() {
       shippedProposals: true,
     },
   ];
+  const presetTypescript = [
+    '@babel/preset-typescript',
+    {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
+  ];
   const replacePlugin = getReplacePlugin();
   const unminifiedPlugins = [
     './build-system/babel-plugins/babel-plugin-jsx-style-object',
@@ -46,7 +50,7 @@ function getUnminifiedConfig() {
     './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);
-  const unminifiedPresets = [presetEnv];
+  const unminifiedPresets = [presetTypescript, presetEnv];
   return {
     compact: false,
     plugins: unminifiedPlugins,
@@ -56,6 +60,7 @@ function getUnminifiedConfig() {
       constantSuper: true,
       noClassCalls: true,
       setClassMethods: true,
+      setPublicClassFields: true,
     },
   };
 }
