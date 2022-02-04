@@ -6,6 +6,7 @@ import '../amp-story-shopping';
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
+import {registerServiceBuilder} from 'src/service-helpers';
 
 import {
   Action,
@@ -14,7 +15,7 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStoryShoppingAttachment} from '../amp-story-shopping-attachment';
 import '../amp-story-shopping-tag';
-import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
+import {AmpStoryPageAttachment} from '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
 
 describes.realWin(
   'amp-story-shopping-tag-v0.1',
@@ -30,6 +31,7 @@ describes.realWin(
     let shoppingTag;
     let storeService;
     let localizationService;
+    let shoppingAttachmentEl;
 
     beforeEach(async () => {
       win = env.win;
@@ -50,6 +52,9 @@ describes.realWin(
       storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
 
       localizationService = new LocalizationService(win.document.body);
+      registerServiceBuilder(win, 'localization', function () {
+        return localizationService;
+      });
       env.sandbox
         .stub(Services, 'localizationServiceForOrNull')
         .returns(Promise.resolve(localizationService));
@@ -64,7 +69,7 @@ describes.realWin(
       shoppingTag = await shoppingTagEl.getImpl();
 
       // Set up the shopping attachment.
-      const shoppingAttachmentEl = win.document.createElement(
+      shoppingAttachmentEl = win.document.createElement(
         'amp-story-shopping-attachment'
       );
       shoppingAttachmentEl.getAmpDoc = () => ampdoc;
@@ -101,6 +106,19 @@ describes.realWin(
       expect(shoppingTag.isLayoutSupported(Layout_Enum.CONTAINER)).to.be.true;
     });
 
+    it('should open on click', async () => {
+      const pageAttachmentEl = shoppingAttachmentEl.querySelector(
+        'amp-story-page-attachment'
+      );
+      const pageAttachment = new AmpStoryPageAttachment(pageAttachmentEl);
+      const pageAttachmentClickSpy = env.sandbox.spy(pageAttachment, 'open');
+      pageAttachmentEl.getImpl = Promise.resolve(pageAttachment);
+      env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
+        shoppingTagEl.click();
+        expect(pageAttachmentClickSpy).to.be.calledOnce();
+      });
+    });
+
     it('should set active product in store service when shopping tag is clicked', async () => {
       const tagData = {
         'productId': 'sunglasses',
@@ -110,7 +128,7 @@ describes.realWin(
           '/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png',
       };
 
-      await shoppingTagEl.click();
+      shoppingTagEl.click();
 
       env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
         expect(
