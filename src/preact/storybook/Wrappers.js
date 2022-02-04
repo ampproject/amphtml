@@ -1,3 +1,4 @@
+// @ts-ignore
 import {boolean, object, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
