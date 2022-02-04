@@ -1321,7 +1321,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     return waitForElementsWithUnresolvedAudio(this.element).then(() =>
       Array.prototype.some.call(
         ampVideoEls,
-        (video) => !video.hasAttribute('noaudio') && parseFloat(video.getAttribute('volume')) !== 0
+        (video) =>
+          !video.hasAttribute('noaudio') &&
+          parseFloat(video.getAttribute('volume')) !== 0
       )
     );
   }
