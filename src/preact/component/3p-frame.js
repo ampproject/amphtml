@@ -20,7 +20,6 @@ import {
   getBootstrapUrl,
   getDefaultBootstrapBaseUrl,
 } from '../../3p-frame';
-import {parseUrlDeprecated} from '../../url';
 
 /** @type {Object<string,function():void>} 3p frames for that type. */
 export const countGenerators = {};
@@ -105,7 +104,7 @@ function ProxyIframeEmbedWithRef(
     };
     setNameAndSrc({
       name: JSON.stringify({
-        'host': parseUrlDeprecated(src).hostname,
+        'host': new URL(src, win.location.toString()).hostname,
         'bootstrap': getBootstrapUrl(type),
         'type': type,
         // "name" must be unique across iframes, so we add a count.
