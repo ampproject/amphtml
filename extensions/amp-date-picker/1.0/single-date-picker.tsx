@@ -1,5 +1,4 @@
 import {isValid} from 'date-fns';
-import {addDays} from 'date-fns/esm';
 // TODO: Fix this
 // eslint-disable-next-line local/no-import
 import {ComponentProps, Ref} from 'preact';
@@ -26,6 +25,7 @@ import {DateFieldNameByType, FORM_INPUT_SELECTOR, TAG} from './constants';
 import {getCurrentDate, getFormattedDate, parseDate} from './date-helpers';
 import {SingleDatePickerAPI, SingleDatePickerProps} from './types';
 import {DatePickerContext} from './use-date-picker';
+import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
 import {useDay} from './use-day';
 
@@ -45,46 +45,35 @@ function SingleDatePickerWithRef(
   }: SingleDatePickerProps,
   ref: Ref<SingleDatePickerAPI>
 ) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLElement>(null);
 
   const [hiddenInputProps, setHiddenInputProps] =
     useState<ComponentProps<'input'>>();
-  // This allow the calendar to navigate to a new month when the date changes
-  const [date, _setDate] = useState<Date>();
+
   const [month, setMonth] = useState<Date>(initialVisibleMonth);
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
   const {blockedDates} = useDay();
 
+  const dateInput = useDatePickerInput((date) =>
+    getFormattedDate(date, format, locale)
+  );
+
+  /**
+   * Sets the selected date, month, and input value
+   */
   const handleSetDate = useCallback(
     (date: Date) => {
-      _setDate(date);
       setMonth(date);
-      if (inputRef.current) {
-        inputRef.current.value = getFormattedDate(date, format, locale);
-      }
+      dateInput.handleSetDate(date);
     },
-    [format, locale]
+    [dateInput]
   );
 
-  const clear = useCallback(() => {
-    _setDate(undefined);
-    setMonth(initialVisibleMonth);
-    if (inputRef.current) {
-      inputRef.current.value = '';
-    }
-  }, [initialVisibleMonth]);
-
-  const today = useCallback(
-    ({offset = 0} = {}) => {
-      const date = addDays(getCurrentDate(), offset);
-      handleSetDate(date);
-    },
-    [handleSetDate]
-  );
-
-  const setDate = useCallback(
+  /**
+   * Sets a date if it is available. Closes the date picker in overlay mode.
+   */
+  const selectDate = useCallback(
     (date: Date) => {
       if (blockedDates.contains(date)) {
         return;
@@ -97,15 +86,35 @@ function SingleDatePickerWithRef(
     [blockedDates, handleSetDate, openAfterSelect, transitionTo, mode]
   );
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      clear,
-      today,
-      setDate,
-    }),
-    [clear, today, setDate]
+  /**
+   * For inputs that are valid dates, update the date-picker value.
+   */
+  const handleInput = useCallback(
+    (e: InputEvent) => {
+      const {target} = e;
+      if ((target as HTMLInputElement).type === 'hidden') {
+        return;
+      }
+
+      const date = parseDate(
+        (target as HTMLInputElement).value,
+        format,
+        locale
+      );
+      if (date && isValid(date)) {
+        selectDate(date);
+      }
+    },
+    [format, locale, selectDate]
   );
+
+  /**
+   * Resets the date and input value and returns to the initial month
+   */
+  const clear = useCallback(() => {
+    dateInput.clear();
+    setMonth(initialVisibleMonth);
+  }, [initialVisibleMonth, dateInput]);
 
   /**
    * Generate a name for a hidden input.
@@ -136,6 +145,16 @@ function SingleDatePickerWithRef(
     [id, onError]
   );
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      clear,
+      today: dateInput.setToToday,
+      setDate: selectDate,
+    }),
+    [clear, dateInput, selectDate]
+  );
+
   useEffect(() => {
     const form = closestAncestorElementBySelector(
       containerRef.current!,
@@ -146,11 +165,11 @@ function SingleDatePickerWithRef(
       inputSelector
     ) as HTMLInputElement;
     if (inputElement) {
-      inputRef.current = inputElement;
+      dateInput.ref.current = inputElement;
       if (inputElement.value) {
         const parsedDate = parseDate(inputElement.value, format, locale);
         if (parsedDate) {
-          _setDate(parsedDate);
+          dateInput.setDate(parsedDate);
         }
       }
     } else if (mode === 'static' && !!form) {
@@ -165,40 +184,18 @@ function SingleDatePickerWithRef(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /**
-   * For inputs that are valid dates, update the date-picker value.
-   */
-  const handleInput = useCallback(
-    (e: InputEvent) => {
-      const {target} = e;
-      if ((target as HTMLInputElement).type === 'hidden') {
-        return;
-      }
-
-      const date = parseDate(
-        (target as HTMLInputElement).value,
-        format,
-        locale
-      );
-      if (date && isValid(date)) {
-        setDate(date);
-      }
-    },
-    [format, locale, setDate]
-  );
-
   useEffect(() => {
     // Since we are passing this ref directly into the container, we can assume
     // that containerRef.current is defined in this case
     const containerEl = containerRef.current!;
     const document = containerEl.ownerDocument;
-    const inputEl = inputRef.current;
+    const inputEl = dateInput.ref.current;
 
     if (!document) {
       return;
     }
     const handleFocus = (event: FocusEvent) => {
-      if (event.target === inputRef.current) {
+      if (event.target === dateInput.ref.current) {
         transitionTo('overlay-open-input');
       }
     };
@@ -239,23 +236,29 @@ function SingleDatePickerWithRef(
       inputEl?.removeEventListener('change', handleInput);
       inputEl?.removeEventListener('keydown', handleInputKeydown);
     };
-  }, [transitionTo, mode, handleInput]);
+  }, [transitionTo, mode, handleInput, dateInput]);
 
   return (
     <ContainWrapper
       ref={containerRef}
-      data-date={date && getFormattedDate(date, format, locale)}
+      data-date={
+        dateInput.date && getFormattedDate(dateInput.date, format, locale)
+      }
     >
-      <DatePickerContext.Provider value={{selectedDate: date, type: 'single'}}>
+      <DatePickerContext.Provider
+        value={{selectedDate: dateInput.date, type: 'single'}}
+      >
         {children}
-        {hiddenInputProps && <input ref={inputRef} {...hiddenInputProps} />}
+        {hiddenInputProps && (
+          <input ref={dateInput.ref} {...hiddenInputProps} />
+        )}
         {isOpen && (
           <BaseDatePicker
             mode="single"
-            selected={date}
+            selected={dateInput.date}
             // TODO: This might be a bug in ReactDayPicker types
             // @ts-ignore
-            onSelect={setDate}
+            onSelect={selectDate}
             locale={locale}
             month={month}
             monthFormat={monthFormat}

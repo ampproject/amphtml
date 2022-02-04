@@ -85,6 +85,8 @@ import {DEFAULT_LOCALE, ISO_8601} from './constants';
 
 import {DEFAULT_FORMAT} from '../0.1/constants';
 
+// This is a map to convert moment.js locale strings to dateFns locale objects
+// It includes most locales, but some more obscure locales were not included in both
 export const localeMap: {[key: string]: Locale} = {
   'en': enUS,
   'af': af,
@@ -169,10 +171,8 @@ export const localeMap: {[key: string]: Locale} = {
 
 /**
  *
- * Convert a moment locale string to a date-fns locale object
- * If the string does not exist in the map, falls back to default locale
- * @param {string} localeString
- * @return {Locale} locale
+ * Convert a moment locale string to a date-fns locale object.
+ * If the string does not exist in the map, falls back to default locale.
  */
 export function getLocale(localeString: string) {
   return localeMap[localeString] || localeMap[DEFAULT_LOCALE];
@@ -201,10 +201,6 @@ export function parseDate(
 
 /**
  * Formats a date in the page's locale and the element's configured format.
- * @param {?Date} date
- * @param {string=} dateFormat
- * @param {string=} locale
- * @return {string}
  */
 export function getFormattedDate(
   date: Date,
@@ -222,8 +218,8 @@ export function getFormattedDate(
 }
 
 /**
- * Returns today's date as a Date object
- * @return {Date}
+ * Returns today's date as a Date object.
+ * This is stubbed for testing.
  */
 export function getCurrentDate() {
   return startOfToday();

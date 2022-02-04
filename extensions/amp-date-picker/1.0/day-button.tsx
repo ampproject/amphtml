@@ -8,12 +8,12 @@ import {useDay} from './use-day';
 export function DayButton({date, displayMonth}: DayProps) {
   const buttonRef = useRef();
 
-  const day = useDayRender(date, displayMonth, buttonRef);
+  const {buttonProps} = useDayRender(date, displayMonth, buttonRef);
   const {getLabel, isDisabled, isHighlighted} = useDay();
 
   return (
     <Button
-      {...day.buttonProps}
+      {...buttonProps}
       ref={buttonRef}
       aria-label={getLabel(date)}
       aria-disabled={isDisabled(date)}
