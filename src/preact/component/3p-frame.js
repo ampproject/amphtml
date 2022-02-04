@@ -20,6 +20,7 @@ import {
   getBootstrapUrl,
   getDefaultBootstrapBaseUrl,
 } from '../../3p-frame';
+import {parseUrlDeprecated} from '../../url';
 
 /** @type {Object<string,function():void>} 3p frames for that type. */
 export const countGenerators = {};
@@ -38,9 +39,9 @@ const DEFAULT_SANDBOX =
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
- * @param {IframeEmbedDef.Props} props
- * @param {{current: (IframeEmbedDef.Api|null)}} ref
- * @return {PreactDef.Renderable}
+ * @param {import('./types').IframeEmbedProps} props
+ * @param {import('preact').RefObject<import('./types').IframeEmbedApi>} ref
+ * @return {import('preact').VNode}
  */
 function ProxyIframeEmbedWithRef(
   {
@@ -104,7 +105,7 @@ function ProxyIframeEmbedWithRef(
     };
     setNameAndSrc({
       name: JSON.stringify({
-        'host': new URL(src, win.location.toString()).hostname,
+        'host': parseUrlDeprecated(src).hostname,
         'bootstrap': getBootstrapUrl(type),
         'type': type,
         // "name" must be unique across iframes, so we add a count.
@@ -142,6 +143,7 @@ function ProxyIframeEmbedWithRef(
 
   return (
     <IframeEmbed
+      {...rest}
       allow={allow}
       contentRef={contentRef}
       messageHandler={messageHandler}
@@ -151,7 +153,6 @@ function ProxyIframeEmbedWithRef(
       sandbox={excludeSandbox ? undefined : sandbox}
       src={src}
       title={title}
-      {...rest}
     />
   );
 }
