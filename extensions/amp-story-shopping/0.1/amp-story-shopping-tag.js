@@ -39,10 +39,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
-    /** @param {boolean} */
+    /** @param {boolean} element */
     this.hasAppendedInnerShoppingTagEl_ = false;
 
-    /** @param {?ShoppingConfigDataDef} */
+    /** @param {!ShoppingConfigDataDef} tagData */
     this.tagData_ = null;
   }
 
@@ -138,21 +138,13 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     });
   }
 
-  /** @private */
+  /**
+   * @private
+   */
   onClick_() {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': this.tagData_,
     });
-    this.openPageAttachment_();
-  }
-
-  /** @private */
-  openPageAttachment_() {
-    this.element
-      .closest('amp-story-page')
-      .querySelector('amp-story-page-attachment')
-      .getImpl()
-      .then((impl) => impl.open());
   }
 
   /** @override */
