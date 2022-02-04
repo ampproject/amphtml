@@ -104,7 +104,7 @@ function ProxyIframeEmbedWithRef(
     };
     setNameAndSrc({
       name: JSON.stringify({
-        'host': new URL(src, win.location).hostname,
+        'host': new URL(src, win.location.toString()).hostname,
         'bootstrap': getBootstrapUrl(type),
         'type': type,
         // "name" must be unique across iframes, so we add a count.
