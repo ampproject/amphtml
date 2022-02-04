@@ -5,25 +5,9 @@ import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoDateDisplay} from './component';
 
-import {mustache} from '../../amp-mustache/1.0/bento-mustache';
+export const TAG = 'bento-date-display';
 
-export class BaseElement extends PreactBaseElement {
-  /** @override */
-  checkPropsPostMutations() {
-    const template = this.element.querySelector('template')./*OK*/ innerHTML;
-    if (!template) {
-      // show error
-      return;
-    }
-
-    this.mutateProps({
-      'render': (data) => {
-        const html = mustache.render(template, data);
-        return {'__html': html};
-      },
-    });
-  }
-}
+export class BaseElement extends PreactBaseElement {}
 
 /** @override */
 BaseElement['Component'] = BentoDateDisplay;
