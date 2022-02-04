@@ -5,7 +5,6 @@ import {Services} from '#service';
 
 import {afterRenderPromise} from '#testing/helpers';
 
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   AmpStoryStoreService,
