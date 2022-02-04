@@ -90,6 +90,11 @@ async function getValidatorJs() {
     return localJsValidatorPath;
   }
   log('Using the', cyan('wasm validator from the CDN') + '...');
+  logLocalDev(
+    '⤷ To use a locally built wasm or js validator,',
+    'run the build command from',
+    cyan('validator/README.md') + '.'
+  );
   return 'https://cdn.ampproject.org/v0/validator_wasm.js'; // eslint-disable-line local/no-forbidden-terms
 }
 
