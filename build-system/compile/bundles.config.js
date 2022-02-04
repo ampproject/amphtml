@@ -224,6 +224,10 @@ exports.extensionAliasBundles = {
     version: '1.0',
     aliasedVersion: '0.1',
   },
+  'amp-mustache': {
+    version: '0.2',
+    aliasedVersion: '1.0',
+  },
 };
 
 /**
