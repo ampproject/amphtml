@@ -10,6 +10,12 @@ import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 const TAG = 'amp-story-subscriptions';
 
 /**
+ * The attribute name used in amp-subscriptions to indicate the content is locked or not.
+ * @const {string}
+ */
+const SUBSCRIPTIONS_SECTION = 'subscriptions-section';
+
+/**
  * The index of the limited-content page, which is the page where the paywall would be triggered.
  * @const {number}
  */
@@ -33,9 +39,9 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       document.querySelectorAll('amp-story-page'),
       (pageEl, index) => {
         if (index == FIRST_PAYWALL_STORY_PAGE_INDEX) {
-          pageEl.setAttribute('subscriptions-section', 'limited-content');
+          pageEl.setAttribute(SUBSCRIPTIONS_SECTION, 'limited-content');
         } else if (index > FIRST_PAYWALL_STORY_PAGE_INDEX) {
-          pageEl.setAttribute('subscriptions-section', 'content');
+          pageEl.setAttribute(SUBSCRIPTIONS_SECTION, 'content');
         }
       }
     );
