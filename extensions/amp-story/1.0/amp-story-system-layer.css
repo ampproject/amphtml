@@ -225,7 +225,6 @@
 
 .i-amphtml-story-mute-audio-control,
 .i-amphtml-story-unmute-audio-control,
-.i-amphtml-paused-display,
 .i-amphtml-story-pause-control,
 .i-amphtml-story-play-control,
 .i-amphtml-story-mute-text,
@@ -235,14 +234,39 @@
   display: none !important;
 }
 
+/*
+  Visible to screen readers only.  
+  https://www.a11yproject.com/posts/how-to-hide-content/ 
+*/
+.i-amphtml-paused-display { 
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+} 
+
 [i-amphtml-current-page-has-audio]:not([muted]) .i-amphtml-story-mute-audio-control,
 [i-amphtml-current-page-has-audio][muted] .i-amphtml-story-unmute-audio-control {
   display: block !important;
 }
 
+/* Reset screen reader only styles when button is visible to user. */
 [desktop] .i-amphtml-paused-display,
-.i-amphtml-story-desktop-one-panel .i-amphtml-paused-display {
+.i-amphtml-story-desktop-one-panel .i-amphtml-paused-display,
+.amp-mode-keyboard-active:not([desktop]) .i-amphtml-paused-display {
   display: block !important;
+  position: inherit !important;
+  width: inherit !important;
+  height: inherit !important;
+  padding: 0 !important;
+  margin: inherit !important;
+  overflow: inherit !important;
+  clip: inherit !important;
+  white-space: inherit !important;
 }
 
 .i-amphtml-story-system-layer-buttons button[disabled][disabled] {
@@ -251,10 +275,6 @@
 
 .i-amphtml-story-has-playback-ui:not([paused]) .i-amphtml-story-pause-control,
 .i-amphtml-story-has-playback-ui[paused] .i-amphtml-story-play-control {
-  display: block !important;
-}
-
-.amp-mode-keyboard-active:not([desktop]) .i-amphtml-paused-display {
   display: block !important;
 }
 
