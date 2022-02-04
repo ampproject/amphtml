@@ -1,22 +1,8 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Observable} from '#core/data-structures/observable';
 
-import {Observable} from '../../../src/observable';
-import {Services} from '../../../src/services';
-import {devAssert} from '../../../src/log';
+import {Services} from '#service';
+
+import {devAssert} from '#utils/log';
 
 /**
  * @typedef {{
@@ -51,7 +37,7 @@ export class ScrollManager {
     /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(root.ampdoc);
 
-    /** @private {!UnlistenDef|null} */
+    /** @private {?UnlistenDef} */
     this.viewportOnChangedUnlistener_ = null;
 
     /** @private {!Observable<!./scroll-manager.ScrollEventDef>} */
@@ -95,10 +81,10 @@ export class ScrollManager {
       // In the case of shadow/embedded documents, the root element's
       // layoutRect is relative to the parent doc's origin
       const {
-        top: scrollTop,
-        left: scrollLeft,
-        width: scrollWidth,
         height: scrollHeight,
+        left: scrollLeft,
+        top: scrollTop,
+        width: scrollWidth,
       } = initRootElementRect;
 
       /** {./scroll-manager.ScrollEventDef} */
@@ -143,10 +129,10 @@ export class ScrollManager {
       const {height: initialScrollHeight, width: initialScrollWidth} = rects[0];
       // Current root layout rectangle
       const {
-        top: scrollTop,
-        left: scrollLeft,
-        width: scrollWidth,
         height: scrollHeight,
+        left: scrollLeft,
+        top: scrollTop,
+        width: scrollWidth,
       } = rects[1];
       /** {./scroll-manager.ScrollEventDef} */
       const scrollEvent = {

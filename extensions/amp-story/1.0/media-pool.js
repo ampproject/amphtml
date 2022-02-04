@@ -1,20 +1,13 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isConnectedNode} from '#core/dom';
+import {matches} from '#core/dom/query';
+import {findIndex} from '#core/types/array';
+import {getWin} from '#core/window';
 
-import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
+import {Services} from '#service';
+
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
 import {
   BlessTask,
   ELEMENT_BLESSED_PROPERTY_NAME,
@@ -28,15 +21,9 @@ import {
   UnmuteTask,
   UpdateSourcesTask,
 } from './media-tasks';
-import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
-import {dev, devAssert} from '../../../src/log';
-import {findIndex} from '../../../src/utils/array';
-import {isConnectedNode, matches} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
+
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */
@@ -82,7 +69,7 @@ export let ElementDistanceFnDef;
  * Represents a task to be executed on a media element.
  * @typedef {function(!PoolBoundElementDef, *): !Promise}
  */
-let ElementTask_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let ElementTask_1_0_Def; // eslint-disable-line local/camelcase
 
 /**
  * @const {string}
@@ -194,19 +181,6 @@ export class MediaPool {
      */
     this.blessed_ = false;
 
-    /**
-     * The default source to use for pool-created audio sources,
-     * @private @const {!Object<!MediaType, string>}
-     */
-    this.defaultSources_ = {
-      [MediaType.AUDIO]: isExperimentOn(win, 'disable-amp-story-default-media')
-        ? ''
-        : BLANK_AUDIO_SRC,
-      [MediaType.VIDEO]: isExperimentOn(win, 'disable-amp-story-default-media')
-        ? ''
-        : BLANK_VIDEO_SRC,
-    };
-
     /** @private {?Array<!AmpElement>} */
     this.ampElementsToBless_ = null;
 
@@ -271,23 +245,15 @@ export class MediaPool {
       // comparison with the itervar below, so we have to roll it by hand.
       for (let i = count; i > 0; i--) {
         // Use seed element at end of set to prevent wasting it.
-        const mediaEl = /** @type {!PoolBoundElementDef} */ (i == 1
-          ? mediaElSeed
-          : mediaElSeed.cloneNode(/* deep */ true));
+        const mediaEl = /** @type {!PoolBoundElementDef} */ (
+          i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true)
+        );
         mediaEl.addEventListener('error', this.onMediaError_, {capture: true});
-        const sources = this.getDefaultSource_(type);
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
         // In Firefox, cloneNode() does not properly copy the muted property
         // that was set in the seed. We need to set it again here.
         mediaEl.muted = true;
         mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
-        this.enqueueMediaElementTask_(
-          mediaEl,
-          new UpdateSourcesTask(this.win_, sources)
-        );
-        // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
-        // is returned.  If so, we should adjust the pool size/distribution
-        // between media types.
         this.unallocated[type].push(mediaEl);
       }
     });
@@ -310,18 +276,11 @@ export class MediaPool {
   }
 
   /**
-   * @param {!MediaType} mediaType The media type whose source should be
-   *     retrieved.
-   * @return {!Sources} The default source for the specified type of media.
+   * @return {!Sources} The default source, empty.
+   * @private
    */
-  getDefaultSource_(mediaType) {
-    const sourceStr = this.defaultSources_[mediaType];
-    if (sourceStr === undefined) {
-      dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
-      return new Sources();
-    }
-
-    return new Sources(sourceStr);
+  getDefaultSource_() {
+    return new Sources();
   }
 
   /**
@@ -544,37 +503,41 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(
       poolMediaEl,
       new SwapIntoDomTask(placeholderEl)
-    ).then(
-      () => {
-        this.maybeResetAmpMedia_(ampMediaForPoolEl);
-        this.maybeResetAmpMedia_(ampMediaForDomEl);
+    )
+      .then(() =>
+        Promise.all([
+          this.maybeResetAmpMedia_(ampMediaForPoolEl),
+          this.maybeResetAmpMedia_(ampMediaForDomEl),
+        ])
+      )
+      .then(() =>
         this.enqueueMediaElementTask_(
           poolMediaEl,
           new UpdateSourcesTask(this.win_, sources)
-        );
-        this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
-      },
-      () => {
+        )
+      )
+      .then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()))
+      .catch(() => {
         this.forceDeallocateMediaElement_(poolMediaEl);
-      }
-    );
+      });
   }
 
   /**
    * @param {?Element} componentEl
+   * @return {!Promise}
    * @private
    */
   maybeResetAmpMedia_(componentEl) {
     if (!componentEl) {
-      return;
+      return Promise.resolve();
     }
 
     if (componentEl.tagName.toLowerCase() == 'amp-audio') {
       // TODO(alanorozco): Implement reset for amp-audio
-      return;
+      return Promise.resolve();
     }
 
-    componentEl.getImpl().then((impl) => {
+    return componentEl.getImpl().then((impl) => {
       if (impl.resetOnDomChange) {
         impl.resetOnDomChange();
       }
@@ -588,13 +551,12 @@ export class MediaPool {
    *     has been reset.
    */
   resetPoolMediaElementSource_(poolMediaEl) {
-    const mediaType = this.getMediaType_(poolMediaEl);
-    const defaultSources = this.getDefaultSource_(mediaType);
+    const defaultSources = this.getDefaultSource_();
 
     return this.enqueueMediaElementTask_(
       poolMediaEl,
       new UpdateSourcesTask(this.win_, defaultSources)
-    );
+    ).then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()));
   }
 
   /**
@@ -608,11 +570,13 @@ export class MediaPool {
    */
   swapPoolMediaElementOutOfDom_(poolMediaEl) {
     const placeholderElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
-    const placeholderEl = /** @type {!PlaceholderElementDef} */ (dev().assertElement(
-      this.placeholderEls_[placeholderElId],
-      `No media element ${placeholderElId} to put back into DOM after` +
-        'eviction.'
-    ));
+    const placeholderEl = /** @type {!PlaceholderElementDef} */ (
+      dev().assertElement(
+        this.placeholderEls_[placeholderElId],
+        `No media element ${placeholderElId} to put back into DOM after` +
+          'eviction.'
+      )
+    );
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
 
     const swapOutOfDom = this.enqueueMediaElementTask_(
@@ -890,6 +854,11 @@ export class MediaPool {
       return Promise.resolve();
     }
 
+    // When a video is muted, reset its volume to the default value of 1.
+    if (mediaType == MediaType.VIDEO) {
+      domMediaEl.volume = 1;
+    }
+
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
   }
 
@@ -908,6 +877,16 @@ export class MediaPool {
 
     if (!poolMediaEl) {
       return Promise.resolve();
+    }
+
+    if (mediaType == MediaType.VIDEO) {
+      const ampVideoEl = domMediaEl.parentElement;
+      if (ampVideoEl) {
+        const volume = ampVideoEl.getAttribute('volume');
+        if (volume) {
+          domMediaEl.volume = parseFloat(volume);
+        }
+      }
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
@@ -1017,7 +996,7 @@ export class MediaPool {
     const newId = String(nextInstanceId++);
     element[POOL_MEDIA_ELEMENT_PROPERTY_NAME] = newId;
     instances[newId] = new MediaPool(
-      toWin(root.getElement().ownerDocument.defaultView),
+      getWin(root.getElement()),
       root.getMaxMediaElementCounts(),
       (element) => root.getElementDistance(element)
     );

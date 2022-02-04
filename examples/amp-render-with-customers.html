@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8" />
+    <title>My AMP Page</title>
+    <link rel="canonical" href="self.html" />
+    <meta name="viewport" content="width=device-width" />
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+    <script async custom-element="amp-render" src="https://cdn.ampproject.org/v0/amp-render-1.0.js"></script>
+    <style amp-custom>
+      p {
+        font-size: 15px;
+      }
+      .profile {
+        border: 2px solid blueviolet;
+        margin: 16px;
+        padding: 8px
+      }
+    </style>
+  </head>
+  <body>
+    <amp-render binding="always" src="./customers.json" layout="responsive" height="10000" width="500">
+      <template type="amp-mustache">
+        <h1>{{header}}</h1>
+        <h2>{{title}}</h2>
+        {{#customers}}
+          <div class="profile">
+            <amp-img src="{{picture}}" height="64" width="64"></amp-img>
+            <p>Name: {{name}}</p>
+            <p>Age: {{age}}</p>
+            <p>Company: {{company}}</p>
+            <p>Account balance: {{balance}}</p>
+            <fieldset>
+              <legend>Contact info</legend>
+              <p>
+              {{#address}}
+                Address: {{#mailing}}{{block}} {{street}}, {{city}}, {{state}} {{zip}}{{/mailing}}
+              {{/address}}
+              </p>
+              <p>Email: {{email}}</p>
+              <p>Phone: {{#phone}}{{cell}} (cell) {{home}} (home) {{work}} (work){{/phone}}</p>
+            </fieldset>
+          </div>
+        {{/customers}}
+      </template>
+    </amp-render>
+  </body>
+</html>

@@ -1,36 +1,19 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {deepEquals} from '#core/types/object/json';
 
-import {deepEquals} from '../../../src/json';
-import {dict} from '../../../src/utils/object';
+import {getData} from '#utils/event-helper';
 
 import {ENDPOINTS} from './constants';
+
 import {TwoStepsResponse} from '../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
-import {getData} from '../../../src/event-helper';
 
 export class Linkmate {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
    * @param {!../../../src/service/xhr-impl.Xhr} xhr
    * @param {!Object} linkmateOptions
+   * @param {!Object} win
    */
-  constructor(ampDoc, xhr, linkmateOptions) {
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampDoc_ = ampDoc;
-
+  constructor(ampDoc, xhr, linkmateOptions, win) {
     /** @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = xhr;
 
@@ -43,14 +26,14 @@ export class Linkmate {
     /** @private {string} */
     this.linkAttribute_ = linkmateOptions.linkAttribute;
 
-    /** @private {!Document|!ShadowRoot} */
-    this.rootNode_ = this.ampDoc_.getRootNode();
-
     /** @private {?Array<!HTMLElement>} */
     this.anchorList_ = null;
 
     /** @private {?Array<JsonObject>}*/
     this.linkmateResponse_ = null;
+
+    /** @private {?Array<JsonObject>}*/
+    this.win_ = win;
   }
 
   /**
@@ -99,10 +82,10 @@ export class Linkmate {
     const linksPayload = this.buildLinksPayload_(anchorList);
     const editPayload = this.getEditInfo_();
 
-    const payload = dict({
+    const payload = {
       'article': editPayload,
       'links': linksPayload,
-    });
+    };
 
     const fetchUrl = ENDPOINTS.LINKMATE_ENDPOINT.replace(
       '.pub_id.',
@@ -111,7 +94,7 @@ export class Linkmate {
     const postOptions = {
       method: 'POST',
       ampCors: false,
-      headers: dict({'Content-Type': 'application/json'}),
+      headers: {'Content-Type': 'application/json'},
       body: payload,
     };
 
@@ -164,10 +147,32 @@ export class Linkmate {
    * @private
    */
   getEditInfo_() {
-    return dict({
-      'name': this.rootNode_.title || null,
-      'url': this.ampDoc_.getUrl(),
-    });
+    return {
+      'name': this.getEditName_(),
+      'url': this.getLocationHref_(),
+    };
+  }
+
+  /**
+   * Retrieve edit name.
+   * @return {string}
+   * @private
+   */
+  getEditName_() {
+    let editName = null;
+    if (this.win_.document.getElementsByTagName('title').length > 0) {
+      editName = this.win_.document.getElementsByTagName('title')[0].text;
+    }
+    return editName;
+  }
+
+  /**
+   * Retrieve url of the current doc.
+   * @return {string}
+   * @private
+   */
+  getLocationHref_() {
+    return this.win_.location.href;
   }
 
   /**

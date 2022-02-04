@@ -1,43 +1,45 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getDataParamsFromAttributes} from '#core/dom';
+import {Layout_Enum} from '#core/dom/layout';
+import {toggle} from '#core/dom/style';
+import {parseQueryString} from '#core/types/string/url';
+import {getWin} from '#core/window';
+
+import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {Services} from '#service';
+
+import {userAssert} from '#utils/log';
+
+import {BaseElement} from './base-element';
+import {getSocialConfig} from './social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-1.0.css';
-import {Layout} from '../../../src/layout';
-import {PreactBaseElement} from '../../../src/preact/base-element';
-import {Services} from '../../../src/services';
-import {SocialShare} from './social-share';
-import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dict} from '../../../src/utils/object';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getSocialConfig} from './social-share-config';
-import {isExperimentOn} from '../../../src/experiments';
-import {toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
 
+/** @const {!JsonObject<string, string>} */
+const DEFAULT_RESPONSIVE_DIMENSIONS = {
+  'width': '100%',
+  'height': '100%',
+};
+
 /**
  * @private
- * @param {string} type
- * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
- * @param {!../../../src/service/platform-impl.Platform} platform
+ * @param {!Element} element
  * @return {!JsonObject|undefined}
  */
-const getTypeConfigOrUndefined = (type, viewer, platform) => {
+const getTypeConfigOrUndefined = (element) => {
+  const viewer = Services.viewerForDoc(element);
+  const platform = Services.platformFor(getWin(element));
+  const type = userAssert(
+    element.getAttribute('type'),
+    'The type attribute is required. %s',
+    element
+  );
   if (type === 'system') {
     // navigator.share unavailable
     if (!systemShareSupported(viewer, platform)) {
@@ -54,7 +56,7 @@ const getTypeConfigOrUndefined = (type, viewer, platform) => {
       return;
     }
   }
-  return /** @type {!JsonObject} */ (getSocialConfig(type)) || dict();
+  return /** @type {!JsonObject} */ (getSocialConfig(type)) || {};
 };
 
 /**
@@ -71,40 +73,94 @@ const systemShareSupported = (viewer, platform) => {
   return 'share' in navigator && !isChromeWebview;
 };
 
-class AmpSocialShare extends PreactBaseElement {
+/**
+ * @private
+ * @param {!Element} element
+ * @param {!Array<MutationRecord>} mutations
+ * @param {string} prevTypeValue
+ * @return {!JsonObject|undefined}
+ */
+const updateTypeConfig = (element, mutations, prevTypeValue) => {
+  let typeUpdated;
+  let mutatedEligibleAttribute;
+
+  // Check all mutations since we want to catch any 'data-param-*' attributes
+  mutations.forEach((mutation) => {
+    if (
+      mutation.attributeName === 'type' ||
+      mutation.attributeName === 'data-target' ||
+      mutation.attributeName === 'data-share-endpoint' ||
+      (mutation.attributeName && mutation.attributeName.includes('data-param-'))
+    ) {
+      mutatedEligibleAttribute = true;
+      typeUpdated = typeUpdated || mutation.attributeName === 'type';
+    }
+  });
+
+  // If no matching attribute changes exit and do nothing
+  if (!mutatedEligibleAttribute) {
+    return;
+  }
+
+  // If 'type' attribute was changed, remove the class of the old 'type'
+  if (typeUpdated) {
+    element.classList.remove(`amp-social-share-${prevTypeValue}`);
+  }
+
+  const typeConfig = getTypeConfigOrUndefined(element);
+  if (!typeConfig) {
+    toggle(element, false);
+    return;
+  }
+  element.classList.add(`amp-social-share-${element.getAttribute('type')}`);
+  return typeConfig;
+};
+
+class AmpSocialShare extends setSuperClass(BaseElement, AmpPreactBaseElement) {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?string} */
+    this.ampSocialShareType_ = null;
+  }
+
   /** @override */
   init() {
-    const viewer = Services.viewerForDoc(this.element);
-    const platform = Services.platformFor(window);
-    const type = userAssert(
-      this.element.getAttribute('type'),
-      'The type attribute is required. %s',
-      this.element
-    );
-    const typeConfig = getTypeConfigOrUndefined(type, viewer, platform);
+    const typeConfig = getTypeConfigOrUndefined(this.element);
     // Hide/ignore component if typeConfig is undefined
     if (!typeConfig) {
       toggle(this.element, false);
       return;
     }
+    this.ampSocialShareType_ = this.element.getAttribute('type');
+    this.element.classList.add(`amp-social-share-${this.ampSocialShareType_}`);
 
-    this.element.classList.add(`amp-social-share-${type}`);
     this.renderWithHrefAndTarget_(typeConfig);
-    const responsive =
-      this.element.getAttribute('layout') === Layout.RESPONSIVE && '100%';
-    return dict({
-      'width': responsive || this.element.getAttribute('width'),
-      'height': responsive || this.element.getAttribute('height'),
-      'color': 'currentColor',
-      'background': 'inherit',
-    });
+    if (this.element.getAttribute('layout') === Layout_Enum.RESPONSIVE) {
+      return DEFAULT_RESPONSIVE_DIMENSIONS;
+    }
+  }
+
+  /** @override */
+  mutationObserverCallback(mutations) {
+    const typeConfig = updateTypeConfig(
+      this.element,
+      mutations,
+      this.ampSocialShareType_
+    );
+    if (typeConfig) {
+      this.ampSocialShareType_ = this.element.getAttribute('type');
+      this.renderWithHrefAndTarget_(typeConfig);
+    }
   }
 
   /** @override */
   isLayoutSupported() {
     userAssert(
-      isExperimentOn(this.win, 'amp-social-share-bento'),
-      'expected amp-social-share-bento experiment to be enabled'
+      isExperimentOn(this.win, 'bento') ||
+        isExperimentOn(this.win, 'bento-social-share'),
+      'expected global "bento" or specific "bento-social-share" experiment to be enabled'
     );
     return true;
   }
@@ -118,7 +174,7 @@ class AmpSocialShare extends PreactBaseElement {
   renderWithHrefAndTarget_(typeConfig) {
     const customEndpoint = this.element.getAttribute('data-share-endpoint');
     const shareEndpoint = customEndpoint || typeConfig['shareEndpoint'] || '';
-    const urlParams = typeConfig['defaultParams'] || dict();
+    const urlParams = typeConfig['defaultParams'] || {};
     Object.assign(urlParams, getDataParamsFromAttributes(this.element));
     const hrefWithVars = addParamsToUrl(shareEndpoint, urlParams);
     const urlReplacements = Services.urlReplacementsForDoc(this.element);
@@ -137,34 +193,21 @@ class AmpSocialShare extends PreactBaseElement {
         const target = this.element.getAttribute('data-target') || '_blank';
 
         if (customEndpoint) {
-          this.mutateProps(
-            dict({
-              'endpoint': expandedUrl,
-              'target': target,
-            })
-          );
+          this.mutateProps({
+            'endpoint': expandedUrl,
+            'params': null,
+            'target': target,
+          });
         } else {
-          this.mutateProps(
-            dict({
-              'params': parseQueryString(search),
-              'target': target,
-            })
-          );
+          this.mutateProps({
+            'endpoint': null,
+            'params': parseQueryString(search),
+            'target': target,
+          });
         }
       });
   }
 }
-
-/** @override */
-AmpSocialShare['Component'] = SocialShare;
-
-AmpSocialShare['passthroughNonEmpty'] = true;
-
-/** @override */
-AmpSocialShare['props'] = {
-  'tabIndex': {attr: 'tabindex'},
-  'type': {attr: 'type'},
-};
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpSocialShare, CSS);

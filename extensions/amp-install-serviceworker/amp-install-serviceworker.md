@@ -7,22 +7,6 @@ teaser:
   text: Installs a ServiceWorker for the current page.
 ---
 
-<!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-install-serviceworker
 
 ## Usage
@@ -77,11 +61,11 @@ and `data-no-service-worker-fallback-shell-url` attributes as following:
 
 Where:
 
-- `data-no-service-worker-fallback-shell-url` specifies the link for AMP+PWA
-  shell. It's required to be on the source origin as the AMP document.
-- `data-no-service-worker-fallback-url-match` is a JavaScript regular expression
-  that describes how to match "in-shell" links vs non-in-shell links.
-- Both of these attributes must be present to trigger URL rewrite.
+-   `data-no-service-worker-fallback-shell-url` specifies the link for AMP+PWA
+    shell. It's required to be on the source origin as the AMP document.
+-   `data-no-service-worker-fallback-url-match` is a JavaScript regular expression
+    that describes how to match "in-shell" links vs non-in-shell links.
+-   Both of these attributes must be present to trigger URL rewrite.
 
 URL rewrite works as following:
 
@@ -127,7 +111,7 @@ The URL of the ServiceWorker to register, which must use `https` protocol.
 
 ### `data-iframe-src`
 
-The URL of an HTML document that installs a ServiceWorker. The URL must use `https` protocol.
+The URL of an HTML document that installs a ServiceWorker. The URL must use `https` protocol. This attribute is necessary if the AMP page is going to be served from an AMP Cache.
 
 ### `data-scope`
 
@@ -159,4 +143,4 @@ The value must be an URL on the same origin as the AMP document itself.
 
 ## Validation
 
-See [amp-install-serviceworker rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/validator-amp-install-serviceworker.protoascii) in the AMP validator specification.
+See [amp-install-serviceworker rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-install-serviceworker/validator-amp-install-serviceworker.protoascii) in the AMP validator specification.

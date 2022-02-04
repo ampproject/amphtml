@@ -1,20 +1,11 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import * as fakeTimers from '@sinonjs/fake-timers';
 
-import * as lolex from 'lolex';
+import {Deferred} from '#core/data-structures/promise';
+import {Signals} from '#core/data-structures/signals';
+
+import {macroTask} from '#testing/helpers';
+
+import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
   AmpStoryEventTracker,
   AnalyticsEvent,
@@ -28,11 +19,6 @@ import {
   VisibilityTracker,
   trackerTypeForTesting,
 } from '../events';
-import {AmpdocAnalyticsRoot} from '../analytics-root';
-import {Deferred} from '../../../../src/utils/promise';
-import {Signals} from '../../../../src/utils/signals';
-import {macroTask} from '../../../../testing/yield';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('Events', {amp: 1}, (env) => {
   let win;
@@ -41,9 +27,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
   let handler;
   let analyticsElement;
   let target;
-  let target2;
   let child;
-  let child2;
 
   beforeEach(() => {
     win = env.win;
@@ -58,17 +42,9 @@ describes.realWin('Events', {amp: 1}, (env) => {
     target.classList.add('target');
     win.document.body.appendChild(target);
 
-    target2 = win.document.createElement('div');
-    target2.classList.add('target2');
-    win.document.body.appendChild(target2);
-
     child = win.document.createElement('div');
     child.classList.add('child');
     target.appendChild(child);
-
-    child2 = win.document.createElement('div');
-    child2.classList.add('child2');
-    target2.appendChild(child2);
   });
 
   describe('AnalyticsEvent', () => {
@@ -1179,7 +1155,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
     let tracker;
 
     beforeEach(() => {
-      clock = lolex.install({target: root.ampdoc.win});
+      clock = fakeTimers.withGlobal(root.ampdoc.win).install();
       tracker = root.getTracker(AnalyticsEventType.TIMER, TimerEventTracker);
     });
 
@@ -1820,12 +1796,12 @@ describes.realWin('Events', {amp: 1}, (env) => {
     let saveCallback;
     let matchEmptySpec;
     let matchFunc;
-    let getAmpElementSpy;
+    let getElementSpy;
 
     beforeEach(() => {
       tracker = root.getTracker('visible', VisibilityTracker);
       visibilityManagerMock = env.sandbox.mock(root.getVisibilityManager());
-      getAmpElementSpy = env.sandbox.spy(root, 'getAmpElement');
+      getElementSpy = env.sandbox.spy(root, 'getElement');
       tracker.waitForTrackers_['ini-load'] = root.getTracker(
         'ini-load',
         IniLoadTracker
@@ -1833,6 +1809,16 @@ describes.realWin('Events', {amp: 1}, (env) => {
       iniLoadTrackerMock = env.sandbox.mock(
         tracker.waitForTrackers_['ini-load']
       );
+
+      target.parentNode.removeChild(target);
+
+      target = win.document.createElement('amp-list');
+      target.classList.add('target');
+      win.document.body.appendChild(target);
+
+      child = win.document.createElement('div');
+      child.classList.add('child');
+      target.appendChild(child);
 
       target.classList.add('i-amphtml-element');
       targetSignals = new Signals();
@@ -1976,7 +1962,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
           eventResolver
         );
         expect(res).to.be.a('function');
-        const unlistenReady = getAmpElementSpy.returnValues[0];
+        const unlistenReady = getElementSpy.returnValues[0];
         // #getAmpElement Promise
         await unlistenReady;
         // #assertMeasurable_ Promise
@@ -1998,9 +1984,9 @@ describes.realWin('Events', {amp: 1}, (env) => {
         let eventsSpy;
         let res;
         let error;
+        let target2;
 
         beforeEach(() => {
-          toggleExperiment(win, 'visibility-trigger-improvements', true);
           readyPromise = Promise.resolve();
           unlisten = env.sandbox.spy();
           unlisten2 = env.sandbox.spy();
@@ -2008,6 +1994,10 @@ describes.realWin('Events', {amp: 1}, (env) => {
 
           eventsSpy = env.sandbox.spy(tracker, 'onEvent_');
 
+          target2 = win.document.createElement('amp-list');
+          win.document.body.appendChild(target2);
+
+          target2.classList.add('target2');
           target2.classList.add('i-amphtml-element');
           targetSignals2 = new Signals();
           target2.signals = () => targetSignals2;
@@ -2039,8 +2029,6 @@ describes.realWin('Events', {amp: 1}, (env) => {
               }
             });
           }
-
-          toggleExperiment(win, 'visibility-trigger-improvements', false);
         });
 
         it('should fire event per selector', async () => {
@@ -2082,8 +2070,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
             .once();
           // Dispose function
           res = tracker.add(analyticsElement, 'visible', config, eventResolver);
-          const unlistenReady = getAmpElementSpy.returnValues[0];
-          const unlistenReady2 = getAmpElementSpy.returnValues[1];
+          const unlistenReady = getElementSpy.returnValues[0];
+          const unlistenReady2 = getElementSpy.returnValues[1];
           // #getAmpElement Promise
           await unlistenReady;
           await unlistenReady2;
@@ -2153,7 +2141,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         eventResolver
       );
       expect(res).to.be.a('function');
-      const unlistenReady = getAmpElementSpy.returnValues[0];
+      const unlistenReady = getElementSpy.returnValues[0];
       // #getAmpElement Promise
       await unlistenReady;
       // #assertMeasurable_ Promise
@@ -2178,8 +2166,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
         .returns(null)
         .once();
       tracker.add(analyticsElement, 'hidden', config, eventResolver);
-      const unlistenReady = getAmpElementSpy.returnValues[0];
-      // #getAmpElement Promise
+      const unlistenReady = getElementSpy.returnValues[0];
+      // #getElement Promise
       yield unlistenReady;
       // #assertMeasurable_ Promise
       yield macroTask();
@@ -2238,6 +2226,50 @@ describes.realWin('Events', {amp: 1}, (env) => {
             .once();
           const promise2 = tracker.getReadyPromise('render-start', target);
           return promise2;
+        });
+      });
+
+      describe('non AMP elements', () => {
+        it('with non AMP element and waitFor NONE or null', () => {
+          const element = win.document.createElement('p');
+          expect(tracker.getReadyPromise('none', element)).to.be.null;
+          expect(tracker.getReadyPromise(null, element)).to.be.null;
+          expect(tracker.getReadyPromise(undefined, element)).to.be.null;
+        });
+
+        it('error with non AMP element and waitFor not NONE or null', () => {
+          const element = win.document.createElement('p');
+          expect(() => tracker.getReadyPromise('ini-load', element)).to.throw(
+            /waitFor for non-AMP elements must be none or null. Found ini-load/
+          );
+        });
+
+        it('should set default waitFor for AMP element', async () => {
+          const element = win.document.createElement('amp-list');
+          tracker.waitForTrackers_['render-start'] = root.getTracker(
+            'render-start',
+            SignalTracker
+          );
+          const signalTrackerMock = env.sandbox.mock(
+            tracker.waitForTrackers_['render-start']
+          );
+          const iniLoadTrackerMock = env.sandbox.mock(
+            tracker.waitForTrackers_['ini-load']
+          );
+
+          await tracker.getReadyPromise(null, element);
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('ini-load', element)
+            .returns(Promise.resolve())
+            .once();
+
+          await tracker.getReadyPromise('render-start', element);
+          signalTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('render-start')
+            .returns(Promise.resolve())
+            .once();
         });
       });
     });

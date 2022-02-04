@@ -1,0 +1,102 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This runs some tests which exercise our HTML parser.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content=width=device-width,minimum-scale=1>
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|
+|    <!-- Strangely quoted attributes: -->
+|    <a href="foo.html""></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:17:2 The attribute '"' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href='foo.html''></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:18:2 The attribute ''' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href=""foo.html"></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:19:2 The attribute 'foo.html"' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href=''foo.html'></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:20:2 The attribute 'foo.html'' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href=""foo.html""></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:21:2 The attribute 'foo.html""' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href=''foo.html''></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:22:2 The attribute 'foo.html''' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a '></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:23:2 The attribute ''' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a "></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:24:2 The attribute '"' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href"foo.html"></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:25:2 The attribute 'href"foo.html"' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href'foo.html'></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:26:2 The attribute 'href'foo.html'' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href"foo.html""></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:27:2 The attribute 'href"foo.html""' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href'foo.html''></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:28:2 The attribute 'href'foo.html''' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href""foo.html"></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:29:2 The attribute 'href""foo.html"' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href''foo.html'></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:30:2 The attribute 'href''foo.html'' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href""foo.html""></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:31:2 The attribute 'href""foo.html""' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a href''foo.html''></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:32:2 The attribute 'href''foo.html''' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|
+|    <!-- Attributes in closing tags: -->
+|    <a></a foo>
+|    <a></a href>
+|    <a></a foo="foo.html">
+|    <a></a href="foo.html">
+|
+|    <!-- <, / as attributes: -->
+|    <a < ></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:41:2 The attribute '<' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a / ></a>
+|    <a /a></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:43:2 The attribute 'a' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|    <a /a ></a>
+>>   ^~~~~~~~~
+feature_tests/parser.html:44:2 The attribute 'a' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
+|
+|    <!-- Tags that may be processing instructions: -->
+|    <?php ?>
+|    < ?php ?>
+>>     ^~~~~~~~~
+feature_tests/parser.html:48:4 The tag '<?' is disallowed.
+|    <?php echo 'Hello, World'; ?>
+|    <?php <span>Content</span> ?>
+>>     ^~~~~~~~~
+feature_tests/parser.html:50:4 The tag '<?' is disallowed.
+|    <?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" />
+>>     ^~~~~~~~~
+feature_tests/parser.html:51:4 The tag '<?' is disallowed.
+|    < ?xml:namespace ?>
+>>     ^~~~~~~~~
+feature_tests/parser.html:52:4 The tag '<?' is disallowed.
+|
+|  </body>
+|  </html>

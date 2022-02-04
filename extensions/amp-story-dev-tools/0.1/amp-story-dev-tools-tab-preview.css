@@ -1,0 +1,575 @@
+
+
+ amp-story-dev-tools-tab-preview {
+  --i-amphtml-story-dev-tools-device-shadow: 0px 11.0046px 27.5114px rgba(0, 0, 0, 0.34), inset 0px 2.20091px 3.30137px rgba(44, 46, 52, 0.6) !important;
+  padding: var(--i-amphtml-story-dev-tools-vertical-spacing) 10% !important;
+  padding-bottom: calc(var(--i-amphtml-story-dev-tools-vertical-spacing) + 64px) !important;
+}
+
+.i-amphtml-story-dev-tools-devices-container {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  position: relative;
+}
+
+.i-amphtml-story-dev-tools-device {
+  background: var(--i-amphtml-story-dev-tools-gray-1) !important;
+  border-radius: 40px !important;
+  box-shadow: var(--i-amphtml-story-dev-tools-device-shadow) !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  margin: auto !important;
+  height: fit-content !important;
+  padding: 10px 8px !important;
+  transition: transform var(--i-amphtml-story-dev-tools-material-easing-standard) 0.15s !important;
+  /* Fades in after transition:transform ends (above) so devices are in place before the fade-in */
+  animation: i-amphtml-story-dev-tools-fade-in 0.3s var(--i-amphtml-story-dev-tools-material-easing-decelerated) !important;
+}
+
+@keyframes i-amphtml-story-dev-tools-fade-in {
+  0% {opacity: 0; }
+  50% {opacity: 0; }
+  100% {opacity: 1; }
+}
+
+.i-amphtml-story-dev-tools-device-screen {
+  border-radius: 30px !important;
+  background: var(--i-amphtml-story-dev-tools-gray-2) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+amp-story-player a {
+  display: none !important;
+}
+
+.i-amphtml-story-dev-tools-device-chips-container {
+  position: absolute !important;
+  bottom: var(--i-amphtml-story-dev-tools-vertical-spacing) !important;
+  width: 80% !important;
+  text-align: center !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip {
+  --i-amphtml-story-dev-tools-device-chip-background: var(--i-amphtml-story-dev-tools-gray-3) !important;
+  --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-gray-4) !important;
+  --i-amphtml-story-dev-tools-device-chip-icon-background: black !important;
+  color: white !important;
+  border-radius: 16px !important;
+  background: var(--i-amphtml-story-dev-tools-device-chip-background) !important;
+  border: 1px solid var(--i-amphtml-story-dev-tools-device-chip-background) !important;
+  height: 32px !important;
+  font-size: 13px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding-inline-start: 10px !important;
+  padding-inline-end: 6px !important;
+  margin: 0 5px !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  outline: none !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip:hover, .i-amphtml-story-dev-tools-device-chip:focus {
+  background: var(--i-amphtml-story-dev-tools-device-chip-background-hover) !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip svg {
+  background: var(--i-amphtml-story-dev-tools-device-chip-icon-background) !important;
+  border-radius: 50% !important;
+  padding: 2px !important;
+  margin-inline-start: 10px !important;
+  transition: transform 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard) !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip[inactive] {
+  --i-amphtml-story-dev-tools-device-chip-background: transparent !important;
+  --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-gray-1) !important;
+  --i-amphtml-story-dev-tools-device-chip-icon-background: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+  border: 1px solid var(--i-amphtml-story-dev-tools-device-chip-icon-background) !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip[disabled] {
+  cursor: initial !important;
+  --i-amphtml-story-dev-tools-device-chip-background-hover: var(--i-amphtml-story-dev-tools-device-chip-background) !important;
+  opacity: 0.2 !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip[inactive] svg {
+  transform: rotate(90deg) !important;
+}
+
+/* Removes the second line in the + (to convert to -) when the device is selected (not inactive) */
+.i-amphtml-story-dev-tools-device-chip:not([inactive]):not(.i-amphtml-story-dev-tools-add-device) .i-amphtml-story-dev-tools-device-chip-add-stick {
+  fill: transparent !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device {
+  background: var(--i-amphtml-story-dev-tools-accent) !important;
+  color: black !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device svg {
+  fill: var(--i-amphtml-story-dev-tools-accent) !important;
+  background: black !important;
+}
+
+.i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device:hover, .i-amphtml-story-dev-tools-device-chip.i-amphtml-story-dev-tools-add-device:focus {
+  background: var(--i-amphtml-story-dev-tools-accent-light) !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-bg {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  background: transparent !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 1 !important;
+  transition: background 0.2s var(--i-amphtml-story-dev-tools-material-easing-standard) !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-container {
+  background: black !important;
+  width: min(650px, 90%) !important;
+  border-radius: 30px !important;
+  padding: 40px !important;
+  position: relative !important;
+  transition: transform 0.2s var(--i-amphtml-story-dev-tools-material-easing-accelerated), opacity 0.2s var(--i-amphtml-story-dev-tools-material-easing-accelerated) !important;
+  transform: translateY(5vh) !important;
+  opacity: 0 !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-bg[active] {
+  background: var(--i-amphtml-story-dev-tools-gray-transparent-1) !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-bg[active] .i-amphtml-story-dev-tools-device-dialog-container  {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  transition: transform 0.2s var(--i-amphtml-story-dev-tools-material-easing-decelerated), opacity 0.2s var(--i-amphtml-story-dev-tools-material-easing-decelerated) !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-container h1 {
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  opacity: .4 !important;
+  letter-spacing: 1px !important;
+  font-weight: normal !important;
+  margin: 0px !important;
+  margin-bottom: 5px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-container h1:not(:first-child) {
+  margin-top: 25px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-container.i-amphtml-story-dev-tools-device-dialog-add-devices h1 {
+  margin-inline-start: 15px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-link {
+  color: var(--i-amphtml-story-dev-tools-white-transparent-4) !important;
+  text-decoration: none !important;
+  display: block !important;
+  padding: 10px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-link:hover {
+  color: white !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-link:not(:last-child) {
+  border-bottom: 1px solid var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-arrow {
+  background: url('data:image/svg+xml;charset=utf-8, <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M15.9998 10.6667L15.0598 11.6067L18.7798 15.3333H10.6665V16.6667H18.7798L15.0598 20.3933L15.9998 21.3333L21.3332 16L15.9998 10.6667Z" fill="white"/></svg>') !important;
+  width: 32px !important;
+  height: 32px !important;
+  opacity: 0.6 !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-link:hover .i-amphtml-story-dev-tools-device-dialog-arrow {
+  opacity: 1 !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-container .i-amphtml-story-dev-tools-device-chip {
+  margin: 4px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-close {
+  cursor: pointer !important;
+  width: 40px !important;
+  height: 40px !important;
+  position: absolute !important;
+  top: 6px !important;
+  right: 6px !important;
+  opacity: .6 !important;
+  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18px" height="18px"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-close:hover, .i-amphtml-story-dev-tools-device-dialog-close:focus {
+  opacity: 1 !important;
+}
+
+.i-amphtml-story-dev-tools-button-help {
+  position: absolute !important;
+  right: 0 !important;
+}
+
+.i-amphtml-story-dev-tools-button-icon {
+  background: var(--i-amphtml-story-dev-tools-accent)!important;
+  width: 20px !important;
+  height: 20px !important;
+  margin-inline-start: 10px !important;
+  position: relative !important;
+  border-radius: 50% !important;
+}
+
+.i-amphtml-story-dev-tools-button-icon:after {
+  content: '' !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  left: 0 !important;
+}
+
+.i-amphtml-story-dev-tools-button-help-icon:after {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 8 14" fill="black"><path d="M2.97362 9.56098V8.7832C2.97362 8.15086 3.10152 7.61969 3.35731 7.1897C3.61311 6.74706 4.05436 6.25384 4.68106 5.71003C5.06475 5.36856 5.3717 5.05239 5.60192 4.76152C5.83213 4.458 5.94724 4.08491 5.94724 3.64228C5.94724 3.1617 5.77458 2.757 5.42926 2.42818C5.09672 2.09937 4.6235 1.93496 4.00959 1.93496C3.39568 1.93496 2.91607 2.11834 2.57074 2.4851C2.22542 2.83921 1.98241 3.22493 1.84173 3.64228L0 2.88347C0.140687 2.45348 0.377298 2.01716 0.709832 1.57453C1.04237 1.11924 1.47722 0.746161 2.01439 0.455285C2.56435 0.151762 3.22302 0 3.99041 0C4.78337 0 5.48042 0.158085 6.08154 0.474255C6.69544 0.790425 7.16867 1.22042 7.5012 1.76423C7.83373 2.29539 8 2.90244 8 3.58537C8 4.09124 7.90408 4.5402 7.71223 4.93225C7.53317 5.3243 7.30296 5.67209 7.02158 5.97561C6.753 6.27913 6.49081 6.55104 6.23501 6.79133C5.81295 7.17073 5.51239 7.51852 5.33333 7.83469C5.15428 8.15086 5.06475 8.54291 5.06475 9.01084V9.56098H2.97362ZM4.00959 14C3.60032 14 3.255 13.8609 2.97362 13.5827C2.70504 13.3044 2.57074 12.9693 2.57074 12.5772C2.57074 12.1852 2.70504 11.85 2.97362 11.5718C3.255 11.2936 3.60032 11.1545 4.00959 11.1545C4.40608 11.1545 4.73861 11.2936 5.00719 11.5718C5.28857 11.85 5.42926 12.1852 5.42926 12.5772C5.42926 12.9693 5.28857 13.3044 5.00719 13.5827C4.73861 13.8609 4.40608 14 4.00959 14Z"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-help-tips {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-help-tips p {
+  font-size: 14px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-help-tips .i-amphtml-story-dev-tools-device-dialog-help-hint {
+  color: var(--i-amphtml-story-dev-tools-white-transparent-3) !important;
+  border: 1px solid var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+  font-size: 12px !important;
+  padding: 10px 20px !important;
+  border-radius: 20px !important;
+  margin-inline-start: 20px !important;
+}
+
+.i-amphtml-story-dev-tools-device-dialog-help-tips .i-amphtml-story-dev-tools-device-dialog-help-hint b {
+  color: var(--i-amphtml-story-dev-tools-accent-light) !important;
+}
+
+/* Device details - hardware */
+
+.i-amphtml-story-dev-tools-device[native] .i-amphtml-story-dev-tools-device-screen {
+  background: black !important;
+}
+
+.i-amphtml-story-dev-tools-device[oneplus7pro] {
+  padding: 12px 5px !important;
+}
+
+.i-amphtml-story-dev-tools-device[oneplus5t] {
+  padding-top: 45px !important;
+  padding-bottom: 45px !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2] {
+  padding-top: 82px !important;
+  padding-bottom: 82px !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel3] {
+  padding-top: 50px !important;
+  padding-bottom: 50px !important;
+}
+
+.i-amphtml-story-dev-tools-device[desktop] {
+  border-radius: 10px !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2] .i-amphtml-story-dev-tools-device-screen,
+.i-amphtml-story-dev-tools-device[pixel3] .i-amphtml-story-dev-tools-device-screen,
+.i-amphtml-story-dev-tools-device[iphone8] .i-amphtml-story-dev-tools-device-screen,
+.i-amphtml-story-dev-tools-device[oneplus5t] .i-amphtml-story-dev-tools-device-screen,
+.i-amphtml-story-dev-tools-device[desktop] .i-amphtml-story-dev-tools-device-screen {
+  border-radius: 5px !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2]::after,
+.i-amphtml-story-dev-tools-device[pixel2]::before {
+  content: "";
+  width: 157px;
+  height: 8px;
+  border-radius: 4px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 40px;
+  background: var(--i-amphtml-story-dev-tools-gray-2) !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2]::before {
+  top: auto;
+  bottom: 40px;
+}
+
+.i-amphtml-story-dev-tools-device[iphone11],
+.i-amphtml-story-dev-tools-device[iphone11pro] {
+  border-radius: 59px !important;
+  padding: 12px !important;
+}
+
+.i-amphtml-story-dev-tools-device[iphone11],
+.i-amphtml-story-dev-tools-device[iphone11pro] {
+  border-radius: 59px !important;
+  padding: 12px !important;
+}
+
+.i-amphtml-story-dev-tools-device[iphone8] {
+  padding: 90px 12px !important;
+}
+
+.i-amphtml-story-dev-tools-device[iphone11] .i-amphtml-story-dev-tools-device-screen,
+.i-amphtml-story-dev-tools-device[iphone11pro] .i-amphtml-story-dev-tools-device-screen {
+  border-radius: 47px !important;
+}
+
+.i-amphtml-story-dev-tools-device[iphone11]::after,
+.i-amphtml-story-dev-tools-device[iphone11pro]::after {
+  content: "";
+  width: 50%;
+  height: 30px;
+  border-radius: 0 0 22px 22px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 10px;
+  background: var(--i-amphtml-story-dev-tools-gray-1) !important;
+}
+
+.i-amphtml-story-dev-tools-device[iphone8]::after {
+  content: "";
+  width: 54px;
+  height: 54px;
+  border-radius: 30px;
+  position: absolute;
+  bottom: 18px;
+  border: 2px solid var(--i-amphtml-story-dev-tools-gray-3) !important;
+  left: 168px;
+}
+
+/* Device details - UI */
+
+.i-amphtml-story-dev-tools-device-statusbar {
+  flex: 1 !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0px 20px !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-dev-tools-device[desktop] .i-amphtml-story-dev-tools-device-statusbar {
+  background: black !important;
+}
+
+.i-amphtml-story-dev-tools-device[desktop] .i-amphtml-story-dev-tools-device-statusbar::after {
+  content: "" !important;
+  width: 300px !important;
+  height: 24px !important;
+  position: absolute !important;
+  left: 20px !important;
+  bottom: 0px !important;
+  background: var(--i-amphtml-story-dev-tools-gray-2) !important;
+  border-radius: 5px 5px 0 0 !important;
+}
+
+.i-amphtml-story-dev-tools-device-statusbar-icons,
+.i-amphtml-story-dev-tools-device-statusbar-clock {
+  opacity: 0.21 !important;
+}
+
+.i-amphtml-story-dev-tools-device[android] .i-amphtml-story-dev-tools-device-statusbar-icons {
+  width: 83px !important;
+  height: 15px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="84" height="16" fill="none"><path fill="#fff" d="M56.44 12.2h-1.47V5.07l-2.18.74V4.56l3.46-1.28h.2v8.92zm9.07 0h-5.98v-1.02l2.96-3.23c.43-.47.73-.87.91-1.19.18-.32.28-.64.28-.96 0-.43-.12-.77-.36-1.03s-.56-.39-.96-.39c-.48 0-.85.15-1.12.44-.26.3-.4.7-.4 1.2h-1.48c0-.54.12-1.02.37-1.46.25-.43.6-.77 1.05-1 .46-.25 1-.37 1.59-.37.86 0 1.54.22 2.04.65.5.44.75 1.03.75 1.8 0 .44-.13.9-.38 1.4a7.87 7.87 0 01-1.23 1.65l-2.17 2.33h4.13v1.18zm2.11-1.56c.28 0 .5.08.65.24a.8.8 0 01.22.58.8.8 0 01-.22.58c-.15.15-.37.23-.65.23a.86.86 0 01-.62-.23.77.77 0 01-.24-.58.8.8 0 01.23-.58.83.83 0 01.63-.24zm0-5.18c.28 0 .5.08.65.23a.8.8 0 01.22.59.8.8 0 01-.22.58c-.15.15-.37.23-.65.23a.86.86 0 01-.62-.23.77.77 0 01-.24-.58.8.8 0 01.23-.59.83.83 0 01.63-.23zm4.05 1.62h.9c.46 0 .82-.12 1.09-.35.26-.24.4-.57.4-1.01 0-.42-.11-.75-.34-.98-.22-.24-.56-.36-1.01-.36-.4 0-.73.12-.98.35-.26.23-.39.53-.39.9h-1.48c0-.46.12-.87.36-1.25.24-.37.58-.66 1.01-.87a3.3 3.3 0 011.46-.32c.89 0 1.58.23 2.09.67.5.45.76 1.06.76 1.86 0 .4-.13.77-.38 1.13-.26.35-.58.61-.99.8.5.16.86.42 1.11.78.26.36.39.78.39 1.28 0 .8-.28 1.43-.82 1.9-.55.48-1.27.71-2.16.71-.85 0-1.55-.23-2.1-.68a2.25 2.25 0 01-.82-1.82h1.49c0 .39.13.7.39.95s.62.37 1.06.37c.46 0 .82-.12 1.09-.37.26-.24.4-.6.4-1.06 0-.47-.15-.83-.42-1.08-.28-.25-.7-.38-1.24-.38h-.87V7.08zm11.18 1.38c0 1.28-.24 2.24-.72 2.9-.47.64-1.2.96-2.18.96-.96 0-1.68-.31-2.17-.94a4.67 4.67 0 01-.74-2.82V7.02c0-1.27.23-2.23.71-2.87.48-.64 1.21-.96 2.2-.96.96 0 1.69.31 2.16.94.48.62.73 1.55.74 2.8v1.53zM81.37 6.8c0-.84-.11-1.45-.34-1.83-.23-.4-.6-.59-1.09-.59-.48 0-.84.19-1.07.56-.22.36-.34.94-.36 1.72v2.01c0 .83.12 1.45.35 1.86.23.4.6.6 1.1.6.47 0 .82-.18 1.05-.55.23-.38.35-.97.36-1.77V6.8z"/><path fill="#fff" fill-rule="evenodd" d="M43.05 2.14v-.77H39.6v.77h-2.2v11.48h7.88V2.14h-2.23zM18 13.34h11.99V1.36L18 13.34zM.8 3.71l8 9.62 8-9.62c-2.23-1.65-5-2.63-8-2.63s-5.77.98-8 2.63z" clip-rule="evenodd"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-device[desktop] .i-amphtml-story-dev-tools-device-statusbar-icons {
+  width: 69px !important;
+  height: 26px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="69" height="26" fill="none"><mask id="a" width="26.87" height="26.87" x="42.17" y=".04" fill="#000" maskUnits="userSpaceOnUse"><path fill="#fff" d="M42.17.04h26.87v26.87H42.17z"/><path d="M49.82 7.24l6.23 6.22 6.24-6.22-6.23 6.23 6.23 6.24-6.24-6.23-6.23 6.23 6.23-6.24-6.23-6.23z"/></mask><path fill="#C4C4C4" d="M49.82 7.24l6.23 6.22 6.24-6.22-6.23 6.23 6.23 6.24-6.24-6.23-6.23 6.23 6.23-6.24-6.23-6.23z"/><path fill="#fff" d="M49.82 7.24l1.06-1.07-2.12 2.13 1.06-1.06zm6.23 6.22L55 14.52l1.06 1.06 1.06-1.06-1.06-1.06zm6.24-6.22l1.06 1.06-2.12-2.13 1.06 1.07zm-6.23 6.23L55 12.41l-1.06 1.06L55 14.53l1.06-1.06zm6.23 6.24l-1.06 1.06 2.12-2.12-1.06 1.06zm-6.24-6.23l1.06-1.06-1.06-1.06L55 12.42l1.06 1.06zm-6.23 6.23l-1.06-1.06 2.12 2.12-1.06-1.06zm6.23-6.24l1.06 1.06 1.06-1.06-1.06-1.06-1.06 1.06zm-7.3-5.17L55 14.52l2.12-2.12-6.23-6.23-2.12 2.13zm8.36 6.22l6.24-6.22-2.12-2.13-6.24 6.23 2.12 2.12zm4.12-8.34L55 12.4l2.12 2.12 6.23-6.23-2.12-2.12zM55 14.53l6.23 6.24 2.12-2.12-6.23-6.24L55 14.53zm8.35 4.12l-6.24-6.23L55 14.54l6.24 6.23 2.12-2.12zm-8.36-6.23l-6.23 6.23 2.12 2.12 6.23-6.23L55 12.42zm-4.11 8.35l6.23-6.24-2.13-2.12-6.22 6.24 2.12 2.12zm6.23-8.36l-6.23-6.23-2.12 2.12 6.22 6.23 2.13-2.12z" mask="url(#a)"/><path stroke="#fff" stroke-width="3" d="M25.97 8.62h10.68v9.73H25.97zM14.09 18.52H.89"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios] .i-amphtml-story-dev-tools-device-statusbar-icons {
+  width: 66.7px !important;
+  height: 12px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="67" height="12" fill="none"><rect width="21" height="10.33" x="42.83" y=".5" stroke="#fff" opacity=".35" rx="2.17"/><path fill="#fff" d="M65.33 3.67v4a2.17 2.17 0 000-4" opacity=".4"/><rect width="18" height="7.33" x="44.33" y="2" fill="#fff" rx="1.33"/><path fill="#fff" fill-rule="evenodd" d="M29.66 3.28c2.22 0 4.35.85 5.96 2.38a.3.3 0 00.43 0l1.16-1.17a.32.32 0 000-.46 10.9 10.9 0 00-15.09 0 .32.32 0 000 .46l1.16 1.16a.3.3 0 00.43 0 8.64 8.64 0 015.95-2.37zm0 3.8c1.22 0 2.4.45 3.3 1.26.12.12.31.12.43 0l1.16-1.17a.32.32 0 000-.46 7.16 7.16 0 00-9.76 0 .32.32 0 000 .46l1.15 1.17c.12.12.31.12.43 0a4.9 4.9 0 013.3-1.27zm2.32 2.55c0 .08-.04.17-.1.23l-2 2.01a.31.31 0 01-.44 0l-2-2.01a.31.31 0 01.01-.46 3.42 3.42 0 014.42 0c.07.06.1.14.1.23zM16 1h-1a1 1 0 00-1 1v8.67a1 1 0 001 1h1a1 1 0 001-1V2a1 1 0 00-1-1zm-5.67 2.33h1a1 1 0 011 1v6.34a1 1 0 01-1 1h-1a1 1 0 01-1-1V4.33a1 1 0 011-1zM6.67 5.67h-1a1 1 0 00-1 1v4a1 1 0 001 1h1a1 1 0 001-1v-4a1 1 0 00-1-1zM2 7.67H1a1 1 0 00-1 1v2a1 1 0 001 1h1a1 1 0 001-1v-2a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios][iphone11] .i-amphtml-story-dev-tools-device-statusbar-clock,
+.i-amphtml-story-dev-tools-device[ios][iphone11pro] .i-amphtml-story-dev-tools-device-statusbar-clock {
+  margin-left: 15px !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios] .i-amphtml-story-dev-tools-device-statusbar-clock {
+  width: 40px !important;
+  height: 12px !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="12" fill="none"><path fill="#fff" d="M3.5 11h1.89V.43H3.5L.74 2.37v1.78L3.37 2.3h.13V11zm4.49-7.44h1.77c0-1.11.73-1.88 1.88-1.88 1.1 0 1.77.74 1.77 1.7 0 .8-.32 1.31-1.66 2.66L8.1 9.73V11h7.34V9.43h-4.78v-.12l2.27-2.24c1.82-1.78 2.36-2.63 2.36-3.86 0-1.76-1.43-3.04-3.53-3.04-2.2 0-3.76 1.39-3.76 3.39zm10.61.6c.7 0 1.17-.48 1.17-1.14 0-.65-.47-1.13-1.17-1.13-.69 0-1.17.48-1.17 1.13 0 .66.48 1.14 1.17 1.14zm0 5.38c.7 0 1.17-.5 1.17-1.14 0-.65-.47-1.14-1.17-1.14-.69 0-1.17.49-1.17 1.14 0 .64.48 1.14 1.17 1.14zm5.65-3.26h1.32c1.3 0 2.1.66 2.1 1.72 0 1.02-.86 1.71-2.07 1.71-1.23 0-2.05-.63-2.14-1.61h-1.8c.08 1.91 1.66 3.16 3.96 3.16 2.28 0 3.98-1.31 3.98-3.13 0-1.44-.9-2.37-2.33-2.6v-.12c1.12-.3 1.91-1.14 1.92-2.42 0-1.51-1.26-2.82-3.5-2.82-2.3 0-3.73 1.3-3.83 3.15h1.77c.08-1.06.8-1.64 1.95-1.64 1.12 0 1.79.68 1.79 1.56 0 .96-.75 1.63-1.83 1.63h-1.3v1.41zm10.92 4.98c2.53 0 4.03-2.04 4.03-5.54S37.67.17 35.17.17c-2.51 0-4.04 2.04-4.04 5.53 0 3.51 1.5 5.56 4.04 5.56zm0-1.53c-1.34 0-2.13-1.39-2.13-4.03 0-2.61.8-4 2.13-4 1.32 0 2.12 1.38 2.12 4 0 2.65-.78 4.03-2.12 4.03z"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-device-appbar {
+  height: 48px !important;
+  position: relative !important;
+  align-items: center !important;
+  display: flex !important;
+  padding: 0px 15px !important;
+  justify-content: space-between !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios] .i-amphtml-story-dev-tools-device-appbar {
+  height: 40px !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios][browser] .i-amphtml-story-dev-tools-device-appbar-urlbar {
+  height: 28px !important;
+  background: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+}
+
+.i-amphtml-story-dev-tools-device .i-amphtml-story-dev-tools-device-appbar-icon {
+  background: var(--i-amphtml-story-dev-tools-white-transparent-2) !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 12px !important;
+  margin: 5px !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios][browser] .i-amphtml-story-dev-tools-device-appbar > .i-amphtml-story-dev-tools-device-appbar-icon,
+.i-amphtml-story-dev-tools-device[ios][native] .i-amphtml-story-dev-tools-device-appbar > .i-amphtml-story-dev-tools-device-appbar-icon:last-child {
+  display: none !important;
+}
+
+.i-amphtml-story-dev-tools-device[browser] .i-amphtml-story-dev-tools-device-appbar-urlbar {
+  background: var(--i-amphtml-story-dev-tools-black-transparent-1) !important;
+  flex: 1 !important;
+  height: 40px !important;
+  border-radius: 20px !important;
+  margin: 5px !important;
+}
+
+.i-amphtml-story-dev-tools-device[desktop][browser] .i-amphtml-story-dev-tools-device-appbar-urlbar {
+  height: 34px !important;
+  border-radius: 17px !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios][browser] .i-amphtml-story-dev-tools-device-bottombar {
+  height: 42px !important;
+  display: flex !important;
+  justify-content: space-around !important;
+  align-items: center !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios][browser] .i-amphtml-story-dev-tools-device-bottombar > div {
+  background: var(--i-amphtml-story-dev-tools-gray-5) !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 15px !important;
+}
+
+.i-amphtml-story-dev-tools-device-navigation {
+  height: 15px !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios][native] .i-amphtml-story-dev-tools-device-navigation {
+  height: 0px !important;
+}
+
+.i-amphtml-story-dev-tools-device[ios][browser] .i-amphtml-story-dev-tools-device-navigation {
+  height: 36px !important;
+}
+
+.i-amphtml-story-dev-tools-device-navigation::after {
+  content: "" !important;
+  width: 36% !important;
+  height: 5px !important;
+  background: white !important;
+  border-radius: 5px !important;
+  position: absolute !important;
+  bottom: 5px !important;
+  left: 32% !important;
+}
+
+.i-amphtml-story-dev-tools-device[oneplus5t] .i-amphtml-story-dev-tools-device-navigation::after,
+.i-amphtml-story-dev-tools-device[oneplus7pro] .i-amphtml-story-dev-tools-device-navigation::after {
+  width: 26% !important;
+  left: 37% !important;
+  height: 4px !important;
+}
+
+.i-amphtml-story-dev-tools-device[oneplus5t] .i-amphtml-story-dev-tools-device-navigation,
+.i-amphtml-story-dev-tools-device[oneplus7pro] .i-amphtml-story-dev-tools-device-navigation {
+  background: black !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2] .i-amphtml-story-dev-tools-device-navigation,
+.i-amphtml-story-dev-tools-device[pixel3] .i-amphtml-story-dev-tools-device-navigation {
+  background: black !important;
+  height: 48px !important;
+  flex: none !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2] .i-amphtml-story-dev-tools-device-navigation::after,
+.i-amphtml-story-dev-tools-device[pixel3] .i-amphtml-story-dev-tools-device-navigation::after {
+  width: 8% !important;
+  left: 46% !important;
+  bottom: 0 !important;
+  top: 0 !important;
+  margin: auto !important;
+  height: 10px !important;
+}
+
+.i-amphtml-story-dev-tools-device[pixel2] .i-amphtml-story-dev-tools-device-navigation::before,
+.i-amphtml-story-dev-tools-device[pixel3] .i-amphtml-story-dev-tools-device-navigation::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 20% !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  margin: auto !important;
+  width: 7px !important;
+  height: 11px !important;
+  background: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6.93996 1.60675L5.99996 0.666748L0.666626 6.00008L5.99996 11.3334L6.93996 10.3934L2.55329 6.00008" fill="white"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-device[iphone8] .i-amphtml-story-dev-tools-device-navigation,
+.i-amphtml-story-dev-tools-device[ipad] .i-amphtml-story-dev-tools-device-navigation,
+.i-amphtml-story-dev-tools-device[desktop] .i-amphtml-story-dev-tools-device-navigation,
+.i-amphtml-story-dev-tools-device[ios][browser][ipad] .i-amphtml-story-dev-tools-device-bottombar,
+.i-amphtml-story-dev-tools-device[ios][native] .i-amphtml-story-dev-tools-device-bottombar,
+.i-amphtml-story-dev-tools-device[android][browser] .i-amphtml-story-dev-tools-device-bottombar,
+.i-amphtml-story-dev-tools-device[desktop][browser] .i-amphtml-story-dev-tools-device-bottombar {
+  display: none !important;
+}

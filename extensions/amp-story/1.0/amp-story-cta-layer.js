@@ -1,20 +1,4 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This is a layer that allows a call to action in a story page.
  * With this, a user could link to an external site from inside a story using
  * the call to action layer, for example.
@@ -29,10 +13,12 @@
  * ...
  */
 
+import {removeElement} from '#core/dom';
+import {matches} from '#core/dom/query';
+
+import {user} from '#utils/log';
+
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {addAttributesToElement, matches, removeElement} from '../../../src/dom';
-import {dict} from '../../../src/utils/object';
-import {user} from '../../../src/log';
 
 /**
  * @type {string}
@@ -63,17 +49,17 @@ export class AmpStoryCtaLayer extends AmpStoryBaseLayer {
   setOrOverwriteAttributes_() {
     const ctaLinks = this.element.querySelectorAll('a');
     for (let i = 0; i < ctaLinks.length; i++) {
-      addAttributesToElement(ctaLinks[i], dict({'target': '_blank'}));
+      ctaLinks[i].setAttribute('target', '_blank');
 
       if (!ctaLinks[i].getAttribute('role')) {
-        addAttributesToElement(ctaLinks[i], dict({'role': 'link'}));
+        ctaLinks[i].setAttribute('role', 'link');
       }
     }
 
     const ctaButtons = this.element.querySelectorAll('button');
     for (let i = 0; i < ctaButtons.length; i++) {
       if (!ctaButtons[i].getAttribute('role')) {
-        addAttributesToElement(ctaButtons[i], dict({'role': 'button'}));
+        ctaButtons[i].setAttribute('role', 'button');
       }
     }
   }

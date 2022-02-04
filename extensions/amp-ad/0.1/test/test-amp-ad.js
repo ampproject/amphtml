@@ -1,25 +1,12 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getA4ARegistry} from '#ads/_a4a-config';
+import {adConfig} from '#ads/_config';
+
+import {Services} from '#service';
+
+import {stubService} from '#testing/helpers/service';
 
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
-import {Services} from '../../../../src/services';
-import {adConfig} from '../../../../ads/_config';
-import {getA4ARegistry} from '../../../../ads/_a4a-config';
-import {stubService} from '../../../../testing/test-helper';
 
 describes.realWin('Ad loader', {amp: true}, (env) => {
   let win, doc;
@@ -63,7 +50,7 @@ describes.realWin('Ad loader', {amp: true}, (env) => {
 
       beforeEach(() => {
         const getUserNotificationStub = stubService(
-          window.sandbox,
+          env.sandbox,
           win,
           'userNotificationManager',
           'get'
@@ -208,35 +195,6 @@ describes.realWin('Ad loader', {amp: true}, (env) => {
         });
       });
 
-      it('uses Fast Fetch if remote.html is used but disabled', () => {
-        const meta = doc.createElement('meta');
-        meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.test/remote.html');
-        doc.head.appendChild(meta);
-        adConfig['zort'] = {remoteHTMLDisabled: true};
-        a4aRegistry['zort'] = function () {
-          return true;
-        };
-        ampAdElement.setAttribute('type', 'zort');
-        const zortInstance = {};
-        const zortConstructor = function () {
-          return zortInstance;
-        };
-        const extensions = Services.extensionsFor(win);
-        const extensionsStub = env.sandbox
-          .stub(extensions, 'loadElementClass')
-          .withArgs('amp-ad-network-zort-impl')
-          .returns(Promise.resolve(zortConstructor));
-        ampAd = new AmpAd(ampAdElement);
-        return ampAd.upgradeCallback().then((baseElement) => {
-          expect(extensionsStub).to.be.called;
-          expect(ampAdElement.getAttribute('data-a4a-upgrade-type')).to.equal(
-            'amp-ad-network-zort-impl'
-          );
-          expect(baseElement).to.equal(zortInstance);
-        });
-      });
-
       it('upgrades to registered, A4A type network-specific element', () => {
         a4aRegistry['zort'] = function () {
           return true;
@@ -277,6 +235,8 @@ describes.realWin('Ad loader', {amp: true}, (env) => {
             const extensions = Services.extensionsFor(win);
             extensions.registerExtension(
               'amp-ad-network-zort-impl',
+              '0.1',
+              true,
               () => {
                 extensions.addElement(
                   'amp-ad-network-zort-impl',

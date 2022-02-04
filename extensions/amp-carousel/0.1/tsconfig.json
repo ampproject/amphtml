@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "paths": {
+      "#builtins/*": ["../../../src/builtins/*"],
+      "#compiler": ["../../../src/compiler"],
+      "#compiler/*": ["../../../src/compiler/*"],
+      "#core": ["../../../src/core"],
+      "#core/*": ["../../../src/core/*"],
+      "#third_party/*": ["../../../third_party/*"]
+    }
+  },
+  "include": ["*.js", "**/*.d.ts", "../../../src/**/*.d.ts"],
+  "exclude": ["../../../src/purifier/index.d.ts"]
+}

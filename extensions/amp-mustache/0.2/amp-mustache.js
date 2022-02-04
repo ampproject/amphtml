@@ -1,30 +1,16 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {iterateCursor, templateContentClone} from '#core/dom';
 
-import {Purifier} from '../../../src/purifier/purifier';
-import {dict} from '../../../src/utils/object';
-import {getService, registerServiceBuilder} from '../../../src/service';
-import {iterateCursor, templateContentClone} from '../../../src/dom';
+import {Purifier} from '#purifier';
+
+import {user} from '#utils/log';
+
+import mustache from '#third_party/mustache/mustache';
+
+import {BaseTemplate} from '../../../src/base-template';
+import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
-import {user} from '../../../src/log';
-import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
-
-const BaseTemplate = /** @type {typeof ../../../src/service/template-impl.BaseTemplate} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -41,7 +27,7 @@ export class AmpMustache extends BaseTemplate {
     super(element, win);
 
     registerServiceBuilder(win, 'purifier', function () {
-      return new Purifier(win.document, dict(), rewriteAttributeValue);
+      return new Purifier(win.document, {}, rewriteAttributeValue);
     });
     /** @private @const {!Purifier} */
     this.purifier_ = getService(win, 'purifier');
@@ -61,7 +47,7 @@ export class AmpMustache extends BaseTemplate {
       return;
     }
     /** @private @const {!JsonObject} */
-    this.nestedTemplates_ = dict();
+    this.nestedTemplates_ = {};
 
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
@@ -116,11 +102,27 @@ export class AmpMustache extends BaseTemplate {
 
   /** @override */
   setHtml(html) {
-    return this.purifyAndSetHtml_(html);
+    const wrapped = `<div>${html}</div>`;
+    const purified = this.tryUnwrap(this.purifyAndSetHtml_(wrapped));
+    return this.unwrapChildren(purified);
   }
 
   /** @override */
   render(data) {
+    return this.tryUnwrap(this.render_(data));
+  }
+
+  /** @override */
+  renderAsString(data) {
+    return this.render_(data)./*OK*/ innerHTML;
+  }
+
+  /**
+   * @param {!JsonObject|string} data
+   * @return {!Element}
+   * @private
+   */
+  render_(data) {
     let mustacheData = data;
     // Also render any nested templates.
     if (typeof data === 'object') {
@@ -135,15 +137,13 @@ export class AmpMustache extends BaseTemplate {
   }
 
   /**
-   *
    * @param {string} html
    * @return {!Element}
    * @private
    */
   purifyAndSetHtml_(html) {
     const body = this.purifier_.purifyHtml(`<div>${html}</div>`);
-    const div = body.firstElementChild;
-    return this.unwrap(div);
+    return body.firstElementChild;
   }
 }
 

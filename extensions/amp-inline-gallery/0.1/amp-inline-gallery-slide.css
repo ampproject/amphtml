@@ -1,0 +1,72 @@
+
+
+amp-inline-gallery-slide {
+  /*
+   * We do not want the slide to be positioned, so the captions can position
+   * relative to the gallery itself.
+   */
+  position: static !important;
+  /*
+   * Do not transform the slide, but rather transform just the content.
+   */
+  transform: none !important;
+  will-change: auto !important;
+}
+
+amp-inline-gallery-slide.i-amphtml-layout-size-defined {
+  /*
+  * Since the content is translated, it may be outside the area of the
+  * slide itself.
+  */
+  overflow: visible !important;
+}
+
+.i-amphtml-inline-gallery-slide-container {
+  width: 100%;
+  height: 100%;
+  /* Override default from <figure> */
+  margin: 0;
+}
+
+.i-amphtml-inline-gallery-slide-content-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Subtract out height for the caption */
+  height: calc(100% - calc(var(--i-amphtml-caption-height, 0px)));
+  transform: var(--content-transform, translateZ(1px));
+  will-change: transform;
+  overflow: hidden;
+}
+
+.i-amphtml-inline-gallery-slide-caption {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  margin-top: var(--caption-margin-top);
+  height: var(--i-amphtml-caption-height, 0);
+  overflow: hidden;
+  opacity: var(--caption-opacity);
+}
+
+.i-amphtml-inline-gallery-slide-see-more {
+  float: right;
+  padding: 0;
+  padding-left: 6px;
+  border: 0;
+  color: #48f;
+  background-color: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.25em;
+}
+
+.i-amphtml-inline-gallery-slide-persistent-slot {
+  clear: both;
+}
+
+.i-amphtml-inline-gallery-slide-content-slot > * {
+  height: 100%;
+  width: 100%;
+}

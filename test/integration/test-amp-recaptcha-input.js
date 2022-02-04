@@ -1,34 +1,18 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
 
-import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {Deferred} from '../../src/utils/promise';
-import {poll} from '../../testing/iframe';
+import {BrowserController, RequestBank} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
 
-// TODO(wg-ui-and-a11y): These tests are broken on Firefox (as of v77). They
+// TODO(wg-components): These tests are broken on Firefox (as of v77). They
 // also fail on Safari.
-describe
+describes.sandboxed
   .configure()
   .skipFirefox()
   .skipSafari()
-  .run('amp-recaptcha-input', function () {
+  .run('amp-recaptcha-input', {}, function () {
     describes.integration(
       'with form and amp-mustache',
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="POST"
@@ -113,7 +97,6 @@ describe
         display: block;
       }
     `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache:0.2'],
         experiments: ['amp-recaptcha-input'],
       },
@@ -184,7 +167,6 @@ describe
     describes.integration(
       recaptchaRequestId.GET,
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="GET"
@@ -206,7 +188,6 @@ describe
       </fieldset>
     </form>
   `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form'],
         experiments: ['amp-recaptcha-input'],
       },
@@ -239,7 +220,6 @@ describe
     describes.integration(
       recaptchaRequestId.POST,
       {
-        /* eslint-disable max-len */
         body: `
     <form
       method="POST"
@@ -261,7 +241,6 @@ describe
       </fieldset>
     </form>
   `,
-        /* eslint-enable max-len */
         extensions: ['amp-recaptcha-input', 'amp-form'],
         experiments: ['amp-recaptcha-input'],
       },

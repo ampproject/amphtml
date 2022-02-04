@@ -1,23 +1,6 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
 
-import {RefreshIntersectionObserverPolyfillWrapper} from './refresh-intersection-observer-polyfill-wrapper';
-import {Services} from '../../../src/services';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {devAssert, user, userAssert} from '#utils/log';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
@@ -81,6 +64,9 @@ export function getPublisherSpecifiedRefreshInterval(element, unusedWin) {
  * @return {?number}
  */
 function checkAndSanitizeRefreshInterval(refreshInterval) {
+  if (refreshInterval === 'false') {
+    return null;
+  }
   const refreshIntervalNum = Number(refreshInterval);
   if (isNaN(refreshIntervalNum) || refreshIntervalNum < MIN_REFRESH_INTERVAL) {
     user().warn(
@@ -132,7 +118,7 @@ const RefreshLifecycleState = {
  * Each IO is configured to a different threshold, and all elements that
  * share the same visiblePercentageMin will be monitored by the same IO.
  *
- * @const {!Object<string, (!IntersectionObserver|!RefreshIntersectionObserverPolyfillWrapper)>}
+ * @const {!Object<string, (!IntersectionObserver)>}
  */
 const observers = {};
 
@@ -170,10 +156,10 @@ export function getRefreshManager(a4a, opt_predicate) {
   }
   return new RefreshManager(
     a4a,
-    dict({
+    {
       'visiblePercentageMin': 50,
       'continuousTimeMin': 1,
-    }),
+    },
     refreshInterval
   );
 }
@@ -226,20 +212,16 @@ export class RefreshManager {
    * one if one does not yet exist.
    *
    * @param {number} threshold
-   * @return {(!IntersectionObserver|!RefreshIntersectionObserverPolyfillWrapper)}
+   * @return {!IntersectionObserver}
    */
   getIntersectionObserverWithThreshold_(threshold) {
     const thresholdString = String(threshold);
     return (
       observers[thresholdString] ||
-      (observers[thresholdString] =
-        'IntersectionObserver' in this.win_
-          ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
-          : new RefreshIntersectionObserverPolyfillWrapper(
-              this.ioCallback_,
-              this.a4a_,
-              {threshold}
-            ))
+      (observers[thresholdString] = new this.win_.IntersectionObserver(
+        this.ioCallback_,
+        {threshold}
+      ))
     );
   }
 

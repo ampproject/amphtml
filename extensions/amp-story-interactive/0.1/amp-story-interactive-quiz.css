@@ -1,0 +1,294 @@
+
+
+/* 1em = 16px for interactive components, unless overriden by font-size */
+.i-amphtml-story-interactive-quiz-option-container {
+  display: flex !important;
+  flex-direction: column;
+  background-color: var(
+    --i-amphtml-interactive-options-chip-background-color
+  ) !important;
+  border-radius: 2em !important;
+  padding: 0.5em 0.5em 0 0.5em !important;
+  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
+}
+
+.i-amphtml-story-interactive-quiz-option {
+  font-family: inherit !important;
+  position: relative !important;
+  display: flex !important;
+  justify-items: start !important;
+  align-items: center !important;
+  border-radius: 1.649em !important; /* On iOS inset shadows with border-radius require borders smaller than sides to render correctly. Issue #31036 */
+  padding: 0.5em 1em 0.5em 0.5em !important;
+  background-color: var(
+    --i-amphtml-interactive-option-background-color
+  ) !important;
+  margin-bottom: 0.5em !important;
+  color: var(--i-amphtml-interactive-option-text-color) !important;
+  box-shadow: var(--i-amphtml-interactive-chip-shadow),
+    inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow),
+    inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow),
+    inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  font-size: 1em !important;
+  line-height: 1.25em !important;
+  overflow: hidden !important;
+  z-index: 0 !important;
+  border: none !important;
+  outline: none !important;
+  text-align: start !important;
+}
+
+[dir='rtl'] .i-amphtml-story-interactive-quiz-option {
+  padding: 0.5em 0.5em 0.5em 1em !important;
+}
+
+/* Truncate option text and add an ellipsis after 2 lines. */
+.i-amphtml-story-interactive-quiz-option-text {
+  max-height: 2.5em !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  visibility: visible !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-option-selected {
+  color: white !important;
+  border: solid 1px transparent !important;
+}
+
+.i-amphtml-story-interactive-quiz-answer-choice {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  height: 1.5em !important;
+  width: 1.5em !important;
+  min-width: 1.5em !important;
+  border-radius: 50% !important;
+  border: solid 0.125em !important;
+  padding: .31em !important;
+  margin-right: 1em !important;
+  color: var(--interactive-accent-color) !important;
+  border-color: var(--i-amphtml-interactive-answer-choice-border) !important;
+  font-size: 1em !important;
+  line-height: 1em !important;
+  font-weight: bold !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 1.5em !important;
+}
+
+[dir='rtl'] .i-amphtml-story-interactive-quiz-answer-choice {
+  margin-left: 16px !important;
+  margin-right: 0px !important;
+}
+
+.i-amphtml-story-interactive-quiz-percentage-text {
+  display: flex !important;
+  padding-left: 1em !important;
+  margin-left: auto !important;
+  visibility: hidden !important;
+  flex-shrink: 0 !important;
+}
+
+.i-amphtml-story-interactive-quiz-option:not(.i-amphtml-story-interactive-option-selected) .i-amphtml-story-interactive-quiz-percentage-text {
+  opacity: 0.5 !important;
+}
+
+[dir='rtl'] .i-amphtml-story-interactive-quiz-percentage-text {
+  padding-left: 0px !important;
+  padding-right: 1em !important;
+  margin-right: auto !important;
+  margin-left: 0px !important;
+}
+
+.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-quiz-percentage-text {
+  visibility: visible !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-option-selected
+  > .i-amphtml-story-interactive-quiz-percentage-text {
+  color: white !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  :not([correct])
+  > .i-amphtml-story-interactive-quiz-answer-choice {
+  color: var(--incorrect-color) !important;
+  border-color: var(--incorrect-color) !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  [correct]
+  > .i-amphtml-story-interactive-quiz-answer-choice {
+  color: var(--correct-color) !important;
+  border-color: var(--correct-color) !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-option-selected
+  > .i-amphtml-story-interactive-quiz-answer-choice {
+  border-color: transparent !important;
+  animation: answer-choice-bounce forwards 600ms linear;
+  background-color: var(
+    --i-amphtml-interactive-answer-choice-background
+  ) !important;
+}
+
+/** TODO(jackbsteinberg): Use a more a11y-friendly approach than color: transparent */
+
+.i-amphtml-story-interactive-post-selection
+  [correct]
+  > .i-amphtml-story-interactive-quiz-answer-choice {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%235BBA74'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z'/%3E%3C/svg%3E") !important;
+  color: transparent !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  :not([correct])
+  > .i-amphtml-story-interactive-quiz-answer-choice {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%23F34E4E'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E") !important;
+  color: transparent !important;
+}
+
+.i-amphtml-story-interactive-quiz-option > * {
+  position: relative !important;
+}
+
+.i-amphtml-story-interactive-quiz-option::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0px !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: var(--i-amphtml-interactive-chip-radius) !important;
+  line-height: 1.25em !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-quiz-option:focus::before {
+    background: var(--i-amphtml-interactive-theme-shading) !important;
+}
+
+.i-amphtml-story-interactive-post-selection:not(.i-amphtml-story-interactive-has-data)
+  .i-amphtml-story-interactive-quiz-option-selected[correct].i-amphtml-story-interactive-quiz-option::before {
+  animation: option-select-correct forwards 150ms cubic-bezier(0, 0, 0.2, 1) !important;
+}
+
+.i-amphtml-story-interactive-post-selection:not(.i-amphtml-story-interactive-has-data)
+  .i-amphtml-story-interactive-quiz-option-selected:not([correct]).i-amphtml-story-interactive-quiz-option::before {
+  animation: option-select-incorrect forwards 150ms cubic-bezier(0, 0, 0.2, 1) !important;
+}
+
+.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-quiz-option::before {
+  transform: translateX(var(--option-percentage, 0%)) !important;
+}
+
+.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data[dir='rtl']
+  .i-amphtml-story-interactive-quiz-option::before {
+  transform: translateX(calc(-1 * var(--option-percentage, 0%))) !important;
+}
+
+.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-quiz-option::before {
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0px !important;
+  background: var(--i-amphtml-interactive-theme-shading) !important;
+  color: var(--i-amphtml-interactive-theme-shading) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time)
+    var(--i-amphtml-interactive-ease-out-curve) !important;
+}
+
+.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data[dir='rtl']
+  .i-amphtml-story-interactive-quiz-option::before {
+  left: 101% !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-option-selected[correct].i-amphtml-story-interactive-quiz-option {
+  background: var(--correct-color) !important;
+  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset) !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-option-selected:not([correct]).i-amphtml-story-interactive-quiz-option {
+  background: var(--incorrect-color) !important;
+  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset) !important;
+}
+
+.i-amphtml-story-interactive-option-selected.i-amphtml-story-interactive-quiz-option {
+  border: none !important;
+  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset) !important;
+}
+
+.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-option-selected[correct].i-amphtml-story-interactive-quiz-option::before {
+  background: var(--correct-color-shaded) !important;
+  color: var(--correct-color-shaded) !important;
+}
+
+.i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data
+  .i-amphtml-story-interactive-option-selected:not([correct]).i-amphtml-story-interactive-quiz-option::before {
+  background: var(--incorrect-color-shaded) !important;
+  color: var(--incorrect-color-shaded) !important;
+}
+
+@keyframes option-select-incorrect {
+  0% {
+    border-color: var(--incorrect-color);
+    background: var(--incorrect-color);
+    opacity: 0.2;
+    transform: scale(0.1);
+    color: var(--incorrect-color);
+  }
+  50% {
+    opacity: 1;
+    color: var(--incorrect-color);
+  }
+  100% {
+    border-color: var(--incorrect-color);
+    background: var(--incorrect-color);
+    transform: scale(1);
+    color: white;
+  }
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option
+    .i-amphtml-story-interactive-quiz-answer-choice {
+  animation: i-amphtml-story-interactive-quiz-answer-choice-landing-animation var(--i-amphtml-interactive-animation-time) !important;
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:nth-of-type(2)
+    .i-amphtml-story-interactive-quiz-answer-choice {
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:nth-of-type(3)
+    .i-amphtml-story-interactive-quiz-answer-choice {
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:nth-of-type(4)
+    .i-amphtml-story-interactive-quiz-answer-choice {
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4) !important;
+}
+
+@keyframes i-amphtml-story-interactive-quiz-answer-choice-landing-animation {
+  33% {
+    transform: scale(.8);
+  }
+}

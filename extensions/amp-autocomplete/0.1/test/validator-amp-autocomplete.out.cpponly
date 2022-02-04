@@ -1,0 +1,618 @@
+FAIL
+|  <!--
+|    Test Description:
+|    Tests for the amp-autocomplete tag.
+|  -->
+|
+|  <!DOCTYPE html>
+|  <html ⚡ lang="en">
+|    <head>
+|      <meta charset="utf-8" />
+|      <title>amp-autocomplete example</title>
+|      <link rel="canonical" href="amps.html" />
+|      <meta
+|        name="viewport"
+|        content="width=device-width,minimum-scale=1,initial-scale=1"
+|      />
+|      <style amp-boilerplate>
+|        body {
+|          -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+|          -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+|          -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+|          animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+|        }
+|        @-webkit-keyframes -amp-start {
+|          from {
+|            visibility: hidden;
+|          }
+|          to {
+|            visibility: visible;
+|          }
+|        }
+|        @-moz-keyframes -amp-start {
+|          from {
+|            visibility: hidden;
+|          }
+|          to {
+|            visibility: visible;
+|          }
+|        }
+|        @-ms-keyframes -amp-start {
+|          from {
+|            visibility: hidden;
+|          }
+|          to {
+|            visibility: visible;
+|          }
+|        }
+|        @-o-keyframes -amp-start {
+|          from {
+|            visibility: hidden;
+|          }
+|          to {
+|            visibility: visible;
+|          }
+|        }
+|        @keyframes -amp-start {
+|          from {
+|            visibility: hidden;
+|          }
+|          to {
+|            visibility: visible;
+|          }
+|        }
+|      </style>
+|      <noscript
+|        ><style amp-boilerplate>
+|          body {
+|            -webkit-animation: none;
+|            -moz-animation: none;
+|            -ms-animation: none;
+|            animation: none;
+|          }
+|        </style></noscript
+|      >
+|      <script
+|        async
+|        custom-element="amp-autocomplete"
+|        src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"
+|      ></script>
+|      <script
+|        async
+|        custom-element="amp-bind"
+|        src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"
+|      ></script>
+|      <script
+|        async
+|        custom-element="amp-form"
+|        src="https://cdn.ampproject.org/v0/amp-form-0.1.js"
+|      ></script>
+|      <script
+|        async
+|        custom-template="amp-mustache"
+|        src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"
+|      ></script>
+|      <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    </head>
+|    <body>
+|      <!-- Valid: amp-component with static data and filter=prefix attribute -->
+|      <amp-autocomplete filter="prefix">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and filter=prefix attribute -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: textarea and src attr -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <textarea></textarea>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: textarea with other attr, autocomplete with src attr -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <textarea autoexpand placeholder="Reply"></textarea>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: input and src and query attr -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        query="q"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: input and [src] attr -->
+|      <amp-autocomplete filter="prefix" [src]="foo.bar">
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: input tag with type "text" and script tag -->
+|      <amp-autocomplete filter="prefix">
+|        <input type="text" />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: input tag with type "search" and script tag -->
+|      <amp-autocomplete filter="prefix">
+|        <input type="search" />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and filter=token-prefix attribute -->
+|      <amp-autocomplete filter="token-prefix">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and filter=token-prefix attribute -->
+|      <amp-autocomplete
+|        filter="token-prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and filter=substring attribute -->
+|      <amp-autocomplete filter="substring">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and filter=substring attribute -->
+|      <amp-autocomplete
+|        filter="substring"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and filter=fuzzy attribute -->
+|      <amp-autocomplete filter="fuzzy">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and filter=fuzzy attribute -->
+|      <amp-autocomplete
+|        filter="fuzzy"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and filter=none attribute -->
+|      <amp-autocomplete filter="none">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and filter=none attribute -->
+|      <amp-autocomplete
+|        filter="none"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and filter=custom and filter-expr attribute -->
+|      <amp-autocomplete filter="custom" filter-expr="true">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and filter=custom and filter-expr attribute -->
+|      <amp-autocomplete
+|        filter="custom"
+|        filter-expr="true"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and inline=@ attribute -->
+|      <amp-autocomplete inline="@" filter="prefix">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and inline=@ attribute -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        inline="@"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and items=property attribute -->
+|      <amp-autocomplete filter="prefix" items="property">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and items=property attribute -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        items="property"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and min-characters attribute -->
+|      <amp-autocomplete filter="prefix" min-characters="3">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and min-characters attribute -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        min-characters="3"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and max-entries attribute -->
+|      <amp-autocomplete filter="prefix" max-entries="10">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and max-items attribute -->
+|      <amp-autocomplete filter="prefix" max-items="10">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and max-entries attribute -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        max-entries="10"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and max-items attribute -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        max-items="10"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component suggest-first attribute and filter attribute-->
+|      <amp-autocomplete suggest-first filter="prefix">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component suggest-first attribute and filter!="prefix" attribute-->
+|      <amp-autocomplete suggest-first filter="substring">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and suggest-first attribute -->
+|      <amp-autocomplete
+|        suggest-first
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        filter="prefix"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and highlight-user-entry attribute -->
+|      <amp-autocomplete filter="prefix" highlight-user-entry>
+|        <input type="text" />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and highlight-user-entry attribute -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        highlight-user-entry
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input type="text" />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and submit-on-enter attribute -->
+|      <amp-autocomplete filter="prefix" submit-on-enter>
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and submit-on-enter attribute -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        submit-on-enter
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and rich content template -->
+|      <amp-autocomplete filter="prefix">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|        <template type="amp-mustache" id="amp-template-default">
+|          <div class="city-item" data-value="{{value}}">
+|            <div>{{value}}</div>
+|            <div class="custom-population">Population: {{population}}</div>
+|          </div>
+|        </template>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and rich content template with data-json -->
+|      <amp-autocomplete filter="prefix">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|        <template type="amp-mustache" id="amp-template-default">
+|          <div class="city-item" data-value="{{value}}" data-json="{{objToJson}}">
+|            <div>{{value}}</div>
+|            <div class="custom-population">Population: {{population}}</div>
+|          </div>
+|        </template>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and rich content template -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|        <template type="amp-mustache" id="amp-template-default">
+|          <div class="city-item" data-value="{{value}}">
+|            <div>{{value}}</div>
+|            <div class="custom-population">Population: {{population}}</div>
+|          </div>
+|        </template>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and rich content template with data-json -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|        <template type="amp-mustache" id="amp-template-default">
+|          <div class="city-item" data-value="{{value}}" data-json="{{objToJson}}">
+|            <div>{{value}}</div>
+|            <div class="custom-population">Population: {{population}}</div>
+|          </div>
+|        </template>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and rich content template -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|        <template type="amp-mustache" id="amp-template-default">
+|          {{#disabled}}
+|          <div data-disabled>
+|            <b>{{value}}</b>
+|          </div>
+|          {{/disabled}} {{^disabled}}
+|          <div class="city-item" data-value="{{value}}">
+|            <div>{{value}}</div>
+|            <div class="custom-population">Population: {{population}}</div>
+|          </div>
+|          {{/disabled}}
+|        </template>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and template attr -->
+|      <amp-autocomplete filter="prefix" template="my-template-id">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and template attr -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        template="my-template-id"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with static data and template script child -->
+|      <amp-autocomplete filter="prefix">
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|        <script type="text/plain" template="amp-mustache">
+|          <div class="city-item" data-value="{{value}}">
+|            <div>{{value}}</div>
+|            <div class="custom-population">Population: {{population}}</div>
+|          </div>
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data and template attr -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|        <script type="application/json">
+|          {}
+|        </script>
+|        <script type="text/plain" template="amp-mustache">
+|          <div class="city-item" data-value="{{value}}">
+|            <div>{{value}}</div>
+|            <div class="custom-population">Population: {{population}}</div>
+|          </div>
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: filter unspecified -->
+|      <amp-autocomplete>
+|        <input />
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:510:4 The mandatory attribute 'filter' is missing in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: width is mistyped -->
+|      <amp-autocomplete widht="100" filter="prefix">
+|        <input />
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:518:4 The attribute 'widht' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: responsive layout is not supported -->
+|      <amp-autocomplete layout="responsive" filter="prefix">
+|        <input />
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:526:4 The specified layout 'RESPONSIVE' is not supported by tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: amp-autocomplete with invalid input types -->
+|      <amp-autocomplete widht="100" filter="prefix">
+|        <input type="file" />
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:534:4 The attribute 'widht' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|        <script type="application/json">
+>>       ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:535:6 The tag 'input' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form/)
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: amp-autocomplete with filter=custom and no filter-expr attribute -->
+|      <amp-autocomplete filter="custom">
+|        <input />
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:542:4 The attribute 'filter-expr' in tag 'amp-autocomplete' is missing or incorrect, but required by attribute 'filter'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: amp-autocomplete with filter=custom and no filter-expr attribute -->
+|      <amp-autocomplete
+|        filter="custom"
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:550:4 The attribute 'filter-expr' in tag 'amp-autocomplete' is missing or incorrect, but required by attribute 'filter'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: amp-autocomplete with unexpected filter -->
+|      <amp-autocomplete filter="random">
+|        <input />
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:558:4 The attribute 'filter' in tag 'amp-autocomplete' is set to the invalid value 'random'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|        <script type="application/json">
+|          {}
+|        </script>
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: amp-autocomplete with unexpected filter and src attr -->
+|      <amp-autocomplete
+|        filter="random"
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:566:4 The attribute 'filter' in tag 'amp-autocomplete' is set to the invalid value 'random'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: amp-autocomplete with query attr missing src attr -->
+|      <amp-autocomplete filter="prefix" query="q">
+|        <input />
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:574:4 The attribute 'src' in tag 'amp-autocomplete' is missing or incorrect, but required by attribute 'query'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|      </amp-autocomplete>
+|
+|      <!-- Valid: amp-component with remote data, filter=prefix and prefetch attribute -->
+|      <amp-autocomplete
+|        filter="prefix"
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        prefetch
+|      >
+|        <input />
+|      </amp-autocomplete>
+|
+|      <!-- Invalid: prefetch is mistyped -->
+|      <amp-autocomplete
+|        filter="prefix"
+>>     ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:588:4 The attribute 'prefecth' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete/)
+|        src="https://data.com/articles.json?ref=CANONICAL_URL"
+|        prefecth
+|      >
+|        <input />
+|      </amp-autocomplete>
+|    </body>
+|  </html>

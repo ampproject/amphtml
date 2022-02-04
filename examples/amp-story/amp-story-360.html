@@ -1,0 +1,51 @@
+<!doctype html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>amp-story-360 Example</title>
+    <link rel="canonical" href="example.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-360" src="https://cdn.ampproject.org/v0/amp-story-360-0.1.js"></script>
+    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  </head>
+  <body>
+    <amp-story
+        standalone
+        title="Demo Story"
+        publisher="AMP Story"
+        publisher-logo-src="example.com/logo.png"
+        poster-portrait-src="example.com/poster.jpg">
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="fill">
+          <amp-story-360 layout="fill" heading-start="30" pitch-start="20" heading-end="-20" pitch-end="10" duration="5s" controls="gyroscope">
+            <amp-video poster="img/nasa_training_poster.jpg" autoplay layout="fill" loop>
+              <!-- Credit: NASA -->
+              <!-- https://commons.wikimedia.org/wiki/File:NASA_VR-360_Astronaut_Training-_Space_Walk.webm -->
+              <source src="img/NASA_VR_360_Astronaut_Training_Space_Walk_Clip.mp4" type="video/mp4" />
+            </amp-video>
+          </amp-story-360>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="page1">
+        <amp-story-grid-layer template="fill">
+          <amp-story-360 layout="fill" heading-end="50" pitch-end="-5" heading-start="115" pitch-start="10" duration="3s" controls="gyroscope"
+          scene-pitch="-5">
+            <!-- Curiosity self-portrat, Sol 1462 (September 2016) Credit: NASA / JPL / MSSS / Seán Doran -->
+            <!-- https://informal.jpl.nasa.gov/museum/360-video -->
+            <amp-img src="img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg" width="1998" height="999" title="Curiosity self-portrait"></amp-img>
+          </amp-story-360>
+        </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="page2">
+        <amp-story-grid-layer template="fill">
+          <amp-story-360 layout="fill" heading-start="95" pitch-start="-10" heading-end="-60" pitch-end="-20" duration="3s" controls="gyroscope">
+            <amp-img src="img/Equirectangular_projection_SW.jpg" width="2058" height="1036" aria-label="globe"></amp-img>
+          </amp-story-360>
+        </amp-story-grid-layer>
+      </amp-story-page>
+    </amp-story>
+  </body>
+</html>

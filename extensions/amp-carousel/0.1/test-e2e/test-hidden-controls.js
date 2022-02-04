@@ -1,24 +1,7 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 describes.endtoend(
   'AMP carousel 0.1 buttons with hidden controls',
   {
-    testUrl:
-      'http://localhost:8000/test/manual/amp-carousel/0.1/hidden-controls.amp.html',
+    fixture: 'amp-carousel/0.1/hidden-controls.amp.html',
     experiments: ['amp-carousel'],
     environments: ['single'],
   },
@@ -27,7 +10,7 @@ describes.endtoend(
      * A helper function for expecting an error from an async function since we
      * don't have ChaiAsExpected and we cannot wait for errors from
      * @param {function()} fn A function to run
-     * @param {!RegExp} regExp A regular expression to match the error message.
+     * @param {RegExp} regExp A regular expression to match the error message.
      */
     async function expectAysncError(fn, regExp) {
       let error;
@@ -45,7 +28,7 @@ describes.endtoend(
 
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
     });
 

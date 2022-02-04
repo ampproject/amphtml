@@ -1,0 +1,39 @@
+name: Release tagger
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'tagger action (promote | rollback)'
+        required: true
+      head:
+        description: 'head AMP version'
+        required: true
+      base:
+        description: 'base AMP version'
+        required: true
+      channel:
+        description: 'release channel (beta-opt-in | beta-percent | stable | lts)'
+        required: true
+      sha:
+        description: 'commit sha'
+        required: true
+jobs:
+  tagger:
+    environment: release_tagger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - uses: actions/checkout@v2
+      - run: bash ./.github/workflows/install_dependencies.sh
+      - name: Run tagger
+        run: |
+          node ./build-system/release-tagger/index.js \
+            --action ${{ github.event.inputs.action }} \
+            --head ${{ github.event.inputs.head }} \
+            --base ${{ github.event.inputs.base }} \
+            --channel ${{ github.event.inputs.channel }} \
+            --sha ${{ github.event.inputs.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}

@@ -1,33 +1,19 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {RAW_OBJECT_ARGS_KEY} from '#core/constants/action-constants';
+import {htmlFor} from '#core/dom/static-template';
+import {toggle} from '#core/dom/style';
 
-import {AmpDocService, AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {RAW_OBJECT_ARGS_KEY} from '../../src/action-constants';
-import {Services} from '../../src/services';
+import {Services} from '#service';
+import {AmpDocService, AmpDocSingle} from '#service/ampdoc-impl';
+import {cidServiceForDocForTesting} from '#service/cid-impl';
+import {installHistoryServiceForDoc} from '#service/history-impl';
 import {
   StandardActions,
   getAutofocusElementForShowAction,
-} from '../../src/service/standard-actions-impl';
-import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
-import {htmlFor} from '../../src/static-template';
-import {installHistoryServiceForDoc} from '../../src/service/history-impl';
-import {macroTask} from '../../testing/yield';
-import {setParentWindow} from '../../src/service';
-import {toggle} from '../../src/style';
-import {user} from '../../src/log';
+} from '#service/standard-actions-impl';
+
+import {user} from '#utils/log';
+
+import {macroTask} from '#testing/helpers';
 
 describes.sandboxed('StandardActions', {}, (env) => {
   let standardActions;
@@ -83,6 +69,16 @@ describes.sandboxed('StandardActions', {}, (env) => {
   function expectElementToDropClass(element, className) {
     expectElementMutatedAsync(element);
     expect(element.classList.contains(className)).to.false;
+  }
+
+  function expectCheckboxToHaveCheckedStateTrue(element) {
+    expectElementMutatedAsync(element);
+    expect(element.checked).to.true;
+  }
+
+  function expectCheckboxToHaveCheckedStateFalse(element) {
+    expectElementMutatedAsync(element);
+    expect(element.checked).to.false;
   }
 
   function expectAmpElementToHaveBeenHidden(element) {
@@ -538,6 +534,62 @@ describes.sandboxed('StandardActions', {}, (env) => {
     });
   });
 
+  describe('"toggleChecked" action', () => {
+    it('should set checked property to false when checked property is true', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      element.checked = true;
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {},
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateFalse(element);
+    });
+
+    it('should set checked property to true when checked property is false', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      element.checked = false;
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {},
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateTrue(element);
+    });
+
+    it('should set checked property to true when force=true', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'force': true,
+        },
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateTrue(element);
+    });
+
+    it('should set checked property to false when force=false', () => {
+      const element = createElement();
+      element.type = 'checkbox';
+      const invocation = {
+        node: element,
+        satisfiesTrust: () => true,
+        args: {
+          'force': false,
+        },
+      };
+      standardActions.handleToggleChecked_(invocation);
+      expectCheckboxToHaveCheckedStateFalse(element);
+    });
+  });
+
   describe('"scrollTo" action', () => {
     it('should handle normal element', () => {
       const element = createElement();
@@ -699,7 +751,10 @@ describes.sandboxed('StandardActions', {}, (env) => {
           });
         yield standardActions.handleAmpTarget_(invocation);
         expect(navigator.navigateTo).to.be.calledTwice;
-        expect(userError).to.be.calledWith('STANDARD-ACTIONS', 'Fake error.');
+        expect(userError).to.be.calledWith(
+          'STANDARD-ACTIONS',
+          env.sandbox.match((arg) => arg.message === 'Fake error.')
+        );
       });
     });
 
@@ -895,49 +950,106 @@ describes.sandboxed('StandardActions', {}, (env) => {
       expect(result).to.eql('scrollToResponsePromise');
     });
   });
+});
 
-  describes.fakeWin('installInEmbedWindow', {}, (env) => {
-    let embedWin;
-    let embedActions;
+describes.realWin('toggleTheme action', {amp: true}, (env) => {
+  let invocation, win, body, standardActions;
+  let matchMediaStub, getItemStub, setItemStub;
 
-    beforeEach(() => {
-      embedWin = env.win;
-      setParentWindow(embedWin, window);
+  beforeEach(() => {
+    win = env.win;
+    body = win.document.body;
+    standardActions = new StandardActions(env.ampdoc);
 
-      embedActions = {
-        addGlobalTarget: env.sandbox.spy(),
-        addGlobalMethodHandler: env.sandbox.spy(),
-      };
-      const embedElement = embedWin.document.documentElement;
-      env.sandbox
-        .stub(Services, 'actionServiceForDoc')
-        .withArgs(embedElement)
-        .returns(embedActions);
-    });
+    getItemStub = env.sandbox.stub(win.localStorage, 'getItem');
+    setItemStub = env.sandbox.stub(win.localStorage, 'setItem');
 
-    it('should configured the embedded actions service', () => {
-      StandardActions.installInEmbedWindow(embedWin, ampdoc);
+    matchMediaStub = env.sandbox.stub(win, 'matchMedia');
 
-      const {
-        addGlobalTarget: target,
-        addGlobalMethodHandler: handler,
-      } = embedActions;
+    invocation = {
+      node: {
+        ownerDocument: {
+          defaultView: env.win,
+        },
+      },
+      satisfiesTrust: () => true,
+    };
 
-      // Global targets.
-      expect(target).to.be.calledOnce;
-      expect(target).to.be.calledWith('AMP', env.sandbox.match.func);
+    invocation.method = 'toggleTheme';
+  });
 
-      // Global actions.
-      expect(handler).to.have.callCount(6);
-      expect(handler).to.be.calledWith('hide', env.sandbox.match.func);
-      expect(handler).to.be.calledWith('show', env.sandbox.match.func);
-      expect(handler).to.be.calledWith(
-        'toggleVisibility',
-        env.sandbox.match.func
-      );
-      expect(handler).to.be.calledWith('scrollTo', env.sandbox.match.func);
-      expect(handler).to.be.calledWith('focus', env.sandbox.match.func);
-      expect(handler).to.be.calledWith('toggleClass', env.sandbox.match.func);
-    });
+  it('should set amp-dark-mode property in localStorage with yes', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns('no');
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned('no');
+
+    expect(body).to.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'yes');
+  });
+
+  it('should set amp-dark-mode property in localStorage with no', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns('yes');
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned('yes');
+
+    expect(body).to.not.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'no');
+  });
+
+  it('should set amp-dark-mode property in localStorage with yes if it is null and user prefers light mode', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns(null);
+
+    matchMediaStub
+      .withArgs('(prefers-color-scheme: dark)')
+      .returns({matches: false});
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned(null);
+
+    expect(body).to.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'yes');
+  });
+
+  it('should set amp-dark-mode property in localStorage with no if it is null and user prefers dark mode', async () => {
+    getItemStub.withArgs('amp-dark-mode').returns(null);
+
+    matchMediaStub
+      .withArgs('(prefers-color-scheme: dark)')
+      .returns({matches: true});
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(getItemStub)
+      .to.be.calledOnce.and.calledWith('amp-dark-mode')
+      .and.returned(null);
+
+    expect(body).to.not.have.class('amp-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'no');
+  });
+
+  it('should add custom dark mode class to the body', async () => {
+    body.setAttribute('data-prefers-dark-mode-class', 'is-dark-mode');
+    getItemStub.withArgs('amp-dark-mode').returns('no');
+
+    await standardActions.handleAmpTarget_(invocation);
+
+    expect(body).to.have.class('is-dark-mode');
+
+    expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'yes');
   });
 });

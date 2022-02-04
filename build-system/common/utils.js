@@ -1,71 +1,56 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 const argv = require('minimist')(process.argv.slice(2));
+const experimentsConfig = require('../global-configs/experiments-config.json');
+const fastGlob = require('fast-glob');
 const fs = require('fs-extra');
-const globby = require('globby');
-const log = require('fancy-log');
-const path = require('path');
 const {clean} = require('../tasks/clean');
-const {doBuild} = require('../tasks/build');
-const {doDist} = require('../tasks/dist');
+const {cyan, green, red, yellow} = require('kleur/colors');
+const {default: ignore} = require('ignore');
 const {execOrDie} = require('./exec');
-const {gitDiffNameOnlyMaster} = require('./git');
-const {green, cyan, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('./travis');
-
-const ROOT_DIR = path.resolve(__dirname, '../../');
+const {gitDiffNameOnlyMain} = require('./git');
+const {log, logLocalDev} = require('./logging');
 
 /**
  * Performs a clean build of the AMP runtime in testing mode.
- * Used by `gulp e2e|integration|visual_diff`.
+ * Used by `amp e2e|integration|visual-diff`.
+ *
+ * @param {boolean} opt_minified builds the minified runtime
+ * @return {Promise<void>}
  */
-async function buildRuntime() {
+async function buildRuntime(opt_minified = false) {
   await clean();
-  if (argv.compiled) {
-    await doDist({fortesting: true});
+  if (argv.minified || opt_minified === true) {
+    execOrDie(`amp dist --fortesting`);
   } else {
-    await doBuild({fortesting: true});
+    execOrDie(`amp build --fortesting`);
   }
 }
 
 /**
- * Logs a message on the same line to indicate progress
- *
- * @param {string} message
+ * Extracts and validates the config for the given experiment.
+ * @param {string} experiment
+ * @return {?Object}
  */
-function logOnSameLine(message) {
-  if (!isTravisBuild() && process.stdout.isTTY) {
-    process.stdout.moveCursor(0, -1);
-    process.stdout.cursorTo(0);
-    process.stdout.clearLine();
-  }
-  log(message);
+function getExperimentConfig(experiment) {
+  const config = experimentsConfig[experiment];
+  const valid =
+    config?.name &&
+    config?.define_experiment_constant &&
+    config?.expiration_date_utc &&
+    new Number(new Date(config.expiration_date_utc)) >= Date.now();
+  return valid ? config : null;
 }
 
 /**
  * Gets the list of files changed on the current branch that match the given
- * array of glob patterns
+ * array of glob patterns using the given options.
  *
  * @param {!Array<string>} globs
+ * @param {!Object} options
  * @return {!Array<string>}
  */
-function getFilesChanged(globs) {
-  const allFiles = globby.sync(globs, {dot: true});
-  return gitDiffNameOnlyMaster().filter((changedFile) => {
+function getFilesChanged(globs, options) {
+  const allFiles = fastGlob.sync(globs, options).map(String);
+  return gitDiffNameOnlyMain().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
 }
@@ -77,53 +62,83 @@ function getFilesChanged(globs) {
  * @return {!Array<string>}
  */
 function logFiles(files) {
-  if (!isTravisBuild()) {
-    log(green('INFO: ') + 'Checking the following files:');
-    for (const file of files) {
-      log(cyan(file));
-    }
+  logLocalDev(green('INFO: ') + 'Checking the following files:');
+  for (const file of files) {
+    logLocalDev(cyan(file));
   }
   return files;
 }
 
 /**
- * Extracts the list of files from argv.files.
+ * Extracts the list of files from argv.files. Throws an error if no matching
+ * files were found.
  *
  * @return {Array<string>}
  */
 function getFilesFromArgv() {
-  return argv.files
-    ? globby.sync(argv.files.split(',').map((s) => s.trim()))
-    : [];
+  if (!argv.files) {
+    return [];
+  }
+  const toPosix = (str) => str.replace(/\\\\?/g, '/');
+  const globs = Array.isArray(argv.files) ? argv.files : argv.files.split(',');
+  const allFiles = [];
+  for (const glob of globs) {
+    const files = fastGlob.sync(toPosix(glob.trim()));
+    if (files.length == 0) {
+      log(red('ERROR:'), 'Argument', cyan(glob), 'matched zero files.');
+      throw new Error('Argument matched zero files.');
+    }
+    allFiles.push(...files);
+  }
+  return allFiles;
+}
+
+/**
+ * Returns list of files in the comma-separated file named at --filelist.
+ *
+ * @return {Array<string>}
+ */
+function getFilesFromFileList() {
+  if (!argv.filelist) {
+    return [];
+  }
+  return fs.readFileSync(argv.filelist, 'utf8').trim().split(',');
 }
 
 /**
  * Gets a list of files to be checked based on command line args and the given
- * file matching globs. Used by tasks like prettify, check-links, etc.
+ * file matching globs. Used by tasks like prettify, lint, check-links, etc.
+ * Optionally takes in options for globbing and a file containing ignore rules.
  *
  * @param {!Array<string>} globs
  * @param {Object=} options
+ * @param {string=} ignoreFile
  * @return {!Array<string>}
  */
-function getFilesToCheck(globs, options = {}) {
+function getFilesToCheck(globs, options = {}, ignoreFile = undefined) {
+  const ignored = ignore();
+  if (ignoreFile) {
+    const ignoreRules = fs.readFileSync(ignoreFile, 'utf8');
+    ignored.add(ignoreRules);
+  }
   if (argv.files) {
-    return logFiles(getFilesFromArgv());
+    return logFiles(ignored.filter(getFilesFromArgv()));
   }
   if (argv.local_changes) {
-    const filesChanged = getFilesChanged(globs);
+    const filesChanged = ignored.filter(getFilesChanged(globs, options));
     if (filesChanged.length == 0) {
       log(green('INFO: ') + 'No files to check in this PR');
       return [];
     }
     return logFiles(filesChanged);
   }
-  return globby.sync(globs, options);
+  return ignored.filter(fastGlob.sync(globs, options).map(String));
 }
 
 /**
  * Ensures that a target is only called with `--files` or `--local_changes`
  *
- * @param {string} taskName name of the gulp task.
+ * @param {string} taskName name of the amp task.
  * @return {boolean} if the use is valid.
  */
 function usesFilesOrLocalChanges(taskName) {
@@ -132,13 +147,13 @@ function usesFilesOrLocalChanges(taskName) {
     log(
       yellow('NOTE 1:'),
       'It is infeasible for',
-      cyan(`gulp ${taskName}`),
+      cyan(`amp ${taskName}`),
       'to check all files in the repo at once.'
     );
     log(
       yellow('NOTE 2:'),
       'Please run',
-      cyan(`gulp ${taskName}`),
+      cyan(`amp ${taskName}`),
       'with',
       cyan('--files'),
       'or',
@@ -148,27 +163,11 @@ function usesFilesOrLocalChanges(taskName) {
   return validUsage;
 }
 
-/**
- * Runs 'yarn' to install packages in a given directory.
- *
- * @param {string} dir
- */
-function installPackages(dir) {
-  log(
-    'Running',
-    cyan('yarn'),
-    'to install packages in',
-    cyan(path.relative(ROOT_DIR, dir)) + '...'
-  );
-  execOrDie(`npx yarn --cwd ${dir}`, {'stdio': 'ignore'});
-}
-
 module.exports = {
   buildRuntime,
-  getFilesChanged,
+  getExperimentConfig,
   getFilesFromArgv,
+  getFilesFromFileList,
   getFilesToCheck,
-  installPackages,
-  logOnSameLine,
   usesFilesOrLocalChanges,
 };

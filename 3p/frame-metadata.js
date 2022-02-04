@@ -1,24 +1,9 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {once} from '#core/types/function';
+import {parseJson} from '#core/types/object/json';
 
-import {dev} from '../src/log';
-import {dict} from '../src/utils/object.js';
+import {dev} from '#utils/log';
+
 import {getMode} from '../src/mode';
-import {once} from '../src/utils/function.js';
-import {parseJson} from '../src/json';
 import {parseUrlDeprecated} from '../src/url';
 
 /**
@@ -46,11 +31,11 @@ import {parseUrlDeprecated} from '../src/url';
 export let ContextStateDef;
 
 /** @const {!JsonObject} */
-const FALLBACK = dict({
-  'attributes': dict({
-    '_context': dict(),
-  }),
-});
+const FALLBACK = {
+  'attributes': {
+    '_context': {},
+  },
+};
 
 /**
  * Gets metadata encoded in iframe name attribute.
@@ -86,8 +71,8 @@ export function getAmpConfig() {
 /**
  * @return {!JsonObject}
  */
-const getAttributeDataImpl_ = once(() => {
-  const data = Object.assign(dict({}), allMetadata()['attributes']);
+const getAttributeData = once(() => {
+  const data = Object.assign(Object.create(null), allMetadata()['attributes']);
 
   // TODO(alanorozco): don't delete _context. refactor data object structure.
   if ('_context' in data) {
@@ -97,13 +82,7 @@ const getAttributeDataImpl_ = once(() => {
   return data;
 });
 
-/**
- * @return {!JsonObject}
- */
-export function getAttributeData() {
-  // using indirect invocation to prevent no-export-side-effect issue
-  return getAttributeDataImpl_();
-}
+export {getAttributeData};
 
 /**
  * @return {!Location}

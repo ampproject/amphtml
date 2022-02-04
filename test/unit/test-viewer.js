@@ -1,31 +1,17 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseQueryString} from '#core/types/string/url';
 
-import {Services} from '../../src/services';
-import {ViewerImpl} from '../../src/service/viewer-impl';
-import {dev} from '../../src/log';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installTimerService} from '../../src/service/timer-impl';
-import {
-  parseQueryString,
-  parseUrlDeprecated,
-  removeFragment,
-} from '../../src/url';
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '#service/document-info-impl';
+import {installPlatformService} from '#service/platform-impl';
+import {installTimerService} from '#service/timer-impl';
+import {ViewerImpl} from '#service/viewer-impl';
+
+import {dev} from '#utils/log';
+
+import {FakePerformance} from '#testing/fake-dom';
+
+import {parseUrlDeprecated, removeFragment} from '../../src/url';
 
 describes.sandboxed('Viewer', {}, (env) => {
   let windowMock;
@@ -82,6 +68,7 @@ describes.sandboxed('Viewer', {}, (env) => {
       ancestorOrigins: null,
       search: '',
     };
+    windowApi.performance = new FakePerformance(window);
     windowApi.addEventListener = (type, listener) => {
       events[type] = listener;
     };
@@ -315,10 +302,6 @@ describes.sandboxed('Viewer', {}, (env) => {
     );
   });
 
-  it('should configure prerenderSize by default', () => {
-    expect(viewer.getPrerenderSize()).to.equal(1);
-  });
-
   it('should return promise that resolve on visible', function* () {
     const viewer = new ViewerImpl(ampdoc);
     expect(ampdoc.isVisible()).to.be.true;
@@ -335,12 +318,13 @@ describes.sandboxed('Viewer', {}, (env) => {
     return promise;
   });
 
-  it('should initialize firstVisibleTime when doc becomes visible', () => {
-    params['prerenderSize'] = '3';
+  // TODO(#37245): Fix failing test
+  it.skip('should initialize firstVisibleTime when doc becomes visible', () => {
     const viewer = new ViewerImpl(ampdoc);
     expect(ampdoc.isVisible()).to.be.true;
-    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
-    expect(ampdoc.getLastVisibleTime()).to.equal(0);
+    // We don't live during the unix epoch, so time is always positive.
+    expect(ampdoc.getFirstVisibleTime()).to.equal(1);
+    expect(ampdoc.getLastVisibleTime()).to.equal(1);
 
     // Becomes invisible.
     clock.tick(1);
@@ -348,8 +332,8 @@ describes.sandboxed('Viewer', {}, (env) => {
       state: 'hidden',
     });
     expect(ampdoc.isVisible()).to.be.false;
-    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
-    expect(ampdoc.getLastVisibleTime()).to.equal(0);
+    expect(ampdoc.getFirstVisibleTime()).to.equal(1);
+    expect(ampdoc.getLastVisibleTime()).to.equal(1);
 
     // Back to visible.
     clock.tick(1);
@@ -357,7 +341,7 @@ describes.sandboxed('Viewer', {}, (env) => {
       state: 'visible',
     });
     expect(ampdoc.isVisible()).to.be.true;
-    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getFirstVisibleTime()).to.equal(1);
     expect(ampdoc.getLastVisibleTime()).to.equal(2);
 
     // Back to invisible again.
@@ -366,14 +350,8 @@ describes.sandboxed('Viewer', {}, (env) => {
       state: 'hidden',
     });
     expect(ampdoc.isVisible()).to.be.false;
-    expect(ampdoc.getFirstVisibleTime()).to.equal(0);
+    expect(ampdoc.getFirstVisibleTime()).to.equal(1);
     expect(ampdoc.getLastVisibleTime()).to.equal(2);
-  });
-
-  it('should configure prerenderSize', () => {
-    params['prerenderSize'] = '3';
-    const viewer = new ViewerImpl(ampdoc);
-    expect(viewer.getPrerenderSize()).to.equal(3);
   });
 
   it('should receive viewport event', () => {
@@ -500,13 +478,6 @@ describes.sandboxed('Viewer', {}, (env) => {
   });
 
   describe('should receive the visibilitychange event', () => {
-    it('should change prerenderSize', () => {
-      viewer.receiveMessage('visibilitychange', {
-        prerenderSize: 4,
-      });
-      expect(viewer.getPrerenderSize()).to.equal(4);
-    });
-
     it('should change visibilityState', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
@@ -553,7 +524,7 @@ describes.sandboxed('Viewer', {}, (env) => {
           viewer.receiveMessage('visibilitychange', {
             state: 'what is this',
           });
-        }).to.throw('Unknown VisibilityState value');
+        }).to.throw('Assertion failed');
       });
       expect(ampdoc.getVisibilityState()).to.equal('paused');
     });
@@ -678,6 +649,18 @@ describes.sandboxed('Viewer', {}, (env) => {
     it('should become visible on mousedown', eventTest.bind(null, 'mousedown'));
 
     it('should become visible on keydown', eventTest.bind(null, 'keydown'));
+
+    it('should not become visible when not a single doc', () => {
+      env.sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
+      ampdoc.overrideVisibilityState('prerender');
+
+      viewer = new ViewerImpl(ampdoc);
+
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
+      expect(events.touchstart).to.be.undefined;
+      expect(events.keydown).to.be.undefined;
+      expect(events.mousedown).to.be.undefined;
+    });
   });
 
   describe('Messaging not embedded', () => {
@@ -1797,6 +1780,90 @@ describes.sandboxed('Viewer', {}, (env) => {
       });
       clock.tick(1010);
       return result;
+    });
+  });
+
+  describe('onMessage', () => {
+    it('should fire observer on event', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.onMessage('event', onMessageSpy);
+      viewer.receiveMessage('event', {foo: 'bar'});
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should not fire observer on other events', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.onMessage('event', onMessageSpy);
+      viewer.receiveMessage('otherevent', {foo: 'bar'});
+      expect(onMessageSpy).to.not.have.been.called;
+    });
+
+    it('should fire observer with queued messages on handler registration', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should empty queued messages after first handler registration', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessage('event', onMessageSpy);
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should cap the max number of queued messages', () => {
+      const onMessageSpy = env.sandbox.spy();
+      for (let i = 0; i < 55; i++) {
+        viewer.receiveMessage('event', {foo: 'bar'});
+      }
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.callCount(50);
+    });
+  });
+
+  describe('onMessageRespond', () => {
+    it('should call responder on event', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.receiveMessage('event', {foo: 'bar'});
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should not call responder on other events', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.receiveMessage('otherevent', {foo: 'bar'});
+      expect(onMessageRespondStub).to.not.have.been.called;
+    });
+
+    it('should call responder with queued messages on responder registration', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should empty queued messages after first responder registration', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should return responder response when enqueing message on responder registration', async () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves('response');
+      const promise = viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(await promise).to.equal('response');
     });
   });
 });

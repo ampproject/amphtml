@@ -1,4 +1,0 @@
-{
-  "plugins": ["../../../.."],
-  "throws": "can't handle computed namespace"
-}

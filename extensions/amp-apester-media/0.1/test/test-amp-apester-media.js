@@ -1,20 +1,5 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-apester-media';
-import {Services} from '../../../../src/services';
+import {Services} from '#service';
 
 describes.realWin(
   'amp-apester-media',
@@ -40,7 +25,7 @@ describes.realWin(
       }
     });
 
-    function getApester(attributes, opt_responsive) {
+    async function getApester(attributes, opt_responsive) {
       const media = doc.createElement('amp-apester-media');
       const regularResponse = {
         status: 200,
@@ -81,14 +66,6 @@ describes.realWin(
           ? playlistResponse
           : regularResponse;
 
-      changeSizeSpy = env.sandbox.spy(
-        media.implementation_,
-        'forceChangeHeight'
-      );
-      attemptChangeSizeSpy = env.sandbox.spy(
-        media.implementation_,
-        'attemptChangeHeight'
-      );
       xhrMock = env.sandbox.mock(Services.xhrFor(win));
       if (attributes) {
         xhrMock.expects('fetchJson').returns(
@@ -112,12 +89,14 @@ describes.realWin(
         media.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(media);
-      return media
-        .build()
-        .then(() => {
-          return media.layoutCallback();
-        })
-        .then(() => media);
+      await media.buildInternal();
+
+      const impl = await media.getImpl();
+      changeSizeSpy = env.sandbox.spy(impl, 'forceChangeHeight');
+      attemptChangeSizeSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
+
+      await media.layoutCallback();
+      return media;
     }
 
     it('renders', () => {
@@ -186,21 +165,20 @@ describes.realWin(
       });
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return getApester({
+    it('removes iframe after unlayoutCallback', async () => {
+      const ape = await getApester({
         'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
-      }).then((ape) => {
-        const iframe = ape.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.src).not.to.be.null;
-        const url = new URL(iframe.src);
-        expect(url.hostname).to.equal('renderer.apester.com');
-        expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
-        const tag = ape.implementation_;
-        tag.unlayoutCallback();
-        expect(ape.querySelector('iframe')).to.be.null;
-        expect(tag.iframe_).to.be.null;
       });
+      const tag = await ape.getImpl();
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).not.to.be.null;
+      const url = new URL(iframe.src);
+      expect(url.hostname).to.equal('renderer.apester.com');
+      expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
+      tag.unlayoutCallback();
+      expect(ape.querySelector('iframe')).to.be.null;
+      expect(tag.iframe_).to.be.null;
     });
 
     it('requires media-id or channel-token', () => {

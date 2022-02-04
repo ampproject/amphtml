@@ -1,0 +1,36 @@
+---
+name: Feature Request
+description: Request a new feature in AMP.
+labels: 'Type: Feature Request'
+body:
+  - type: markdown
+    id: header
+    attributes:
+      value: |
+        Thanks for filling out this feature request.
+        - Feature requests related to the [AMP](https://amp.dev) format and cache can be reported using the form below.
+        - Feature requests related to the [AMP WordPress Plugin](https://wordpress.org/plugins/amp/) can be reported at the [support forum](https://wordpress.org/support/plugin/amp/) or at the [`amp-wp`](https://github.com/ampproject/amp-wp/issues) repository.
+        - Questions about AMP uage can be asked at the [`#using-amp`](https://amphtml.slack.com/archives/C9HPA6HGB) Slack channel or at the [`amp-html`](http://stackoverflow.com/questions/tagged/amp-html) tag at Stack Overflow.
+        - Questions about Google Search can be asked at Google's [Help Community](https://goo.gl/utQ1KZ).
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A brief description of the feature request.
+      placeholder: Provide a clear and concise description of the new feature or change to an existing feature you'd like to see.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives_considered
+    attributes:
+      label: Alternatives Considered
+      description: Alternatives to this feature request.
+      placeholder: Provide details around any alternative solutions or features you've considered.
+    validations:
+      required: true
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Other relevant context.
+      placeholder: Add any other context about your feature request here. E.g. paste a screenshot, or provide a link.

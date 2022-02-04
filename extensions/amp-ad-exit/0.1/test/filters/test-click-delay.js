@@ -1,23 +1,7 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {ClickDelayFilter} from '../../filters/click-delay';
 import {FilterType} from '../../filters/filter';
 
-describe('click-delay', () => {
+describes.sandboxed('click-delay', {}, (env) => {
   const DEFAULT_CONFIG = {
     type: FilterType.CLICK_DELAY,
     delay: 123,
@@ -26,7 +10,7 @@ describe('click-delay', () => {
 
   it('should use performance timing', () => {
     const win = {performance: {timing: {'navigationStart': 456}}};
-    window.sandbox.stub(Date, 'now').returns(123);
+    env.sandbox.stub(Date, 'now').returns(123);
     expect(
       new ClickDelayFilter('foo', DEFAULT_CONFIG, win).intervalStart
     ).to.equal(456);
@@ -57,7 +41,7 @@ describe('click-delay', () => {
               ).to.throw(win.err)
             );
           } else {
-            window.sandbox.stub(Date, 'now').returns(123);
+            env.sandbox.stub(Date, 'now').returns(123);
             expect(
               new ClickDelayFilter('foo', test.config, test.win).intervalStart
             ).to.equal(123);
@@ -72,7 +56,7 @@ describe('click-delay', () => {
       const filter = new ClickDelayFilter('foo', DEFAULT_CONFIG, {
         performance: {timing: {navigationStart: 1}},
       });
-      const nowStub = window.sandbox.stub(Date, 'now');
+      const nowStub = env.sandbox.stub(Date, 'now');
       nowStub.onFirstCall().returns(1001);
       expect(filter.filter()).to.be.true;
     });
@@ -81,7 +65,7 @@ describe('click-delay', () => {
       const filter = new ClickDelayFilter('foo', DEFAULT_CONFIG, {
         performance: {timing: {navigationStart: 1}},
       });
-      const nowStub = window.sandbox.stub(Date, 'now');
+      const nowStub = env.sandbox.stub(Date, 'now');
       nowStub.onFirstCall().returns(1);
       nowStub.onSecondCall().returns(125);
       expect(filter.filter()).to.be.false;

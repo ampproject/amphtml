@@ -1,20 +1,6 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {installDocService} from '#service/ampdoc-impl';
 
-import {Services} from '../../src/services';
 import {
   activateChunkingForTesting,
   chunkInstanceForTesting,
@@ -22,9 +8,8 @@ import {
   onIdle,
   startupChunk,
 } from '../../src/chunk';
-import {installDocService} from '../../src/service/ampdoc-impl';
 
-describe('chunk2', () => {
+describes.sandboxed('chunk2', {}, () => {
   beforeEach(() => {
     activateChunkingForTesting();
   });
@@ -217,9 +202,8 @@ describe('chunk2', () => {
           env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return false;
           });
-          env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
-            15
-          );
+          env.win.requestIdleCallback =
+            resolvingIdleCallbackWithTimeRemaining(15);
           const chunks = chunkInstanceForTesting(env.win.document);
           env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
             throw new Error('No calls expected: executeAsap_');
@@ -252,9 +236,8 @@ describe('chunk2', () => {
           env.sandbox.stub(ampdoc, 'isVisible').callsFake(() => {
             return false;
           });
-          env.win.requestIdleCallback = resolvingIdleCallbackWithTimeRemaining(
-            15
-          );
+          env.win.requestIdleCallback =
+            resolvingIdleCallbackWithTimeRemaining(15);
           const chunks = chunkInstanceForTesting(env.win.document);
           env.sandbox.stub(chunks, 'executeAsap_').callsFake(() => {
             throw new Error('No calls expected: executeAsap_');
@@ -360,7 +343,7 @@ describe('chunk2', () => {
   );
 });
 
-describe('long tasks', () => {
+describes.sandboxed('long tasks', {}, () => {
   describes.fakeWin(
     'long chunk tasks force a macro task between work',
     {
@@ -414,7 +397,7 @@ describe('long tasks', () => {
         ).macroAfterLongTask_ = true;
       });
 
-      it('should not run macro tasks with invisible bodys', (done) => {
+      it('should not break out of microtask loop when body is invisible', (done) => {
         startupChunk(env.win.document, complete('init', true));
         startupChunk(env.win.document, complete('a', true));
         startupChunk(env.win.document, complete('b', true));
@@ -482,14 +465,121 @@ describe('long tasks', () => {
   );
 });
 
-describe('onIdle', () => {
+describes.sandboxed('isInputPending usage', {}, () => {
+  describes.fakeWin(
+    'pending input breaks microtask loop to subsequent macrotask',
+    {
+      amp: false,
+    },
+    (env) => {
+      let subscriptions;
+      let progress;
+      let postMessageCalls;
+      let pendingInput;
+
+      function complete(str, simulatePendingInputAfter) {
+        return function (unusedIdleDeadline) {
+          if (simulatePendingInputAfter) {
+            pendingInput = true;
+          }
+          progress += str;
+        };
+      }
+
+      function runSubs() {
+        subscriptions['message']
+          .slice()
+          .forEach((method) => method({data: 'amp-macro-task'}));
+      }
+
+      beforeEach(() => {
+        postMessageCalls = 0;
+        pendingInput = false;
+        subscriptions = {};
+
+        env.win.navigator.scheduling = {
+          isInputPending: function () {
+            if (pendingInput) {
+              pendingInput = false;
+              return true;
+            }
+
+            return false;
+          },
+        };
+
+        installDocService(env.win, /* isSingleDoc */ true);
+
+        env.win.addEventListener = function (type, handler) {
+          if (subscriptions[type] && !subscriptions[type].includes(handler)) {
+            subscriptions[type].push(handler);
+          } else {
+            subscriptions[type] = [handler];
+          }
+        };
+
+        env.win.postMessage = function (key) {
+          expect(key).to.equal('amp-macro-task');
+          postMessageCalls++;
+          runSubs();
+        };
+
+        progress = '';
+        chunkInstanceForTesting(
+          env.win.document.documentElement
+        ).macroAfterLongTask_ = true;
+      });
+
+      it('should not break out of microtask loop when body is invisible', (done) => {
+        startupChunk(env.win.document, complete('init', true));
+        startupChunk(env.win.document, complete('a', true));
+        startupChunk(env.win.document, complete('b', true));
+        startupChunk(env.win.document, () => {
+          expect(progress).to.equal('initab');
+          done();
+        });
+      });
+
+      it('should execute chunks after pending input in a macro task', (done) => {
+        startupChunk(env.win.document, complete('1', true));
+        startupChunk(env.win.document, complete('2', false));
+        startupChunk(
+          env.win.document,
+          function () {
+            complete('3', false)();
+            expect(progress).to.equal('123');
+            expect(postMessageCalls).to.equal(0);
+          },
+          /* make body visible */ true
+        );
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(1);
+          expect(progress).to.equal('123');
+          complete('4', false)();
+        });
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(1);
+          expect(progress).to.equal('1234');
+        });
+        startupChunk(env.win.document, complete('5', true));
+        startupChunk(env.win.document, () => {
+          expect(postMessageCalls).to.equal(2);
+          expect(progress).to.equal('12345');
+          done();
+        });
+      });
+    }
+  );
+});
+
+describes.sandboxed('onIdle', {}, (env) => {
   let win;
   let calls;
   let callbackCalled;
   let clock;
 
   beforeEach(() => {
-    clock = window.sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     calls = [];
     callbackCalled = false;
     win = {

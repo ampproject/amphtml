@@ -1,25 +1,10 @@
 FAIL
 |  <!--
-|    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
-|
-|    Licensed under the Apache License, Version 2.0 (the "License");
-|    you may not use this file except in compliance with the License.
-|    You may obtain a copy of the License at
-|
-|        http://www.apache.org/licenses/LICENSE-2.0
-|
-|    Unless required by applicable law or agreed to in writing, software
-|    distributed under the License is distributed on an "AS-IS" BASIS,
-|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-|    See the License for the specific language governing permissions and
-|    limitations under the license.
-|  -->
-|  <!--
 |    Test Description:
 |    Tests support for the amp-mowplayer tag.
 |  -->
 |  <!doctype html>
-|  <html ⚡>
+|  <html ⚡ lang="en">
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
@@ -33,23 +18,23 @@ FAIL
 |  	<amp-mowplayer
 |  		data-mediaid="v-myfwarfx4tb"
 |  		layout="responsive"
-|  		width="16" 
+|  		width="16"
 |  		height="9">
 |  	</amp-mowplayer>
 |  	<!-- Alternate valid example with playlist. -->
 |  	<amp-mowplayer
 |  		data-mediaid="p-mmzhwcu9mbu"
 |  		layout="responsive"
-|  		width="16" 
+|  		width="16"
 |  		height="9">
 |  	</amp-mowplayer>
 |  	<!-- Invalid example missing a media id. -->
 |  	<amp-mowplayer
 >>  ^~~~~~~~~
-amp-mowplayer/0.1/test/validator-amp-mowplayer.html:46:1 The mandatory attribute 'data-mediaid' is missing in tag 'amp-mowplayer'. (see https://amp.dev/documentation/components/amp-mowplayer)
+amp-mowplayer/0.1/test/validator-amp-mowplayer.html:31:1 The mandatory attribute 'data-mediaid' is missing in tag 'amp-mowplayer'. (see https://amp.dev/documentation/components/amp-mowplayer)
 |  		data-mediasid="v-myfwarfx4tb"
 |  		layout="responsive"
-|  		width="16" 
+|  		width="16"
 |  		height="9">
 |  	</amp-mowplayer>
 |  </body>

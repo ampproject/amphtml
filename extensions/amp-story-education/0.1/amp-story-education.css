@@ -1,18 +1,4 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700');
 @import '../../amp-story/1.0/amp-story-shadow-reset.css';
@@ -75,11 +61,14 @@ amp-story-education {
 .i-amphtml-story-education-navigation-gesture-outer {
   position: absolute !important;
   height: 60px !important;
-  width: 100% !important;
   border-radius: 60px !important;
   border: 4px solid #FFF !important;
   animation: i-amphtml-tap-outer 1.6s cubic-bezier(0.4,0,0.2,1) 0.5s infinite backwards !important;
   will-change: left, opacity !important;
+}
+
+[step="tap"] .i-amphtml-story-education-navigation-gesture-outer {
+  width: 100% !important;
 }
 
 [step="swipe"] .i-amphtml-story-education-navigation-gesture-outer {
@@ -96,18 +85,15 @@ amp-story-education {
   width: 30px !important;
   background: #FFF;
   border-radius: 50% !important;
-  opacity: 0.5 !important;
   animation: i-amphtml-tap-inner 1.6s cubic-bezier(0.4,0,0.2,1) 0.5s infinite backwards !important;
   will-change: opacity !important;
 }
 
 [step="swipe"] .i-amphtml-story-education-navigation-gesture-inner {
-  left: 15px !important;
   animation: i-amphtml-swipe-inner 1.6s cubic-bezier(0.4,0,0.2,1) 0.5s infinite backwards !important;
 }
 
 [dir="rtl"] [step="swipe"] .i-amphtml-story-education-navigation-gesture-inner {
-  right: 15px !important;
   animation: i-amphtml-swipe-inner-rtl 1.6s cubic-bezier(0.4,0,0.2,1) 0.5s infinite backwards !important;
 }
 
@@ -250,7 +236,7 @@ amp-story-education {
   80%, 90% {
     opacity: 0;
     left: 15px;
-  },
+  }
 
   100% {
     opacity: 0;

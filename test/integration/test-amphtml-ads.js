@@ -1,36 +1,20 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {parseQueryString} from '#core/types/string/url';
 
-import {NO_SIGNING_EXP} from '../../extensions/amp-a4a/0.1/amp-a4a';
-import {RequestBank} from '../../testing/test-helper';
-import {maybeSwitchToCompiledJs} from '../../testing/iframe';
-import {parseQueryString} from '../../src/url';
-import {xhrServiceForTesting} from '../../src/service/xhr-impl';
+import {xhrServiceForTesting} from '#service/xhr-impl';
 
-// TODO(wg-ads, #29112): Unskip on Safari.
-const t = describe.configure().skipSafari();
+import {RequestBank} from '#testing/helpers/service';
+import {maybeSwitchToMinifiedJs} from '#testing/iframe';
 
-[NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment].forEach((branch) => {
-  t.run(`AMPHTML ad on AMP Page ${NO_SIGNING_EXP.id}:${branch}`, () => {
-    describes.integration(
-      'ATF',
-      {
-        amp: true,
-        extensions: ['amp-ad'],
-        body: `
+// TODO(wg-monetization, #29112): Unskip on Safari.
+const t = describes.sandboxed.configure().skipSafari();
+
+t.run('AMPHTML ad on AMP Page', {}, () => {
+  describes.integration(
+    'ATF',
+    {
+      amp: true,
+      extensions: ['amp-ad'],
+      body: `
   <amp-ad
       width="300" height="250"
       id="i-amphtml-demo-id"
@@ -38,30 +22,29 @@ const t = describe.configure().skipSafari();
       a4a-conversion="true"
       checksig=""
       disable3pfallback="true"
-      data-experiment-id=${NO_SIGNING_EXP.id}:${branch}
       src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}">
   </amp-ad>
       `,
-      },
-      () => {
-        afterEach(() => {
-          return RequestBank.tearDown();
-        });
+    },
+    () => {
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
 
-        it('should layout amp-img, amp-pixel, amp-analytics', () => {
-          // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
-          return testAmpComponents();
-        });
-      }
-    );
+      it('should layout amp-img, amp-pixel, amp-analytics', () => {
+        // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
+        return testAmpComponents();
+      });
+    }
+  );
 
-    describes.integration(
-      'BTF',
-      {
-        amp: true,
-        extensions: ['amp-ad'],
-        frameStyle: 'height: 100vh',
-        body: `
+  describes.integration(
+    'BTF',
+    {
+      amp: true,
+      extensions: ['amp-ad'],
+      frameStyle: 'height: 100vh',
+      body: `
   <div style="height: 100vh"></div>
   <amp-ad
       width="300" height="250"
@@ -70,27 +53,25 @@ const t = describe.configure().skipSafari();
       a4a-conversion="true"
       checksig=""
       disable3pfallback="true"
-      data-experiment-id=${branch}
       src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}">
   </amp-ad>
       `,
-      },
-      (env) => {
-        afterEach(() => {
-          return RequestBank.tearDown();
-        });
+    },
+    (env) => {
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
 
-        // TODO(#24657): Flaky on Travis.
-        it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
-          // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
-          return testAmpComponentsBTF(env.win);
-        });
-      }
-    );
-  });
+      // TODO(#24657): Flaky on CI.
+      it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
+        // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
+        return testAmpComponentsBTF(env.win);
+      });
+    }
+  );
 });
 
-t.run('AMPHTML ad on non-AMP page (inabox)', () => {
+t.run('AMPHTML ad on non-AMP page (inabox)', {}, () => {
   describes.integration(
     'ATF',
     {
@@ -282,13 +263,14 @@ t.run('AMPHTML ad on non-AMP page (inabox)', () => {
   );
 });
 
-t.run('A more real AMPHTML image ad', () => {
+// TODO(wg-monetization, #24421): Make this test less flaky.
+t.skip('A more real AMPHTML image ad', () => {
   const {testServerPort} = window.ampTestRuntimeConfig;
 
   // The image ad as seen in examples/inabox.gpt.html,
   // with visibility pings being placeholders that's substituted with calls to
   // the request bank.
-  const adBody = maybeSwitchToCompiledJs(
+  const adBody = maybeSwitchToMinifiedJs(
     // eslint-disable-next-line no-undef
     __html__['test/fixtures/amp-cupcake-ad.html']
   )
@@ -338,12 +320,14 @@ t.run('A more real AMPHTML image ad', () => {
         Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
       });
 
-      it('should properly render ad in a friendly iframe with viewability pings', () => {
+      // TODO(wg-monetization, #24421): Make this test less flaky.
+      it.skip('should properly render ad in a friendly iframe with viewability pings', () => {
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });
 
-      it('should properly render ad in a safe frame with viewability pings', () => {
+      // TODO(wg-monetization, #24421): Make this test less flaky.
+      it.skip('should properly render ad in a safe frame with viewability pings', () => {
         writeSafeFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });

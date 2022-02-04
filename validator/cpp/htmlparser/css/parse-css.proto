@@ -1,0 +1,86 @@
+syntax = "proto2";
+
+package htmlparser.css;
+
+message TokenType {
+  enum Code {
+    UNKNOWN = 0;
+
+    // Tokens produced by the tokenize
+    // method.
+    AT_KEYWORD = 1;
+    CDC = 2;  // -->
+    CDO = 3;  // <!--
+    CLOSE_CURLY = 4;
+    CLOSE_PAREN = 5;
+    CLOSE_SQUARE = 6;
+    COLON = 7;
+    COLUMN = 8;  // ||
+    COMMA = 9;
+    DASH_MATCH = 10;  // |=
+    DELIM = 11;
+    DIMENSION = 12;
+    EOF_TOKEN = 13;  // Can't call this EOF due to symbol conflict in C.
+    ERROR = 14;
+    FUNCTION_TOKEN = 15;
+    HASH = 16;
+    IDENT = 17;
+    INCLUDE_MATCH = 18;  // ~=
+    NUMBER = 19;
+    OPEN_CURLY = 20;
+    OPEN_PAREN = 21;
+    OPEN_SQUARE = 22;
+    PERCENTAGE = 23;
+    PREFIX_MATCH = 24;  // ^=
+    SEMICOLON = 25;
+    STRING = 26;
+    SUBSTRING_MATCH = 27;  // *=
+    SUFFIX_MATCH = 28;     // $=
+    URL = 29;
+    WHITESPACE = 30;
+
+    // AST nodes produced by the parsing routines.
+    STYLESHEET = 31;
+    AT_RULE = 32;
+    QUALIFIED_RULE = 33;
+    DECLARATION = 34;
+
+    // For ExtractUrls
+    PARSED_CSS_URL = 35;
+
+    // For selector parsing.
+    TYPE_SELECTOR = 36;
+    ID_SELECTOR = 37;
+    ATTR_SELECTOR = 38;
+    PSEUDO_SELECTOR = 39;
+    CLASS_SELECTOR = 40;
+    SIMPLE_SELECTOR_SEQUENCE = 41;
+    COMBINATOR = 42;
+    SELECTORS_GROUP = 43;
+  }
+}
+
+// Enum describing how to parse the rules inside a CSS AT Rule.
+message BlockType {
+  enum Code {
+    UNKNOWN = 0;
+    // Parse this simple block as a list of rules
+    // (Either Qualified Rules or AT Rules)
+    PARSE_AS_RULES = 1;
+    // Parse this simple block as a list of declarations
+    PARSE_AS_DECLARATIONS = 2;
+    // Ignore this simple block, do not parse. This is generally used
+    // in conjunction with a later step emitting an error for this rule.
+    PARSE_AS_IGNORE = 3;
+  }
+}
+
+message CombinatorType {
+  enum Code {
+    UNKNOWN = 0;
+    DESCENDANT = 1;
+    CHILD = 2;
+    ADJACENT_SIBLING = 3;
+    GENERAL_SIBLING = 4;
+  }
+}

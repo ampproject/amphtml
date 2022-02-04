@@ -1,0 +1,62 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Doubleclick RTC Example</title>
+  <link rel="canonical" href="http://nonblocking.io/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    amp-ad {
+      border: 1px solid #ccc;
+      max-width: 500px;
+    }
+  </style>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h2> NOTE: Must disable check that isSecureUrl for testing </h2>
+  <h2>Doubleclick with RTC</h2>
+    <amp-ad width="320" height="50"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1", "PAGE_ID": "1"}, "nonexistent-vendor": {"SLOT_ID": "1"}, "fakeVendor2": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1", "https://localhost:4443/abc?timeout=true", "https://broken.zzzzzz", "https://localhost:4443/zqq?slot_id=1"], "timeoutMillis": 500}'
+            json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+    </amp-ad>
+
+    <amp-ad width="320" height="50"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{"urls": ["https://www.example.biz/?pvi=PAGEVIEWID&href=HREF&ds=ATTR(data-slot)&h=ATTR(height)&w=ATTR(width)&ovw=ATTR(data-override-width)&json=ATTR(json)&ovh=ATTR(data-override-height)"], "timeoutMillis": 500}'
+            json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
+    </amp-ad>
+
+    <amp-ad width="320" height="50"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{
+            "vendors": {
+            "fakeVendor": {
+            "SLOT_ID": {"key":"param"}
+            }
+            }
+            }'>
+    </amp-ad>
+
+    <amp-ad width="320" height="50"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{"urls": ["amp-script:targetingFns.getTargeting"]}'
+    </amp-ad>
+    <amp-script nodom data-ampdevmode id="targetingFns" script="targetingFnsScript"></amp-script>
+    <script id="targetingFnsScript" type="text/plain" target="amp-script">
+      exportFunction("getTargeting", () => {
+        return {
+          targeting: {food: ["chicken", "beans"]},
+          categoryExclusions: ["sports", "food", "fun"]
+        };
+      });
+    </script>
+</body>
+</html>

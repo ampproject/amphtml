@@ -1,53 +1,42 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {CSS} from '../../../build/amp-next-page-1.0.css';
-import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
-import {MultidocManager} from '../../../src/multidoc-manager';
-import {Services} from '../../../src/services';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {
-  UrlReplacementPolicy,
-  batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {VisibilityState} from '../../../src/visibility-state';
-import {
-  childElementByAttr,
-  childElementsByTag,
   insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
+} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {
+  childElementByAttr,
+  childElementsByTag,
   scopedQuerySelector,
-} from '../../../src/dom';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex} from '../../../src/utils/array';
-import {htmlFor, htmlRefs} from '../../../src/static-template';
-import {installStylesForDoc} from '../../../src/style-installer';
+} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {setStyles, toggle} from '#core/dom/style';
+import {findIndex, toArray} from '#core/types/array';
+import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
+import {validatePage, validateUrl} from './utils';
+import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
+
+import {CSS} from '../../../build/amp-next-page-1.0.css';
+import {
+  UrlReplacementPolicy_Enum,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
-import {setStyles, toggle} from '../../../src/style';
-import {toArray} from '../../../src/types';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryParseJson} from '../../../src/json';
-import {validatePage, validateUrl} from './utils';
-import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
+import {MultidocManager} from '../../../src/multidoc-manager';
+import {installStylesForDoc} from '../../../src/style-installer';
 
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;
@@ -82,6 +71,9 @@ export class NextPageService {
      */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
+    /** @private {!../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
+
     /**
      * @private
      * @const {!../../../src/service/mutator-interface.MutatorInterface}
@@ -89,7 +81,7 @@ export class NextPageService {
     this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win_);
+    this.templates_ = Services.templatesForDoc(ampdoc);
 
     /** @private {?Element} */
     this.separator_ = null;
@@ -198,12 +190,17 @@ export class NextPageService {
 
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
+
+    // Set the current title page as the host page so we don't do replaceState and
+    // trigger `amp-next-page-scroll` event (in `setPageTitle` method) when
+    // next page is not even displayed (issue #33404).
+    this.currentTitlePage_ = this.hostPage_;
+
     this.toggleHiddenAndReplaceableElements(this.doc_);
     // Have the recommendation box be always visible
     insertAtStart(this.host_, this.recBox_);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
-    this.initializeHistory();
 
     this.navigation_ = Services.navigationForDoc(this.ampdoc_);
 
@@ -335,11 +332,11 @@ export class NextPageService {
     this.pages_.forEach((page, index) => {
       if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
-          page.setVisibility(VisibilityState.HIDDEN);
+          page.setVisibility(VisibilityState_Enum.HIDDEN);
         }
       } else if (page.relativePos !== ViewportRelativePos.LEAVING_VIEWPORT) {
         if (!page.isVisible()) {
-          page.setVisibility(VisibilityState.VISIBLE);
+          page.setVisibility(VisibilityState_Enum.VISIBLE);
         }
         this.hidePreviousPages_(index);
         this.resumePausedPages_(index);
@@ -348,7 +345,7 @@ export class NextPageService {
 
     // If no page is visible then the host page should be
     if (!this.pages_.some((page) => page.isVisible())) {
-      this.hostPage_.setVisibility(VisibilityState.VISIBLE);
+      this.hostPage_.setVisibility(VisibilityState_Enum.VISIBLE);
     }
 
     // Hide elements if necessary
@@ -393,7 +390,7 @@ export class NextPageService {
       this.visibilityObserver_.isScrollingDown() &&
       this.hostPage_.isVisible()
     ) {
-      this.hostPage_.setVisibility(VisibilityState.HIDDEN);
+      this.hostPage_.setVisibility(VisibilityState_Enum.HIDDEN);
     }
 
     // Get all the pages that the user scrolled past (or didn't see yet)
@@ -411,7 +408,7 @@ export class NextPageService {
         .map((page, away) => {
           // Hide all pages whose visibility state have changed to hidden
           if (page.isVisible()) {
-            page.setVisibility(VisibilityState.HIDDEN);
+            page.setVisibility(VisibilityState_Enum.HIDDEN);
           }
           // Pause those that are too far away
           if (away >= pausePageCount) {
@@ -483,20 +480,11 @@ export class NextPageService {
   }
 
   /**
-   * Adds an initial entry in history that sub-pages can
-   * replace when they become visible
-   */
-  initializeHistory() {
-    const {title, url} = this.hostPage_;
-    this.history_.push(undefined /** opt_onPop */, {title, url});
-  }
-
-  /**
    * Creates the initial (host) page based on the window's metadata
    * @return {!HostPage}
    */
   createHostPage() {
-    const {title, location} = this.doc_;
+    const {location, title} = this.doc_;
     const {href: url} = location;
     const image =
       parseSchemaImage(this.doc_) ||
@@ -504,17 +492,19 @@ export class NextPageService {
       parseFavicon(this.doc_) ||
       '';
 
-    return /** @type {!HostPage} */ (new HostPage(
-      this,
-      {
-        url,
-        title: title || '',
-        image,
-      },
-      PageState.INSERTED /** initState */,
-      VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_
-    ));
+    return /** @type {!HostPage} */ (
+      new HostPage(
+        this,
+        {
+          url,
+          title: title || '',
+          image,
+        },
+        PageState.INSERTED /** initState */,
+        VisibilityState_Enum.VISIBLE /** initVisibility */,
+        this.doc_
+      )
+    );
   }
 
   /**
@@ -544,6 +534,20 @@ export class NextPageService {
     );
 
     return container;
+  }
+
+  /**
+   * Forward the allowlisted capabilities from the viewer
+   * to the multidoc's ampdocs (i.e. CID), so they know
+   * the viewer supports it for the multidoc.
+   * @return {?string}
+   */
+  getCapabilities_() {
+    const hasCidCapabilities = this.viewer_.hasCapability('cid');
+    if (hasCidCapabilities) {
+      return 'cid';
+    }
+    return null;
   }
 
   /**
@@ -594,11 +598,34 @@ export class NextPageService {
       const amp = this.multidocManager_.attachShadowDoc(
         shadowRoot,
         content,
-        '',
+        page.url,
         {
-          visibilityState: VisibilityState.PRERENDER,
+          visibilityState: VisibilityState_Enum.PRERENDER,
+          cap: this.getCapabilities_(),
         }
       );
+
+      // Reuse message deliverer from existing viewer.
+      // Even though we have multiple instances of the Viewer service, we only
+      // have a single messaging channel.
+      const messageDeliverer = this.viewer_.maybeGetMessageDeliverer();
+      if (messageDeliverer) {
+        amp.onMessage((eventType, data, awaitResponse) => {
+          // Some messages should be suppressed when coming from the inserted
+          // document. These are related to the viewport, so we allow the host
+          // document to handle these events instead.
+          // Otherwise, we would confuse the viewer and observe issues like the
+          // header appearing unexpectedly.
+          if (
+            eventType === 'documentHeight' ||
+            eventType === 'scroll' ||
+            eventType === 'viewport'
+          ) {
+            return;
+          }
+          return messageDeliverer(eventType, data, awaitResponse);
+        });
+      }
 
       const ampdoc = devAssert(amp.ampdoc);
       installStylesForDoc(ampdoc, CSS, null, false, TAG);
@@ -868,10 +895,12 @@ export class NextPageService {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
-    const pages = /** @type {!Array<!./page.PageMeta>} */ (user().assertArray(
-      parsed,
-      `${TAG} Page list expected an array, found: ${typeof parsed}`
-    ));
+    const pages = /** @type {!Array<!./page.PageMeta>} */ (
+      user().assertArray(
+        parsed,
+        `${TAG} Page list expected an array, found: ${typeof parsed}`
+      )
+    );
 
     removeElement(scriptElement);
     return pages;
@@ -889,15 +918,16 @@ export class NextPageService {
     }
 
     if (this.remoteFetchingPromise_) {
-      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
-        .remoteFetchingPromise_);
+      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (
+        this.remoteFetchingPromise_
+      );
     }
 
     this.remoteFetchingPromise_ = batchFetchJsonFor(
       this.ampdoc_,
       this.getHost_(),
       {
-        urlReplacement: UrlReplacementPolicy.ALL,
+        urlReplacement: UrlReplacementPolicy_Enum.ALL,
         xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
       }
     )
@@ -914,8 +944,9 @@ export class NextPageService {
         return [];
       });
 
-    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
-      .remoteFetchingPromise_);
+    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (
+      this.remoteFetchingPromise_
+    );
   }
 
   /**

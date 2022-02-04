@@ -1,46 +1,64 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
-const gulp = require('gulp');
-const gulpAva = require('gulp-ava');
-const {isTravisBuild} = require('../common/travis');
+const argv = require('minimist')(process.argv.slice(2));
+const {dirname, relative} = require('path');
+const {execOrDie} = require('../common/exec');
+const {sync: globbySync} = require('globby');
+
+const testFiles = [
+  'build-system/compile/generate/test/*.test.js',
+  'build-system/release-tagger/test/*test*.js',
+  'build-system/server/app-index/test/*test*.js',
+  'build-system/server/test/app-utils.test.js',
+  'build-system/tasks/css/test/bento-css.test.js',
+  'build-system/tasks/get-zindex/get-zindex.test.js',
+  'build-system/tasks/make-extension/test/test.js',
+  'build-system/tasks/markdown-toc/test/test.js',
+  'build-system/tasks/prepend-global/prepend-global.test.js',
+];
+
+let targetFiles;
+
+/**
+ * Determines whether to trigger ava by a file change adjacent to a test file.
+ * Considered adjacent when the file changed is in the same directory as one of
+ * the listed test files, or its parent if the directory is named `test`.
+ * @param {string} changedFile
+ * @return {boolean}
+ */
+function shouldTriggerAva(changedFile) {
+  if (!targetFiles) {
+    const thisFile = relative(process.cwd(), __filename);
+    const patterns = testFiles.map(
+      (pattern) => dirname(pattern).replace(/\/test$/, '') + '/'
+    );
+    targetFiles = new Set([thisFile, ...globbySync(patterns)]);
+  }
+  return targetFiles.has(changedFile);
+}
 
 /**
  * Runs ava tests.
- * @return {!Vinyl}
+ * @return {Promise<void>}
  */
 async function ava() {
-  return gulp
-    .src([
-      require.resolve('./csvify-size/test.js'),
-      require.resolve('./get-zindex/test.js'),
-      require.resolve('./prepend-global/test.js'),
-    ])
-    .pipe(
-      gulpAva({
-        'concurrency': 5,
-        'failFast': true,
-        'silent': isTravisBuild(),
-      })
-    );
+  execOrDie(
+    [
+      'npx ava',
+      ...testFiles,
+      '--color --fail-fast',
+      argv.watch ? '--watch' : '',
+    ].join(' ')
+  );
 }
 
 module.exports = {
   ava,
+  shouldTriggerAva,
 };
 
-ava.description = 'Runs ava tests for gulp tasks';
+ava.description = "Run ava tests for AMP's tasks";
+
+ava.flags = {
+  'watch': 'Watch for changes',
+};

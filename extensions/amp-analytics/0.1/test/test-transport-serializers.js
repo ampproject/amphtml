@@ -1,22 +1,6 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {isArray} from '#core/types';
 
 import {TransportSerializers} from '../transport-serializer';
-import {dict} from '../../../../src/utils/object';
-import {isArray} from '../../../../src/types';
 
 /**
  * Please add your custom test data here in alphabetic order.
@@ -110,7 +94,7 @@ const SerializerTests = {
 /**
  * Real test. Plugin vendors don't need to modify
  */
-describe('Transport serializers', () => {
+describes.sandboxed('Transport serializers', {}, () => {
   it('TransportSerializers sort in alphabetic order', () => {
     const keys = Object.keys(TransportSerializers);
     const sorted = Object.keys(TransportSerializers).sort();
@@ -130,11 +114,11 @@ describe('Transport serializers', () => {
       });
 
       it('should handler extraUrlParams with value null', () => {
-        const batchSegment = dict({
+        const batchSegment = {
           'trigger': 'click',
           'timestamp': 0,
           'extraUrlParams': null,
-        });
+        };
         try {
           const output = serializer.generateBatchRequest('base', [
             batchSegment,
@@ -146,11 +130,11 @@ describe('Transport serializers', () => {
       });
 
       it('should properly encode segments', () => {
-        const batchSegment = dict({
+        const batchSegment = {
           'trigger': 'click',
           'timestamp': 0,
           'extraUrlParams': '12?3',
-        });
+        };
         try {
           const output = serializer.generateBatchRequest('base', [
             batchSegment,
@@ -162,11 +146,11 @@ describe('Transport serializers', () => {
       });
 
       it('should return a string', () => {
-        const batchSegment = dict({
+        const batchSegment = {
           'trigger': 'click',
           'timestamp': 0,
           'extraUrlParams': '123',
-        });
+        };
         try {
           const output = serializer.generateBatchRequest('base', [
             batchSegment,

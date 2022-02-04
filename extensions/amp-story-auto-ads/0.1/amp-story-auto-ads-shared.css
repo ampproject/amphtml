@@ -1,0 +1,11 @@
+
+
+/* CSS shared between amp-story-auto-ads and inabox story ad rendering. */
+
+.i-amphtml-story-ad-link-root {
+  all: initial !important;
+  color: initial !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}

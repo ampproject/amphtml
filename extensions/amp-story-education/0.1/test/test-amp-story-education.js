@@ -1,29 +1,14 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
 
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   AmpStoryStoreService,
   StateProperty,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryEducation, State} from '../amp-story-education';
-import {LocalizationService} from '../../../../src/service/localization';
-import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-education', {amp: true}, (env) => {
   let ampdoc;
@@ -140,9 +125,8 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
       storyEducation.setState_(State.NAVIGATION_TAP);
-      const navigationTapEl = storyEducation.containerEl_.querySelector(
-        '[step="tap"]'
-      );
+      const navigationTapEl =
+        storyEducation.containerEl_.querySelector('[step="tap"]');
 
       expect(navigationTapEl).to.exist;
     });
@@ -154,9 +138,8 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       // TODO(gmajoulet): remove private method call when viewer messaging is
       // introduced.
       storyEducation.setState_(State.NAVIGATION_SWIPE);
-      const navigationSwipeEl = storyEducation.containerEl_.querySelector(
-        '[step="swipe"]'
-      );
+      const navigationSwipeEl =
+        storyEducation.containerEl_.querySelector('[step="swipe"]');
 
       expect(navigationSwipeEl).to.exist;
     });
@@ -182,9 +165,8 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       const clickEvent = new MouseEvent('click', {clientX: 100, clientY: 100});
       storyEducation.containerEl_.dispatchEvent(clickEvent);
 
-      const navigationSwipeEl = storyEducation.containerEl_.querySelector(
-        '[step="swipe"]'
-      );
+      const navigationSwipeEl =
+        storyEducation.containerEl_.querySelector('[step="swipe"]');
       expect(navigationSwipeEl).to.exist;
     });
 
@@ -257,9 +239,8 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       await Promise.resolve(); // whenFirstVisible icrotask tick.
       await Promise.resolve(); // sendMessageAwaitResponse microtask tick.
 
-      const navigationTapEl = storyEducation.containerEl_.querySelector(
-        '[step="tap"]'
-      );
+      const navigationTapEl =
+        storyEducation.containerEl_.querySelector('[step="tap"]');
       expect(navigationTapEl).to.exist;
     });
 
@@ -275,9 +256,8 @@ describes.realWin('amp-story-education', {amp: true}, (env) => {
       await Promise.resolve(); // whenFirstVisible microtask tick.
       await Promise.resolve(); // sendMessageAwaitResponse microtask tick.
 
-      const navigationTapEl = storyEducation.containerEl_.querySelector(
-        '[step="tap"]'
-      );
+      const navigationTapEl =
+        storyEducation.containerEl_.querySelector('[step="tap"]');
       expect(navigationTapEl).to.not.exist;
     });
   });

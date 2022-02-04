@@ -1,0 +1,158 @@
+/** See #23876 and #31363. */
+:host {
+  all: initial;
+  color: initial;
+}
+
+.story-player-iframe {
+  height: 100%;
+  width: 100%;
+  flex: 0 0 100%;
+  border: 0;
+  opacity: 0;
+  transition: opacity 500ms ease;
+  position: absolute;
+}
+
+.i-amphtml-story-player-main-container {
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.i-amphtml-story-player-loaded .story-player-iframe {
+  opacity: 1;
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.i-amphtml-story-player-no-navigation-transition .story-player-iframe {
+  transition-duration: 0.01s; /* Set to low value so transitionend is emitted */
+}
+
+.i-amphtml-story-player-main-container iframe:nth-of-type(1),
+.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="0"] {
+  transform: translate3d(0, 0, 1px);
+}
+
+.i-amphtml-story-player-main-container iframe:nth-of-type(2),
+.i-amphtml-story-player-main-container iframe:nth-of-type(3),
+.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="1"] {
+  transform: translate3d(100%, 0, 0);
+}
+
+.i-amphtml-story-player-main-container .story-player-iframe[i-amphtml-iframe-position="-1"]{
+  transform: translate3d(-100%, 0, 0);
+}
+
+/* TODO(#30031): delete this once new custom UI API is ready. */
+.amp-story-player-exit-control-button {
+  position: absolute;
+  height: 48px;
+  width: 48px;
+  background-repeat: no-repeat;
+  background-position: 50%;
+  margin-top: 7px;
+  background-size: 28px;
+  border: 0px;
+  background-color: transparent;
+  outline: transparent;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* TODO(#30031): delete this once new custom UI API is ready. */
+.amp-story-player-close-button {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="%23FFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>');
+}
+
+/* TODO(#30031): delete this once new custom UI API is ready. */
+.amp-story-player-back-button {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="%23FFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>');
+}
+
+/* TODO(#30031): delete this once new custom UI API is ready. */
+.amp-story-player-hide-button {
+  display: none;
+}
+
+/* For panel player UI. */
+
+/**
+ * NOTE: If you change any variables or media queries change:
+ * extensions/amp-story/1.0/amp-story-desktop-one-panel.css
+ */
+
+.i-amphtml-story-player-panel {
+  --i-amphtml-story-player-panel-ratio: 69 / 116;
+  --i-amphtml-story-player-panel-responsive-margin: max(74px, calc(var(--i-amphtml-story-player-height) * .0825));
+  /** Calculates panel height by subtracting responsive vertical margin. */
+  --i-amphtml-story-player-panel-height: calc(var(--i-amphtml-story-player-height) - var(--i-amphtml-story-player-panel-responsive-margin) * 2);
+  --i-amphtml-story-player-panel-width: calc(var(--i-amphtml-story-player-panel-height) * var(--i-amphtml-story-player-panel-ratio));
+  --i-amphtml-story-player-panel-button-margin: max(10px, calc(50vw - 145px - var(--i-amphtml-story-player-panel-width) / 2));
+}
+
+/* Override if iframe height is less than 756px. */
+.i-amphtml-story-player-panel.i-amphtml-story-player-panel-medium {
+  --i-amphtml-story-player-panel-responsive-margin: 0px;
+  --i-amphtml-story-player-panel-width: calc(var(--i-amphtml-story-player-height) * var(--i-amphtml-story-player-panel-ratio));
+}
+
+/* Override if iframe height is less than 538px. */
+.i-amphtml-story-player-panel.i-amphtml-story-player-panel-small {
+  /** If changing this, also change amp-story-desktop-one-panel.css **/
+  --i-amphtml-story-player-panel-ratio: 36 / 53;
+}
+
+.i-amphtml-story-player-panel-prev,
+.i-amphtml-story-player-panel-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  z-index: 1;
+  background-color: transparent;
+  border: none;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  transition: 150ms opacity;
+}
+
+.i-amphtml-story-player-panel-prev[disabled],
+.i-amphtml-story-player-panel-next[disabled] {
+  opacity: .1;
+  cursor: initial;
+}
+
+.i-amphtml-story-player-full-bleed-story .i-amphtml-story-player-panel-prev,
+.i-amphtml-story-player-full-bleed-story .i-amphtml-story-player-panel-next,
+:not(.i-amphtml-story-player-panel) .i-amphtml-story-player-panel-prev,
+:not(.i-amphtml-story-player-panel) .i-amphtml-story-player-panel-next {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.i-amphtml-story-player-panel-prev, .i-amphtml-story-player-panel-next {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#fff" stroke-linecap="round" stroke-width="1.9" d="M17 29.2V18.8c0-1.2 1.4-2 2.5-1.3l7.5 5.2c1 .6 1 2 0 2.6l-7.5 5.2c-1 .7-2.5 0-2.5-1.3Z"/><rect width="1.8" height="15.6" x="30.2" y="16.2" fill="#fff" rx=".9"/></svg>') !important;
+}
+
+.i-amphtml-story-player-panel-prev {
+  margin-inline-start: calc(var(--i-amphtml-story-player-panel-button-margin));
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.i-amphtml-story-player-panel-next {
+  margin-inline-end: var(--i-amphtml-story-player-panel-button-margin);
+  right: 0;
+}
+
+[dir="rtl"].i-amphtml-story-player-panel-prev {
+  right: 0;
+}
+
+[dir="rtl"].i-amphtml-story-player-panel-next {
+  left: 0;
+  transform: translateY(-50%) rotate(180deg);
+}

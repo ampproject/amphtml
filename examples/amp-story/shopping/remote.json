@@ -1,0 +1,12 @@
+{
+  "items": [
+    {
+      "productId": "art",
+      "productTitle": "Abstract Art",
+      "productBrand": "V. Artsy",
+      "productPrice": 1200.0,
+      "productPriceCurrency": "JPY",
+      "productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
+    }
+  ]
+}

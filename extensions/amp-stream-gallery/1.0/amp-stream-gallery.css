@@ -1,0 +1,17 @@
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
+ */
+amp-stream-gallery {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Pre-upgrade: size-defining element - hide children. */
+amp-stream-gallery:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
+  display: none;
+  content-visibility: hidden;
+}

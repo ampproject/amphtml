@@ -1,0 +1,49 @@
+{
+  "sourceType": "module",
+  "allowImportExportEverywhere": true,
+  "allowReturnOutsideFunction": true,
+  "startLine": 1,
+  "tokens": true,
+  "plugins": [
+    [
+      "flow",
+      {
+        "all": true
+      }
+    ],
+    "flowComments",
+    "jsx",
+    "asyncGenerators",
+    "bigInt",
+    "classProperties",
+    "classPrivateProperties",
+    "classPrivateMethods",
+    [
+      "decorators",
+      {
+        "decoratorsBeforeExport": false
+      }
+    ],
+    "doExpressions",
+    "dynamicImport",
+    "exportDefaultFrom",
+    "exportNamespaceFrom",
+    "functionBind",
+    "functionSent",
+    "importAssertions",
+    "importMeta",
+    "logicalAssignment",
+    "nullishCoalescingOperator",
+    "numericSeparator",
+    "objectRestSpread",
+    "optionalCatchBinding",
+    "optionalChaining",
+    [
+      "pipelineOperator",
+      {
+        "proposal": "minimal"
+      }
+    ],
+    "throwExpressions"
+  ]
+}

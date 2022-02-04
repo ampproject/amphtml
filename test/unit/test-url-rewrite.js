@@ -1,25 +1,9 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {
   resolveUrlAttr,
   rewriteAttributesForElement,
 } from '../../src/url-rewrite';
 
-describe('resolveUrlAttr', () => {
+describes.sandboxed('resolveUrlAttr', {}, () => {
   it('should throw if __amp_source_origin is set', () => {
     allowConsoleError(() => {
       expect(() =>
@@ -147,7 +131,7 @@ describe('resolveUrlAttr', () => {
     });
 });
 
-describe('rewriteAttributesForElement', () => {
+describes.sandboxed('rewriteAttributesForElement', {}, () => {
   let location = 'https://pub.com/';
   it('should not modify `target` on publisher origin', () => {
     const element = document.createElement('a');

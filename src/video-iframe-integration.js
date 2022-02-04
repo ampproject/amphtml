@@ -1,41 +1,19 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 /* eslint-disable local/window-property-name */
 
-import {dict} from '../src/utils/object';
-import {getData, listen} from '../src/event-helper';
-import {getMode} from '../src/mode';
-import {isFiniteNumber} from '../src/types';
-import {once} from '../src/utils/function';
-import {tryParseJson} from '../src/json';
-import {tryResolve} from '../src/utils/promise';
+import {tryResolve} from '#core/data-structures/promise';
+import {isFiniteNumber} from '#core/types';
+import {once} from '#core/types/function';
+import {tryParseJson} from '#core/types/object/json';
+
+import {getData, listen} from '#utils/event-helper';
+
+import {getMode} from './mode';
 
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
 const TAG = '<amp-video-iframe>';
 const DOCS_URL = 'https://go.amp.dev/c/amp-video-iframe';
 const __AMP__ = '__AMP__VIDEO_IFRAME__';
-
-/**
- * @typedef {{
- *   sourceUrl: string,
- *   canonicalUrl: string,
- * }}
- */
-let DocMetadataDef;
 
 /**
  * @typedef {{
@@ -120,16 +98,13 @@ export class AmpVideoIntegration {
     this.usedListenToHelper_ = false;
 
     /**
-     * @return {!DocMetadataDef}
+     * @return {!JsonObject}
      * @private
      */
-    this.getMetadataOnce_ = once(() => {
-      const {canonicalUrl, sourceUrl} = tryParseJson(this.win_.name);
-      return {canonicalUrl, sourceUrl};
-    });
+    this.getMetadataOnce_ = once(() => tryParseJson(this.win_.name));
   }
 
-  /** @return {!DocMetadataDef} */
+  /** @return {!JsonObject} */
   getMetadata() {
     return this.getMetadataOnce_();
   }
@@ -342,7 +317,7 @@ export class AmpVideoIntegration {
 
   /**
    * @param {function()} callback
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Promise}
    * @private
    */
   safePlayOrPause_(callback) {
@@ -360,7 +335,7 @@ export class AmpVideoIntegration {
    * @param {string} event
    */
   postEvent(event) {
-    this.postToParent_(dict({'event': event}));
+    this.postToParent_({'event': event});
   }
 
   /**
@@ -369,21 +344,19 @@ export class AmpVideoIntegration {
    * @param {!Object<string, string>=} opt_vars
    */
   postAnalyticsEvent(eventType, opt_vars) {
-    this.postToParent_(
-      dict({
-        'event': 'analytics',
-        'analytics': {
-          'eventType': eventType,
-          'vars': opt_vars,
-        },
-      })
-    );
+    this.postToParent_({
+      'event': 'analytics',
+      'analytics': {
+        'eventType': eventType,
+        'vars': opt_vars,
+      },
+    });
   }
 
   /**
    * @param {!JsonObject} data
    * @param {function()=} opt_callback
-   * @return {*} TODO(#23582): Specify return type
+   * @return {number}
    * @private
    */
   postToParent_(data, opt_callback) {
@@ -405,19 +378,28 @@ export class AmpVideoIntegration {
    * @param {function(!JsonObject)} callback
    */
   getIntersection(callback) {
-    this.listenToOnce_();
-    this.getIntersectionForTesting_(callback);
+    this.getFromHostForTesting_('getIntersection', callback);
+  }
+
+  /**
+   * Gets the host document's user consent data.
+   * @param {function(!JsonObject)} callback
+   */
+  getConsentData(callback) {
+    this.getFromHostForTesting_('getConsentData', callback);
   }
 
   /**
    * Returns message id for testing. Private as message id is an implementation
    * detail that others should not rely on.
+   * @param {string} method
    * @param {function(!JsonObject)} callback
-   * @return {*} TODO(#23582): Specify return type
+   * @return {number}
    * @private
    */
-  getIntersectionForTesting_(callback) {
-    return this.postToParent_(dict({'method': 'getIntersection'}), callback);
+  getFromHostForTesting_(method, callback) {
+    this.listenToOnce_();
+    return this.postToParent_({'method': method}, callback);
   }
 }
 

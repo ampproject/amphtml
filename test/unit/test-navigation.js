@@ -1,26 +1,13 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {createElementWithAttributes} from '#core/dom';
+
+import {Services} from '#service';
+import {maybeExpandUrlParamsForTesting} from '#service/navigation';
+import {installUrlReplacementsServiceForDoc} from '#service/url-replacements-impl';
+
+import {macroTask} from '#testing/helpers';
 
 import * as Impression from '../../src/impression';
-import {Services} from '../../src/services';
 import {addParamToUrl} from '../../src/url';
-import {createElementWithAttributes} from '../../src/dom';
-import {installUrlReplacementsServiceForDoc} from '../../src/service/url-replacements-impl';
-import {macroTask} from '../../testing/yield';
-import {maybeExpandUrlParamsForTesting} from '../../src/service/navigation';
 
 describes.sandboxed('Navigation', {}, () => {
   let event;
@@ -637,15 +624,15 @@ describes.sandboxed('Navigation', {}, () => {
         });
 
         it('should navigate relative to source url', () => {
+          // URLs relative to root.
           win.location.href =
             'https://cdn.ampproject.org/c/s/www.pub.com/dir/page.html';
-          const urlService = Services.urlForDoc(doc.documentElement);
+          handler.navigateTo(win, '/abc.html');
+          expect(win.location.href).to.equal('https://www.pub.com/abc.html');
 
-          env.sandbox.stub(urlService, 'getSourceUrl').callsFake((url) => {
-            expect(url).to.equal('abc.html');
-            return 'https://www.pub.com/dir/abc.html';
-          });
-
+          // URLs relative to current directory.
+          win.location.href =
+            'https://cdn.ampproject.org/c/s/www.pub.com/dir/page.html';
           handler.navigateTo(win, 'abc.html');
           expect(win.location.href).to.equal(
             'https://www.pub.com/dir/abc.html'
@@ -803,6 +790,28 @@ describes.sandboxed('Navigation', {}, () => {
           expect(event.defaultPrevented).to.be.false;
         });
 
+        it('should not intercept requests a shadow doc', () => {
+          handler.isTrustedViewer_ = true;
+          handler.ampdoc.isSingleDoc = () => false;
+          // isSingleDoc affects where the services get stored. So stub the getters.
+          env.sandbox
+            .stub(Services, 'urlForDoc')
+            .returns(handler.ampdoc.win.__AMP_SERVICES.url.obj);
+          env.sandbox
+            .stub(Services, 'viewerForDoc')
+            .returns(handler.ampdoc.win.__AMP_SERVICES.viewer.obj);
+
+          handler.handle_(event);
+
+          expect(viewerInterceptsNavigationSpy).to.be.calledOnce;
+          expect(viewerInterceptsNavigationSpy).to.be.calledWithExactly(
+            'https://www.google.com/other',
+            'intercept_click'
+          );
+          expect(sendMessageStub).to.not.be.called;
+          expect(event.defaultPrevented).to.be.false;
+        });
+
         it('should require opted in ampdoc', () => {
           ampdoc
             .getRootNode()
@@ -851,16 +860,11 @@ describes.sandboxed('Navigation', {}, () => {
           beforeEach(() => {
             win = env.win;
             doc = win.document;
-            // TODO(#22733): cleanup `env.ampdoc` part.
-            ampdoc = doc.__AMPDOC || env.ampdoc;
+            ampdoc = env.ampdoc;
             parentWin = env.parentWin;
             embed = env.embed;
 
-            // TODO(#22733): cleanup `win.__AMP_SERVICES.navigation` part.
-            handler = (
-              (ampdoc.__AMP_SERVICES && ampdoc.__AMP_SERVICES.navigation) ||
-              win.__AMP_SERVICES.navigation
-            ).obj;
+            handler = ampdoc.__AMP_SERVICES.navigation.obj;
             winOpenStub = env.sandbox.stub(win, 'open').callsFake(() => {
               return {};
             });
@@ -880,9 +884,8 @@ describes.sandboxed('Navigation', {}, () => {
             // Navigation uses the UrlReplacements service scoped to the event
             // target, but for testing stub in the top-level service for simplicity.
             const {documentElement} = parentWin.document;
-            const urlReplacements = Services.urlReplacementsForDoc(
-              documentElement
-            );
+            const urlReplacements =
+              Services.urlReplacementsForDoc(documentElement);
             env.sandbox
               .stub(Services, 'urlReplacementsForDoc')
               .withArgs(anchor)

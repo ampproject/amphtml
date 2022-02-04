@@ -1,28 +1,12 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import '../amp-timeago';
-import {toggleExperiment} from '../../../../src/experiments';
-import {waitForChildPromise} from '../../../../src/dom';
-import {whenCalled} from '../../../../testing/test-helper.js';
+import {toggleExperiment} from '#experiments';
+
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
-  'amp-timeago',
+  'amp-timeago 1.0',
   {
     amp: {
-      runtimeOn: true,
       extensions: ['amp-timeago:1.0'],
     },
   },
@@ -31,28 +15,36 @@ describes.realWin(
     let element;
 
     const getTimeFromShadow = async () => {
-      await whenCalled(env.sandbox.spy(element, 'attachShadow'));
-      const shadow = element.shadowRoot;
-      await waitForChildPromise(shadow, (shadow) => {
-        return shadow.querySelector('time');
-      });
-      const time = shadow.querySelector('time');
-      if (time.textContent) {
-        return time.textContent;
-      }
-      await new Promise((resolve) => {
-        const mo = new MutationObserver(() => {
-          mo.disconnect();
-          resolve();
-        });
-        mo.observe(time, {characterData: true, subtree: true});
-      });
-      return time.textContent;
+      await element.buildInternal();
+      const getTimeContent = () =>
+        element.shadowRoot &&
+        element.shadowRoot.querySelector('time') &&
+        element.shadowRoot.querySelector('time').textContent;
+      await waitFor(getTimeContent, 'Timeago rendered');
+      return getTimeContent();
+    };
+
+    const getTimeFromSlot = async () => {
+      await element.buildInternal();
+      const getTimeContent = () => {
+        const slot =
+          element.shadowRoot && element.shadowRoot.querySelector('slot');
+        if (!slot) {
+          return null;
+        }
+        return slot
+          .assignedNodes()
+          .map((n) => n.textContent)
+          .join('')
+          .trim();
+      };
+      await waitFor(getTimeContent, 'Timeago rendered as slot');
+      return getTimeContent();
     };
 
     beforeEach(() => {
       win = env.win;
-      toggleExperiment(win, 'amp-timeago-bento', true);
+      toggleExperiment(win, 'bento-timeago', true);
 
       element = win.document.createElement('amp-timeago');
       element.setAttribute('layout', 'fixed');
@@ -61,13 +53,23 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-timeago-bento', false);
+      toggleExperiment(win, 'bento-timeago', false);
     });
 
-    it('should renders display 2 days ago when built', async () => {
+    it('should render display 2 days ago when built', async () => {
       const date = new Date();
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
+      element.textContent = date.toString();
+      win.document.body.appendChild(element);
+      const time = await getTimeFromShadow();
+      expect(time).to.equal('2 days ago');
+    });
+
+    it('should render display 2 days ago using "timestamp-ms"', async () => {
+      const date = new Date();
+      date.setDate(date.getDate() - 2);
+      element.setAttribute('timestamp-ms', date.getTime());
       element.textContent = date.toString();
       win.document.body.appendChild(element);
       const time = await getTimeFromShadow();
@@ -80,7 +82,7 @@ describes.realWin(
       element.textContent = 'Sunday 1 January 2017';
       element.setAttribute('cutoff', '8640000');
       win.document.body.appendChild(element);
-      const time = await getTimeFromShadow();
+      const time = await getTimeFromSlot();
       expect(time).to.equal('Sunday 1 January 2017');
     });
 

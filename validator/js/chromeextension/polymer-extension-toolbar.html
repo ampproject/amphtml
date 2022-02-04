@@ -1,0 +1,52 @@
+<link href="polymer.html" rel="import">
+<dom-module id="extension-toolbar">
+  <style scope="extension-toolbar">
+    paper-toolbar {
+      background-color: #fff;
+      color: #000;
+      z-index: 1000;
+      --paper-toolbar-title: {
+        font-weight: inherit;
+        margin-left: 0 !important;
+        overflow: visible;
+      };
+    }
+    #ampLogo {
+      background-image: url('icon-128.png');
+      background-position: center left;
+      background-repeat: no-repeat;
+      background-size: 30px 30px;
+      padding: 30px 20px;
+      white-space: nowrap;
+    }
+    paper-spinner {
+      float: right;
+      height: 24px;
+      width: 24px;
+      --paper-spinner-stroke-width: 2px;
+    }
+  </style>
+  <template>
+    <paper-toolbar>
+      <span class="title">
+        <span id="ampLogo"></span>
+        {{ extensionName }}
+        <paper-spinner id="spinner" active></paper-spinner>
+      </span>
+    </paper-toolbar>
+  </template>
+  <script>
+    Polymer({
+      is: 'extension-toolbar',
+      changeSpinnerState: function(state) {
+        this.$.spinner.active = state;
+      },
+      properties: {
+        extensionName: {
+          type: String,
+          value: chrome.i18n.getMessage("extensionName"),
+        },
+      },
+    });
+  </script>
+</dom-module>

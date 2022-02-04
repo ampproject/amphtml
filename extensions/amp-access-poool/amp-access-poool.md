@@ -6,22 +6,6 @@ teaser:
   text: Displays a Poool paywall.
 ---
 
-<!---
-Copyright 2017 The AMP HTML Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-access-poool
 
 ## Usage
@@ -49,9 +33,9 @@ For example : use `customSegment="amp-custom-segment"` to achieve `poool("config
 
 The `amp-access-poool` component requires 3 different sections:
 
-- The article preview, shown when access hasn't been granted yet (with `amp-access="NOT access"`) and identified by Poool using the `poool-access-preview` attribute
-- The article content, shown when access has been granted (with `amp-access="access"`), hidden by the `amp-access-hide` attribute until access has been granted, and identified by Poool using the `poool-access-content` attribute
-- Poool's Paywall container, shown when access hasn't been granted yet (with `amp-access="NOT error AND NOT access"`), identified by Poool using the `poool` id
+-   The article preview, shown when access hasn't been granted yet (with `amp-access="NOT access"`) and identified by Poool using the `poool-access-preview` attribute
+-   The article content, shown when access has been granted (with `amp-access="access"`), hidden by the `amp-access-hide` attribute until access has been granted, and identified by Poool using the `poool-access-content` attribute
+-   Poool's Paywall container, shown when access hasn't been granted yet (with `amp-access="NOT error AND NOT access"`), identified by Poool using the `poool` id
 
 ```html
 <section poool-access-preview amp-access="NOT access">
@@ -168,6 +152,16 @@ See [documentation](https://dev.poool.tech/doc/sdk#custom_segment) for more info
 Following latest GDPR requirements, we decided to disable cookies by default inside our paywall. You will have to explicitly set this attribute to reflect the user's consent.
 See [documentation](https://dev.poool.tech/doc/sdk#cookies_enabled) for more information.
 
+### locale
+
+Set default locale for all texts inside the paywall.
+See [documentation](https://dev.poool.tech/doc/sdk#locale) for more information.
+
+### context
+
+Override default or native contexts with a custom context value.
+See [documentation](https://dev.poool.tech/doc/sdk#context) for more information.
+
 ## Validation
 
-See [`amp-access-poool` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-poool/validator-amp-access-poool.protoascii) in the AMP validator specification.
+See [`amp-access-poool` rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-access-poool/validator-amp-access-poool.protoascii) in the AMP validator specification.

@@ -1,23 +1,7 @@
-/**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
-import {Vsync} from '../../src/service/vsync-impl';
-import {installTimerService} from '../../src/service/timer-impl';
+import {Services} from '#service';
+import {AmpDocShadow, installDocService} from '#service/ampdoc-impl';
+import {installTimerService} from '#service/timer-impl';
+import {Vsync} from '#service/vsync-impl';
 
 describes.fakeWin('vsync', {}, (env) => {
   let win, doc;
@@ -72,8 +56,7 @@ describes.fakeWin('vsync', {}, (env) => {
       });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should generate a frame and run callbacks', () => {
+    it('should generate a frame and run callbacks', () => {
       let result = '';
       return new Promise((resolve) => {
         vsync.run({
@@ -171,8 +154,7 @@ describes.fakeWin('vsync', {}, (env) => {
       });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should schedule nested vsyncs', () => {
+    it('should schedule nested vsyncs', () => {
       let result = '';
       return new Promise((resolve) => {
         vsync.run({
@@ -207,8 +189,7 @@ describes.fakeWin('vsync', {}, (env) => {
       });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from runPromise that executes "run"', () => {
+    it('should return a promise from runPromise that executes "run"', () => {
       const measureSpy = env.sandbox.spy();
       const mutateSpy = env.sandbox.spy();
       return vsync
@@ -219,8 +200,7 @@ describes.fakeWin('vsync', {}, (env) => {
         });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from measurePromise that runs measurer', () => {
+    it('should return a promise from measurePromise that runs measurer', () => {
       let measured = false;
       return vsync
         .measurePromise(() => {
@@ -231,8 +211,7 @@ describes.fakeWin('vsync', {}, (env) => {
         });
     });
 
-    // TODO(choumx, #12476): Make this test work with sinon 4.0.
-    it.skip('should return a promise from mutatePromisethat runs mutator', () => {
+    it('should return a promise from mutatePromisethat runs mutator', () => {
       const mutator = env.sandbox.spy();
       return vsync.mutatePromise(mutator).then(() => {
         expect(mutator).to.be.calledOnce;
@@ -450,10 +429,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = '';
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
-          result += 'mu1';
+          result += 'mu1'; // eslint-disable-line @typescript-eslint/no-unused-vars
         },
       });
 
@@ -467,10 +446,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       isVisibleStub.returns(false);
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = '';
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
-          result += 'mu1';
+          result += 'mu1'; // eslint-disable-line @typescript-eslint/no-unused-vars
         },
       });
       const res = task();
@@ -730,10 +709,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = '';
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
-          result += 'mu1';
+          result += 'mu1'; // eslint-disable-line @typescript-eslint/no-unused-vars
         },
       });
 
@@ -747,10 +726,10 @@ describes.fakeWin('vsync', {}, (env) => {
       vsync.raf_ = (handler) => (rafHandler = handler);
       doc.visibilityState = 'hidden';
 
-      let result = ''; // eslint-disable-line no-unused-vars
+      let result = '';
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
-          result += 'mu1';
+          result += 'mu1'; // eslint-disable-line @typescript-eslint/no-unused-vars
         },
       });
       const res = task();

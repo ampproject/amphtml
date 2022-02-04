@@ -1,18 +1,4 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {dev, user} from '#utils/log';
 
 import {
   Action,
@@ -20,8 +6,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 
 /** @type {string} */
 const TAG = 'amp-story-viewer-messaging-handler';
@@ -57,6 +41,10 @@ const GET_STATE_CONFIGURATIONS = {
   'PAGE_ATTACHMENT_STATE': {
     dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.PAGE_ATTACHMENT_STATE,
+  },
+  'UI_STATE': {
+    dataSource: DataSources.STORE_SERVICE,
+    property: StateProperty.UI_STATE,
   },
   'STORY_PROGRESS': {
     dataSource: DataSources.VARIABLE_SERVICE,
@@ -106,6 +94,9 @@ export class AmpStoryViewerMessagingHandler {
     );
     this.viewer_.onMessageRespond('setDocumentState', (data) =>
       this.onSetDocumentState_(data)
+    );
+    this.viewer_.onMessageRespond('customDocumentUI', (data) =>
+      this.onCustomDocumentUI_(data)
     );
   }
 
@@ -164,10 +155,10 @@ export class AmpStoryViewerMessagingHandler {
     }
 
     this.storeService_.subscribe(config.property, (value) => {
-      this.viewer_.sendMessage(
-        'documentStateUpdate',
-        dict({'state': state, 'value': value})
-      );
+      this.viewer_.sendMessage('documentStateUpdate', {
+        'state': state,
+        'value': value,
+      });
     });
   }
 
@@ -192,5 +183,17 @@ export class AmpStoryViewerMessagingHandler {
     this.storeService_.dispatch(config.action, value);
 
     return Promise.resolve({state, value});
+  }
+
+  /**
+   * Handles 'customDocumentUI' viewer messages.
+   * @param {!Object} data
+   * @private
+   */
+  onCustomDocumentUI_(data) {
+    this.storeService_.dispatch(
+      Action.SET_VIEWER_CUSTOM_CONTROLS,
+      data.controls
+    );
   }
 }

@@ -1,34 +1,20 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {getChildJsonConfig} from '#core/dom';
+import {setInitialDisplay, setStyles, toggle} from '#core/dom/style';
+import {clamp} from '#core/math';
+import {isFiniteNumber} from '#core/types';
 
-import {ActionTrust} from '../../../src/action-constants';
-import {Builder} from './web-animations';
-import {Pass} from '../../../src/pass';
-import {Services} from '../../../src/services';
-import {WebAnimationPlayState} from './web-animation-types';
+import {Services} from '#service';
+
+import {getDetail, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
+import {installWebAnimationsIfNecessary} from './install-polyfill';
 import {WebAnimationService} from './web-animation-service';
-import {clamp} from '../../../src/utils/math';
-import {dev, userAssert} from '../../../src/log';
-import {getChildJsonConfig} from '../../../src/json';
-import {getDetail, listen} from '../../../src/event-helper';
-import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {getParentWindowFrameElement} from '../../../src/service';
-import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
-import {isFiniteNumber} from '../../../src/types';
-import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
+import {WebAnimationPlayState} from './web-animation-types';
+import {Builder} from './web-animations';
+
+import {Pass} from '../../../src/pass';
 
 const TAG = 'amp-animation';
 
@@ -54,9 +40,6 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {!Array<!UnlistenDef>} */
     this.cleanups_ = [];
-
-    /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
-    this.embed_ = null;
 
     /** @private {?JsonObject} */
     this.configJson_ = null;
@@ -121,64 +104,65 @@ export class AmpAnimation extends AMP.BaseElement {
         this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
       })
     );
-    const io = new ampdoc.win.IntersectionObserver((records) => {
-      this.isIntersecting_ = records[records.length - 1].isIntersecting;
-      this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
-    });
+    const io = new ampdoc.win.IntersectionObserver(
+      (records) => {
+        const {isIntersecting} = records[records.length - 1];
+        this.isIntersecting_ = isIntersecting;
+        this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
+      },
+      {threshold: 0.001}
+    );
     io.observe(dev().assertElement(this.element.parentElement));
     this.cleanups_.push(() => io.disconnect());
 
     // Resize.
     this.cleanups_.push(listen(this.win, 'resize', () => this.onResize_()));
 
-    // TODO(#22733): remove when ampdoc-fie is launched.
-    const frameElement = getParentWindowFrameElement(this.element, ampdoc.win);
-    const embed = frameElement
-      ? getFriendlyIframeEmbedOptional(frameElement)
-      : null;
-    this.embed_ = embed;
-
     // Actions.
     this.registerDefaultAction(
       this.startAction_.bind(this),
       'start',
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'restart',
       this.restartAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
-    this.registerAction('pause', this.pauseAction_.bind(this), ActionTrust.LOW);
+    this.registerAction(
+      'pause',
+      this.pauseAction_.bind(this),
+      ActionTrust_Enum.LOW
+    );
     this.registerAction(
       'resume',
       this.resumeAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'togglePause',
       this.togglePauseAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'seekTo',
       this.seekToAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'reverse',
       this.reverseAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'finish',
       this.finishAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     this.registerAction(
       'cancel',
       this.cancelAction_.bind(this),
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
@@ -380,7 +364,7 @@ export class AmpAnimation extends AMP.BaseElement {
   onResize_() {
     // Store the previous `triggered` and `pausedByAction` value since
     // `cancel` may reset it.
-    const {triggered_: triggered, pausedByAction_: pausedByAction} = this;
+    const {pausedByAction_: pausedByAction, triggered_: triggered} = this;
 
     // Stop animation right away.
     if (this.runner_) {
@@ -473,21 +457,20 @@ export class AmpAnimation extends AMP.BaseElement {
   createRunner_(opt_args, opt_positionObserverData) {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
-    const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (this
-      .configJson_);
-    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (opt_args ||
-      null);
+    const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
+      this.configJson_
+    );
+    const args = /** @type {?./web-animation-types.WebAnimationDef} */ (
+      opt_args || null
+    );
 
     // Ensure polyfill is installed.
-    installWebAnimationsIfNecessary(this.win);
-
     const ampdoc = this.getAmpDoc();
-    const readyPromise = this.embed_
-      ? this.embed_.whenReady()
-      : ampdoc.whenReady();
-    const hostWin = this.embed_ ? this.embed_.win : this.win;
-    const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
-    return readyPromise.then(() => {
+    const polyfillPromise = installWebAnimationsIfNecessary(ampdoc);
+    const readyPromise = ampdoc.whenReady();
+    const hostWin = this.win;
+    const baseUrl = ampdoc.getUrl();
+    return Promise.all([polyfillPromise, readyPromise]).then(() => {
       const builder = new Builder(
         hostWin,
         this.getRootNode_(),
@@ -504,9 +487,7 @@ export class AmpAnimation extends AMP.BaseElement {
    * @private
    */
   getRootNode_() {
-    return this.embed_
-      ? this.embed_.win.document
-      : this.getAmpDoc().getRootNode();
+    return this.getAmpDoc().getRootNode();
   }
 
   /** @private */

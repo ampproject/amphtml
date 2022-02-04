@@ -1,0 +1,96 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async custom-element="amp-story-share-menu"
+        src="https://cdn.ampproject.org/v0/amp-story-share-menu-0.1.js"></script>
+    <script async custom-element="amp-analytics"
+        src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <title>My Story</title>
+    <meta name="viewport"
+          content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link rel="canonical" href="share.html">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
+      amp-story-page {
+        background-color: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <amp-story
+      title="Share amp-story example"
+      publisher="The AMP Team"
+      publisher-logo-src="https://example.com/logo/1x1.png"
+      poster-portrait-src="https://example.com/my-story/poster/3x4.jpg"
+      poster-square-src="https://example.com/my-story/poster/1x1.jpg"
+      poster-landscape-src="https://example.com/my-story/poster/4x3.jpg"
+      standalone>
+
+      <amp-analytics id="analytics1">
+        <script type="application/json">
+          {
+            "requests": {
+              "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/main/examples/img/ampicon.png",
+              "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+              "share": "${base}?&index=${storyPageIndex}&id=${storyPageId}",
+              "pageView": "${base}?&index=${storyPageIndex}&count=${storyPageCount}&id=${storyPageId}&muted=${storyIsMuted}&progress=${storyProgress}"
+            },
+            "triggers": {
+              "trackShare": {
+                "on": "story-open",
+                "tagName": "amp-story-share-menu",
+                "request": "share"
+              }
+            }
+          }
+        </script>
+      </amp-analytics>
+
+      <amp-story-page id="cover">
+        <amp-story-grid-layer template="vertical">
+          <h1>Check the share providers</h1>
+          <h2>Should show:</h2>
+          <ol>
+            <li>Copy link</li>
+            <li>Twitter</li>
+            <li>Facebook</li>
+            <li>Pinterest</li>
+            <li>Linkedin</li>
+            <li>Tumblr</li>
+            <li>Email</li>
+            <li>Whataspp</li>
+            <li>Line</li>
+            <li>SMS</li>
+          </ol>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-social-share layout="nodisplay">
+        <script type="application/json">
+          {
+            "shareProviders": [
+              "twitter",
+              "facebook",
+              "pinterest",
+              "linkedin",
+              "tumblr",
+              "gplus",
+              "email",
+              "whatsapp",
+              "line",
+              "sms"
+            ]
+          }
+        </script>
+      </amp-story-social-share>
+    </amp-story>
+  </body>
+</html>

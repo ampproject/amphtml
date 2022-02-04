@@ -1,21 +1,7 @@
-/**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {px} from '#core/dom/style';
 
-import {GRID_LAYER_TEMPLATE_CLASS_NAMES} from './amp-story-grid-layer';
-import {StoryAnimationPresetDef} from './animation-types';
+import {userAssert} from '#utils/log';
+
 import {
   calculateTargetScalingFactor,
   rotateAndTranslate,
@@ -23,13 +9,10 @@ import {
   translate2d,
   whooshIn,
 } from './animation-presets-utils';
-import {px} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+import {StoryAnimationPresetDef} from './animation-types';
 
 /** @const {string} */
 const FULL_BLEED_CATEGORY = 'full-bleed';
-/** @const {string} */
-const FILL_TEMPLATE_LAYOUT = 'fill';
 /** @const {number} */
 const SCALE_HIGH_DEFAULT = 3;
 /** @const {number} */
@@ -43,6 +26,8 @@ const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
 const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** @const {string} */
 const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
+/** @const {string} */
+const DEFAULT_CURVE = '0.4, 0.4, 0.0, 1';
 
 /** @const {!Array<string>} */
 export const PRESET_OPTION_ATTRIBUTES = [
@@ -83,15 +68,6 @@ export function setStyleForPreset(el, presetName) {
   // For full bleed animations.
   if (FULL_BLEED_ANIMATION_NAMES.indexOf(presetName) >= 0) {
     const parent = el.parentElement;
-    if (
-      parent.classList.contains(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
-      )
-    ) {
-      parent.classList.remove(
-        GRID_LAYER_TEMPLATE_CLASS_NAMES[FILL_TEMPLATE_LAYOUT]
-      );
-    }
     parent.classList.add(ANIMATION_CSS_CLASS_NAMES[FULL_BLEED_CATEGORY]);
   }
 }
@@ -103,8 +79,8 @@ export function setStyleForPreset(el, presetName) {
  */
 export const presets = {
   'pulse': {
-    duration: 400,
-    easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)',
+    duration: 600,
+    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
     keyframes: [
       {
         offset: 0,
@@ -125,56 +101,56 @@ export const presets = {
     ],
   },
   'fly-in-left': {
-    duration: 400,
-    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
+    duration: 600,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
       return translate2d(offsetX, 0, 0, 0);
     },
   },
   'fly-in-right': {
-    duration: 400,
-    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
+    duration: 600,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return translate2d(offsetX, 0, 0, 0);
     },
   },
   'fly-in-top': {
-    duration: 400,
-    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
+    duration: 600,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
     keyframes(dimensions) {
       const offsetY = -(dimensions.targetY + dimensions.targetHeight);
       return translate2d(0, offsetY, 0, 0);
     },
   },
   'fly-in-bottom': {
-    duration: 400,
-    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
+    duration: 600,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
     keyframes(dimensions) {
       const offsetY = dimensions.pageHeight - dimensions.targetY;
       return translate2d(0, offsetY, 0, 0);
     },
   },
   'rotate-in-left': {
-    duration: 600,
-    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
+    duration: 1000,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
       return rotateAndTranslate(offsetX, 0, 0, 0, -1);
     },
   },
   'rotate-in-right': {
-    duration: 600,
-    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
+    duration: 1000,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return rotateAndTranslate(offsetX, 0, 0, 0, 1);
     },
   },
   'fade-in': {
-    duration: 400,
-    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes: [
       {
         opacity: 0,
@@ -184,51 +160,99 @@ export const presets = {
       },
     ],
   },
+  'scale-fade-up': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes: [
+      {
+        opacity: 0,
+        transform: 'scale(0.8)',
+      },
+      {
+        opacity: 1,
+        transform: 'scale(1)',
+      },
+    ],
+  },
+  'scale-fade-down': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes: [
+      {
+        opacity: 0,
+        transform: 'scale(1.4)',
+      },
+      {
+        opacity: 1,
+        transform: 'scale(1)',
+      },
+    ],
+  },
   'drop': {
     duration: 1600,
+    easing: `linear`,
     keyframes(dimensions) {
       const maxBounceHeight = Math.max(
         160,
         dimensions.targetY + dimensions.targetHeight
       );
-
       return [
         {
-          offset: 0,
-          transform: `translateY(${px(-maxBounceHeight)})`,
-          easing: 'cubic-bezier(.75,.05,.86,.08)',
+          offset: 0.0,
+          transform: `translateY(${px(Number(-maxBounceHeight))})`,
+          easing: 'cubic-bezier(.5, 0, 1, 1)',
         },
         {
-          offset: 0.3,
-          transform: 'translateY(0)',
-          easing: 'cubic-bezier(.22,.61,.35,1)',
+          offset: 0.29,
+          transform: `translateY(0)`,
+          easing: 'cubic-bezier(0, 0, .5, 1)',
         },
         {
-          offset: 0.52,
-          transform: `translateY(${px(-0.6 * maxBounceHeight)})`,
-          easing: 'cubic-bezier(.75,.05,.86,.08)',
+          offset: 0.45,
+          transform: `translateY(${px(-maxBounceHeight * 0.2812)})`,
+          easing: 'cubic-bezier(.5, 0, 1, 1)',
         },
         {
-          offset: 0.74,
-          transform: 'translateY(0)',
-          easing: 'cubic-bezier(.22,.61,.35,1)',
+          offset: 0.61,
+          transform: `translateY(0)`,
+          easing: 'cubic-bezier(0, 0, .5, 1)',
         },
         {
-          offset: 0.83,
-          transform: `translateY(${px(-0.3 * maxBounceHeight)})`,
-          easing: 'cubic-bezier(.75,.05,.86,.08)',
+          offset: 0.71,
+          transform: `translateY(${px(-maxBounceHeight * 0.0956)})`,
+          easing: 'cubic-bezier(.5, 0, 1, 1)',
+        },
+        {
+          offset: 0.8,
+          transform: `translateY(0)`,
+          easing: 'cubic-bezier(0, 0, .5, 1)',
+        },
+        {
+          offset: 0.85,
+          transform: `translateY(${px(-maxBounceHeight * 0.0359)})`,
+          easing: 'cubic-bezier(.5, 0, 1, 1)',
+        },
+        {
+          offset: 0.92,
+          transform: `translateY(0)`,
+          easing: 'cubic-bezier(0, 0, .5, 1)',
+        },
+        {
+          offset: 0.96,
+          transform: `translateY(${px(-maxBounceHeight * 0.0156)})`,
+          easing: 'cubic-bezier(.5, 0, 1, 1)',
         },
         {
           offset: 1,
-          transform: 'translateY(0)',
-          easing: 'cubic-bezier(.22,.61,.35,1)',
+          transform: `translateY(0)`,
+          easing: 'cubic-bezier(0, 0, .5, 1)',
         },
       ];
     },
   },
   'twirl-in': {
     duration: 1000,
-    easing: 'cubic-bezier(.2,.75,.4,1)',
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes: [
       {
         transform: 'rotate(-540deg) scale(0.1)',
@@ -241,16 +265,16 @@ export const presets = {
     ],
   },
   'whoosh-in-left': {
-    duration: 400,
-    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
       return whooshIn(offsetX, 0, 0, 0);
     },
   },
   'whoosh-in-right': {
-    duration: 400,
-    easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return whooshIn(offsetX, 0, 0, 0);

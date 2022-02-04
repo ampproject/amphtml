@@ -1,32 +1,26 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Keys_Enum} from '#core/constants/key-codes';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {toggle} from '#core/dom/style';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {getSocialConfig} from './amp-social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-import {Keys} from '../../../src/utils/key-codes';
-import {Services} from '../../../src/services';
-import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getDataParamsFromAttributes, openWindowDialog} from '../../../src/dom';
-import {getSocialConfig} from './amp-social-share-config';
-import {toggle} from '../../../src/style';
+import {openWindowDialog} from '../../../src/open-window-dialog';
+import {addParamsToUrl} from '../../../src/url';
 
 const TAG = 'amp-social-share';
 
 class AmpSocialShare extends AMP.BaseElement {
+  /** @override @nocollapse */
+  static prerenderAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -34,7 +28,7 @@ class AmpSocialShare extends AMP.BaseElement {
     this.shareEndpoint_ = null;
 
     /** @private @const {!JsonObject} */
-    this.params_ = dict();
+    this.params_ = {};
 
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
@@ -51,11 +45,6 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported() {
-    return true;
-  }
-
-  /** @override */
-  prerenderAllowed() {
     return true;
   }
 
@@ -94,7 +83,7 @@ class AmpSocialShare extends AMP.BaseElement {
         return;
       }
     }
-    const typeConfig = getSocialConfig(typeAttr) || dict();
+    const typeConfig = getSocialConfig(typeAttr) || {};
     if (typeConfig['obsolete']) {
       toggle(element, false);
       user().warn(TAG, `Skipping obsolete share button ${typeAttr}`);
@@ -117,6 +106,9 @@ class AmpSocialShare extends AMP.BaseElement {
     element.setAttribute('role', 'button');
     if (!element.hasAttribute('tabindex')) {
       element.setAttribute('tabindex', '0');
+    }
+    if (!element.getAttribute('aria-label')) {
+      element.setAttribute('aria-label', `Share by ${typeAttr}`);
     }
     element.addEventListener('click', () => this.handleClick_());
     element.addEventListener('keydown', this.handleKeyPress_.bind(this));
@@ -173,7 +165,7 @@ class AmpSocialShare extends AMP.BaseElement {
    */
   handleKeyPress_(event) {
     const {key} = event;
-    if (key == Keys.SPACE || key == Keys.ENTER) {
+    if (key == Keys_Enum.SPACE || key == Keys_Enum.ENTER) {
       event.preventDefault();
       this.handleActivation_();
     }
@@ -197,7 +189,9 @@ class AmpSocialShare extends AMP.BaseElement {
       devAssert(navigator.share);
       const dataStr = href.substr(href.indexOf('?'));
       const data = parseQueryString(dataStr);
-      navigator.share(data).catch((e) => {
+      // Spreading data into an Object since Chrome uses the Object prototype.
+      // TODO:(crbug.com/1123689): Remove this workaround once WebKit fix is released.
+      navigator.share({...data}).catch((e) => {
         user().warn(TAG, e.message, dataStr);
       });
     } else {

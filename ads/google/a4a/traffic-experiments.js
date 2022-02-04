@@ -1,20 +1,4 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * Machinery for doing "traffic-level" experiments.  That is, rather than
  * a single user choosing to opt-in to an experimental version of a module,
  * this framework allows you to do randomized, controlled experiments on all
@@ -22,12 +6,15 @@
  * impacts on click-throughs.
  */
 
-import {EXPERIMENT_ATTRIBUTE, mergeExperimentIds} from './utils';
+import {parseQueryString} from '#core/types/string/url';
+
+import {Services} from '#service';
+
 import {
-  ExperimentInfo, // eslint-disable-line no-unused-vars
-} from '../../../src/experiments';
-import {Services} from '../../../src/services';
-import {parseQueryString} from '../../../src/url';
+  AMP_EXPERIMENT_ATTRIBUTE,
+  EXPERIMENT_ATTRIBUTE,
+  mergeExperimentIds,
+} from './utils';
 
 /** @typedef {{
  *    control: string,
@@ -141,18 +128,42 @@ export function validateExperimentIds(idList) {
  *
  * @param {string|undefined} experimentId  ID to add to the element.
  * @param {Element} element to add the experiment ID to.
+ * @param {string} attr the attribute name that holds the experiments
  */
-export function addExperimentIdToElement(experimentId, element) {
+function addExpIdToElement(experimentId, element, attr) {
   if (!experimentId) {
     return;
   }
-  const currentEids = element.getAttribute(EXPERIMENT_ATTRIBUTE);
+  const currentEids = element.getAttribute(attr);
   if (currentEids && validateExperimentIds(parseExperimentIds(currentEids))) {
-    element.setAttribute(
-      EXPERIMENT_ATTRIBUTE,
-      mergeExperimentIds([experimentId], currentEids)
-    );
+    element.setAttribute(attr, mergeExperimentIds([experimentId], currentEids));
   } else {
-    element.setAttribute(EXPERIMENT_ATTRIBUTE, experimentId);
+    element.setAttribute(attr, experimentId);
   }
+}
+
+/**
+ * Adds a single experimentID to an element iff it's a valid experiment ID.
+ * No-ops if the experimentId is undefined.
+ *
+ * @param {string|undefined} experimentId  ID to add to the element.
+ * @param {Element} element to add the experiment ID to.
+ */
+export function addExperimentIdToElement(experimentId, element) {
+  addExpIdToElement(experimentId, element, EXPERIMENT_ATTRIBUTE);
+}
+
+/**
+ * Adds a single AMP experimentID to an element iff it's a valid experiment ID.
+ * No-ops if the experimentId is undefined.
+ *
+ * Note that AMP experiment brances do not have their own unique IDs. Instead,
+ * we generate a pseudo ID for them by concatenating the id with the
+ * experiment's value.
+ *
+ * @param {string|undefined} experimentId  ID to add to the element.
+ * @param {Element} element to add the experiment ID to.
+ */
+export function addAmpExperimentIdToElement(experimentId, element) {
+  addExpIdToElement(experimentId, element, AMP_EXPERIMENT_ATTRIBUTE);
 }

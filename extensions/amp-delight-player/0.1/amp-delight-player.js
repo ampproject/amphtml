@@ -1,36 +1,34 @@
-/**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent, removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+import {PauseHelper} from '#core/dom/video/pause-helper';
+
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen, listenOncePromise} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-delight-player-0.1.css';
-import {Deferred} from '../../../src/utils/promise';
-import {Services} from '../../../src/services';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {
   createFrameFor,
   objOrParseJson,
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dict} from '../../../src/utils/object';
-import {getData, listen, listenOncePromise} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
+import {
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
+} from '../../../src/video-interface';
 
 /** @const */
 const TAG = 'amp-delight-player';
@@ -65,6 +63,8 @@ const DelightEvent = {
   DISABLE_INTERFACE: 'x-dl8-to-iframe-disable-interface',
   SEEK: 'x-dl8-to-iframe-seek',
   CUSTOM_TICK: 'x-dl8-to-parent-amp-custom-tick',
+  CONSENT_DATA: 'x-dl8-to-iframe-consent-data',
+  PLAYER_READY: 'x-dl8-to-parent-player-ready',
 
   PING: 'x-dl8-ping',
   PONG: 'x-dl8-pong',
@@ -81,6 +81,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {boolean} */
+    this.isInViewport_ = false;
 
     /** @private {string} */
     this.baseURL_ = 'https://players.delight-vr.com';
@@ -126,6 +129,12 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     /** @private {HTMLElement} */
     this.placeholderEl_ = null;
+
+    /** @private @const */
+    this.pauseHelper_ = new PauseHelper(this.element);
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -162,6 +171,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => (this.isInViewport_ = isIntersecting)
+    );
     const src = `${this.baseURL_}/player/${this.contentID_}?amp=1`;
     const iframe = createFrameFor(this, src);
 
@@ -180,7 +193,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    if (this.element.hasAttribute(VideoAttributes.DOCK)) {
+    if (this.element.hasAttribute(VideoAttributes_Enum.DOCK)) {
       return false; // do nothing, do not relayout
     }
 
@@ -197,6 +210,9 @@ class AmpDelightPlayer extends AMP.BaseElement {
     this.playerReadyResolver_ = deferred.resolve;
 
     this.unregisterEventHandlers_();
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
+    this.pauseHelper_.updatePlaying(false);
 
     return true;
   }
@@ -210,12 +226,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
   createPlaceholderCallback() {
     const html = htmlFor(this.element);
     const placeholder = html`
-      <div placeholder><amp-img layout="fill"></amp-img></div>
+      <img placeholder referrerpolicy="origin" loading="lazy" />
     `;
 
-    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+    applyFillContent(placeholder);
 
-    placeholder.firstElementChild.setAttribute('src', src);
+    const src = `${this.baseURL_}/poster/${this.contentID_}`;
+    placeholder.setAttribute('src', src);
 
     this.placeholderEl_ = /** @type {HTMLElement} */ (placeholder);
 
@@ -226,7 +243,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
   firstLayoutCompleted() {
     const el = this.placeholderEl_;
     let promise = null;
-    if (el && this.isInViewport()) {
+    if (el && this.isInViewport_) {
       el.classList.add('i-amphtml-delight-player-faded');
       promise = listenOncePromise(el, 'transitionend');
     } else {
@@ -265,14 +282,24 @@ class AmpDelightPlayer extends AMP.BaseElement {
 
     const {element} = this;
 
+    switch (data['type']) {
+      case DelightEvent.PLAYING:
+        this.pauseHelper_.updatePlaying(true);
+        break;
+      case DelightEvent.PAUSED:
+      case DelightEvent.ENDED:
+        this.pauseHelper_.updatePlaying(false);
+        break;
+    }
+
     const redispatched = redispatch(element, data['type'], {
-      [DelightEvent.PLAYING]: VideoEvents.PLAYING,
-      [DelightEvent.PAUSED]: VideoEvents.PAUSE,
-      [DelightEvent.ENDED]: VideoEvents.ENDED,
-      [DelightEvent.MUTED]: VideoEvents.MUTED,
-      [DelightEvent.UNMUTED]: VideoEvents.UNMUTED,
-      [DelightEvent.AD_START]: VideoEvents.AD_START,
-      [DelightEvent.AD_END]: VideoEvents.AD_END,
+      [DelightEvent.PLAYING]: VideoEvents_Enum.PLAYING,
+      [DelightEvent.PAUSED]: VideoEvents_Enum.PAUSE,
+      [DelightEvent.ENDED]: VideoEvents_Enum.ENDED,
+      [DelightEvent.MUTED]: VideoEvents_Enum.MUTED,
+      [DelightEvent.UNMUTED]: VideoEvents_Enum.UNMUTED,
+      [DelightEvent.AD_START]: VideoEvents_Enum.AD_START,
+      [DelightEvent.AD_END]: VideoEvents_Enum.AD_END,
     });
 
     if (redispatched) {
@@ -297,8 +324,12 @@ class AmpDelightPlayer extends AMP.BaseElement {
         break;
       }
       case DelightEvent.READY: {
-        element.dispatchCustomEvent(VideoEvents.LOAD);
+        dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
         this.playerReadyResolver_(this.iframe_);
+        break;
+      }
+      case DelightEvent.PLAYER_READY: {
+        this.sendConsentData_();
         break;
       }
       case DelightEvent.TIME_UPDATE: {
@@ -341,13 +372,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @param {!Object<string, string>=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars) {
-    this.element.dispatchCustomEvent(
-      VideoEvents.CUSTOM_TICK,
-      dict({
-        'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
-        'vars': vars,
-      })
-    );
+    dispatchCustomEvent(this.element, VideoEvents_Enum.CUSTOM_TICK, {
+      'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
+      'vars': vars,
+    });
   }
 
   /**
@@ -503,6 +531,42 @@ class AmpDelightPlayer extends AMP.BaseElement {
     if (this.unlistenDeviceMotion_) {
       this.unlistenDeviceMotion_();
     }
+  }
+
+  /**
+   * Requests consent data from consent module
+   * and forwards information to iframe
+   * @private
+   */
+  sendConsentData_() {
+    const consentPolicyId = super.getConsentPolicy() || 'default';
+    const consentStringPromise = getConsentPolicyInfo(
+      this.element,
+      consentPolicyId
+    );
+    const metadataPromise = getConsentMetadata(this.element, consentPolicyId);
+    const consentPolicyStatePromise = getConsentPolicyState(
+      this.element,
+      consentPolicyId
+    );
+    const consentPolicySharedDataPromise = getConsentPolicySharedData(
+      this.element,
+      consentPolicyId
+    );
+
+    Promise.all([
+      metadataPromise,
+      consentStringPromise,
+      consentPolicyStatePromise,
+      consentPolicySharedDataPromise,
+    ]).then((consents) => {
+      this.sendCommand_(DelightEvent.CONSENT_DATA, {
+        'consentMetadata': consents[0],
+        'consentString': consents[1],
+        'consentPolicyState': consents[2],
+        'consentPolicySharedData': consents[3],
+      });
+    });
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface

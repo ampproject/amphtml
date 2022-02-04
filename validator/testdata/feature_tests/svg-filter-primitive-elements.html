@@ -1,0 +1,202 @@
+<!--
+  Test Description:
+  Tests SVG filter primitive elements.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <!-- Valid: feBlend -->
+  <svg>
+    <defs>
+      <filter id="spotlight">
+        <feFlood result="floodFill" x="0" y="0" width="100%" height="100%"
+            flood-color="green" flood-opacity="1"/>
+        <feBlend in="SourceGraphic" in2="floodFill" mode="multiply"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Valid: feComponentTransfer -->
+  <svg>
+    <defs>
+      <filter id="identity" x="0" y="0" width="100%" height="100%">
+        <feComponentTransfer>
+          <feFuncR type="identity"></feFuncR>
+          <feFuncG type="identity"></feFuncG>
+          <feFuncB type="identity"></feFuncB>
+          <feFuncA type="identity"></feFuncA>
+        </feComponentTransfer>
+      </filter>
+      <filter id="table" x="0" y="0" width="100%" height="100%">
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues="0 0 1 1"></feFuncR>
+          <feFuncG type="table" tableValues="1 1 0 0"></feFuncG>
+          <feFuncB type="table" tableValues="0 1 1 0"></feFuncB>
+        </feComponentTransfer>
+      </filter>
+      <filter id="linear" x="0" y="0" width="100%" height="100%">
+        <feComponentTransfer>
+          <feFuncR type="linear" slope="0.5" intercept="0"></feFuncR>
+          <feFuncG type="linear" slope="0.5" intercept="0.25"></feFuncG>
+          <feFuncB type="linear" slope="0.5" intercept="0.5"></feFuncB>
+        </feComponentTransfer>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- Valid: feConvolveMatrix -->
+  <svg>
+    <defs>
+      <filter id="emboss">
+        <feConvolveMatrix
+            kernelMatrix="3 0 0
+                          0 0 0
+                          0 0 -3"/>
+      </filter>
+    </defs>
+    <image xlink:href="/foo.svg" x="0" y="0"
+        height="200" width="200" style="filter:url(#emboss);" />
+  </svg>
+
+  <!-- Valid: feDiffuseLighting -->
+  <svg>
+    <text text-anchor="middle" x="170" y="22">fePointLight</text>
+    <filter id="lightMe1">
+      <feDiffuseLighting in="SourceGraphic" result="light"
+          lighting-color="white">
+        <fePointLight x="150" y="60" z="20" />
+      </feDiffuseLighting>
+      <feComposite in="SourceGraphic" in2="light"
+                   operator="arithmetic" k1="1" k2="0" k3="0" k4="0"/>
+    </filter>
+    <circle cx="170" cy="80" r="50" fill="green"
+        filter="url(#lightMe1)" />
+  </svg>
+
+  <!-- Valid: feDisplacementMap -->
+  <svg>
+    <filter id="displacementFilter">
+      <feTurbulence type="turbulence" baseFrequency="0.05"
+          numOctaves="2" result="turbulence"/>
+      <feDisplacementMap in2="turbulence" in="SourceGraphic"
+          scale="50" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <circle cx="100" cy="100" r="100"
+        style="filter: url(#displacementFilter)"/>
+  </svg>
+
+  <!-- Valid: feDropShadow -->
+  <svg>
+    <defs>
+      <filter id="shadow">
+        <feDropShadow dx="0.2" dy="0.4" stdDeviation="0.2"/>
+      </filter>
+    </defs>
+    <circle cx="5" cy="50%" r="4"
+        style="fill:pink; filter:url(#shadow);"/>
+  </svg>
+
+  <!-- Valid: feMorphology -->
+  <svg>
+    <filter id="erode">
+      <feMorphology operator="erode" radius="1"/>
+    </filter>
+    <filter id="dilate">
+      <feMorphology operator="dilate" radius="2"/>
+    </filter>
+    <text y="1em">Normal text</text>
+    <text id="thin" y="2em">Thinned text</text>
+    <text id="thick" y="3em">Fattened text</text>
+  </svg>
+
+  <!-- Valid: fePointLight -->
+  <svg>
+   <defs>
+      <filter id="spotlight">
+        <feSpecularLighting result="spotlight" specularConstant="1.5"
+            specularExponent="80" lighting-color="#FFF">
+          <fePointLight x="50" y="50" z="220"/>
+        </feSpecularLighting>
+        <feComposite in="SourceGraphic" in2="spotlight" operator="arithmetic"
+            k1="0" k2="1" k3="1" k4="0"/>
+      </filter>
+    </defs>
+    <image xlink:href="/foo.png" x="10%" y="10%"
+        width="80%" height="80%" style="filter:url(#spotlight);"/>
+  </svg>
+
+  <!-- Valid: feSpecularLighting -->
+  <svg>
+    <filter id = "filter">
+      <feSpecularLighting result="specOut"
+          specularExponent="20" lighting-color="#bbbbbb">
+        <fePointLight x="50" y="75" z="200"/>
+      </feSpecularLighting>
+      <feComposite in="SourceGraphic" in2="specOut"
+          operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
+    </filter>
+    <circle cx="110" cy="110" r="100" style="filter:url(#filter)"/>
+  </svg>
+
+  <!-- Valid: feSpotlight -->
+  <svg>
+    <defs>
+      <filter id="spotlight">
+        <feSpecularLighting result="spotlight" specularConstant="1.5"
+            specularExponent="4" lighting-color="#FFF">
+          <feSpotLight x="600" y="600" z="400" limitingConeAngle="5.5" />
+        </feSpecularLighting>
+        <feComposite in="SourceGraphic" in2="spotlight" operator="out"
+            k1="0" k2="1" k3="1" k4="0"/>
+      </filter>
+    </defs>
+    <image xlink:href="/foo.png" x="10%" y="10%"
+        width="80%" height="80%" style="filter:url(#spotlight);"/>
+  </svg>
+
+  <!-- Valid: feTile -->
+  <svg>
+    <defs>
+      <filter id="tile" x="0" y="0" width="100%" height="100%">
+        <feTile in="SourceGraphic" x="50" y="50"
+            width="100" height="100" />
+        <feTile/>
+      </filter>
+    </defs>
+    <image xlink:href="/foo.png"
+        x="10%" y="10%" width="80%" height="80%"
+        style="filter:url(#tile);"/>
+  </svg>
+
+  <!-- Valid: feTurbulence -->
+  <svg>
+    <filter id="displacementFilter">
+      <feTurbulence type="turbulence" baseFrequency="0.05"
+          numOctaves="2" result="turbulence"/>
+      <feDisplacementMap in2="turbulence" in="SourceGraphic"
+          scale="50" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <circle cx="100" cy="100" r="100"
+        style="filter: url(#displacementFilter)"/>
+  </svg>
+
+  <!-- Invalid: feImage, due to potentially leaking during prefetch -->
+  <svg>
+    <defs>
+      <filter id="image">
+        <feImage xlink:href="/foo.png"/>
+      </filter>
+    </defs>
+    <rect x="10%" y="10%" width="80%" height="80%"
+        style="filter:url(#image);"/>
+  </svg>
+
+</body>
+</html>

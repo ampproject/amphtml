@@ -1,0 +1,86 @@
+PASS
+|  <!--
+|    Test Description:
+|    Test JSON parsing.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+|  </head>
+|  <body>
+|
+|  <!-- The JSON string contains a carriage return `\r` between `:` and `false` -->
+|  <amp-state id="td_amp_menu_state">
+|  <script type="application/json">
+|  {"visible": true,
+|   "display": "none",
+|   "background":
+|   red}
+>>  ^~~~~~~~~
+feature_tests/json-parsing-invalid.html:23:1 The script tag contains invalid JSON that cannot be parsed.
+|  </script>
+|  </amp-state>
+|
+|  <amp-state id="td_amp_menu_state">
+|  <script type="application/json">{"visible":
+|  # visibility hidden.
+>> ^~~~~~~~~
+feature_tests/json-parsing-invalid.html:29:0 The script tag contains invalid JSON that cannot be parsed.
+|  false}</script>
+|  </amp-state>
+|
+|  <amp-state id="td_amp_menu_state">
+|  <script type="application/json">{"visible":
+|                      False}</script>
+>>                     ^~~~~~~~~
+feature_tests/json-parsing-invalid.html:35:20 The script tag contains invalid JSON that cannot be parsed.
+|  </amp-state>
+|
+|  <amp-state id="td_amp_menu_state">
+|  <script type="application/json">{"visible":           hidden}</script>
+>>                                                       ^~~~~~~~~
+feature_tests/json-parsing-invalid.html:39:54 The script tag contains invalid JSON that cannot be parsed.
+|  </amp-state>
+|
+|  <amp-state id="td_amp_menu_state">
+|    <script type="application/json">ohmygod</script>
+>>                                   ^~~~~~~~~
+feature_tests/json-parsing-invalid.html:43:34 The script tag contains invalid JSON that cannot be parsed.
+|  </amp-state>
+|
+|  <amp-state id="td_amp_menu_state">
+|    <script type="application/json">
+|
+|
+|
+|
+|                 ohmygod</script>
+>>                ^~~~~~~~~
+feature_tests/json-parsing-invalid.html:52:15 The script tag contains invalid JSON that cannot be parsed.
+|  </amp-state>
+|
+|  <amp-state id="td_amp_menu_state">
+|    <script type="application/json">
+|
+|
+|
+|
+|  {"hello": "world",
+|
+|      // This is comment
+>>     ^~~~~~~~~
+feature_tests/json-parsing-invalid.html:63:4 The script tag contains invalid JSON that cannot be parsed.
+|   "foo": "bar"}</script>
+|  </amp-state>
+|    <!-- Invalid: JSON-LD can not be parsed. -->
+|    <script type="application/ld+json">lemur</script>
+>>                                      ^~~~~~~~~
+feature_tests/json-parsing-invalid.html:67:37 The script tag contains invalid JSON that cannot be parsed.
+|  </body>
+|  </html>

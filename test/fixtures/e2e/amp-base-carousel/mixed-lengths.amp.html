@@ -1,0 +1,45 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mixed lengths carousel, looping</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-latest.js"></script>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
+  <style amp-custom>
+    body {
+      font-family: 'Questrial', Arial;
+    }
+
+    amp-base-carousel .slide.slide img{
+      object-fit: cover;
+    }
+
+    .slide {
+      padding: 4px;
+    }
+
+    .narrow {
+      width: 50%;
+    }
+
+    .wide {
+      width: 75%;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>Mixed lengths carousel, looping</h1>
+  <amp-base-carousel id="carousel-1" width="300" height="200" layout="responsive" loop="true" mixed-length="true" snap-align="center" lightbox>
+    <amp-img class="slide wide" src="./img/redgradient.png" height="200" layout="fixed-height"></amp-img>
+    <amp-img class="slide narrow" src="./img/bluegradient.png" height="200" layout="fixed-height"></amp-img>
+    <amp-img class="slide wide" src="./img/orangegradient.png" height="200" layout="fixed-height"></amp-img>
+    <amp-img class="slide narrow" src="./img/greengradient.png" height="200" layout="fixed-height"></amp-img>
+    <amp-img class="slide wide" src="./img/tealgradient.png" height="200" layout="fixed-height"></amp-img>
+  </amp-base-carousel>
+</body>
+</html>

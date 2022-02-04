@@ -1,0 +1,62 @@
+
+
+/* Pre-upgrade: not displayed */
+amp-sidebar[hidden] {
+  display: none !important;
+}
+
+amp-sidebar {
+  color: black;
+  background-color: #efefef;
+  height: 100vh;
+  top: 0;
+  outline: none;
+  z-index: 2147483647;
+  max-height: 100vh !important;
+  /**
+   * Max width allowed to be configurable by user.  If user wants width to be
+   * controlled by content size and max-width, then this property needs to be
+   * configurable.
+   */
+  max-width: 80vw;
+  min-width: 45px !important;
+}
+
+amp-sidebar::part(c),
+amp-sidebar::part(wrapper),
+amp-sidebar::part(sidebar) {
+  /* Inherit values specified on amp-sidebar */
+  color: inherit;
+  background-color: inherit;
+  height: inherit;
+  top: inherit;
+  outline: inherit;
+  z-index: inherit;
+  /* Use unspecified default values from amp-sidebar element */
+  width: inherit;
+  padding: inherit;
+  border: inherit;
+
+  max-width: inherit;
+  max-height: inherit;
+  min-width: inherit;
+}
+
+
+/**
+ * Hide the amp-sidebar and remove from the flow of the page so user applied
+ * styling is not shown directly on amp-sidebar element.
+ */
+amp-sidebar {
+  visibility: hidden !important;
+  position: fixed !important;
+}
+
+/**
+ * The host element, amp-sidebar, is not visible to allow direct styling to be
+ * inherited by its children.  Its children should be visible so the styling
+ * is displayed.
+ */
+amp-sidebar::part(c) {
+  visibility: visible !important;
+}

@@ -1,0 +1,30 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This test demonstrates that all scripts must have a module and nomodule
+|    pairing when the first script is module.
+|  -->
+|  <!doctype html>
+|  <html ⚡ transformed="google;v=1">
+|  <head>
+|    <meta charset=utf-8>
+|    <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+|    <meta name=viewport content="width=device-width">
+|
+|    <!-- Invalid: missing nomodule pair for AMP runtime script -->
+|    <script async crossorigin=anonymous src=https://cdn.ampproject.org/v0.mjs type=module></script>
+|
+|    <!-- Invalid: missing nomodule pair for AMP extension script -->
+|    <script async crossorigin=anonymous custom-element=amp-ad src=https://cdn.ampproject.org/v0/amp-ad-0.1.mjs type=module></script>
+|
+|    <link rel=canonical href="./regular-html-version.html">
+|  </head>
+|  <body>
+|    Hello, world.
+|    <amp-ad layout=nodisplay type></amp-ad>
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+transformed_feature_tests/module_nomodule_no_paired_nomodule.html:25:6 The tag 'amphtml nomodule engine script' is missing or incorrect, but required by 'amphtml module engine script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+>>       ^~~~~~~~~
+transformed_feature_tests/module_nomodule_no_paired_nomodule.html:25:6 The tag 'amp-ad nomodule extension script' is missing or incorrect, but required by 'amp-ad module extension script'. (see https://amp.dev/documentation/components/amp-ad)

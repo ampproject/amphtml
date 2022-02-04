@@ -1,22 +1,5 @@
-/**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import {dict} from '../../../src/utils/object';
-import {getState} from '../../../src/history';
-import {parseJson} from '../../../src/json';
+import {parseJson} from '#core/types/object/json';
+import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 
 const EXPIRATION_DURATION_MILLIS = 10 * 60 * 1000; // 10 Minutes
 const CREATION_TIME = 'time';
@@ -27,7 +10,6 @@ export const LOCAL_STORAGE_KEY = 'amp-story-state';
 /** @enum {string} */
 export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
   NAVIGATION_PATH: 'ampStoryNavigationPath',
 };
 
@@ -42,7 +24,7 @@ export const HistoryState = {
  */
 export function setHistoryState(win, stateName, value) {
   const {history} = win;
-  const state = getState(history) || {};
+  const state = getWindowHistoryState(history) || {};
   const newHistory = {
     ...state,
     [stateName]: value,
@@ -61,15 +43,16 @@ export function setHistoryState(win, stateName, value) {
  */
 export function getHistoryState(win, stateName) {
   const {history} = win;
-  let state = getState(history);
+  let state = getWindowHistoryState(history);
   // We do get an early state but without a navigation path. In that case we
   // prefer localStorage.
   if (!state || !state[stateName]) {
     state = getLocalStorageState(win);
   }
   if (state) {
-    return /** @type {string|boolean|Array<string>|null} */ (state[stateName] ||
-      null);
+    return /** @type {string|boolean|Array<string>|null} */ (
+      state[stateName] || null
+    );
   }
   return null;
 }
@@ -81,8 +64,12 @@ export function getHistoryState(win, stateName) {
  */
 function getLocalStorageState(win) {
   // We definitely don't want to restore state from localStorage if the URL
-  // is explicit about the page that should be shown.
-  if (win.location.hash.indexOf('page=') != -1) {
+  // is explicit about it.
+  const {hash} = win.location;
+  if (
+    hash.indexOf('page=') != -1 ||
+    hash.indexOf('ignoreLocalStorageHistory') != -1
+  ) {
     return undefined;
   }
   const container = getLocalStorageStateContainer(win);
@@ -115,7 +102,7 @@ function setLocalStorageState(win, state) {
 function getLocalStorageStateContainer(win) {
   const container = readLocalStorage(win);
   if (!container) {
-    return dict();
+    return {};
   }
   const now = Date.now();
   let expired = false;

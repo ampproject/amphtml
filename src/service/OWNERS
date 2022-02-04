@@ -1,15 +1,15 @@
 // For an explanation of the OWNERS rules and syntax, see:
-// https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
+// https://github.com/ampproject/amp-github-apps/blob/main/owners/OWNERS.example
 
 {
   rules: [
     {
       pattern: 'video-*.js',
-      owners: [{name: 'ampproject/wg-ui-and-a11y'}],
+      owners: [{name: 'ampproject/wg-components'}],
     },
     {
-      pattern: '{cid-*,*-cid-*,*-cid,url-replacements-impl}.js',
-      owners: [{name: 'ampproject/wg-analytics'}],
+      pattern: '{cid-*,*-cid-*,*-cid,url-replacements-impl,storage-impl}.js',
+      owners: [{name: 'ampproject/wg-components'}],
     },
   ],
 }

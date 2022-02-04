@@ -1,25 +1,13 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {bindParser as parser} from '#build/parsers/bind-expr-impl';
+
+import {isArray, isObject} from '#core/types';
+import {hasOwn, map} from '#core/types/object';
+
+import {devAssert, user} from '#utils/log';
 
 import {AstNodeType} from './bind-expr-defines';
-import {devAssert, user} from '../../../src/log';
-import {dict, hasOwn, map} from '../../../src/utils/object';
+
 import {getMode} from '../../../src/mode';
-import {isArray, isObject} from '../../../src/types';
-import {bindParser as parser} from '../../../build/parsers/bind-expr-impl';
 
 const TAG = 'amp-bind';
 
@@ -27,7 +15,7 @@ const TAG = 'amp-bind';
  * Maximum number of nodes in an expression AST.
  * @const @private {number}
  */
-const MAX_AST_SIZE = 100;
+const MAX_AST_SIZE = 250;
 
 /** @const @private {string} */
 const CUSTOM_FUNCTIONS = 'custom-functions';
@@ -116,7 +104,7 @@ function generateFunctionAllowlist() {
   }
 
   // Prototype functions.
-  const allowlist = dict({
+  const allowlist = {
     '[object Array]': {
       // TODO(choumx): Polyfill Array#find and Array#findIndex for IE.
       'concat': Array.prototype.concat,
@@ -152,7 +140,7 @@ function generateFunctionAllowlist() {
       'toLowerCase': String.prototype.toLowerCase,
       'toUpperCase': String.prototype.toUpperCase,
     },
-  });
+  };
 
   // Un-namespaced static functions.
   allowlist[CUSTOM_FUNCTIONS] = {
@@ -184,7 +172,8 @@ function generateFunctionAllowlist() {
       const func = functionsForType[name];
       if (func) {
         devAssert(
-          !func.name || name === func.name,
+          // Partial match to account for bundlers adding a suffix to the name.
+          !func.name || func.name.startsWith(name),
           'Listed function name ' +
             `"${name}" doesn't match name property "${func.name}".`
         );
@@ -338,7 +327,7 @@ export class BindExpression {
       return null;
     }
 
-    const {type, args, value} = node;
+    const {args, type, value} = node;
 
     // `value` should always exist for literals.
     if (type === AstNodeType.LITERAL && value !== undefined) {

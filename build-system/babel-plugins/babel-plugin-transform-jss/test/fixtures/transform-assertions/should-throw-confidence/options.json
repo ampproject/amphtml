@@ -1,0 +1,8 @@
+{
+  "plugins": [
+    "../../../.."
+  ],
+  "sourceType": "module",
+  "filename": "component.jss.js",
+  "throws": "statically evaluatable"
+}

@@ -1,0 +1,142 @@
+
+
+amp-story-dev-tools-tab-debug {
+  overflow-y: auto !important;
+  padding: var(--i-amphtml-story-dev-tools-vertical-spacing) 10% !important;
+}
+
+amp-story-dev-tools-tab-debug::-webkit-scrollbar {
+  width: 8px !important;
+}
+amp-story-dev-tools-tab-debug::-webkit-scrollbar-thumb {
+  background-color: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+  border-radius: 3px !important;
+}
+amp-story-dev-tools-tab-debug::-webkit-scrollbar-thumb:hover {
+  background-color: var(--i-amphtml-story-dev-tools-white-transparent-2) !important;
+}
+
+.i-amphtml-story-dev-tools-log-status-title {
+  font-size: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  line-height: 16px !important;
+  margin-bottom: 10px !important;
+}
+
+.i-amphtml-story-dev-tools-log-status-title .i-amphtml-story-dev-tools-log-status-icon {
+  margin-inline-end: 10px !important;
+}
+
+.i-amphtml-story-dev-tools-log-message {
+  margin-bottom: 16px !important;
+  background: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+  color: white !important;
+  position: relative !important;
+  padding: 16px !important;
+  border-radius: 16px !important;
+}
+
+.i-amphtml-story-dev-tools-log-type {
+  margin: 0 !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+}
+
+.i-amphtml-story-dev-tools-log-position {
+  font-family: monospace !important;
+}
+
+.i-amphtml-story-dev-tools-log-spec {
+  color: white !important;
+  text-decoration: none !important;
+  position: absolute !important;
+  right: 10px !important;
+  top: 10px !important;
+  border-radius: 20px !important;
+  border: 2px solid var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+  padding: 5px 10px !important;
+  font-size: 12px !important;
+}
+
+.i-amphtml-story-dev-tools-log-spec:hover {
+  background: var(--i-amphtml-story-dev-tools-white-transparent-1) !important;
+}
+
+.i-amphtml-story-dev-tools-log-code {
+  margin-bottom: 0px !important;
+  line-height: 24px !important;
+}
+
+.i-amphtml-story-dev-tools-log-code-line {
+  text-overflow: ellipsis !important;
+  overflow-x: hidden !important;
+  display: block !important;
+}
+
+.i-amphtml-story-dev-tools-log-code-line:nth-child(2) {
+  color: var(--i-amphtml-story-dev-tools-error-color) !important;
+}
+
+.i-amphtml-story-dev-tools-log-status-icon {
+  width: 20px !important;
+  height: 20px !important;
+  background-size: contain !important;
+  display: inherit !important;
+}
+
+.i-amphtml-story-dev-tools-log-status-icon-passed {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L4 11L5.4 9.6L8 12.2L14.6 5.6L16 7L8 15Z" fill="#2DE561"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-log-status-icon-failed {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path xmlns="http://www.w3.org/2000/svg" d="M9.99 0C4.47 0 0 4.48 0 10C0 15.52 4.47 20 9.99 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 9.99 0ZM11 10C11 10.55 10.55 11 10 11C9.45 11 9 10.55 9 10V6C9 5.45 9.45 5 10 5C10.55 5 11 5.45 11 6V10ZM11 14C11 14.55 10.55 15 10 15C9.45 15 9 14.55 9 14C9 13.45 9.45 13 10 13C10.55 13 11 13.45 11 14Z" fill="#FF5252"/></svg>') !important;
+}
+
+.i-amphtml-story-dev-tools-tab-selector .i-amphtml-story-dev-tools-log-status-icon {
+  width: 16px !important;
+  height: 16px !important;
+  margin-inline-start: 5px !important;
+}
+
+.i-amphtml-story-dev-tools-tab-selector .i-amphtml-story-dev-tools-log-status-number-failed {
+  font-size: 10px !important;
+  background: var(--i-amphtml-story-dev-tools-error-color) !important;
+  color: black !important;
+  border-radius: 10px !important;
+  height: 16px !important;
+  width: 16px !important;
+  display: inherit !important;
+  margin-inline-start: 5px !important;
+  font-weight: bold !important;
+  display: initial !important;
+  padding: 1px !important;
+}
+
+.i-amphtml-story-dev-tools-debug-success-image {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="295" height="308" fill="none"><rect width="233.8" height="165.73" x="34" y="92.5" fill="#161725" rx="6"/><path fill="#fff" d="M262.07 261.03H39.67a9 9 0 01-8.98-8.99V96.84a9 9 0 018.99-8.98h222.4a9 9 0 018.98 8.99v155.18c.02 4.96-4.02 9-8.99 9zM39.67 91.16A5.68 5.68 0 0034 96.85v155.18a5.69 5.69 0 005.68 5.68h222.4a5.69 5.69 0 005.68-5.68V96.85a5.69 5.69 0 00-5.69-5.69H39.67z"/><path fill="#fff" d="M269.42 107H32.33V96.85a7.34 7.34 0 017.35-7.35h222.4a7.34 7.34 0 017.34 7.35V107z"/><path fill="#161725" d="M46.83 97.51a3.3 3.3 0 11-6.6.01 3.3 3.3 0 016.6 0zM56.74 97.51a3.3 3.3 0 11-6.6.01 3.3 3.3 0 016.6 0zM66.64 97.51a3.3 3.3 0 11-6.6.01 3.3 3.3 0 016.6 0z"/><path fill="#fff" d="M0 228.89c3.97-1.15 7.5-3.4 10.44-6.68a21.51 21.51 0 003.18-4.43l7.56 3.66c-.22.47-5.79 11.73-18.85 15.5L0 228.9z"/><g filter="url(#filter0_d)"><path fill="#FCF75A" d="M149.13 250.34c1.15 3.97 3.4 7.49 6.68 10.44a21.52 21.52 0 004.43 3.18l-3.66 7.56c-.48-.22-11.73-5.8-15.5-18.86l8.05-2.32z"/></g><g filter="url(#filter1_d)"><path fill="#FCF75A" d="M177.87 72.46a22.36 22.36 0 008.17 9.32 21.4 21.4 0 004.85 2.47l-2.48 8.01c-.5-.15-12.46-3.95-18.16-16.29l7.62-3.51z"/></g><path fill="#FCF75A" d="M216.8 119.93c1.65 1.72 2.81 3.4 3.53 5.13a9.9 9.9 0 01.59 6.35c-1.64 6.52-9.68 8.91-10.59 9.16l-2.23-8.1h-.02c1.77-.52 4.43-1.94 4.7-3.13.15-.62-.46-2.14-2.72-4.3l5.79-6.07.96.96z"/><path fill="#9F9AEE" d="M47.88 268.2c5.34.43 10-1.54 13.49-5.71 2.43-2.92 3.41-5.92 3.52-6.26l-7.7-2.4v-.03c0 .02-.65 1.94-2.17 3.69a7.25 7.25 0 01-6.45 2.66l-.69 8.04zM83.98 147.28c.08-.22.63-1.58 4.1-5.85 1.9-2.36 3.73-4.4 3.75-4.41l-3.5-3.14c-.07.09-1.9 2.13-3.88 4.58-3.77 4.64-4.62 6.43-4.93 7.38l4.46 1.44z"/><path fill="#79B3FF" d="M281.1 169.84c-.42 0-2.93-.14-11.81-3.44-4.89-1.8-9.22-3.66-9.26-3.69l-3.18 7.43c.18.08 4.53 1.93 9.6 3.82 9.65 3.57 13.03 3.96 14.74 3.95l-.1-8.07z"/><path fill="#4E5EAF" d="M123.9 289.63c-.27.3-2.07 2.06-10.51 6.35-4.63 2.36-8.94 4.3-8.98 4.31l3.32 7.38c.19-.09 4.5-2.01 9.31-4.48 9.17-4.67 11.75-6.9 12.9-8.17l-6.03-5.4zM181.52 241.7c-.2-.04-1.41-.33-5.42-2.65a97.79 97.79 0 01-4.16-2.52l-2.26 3.12c.08.05 2.02 1.3 4.31 2.61 4.36 2.52 5.97 3 6.8 3.15l.73-3.72z"/><g filter="url(#filter2_d)"><path fill="#79B3FF" d="M40.56 142.84c-.25.33-1.95 2.16-10.14 6.95-4.5 2.62-8.68 4.8-8.71 4.82l3.72 7.18c.19-.1 4.37-2.27 9.04-5 8.9-5.17 11.35-7.56 12.42-8.89l-6.33-5.06z"/></g><path fill="#FCF75A" d="M294.97 287.33c0-5.16-2.44-9.36-5.45-9.36-.8 0-13.27 4.82-13.27 4.82l1.38 18.54 12.9-4.82c2.48-.77 4.44-4.59 4.44-9.18z"/><path fill="#4E5EAF" d="M258 279.02a8.02 8.02 0 015.35-3.2c-11.7-7.93-28.4-19.3-35.62-24.65a4.25 4.25 0 00-5.92.86 4.25 4.25 0 00.86 5.92c6.4 4.73 21.54 17.25 33.9 27.52-.47-2.2 0-4.54 1.44-6.45z"/><path fill="#FCF75A" d="M275.1 291.63c1.38-1.86 3.82-5.4.76-7.35 0 0-5.3-3.54-12.5-8.46a8.13 8.13 0 00-6.78 9.65l18.38 15.38c3.05 2.01-1.24-7.35.14-9.22z"/><path fill="#AE9D00" d="M276.82 301.48c3 0 5.44-4.2 5.44-9.37 0-5.17-2.44-9.36-5.44-9.36-3 0-5.44 4.19-5.44 9.36 0 5.17 2.43 9.37 5.44 9.37z"/><path fill="#FCF75A" d="M279.88 291.35c0-3.25-1.3-5.69-3.01-5.69-1.72 0-3.01 2.44-3.01 5.69 0 2.1.57 3.96 1.48 4.96l.96-.9c-.67-.72-1.15-2.34-1.15-4.06 0-1.25.24-2.44.62-3.3.33-.67.72-1.1 1.1-1.1.38 0 .76.43 1.1 1.1.38.86.62 2.06.62 3.3 0 3.96-1.39 8.02-3.78 9.4.43.3.91.53 1.34.63 2.25-1.82 3.73-5.54 3.73-10.03z"/><g filter="url(#filter3_d)"><path fill="#4E5EAF" d="M139.32 73.67c2.15 5.05-7.08 13.8-20.57 19.46-13.5 5.72-26.16 6.22-28.27 1.16C88.38 89.24 82.87 8 82.87 8s54.34 60.62 56.45 65.67z"/><path fill="#9F9AEE" d="M117.55 58.14a52.33 52.33 0 01-30.71 3.28c.46 5.42.91 10.6 1.37 15.2 11.17 3.68 24.17 3.39 36.42-1.79 4.01-1.7 7.7-3.8 11.05-6.25a572.66 572.66 0 00-11.55-13.75 48.89 48.89 0 01-6.58 3.31zM100.04 27.34a51.1 51.1 0 01-15.73 1.49c.38 4.93.79 10.43 1.2 16.06a52.16 52.16 0 0027.57-2.73c-4.39-5.05-8.9-10.18-13.04-14.82z"/></g><path fill="#fff" d="M151.5 159.58a22.93 22.93 0 10.02 45.85 22.93 22.93 0 00-.02-45.85zm-4.58 34.38l-9.17-9.17 3.2-3.2 5.97 5.95 15.12-15.12 3.21 3.2-18.33 18.34z"/><defs><filter id="filter0_d" width="51.16" height="53.19" x="125.07" y="240.34" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/><feOffset dy="6"/><feGaussianBlur stdDeviation="8"/><feColorMatrix values="0 0 0 0 0.0375 0 0 0 0 0.045 0 0 0 0 0.1125 0 0 0 0.56 0"/><feBlend in2="BackgroundImageFix" result="effect1_dropShadow"/><feBlend in="SourceGraphic" in2="effect1_dropShadow" result="shape"/></filter><filter id="filter1_d" width="54.84" height="57.72" x="153.89" y="59.99" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/><feOffset dy="6"/><feGaussianBlur stdDeviation="8"/><feColorMatrix values="0 0 0 0 0.0375 0 0 0 0 0.045 0 0 0 0 0.1125 0 0 0 0.56 0"/><feBlend in2="BackgroundImageFix" result="effect1_dropShadow"/><feBlend in="SourceGraphic" in2="effect1_dropShadow" result="shape"/></filter><filter id="filter2_d" width="60.08" height="61.82" x="3.62" y="125.72" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/><feOffset dy="4"/><feGaussianBlur stdDeviation="8"/><feColorMatrix values="0 0 0 0 0.0375 0 0 0 0 0.045 0 0 0 0 0.1125 0 0 0 1 0"/><feBlend in2="BackgroundImageFix" result="effect1_dropShadow"/><feBlend in="SourceGraphic" in2="effect1_dropShadow" result="shape"/></filter><filter id="filter3_d" width="80.77" height="113.78" x="66.87" y="0" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/><feOffset dx="-4" dy="4"/><feGaussianBlur stdDeviation="6"/><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/><feBlend in2="BackgroundImageFix" result="effect1_dropShadow"/><feBlend in="SourceGraphic" in2="effect1_dropShadow" result="shape"/></filter></defs></svg>') !important;
+  width: 295px !important;
+  height: 308px !important;
+}
+
+.i-amphtml-story-dev-tools-debug-success {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
+.i-amphtml-story-dev-tools-debug-success .i-amphtml-story-dev-tools-log-status-title {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+}
+
+.i-amphtml-story-dev-tools-debug-success-message {
+  font-size: 28px !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  -webkit-font-smoothing: antialiased !important;
+}

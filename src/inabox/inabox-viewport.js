@@ -1,38 +1,28 @@
-/**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import {getFrameOverlayManager} from '#ads/inabox/frame-overlay-manager';
+import {getPositionObserver} from '#ads/inabox/position-observer';
 
-import {MessageType} from '../../src/3p-frame-messaging';
-import {Observable} from '../observable';
-import {Services} from '../services';
-import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
-import {ViewportInterface} from '../service/viewport/viewport-interface';
-import {canInspectWindow} from '../iframe-helper';
-import {dev, devAssert} from '../log';
-import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
-import {getPositionObserver} from '../../ads/inabox/position-observer';
-import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
-import {isIframed} from '../dom';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {devAssert, devAssertElement} from '#core/assert';
+import {Observable} from '#core/data-structures/observable';
+import {isIframed} from '#core/dom';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from '../layout-rect';
-import {px, resetStyles, setImportantStyles} from '../style';
-import {registerServiceBuilderForDoc} from '../service';
-import {throttle} from '../utils/rate-limit';
+} from '#core/dom/layout/rect';
+import {px, resetStyles, setImportantStyles} from '#core/dom/style';
+import {throttle} from '#core/types/function';
+
+import {Services} from '#service';
+import {ViewportBindingDef} from '#service/viewport/viewport-binding-def';
+import {ViewportInterface} from '#service/viewport/viewport-interface';
+
+import {dev} from '#utils/log';
+
+import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+
+import {canInspectWindow} from '../iframe-helper';
+import {registerServiceBuilderForDoc} from '../service-helpers';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
@@ -512,8 +502,8 @@ export class ViewportBindingInabox {
   /** @private */
   listenForPosition_() {
     this.iframeClient_.makeRequest(
-      MessageType.SEND_POSITIONS,
-      MessageType.POSITION,
+      MessageType_Enum.SEND_POSITIONS,
+      MessageType_Enum.POSITION,
       (data) => {
         dev().fine(TAG, 'Position changed: ', data);
         this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
@@ -680,8 +670,8 @@ export class ViewportBindingInabox {
     if (!this.requestPositionPromise_) {
       this.requestPositionPromise_ = new Promise((resolve) => {
         this.iframeClient_.requestOnce(
-          MessageType.SEND_POSITIONS,
-          MessageType.POSITION,
+          MessageType_Enum.SEND_POSITIONS,
+          MessageType_Enum.POSITION,
           (data) => {
             this.requestPositionPromise_ = null;
             devAssert(data['targetRect'], 'Host should send targetRect');
@@ -749,8 +739,8 @@ export class ViewportBindingInabox {
         }
       } else {
         this.iframeClient_.requestOnce(
-          MessageType.FULL_OVERLAY_FRAME,
-          MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+          MessageType_Enum.FULL_OVERLAY_FRAME,
+          MessageType_Enum.FULL_OVERLAY_FRAME_RESPONSE,
           (response) => {
             if (response['success']) {
               this.updateBoxRect_(response['boxRect']);
@@ -785,8 +775,8 @@ export class ViewportBindingInabox {
         }
       } else {
         this.iframeClient_.requestOnce(
-          MessageType.CANCEL_FULL_OVERLAY_FRAME,
-          MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+          MessageType_Enum.CANCEL_FULL_OVERLAY_FRAME,
+          MessageType_Enum.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
           (response) => {
             this.updateBoxRect_(response['boxRect']);
             resolve();
@@ -798,7 +788,7 @@ export class ViewportBindingInabox {
 
   /** @visibleForTesting */
   getBodyElement() {
-    return dev().assertElement(this.win.document.body);
+    return devAssertElement(this.win.document.body);
   }
 
   /** @override */

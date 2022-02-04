@@ -1,0 +1,61 @@
+tags: {  # amp-tiktok
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-tiktok"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-tiktok>
+  html_format: AMP
+  tag_name: "AMP-TIKTOK"
+  spec_name: "AMP-TIKTOK"
+  requires_extension: "amp-tiktok"
+  attr_lists: "extended-amp-global"
+  attrs: {
+    name: "data-src";
+    value_regex: "(https://www\\.tiktok\\.com/.*)?\\d+.*";
+    mandatory: true
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-tiktok"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-tiktok>
+  html_format: AMP
+  tag_name: "AMP-TIKTOK"
+  spec_name: "AMP-TIKTOK blockquote"
+  requires_extension: "amp-tiktok"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-tiktok"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+  child_tags: {
+    child_tag_name_oneof: "BLOCKQUOTE"
+    mandatory_min_num_child_tags: 1
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "BLOCKQUOTE"
+  spec_name: "BLOCKQUOTE with TikTok"
+  attrs: { name: "align" }
+  attr_lists: "cite-attr"
+  mandatory_ancestor: "AMP-TIKTOK blockquote"
+}

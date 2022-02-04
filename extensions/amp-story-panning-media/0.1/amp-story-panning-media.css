@@ -1,0 +1,27 @@
+
+
+amp-story-panning-media {
+  /* Child img gets 100% height. This centers the image. */
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  /*
+  This gives a 3d reference point for the translate3d z value on the child.
+  A reference point is necessary for the effect of 3d space.
+  The calculation to convert scale to zoom is:
+  perspective * (zoom - 1) / zoom
+  1 is used here to simplify the calculation in updateTransform_ to be:
+  (zoom - 1) / zoom
+  */
+  perspective: 1px !important;
+}
+
+amp-story-panning-media amp-img {
+  backface-visibility: hidden !important;
+}
+
+amp-story-grid-layer[template="fill"] amp-story-panning-media amp-img img {
+  /* override for layout=fill */
+  position: relative !important;
+  display: inline-block !important;
+}

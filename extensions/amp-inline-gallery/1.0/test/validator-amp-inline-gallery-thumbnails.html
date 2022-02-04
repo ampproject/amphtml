@@ -1,0 +1,67 @@
+<!--
+  Test Description:
+  Tests for the amp-inline-gallery-thumbnails tag. See the inline comments.
+-->
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-inline-gallery" src="https://cdn.ampproject.org/v0/amp-inline-gallery-1.0.js"></script>
+</head>
+<body>
+  <!-- Valid: Wrapped with a parent div -->
+  <amp-inline-gallery layout="container">
+    <div>
+      <amp-inline-gallery-thumbnails layout="fixed-height" height="96">
+      </amp-inline-gallery-thumbnails>
+    </div>
+  </amp-inline-gallery>
+  <!-- Valid: Loop attribute specified -->
+  <amp-inline-gallery layout="container">
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop="true">
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+  <!-- Valid: Loop attribute specified with no value -->
+  <amp-inline-gallery layout="container">
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" loop>
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+  <!-- Valid: Aspect ratio -->
+  <amp-inline-gallery layout="container">
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio="3">
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+  <!-- Valid: Aspect ratio (float) -->
+  <amp-inline-gallery layout="container">
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio="3.5">
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+  <!-- Invalid: Not in a gallery -->
+  <amp-inline-gallery-thumbnails layout="fixed-height" height="96">
+  </amp-inline-gallery-thumbnails>
+  <!-- Invalid: Non-number aspect ratio-->
+  <amp-inline-gallery layout="container">
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio="two">
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+  <!-- Invalid: Aspect ratio of zero -->
+  <amp-inline-gallery layout="container">
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio="0">
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+  <!-- Invalid: Aspect ratio of zero (float) -->
+  <amp-inline-gallery layout="container">
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" aspect-ratio-height="0.00">
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+  <!-- Invalid: Snap attribute without value -->
+  <amp-inline-gallery layout="container">
+    <amp-inline-gallery-thumbnails layout="fixed-height" height="96" snap>
+    </amp-inline-gallery-thumbnails>
+  </amp-inline-gallery>
+</body>
+</html>
