@@ -7,7 +7,6 @@ import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   StateProperty,
@@ -38,7 +37,8 @@ describes.realWin(
       // Set up the story.
       const storyEl = win.document.createElement('amp-story');
       const pageEl = win.document.createElement('amp-story-page');
-      storyEl.getAmpDoc = () => new AmpDocSingle(win);
+      const ampdoc = new AmpDocSingle(win);
+      storyEl.getAmpDoc = () => ampdoc;
       win.document.body.appendChild(storyEl);
       storyEl.appendChild(pageEl);
 
@@ -67,7 +67,7 @@ describes.realWin(
       const shoppingAttachmentEl = win.document.createElement(
         'amp-story-shopping-attachment'
       );
-      shoppingAttachmentEl.getAmpDoc = () => new AmpDocSingle(win);
+      shoppingAttachmentEl.getAmpDoc = () => ampdoc;
       pageEl.appendChild(shoppingAttachmentEl);
       const shoppingAttachment = new AmpStoryShoppingAttachment(
         shoppingAttachmentEl
