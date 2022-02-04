@@ -231,39 +231,52 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   renderPdpTemplate_(activeProductData) {
+    const {ratingValue, reviewCount, reviewUrl} =
+      activeProductData.aggregateRating;
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
-          <div>
-            <span class="i-amphtml-amp-story-shopping-pdp-header-brand">
-              {activeProductData.productBrand}
-            </span>
+          <span class="i-amphtml-amp-story-shopping-pdp-header-brand">
+            {activeProductData.productBrand}
+          </span>
+          <div class="i-amphtml-amp-story-shopping-pdp-header-title-and-price">
             <span class="i-amphtml-amp-story-shopping-pdp-header-title">
               {activeProductData.productTitle}
             </span>
+            <span class="i-amphtml-amp-story-shopping-pdp-header-price">
+              {formatI18nNumber(
+                this.localizationService_,
+                this.element,
+                activeProductData.productPriceCurrency,
+                activeProductData.productPrice
+              )}
+            </span>
           </div>
-          <span class="i-amphtml-amp-story-shopping-pdp-header-price">
-            {formatI18nNumber(
-              this.localizationService_,
-              this.element,
-              activeProductData.productPriceCurrency,
-              activeProductData.productPrice
-            )}
+          <span class="i-amphtml-amp-story-shopping-pdp-reviews">
+            {ratingValue} (
+            <a
+              class="i-amphtml-amp-story-shopping-pdp-reviews-link"
+              href={reviewUrl}
+              target="_top"
+            >
+              {reviewCount} reviews
+            </a>
+            )
           </span>
+          <a
+            class="i-amphtml-amp-story-shopping-pdp-cta"
+            href={activeProductData.productUrl}
+            target="_top"
+          >
+            <span class="i-amphtml-amp-story-shopping-pdp-cta-text">
+              {this.localizationService_.getLocalizedString(
+                LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL,
+                this.element
+              )}
+            </span>
+            <span class="i-amphtml-amp-story-shopping-pdp-cta-icon"></span>
+          </a>
         </div>
-        <a
-          class="i-amphtml-amp-story-shopping-pdp-cta"
-          href={activeProductData.productUrl}
-          target="_top"
-        >
-          <span class="i-amphtml-amp-story-shopping-pdp-cta-text">
-            {this.localizationService_.getLocalizedString(
-              LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL,
-              this.element
-            )}
-          </span>
-          <span class="i-amphtml-amp-story-shopping-pdp-cta-icon"></span>
-        </a>
         <div class="i-amphtml-amp-story-shopping-pdp-carousel">
           {activeProductData.productImages.map((image) => (
             <div
