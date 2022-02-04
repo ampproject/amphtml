@@ -678,9 +678,6 @@ async function maybeBuildBentoExtensionJs(dir, name, options) {
   const bentoName = getBentoName(name);
   return buildExtensionJs(dir, bentoName, {
     ...options,
-    // Use esbuild since Closure does not use a different babel config for
-    // Bento elements.
-    esbuild: true,
     wrapper: 'bento',
     babelCaller: options.minify
       ? 'bento-element-minified'
@@ -746,8 +743,8 @@ async function getBentoBuildFilename(dir, name, mode, options) {
  * @return {string}
  */
 function generateBentoEntryPointSource(name, toExport, outputFilename) {
-  const bentoCePath = path.relative(
-    path.dirname(outputFilename),
+  const bentoCePath = path.posix.relative(
+    path.posix.dirname(outputFilename),
     'src/preact/bento-ce'
   );
 
