@@ -258,7 +258,7 @@ function DateRangePickerWithRef(
 
   useImperativeHandle(
     ref,
-    () => /** @type {!BentoDatePickerDef.BentoDatePickerApi} */ ({
+    () => ({
       clear,
       setDates: ({end, start}: {end: Date; start: Date}) =>
         selectDateRange({from: start, to: end}),

@@ -22,10 +22,6 @@ export {DayContext};
 // Example: Wednesday, December 1, 2021
 const DATE_FORMAT = 'cccc, LLLL d, yyyy';
 
-/**
- *
- * @return {BentoDatePickerDef.AttributesContextFunctions} values
- */
 export function useDay() {
   const context = useContext(DayContext);
   if (!context) {

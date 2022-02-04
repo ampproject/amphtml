@@ -175,7 +175,8 @@ export const localeMap: {[key: string]: Locale} = {
  * If the string does not exist in the map, falls back to default locale.
  */
 export function getLocale(localeString: string) {
-  return localeMap[localeString] || localeMap[DEFAULT_LOCALE];
+  const defaultLocale = 'en';
+  return localeMap[localeString] || localeMap[defaultLocale];
 }
 
 /**
@@ -185,13 +186,12 @@ export function getLocale(localeString: string) {
 export function parseDate(
   value: string,
   dateFormat: string,
-  locale: string = DEFAULT_LOCALE
+  locale: Locale = DEFAULT_LOCALE
 ) {
   if (!value) {
     return null;
   }
-  const _locale = getLocale(locale);
-  const date = parse(value, dateFormat, new Date(), {locale: _locale});
+  const date = parse(value, dateFormat, new Date(), {locale});
   if (isValid(date)) {
     return date;
   }
@@ -211,9 +211,7 @@ export function getFormattedDate(
     return '';
   }
   const isUnixTimestamp = dateFormat.match(/[Xx]/);
-  const _locale = isUnixTimestamp
-    ? getLocale(DEFAULT_LOCALE)
-    : getLocale(locale);
+  const _locale = isUnixTimestamp ? DEFAULT_LOCALE : locale;
   return format(date, dateFormat, {locale: _locale});
 }
 

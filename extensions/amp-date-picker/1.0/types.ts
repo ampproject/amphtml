@@ -23,7 +23,7 @@ interface CommonDatePickerProps {
   highlighted: DateSelector;
   id?: string;
   initialVisibleMonth: Date;
-  locale: string;
+  locale: Locale;
   max?: Date;
   min: Date;
   mode: DatePickerMode;
