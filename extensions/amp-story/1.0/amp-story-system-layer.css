@@ -235,10 +235,10 @@
 }
 
 /*
-  Visible to screen readers only.  
-  https://www.a11yproject.com/posts/how-to-hide-content/ 
+  Visible to screen readers only.
+  https://www.a11yproject.com/posts/how-to-hide-content/
 */
-.i-amphtml-paused-display { 
+.i-amphtml-paused-display {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -247,7 +247,7 @@
   overflow: hidden !important;
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
-} 
+}
 
 [i-amphtml-current-page-has-audio]:not([muted]) .i-amphtml-story-mute-audio-control,
 [i-amphtml-current-page-has-audio][muted] .i-amphtml-story-unmute-audio-control {
