@@ -1172,7 +1172,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       });
 
       it('can use the offset argment to add or subtract days today', () => {
-        ref.current.today({offset: -1});
+        ref.current.today(-1);
         wrapper.update();
 
         expect(wrapper.exists('[data-date="2022-01-20"]')).to.be.true;
@@ -1216,10 +1216,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       });
 
       it('can set the start and end dates', () => {
-        ref.current.setDates({
-          start: new Date(2022, 0, 21),
-          end: new Date(2022, 0, 22),
-        });
+        ref.current.setDates(new Date(2022, 0, 21), new Date(2022, 0, 22));
         wrapper.update();
 
         expect(wrapper.exists('[data-startdate="2022-01-21"]')).to.be.true;
@@ -1243,7 +1240,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       });
 
       it('can use the offset argment to add or subtract days from start today', () => {
-        ref.current.startToday({offset: -1});
+        ref.current.startToday(-1);
         wrapper.update();
 
         expect(wrapper.exists('[data-startdate="2022-01-20"]')).to.be.true;
@@ -1263,7 +1260,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       });
 
       it('can use the offset argment to add or subtract days from end today', () => {
-        ref.current.endToday({offset: -1});
+        ref.current.endToday(-1);
         wrapper.update();
 
         expect(wrapper.exists('[data-enddate="2022-01-20"]')).to.be.true;

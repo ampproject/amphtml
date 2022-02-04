@@ -35,7 +35,7 @@ export function useDatePickerInput(formatDate: (date: Date) => string) {
    * Sets the date to today (with an optional offset property)
    */
   const setToToday = useCallback(
-    ({offset = 0} = {}) => {
+    (offset = 0) => {
       const date = addDays(getCurrentDate(), offset);
       handleSetDate(date);
     },

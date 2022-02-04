@@ -260,8 +260,8 @@ function DateRangePickerWithRef(
     ref,
     () => ({
       clear,
-      setDates: ({end, start}: {end: Date; start: Date}) =>
-        selectDateRange({from: start, to: end}),
+      setDates: (startDate: Date, endDate: Date) =>
+        selectDateRange({from: startDate, to: endDate}),
       startToday: startDateInput.setToToday,
       endToday: endDateInput.setToToday,
     }),

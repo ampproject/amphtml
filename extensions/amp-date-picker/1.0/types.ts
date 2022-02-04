@@ -8,10 +8,6 @@ export type DatePickerState =
   | 'overlay-open-picker'
   | 'static';
 
-type TodayArgs = {
-  offset: number;
-};
-
 export type Range = {
   start: Date;
   end: Date;
@@ -52,13 +48,15 @@ export type BentoDatePickerProps = SingleDatePickerProps & DateRangePickerProps;
 
 export interface SingleDatePickerAPI {
   clear(): void;
-  today(args: TodayArgs): void;
+  today(offset?: number): void;
   setDate(date: Date): void;
 }
 
 export interface DateRangePickerAPI {
   clear(): void;
-  startToday(args: TodayArgs): void;
-  endToday(args: TodayArgs): void;
-  setDates(range: Range): void;
+  startToday(offset?: number): void;
+  endToday(offset?: number): void;
+  setDates(startDate: Date, endDate: Date): void;
 }
+
+export type BentodatePickerAPI = DateRangePickerAPI & SingleDatePickerAPI;
