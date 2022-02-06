@@ -4,16 +4,13 @@ const {
   buildBentoExtensionJs,
   buildBinaries,
   buildExtensionCss,
-  buildExtensionJs,
   buildNpmBinaries,
   buildNpmCss,
   declareExtension,
-  getBentoBuildFilename,
   getExtensionsFromArg,
 } = require('./extension-helpers');
 const {bentoBundles, verifyBentoBundles} = require('../compile/bundles.config');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
-const {getBentoName} = require('./bento-helpers');
 const {log} = require('../common/logging');
 const {mkdirSync} = require('fs');
 const {red} = require('kleur/colors');
