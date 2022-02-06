@@ -18,9 +18,7 @@ exports.jsBundles = {
     minifiedDestDir: './build/',
   },
   'bento.js': {
-    // This file is generated, so we find its source in the build/ dir
-    // See compileBentoRuntime() and generateBentoRuntimeEntrypoint()
-    srcDir: 'build/',
+    srcDir: './src/bento',
     srcFilename: 'bento.js',
     destDir: './dist',
     minifiedDestDir: './dist',

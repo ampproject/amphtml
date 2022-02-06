@@ -38,6 +38,7 @@ const {parse: pathParse} = require('path');
 const {renameSelectorsToBentoTagNames} = require('./css/bento-css');
 const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
+const {getRemapBentoDependencies} = require('../compile/bento-remap');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -675,21 +676,20 @@ async function maybeBuildBentoExtensionJs(dir, name, options) {
   if (!options.bento) {
     return;
   }
+  const remapDependencies = getRemapBentoDependencies();
   const bentoName = getBentoName(name);
-  return buildExtensionJs(dir, bentoName, {
+  await buildExtensionJs(dir, bentoName, {
     ...options,
-    wrapper: 'bento',
-    babelCaller: options.minify
-      ? 'bento-element-minified'
-      : 'bento-element-unminified',
+    externalDependencies: Object.values(remapDependencies),
+    remapDependencies,
+    wrapper: 'none',
+    outputFormat: argv.esm ? 'esm' : 'amd',
     filename: await getBentoBuildFilename(
       dir,
       bentoName,
       'standalone',
       options
     ),
-    // Include extension directory since our entrypoint may be elsewhere.
-    extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
   });
 }
 

@@ -19,8 +19,7 @@ const {log} = require('./build-system/common/logging');
  */
 const babelTransforms = new Map([
   ['babel-jest', 'getEmptyConfig'],
-  ['bento-element-minified', 'getBentoElementMinifiedConfig'],
-  ['bento-element-unminified', 'getBentoElementUnminifiedConfig'],
+  ['amd', 'getAmdConfig'],
   ['test', 'getTestConfig'],
   ['unminified', 'getUnminifiedConfig'],
   ['minified', 'getMinifiedConfig'],
