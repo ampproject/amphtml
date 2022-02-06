@@ -160,12 +160,12 @@ describes.realWin(
         });
       });
 
-      it('sets amp=1 fragment in src', async () => {
+      it('sets ampGoogleReadAloudPlayer=1 fragment in src', async () => {
         const element = await createAndRenderBasicGoogleReadAloudPlayer();
 
         const iframe = element.querySelector('iframe');
         expect(iframe).to.not.be.null;
-        expect(iframe.src).to.match(/.*#amp=1$/);
+        expect(iframe.src).to.match(/.*#ampGoogleReadAloudPlayer=1$/);
       });
     });
 

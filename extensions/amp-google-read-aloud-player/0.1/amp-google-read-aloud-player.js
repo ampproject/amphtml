@@ -99,7 +99,7 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
       )
     );
 
-    return `${src}#amp=1`;
+    return `${src}#ampGoogleReadAloudPlayer=1`;
   }
 
   /**
