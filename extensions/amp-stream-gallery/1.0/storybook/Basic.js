@@ -4,6 +4,8 @@ import * as Preact from '#preact';
 
 import {BentoStreamGallery} from '../component';
 
+import '../component.jss';
+
 const CONTROLS = ['auto', 'always', 'never'];
 
 export default {

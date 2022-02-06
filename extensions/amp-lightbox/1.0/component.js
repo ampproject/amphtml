@@ -145,7 +145,7 @@ function BentoLightboxWithRef(
         wrapperClassName={classes.wrapper}
         contentProps={CONTENT_PROPS}
         role="dialog"
-        tabIndex="0"
+        tabindex="0"
         onKeyDown={(event) => {
           if (event.key === Keys_Enum.ESCAPE) {
             setVisible(false);
@@ -192,7 +192,7 @@ function ScreenReaderCloseButton({'aria-label': ariaLabel, onClick}) {
       aria-label={ariaLabel}
       class={classes.closeButton}
       onClick={onClick}
-      tabIndex={-1}
+      tabindex={-1}
     />
   );
 }

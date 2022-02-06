@@ -1,5 +1,4 @@
 import {devAssert} from '#core/assert';
-import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Loading_Enum} from '#core/constants/loading-instructions';
 import {ReadyState_Enum} from '#core/constants/ready-state';
@@ -114,19 +113,16 @@ export class PreactBaseElement extends BaseElement {
 
   /** @override @nocollapse */
   static requiresShadowDom() {
-    // eslint-disable-next-line local/no-static-this
     return this['usesShadowDom'];
   }
 
   /** @override @nocollapse */
   static usesLoading() {
-    // eslint-disable-next-line local/no-static-this
     return this['loadable'];
   }
 
   /** @override @nocollapse */
   static prerenderAllowed() {
-    // eslint-disable-next-line local/no-static-this
     return !this.usesLoading();
   }
 
@@ -231,12 +227,12 @@ export class PreactBaseElement extends BaseElement {
    */
   static props = {};
 
-  /** @param {AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {JsonObject} */
-    this.defaultProps_ = /** @type {JsonObject} */ ({
+  /**
+   * Returns default props
+   * @return {JsonObject}
+   */
+  getDefaultProps() {
+    return {
       'loading': Loading_Enum.AUTO,
 
       /**
@@ -253,16 +249,15 @@ export class PreactBaseElement extends BaseElement {
       'onPlayingState': (isPlaying) => {
         this.updateIsPlaying_(isPlaying);
       },
-      'onLoading': () => {
-        this.handleOnLoading();
-      },
-      'onLoad': () => {
-        this.handleOnLoad();
-      },
-      'onError': () => {
-        this.handleOnError();
-      },
-    });
+    };
+  }
+
+  /** @param {AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @protected {JsonObject} */
+    this.defaultProps_ = this.getDefaultProps();
 
     /**
      * @type {import('./context').AmpContext}
@@ -307,7 +302,7 @@ export class PreactBaseElement extends BaseElement {
     /** @private {?Array} */
     this.contextValues_ = null;
 
-    /** @type {Element | null} */
+    /** @protected {Element | null} */
     this.container_ = null;
 
     /** @private {boolean} */
@@ -493,32 +488,6 @@ export class PreactBaseElement extends BaseElement {
     this.mediaQueryProps_?.dispose();
   }
 
-  /** @override */
-  mutatedAttributesCallback() {
-    if (this.container_) {
-      this.scheduleRender_();
-    }
-  }
-
-  /**
-   * @param {number} newHeight
-   * @override
-   */
-  attemptChangeHeight(newHeight) {
-    return super.attemptChangeHeight(newHeight).catch((e) => {
-      // It's okay to disable this lint rule since we check that the restricted
-      // method exists.
-      // eslint-disable-next-line local/restrict-this-access
-      if (this.getOverflowElement && !this.getOverflowElement()) {
-        console./* OK */ warn(
-          '[overflow] element not found. Provide one to enable resizing to full contents.',
-          this.element
-        );
-      }
-      throw e;
-    });
-  }
-
   /**
    * @protected
    * @param {JsonObject} props
@@ -536,27 +505,6 @@ export class PreactBaseElement extends BaseElement {
     const ref = this.currentRef_;
     devAssert(ref);
     return ref;
-  }
-
-  /**
-   * Register an action for AMP documents to execute an API handler.
-   *
-   * This has no effect on Bento documents, since they lack an Actions system.
-   * Instead, they should use `(await element.getApi()).action()`
-   * @param {string} alias
-   * @param {function(API_TYPE, *):void} handler
-   * @param {ActionTrust_Enum} minTrust
-   * @protected
-   */
-  registerApiAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
-    this.registerAction?.(
-      alias,
-      /** @param {*} invocation */
-      (invocation) => {
-        handler(this.api(), invocation);
-      },
-      minTrust
-    );
   }
 
   /**
@@ -611,7 +559,7 @@ export class PreactBaseElement extends BaseElement {
     }
   }
 
-  /** @private */
+  /** @protected */
   scheduleRender_() {
     if (!this.scheduledRender_) {
       this.scheduledRender_ = true;
@@ -651,43 +599,6 @@ export class PreactBaseElement extends BaseElement {
     if (this.resetLoading_) {
       this.resetLoading_ = false;
       this.mutateProps({'loading': Loading_Enum.AUTO});
-    }
-  }
-
-  /**
-   * Default handler for onLoad event
-   * Displays loader. Override to customize.
-   * @protected
-   */
-  handleOnLoad() {
-    this.toggleLoading?.(false);
-    this.toggleFallback?.(false);
-    this.togglePlaceholder?.(false);
-  }
-
-  /**
-   * Default handler for onLoading event
-   * Reveals loader. Override to customize.
-   * @protected
-   */
-  handleOnLoading() {
-    this.toggleLoading?.(true);
-  }
-
-  /**
-   * Default handler for onError event
-   * Displays Fallback / Placeholder. Override to customize.
-   * @protected
-   */
-  handleOnError() {
-    this.toggleLoading?.(false);
-    // If the content fails to load and there's a fallback element, display the fallback.
-    // Otherwise, continue displaying the placeholder.
-    if (this.getFallback?.()) {
-      this.toggleFallback?.(true);
-      this.togglePlaceholder?.(false);
-    } else {
-      this.togglePlaceholder?.(true);
     }
   }
 
@@ -838,17 +749,22 @@ export class PreactBaseElement extends BaseElement {
     // Add AmpContext with renderable/playable proeprties.
     const v = <WithAmpContext {...this.context_}>{comp}</WithAmpContext>;
 
-    if (this.hydrationPending_) {
-      this.hydrationPending_ = false;
-      hydrate(v, container);
-    } else {
-      const replacement = lightDomTag
-        ? childElementByAttr(container, RENDERED_ATTR)
-        : null;
-      if (replacement) {
-        replacement[RENDERED_PROP] = true;
+    try {
+      if (this.hydrationPending_) {
+        this.hydrationPending_ = false;
+        hydrate(v, container);
+      } else {
+        const replacement = lightDomTag
+          ? childElementByAttr(container, RENDERED_ATTR)
+          : null;
+        if (replacement) {
+          replacement[RENDERED_PROP] = true;
+        }
+        render(v, container, replacement ?? undefined);
       }
-      render(v, container, replacement ?? undefined);
+    } catch (err) {
+      this.renderDeferred_?.reject(err);
+      throw err;
     }
 
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.

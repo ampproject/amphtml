@@ -3,6 +3,8 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {BaseElement} from './base-element';
 
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
@@ -11,7 +13,7 @@ import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 const TAG = 'amp-twitter';
 const TYPE = 'twitter';
 
-class AmpTwitter extends BaseElement {
+class AmpTwitter extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
