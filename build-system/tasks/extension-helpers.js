@@ -574,6 +574,9 @@ async function buildExtensionCss(extDir, name, version, options) {
       const css = await jsifyCssAsync(filename);
       await writeCssBinaries(name, versions, css);
 
+      // TODO(wg-infra): This option is only required on components not yet
+      // moved from extensions/. Once all are moved into src/bento/components,
+      // this can be removed.
       if (options.bento) {
         await buildBentoCss(name, versions, css);
       }

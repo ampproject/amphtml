@@ -2,9 +2,8 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  buildComponent,
+  buildBentoComponent,
   getBentoComponentsToBuild,
-  maybeInitializeBentoComponents,
 } = require('../tasks/build-bento');
 const {
   doBuild3pVendor,
@@ -21,9 +20,6 @@ const {VERSION} = require('../compile/internal-version');
 
 const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles);
-
-const bentoBundles = {};
-maybeInitializeBentoComponents(bentoBundles);
 
 const vendorBundles = generateBundles();
 
@@ -177,32 +173,19 @@ async function preBuildExtensions() {
 }
 
 /**
- * Normalized the callback from "build" and use it to build the inputted component.
- *
- * @param {!Object} components
- * @param {string} name
- * @param {?Object} options
- * @return {Promise<void|void[]>}
- */
-function doBuildBentoComponent(components, name, options) {
-  const component = components[name];
-  return buildComponent(component.name, component.version, component.hasCss, {
-    ...options,
-    ...component,
-  });
-}
-
-/**
  * Pre-builds default components and ones requested via command line flags.
  * @return {Promise<void>}
  */
 async function preBuildBentoComponents() {
-  const components = getBentoComponentsToBuild(/* preBuild */ true);
-  for (const componentBundle in bentoBundles) {
-    const component = bentoBundles[componentBundle].name;
-    if (components.includes(component) && !componentBundle.endsWith('latest')) {
-      await build(bentoBundles, componentBundle, doBuildBentoComponent);
-    }
+  const components = getBentoComponentsToBuild();
+  for (const component of components) {
+    const {name} = component;
+    // The build() call uses the "bundle object" merely to keep track of
+    // rebuild state. We can therefore pass it an empty object.
+    const buildBundle = {[name]: {}};
+    await build(buildBundle, name, (_bundles, _name, options) =>
+      buildBentoComponent(component, options)
+    );
   }
 }
 
