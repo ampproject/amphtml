@@ -6,31 +6,11 @@ teaser:
   text: Embeds the Google Read Aloud Player.
 ---
 
-<!--
-Copyright 2019 The AMP HTML Authors. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS-IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
--->
-
 # amp-google-read-aloud-player
 
 ## Behavior
 
-Embeds the Google Read Aloud web player which enables reading out loud web pages.
-
-## Supported Layouts
-
-`fixed` and `fixed-height`.
+Embeds the Google Read Aloud player. This player reads the content of your page out loud.
 
 ## Attributes
 
@@ -89,13 +69,9 @@ player should read aloud.</li>
     <td width="20%"><strong>data-speakable</strong></td>
     <td>Controls the contents to read aloud.
 <br><br>
-Possible values:
-<ul>
-  <li>false - Google automatically analyzes the web page and decides which text parts are suitable
-for reading aloud.</li>
-  <li>true - Google uses only text from elements marked with the speakable markup on the web page.
-</li></td>
-</ul>
+When present, uses text only from elements annotated with 
+<a href="https://developers.google.com/search/docs/data-types/speakable">speakable markup</a>, otherwise, 
+Google analyzes the document automatically to choose the suitable text parts.
   </tr>
   <tr>
     <td width="20%"><strong>data-call-to-action-label</strong></td>
@@ -116,7 +92,7 @@ outro can be used by publishers to create a unique ending for each playback.</td
   </tr>
   <tr>
     <td width="20%"><strong>data-ad-tag-url</strong></td>
-    <td>A complete <a href ="https://support.google.com/admanager/table/9749596?hl=en">VAST ad tag URL</a> 
+    <td>A complete <a href ="https://support.google.com/admanager/table/9749596">VAST ad tag URL</a> 
 with parameters for playing pre-roll audio ads. When present, audio ads will be played before 
 reading aloud page contents, after the user clicks on the play button for the first time. If not 
 present, only page content will be played.<br/>
@@ -140,11 +116,12 @@ Include an `amp-google-read-aloud-player` on your AMP document:
 
 ```html
 <amp-google-read-aloud-player
-  layout="fixed-height" height="65"
-  data-api-key=<YOUR_API_KEY>
-  data-tracking-ids=<YOUR_TRACKING_IDS>
-  data-voice=<YOUR_VOICE>>
-</amp-google-read-aloud-player>
+  layout="fixed-height"
+  height="65"
+  data-api-key="<YOUR_API_KEY>"
+  data-tracking-ids="<YOUR_TRACKING_IDS>"
+  data-voice="<YOUR_VOICE>"
+></amp-google-read-aloud-player>
 ```
 
 ## Validation

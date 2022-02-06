@@ -1,36 +1,13 @@
-/**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import {getDataParamsFromAttributes, removeElement} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 import {tryParseJson} from '#core/types/object/json';
 
-import {isExperimentOn} from '#experiments';
-
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
-
-import {userAssert} from '#utils/log';
 
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {SandboxOptions_Enum, createFrameFor} from '../../../src/iframe-video';
 import {addParamsToUrl} from '../../../src/url';
-
-/** @private @const */
-const EXPERIMENT = 'amp-google-read-aloud-player';
 
 /** @private @const */
 const TAG = 'amp-google-read-aloud-player';
@@ -88,8 +65,6 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    this.assertExperimentIsOn_();
-
     return layout == Layout_Enum.FIXED || layout == Layout_Enum.FIXED_HEIGHT;
   }
 
@@ -111,14 +86,6 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
   /** @override */
   resumeCallback() {
     this.play(false /** unusedIsAutoplay */);
-  }
-
-  /** Assert the experiment is on. */
-  assertExperimentIsOn_() {
-    userAssert(
-      isExperimentOn(this.win, 'amp-google-read-aloud-player'),
-      `Experiment ${EXPERIMENT} is not turned on.`
-    );
   }
 
   /** @return {string} */
