@@ -672,24 +672,25 @@ function buildBinaries(extDir, binaries, options) {
  * @return {!Promise}
  */
 async function maybeBuildBentoExtensionJs(dir, name, options) {
-  if (!options.bento) {
-    return;
+  if (options.bento) {
+    await buildBentoExtensionJs(dir, getBentoName(name), options);
   }
-  const bentoName = getBentoName(name);
-  return buildExtensionJs(dir, bentoName, {
+}
+
+/**
+ * @param {string} dir
+ * @param {string} name
+ * @param {!Object} options
+ * @return {!Promise}
+ */
+async function buildBentoExtensionJs(dir, name, options) {
+  return buildExtensionJs(dir, name, {
     ...options,
     wrapper: 'bento',
     babelCaller: options.minify
       ? 'bento-element-minified'
       : 'bento-element-unminified',
-    filename: await getBentoBuildFilename(
-      dir,
-      bentoName,
-      'standalone',
-      options
-    ),
-    // Include extension directory since our entrypoint may be elsewhere.
-    extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
+    filename: await getBentoBuildFilename(dir, name, 'standalone', options),
   });
 }
 
@@ -914,6 +915,7 @@ async function copyWorkerDomResources(version) {
 }
 
 module.exports = {
+  buildBentoExtensionJs,
   buildBinaries,
   buildExtensionCss,
   buildExtensionJs,

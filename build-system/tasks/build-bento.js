@@ -1,6 +1,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const {
+  buildBentoExtensionJs,
   buildBinaries,
   buildExtensionCss,
   buildExtensionJs,
@@ -164,21 +165,7 @@ async function buildBentoComponent(
     return Promise.all(promises);
   }
 
-  const bentoName = getBentoName(name);
-  promises.push(
-    buildExtensionJs(componentsDir, bentoName, {
-      ...options,
-      wrapper: 'none',
-      filename: await getBentoBuildFilename(
-        componentsDir,
-        bentoName,
-        'standalone',
-        options
-      ),
-      // Include extension directory since our entrypoint may be elsewhere.
-      extraGlobs: [...(options.extraGlobs || []), `${componentsDir}/**/*.js`],
-    })
-  );
+  promises.push(buildBentoExtensionJs(componentsDir, name, options));
   return Promise.all(promises);
 }
 
