@@ -41,6 +41,7 @@ const {watch} = require('chokidar');
 const {
   getSharedBentoModules,
 } = require('../compile/generate/shared-bento-symbols');
+const {getRemapBentoDependencies} = require('../compile/bento-remap');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -721,12 +722,13 @@ function getSharedBentoPackageRemap() {
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(dir, name, options) {
+  const remapDependencies = getRemapBentoDependencies();
   await buildExtensionJs(dir, name, {
     ...options,
-    wrapper: 'bento',
-    babelCaller: options.minify
-      ? 'bento-element-minified'
-      : 'bento-element-unminified',
+    externalDependencies: Object.values(remapDependencies),
+    remapDependencies,
+    wrapper: 'none',
+    outputFormat: argv.esm ? 'esm' : 'amd',
     filename: await getBentoBuildFilename(dir, name, 'standalone', options),
   });
 }

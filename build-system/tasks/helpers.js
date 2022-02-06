@@ -12,10 +12,7 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {cyan, green, red} = require('kleur/colors');
-const {
-  generateBentoCoreEntrypoint,
-  generateBentoRuntimeEntrypoint,
-} = require('../compile/generate/bento');
+const {generateBentoCoreEntrypoint} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {massageSourcemaps} = require('./sourcemaps');
@@ -140,11 +137,10 @@ async function compileBentoRuntimeAndCore(options) {
  * @return {Promise<void>}
  */
 async function compileBentoRuntime(options) {
-  const {srcDir, srcFilename} = jsBundles['bento.js'];
-  const filename = `${srcDir}/${srcFilename}`;
-  const fileSource = generateBentoRuntimeEntrypoint();
-  await fs.outputFile(filename, fileSource);
-  await doBuildJs(jsBundles, 'bento.js', options);
+  await doBuildJs(jsBundles, 'bento.js', {
+    ...options,
+    outputFormat: argv.esm ? 'esm' : 'amd',
+  });
 }
 
 /**
@@ -391,7 +387,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         outfile: destFile,
         define: experimentDefines,
         plugins,
-        format: options.outputFormat,
+        // esbuild does not support AMD, so we build as ESM in order to preserve
+        // import statements. These are transformed in a post-build Babel step.
+        format: options.outputFormat === 'amd' ? 'esm' : options.outputFormat,
         banner,
         footer,
         // For es5 builds, ensure esbuild-injected code is transpiled.
@@ -420,6 +418,24 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       fs.outputFile(destFile, code),
       fs.outputFile(`${destFile}.map`, map),
     ]);
+
+    // TODO(alanorozco): Sourcemaps are probably very broken.
+    if (options.outputFormat === 'amd') {
+      await esbuild.build({
+        entryPoints: [destFile],
+        outfile: destFile,
+        bundle: true,
+        sourceRoot: path.dirname(destFile),
+        format: 'cjs',
+        target: 'es5',
+        plugins: [getEsbuildBabelPlugin('amd', /* cache */ true)],
+        allowOverwrite: true,
+        incremental: !!options.watch,
+        logLevel: 'silent',
+        write: true,
+        minify: options.minify,
+      });
+    }
 
     await finishBundle(destDir, destFilename, options, startTime);
   }
