@@ -212,5 +212,23 @@ describes.realWin(
       expect(iframe).to.be.null;
       expect(impl.iframe).to.be.undefined;
     });
+
+    it('pauseCallback', async () => {
+      const element = await createAndRenderBasicGoogleReadAloudPlayer();
+      const impl = await element.getImpl(false);
+      env.sandbox.spy(impl, 'pause');
+
+      impl.pauseCallback();
+      expect(impl.pause.withArgs()).to.have.been.calledOnce;
+    });
+
+    it('resumeCallback', async () => {
+      const element = await createAndRenderBasicGoogleReadAloudPlayer();
+      const impl = await element.getImpl(false);
+      env.sandbox.spy(impl, 'play');
+
+      impl.resumeCallback();
+      expect(impl.play.withArgs(false)).to.have.been.calledOnce;
+    });
   }
 );
