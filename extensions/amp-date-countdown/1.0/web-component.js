@@ -1,5 +1,7 @@
 import {defineBentoElement} from '#preact/bento-ce';
 
+import {getTemplate} from '#utils/template-utils';
+
 import {BaseElement, TAG} from './base-element';
 
 import {mustache} from '../../amp-mustache/1.0/bento-mustache';
@@ -7,7 +9,7 @@ import {mustache} from '../../amp-mustache/1.0/bento-mustache';
 export class BentoDateCountdown extends BaseElement {
   /** @override */
   checkPropsPostMutations() {
-    const template = this.element.querySelector('template')./*OK*/ innerHTML;
+    const template = getTemplate(this.element);
     if (!template) {
       // show error?
       return;
@@ -15,7 +17,7 @@ export class BentoDateCountdown extends BaseElement {
 
     this.mutateProps({
       'render': (data) => {
-        const html = mustache.render(template, data);
+        const html = mustache.render(template./*OK*/ innerHTML, data);
         return {'__html': html};
       },
     });
