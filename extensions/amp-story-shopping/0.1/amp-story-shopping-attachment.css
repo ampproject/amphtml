@@ -127,8 +127,8 @@ amp-story-shopping-attachment a {
   display: inline-flex !important;
   padding: 0 .88em !important;
   align-items: center !important;
-  height: var(--shopping-cta-height) !important; 
-  border-radius: calc(var(--shopping-cta-height) / 2) !important; 
+  height: var(--shopping-cta-height) !important;
+  border-radius: calc(var(--shopping-cta-height) / 2) !important;
   background: var(--i-amphtml-draggable-drawer-text-color) !important;
   font-weight: 500 !important;
   color: var(--i-amphtml-draggable-drawer-background-color) !important;
@@ -168,7 +168,7 @@ amp-story-shopping-attachment a {
   background-repeat: no-repeat !important;
   background-position: center !important;
   background-size: cover !important;
-  margin-inline-end: 0.2em !important;  
+  margin-inline-end: 0.2em !important;
 }
 
 [theme="dark"] .i-amphtml-amp-story-shopping-pdp-reviews:before {
@@ -219,7 +219,7 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:only-child {
-  width: calc(100% - var(--shopping-attachment-horizontal-padding) * 2) !important; 
+  width: calc(100% - var(--shopping-attachment-horizontal-padding) * 2) !important;
   border-radius: 1.1em !important;
   cursor: auto !important;
 }
