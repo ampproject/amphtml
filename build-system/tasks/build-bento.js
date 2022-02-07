@@ -122,17 +122,9 @@ async function watchBentoComponent(
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
- * @param {!Array=} extraGlobs
  * @return {!Promise<void|void[]>}
  */
-async function buildBentoComponent(
-  name,
-  version,
-  hasCss,
-  options = {},
-  extraGlobs
-) {
-  options.extraGlobs = extraGlobs;
+async function buildBentoComponent(name, version, hasCss, options = {}) {
   options.npm = true;
   options.bento = true;
 
@@ -181,13 +173,10 @@ async function buildBentoComponents(options) {
       (component) => options.compileOnlyCss || toBuild.includes(component.name)
     )
     .map((component) =>
-      buildBentoComponent(
-        component.name,
-        component.version,
-        component.hasCss,
-        {...options, ...component},
-        component.extraGlobs
-      )
+      buildBentoComponent(component.name, component.version, component.hasCss, {
+        ...options,
+        ...component,
+      })
     );
 
   await Promise.all(results);
