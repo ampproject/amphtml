@@ -53,6 +53,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
+    /** @private {!Map<string, Element>} */
     this.builtTemplates_ = {};
   }
 
@@ -128,13 +129,15 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   * Active product data is cleared if attachment is opening and activeProductData was previously set.
+   * It's cleared on open instead of close so that content doesn't jump while closing.
    * @param {boolean} isOpen
    * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
   checkClearActiveProductData_(isOpen, shoppingData) {
     const {activeProductData} = shoppingData;
-    if (activeProductData && !isOpen && this.isOnActivePage_()) {
+    if (!isOpen && activeProductData && this.isOnActivePage_()) {
       this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
         'activeProductData': null,
       });
@@ -142,6 +145,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   * On attachment state or shopping data state update, check if on active page and update template.
    * @param {boolean} isOpen
    * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
@@ -161,6 +165,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     const featuredProduct =
       shoppingData.activeProductData || singleProductOnPage;
 
+    // templateId string used to key already built templates.
     const templateId = `pdp-${featuredProduct?.productId || 'plp'}`;
 
     // Iterate over built templates and set active attribute.
@@ -177,11 +182,13 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         this.mutateElement(() => template.removeAttribute('active'));
       }
     });
+
+    // Early return if template is already built.
     if (templateAlreadyBuilt) {
       return;
     }
 
-    // Construct template and assign it to builtTemplates.
+    // If not already built, build template and assign it to builtTemplates_ by templateId.
     this.builtTemplates_[templateId] = (
       <div class="i-amphtml-amp-story-shopping" active>
         {featuredProduct && this.renderPdpTemplate_(featuredProduct)}
@@ -198,24 +205,16 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
-   *
-   * @param {!Element} template
+   * Centers carousel card image on click.
+   * @param {!Element} carouselCard
    * @private
    */
-  resetCarouselScroll_(template) {
-    template
-      .querySelector('.i-amphtml-amp-story-shopping-pdp-carousel')
-      ?.scroll({left: 0});
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isOnActivePage_() {
-    return (
-      this.pageEl_.id === this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
-    );
+  onPdpCarouselCardClick_(carouselCard) {
+    carouselCard.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
   }
 
   /**
@@ -240,15 +239,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
-   * Centers carousel card image on click.
-   * @param {!Element} carouselCard
+   * @param {!Element} el
    * @private
    */
-  onPdpCarouselCardClick_(carouselCard) {
-    carouselCard.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-      inline: 'center',
+  resetCarouselScroll_(el) {
+    el.querySelector('.i-amphtml-amp-story-shopping-pdp-carousel')?.scroll({
+      left: 0,
     });
   }
 
@@ -361,6 +357,16 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           ))}
         </div>
       </div>
+    );
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isOnActivePage_() {
+    return (
+      this.pageEl_.id === this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
     );
   }
 

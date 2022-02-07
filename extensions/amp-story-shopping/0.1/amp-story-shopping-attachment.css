@@ -124,7 +124,7 @@ amp-story-shopping-attachment a {
 
 .i-amphtml-amp-story-shopping-pdp-cta {
   font-size: 1.25em !important;
-  --i-amphtml-shopping-cta-height: 2.55em;
+  --i-amphtml-shopping-cta-height: 2.55em !important;
   display: inline-flex !important;
   padding: 0 .88em !important;
   align-items: center !important;
