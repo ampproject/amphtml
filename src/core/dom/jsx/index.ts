@@ -31,64 +31,60 @@
  */
 import {devAssert} from '#core/assert';
 
-/**
- * @typedef {Node|Object|string|number|bigint|boolean|null|undefined}
- */
-let DomJsxChildDef;
+type Tag = string | ((props: Props) => Element);
+type Props = {[string: string]: any} | null | undefined;
+type Child =
+  | Child[]
+  | Node
+  | Object
+  | string
+  | number
+  | bigint
+  | boolean
+  | null
+  | undefined;
 
-/**
- * @param {Element} parent
- * @param {DomJsxChildDef|Array<DomJsxChildDef>} child
- */
-function appendChild(parent, child) {
+function appendChild(parent: Element, child: Child) {
   if (!!child === child || child == null) {
     return;
   }
   if (Array.isArray(child)) {
-    const children = /** @type {Array<DomJsxChildDef>} */ (child);
-    children.forEach((child) => {
+    child.forEach((child) => {
       appendChild(parent, child);
     });
     return;
   }
-  const maybeNode = /** @type {Node} */ (child);
+  const maybeNode = child as Node;
   parent.appendChild(
     maybeNode.nodeType ? maybeNode : self.document.createTextNode(String(child))
   );
 }
 
-/**
- * @param {Element} element
- * @param {string} name
- * @param {*} value
- */
-function setAttribute(element, name, value) {
+function setAttribute(element: Element, name: string, value: any) {
   if (value === false || value == null) {
     return;
   }
   if (typeof value === 'function' && name[0] === 'o' && name[1] === 'n') {
-    const eventName = name.toLowerCase().substr(2);
+    const eventName = name.toLowerCase().substring(2);
     element.addEventListener(eventName, value);
     return;
   }
   element.setAttribute(name, value === true ? '' : String(value));
 }
 
-/**
- * @param {string | (function(*): Element)} tag
- * @param {Object<string, *>} props
- * @param {...*} children
- * @return {Element}
- */
-export function createElement(tag, props, ...children) {
+export function createElement(
+  tag: Tag,
+  props: Props,
+  ...children: Child[]
+): Element {
   if (typeof tag !== 'string') {
     return tag({...props, children});
   }
   // We expect all SVG-related tags to have `xmlns` set during build time.
   // See babel-plugin-dom-jsx-svg-namespace
-  const xmlns = props?.['xmlns'];
+  const xmlns = props?.xmlns;
   if (xmlns) {
-    delete props['xmlns'];
+    delete props.xmlns;
   }
   const element = xmlns
     ? self.document.createElementNS(xmlns, tag)
@@ -102,9 +98,6 @@ export function createElement(tag, props, ...children) {
   return element;
 }
 
-/**
- * @return {null}
- */
 export function Fragment() {
   devAssert(
     null,
