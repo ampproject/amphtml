@@ -1,10 +1,9 @@
+import mustache from '#bento/components/bento-mustache/1.0/bento-mustache';
+import {getTemplate} from '#bento/util/template';
+
 import {defineBentoElement} from '#preact/bento-ce';
 
-import {getTemplate} from '#utils/template-utils';
-
 import {BaseElement, TAG} from './base-element';
-
-import mustache from '#bento/components/bento-mustache/1.0/bento-mustache';
 
 export class BentoDateCountdown extends BaseElement {
   /** @override */
