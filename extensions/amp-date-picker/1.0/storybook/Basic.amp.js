@@ -1,5 +1,11 @@
-import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
+import {format} from 'path';
+
+import * as Preact from '#preact';
+
+import {ISO_8601} from '../constants';
+
+const today = new Date();
 
 export default {
   title: 'amp-date-picker-1_0',
@@ -9,14 +15,19 @@ export default {
     experiments: ['bento'],
   },
   args: {
-    'data-example-property': 'example string property argument',
+    'type': 'single',
+    'layout': 'fixed-height',
+    'height': '360',
+    'initial-visible-month': format(today, ISO_8601),
+    'locale': 'en-us',
+    'mode': 'static',
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
 export const _default = (args) => {
   return (
-    <amp-date-picker width="300" height="200" {...args}>
+    <amp-date-picker {...args}>
+      <input id="date" placeholder="Pick a date" />
       This text is inside.
     </amp-date-picker>
   );

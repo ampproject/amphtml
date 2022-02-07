@@ -1,10 +1,12 @@
+import {enUS} from 'date-fns/locale';
+
 import * as Preact from '#preact';
 import {useRef} from '#preact';
 
-import {BentoDatePicker} from '../component/component';
+import {BentoDatePicker} from '../component/component.tsx';
+import {useDatePicker} from '../component/use-date-picker';
 import {getFormattedDate} from '../date-helpers';
 import {localeMap} from '../parsers';
-import {useDatePicker} from '../use-date-picker';
 
 const today = new Date();
 
@@ -26,7 +28,7 @@ export default {
     layout: 'fixed-height',
     height: 360,
     initialVisibleMonth: today,
-    locale: 'en',
+    locale: enUS,
     mode: 'static',
     maximumNights: 0,
   },
