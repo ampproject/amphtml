@@ -52,7 +52,7 @@ module.exports = function (babel) {
               deps.elements.length === 1
                 ? `'${deps.elements[0].value}'`
                 : 'null',
-            __HAS_EXPORTS__: String(deps.elements[0].value === 'exports'),
+            __HAS_EXPORTS__: String(deps.elements[0]?.value === 'exports'),
           })
         );
       },
