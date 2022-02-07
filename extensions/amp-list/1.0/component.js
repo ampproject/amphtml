@@ -60,11 +60,11 @@ function getNextUrl(lastPage, loadMoreBookmark) {
  */
 function getItemsFromPage(pageData, itemsKey) {
   if (!pageData) {
-    return null;
+    return [];
   }
   let items = getValue(pageData, itemsKey);
   if (!items) {
-    return null;
+    return [];
   }
   if (!Array.isArray(items)) {
     items = [items];
