@@ -53,6 +53,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+    this.addListener();
   }
 
   /** @override */
@@ -121,7 +122,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     return super.sendXhrRequest(adUrl).then((response) => {
       return response.text().then((responseText) => {
         if (includes(responseText, SAS_NO_AD_STR)) {
-          this./*OK*/ collapse();
+          this.collapseIframe();
         }
         return new Response(response);
       });
@@ -176,7 +177,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /**
-<<<<<<< HEAD
    * Collapses ad iframe
    */
   collapseIframe() {
@@ -186,20 +186,17 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   /**
    * Adds message event listener and triggers collapsing
    */
-  listen() {
-    const collapse = () => {
-      this.collapseIframe();
-    };
-    window.addEventListener('message', (event) => {
+  addListener() {
+    const messageListener = (event) => {
       if (event.data.type === 'collapse') {
-        collapse();
+        this.collapseIframe();
+        this.win.removeEventListener('message', messageListener);
       }
-    });
+    };
+    this.win.addEventListener('message', messageListener);
   }
 
   /**
-=======
->>>>>>> main
    * Chooses RTC callout with highest bid price
    * @param {Array<Object>} rtcResponseArray
    * @return {Object}

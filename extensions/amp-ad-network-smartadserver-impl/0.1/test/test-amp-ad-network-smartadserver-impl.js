@@ -19,6 +19,8 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
 
+import {createIframeWithMessageStub} from '#testing/iframe';
+
 import {XORIGIN_MODE} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAdNetworkSmartadserverImpl} from '../amp-ad-network-smartadserver-impl';
 
@@ -351,6 +353,31 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
       expect(stub.notCalled).to.equal(true);
       await impl.sendXhrRequest();
       expect(stub.calledOnce).to.equal(true);
+    });
+
+    it('should collapse on collapse event', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad');
+      const iframe = createIframeWithMessageStub(win);
+      element.appendChild(iframe);
+      doc.body.appendChild(element);
+
+      impl = new AmpAdNetworkSmartadserverImpl(element, doc, win);
+      const stub = env.sandbox.stub(impl, 'collapseIframe');
+      const data = {
+        sentinel: 'amp',
+        type: 'collapse',
+      };
+
+      expect(stub).to.not.be.called;
+
+      iframe.contentWindow.parent.postMessage('collapse', '*');
+      expect(stub).to.not.be.called;
+
+      iframe.contentWindow.parent.postMessage(data, '*');
+      expect(stub).to.be.calledOnce;
+
+      iframe.contentWindow.parent.postMessage(data, '*');
+      expect(stub).to.be.calledOnce;
     });
   });
 
