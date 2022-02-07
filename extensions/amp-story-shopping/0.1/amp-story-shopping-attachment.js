@@ -258,8 +258,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   renderPdpTemplate_(activeProductData) {
-    const {ratingValue, reviewCount, reviewUrl} =
-      activeProductData.aggregateRating;
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
@@ -280,13 +278,13 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             </span>
           </div>
           <span class="i-amphtml-amp-story-shopping-pdp-reviews">
-            {ratingValue} (
+            {activeProductData.aggregateRating.ratingValue} (
             <a
               class="i-amphtml-amp-story-shopping-pdp-reviews-link"
-              href={reviewUrl}
+              href={activeProductData.aggregateRating.reviewUrl}
               target="_top"
             >
-              {reviewCount + ' '}
+              {activeProductData.aggregateRating.reviewCount + ' '}
               {this.localizationService_.getLocalizedString(
                 LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL,
                 this.element
