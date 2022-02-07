@@ -11,9 +11,9 @@ import {
 } from './amp-story-shopping-config';
 
 import {
+  Action,
   ShoppingConfigDataDef,
   StateProperty,
-  Action,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {!Array<!Object>} fontFaces */
@@ -210,7 +210,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onPdpCarouselCardClick_(carouselCard) {
-    carouselCard.scrollIntoView({
+    carouselCard./*OK*/ scrollIntoView({
       behavior: 'smooth',
       block: 'nearest',
       inline: 'center',
