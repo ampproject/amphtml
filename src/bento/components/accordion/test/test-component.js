@@ -5,7 +5,7 @@ import {
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '#bento/components/bento-accordion/1.0/component';
+} from '#bento/components/accordion/component';
 
 import * as Preact from '#preact';
 import {useAmpContext} from '#preact/context';
