@@ -1,5 +1,7 @@
 import '../amp-google-read-aloud-player';
 
+import {expect} from 'chai';
+
 import {createElementWithAttributes} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 
@@ -198,6 +200,17 @@ describes.realWin(
           expect(postMessage.withArgs(lowercaseMethod)).to.have.been.calledOnce;
         });
       });
+    });
+
+    it('unlayoutCallback', async () => {
+      const element = await createAndRenderBasicGoogleReadAloudPlayer();
+
+      const impl = await element.getImpl(false);
+      expect(impl.unlayoutCallback()).to.be.true;
+
+      const iframe = element.querySelector('iframe');
+      expect(iframe).to.be.null;
+      expect(impl.iframe).to.be.undefined;
     });
   }
 );
