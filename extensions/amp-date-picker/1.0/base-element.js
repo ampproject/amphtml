@@ -50,6 +50,11 @@ BaseElement['props'] = {
     parseAttr: parseBooleanAttribute,
   },
   // Not implemented
+  'openAfterClear': {
+    attr: 'open-after-clear',
+    parseAttr: parseBooleanAttribute,
+  },
+  // Not implemented
   'hideKeyboardShortcutsPanel': {
     attr: 'hide-keyboard-shortcuts-panel',
     parseAttr: parseBooleanAttribute,
