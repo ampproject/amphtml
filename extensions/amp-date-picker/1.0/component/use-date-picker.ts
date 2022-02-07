@@ -1,6 +1,6 @@
 import {createContext, useContext} from '#preact';
 
-import {DateFieldType, DatePickerType} from './types';
+import {DateFieldType, DatePickerType} from '../types';
 
 interface DatePickerContextType {
   selectedDate?: Date;

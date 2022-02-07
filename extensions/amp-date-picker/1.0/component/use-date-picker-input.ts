@@ -2,7 +2,7 @@ import {addDays} from 'date-fns';
 
 import {useCallback, useRef, useState} from '#preact';
 
-import {getCurrentDate} from './date-helpers';
+import {getCurrentDate} from '../date-helpers';
 
 /**
  * Baseline functions for a date input field

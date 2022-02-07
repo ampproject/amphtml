@@ -7,6 +7,10 @@ import {useMemo} from '#preact';
 import {forwardRef} from '#preact/compat';
 
 import './amp-date-picker.css';
+import {DateRangePicker} from './date-range-picker';
+import {SingleDatePicker} from './single-date-picker';
+import {DayContext} from './use-day';
+
 import {
   DEFAULT_END_INPUT_SELECTOR,
   DEFAULT_INPUT_SELECTOR,
@@ -16,12 +20,9 @@ import {
   DEFAULT_START_INPUT_SELECTOR,
   DEFAULT_WEEK_DAY_FORMAT,
   ISO_8601,
-} from './constants';
-import {getCurrentDate} from './date-helpers';
-import {DateRangePicker} from './date-range-picker';
-import {SingleDatePicker} from './single-date-picker';
-import {BentoDatePickerProps} from './types';
-import {DayContext} from './use-day';
+} from '../constants';
+import {getCurrentDate} from '../date-helpers';
+import {BentoDatePickerProps} from '../types';
 
 type PropertiesWithDefaults =
   | 'endInputSelector'

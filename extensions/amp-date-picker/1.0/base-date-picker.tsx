@@ -3,9 +3,9 @@ import {DayPicker, DayPickerProps} from 'react-day-picker';
 import * as Preact from '#preact';
 import {useCallback} from '#preact';
 
+import {DayButton} from './component/day-button';
+import {useDay} from './component/use-day';
 import {getFormattedDate} from './date-helpers';
-import {DayButton} from './day-button';
-import {useDay} from './use-day';
 
 interface BaseDatePickerProps extends DayPickerProps {
   monthFormat: string;

@@ -3,7 +3,8 @@ import {addDays, format, isAfter, isBefore, subDays} from 'date-fns';
 import {createContext, useCallback, useContext, useMemo} from '#preact';
 
 import {DatesList} from './dates-list';
-import {BentoDatePickerProps} from './types';
+
+import {BentoDatePickerProps} from '../types';
 
 type DayContextValue = Pick<
   BentoDatePickerProps,

@@ -13,7 +13,7 @@ import {
   selectDate,
 } from './test-helpers';
 
-import {BentoDatePicker} from '../component.tsx';
+import {BentoDatePicker} from '../component/component.tsx';
 import * as helpers from '../date-helpers';
 
 const DEFAULT_PROPS = {

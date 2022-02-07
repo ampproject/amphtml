@@ -2,8 +2,8 @@ import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 
 import {useCallback, useEffect, useRef, useState} from '#preact';
 
-import {noop} from './constants';
-import {DatePickerMode, DatePickerState} from './types';
+import {noop} from '../constants';
+import {DatePickerMode, DatePickerState} from '../types';
 
 export function useDatePickerState(mode: DatePickerMode) {
   const [isOpen, setIsOpen] = useState(mode === 'static');

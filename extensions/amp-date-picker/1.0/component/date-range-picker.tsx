@@ -29,15 +29,20 @@ import {
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
-import {BaseDatePicker} from './base-date-picker';
-import {DateFieldNameByType, FORM_INPUT_SELECTOR, TAG} from './constants';
-import {getFormattedDate} from './date-helpers';
-import {parseDate} from './parsers';
-import {DateFieldType, DateRangePickerAPI, DateRangePickerProps} from './types';
 import {DatePickerContext} from './use-date-picker';
 import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
 import {useDay} from './use-day';
+
+import {BaseDatePicker} from '../base-date-picker';
+import {DateFieldNameByType, FORM_INPUT_SELECTOR, TAG} from '../constants';
+import {getFormattedDate} from '../date-helpers';
+import {parseDate} from '../parsers';
+import {
+  DateFieldType,
+  DateRangePickerAPI,
+  DateRangePickerProps,
+} from '../types';
 
 function DateRangePickerWithRef(
   {
