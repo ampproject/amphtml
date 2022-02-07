@@ -691,6 +691,8 @@ async function buildBentoExtensionJs(dir, name, options) {
       ? 'bento-element-minified'
       : 'bento-element-unminified',
     filename: await getBentoBuildFilename(dir, name, 'standalone', options),
+    // Include extension directory since our entrypoint may be elsewhere.
+    extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
   });
 }
 
