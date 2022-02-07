@@ -1,4 +1,4 @@
-import { ReadyState_Enum } from "#core/constants/ready-state";
+import {ReadyState_Enum} from '#core/constants/ready-state';
 
 export {};
 
@@ -28,6 +28,13 @@ declare global {
 
     unmount: () => Promise<void>;
     ensureLoaded: () => Promise<void>;
+  }
+
+  /**
+   * For testing, we need access to additional "internal" methods:
+   */
+  interface AmpElementInternal extends AmpElement {
+    mountInternal(): Promise<void>;
   }
 
   interface AmpForm {}

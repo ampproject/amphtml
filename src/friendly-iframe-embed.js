@@ -54,12 +54,12 @@ import {cssText as ampSharedCss} from '../build/ampshared.css';
  *
  *
  * @typedef {{
- *   host: (?AmpElement|undefined),
+ *   host?: (?AmpElement|undefined),
  *   url: string,
  *   html: ?string,
- *   extensions: (?Array<{extensionId: string, extensionVersion: string}>|undefined),
- *   fonts: (?Array<string>|undefined),
- *   skipHtmlMerge: (boolean|undefined),
+ *   extensions?: (?Array<{extensionId: string, extensionVersion: string}>|undefined),
+ *   fonts?: (?Array<string>|undefined),
+ *   skipHtmlMerge?: (boolean|undefined),
  * }}
  */
 export let FriendlyIframeSpec;
@@ -130,7 +130,7 @@ export function preloadFriendlyIframeEmbedExtensions(win, extensions) {
  * @param {!HTMLIFrameElement} iframe
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
- * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+ * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} [opt_preinstallCallback]
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(

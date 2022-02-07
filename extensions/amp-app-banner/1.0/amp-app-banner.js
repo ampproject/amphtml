@@ -11,7 +11,10 @@ import {CSS} from '../../../build/amp-app-banner-1.0.css';
 /** @const {string} */
 const TAG = 'amp-app-banner';
 
-class AmpAppBanner extends setSuperClass(BaseElement, AmpPreactBaseElement) {
+export class AmpAppBanner extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

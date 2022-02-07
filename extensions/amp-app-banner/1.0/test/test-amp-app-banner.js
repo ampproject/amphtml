@@ -1,3 +1,4 @@
+import {querySelectorInSlot} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
@@ -6,7 +7,13 @@ import {logger} from '#preact/logger';
 import {platformUtils} from '#preact/utils/platform';
 
 import {waitFor} from '#testing/helpers/service';
+
 import '../amp-app-banner';
+import {testFriendlyIframeEmbed} from './bento-test-friendly-iframe-embed';
+
+import {AmpAppBanner} from '../amp-app-banner';
+
+const CONTENTS = 'div > div > div'; // TODO: use a better selector
 
 describes.realWin(
   'amp-app-banner-v1.0',
@@ -89,6 +96,48 @@ describes.realWin(
         expect(element.shadowRoot.querySelector('div')).to.be.not.null;
         expect(element.shadowRoot.querySelector('button[aria-label="Dismiss"]'))
           .to.be.not.null;
+      });
+    });
+
+    describe('document-scope inside a Friendly IFrame Embed (FIE)', () => {
+      let element;
+      beforeEach(async () => {
+        env.sandbox.stub(window, 'open');
+
+        element = await testFriendlyIframeEmbed({
+          document,
+          tag: 'amp-app-banner',
+          component: AmpAppBanner,
+          url: 'https://example.com',
+          html: `
+            <head>
+              <meta name="apple-itunes-app" content="app-id=22222222,app-argument=https://friendly-iframe-embed.test/deep-link" />
+            </head>
+            <body>
+              <amp-app-banner>
+                <button open-button>Get the app</button>
+              </amp-app-banner>
+            </body>
+          `,
+        });
+      });
+
+      it('testing document-scope', async () => {
+        expect(element.shadowRoot.querySelector(CONTENTS)).to.be.not.null;
+
+        // See what happens when we click the "open in app" button:
+        const openButton = querySelectorInSlot(
+          element.shadowRoot.querySelector('slot'),
+          '[open-button]'
+        );
+        openButton.click();
+
+        // Ensure the <meta> tag was parsed correctly (and from the correct document)
+        expect(window.open).calledWith(
+          'https://friendly-iframe-embed.test/deep-link',
+          '_top',
+          undefined
+        );
       });
     });
   }
