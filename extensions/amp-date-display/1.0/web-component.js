@@ -4,7 +4,7 @@ import {getTemplate} from '#utils/template-utils';
 
 import {BaseElement, TAG} from './base-element';
 
-import {mustache} from '../../amp-mustache/1.0/bento-mustache';
+import mustache from '#bento/components/bento-mustache/1.0/bento-mustache';
 
 export class BentoDateDisplay extends BaseElement {
   /** @override */
