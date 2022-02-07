@@ -3,13 +3,13 @@ amp-story-shopping-attachment {
   width: 100% !important;
   font-family: 'Poppins', sans-serif !important;
   font-size: calc(var(--story-page-vmin) * 3) !important; /* override with ems for pixel perfect layout */
-  --shopping-attachment-horizontal-padding: 1.5em;
-  --shopping-attachment-vertical-padding: 1.2em;
-  --three-percent-overlay: rgba(0,0,0,.03);
+  --i-amphtml-shopping-attachment-horizontal-padding: 1.5em !important;
+  --i-amphtml-shopping-attachment-vertical-padding: 1.2em !important;
+  --i-amphtml-shopping-three-percent-overlay: rgba(0, 0, 0,  .03) !important;
 }
 
 amp-story-shopping-attachment[theme="dark"] {
-  --three-percent-overlay: rgba(255, 255, 255, .03);
+  --i-amphtml-shopping-three-percent-overlay: rgba(255, 255, 255, .03) !important;
 }
 
 amp-story-shopping-attachment a {
@@ -27,13 +27,13 @@ amp-story-shopping-attachment a {
 /* PLP (Product Listing Page). */
 
 .i-amphtml-amp-story-shopping-plp {
-  padding: 0 var(--shopping-attachment-horizontal-padding) !important;
+  padding: 0 var(--i-amphtml-shopping-attachment-horizontal-padding) !important;
 }
 
 .i-amphtml-amp-story-shopping-plp-header {
   font-weight: 600 !important;
   font-size: 1.5em !important;
-  margin: var(--shopping-attachment-vertical-padding) 0 var(--shopping-attachment-vertical-padding) !important;
+  margin: var(--i-amphtml-shopping-attachment-vertical-padding) 0 var(--i-amphtml-shopping-attachment-vertical-padding) !important;
 }
 
 .i-amphtml-amp-story-shopping-plp-cards {
@@ -43,7 +43,7 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-plp-card {
-  width: calc(50% - var(--shopping-attachment-horizontal-padding) / 2) !important;
+  width: calc(50% - var(--i-amphtml-shopping-attachment-horizontal-padding) / 2) !important;
   margin-bottom: 3em !important;
   cursor: pointer !important;
 }
@@ -56,7 +56,7 @@ amp-story-shopping-attachment a {
   background-position: center !important;
   background-repeat: none !important;
   background-size: cover !important;
-  background-color: var(--three-percent-overlay) !important;
+  background-color: var(--i-amphtml-shopping-three-percent-overlay) !important;
 }
 
 .i-amphtml-amp-story-shopping-plp-card-brand {
@@ -91,11 +91,11 @@ amp-story-shopping-attachment a {
   display: block !important;
   width: 100% !important;
   height: .75em !important;
-  background-color: var(--three-percent-overlay) !important;
+  background-color: var(--i-amphtml-shopping-three-percent-overlay) !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-header {
-  margin: 1.5em var(--shopping-attachment-horizontal-padding) 2em !important;
+  margin: 1.5em var(--i-amphtml-shopping-attachment-horizontal-padding) 2em !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-header-brand {
@@ -124,12 +124,12 @@ amp-story-shopping-attachment a {
 
 .i-amphtml-amp-story-shopping-pdp-cta {
   font-size: 1.25em !important;
-  --shopping-cta-height: 2.55em;
+  --i-amphtml-shopping-cta-height: 2.55em;
   display: inline-flex !important;
   padding: 0 .88em !important;
   align-items: center !important;
-  height: var(--shopping-cta-height) !important;
-  border-radius: calc(var(--shopping-cta-height) / 2) !important;
+  height: var(--i-amphtml-shopping-cta-height) !important;
+  border-radius: calc(var(--i-amphtml-shopping-cta-height) / 2) !important;
   background: var(--i-amphtml-draggable-drawer-text-color) !important;
   font-weight: 500 !important;
   color: var(--i-amphtml-draggable-drawer-background-color) !important;
@@ -185,7 +185,7 @@ amp-story-shopping-attachment a {
   display: flex !important;
   overflow-x: auto !important;
   scroll-snap-type: x mandatory !important;
-  margin-bottom: var(--shopping-attachment-vertical-padding) !important;
+  margin-bottom: var(--i-amphtml-shopping-attachment-vertical-padding) !important;
   --carousel-height: calc(var(--story-page-vh) * 80 - var(--story-page-vw) * 60) !important;
   height: var(--carousel-height) !important;
   max-height: 100vw !important;
@@ -196,10 +196,10 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card {
-  margin-inline-start: calc(var(--shopping-attachment-horizontal-padding) / 2) !important;
+  margin-inline-start: calc(var(--i-amphtml-shopping-attachment-horizontal-padding) / 2) !important;
   scroll-snap-align: center !important;
   flex-shrink: 0 !important;
-  background-color: var(--three-percent-overlay) !important;
+  background-color: var(--i-amphtml-shopping-three-percent-overlay) !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
@@ -209,18 +209,18 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
-  margin-inline-start: var(--shopping-attachment-horizontal-padding) !important;
+  margin-inline-start: var(--i-amphtml-shopping-attachment-horizontal-padding) !important;
   border-radius: 1.1em 0 0 1.1em !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:last-child {
-  margin-inline-end: var(--shopping-attachment-horizontal-padding) !important;
+  margin-inline-end: var(--i-amphtml-shopping-attachment-horizontal-padding) !important;
   border-radius: 0 1.1em 1.1em 0 !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:only-child {
-  width: calc(100% - var(--shopping-attachment-horizontal-padding) * 2) !important;
-  max-width: calc(100% - var(--shopping-attachment-horizontal-padding) * 2)!important;
+  width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-padding) * 2) !important;
+  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-padding) * 2)!important;
   border-radius: 1.1em !important;
   cursor: auto !important;
 }
