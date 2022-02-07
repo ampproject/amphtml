@@ -1,7 +1,7 @@
 import {WindowInterface} from '#core/window/interface';
 
 import {logger} from '#preact/logger';
-import {DocumentInfo} from '#preact/utils/documentInfo';
+import {DocumentInfo} from '#preact/utils/docInfo';
 import {DocumentScopeBase} from '#preact/utils/documentScopeBase';
 import {platformUtils} from '#preact/utils/platform';
 import {UrlUtils} from '#preact/utils/url';
