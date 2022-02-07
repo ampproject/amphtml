@@ -7,9 +7,9 @@ import {useLocalStorage} from '#preact/hooks/useLocalStorage';
 import {logger} from '#preact/logger';
 import {platformUtils} from '#preact/utils/platform';
 
-import {getAndroidAppInfo} from './android';
 import {useStyles} from './component.jss';
-import {getIOSAppInfo} from './ios';
+import {getAndroidAppInfo} from './utils/android';
+import {getIOSAppInfo} from './utils/ios';
 
 /**
  * The raw App Banner component; no platform-specific logic

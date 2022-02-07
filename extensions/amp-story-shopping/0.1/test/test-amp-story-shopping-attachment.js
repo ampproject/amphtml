@@ -55,7 +55,7 @@ describes.realWin(
         'amp-story-shopping-tag',
         {
           'layout': 'container',
-          'data-tag-id': 'lamp',
+          'data-product-id': 'lamp',
         }
       );
       pageEl.appendChild(tagEl);
@@ -69,12 +69,12 @@ describes.realWin(
     async function dispatchTestShoppingData() {
       const shoppingData = {
         'lamp': {
-          'product-tag-id': 'lamp',
-          'product-title': 'Brass Lamp',
-          'product-brand': 'Lamp Co',
-          'product-price': 799.0,
-          'product-price-currency': 'USD',
-          'product-images': ['https://source.unsplash.com/Ry9WBo3qmoc/500x500'],
+          'productId': 'lamp',
+          'productTitle': 'Brass Lamp',
+          'productBrand': 'Lamp Co',
+          'productPrice': 799.0,
+          'productPriceCurrency': 'USD',
+          'productImages': ['https://source.unsplash.com/Ry9WBo3qmoc/500x500'],
         },
       };
       storeService.dispatch(Action.CHANGE_PAGE, {
@@ -87,6 +87,14 @@ describes.realWin(
 
     it('should build shopping attachment component', () => {
       expect(() => shoppingImpl.layoutCallback()).to.not.throw();
+    });
+
+    it('should build CTA with i18n shopping label text', async () => {
+      await dispatchTestShoppingData();
+      const attachmentChildEl = shoppingEl.querySelector(
+        'amp-story-page-attachment'
+      );
+      expect(attachmentChildEl.getAttribute('cta-text')).to.equal('Shop Now');
     });
 
     it('should open attachment', async () => {
