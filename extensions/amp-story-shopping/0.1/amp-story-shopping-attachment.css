@@ -85,7 +85,8 @@ amp-story-shopping-attachment a {
 
 /* PDP (Product Description Page). */
 
-.i-amphtml-amp-story-shopping-pdp:after {
+/* Only display section divider when pdp is not the only child. */
+.i-amphtml-amp-story-shopping-pdp:not(:only-child):after {
   content: '' !important;
   display: block !important;
   width: 100% !important;
