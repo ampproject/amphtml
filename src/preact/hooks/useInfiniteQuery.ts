@@ -10,24 +10,30 @@ const initialState = {
   hasMore: true,
 };
 
-/**
- * @typedef InfiniteQueryConfig
- * @property {function({ pageParam: (TPageParam|undefined) }): Promise<TPage>} fetchPage - Fetches a page of data.  The pageParam is not provided for the first page.
- * @property {function(page: TPage): TPageParam} getNextPageParam - Get the pageParam for fetching the next page.  If returns falsey, then "hasMore' will be false.
- * @template TPage
- * @template TPageParam
- */
+export type InfiniteQueryConfig<TPage, TPageParam> = {
+  // Fetches a page of data.  The pageParam is not provided for the first page.
+  fetchPage(pageInfo: {pageParam?: TPageParam}): Promise<TPage>;
+  // Get the pageParam for fetching the next page.  If returns falsy, then "hasMore' will be false.
+  getNextPageParam(page: TPage): TPageParam;
+};
 
-/**
- * @typedef InfiniteQueryResponse
- * @property {TPage[]} pages - An array of all pages of data
- * @property {function(): Promise<void>} loadMore - A method to load more data.  If already loading, ignored.
- * @property {boolean} hasMore - True if there is more data that can be loaded
- * @property {function(): Promise<void>>} refresh - Resets all data and loads the first page.  Old data remains available while loading.
- * @property {boolean} loading - True if data is loading
- * @property {Error|null} error - Holds any request errors.  Clears if 'loadMore' or 'refresh' is called.
- * @template TPage
- */
+export type InfiniteQueryState<TPage> = {
+  // An array of all pages of data
+  pages: TPage[];
+  // true if there is more data that can be loaded
+  hasMore: boolean;
+  // true if data is loading
+  loading: boolean;
+  // Holds any request errors.  Clears if 'loadMore' or 'reset' is called.
+  error: Error | null;
+};
+
+export type InfiniteQueryResponse<TPage> = InfiniteQueryState<TPage> & {
+  // A method to load more data.  If already loading, ignored.
+  loadMore(): Promise<void>;
+  // Resets all data and loads the first page.  Old data remains available while loading.
+  reset(): Promise<void>;
+};
 
 /**
  * Loads multiple pages of data.
@@ -43,14 +49,13 @@ const initialState = {
  *     return pageData.nextCursor;
  *   }
  * });
- *
- * @param {InfiniteQueryConfig} config
- * @return {InfiniteQueryResponse}
- * @template TPage
- * @template TPageParam
  */
-export function useInfiniteQuery({fetchPage, getNextPageParam}) {
-  const [state, setState] = useStateSafe(initialState);
+export function useInfiniteQuery<TPage, TPageParam>({
+  fetchPage,
+  getNextPageParam,
+}: InfiniteQueryConfig<TPage, TPageParam>): InfiniteQueryResponse<TPage> {
+  const [state, setState] =
+    useStateSafe<InfiniteQueryState<TPage>>(initialState);
 
   // Use a ref to keep these current:
   const ref = useValueRef({fetchPage, getNextPageParam, state});
@@ -71,7 +76,7 @@ export function useInfiniteQuery({fetchPage, getNextPageParam}) {
 
       setState((s) => ({...s, loading: true}));
 
-      const pages = resetting ? [] : state.pages;
+      const pages: TPage[] = resetting ? [] : state.pages;
       const lastPage = pages.length ? pages[pages.length - 1] : undefined;
 
       try {

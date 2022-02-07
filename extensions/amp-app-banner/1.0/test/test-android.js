@@ -1,6 +1,6 @@
 import {WindowInterface} from '#core/window/interface';
 
-import {DocumentInfo} from '#preact/utils/docInfo';
+import {DocumentInfo} from '#preact/utils/documentInfo';
 import {platformUtils} from '#preact/utils/platform';
 import {xhrUtils} from '#preact/utils/xhr';
 

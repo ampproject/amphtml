@@ -2,6 +2,7 @@ import * as Preact from '#preact';
 import {
   Fragment,
   cloneElement,
+  isValidElement,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -52,31 +53,18 @@ function getNextUrl(lastPage, loadMoreBookmark) {
 }
 
 /**
- * Gathers all items from all pages of data
- * @param {Array<any>>} pages
- * @param {string} itemsKey
- * @return {Array<any>}
- */
-function collectItemsFromPages(pages, itemsKey) {
-  return pages.reduce((allItems, page) => {
-    const pageItems = getItemsFromResults(page, itemsKey);
-    return pageItems ? allItems.concat(pageItems) : allItems;
-  }, []);
-}
-
-/**
  *
- * @param {object} results
+ * @param {object} pageData
  * @param {string} itemsKey
  * @return {*}
  */
-function getItemsFromResults(results, itemsKey) {
-  if (!results) {
-    return null;
+function getItemsFromPage(pageData, itemsKey) {
+  if (!pageData) {
+    return [];
   }
-  let items = getValue(results, itemsKey);
+  let items = getValue(pageData, itemsKey);
   if (!items) {
-    return null;
+    return [];
   }
   if (!Array.isArray(items)) {
     items = [items];
@@ -154,7 +142,7 @@ export function BentoListWithRef(
 
   // Rendering logic:
   const list = useMemo(() => {
-    let items = collectItemsFromPages(pages, itemsKey);
+    let items = pages.flatMap((page) => getItemsFromPage(page, itemsKey));
 
     if (maxItems > 0 && items.length > maxItems) {
       items = items.slice(0, maxItems);
@@ -215,7 +203,7 @@ export {BentoList};
  * @return {!PreactDef.Renderable}
  */
 function augment(component, props) {
-  if (!Preact.isValidElement(component)) {
+  if (!isValidElement(component)) {
     return component;
   }
   return cloneElement(component, {...props, ...component.props});

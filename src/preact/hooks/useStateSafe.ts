@@ -1,14 +1,15 @@
+import type {StateUpdater} from 'preact/compat';
+
 import {useCallback, useEffect, useRef, useState} from '#preact';
 
 /**
  * Same as useState, but ignores setState once the component is unmounted.
  *
  * This avoids React's "Can't perform a React state update on an unmounted component" console error
- * @param {S|function():S} initial
- * @return {{0: S, 1: function((S|function(S):S)):undefined}}
- * @template S
  */
-export function useStateSafe(initial) {
+export function useStateSafe<S>(
+  initialState: S | (() => S)
+): readonly [S, StateUpdater<S>] {
   const isMounted = useRef(false);
   useEffect(() => {
     isMounted.current = true;
@@ -18,8 +19,8 @@ export function useStateSafe(initial) {
     };
   }, []);
 
-  const [state, setState] = useState(initial);
-  const setStateSafe = useCallback(
+  const [state, setState] = useState(initialState);
+  const setStateSafe = useCallback<StateUpdater<S>>(
     (newState) => {
       if (!isMounted.current) {
         return;
@@ -29,5 +30,5 @@ export function useStateSafe(initial) {
     [setState]
   );
 
-  return [state, setStateSafe];
+  return [state, setStateSafe] as const;
 }
