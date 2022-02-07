@@ -135,6 +135,7 @@ export let ShoppingDataDef;
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
  *    pageSize: {width: number, height: number},
+ *    subscriptionsDialogState: boolean,
  * }}
  */
 export let State;
@@ -189,6 +190,9 @@ const StateProperty = mangleObjectValues({
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
   PAGE_IDS: 'pageIds',
   PAGE_SIZE: 'pageSize',
+
+  // AMP Story paywall states.
+  SUBSCRIPTIONS_DIALOG_STATE: 'subscriptionsDialogState',
 });
 
 export {StateProperty};
@@ -196,12 +200,18 @@ export {StateProperty};
 /** @const @enum {string|number} */
 const Action = mangleObjectValues({
   ADD_INTERACTIVE_REACT: 'addInteractiveReact',
+  ADD_NEW_PAGE_ID: 'addNewPageId',
+  ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
+  ADD_SHOPPING_DATA: 'addShoppingData',
   ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
-  SET_CONSENT_ID: 'setConsentId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
+  SET_CONSENT_ID: 'setConsentId',
+  SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
   SET_NAVIGATION_PATH: 'setNavigationPath',
   SET_PAGE_IDS: 'setPageIds',
+  SET_PAGE_SIZE: 'updatePageSize',
+  SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
@@ -214,16 +224,11 @@ const Action = mangleObjectValues({
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
-  ADD_SHOPPING_DATA: 'addShoppingData',
-  TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
+  TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
+  TOGGLE_SUBSCRIPTIONS_DIALOG: 'toggleSubscriptionsDialog',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
-  SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
-  ADD_NEW_PAGE_ID: 'addNewPageId',
-  SET_PAGE_SIZE: 'updatePageSize',
-  ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
-  SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
 });
 
 export {Action};
@@ -443,6 +448,12 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.VIEWER_CUSTOM_CONTROLS]: data,
       });
+    case Action.TOGGLE_SUBSCRIPTIONS_DIALOG:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SUBSCRIPTIONS_DIALOG_STATE]: !!data,
+        [StateProperty.PAUSED_STATE]: !!data,
+      });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -580,6 +591,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
       [StateProperty.PREVIEW_STATE]: false,
+      [StateProperty.SUBSCRIPTIONS_DIALOG_STATE]: false,
     });
   }
 
