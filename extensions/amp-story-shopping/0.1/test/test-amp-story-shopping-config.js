@@ -20,19 +20,8 @@ describes.realWin(
   (env) => {
     let pageElement;
 
-    const defaultInlineConfig = {
-      items: [
-        {
-          'productId': 'city-pop',
-          'productTitle': 'Plastic Love',
-          'productPrice': 19,
-          'productPriceCurrency': 'JPY',
-        },
-      ],
-    };
-
     const keyedDefaultInlineConfig = {
-      'city-pop': defaultInlineConfig.items[0],
+      'art': remoteConfig.items[0],
     };
 
     beforeEach(async () => {
@@ -42,12 +31,12 @@ describes.realWin(
 
     async function createAmpStoryShoppingConfig(
       src = null,
-      config = defaultInlineConfig
+      config = remoteConfig
     ) {
       pageElement.appendChild(
-        <amp-story-shopping-config layout="nodisplay" src={src}>
+        <amp-story-shopping-attachment layout="nodisplay" src={src}>
           <script type="application/json">{JSON.stringify(config)}</script>
-        </amp-story-shopping-config>
+        </amp-story-shopping-attachment>
       );
       return getShoppingConfig(pageElement);
     }
@@ -55,7 +44,7 @@ describes.realWin(
     it('throws on no config', async () => {
       expectAsyncConsoleError(async () => {
         expect(() => {
-          pageElement.appendChild(<amp-story-shopping-config />);
+          pageElement.appendChild(<amp-story-shopping-attachment />);
           return getShoppingConfig(pageElement);
         }).to.throw(/<script> tag with type=\"application\/json\"​​​/);
       });

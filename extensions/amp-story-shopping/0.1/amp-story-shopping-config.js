@@ -24,7 +24,7 @@ export let KeyedShoppingConfigDef;
  * @return {!Promise<!KeyedShoppingConfigDef>}
  */
 export function getShoppingConfig(pageElement) {
-  const element = pageElement.querySelector('amp-story-shopping-config');
+  const element = pageElement.querySelector('amp-story-shopping-attachment');
   return getElementConfig(element).then((config) => {
     //TODO(#36412): Add call to validate config here.
     return keyByProductTagId(config);
