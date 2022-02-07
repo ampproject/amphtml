@@ -90,8 +90,10 @@ describes.realWin(
     describe('#layoutCallback', () => {
       it('sets required params in iframe src', async () => {
         const canonicalUrl = 'foo.html';
+        const sourceUrl = 'bar.html';
         env.sandbox.stub(Services, 'documentInfoForDoc').returns({
           canonicalUrl,
+          sourceUrl,
         });
 
         const element = await createAndRenderBasicGoogleReadAloudPlayer();
@@ -139,8 +141,10 @@ describes.realWin(
 
       it('sets metadata in iframe name — with jsonLd', async () => {
         const canonicalUrl = 'foo.html';
+        const sourceUrl = 'bar.html';
         env.sandbox.stub(Services, 'documentInfoForDoc').returns({
           canonicalUrl,
+          sourceUrl,
         });
 
         const jsonLd = {jsonLd: 'blah'};
@@ -156,6 +160,7 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(JSON.parse(iframe.name)).to.deep.equal({
           canonicalUrl,
+          sourceUrl,
           jsonLd,
         });
       });

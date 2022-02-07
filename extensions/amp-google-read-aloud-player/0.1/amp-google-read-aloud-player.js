@@ -107,10 +107,11 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
    * @private
    */
   getMetadata_() {
-    const {canonicalUrl} = Services.documentInfoForDoc(this.element);
+    const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(this.element);
     const rootNode = this.getAmpDoc().getRootNode();
 
     return {
+      'sourceUrl': sourceUrl,
       'canonicalUrl': canonicalUrl,
       'jsonLd': this.getJsonLd_(rootNode),
     };
