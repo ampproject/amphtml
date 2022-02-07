@@ -6,7 +6,7 @@ import {useCallback, useEffect, useRef, useState} from '#preact';
  * Uses a shared IntersectionObserver per window instance to observe the given `ref`.
  *
  * @param {function(IntersectionObserverEntry):void} callback
- * @param {IOOptions} [ioOptions]
+ * @param {import('#core/dom/layout/types').IOOptions} [ioOptions]
  * @return {function(Element):void}
  */
 export function useIntersectionObserver(callback, ioOptions) {
@@ -36,7 +36,7 @@ export function useIntersectionObserver(callback, ioOptions) {
  * Returns whether an element is within the viewport.
  *
  * @param {{current: ?Element}} ref
- * @param {IOOptions} [ioOptions]
+ * @param {import('#core/dom/layout/types').IOOptions} [ioOptions]
  * @return {boolean}
  */
 export function useIsInViewport(ref, ioOptions) {
@@ -45,7 +45,7 @@ export function useIsInViewport(ref, ioOptions) {
   useEffect(() => {
     const node = ref.current;
     if (!node) {
-      return null;
+      return;
     }
 
     const unobserve = observeIntersections(

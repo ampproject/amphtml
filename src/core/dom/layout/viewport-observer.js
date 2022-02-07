@@ -3,18 +3,11 @@ import {removeItem} from '#core/types/array';
 import {getWin} from '#core/window';
 
 /**
- * @typedef IOOptions
- * @property {number|!Array<number>} [threshold]
- * @property {boolean} [needsRootBounds]
- * @property {string} [rootMargin]
- */
-
-/**
  * Returns an IntersectionObserver tracking the Viewport.
  *
  * @param {function(Array<IntersectionObserverEntry>):void} ioCallback
  * @param {Window} win
- * @param {IOOptions} [opts]
+ * @param {import('./types').IOOptions} [opts]
  * @return {IntersectionObserver}
  */
 export function createViewportObserver(ioCallback, win, opts = {}) {
@@ -46,7 +39,7 @@ const viewportCallbacks = new WeakMap();
  *
  * @param {Element} element
  * @param {function(IntersectionObserverEntry):void} callback
- * @param {IOOptions} [opts]
+ * @param {import('./types').IOOptions} [opts]
  * @return {import('#core/types/function/types').UnlistenCallback} clean up closure to unobserve the element
  */
 export function observeIntersections(element, callback, opts) {
