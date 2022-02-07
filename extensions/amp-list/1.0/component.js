@@ -2,6 +2,7 @@ import * as Preact from '#preact';
 import {
   Fragment,
   cloneElement,
+  isValidElement,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -215,7 +216,7 @@ export {BentoList};
  * @return {!PreactDef.Renderable}
  */
 function augment(component, props) {
-  if (!Preact.isValidElement(component)) {
+  if (!isValidElement(component)) {
     return component;
   }
   return cloneElement(component, {...props, ...component.props});
