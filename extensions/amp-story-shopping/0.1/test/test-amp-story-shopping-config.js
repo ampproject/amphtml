@@ -80,6 +80,11 @@ describes.realWin(
             'productImages': [
               'https://source.unsplash.com/BdVQU-NDtA8/500x500',
             ],
+            'aggregateRating': {
+              'ratingValue': '4.4',
+              'reviewCount': '89',
+              'reviewUrl': 'https://www.google.com',
+            },
           },
         };
       env.sandbox.stub(Services, 'xhrFor').returns({
