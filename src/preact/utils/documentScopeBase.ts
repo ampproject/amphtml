@@ -17,23 +17,22 @@
  * SomeUtility.forDoc(ownerDocument).findMeta('name');
  */
 export class DocumentScopeBase {
-  /**
-   * @param {Document} ownerDocument
-   * @protected
-   */
-  constructor(ownerDocument) {
-    /** @protected */
-    this.ownerDocument = ownerDocument;
-  }
+  // eslint-disable-next-line no-restricted-syntax
+  constructor(protected ownerDocument: Document) {}
 
   /**
    * Utility for constructing this class.
    * This is semantically preferred over using 'new', because 'new' implies a performance overhead.
-   * @param {Document} ownerDocument
-   * @return {new this}
    */
-  static forDoc(ownerDocument) {
+  static forDoc<T extends Instantiable>(
+    this: T,
+    ownerDocument: Document
+  ): InstanceType<T> {
     const SubClass = this;
-    return new SubClass(ownerDocument);
+    return new SubClass(ownerDocument) as InstanceType<T>;
   }
 }
+
+type Instantiable = {
+  new (ownerDocument: Document): unknown;
+};

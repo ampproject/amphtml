@@ -2,14 +2,14 @@ import {INVALID_PROTOCOLS} from '#core/types/string/url';
 
 import {DocumentScopeBase} from '#preact/utils/documentScopeBase';
 
+type UrlOrString = URL | string;
+
 export class UrlUtils extends DocumentScopeBase {
   static forDoc = DocumentScopeBase.forDoc;
 
-  /**
-   * @return {HTMLAnchorElement}
-   * @private
-   */
-  getAnchor_() {
+  private anchor_: HTMLAnchorElement | null = null;
+
+  private getAnchor_() {
     if (!this.anchor_) {
       this.anchor_ = this.ownerDocument.createElement('a');
     }
@@ -17,10 +17,9 @@ export class UrlUtils extends DocumentScopeBase {
   }
 
   /**
-   * @param {string} url
-   * @return {!URL}
+   * Parses the URL, relative to the current document.
    */
-  parse(url) {
+  parse(url: UrlOrString) {
     const anchor = this.getAnchor_();
     anchor.href = '';
     return new URL(url, anchor.href);
@@ -29,22 +28,18 @@ export class UrlUtils extends DocumentScopeBase {
   /**
    * Returns whether the URL has valid protocol.
    * Deep link protocol is valid, but not javascript etc.
-   * @param {string|!URL} url
-   * @return {boolean}
    */
-  isProtocolValid(url) {
+  isProtocolValid(url: UrlOrString) {
     const parsed = this.parse(url);
     return !INVALID_PROTOCOLS.includes(parsed.protocol);
   }
 
   /**
    * Asserts that a given url is HTTPS or protocol relative.
-   *
-   * @param {string|URL} url
-   * @param {string=} sourceName Used for error messages.
-   * @return {void}
+   * @param url
+   * @param sourceName Used for error messages.
    */
-  assertHttpsUrl(url, sourceName = 'url') {
+  assertHttpsUrl(url: UrlOrString, sourceName = 'url') {
     if (!this.isSecureUrl(url)) {
       throw new Error(
         `${sourceName} must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${url}`
@@ -54,10 +49,8 @@ export class UrlUtils extends DocumentScopeBase {
 
   /**
    * Returns `true` if the URL is secure: either HTTPS or localhost (for testing).
-   * @param {string|!URL} url
-   * @return {boolean}
    */
-  isSecureUrl(url) {
+  isSecureUrl(url: UrlOrString) {
     const parsed = this.parse(url);
 
     return (

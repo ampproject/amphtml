@@ -6,10 +6,11 @@ export class DocumentInfo extends DocumentScopeBase {
   static forDoc = DocumentScopeBase.forDoc;
 
   /**
-   * @param {string} metaName
-   * @return {string|null}
+   * Returns the contents of a meta tag with a matching name
+   *
+   * @param metaName
    */
-  getMetaByName(metaName) {
+  getMetaByName(metaName: string): string | null {
     const metas = this.ownerDocument.head.querySelectorAll('meta[name]');
     return (
       Array.from(metas)
@@ -23,24 +24,23 @@ export class DocumentInfo extends DocumentScopeBase {
   }
 
   /**
-   * @return {string}
+   * Gets the URL of the document
    */
-  get sourceUrl() {
+  get sourceUrl(): string {
     return this.ownerDocument.location.href;
   }
 
   /**
-   * @return {string}
+   * Gets the canonical URL of the current document
    */
   get canonicalUrl() {
-    const canonicalUrl = this.ownerDocument.AMP?.canonicalUrl;
+    const canonicalUrl = (this.ownerDocument as any).AMP?.canonicalUrl;
     if (canonicalUrl) {
       return canonicalUrl;
     }
 
-    const canonicalTag = this.ownerDocument.querySelector(
-      'link[rel=canonical]'
-    );
+    const canonicalTag: HTMLLinkElement | null =
+      this.ownerDocument.querySelector('link[rel=canonical]');
     if (canonicalTag) {
       return UrlUtils.forDoc(this.ownerDocument).parse(canonicalTag.href).href;
     }
