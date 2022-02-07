@@ -6,10 +6,8 @@ import {toggleExperiment} from '#experiments';
 import {logger} from '#preact/logger';
 import {platformUtils} from '#preact/utils/platform';
 
+import {friendlyIframeEmbedTester} from '#testing/friendly-iframe-embed-tester';
 import {waitFor} from '#testing/helpers/service';
-
-import '../amp-app-banner';
-import {testFriendlyIframeEmbed} from './bento-test-friendly-iframe-embed';
 
 import {AmpAppBanner} from '../amp-app-banner';
 
@@ -104,10 +102,10 @@ describes.realWin(
       beforeEach(async () => {
         env.sandbox.stub(window, 'open');
 
-        element = await testFriendlyIframeEmbed({
+        element = await friendlyIframeEmbedTester({
           document,
           tag: 'amp-app-banner',
-          component: AmpAppBanner,
+          element: AmpAppBanner,
           url: 'https://example.com',
           html: `
             <head>

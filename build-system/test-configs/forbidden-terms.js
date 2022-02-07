@@ -176,6 +176,7 @@ const forbiddenTermsGlobal = {
     allowlist: [
       'build-system/externs/amp.extern.js',
       'src/service/scheduler.js',
+      'testing/friendly-iframe-embed-tester.ts',
     ],
   },
   'getSchedulerForDoc': {
