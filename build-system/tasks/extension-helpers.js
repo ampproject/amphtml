@@ -684,7 +684,7 @@ async function maybeBuildBentoExtensionJs(dir, name, options) {
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(dir, name, options) {
-  return buildExtensionJs(dir, name, {
+  await buildExtensionJs(dir, name, {
     ...options,
     wrapper: 'bento',
     babelCaller: options.minify
