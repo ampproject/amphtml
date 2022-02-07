@@ -463,7 +463,7 @@ async function buildExtension(name, version, hasCss, options, extraGlobs) {
   }
 
   await Promise.all([
-    maybeBuildBentoExtensionJs(extDir, name, options),
+    options.bento && buildBentoExtensionJs(extDir, getBentoName(name), options),
     buildExtensionJs(extDir, name, {...options, bento: false}),
   ]);
 }
@@ -663,18 +663,6 @@ function buildBinaries(extDir, binaries, options) {
     });
   });
   return Promise.all(promises);
-}
-
-/**
- * @param {string} dir
- * @param {string} name
- * @param {!Object} options
- * @return {!Promise}
- */
-async function maybeBuildBentoExtensionJs(dir, name, options) {
-  if (options.bento) {
-    await buildBentoExtensionJs(dir, getBentoName(name), options);
-  }
 }
 
 /**
