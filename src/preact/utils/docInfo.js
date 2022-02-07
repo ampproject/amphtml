@@ -36,6 +36,7 @@ export const docInfo = {
       return canonicalUrl;
     }
 
+    /** @type {HTMLLinkElement | null} */
     const canonicalTag = rootNode.querySelector('link[rel=canonical]');
     if (canonicalTag) {
       return urlUtils.parse(canonicalTag.href).href;

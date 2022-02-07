@@ -1,18 +1,16 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const {
+  buildBentoExtensionJs,
   buildBinaries,
   buildExtensionCss,
-  buildExtensionJs,
   buildNpmBinaries,
   buildNpmCss,
   declareExtension,
-  getBentoBuildFilename,
   getExtensionsFromArg,
 } = require('./extension-helpers');
 const {bentoBundles, verifyBentoBundles} = require('../compile/bundles.config');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
-const {getBentoName} = require('./bento-helpers');
 const {log} = require('../common/logging');
 const {mkdirSync} = require('fs');
 const {red} = require('kleur/colors');
@@ -124,17 +122,9 @@ async function watchBentoComponent(
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
- * @param {!Array=} extraGlobs
  * @return {!Promise<void|void[]>}
  */
-async function buildBentoComponent(
-  name,
-  version,
-  hasCss,
-  options = {},
-  extraGlobs
-) {
-  options.extraGlobs = extraGlobs;
+async function buildBentoComponent(name, version, hasCss, options = {}) {
   options.npm = true;
   options.bento = true;
 
@@ -164,21 +154,7 @@ async function buildBentoComponent(
     return Promise.all(promises);
   }
 
-  const bentoName = getBentoName(name);
-  promises.push(
-    buildExtensionJs(componentsDir, bentoName, {
-      ...options,
-      wrapper: 'none',
-      filename: await getBentoBuildFilename(
-        componentsDir,
-        bentoName,
-        'standalone',
-        options
-      ),
-      // Include extension directory since our entrypoint may be elsewhere.
-      extraGlobs: [...(options.extraGlobs || []), `${componentsDir}/**/*.js`],
-    })
-  );
+  promises.push(buildBentoExtensionJs(componentsDir, name, options));
   return Promise.all(promises);
 }
 
@@ -197,13 +173,10 @@ async function buildBentoComponents(options) {
       (component) => options.compileOnlyCss || toBuild.includes(component.name)
     )
     .map((component) =>
-      buildBentoComponent(
-        component.name,
-        component.version,
-        component.hasCss,
-        {...options, ...component},
-        component.extraGlobs
-      )
+      buildBentoComponent(component.name, component.version, component.hasCss, {
+        ...options,
+        ...component,
+      })
     );
 
   await Promise.all(results);

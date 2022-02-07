@@ -3,7 +3,7 @@ import {logger} from '#preact/logger';
 
 /**
  * @param {string} key
- * @param {any} [defaultValue]
+ * @param {*=} defaultValue
  * @return {{ "0": any, "1": function(any): void }}
  */
 export function useLocalStorage(key, defaultValue = null) {
@@ -19,7 +19,7 @@ export function useLocalStorage(key, defaultValue = null) {
   });
 
   const storeValue = useCallback(
-    (newValue) => {
+    (/** @type {any} */ newValue) => {
       try {
         const json = JSON.stringify(newValue);
         self.localStorage?.setItem(key, json);
