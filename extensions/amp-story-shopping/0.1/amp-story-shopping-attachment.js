@@ -169,7 +169,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     Object.values(this.builtTemplates_).forEach((template) => {
       if (template === this.builtTemplates_[templateId]) {
         templateAlreadyBuilt = true;
-        this.mutateElement(() => template.setAttribute('active', true));
+        this.mutateElement(() => {
+          template.setAttribute('active', true);
+          this.resetCarouselScroll_(template);
+        });
       } else {
         this.mutateElement(() => template.removeAttribute('active'));
       }
@@ -195,6 +198,17 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   *
+   * @param {!Element} template
+   * @private
+   */
+  resetCarouselScroll_(template) {
+    template
+      .querySelector('.i-amphtml-amp-story-shopping-pdp-carousel')
+      ?.scroll({left: 0});
+  }
+
+  /**
    * @return {boolean}
    * @private
    */
@@ -208,7 +222,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
-  onClick_(shoppingData) {
+  onPlpCardClick_(shoppingData) {
     this.scrollToTop_();
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
@@ -223,6 +237,19 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         top: 0,
         behavior: 'smooth',
       });
+  }
+
+  /**
+   * Centers carousel card image on click.
+   * @param {!Element} carouselCard
+   * @private
+   */
+  onPdpCarouselCardClick_(carouselCard) {
+    carouselCard.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
   }
 
   /**
@@ -285,13 +312,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               role="img"
               aria-label={image.alt}
               style={`background-image: url("${image.url}")`}
-              onClick={(e) =>
-                e.target.scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'nearest',
-                  inline: 'center',
-                })
-              }
+              onClick={(e) => this.onPdpCarouselCardClick_(e.target)}
             ></div>
           ))}
         </div>
@@ -318,7 +339,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             <div
               class="i-amphtml-amp-story-shopping-plp-card"
               role="button"
-              onClick={() => this.onClick_(data)}
+              onClick={() => this.onPlpCardClick_(data)}
             >
               <div
                 class="i-amphtml-amp-story-shopping-plp-card-image"

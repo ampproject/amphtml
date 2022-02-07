@@ -184,7 +184,6 @@ amp-story-shopping-attachment a {
   display: flex !important;
   overflow-x: auto !important;
   scroll-snap-type: x mandatory !important;
-  scroll-behavior: smooth !important;
   margin-bottom: var(--shopping-attachment-vertical-padding) !important;
   --carousel-height: calc(var(--story-page-vh) * 80 - var(--story-page-vw) * 60) !important;
   height: var(--carousel-height) !important;
