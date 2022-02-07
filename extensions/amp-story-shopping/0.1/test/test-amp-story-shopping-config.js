@@ -26,7 +26,6 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let shoppingConfig;
     let storeService;
     let userWarnStub;
 
