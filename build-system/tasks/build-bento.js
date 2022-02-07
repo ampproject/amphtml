@@ -6,7 +6,6 @@ const {
   buildExtensionJs,
   buildNpmBinaries,
   buildNpmCss,
-  declareExtension,
   getBentoBuildFilename,
   getExtensionsFromArg,
 } = require('./extension-helpers');
@@ -24,16 +23,22 @@ const COMPONENTS = {};
 /**
  * Initializes all components from build-system/compile/bundles.config.bento.json
  * if not already done and populates the given components object.
- * @param {Object} componentsObject
+ *
+ * @return {Object}
  */
-function maybeInitializeBentoComponents(componentsObject) {
-  if (Object.keys(componentsObject).length > 0) {
-    return;
+function getBentoComponents() {
+  if (Object.keys(COMPONENTS).length > 0) {
+    return COMPONENTS;
   }
+
   verifyBentoBundles();
-  bentoBundles.forEach((c) => {
-    declareExtension(c.name, c.version, c.options, componentsObject);
-  });
+  for (const bundle of bentoBundles) {
+    COMPONENTS[`${bundle.name}-1.0`] = bundle;
+  }
+  // bentoBundles.forEach((c) => {
+  //   declareExtension(c.name, c.options, componentsObject);
+  // });
+  return COMPONENTS;
 }
 
 /**
@@ -76,23 +81,16 @@ function getBentoComponentsToBuild(preBuild = false) {
  *
  * @param {string} componentsDir
  * @param {string} name
- * @param {string} version
  * @param {boolean} hasCss
  * @param {?Object} options
  * @return {Promise<void>}
  */
-async function watchBentoComponent(
-  componentsDir,
-  name,
-  version,
-  hasCss,
-  options
-) {
+async function watchBentoComponent(componentsDir, name, hasCss, options) {
   /**
    * Steps to run when a watched file is modified.
    */
   function watchFunc() {
-    buildBentoComponent(name, version, hasCss, {
+    buildBentoComponent(name, hasCss, {
       ...options,
       continueOnError: true,
       isRebuild: true,
@@ -120,20 +118,12 @@ async function watchBentoComponent(
  *
  * @param {string} name Name of the extension. Must be the sub directory in
  *     the components directory and the name of the JS and optional CSS file.
- * @param {string} version Version of the extension. Must be identical to
- *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
  * @param {!Array=} extraGlobs
  * @return {!Promise<void|void[]>}
  */
-async function buildBentoComponent(
-  name,
-  version,
-  hasCss,
-  options = {},
-  extraGlobs
-) {
+async function buildBentoComponent(name, hasCss, options = {}, extraGlobs) {
   options.extraGlobs = extraGlobs;
   options.npm = true;
   options.bento = true;
@@ -141,16 +131,16 @@ async function buildBentoComponent(
   if (options.compileOnlyCss && !hasCss) {
     return;
   }
-  const componentsDir = `src/bento/components/${name}/${version}`;
+  const componentsDir = `src/bento/components/${name}`;
   if (options.watch) {
-    await watchBentoComponent(componentsDir, name, version, hasCss, options);
+    await watchBentoComponent(componentsDir, name, hasCss, options);
   }
 
   /** @type {Promise<void>[]} */
   const promises = [];
   if (hasCss) {
     mkdirSync('build/css', {recursive: true});
-    promises.push(buildExtensionCss(componentsDir, name, version, options));
+    promises.push(buildExtensionCss(componentsDir, name, '1.0', options));
     if (options.compileOnlyCss) {
       return Promise.all(promises);
     }
@@ -190,16 +180,14 @@ async function buildBentoComponent(
  */
 async function buildBentoComponents(options) {
   const startTime = Date.now();
-  maybeInitializeBentoComponents(COMPONENTS);
   const toBuild = getBentoComponentsToBuild();
-  const results = Object.values(COMPONENTS)
+  const results = Object.values(getBentoComponents())
     .filter(
       (component) => options.compileOnlyCss || toBuild.includes(component.name)
     )
     .map((component) =>
       buildBentoComponent(
         component.name,
-        component.version,
         component.hasCss,
         {...options, ...component},
         component.extraGlobs
@@ -220,5 +208,5 @@ module.exports = {
   buildBentoComponents,
   buildComponent: buildBentoComponent,
   getBentoComponentsToBuild,
-  maybeInitializeBentoComponents,
+  getBentoComponents,
 };

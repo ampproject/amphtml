@@ -785,13 +785,22 @@ async function buildExtensionJs(dir, name, options) {
       ? wrapperOrFn(name, version, argv.esm, options.loadPriority)
       : wrapperOrFn;
 
-  await compileJs(`${dir}/`, filename, './dist/v0', {
-    ...options,
-    toName: `${name}-${version}.max.js`,
-    minifiedName: `${name}-${version}.js`,
-    aliasName: isLatest ? `${name}-latest.js` : '',
-    wrapper: resolvedWrapper,
-  });
+  if (options.bento) {
+    await compileJs(`${dir}/`, filename, './dist/v0', {
+      ...options,
+      toName: `${name}.max.js`,
+      minifiedName: `${name}.js`,
+      wrapper: resolvedWrapper,
+    });
+  } else {
+    await compileJs(`${dir}/`, filename, './dist/v0', {
+      ...options,
+      toName: `${name}-${version}.max.js`,
+      minifiedName: `${name}-${version}.js`,
+      aliasName: isLatest ? `${name}-latest.js` : '',
+      wrapper: resolvedWrapper,
+    });
+  }
 
   // If an incremental watch build fails, simply return.
   if (options.errored) {

@@ -284,12 +284,5 @@ exports.verifyBentoBundles = function () {
       bundle.name,
       bundleString
     );
-    verifyBundle_(
-      'version' in bundle,
-      'version',
-      'is missing from',
-      bundle.name,
-      bundleString
-    );
   });
 };

@@ -4,7 +4,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const {
   buildComponent,
   getBentoComponentsToBuild,
-  maybeInitializeBentoComponents,
+  getBentoComponents,
 } = require('../tasks/build-bento');
 const {
   doBuild3pVendor,
@@ -21,9 +21,7 @@ const {VERSION} = require('../compile/internal-version');
 
 const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles);
-
-const bentoBundles = {};
-maybeInitializeBentoComponents(bentoBundles);
+const bentoBundles = getBentoComponents();
 
 const vendorBundles = generateBundles();
 
