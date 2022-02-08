@@ -2,8 +2,8 @@ import {parseBooleanAttribute} from '#core/dom';
 
 import {PreactBaseElement} from '#preact/base-element';
 
+import {BentoDatePicker} from './component';
 import {CSS as COMPONENT_CSS} from './component/component.jss';
-import {BentoDatePicker} from './component/component.tsx';
 import {parseDate, parseDateList, parseLocale} from './parsers';
 
 export class BaseElement extends PreactBaseElement {}

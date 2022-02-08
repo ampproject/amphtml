@@ -1,9 +1,8 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {format} from 'path';
 
 import * as Preact from '#preact';
 
-import {ISO_8601} from '../constants';
+import {getFormattedDate} from '../date-helpers';
 
 const today = new Date();
 
@@ -18,7 +17,7 @@ export default {
     'type': 'single',
     'layout': 'fixed-height',
     'height': '360',
-    'initial-visible-month': format(today, ISO_8601),
+    'initial-visible-month': getFormattedDate(today),
     'locale': 'en-us',
     'mode': 'static',
   },

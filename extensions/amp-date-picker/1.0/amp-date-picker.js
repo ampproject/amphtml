@@ -34,16 +34,18 @@ class AmpDatePicker extends setSuperClass(BaseElement, AmpPreactBaseElement) {
         invocation.args && invocation.args['end']
       )
     );
+
+    return super.init();
   }
 
   /** @override */
-  isLayoutSupported(layout) {
+  isLayoutSupported() {
     userAssert(
       isExperimentOn(this.win, 'bento') ||
         isExperimentOn(this.win, 'bento-date-picker'),
       'expected global "bento" or specific "bento-date-picker" experiment to be enabled'
     );
-    return super.isLayoutSupported(layout);
+    return true;
   }
 }
 

@@ -6,7 +6,7 @@ import * as Preact from '#preact';
 import {useMemo} from '#preact';
 import {forwardRef} from '#preact/compat';
 
-import './amp-date-picker.css';
+// import './amp-date-picker.css';
 import {DateRangePicker} from './date-range-picker';
 import {SingleDatePicker} from './single-date-picker';
 import {DayContext} from './use-day';
