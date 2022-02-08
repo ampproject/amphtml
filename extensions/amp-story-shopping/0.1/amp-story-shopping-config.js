@@ -18,7 +18,7 @@ let ShoppingConfigResponseDef;
 export let KeyedShoppingConfigDef;
 
 /**
- * Gets Shopping config from an <amp-story-page> element.
+ * Gets Shopping config from an element.
  * The config is validated and keyed by 'product-tag-id'.
  * @param {!Element} element <amp-story-shopping-attachment>
  * @return {!Promise<!KeyedShoppingConfigDef>}

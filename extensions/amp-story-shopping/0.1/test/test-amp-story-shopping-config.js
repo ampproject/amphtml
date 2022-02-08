@@ -23,18 +23,48 @@ describes.realWin(
     const defaultInlineConfig = {
       'items': [
         {
+          'productId': 'lamp',
+          'productTitle': 'Brass Lamp',
+          'productBrand': 'Lamp Co',
+          'productPrice': 799.0,
+          'productPriceCurrency': 'USD',
+          'productImages': ['https://source.unsplash.com/Ry9WBo3qmoc/500x500'],
+        },
+        {
           'productId': 'art',
           'productTitle': 'Abstract Art',
           'productBrand': 'V. Artsy',
           'productPrice': 1200.0,
-          'productPriceCurrency': 'JPY',
+          'productPriceCurrency': 'INR',
           'productImages': ['https://source.unsplash.com/BdVQU-NDtA8/500x500'],
+        },
+        {
+          'productId': 'chair',
+          'productTitle': 'Yellow chair',
+          'productBrand': 'Chair Co.',
+          'productPrice': 1000.0,
+          'productPriceCurrency': 'BRL',
+          'productTagText': 'The perfectly imperfect yellow chair',
+          'productImages': ['https://source.unsplash.com/DgQGKKLaVhY/500x500'],
+        },
+        {
+          'productId': 'flowers',
+          'productTitle': 'Flowers',
+          'productBrand': 'Very Long Flower Company Name',
+          'productPrice': 10.0,
+          'productPriceCurrency': 'USD',
+          'productIcon':
+            '/examples/visual-tests/amp-story/img/shopping/icon.png',
+          'productImages': ['https://source.unsplash.com/SavQfLRm4Do/500x500'],
         },
       ],
     };
 
     const keyedDefaultInlineConfig = {
-      'art': defaultInlineConfig.items[0],
+      'lamp': defaultInlineConfig.items[0],
+      'art': defaultInlineConfig.items[1],
+      'chair': defaultInlineConfig.items[2],
+      'flowers': defaultInlineConfig.items[3],
     };
 
     beforeEach(async () => {
