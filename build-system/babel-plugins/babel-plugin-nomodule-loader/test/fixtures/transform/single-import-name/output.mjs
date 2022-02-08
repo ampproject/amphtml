@@ -46,7 +46,7 @@
   }
 })(function (_foo) {
   console.log({
-    foo,
-    bar
+    foo: _foo.foo,
+    bar: _foo.bar
   });
 });

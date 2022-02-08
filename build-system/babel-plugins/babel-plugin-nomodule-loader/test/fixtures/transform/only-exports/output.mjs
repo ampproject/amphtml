@@ -46,6 +46,7 @@
   }
 })(function (exports) {
   const x = 'y';
+  exports.x = x;
 
   function y() {}
 });

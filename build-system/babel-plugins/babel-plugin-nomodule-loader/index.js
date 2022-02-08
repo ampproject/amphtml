@@ -2,6 +2,9 @@ const {hasExports, isModule} = require('@babel/helper-module-transforms');
 const {
   default: normalizeAndLoadMetadata,
 } = require('@babel/helper-module-transforms/lib/normalize-and-load-metadata');
+const {
+  default: rewriteLiveReferences,
+} = require('@babel/helper-module-transforms/lib/rewrite-live-references');
 const {readFileSync} = require('fs');
 const {join: pathJoin, posix, relative} = require('path');
 
@@ -59,8 +62,10 @@ module.exports = function (babel) {
           if (!isModule(path)) {
             throw new Error();
           }
-          const filename = relative(process.cwd(), state.filename);
           const meta = normalizeAndLoadMetadata(path, 'exports', {});
+          rewriteLiveReferences(path, meta);
+
+          const filename = relative(process.cwd(), state.filename);
           const importNames = [];
           const callbackArgs = [];
           const metaHasExports = hasExports(meta);

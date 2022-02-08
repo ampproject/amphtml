@@ -46,8 +46,9 @@
   }
 })(function (exports, _foo) {
   const baz = {
-    foo,
-    bar,
+    foo: _foo.foo,
+    bar: _foo.bar,
     baz: 'baz'
   };
+  exports.baz = baz;
 });
