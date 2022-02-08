@@ -3,7 +3,9 @@
  * @return {HTMLTemplateElement|null}
  */
 export function getTemplate(element) {
-  return element.hasAttribute('template')
-    ? element.ownerDocument.getElementById(element.getAttribute('template'))
-    : element.querySelector('template');
+  if (element.hasAttribute('template')) {
+    const id = element.getAttribute('template')
+    return element.ownerDocument.querySelector(`template#${id}`);
+  }
+  return element.querySelector('template');
 }
