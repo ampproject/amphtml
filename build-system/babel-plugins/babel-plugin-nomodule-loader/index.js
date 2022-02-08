@@ -88,7 +88,7 @@ module.exports = function (babel) {
               __IMPORT_NAMES__: t.arrayExpression(importNames),
               __SINGLE_IMPORT_NAME__:
                 importNames.length === 1 && !metaHasExports
-                  ? importNames[0]
+                  ? t.cloneNode(importNames[0])
                   : t.nullLiteral(),
               __CALLBACK_ARGS__: callbackArgs,
             })
