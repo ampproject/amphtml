@@ -212,7 +212,10 @@ function requestCachedVideoSources(videoEl, ampdoc) {
       'amp-google-video-cache-response'
     );
     try {
-      return Promise.resolve(JSON.parse(inlineResponseEl.textContent));
+      const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
+      if (inlinedResponseJson['sources']) {
+        return Promise.resolve(inlineResponseJson);
+      }
     } catch (err) {
       // If parsing the response fails, an XHR request will be made below.
     }
