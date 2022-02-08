@@ -30,7 +30,8 @@ export function getLocalizationService(element) {
   let localizationService = Services.localizationForDoc(element);
 
   if (!localizationService) {
-    localizationService = new LocalizationService(element, testUrl);
+    localizationService = new LocalizationService(element);
+    localizationService.registerFromUrl(testUrl);
     registerServiceBuilderForDoc(element, 'localization', function () {
       return localizationService;
     });

@@ -62,10 +62,12 @@ export class LocalizationService {
    * @param {string} url
    */
   registerFromUrl(url) {
+    console.log('registerFromUrl', url);
     Services.xhrFor(getWin(this.element_))
       .fetchJson(url)
+      .then((res) => res.json())
       .then((res) => {
-        this.registerLocalizedStringBundle(res.json());
+        this.registerLocalizedStringBundle(res);
         this.newBundleObserver_.fire();
       });
   }
