@@ -23,7 +23,7 @@ import '@ampproject/bento-date-display';
 ```html
 <head>
   <script async src="https://cdn.ampproject.org/bento.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-mustache-1.0.js"></script>
+  <script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
   <script async src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css">
 </head>
@@ -33,7 +33,7 @@ import '@ampproject/bento-date-display';
     displayIn="utc"
     locale="en-GB"
   >
-    <template type="amp-mustache">
+    <template>
       <div>ISO: {{iso}}; locale: {{localeString}}</div>
     </template>
   </bento-date-display>
@@ -110,7 +110,6 @@ Note that if `display-in` attrubute is set to `utc`, the value of
 ### Styling
 
 You may use the `bento-date-display` element selector to style the Bento Date Display component freely.
-
 
 ---
 

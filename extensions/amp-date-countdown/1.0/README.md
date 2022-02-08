@@ -6,42 +6,71 @@ Displays a countdown sequence to a specified date. Refer to the [returned time p
 
 You must include each Bento component's required CSS library to guarantee proper loading and before adding custom styles. Or use the light-weight pre-upgrade styles available inline. See [Layout and style](#layout-and-style).
 
-### Example: Import via npm
-
-Install via npm:
+### Import via npm
 
 ```sh
-npm install @ampproject/bento-date-countdown
+npm install @bentoproject/bento-date-countdown
 ```
 
 ```javascript
-import '@ampproject/bento-date-countdown';
+import {defineElement as defineBentoDateCountdown} from '@bentoproject/bento-date-countdown';
+defineBentoDateCountdown();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
 
 ```html
-<head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-mustache-1.0.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.css">
-</head>
-<body>
-  <bento-date-countdown timeleft-ms="200000000" biggest-unit="HOURS">
-    <template type="amp-mustache">
-      <div>
-        <span>{{days}} {{dd}} {{d}}</span>
-        <br>
-        <span>{{hours}} {{hh}} {{h}}</span>
-        <br>
-        <span>{{minutes}} {{mm}} {{m}}</span>
-        <br>
-        <span>{{seconds}} {{ss}} {{s}}</span>
-      </div>
-    </template>
-  </bento-date-countdown>
-</body>
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.css" crossorigin="anonymous">
+```
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-date-countdown-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-date-countdown timeleft-ms="200000000" biggest-unit="HOURS">
+      <template>
+        <div>
+          <span>{{days}} {{dd}} {{d}}</span>
+          <br>
+          <span>{{hours}} {{hh}} {{h}}</span>
+          <br>
+          <span>{{minutes}} {{mm}} {{m}}</span>
+          <br>
+          <span>{{seconds}} {{ss}} {{s}}</span>
+        </div>
+      </template>
+    </bento-date-countdown>
+  </body>
+</html>
 ```
 
 ### Interactivity and API usage
