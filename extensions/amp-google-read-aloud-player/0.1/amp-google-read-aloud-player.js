@@ -47,6 +47,7 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    // Uses the video manager in order to support auto-pause of media.
     installVideoManagerForDoc(this.element);
   }
 
