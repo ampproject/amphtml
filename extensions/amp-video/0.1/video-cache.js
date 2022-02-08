@@ -211,13 +211,10 @@ function requestCachedVideoSources(videoEl, ampdoc) {
     const inlineResponseEl = win.document.getElementById(
       'amp-google-video-cache-response'
     );
-    if (inlineResponseEl?.textContent) {
-      try {
-        const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
-        return Promise.resolve(inlineResponseJson);
-      } catch (err) {
-        // If parsing the response fails, an XHR request will be made below.
-      }
+    try {
+      return Promise.resolve(JSON.parse(inlineResponseEl.textContent));
+    } catch (err) {
+      // If parsing the response fails, an XHR request will be made below.
     }
   }
 
