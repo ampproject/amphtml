@@ -32,6 +32,19 @@ exports.jsBundles = {
       aliasName: 'custom-elements-polyfill.js',
     },
   },
+  'bento.core.js': {
+    // This file is generated, so we find its source in the build/ dir
+    // See compileBentoCore() and generateBentoCoreEntrypoint()
+    srcDir: 'build/',
+    srcFilename: 'bento.shared.js',
+    destDir: './src/bento/core/dist',
+    minifiedDestDir: './src/bento/core/dist',
+    options: {
+      includePolyfills: false,
+      toName: 'bento.core.max.js',
+      minifiedName: 'bento.core.js',
+    },
+  },
   'alp.max.js': {
     srcDir: './ads/alp/',
     srcFilename: 'install-alp.js',
