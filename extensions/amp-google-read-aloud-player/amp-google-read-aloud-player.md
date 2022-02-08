@@ -116,7 +116,6 @@ Include an `amp-google-read-aloud-player` on your AMP document:
 
 ```html
 <amp-google-read-aloud-player
-  layout="fixed-height"
   height="65"
   data-api-key="<YOUR_API_KEY>"
   data-tracking-ids="<YOUR_TRACKING_IDS>"
