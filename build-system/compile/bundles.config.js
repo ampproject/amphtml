@@ -122,7 +122,6 @@ exports.jsBundles = {
       toName: 'amp-viewer-host.max.js',
       minifiedName: 'amp-viewer-host.js',
       incudePolyfills: true,
-      extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
       skipUnknownDepsCheck: true,
     },
   },
@@ -197,7 +196,6 @@ exports.jsBundles = {
       toName: 'amp-inabox.js',
       minifiedName: 'amp4ads-v0.js',
       includePolyfills: true,
-      extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
     },
   },
 };

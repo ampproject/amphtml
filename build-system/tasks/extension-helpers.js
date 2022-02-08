@@ -88,7 +88,6 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   version?: string,
  *   hasCss?: boolean,
  *   loadPriority?: string,
- *   extraGlobs?: Array<string>,
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
  *   wrapper?: string,
@@ -365,7 +364,7 @@ async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
   let o = {...options};
   o = Object.assign(o, e);
-  await buildExtension(e.name, e.version, e.hasCss, o, e.extraGlobs);
+  await buildExtension(e.name, e.version, e.hasCss, o);
 }
 
 /**
@@ -417,12 +416,10 @@ async function watchExtension(extDir, name, version, hasCss, options) {
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
- * @param {!Array=} extraGlobs
  * @return {!Promise<void>}
  */
-async function buildExtension(name, version, hasCss, options, extraGlobs) {
+async function buildExtension(name, version, hasCss, options) {
   options = options || {};
-  options.extraGlobs = extraGlobs;
   if (options.compileOnlyCss && !hasCss) {
     return;
   }
@@ -679,8 +676,6 @@ async function buildBentoExtensionJs(dir, name, options) {
       ? 'bento-element-minified'
       : 'bento-element-unminified',
     filename: await getBentoBuildFilename(dir, name, 'standalone', options),
-    // Include extension directory since our entrypoint may be elsewhere.
-    extraGlobs: [...(options.extraGlobs || []), `${dir}/**/*.js`],
   });
 }
 
