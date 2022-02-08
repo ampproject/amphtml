@@ -107,25 +107,16 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (this.shoppingTags_.length === 0) {
       return;
     }
+
+    // Update teamplet on attachment state update or shopping data update.
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
-      (isOpen) => {
-        const shoppingData = this.storeService_.get(
-          StateProperty.SHOPPING_DATA
-        );
-        this.checkClearActiveProductData_(isOpen, shoppingData);
-        this.updateTemplate_(isOpen, shoppingData);
-      },
+      () => this.updateTemplate_(),
       true /** callToInitialize */
     );
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
-      (shoppingData) => {
-        const isOpen = this.storeService_.get(
-          StateProperty.PAGE_ATTACHMENT_STATE
-        );
-        this.updateTemplate_(isOpen, shoppingData);
-      },
+      () => this.updateTemplate_(),
       true /** callToInitialize */
     );
   }
@@ -133,13 +124,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /**
    * Active product data is cleared if attachment is opening and activeProductData was previously set.
    * It's cleared on open instead of close so that content doesn't jump while closing.
-   * @param {boolean} isOpen
    * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
-  checkClearActiveProductData_(isOpen, shoppingData) {
-    const {activeProductData} = shoppingData;
-    if (!isOpen && activeProductData && this.isOnActivePage_()) {
+  checkClearActiveProductData_(shoppingData) {
+    if (shoppingData.activeProductData) {
       this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
         'activeProductData': null,
       });
@@ -148,14 +137,14 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * On attachment state or shopping data state update, check if on active page and update template.
-   * @param {boolean} isOpen
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
-  updateTemplate_(isOpen, shoppingData) {
-    if (!isOpen || !this.isOnActivePage_()) {
+  updateTemplate_() {
+    if (!this.attachmentIsOpen_() || !this.isOnActivePage_()) {
       return;
     }
+    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
+    this.checkClearActiveProductData_(shoppingData);
     const shoppingDataForPage = this.shoppingTags_.map(
       (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
     );
@@ -187,6 +176,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.builtTemplates_[templateId] = template;
       this.mutateElement(() => this.templateContainer_.appendChild(template));
     }
+  }
+
+  attachmentIsOpen_() {
+    return this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
   }
 
   /**
