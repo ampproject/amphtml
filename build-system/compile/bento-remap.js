@@ -1,18 +1,29 @@
 const babelTypes = require('@babel/types');
 const {parse} = require('@babel/parser');
 const {resolvePath} = require('../babel-config/import-resolver');
-const path = require('path');
-const {readFileSync} = require('fs-extra');
+const {lstatSync, readFileSync} = require('fs-extra');
 const {once} = require('../common/once');
 const {bentoBundles} = require('./bundles.config');
+const glob = require('globby');
 
 /**
- * @param {string} name
- * @return {string}
+ * @param {string} path
+ * @return {?string}
  */
-function resolvePathAbsolute(name) {
-  const resolved = resolvePath(name);
-  return path.posix.join(process.cwd(), resolved);
+function resolveExactModuleFile(path) {
+  let unaliased = resolvePath(path);
+  try {
+    if (lstatSync(unaliased).isDirectory()) {
+      unaliased += '/index';
+    }
+  } catch {
+    // lstat fails if not directory
+  }
+  const result = glob.sync(`${unaliased}.{js,jsx,ts,tsx}`);
+  if (result.length !== 1) {
+    return null;
+  }
+  return result[0];
 }
 
 /**
@@ -59,18 +70,16 @@ function getAllRemappings() {
     cdn: `./${name}-${version}.mjs`,
   }));
 
-  return [...coreBentoRemappings, ...componentRemappings]
-    .map(({source, ...rest}) => {
-      // esbuild wants absolute paths
-      const absolute = resolvePathAbsolute(source);
-      return [
-        {source: absolute, ...rest},
-        // When an index.js file is present, esbuild will remap to the directory
-        // with a trailing slash. We add another entry to match these cases.
-        {source: `${absolute}/`, ...rest},
-      ];
-    })
-    .flat();
+  return /** @type {MappingEntryDef[]} */ (
+    [...coreBentoRemappings, ...componentRemappings]
+      .map(({source, ...rest}) => {
+        const resolved = resolveExactModuleFile(source);
+        if (resolved) {
+          return {source: resolved, ...rest};
+        }
+      })
+      .filter(Boolean)
+  );
 }
 
 /**
