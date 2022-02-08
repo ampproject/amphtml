@@ -8,6 +8,8 @@ import {AndroidAppInfo} from '../utils/android';
 
 describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
   let xhrServiceStub;
+  /** @type {AndroidAppInfo} */
+  let androidAppInfo;
   beforeEach(() => {
     xhrServiceStub = env.sandbox.stub(xhrUtils);
     const docInfo = DocumentInfo.forDoc(document);
@@ -15,11 +17,6 @@ describes.sandboxed('BentoAppBanner preact component v1.0', {}, (env) => {
       .stub(docInfo, 'canonicalUrl')
       .get(() => 'https://test.com/canonicalUrl');
     env.sandbox.stub(DocumentInfo, 'forDoc').returns(docInfo);
-  });
-
-  /** @type {AndroidAppInfo} */
-  let androidAppInfo;
-  beforeEach(() => {
     androidAppInfo = AndroidAppInfo.forDoc(document);
   });
 

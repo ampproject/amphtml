@@ -31,7 +31,7 @@ export class AndroidAppInfo extends DocumentScopeBase {
       return null;
     }
 
-    const manifestLink = self.document.head.querySelector(
+    const manifestLink = this.ownerDocument.head?.querySelector(
       'link[rel=manifest],link[rel=origin-manifest]'
     );
 

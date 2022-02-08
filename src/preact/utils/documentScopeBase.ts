@@ -18,7 +18,10 @@
  */
 export class DocumentScopeBase {
   // eslint-disable-next-line no-restricted-syntax
-  constructor(protected ownerDocument: Document) {}
+  protected ownerDocument: Document;
+  constructor(ownerDocument: Document) {
+    this.ownerDocument = ownerDocument;
+  }
 
   /**
    * Utility for constructing this class.
