@@ -1,6 +1,5 @@
 import '../amp-google-read-aloud-player';
 
-import {expect} from 'chai';
 
 import {createElementWithAttributes} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
