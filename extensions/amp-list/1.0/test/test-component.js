@@ -327,12 +327,6 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         await waitForData(component, 3);
         expect(snapshot(component)).to.equal(expectedPage3);
       });
-
-      describe('loadMoreBookmark', () => {
-        it('', async () => {
-          //
-        });
-      });
     });
     describe('auto', () => {
       beforeEach(() => {
@@ -381,6 +375,65 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         await waitForData(component, 3);
         expect(snapshot(component)).to.equal(expectedPage3);
       });
+    });
+  });
+
+  describe('loadMoreBookmark', () => {
+    const mockData = [
+      {
+        items: ['one', 'two', 'three'],
+        METADATA: {'NEXT_PAGE_URL': 'page-2.json'},
+      },
+      {
+        items: ['four', 'five'],
+        METADATA: {'NEXT_PAGE_URL': 'page-3.json'},
+      },
+      {
+        items: ['six', 'seven', 'eight', 'nine'],
+        METADATA: {'NEXT_PAGE_URL': null},
+      },
+    ];
+    let component;
+    beforeEach(async () => {
+      mockData.forEach((page, index) => {
+        fetchJson.onCall(index).resolves(page);
+      });
+
+      component = mount(
+        <BentoList
+          src="page-1.json"
+          loadMore="manual"
+          loadMoreBookmark="METADATA.NEXT_PAGE_URL"
+        />
+      );
+      await waitForData(component);
+    });
+
+    const expectedPage1 = `<div><p>one</p><p>two</p><p>three</p></div><button>Load more</button>`;
+    const expectedPage2 = `<div><p>one</p><p>two</p><p>three</p><p>four</p><p>five</p></div><button>Load more</button>`;
+    const expectedPage3 = `<div><p>one</p><p>two</p><p>three</p><p>four</p><p>five</p><p>six</p><p>seven</p><p>eight</p><p>nine</p></div>`;
+
+    it('should render the first page of data, as normal', async () => {
+      expect(snapshot(component)).to.equal(expectedPage1);
+    });
+
+    it('clicking the button should keep loading more data', async () => {
+      // Check page 1:
+      expect(snapshot(component)).to.equal(expectedPage1);
+
+      // Load page 2:
+      component.find('button').simulate('click');
+      expect(fetchJson).callCount(2).calledWith('page-2.json');
+      expect(snapshot(component)).to.equal(expectedPage1);
+      await waitForData(component, 2);
+      expect(snapshot(component)).to.equal(expectedPage2);
+
+      // Load page 3:
+      component.find('button').simulate('click');
+      expect(fetchJson).callCount(3).calledWith('page-3.json');
+      expect(snapshot(component)).to.equal(expectedPage2);
+      await waitForData(component, 3);
+      expect(snapshot(component)).to.equal(expectedPage3);
     });
   });
 
