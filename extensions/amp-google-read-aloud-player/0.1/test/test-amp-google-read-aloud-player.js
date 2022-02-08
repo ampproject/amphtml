@@ -23,7 +23,6 @@ const AD_TAG_URL = 'http://www.example.com/ad';
 const VOICE = 'SOME_VOICE';
 
 const LAYOUT_ATTRS = {
-  layout: Layout_Enum.FIXED_HEIGHT,
   height: 60,
 };
 
