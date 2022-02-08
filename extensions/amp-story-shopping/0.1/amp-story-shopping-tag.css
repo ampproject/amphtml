@@ -26,16 +26,6 @@ amp-story-shopping-tag {
   flex-flow: row-reverse !important;
 }
 
-/* Maintains the dot position in RTL mode */
-[dir=rtl] .i-amphtml-amp-story-shopping-tag-dot {
-  margin-inline-start: 4px !important;
-}
-
-/* Maintans the correct margins in RTL mode */
-[dir=rtl] .i-amphtml-amp-story-shopping-tag-pill {
-  padding: 4px 4px 4px 12px !important
-}
-
 .i-amphtml-amp-story-shopping-tag-inner {
   height: 36px !important;
   max-width: 168px !important;
@@ -91,11 +81,13 @@ amp-story-shopping-tag {
   height: 100% !important;
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   backdrop-filter: var(--i-amphtml-shopping-tag-backdrop-filter) !important;
-  padding: 4px 12px 4px 4px !important;
+  padding: 4px 0px !important;
 }
 
 .i-amphtml-story-shopping-tag-pill-multi-line {
   border-radius: 10px !important;
+  margin-inline-start: 9px !important;
+  margin-inline-end: 4px !important;
 }
 
 .i-amphtml-amp-story-shopping-tag-pill-image {
@@ -123,4 +115,5 @@ amp-story-shopping-tag {
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
   max-height: 32px !important;
+  margin-inline-end: 12px !important;
 }
