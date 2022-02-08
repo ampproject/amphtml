@@ -276,6 +276,7 @@ const htmlFixtureGlobs = [
   '!examples/amp-subscriptions-google/amp-subscriptions.amp.html',
   '!examples/amp-subscriptions-rtp.amp.html',
   '!examples/amp-tiktok.amp.html',
+  '!examples/amp-toggle-theme.html',
   '!examples/ampcontext-creative-json.html',
   '!examples/ampcontext-creative.html',
   '!examples/amphtml-ads/adchoices-1.a4a.html',
