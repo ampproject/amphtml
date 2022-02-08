@@ -50,13 +50,13 @@ function getAllRemappings() {
   const coreBentoModules = getExportAll('src/bento/bento.js');
   const coreBentoRemappings = coreBentoModules.map((source) => ({
     source,
-    cdn: './dist/bento.mjs',
+    cdn: '../bento.mjs',
   }));
 
   // Allow component cross-dependency
   const componentRemappings = bentoBundles.map(({name, version}) => ({
     source: `./src/bento/components/${name}/${version}/${name}`,
-    cdn: `./dist/v0/${name}-${version}.mjs`,
+    cdn: `./${name}-${version}.mjs`,
   }));
 
   return [...coreBentoRemappings, ...componentRemappings]

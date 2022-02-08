@@ -19,7 +19,7 @@ const {log} = require('./build-system/common/logging');
  */
 const babelTransforms = new Map([
   ['babel-jest', 'getEmptyConfig'],
-  ['amd', 'getAmdConfig'],
+  ['nomodule-loader', 'getNoModuleLoaderConfig'],
   ['test', 'getTestConfig'],
   ['unminified', 'getUnminifiedConfig'],
   ['minified', 'getMinifiedConfig'],

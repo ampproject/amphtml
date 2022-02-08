@@ -728,7 +728,7 @@ async function buildBentoExtensionJs(dir, name, options) {
     externalDependencies: Object.values(remapDependencies),
     remapDependencies,
     wrapper: 'none',
-    outputFormat: argv.esm ? 'esm' : 'amd',
+    outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
     filename: await getBentoBuildFilename(dir, name, 'standalone', options),
   });
 }

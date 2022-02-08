@@ -144,7 +144,7 @@ async function compileBentoRuntimeAndCore(options) {
 async function compileBentoRuntime(options) {
   await doBuildJs(jsBundles, 'bento.js', {
     ...options,
-    outputFormat: argv.esm ? 'esm' : 'amd',
+    outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
   });
 }
 
@@ -392,9 +392,12 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         outfile: destFile,
         define: experimentDefines,
         plugins,
-        // esbuild does not support AMD, so we build as ESM in order to preserve
+        // When using `nomodule-loader` we build as ESM in order to preserve
         // import statements. These are transformed in a post-build Babel step.
-        format: options.outputFormat === 'amd' ? 'esm' : options.outputFormat,
+        format:
+          options.outputFormat === 'nomodule-loader'
+            ? 'esm'
+            : options.outputFormat,
         banner,
         footer,
         // For es5 builds, ensure esbuild-injected code is transpiled.
@@ -418,9 +421,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
     const sourceMapComment = `//# sourceMappingURL=${destFilename}.map`;
 
-    if (options.outputFormat === 'amd') {
+    if (options.outputFormat === 'nomodule-loader') {
       const result = await babel.transformAsync(code, {
-        caller: {name: 'amd'},
+        caller: {name: 'nomodule-loader'},
         inputSourceMap: map,
         filename: destFile,
         sourceRoot: path.dirname(destFile),
@@ -431,7 +434,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     }
 
     if (options.minify) {
-      const result = await minify(code);
+      const result = await minify(code, {
+        // toplevel clobbers the global namespace when transforming for amd
+        toplevel: options.outputFormat !== 'nomodule-loader',
+      });
       code = `${result.code}${sourceMapComment}`;
       map = remapping([result.map, map], () => null, !argv.full_sourcemaps);
     }
@@ -547,9 +553,10 @@ const mangleIdentifier = {
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
+ * @param {terser.MinifyOptions} options
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code) {
+async function minify(code, options = {}) {
   /* eslint-disable local/camelcase */
   const terserOptions = {
     mangle: {
@@ -571,6 +578,7 @@ async function minify(code) {
     toplevel: true,
     module: !!argv.esm,
     nameCache: argv.nomanglecache ? undefined : nameCache,
+    ...options,
   };
   /* eslint-enable local/camelcase */
 
