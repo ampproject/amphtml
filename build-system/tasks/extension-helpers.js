@@ -39,9 +39,9 @@ const {renameSelectorsToBentoTagNames} = require('./css/bento-css');
 const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
 const {
-  getSharedBentoModules,
-} = require('../compile/generate/shared-bento-symbols');
-const {getRemapBentoDependencies} = require('../compile/bento-remap');
+  getRemapBentoDependencies,
+  getRemapBentoNpmDependencies,
+} = require('../compile/bento-remap');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -666,8 +666,8 @@ async function buildNpmBinaries(extDir, name, options) {
     };
     if (options.useBentoCore) {
       // remap all shared modules to the @bentoproject/core package and declare as external
-      npm.bento.remap = getSharedBentoPackageRemap();
-      npm.bento.external = ['@bentoproject/core'];
+      npm.bento.remap = getRemapBentoNpmDependencies();
+      npm.bento.external = Object.values(npm.bento.remap);
     }
   }
   const binaries = Object.values(npm);
@@ -700,19 +700,6 @@ function buildBinaries(extDir, binaries, options) {
     });
   });
   return Promise.all(promises);
-}
-
-/**
- * Creates configuration to remap shared bento modules
- * Returns an Object of the form: `{'path/to/shared/module': '@bentoproject/core'}`.
- * Uses require.resolve() to normalize directories to the appropriate index file
- * @return {Object}
- */
-function getSharedBentoPackageRemap() {
-  const remap = Object.fromEntries(
-    getSharedBentoModules().map((p) => [p, '@bentoproject/core'])
-  );
-  return remap;
 }
 
 /**

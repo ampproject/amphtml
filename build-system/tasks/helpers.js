@@ -12,7 +12,6 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {cyan, green, red} = require('kleur/colors');
-const {generateBentoCoreEntrypoint} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
 const {massageSourcemaps} = require('./sourcemaps');
@@ -134,55 +133,18 @@ async function compileCoreRuntime(options) {
  * @return {Promise<void>}
  */
 async function compileBentoRuntimeAndCore(options) {
-  await Promise.all([compileBentoRuntime(options), compileBentoCore(options)]);
-}
-
-/**
- * @param {!Object} options
- * @return {Promise<void>}
- */
-async function compileBentoRuntime(options) {
-  await doBuildJs(jsBundles, 'bento.js', {
-    ...options,
-    outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
-  });
-}
-
-/**
- * @typedef {{
- *  minifiedName?: string;
- *  toName?: string;
- *  outputFormat?: string;
- *  esbuild?: boolean;
- *  minify?: boolean;
- *  watch?: boolean;
- *  onWatchBuild?: *;
- *  wrapper?: string;
- *  babelCaller?: string;
- *  remapDependencies?: Object;
- *  externalDependencies?: Array<string>
- * }} CompileBentoCoreOptions
- */
-
-/**
- * @param {CompileBentoCoreOptions} options
- * @return {Promise<void>}
- */
-async function compileBentoCore(options) {
-  const {options: bundleOpts, srcDir, srcFilename} = jsBundles['bento.core.js'];
-  const {minifiedName, toName} = bundleOpts;
-  const filename = `${srcDir}/${srcFilename}`;
-  const fileSource = generateBentoCoreEntrypoint();
-  await fs.outputFile(filename, fileSource);
-
-  const esm = argv.esm || argv.sxg || false;
-  await doBuildJs(jsBundles, 'bento.core.js', {
-    ...options,
-    toName: maybeToNpmEsmName(toName),
-    minifiedName: maybeToNpmEsmName(minifiedName),
-
-    outputFormat: esm ? 'esm' : 'cjs',
-  });
+  await Promise.all([
+    // cdn
+    doBuildJs(jsBundles, 'bento.js', {
+      ...options,
+      outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
+    }),
+    // npm
+    doBuildJs(jsBundles, '@bentoproject/core', {
+      ...options,
+      outputFormat: argv.esm ? 'esm' : 'cjs',
+    }),
+  ]);
 }
 
 /**

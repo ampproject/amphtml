@@ -6,6 +6,7 @@ const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
+const {maybeToNpmEsmName} = require('../tasks/helpers');
 
 /**
  * Used to generate top-level JS build targets
@@ -30,17 +31,15 @@ exports.jsBundles = {
       aliasName: 'custom-elements-polyfill.js',
     },
   },
-  'bento.core.js': {
-    // This file is generated, so we find its source in the build/ dir
-    // See compileBentoCore() and generateBentoCoreEntrypoint()
-    srcDir: 'build/',
-    srcFilename: 'bento.shared.js',
+  '@bentoproject/core': {
+    srcDir: './src/bento/',
+    srcFilename: 'bento.js',
     destDir: './src/bento/core/dist',
     minifiedDestDir: './src/bento/core/dist',
     options: {
       includePolyfills: false,
-      toName: 'bento.core.max.js',
-      minifiedName: 'bento.core.js',
+      toName: maybeToNpmEsmName('bento.core.max.js'),
+      minifiedName: maybeToNpmEsmName('bento.core.js'),
     },
   },
   'alp.max.js': {

@@ -5,6 +5,7 @@ const {lstatSync, readFileSync} = require('fs-extra');
 const {once} = require('../common/once');
 const {bentoBundles} = require('./bundles.config');
 const glob = require('globby');
+const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 
 /**
  * @param {string} path
@@ -55,19 +56,20 @@ let MappingEntryDef;
 /** @return {MappingEntryDef[]}}} */
 function getAllRemappings() {
   // IMPORTANT: cdn mappings must start with ./dist/
-  // TODO(keshavvi): Add npm mappings
 
   // Determine modules to import from shared bento.mjs.
   const coreBentoModules = getExportAll('src/bento/bento.js');
   const coreBentoRemappings = coreBentoModules.map((source) => ({
     source,
     cdn: '../bento.mjs',
+    npm: '@bentoproject/core',
   }));
 
   // Allow component cross-dependency
   const componentRemappings = bentoBundles.map(({name, version}) => ({
     source: `./src/bento/components/${name}/${version}/${name}`,
     cdn: `./${name}-${version}.mjs`,
+    npm: `@bentoproject/${getNameWithoutComponentPrefix(name)}`,
   }));
 
   return /** @type {MappingEntryDef[]} */ (
@@ -102,6 +104,13 @@ function getRemappings(type) {
  */
 const getRemapBentoDependencies = once(() => getRemappings('cdn'));
 
+/**
+ * Remaps imports from source to externals.
+ * @return {{[string: string]: string}}
+ */
+const getRemapBentoNpmDependencies = once(() => getRemappings('npm'));
+
 module.exports = {
   getRemapBentoDependencies,
+  getRemapBentoNpmDependencies,
 };
