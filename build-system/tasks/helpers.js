@@ -133,15 +133,19 @@ async function compileCoreRuntime(options) {
  * @return {Promise<void>}
  */
 async function compileBentoRuntimeAndCore(options) {
+  const bundleName = 'bento.js';
+  const {srcDir, srcFilename} = jsBundles[bundleName];
   await Promise.all([
     // cdn
-    doBuildJs(jsBundles, 'bento.js', {
+    doBuildJs(jsBundles, bundleName, {
       ...options,
       outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
     }),
     // npm
-    doBuildJs(jsBundles, '@bentoproject/core', {
+    compileJs(srcDir, srcFilename, 'src/bento/core/dist', {
       ...options,
+      toName: maybeToNpmEsmName('bento.core.max.js'),
+      minifiedName: maybeToNpmEsmName('bento.core.js'),
       outputFormat: argv.esm ? 'esm' : 'cjs',
     }),
   ]);
@@ -755,8 +759,6 @@ async function getDependencies(entryPoint, options) {
 module.exports = {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoCore,
-  compileBentoRuntime,
   compileBentoRuntimeAndCore,
   compileCoreRuntime,
   compileJs,

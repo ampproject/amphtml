@@ -31,17 +31,6 @@ exports.jsBundles = {
       aliasName: 'custom-elements-polyfill.js',
     },
   },
-  '@bentoproject/core': {
-    srcDir: './src/bento/',
-    srcFilename: 'bento.js',
-    destDir: './src/bento/core/dist',
-    minifiedDestDir: './src/bento/core/dist',
-    options: {
-      includePolyfills: false,
-      toName: maybeToNpmEsmName('bento.core.max.js'),
-      minifiedName: maybeToNpmEsmName('bento.core.js'),
-    },
-  },
   'alp.max.js': {
     srcDir: './ads/alp/',
     srcFilename: 'install-alp.js',
