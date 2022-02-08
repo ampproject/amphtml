@@ -11,33 +11,67 @@ You must include each Bento component's required CSS library to guarantee proper
 Install via npm:
 
 ```sh
-npm install @ampproject/bento-date-display
+npm install @bentoproject/bento-date-display
 ```
 
 ```javascript
-import '@ampproject/bento-date-display';
+import {defineElement as defineBentoDateDisplay} from '@bentoproject/bento-date-display';
+defineBentoDateDisplay();
 ```
 
-### Example: Include via `<script>`
+### Include via `<script>`
 
 ```html
-<head>
-  <script async src="https://cdn.ampproject.org/bento.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
-  <script async src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css">
-</head>
-<body>
-  <bento-date-display
-    datetime="2021-09-09T16:02:08.494Z"
-    displayIn="utc"
-    locale="en-GB"
-  >
-    <template>
-      <div>ISO: {{iso}}; locale: {{localeString}}</div>
-    </template>
-  </bento-date-display>
-</body>
+<script type="module" src="https://cdn.ampproject.org/bento.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/bento.js" crossorigin="anonymous"></script>
+<!-- Include bento-mustache.js to use mustache templates with this component -->
+<script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
+<script type="module" src="https://cdn.ampproject.org/v0/bento-date-display-1.0.mjs" crossorigin="anonymous"></script>
+<script nomodule src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css" crossorigin="anonymous">
+```
+
+### Example
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script async src="https://cdn.ampproject.org/v0/bento-mustache.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-display-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-display-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-date-display-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-date-display
+      datetime="2021-09-09T16:02:08.494Z"
+      displayIn="utc"
+      locale="en-GB"
+    >
+      <template>
+        <div>ISO: {{iso}}; locale: {{localeString}}</div>
+      </template>
+    </bento-date-display>
+  </body>
+</html>
 ```
 
 ### Interactivity and API usage
