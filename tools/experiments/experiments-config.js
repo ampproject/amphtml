@@ -188,10 +188,4 @@ export const EXPERIMENTS = [
     name: 'Load inactive pages outside the viewport to prevent them from counting towards LCP when invisible',
     spec: 'https://github.com/ampproject/amphtml/pull/35323',
   },
-  {
-    id: 'amp-google-read-aloud-player',
-    name: 'AMP player for reading aloud web pages powered by Google',
-    spec: 'https://github.com/ampproject/amphtml/issues/31013',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/37401',
-  },
 ];
