@@ -108,7 +108,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
 
-    // Update teamplet on attachment state update or shopping data update.
+    // Update templet on attachment state update or shopping data update.
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
       () => this.updateTemplate_(),
