@@ -35,3 +35,88 @@ amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
   opacity: 0.55 !important;
   transition: opacity 0.2s cubic-bezier(0, 0, 0.2, 1) !important;
 }
+
+.i-amphtml-story-subscriptions-banner {
+  position: relative !important;
+  width: 100% !important;
+  background: #EBDEC9;
+  border-radius: 16px 16px 0px 0px;
+
+  font-family: Poppins;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 24px;
+  line-height: 24px;
+
+  text-align: center;
+  padding: 23px 0 23px 0;
+}
+
+.i-amphtml-story-subscriptions-title {
+  width: 100%;
+
+  font-family: Poppins;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 24px;
+
+  text-align: center;
+
+  color: #000000;
+
+  margin-top: 31px;
+}
+
+.i-amphtml-story-subscriptions-subtitle-first, .i-amphtml-story-subscriptions-subtitle-second {
+  width: 100%;
+
+  font-family: Poppins;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 22px;
+
+  text-align: center;
+
+  color: #000000;
+}
+
+.i-amphtml-story-subscriptions-subtitle-first {
+  margin-top: 14px;
+}
+
+.i-amphtml-story-subscriptions-signin {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.i-ampthml-story-subscriptions-button-container {
+  display: flex;
+  margin-top: 35px;
+  margin-bottom: 41px;
+  justify-content: center;
+  padding: 0 5%;
+}
+
+.i-ampthml-story-subscriptions-button-google {
+  display: flex;
+}
+
+.i-amphtml-story-subscriptions-button-publisher {
+  background: #000000;
+  margin-left: 20px;
+  border-radius: 100px;
+  height: 40px;
+  width: 142px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.publisher-button-text {
+  z-index: 0;
+  margin-left: 5px;
+  margin-right: 5px;
+  color:#FFFFFF;
+}

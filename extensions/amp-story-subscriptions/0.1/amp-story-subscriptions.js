@@ -4,6 +4,8 @@ import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 
+import {dev} from '#utils/log';
+
 import {CSS} from '../../../build/amp-story-subscriptions-0.1.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 
@@ -36,7 +38,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     // 'limited-content' is for the paywall dialog page, where a paywall would trigger based on both time advance or click events.
     // 'content' is for all the remaining locked pages.
     iterateCursor(
-      document.querySelectorAll('amp-story-page'),
+      this.element.parentElement.getElementsByTagName('amp-story-page'),
       (pageEl, index) => {
         if (index == FIRST_PAYWALL_STORY_PAGE_INDEX) {
           pageEl.setAttribute(SUBSCRIPTIONS_SECTION, 'limited-content');
@@ -48,10 +50,84 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
     // Create a paywall dialog element that have required attributes to be able to be
     // rendered by amp-subscriptions.
-    // TODO(#37285): complete the rest of paywall dialog UI based on the publisher-provided attributes.
     const dialogEl = (
-      <div subscriptions-dialog subscriptions-display="NOT granted"></div>
+      <div subscriptions-dialog subscriptions-display="NOT granted">
+        <div class="i-amphtml-story-subscriptions-banner"></div>
+        <div class="i-amphtml-story-subscriptions-title"></div>
+        <div class="i-amphtml-story-subscriptions-subtitle-first"></div>
+        <div class="i-amphtml-story-subscriptions-subtitle-second"></div>
+        <div class="i-ampthml-story-subscriptions-button-container">
+          <div
+            class="i-ampthml-story-subscriptions-button-google"
+            subscriptions-action="subscribe"
+            subscriptions-display="NOT granted"
+            subscriptions-service="subscribe.google.com"
+            subscriptions-decorate
+          >
+            Subscribe
+          </div>
+          <div
+            class="i-amphtml-story-subscriptions-button-publisher"
+            subscriptions-action="subscribe"
+            subscriptions-display="NOT granted"
+          >
+            <div class="publisher-button-text"></div>
+            <img style="width: 27px; height: 27px;"></img>
+          </div>
+        </div>
+        <div class="i-amphtml-story-subscriptions-signin">
+          Already a subscriber?
+          <a
+            subscriptions-action="login"
+            subscriptions-display="NOT granted"
+            style="text-decoration: underline; font-weight: bold;"
+          >
+            Sign in
+          </a>
+        </div>
+      </div>
     );
+
+    const titleEl = dev().assertElement(
+      dialogEl.querySelector('.i-amphtml-story-subscriptions-title')
+    );
+    titleEl.textContent = this.element.getAttribute('title');
+
+    const logoImg = dev().assertElement(dialogEl.querySelector('img'));
+    logoImg.setAttribute(
+      'src',
+      this.element.getAttribute('publisher-logo-url')
+    );
+
+    const buttonTextEl = dev().assertElement(
+      dialogEl.querySelector('.publisher-button-text')
+    );
+    buttonTextEl.textContent = this.element.getAttribute(
+      'publisher-button-text'
+    );
+
+    if (this.element.hasAttribute('banner-text')) {
+      const bannerEl = dev().assertElement(
+        dialogEl.querySelector('.i-amphtml-story-subscriptions-banner')
+      );
+      bannerEl.textContent = this.element.getAttribute('banner-text');
+    }
+
+    if (this.element.hasAttribute('subtitle-first')) {
+      const subtitleFirstEl = dev().assertElement(
+        dialogEl.querySelector('.i-amphtml-story-subscriptions-subtitle-first')
+      );
+      subtitleFirstEl.textContent = this.element.getAttribute('subtitle-first');
+    }
+
+    if (this.element.hasAttribute('subtitle-second')) {
+      const subtitleSecondEl = dev().assertElement(
+        dialogEl.querySelector('.i-amphtml-story-subscriptions-subtitle-second')
+      );
+      subtitleSecondEl.textContent =
+        this.element.getAttribute('subtitle-second');
+    }
+
     this.element.appendChild(dialogEl);
 
     return Services.storyStoreServiceForOrNull(this.win).then(

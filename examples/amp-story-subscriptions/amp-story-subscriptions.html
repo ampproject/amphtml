@@ -143,6 +143,43 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700" rel="stylesheet">
 
     <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+    <script async custom-element="amp-subscriptions" src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"></script>
+    <script
+      async
+      custom-element="amp-subscriptions-google"
+      src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"
+    ></script>
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "isAccessibleForFree": "False",
+        "isPartOf": {
+          "@type": ["CreativeWork", "Product"],
+          "name" : "Product A",
+          "productID": "scenic-2017.appspot.com:news"
+        }
+      }
+    </script>
+    <script type="application/json" id="amp-subscriptions">
+      {
+        "services": [
+          {
+            "authorizationUrl": "https://scenic-2017.appspot.com/amp-entitlements?pubid=scenic-2017.appspot.com&meter=1&rid=READER_ID",
+            "pingbackUrl": "https://scenic-2017.appspot.com/amp-pingback?pubid=scenic-2017.appspot.com",
+            "actions":{
+              "login": "https://scenic-2017.appspot.com/signin?rid=READER_ID",
+              "subscribe": "https://scenic-2017.appspot.com/subscribe"
+            }
+          },
+          {
+            "serviceId": "subscribe.google.com"
+          }
+        ]
+      }
+    </script>
+    
     <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-subscriptions" src="https://cdn.ampproject.org/v0/amp-story-subscriptions-0.1.js"></script>
@@ -212,9 +249,9 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-subscriptions
-        layout="container"
-      ></amp-story-subscriptions>
+      <amp-story-subscriptions layout='container' banner-text='$0.50/week' title='Culture at your fingertips' subtitle-first='Subscribe for unlimited access.'
+        subtitle-second='Cancel anytime.' publisher-logo-url='../img/amp-story-subscriptions-publisher-icon.png' publisher-button-text='Subscribe'>
+      </amp-story-subscriptions>
     </amp-story>>
   </body>
 </html>
