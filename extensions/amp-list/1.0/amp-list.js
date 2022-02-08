@@ -8,7 +8,6 @@ import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
 
-import {CSS} from '../../../build/amp-list-1.0.css';
 import {FetchJsonUtil} from '../../amp-render/1.0/shared/amp-fetch-utils';
 
 /** @const {string} */
@@ -104,5 +103,5 @@ class AmpList extends setSuperClass(BaseElement, AmpPreactBaseElement) {
 }
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpList, CSS);
+  AMP.registerElement(TAG, AmpList);
 });
