@@ -9,15 +9,21 @@ let defineTemplate;
 module.exports = function (babel) {
   const {types: t} = babel;
 
-  /** @return {string} */
-  function getTemplate() {
+  /**
+   * @param {Object} replacements
+   * @return {babel.Node}
+   */
+  function buildDefineFn(replacements) {
     if (!defineTemplate) {
-      defineTemplate = readFileSync(
+      const templateSource = readFileSync(
         pathJoin(__dirname, 'define-template.js'),
         'utf8'
       );
+      defineTemplate = babel.template(templateSource, {
+        placeholderPattern: /^__[A-Z0-9_]+__$/,
+      });
     }
-    return defineTemplate;
+    return defineTemplate(replacements);
   }
 
   return {
@@ -38,11 +44,8 @@ module.exports = function (babel) {
             dep.value = pathToModuleName(dep.value);
           }
         }
-        const template = getTemplate();
         path.replaceWith(
-          babel.template(template, {
-            placeholderPattern: /^__[A-Z0-9_]+__$/,
-          })({
+          buildDefineFn({
             __ARGS__: path.node.arguments,
             __MODULE_NAME__: `'${pathToModuleName(filename)}'`,
             __ONLY_DEP__:
