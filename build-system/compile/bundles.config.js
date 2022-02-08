@@ -6,7 +6,6 @@ const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
-const {maybeToNpmEsmName} = require('../tasks/helpers');
 
 /**
  * Used to generate top-level JS build targets
