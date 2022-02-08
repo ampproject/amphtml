@@ -1,4 +1,4 @@
-import {BaseElement} from '#bento/components/jwplayer/1.0/base-element';
+import {BaseElement} from '#bento/components/bento-jwplayer/1.0/base-element';
 
 import {isExperimentOn} from '#experiments';
 

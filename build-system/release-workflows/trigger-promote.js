@@ -33,6 +33,7 @@ async function trigger_() {
   const octokit = new Octokit({auth: process.env.GITHUB_TOKEN});
   const inputs = {
     'amp-version': ampVersion,
+    'auto-merge': 'true',
   };
   await octokit.rest.actions.createWorkflowDispatch({
     ...cdnConfigurationParams,

@@ -1,10 +1,12 @@
 {
   "items": [
     {
-      "product-tag-id": "city-pop",
-      "product-title": "Plastic Love",
-      "product-price": 19,
-      "product-price-currency": "JPY"
+      "productId": "art",
+      "productTitle": "Abstract Art",
+      "productBrand": "V. Artsy",
+      "productPrice": 1200.0,
+      "productPriceCurrency": "JPY",
+      "productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
     }
   ]
 }

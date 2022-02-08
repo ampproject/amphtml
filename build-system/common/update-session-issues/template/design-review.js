@@ -14,7 +14,6 @@ const timeRotationUtc = [
   [/* wed */ 3, '21:00', 'Americas'],
   [/* wed */ 3, '16:30', 'Africa/Europe/western Asia'],
   [/* wed */ 3, '21:00', 'Americas'],
-  [/* thu */ 4, '01:00', 'Asia/Oceania'],
 ];
 
 const timeRotationStart = new Date('2021-12-01');

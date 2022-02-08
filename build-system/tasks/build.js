@@ -1,7 +1,7 @@
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoRuntime,
+  compileBentoRuntimeAndCore,
   compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
@@ -49,7 +49,7 @@ async function build() {
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
   } else if (argv.bento_runtime_only) {
-    await compileBentoRuntime(options);
+    await compileBentoRuntimeAndCore(options);
   } else {
     await compileAllJs(options);
   }

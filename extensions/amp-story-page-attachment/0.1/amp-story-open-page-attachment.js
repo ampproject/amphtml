@@ -99,11 +99,6 @@ const ctaLabelFromAttr = (element) =>
  */
 const openLabelOrFallback = (element, attachmentEl, label) => {
   const localizationService = Services.localizationForDoc(element);
-  if (attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT') {
-    return localizationService.getLocalizedString(
-      LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
-    );
-  }
   return (
     label?.trim() ||
     localizationService.getLocalizedString(
@@ -194,10 +189,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     return (
       <div
         class="i-amphtml-story-inline-page-attachment-img"
-        // TODO(alanorozco): This style attr would be nicer as an object.
-        // We need to enable babel-plugin-jsx-style-object in the testing config
-        // so that we can verify results of style objects.
-        style={`background-image: url(${proxied}) !important`}
+        style={{backgroundImage: `url(${proxied}) !important`}}
       ></div>
     );
   };

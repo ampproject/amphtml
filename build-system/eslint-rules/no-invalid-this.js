@@ -2,7 +2,7 @@
 
 // Disables use of the `this` value when we suspect that it is using the
 // implicit global `this`. `this` is only valid inside class
-// methods/constructors, and nested arrow functions.
+// methods/constructors, property definitions, and nested arrow functions.
 //
 // We special case calls to `fn.bind`, `fn.call`, and `fn.apply`, since they
 // are usually forwarding the `this` context and not direclty using it. The
@@ -59,7 +59,11 @@ module.exports = {
 
         for (let i = 0; i < ancestors.length; i++) {
           const ancestor = ancestors[i];
+
           switch (ancestor.type) {
+            case 'PropertyDefinition':
+              return;
+
             case 'FunctionExpression':
               const parent = ancestors[i + 1];
               // Allow functions that are used as methods.

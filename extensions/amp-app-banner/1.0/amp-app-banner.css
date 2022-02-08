@@ -1,0 +1,11 @@
+amp-app-banner {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0;
+  width: 100%;
+  max-height: 100px !important;
+  box-sizing: border-box;
+  background: #fff;
+  z-index: 13;
+  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
+}

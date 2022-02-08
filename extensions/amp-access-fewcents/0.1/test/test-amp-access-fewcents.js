@@ -20,6 +20,15 @@ const TAG = 'amp-access-fewcents';
 
 const TAG_SHORTHAND = 'aaf';
 
+const fewcentsConfigValue = {
+  publisherLogoUrl: 'https://www.jagranimages.com/images/jagran-logo-2021.png',
+  contentSelector: 'amp-access-fewcents-dialog',
+  primaryColor: '',
+  accessKey: 'localhost',
+  category: 'paywall',
+  articleIdentifier: 'mockArticleIdentifier',
+};
+
 const paywallResponse = {
   success: true,
   message: 'Amp article price returned with unlock url.',
@@ -66,15 +75,8 @@ describes.realWin(
       ampdoc = env.ampdoc;
       document = win.document;
 
-      fewcentsConfig = {
-        publisherLogoUrl:
-          'https://www.jagranimages.com/images/jagran-logo-2021.png',
-        contentSelector: 'amp-access-fewcents-dialog',
-        primaryColor: '',
-        accessKey: 'localhost',
-        category: 'paywall',
-        articleIdentifier: 'mockArticleIdentifier',
-      };
+      fewcentsConfig = fewcentsConfigValue;
+      fewcentsConfig['environment'] = 'development';
 
       accessSource = {
         getAdapterConfig: () => {
@@ -100,7 +102,7 @@ describes.realWin(
       xhrMock.verify();
     });
 
-    describe('authorize', () => {
+    describe('authorize on development environment', () => {
       let emptyContainerStub;
       beforeEach(() => {
         emptyContainerStub = env.sandbox.stub(vendor, 'emptyContainer_');
@@ -229,6 +231,90 @@ describes.realWin(
         emptyContainerStub.returns(Promise.resolve());
         return vendor.authorize().then((res) => {
           expect(res.access).to.be.true;
+        });
+      });
+    });
+
+    describe('authorize on demo environment', () => {
+      let emptyContainerStub;
+
+      beforeEach(() => {
+        fewcentsConfig = fewcentsConfigValue;
+        fewcentsConfig['environment'] = 'demo';
+        vendor = new AmpAccessFewcents(accessService, accessSource);
+        emptyContainerStub = env.sandbox.stub(vendor, 'emptyContainer_');
+        env.sandbox.stub(vendor, 'renderPurchaseOverlay_');
+      });
+
+      afterEach(() => {
+        vendor.fewCentsBidId_ = null;
+      });
+
+      it('should show the paywall on demo : authorization response fails - 402 error', () => {
+        accessSourceMock
+          .expects('buildUrl')
+          .returns(Promise.resolve('https://builturl'))
+          .once();
+
+        xhrMock
+          .expects('fetchJson')
+          .returns(
+            Promise.reject({
+              response: {
+                status: 402,
+                json() {
+                  return Promise.resolve(paywallResponse);
+                },
+              },
+            })
+          )
+          .once();
+
+        emptyContainerStub.returns(Promise.resolve());
+        return vendor.authorize().then((res) => {
+          expect(res.access).to.be.false;
+        });
+      });
+    });
+
+    describe('authorize on default environment', () => {
+      let emptyContainerStub;
+
+      beforeEach(() => {
+        fewcentsConfig = fewcentsConfigValue;
+        fewcentsConfig['environment'] = 'production';
+        vendor = new AmpAccessFewcents(accessService, accessSource);
+        emptyContainerStub = env.sandbox.stub(vendor, 'emptyContainer_');
+        env.sandbox.stub(vendor, 'renderPurchaseOverlay_');
+      });
+
+      afterEach(() => {
+        vendor.fewCentsBidId_ = null;
+      });
+
+      it('should show the paywall on demo : authorization response fails - 402 error', () => {
+        accessSourceMock
+          .expects('buildUrl')
+          .returns(Promise.resolve('https://builturl'))
+          .once();
+
+        xhrMock
+          .expects('fetchJson')
+          .returns(
+            Promise.reject({
+              response: {
+                status: 402,
+                json() {
+                  return Promise.resolve(paywallResponse);
+                },
+              },
+            })
+          )
+          .once();
+
+        emptyContainerStub.returns(Promise.resolve());
+        return vendor.authorize().then((res) => {
+          expect(res.access).to.be.false;
         });
       });
     });
