@@ -34,9 +34,6 @@ module.exports = function (babel) {
         }
         const filename = relative(process.cwd(), state.filename);
         for (const dep of deps.elements) {
-          if (!t.isLiteral(dep) || typeof dep.value !== 'string') {
-            throw path.buildCodeFrameError();
-          }
           if (dep.value !== 'exports') {
             dep.value = pathToModuleName(dep.value);
           }
