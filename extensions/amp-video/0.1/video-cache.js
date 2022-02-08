@@ -213,7 +213,7 @@ function requestCachedVideoSources(videoEl, ampdoc) {
     );
     try {
       const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
-      if (inlinedResponseJson['sources']) {
+      if (inlineResponseJson['sources']) {
         return Promise.resolve(inlineResponseJson);
       }
     } catch (err) {
