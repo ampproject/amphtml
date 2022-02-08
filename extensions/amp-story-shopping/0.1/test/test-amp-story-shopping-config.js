@@ -20,8 +20,21 @@ describes.realWin(
   (env) => {
     let pageElement;
 
+    const defaultInlineConfig = {
+      'items': [
+        {
+          'productId': 'art',
+          'productTitle': 'Abstract Art',
+          'productBrand': 'V. Artsy',
+          'productPrice': 1200.0,
+          'productPriceCurrency': 'JPY',
+          'productImages': ['https://source.unsplash.com/BdVQU-NDtA8/500x500'],
+        },
+      ],
+    };
+
     const keyedDefaultInlineConfig = {
-      'art': remoteConfig.items[0],
+      'art': defaultInlineConfig.items[0],
     };
 
     beforeEach(async () => {
@@ -31,14 +44,17 @@ describes.realWin(
 
     async function createAmpStoryShoppingConfig(
       src = null,
-      config = remoteConfig
+      config = defaultInlineConfig
     ) {
       pageElement.appendChild(
         <amp-story-shopping-attachment layout="nodisplay" src={src}>
           <script type="application/json">{JSON.stringify(config)}</script>
         </amp-story-shopping-attachment>
       );
-      return getShoppingConfig(pageElement);
+
+      return getShoppingConfig(
+        pageElement.getElementsByTagName('amp-story-shopping-attachment')[0]
+      );
     }
 
     it('throws on no config', async () => {
