@@ -14,8 +14,8 @@
  *   - Use standard HTML attribute names on elements (`class`, not `className`).
  *   - Dashes are ok, like `data-foo="bar"`.
  *
- * 🚫 No objects in attribute values, like `style={{width: 40}}`
- *   - For `style`, use strings instead.
+ * 🚫 No objects in attribute values, like `class={{foo: true, bar: false}}`
+ *   - Objects in `style` are ok. They're converted to strings during build time.
  *   - For `class`, call `objstr()` or use strings instead.
  *
  * 🚫 No Fragments
