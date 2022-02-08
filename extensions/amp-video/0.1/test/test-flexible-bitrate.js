@@ -173,38 +173,6 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       expect(currentBitrates(v)).to.jsonEqual([2000, 3000, 4000, null]);
     });
 
-    it('should retain order within a given bitrate', () => {
-      const m = getManager('4g');
-      const v = getVideo([4000, 1000, 3000, 2000], ['mkv', 'mp4']);
-      const cacheSource = v.firstElementChild.cloneNode();
-      cacheSource.setAttribute('amp-orig-src', 'CACHE');
-      v.insertBefore(cacheSource, v.firstElementChild);
-      m.sortSources_(v);
-      expect(currentBitrates(v)).to.jsonEqual([
-        2000, 2000, 1000, 1000, 3000, 3000, 4000, 4000, 4000,
-      ]);
-      expect(
-        toArray(childElementsByTag(v, 'source')).map((source) => {
-          return source.getAttribute('type');
-        })
-      ).to.jsonEqual([
-        'video/mkv',
-        'video/mp4',
-        'video/mkv',
-        'video/mp4',
-        'video/mkv',
-        'video/mp4',
-        'video/mkv',
-        'video/mkv',
-        'video/mp4',
-      ]);
-      expect(
-        toArray(childElementsByTag(v, 'source')).map((source) => {
-          return source.getAttribute('amp-orig-src');
-        })
-      ).to.jsonEqual([null, null, null, null, null, null, 'CACHE', null, null]);
-    });
-
     it("should sort sources only when it's not already sorted", () => {
       const m = getManager('4g');
       const v0 = getVideo([4000, 1000, 3000, 2000]);

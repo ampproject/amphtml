@@ -78,7 +78,7 @@ export class AmpVideo extends AMP.BaseElement {
    */
   static prerenderAllowed(element) {
     // Only allow prerender if video sources are cached, or if video has a poster image.
-    return element.getAttribute('poster') || element.hasAttribute('cache');
+    return !!element.getAttribute('poster') || element.hasAttribute('cache');
   }
 
   /**

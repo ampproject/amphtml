@@ -136,11 +136,6 @@ export class Sources {
     const srcAttr = element.getAttribute('src');
     srcEl.setAttribute('src', srcAttr);
 
-    const origSrcAttr = element.getAttribute('amp-orig-src');
-    if (origSrcAttr) {
-      srcEl.setAttribute('amp-orig-src', origSrcAttr);
-    }
-
     const typeAttr = element.getAttribute('type');
     if (typeAttr) {
       srcEl.setAttribute('type', typeAttr);

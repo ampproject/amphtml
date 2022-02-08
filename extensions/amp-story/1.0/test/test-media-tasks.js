@@ -205,18 +205,6 @@ describes.realWin('media-tasks', {}, (env) => {
       expect(el.firstElementChild.getAttribute('src')).to.equal('./foo.mp4');
     });
 
-    it('should propagate the amp-orig-src attribute as a source', () => {
-      el.setAttribute('src', './foo.mp4');
-      el.setAttribute('amp-orig-src', './bar.mp4');
-      const newSources = Sources.removeFrom(win, el);
-      const task = new UpdateSourcesTask(win, newSources);
-      task.execute(el);
-      expect(el.firstElementChild).to.have.attribute('amp-orig-src');
-      expect(el.firstElementChild.getAttribute('amp-orig-src')).to.equal(
-        './bar.mp4'
-      );
-    });
-
     it('should drop sources if a src attribute is specified', () => {
       el.setAttribute('src', './foo.mp4');
       getFakeSources([1, 2, 3]).forEach((source) => {
