@@ -115,7 +115,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         );
         this.checkClearActiveProductData_(isOpen, shoppingData);
         this.updateTemplate_(isOpen, shoppingData);
-      }
+      },
+      true /** callToInitialize */
     );
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
@@ -124,7 +125,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           StateProperty.PAGE_ATTACHMENT_STATE
         );
         this.updateTemplate_(isOpen, shoppingData);
-      }
+      },
+      true /** callToInitialize */
     );
   }
 
@@ -166,31 +168,40 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       shoppingData.activeProductData || singleProductOnPage;
 
     // templateId string used to key already built templates.
-    const templateId = `pdp-${featuredProduct?.productId || 'plp'}`;
+    const templateId = featuredProduct
+      ? `pdp-${featuredProduct.productId}`
+      : 'plp';
 
-    // Iterate over built templates and set active attribute.
-    // If a template is already built, return early.
-    let templateAlreadyBuilt = false;
-    Object.values(this.builtTemplates_).forEach((template) => {
-      if (template === this.builtTemplates_[templateId]) {
-        templateAlreadyBuilt = true;
-        this.mutateElement(() => {
-          template.setAttribute('active', true);
-          this.resetCarouselScroll_(template);
-        });
-      } else {
-        this.mutateElement(() => template.removeAttribute('active'));
-      }
-    });
+    // Remove active attribute from already built templates.
+    Object.values(this.builtTemplates_).forEach((template) =>
+      template.removeAttribute('active')
+    );
 
-    // Early return if template is already built.
-    if (templateAlreadyBuilt) {
-      return;
+    const template = this.getTemplate_(
+      templateId,
+      featuredProduct,
+      shoppingDataForPage
+    );
+    template.setAttribute('active', '');
+    this.resetScroll_(template);
+
+    // If template has not been appended to the dom, append it and assign it to build
+    if (!template.isConnected) {
+      this.builtTemplates_[templateId] = template;
+      this.mutateElement(() => this.templateContainer_.appendChild(template));
     }
+  }
 
-    // If not already built, build template and assign it to builtTemplates_ by templateId.
-    this.builtTemplates_[templateId] = (
-      <div class="i-amphtml-amp-story-shopping" active>
+  /**
+   * Returns template if already built. If not built, returns a built template.
+   * @param {!string} templateId
+   * @param {?ShoppingConfigDataDef} featuredProduct
+   * @param {!Array<!ShoppingConfigDataDef} shoppingDataForPage
+   * @private
+   */
+  getTemplate_(templateId, featuredProduct, shoppingDataForPage) {
+    const buildTemplate = () => (
+      <div class="i-amphtml-amp-story-shopping">
         {featuredProduct && this.renderPdpTemplate_(featuredProduct)}
         {shoppingDataForPage.length > 1 &&
           this.renderPlpTemplate_(
@@ -199,9 +210,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       </div>
     );
 
-    this.mutateElement(() =>
-      this.templateContainer_.appendChild(this.builtTemplates_[templateId])
-    );
+    return this.builtTemplates_[templateId] || buildTemplate();
   }
 
   /**
@@ -218,34 +227,34 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   * On plp card click dispatch shopping data.
    * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
   onPlpCardClick_(shoppingData) {
-    this.scrollToTop_();
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
   }
 
-  /** @private */
-  scrollToTop_() {
+  /**
+   * @param {!Element} template
+   * @private
+   */
+  resetScroll_(template) {
+    // If template contains carousel, reset carousel scroll.
+    template
+      .querySelector('.i-amphtml-amp-story-shopping-pdp-carousel')
+      ?.scroll({
+        left: 0,
+      });
+    // Smooth scroll drawer to top.
     this.element
       .querySelector('.i-amphtml-story-draggable-drawer-container')
       .scroll({
         top: 0,
         behavior: 'smooth',
       });
-  }
-
-  /**
-   * @param {!Element} el
-   * @private
-   */
-  resetCarouselScroll_(el) {
-    el.querySelector('.i-amphtml-amp-story-shopping-pdp-carousel')?.scroll({
-      left: 0,
-    });
   }
 
   /**

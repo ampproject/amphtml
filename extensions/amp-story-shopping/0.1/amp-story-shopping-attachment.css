@@ -17,11 +17,11 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping {
-  display: none;
+  display: none !important;
 }
 
 .i-amphtml-amp-story-shopping[active] {
-  display: block;
+  display: block !important;
 }
 
 /* PLP (Product Listing Page). */
@@ -33,7 +33,7 @@ amp-story-shopping-attachment a {
 .i-amphtml-amp-story-shopping-plp-header {
   font-weight: 600 !important;
   font-size: 1.5em !important;
-  margin: var(--i-amphtml-shopping-attachment-vertical-padding) 0 var(--i-amphtml-shopping-attachment-vertical-padding) !important;
+  margin: var(--i-amphtml-shopping-attachment-vertical-padding) 0 !important;
 }
 
 .i-amphtml-amp-story-shopping-plp-cards {
