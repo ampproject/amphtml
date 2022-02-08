@@ -1,8 +1,6 @@
 import '../amp-google-read-aloud-player';
 
-
 import {createElementWithAttributes} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 
