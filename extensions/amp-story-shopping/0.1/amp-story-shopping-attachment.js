@@ -160,17 +160,14 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
     );
 
-    // If there is only one product on the page, feature it.
-    // Otherwise feature the active product.
-    const singleProductOnPage =
-      shoppingDataForPage.length === 1 && shoppingDataForPage[0];
-    const featuredProduct =
-      shoppingData.activeProductData || singleProductOnPage;
+    let productForPdp = shoppingData.activeProductData;
+    // If no active product and only one product on page, use the one product for the PDP.
+    if (!shoppingData.activeProductData && shoppingDataForPage.length === 1) {
+      productForPdp = shoppingDataForPage[0];
+    }
 
     // templateId string used to key already built templates.
-    const templateId = featuredProduct
-      ? `pdp-${featuredProduct.productId}`
-      : 'plp';
+    const templateId = productForPdp ? `pdp-${productForPdp.productId}` : 'plp';
 
     // Remove active attribute from already built templates.
     Object.values(this.builtTemplates_).forEach((template) =>
@@ -179,13 +176,13 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     const template = this.getTemplate_(
       templateId,
-      featuredProduct,
+      productForPdp,
       shoppingDataForPage
     );
     template.setAttribute('active', '');
     this.resetScroll_(template);
 
-    // If template has not been appended to the dom, append it and assign it to build
+    // If template has not been appended to the dom, append it and assign it to built templates.
     if (!template.isConnected) {
       this.builtTemplates_[templateId] = template;
       this.mutateElement(() => this.templateContainer_.appendChild(template));
@@ -195,17 +192,19 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /**
    * Returns template if already built. If not built, returns a built template.
    * @param {!string} templateId
-   * @param {?ShoppingConfigDataDef} featuredProduct
+   * @param {?ShoppingConfigDataDef} productForPdp
    * @param {!Array<!ShoppingConfigDataDef} shoppingDataForPage
    * @private
    */
-  getTemplate_(templateId, featuredProduct, shoppingDataForPage) {
+  getTemplate_(templateId, productForPdp, shoppingDataForPage) {
     const buildTemplate = () => (
       <div class="i-amphtml-amp-story-shopping">
-        {featuredProduct && this.renderPdpTemplate_(featuredProduct)}
+        {/* If there is a product for the PDP, render PDP. */}
+        {productForPdp && this.renderPdpTemplate_(productForPdp)}
+        {/* If there is more than one product on the page, render PLP. */}
         {shoppingDataForPage.length > 1 &&
           this.renderPlpTemplate_(
-            shoppingDataForPage.filter((item) => item !== featuredProduct)
+            shoppingDataForPage.filter((item) => item !== productForPdp)
           )}
       </div>
     );
