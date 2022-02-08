@@ -18,81 +18,76 @@ import {
 let ShoppingConfigResponseDef;
 
 /**
- * Validates string length of shopping config attributes
- * @param {?string} field
- * @param {?string} value
- * @return {!Array<string>}
+ * Validates if a required field exists for shopping config attributes
+ * @param {string} field
+ * @param {?string=} value
  */
-function validateRequired(field, value) {
-  if (value === undefined) {
+function validateRequired(field, value = null) {
+  if (value == null) {
     throw Error(`Field ${field} is required.`);
   }
 }
+/**
+ * Max Length of strings allowed in shopping config.
+ */
+const MAX_STR_LEN = 100;
 
 /**
  * Validates string length of shopping config attributes
- * @param {?string} field
- * @param {?string} str
- * @param {?number} maxLen
- * @return {!Array<string>}
+ * @param {string} field
+ * @param {?string=} str
  */
-function validateStringLength(field, str, maxLen = 100) {
-  if (str !== undefined && str.length > maxLen) {
+function validateStringLength(field, str = undefined) {
+  if (str !== undefined && str.length > MAX_STR_LEN) {
     throw Error(
-      `Length of ${field} exceeds max length: ${str.length} > ${maxLen}`
+      `Length of ${field} exceeds max length: ${str.length} > ${MAX_STR_LEN}`
     );
   }
 }
 
 /**
  * Validates number in shopping config attributes
- * @param {?string} field
- * @param {?number} number
- * @return {!Array<string>}
+ * @param {string} field
+ * @param {?number=} number
  */
-function validateNumber(field, number) {
-  if (number !== undefined && isNaN(number)) {
+function validateNumber(field, number = null) {
+  if (number != null && isNaN(number)) {
     throw Error(`Value for field ${field} is not a number`);
   }
 }
 
 /**
  * Validates url of shopping config attributes
- * @param {?string} field
- * @param {!Array<string>} url
- * @return {!Array<string>}
+ * @param {string} field
+ * @param {?Array<string>=} url
  */
-function validateURL(field, url) {
-  if (url === undefined) {
+function validateURLs(field, url = null) {
+  if (url == null) {
     /* Not a Required Attribute, return.*/
     return;
   }
 
   const urls = Array.isArray(url) ? url : [url];
 
-  return urls.map((url) => {
-    try {
-      assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
-    } catch (e) {
-      return e.message;
-    }
+  urls.forEach((url) => {
+    assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
   });
 }
 
-/** @private @const {!Object<Array<Function>>} */
-const productValidationConfig_ = {
+/** @const {!Object<string, !Array<function>>} */
+const PRODUCT_VALIDATION_CONFIG = {
   /* Required Attrs */
   'productId': [validateRequired, validateStringLength],
   'productTitle': [validateRequired, validateStringLength],
   'productPrice': [validateRequired, validateNumber],
-  'productImages': [validateRequired, validateURL],
+  'productImages': [validateRequired, validateURLs],
   'productPriceCurrency': [validateRequired, validateStringLength],
   /* Optional Attrs */
   'productColor': [validateStringLength],
   'productSize': [validateStringLength],
-  'productIcon': [validateURL],
+  'productIcon': [validateURLs],
   'productTagText': [validateStringLength],
-  'reviewsData': [validateURL],
+  'reviewsData': [validateURLs],
   'ctaText': [validateNumber],
   'shippingText': [validateNumber],
 };
@@ -102,13 +97,13 @@ const productValidationConfig_ = {
  * @param {!ShoppingConfigDataDef} shoppingConfig
  */
 function validateConfig(shoppingConfig) {
-  Object.keys(productValidationConfig_).forEach((configKey) => {
-    const validationFunctions = productValidationConfig_[configKey];
+  Object.keys(PRODUCT_VALIDATION_CONFIG).forEach((configKey) => {
+    const validationFunctions = PRODUCT_VALIDATION_CONFIG[configKey];
     validationFunctions.forEach((fn) => {
       try {
         fn(configKey, shoppingConfig[configKey]);
       } catch (err) {
-        user().warn('ERROR', `amp-story-shopping-config: ${err}`);
+        user().warn('AMP-STORY-SHOPPING-CONFIG', `${err}`);
       }
     });
   });

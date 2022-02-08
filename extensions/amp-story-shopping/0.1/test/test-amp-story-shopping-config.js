@@ -16,6 +16,10 @@ import {
   storeShoppingConfig,
 } from '../amp-story-shopping-config';
 
+const keyedDefaultInlineConfig = {
+  'art': configData.items[0],
+};
+
 describes.realWin(
   'amp-story-shopping-config-v0.1',
   {
@@ -28,6 +32,7 @@ describes.realWin(
     let win;
     let storeService;
     let userWarnStub;
+    let pageElement;
 
     beforeEach(async () => {
       win = env.win;
@@ -36,22 +41,13 @@ describes.realWin(
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
+      pageElement = <amp-story-page id="page1"></amp-story-page>;
+      env.win.document.body.appendChild(pageElement);
     });
-
-    let pageElement;
 
     it('should build shopping config component', async () => {
       await createAmpStoryShoppingConfig();
       expect(() => getShoppingConfig(pageElement)).to.not.throw();
-    });
-
-    const keyedDefaultInlineConfig = {
-      'art': configData.items[0],
-    };
-
-    beforeEach(async () => {
-      pageElement = <amp-story-page id="page1"></amp-story-page>;
-      env.win.document.body.appendChild(pageElement);
     });
 
     async function createAmpStoryShoppingConfig(
