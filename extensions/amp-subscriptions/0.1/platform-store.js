@@ -30,7 +30,7 @@ export class PlatformStore {
    * @param {!JsonObject|Object<string, number>} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
    * @param {Object<string, !./subscription-platform.SubscriptionPlatform>=} opt_Platforms
-   * @param {} opt_externalOnEntitlementResolvedCallbacks
+   * @param {!Observable<!EntitlementChangeEventDef>} opt_externalOnEntitlementResolvedCallbacks
    */
   constructor(
     platformKeys,

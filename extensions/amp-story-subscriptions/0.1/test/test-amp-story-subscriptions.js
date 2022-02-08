@@ -56,6 +56,8 @@ describes.realWin(
         });
       story = await storyEl.getImpl();
 
+      AmpStory.isBrowserSupported = () => true;
+
       return pageArray;
     }
 
