@@ -1,4 +1,7 @@
+// @ts-ignore
 import {boolean, select, withKnobs} from '@storybook/addon-knobs';
+
+import {Loading_Enum} from '#core/constants/loading-instructions';
 
 import * as Preact from '#preact';
 import {WithAmpContext, useAmpContext, useLoading} from '#preact/context';
@@ -29,7 +32,7 @@ export const _default = () => {
 };
 
 /**
- * @return {PreactDef.Renderable}
+ * @return {import('preact').VNode}
  */
 function Composite() {
   return (
@@ -47,12 +50,12 @@ function Composite() {
 }
 
 /**
- * @param {{title: string, loading: string}} props
- * @return {PreactDef.Renderable}
+ * @param {{title: string, loading?: string}} props
+ * @return {import('preact').VNode}
  */
 function Info({loading: loadingProp, title, ...rest}) {
   const {loading: loadingContext, playable, renderable} = useAmpContext();
-  const loading = useLoading(loadingProp);
+  const loading = useLoading(loadingProp ?? Loading_Enum.AUTO);
   const load = loading != 'unload';
   const infoStyle = {border: '1px dotted gray', margin: 8};
   const imgStyle = {
