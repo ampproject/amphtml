@@ -22,6 +22,11 @@ const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
 const {resolvePath} = require('../babel-config/import-resolver');
+const babel = require('@babel/core');
+const Remapping = require('@ampproject/remapping');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -403,39 +408,40 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     } else {
       result = await result.rebuild();
     }
-    let code = result.outputFiles.find(({path}) => !path.endsWith('.map')).text;
-    let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
+
+    const {outputFiles} = result;
+
+    let code = outputFiles.find(({path}) => !path.endsWith('.map')).text;
+    let map = JSON.parse(
+      result.outputFiles.find(({path}) => path.endsWith('.map')).text
+    );
+
+    const sourceMapComment = `//# sourceMappingURL=${destFilename}.map`;
+
+    if (options.outputFormat === 'amd') {
+      const result = await babel.transformAsync(code, {
+        caller: {name: 'amd'},
+        inputSourceMap: map,
+        filename: destFile,
+        sourceRoot: path.dirname(destFile),
+        sourceMaps: true,
+      });
+      code = `${result?.code}${sourceMapComment}`;
+      map = result?.map;
+    }
 
     if (options.minify) {
-      const {code: minified, map: minifiedMap} = await minify(code);
-      code = minified;
-      map = await massageSourcemaps([minifiedMap, map], babelMaps, options);
-    } else {
-      map = await massageSourcemaps([map], babelMaps, options);
+      const result = await minify(code);
+      code = `${result.code}${sourceMapComment}`;
+      map = remapping([result.map, map], () => null, !argv.full_sourcemaps);
     }
+
+    massageSourcemaps(map, options);
 
     await Promise.all([
       fs.outputFile(destFile, code),
-      fs.outputFile(`${destFile}.map`, map),
+      fs.outputJson(`${destFile}.map`, map),
     ]);
-
-    // TODO(alanorozco): Sourcemaps are probably very broken.
-    if (options.outputFormat === 'amd') {
-      await esbuild.build({
-        entryPoints: [destFile],
-        outfile: destFile,
-        bundle: true,
-        sourceRoot: path.dirname(destFile),
-        format: 'cjs',
-        target: 'es5',
-        plugins: [getEsbuildBabelPlugin('amd', /* cache */ true)],
-        allowOverwrite: true,
-        incremental: !!options.watch,
-        logLevel: 'silent',
-        write: true,
-        minify: options.minify,
-      });
-    }
 
     await finishBundle(destDir, destFilename, options, startTime);
   }
