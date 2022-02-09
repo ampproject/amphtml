@@ -42,23 +42,21 @@ describes.realWin(
      * @param {Array<string>=} ids
      * @return {!Array<!Element>}
      */
-    async function createStoryWithPages(count, ids = [], autoAdvance = false) {
-      const pageArray = Array(count)
+    async function createStoryWithPages(count, ids = []) {
+      Array(count)
         .fill(undefined)
         .map((unused, i) => {
-          const page = doc.createElement('amp-story-page');
-          if (autoAdvance) {
-            page.setAttribute('auto-advance-after', '2s');
-          }
-          page.id = ids && ids[i] ? ids[i] : `-page-${i}`;
+          const page = (
+            <amp-story-page
+              auto-advance-after="2s"
+              id={ids && ids[i] ? ids[i] : `-page-${i}`}
+            ></amp-story-page>
+          );
           storyEl.appendChild(page);
-          return page;
         });
-      story = await storyEl.getImpl();
 
       AmpStory.isBrowserSupported = () => true;
-
-      return pageArray;
+      story = await storyEl.getImpl();
     }
 
     beforeEach(async () => {

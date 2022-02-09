@@ -1323,8 +1323,6 @@ export class AmpStory extends AMP.BaseElement {
             Action.TOGGLE_SUBSCRIPTIONS_DIALOG,
             false
           );
-
-          this.switchTo_(this.activePage_.element.id, NavigationDirection.NEXT);
         }
       });
       return Promise.resolve();
