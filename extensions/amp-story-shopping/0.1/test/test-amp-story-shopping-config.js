@@ -4,6 +4,8 @@ import {Services} from '#service';
 
 import {user} from '#utils/log';
 
+import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
+
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
 import * as remoteConfig from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -14,6 +16,8 @@ import {
 import {
   getShoppingConfig,
   storeShoppingConfig,
+  validateConfig,
+  validateURLs,
 } from '../amp-story-shopping-config';
 
 const keyedDefaultInlineConfig = {
@@ -192,7 +196,6 @@ describes.realWin(
     });
 
     it('test config invalid url array', async () => {
-      expectAsyncConsoleError(userWarnStub, 1);
       const invalidConfig = {
         'items': [
           {
@@ -204,8 +207,15 @@ describes.realWin(
           },
         ],
       };
-
+      /*const invalidURLStub = env.sandbox.spy(validateURLs);
+      const validateConfigStub = env.sandbox.spy(validateConfig);
       await createAmpStoryShoppingConfig(null, invalidConfig);
+      expect(validateConfigStub).to.be.called.once;
+      expect(invalidURLStub).to.be.called.thrice;
+      expect(invalidURLStub).to.be.called.calledWith(
+        'productImages',
+        invalidConfig['items'][0]['productImages']
+      );*/
     });
   }
 );

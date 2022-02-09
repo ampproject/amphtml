@@ -61,7 +61,7 @@ function validateNumber(field, number = null) {
  * @param {string} field
  * @param {?Array<string>=} url
  */
-function validateURLs(field, url = null) {
+export function validateURLs(field, url = null) {
   if (url == null) {
     /* Not a Required Attribute, return.*/
     return;
@@ -96,7 +96,7 @@ const PRODUCT_VALIDATION_CONFIG = {
  * Validates shopping config.
  * @param {!ShoppingConfigDataDef} shoppingConfig
  */
-function validateConfig(shoppingConfig) {
+export function validateConfig(shoppingConfig) {
   Object.keys(PRODUCT_VALIDATION_CONFIG).forEach((configKey) => {
     const validationFunctions = PRODUCT_VALIDATION_CONFIG[configKey];
     validationFunctions.forEach((fn) => {
