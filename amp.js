@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-//
+
 const {
   createTask,
   finalizeRunner,
