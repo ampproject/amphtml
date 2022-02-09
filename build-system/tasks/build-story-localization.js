@@ -54,10 +54,10 @@ async function getLanguageStrings() {
 
 /**
  * Retrieves the fallback language codes for each current locale
- * and assigns any strings from the fallback language.
+ * and merges any strings from the fallback language.
  * @param {Object} languages
  */
-function ensureFallbacks(languages) {
+function mergeFallbacks(languages) {
   for (const langKey in languages) {
     languages[langKey] = getLanguageCodeFallbacks(langKey)
       .map((x) => languages[x])
@@ -73,7 +73,7 @@ async function writeStoryLocalizationFiles() {
   const startTime = Date.now();
   await fs.ensureDir(dest);
   const languages = await getLanguageStrings();
-  ensureFallbacks(languages);
+  mergeFallbacks(languages);
   // Write out each individual lang file.
   for (const langKey in languages) {
     await fs.writeJson(`${dest}/amp-story.${langKey}.json`, languages[langKey]);
