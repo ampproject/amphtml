@@ -5,8 +5,9 @@ const pathMod = require('path');
 const dest = 'dist/v0';
 
 /**
- * Normalizes the json locale strings and writes them out to the dist
- * directory.
+ * Flattens the structure of the json locale strings and writes them out to the
+ * dist directory.
+ * @return {Promise<void>}
  */
 async function buildStoryLocalization() {
   await fs.ensureDir(dest);
@@ -19,11 +20,15 @@ async function buildStoryLocalization() {
       translations[key] = value['string'];
     }
     langs[langKey] = translations;
-    await fs.writeFile(`${dest}/amp-story.${langKey}.json`, JSON.stringify(translations));
+    await fs.writeFile(
+      `${dest}/amp-story.${langKey}.json`,
+      JSON.stringify(translations)
+    );
   }
   await fs.writeFile(`${dest}/amp-story.all-lang.json`, JSON.stringify(langs));
 }
 
 module.exports = {buildStoryLocalization};
 
-buildStoryLocalization.description = 'Normalizes the json locale strings and writes them out to the dist directory';
+buildStoryLocalization.description =
+  'Flattens the structure of the json locale strings and writes them out to the dist directory';
