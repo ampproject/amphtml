@@ -15,6 +15,7 @@ const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
 const {parseExtensionFlags} = require('./extension-helpers');
+const {buildStoryLocalization} = require('./build-story-localization');
 
 const argv = require('minimist')(process.argv.slice(2));
 
@@ -26,7 +27,11 @@ const argv = require('minimist')(process.argv.slice(2));
  * @return {Promise}
  */
 async function runPreBuildSteps(options) {
-  return Promise.all([compileCss(options), bootstrapThirdPartyFrames(options)]);
+  return Promise.all([
+    buildStoryLocalization(),
+    compileCss(options),
+    bootstrapThirdPartyFrames(options),
+  ]);
 }
 
 /**
