@@ -46,10 +46,6 @@ amp-story-shopping-tag {
   margin-inline-start: 4px !important;
 }
 
-.i-amphtml-amp-story-shopping-tag-dot-flipped {
-  margin-inline-start: 4px !important;
-}
-
 .i-amphtml-amp-story-shopping-tag-dot {
   width: 16px !important;
   height: 16px !important;
@@ -82,6 +78,7 @@ amp-story-shopping-tag {
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   backdrop-filter: var(--i-amphtml-shopping-tag-backdrop-filter) !important;
   padding: 4px 0px !important;
+  margin-inline-end: 4px !important;
 }
 
 .i-amphtml-story-shopping-tag-pill-multi-line {
