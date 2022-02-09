@@ -1284,6 +1284,19 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    if (
+      isExperimentOn(this.win, 'amp-story-paywall-exp') &&
+      targetPage.isPaywallProtected()
+    ) {
+      if (this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE)) {
+        // Subscription dialog is already triggered.
+        return Promise.resolve();
+      }
+      this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
+
+      // TODO(#37285): add SubscriptionService to actually trigger the subscription dialog.
+    }
+
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
     if (!targetPage.isAd()) {

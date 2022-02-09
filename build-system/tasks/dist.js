@@ -5,7 +5,7 @@ const path = require('path');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoRuntime,
+  compileBentoRuntimeAndCore,
   compileCoreRuntime,
   compileJs,
   endBuildStep,
@@ -116,7 +116,7 @@ async function dist() {
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
   } else if (argv.bento_runtime_only) {
-    await compileBentoRuntime(options);
+    await compileBentoRuntimeAndCore(options);
   } else {
     await Promise.all([
       writeVersionFiles(),
@@ -205,10 +205,6 @@ function buildLoginDone(version) {
     minify: true,
     minifiedName,
     aliasName,
-    extraGlobs: [
-      `${buildDir}/amp-login-done-0.1.max.js`,
-      `${buildDir}/amp-login-done-dialog.js`,
-    ],
   });
 }
 
@@ -228,7 +224,6 @@ async function buildWebPushPublisherFiles() {
         includePolyfills: true,
         minify: true,
         minifiedName,
-        extraGlobs: [`${tempBuildDir}/*.js`],
       });
     }
   }
