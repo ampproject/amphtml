@@ -103,8 +103,8 @@ amp-story-shopping-tag {
   background-repeat: no-repeat !important;
   background-position: center !important;
   flex-shrink: 0 !important;
-  margin: 2px 4px 2px 2px !important;
   margin-inline-start: 9px !important;
+  margin-inline-end: 4px !important;
 }
 
 .i-amphtml-amp-story-shopping-tag-pill-text {
