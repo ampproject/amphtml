@@ -22,7 +22,7 @@ let ShoppingConfigResponseDef;
  * @param {string} field
  * @param {?string=} value
  */
-function validateRequired(field, value = null) {
+export function validateRequired(field, value = null) {
   if (value == null) {
     throw Error(`Field ${field} is required.`);
   }
@@ -30,14 +30,14 @@ function validateRequired(field, value = null) {
 /**
  * Max Length of strings allowed in shopping config.
  */
-const MAX_STR_LEN = 100;
+export const MAX_STR_LEN = 100;
 
 /**
  * Validates string length of shopping config attributes
  * @param {string} field
  * @param {?string=} str
  */
-function validateStringLength(field, str = undefined) {
+export function validateStringLength(field, str = undefined) {
   if (str !== undefined && str.length > MAX_STR_LEN) {
     throw Error(
       `Length of ${field} exceeds max length: ${str.length} > ${MAX_STR_LEN}`
@@ -50,9 +50,9 @@ function validateStringLength(field, str = undefined) {
  * @param {string} field
  * @param {?number=} number
  */
-function validateNumber(field, number = null) {
+export function validateNumber(field, number = null) {
   if (number != null && isNaN(number)) {
-    throw Error(`Value for field ${field} is not a number`);
+    throw Error(`Value ${number} for field ${field} is not a number`);
   }
 }
 
@@ -75,7 +75,7 @@ export function validateURLs(field, url = null) {
 }
 
 /** @const {!Object<string, !Array<function>>} */
-const PRODUCT_VALIDATION_CONFIG = {
+export const PRODUCT_VALIDATION_CONFIG = {
   /* Required Attrs */
   'productId': [validateRequired, validateStringLength],
   'productTitle': [validateRequired, validateStringLength],

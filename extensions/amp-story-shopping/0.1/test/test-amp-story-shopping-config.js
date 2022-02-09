@@ -4,8 +4,6 @@ import {Services} from '#service';
 
 import {user} from '#utils/log';
 
-import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
-
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
 import * as remoteConfig from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -14,9 +12,13 @@ import {
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {
+  MAX_STR_LEN,
+  PRODUCT_VALIDATION_CONFIG,
   getShoppingConfig,
   storeShoppingConfig,
-  validateConfig,
+  validateNumber,
+  validateRequired,
+  validateStringLength,
   validateURLs,
 } from '../amp-story-shopping-config';
 
@@ -152,8 +154,23 @@ describes.realWin(
       });
     });
 
+    it('test validate required fields for config', async () => {
+      const invalidConfig = {
+        'items': [{}],
+      };
+
+      await createAmpStoryShoppingConfig(null, invalidConfig);
+
+      for (const [key, value] of Object.entries(PRODUCT_VALIDATION_CONFIG)) {
+        if (value.includes(validateRequired)) {
+          expect(() => {
+            validateRequired(key, invalidConfig['items'][0][key]);
+          }).to.throw(`Field ${key} is required.`);
+        }
+      }
+    });
+
     it('test config string too long', async () => {
-      expectAsyncConsoleError(userWarnStub, 1);
       const invalidConfig = {
         'items': [
           {
@@ -172,15 +189,22 @@ describes.realWin(
       };
 
       await createAmpStoryShoppingConfig(null, invalidConfig);
+      expect(() => {
+        validateStringLength(
+          'productTitle',
+          invalidConfig['items'][0]['productTitle']
+        );
+      }).to.throw(
+        `Length of productTitle exceeds max length: ${invalidConfig['items'][0]['productTitle'].length} > ${MAX_STR_LEN}`
+      );
     });
 
     it('test config not a number', async () => {
-      expectAsyncConsoleError(userWarnStub, 1);
       const invalidConfig = {
         'items': [
           {
             'productId': 'city-pop',
-            'productTitle': 'Plastic Love',
+            'productTitle': 'Adventure',
             'productPrice': 'two dozen watermelons',
             /* Not an actual price */
             'productPriceCurrency': 'JPY',
@@ -193,6 +217,15 @@ describes.realWin(
       };
 
       await createAmpStoryShoppingConfig(null, invalidConfig);
+
+      expect(() => {
+        validateNumber(
+          'productPrice',
+          invalidConfig['items'][0]['productPrice']
+        );
+      }).to.throw(
+        `Value ${invalidConfig['items'][0]['productPrice']} for field productPrice is not a number`
+      );
     });
 
     it('test config invalid url array', async () => {
@@ -200,22 +233,23 @@ describes.realWin(
         'items': [
           {
             'productId': 'city-pop',
-            'productTitle': 'Plastic Love',
+            'productTitle': 'Adventure',
             'productPrice': 19,
             'productPriceCurrency': 'JPY',
             'productImages': ['http://pizazz', 'http://zapp'],
           },
         ],
       };
-      /*const invalidURLStub = env.sandbox.spy(validateURLs);
-      const validateConfigStub = env.sandbox.spy(validateConfig);
-      await createAmpStoryShoppingConfig(null, invalidConfig);
-      expect(validateConfigStub).to.be.called.once;
-      expect(invalidURLStub).to.be.called.thrice;
-      expect(invalidURLStub).to.be.called.calledWith(
-        'productImages',
-        invalidConfig['items'][0]['productImages']
-      );*/
+
+      expect(() => {
+        validateURLs(
+          'productImages',
+          invalidConfig['items'][0]['productImages']
+        );
+      }).to.throw(
+        'amp-story-shopping-config productImages source must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ' +
+          invalidConfig['items'][0]['productImages'][0]
+      );
     });
   }
 );
