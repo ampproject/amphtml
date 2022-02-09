@@ -26,6 +26,7 @@ interface CommonDatePickerProps {
   monthFormat: string;
   numberOfMonths: number;
   onError: (message: string) => void;
+  openAfterClear: boolean;
   openAfterSelect: boolean;
   weekDayFormat: string;
   children?: Element;

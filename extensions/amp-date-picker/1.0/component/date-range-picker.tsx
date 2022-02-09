@@ -58,6 +58,7 @@ function DateRangePickerWithRef(
     monthFormat,
     numberOfMonths,
     onError,
+    openAfterClear,
     openAfterSelect,
     startInputSelector,
     weekDayFormat,
@@ -261,7 +262,17 @@ function DateRangePickerWithRef(
     setMonth(initialVisibleMonth);
     startDateInput.clear();
     endDateInput.clear();
-  }, [initialVisibleMonth, startDateInput, endDateInput]);
+
+    if (openAfterClear) {
+      transitionTo('overlay-open-input');
+    }
+  }, [
+    initialVisibleMonth,
+    startDateInput,
+    endDateInput,
+    openAfterClear,
+    transitionTo,
+  ]);
 
   useImperativeHandle(
     ref,

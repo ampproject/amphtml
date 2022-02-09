@@ -1,3 +1,4 @@
+import {expect} from 'chai';
 import {format} from 'date-fns';
 import {mount} from 'enzyme';
 import {RRule} from 'rrule';
@@ -1188,6 +1189,27 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         expect(wrapper.find('input').getDOMNode().value).to.equal('');
       });
 
+      it('reopens the picker if openAfterClear is true', () => {
+        wrapper = mount(
+          <BentoDatePicker
+            ref={ref}
+            initialVisibleMonth={new Date(2022, 0)}
+            inputSelector="[name=date]"
+            mode="overlay"
+            openAfterClear
+          >
+            <input name="date" value="2022-01-01" />
+          </BentoDatePicker>
+        );
+
+        expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+
+        ref.current.clear();
+        wrapper.update();
+
+        expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+      });
+
       it('can set the date', () => {
         ref.current.setDate(new Date(2022, 0, 21));
         wrapper.update();
@@ -1246,6 +1268,30 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         expect(
           wrapper.find('input[name="enddate"]').getDOMNode().value
         ).to.equal('');
+      });
+
+      it('reopens the picker if openAfterClear is true', () => {
+        wrapper = mount(
+          <BentoDatePicker
+            ref={ref}
+            type="range"
+            initialVisibleMonth={new Date(2022, 0)}
+            startInputSelector="[name=startdate]"
+            endInputSelector="[name=enddate]"
+            mode="overlay"
+            openAfterClear
+          >
+            <input name="startdate" value="2022-01-01" />
+            <input name="enddate" value="2022-01-02" />
+          </BentoDatePicker>
+        );
+
+        expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+
+        ref.current.clear();
+        wrapper.update();
+
+        expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
       });
 
       it('can set the start and end dates', () => {

@@ -48,7 +48,6 @@ BaseElement['props'] = {
     attr: 'open-after-select',
     parseAttr: parseBooleanAttribute,
   },
-  // Not implemented
   'openAfterClear': {
     attr: 'open-after-clear',
     parseAttr: parseBooleanAttribute,

@@ -42,6 +42,7 @@ function SingleDatePickerWithRef(
     monthFormat,
     numberOfMonths,
     onError,
+    openAfterClear,
     openAfterSelect,
     weekDayFormat,
   }: SingleDatePickerProps,
@@ -116,7 +117,11 @@ function SingleDatePickerWithRef(
   const clear = useCallback(() => {
     dateInput.clear();
     setMonth(initialVisibleMonth);
-  }, [initialVisibleMonth, dateInput]);
+
+    if (openAfterClear) {
+      transitionTo('overlay-open-input');
+    }
+  }, [initialVisibleMonth, dateInput, transitionTo, openAfterClear]);
 
   /**
    * Generate a name for a hidden input.
