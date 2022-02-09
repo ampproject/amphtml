@@ -1,7 +1,7 @@
 import {isValid} from 'date-fns';
 // TODO: Fix this
 // eslint-disable-next-line local/no-import
-import {ComponentProps, Ref} from 'preact';
+// import {ComponentProps, Ref} from 'preact';
 
 import {Keys_Enum} from '#core/constants/key-codes';
 import {
@@ -29,7 +29,10 @@ import {useDay} from './use-day';
 import {DateFieldNameByType, FORM_INPUT_SELECTOR, TAG} from '../constants';
 import {getCurrentDate, getFormattedDate} from '../date-helpers';
 import {parseDate} from '../parsers';
-import {SingleDatePickerAPI, SingleDatePickerProps} from '../types';
+import {
+  // SingleDatePickerAPI,
+  SingleDatePickerProps,
+} from '../types';
 
 function SingleDatePickerWithRef(
   {
@@ -46,12 +49,14 @@ function SingleDatePickerWithRef(
     openAfterSelect,
     weekDayFormat,
   }: SingleDatePickerProps,
-  ref: Ref<SingleDatePickerAPI>
+  // ref: Ref<SingleDatePickerAPI>
+  ref: any
 ) {
   const containerRef = useRef<HTMLElement>(null);
 
-  const [hiddenInputProps, setHiddenInputProps] =
-    useState<ComponentProps<'input'>>();
+  // const [hiddenInputProps, setHiddenInputProps] =
+  //   useState<ComponentProps<'input'>>();
+  const [hiddenInputProps, setHiddenInputProps] = useState<any>();
 
   const [month, setMonth] = useState<Date>(initialVisibleMonth);
 

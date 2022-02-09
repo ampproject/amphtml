@@ -7,6 +7,7 @@ import {BentoDatePicker} from '../component/component.tsx';
 import {useDatePicker} from '../component/use-date-picker';
 import {getFormattedDate} from '../date-helpers';
 import {localeMap} from '../parsers';
+import '../amp-date-picker.css';
 
 const today = new Date();
 
