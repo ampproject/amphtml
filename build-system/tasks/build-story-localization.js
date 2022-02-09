@@ -25,7 +25,7 @@ function getLanguageCodeFallbacks(languageCode) {
   }
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
   return matches.reduce(
-    (fallbackLanguageCodeList, chunk, index) => {
+    (fallbackLanguageCodeList, _, index) => {
       const fallbackLanguageCode = matches
         .slice(0, index + 1)
         .join('-')
