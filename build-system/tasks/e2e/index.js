@@ -25,6 +25,7 @@ const {isCiBuild, isCircleciBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {maybePrintCoverageMessage} = require('../helpers');
 const {watch} = require('chokidar');
+const {buildBentoE2E} = require('./build-bento-e2e');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isCiBuild() ? 2 : 0;
@@ -49,6 +50,13 @@ async function setUpTesting_() {
   if (!argv.nobuild) {
     await buildRuntime();
   }
+
+  await buildBentoE2E({
+    fortesting: true,
+    localDev: true,
+    minify: true,
+    watch: argv.watch,
+  });
 
   // start up web server
   return startServer(
