@@ -5,6 +5,7 @@
     "**/*.jsx",
     "**/*.d.ts",
     "../core/**/globals.d.ts",
-    "../**/base-element.d.ts"
+    "../**/base-element.d.ts",
+    "index.ts"
   ]
 }
