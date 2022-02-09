@@ -16,8 +16,6 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
 
 /**
  * Finds fallback language codes for the current language code.
- * This code is a copy of the same logic found in
- * extensions/amp-story/1.0/amp-story-localization-service.js
  * @param {string} languageCode the language code to get fallbacks for
  * @return {string[]}
  */
