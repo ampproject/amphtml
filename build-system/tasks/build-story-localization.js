@@ -76,16 +76,10 @@ async function buildStoryLocalization() {
   ensureFallbacks(languages);
   // Write out each individual lang file.
   for (const langKey in languages) {
-    await fs.writeFile(
-      `${dest}/amp-story.${langKey}.json`,
-      JSON.stringify(languages[langKey])
-    );
+    await fs.writeJson(`${dest}/amp-story.${langKey}.json`, languages[langKey]);
   }
   // Write out all the languages into one file.
-  await fs.writeFile(
-    `${dest}/amp-story.all-lang.json`,
-    JSON.stringify(languages)
-  );
+  await fs.writeJson(`${dest}/amp-story.all-lang.json`, languages);
 }
 
 module.exports = {buildStoryLocalization};
