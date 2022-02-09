@@ -61,9 +61,7 @@ function ensureFallbacks(languages) {
   for (const langKey in languages) {
     languages[langKey] = getLanguageCodeFallbacks(languages, langKey)
       .map((x) => languages[x])
-      .reduce((prev, cur) => {
-        return Object.assign(prev, cur);
-      }, Object.create(null));
+      .reduce((prev, cur) => Object.assign(prev, cur), Object.create(null));
   }
 }
 
