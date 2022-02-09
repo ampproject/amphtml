@@ -297,6 +297,23 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       expect(wrapper.text()).to.contain('December 2020');
     });
+
+    it('allows the user to configure the number of months', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="single"
+          initialVisibleMonth={new Date(2022, 0)}
+          numberOfMonths={2}
+        />
+      );
+
+      expect(wrapper.find('[aria-label="Calendar"]').last().text()).to.contain(
+        'January 2022'
+      );
+      expect(wrapper.find('[aria-label="Calendar"]').last().text()).to.contain(
+        'February 2022'
+      );
+    });
   });
 
   describe('showing the date picker in static mode for a date range', () => {
@@ -400,6 +417,23 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       );
 
       expect(wrapper.text()).to.contain('January 2021');
+    });
+
+    it('allows the user to configure the number of months', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          initialVisibleMonth={new Date(2022, 0)}
+          numberOfMonths={2}
+        />
+      );
+
+      expect(wrapper.find('[aria-label="Calendar"]').last().text()).to.contain(
+        'January 2022'
+      );
+      expect(wrapper.find('[aria-label="Calendar"]').last().text()).to.contain(
+        'February 2022'
+      );
     });
   });
 

@@ -41,6 +41,7 @@ function SingleDatePickerWithRef(
     locale,
     mode,
     monthFormat,
+    numberOfMonths,
     onError,
     openAfterSelect,
     weekDayFormat,
@@ -267,6 +268,7 @@ function SingleDatePickerWithRef(
             weekDayFormat={weekDayFormat}
             onMonthChange={setMonth}
             today={getCurrentDate()}
+            numberOfMonths={numberOfMonths}
           />
         )}
       </DatePickerContext.Provider>

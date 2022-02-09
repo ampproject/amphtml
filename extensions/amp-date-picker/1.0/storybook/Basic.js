@@ -31,6 +31,7 @@ export default {
     locale: enUS,
     mode: 'static',
     maximumNights: 0,
+    numberOfMonths: 1,
   },
 };
 

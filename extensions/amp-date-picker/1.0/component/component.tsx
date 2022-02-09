@@ -6,7 +6,7 @@ import * as Preact from '#preact';
 import {useMemo} from '#preact';
 import {forwardRef} from '#preact/compat';
 
-// import './amp-date-picker.css';
+import './amp-date-picker.css';
 import {DateRangePicker} from './date-range-picker';
 import {SingleDatePicker} from './single-date-picker';
 import {DayContext} from './use-day';
@@ -35,6 +35,7 @@ type PropertiesWithDefaults =
   | 'minimumNights'
   | 'mode'
   | 'monthFormat'
+  | 'numberOfMonths'
   | 'onError'
   | 'startInputSelector'
   | 'type'
@@ -62,6 +63,7 @@ function BentoDatePickerWithRef(
         weekDayFormat: DEFAULT_WEEK_DAY_FORMAT,
         maximumNights: 0,
         minimumNights: 1,
+        numberOfMonths: 1,
       }),
       []
     );

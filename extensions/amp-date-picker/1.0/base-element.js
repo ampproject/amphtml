@@ -27,7 +27,6 @@ BaseElement['props'] = {
   'locale': {attr: 'locale', parseAttr: parseLocale},
   'maximumNights': {attr: 'maximum-nights', parseAttr: parseInt},
   'minimumNights': {attr: 'minimum-nights', parseAttr: parseInt},
-  // Not implemented
   'numberOfMonths': {attr: 'number-of-months', parseAttr: parseInt},
   // Not implemented
   'firstDayOfWeek': {attr: 'first-day-of-week', parseAttr: parseInt},

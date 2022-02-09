@@ -24,6 +24,7 @@ interface CommonDatePickerProps {
   min: Date;
   mode: DatePickerMode;
   monthFormat: string;
+  numberOfMonths: number;
   onError: (message: string) => void;
   openAfterSelect: boolean;
   weekDayFormat: string;

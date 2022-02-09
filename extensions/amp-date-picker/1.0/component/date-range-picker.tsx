@@ -56,6 +56,7 @@ function DateRangePickerWithRef(
     locale,
     mode,
     monthFormat,
+    numberOfMonths,
     onError,
     openAfterSelect,
     startInputSelector,
@@ -490,6 +491,7 @@ function DateRangePickerWithRef(
             monthFormat={monthFormat}
             weekDayFormat={weekDayFormat}
             onMonthChange={setMonth}
+            numberOfMonths={numberOfMonths}
           />
         )}
       </DatePickerContext.Provider>
