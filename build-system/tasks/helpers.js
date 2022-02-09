@@ -401,7 +401,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
     if (options.minify) {
       const result = await minify(code, {
-        // toplevel clobbers the global namespace when transforming for amd
+        // toplevel clobbers the global namespace when with nomodule-loader
         toplevel: options.outputFormat !== 'nomodule-loader',
       });
       code = `${result.code}${sourceMapComment}`;
