@@ -1,4 +1,4 @@
-import {createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import '../amp-story-shopping';
@@ -38,8 +38,8 @@ describes.realWin(
       win = env.win;
 
       // Set up the story.
-      const storyEl = win.document.createElement('amp-story');
-      const pageEl = win.document.createElement('amp-story-page');
+      const storyEl = <amp-story></amp-story>;
+      const pageEl = <amp-story-page></amp-story-page>;
       const ampdoc = new AmpDocSingle(win);
       storyEl.getAmpDoc = () => ampdoc;
       win.document.body.appendChild(storyEl);
@@ -61,17 +61,13 @@ describes.realWin(
         .returns(Promise.resolve(localizationService));
 
       // Set up shopping tag
-      shoppingTagEl = createElementWithAttributes(
-        win.document,
-        'amp-story-shopping-tag',
-        {'layout': 'container'}
-      );
+      shoppingTagEl = <amp-story-shopping-tag></amp-story-shopping-tag>;
       pageEl.appendChild(shoppingTagEl);
       shoppingTag = await shoppingTagEl.getImpl();
 
       // Set up the shopping attachment.
-      shoppingAttachmentEl = win.document.createElement(
-        'amp-story-shopping-attachment'
+      shoppingAttachmentEl = (
+        <amp-story-shopping-attachment></amp-story-shopping-attachment>
       );
       shoppingAttachmentEl.getAmpDoc = () => ampdoc;
       pageEl.appendChild(shoppingAttachmentEl);
