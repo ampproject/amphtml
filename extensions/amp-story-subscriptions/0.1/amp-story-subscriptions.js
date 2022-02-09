@@ -1,6 +1,7 @@
 import {iterateCursor} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {scopedQuerySelector} from '#core/dom/query';
 
 import {Services} from '#service';
 
@@ -30,6 +31,9 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
     /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
+
+    /** @private {?Element} */
+    this.dialogEl_ = null;
   }
 
   /** @override */
@@ -50,7 +54,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
     // Create a paywall dialog element that have required attributes to be able to be
     // rendered by amp-subscriptions.
-    const dialogEl = (
+    this.dialogEl_ = (
       <div subscriptions-dialog subscriptions-display="NOT granted">
         <div class="i-amphtml-story-subscriptions-banner"></div>
         <div class="i-amphtml-story-subscriptions-title"></div>
@@ -72,7 +76,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
             subscriptions-display="NOT granted"
           >
             <div class="publisher-button-text"></div>
-            <img style="width: 27px; height: 27px;"></img>
+            <img class="publisher-logo"></img>
           </div>
         </div>
         <div class="i-amphtml-story-subscriptions-signin">
@@ -88,47 +92,30 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       </div>
     );
 
-    const titleEl = dev().assertElement(
-      dialogEl.querySelector('.i-amphtml-story-subscriptions-title')
+    this.applyAttributeAsText_('title', '.i-amphtml-story-subscriptions-title');
+    this.applyAttributeAsText_(
+      'publisher-button-text',
+      '.i-amphtml-story-subscriptions-button-publisher .publisher-button-text'
     );
-    titleEl.textContent = this.element.getAttribute('title');
-
-    const logoImg = dev().assertElement(dialogEl.querySelector('img'));
+    this.applyAttributeAsText_(
+      'banner-text',
+      '.i-amphtml-story-subscriptions-banner'
+    );
+    this.applyAttributeAsText_(
+      'subtitle-first',
+      '.i-amphtml-story-subscriptions-subtitle-first'
+    );
+    this.applyAttributeAsText_(
+      'subtitle-second',
+      '.i-amphtml-story-subscriptions-subtitle-second'
+    );
+    const logoImg = dev().assertElement(this.dialogEl_.querySelector('img'));
     logoImg.setAttribute(
       'src',
       this.element.getAttribute('publisher-logo-url')
     );
 
-    const buttonTextEl = dev().assertElement(
-      dialogEl.querySelector('.publisher-button-text')
-    );
-    buttonTextEl.textContent = this.element.getAttribute(
-      'publisher-button-text'
-    );
-
-    if (this.element.hasAttribute('banner-text')) {
-      const bannerEl = dev().assertElement(
-        dialogEl.querySelector('.i-amphtml-story-subscriptions-banner')
-      );
-      bannerEl.textContent = this.element.getAttribute('banner-text');
-    }
-
-    if (this.element.hasAttribute('subtitle-first')) {
-      const subtitleFirstEl = dev().assertElement(
-        dialogEl.querySelector('.i-amphtml-story-subscriptions-subtitle-first')
-      );
-      subtitleFirstEl.textContent = this.element.getAttribute('subtitle-first');
-    }
-
-    if (this.element.hasAttribute('subtitle-second')) {
-      const subtitleSecondEl = dev().assertElement(
-        dialogEl.querySelector('.i-amphtml-story-subscriptions-subtitle-second')
-      );
-      subtitleSecondEl.textContent =
-        this.element.getAttribute('subtitle-second');
-    }
-
-    this.element.appendChild(dialogEl);
+    this.element.appendChild(this.dialogEl_);
 
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
@@ -141,6 +128,23 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout_Enum.CONTAINER;
+  }
+
+  /**
+   * @param {string} attr
+   * @param {string} selector
+   * @private
+   */
+  applyAttributeAsText_(attr, selector) {
+    const attrValue = this.element.getAttribute(attr);
+    if (!attrValue) {
+      return;
+    }
+
+    const el = dev().assertElement(
+      scopedQuerySelector(this.dialogEl_, selector)
+    );
+    el.textContent = attrValue;
   }
 
   /**

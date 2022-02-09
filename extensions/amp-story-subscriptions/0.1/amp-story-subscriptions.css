@@ -25,7 +25,7 @@ amp-story-subscriptions::before {
   left: 0 !important;
   height: 100% !important;
   width: 100% !important;
-  background: #000000 !important;
+  background: black !important;
   opacity: 0 !important;
   pointer-events: auto !important;
   transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1) !important;
@@ -41,44 +41,35 @@ amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
   width: 100% !important;
   background: #EBDEC9;
   border-radius: 16px 16px 0px 0px;
-
   font-family: Poppins;
   font-style: normal;
   font-weight: normal;
   font-size: 24px;
   line-height: 24px;
-
   text-align: center;
   padding: 23px 0 23px 0;
 }
 
 .i-amphtml-story-subscriptions-title {
   width: 100%;
-
   font-family: Poppins;
   font-style: normal;
   font-weight: bold;
   font-size: 20px;
   line-height: 24px;
-
   text-align: center;
-
-  color: #000000;
-
+  color: black;
   margin-top: 31px;
 }
 
 .i-amphtml-story-subscriptions-subtitle-first, .i-amphtml-story-subscriptions-subtitle-second {
   width: 100%;
-
   font-family: Poppins;
   font-style: normal;
   font-size: 16px;
   line-height: 22px;
-
   text-align: center;
-
-  color: #000000;
+  color: black;
 }
 
 .i-amphtml-story-subscriptions-subtitle-first {
@@ -103,20 +94,23 @@ amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
 }
 
 .i-amphtml-story-subscriptions-button-publisher {
-  background: #000000;
+  background: black;
   margin-left: 20px;
   border-radius: 100px;
   height: 40px;
   width: 142px;
-
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.publisher-button-text {
-  z-index: 0;
+.i-amphtml-story-subscriptions-button-publisher .publisher-button-text {
   margin-left: 5px;
   margin-right: 5px;
   color:#FFFFFF;
+}
+
+.i-amphtml-story-subscriptions-button-publisher .publisher-logo {
+  width: 27px;
+  height: 27px;
 }
