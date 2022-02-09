@@ -94,7 +94,7 @@ async function runPreDistSteps(options) {
   await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
-  await buildStoryLocalization();
+  await buildStoryLocalization(options);
   displayLifecycleDebugging();
 }
 

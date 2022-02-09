@@ -1,8 +1,13 @@
 const fs = require('fs-extra');
 const fastGlob = require('fast-glob');
 const pathMod = require('path');
+const debounce = require('../common/debounce');
+const {endBuildStep, watchDebounceDelay} = require('./helpers');
+const {watch} = require('chokidar');
 
 const dest = 'dist/v0';
+
+const LOCALES_DIR = 'extensions/amp-story/1.0/_locales/*.json';
 
 const FALLBACK_LANGUAGE_CODE = 'en';
 
@@ -36,11 +41,11 @@ function getLanguageCodeFallbacks(languageCode) {
 /**
  * Reads the language files found in amp-story and stores it in a
  * Object.
- * @return {Object}
+ * @return {Promise<Object>}
  */
 async function getLanguageStrings() {
   const langs = Object.create(null);
-  const jsonFiles = await fastGlob('extensions/amp-story/1.0/_locales/*.json');
+  const jsonFiles = await fastGlob(LOCALES_DIR);
   for (const jsonFile of jsonFiles) {
     const langKey = pathMod.basename(jsonFile, '.json');
     const translations = JSON.parse(await fs.readFile(jsonFile, 'utf8'));
@@ -66,11 +71,11 @@ function ensureFallbacks(languages) {
 }
 
 /**
- * Flattens the structure of the json locale strings and writes them out to the
- * dist directory.
+ * Write the localization files to dist/v0/
  * @return {Promise<void>}
  */
-async function buildStoryLocalization() {
+async function writeStoryLocalizationFiles() {
+  const startTime = Date.now();
   await fs.ensureDir(dest);
   const languages = await getLanguageStrings();
   ensureFallbacks(languages);
@@ -80,6 +85,23 @@ async function buildStoryLocalization() {
   }
   // Write out all the languages into one file.
   await fs.writeJson(`${dest}/amp-story.all-lang.json`, languages);
+  endBuildStep('Generated Story JSON Localization files into', dest, startTime);
+}
+
+/**
+ * Flattens the structure of the json locale strings and writes them out to the
+ * dist directory.
+ * @param {Object=} options
+ * @return {Promise<void>}
+ */
+async function buildStoryLocalization(options = {}) {
+  if (options.watch) {
+    watch(LOCALES_DIR).on(
+      'change',
+      debounce(writeStoryLocalizationFiles, watchDebounceDelay)
+    );
+  }
+  await writeStoryLocalizationFiles();
 }
 
 module.exports = {buildStoryLocalization};
