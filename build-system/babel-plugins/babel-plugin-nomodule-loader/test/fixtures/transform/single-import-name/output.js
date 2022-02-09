@@ -1,47 +1,35 @@
-(function defineish(callback) {
-  var modules = self.BENTO = self.BENTO || {};
+(function defineish(defineCallback) {
+  var callbacks = self.BENTO = self.BENTO || {};
   var exec = false ? function (_exports) {
-    callback.apply(null, arguments);
+    defineCallback.apply(null, arguments);
     var name = "build-system/babel-plugins/babel-plugin-nomodule-loader/test/fixtures/transform/single-import-name/input";
+    var awaiting = callbacks[name] = callbacks[name] || [];
 
-    var _module = modules[name] = modules[name] || {};
-
-    _module.e = _exports;
-
-    while (_module.c && _module.c.length > 0) {
-      _module.c.pop()(_exports);
+    while (awaiting.length) {
+      awaiting.pop()(_exports);
     }
-  } : callback;
+
+    awaiting.push = function (callback) {
+      callback(_exports);
+    };
+  } : defineCallback;
 
   if (false) {
     exec({});
   } else if ("build-system/babel-plugins/babel-plugin-nomodule-loader/test/fixtures/transform/single-import-name/foo") {
     var name = "build-system/babel-plugins/babel-plugin-nomodule-loader/test/fixtures/transform/single-import-name/foo";
-
-    var _module = modules[name] = modules[name] || {
-      c: []
-    };
-
-    if (_module.e) {
-      exec(_module.e);
-    } else {
-      _module.c.push(exec);
-    }
+    (callbacks[name] = callbacks[name] || []).push(exec);
   } else {
     Promise.all(["build-system/babel-plugins/babel-plugin-nomodule-loader/test/fixtures/transform/single-import-name/foo"].map(function (name, i) {
       if (false && i === 0) {
         return {};
       }
 
-      var _module = modules[name] = modules[name] || {
-        c: []
-      };
-
-      return _module.e || new Promise(function (resolve) {
-        _module.c.push(resolve);
+      return new Promise(function (resolve) {
+        (callbacks[name] = callbacks[name] || []).push(resolve);
       });
-    })).then(function (deps) {
-      exec.apply(null, deps);
+    })).then(function (modules) {
+      exec.apply(null, modules);
     });
   }
 })(function (_foo) {
