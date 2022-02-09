@@ -59,7 +59,7 @@ async function getLanguageStrings() {
  */
 function ensureFallbacks(languages) {
   for (const langKey in languages) {
-    languages[langKey] = getLanguageCodeFallbacks(languages, langKey)
+    languages[langKey] = getLanguageCodeFallbacks(langKey)
       .map((x) => languages[x])
       .reduce((prev, cur) => Object.assign(prev, cur), Object.create(null));
   }
