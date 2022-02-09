@@ -4,6 +4,7 @@ const pathMod = require('path');
 const debounce = require('../common/debounce');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {watch} = require('chokidar');
+const {readJson} = require('../json-locales');
 
 const dest = 'dist/v0';
 
@@ -48,11 +49,7 @@ async function getLanguageStrings() {
   const jsonFiles = await fastGlob(LOCALES_DIR);
   for (const jsonFile of jsonFiles) {
     const langKey = pathMod.basename(jsonFile, '.json');
-    const translations = JSON.parse(await fs.readFile(jsonFile, 'utf8'));
-    for (const [key, value] of Object.entries(translations)) {
-      translations[key] = value['string'];
-    }
-    langs[langKey] = translations;
+    langs[langKey] = readJson(jsonFile);
   }
   return langs;
 }
