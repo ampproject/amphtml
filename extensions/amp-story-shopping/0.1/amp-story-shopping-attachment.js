@@ -343,7 +343,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             >
               <div
                 class="i-amphtml-amp-story-shopping-plp-card-image"
-                style={{backgroundImage: `url("${data['productImages'][0]}")`}}
+                style={{
+                  backgroundImage: `url("${data['productImages'][0].url}")`,
+                }}
               ></div>
               <div class="i-amphtml-amp-story-shopping-plp-card-brand">
                 {data['productBrand']}
