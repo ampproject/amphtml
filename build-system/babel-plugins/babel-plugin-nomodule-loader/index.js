@@ -80,7 +80,8 @@ module.exports = function (babel) {
           const callbackArgs = [];
           const metaHasExports = hasExports(meta);
           if (metaHasExports) {
-            importNames.push(t.stringLiteral(''));
+            // exports is identified as the number 0
+            importNames.push(t.numericLiteral(0));
             callbackArgs.push(t.identifier(meta.exportName));
           }
           for (const [source, metadata] of meta.source) {

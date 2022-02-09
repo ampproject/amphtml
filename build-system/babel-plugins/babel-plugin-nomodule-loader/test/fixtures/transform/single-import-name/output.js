@@ -20,8 +20,8 @@
     var name = "build-system/babel-plugins/babel-plugin-nomodule-loader/test/fixtures/transform/single-import-name/foo";
     (callbacks[name] = callbacks[name] || []).push(exec);
   } else {
-    Promise.all(["build-system/babel-plugins/babel-plugin-nomodule-loader/test/fixtures/transform/single-import-name/foo"].map(function (name, i) {
-      if (false && i === 0) {
+    Promise.all(["build-system/babel-plugins/babel-plugin-nomodule-loader/test/fixtures/transform/single-import-name/foo"].map(function (name) {
+      if (false && name === 0) {
         return {};
       }
 

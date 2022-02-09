@@ -43,9 +43,9 @@
   } else {
     // Fallback general purpose implementation.
     Promise.all(
-      __IMPORT_NAMES__.map(function (name, i) {
-        // exports is always the initial item of IMPORT_NAMES
-        if (__HAS_EXPORTS__ && i === 0) {
+      __IMPORT_NAMES__.map(function (name) {
+        // exports is identified as the number 0
+        if (__HAS_EXPORTS__ && name === 0) {
           return {};
         }
         return new Promise(function (resolve) {

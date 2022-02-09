@@ -20,8 +20,8 @@
     var name = null;
     (callbacks[name] = callbacks[name] || []).push(exec);
   } else {
-    Promise.all(["", "build-system/babel-plugins/babel-plugin-nomodule-loader/test/fixtures/transform/imports-and-exports/foo"].map(function (name, i) {
-      if (true && i === 0) {
+    Promise.all([0, "build-system/babel-plugins/babel-plugin-nomodule-loader/test/fixtures/transform/imports-and-exports/foo"].map(function (name) {
+      if (true && name === 0) {
         return {};
       }
 

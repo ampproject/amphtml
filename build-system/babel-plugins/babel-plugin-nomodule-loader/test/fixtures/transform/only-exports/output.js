@@ -20,8 +20,8 @@
     var name = null;
     (callbacks[name] = callbacks[name] || []).push(exec);
   } else {
-    Promise.all([""].map(function (name, i) {
-      if (true && i === 0) {
+    Promise.all([0].map(function (name) {
+      if (true && name === 0) {
         return {};
       }
 
