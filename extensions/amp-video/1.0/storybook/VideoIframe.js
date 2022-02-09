@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as Preact from '#preact';
-import {useCallback} from '#preact';
-
-import {createCustomEvent} from '#utils/event-helper';
-
 import {
   BentoAccordion,
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '../../../amp-accordion/1.0/component';
+} from '#bento/components/bento-accordion/1.0/component';
+
+import * as Preact from '#preact';
+import {useCallback} from '#preact';
+
+import {createCustomEvent} from '#utils/event-helper';
+
 import {VideoIframe} from '../video-iframe';
 
 export default {

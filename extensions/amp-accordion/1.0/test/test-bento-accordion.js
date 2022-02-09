@@ -1,5 +1,7 @@
 import {CSS} from '#build/bento-accordion-1.0.css';
 
+import {BaseElement as BentoAccordion} from '#bento/components/bento-accordion/1.0/base-element';
+
 import {subscribe, unsubscribe} from '#core/context';
 import {htmlFor} from '#core/dom/static-template';
 
@@ -7,8 +9,6 @@ import {defineBentoElement} from '#preact/bento-ce';
 import {CanRender} from '#preact/contextprops';
 
 import {waitFor} from '#testing/helpers/service';
-
-import {BaseElement as BentoAccordion} from '../base-element';
 
 describes.realWin(
   'bento-accordion:1.0',
