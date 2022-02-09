@@ -1,3 +1,9 @@
+/**
+ * @fileoverview
+ * Transforms ESM import statements into an async loader meant for `nomodule`
+ * builds.
+ */
+
 const {
   buildNamespaceInitStatements,
   ensureStatementsHoisted,
