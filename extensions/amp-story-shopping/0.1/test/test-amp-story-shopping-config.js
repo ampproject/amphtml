@@ -72,6 +72,7 @@ describes.realWin(
         // matches remote.json
         {
           'art': {
+            'productUrl': 'https://www.google.com',
             'productId': 'art',
             'productTitle': 'Abstract Art',
             'productBrand': 'V. Artsy',
