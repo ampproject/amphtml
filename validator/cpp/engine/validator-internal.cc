@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "glog/logging.h"
 #include "google/protobuf/repeated_field.h"
 #include "absl/algorithm/container.h"
 #include "absl/base/thread_annotations.h"
@@ -41,6 +40,7 @@
 #include "cpp/htmlparser/defer.h"
 #include "cpp/htmlparser/elements.h"
 #include "cpp/htmlparser/json/parser.h"
+#include "cpp/htmlparser/logging.h"
 #include "cpp/htmlparser/node.h"
 #include "cpp/htmlparser/parser.h"
 #include "cpp/htmlparser/strings.h"
@@ -127,7 +127,25 @@ static const LazyRE2 kRuntimeScriptPathRe = {
 static const LazyRE2 kExtensionPathRe = {
     R"re((?:lts/)?v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.(?:m)?js(?:\?f=sxg)?)re"};
 
+// Generates a htmlparser::css::CssParsingConfig.
+CssParsingConfig GenCssParsingConfig() {
+  CssParsingConfig config;
+  // If other @ rule types are added to the rules, their block parsing types
+  // will need to be added here as well.
+  config.at_rule_spec["font-face"] = BlockType::PARSE_AS_DECLARATIONS;
+  config.at_rule_spec["keyframes"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
+  config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
+  // Note that ignoring still generates an error.
+  config.default_spec = BlockType::PARSE_AS_IGNORE;
+  return config;
+}
+
 namespace {
+
+#define CHECK_NOTNULL(x) (x)
 
 // Sorts and eliminates duplicates in |v|.
 template <typename T>
@@ -842,22 +860,6 @@ class ParsedAttrSpecs {
   vector<unique_ptr<ParsedAttrSpec>> parsed_attr_specs_;
   unordered_map<std::string, vector<const ParsedAttrSpec*>> attr_lists_by_name_;
 };
-
-// Generates a htmlparser::css::CssParsingConfig.
-CssParsingConfig GenCssParsingConfig() {
-  CssParsingConfig config;
-  // If other @ rule types are added to the rules, their block parsing types
-  // will need to be added here as well.
-  config.at_rule_spec["font-face"] = BlockType::PARSE_AS_DECLARATIONS;
-  config.at_rule_spec["keyframes"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
-  config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
-  // Note that ignoring still generates an error.
-  config.default_spec = BlockType::PARSE_AS_IGNORE;
-  return config;
-}
 
 // Instances of this class precompute the regular expressions for a particular
 // Cdata specification.
@@ -5690,7 +5692,7 @@ class Validator {
     // Currently parser returns nullptr only if document is too complex.
     // NOTE: If htmlparser starts returning null document for other reasons, we
     // must add new error types here.
-    if (doc == nullptr) {
+    if (!doc || !doc->status().ok()) {
       context_.AddError(ValidationError::DOCUMENT_TOO_COMPLEX, LineCol(1, 0),
                         {}, "", &result_);
       return result_;
@@ -5849,14 +5851,16 @@ class Validator {
         auto dummy_node = std::make_unique<htmlparser::Node>(
             htmlparser::NodeType::ELEMENT_NODE, htmlparser::Atom::BODY);
         auto doc = htmlparser::ParseFragment(c->Data(), dummy_node.get());
-        // Append all the nodes to the original <noscript> parent.
-        for (htmlparser::Node* cn : doc->FragmentNodes()) {
-          cn->UpdateChildNodesPositions(node);
-          UpdateLineColumnIndex(cn);
-          ValidateNode(cn, ++stack_size);
-          --stack_size;
+        if (doc && doc->status().ok()) {
+          // Append all the nodes to the original <noscript> parent.
+          for (htmlparser::Node* cn : doc->FragmentNodes()) {
+            cn->UpdateChildNodesPositions(node);
+            UpdateLineColumnIndex(cn);
+            ValidateNode(cn, ++stack_size);
+            --stack_size;
+          }
+          node->RemoveChild(c);
         }
-        node->RemoveChild(c);
       }
       c = next;
     }

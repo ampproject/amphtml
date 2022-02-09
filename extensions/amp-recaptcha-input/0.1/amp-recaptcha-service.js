@@ -3,21 +3,22 @@
  * interacting with the 3p recaptcha bootstrap iframe
  */
 
-import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
-
 import {Deferred, tryResolve} from '#core/data-structures/promise';
+import {removeElement} from '#core/dom';
+import {setStyle} from '#core/dom/style';
+import * as mode from '#core/mode';
+
 import {Services} from '#service';
+
+import {loadPromise} from '#utils/event-helper';
 import {dev, devAssert} from '#utils/log';
-import {dict} from '#core/types/object';
+
+import {urls} from '../../../src/config';
+import {listenFor, postMessage} from '../../../src/iframe-helper';
 import {getMode} from '../../../src/mode';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {getSourceOrigin} from '../../../src/url';
-import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {loadPromise} from '#utils/event-helper';
-import {removeElement} from '#core/dom';
-import {setStyle} from '#core/dom/style';
-import {urls} from '../../../src/config';
-import * as mode from '#core/mode';
+import ampToolboxCacheUrl from '../../../third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm';
 
 /**
  * @fileoverview
@@ -148,10 +149,10 @@ export class AmpRecaptchaService {
       reject: executePromise.reject,
     };
     this.recaptchaApiReady_.promise.then(() => {
-      const message = dict({
+      const message = {
         'id': messageId,
         'action': 'amp_' + action,
-      });
+      };
 
       // Send the message
       this.postMessageToIframe_(
@@ -224,13 +225,11 @@ export class AmpRecaptchaService {
       iframe.setAttribute('data-amp-3p-sentinel', 'amp-recaptcha');
       iframe.setAttribute(
         'name',
-        JSON.stringify(
-          dict({
-            'sitekey': this.sitekey_,
-            'sentinel': 'amp-recaptcha',
-            'global': this.global_,
-          })
-        )
+        JSON.stringify({
+          'sitekey': this.sitekey_,
+          'sentinel': 'amp-recaptcha',
+          'global': this.global_,
+        })
       );
       iframe.classList.add('i-amphtml-recaptcha-iframe');
       setStyle(iframe, 'border', 'none');

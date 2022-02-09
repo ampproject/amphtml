@@ -29,9 +29,6 @@
   "12": {
     "string": "SMS"
   },
-  "13": {
-    "string": "Mere"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Du skal aktivere amp-story-eksperimentet for at se dette indhold."
   },
   "21": {
     "string": "Vi beklager, men det ser ud til, at din browser ikke understøtter denne oplevelse"
@@ -68,9 +62,6 @@
   "35": {
     "string": "Stryg op"
   },
-  "62": {
-    "string": "Begynd at dele startende fra denne side"
-  },
   "63": {
     "string": "Line"
   },
@@ -91,9 +82,6 @@
   },
   "69": {
     "string": "Del historie"
-  },
-  "70": {
-    "string": "Slå historiemenu til"
   },
   "71": {
     "string": "A"
@@ -127,9 +115,6 @@
   },
   "81": {
     "string": "Tip"
-  },
-  "82": {
-    "string": "Forrige side"
   },
   "83": {
     "string": "Aktiver"

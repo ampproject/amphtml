@@ -1,13 +1,13 @@
-import {createElementWithAttributes} from '#core/dom';
-import {Layout_Enum} from '#core/dom/layout';
-import '../amp-story-shopping';
+import * as Preact from '#core/dom/jsx';
 
-import * as configData from '../../../../examples/amp-story/shopping/remote.json';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {Services} from '#service';
+
+import * as remoteConfig from '../../../../examples/amp-story/shopping/remote.json';
+import {Action} from '../../../amp-story/1.0/amp-story-store-service';
 import {
-  StateProperty,
-  getStoreService,
-} from '../../../amp-story/1.0/amp-story-store-service';
+  getShoppingConfig,
+  storeShoppingConfig,
+} from '../amp-story-shopping-config';
 
 describes.realWin(
   'amp-story-shopping-config-v0.1',
@@ -18,90 +18,112 @@ describes.realWin(
     },
   },
   (env) => {
-    let win;
-    let element;
-    let shoppingConfig;
-    let storeService;
+    let pageElement;
+
+    const defaultInlineConfig = {
+      items: [
+        {
+          'productId': 'city-pop',
+          'productTitle': 'Plastic Love',
+          'productPrice': 19,
+          'productPriceCurrency': 'JPY',
+        },
+      ],
+    };
+
+    const keyedDefaultInlineConfig = {
+      'city-pop': defaultInlineConfig.items[0],
+    };
 
     beforeEach(async () => {
-      win = env.win;
-      storeService = getStoreService(win);
-      registerServiceBuilder(win, 'story-store', function () {
-        return storeService;
-      });
-
-      await createAmpStoryShoppingConfig();
+      pageElement = <amp-story-page id="page1"></amp-story-page>;
+      env.win.document.body.appendChild(pageElement);
     });
 
-    async function createAmpStoryShoppingConfig() {
-      const pageEl = win.document.createElement('amp-story-page');
-      pageEl.id = 'page1';
-      element = createElementWithAttributes(
-        win.document,
-        'amp-story-shopping-config',
-        {'layout': 'nodisplay'}
+    async function createAmpStoryShoppingConfig(
+      src = null,
+      config = defaultInlineConfig
+    ) {
+      pageElement.appendChild(
+        <amp-story-shopping-config layout="nodisplay" src={src}>
+          <script type="application/json">{JSON.stringify(config)}</script>
+        </amp-story-shopping-config>
       );
-
-      element.innerHTML = `
-        <script type="application/json">
-          ${JSON.stringify(configData)}
-        </script>
-      `;
-
-      pageEl.appendChild(element);
-      win.document.body.appendChild(pageEl);
-
-      shoppingConfig = await element.getImpl();
+      return getShoppingConfig(pageElement);
     }
-
-    it('should build shopping config component', () => {
-      expect(() => shoppingConfig.layoutCallback()).to.not.throw();
-    });
 
     it('throws on no config', async () => {
       expectAsyncConsoleError(async () => {
-        expect(async () => {
-          await shoppingConfig.buildCallback();
-        }).to.throw(
-          /The amp-story-auto-ads:config should be inside a <script> tag with type=\"application\/json\"​​​/
-        );
+        expect(() => {
+          pageElement.appendChild(<amp-story-shopping-config />);
+          return getShoppingConfig(pageElement);
+        }).to.throw(/<script> tag with type=\"application\/json\"​​​/);
       });
+    });
+
+    it('does use inline config', async () => {
+      const result = await createAmpStoryShoppingConfig();
+      expect(result).to.deep.eql(keyedDefaultInlineConfig);
     });
 
     it('does use remote config when src attribute is provided', async () => {
-      const exampleURL = 'foo.example';
-      element.setAttribute('src', exampleURL);
-
-      const expectedRemoteResult = JSON.parse(
-        '{"city-pop":{"product-tag-id":"city-pop","product-title":"Plastic Love","product-price": "19"}}'
-      );
-
-      expect(storeService.get(StateProperty.SHOPPING_DATA)).to.deep.eql(
-        expectedRemoteResult
-      );
+      const remoteUrl = 'https://foo.example';
+      const expectedRemoteResult =
+        // matches remote.json
+        {
+          'art': {
+            'productId': 'art',
+            'productTitle': 'Abstract Art',
+            'productBrand': 'V. Artsy',
+            'productPrice': 1200.0,
+            'productPriceCurrency': 'JPY',
+            'productImages': [
+              'https://source.unsplash.com/BdVQU-NDtA8/500x500',
+            ],
+          },
+        };
+      env.sandbox.stub(Services, 'xhrFor').returns({
+        fetchJson(url) {
+          if (url === remoteUrl) {
+            return Promise.resolve({
+              ok: true,
+              json: () => remoteConfig,
+            });
+          }
+        },
+      });
+      const result = await createAmpStoryShoppingConfig(remoteUrl);
+      expect(result).to.deep.eql(expectedRemoteResult);
     });
 
     it('does use inline config when remote src is invalid', async () => {
-      const exampleURL = 'invalidRemoteURL';
-      element.setAttribute('src', exampleURL);
-
-      shoppingConfig.buildCallback().then(async () => {
-        expect(await shoppingConfig.getInlineConfig_).to.be.called();
+      env.sandbox.stub(Services, 'xhrFor').returns({
+        fetchJson() {
+          throw new Error();
+        },
       });
+      const result = await createAmpStoryShoppingConfig('invalidRemoteUrl');
+      expect(result).to.deep.eql(keyedDefaultInlineConfig);
     });
 
-    it('Test Invalid Remote Config URL', async () => {
-      const exampleURL = 'invalidRemoteURL';
-      element.setAttribute('src', exampleURL);
-      expectAsyncConsoleError(async () => {
-        expect(async () => {
-          await shoppingConfig.buildCallback();
-        }).to.throw(
-          /'amp-story-auto-ads:config error determining if remote config is valid json: bad url or bad json'​​​/
-        );
+    describe('storeShoppingConfig', () => {
+      let storeService;
+
+      beforeEach(async () => {
+        storeService = {dispatch: env.sandbox.spy()};
+        env.sandbox
+          .stub(Services, 'storyStoreServiceForOrNull')
+          .resolves(storeService);
       });
-      expect(shoppingConfig.isLayoutSupported(Layout_Enum.NODISPLAY)).to.be
-        .true;
+
+      it('dispatches ADD_SHOPPING_DATA', async () => {
+        const config = {foo: {bar: true}};
+
+        await storeShoppingConfig(pageElement, config);
+
+        expect(storeService.dispatch.withArgs(Action.ADD_SHOPPING_DATA, config))
+          .to.have.been.calledOnce;
+      });
     });
   }
 );

@@ -28,7 +28,12 @@ function getUnminifiedConfig() {
       modules: false,
       loose: true,
       targets,
+      shippedProposals: true,
     },
+  ];
+  const presetTypescript = [
+    '@babel/preset-typescript',
+    {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
   ];
   const replacePlugin = getReplacePlugin();
   const unminifiedPlugins = [
@@ -42,20 +47,20 @@ function getUnminifiedConfig() {
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
-    '@babel/plugin-transform-classes',
     './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
   ].filter(Boolean);
-  const unminifiedPresets = [presetEnv];
+  const unminifiedPresets = [presetTypescript, presetEnv];
   return {
     compact: false,
     plugins: unminifiedPlugins,
     presets: unminifiedPresets,
-    sourceMaps: 'inline',
+    sourceMaps: true,
     assumptions: {
       constantSuper: true,
       noClassCalls: true,
       setClassMethods: true,
+      setPublicClassFields: true,
     },
   };
 }

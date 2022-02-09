@@ -10,13 +10,6 @@ http_archive(
 )
 
 http_archive(
-    name = "com_github_glog",
-    sha256 = "9411249a033ff79b100d55111347cba886eebf4f0bb6394554b9c11a98eb837f",
-    strip_prefix = "glog-f4dd77ae6b8e5f8e1323c929e81dbc40ff58fc7b",
-    urls = ["https://github.com/google/glog/archive/f4dd77ae6b8e5f8e1323c929e81dbc40ff58fc7b.zip"],
-)
-
-http_archive(
     name = "com_google_googletest",
     sha256 = "002d540f947e5981f54ddaab476d87b113d2a14822f21a34dca30f24c9492a24",
     strip_prefix = "googletest-16f637fbf4ffc3f7a01fa4eceb7906634565242f",
@@ -69,6 +62,40 @@ http_archive(
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
 rules_proto_dependencies()
 rules_proto_toolchains()
+
+http_archive(
+    name = "emsdk",
+    sha256 = "d55e3c73fc4f8d1fecb7aabe548de86bdb55080fe6b12ce593d63b8bade54567",
+    strip_prefix = "emsdk-3891e7b04bf8cbb3bc62758e9c575ae096a9a518/bazel",
+    url = "https://github.com/emscripten-core/emsdk/archive/3891e7b04bf8cbb3bc62758e9c575ae096a9a518.tar.gz",
+)
+
+load("@emsdk//:deps.bzl", emsdk_deps = "deps")
+emsdk_deps()
+
+load("@emsdk//:emscripten_deps.bzl", emsdk_emscripten_deps = "emscripten_deps")
+emsdk_emscripten_deps(emscripten_version = "2.0.31")
+
+http_archive(
+    name = "com_google_javascript_closure_library",
+    sha256 = "355e3cb51a498ea083f2bd200cd6b025df7692d0d339a7353ff99faa8d6710b4",
+    strip_prefix = "closure-library-57beea47d30d7123dc2268972f20b544e501432b",
+    urls = ["https://github.com/google/closure-library/archive/57beea47d30d7123dc2268972f20b544e501432b.tar.gz"],
+)
+
+http_archive(
+    name = "io_bazel_rules_closure",
+    sha256 = "358b8949cb682a5a5566894c9a56af7a184b71de63ffc5e0023551545eadee7a",
+    strip_prefix = "rules_closure-a90f5b6a2d79c539d685c71059f534f782389213",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_closure/archive/a90f5b6a2d79c539d685c71059f534f782389213.tar.gz",
+        "https://github.com/bazelbuild/rules_closure/archive/a90f5b6a2d79c539d685c71059f534f782389213.tar.gz",
+    ],
+)
+
+load("@io_bazel_rules_closure//closure:repositories.bzl", "rules_closure_dependencies", "rules_closure_toolchains")
+rules_closure_dependencies()
+rules_closure_toolchains()
 
 local_repository(
     name = "amphtml-extensions",

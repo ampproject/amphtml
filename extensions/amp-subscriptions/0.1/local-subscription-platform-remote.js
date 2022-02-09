@@ -1,10 +1,14 @@
+import {isArray, isArray} from '#core/types';
+import {dict} from '#core/types/object';
+
+import {Services} from '#service';
+
+import {devAssert, devAssert, userAssert, userAssert} from '#utils/log';
+
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
-import {Services} from '#service';
+
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
-import {devAssert, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {isArray} from '#core/types';
 // import {debug} from 'console';
 
 /**
@@ -137,9 +141,9 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: dict({
+        headers: {
           'Content-Type': 'text/plain',
-        }),
+        },
         body: this.stringifyPingbackData_(selectedEntitlement),
       });
     });

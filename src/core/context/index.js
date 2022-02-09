@@ -37,7 +37,7 @@ export function unassignSlot(node, slot) {
  * Sets (or unsets) the direct parent. If the parent is set, the node will no
  * longer try to discover itself.
  *
- * @param {Node} node
+ * @param {Node|ShadowRoot} node
  * @param {?Node} parent
  */
 export function setParent(node, parent) {
@@ -87,7 +87,7 @@ export function rediscoverChildren(node) {
  *
  * @param {Node} node The target node.
  * @param {IContextProp<T, ?>} prop
- * @param {function(T):void} setter
+ * @param {function(*):void} setter
  * @param {T} value
  * @template T
  */
@@ -101,7 +101,7 @@ export function setProp(node, prop, setter, value) {
  *
  * @param {Node} node The target node.
  * @param {IContextProp<T, ?>} prop
- * @param {function(T):void} setter
+ * @param {function(*):void} setter
  * @template T
  */
 export function removeProp(node, prop, setter) {

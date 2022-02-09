@@ -1,6 +1,7 @@
 import {Services} from '#service';
+
 import {StateProperty, getStoreService} from './amp-story-store-service';
-import {dict} from '#core/types/object';
+
 import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /**
@@ -53,7 +54,7 @@ export class AmpStoryVariableService {
    */
   constructor(win) {
     /** @private {!StoryVariableDef} */
-    this.variables_ = dict({
+    this.variables_ = {
       [AnalyticsVariable.STORY_INTERACTIVE_ID]: null,
       [AnalyticsVariable.STORY_INTERACTIVE_RESPONSE]: null,
       [AnalyticsVariable.STORY_INTERACTIVE_TYPE]: null,
@@ -64,7 +65,7 @@ export class AmpStoryVariableService {
       [AnalyticsVariable.STORY_IS_MUTED]: null,
       [AnalyticsVariable.STORY_PREVIOUS_PAGE_ID]: null,
       [AnalyticsVariable.STORY_ADVANCEMENT_MODE]: null,
-    });
+    };
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);

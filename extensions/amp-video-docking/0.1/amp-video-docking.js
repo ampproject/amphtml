@@ -14,7 +14,6 @@ import {
 } from '#core/dom/style';
 import {getInternalVideoElementFor} from '#core/dom/video';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -830,7 +829,7 @@ export class VideoDocking {
     const event = createCustomEvent(
       this.ampdoc_.win,
       /** @type {string} */ (action),
-      /* detail */ dict({})
+      {}
     );
     const actions = Services.actionServiceForDoc(element);
     actions.trigger(element, action, event, trust);

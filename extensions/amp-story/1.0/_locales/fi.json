@@ -29,9 +29,6 @@
   "12": {
     "string": "Tekstiviesti"
   },
-  "13": {
-    "string": "Lisää"
-  },
   "14": {
     "string": "Tumblr"
   },
@@ -40,9 +37,6 @@
   },
   "16": {
     "string": "WhatsApp"
-  },
-  "19": {
-    "string": "Sinun täytyy ottaa AMP-tarinakokeilu käyttöön, jotta voit tarkastella tätä sisältöä."
   },
   "21": {
     "string": "Valitettavasti selaimesi ei tue tätä ominaisuutta"
@@ -68,9 +62,6 @@
   "35": {
     "string": "Pyyhkäise ylös"
   },
-  "62": {
-    "string": "Jaa tältä sivulta alkaen"
-  },
   "63": {
     "string": "LINE"
   },
@@ -91,9 +82,6 @@
   },
   "69": {
     "string": "Jaa tarina"
-  },
-  "70": {
-    "string": "Avaa tarinan valikko"
   },
   "71": {
     "string": "A"
@@ -127,9 +115,6 @@
   },
   "81": {
     "string": "Vinkki"
-  },
-  "82": {
-    "string": "Edellinen sivu"
   },
   "83": {
     "string": "Aktivoi"

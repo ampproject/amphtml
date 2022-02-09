@@ -1,8 +1,9 @@
 import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {setImportantStyles} from '#core/dom/style';
+
 import {user} from '#utils/log';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 /** @const {number} */
 const CANVAS_SIZE = 3;

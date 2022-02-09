@@ -1,12 +1,16 @@
-import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {ImaPlayerData} from './ima-player-data';
-import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
-import {getData} from '#utils/event-helper';
-import {htmlFor, htmlRefs, svgFor} from '#core/dom/static-template';
-import {isArray, isObject} from '#core/types';
 import {loadScript} from '#3p/3p';
+
+import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {htmlFor, htmlRefs, svgFor} from '#core/dom/static-template';
+import {camelCaseToTitleCase, setStyle, toggle} from '#core/dom/style';
+import {isArray, isObject} from '#core/types';
 import {throttle} from '#core/types/function';
 import {tryParseJson} from '#core/types/object/json';
+
+import {getData} from '#utils/event-helper';
+
+import {ImaPlayerData} from './ima-player-data';
+
 // Source for this constant is css/amp-ima-video-iframe.css
 import {cssText} from '../../../build/amp-ima-video-iframe.css';
 

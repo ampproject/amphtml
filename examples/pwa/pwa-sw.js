@@ -1,6 +1,6 @@
 'use strict';
 
-self.addEventListener('install', (event) => {});
+self.addEventListener('install', () => {});
 
 self.addEventListener('fetch', (event) => {
   // TODO(dvoytenko): use cache, implement one-behind.

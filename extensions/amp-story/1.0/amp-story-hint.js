@@ -1,15 +1,18 @@
 import * as Preact from '#core/dom/jsx';
-import {CSS} from '../../../build/amp-story-hint-1.0.css';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {localize} from './amp-story-localization-service';
 import {
   EmbeddedComponentState,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {LocalizedStringId_Enum} from '#service/localization/strings';
-import {Services} from '#service';
 import {createShadowRootWithStyle} from './utils';
-import {localize} from './amp-story-localization-service';
+
+import {CSS} from '../../../build/amp-story-hint-1.0.css';
 
 /**
  * @param {!Element} element

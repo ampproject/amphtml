@@ -119,7 +119,7 @@ amp-ad[sticky='left'] .amp-ad-close-button {
 }
 
 amp-ad[sticky] {
-  z-index: 11;
+  z-index: 2147483647;
   position: fixed;
   overflow: visible !important;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2) !important;
