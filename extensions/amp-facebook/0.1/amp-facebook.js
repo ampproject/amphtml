@@ -1,15 +1,19 @@
-import {Services} from '#service';
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {createLoaderLogo} from './facebook-loader';
-import {dashToUnderline} from '#core/types/string';
-import {getData, listen} from '#utils/event-helper';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {getMode} from '../../../src/mode';
-import {isObject} from '#core/types';
-import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '#core/dom';
+import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
+import {dashToUnderline} from '#core/types/string';
+
+import {Services} from '#service';
+
+import {getData, listen} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
+
+import {createLoaderLogo} from './facebook-loader';
+
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {listenFor} from '../../../src/iframe-helper';
+import {getMode} from '../../../src/mode';
 
 const TYPE = 'facebook';
 
@@ -70,10 +74,17 @@ class AmpFacebook extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const embedAs = this.element.getAttribute('data-embed-as');
+    if (embedAs === 'comment') {
+      this.user().warn(
+        'BENTO-LIGTHBOX',
+        'Embedded Comments have been deprecated: https://developers.facebook.com/docs/plugins/embedded-comments'
+      );
+      return;
+    }
     userAssert(
-      !embedAs || ['post', 'video', 'comment'].indexOf(embedAs) !== -1,
+      !embedAs || ['post', 'video'].indexOf(embedAs) !== -1,
       'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
-        ' "post", "video" or "comment" but was: %s',
+        ' "post" or "video" but was: %s',
       embedAs
     );
     const iframe = getIframe(this.win, this.element, TYPE);

@@ -9,7 +9,7 @@
         {name: 'cramforce', requestReviews: false},
         {name: 'dvoytenko', requestReviews: false},
         {name: 'jridgewell', requestReviews: false},
-        {name: 'kristoferbaxter', requestReviews: false},
+        {name: 'rsimha', requestReviews: false},
       ],
     },
     {
@@ -50,6 +50,10 @@
       // Locked down to minimize new import aliases being added
       pattern: 'tsconfig{,.base}.json',
       owners: [{name: 'ampproject/wg-performance', required: true}],
+    },
+    {
+      pattern: '**/tsconfig.json',
+      owners: [{name: 'ampproject/wg-performance'}],
     },
     {
       pattern: '**/*.d.ts',

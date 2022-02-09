@@ -26,12 +26,12 @@ function assertIsName(name) {
  * This method isn't required for modern builds, can be removed.
  * TODO(#37136): This will fail if `root` is a `ShadowRoot`.
  *
- * @param {HTMLElement|ShadowRoot} root
+ * @param {Element|ShadowRoot} root
  * @param {string} selector
  * @return {NodeList}
  */
 function scopedQuerySelectionFallback(root, selector) {
-  const {classList} = /** @type {HTMLElement} */ (root);
+  const {classList} = /** @type {Element} */ (root);
 
   const unique = 'i-amphtml-scoped';
   classList.add(unique);
@@ -44,7 +44,7 @@ function scopedQuerySelectionFallback(root, selector) {
 /**
  * Finds the first element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {HTMLElement|ShadowRoot} root
+ * @param {Element|ShadowRoot} root
  * @param {string} selector
  * @return {?HTMLElement}
  *
@@ -263,7 +263,7 @@ export function childNodes(parent, callback) {
 
 /**
  * Finds the first child element that has the specified attribute.
- * @param {HTMLElement|ShadowRoot} parent
+ * @param {Element|ShadowRoot} parent
  * @param {string} attr
  * @return {?Element}
  */
@@ -389,4 +389,25 @@ function isInternalElement(nodeOrTagName) {
   }
 
   return !!tagName && tagName.toLowerCase().startsWith('i-');
+}
+
+/**
+ * Finds a matching node inside an HTML template slot's children
+ * @param {HTMLSlotElement} slot
+ * @param {string} selector
+ * @return {HTMLElement|null}
+ */
+export function querySelectorInSlot(slot, selector) {
+  const nodes = /** @type {HTMLElement[]} */ (slot.assignedElements());
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (matches(node, selector)) {
+      return node;
+    }
+    const child = scopedQuerySelector(node, selector);
+    if (child) {
+      return child;
+    }
+  }
+  return null;
 }

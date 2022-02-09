@@ -1,6 +1,6 @@
 import {Deferred} from '#core/data-structures/promise';
 import {isEnumValue, isObject} from '#core/types';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
 
 import {isExperimentOn} from '#experiments';
@@ -228,7 +228,7 @@ export class AccessSource {
    */
   buildConfigLoginMap_(configJson) {
     const loginConfig = configJson['login'];
-    const loginMap = dict();
+    const loginMap = {};
     if (!loginConfig) {
       // Ignore: in some cases login config is not necessary.
     } else if (typeof loginConfig == 'string') {

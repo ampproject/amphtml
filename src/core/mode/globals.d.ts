@@ -1,3 +1,4 @@
+/* eslint-disable local/no-forbidden-terms */
 export {};
 
 declare global {

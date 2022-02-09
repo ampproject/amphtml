@@ -10,6 +10,7 @@
 'use strict';
 
 const {cyan, yellow} = require('kleur/colors');
+
 const {log} = require('./build-system/common/logging');
 
 /**

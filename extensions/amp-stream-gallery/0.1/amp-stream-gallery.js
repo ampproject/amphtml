@@ -1,6 +1,24 @@
-import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {
+  dispatchCustomEvent,
+  isRTL,
+  iterateCursor,
+  toggleAttribute,
+} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {htmlFor} from '#core/dom/static-template';
+import {setStyle} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {createCustomEvent, getDetail} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-stream-gallery-0.1.css';
+import {ActionSource} from '../../amp-base-carousel/0.1/action-source';
 import {Carousel} from '../../amp-base-carousel/0.1/carousel';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {ChildLayoutManager} from '../../amp-base-carousel/0.1/child-layout-manager';
@@ -8,21 +26,6 @@ import {
   ResponsiveAttributes,
   getResponsiveAttributeValue,
 } from '../../amp-base-carousel/0.1/responsive-attributes';
-import {Services} from '#service';
-import {createCustomEvent, getDetail} from '#utils/event-helper';
-import {dev, devAssert, user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
-import {
-  dispatchCustomEvent,
-  isRTL,
-  iterateCursor,
-  toggleAttribute,
-} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
-import {isExperimentOn} from '#experiments';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {setStyle} from '#core/dom/style';
-import {toArray} from '#core/types/array';
 
 /** @enum {number} */
 const InsetArrowVisibility = {
@@ -32,11 +35,11 @@ const InsetArrowVisibility = {
 };
 
 /** Maps attribute values to enum values. */
-const insetArrowVisibilityMapping = dict({
+const insetArrowVisibilityMapping = {
   'never': InsetArrowVisibility.NEVER,
   'auto': InsetArrowVisibility.AUTO,
   'always': InsetArrowVisibility.ALWAYS,
-});
+};
 
 /**
  * @param {!Element} el The Element to check.
@@ -749,7 +752,7 @@ class AmpStreamGallery extends AMP.BaseElement {
       return;
     }
 
-    const data = dict({'index': index});
+    const data = {'index': index};
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
     const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;

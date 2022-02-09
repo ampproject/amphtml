@@ -2,7 +2,7 @@ import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {isObject} from '#core/types';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {dev, devAssert} from '#utils/log';
@@ -192,10 +192,10 @@ export class AbstractAmpContext {
   getHtml(selector, attributes, callback) {
     this.client_.getData(
       MessageType_Enum.GET_HTML,
-      dict({
+      {
         'selector': selector,
         'attributes': attributes,
-      }),
+      },
       callback
     );
   }
@@ -219,15 +219,12 @@ export class AbstractAmpContext {
    */
   requestResize(width, height, hasOverflow) {
     const requestId = this.nextResizeRequestId_++;
-    this.client_.sendMessage(
-      MessageType_Enum.EMBED_SIZE,
-      dict({
-        'id': requestId,
-        'width': width,
-        'height': height,
-        'hasOverflow': hasOverflow,
-      })
-    );
+    this.client_.sendMessage(MessageType_Enum.EMBED_SIZE, {
+      'id': requestId,
+      'width': width,
+      'height': height,
+      'hasOverflow': hasOverflow,
+    });
     const deferred = new Deferred();
     this.resizeIdToDeferred_[requestId] = deferred;
     return deferred.promise;
@@ -265,13 +262,10 @@ export class AbstractAmpContext {
    * @private
    */
   sendDeprecationNotice_(endpoint) {
-    this.client_.sendMessage(
-      MessageType_Enum.USER_ERROR_IN_IFRAME,
-      dict({
-        'message': `${endpoint} is deprecated`,
-        'expected': true,
-      })
-    );
+    this.client_.sendMessage(MessageType_Enum.USER_ERROR_IN_IFRAME, {
+      'message': `${endpoint} is deprecated`,
+      'expected': true,
+    });
   }
 
   /**
@@ -425,12 +419,9 @@ export class AbstractAmpContext {
     if (!e.message) {
       return;
     }
-    this.client_.sendMessage(
-      MessageType_Enum.USER_ERROR_IN_IFRAME,
-      dict({
-        'message': e.message,
-      })
-    );
+    this.client_.sendMessage(MessageType_Enum.USER_ERROR_IN_IFRAME, {
+      'message': e.message,
+    });
   }
 }
 

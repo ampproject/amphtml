@@ -8,7 +8,7 @@ const path = require('path');
 const testConfig = require('../../test-configs/config');
 const {cyan, green} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
-const {extensions, maybeInitializeExtensions} = require('../extension-helpers');
+const {EXTENSIONS, maybeInitializeExtensions} = require('../extension-helpers');
 const {gitDiffNameOnlyMain} = require('../../common/git');
 const {isCiBuild} = require('../../common/ci');
 const {log, logLocalDev} = require('../../common/logging');
@@ -36,7 +36,7 @@ function isLargeRefactor() {
  */
 function extractCssJsFileMap() {
   execOrDie('amp css', {'stdio': 'ignore'});
-  maybeInitializeExtensions(extensions);
+  maybeInitializeExtensions(EXTENSIONS);
   /** @type {Object<string, string>} */
   const cssJsFileMap = {};
 
@@ -55,8 +55,8 @@ function extractCssJsFileMap() {
     cssJsFileMap[cssFilePath] = jsFilePath;
   }
 
-  Object.keys(extensions).forEach((extension) => {
-    const cssData = extensions[extension];
+  Object.keys(EXTENSIONS).forEach((extension) => {
+    const cssData = EXTENSIONS[extension];
     if (cssData['hasCss']) {
       addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
       if (cssData.hasOwnProperty('cssBinaries')) {

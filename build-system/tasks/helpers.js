@@ -6,25 +6,25 @@ const experimentDefines = require('../global-configs/experiments-const.json');
 const fs = require('fs-extra');
 const open = require('open');
 const path = require('path');
-const Remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {cyan, green, red} = require('kleur/colors');
-const {generateBentoRuntimeEntrypoint} = require('../compile/generate/bento');
+const {
+  generateBentoCoreEntrypoint,
+  generateBentoRuntimeEntrypoint,
+} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {getSourceRoot} = require('../compile/helpers');
+const {massageSourcemaps} = require('./sourcemaps');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
-
-/** @type {Remapping.default} */
-const remapping = /** @type {*} */ (Remapping);
+const {resolvePath} = require('../babel-config/import-resolver');
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -123,6 +123,19 @@ async function compileCoreRuntime(options) {
 }
 
 /**
+ * Compiles the "core" utilies used by all bento extensions
+ *
+ * Outputs 2 scripts:
+ * 1) for direct consumption in the browser
+ * 2) for consumption by npm package users
+ * @param {Object} options
+ * @return {Promise<void>}
+ */
+async function compileBentoRuntimeAndCore(options) {
+  await Promise.all([compileBentoRuntime(options), compileBentoCore(options)]);
+}
+
+/**
  * @param {!Object} options
  * @return {Promise<void>}
  */
@@ -131,11 +144,43 @@ async function compileBentoRuntime(options) {
   const filename = `${srcDir}/${srcFilename}`;
   const fileSource = generateBentoRuntimeEntrypoint();
   await fs.outputFile(filename, fileSource);
-  await doBuildJs(jsBundles, 'bento.js', {
+  await doBuildJs(jsBundles, 'bento.js', options);
+}
+
+/**
+ * @typedef {{
+ *  minifiedName?: string;
+ *  toName?: string;
+ *  outputFormat?: string;
+ *  esbuild?: boolean;
+ *  minify?: boolean;
+ *  watch?: boolean;
+ *  onWatchBuild?: *;
+ *  wrapper?: string;
+ *  babelCaller?: string;
+ *  remapDependencies?: Object;
+ *  externalDependencies?: Array<string>
+ * }} CompileBentoCoreOptions
+ */
+
+/**
+ * @param {CompileBentoCoreOptions} options
+ * @return {Promise<void>}
+ */
+async function compileBentoCore(options) {
+  const {options: bundleOpts, srcDir, srcFilename} = jsBundles['bento.core.js'];
+  const {minifiedName, toName} = bundleOpts;
+  const filename = `${srcDir}/${srcFilename}`;
+  const fileSource = generateBentoCoreEntrypoint();
+  await fs.outputFile(filename, fileSource);
+
+  const esm = argv.esm || argv.sxg || false;
+  await doBuildJs(jsBundles, 'bento.core.js', {
     ...options,
-    // The pre-closure babel step wants the entry file to be generated earlier.
-    // Much simpler to generate it here and use esbuild instead.
-    esbuild: true,
+    toName: maybeToNpmEsmName(toName),
+    minifiedName: maybeToNpmEsmName(minifiedName),
+
+    outputFormat: esm ? 'esm' : 'cjs',
   });
 }
 
@@ -154,7 +199,7 @@ async function compileAllJs(options) {
   const startTime = Date.now();
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', options),
-    compileBentoRuntime(options),
+    compileBentoRuntimeAndCore(options),
     doBuildJs(jsBundles, 'alp.max.js', options),
     doBuildJs(jsBundles, 'integration.js', options),
     doBuildJs(jsBundles, 'ampcontext-lib.js', options),
@@ -392,17 +437,36 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       name: 'remap-dependencies',
       setup(build) {
         build.onResolve({filter: /.*/}, (args) => {
-          const {path: importPath, resolveDir} = args;
-          const dep = importPath.startsWith('.')
-            ? path.posix.join(resolveDir, importPath)
-            : importPath;
+          const {resolveDir} = args;
+          let {path: importPath} = args;
+
+          // Convert directory imports -> explicit imports of the index file.
+          // Leave js/ts extension out to be lang-agnostic.
+          if (importPath === './') {
+            importPath = './index';
+          }
+
+          let dep;
+          // Use resolvePath() the path to normalize files/directories.
+          // If file, gets filepath; if directory, gets the index filepath
+          if (importPath.startsWith('.')) {
+            const absImportPath = path.posix.join(resolveDir, importPath);
+            const rootDir = process.cwd();
+            const rootRelativePath = path.posix.relative(
+              rootDir,
+              absImportPath
+            );
+            dep = resolvePath(rootRelativePath);
+          } else {
+            dep = importPath;
+          }
           for (const {regex, value} of remaps) {
             if (!regex.test(dep)) {
               continue;
             }
             const isExternal = external.includes(value);
             return {
-              path: isExternal ? value : require.resolve(value),
+              path: isExternal ? value : resolvePath(value),
               external: isExternal,
             };
           }
@@ -696,56 +760,12 @@ async function getDependencies(entryPoint, options) {
   return Object.keys(result.metafile?.inputs ?? {});
 }
 
-/**
- * @param {!Array<string|object>} sourcemaps
- * @param {Map<string, string|object>} babelMaps
- * @param {*} options
- * @return {string}
- */
-function massageSourcemaps(sourcemaps, babelMaps, options) {
-  const root = process.cwd();
-  const remapped = remapping(
-    sourcemaps,
-    (f) => {
-      if (f.includes('__SOURCE__')) {
-        return null;
-      }
-      const file = path.join(root, f);
-      // The Babel tranformed file and the original file have the same path,
-      // which makes it difficult to distinguish during remapping's load phase.
-      // We perform some manual path mangling to destingish the babel files
-      // (which have a sourcemap) from the actual source file by pretending the
-      // source file exists in the '__SOURCE__' root directory.
-      const map = babelMaps.get(file);
-      if (!map) {
-        throw new Error(`failed to find sourcemap for babel file "${f}"`);
-      }
-      return {
-        ...map,
-        sourceRoot: path.posix.join('/__SOURCE__/', path.dirname(f)),
-      };
-    },
-    !argv.full_sourcemaps
-  );
-
-  remapped.sources = remapped.sources.map((source) => {
-    if (source.startsWith('/__SOURCE__/')) {
-      return source.slice('/__SOURCE__/'.length);
-    }
-    return source;
-  });
-  remapped.sourceRoot = getSourceRoot(options);
-  if (remapped.file) {
-    remapped.file = path.basename(remapped.file);
-  }
-
-  return remapped.toString();
-}
-
 module.exports = {
   bootstrapThirdPartyFrames,
   compileAllJs,
+  compileBentoCore,
   compileBentoRuntime,
+  compileBentoRuntimeAndCore,
   compileCoreRuntime,
   compileJs,
   esbuildCompile,

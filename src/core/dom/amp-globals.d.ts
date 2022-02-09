@@ -1,6 +1,12 @@
+import { ReadyState_Enum } from "#core/constants/ready-state";
+
 export {};
 
 declare global {
+  interface Window {
+    __AMP_SHADOW_CSS?: null | {[key: string]: CSSStyleSheet};
+  }
+
   // An interface for elements with pause functionality, such as media players.
   interface IPausable {
     pause: () => void;
@@ -15,6 +21,7 @@ declare global {
   // expectations rather than the catch-all AMP-specific `AmpElement` class. This
   // is already done with the `IPausable` interface.
   interface AmpElement extends HTMLElement, IPausable {
+    readyState: ReadyState_Enum;
     sizerElement?: HTMLElement;
 
     getPlaceholder: () => null | Element;

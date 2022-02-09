@@ -223,8 +223,9 @@ exports.rules = [
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
-      // VideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
+      // AmpVideoBaseElement, BentoVideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
       'extensions/**->extensions/amp-video/1.0/video-base-element.js',
+      'extensions/**->extensions/amp-video/1.0/base-element.js',
       'extensions/**->extensions/amp-video/1.0/video-iframe.js',
 
       // <amp-video-iframe> versions share this message API definition.
@@ -270,10 +271,12 @@ exports.rules = [
       'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/toast.js',
 
       // Story Shopping
+      'extensions/amp-story-shopping/0.1/amp-story-shopping.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-config.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-config.js->extensions/amp-story/1.0/request-utils.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
       // Interactive components that depend on story functionality.
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -285,6 +288,9 @@ exports.rules = [
       'extensions/amp-story-interactive/0.1/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-interactive/0.1/interactive-disclaimer.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-slider.js->extensions/amp-story/1.0/amp-story-store-service.js',
+
+      // AMP Story Subscriptions.
+      'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
@@ -305,7 +311,7 @@ exports.rules = [
       'extensions/amp-story-page-attachment/0.1/amp-story-draggable-drawer.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/loading-spinner.js',
-      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-open-page-attachment.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-open-page-attachment.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/history.js',
       'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/story-analytics.js',
@@ -331,6 +337,8 @@ exports.rules = [
         'src/service/extension-script.js',
       'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/extension-script.js',
+      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
@@ -348,8 +356,6 @@ exports.rules = [
       'extensions/amp-dailymotion/0.1/amp-dailymotion.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-brid-player/0.1/amp-brid-player.js->' +
-        'src/service/video-manager-impl.js',
-      'extensions/amp-jwplayer/0.1/amp-jwplayer.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
         'src/service/video-manager-impl.js',
@@ -494,6 +500,12 @@ exports.rules = [
   {
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'extensions/**/*.js',
+    allowlist: [
+      // Do not add to this allowlist.
+      // These files are here temporarily while all the bento components are moved out of extensions.
+      'src/bento/components/bento-jwplayer/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      'src/bento/components/bento-jwplayer/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+    ],
   },
   {
     filesMatching: 'src/**/*.js',

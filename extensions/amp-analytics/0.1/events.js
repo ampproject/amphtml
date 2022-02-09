@@ -1,20 +1,23 @@
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {Deferred} from '#core/data-structures/promise';
 import {Observable} from '#core/data-structures/observable';
+import {Deferred} from '#core/data-structures/promise';
+import {getDataParamsFromAttributes} from '#core/dom';
+import {isAmpElement} from '#core/dom/amp-element-helpers';
+import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
+import {enumValues} from '#core/types/enum';
+import {debounce} from '#core/types/function';
+import {deepMerge, hasOwn} from '#core/types/object';
+
+import {isExperimentOn} from '#experiments';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {
   PlayingStates_Enum,
   VideoAnalyticsEvents_Enum,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
-import {enumValues} from '#core/types/enum';
-import {deepMerge, dict, hasOwn} from '#core/types/object';
-import {dev, devAssert, user, userAssert} from '#utils/log';
-import {getData} from '#utils/event-helper';
-import {getDataParamsFromAttributes} from '#core/dom';
-import {isAmpElement} from '#core/dom/amp-element-helpers';
-import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
-import {debounce} from '#core/types/function';
-import {isExperimentOn} from '#experiments';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -278,7 +281,7 @@ export class AnalyticsEvent {
    * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
    * attribute value from target element should be included.
    */
-  constructor(target, type, vars = dict(), enableDataVars = true) {
+  constructor(target, type, vars = {}, enableDataVars = true) {
     /** @const */
     this['target'] = target;
     /** @const */
@@ -333,7 +336,7 @@ export class BrowserEventTracker extends EventTracker {
     this.observables_ = new Observable();
 
     /** @private {!Object<BrowserEventType, boolean>} */
-    this.listenerMap_ = dict({});
+    this.listenerMap_ = {};
 
     /** @private {?function(!Event)} */
     this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
@@ -781,7 +784,7 @@ export class ScrollEventTracker extends EventTracker {
    * @private
    */
   normalizeBoundaries_(bounds) {
-    const result = dict({});
+    const result = {};
     if (!bounds || !Array.isArray(bounds)) {
       return result;
     }
@@ -825,7 +828,7 @@ export class ScrollEventTracker extends EventTracker {
         continue;
       }
       bounds[bound] = true;
-      const vars = dict();
+      const vars = {};
       vars[varName] = b;
       listener(
         new AnalyticsEvent(
@@ -1152,10 +1155,10 @@ class TimerEventHandler {
       timerDuration = this.calculateDuration_();
       this.lastRequestTime_ = Date.now();
     }
-    return dict({
+    return {
       'timerDuration': timerDuration,
       'timerStart': this.startTime_ || 0,
-    });
+    };
   }
 }
 
@@ -1543,7 +1546,7 @@ function normalizeVideoEventType(type, details) {
  */
 function removeInternalVars(details) {
   if (!details) {
-    return dict();
+    return {};
   }
   const clean = {...details};
   delete clean[videoAnalyticsCustomEventTypeKey];

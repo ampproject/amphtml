@@ -14,9 +14,6 @@ on:
       channel:
         description: 'release channel (beta-opt-in | beta-percent | stable | lts)'
         required: true
-      time:
-        description: 'action time'
-        required: true
       sha:
         description: 'commit sha'
         required: true
@@ -37,7 +34,6 @@ jobs:
             --head ${{ github.event.inputs.head }} \
             --base ${{ github.event.inputs.base }} \
             --channel ${{ github.event.inputs.channel }} \
-            --time ${{ github.event.inputs.time }} \
             --sha ${{ github.event.inputs.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}

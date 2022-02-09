@@ -1,4 +1,3 @@
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import * as Preact from '#preact';
@@ -34,7 +33,7 @@ export function BentoSoundcloud({
     return () => {
       // Pause widget
       iframeRef.current?.contentWindow?./*OK*/ postMessage(
-        JSON.stringify(dict({'method': 'pause'})),
+        JSON.stringify({'method': 'pause'}),
         'https://w.soundcloud.com'
       );
 
