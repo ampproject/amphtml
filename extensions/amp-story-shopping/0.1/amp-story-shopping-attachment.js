@@ -178,15 +178,20 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     }
   }
 
+  /**
+   * @return {boolean}
+   * @private
+   */
   attachmentIsOpen_() {
     return this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
   }
 
   /**
    * Returns template if already built. If not built, returns a built template.
-   * @param {!string} templateId
+   * @param {string} templateId
    * @param {?ShoppingConfigDataDef} productForPdp
    * @param {!Array<!ShoppingConfigDataDef} shoppingDataForPage
+   * @return {Element}
    * @private
    */
   getTemplate_(templateId, productForPdp, shoppingDataForPage) {
