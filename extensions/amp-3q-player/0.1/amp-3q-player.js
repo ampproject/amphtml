@@ -210,15 +210,11 @@ class Amp3QPlayer extends AMP.BaseElement {
    * @param {number} newHeight
    */
   resize_(newHeight) {
-    this.element.classList.remove(
-      'i-amphtml-fill-content',
-      'i-amphtml-replaced-content'
-    );
-
-    this.element.setAttribute('layout', 'container');
-    this.element.setAttribute('i-amphtml-layout', 'container');
-    this.element.classList.add('i-amphtml-layout-container');
-    setStyle(this.element, 'height', newHeight, 'px');
+    this.attemptChangeHeight(newHeight).then(() => {
+      this.notifyChangedHeight_();
+    }).catch(() => {
+      this.notifyChangeHeightRejected_();
+    });
   }
 
   /**
