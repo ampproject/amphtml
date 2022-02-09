@@ -79,30 +79,14 @@ import LocalizedStringsTr from './_locales/tr.json' assert {type: 'json'}; // lg
 import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryConsent, AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryCtaLayer, AmpStoryCtaLayer} from './amp-story-cta-layer';
-import {
-  AmpStoryEmbeddedComponent,
-  AmpStoryEmbeddedComponent,
-} from './amp-story-embedded-component';
-import {AmpStoryGridLayer, AmpStoryGridLayer} from './amp-story-grid-layer';
-import {AmpStoryHint, AmpStoryHint} from './amp-story-hint';
+import {AmpStoryConsent} from './amp-story-consent';
+import {AmpStoryCtaLayer} from './amp-story-cta-layer';
+import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
+import {AmpStoryGridLayer} from './amp-story-grid-layer';
+import {AmpStoryHint} from './amp-story-hint';
 import {InfoDialog} from './amp-story-info-dialog';
 import {getLocalizationService} from './amp-story-localization-service';
-import {
-  AmpStoryPage,
-  AmpStoryPage,
-  NavigationDirection,
-  NavigationDirection,
-  PageState,
-  PageState,
-} from './amp-story-page';
-import {AmpStoryPageAttachment} from './amp-story-page-attachment';
-import {
-  AmpStoryRenderService,
-  AmpStoryRenderService,
-} from './amp-story-render-service';
+import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryShare} from './amp-story-share';
 import {
   Action,
@@ -114,12 +98,9 @@ import {
 } from './amp-story-store-service';
 import {SystemLayer} from './amp-story-system-layer';
 import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
-import {
-  AmpStoryViewerMessagingHandler,
-  AmpStoryViewerMessagingHandler,
-} from './amp-story-viewer-messaging-handler';
+import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {upgradeBackgroundAudio} from './audio';
-import {BackgroundBlur, BackgroundBlur} from './background-blur';
+import {BackgroundBlur} from './background-blur';
 import {isPreviewMode} from './embed-mode';
 import {EventType, dispatch} from './events';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
@@ -138,14 +119,9 @@ import {
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
-import {
-  AnalyticsVariable,
-  AnalyticsVariable,
-  getVariableService,
-  getVariableService,
-} from './variable-service';
+import {AnalyticsVariable, getVariableService} from './variable-service';
 
-import {CSS, CSS} from '../../../build/amp-story-1.0.css';
+import {CSS} from '../../../build/amp-story-1.0.css';
 import {getConsentPolicyState} from '../../../src/consent';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
@@ -2642,8 +2618,4 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
-  AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
-  AMP.registerElement('amp-story-page-outlink', AmpStoryPageAttachment); // Shares codepath with amp-story-page-attachment.
-  // AMP.registerElement('amp-story-subscription', AmpStorySubscription);
-  AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

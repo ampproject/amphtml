@@ -1,9 +1,9 @@
-import {isArray, isArray} from '#core/types';
+import {isArray} from '#core/types';
 import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {devAssert, devAssert, userAssert, userAssert} from '#utils/log';
+import {devAssert, userAssert} from '#utils/log';
 
 import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
