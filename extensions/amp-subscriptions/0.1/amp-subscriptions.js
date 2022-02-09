@@ -166,6 +166,12 @@ export class SubscriptionService {
         });
 
       isStoryDocument(this.ampdoc_).then((isStory) => {
+        if (isStory) {
+          // Make the dialog with round corners for AMP Story.
+          const doc = this.ampdoc_.getRootNode();
+          const dialogWrapperEl = doc.querySelector('amp-subscriptions-dialog');
+          dialogWrapperEl.classList.add('i-amphtml-subs-amp-story-dialog');
+        }
         // Delegates the platform selection and activation call if is story.
         if (isStory) {
           // Make the dialog with round corners for AMP Story.
@@ -206,6 +212,36 @@ export class SubscriptionService {
    */
   getDialog() {
     return this.dialog_;
+  }
+
+  /**
+   * Select and activate all platforms. Do nothing if the viewer can authorize the user.
+   * @return {!Promise}
+   */
+  selectAndActivatePlatform() {
+    return this.initialize_().then(() => {
+      if (this.doesViewerProvideAuth_ || this.platformConfig_['alwaysGrant']) {
+        return;
+      }
+
+      return this.selectAndActivatePlatform_();
+    });
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   */
+  getGrantStatus() {
+    return this.platformStore_.getGrantStatus();
+  }
+
+  /**
+   * This registers a callback which is called whenever a platform key is resolved
+   * with an entitlement.
+   * @param {function(!EntitlementChangeEventDef):void} callback
+   */
+  addOnEntitlementResolvedCallback(callback) {
+    this.platformStore_.addOnEntitlementResolvedCallback(callback);
   }
 
   /**

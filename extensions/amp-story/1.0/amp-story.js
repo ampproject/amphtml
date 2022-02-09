@@ -16,8 +16,6 @@ import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 // import {AmpStorySubscription} from '../../amp-story-subscription/0.1/amp-story-subscription';
-import {BackgroundBlur} from './background-blur';
-import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
@@ -82,23 +80,29 @@ import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lg
 import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryAccess} from './amp-story-access';
-import {AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryCtaLayer} from './amp-story-cta-layer';
-import {AmpStoryCtaLayer} from './amp-story-cta-layer';
-import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
-import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
-import {AmpStoryGridLayer} from './amp-story-grid-layer';
-import {AmpStoryGridLayer} from './amp-story-grid-layer';
-import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryHint} from './amp-story-hint';
+import {AmpStoryConsent, AmpStoryConsent} from './amp-story-consent';
+import {AmpStoryCtaLayer, AmpStoryCtaLayer} from './amp-story-cta-layer';
+import {
+  AmpStoryEmbeddedComponent,
+  AmpStoryEmbeddedComponent,
+} from './amp-story-embedded-component';
+import {AmpStoryGridLayer, AmpStoryGridLayer} from './amp-story-grid-layer';
+import {AmpStoryHint, AmpStoryHint} from './amp-story-hint';
 import {InfoDialog} from './amp-story-info-dialog';
 import {getLocalizationService} from './amp-story-localization-service';
-import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
-import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
+import {
+  AmpStoryPage,
+  AmpStoryPage,
+  NavigationDirection,
+  NavigationDirection,
+  PageState,
+  PageState,
+} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
-import {AmpStoryRenderService} from './amp-story-render-service';
-import {AmpStoryRenderService} from './amp-story-render-service';
+import {
+  AmpStoryRenderService,
+  AmpStoryRenderService,
+} from './amp-story-render-service';
 import {AmpStoryShare} from './amp-story-share';
 import {
   Action,
@@ -110,10 +114,12 @@ import {
 } from './amp-story-store-service';
 import {SystemLayer} from './amp-story-system-layer';
 import {renderUnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
-import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
-import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
+import {
+  AmpStoryViewerMessagingHandler,
+  AmpStoryViewerMessagingHandler,
+} from './amp-story-viewer-messaging-handler';
 import {upgradeBackgroundAudio} from './audio';
-import {BackgroundBlur} from './background-blur';
+import {BackgroundBlur, BackgroundBlur} from './background-blur';
 import {isPreviewMode} from './embed-mode';
 import {EventType, dispatch} from './events';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
@@ -132,10 +138,14 @@ import {
   setAttributeInMutate,
   shouldShowStoryUrlInfo,
 } from './utils';
-import {AnalyticsVariable, getVariableService} from './variable-service';
-import {AnalyticsVariable, getVariableService} from './variable-service';
+import {
+  AnalyticsVariable,
+  AnalyticsVariable,
+  getVariableService,
+  getVariableService,
+} from './variable-service';
 
-import {CSS} from '../../../build/amp-story-1.0.css';
+import {CSS, CSS} from '../../../build/amp-story-1.0.css';
 import {getConsentPolicyState} from '../../../src/consent';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
@@ -331,6 +341,12 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {boolean} whether the styles were rewritten */
     this.didRewriteStyles_ = false;
+
+    /** @private @const {} */
+    this.subscriptionsService_ = null;
+
+    /** @private @const {} */
+    this.granted_ = true;
   }
 
   /** @override */
@@ -1355,15 +1371,30 @@ export class AmpStory extends AMP.BaseElement {
 
     if (
       isExperimentOn(this.win, 'amp-story-paywall-exp') &&
-      targetPage.isPaywallProtected()
+      targetPage.isPaywallProtected() &&
+      !this.granted_
     ) {
       if (this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE)) {
-        // Subscription dialog is already triggered.
+        // Do nothing when the subscription dialog is already triggered.
         return Promise.resolve();
       }
       this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
 
-      // TODO(#37285): add SubscriptionService to actually trigger the subscription dialog.
+      this.subscriptionsService_.selectAndActivatePlatform();
+      this.subscriptionsService_.addOnEntitlementResolvedCallback((e) => {
+        const {entitlement} = e;
+        if (
+          this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE) &&
+          entitlement.granted
+        ) {
+          this.granted_ = true;
+          this.storeService_.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_DIALOG,
+            false
+          );
+        }
+      });
+      return Promise.resolve();
     }
 
     const subscriptionsSection = targetPage.element.getAttribute(
@@ -2594,6 +2625,14 @@ export class AmpStory extends AMP.BaseElement {
       (e) => matches(e, 'a.i-amphtml-story-page-open-attachment[href]'),
       this.element
     );
+  }
+
+  /**
+   * @private
+   * @return {boolean}
+   */
+  isPaywallStory_() {
+    return this.element.querySelector('amp-story-subscriptions') != null;
   }
 }
 

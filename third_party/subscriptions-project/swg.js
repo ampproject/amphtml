@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.204 */
+/** Version: 0.1.22.205 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5020,7 +5020,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.204',
+    '_client': 'SwG 0.1.22.205',
   });
 }
 
@@ -6350,7 +6350,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.204',
+        '_client': 'SwG 0.1.22.205',
         'supportsEventManager': true,
       },
       args || {}
@@ -7258,7 +7258,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.204');
+    context.setClientVersion('SwG 0.1.22.205');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -10621,6 +10621,7 @@ const MeterClientTypes = {
 const IFRAME_BOX_SHADOW =
   'rgba(60, 64, 67, 0.3) 0px -2px 5px, rgba(60, 64, 67, 0.15) 0px -5px 5px';
 const MINIMIZED_IFRAME_SIZE = '420px';
+const ANONYMOUS_USER_ATTRIBUTE = 'anonymous_user';
 /**
  * The iframe URLs to be used per MeterClientType
  * @type {Object.<MeterClientTypes, string>}
@@ -10628,6 +10629,11 @@ const MINIMIZED_IFRAME_SIZE = '420px';
 const IframeUrlByMeterClientType = {
   [MeterClientTypes.LICENSED_BY_GOOGLE]: '/metertoastiframe',
   [MeterClientTypes.METERED_BY_GOOGLE]: '/meteriframe',
+};
+/** @enum {string} */
+const MeterType = {
+  UNKNOWN: 'UNKNOWN',
+  KNOWN: 'KNOWN',
 };
 
 class MeterToastApi {
@@ -10637,7 +10643,10 @@ class MeterToastApi {
    */
   constructor(
     deps,
-    {meterClientType = MeterClientTypes.LICENSED_BY_GOOGLE} = {}
+    {
+      meterClientType = MeterClientTypes.LICENSED_BY_GOOGLE,
+      meterClientUserAttribute = ANONYMOUS_USER_ATTRIBUTE,
+    } = {}
   ) {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
@@ -10653,6 +10662,9 @@ class MeterToastApi {
 
     /** @private @const {!MeterClientTypes} */
     this.meterClientType_ = meterClientType;
+
+    /** @private @const {string} */
+    this.meterClientUserAttribute_ = meterClientUserAttribute;
 
     /**
      * Function this class calls when a user dismisses the toast to consume a
@@ -10678,16 +10690,24 @@ class MeterToastApi {
    * @return {!Promise}
    */
   start() {
+    const additionalArguments = {
+      isClosable: true,
+      hasSubscriptionCallback: this.deps_
+        .callbacks()
+        .hasSubscribeRequestCallback(),
+    };
+    if (this.meterClientType_ === MeterClientTypes.METERED_BY_GOOGLE) {
+      additionalArguments['meterType'] =
+        this.meterClientUserAttribute_ === ANONYMOUS_USER_ATTRIBUTE
+          ? MeterType.UNKNOWN
+          : MeterType.KNOWN;
+    }
     return this.deps_
       .storage()
       .get(Constants$1.USER_TOKEN, true)
       .then((swgUserToken) => {
-        const iframeArgs = this.activityPorts_.addDefaultArguments({
-          isClosable: true,
-          hasSubscriptionCallback: this.deps_
-            .callbacks()
-            .hasSubscribeRequestCallback(),
-        });
+        const iframeArgs =
+          this.activityPorts_.addDefaultArguments(additionalArguments);
 
         const iframeUrl =
           IframeUrlByMeterClientType[
@@ -12092,6 +12112,10 @@ class EntitlementsManager {
         const meterToastApi = new MeterToastApi(this.deps_, {
           meterClientType:
             entitlement.subscriptionTokenContents['metering']['clientType'],
+          meterClientUserAttribute:
+            entitlement.subscriptionTokenContents['metering'][
+              'clientUserAttribute'
+            ],
         });
         meterToastApi.setOnConsumeCallback(onConsumeCallback);
         return meterToastApi.start();

@@ -30,7 +30,7 @@ export class PlatformStore {
    * @param {!JsonObject|Object<string, number>} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
    * @param {Object<string, !./subscription-platform.SubscriptionPlatform>=} opt_Platforms
-   * @param {} opt_externalOnEntitlementResolvedCallbacks
+   * @param {!Observable<!EntitlementChangeEventDef>} opt_externalOnEntitlementResolvedCallbacks
    */
   constructor(
     platformKeys,
@@ -90,6 +90,12 @@ export class PlatformStore {
 
     /** @private @const {!Object<string, number>} */
     this.scoreConfig_ = Object.assign(DEFAULT_SCORE_CONFIG, scoreConfig);
+
+    /** @private @const {!Observable<!EntitlementChangeEventDef>} */
+    this.externalOnEntitlementResolvedCallbacks_ =
+      opt_externalOnEntitlementResolvedCallbacks
+        ? opt_externalOnEntitlementResolvedCallbacks
+        : new Observable();
   }
 
   /**
