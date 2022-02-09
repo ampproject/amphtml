@@ -6,7 +6,7 @@
 
     var _module = modules[name] = modules[name] || {};
 
-    _module.m = _exports;
+    _module.e = _exports;
 
     while (_module.c && _module.c.length > 0) {
       _module.c.pop()(_exports);
@@ -22,8 +22,8 @@
       c: []
     };
 
-    if (_module.m) {
-      exec(_module.m);
+    if (_module.e) {
+      exec(_module.e);
     } else {
       _module.c.push(exec);
     }
@@ -37,16 +37,21 @@
         c: []
       };
 
-      return _module.m || new Promise(function (resolve) {
+      return _module.e || new Promise(function (resolve) {
         _module.c.push(resolve);
       });
     })).then(function (deps) {
       exec.apply(null, deps);
     });
   }
-})(function (exports) {
+})(function (_exports) {
+  "use strict";
+
+  _exports.__esModule = true;
+  _exports.y = y;
+  _exports.x = void 0;
   const x = 'y';
-  exports.x = x;
+  _exports.x = x;
 
   function y() {}
 });

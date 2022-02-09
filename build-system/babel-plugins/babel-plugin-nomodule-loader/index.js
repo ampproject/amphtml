@@ -1,10 +1,10 @@
-const {hasExports, isModule} = require('@babel/helper-module-transforms');
 const {
-  default: normalizeAndLoadMetadata,
-} = require('@babel/helper-module-transforms/lib/normalize-and-load-metadata');
-const {
-  default: rewriteLiveReferences,
-} = require('@babel/helper-module-transforms/lib/rewrite-live-references');
+  buildNamespaceInitStatements,
+  ensureStatementsHoisted,
+  hasExports,
+  isModule,
+  rewriteModuleStatementsAndPrepareHeader,
+} = require('@babel/helper-module-transforms');
 const {readFileSync} = require('fs');
 const {join: pathJoin, posix, relative} = require('path');
 
@@ -55,15 +55,19 @@ module.exports = function (babel) {
   }
 
   return {
-    name: 'nomodule-async',
+    name: 'nomodule-loader',
     visitor: {
       Program: {
         exit(path, state) {
           if (!isModule(path)) {
             throw new Error();
           }
-          const meta = normalizeAndLoadMetadata(path, 'exports', {});
-          rewriteLiveReferences(path, meta);
+          const loose = true;
+          const noInterop = true;
+          const {headers, meta} = rewriteModuleStatementsAndPrepareHeader(
+            path,
+            {loose, noInterop}
+          );
 
           const filename = relative(process.cwd(), state.filename);
           const importNames = [];
@@ -78,10 +82,15 @@ module.exports = function (babel) {
               t.stringLiteral(resolveModuleName(filename, source))
             );
             callbackArgs.push(t.identifier(metadata.name));
+            headers.push(
+              ...buildNamespaceInitStatements(meta, metadata, loose)
+            );
           }
           if (importNames.length < 1) {
             return;
           }
+          ensureStatementsHoisted(headers);
+          path.unshiftContainer('body', headers);
           injectWrapper(
             path,
             buildWrapper({
