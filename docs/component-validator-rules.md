@@ -426,11 +426,23 @@ Optionally, you may add more than one valid variant and/or invalid examples.
 
 ## Test Output files
 
-After creating your validator html file, You need to create the corresponding `.out` file to act as your test results. These are used to verify if the validator is validating your extension correctly. To do this, navigate to the root of the project, `amphtml/` and run `amp validator --update_tests`. This should generate a matching `.out` file, and for this example, it would be:
+After creating your validator html file, You need to create the corresponding `.out` file to act as your test results. These are used to verify if the validator is validating your extension correctly.
+There are two alternative ways to do this.
 
-<pre>
-amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat.out</b>
-</pre>
+1. Option 1
+
+   Install [Bazel](https://docs.bazel.build/versions/main/install.html),
+   navigate to the validator folder `amphtml/validator`,
+   and run `bazel run cpp/engine:update-tests`.
+   This should generate a matching `.out` file, and for this example, it would be:
+   <pre>
+   amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat.out</b>
+   </pre>
+
+1. Option 2
+
+   Wait PR checks to fail.
+   The error message in CircleCI includes the expected content of the `.out` file.
 
 After generating the `.out` file, you should check it's contents that it gives the correct validation results/errors. If you only added valid examples, this file should contain a single line:
 
