@@ -26,6 +26,10 @@ amp-story-shopping-tag {
   flex-flow: row-reverse !important;
 }
 
+[dir=rtl].i-amphtml-amp-story-shopping-tag-inner-flipped {
+  flex-direction: row !important;
+}
+
 .i-amphtml-amp-story-shopping-tag-inner {
   height: 36px !important;
   max-width: 168px !important;
