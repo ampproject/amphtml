@@ -7,15 +7,10 @@
  * @fileoverview
  */
 
-// Preact type declarations need to be exported as types
-import {ComponentProps, FunctionalComponent, Ref} from 'preact';
-
 // Importing directly from preact/dom is a hack to allow us to mimic the structure of react.
 export {hydrate, render} from 'preact/dom';
 
 export {createElement, cloneElement, createRef, createContext} from 'preact';
-
-export type {ComponentProps, Ref, FunctionalComponent};
 
 export {
   useState,
@@ -32,6 +27,6 @@ export {
  * @param {*} props
  * @return {import('preact').ComponentChildren}
  */
-export function Fragment(props: any) {
+export function Fragment(props) {
   return props.children;
 }
