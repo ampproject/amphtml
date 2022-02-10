@@ -130,7 +130,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Active product data is cleared after the attachment closes so that content does not jump.
-   * @param {!isOpen} boolean
+   * @param {boolean} isOpen
    * @private
    */
   checkClearActiveProductData_(isOpen) {
@@ -193,14 +193,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.builtTemplates_[templateId] = template;
       this.mutateElement(() => this.templateContainer_.appendChild(template));
     }
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  attachmentIsOpen_() {
-    return this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
   }
 
   /**
