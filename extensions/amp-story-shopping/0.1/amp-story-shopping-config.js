@@ -51,7 +51,9 @@ function keyByProductTagId(config) {
 export function storeShoppingConfig(pageElement, config) {
   const win = pageElement.ownerDocument.defaultView;
   return Services.storyStoreServiceForOrNull(win).then((storeService) => {
-    storeService?.dispatch(Action.ADD_SHOPPING_DATA, config);
+    const shoppingConfig = {};
+    shoppingConfig[pageElement.id] = config;
+    storeService?.dispatch(Action.ADD_SHOPPING_DATA, shoppingConfig);
     return config;
   });
 }

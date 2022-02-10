@@ -233,7 +233,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
-    this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
+    const pageElement = this.element.parentElement;
+
+    this.tagData_ =
+      shoppingData[pageElement.id][
+        this.element.getAttribute('data-product-id')
+      ];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }

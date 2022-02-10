@@ -1,3 +1,5 @@
+import {CONSOLE_APPENDER} from 'karma/lib/constants';
+
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
@@ -131,7 +133,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (this.plpContainer_.querySelector('.i-amphtml-amp-story-shopping-plp')) {
       return;
     }
-    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
+
+    const pageElement = this.element.parentElement;
+    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA)[
+      pageElement.id
+    ];
     const shoppingDataForPage = this.shoppingTags_.map(
       (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
     );
