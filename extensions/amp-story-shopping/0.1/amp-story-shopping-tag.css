@@ -83,9 +83,8 @@ amp-story-shopping-tag {
   height: 100% !important;
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   backdrop-filter: var(--i-amphtml-shopping-tag-backdrop-filter) !important;
-  padding: 4px 0px !important;
   margin-inline-end: 4px !important;
-  padding-inline-start: var(--pill-padding-inline-start);
+  padding-inline-start: var(--pill-padding-inline-start) !important;
   padding-inline-end: 12px;
   transform-origin: 16px;
 }
@@ -106,9 +105,7 @@ amp-story-shopping-tag {
     transform: scale(1);
   }
   50% {
-    animation-timing-function: cubic-bezier(0.83, 0, 0.17, 1);
     clip-path: circle(calc(var(--circle-size) * .5 + var(--pill-padding-inline-start)) at calc(var(--pill-padding-inline-start) + var(--circle-size) * .5));
-    animation-timing-function: cubic-bezier(0.83, 0, 0.17, 1);
   }
   50.001% {
     clip-path: inset(0px calc(100% - 36px) 0px 0px round 30px);
@@ -150,9 +147,7 @@ amp-story-shopping-tag {
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
   max-height: 32px !important;
-  margin-inline-end: 12px !important;
-  /* opacity: 0; */
-  /* animation: animate-in-text 1s 1s forwards; */
+  animation: animate-in-text 1s 1s forwards;
   opacity: 0;
 }
 
