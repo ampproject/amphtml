@@ -34,4 +34,6 @@
   }
 })(function (_x) {
   "use strict";
+
+  console.log(_x.default);
 });
