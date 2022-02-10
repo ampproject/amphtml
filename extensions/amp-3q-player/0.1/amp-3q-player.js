@@ -1,27 +1,26 @@
-import { Deferred } from '#core/data-structures/promise';
-import { removeElement } from '#core/dom';
+import {Deferred} from '#core/data-structures/promise';
+import {removeElement} from '#core/dom';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
 } from '#core/dom/fullscreen';
-import { isLayoutSizeDefined } from '#core/dom/layout';
-import { setStyle } from '#core/dom/style';
-import { PauseHelper } from '#core/dom/video/pause-helper';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {PauseHelper} from '#core/dom/video/pause-helper';
 
-import { Services } from '#service';
-import { installVideoManagerForDoc } from '#service/video-manager-impl';
+import {Services} from '#service';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import { getData, listen } from '#utils/event-helper';
-import { dev, userAssert } from '#utils/log';
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
 
 import {
   createFrameFor,
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import { addParamToUrl } from '../../../src/url';
-import { VideoEvents_Enum } from '../../../src/video-interface';
+import {addParamToUrl} from '../../../src/url';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-3q-player';
 
@@ -63,7 +62,7 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const { element: el } = this;
+    const {element: el} = this;
 
     this.dataId = userAssert(
       el.getAttribute('data-id'),
@@ -210,11 +209,7 @@ class Amp3QPlayer extends AMP.BaseElement {
    * @param {number} newHeight
    */
   resize_(newHeight) {
-    this.attemptChangeHeight(newHeight).then(() => {
-      this.notifyChangedHeight_();
-    }).catch(() => {
-      this.notifyChangeHeightRejected_();
-    });
+    this.attemptChangeHeight(newHeight);
   }
 
   /**
