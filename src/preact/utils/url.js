@@ -1,5 +1,15 @@
 import {INVALID_PROTOCOLS} from '#core/types/string/url';
 
+/**
+ * @type {{
+ *   anchor_?: HTMLAnchorElement,
+ *   getAnchor_: function(): HTMLAnchorElement
+ *   parse: function(string|URL): URL
+ *   isProtocolValid: function(URL|string): boolean
+ *   assertHttpsUrl: function(URL|string, string=): void
+ *   isSecureUrl: function(URL|string): boolean
+ * }}
+ */
 export const urlUtils = {
   /**
    * @return {HTMLAnchorElement}
@@ -36,9 +46,9 @@ export const urlUtils = {
   /**
    * Asserts that a given url is HTTPS or protocol relative.
    *
-   * @param {?string|URL} url
+   * @param {string|URL} url
    * @param {string=} sourceName Used for error messages.
-   * @return {string}
+   * @return {void}
    */
   assertHttpsUrl(url, sourceName = 'url') {
     if (!this.isSecureUrl(url)) {

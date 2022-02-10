@@ -102,4 +102,15 @@ function getSharedBentoSymbols() {
   return sharedBentoSymbols;
 }
 
-module.exports = {getExportedSymbols, getSharedBentoSymbols};
+/**
+ * @return {Array<string>}
+ */
+function getSharedBentoModules() {
+  return packages.map((pkg) => resolvePath(`src/${pkg}`));
+}
+
+module.exports = {
+  getExportedSymbols,
+  getSharedBentoSymbols,
+  getSharedBentoModules,
+};

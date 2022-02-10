@@ -85,7 +85,6 @@ import {AmpStoryHint} from './amp-story-hint';
 import {InfoDialog} from './amp-story-info-dialog';
 import {getLocalizationService} from './amp-story-localization-service';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
-import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryShare} from './amp-story-share';
 import {
   Action,
@@ -198,7 +197,7 @@ const DEFAULT_THEME_COLOR = '#202125';
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
@@ -1282,6 +1281,19 @@ export class AmpStory extends AMP.BaseElement {
     // Step out if trying to navigate to the currently active page.
     if (this.activePage_ && this.activePage_.element.id === targetPageId) {
       return Promise.resolve();
+    }
+
+    if (
+      isExperimentOn(this.win, 'amp-story-paywall-exp') &&
+      targetPage.isPaywallProtected()
+    ) {
+      if (this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE)) {
+        // Subscription dialog is already triggered.
+        return Promise.resolve();
+      }
+      this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
+
+      // TODO(#37285): add SubscriptionService to actually trigger the subscription dialog.
     }
 
     const oldPage = this.activePage_;
@@ -2449,5 +2461,4 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
-  AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

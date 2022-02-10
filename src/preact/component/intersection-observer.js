@@ -5,12 +5,13 @@ import {useCallback, useRef} from '#preact';
 /**
  * Uses a shared IntersectionObserver per window instance to observe the given `ref`.
  *
- * @param {function(IntersectionObserverEntry)} callback
- * @return {function(Element)}
+ * @param {function(IntersectionObserverEntry):void} callback
+ * @return {function(Element):void}
  */
 export function useIntersectionObserver(callback) {
   const unobserveRef = useRef(null);
   const refCb = useCallback(
+    /** @param {Element} node */
     (node) => {
       const cleanup = unobserveRef.current;
       if (cleanup) {
