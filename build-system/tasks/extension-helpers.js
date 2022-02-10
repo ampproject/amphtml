@@ -709,7 +709,7 @@ function buildBinaries(extDir, binaries, options) {
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(dir, name, options) {
-  const remapDependencies = getRemapBentoDependencies();
+  const remapDependencies = getRemapBentoDependencies(options.minify);
   await buildExtensionJs(dir, name, {
     ...options,
     externalDependencies: Object.values(remapDependencies),
