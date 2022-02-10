@@ -289,6 +289,9 @@ exports.rules = [
       'extensions/amp-story-interactive/0.1/interactive-disclaimer.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-interactive/0.1/amp-story-interactive-slider.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
+      // AMP Story Subscriptions.
+      'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/amp-story-store-service.js',
+
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
       'extensions/amp-subscriptions/0.1/local-subscription-platform-iframe.js->extensions/amp-access/0.1/iframe-api/messenger.js',
@@ -400,6 +403,8 @@ exports.rules = [
         'src/service/notification-ui-manager.js',
       'extensions/amp-consent/0.1/amp-consent.js->' +
         'src/service/notification-ui-manager.js',
+      'extensions/amp-google-read-aloud-player/0.1/amp-google-read-aloud-player.js->' +
+        'src/service/video-manager-impl.js',
       // Accessing USER_INTERACTED constant:
       'extensions/amp-story/1.0/page-advancement.js->' +
         'src/service/action-impl.js',
@@ -500,8 +505,8 @@ exports.rules = [
     allowlist: [
       // Do not add to this allowlist.
       // These files are here temporarily while all the bento components are moved out of extensions.
-      'src/bento/components/jwplayer/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-      'src/bento/components/jwplayer/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
+      'src/bento/components/bento-jwplayer/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
+      'src/bento/components/bento-jwplayer/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
     ],
   },
   {

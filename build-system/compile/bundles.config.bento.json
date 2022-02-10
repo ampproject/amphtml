@@ -1,6 +1,14 @@
 [
   {
-    "name": "jwplayer",
+    "name": "bento-accordion",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
+  },
+  {
+    "name": "bento-jwplayer",
     "version": "1.0",
     "options": {
       "hasCss": true

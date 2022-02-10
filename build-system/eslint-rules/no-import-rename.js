@@ -3,7 +3,7 @@
 const path = require('path');
 
 // Forbids using these imports unless is is explicitly imported as the same
-// name. This aids in writing lint rules for these imports.
+// name. This aids in writing lint rules and transforms for these imports.
 //
 // GOOD
 // import { setStyle } from '#core/dom/style';
@@ -29,6 +29,7 @@ const imports = {
     'setStyle',
     'setStyles',
   ],
+  '#core/types/enum': ['mangleObjectValues'],
   '#experiments': ['isExperimentOn'],
   '#utils/log': ['user', 'dev'],
   '#preact/utils': ['propName', 'tabindexFromProps'],

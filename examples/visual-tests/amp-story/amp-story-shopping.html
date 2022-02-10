@@ -9,23 +9,19 @@
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-shopping" src="https://cdn.ampproject.org/v0/amp-story-shopping-0.1.js"></script>
     <style amp-custom>
-      [data-product-id="lamp"],
-      [data-product-id="lamp-rtl"] {
+      [data-product-id="lamp"]{
         top: 31%;
         left: 1%;
       }
-      [data-product-id="art"],
-      [data-product-id="art-rtl"] {
+      [data-product-id="art"] {
         top: 15%;
         left: 40%;
       }
-      [data-product-id="chair"],
-      [data-product-id="chair-rtl"] {
+      [data-product-id="chair"] {
         top: 53%;
         left: 30%;
       }
-      [data-product-id="flowers"],
-      [data-product-id="flowers-rtl"] {
+      [data-product-id="flowers"] {
         top: 46%;
         left: 83%;
       }
@@ -143,65 +139,6 @@
           <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
         <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
-      </amp-story-page>
-      <amp-story-page id="inline-light-theme-two" dir="rtl">
-        <!--
-          RTL example
-        -->
-        <amp-story-shopping-config layout="nodisplay">
-          <script type="application/json">
-            {
-              "items" : [
-                {
-                  "productId": "lamp-rtl",
-                  "productTitle": "Brass Lamp",
-                  "productBrand": "Lamp Co",
-                  "productPrice": 799.00,
-                  "productPriceCurrency": "AED",
-                  "productTagText": " حبا حبا حبا سعادةا سعادة",
-                  "productImages": ["https://source.unsplash.com/Ry9WBo3qmoc/500x500"]
-                },
-                {
-                  "productId": "art-rtl",
-                  "productTitle": "Abstract Art",
-                  "productBrand": "V. Artsy",
-                  "productPriceCurrency": "AED",
-                  "productPrice": 1200.00,
-                  "productTagText": "حبا حب سعادة قط حبا حب سعادة قط",
-                  "productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
-                },
-                {
-                  "productId": "chair-rtl",
-                  "productTitle": "Yellow chair",
-                  "productBrand": "Chair Co.",
-                  "productPrice": 1000.00,
-                  "productPriceCurrency": "AED",
-                  "productIcon": "/examples/visual-tests/amp-story/img/shopping/nest-home-icon.png",
-                  "productImages": ["https://source.unsplash.com/DgQGKKLaVhY/500x500"]
-                 },
-                 {
-                  "productId": "flowers-rtl",
-                  "productTitle": "Flowers",
-                  "productBrand": "Very Long Flower Company Name",
-                  "productPrice": 10.00,
-                  "productPriceCurrency": "AED",
-                  "productIcon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
-                  "productImages": ["https://source.unsplash.com/SavQfLRm4Do/500x500"]
-                 }
-              ]
-            }
-          </script>
-        </amp-story-shopping-config>
-        <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-product-id="lamp-rtl" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-product-id="art-rtl" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-product-id="chair-rtl" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-product-id="flowers-rtl" ></amp-story-shopping-tag>
-        </amp-story-grid-layer>
-        <amp-story-shopping-attachment></amp-story-shopping-attachment>
       </amp-story-page>
       <amp-story-page id="inline-no-product">
         <!--
