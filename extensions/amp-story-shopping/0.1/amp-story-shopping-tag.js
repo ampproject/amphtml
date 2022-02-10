@@ -6,9 +6,15 @@ import {
 } from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
+import {devAssert} from '#utils/log';
+
+import {toggleAttribute} from '#core/dom';
+
 import {Services} from '#service';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
+
+import {closestAncestorElementBySelector} from '#core/dom/query';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
@@ -54,6 +60,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     /** @private {!AmpElement} element */
     this.shoppingTagEl_ = null;
+    /** @private {?Element} */
+    this.pageEl_ = null;
   }
 
   /** @override */
@@ -74,6 +82,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     }
 
     this.element.setAttribute('role', 'button');
+
+    this.pageEl_ = devAssert(
+      closestAncestorElementBySelector(this.element, 'amp-story-page')
+    );
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -108,6 +120,22 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       },
       true /** callToInitialize */
     );
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      (id) => {
+        this.setShoppingTagActive(id === this.pageEl_.id);
+      },
+      true /** callToInitialize */
+    );
+  }
+
+  /**
+   * Activate or deactivate shopping tag
+   * @param {boolean} isActive
+   */
+  setShoppingTagActive(isActive) {
+    toggleAttribute(this.shoppingTagEl_, 'active', isActive);
   }
 
   /**
