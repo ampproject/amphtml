@@ -235,38 +235,20 @@
 }
 
 /*
-  Visible to screen readers only.
-  https://www.a11yproject.com/posts/how-to-hide-content/
+  Visible to screen readers only. Screen readers will set :focus on iOS but not android, 
+  therefore on android the button remains hidden but interactable.
 */
-.i-amphtml-paused-display {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
+.i-amphtml-story-system-layer:not([desktop]):not(.i-amphtml-story-desktop-one-panel):not(.amp-mode-keyboard-active)
+  .i-amphtml-paused-display
+  button:not(:focus) {
+  width: 0px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 [i-amphtml-current-page-has-audio]:not([muted]) .i-amphtml-story-mute-audio-control,
 [i-amphtml-current-page-has-audio][muted] .i-amphtml-story-unmute-audio-control {
   display: block !important;
-}
-
-/* Reset screen reader only styles when button is visible to user. */
-[desktop] .i-amphtml-paused-display,
-.i-amphtml-story-desktop-one-panel .i-amphtml-paused-display,
-.amp-mode-keyboard-active:not([desktop]) .i-amphtml-paused-display {
-  display: block !important;
-  position: inherit !important;
-  width: inherit !important;
-  height: inherit !important;
-  padding: 0 !important;
-  margin: inherit !important;
-  overflow: inherit !important;
-  clip: inherit !important;
-  white-space: inherit !important;
 }
 
 .i-amphtml-story-system-layer-buttons button[disabled][disabled] {
