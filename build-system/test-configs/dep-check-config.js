@@ -403,6 +403,8 @@ exports.rules = [
         'src/service/notification-ui-manager.js',
       'extensions/amp-consent/0.1/amp-consent.js->' +
         'src/service/notification-ui-manager.js',
+      'extensions/amp-google-read-aloud-player/0.1/amp-google-read-aloud-player.js->' +
+        'src/service/video-manager-impl.js',
       // Accessing USER_INTERACTED constant:
       'extensions/amp-story/1.0/page-advancement.js->' +
         'src/service/action-impl.js',
