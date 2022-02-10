@@ -103,7 +103,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
       },
       () => {
-        console.log(shouldFlip);
         this.shoppingTagEl_.classList.toggle(
           'i-amphtml-amp-story-shopping-tag-inner-flipped',
           shouldFlip
