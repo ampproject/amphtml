@@ -1,5 +1,3 @@
-import {CONSOLE_APPENDER} from 'karma/lib/constants';
-
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
