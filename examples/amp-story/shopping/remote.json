@@ -1,16 +1,12 @@
 {
   "items": [
     {
-      "product-tag-id": "city-pop",
-      "product-title": "Plastic Love"
-    },
-    {
-      "product-tag-id": "k-pop",
-      "product-title": "Gangnam Style"
-    },
-    {
-      "product-tag-id": "eurodance",
-      "product-title": "Crystal King Battle"
+      "productId": "art",
+      "productTitle": "Abstract Art",
+      "productBrand": "V. Artsy",
+      "productPrice": 1200.0,
+      "productPriceCurrency": "JPY",
+      "productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
     }
   ]
 }

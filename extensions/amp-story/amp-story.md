@@ -383,7 +383,7 @@ Use 720p videos or higher to take advantage of all the video transcodes and adap
 Example:
 
 ```html
-<amp-video layout="fill" poster="img.png" cache="google">
+<amp-video layout="fill" poster="img.png" cache="google" autoplay>
   <source src="video.mp4" type="video/mp4">
 </amp-video>
 ```

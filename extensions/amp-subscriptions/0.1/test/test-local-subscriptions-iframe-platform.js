@@ -1,12 +1,13 @@
+import {PageConfig} from '#third_party/subscriptions-project/config';
+
+import {Messenger} from '../../../amp-access/0.1/iframe-api/messenger';
 import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
 import {Entitlement} from '../entitlement';
+import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 import {LocalSubscriptionIframePlatform} from '../local-subscription-platform-iframe';
-import {Messenger} from '../../../amp-access/0.1/iframe-api/messenger';
-import {PageConfig} from '#third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {UrlBuilder} from '../url-builder';
-import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 
 describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, (env) => {
   let ampdoc;

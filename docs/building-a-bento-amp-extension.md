@@ -99,8 +99,6 @@ In most cases you'll only create the required (req'd) files. If your element doe
 AMP runtime is currently in v0 major version. Extensions versions are maintained separately. If your changes to your non-experimental
 extension makes breaking changes that are not backward compatible you should release a new version of your extension. This would usually be by creating a [0.2 or 1.0](./spec/amp-versioning-policy.md#amp-extensions) directory next to your 0.1.
 
-When version 0.2 is under development, make sure that `latestVersion` is set to 0.1 for both the 0.1 and 0.2 entries in `extensionBundles`. Once 0.2 is ready to be released, `latestVersion` can be changed to 0.2.
-
 If your extension is still in experiments breaking changes usually are fine so you can just update the same version.
 
 Note that Bento upgrades to existing AMP components should go by one major version, meaning it should create a 1.0 directory next to an existing 0.1 or 0.2.
@@ -115,7 +113,6 @@ exports.extensionBundles = [
   {
     "name": "amp-carousel",
     "version": "0.1",
-    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
@@ -123,7 +120,6 @@ exports.extensionBundles = [
   {
     "name": "amp-kaltura-player",
     "version": "0.1",
-    "latestVersion": "0.1",
   },
 ...
 ];
@@ -137,7 +133,6 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "1.0",
-    "latestVersion": "1.0",
     "options": {
 +     "npm": true,
 +     "wrapper": "bento"
@@ -155,7 +150,6 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "0.1",
-    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
@@ -163,7 +157,6 @@ exports.extensionBundles = [
   {
     "name": "amp-my-element",
     "version": "1.0",
-+   "latestVersion": "0.1",
     "options": {
       "npm": true,
       "wrapper": "bento"
@@ -279,7 +272,7 @@ actionServiceForDoc(doc.documentElement).trigger(
   createCustomEvent(
     win,
     `amp-base-carousel.${name}`,
-    dict({'index': index})
+    {'index': index}
   ),
   ActionTrust.DEFAULT
 );
@@ -358,6 +351,8 @@ You must document your element's actions and events in its own reference documen
 The following shows the overall structure of your element implementation file (`extensions/amp-my-element/1.0/amp-my-element.js`). See [Experiments](#experiments) to make sure your component is experimentally gated if necessary.
 
 ```js
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {func1, func2} from '../../../src/module';
 import {BaseElement} from './base-element'; // Preact base element.
 import {CSS} from '../../../build/amp-my-element-1.0.css';
@@ -369,7 +364,7 @@ const EXPERIMENT = 'amp-my-element';
 /** @const */
 const TAG = 'amp-my-element';
 
-class AmpMyElement extends BaseElement {
+class AmpMyElement extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     // Perform any additional processing of prop values that are not
@@ -378,10 +373,10 @@ class AmpMyElement extends BaseElement {
     this.registerApiAction('close', (api) => api.close());
 
     const processedProp = parseInt(element.getAttribute('data-binary'), 2);
-    return dict({
+    return {
       'processedProp': processedProp,
-      'onClose': (event) => fireAmpEvent(event)}
-    );
+      'onClose': (event) => fireAmpEvent(event)
+    };
   }
 
   /** @override */

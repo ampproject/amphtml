@@ -39,7 +39,6 @@ let ArgsDef;
  * @typedef {{
  *   name: string,
  *   version: string,
- *   latestVersion?: (string|undefined)
  *   options?: ({hasCss?: boolean, wrapper?: string}|undefined)
  * }}
  */
@@ -145,18 +144,11 @@ async function insertExtensionBundlesConfig(
   destination = extensionBundlesJson
 ) {
   const extensionBundles = fs.readJsonSync(destination, {throws: false}) ?? [];
-  const existingOrNull = extensionBundles.find(
-    ({name}) => name === bundle.name
-  );
 
-  const {latestVersion, name, version, ...rest} = bundle;
+  const {name, version, ...rest} = bundle;
   extensionBundles.push({
     name,
     version,
-    latestVersion:
-      (existingOrNull && existingOrNull.latestVersion) ||
-      latestVersion ||
-      version,
     ...rest,
   });
 
@@ -237,6 +229,7 @@ async function makeExtensionFromTemplates(
           '__jss_styles_use_styles__': 'const styles = useStyles()',
           '__jss_styles_example_or_placeholder__':
             '`${styles.exampleContentHidden}`',
+          '__jss_import_storybook__': `import '../component.jss'`,
         }
       : {
           '__jss_import_component_css_': '',
@@ -244,6 +237,7 @@ async function makeExtensionFromTemplates(
           '__jss_import_use_styles__': '',
           '__jss_styles_use_styles__': '',
           '__jss_styles_example_or_placeholder__': `'my-classname'`,
+          '__jss_import_storybook__': '',
         }),
     // eslint-disable-next-line local/no-forbidden-terms
     // This allows generated code to contain "DO NOT SUBMIT", which will cause

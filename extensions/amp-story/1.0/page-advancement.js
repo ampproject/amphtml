@@ -1,4 +1,13 @@
-import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import {closest, matches} from '#core/dom/query';
+
+import {Services} from '#service';
+import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
+
+import {listenOnce} from '#utils/event-helper';
+import {dev, user} from '#utils/log';
+
+import {interactiveElementsSelectors} from './amp-story-embedded-component';
 import {
   Action,
   EmbeddedComponentState,
@@ -8,16 +17,10 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
-import {Services} from '#service';
-import {TAPPABLE_ARIA_ROLES} from '#service/action-impl';
-import {VideoEvents_Enum} from '../../../src/video-interface';
-import {closest, matches} from '#core/dom/query';
-import {dev, user} from '#utils/log';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getAmpdoc} from '../../../src/service-helpers';
 import {hasTapAction, timeStrToMillis} from './utils';
-import {listenOnce} from '#utils/event-helper';
-import {interactiveElementsSelectors} from './amp-story-embedded-component';
+
+import {getAmpdoc} from '../../../src/service-helpers';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 /** @private @const {number} */
 const HOLD_TOUCH_THRESHOLD_MS = 500;
@@ -638,27 +641,6 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Check if click should be handled by the affiliate link logic.
-   * @param {!Element} target
-   * @private
-   * @return {boolean}
-   */
-  isHandledByAffiliateLink_(target) {
-    const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
-
-    // do not handle if clicking on expanded affiliate link
-    if (clickedOnLink && target.hasAttribute('expanded')) {
-      return false;
-    }
-
-    const expandedElement = this.storeService_.get(
-      StateProperty.AFFILIATE_LINK_STATE
-    );
-
-    return expandedElement != null || clickedOnLink;
-  }
-
-  /**
    * Performs a system navigation if it is determined that the specified event
    * was a click intended for navigation.
    * @param {!Event} event 'click' event
@@ -681,18 +663,6 @@ export class ManualAdvancement extends AdvancementConfig {
         clientX: event.clientX,
         clientY: event.clientY,
       });
-      return;
-    }
-
-    if (this.isHandledByAffiliateLink_(target)) {
-      event.preventDefault();
-      event.stopPropagation();
-      const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
-      if (clickedOnLink) {
-        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, target);
-      } else {
-        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, null);
-      }
       return;
     }
 
@@ -1153,10 +1123,13 @@ export class MediaBasedAdvancement extends AdvancementConfig {
       // amp-video, amp-audio, as well as amp-story-page with a background audio
       // are eligible for media based auto advance.
       let element = pageEl.querySelector(
-        `amp-video[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-video#${escapeCssSelectorIdent(autoAdvanceStr)},
-          amp-audio[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
-          amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
+        `amp-video[data-id=${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}], amp-video#${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}, amp-audio[data-id=${escapeCssSelectorIdent(
+          autoAdvanceStr
+        )}], amp-audio#${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (
         matches(

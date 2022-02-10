@@ -8,7 +8,7 @@ const os = require('os');
 const path = require('path');
 const Percy = require('@percy/core');
 const percySnapshot = require('@percy/puppeteer');
-const puppeteer = require('puppeteer'); // eslint-disable-line no-unused-vars
+const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -702,12 +702,14 @@ visualDiff.description = 'Run the AMP visual diff tests';
 visualDiff.flags = {
   'main': 'Include a blank snapshot (baseline for skipped builds)',
   'empty': 'Create a dummy Percy build with only a blank snapshot',
+  'esm': 'uses the typescript server transforms which will serve the mjs files',
   'chrome_debug': 'Print debug info from Chrome',
   'webserver_debug': 'Print debug info from the local amp webserver',
   'percy_agent_debug': 'Print debug info from the @percy/agent instance',
   'debug': 'Set all debugging flags',
   'verbose': 'Print verbose log statements',
   'grep': 'Run tests that match the pattern',
+  'minified': 'Serve minified JS',
   'percy_token': 'Override the PERCY_TOKEN environment variable',
   'percy_branch': 'Override the PERCY_BRANCH environment variable',
   'percy_disabled':

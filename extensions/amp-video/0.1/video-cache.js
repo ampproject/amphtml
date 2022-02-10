@@ -1,5 +1,3 @@
-import {Services} from '#service';
-import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 import {
   createElementWithAttributes,
   iterateCursor,
@@ -7,7 +5,12 @@ import {
 } from '#core/dom';
 import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
 import {user} from '#utils/log';
+
+import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 
 /** @const {!Array<string>} */
 const CODECS_IN_ASCENDING_PRIORITY = ['h264', 'vp09'];
@@ -53,13 +56,17 @@ export function fetchCachedSources(
       const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
         'amp_video_host_url':
           /* document url that contains the video */ canonicalUrl,
+        'amp_video_require_acao_header': videoEl.hasAttribute('crossorigin')
+          ? 1
+          : null,
       });
       return Services.xhrFor(win).fetch(requestUrl, {prerenderSafe: true});
     })
     .then((response) => response.json())
-    .then((jsonResponse) =>
-      applySourcesToVideo(videoEl, jsonResponse['sources'], maxBitrate)
-    )
+    .then((jsonResponse) => {
+      applySourcesToVideo(videoEl, jsonResponse['sources'], maxBitrate);
+      applyAudioInfoToVideo(videoEl, jsonResponse['has_audio']);
+    })
     .catch(() => {
       // If cache fails, video should still load properly.
     });
@@ -154,6 +161,16 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
       );
       videoEl.insertBefore(sourceEl, videoEl.firstChild);
     });
+}
+
+/**
+ * @param {!Element} videoEl
+ * @param {boolean|undefined} hasAudio
+ */
+function applyAudioInfoToVideo(videoEl, hasAudio) {
+  if (hasAudio === false) {
+    videoEl.setAttribute('noaudio', '');
+  }
 }
 
 /**

@@ -39,7 +39,7 @@ experiment_job: &experiment_job
       type: enum
       enum: ['A', 'B', 'C']
   environment:
-    EXP: << parameters.exp >>
+    FLAVOR: experiment<< parameters.exp >>
 
 executors:
   base-docker-small:
@@ -65,7 +65,7 @@ executors:
   macos-medium:
     macos:
       xcode: 12.4.0
-    resource_class: medium
+    resource_class: macos.x86.medium.gen2
 
 commands:
   checkout_repo:
@@ -227,7 +227,7 @@ jobs:
           name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/module-build.js
       - teardown_vm
-  nomodule_build_prod:
+  nomodule_build_bundle_size:
     executor:
       name: node-docker-xlarge
     steps:
@@ -236,7 +236,7 @@ jobs:
           name: '⭐ Nomodule Build ⭐'
           command: node build-system/pr-check/bundle-size-nomodule-build.js
       - teardown_vm
-  module_build_prod:
+  module_build_bundle_size:
     executor:
       name: node-docker-xlarge
     steps:
@@ -463,7 +463,6 @@ jobs:
         type: enum
         enum: ['no-esm', 'esm']
     environment:
-      EXP: << parameters.flavor >>
       FLAVOR: << parameters.flavor >>
       ESM: << parameters.esm >>
     steps:
@@ -482,6 +481,15 @@ jobs:
           command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
       - store_artifacts:
           path: /tmp/release.tar.gz
+      - teardown_vm
+  trigger_promote:
+    executor:
+      name: base-docker-small
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ Trigger Promote Workflow ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js
       - teardown_vm
 
 workflows:
@@ -512,13 +520,13 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - nomodule_build_prod:
-          name: 'Nomodule Build (Prod)'
+      - nomodule_build_bundle_size:
+          name: 'Nomodule Build (Bundle Size)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - module_build_prod:
-          name: 'Module Build (Prod)'
+      - module_build_bundle_size:
+          name: 'Module Build (Bundle Size)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
@@ -531,8 +539,8 @@ workflows:
           name: 'Bundle Size'
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (Prod)'
-            - 'Module Build (Prod)'
+            - 'Nomodule Build (Bundle Size)'
+            - 'Module Build (Bundle Size)'
       - validator_tests:
           name: 'Validator Tests'
           <<: *push_and_pr_builds
@@ -542,6 +550,7 @@ workflows:
           name: 'Visual Diff Tests'
           <<: *push_and_pr_builds
           requires:
+            - 'Module Build (Test)'
             - 'Nomodule Build (Test)'
       - local_unit_tests:
           name: 'Local Unit Tests'
@@ -644,5 +653,12 @@ workflows:
           <<: *release_builds_only
           requires:
             - amp_release
+          context:
+            - release-build-uploader
+      - trigger_promote:
+          name: 'Trigger Promote'
+          <<: *release_builds_only
+          requires:
+            - 'Upload Release'
           context:
             - release-build-uploader

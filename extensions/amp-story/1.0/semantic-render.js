@@ -1,7 +1,9 @@
 import * as Preact from '#core/dom/jsx';
-import {Services} from '#service';
-import {dev} from '#utils/log';
 import {includes} from '#core/types/string';
+
+import {Services} from '#service';
+
+import {dev} from '#utils/log';
 
 /**
  * Renders the page description, and videos title/alt attributes in the page.
@@ -146,7 +148,7 @@ function extractTextContentWebVtt(text) {
     .join(' ');
   // Super loose HTML parsing to get HTML entity parsing and removal
   // of WebVTT elements.
-  const div = document.createElement('div');
+  const div = <div />;
   div./* element is never added to DOM */ innerHTML = text;
   return div.textContent;
 }

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 if (!window.context) {
   // window.context doesn't exist yet, must perform steps to create it
   // before using it

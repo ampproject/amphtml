@@ -8,10 +8,10 @@ const fastGlob = require('fast-glob');
 const marked = require('marked');
 const path = require('path');
 const posthtml = require('posthtml');
+const {copyFile, pathExists, readFile} = require('fs-extra');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
-const {readFile} = require('fs-extra');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
 
@@ -104,9 +104,10 @@ async function getDescription() {
 
 /**
  * Write package.json
+ * @param {{useBentoCore: boolean}} options
  * @return {Promise<void>}
  */
-async function writePackageJson() {
+async function writePackageJson({useBentoCore}) {
   const version = getSemver(extensionVersion, ampVersion);
   if (!valid(version) || ampVersion.length != 13) {
     log(
@@ -153,7 +154,7 @@ async function writePackageJson() {
     main: './dist/web-component.js',
     module: './dist/web-component.module.js',
     exports,
-    files: ['dist/*', 'react.js'],
+    files: ['dist/*', 'react.js', 'styles.css'],
     repository: {
       type: 'git',
       url: 'https://github.com/ampproject/amphtml.git',
@@ -165,6 +166,9 @@ async function writePackageJson() {
       react: '^17.0.0',
     },
   };
+  if (useBentoCore) {
+    json.dependencies = {'@bentoproject/core': `tbd`};
+  }
 
   try {
     await writeFile(`${dir}/package.json`, JSON.stringify(json, null, 2));
@@ -198,6 +202,28 @@ async function writeReactJs() {
 }
 
 /**
+ * todo(kvchari): temporarily copy styles to root of each package to support importing styles from root
+ * Remove when we begin properly proxying style imports.
+ * See issue from more information:
+ * @return {Promise<void>}
+ */
+async function copyCssToRoot() {
+  try {
+    const extDir = path.join('extensions', extension, '1.0');
+    const preactCssDist = path.join(extDir, 'dist', 'styles.css');
+    if (await pathExists(preactCssDist)) {
+      const preactCssRoot = path.join(extDir, 'styles.css');
+      await copyFile(preactCssDist, preactCssRoot);
+      log('Copied', preactCssDist, 'to npm package root');
+    }
+  } catch (e) {
+    log(e);
+    process.exitCode = 1;
+    return;
+  }
+}
+
+/**
  * Main
  * @return {Promise<void>}
  */
@@ -205,8 +231,9 @@ async function main() {
   if (await shouldSkip()) {
     return;
   }
-  writePackageJson();
-  writeReactJs();
+  await writePackageJson({useBentoCore: false});
+  await writeReactJs();
+  await copyCssToRoot();
 }
 
 main();

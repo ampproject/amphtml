@@ -182,6 +182,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-STORY-GRID-LAYER default"
+  descriptive_name: "amp-story-grid-layer child"
   attrs: {
     name: "align-content"
     value: "center"
@@ -299,6 +300,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-STORY-GRID-LAYER animate-in"
+  descriptive_name: "amp-story-grid-layer [animate-in] child"
   # Attribute grid-area is not allowed in this tag. That's what makes this
   # reference point different than the grid-area reference point.
   attrs: {
@@ -520,6 +522,7 @@ tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-STORY-CTA-LAYER animate-in"
+  descriptive_name: "amp-story-cta-layer [animate-in] child"
   attrs: {
     name: "animate-in"
     value: "drop"

@@ -1,0 +1,22 @@
+{
+  "name": "@bentoproject/core",
+  "author": "Bento Authors",
+  "license": "Apache-2.0",
+  "main": "./dist/bento.core.js",
+  "module": "./dist/bento.core.module.js",
+  "exports": {
+    ".": {
+      "import": "./dist/bento.core.module.js",
+      "require": "./dist/bento.core.js"
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ampproject/amphtml.git",
+    "directory": "src/bento/core"
+  },
+  "homepage": "https://github.com/ampproject/amphtml/tree/main/src/bento/core"
+}

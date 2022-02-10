@@ -1,6 +1,7 @@
-import {CSS} from './component.jss';
-import {BentoFitText} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoFitText} from './component';
+import {CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 

@@ -6,18 +6,25 @@ describes.sandboxed
   .configure()
   .skipFirefox()
   .run('DOMPurify-based', {}, (env) => {
+    let html;
     let purify;
     let purifyTripleMustache;
     let rewriteAttributeValueSpy;
 
     beforeEach(() => {
+      html = document.createElement('html');
+      const documentEl = {
+        documentElement: html,
+        createElement: (tagName) => document.createElement(tagName),
+      };
+
       rewriteAttributeValueSpy = env.sandbox.spy(
         urlRewrite,
         'rewriteAttributeValue'
       );
 
       const purifier = new Purifier(
-        document,
+        documentEl,
         {},
         urlRewrite.rewriteAttributeValue
       );
@@ -488,63 +495,82 @@ describes.sandboxed
         expect(purifyTripleMustache(html)).to.be.equal(html);
       });
 
-      it('should allowlist formatting related elements', () => {
-        const nonAllowlistedTag = '<img>';
-        const allowlistedFormattingTags =
-          '<b>abc</b><div>def</div>' +
-          '<br><code></code><del></del><em></em>' +
-          '<i></i><ins></ins><mark></mark><s></s>' +
-          '<small></small><strong></strong><sub></sub>' +
-          '<sup></sup><time></time><u></u><hr>';
-        const html = `${allowlistedFormattingTags}${nonAllowlistedTag}`;
-        // Expect the purifier to unescape the allowlisted tags and to sanitize
-        // and remove the img tag.
-        expect(purifyTripleMustache(html)).to.be.equal(
-          allowlistedFormattingTags
-        );
+      ['amp', 'amp4email'].forEach((format) => {
+        describe(`with ${format} format`, () => {
+          beforeEach(() => {
+            html.setAttribute(format, '');
+          });
+
+          it('should allowlist formatting related elements', () => {
+            const nonAllowlistedTag = '<img>';
+            const allowlistedFormattingTags =
+              '<b>abc</b><div>def</div>' +
+              '<br><code></code><del></del><em></em>' +
+              '<i></i><ins></ins><mark></mark><s></s>' +
+              '<small></small><strong></strong><sub></sub>' +
+              '<sup></sup><time></time><u></u><hr>';
+            const html = `${allowlistedFormattingTags}${nonAllowlistedTag}`;
+            // Expect the purifier to unescape the allowlisted tags and to
+            // sanitize and remove the img tag.
+            expect(purifyTripleMustache(html)).to.be.equal(
+              allowlistedFormattingTags
+            );
+          });
+
+          it('should allowlist h1, h2 and h3 elements', () => {
+            const html =
+              '<h1>Heading 1</h1>' +
+              '<h2>Heading 2</h2>' +
+              '<h3>Heading 3</h3>';
+            expect(purifyTripleMustache(html)).to.be.equal(html);
+          });
+
+          it('should allowlist table related elements and anchor tags', () => {
+            const html =
+              '<table class="valid-class">' +
+              '<colgroup><col><col></colgroup>' +
+              '<caption>caption</caption>' +
+              '<thead><tr><th colspan="2">header</th></tr></thead>' +
+              '<tbody><tr><td>' +
+              '<a href="http://www.google.com">google</a>' +
+              '</td></tr></tbody>' +
+              '<tfoot><tr>' +
+              '<td colspan="2"><span>footer</span></td>' +
+              '</tr></tfoot>' +
+              '</table>';
+            expect(purifyTripleMustache(html)).to.be.equal(html);
+          });
+
+          it('should allowlist container elements', () => {
+            const html =
+              '<article>Article</article>' +
+              '<aside></aside>' +
+              '<blockquote>A quote</blockquote>' +
+              '<details></details>' +
+              '<figcaption></figcaption>' +
+              '<figure></figure>' +
+              '<footer>Footer</footer>' +
+              '<header></header>' +
+              '<main class="content"></main>' +
+              '<nav></nav>' +
+              '<pre></pre>' +
+              '<section id="sec"></section>' +
+              '<summary></summary>';
+            expect(purifyTripleMustache(html)).to.be.equal(html);
+          });
+        });
       });
 
-      it('should allowlist h1, h2, h3 and amp-img elements', () => {
-        const html =
-          '<h1>Heading 1</h1>' +
-          '<h2>Heading 2</h2>' +
-          '<h3>Heading 3</h3>' +
-          '<amp-img></amp-img>';
-        expect(purifyTripleMustache(html)).to.be.equal(html);
+      it('should allowlist amp-img element', () => {
+        html.setAttribute('amp', '');
+        const markup = '<amp-img></amp-img>';
+        expect(purifyTripleMustache(markup)).to.be.equal(markup);
       });
 
-      it('should allowlist table related elements and anchor tags', () => {
-        const html =
-          '<table class="valid-class">' +
-          '<colgroup><col><col></colgroup>' +
-          '<caption>caption</caption>' +
-          '<thead><tr><th colspan="2">header</th></tr></thead>' +
-          '<tbody><tr><td>' +
-          '<a href="http://www.google.com">google</a>' +
-          '</td></tr></tbody>' +
-          '<tfoot><tr>' +
-          '<td colspan="2"><span>footer</span></td>' +
-          '</tr></tfoot>' +
-          '</table>';
-        expect(purifyTripleMustache(html)).to.be.equal(html);
-      });
-
-      it('should allowlist container elements', () => {
-        const html =
-          '<article>Article</article>' +
-          '<aside></aside>' +
-          '<blockquote>A quote</blockquote>' +
-          '<details></details>' +
-          '<figcaption></figcaption>' +
-          '<figure></figure>' +
-          '<footer>Footer</footer>' +
-          '<header></header>' +
-          '<main class="content"></main>' +
-          '<nav></nav>' +
-          '<pre></pre>' +
-          '<section id="sec"></section>' +
-          '<summary></summary>';
-        expect(purifyTripleMustache(html)).to.be.equal(html);
+      it('should not allowlist amp-img element for AMP4Email', () => {
+        html.setAttribute('amp4email', '');
+        const markup = '<amp-img></amp-img>';
+        expect(purifyTripleMustache(markup)).to.be.empty;
       });
 
       it('should sanitize tags, removing unsafe attributes', () => {
