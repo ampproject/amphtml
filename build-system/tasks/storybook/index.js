@@ -102,7 +102,7 @@ function parseEnvs(env) {
           yellow('AMP environment for storybook is temporarily disabled.\n') +
             'See https://github.com/ampproject/storybook-addon-amp/issues/57'
         );
-        // return false;
+        return false;
       }
       return env === 'amp' || env === 'preact' || env === 'react';
     })
