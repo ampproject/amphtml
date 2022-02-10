@@ -2,6 +2,7 @@ import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 
 /**
  * @param {HTMLElement} element
+ * @param {string} attribute
  * @return {HTMLTemplateElement|null}
  */
 export function getTemplate(element, attribute = 'template') {
