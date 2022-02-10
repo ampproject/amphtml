@@ -18,7 +18,7 @@ import {getMode} from '../../../src/mode';
 const TYPE = 'facebook';
 
 class AmpFacebook extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     return createLoaderLogo(element);
   }

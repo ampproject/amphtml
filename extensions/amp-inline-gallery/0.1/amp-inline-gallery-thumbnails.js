@@ -25,7 +25,7 @@ import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
  * the next arrow works properly for that case.
  */
 export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
