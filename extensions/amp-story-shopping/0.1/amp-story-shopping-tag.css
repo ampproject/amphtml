@@ -1,4 +1,3 @@
-
 amp-story-shopping-tag {
   font-family: 'Poppins', sans-serif !important;
   font-weight: 700 !important;
@@ -75,6 +74,9 @@ amp-story-shopping-tag {
 }
 
 .i-amphtml-amp-story-shopping-tag-pill {
+  --circle-size: 24px;
+  --pill-padding-inline-start: 6px;
+
   display: flex !important;
   align-items: center !important;
   border-radius: 100px !important;
@@ -92,8 +94,8 @@ amp-story-shopping-tag {
 }
 
 .i-amphtml-amp-story-shopping-tag-pill-image {
-  width: 24px !important;
-  height: 24px !important;
+  width: var(--circle-size) !important;
+  height: var(--circle-size) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -118,4 +120,15 @@ amp-story-shopping-tag {
   -webkit-line-clamp: 2 !important;
   max-height: 32px !important;
   margin-inline-end: 12px !important;
+  /* opacity: 0; */
+  /* animation: animate-in-text 1s 1s forwards; */
+}
+
+@keyframes animate-in-text {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
