@@ -1,5 +1,7 @@
 <!doctype html>
 <html amp lang="en" lang="de">
+  <!-- This tests the internationalization number formatting for the German Euro (the positioning of commas and decimal points), see
+   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat for more info -->
   <head>
     <meta charset="utf-8">
     <title>Shopping</title>
@@ -14,8 +16,7 @@
         top: 31%;
         left: 1%;
       }
-      [data-product-id="art"],
-      [data-product-id="artPageOne"] {
+      [data-product-id="art"]{
         top: 15%;
         left: 40%;
       }
@@ -53,7 +54,7 @@
                     "productImages": ["https://source.unsplash.com/Ry9WBo3qmoc/500x500"]
                    },
                    {
-                    "productId": "artPageOne",
+                    "productId": "art",
                     "productTitle": "Abstract Art",
                     "productBrand": "V. Artsy",
                     "productPrice": 1200.00,
@@ -87,7 +88,7 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-product-id="artPageOne" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
           <amp-story-shopping-tag data-product-id="chair" ></amp-story-shopping-tag>
           <amp-story-shopping-tag data-product-id="flowers" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
