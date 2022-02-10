@@ -53,7 +53,7 @@ function getImportResolver(extraAliases = {}) {
       ...readJsconfigPaths(),
       ...extraAliases,
     },
-    extensions: ['.js', '.jsx', '.ts', 'tsx'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
     stripExtensions: [],
     babelOptions: {
       caller: {
