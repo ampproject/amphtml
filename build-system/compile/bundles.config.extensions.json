@@ -354,18 +354,9 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
+      "npm": true,
       "hasCss": true,
       "bento": true
-    }
-  },
-  {
-    "name": "amp-date-picker",
-    "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true,
-      "bento": true,
-      "npm": true
     }
   },
   {
