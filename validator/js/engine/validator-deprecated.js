@@ -64,7 +64,7 @@ exports.isSeverityWarning = isSeverityWarning;
  * DEPRECATED. This now always returns an error message stating this is
  * deprecated and to use validator_wasm.js instead.
  *
- * @nocollapse
+ * 
  * @param {string} inputDocContents ignored.
  * @param {string=} opt_htmlFormat the allowed format ignored.
  * @return {!Object} Validation Result (status and errors)

@@ -119,7 +119,7 @@ export class AmpVideo extends AMP.BaseElement {
    * dependent on the value of `prerenderAllowed()`.
    *
    * @override
-   * @nocollapse
+   * 
    */
   static prerenderAllowed(element) {
     // Only allow prerender if video sources are cached on CDN or remote video

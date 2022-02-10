@@ -155,7 +155,7 @@ export const NavigationDirection = {
  * an <amp-story>.
  */
 export class AmpStoryPage extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed(element) {
     return isPrerenderActivePage(element);
   }
