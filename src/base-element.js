@@ -107,7 +107,7 @@ export class BaseElement {
    * independently handle each of these states internally.
    *
    * @return {boolean}
-   * 
+   *
    */
   static R1() {
     return false;
@@ -122,7 +122,7 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {boolean}
-   * 
+   *
    */
   static deferredMount(unusedElement) {
     return true;
@@ -138,7 +138,7 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {boolean}
-   * 
+   *
    */
   static prerenderAllowed(unusedElement) {
     return false;
@@ -152,7 +152,7 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {boolean}
-   * 
+   *
    */
   static usesLoading(unusedElement) {
     return false;
@@ -167,7 +167,7 @@ export class BaseElement {
    *  content: (!Element|undefined),
    *  color: (string|undefined),
    * }}
-   * 
+   *
    */
   static createLoaderLogoCallback(unusedElement) {
     return {};
@@ -182,7 +182,7 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {number}
-   * 
+   *
    */
   static getBuildPriority(unusedElement) {
     return LayoutPriority_Enum.CONTENT;
@@ -197,7 +197,7 @@ export class BaseElement {
    *
    * @param {!AmpElement} unusedElement
    * @return {?Array<string>}
-   * 
+   *
    */
   static getPreconnects(unusedElement) {
     return null;
@@ -209,7 +209,7 @@ export class BaseElement {
    * installed before upgrading and building this class.
    *
    * @return {boolean}
-   * 
+   *
    */
   static requiresShadowDom() {
     return false;
