@@ -88,7 +88,11 @@ export function validateURLs(field, url = null) {
   const urls = Array.isArray(url) ? url : [url];
 
   urls.forEach((url) => {
-    assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
+    if (url.url != null) {
+      assertHttpsUrl(url.url, `amp-story-shopping-config ${field}`);
+    } else {
+      assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
+    }
   });
 }
 

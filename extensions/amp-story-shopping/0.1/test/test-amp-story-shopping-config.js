@@ -2,8 +2,6 @@ import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 
-import {user} from '#utils/log';
-
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
 import * as remoteConfig from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
@@ -93,7 +91,10 @@ describes.realWin(
             'productPrice': 1200.0,
             'productPriceCurrency': 'JPY',
             'productImages': [
-              'https://source.unsplash.com/BdVQU-NDtA8/500x500',
+              {
+                'url': 'https://source.unsplash.com/BdVQU-NDtA8/500x500',
+                'alt': 'Abstract Art',
+              },
             ],
           },
         };
