@@ -5,13 +5,13 @@
 /* global __MODULE_NAME__ */
 /* global __HAS_EXPORTS__ */
 /* global __IMPORT_NAMES__ */
-/* global __SINGLE_IMPORT_NAME__ */
+/* global __SINGLE_IMPORT_NO_EXPORTS__ */
 /* global __ONLY_EXPORTS__ */
 
 /**
  * An async module loader similar to define() in AMD.
- * Our implementation can be compiled down to a minimal form based on the
- * module's needs, as opposed to bundling a general purpose implementation.
+ * Our implementation varies in that it can be compiled down to a minimal form
+ * based on the module's needs, rather than bundling a full implementation.
  */
 (function defineish(defineCallback) {
   // self.BENTO maps module names to callbacks to execute with their contents.
@@ -32,13 +32,13 @@
         };
       }
     : defineCallback;
-  // The most common cases are ONLY_EXPORTS and SINGLE_IMPORT_NAME.
+  // The most common cases are ONLY_EXPORTS and SINGLE_IMPORT_NO_EXPORTS.
   // We provide them with single-purpose implementations whose output is
   // significantly smaller than the worst case.
   if (__ONLY_EXPORTS__) {
     exec({});
-  } else if (__SINGLE_IMPORT_NAME__) {
-    var name = __SINGLE_IMPORT_NAME__;
+  } else if (__SINGLE_IMPORT_NO_EXPORTS__) {
+    var name = __SINGLE_IMPORT_NO_EXPORTS__;
     (callbacks[name] = callbacks[name] || []).push(exec);
   } else {
     // Fallback general purpose implementation.

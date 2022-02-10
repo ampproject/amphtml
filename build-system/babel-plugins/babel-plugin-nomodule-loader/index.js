@@ -64,7 +64,11 @@ module.exports = function (babel) {
     name: 'nomodule-loader',
     visitor: {
       Program: {
-        exit(path, state) {
+        enter(path, state) {
+          // We can stop since this should be the last transform step.
+          // See nomodule-loader-config.js
+          path.stop();
+
           if (!isModule(path)) {
             throw new Error();
           }
@@ -107,7 +111,7 @@ module.exports = function (babel) {
                 metaHasExports && importNames.length === 1
               ),
               __IMPORT_NAMES__: t.arrayExpression(importNames),
-              __SINGLE_IMPORT_NAME__:
+              __SINGLE_IMPORT_NO_EXPORTS__:
                 importNames.length === 1 && !metaHasExports
                   ? t.cloneNode(importNames[0])
                   : t.nullLiteral(),
