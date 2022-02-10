@@ -44,33 +44,15 @@ describes.realWin(
       doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
-    async function getAmpFacebook(href, opt_embedAs, opt_locale) {
+    it('renders', async () => {
       element = createElementWithAttributes(doc, 'amp-facebook', {
-        'data-href': href,
+        'data-href': fbPostHref,
         'height': 500,
         'width': 500,
         'layout': 'responsive',
       });
-      if (opt_embedAs) {
-        element.setAttribute('data-embed-as', opt_embedAs);
-      }
-      if (opt_locale) {
-        element.setAttribute('data-locale', opt_locale);
-      } else {
-        element.setAttribute('data-locale', 'en_US');
-      }
-
       doc.body.appendChild(element);
-      await element.buildInternal();
-      const loadPromise = element.layoutCallback();
-      const shadow = element.shadowRoot;
-      await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
-      await loadPromise;
-      return element;
-    }
-
-    it('renders', async () => {
-      element = await getAmpFacebook(fbPostHref);
+      await waitForRender();
 
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe.src).to.equal(
@@ -79,7 +61,15 @@ describes.realWin(
     });
 
     it('renders iframe in amp-facebook with video', async () => {
-      element = await getAmpFacebook(fbPostHref, 'video');
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-href': fbPostHref,
+        'data-embed-as': 'video',
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
 
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe.src).to.equal(
@@ -87,36 +77,44 @@ describes.realWin(
       );
     });
 
-    it('rejects other supported and unsupported data-embed-as types', async () => {
-      expectAsyncConsoleError(/.*/);
-      await expect(
-        getAmpFacebook(fbCommentsHref, 'comment')
-      ).to.be.rejectedWith(
-        /Embedded Comments have been deprecated: https:\/\/developers.facebook.com\/docs\/plugins\/embedded-comments/
-      );
-      await expect(
-        getAmpFacebook(fbVideoHref, 'unsupported')
-      ).to.be.rejectedWith(
-        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video", "comments", "like", or "page", but was: unsupported/
-      );
-    });
-
     it('ensures iframe is not sandboxed in amp-facebook', async () => {
-      element = await getAmpFacebook(fbPostHref);
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-href': fbPostHref,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
 
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe.hasAttribute('sandbox')).to.be.false;
     });
 
     it('renders amp-facebook with detected locale', async () => {
-      element = await getAmpFacebook(fbPostHref);
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-href': fbPostHref,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
 
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe.getAttribute('name')).to.contain('"locale":"en_US"');
     });
 
     it('renders amp-facebook with specified locale', async () => {
-      element = await getAmpFacebook(fbPostHref, 'post', 'fr_FR');
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-href': fbPostHref,
+        'data-locale': 'fr_FR',
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
 
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe.getAttribute('name')).to.contain('"locale":"fr_FR"');
@@ -276,7 +274,14 @@ describes.realWin(
     });
 
     it('should set data-loading="auto" if no value is specified', async () => {
-      element = await getAmpFacebook(fbPostHref);
+      element = createElementWithAttributes(doc, 'amp-facebook', {
+        'data-href': fbPostHref,
+        'height': 500,
+        'width': 500,
+        'layout': 'responsive',
+      });
+      doc.body.appendChild(element);
+      await waitForRender();
 
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe.getAttribute('loading')).to.equal('auto');
