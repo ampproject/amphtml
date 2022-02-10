@@ -334,7 +334,7 @@ export class ResourcesImpl {
     // catch everything in the first viewport.
     return (
       this.buildAttemptsCount_ < 20 ||
-      // Ignore build quote for previews.
+      // Ignore build quota for previews.
       this.ampdoc.getVisibilityState() == VisibilityState_Enum.PREVIEW ||
       this.ampdoc.hasBeenVisible()
     );
@@ -1515,7 +1515,8 @@ export class ResourcesImpl {
     const shouldPreview =
       visibilityState == VisibilityState_Enum.PREVIEW &&
       resource.previewAllowed();
-    if (!this.visible_ && !(shouldPrerender || shouldPreview)) {
+    const shouldBuild = this.visible_ || shouldPrerender || shouldPreview;
+    if (!shouldBuild) {
       return false;
     }
 

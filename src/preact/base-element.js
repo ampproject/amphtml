@@ -126,9 +126,9 @@ export class PreactBaseElement extends BaseElement {
     return !this.usesLoading();
   }
 
-  /** @override @nocollapse */
+  /** @override */
   static previewAllowed() {
-    return this.prerenderAllowed();
+    return false;
   }
 
   /**

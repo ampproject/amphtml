@@ -162,7 +162,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
     // Go preview. Not considered visible for the purposes of analytics
     // (privacy-preserving).
     viewer.setVisibilityState_(VisibilityState_Enum.PREVIEW);
-    expect(root.getRootVisibility()).to.equal(1);
+    expect(root.getRootVisibility()).to.equal(0);
 
     // Go hidden.
     viewer.setVisibilityState_(VisibilityState_Enum.HIDDEN);

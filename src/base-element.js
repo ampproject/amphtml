@@ -156,7 +156,6 @@ export class BaseElement {
    *
    * @param {!AmpElement} element
    * @return {boolean}
-   * @nocollapse
    */
   static previewAllowed(element) {
     return this.prerenderAllowed(element);
