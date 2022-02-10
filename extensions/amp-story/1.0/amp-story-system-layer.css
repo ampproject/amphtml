@@ -235,7 +235,7 @@
 }
 
 /*
-  Visible to screen readers only. Screen readers will set :focus on iOS but not android, 
+  Visible to screen readers only. Screen readers will set :focus on iOS but not android,
   therefore on android the button remains hidden but interactable.
 */
 .i-amphtml-story-system-layer:not([desktop]):not(.i-amphtml-story-desktop-one-panel):not(.amp-mode-keyboard-active)
