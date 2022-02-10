@@ -37,13 +37,11 @@ describes.realWin(
   (env) => {
     let win;
     let storeService;
-    let userWarnStub;
     let pageElement;
 
     beforeEach(async () => {
       win = env.win;
       storeService = getStoreService(win);
-      userWarnStub = env.sandbox.stub(user(), 'warn');
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });

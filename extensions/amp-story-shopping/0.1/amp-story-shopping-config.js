@@ -11,6 +11,29 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /**
+ * Max Length of strings allowed in shopping config.
+ */
+export const MAX_STR_LEN = 100;
+
+/** @const {!Object<string, !Array<function>>} */
+export const PRODUCT_VALIDATION_CONFIG = {
+  /* Required Attrs */
+  'productId': [validateRequired, validateStringLength],
+  'productTitle': [validateRequired, validateStringLength],
+  'productPrice': [validateRequired, validateNumber],
+  'productImages': [validateRequired, validateURLs],
+  'productPriceCurrency': [validateRequired, validateStringLength],
+  /* Optional Attrs */
+  'productColor': [validateStringLength],
+  'productSize': [validateStringLength],
+  'productIcon': [validateURLs],
+  'productTagText': [validateStringLength],
+  'reviewsData': [validateURLs],
+  'ctaText': [validateNumber],
+  'shippingText': [validateNumber],
+};
+
+/**
  * @typedef {{
  *  items: !Array<!ShoppingConfigDataDef>,
  * }}
@@ -27,18 +50,14 @@ export function validateRequired(field, value = null) {
     throw Error(`Field ${field} is required.`);
   }
 }
-/**
- * Max Length of strings allowed in shopping config.
- */
-export const MAX_STR_LEN = 100;
 
 /**
  * Validates string length of shopping config attributes
  * @param {string} field
  * @param {?string=} str
  */
-export function validateStringLength(field, str = undefined) {
-  if (str !== undefined && str.length > MAX_STR_LEN) {
+export function validateStringLength(field, str = null) {
+  if (str?.length > MAX_STR_LEN) {
     throw Error(
       `Length of ${field} exceeds max length: ${str.length} > ${MAX_STR_LEN}`
     );
@@ -63,7 +82,6 @@ export function validateNumber(field, number = null) {
  */
 export function validateURLs(field, url = null) {
   if (url == null) {
-    /* Not a Required Attribute, return.*/
     return;
   }
 
@@ -73,24 +91,6 @@ export function validateURLs(field, url = null) {
     assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
   });
 }
-
-/** @const {!Object<string, !Array<function>>} */
-export const PRODUCT_VALIDATION_CONFIG = {
-  /* Required Attrs */
-  'productId': [validateRequired, validateStringLength],
-  'productTitle': [validateRequired, validateStringLength],
-  'productPrice': [validateRequired, validateNumber],
-  'productImages': [validateRequired, validateURLs],
-  'productPriceCurrency': [validateRequired, validateStringLength],
-  /* Optional Attrs */
-  'productColor': [validateStringLength],
-  'productSize': [validateStringLength],
-  'productIcon': [validateURLs],
-  'productTagText': [validateStringLength],
-  'reviewsData': [validateURLs],
-  'ctaText': [validateNumber],
-  'shippingText': [validateNumber],
-};
 
 /**
  * Validates shopping config.
@@ -121,9 +121,7 @@ export let KeyedShoppingConfigDef;
 export function getShoppingConfig(pageElement) {
   const element = pageElement.querySelector('amp-story-shopping-config');
   return getElementConfig(element).then((config) => {
-    for (const configItem of config['items']) {
-      validateConfig(configItem);
-    }
+    config['items'].forEach((item) => validateConfig(item));
     return keyByProductTagId(config);
   });
 }
@@ -150,11 +148,4 @@ export function storeShoppingConfig(pageElement, config) {
     storeService?.dispatch(Action.ADD_SHOPPING_DATA, config);
     return config;
   });
-}
-
-export class AmpStoryShoppingConfig extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-  }
 }
