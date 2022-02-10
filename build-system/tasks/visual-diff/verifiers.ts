@@ -1,10 +1,9 @@
-'use strict';
+import {cyan} from 'kleur/colors';
+import type puppeteer from 'puppeteer';
 
-const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
-const {cyan} = require('kleur/colors');
-const {log} = require('./log');
-const {sleep} = require('./helpers');
-const {VisibilityDef} = require('./types');
+import {sleep} from './helpers';
+import {log} from './log';
+import type {VisibilityDef} from './types.d';
 
 const CSS_SELECTOR_RETRY_MS = 200;
 const CSS_SELECTOR_TIMEOUT_MS = 10000;
@@ -12,20 +11,19 @@ const CSS_SELECTOR_TIMEOUT_MS = 10000;
 /**
  * Verifies that all CSS elements are as expected before taking a snapshot.
  *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- * @param {string} testName the full name of the test.
- * @param {!Array<string>} selectors Array of CSS selector that must eventually
- *     be removed from the page.
- * @param {number} timeoutMillis how long to retry.
- * @return {Promise<void>}
+ * @param page a Puppeteer control browser tab/page.
+ * @param testName the full name of the test.
+ * @param selectors Array of CSS selector that must eventually be removed from
+ *     the page.
+ * @param timeoutMillis how long to retry.
  * @throws {Error} an encountered error.
  */
-async function verifySelectorsInvisible(
-  page,
-  testName,
-  selectors,
-  timeoutMillis = CSS_SELECTOR_TIMEOUT_MS
-) {
+export async function verifySelectorsInvisible(
+  page: puppeteer.Page,
+  testName: string,
+  selectors: string[],
+  timeoutMillis: number = CSS_SELECTOR_TIMEOUT_MS
+): Promise<void> {
   log(
     'verbose',
     'Waiting for invisibility of all:',
@@ -54,15 +52,14 @@ async function verifySelectorsInvisible(
  * @param {!Array<string>} selectors Array of CSS selectors that must
  *     eventually appear on the page.
  * @param {number} timeoutMillis how long to retry.
- * @return {Promise<void>}
  * @throws {Error} an encountered error.
  */
-async function verifySelectorsVisible(
-  page,
-  testName,
-  selectors,
-  timeoutMillis = CSS_SELECTOR_TIMEOUT_MS
-) {
+export async function verifySelectorsVisible(
+  page: puppeteer.Page,
+  testName: string,
+  selectors: string[],
+  timeoutMillis: number = CSS_SELECTOR_TIMEOUT_MS
+): Promise<void> {
   log('verbose', 'Waiting for existence of all:', cyan(selectors.join(', ')));
   try {
     await Promise.all(
@@ -96,17 +93,16 @@ async function verifySelectorsVisible(
 /**
  * Wait for all AMP loader indicators to disappear.
  *
- * @param {!puppeteer.Page} page page to wait on.
- * @param {string} testName the full name of the test.
- * @param {number} timeoutMillis how long to retry.
- * @return {Promise<void>}
+ * @param page page to wait on.
+ * @param testName the full name of the test.
+ * @param timeoutMillis how long to retry.
  * @throws {Error} an encountered error.
  */
-async function waitForPageLoad(
-  page,
-  testName,
-  timeoutMillis = CSS_SELECTOR_TIMEOUT_MS
-) {
+export async function waitForPageLoad(
+  page: puppeteer.Page,
+  testName: string,
+  timeoutMillis: number = CSS_SELECTOR_TIMEOUT_MS
+): Promise<void> {
   const allLoadersGone = await waitForElementVisibility(
     page,
     '[class~="i-amphtml-loader"], [class~="i-amphtml-loading"]',
@@ -126,33 +122,32 @@ async function waitForPageLoad(
  *
  * Timeout is set to CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS ms.
  *
- * @param {!puppeteer.Page} page page to check the visibility of elements in.
- * @param {string} selector CSS selector for elements to wait on.
- * @param {!VisibilityDef} options with key 'visible' OR 'hidden' set to true.
- * @param {number} timeoutMillis how long to retry.
+ * @param page page to check the visibility of elements in.
+ * @param selector CSS selector for elements to wait on.
+ * @param options with key 'visible' OR 'hidden' set to true.
+ * @param timeoutMillis how long to retry.
  * @return {Promise<boolean>} true if the expectation is met before the timeout.
  * @throws {Error} if the expectation is not met before the timeout, throws an
  *      error with the message value set to the CSS selector.
  */
 async function waitForElementVisibility(
-  page,
-  selector,
-  options,
-  timeoutMillis
-) {
-  const waitForVisible = Boolean(options['visible']);
-  const waitForHidden = Boolean(options['hidden']);
+  page: puppeteer.Page,
+  selector: string,
+  options: VisibilityDef,
+  timeoutMillis: number
+): Promise<boolean> {
+  const waitForVisible = Boolean(options.visible);
+  const waitForHidden = Boolean(options.hidden);
   if (waitForVisible == waitForHidden) {
     log(
       'fatal',
-      'waitForElementVisibility must be called with exactly one of',
-      "'visible' or 'hidden' set to true."
+      "waitForElementVisibility must be called with exactly one of 'visible' or 'hidden' set to true."
     );
   }
 
   const startTime = Date.now();
   do {
-    const elementsAreVisible = [];
+    const elementsAreVisible: boolean[] = [];
 
     for (const elementHandle of await page.$$(selector)) {
       const boundingBox = await elementHandle.boundingBox();
@@ -199,14 +194,18 @@ async function waitForElementVisibility(
  *
  * Timeout is set to CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS ms.
  *
- * @param {!puppeteer.Page} page page to check the existence of the selector in.
- * @param {string} selector CSS selector.
- * @param {number} timeoutMillis how long to retry.
+ * @param page page to check the existence of the selector in.
+ * @param selector CSS selector.
+ * @param timeoutMillis how long to retry.
  * @return {Promise<boolean>} true if the element exists before the timeout.
  * @throws {Error} if the element does not exist before the timeout, throws an
  *    error with the message value set to the CSS selector.
  */
-async function waitForSelectorExistence(page, selector, timeoutMillis) {
+async function waitForSelectorExistence(
+  page: puppeteer.Page,
+  selector: string,
+  timeoutMillis: number
+): Promise<boolean> {
   const startTime = Date.now();
   do {
     if ((await page.$(selector)) !== null) {
@@ -216,9 +215,3 @@ async function waitForSelectorExistence(page, selector, timeoutMillis) {
   } while (Date.now() < startTime + timeoutMillis);
   throw new Error(selector);
 }
-
-module.exports = {
-  waitForPageLoad,
-  verifySelectorsInvisible,
-  verifySelectorsVisible,
-};

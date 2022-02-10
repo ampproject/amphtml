@@ -1,45 +1,44 @@
-'use strict';
+import Percy, {SnapshotOptions} from '@percy/core';
+import percySnapshot from '@percy/puppeteer';
+import {isPercyEnabled} from '@percy/sdk-utils';
+import atob from 'atob';
+import fs from 'fs';
+import JSON5 from 'json5';
+import {cyan, green, red, yellow} from 'kleur/colors';
+import minimist from 'minimist';
+import os from 'os';
+import path from 'path';
+import type puppeteer from 'puppeteer';
 
-const argv = require('minimist')(process.argv.slice(2));
-const atob = require('atob');
-const fs = require('fs');
-const JSON5 = require('json5');
-const os = require('os');
-const path = require('path');
-const Percy = require('@percy/core');
-const percySnapshot = require('@percy/puppeteer');
-const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
-const {
-  createCtrlcHandler,
-  exitCtrlcHandler,
-} = require('../../common/ctrlcHandler');
-const {
-  gitBranchName,
-  gitCiMainBaseline,
-  gitCommitterEmail,
-  shortSha,
-} = require('../../common/git');
-const {
+import {
   PUPPETEER_CHROMIUM_REVISION,
   launchBrowser,
   loadBrowserFetcher,
   newPage,
   resetPage,
-} = require('./browser');
-const {
+} from './browser';
+import {BASE_TEST_FUNCTION, HOST, PORT} from './consts';
+import {devMode} from './dev-mode';
+import {escapeHtml, sleep} from './helpers';
+import {drawBoxes, log} from './log';
+import type {TestErrorDef, WebpageDef} from './types.d';
+import {
   verifySelectorsInvisible,
   verifySelectorsVisible,
   waitForPageLoad,
-} = require('./verifiers');
-const {BASE_TEST_FUNCTION, HOST, PORT} = require('./consts');
-const {cyan, green, red, yellow} = require('kleur/colors');
-const {devMode} = require('./dev-mode');
-const {drawBoxes, log} = require('./log');
-const {escapeHtml, sleep} = require('./helpers');
-const {isCiBuild} = require('../../common/ci');
-const {isPercyEnabled} = require('@percy/sdk-utils');
-const {startServer, stopServer} = require('../serve');
-const {TestErrorDef, WebpageDef} = require('./types');
+} from './verifiers';
+
+import {isCiBuild} from '../../common/ci';
+import {createCtrlcHandler, exitCtrlcHandler} from '../../common/ctrlcHandler';
+import {
+  gitBranchName,
+  gitCiMainBaseline,
+  gitCommitterEmail,
+  shortSha,
+} from '../../common/git';
+import {startServer, stopServer} from '../serve';
+
+const argv = minimist(process.argv.slice(2));
 
 // CSS injected in every page tested.
 // Normally, as in https://docs.percy.io/docs/percy-specific-css
@@ -88,7 +87,7 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
 /**
  * Decode the write-only Percy token during CI builds.
  */
-function decodePercyTokenForCi() {
+function decodePercyTokenForCi(): void {
   if (isCiBuild()) {
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED || '');
   }
@@ -97,7 +96,7 @@ function decodePercyTokenForCi() {
 /**
  * Override PERCY_* environment variables if passed via amp task parameters.
  */
-function maybeOverridePercyEnvironmentVariables() {
+function maybeOverridePercyEnvironmentVariables(): void {
   ['percy_token', 'percy_branch'].forEach((variable) => {
     if (variable in argv) {
       process.env[variable.toUpperCase()] = argv[variable];
@@ -110,7 +109,7 @@ function maybeOverridePercyEnvironmentVariables() {
  * We do this for all non-push builds in order to prevent them from being used
  * as baselines for future builds.
  */
-function setPercyBranch() {
+function setPercyBranch(): void {
   if (!process.env['PERCY_BRANCH'] && (!argv.main || !isCiBuild())) {
     const userName = gitCommitterEmail();
     const branchName = gitBranchName();
@@ -128,7 +127,7 @@ function setPercyBranch() {
  * builds are always built on top of the previous commit (we use the squash and
  * merge method for pull requests.)
  */
-function setPercyTargetCommit() {
+function setPercyTargetCommit(): void {
   if (isCiBuild() && !argv.main) {
     process.env['PERCY_TARGET_COMMIT'] = gitCiMainBaseline();
   }
@@ -137,16 +136,16 @@ function setPercyTargetCommit() {
 /**
  * Launches a @percy/cli instance.
  *
- * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
- *     manager.
- * @return {Promise<Percy|undefined>} percy agent instance.
+ * @param browserFetcher Puppeteer browser binaries manager.
+ * @return {Promise<Percy | undefined>} percy agent instance.
  */
-async function launchPercyAgent(browserFetcher) {
+async function launchPercyAgent(
+  browserFetcher: puppeteer.BrowserFetcher
+): Promise<Percy | undefined> {
   if (argv.percy_disabled) {
     return;
   }
 
-  // @ts-ignore Type mismatch in library
   const percy = await Percy.start({
     token: process.env.PERCY_TOKEN,
     loglevel: argv.percy_agent_debug ? 'debug' : 'info',
@@ -197,14 +196,20 @@ async function launchPercyAgent(browserFetcher) {
 /**
  * Adds a test error and logs it if running locally (not as part of CI).
  *
- * @param {!Array<!TestErrorDef>} testErrors array of testError objects.
- * @param {string} name full name of the test.
- * @param {string} message extra information about the failure.
- * @param {Error} error error object with stack trace.
- * @param {!Array<puppeteer.ConsoleMessage>} consoleMessages array of console
+ * @param testErrors array of testError objects.
+ * @param name full name of the test.
+ * @param message extra information about the failure.
+ * @param error error object with stack trace.
+ * @param consoleMessages array of console
  *     messages printed so far.
  */
-function addTestError(testErrors, name, message, error, consoleMessages) {
+function addTestError(
+  testErrors: TestErrorDef[],
+  name: string,
+  message: string,
+  error: Error,
+  consoleMessages: puppeteer.ConsoleMessage[]
+): void {
   const testError = {name, message, error, consoleMessages};
   if (!isCiBuild()) {
     logTestError(testError);
@@ -215,9 +220,9 @@ function addTestError(testErrors, name, message, error, consoleMessages) {
 /**
  * Logs a test error (regardless of where it's running).
  *
- * @param {!TestErrorDef} testError object as created by addTestError.
+ * @param testError object as created by addTestError.
  */
-function logTestError(testError) {
+function logTestError(testError: TestErrorDef): void {
   log(
     'error',
     'Error in test',
@@ -243,11 +248,13 @@ function logTestError(testError) {
  * Sets the AMP config, launches a server, and generates Percy snapshots for a
  * set of given webpages.
  *
- * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {!Array<!WebpageDef>} webpages details about the pages to snapshot.
- * @return {Promise<void>}
+ * @param browser a Puppeteer controlled browser.
+ * @param webpages details about the pages to snapshot.
  */
-async function runVisualTests(browser, webpages) {
+async function runVisualTests(
+  browser: puppeteer.Browser,
+  webpages: WebpageDef[]
+): Promise<void> {
   const numUnfilteredPages = webpages.length;
   webpages = webpages.filter((webpage) => !webpage.flaky);
   if (numUnfilteredPages != webpages.length) {
@@ -319,7 +326,6 @@ async function runVisualTests(browser, webpages) {
     await page.goto(
       `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
     );
-    // @ts-ignore Type mismatch in library
     await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
   }
 
@@ -337,15 +343,18 @@ async function runVisualTests(browser, webpages) {
 /**
  * Generates Percy snapshots for a set of given webpages.
  *
- * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {!Array<!WebpageDef>} webpages an array of JSON objects containing
- *     details about the webpages to snapshot.
+ * @param browser a Puppeteer controlled browser.
+ * @param webpages an array of JSON objects containing details about the
+ *     webpages to snapshot.
  * @return {Promise<boolean>} true if all tests passed locally (does not
  *     indicate whether the tests passed on Percy).
  */
-async function snapshotWebpages(browser, webpages) {
-  const availablePages = [];
-  const allPages = [];
+async function snapshotWebpages(
+  browser: puppeteer.Browser,
+  webpages: WebpageDef[]
+): Promise<boolean> {
+  const availablePages: puppeteer.Page[] = [];
+  const allPages: puppeteer.Page[] = [];
 
   log('verbose', 'Preallocating', cyan(MAX_PARALLEL_TABS), 'tabs...');
   for (let i = 0; i < MAX_PARALLEL_TABS; i++) {
@@ -354,8 +363,8 @@ async function snapshotWebpages(browser, webpages) {
     allPages.push(page);
   }
 
-  const pagePromises = [];
-  const testErrors = [];
+  const pagePromises: Promise<void>[] = [];
+  const testErrors: TestErrorDef[] = [];
   let testNumber = 0;
   for (const webpage of webpages) {
     const {name: pageName, viewport} = webpage;
@@ -383,7 +392,7 @@ async function snapshotWebpages(browser, webpages) {
 
       await resetPage(page, viewport);
 
-      const consoleMessages = [];
+      const consoleMessages: puppeteer.ConsoleMessage[] = [];
       const consoleLogger = (consoleMessage) => {
         consoleMessages.push(consoleMessage);
       };
@@ -472,7 +481,6 @@ async function snapshotWebpages(browser, webpages) {
               .replace('__TEST_ERROR__', testError)
               .replace('__HTML_SNAPSHOT__', escapeHtml(htmlSnapshot))
           );
-          // @ts-ignore Type mismatch in library
           await percySnapshot(page, name, SNAPSHOT_SINGLE_BUILD_OPTIONS);
         }
 
@@ -487,7 +495,7 @@ async function snapshotWebpages(browser, webpages) {
 
             // Create a default set of snapshot options for Percy and modify
             // them based on the test's configuration.
-            const snapshotOptions = {};
+            const snapshotOptions: SnapshotOptions = {};
             if (webpage.enable_percy_javascript) {
               snapshotOptions.enableJavaScript = true;
             }
@@ -506,7 +514,6 @@ async function snapshotWebpages(browser, webpages) {
             }
 
             // Finally, send the snapshot to percy.
-            // @ts-ignore Type mismatch in library
             await percySnapshot(page, name, snapshotOptions);
           } catch (snapshotError) {
             addTestError(
@@ -552,7 +559,7 @@ async function snapshotWebpages(browser, webpages) {
 /**
  * Enables debugging if requested via command line.
  */
-function setDebuggingLevel() {
+function setDebuggingLevel(): void {
   if (argv.debug) {
     argv['chrome_debug'] = true;
     argv['webserver_debug'] = true;
@@ -566,10 +573,9 @@ function setDebuggingLevel() {
  * Enables us to require percy checks on GitHub, and yet, not have to do a full
  * build for every PR.
  *
- * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @return {Promise<void>}
+ * @param browser a Puppeteer controlled browser.
  */
-async function createEmptyBuild(browser) {
+async function createEmptyBuild(browser: puppeteer.Browser): Promise<void> {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
 
   const page = await newPage(browser);
@@ -582,59 +588,17 @@ async function createEmptyBuild(browser) {
     // Ignore failures
   }
 
-  // @ts-ignore Type mismatch in library
   await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
 }
 
 /**
  * Runs the AMP visual diff tests.
- * @return {Promise<void>}
- */
-async function visualDiff() {
-  if (!PUPPETEER_CHROMIUM_REVISION) {
-    throw new Error(
-      `${cyan('amp visual-diff')} is only available on Linux, Mac, and Windows`
-    );
-  }
-
-  const handlerProcess = createCtrlcHandler('visual-diff');
-  await ensureOrBuildAmpRuntimeInTestMode_();
-  const browserFetcher = await loadBrowserFetcher();
-  decodePercyTokenForCi();
-  maybeOverridePercyEnvironmentVariables();
-  setPercyBranch();
-  setPercyTargetCommit();
-
-  if (argv.grep) {
-    argv.grep = RegExp(argv.grep);
-  }
-
-  if (argv.dev) {
-    argv['percy_disabled'] = true;
-  }
-
-  if (!argv.percy_disabled && !process.env.PERCY_TOKEN) {
-    log('fatal', 'Could not find', cyan('PERCY_TOKEN'), 'environment variable');
-  }
-
-  const percy = await launchPercyAgent(browserFetcher);
-  try {
-    await performVisualTests(browserFetcher);
-  } finally {
-    // @ts-ignore Type mismatch in library
-    await percy?.stop();
-  }
-  exitCtrlcHandler(handlerProcess);
-}
-
-/**
- * Runs the AMP visual diff tests.
  *
- * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
- *     manager.
- * @return {Promise<void>}
+ * @param browserFetcher Puppeteer browser binaries manager.
  */
-async function performVisualTests(browserFetcher) {
+async function performVisualTests(
+  browserFetcher: puppeteer.BrowserFetcher
+): Promise<void> {
   setDebuggingLevel();
 
   const browser = await launchBrowser(browserFetcher);
@@ -671,10 +635,7 @@ async function performVisualTests(browserFetcher) {
   }
 }
 
-/**
- * @return {Promise<void>}
- */
-async function ensureOrBuildAmpRuntimeInTestMode_() {
+async function ensureOrBuildAmpRuntimeInTestMode(): Promise<void> {
   if (argv.empty) {
     return;
   }
@@ -694,9 +655,44 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
   }
 }
 
-module.exports = {
-  visualDiff,
-};
+/**
+ * Runs the AMP visual diff tests.
+ */
+export async function visualDiff(): Promise<void> {
+  if (!PUPPETEER_CHROMIUM_REVISION) {
+    throw new Error(
+      `${cyan('amp visual-diff')} is only available on Linux, Mac, and Windows`
+    );
+  }
+
+  const handlerProcess = createCtrlcHandler('visual-diff');
+  await ensureOrBuildAmpRuntimeInTestMode();
+  const browserFetcher = await loadBrowserFetcher();
+  decodePercyTokenForCi();
+  maybeOverridePercyEnvironmentVariables();
+  setPercyBranch();
+  setPercyTargetCommit();
+
+  if (argv.grep) {
+    argv.grep = RegExp(argv.grep);
+  }
+
+  if (argv.dev) {
+    argv['percy_disabled'] = true;
+  }
+
+  if (!argv.percy_disabled && !process.env.PERCY_TOKEN) {
+    log('fatal', 'Could not find', cyan('PERCY_TOKEN'), 'environment variable');
+  }
+
+  const percy = await launchPercyAgent(browserFetcher);
+  try {
+    await performVisualTests(browserFetcher);
+  } finally {
+    await percy?.stop();
+  }
+  exitCtrlcHandler(handlerProcess);
+}
 
 visualDiff.description = 'Run the AMP visual diff tests';
 visualDiff.flags = {

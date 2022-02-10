@@ -1,32 +1,33 @@
-'use strict';
+import inquirer from 'inquirer';
+import {cyan, yellow} from 'kleur/colors';
+import path from 'path';
+import type puppeteer from 'puppeteer';
 
-const inquirer = require('inquirer');
-const path = require('path');
-const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
-const {
+import {newPage} from './browser';
+import {HOST, PORT} from './consts';
+import {sleep} from './helpers';
+import {log} from './log';
+import type {WebpageDef} from './types.d';
+import {
   verifySelectorsInvisible,
   verifySelectorsVisible,
   waitForPageLoad,
-} = require('./verifiers');
-const {cyan, yellow} = require('kleur/colors');
-const {HOST, PORT} = require('./consts');
-const {log} = require('./log');
-const {newPage} = require('./browser');
-const {sleep} = require('./helpers');
-const {WebpageDef} = require('./types');
+} from './verifiers';
 
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 
 /**
  * Runs a development mode.
  *
- * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {!Array<!WebpageDef>} webpages an array of JSON objects containing
- *     details about the webpages to snapshot.
+ * @param browser a Puppeteer controlled browser.
+ * @param webpages an array of JSON objects containing details about the
+ *     webpages to snapshot.
  * @return {Promise<void>}
  */
-async function devMode(browser, webpages) {
-  /** @type {WebpageDef} */
+export async function devMode(
+  browser: puppeteer.Browser,
+  webpages: WebpageDef[]
+): Promise<void> {
   const webpage = await inquireForWebpage_(webpages);
   const testName = await inquireForTestFunction_(webpage);
 
@@ -72,8 +73,7 @@ async function devMode(browser, webpages) {
     log('info', '- Press enter on', cyan('empty prompt'), 'to reload the page');
     log('info', '-', cyan('Ctrl + C'), 'to quit.');
     while (true) {
-      /** @type {string} */
-      let cssSelector = (
+      let cssSelector: string = (
         await inquirer.prompt({
           type: 'input',
           name: 'cssSelector',
@@ -126,11 +126,10 @@ async function devMode(browser, webpages) {
 /**
  * Queries the user for a webpage, or selects one if only one matched --grep.
  *
- * @param {!Array<!WebpageDef>} webpages an array of JSON objects containing
- *     details about the webpages to snapshot.
- * @return {Promise<!WebpageDef>}
+ * @param webpages an array of JSON objects containing details about the
+ *     webpages to snapshot.
  */
-async function inquireForWebpage_(webpages) {
+async function inquireForWebpage_(webpages: WebpageDef[]): Promise<WebpageDef> {
   if (webpages.length > 1) {
     return (
       await inquirer.prompt([
@@ -169,11 +168,10 @@ async function inquireForWebpage_(webpages) {
 /**
  * Queries the user for an interactive test, or selects the base case if none.
  *
- * @param {!WebpageDef} webpage a JSON object containing details about the
- *     webpage to snapshot.
- * @return {Promise<string>}
+ * @param webpage a JSON object containing details about the webpage to
+ *     snapshot.
  */
-async function inquireForTestFunction_(webpage) {
+async function inquireForTestFunction_(webpage: WebpageDef): Promise<string> {
   if (Object.keys(webpage.tests_).length > 1) {
     return (
       await inquirer.prompt([
@@ -194,7 +192,3 @@ async function inquireForTestFunction_(webpage) {
   }
   return '';
 }
-
-module.exports = {
-  devMode,
-};

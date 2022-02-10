@@ -27,7 +27,8 @@
     "./global.d.ts"
   ],
   "include": [
-    "./**/*.js"
+    "./**/*.js",
+    "./**/*.ts"
   ],
   "exclude": [
     "./**/node_modules/**",

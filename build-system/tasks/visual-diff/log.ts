@@ -1,17 +1,17 @@
-'use strict';
+import {green, red, yellow} from 'kleur/colors';
+import minimist from 'minimist';
+import type puppeteer from 'puppeteer';
 
-const argv = require('minimist')(process.argv.slice(2));
-const puppeteer = require('puppeteer'); // eslint-disable-line @typescript-eslint/no-unused-vars
-const {green, red, yellow} = require('kleur/colors');
-const {log: logBase} = require('../../common/logging');
+import {log as logBase} from '../../common/logging';
+
+const argv = minimist(process.argv.slice(2));
+
+type Mode = 'info' | 'warning' | 'error' | 'fatal' | 'verbose';
 
 /**
  * Logs a message to the console.
- *
- * @param {string} mode
- * @param {!Array<*>} messages
  */
-function log(mode, ...messages) {
+export function log(mode: Mode, ...messages: Array<any>): void {
   switch (mode) {
     case 'verbose':
       if (argv.verbose) {
@@ -36,13 +36,13 @@ function log(mode, ...messages) {
 
 /**
  * Pretty-prints the current test status of each page.
- * @param {!Array<!puppeteer.Page>} allPages
- * @param {!Array<!puppeteer.Page>} availablePages
- * @param {!puppeteer.Page} thisPage
- * @param {string} thisPageText
- * @return {string}
  */
-function drawBoxes(allPages, availablePages, thisPage, thisPageText) {
+export function drawBoxes(
+  allPages: Array<puppeteer.Page>,
+  availablePages: Array<puppeteer.Page>,
+  thisPage: puppeteer.Page,
+  thisPageText: string
+): string {
   return (
     '[' +
     allPages
@@ -59,8 +59,3 @@ function drawBoxes(allPages, availablePages, thisPage, thisPageText) {
     ']'
   );
 }
-
-module.exports = {
-  drawBoxes,
-  log,
-};

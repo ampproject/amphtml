@@ -1,14 +1,19 @@
-'use strict';
+import fs from 'fs';
+import {cyan, yellow} from 'kleur/colors';
+import minimist from 'minimist';
+import path from 'path';
+import puppeteer from 'puppeteer';
+import {addExtra} from 'puppeteer-extra';
+import PuppeteerExtraPluginUserPreferences from 'puppeteer-extra-plugin-user-preferences';
 
-const argv = require('minimist')(process.argv.slice(2));
-const fs = require('fs');
-const path = require('path');
-const puppeteer = require('puppeteer');
-const PuppeteerExtraPluginUserPreferences = require('puppeteer-extra-plugin-user-preferences');
-const {addExtra} = require('puppeteer-extra');
-const {cyan, yellow} = require('kleur/colors');
-const {HOST} = require('./consts');
-const {log} = require('./log');
+import {HOST} from './consts';
+import {log} from './log';
+
+const argv = minimist(process.argv.slice(2));
+
+// The default export of the `puppeteer` module is guaranteed to be an instance
+// of PuppeteerNode in a Node environment.
+const puppeteerNode = puppeteer as unknown as puppeteer.PuppeteerNode;
 
 // REPEATING TODO(@ampproject/wg-infra): Update this whenever the Percy backend
 // starts using a new version of Chrome to render DOM snapshots.
@@ -26,7 +31,7 @@ const {log} = require('./log');
 // 10. `node utils/check_availability.js ${branchBasePosition} ${branchBasePosition + 1000}`
 //     (e.g., `node utils/check_availability.js 870763 871763)
 // 10. Find the first available value for each platform and update the value below:
-const PUPPETEER_CHROMIUM_REVISION = // 91.0.4472.x
+export const PUPPETEER_CHROMIUM_REVISION = // 91.0.4472.x
   process.platform === 'linux'
     ? '870763'
     : process.platform === 'darwin' // ('mac' in check_availability.js output)
@@ -46,11 +51,12 @@ const VIEWPORT_HEIGHT = 100000;
  * Waits until the browser is up and reachable, and ties its lifecycle to this
  * process's lifecycle.
  *
- * @param {!puppeteer.BrowserFetcher} browserFetcher Puppeteer browser binaries
- *     manager.
- * @return {Promise<!puppeteer.Browser>} a Puppeteer controlled browser.
+ * @param browserFetcher Puppeteer browser binaries manager.
+ * @return {Promise<puppeteer.Browser>} a Puppeteer controlled browser.
  */
-async function launchBrowser(browserFetcher) {
+export async function launchBrowser(
+  browserFetcher: puppeteer.BrowserFetcher
+): Promise<puppeteer.Browser> {
   const browserOptions = {
     args: [
       '--disable-background-media-suspend',
@@ -69,8 +75,7 @@ async function launchBrowser(browserFetcher) {
     waitForInitialPage: false,
   };
 
-  // @ts-ignore type mismatch in puppeteer-extra.
-  const puppeteerExtra = addExtra(puppeteer);
+  const puppeteerExtra = addExtra(puppeteerNode);
   puppeteerExtra.use(
     PuppeteerExtraPluginUserPreferences({
       userPrefs: {
@@ -87,13 +92,11 @@ async function launchBrowser(browserFetcher) {
 
 /**
  * Opens a new browser tab, resizes its viewport, and returns a Page handler.
- *
- * @param {!puppeteer.Browser} browser a Puppeteer controlled browser.
- * @param {?puppeteer.Viewport} viewport optional viewport size object with
- *     numeric fields `width` and `height`.
- * @return {Promise<!puppeteer.Page>}
  */
-async function newPage(browser, viewport = null) {
+export async function newPage(
+  browser: puppeteer.Browser,
+  viewport?: puppeteer.Viewport
+): Promise<puppeteer.Page> {
   log('verbose', 'Creating new tab');
 
   const context = await browser.createIncognitoBrowserContext();
@@ -108,7 +111,7 @@ async function newPage(browser, viewport = null) {
       'network-mocks',
       requestUrl.hostname,
       encodeURIComponent(
-        `${requestUrl.pathname.substr(1)}${requestUrl.search}`
+        `${requestUrl.pathname.slice(1)}${requestUrl.search}`
       ).replace(/%2F/g, '/')
     );
 
@@ -146,12 +149,14 @@ async function newPage(browser, viewport = null) {
 /**
  * Resets the size of a tab and loads about:blank.
  *
- * @param {!puppeteer.Page} page a Puppeteer control browser tab/page.
- * @param {?puppeteer.Viewport} viewport optional viewport size object with
- *     numeric fields `width` and `height`.
- * @return {Promise<void>}
+ * @param page a Puppeteer control browser tab/page.
+ * @param viewport optional viewport size object with numeric fields `width` and
+ *     `height`.
  */
-async function resetPage(page, viewport = null) {
+export async function resetPage(
+  page: puppeteer.Page,
+  viewport?: puppeteer.Viewport
+): Promise<void> {
   const width = viewport ? viewport.width : VIEWPORT_WIDTH;
   const height = viewport ? viewport.height : VIEWPORT_HEIGHT;
 
@@ -169,13 +174,9 @@ async function resetPage(page, viewport = null) {
 
 /**
  * Loads task-specific dependencies are returns an instance of BrowserFetcher.
- *
- * @return {Promise<!puppeteer.BrowserFetcher>}
  */
-async function loadBrowserFetcher() {
-  // @ts-ignore Valid method in Puppeteer's nodejs interface.
-  // https://github.com/puppeteer/puppeteer/blob/main/src/node/Puppeteer.ts
-  const browserFetcher = puppeteer.createBrowserFetcher();
+export async function loadBrowserFetcher(): Promise<puppeteer.BrowserFetcher> {
+  const browserFetcher = puppeteerNode.createBrowserFetcher({});
   const chromiumRevisions = await browserFetcher.localRevisions();
   if (chromiumRevisions.includes(PUPPETEER_CHROMIUM_REVISION)) {
     log(
@@ -200,11 +201,3 @@ async function loadBrowserFetcher() {
   }
   return browserFetcher;
 }
-
-module.exports = {
-  PUPPETEER_CHROMIUM_REVISION,
-  launchBrowser,
-  loadBrowserFetcher,
-  newPage,
-  resetPage,
-};

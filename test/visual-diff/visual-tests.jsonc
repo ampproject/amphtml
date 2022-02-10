@@ -125,7 +125,7 @@
      * - Prepare the page for snapshotting by setting snapshot options for Percy
      *   and, in some cases, modifying the HTML (e.g., when viewport is set, the
      *   page is wrapped in a fixed-size iframe. See file
-     *   build-system/tasks/visual-diff/index.js for complete implementation)
+     *   build-system/tasks/visual-diff/index.ts for complete implementation)
      */
     {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
