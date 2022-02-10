@@ -54,7 +54,7 @@ function getExportAll(filename) {
 let MappingEntryDef;
 
 /** @return {MappingEntryDef[]}}} */
-function getAllRemappings() {
+const getAllRemappings = once(() => {
   // IMPORTANT: cdn mappings must start with ./dist/
 
   // Determine modules to import from shared bento.mjs.
@@ -74,15 +74,15 @@ function getAllRemappings() {
 
   return /** @type {MappingEntryDef[]} */ (
     [...coreBentoRemappings, ...componentRemappings]
-      .map(({source, ...rest}) => {
+      .map(({cdn, npm, source}) => {
         const resolved = resolveExactModuleFile(source);
         if (resolved) {
-          return {source: resolved, ...rest};
+          return {source: resolved, cdn, npm};
         }
       })
       .filter(Boolean)
   );
-}
+});
 
 /**
  * @param {'npm'|'cdn'} type
@@ -100,9 +100,21 @@ function getRemappings(type) {
 
 /**
  * Remaps imports from source to externals.
+ * @param {string} isMinified
  * @return {{[string: string]: string}}
  */
-const getRemapBentoDependencies = once(() => getRemappings('cdn'));
+function getRemapBentoDependencies(isMinified) {
+  const remappings = getRemappings('cdn');
+  if (isMinified) {
+    return remappings;
+  }
+  return Object.fromEntries(
+    Object.entries(isMinified).map(([source, cdn]) => [
+      source,
+      cdn.replace('.mjs', '.max.mjs'),
+    ])
+  );
+}
 
 /**
  * Remaps imports from source to externals.
