@@ -1433,9 +1433,6 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
      * @final
      */
     previewAllowed() {
-      if (this.hasAttribute('nopreview')) {
-        return false;
-      }
       return this.implClass_ ? this.implClass_.previewAllowed(this) : false;
     }
 
