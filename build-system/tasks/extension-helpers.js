@@ -672,7 +672,7 @@ async function buildNpmBinaries(extDir, name, options) {
       npm.bento.external = Object.values(npm.bento.remap);
     }
   }
-  const binaries = Object.values(npm);
+  const binaries = Object.values(npm).filter(Boolean);
   return buildBinaries(extDir, binaries, options);
 }
 
