@@ -18,15 +18,20 @@ module.exports = ({config}) => {
   config.resolve = {
     modules,
     alias: getRelativeAliasMap(rootDir),
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   };
   config.module = {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.jsx?|tsx?$/,
         loader: 'babel-loader',
         exclude: /node_modules/,
         query: {
           presets: [
+            [
+              '@babel/preset-typescript',
+              {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
+            ],
             [
               '@babel/preset-env',
               {

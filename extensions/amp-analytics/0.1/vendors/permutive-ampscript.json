@@ -1,0 +1,45 @@
+{
+  "transport": {
+    "amp-script": true
+  },
+  "requests": {
+    "onPageLoad": "amp-script:permutiveSdk.savePageContext",
+    "onScroll": "amp-script:permutiveSdk.trackScrollEvent",
+    "onInterval": "amp-script:permutiveSdk.trackEngagedTime"
+  },
+  "triggers": {
+    "trackPageLoad": {
+      "on": "ini-load",
+      "request": "onPageLoad"
+    },
+    "trackScroll": {
+      "on": "scroll",
+      "scrollSpec": {
+        "verticalBoundaries": [
+          5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90,
+          95, 100
+        ]
+      },
+      "request": "onScroll"
+    },
+    "trackTimeOnPage": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 5,
+        "immediate": false,
+        "maxTimerLength": 600
+      },
+      "request": "onInterval"
+    }
+  },
+  "extraUrlParams": {
+    "type": "amp",
+    "title": "${title}",
+    "domain": "${canonicalHost}",
+    "url": "${canonicalUrl}",
+    "referrer": "${documentReferrer}",
+    "user_agent": "${userAgent}",
+    "pageHeight": "${scrollHeight}",
+    "verticalScrollBoundary": "${verticalScrollBoundary}"
+  }
+}

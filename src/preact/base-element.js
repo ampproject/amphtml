@@ -106,22 +106,22 @@ const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
  * }} API_TYPE
  */
 export class PreactBaseElement extends BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static R1() {
     return true;
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static requiresShadowDom() {
     return this['usesShadowDom'];
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static usesLoading() {
     return this['loadable'];
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return !this.usesLoading();
   }
@@ -749,17 +749,22 @@ export class PreactBaseElement extends BaseElement {
     // Add AmpContext with renderable/playable proeprties.
     const v = <WithAmpContext {...this.context_}>{comp}</WithAmpContext>;
 
-    if (this.hydrationPending_) {
-      this.hydrationPending_ = false;
-      hydrate(v, container);
-    } else {
-      const replacement = lightDomTag
-        ? childElementByAttr(container, RENDERED_ATTR)
-        : null;
-      if (replacement) {
-        replacement[RENDERED_PROP] = true;
+    try {
+      if (this.hydrationPending_) {
+        this.hydrationPending_ = false;
+        hydrate(v, container);
+      } else {
+        const replacement = lightDomTag
+          ? childElementByAttr(container, RENDERED_ATTR)
+          : null;
+        if (replacement) {
+          replacement[RENDERED_PROP] = true;
+        }
+        render(v, container, replacement ?? undefined);
       }
-      render(v, container, replacement ?? undefined);
+    } catch (err) {
+      this.renderDeferred_?.reject(err);
+      throw err;
     }
 
     // Dispatch the DOM_UPDATE event when rendered in the light DOM.

@@ -1,5 +1,5 @@
 import {devAssert} from '#core/assert';
-import {removeElement} from '#core/dom';
+import {removeElement, toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {closest, closestAncestorElementBySelector} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
@@ -149,7 +149,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = renderPageAttachmentUI(
-        this.storyEl_,
+        this.pageEl_,
         this.element
       );
 
@@ -340,11 +340,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @param {boolean} isActive
    */
   setOpenAttachmentActive(isActive) {
-    if (isActive) {
-      this.openAttachmentEl_.setAttribute('active', '');
-    } else {
-      this.openAttachmentEl_.removeAttribute('äctive');
-    }
+    toggleAttribute(this.openAttachmentEl_, 'active', isActive);
   }
 
   /**
