@@ -346,7 +346,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       result = await esbuild.build({
         entryPoints: [entryPoint],
         bundle: true,
-        sourcemap: true,
+        sourcemap: 'external',
         sourceRoot: path.dirname(destFile),
         sourcesContent: !!argv.full_sourcemaps,
         outfile: destFile,
