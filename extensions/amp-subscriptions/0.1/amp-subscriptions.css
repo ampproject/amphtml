@@ -72,10 +72,6 @@ amp-subscriptions-dialog {
   transition: transform 0.3s ease-in;
 }
 
-amp-subscriptions-dialog.i-amphtml-subs-amp-story-dialog {
-  border-radius: 16px 16px 0px 0px;
-}
-
 .i-amphtml-subs-dialog-close-button {
   position: absolute;
   width: 28px;

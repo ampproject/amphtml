@@ -170,7 +170,9 @@ export class SubscriptionService {
           // Make the dialog with round corners for AMP Story.
           const doc = this.ampdoc_.getRootNode();
           const dialogWrapperEl = doc.querySelector('amp-subscriptions-dialog');
-          dialogWrapperEl.classList.add('i-amphtml-subs-amp-story-dialog');
+          dialogWrapperEl.classList.add(
+            'i-amphtml-story-subscriptions-dialog-wrapper'
+          );
         }
         // Delegates the platform selection and activation call if is story.
         this.startAuthorizationFlow_(!isStory /** shouldActivatePlatform */);
