@@ -73,7 +73,7 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-dot:before {
-  animation: animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+  animation: animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animate-in-duration) forwards, dot-pulse-before 2.5s 1.5s infinite !important;
 }
 
 @keyframes animate-in-sequence-dot-before {
@@ -91,6 +91,22 @@ amp-story-shopping-tag {
   100% {}
 }
 
+@keyframes dot-pulse-before {
+  0% {
+    animation-timing-function: cubic-bezier(.83,0,.71,.99);
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(.8);
+  }         
+  90% {
+    transform: scale(1);
+  }  
+  100% {
+    transform: scale(1);
+  }  
+}
+
 .i-amphtml-amp-story-shopping-tag-dot:after {
   content: '' !important;
   position: absolute !important;
@@ -102,7 +118,7 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-dot:after {
-  animation: animate-in-sequence-dot-after var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+  animation: animate-in-sequence-dot-after var(--i-amphtml-shopping-tag-animate-in-duration) forwards, dot-pulse-after 2.5s 1.8s infinite !important;
 }
 
 @keyframes animate-in-sequence-dot-after {
@@ -117,6 +133,22 @@ amp-story-shopping-tag {
   60% {}
   60.001% {}
   100% {}
+}
+
+@keyframes dot-pulse-after {
+  0% {
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(.8);
+  }         
+  90% {
+    transform: scale(1);
+  }  
+  100% {
+    transform: scale(1);
+  }
 }
 
 .i-amphtml-amp-story-shopping-tag-pill {
