@@ -494,78 +494,80 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     });
   });
 
-  it('should use the inlined source for the first video in the story instead of sending an XHR request', async () => {
-    // Set up an inlined source response for the first video in the story
-    const storyEl = createStoryForInlineResponseTesting();
-    env.win.document.body.appendChild(storyEl);
-    setUpInlinedVideoResponse();
+  describe('web stories: inlined video', async () => {
+    it('should use the inlined source for the first video in the story instead of sending an XHR request', async () => {
+      // Set up an inlined source response for the first video in the story
+      const storyEl = createStoryForInlineResponseTesting();
+      env.win.document.body.appendChild(storyEl);
+      setUpInlinedVideoResponse();
 
-    const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
-    // Fetch the sources for the first video in the story
-    const videoEl = env.win.document.getElementById('video1');
-    await fetchCachedSources(videoEl, env.ampdoc);
+      // Fetch the sources for the first video in the story
+      const videoEl = env.win.document.getElementById('video1');
+      await fetchCachedSources(videoEl, env.ampdoc);
 
-    const addedSources = videoEl.querySelectorAll('source');
-    expect(xhrSpy).to.have.not.been.called();
-    expect(addedSources).to.have.lengthOf(1); // obtained from inlined source
-  });
+      const addedSources = videoEl.querySelectorAll('source');
+      expect(xhrSpy).to.have.not.been.called();
+      expect(addedSources).to.have.lengthOf(1); // obtained from inlined source
+    });
 
-  it('should send an XHR request for any video that is not the very first one within the story', async () => {
-    // Set up an inlined source response for the first video in the story
-    const storyEl = createStoryForInlineResponseTesting();
-    env.win.document.body.appendChild(storyEl);
-    setUpInlinedVideoResponse();
+    it('should send an XHR request for any video that is not the very first one within the story', async () => {
+      // Set up an inlined source response for the first video in the story
+      const storyEl = createStoryForInlineResponseTesting();
+      env.win.document.body.appendChild(storyEl);
+      setUpInlinedVideoResponse();
 
-    const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
-    // Fetch the sources for the second video on the first story page
-    const videoEl2 = env.win.document.getElementById('video2');
-    await fetchCachedSources(videoEl2, env.ampdoc);
+      // Fetch the sources for the second video on the first story page
+      const videoEl2 = env.win.document.getElementById('video2');
+      await fetchCachedSources(videoEl2, env.ampdoc);
 
-    // Fetch the sources for the first video on the second story page
-    const videoEl3 = env.win.document.getElementById('video3');
-    await fetchCachedSources(videoEl3, env.ampdoc);
+      // Fetch the sources for the first video on the second story page
+      const videoEl3 = env.win.document.getElementById('video3');
+      await fetchCachedSources(videoEl3, env.ampdoc);
 
-    expect(xhrSpy).to.have.been.calledWith(
-      'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
-    );
-    expect(xhrSpy).to.have.been.calledWith(
-      'https://example-com.cdn.ampproject.org/mbv/s/example.com/video3.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
-    );
-  });
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video3.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+    });
 
-  it('should send XHR request if inline config not provided', async () => {
-    // Create story without setting an inlined source response
-    const storyEl = createStoryForInlineResponseTesting();
-    env.win.document.body.appendChild(storyEl);
+    it('should send XHR request if inline config not provided', async () => {
+      // Create story without setting an inlined source response
+      const storyEl = createStoryForInlineResponseTesting();
+      env.win.document.body.appendChild(storyEl);
 
-    const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
-    // Fetch the sources for the first video in the story
-    const videoEl = env.win.document.getElementById('video1');
-    await fetchCachedSources(videoEl, env.ampdoc);
+      // Fetch the sources for the first video in the story
+      const videoEl = env.win.document.getElementById('video1');
+      await fetchCachedSources(videoEl, env.ampdoc);
 
-    expect(xhrSpy).to.have.been.calledWith(
-      'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
-    );
-  });
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+    });
 
-  it('should send XHR request if inlined video response fails to parse', async () => {
-    // Set up an inlined source response for the first video in the story
-    const storyEl = createStoryForInlineResponseTesting();
-    env.win.document.body.appendChild(storyEl);
-    setUpInlinedVideoResponse(true /* responseShouldFailToParse */);
+    it('should send XHR request if inlined video response fails to parse', async () => {
+      // Set up an inlined source response for the first video in the story
+      const storyEl = createStoryForInlineResponseTesting();
+      env.win.document.body.appendChild(storyEl);
+      setUpInlinedVideoResponse(true /* responseShouldFailToParse */);
 
-    const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
-    // Fetch the sources for the first video in the story
-    const videoEl = env.win.document.getElementById('video1');
-    await fetchCachedSources(videoEl, env.ampdoc);
+      // Fetch the sources for the first video in the story
+      const videoEl = env.win.document.getElementById('video1');
+      await fetchCachedSources(videoEl, env.ampdoc);
 
-    expect(xhrSpy).to.have.been.calledWith(
-      'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
-    );
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+      );
+    });
   });
 
   function createVideo(children) {
