@@ -16,12 +16,14 @@ export const ClassNames = {
 
   // Generic
   SLIDE: 'amp-carousel-slide',
+  SHOW_SLIDE: 'amp-carousel-slide',
 
   // SlideScroll Carousel
   SLIDESCROLL_CAROUSEL: 'i-amphtml-slidescroll',
   SLIDE_WRAPPER: 'i-amphtml-slide-item',
   SLIDES_CONTAINER: 'i-amphtml-slides-container',
   SLIDES_CONTAINER_NOSNAP: 'i-amphtml-slidescroll-no-snap',
+  SLIDES_ITEM_SHOW: 'i-amphtml-slide-item-show',
 
   // Scrollable Carousel
   SCROLLABLE_CONTAINER: 'i-amphtml-scrollable-carousel-container',
@@ -220,7 +222,7 @@ function buildSlideScrollCarousel(element) {
 
   /** @type {HTMLDivElement[]} */
   const slideWrappers = [];
-  slides.forEach((slide) => {
+  slides.forEach((slide, i) => {
     slide.classList.add(ClassNames.SLIDE);
 
     const slideWrapper = doc.createElement('div');
@@ -229,6 +231,8 @@ function buildSlideScrollCarousel(element) {
     slidesContainer.appendChild(slideWrapper);
     slideWrappers.push(slideWrapper);
   });
+  // Initialize the first slide to be shown.
+  slides[0]?.classList.add(ClassNames.SLIDES_ITEM_SHOW);
 
   return {slidesContainer, slides, slideWrappers};
 }
