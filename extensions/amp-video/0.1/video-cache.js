@@ -207,7 +207,7 @@ function getCacheUrlService(videoEl, ampdoc) {
  */
 function requestCachedVideoSources(videoEl, ampdoc) {
   const {win} = ampdoc;
-  if (shouldUseInlineVideoResponse(videoEl)) {
+  if (shouldUseInlineVideoResponse(videoEl, win)) {
     const inlineResponseEl = win.document.getElementById(
       'amp-google-video-cache-response'
     );
@@ -244,12 +244,12 @@ function requestCachedVideoSources(videoEl, ampdoc) {
  * Returns `true` if the video's inline response should be used instead of
  * issuing an XHR request.
  * @param {!Element} videoEl
+ * @param {!Window} win
  * @return {boolean}
  */
-function shouldUseInlineVideoResponse(videoEl) {
+function shouldUseInlineVideoResponse(videoEl, win) {
   // Google video cache inlines the first video of the first web story page.
-  return matches(
-    videoEl,
-    `amp-story-page:first-of-type amp-video:first-of-type`
-  );
+  const firstVid =
+      win.document.querySelector('amp-story-page:first-of-type amp-video');
+  return videoEl === firstVid;
 }
