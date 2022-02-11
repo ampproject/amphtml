@@ -7,7 +7,7 @@ const glob = require('globby');
  */
 async function findJsSourceFilename(nameWithoutExtension, cwd) {
   const [filename] = await glob(
-    `${nameWithoutExtension}.{js,ts,tsx}`,
+    `${nameWithoutExtension}.{js,jsx,ts,tsx}`,
     cwd ? {cwd} : undefined
   );
   return filename;
