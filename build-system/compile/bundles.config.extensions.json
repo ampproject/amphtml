@@ -488,6 +488,10 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-google-read-aloud-player",
+    "version": "0.1"
+  },
+  {
     "name": "amp-gwd-animation",
     "version": "0.1",
     "latestVersion": "0.1",
