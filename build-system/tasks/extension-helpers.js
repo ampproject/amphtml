@@ -622,6 +622,19 @@ async function buildBentoCss(name, versions, minifiedAmpCss) {
 }
 
 /**
+ * @param {string} nameWithoutExtension
+ * @param {?string|void} cwd
+ * @return {Promise<string|undefined>}
+ */
+async function findJsSourceFilename(nameWithoutExtension, cwd) {
+  const [filename] = await fastGlob(
+    `${nameWithoutExtension}.{js,ts,tsx}`,
+    cwd ? {cwd} : undefined
+  );
+  return filename;
+}
+
+/**
  * @param {string} extDir
  * @param {string} name
  * @param {!Object} options
@@ -732,11 +745,22 @@ async function findJsSourceFilename(nameWithoutExtension, cwd) {
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(dir, name, options) {
+<<<<<<< HEAD
   const entryPoint = await findJsSourceFilename(path.join(dir, name));
   const remapDependencies = getRemapBentoDependencies(
     entryPoint,
     options.minify
   );
+=======
+  const remapDependencies = getRemapBentoDependencies(options.minify);
+
+  // Delete entry point from dependency mapping
+  const entryPoint = await findJsSourceFilename(path.join(dir, name));
+  if (entryPoint) {
+    delete remapDependencies[`./${entryPoint}`];
+  }
+
+>>>>>>> 6bef82d552 (🏗 Allow `bento-mustache` build)
   await buildExtensionJs(dir, name, {
     ...options,
     externalDependencies: [...new Set(Object.values(remapDependencies))],
@@ -825,7 +849,11 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
  */
 async function buildExtensionJs(dir, name, options) {
   const isLatest = legacyLatestVersions[options.name] === options.version;
-  const {version, filename = `${name}.js`, wrapper = 'extension'} = options;
+  const {
+    filename = await findJsSourceFilename(name, dir),
+    version,
+    wrapper = 'extension',
+  } = options;
 
   const wrapperOrFn = wrappers[wrapper];
   if (!wrapperOrFn) {
