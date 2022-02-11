@@ -5,6 +5,14 @@ var BentoListDef = {};
 
 /**
  * @typedef {{
+ *   loadMoreSpinner: string,
+ *   loadMoreIcon: string,
+ * }}
+ */
+BentoListDef.CssStyles;
+
+/**
+ * @typedef {{
  *   src: (string|undefined),
  *   fetchItems?: (function(): Promise<*>),
  *   itemsKey?: string,
@@ -13,10 +21,11 @@ var BentoListDef = {};
  *   loadMore?: 'manual' | 'none' | 'auto',
  *   loadMoreBookmark?: string,
  *   viewportBuffer?: number,
- *   template?: function(): PreactDef.Renderable,
- *   wrapperTemplate?: function(): PreactDef.Renderable,
- *   loadingTemplate?: function(): PreactDef.Renderable,
- *   errorTemplate?: function(): PreactDef.Renderable,
+ *   template?: function(item: *): PreactDef.Renderable,
+ *   wrapperTemplate?: function(list: PreactDef.Renderable): PreactDef.Renderable,
+ *   loadingTemplate?: function(styles: BentoListDef.CssStyles): PreactDef.Renderable,
+ *   loadMoreTemplate?: function(styles: BentoListDef.CssStyles): PreactDef.Renderable,
+ *   errorTemplate?: function(styles: BentoListDef.CssStyles): PreactDef.Renderable,
  * }}
  */
 BentoListDef.Props;

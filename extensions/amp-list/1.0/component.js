@@ -17,18 +17,29 @@ import {xhrUtils} from '#preact/utils/xhr';
 
 import {useStyles} from './component.jss';
 
-const defaultItemTemplate = (item) => <p>{String(item)}</p>;
+const defaultItemTemplate = (item) => <div>{String(item)}</div>;
 const defaultWrapperTemplate = (list) => <div>{list}</div>;
-const defaultErrorTemplate = (error) => `Error: ${error.message}`;
-const defaultLoadMoreTemplate = (styles) => (
-  <button>
-    Load more <span class={styles.loadMoreIcon} />
-  </button>
+const defaultErrorTemplate = (styles, unusedError) => (
+  <div>
+    {'Unable to Load More '}
+    <button>
+      <label>
+        <span class={styles.loadMoreIcon} /> Retry
+      </label>
+    </button>
+  </div>
+);
+const defaultLoadMoreTemplate = () => (
+  <div>
+    <button>
+      <label>See More</label>
+    </button>
+  </div>
 );
 const defaultLoadingTemplate = (styles) => (
-  <span>
-    Loading <span class={styles.loadMoreSpinner} />
-  </span>
+  <div>
+    <span class={styles.loadMoreSpinner} />
+  </div>
 );
 
 /**
@@ -193,8 +204,8 @@ export function BentoListWithRef(
     <ContainWrapper aria-live="polite" {...rest}>
       <Fragment test-id="contents">
         {showResults && augment(wrapperTemplate(list), {'role': 'list'})}
-        {error && errorTemplate?.(error)}
-        {showLoading && loadingTemplate?.(styles)}
+        {error && errorTemplate(styles, error)}
+        {showLoading && loadingTemplate(styles)}
         {showLoadMore &&
           augment(loadMoreTemplate(styles), {
             onClick: () => loadMore(),
