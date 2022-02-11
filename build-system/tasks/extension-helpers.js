@@ -435,7 +435,6 @@ async function buildExtension(name, version, hasCss, options) {
   }
 
   if (hasCss) {
-    await fs.mkdir('build/css', {recursive: true});
     await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
@@ -515,6 +514,7 @@ async function buildNpmBentoWebComponentCss(extDir, options) {
     await buildExtensionCss(extDir, options.name, options.version, options);
   }
   const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
+  await fs.ensureDir(path.dirname(destFilepath));
   await fs.copyFile(srcFilepath, destFilepath);
 }
 

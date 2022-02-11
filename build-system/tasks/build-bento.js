@@ -139,7 +139,10 @@ async function buildBentoComponent(name, version, hasCss, options = {}) {
   /** @type {Promise<void>[]} */
   const promises = [];
   if (hasCss) {
+<<<<<<< HEAD
     await mkdir('build/css', {recursive: true});
+=======
+>>>>>>> 1f6a4e7913 (fix css)
     promises.push(buildExtensionCss(componentsDir, name, version, options));
     if (options.compileOnlyCss) {
       return Promise.all(promises);
