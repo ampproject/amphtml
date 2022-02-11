@@ -85,6 +85,7 @@ describes.realWin(
         // matches remote.json
         {
           'art': {
+            'productUrl': 'https://www.google.com',
             'productId': 'art',
             'productTitle': 'Abstract Art',
             'productBrand': 'V. Artsy',
@@ -92,10 +93,16 @@ describes.realWin(
             'productPriceCurrency': 'JPY',
             'productImages': [
               {
-                'url': 'https://source.unsplash.com/BdVQU-NDtA8/500x500',
+                'url':
+                  '/examples/visual-tests/amp-story/img/shopping/shopping-product.jpg',
                 'alt': 'Abstract Art',
               },
             ],
+            'aggregateRating': {
+              'ratingValue': '4.4',
+              'reviewCount': '89',
+              'reviewUrl': 'https://www.google.com',
+            },
           },
         };
       env.sandbox.stub(Services, 'xhrFor').returns({

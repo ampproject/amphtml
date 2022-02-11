@@ -24,12 +24,12 @@ const PAGE_TAG = 'amp-facebook-page';
 const TYPE = 'facebook';
 
 class AmpFacebookBase extends setSuperClass(BaseElement, AmpPreactBaseElement) {
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     return createLoaderLogo(element);
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();
     const {win} = ampdoc;
