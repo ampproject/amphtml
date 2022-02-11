@@ -246,6 +246,9 @@ amp-story-shopping-tag {
   background-position: center !important;
   flex-shrink: 0 !important;
   margin-inline-end: 4px !important;
+}
+
+[active] .i-amphtml-amp-story-shopping-tag-pill-image {
   animation: animate-out-sequence-pill-image var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
 }
 
@@ -284,14 +287,14 @@ amp-story-shopping-tag {
 }
 
 @keyframes animate-in-sequence-text {
-  0% {}
-  20% {}
-  40% {}
+  0% {
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    opacity: 0; 
+  }
   60% {
     animation-timing-function: cubic-bezier(.85, 0, .15, 1);
     opacity: 0;
   }
-  60.001% {}
   100% {
     opacity: 1;
   }
