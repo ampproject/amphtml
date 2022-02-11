@@ -171,7 +171,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       'amp-story-page'
     );
 
-    const shoppingDataPerPage = Object.entries(shoppingData[pageElement.id]);
+    const shoppingDataPerPage = Object.values(shoppingData[pageElement.id]);
 
     let productForPdp = shoppingData.activeProductData;
     // If no active product and only one product on page, use the one product for the PDP.
