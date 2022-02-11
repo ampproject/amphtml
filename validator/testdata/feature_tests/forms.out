@@ -51,9 +51,7 @@ FAIL
 |          <span>Your email</span>
 |          <input type="email" name="email" required>
 |        </label>
-|        <input type="image" value="https://site.example/image.example">
->>       ^~~~~~~~~
-feature_tests/forms.html:53:6 The mandatory attribute 'src' is missing in tag 'input'. (see https://amp.dev/documentation/components/amp-form/)
+|        <input type="image" src="https://site.example/image.example">
 |        <input type="button" name="button">
 |        <input type="submit" value="Subscribe">
 |      </fieldset>
