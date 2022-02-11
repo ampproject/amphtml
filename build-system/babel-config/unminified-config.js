@@ -55,7 +55,7 @@ function getUnminifiedConfig() {
     compact: false,
     plugins: unminifiedPlugins,
     presets: unminifiedPresets,
-    sourceMaps: true,
+    sourceMaps: 'both',
     assumptions: {
       constantSuper: true,
       noClassCalls: true,

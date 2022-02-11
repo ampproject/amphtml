@@ -3,16 +3,23 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const path = require('path');
+const Remapping = require('@ampproject/remapping');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
 
 /**
- * @param {Object} map
+ * @param {Array<Object|string>} mapChain
  * @param {*} options
+ * @return {Object}
  */
-function massageSourcemaps(map, options) {
+function massageSourcemaps(mapChain, options) {
+  const map = remapping(mapChain, () => null, !argv.full_sourcemaps);
   map.sourceRoot = getSourceRoot(options);
   if (map.file) {
     map.file = path.basename(map.file);
   }
+  return map;
 }
 
 /**

@@ -22,10 +22,6 @@ const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
 const {resolvePath} = require('../babel-config/import-resolver');
 const babel = require('@babel/core');
-const Remapping = require('@ampproject/remapping');
-
-/** @type {Remapping.default} */
-const remapping = /** @type {*} */ (Remapping);
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -240,6 +236,7 @@ function maybeToNpmEsmName(name) {
  * @param {string} destFilename
  */
 function handleBundleError(err, continueOnError, destFilename) {
+  throw err;
   let message = err.toString();
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
@@ -329,11 +326,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
-  const babelMaps = new Map();
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
-    /* enableCache */ true,
-    {babelMaps}
+    /* enableCache */ true
   );
   const plugins = [babelPlugin];
 
@@ -384,19 +379,20 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     let map = JSON.parse(
       result.outputFiles.find(({path}) => path.endsWith('.map')).text
     );
-
-    const sourceMapComment = `//# sourceMappingURL=${destFilename}.map`;
+    const mapChain = [map];
 
     if (options.outputFormat === 'nomodule-loader') {
       const result = await babel.transformAsync(code, {
         caller: {name: 'nomodule-loader'},
-        inputSourceMap: map,
         filename: destFile,
         sourceRoot: path.dirname(destFile),
         sourceMaps: true,
       });
-      code = `${result?.code}${sourceMapComment}`;
-      map = result?.map;
+      if (!result) {
+        throw new Error('failed to babel');
+      }
+      code = result.code;
+      mapChain.unshift(result.map);
     }
 
     if (options.minify) {
@@ -404,14 +400,14 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         // toplevel clobbers the global namespace when with nomodule-loader
         toplevel: options.outputFormat !== 'nomodule-loader',
       });
-      code = `${result.code}${sourceMapComment}`;
-      map = remapping([result.map, map], () => null, !argv.full_sourcemaps);
+      code = result.code;
+      mapChain.unshift(result.map);
     }
+    map = massageSourcemaps(mapChain, options);
 
-    massageSourcemaps(map, options);
-
+    const sourceMapComment = `\n//# sourceMappingURL=${destFilename}.map`;
     await Promise.all([
-      fs.outputFile(destFile, code),
+      fs.outputFile(destFile, `${code}\n${sourceMapComment}`),
       fs.outputJson(`${destFile}.map`, map),
     ]);
 
