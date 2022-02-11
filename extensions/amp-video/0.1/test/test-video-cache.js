@@ -496,8 +496,6 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
   describe('web stories: inlined video', async () => {
     it('should use the inlined source for the first video in the story instead of sending an XHR request', async () => {
-      console.log('test #1');
-
       // Set up an inlined source response for the first video in the story
       const storyEl = createStoryForInlineVideoTesting();
       env.win.document.body.appendChild(storyEl);
@@ -510,7 +508,9 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.not.been.called;
-      const inlinedSources = videoEl.querySelectorAll('source[src="inlined_video_response.mp4"]');
+      const inlinedSources = videoEl.querySelectorAll(
+        'source[src="inlined_video_response.mp4"]'
+      );
       expect(inlinedSources).to.have.lengthOf(1);
     });
 
@@ -599,7 +599,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     const storyPageEl2 = env.win.document.createElement('amp-story-page');
     storyEl.appendChild(storyPageEl1);
     storyEl.appendChild(storyPageEl2);
-    
+
     // Place two videos on the first page. video #1 is nested more deeply than
     // video #2, but it should still be considered the first video on the page.
     const gridLayerEl = env.win.document.createElement('amp-story-grid-layer');
