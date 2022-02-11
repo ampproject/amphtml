@@ -746,6 +746,7 @@ async function findJsSourceFilename(nameWithoutExtension, cwd) {
  */
 async function buildBentoExtensionJs(dir, name, options) {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const entryPoint = await findJsSourceFilename(path.join(dir, name));
   const remapDependencies = getRemapBentoDependencies(
     entryPoint,
@@ -755,12 +756,21 @@ async function buildBentoExtensionJs(dir, name, options) {
   const remapDependencies = getRemapBentoDependencies(options.minify);
 
   // Delete entry point from dependency mapping
+=======
+>>>>>>> 86a9d60956 (structure)
   const entryPoint = await findJsSourceFilename(path.join(dir, name));
-  if (entryPoint) {
-    delete remapDependencies[`./${entryPoint}`];
+  if (!entryPoint) {
+    throw new Error(`No source file matching ${dir}/${name} was found`);
   }
+<<<<<<< HEAD
 
 >>>>>>> 6bef82d552 (🏗 Allow `bento-mustache` build)
+=======
+  const remapDependencies = getRemapBentoDependencies(
+    entryPoint,
+    options.minify
+  );
+>>>>>>> 86a9d60956 (structure)
   await buildExtensionJs(dir, name, {
     ...options,
     externalDependencies: [...new Set(Object.values(remapDependencies))],
