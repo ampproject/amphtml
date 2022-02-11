@@ -512,12 +512,11 @@ async function buildNpmBentoWebComponentCss(extDir, options) {
   const srcFilepath = path.resolve(
     `build/css/${getBentoName(options.name)}-${options.version}.css`
   );
-  if (await fs.pathExists(srcFilepath)) {
-    const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
-    await fs.copyFile(srcFilepath, destFilepath);
-  } else {
+  if (!(await fs.pathExists(srcFilepath))) {
     await buildExtensionCss(extDir, options.name, options.version, options);
   }
+  const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
+  await fs.copyFile(srcFilepath, destFilepath);
 }
 
 /** @type {TransformCache<string>} */
