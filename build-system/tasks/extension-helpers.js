@@ -42,6 +42,7 @@ const {
   getRemapBentoDependencies,
   getRemapBentoNpmDependencies,
 } = require('../compile/bento-remap');
+const {findJsSourceFilename} = require('../common/fs');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -632,17 +633,18 @@ async function buildBentoCss(name, versions, minifiedAmpCss) {
 async function buildNpmBinaries(extDir, name, options) {
   let {npm} = options;
   if (npm === true) {
+    const preactEntryPoint = await findJsSourceFilename('component', extDir);
     npm = {
-      preact: {
-        entryPoint: 'component.js',
+      preact: preactEntryPoint && {
+        entryPoint: preactEntryPoint,
         outfile: 'component-preact.js',
         external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
         remap: {'preact/dom': 'preact'},
         wrapper: '',
       },
-      react: {
+      react: preactEntryPoint && {
+        entryPoint: preactEntryPoint,
         babelCaller: options.minify ? 'react-minified' : 'react-unminified',
-        entryPoint: 'component.js',
         outfile: 'component-react.js',
         external: ['react', 'react-dom'],
         remap: {
@@ -666,7 +668,7 @@ async function buildNpmBinaries(extDir, name, options) {
     };
     if (options.useBentoCore) {
       // remap all shared modules to the @bentoproject/core package and declare as external
-      npm.bento.remap = getRemapBentoNpmDependencies();
+      npm.bento.remap = await getRemapBentoNpmDependencies();
       npm.bento.external = Object.values(npm.bento.remap);
     }
   }
@@ -709,7 +711,7 @@ function buildBinaries(extDir, binaries, options) {
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(dir, name, options) {
-  const remapDependencies = getRemapBentoDependencies(options.minify);
+  const remapDependencies = await getRemapBentoDependencies(options.minify);
   await buildExtensionJs(dir, name, {
     ...options,
     externalDependencies: Object.values(remapDependencies),
@@ -733,26 +735,26 @@ async function buildBentoExtensionJs(dir, name, options) {
 async function getBentoBuildFilename(dir, name, mode, options) {
   const modes = {
     'standalone': {
-      filename: `${name}.js`,
+      basename: name,
       toExport: false,
     },
     'web-component': {
-      filename: 'web-component.js',
+      basename: 'web-component',
       toExport: true,
     },
   };
-  const {filename, toExport} = modes[mode];
-  if (!filename) {
+  const {basename, toExport} = modes[mode];
+  if (!basename) {
     throw new Error(
       `Unknown bento mode "${mode}" (${name}:${options.version})\n` +
         `Expected one of: ${Object.keys(modes).join(', ')}`
     );
   }
-
-  if (await fs.pathExists(`${dir}/${filename}`)) {
-    return filename;
+  const existingFilename = await findJsSourceFilename(basename, dir);
+  if (existingFilename) {
+    return existingFilename;
   }
-  const generatedFilename = `build/${filename}`;
+  const generatedFilename = `build/${basename}.js`;
   const generatedOutputFilename = `${dir}/${generatedFilename}`;
   const generatedSource = generateBentoEntryPointSource(
     name,
@@ -798,7 +800,11 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
  */
 async function buildExtensionJs(dir, name, options) {
   const isLatest = legacyLatestVersions[options.name] === options.version;
-  const {version, filename = `${name}.js`, wrapper = 'extension'} = options;
+  const {
+    version,
+    filename = await findJsSourceFilename(name, dir),
+    wrapper = 'extension',
+  } = options;
 
   const wrapperOrFn = wrappers[wrapper];
   if (!wrapperOrFn) {

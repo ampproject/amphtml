@@ -4,12 +4,12 @@ const {resolvePath} = require('../babel-config/import-resolver');
 const {lstatSync, readFileSync} = require('fs-extra');
 const {once} = require('../common/once');
 const {bentoBundles} = require('./bundles.config');
-const glob = require('globby');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
+const {findJsSourceFilename} = require('../common/fs');
 
 /**
  * @param {string} path
- * @return {?string}
+ * @return {Promise<string|undefined>}
  */
 function resolveExactModuleFile(path) {
   let unaliased = resolvePath(path);
@@ -20,11 +20,7 @@ function resolveExactModuleFile(path) {
   } catch {
     // lstat fails if not directory
   }
-  const result = glob.sync(`${unaliased}.{js,jsx,ts,tsx}`);
-  if (result.length !== 1) {
-    return null;
-  }
-  return result[0];
+  return findJsSourceFilename(unaliased);
 }
 
 /**
@@ -54,7 +50,7 @@ function getExportAll(filename) {
 let MappingEntryDef;
 
 /** @return {MappingEntryDef[]}}} */
-const getAllRemappings = once(() => {
+const getAllRemappings = once(async () => {
   // IMPORTANT: cdn mappings must start with ./dist/
 
   // Determine modules to import from shared bento.mjs.
@@ -73,25 +69,29 @@ const getAllRemappings = once(() => {
   }));
 
   return /** @type {MappingEntryDef[]} */ (
-    [...coreBentoRemappings, ...componentRemappings]
-      .map(({cdn, npm, source}) => {
-        const resolved = resolveExactModuleFile(source);
-        if (resolved) {
-          return {source: resolved, cdn, npm};
-        }
-      })
-      .filter(Boolean)
+    (
+      await Promise.all(
+        [...coreBentoRemappings, ...componentRemappings].map(
+          async ({cdn, npm, source}) => {
+            const resolved = await resolveExactModuleFile(source);
+            if (resolved) {
+              return {source: resolved, cdn, npm};
+            }
+          }
+        )
+      )
+    ).filter(Boolean)
   );
 });
 
 /**
  * @param {'npm'|'cdn'} type
- * @return {{[string: string]: string}}
+ * @return {Promise<{[string: string]: string}>}
  */
-function getRemappings(type) {
+async function getRemappings(type) {
   return /** @type {{[string: string]: string}} */ (
     Object.fromEntries(
-      getAllRemappings()
+      (await getAllRemappings())
         .filter((mapping) => mapping[type])
         .map((mapping) => [mapping.source, mapping[type]])
     )
@@ -101,15 +101,15 @@ function getRemappings(type) {
 /**
  * Remaps imports from source to externals.
  * @param {string} isMinified
- * @return {{[string: string]: string}}
+ * @return {Promise<{[string: string]: string}>}
  */
-function getRemapBentoDependencies(isMinified) {
-  const remappings = getRemappings('cdn');
+async function getRemapBentoDependencies(isMinified) {
+  const remappings = await getRemappings('cdn');
   if (isMinified) {
     return remappings;
   }
   return Object.fromEntries(
-    Object.entries(isMinified).map(([source, cdn]) => [
+    Object.entries(remappings).map(([source, cdn]) => [
       source,
       cdn.replace('.mjs', '.max.mjs'),
     ])
@@ -118,9 +118,11 @@ function getRemapBentoDependencies(isMinified) {
 
 /**
  * Remaps imports from source to externals.
- * @return {{[string: string]: string}}
+ * @return {Promise<{[string: string]: string}>}
  */
-const getRemapBentoNpmDependencies = once(() => getRemappings('npm'));
+function getRemapBentoNpmDependencies() {
+  return getRemappings('npm');
+}
 
 module.exports = {
   getRemapBentoDependencies,
