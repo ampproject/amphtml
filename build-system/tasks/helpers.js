@@ -236,6 +236,7 @@ function maybeToNpmEsmName(name) {
  * @param {string} destFilename
  */
 function handleBundleError(err, continueOnError, destFilename) {
+  throw err;
   let message = err.toString();
   if (err.stack) {
     // Drop the node_modules call stack, which begins with '    at'.
@@ -375,7 +376,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     const {outputFiles} = result;
 
     let code = outputFiles.find(({path}) => !path.endsWith('.map')).text;
-    let map = JSON.parse(
+    const map = JSON.parse(
       result.outputFiles.find(({path}) => path.endsWith('.map')).text
     );
     const mapChain = [map];
@@ -402,12 +403,11 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       code = result.code;
       mapChain.unshift(result.map);
     }
-    map = massageSourcemaps(mapChain, options);
 
     const sourceMapComment = `\n//# sourceMappingURL=${destFilename}.map`;
     await Promise.all([
       fs.outputFile(destFile, `${code}\n${sourceMapComment}`),
-      fs.outputJson(`${destFile}.map`, map),
+      fs.outputJson(`${destFile}.map`, massageSourcemaps(mapChain, options)),
     ]);
 
     await finishBundle(destDir, destFilename, options, startTime);

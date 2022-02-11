@@ -77,8 +77,16 @@ function getEsbuildBabelPlugin(
         {filter: /\.(cjs|mjs|js|jsx|ts|tsx)$/, namespace: ''},
         async (file) => {
           const filename = file.path;
-          const babelOptions =
-            babel.loadOptions({caller: {name: callerName}, filename}) || {};
+          const babelOptions = /** @type {*} */ (
+            babel.loadOptions({caller: {name: callerName}, filename}) || {}
+          );
+
+          if ('sourceMap' in babelOptions) {
+            throw new Error('use sourceMaps option instead of sourceMap');
+          }
+          if (babelOptions.sourceMaps === true) {
+            babelOptions.sourceMaps = 'both';
+          }
 
           const {contents, hash} = await batchedRead(filename);
           const rehash = md5(
