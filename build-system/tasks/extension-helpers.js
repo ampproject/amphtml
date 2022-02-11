@@ -641,7 +641,6 @@ async function findJsSourceFilename(nameWithoutExtension, cwd) {
  * @return {!Promise}
  */
 async function buildNpmBinaries(extDir, name, options) {
-<<<<<<< HEAD
   let {npm} = options;
   if (npm === true) {
     npm = {
@@ -651,29 +650,6 @@ async function buildNpmBinaries(extDir, name, options) {
         external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
         remap: {'preact/dom': 'preact'},
         wrapper: '',
-=======
-  // Some component bundles may not have a React implementation, like
-  // bento-mustache
-  const preactEntryPoint = await findJsSourceFilename('component', extDir);
-  const npm = {
-    preact: preactEntryPoint && {
-      entryPoint: preactEntryPoint,
-      outfile: 'component-preact.js',
-      external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
-      remap: {'preact/dom': 'preact'},
-      wrapper: '',
-    },
-    react: preactEntryPoint && {
-      babelCaller: options.minify ? 'react-minified' : 'react-unminified',
-      entryPoint: preactEntryPoint,
-      outfile: 'component-react.js',
-      external: ['react', 'react-dom'],
-      remap: {
-        'preact': 'react',
-        '.*/preact/compat': 'react',
-        'preact/hooks': 'react',
-        'preact/dom': 'react-dom',
->>>>>>> ce594ff3dc (oops)
       },
       react: {
         babelCaller: options.minify ? 'react-minified' : 'react-unminified',
