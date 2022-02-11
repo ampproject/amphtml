@@ -37,19 +37,11 @@ const fs = require('fs-extra');
 const klaw = require('klaw');
 const path = require('path');
 const tar = require('tar');
-const MagicStringPkg = require('magic-string');
-const RemappingPkg = require('@ampproject/remapping');
 const {cyan, green, red, yellow} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
 const {log} = require('../../common/logging');
 const {MINIFIED_TARGETS} = require('../prepend-global');
 const {VERSION} = require('../../compile/internal-version');
-
-/** @type {MagicStringPkg.default} */
-const MagicString = /** @type {*} */ (MagicStringPkg);
-
-/** @type {RemappingPkg.default} */
-const remapping = /** @type {*} */ (RemappingPkg);
 
 // Flavor config for the base flavor type.
 /** @type {DistFlavorDef} */
@@ -487,51 +479,25 @@ async function prependConfig_(outputDir) {
     );
 
     allPrependPromises.push(
-      ...targetsToConfig.flatMap(async (target) => {
+      ...targetsToConfig.map(async (target) => {
         const targetPath = path.join(rtvPath, target.file);
         const channelConfig = JSON.stringify({
           ...channelPartialConfig,
           ...target.config,
         });
 
-        const [contents, map] = await Promise.all([
-          readMagicString(targetPath),
-          fs.readFile(`${targetPath}.map`, 'utf8'),
-        ]);
+        const contents = await fs.readFile(targetPath, 'utf8');
 
-        contents.prepend(`self.AMP_CONFIG=${channelConfig};/*AMP_CONFIG*/`);
-        const prependedMap = contents.generateDecodedMap({
-          hires: true,
-          source: targetPath,
-        });
-
-        const remapped = remapping(
-          [/** @type {*} */ (prependedMap), map],
-          () => null,
-          !argv.full_sourcemaps
+        return fs.writeFile(
+          targetPath,
+          `self.AMP_CONFIG=${channelConfig};/*AMP_CONFIG*/${contents}`
         );
-
-        return [
-          fs.writeFile(targetPath, contents.toString()),
-          fs.writeJson(`${targetPath}.map`, remapped),
-        ];
       })
     );
   }
   await Promise.all(allPrependPromises);
 
   logSeparator_();
-}
-
-/**
- * @param {string} file
- * @return {Promise<MagicString>}
- */
-async function readMagicString(file) {
-  const contents = await fs.readFile(file, 'utf-8');
-  return new /** @type {*} */ (MagicString)(contents, {
-    filename: path.basename(file),
-  });
 }
 
 /**
