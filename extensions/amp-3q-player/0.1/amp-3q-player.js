@@ -209,7 +209,7 @@ class Amp3QPlayer extends AMP.BaseElement {
    * @param {number} newHeight
    */
   resize_(newHeight) {
-    this.attemptChangeHeight(newHeight);
+    this.attemptChangeHeight(newHeight).catch(() => {});
   }
 
   /**
