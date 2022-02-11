@@ -10,24 +10,19 @@ import {
   ShoppingConfigDataDef,
 } from '../../amp-story/1.0/amp-story-store-service';
 
-/**
- * Max Length of strings allowed in shopping config.
- */
-export const MAX_STR_LEN = 100;
-
 /** @const {!Object<string, !Array<function>>} */
 export const PRODUCT_VALIDATION_CONFIG = {
   /* Required Attrs */
-  'productId': [validateRequired, validateStringLength],
-  'productTitle': [validateRequired, validateStringLength],
+  'productId': [validateRequired, validateString],
+  'productTitle': [validateRequired, validateString],
   'productPrice': [validateRequired, validateNumber],
   'productImages': [validateRequired, validateURLs],
-  'productPriceCurrency': [validateRequired, validateStringLength],
+  'productPriceCurrency': [validateRequired, validateString],
   /* Optional Attrs */
-  'productColor': [validateStringLength],
-  'productSize': [validateStringLength],
+  'productColor': [validateString],
+  'productSize': [validateString],
   'productIcon': [validateURLs],
-  'productTagText': [validateStringLength],
+  'productTagText': [validateString],
   'reviewsData': [validateURLs],
   'ctaText': [validateNumber],
   'shippingText': [validateNumber],
@@ -56,11 +51,9 @@ export function validateRequired(field, value = null) {
  * @param {string} field
  * @param {?string=} str
  */
-export function validateStringLength(field, str = null) {
-  if (str?.length > MAX_STR_LEN) {
-    throw Error(
-      `Length of ${field} exceeds max length: ${str.length} > ${MAX_STR_LEN}`
-    );
+export function validateString(field, str = null) {
+  if (typeof str !== 'string') {
+    throw Error(`${field} ${str} is not a string.`);
   }
 }
 

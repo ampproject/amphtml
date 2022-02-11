@@ -10,13 +10,12 @@ import {
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {
-  MAX_STR_LEN,
   PRODUCT_VALIDATION_CONFIG,
   getShoppingConfig,
   storeShoppingConfig,
   validateNumber,
   validateRequired,
-  validateStringLength,
+  validateString,
   validateURLs,
 } from '../amp-story-shopping-config';
 
@@ -92,11 +91,7 @@ describes.realWin(
             'productPrice': 1200.0,
             'productPriceCurrency': 'JPY',
             'productImages': [
-              {
-                'url':
-                  '/examples/visual-tests/amp-story/img/shopping/shopping-product.jpg',
-                'alt': 'Abstract Art',
-              },
+              '/examples/visual-tests/amp-story/img/shopping/shopping-product.jpg',
             ],
             'aggregateRating': {
               'ratingValue': '4.4',
@@ -176,14 +171,13 @@ describes.realWin(
       }
     });
 
-    it('test config string too long', async () => {
+    it('test config is a string', async () => {
       const invalidConfig = {
         'items': [
           {
             'productId': 'city-pop',
-            'productTitle':
-              'Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, Very, long string',
-            /* Very, Very, Very long string value - will not pass string length test */
+            'productTitle': 123,
+            /* Not a string, will fail string type test */
             'productPrice': 19,
             'productPriceCurrency': 'JPY',
             'productImages': [
@@ -196,12 +190,12 @@ describes.realWin(
 
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(() => {
-        validateStringLength(
+        validateString(
           'productTitle',
           invalidConfig['items'][0]['productTitle']
         );
       }).to.throw(
-        `Length of productTitle exceeds max length: ${invalidConfig['items'][0]['productTitle'].length} > ${MAX_STR_LEN}`
+        `productTitle ${invalidConfig['items'][0]['productTitle']} is not a string.`
       );
     });
 
