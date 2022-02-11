@@ -1,5 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
@@ -105,15 +106,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       () => {
         this.shoppingTagEl_.classList.toggle(
           'i-amphtml-amp-story-shopping-tag-inner-flipped',
-          shouldFlip
-        );
-
-        const dotEl = this.shoppingTagEl_.querySelector(
-          '.i-amphtml-amp-story-shopping-tag-dot'
-        );
-
-        dotEl.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-dot-flipped',
           shouldFlip
         );
 
@@ -233,7 +225,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
-    const pageElement = this.element.parentElement.parentElement;
+    const pageElement = closestAncestorElementBySelector(
+      this.element,
+      'amp-story-page'
+    );
 
     this.tagData_ =
       shoppingData[pageElement.id][

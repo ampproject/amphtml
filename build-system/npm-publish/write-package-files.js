@@ -104,9 +104,10 @@ async function getDescription() {
 
 /**
  * Write package.json
+ * @param {{useBentoCore: boolean}} options
  * @return {Promise<void>}
  */
-async function writePackageJson() {
+async function writePackageJson({useBentoCore}) {
   const version = getSemver(extensionVersion, ampVersion);
   if (!valid(version) || ampVersion.length != 13) {
     log(
@@ -165,6 +166,9 @@ async function writePackageJson() {
       react: '^17.0.0',
     },
   };
+  if (useBentoCore) {
+    json.dependencies = {'@bentoproject/core': `tbd`};
+  }
 
   try {
     await writeFile(`${dir}/package.json`, JSON.stringify(json, null, 2));
@@ -227,7 +231,7 @@ async function main() {
   if (await shouldSkip()) {
     return;
   }
-  await writePackageJson();
+  await writePackageJson({useBentoCore: false});
   await writeReactJs();
   await copyCssToRoot();
 }
