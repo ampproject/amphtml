@@ -12,6 +12,7 @@ amp-story-shopping-tag {
   height: 36px !important;
 
   --i-amphtml-shopping-tag-bg-color: rgba(125, 125, 125, 0.75);
+  --i-amphtml-shopping-tag-animate-in-duration: 2s;
 }
 
 .i-amphtml-amp-story-shopping-product-tag-text {
@@ -50,31 +51,84 @@ amp-story-shopping-tag {
 }
 
 .i-amphtml-amp-story-shopping-tag-dot {
-  width: 16px !important;
-  height: 16px !important;
+  --dot-size: 16px;
+  width: var(--dot-size) !important;
+  height: var(--dot-size) !important;
   border-radius: 100% !important;
-  background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   position: relative !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   margin: 0 4px !important;
   flex-shrink: 0 !important;
-  flex-shrink: 0 !important;
 }
 
 .i-amphtml-amp-story-shopping-tag-dot:before {
-  border-radius: 100% !important;
   content: '' !important;
-  width: 8px !important;
-  height: 8px !important;
-  background: white !important;
+  position: absolute;
+  border-radius: inherit !important;
+  width: var(--dot-size) !important;
+  height: var(--dot-size) !important;
+  background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
+}
+
+[active] .i-amphtml-amp-story-shopping-tag-dot:before {
+  animation: animate-in-dot-before var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+}
+
+@keyframes animate-in-dot-before {
+  0% {
+    transform: scale(0);
+  }
+  20% {
+    transform: scale(0);
+  }
+  45% {
+    transform: scale(1);
+  }
+  50% {
+  }
+  50.001% {
+  }
+  100% {
+  }
+}
+
+.i-amphtml-amp-story-shopping-tag-dot:after {
+  content: '' !important;
+  position: absolute !important;
+  border-radius: inherit !important;
+  width: calc(var(--dot-size) * .5) !important;
+  height: calc(var(--dot-size) * .5) !important;
   box-shadow: 0px 2px 8px var(--i-amphtml-shopping-tag-bg-color) !important;
+  background-color: white !important;
+}
+
+[active] .i-amphtml-amp-story-shopping-tag-dot:after {
+  animation: animate-in-dot-after var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+}
+
+@keyframes animate-in-dot-after {
+  0% {
+    transform: scale(0);
+  }
+  20% {
+  }
+  45% {
+    transform: scale(1);
+  }
+  50% {
+  }
+  50.001% {
+  }
+  100% {
+  }
 }
 
 .i-amphtml-amp-story-shopping-tag-pill {
-  --circle-size: 24px;
+  --icon-size: 24px;
   --pill-padding-inline-start: 6px;
+  --pill-transfrom-origin-at-image-center: calc(var(--pill-padding-inline-start) + var(--icon-size) * .5);
   display: flex !important;
   align-items: center !important;
   border-radius: 18px !important;
@@ -83,34 +137,32 @@ amp-story-shopping-tag {
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   padding-inline-start: var(--pill-padding-inline-start) !important;
   padding-inline-end: 12px;
-  transform-origin: 16px;
-}
-
-[dir=rtl] .i-amphtml-amp-story-shopping-tag-pill {
-  transform-origin: calc(100% - 16px);
+  transform-origin: var(--pill-transfrom-origin-at-image-center);
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-pill {
-  animation: animate-in 2s forwards !important;
+  animation: animate-in-pill var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
 }
 
 [active][dir=rtl] .i-amphtml-amp-story-shopping-tag-pill {
-  animation: animate-in-rtl 2s forwards !important;
+  animation: animate-in-pill-rtl var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+  /* Transform orign from center of icon (right side) in RTL. */
+  transform-origin: calc(100% - var(--pill-transfrom-origin-at-image-center));
 }
 
-@keyframes animate-in {
+@keyframes animate-in-pill {
   0% {
-    clip-path: circle(calc(var(--circle-size) * .5) at calc(var(--pill-padding-inline-start) + var(--circle-size) * .5));
+    clip-path: circle(calc(var(--icon-size) * .5) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5));
     transform: scale(0);
   }
   20% {
-    clip-path: circle(calc(var(--circle-size) * .5) at calc(var(--pill-padding-inline-start) + var(--circle-size) * .5));
+    clip-path: circle(calc(var(--icon-size) * .5) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5));
   }
   45% {
     transform: scale(1);
   }
   50% {
-    clip-path: circle(calc(var(--circle-size) * .5 + var(--pill-padding-inline-start)) at calc(var(--pill-padding-inline-start) + var(--circle-size) * .5));
+    clip-path: circle(calc(var(--icon-size) * .5 + var(--pill-padding-inline-start)) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5));
   }
   50.001% {
     clip-path: inset(0px calc(100% - 36px) 0px 0px round 30px);
@@ -120,19 +172,19 @@ amp-story-shopping-tag {
   }
 }
 
-@keyframes animate-in-rtl {
+@keyframes animate-in-pill-rtl {
   0% {
-    clip-path: circle(calc(var(--circle-size) * 0.5) at calc(100% - var(--pill-padding-inline-start) - var(--circle-size) * .5));
+    clip-path: circle(calc(var(--icon-size) * 0.5) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5));
     transform: scale(0);
   }
   20% {
-    clip-path: circle(calc(var(--circle-size) * 0.5) at calc(100% - var(--pill-padding-inline-start) - var(--circle-size) * .5));
+    clip-path: circle(calc(var(--icon-size) * 0.5) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5));
   }
   45% {
     transform: scale(1);
   }
   50% {
-    clip-path: circle(calc(var(--circle-size) * 0.5 + var(--pill-padding-inline-start)) at calc(100% - var(--pill-padding-inline-start) - var(--circle-size) * .5));
+    clip-path: circle(calc(var(--icon-size) * 0.5 + var(--pill-padding-inline-start)) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5));
   }
   50.001% {
     clip-path: inset(0px 0px 0px calc(100% - 36px) round 30px);
@@ -149,8 +201,8 @@ amp-story-shopping-tag {
 }
 
 .i-amphtml-amp-story-shopping-tag-pill-image {
-  width: var(--circle-size) !important;
-  height: var(--circle-size) !important;
+  width: var(--icon-size) !important;
+  height: var(--icon-size) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
