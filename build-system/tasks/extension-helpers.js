@@ -41,6 +41,7 @@ const {
   getRemapBentoDependencies,
   getRemapBentoNpmDependencies,
 } = require('../compile/bento-remap');
+const {findJsSourceFilename} = require('../common/fs');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -619,19 +620,6 @@ async function buildBentoCss(name, versions, minifiedAmpCss) {
   const bentoName = getBentoName(name);
   const renamedCss = await renameSelectorsToBentoTagNames(minifiedAmpCss);
   await writeCssBinaries(bentoName, versions, renamedCss);
-}
-
-/**
- * @param {string} nameWithoutExtension
- * @param {?string|void} cwd
- * @return {Promise<string|undefined>}
- */
-async function findJsSourceFilename(nameWithoutExtension, cwd) {
-  const [filename] = await fastGlob(
-    `${nameWithoutExtension}.{js,ts,tsx}`,
-    cwd ? {cwd} : undefined
-  );
-  return filename;
 }
 
 /**
