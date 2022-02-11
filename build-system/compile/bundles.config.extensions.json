@@ -12,18 +12,12 @@
   {
     "name": "amp-access",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-access-fewcents",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-access-laterpay",
@@ -31,10 +25,7 @@
       "0.1",
       "0.2"
     ],
-    "latestVersion": "0.2",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.2"
   },
   {
     "name": "amp-access-poool",
@@ -44,26 +35,17 @@
   {
     "name": "amp-access-scroll",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-accordion",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-accordion",
     "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-action-macro",
@@ -73,10 +55,7 @@
   {
     "name": "amp-ad",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-ad-custom",
@@ -131,10 +110,7 @@
   {
     "name": "amp-addthis",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-analytics",
@@ -159,24 +135,17 @@
   {
     "name": "amp-apester-media",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-app-banner",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-app-banner",
     "version": "1.0",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -199,25 +168,18 @@
   {
     "name": "amp-autocomplete",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-base-carousel",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-base-carousel",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -252,7 +214,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -260,10 +221,7 @@
   {
     "name": "amp-byside-content",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-cache-url",
@@ -281,10 +239,7 @@
       "0.1",
       "0.2"
     ],
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-connatix-player",
@@ -294,10 +249,7 @@
   {
     "name": "amp-consent",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-crypto-polyfill",
@@ -315,7 +267,6 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "hasCss": true,
       "bento": true
     }
   },
@@ -330,8 +281,7 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "bento": true,
-      "hasCss": true
+      "bento": true
     }
   },
   {
@@ -345,25 +295,18 @@
     "latestVersion": "0.1",
     "options": {
       "npm": true,
-      "bento": true,
-      "hasCss": true
+      "bento": true
     }
   },
   {
     "name": "amp-date-picker",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-delight-player",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-dynamic-css-classes",
@@ -380,7 +323,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -403,7 +345,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -426,17 +367,13 @@
   {
     "name": "amp-fit-text",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-fit-text",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -449,10 +386,7 @@
   {
     "name": "amp-form",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-fx-collection",
@@ -462,10 +396,7 @@
   {
     "name": "amp-fx-flying-carpet",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-geo",
@@ -503,10 +434,7 @@
   {
     "name": "amp-gwd-animation",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-hulu",
@@ -523,7 +451,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -541,26 +468,17 @@
   {
     "name": "amp-image-lightbox",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-image-slider",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-image-viewer",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-imgur",
@@ -570,17 +488,13 @@
   {
     "name": "amp-inline-gallery",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-inline-gallery",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -593,17 +507,13 @@
   {
     "name": "amp-instagram",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-instagram",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -631,10 +541,7 @@
   {
     "name": "amp-jwplayer",
     "version": "1.0",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-kaltura-player",
@@ -644,17 +551,13 @@
   {
     "name": "amp-lightbox",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-lightbox",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -662,17 +565,13 @@
   {
     "name": "amp-lightbox-gallery",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-lightbox-gallery",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -685,41 +584,28 @@
   {
     "name": "amp-list",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-live-list",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-loader",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-mathml",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-mathml",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "bento": true,
       "npm": true
     }
@@ -727,10 +613,7 @@
   {
     "name": "amp-mega-menu",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-megaphone",
@@ -763,10 +646,7 @@
   {
     "name": "amp-nested-menu",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-next-page",
@@ -774,10 +654,7 @@
       "0.1",
       "1.0"
     ],
-    "latestVersion": "1.0",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "1.0"
   },
   {
     "name": "amp-nexxtv-player",
@@ -792,10 +669,7 @@
   {
     "name": "amp-onetap-google",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-ooyala-player",
@@ -810,26 +684,17 @@
   {
     "name": "amp-pan-zoom",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-pinterest",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-playbuzz",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-position-observer",
@@ -849,10 +714,7 @@
   {
     "name": "amp-recaptcha-input",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-redbull-player",
@@ -882,25 +744,18 @@
   {
     "name": "amp-script",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-selector",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-selector",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -919,17 +774,13 @@
       "0.1",
       "0.2"
     ],
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-sidebar",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -954,17 +805,13 @@
   {
     "name": "amp-social-share",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-social-share",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -979,7 +826,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -997,34 +843,22 @@
   {
     "name": "amp-sticky-ad",
     "version": "1.0",
-    "latestVersion": "1.0",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "1.0"
   },
   {
     "name": "amp-story",
     "version": "1.0",
-    "latestVersion": "1.0",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "1.0"
   },
   {
     "name": "amp-story-360",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-auto-ads",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-auto-analytics",
@@ -1034,95 +868,61 @@
   {
     "name": "amp-story-captions",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-dev-tools",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-education",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-interactive",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-page-attachment",
-    "version": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "version": "0.1"
   },
   {
     "name": "amp-story-panning-media",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-player",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-share-menu",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-shopping",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-story-subscriptions",
-    "version": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "version": "0.1"
   },
   {
     "name": "amp-stream-gallery",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-stream-gallery",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -1130,26 +930,17 @@
   {
     "name": "amp-subscriptions",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-subscriptions-google",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-tiktok",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-timeago",
@@ -1161,7 +952,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -1169,10 +959,7 @@
   {
     "name": "amp-truncate-text",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-twitter",
@@ -1184,7 +971,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -1192,10 +978,7 @@
   {
     "name": "amp-user-notification",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-video",
@@ -1207,7 +990,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -1215,10 +997,7 @@
   {
     "name": "amp-video-docking",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-video-iframe",
@@ -1230,7 +1009,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -1257,7 +1035,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -1280,10 +1057,7 @@
   {
     "name": "amp-web-push",
     "version": "0.1",
-    "latestVersion": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-wistia-player",
@@ -1295,7 +1069,6 @@
     "version": "1.0",
     "latestVersion": "1.0",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }
@@ -1315,7 +1088,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
       "npm": true,
       "bento": true
     }

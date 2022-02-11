@@ -90,11 +90,10 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  * @typedef {{
  *   name?: string,
  *   version?: string,
- *   hasCss?: boolean,
  *   loadPriority?: string,
  *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
- *   wrapper?: string,
+ *   wrapper?: 'none',
  * }}
  */
 const ExtensionOptionDef = {};
@@ -127,7 +126,7 @@ const adVendors = [];
  * @param {!Object} extensionsObject
  */
 function declareExtension(name, version, options, extensionsObject) {
-  const defaultOptions = {hasCss: false, npm: undefined};
+  const defaultOptions = {npm: undefined};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach((v) => {
     extensionsObject[`${name}-${v}`] = {
@@ -368,7 +367,7 @@ async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
   let o = {...options};
   o = Object.assign(o, e);
-  await buildExtension(e.name, e.version, e.hasCss, o);
+  await buildExtension(e.name, e.version, o);
 }
 
 /**
@@ -378,16 +377,15 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {string} extDir
  * @param {string} name
  * @param {string} version
- * @param {boolean} hasCss
  * @param {?Object} options
  * @return {Promise<void>}
  */
-async function watchExtension(extDir, name, version, hasCss, options) {
+async function watchExtension(extDir, name, version, options) {
   /**
    * Steps to run when a watched file is modified.
    */
   function watchFunc() {
-    buildExtension(name, version, hasCss, {
+    buildExtension(name, version, {
       ...options,
       continueOnError: true,
       isRebuild: true,
@@ -418,30 +416,22 @@ async function watchExtension(extDir, name, version, hasCss, options) {
  *     the extensions directory and the name of the JS and optional CSS file.
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
- * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
  * @return {!Promise<void>}
  */
-async function buildExtension(name, version, hasCss, options) {
+async function buildExtension(name, version, options) {
   options = options || {};
-  if (options.compileOnlyCss && !hasCss) {
-    return;
-  }
   const extDir = 'extensions/' + name + '/' + version;
 
   // Use a separate watcher for css and jison compilation.
   // The watcher within compileJs recompiles the JS.
   if (options.watch) {
-    await watchExtension(extDir, name, version, hasCss, options);
+    await watchExtension(extDir, name, version, options);
   }
 
-  if (hasCss) {
-    mkdirSync('build');
-    mkdirSync('build/css');
-    await buildExtensionCss(extDir, name, version, options);
-    if (options.compileOnlyCss) {
-      return;
-    }
+  await buildExtensionCss(extDir, name, version, options);
+  if (options.compileOnlyCss) {
+    return;
   }
 
   await compileJison(`${extDir}/**/*.jison`);

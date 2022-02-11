@@ -75,22 +75,15 @@ function getBentoComponentsToBuild(preBuild = false) {
  * @param {string} componentsDir
  * @param {string} name
  * @param {string} version
- * @param {boolean} hasCss
  * @param {?Object} options
  * @return {Promise<void>}
  */
-async function watchBentoComponent(
-  componentsDir,
-  name,
-  version,
-  hasCss,
-  options
-) {
+async function watchBentoComponent(componentsDir, name, version, options) {
   /**
    * Steps to run when a watched file is modified.
    */
   function watchFunc() {
-    buildBentoComponent(name, version, hasCss, {
+    buildBentoComponent(name, version, {
       ...options,
       continueOnError: true,
       isRebuild: true,
@@ -120,30 +113,22 @@ async function watchBentoComponent(
  *     the components directory and the name of the JS and optional CSS file.
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
- * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
  * @return {!Promise<void|void[]>}
  */
-async function buildBentoComponent(name, version, hasCss, options = {}) {
-  options.npm = true;
+async function buildBentoComponent(name, version, options = {}) {
   options.bento = true;
 
-  if (options.compileOnlyCss && !hasCss) {
-    return;
-  }
   const componentsDir = `src/bento/components/${name}/${version}`;
   if (options.watch) {
-    await watchBentoComponent(componentsDir, name, version, hasCss, options);
+    await watchBentoComponent(componentsDir, name, version, options);
   }
 
   /** @type {Promise<void>[]} */
   const promises = [];
-  if (hasCss) {
-    mkdirSync('build/css', {recursive: true});
-    promises.push(buildExtensionCss(componentsDir, name, version, options));
-    if (options.compileOnlyCss) {
-      return Promise.all(promises);
-    }
+  promises.push(buildExtensionCss(componentsDir, name, version, options));
+  if (options.compileOnlyCss) {
+    return Promise.all(promises);
   }
   promises.push(buildNpmBinaries(componentsDir, name, options));
   promises.push(buildNpmCss(componentsDir, options));
@@ -153,7 +138,6 @@ async function buildBentoComponent(name, version, hasCss, options = {}) {
   if (options.isRebuild) {
     return Promise.all(promises);
   }
-
   promises.push(buildBentoExtensionJs(componentsDir, name, options));
   return Promise.all(promises);
 }
@@ -173,7 +157,7 @@ async function buildBentoComponents(options) {
       (component) => options.compileOnlyCss || toBuild.includes(component.name)
     )
     .map((component) =>
-      buildBentoComponent(component.name, component.version, component.hasCss, {
+      buildBentoComponent(component.name, component.version, {
         ...options,
         ...component,
       })

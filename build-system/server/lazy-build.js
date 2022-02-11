@@ -186,7 +186,7 @@ async function preBuildExtensions() {
  */
 function doBuildBentoComponent(components, name, options) {
   const component = components[name];
-  return buildComponent(component.name, component.version, component.hasCss, {
+  return buildComponent(component.name, component.version, {
     ...options,
     ...component,
   });

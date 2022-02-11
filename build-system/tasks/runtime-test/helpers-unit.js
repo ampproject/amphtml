@@ -2,13 +2,13 @@
 
 const fastGlob = require('fast-glob');
 const fs = require('fs');
+const glob = require('globby');
 const listImportsExports = require('list-imports-exports');
 const minimatch = require('minimatch');
 const path = require('path');
 const testConfig = require('../../test-configs/config');
 const {cyan, green} = require('kleur/colors');
 const {execOrDie} = require('../../common/exec');
-const {EXTENSIONS, maybeInitializeExtensions} = require('../extension-helpers');
 const {gitDiffNameOnlyMain} = require('../../common/git');
 const {isCiBuild} = require('../../common/ci');
 const {log, logLocalDev} = require('../../common/logging');
@@ -36,38 +36,17 @@ function isLargeRefactor() {
  */
 function extractCssJsFileMap() {
   execOrDie('amp css', {'stdio': 'ignore'});
-  maybeInitializeExtensions(EXTENSIONS);
-  /** @type {Object<string, string>} */
-  const cssJsFileMap = {};
 
-  /**
-   * Adds an entry that maps a CSS file to a JS file
-   *
-   * @param {Object} cssData
-   * @param {string} cssBinaryName
-   * @param {Object} cssJsFileMap
-   */
-  function addCssJsEntry(cssData, cssBinaryName, cssJsFileMap) {
-    const cssFilePath =
-      `extensions/${cssData['name']}/${cssData['version']}/` +
-      `${cssBinaryName}.css`;
-    const jsFilePath = `build/${cssBinaryName}-${cssData['version']}.css.js`;
-    cssJsFileMap[cssFilePath] = jsFilePath;
-  }
-
-  Object.keys(EXTENSIONS).forEach((extension) => {
-    const cssData = EXTENSIONS[extension];
-    if (cssData['hasCss']) {
-      addCssJsEntry(cssData, cssData['name'], cssJsFileMap);
-      if (cssData.hasOwnProperty('cssBinaries')) {
-        const cssBinaries = cssData['cssBinaries'];
-        cssBinaries.forEach((cssBinary) => {
-          addCssJsEntry(cssData, cssBinary, cssJsFileMap);
-        });
-      }
-    }
-  });
-  return cssJsFileMap;
+  return Object.fromEntries(
+    glob
+      .sync(['extensions/*/*/*.css', 'src/bento/components/*/*/*.css'])
+      .map((cssFilePath) => {
+        const version = path.basename(path.dirname(cssFilePath));
+        const basename = path.basename(cssFilePath, '.css');
+        const jsFilePath = `build/${basename}-${version}.css.js`;
+        return [cssFilePath, jsFilePath];
+      })
+  );
 }
 
 /**

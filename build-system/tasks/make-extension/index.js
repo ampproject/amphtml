@@ -39,7 +39,7 @@ let ArgsDef;
  * @typedef {{
  *   name: string,
  *   version: string,
- *   options?: ({hasCss?: boolean, wrapper?: string}|undefined)
+ *   options?: ({wrapper?: string}|undefined)
  * }}
  */
 let BundleDef;
@@ -269,9 +269,6 @@ async function makeExtensionFromTemplates(
     version,
   };
 
-  if (!options.nocss) {
-    bundleConfig.options = {...bundleConfig.options, hasCss: true};
-  }
   if (options.bento) {
     bundleConfig.options = {...bundleConfig.options, bento: true};
   }

@@ -206,7 +206,7 @@ test('insertExtensionBundlesConfig inserts new entry', (t) =>
         {
           version: 'x',
           name: 'a',
-          options: {hasCss: true},
+          options: {npm: true},
         },
         destination
       );
@@ -220,7 +220,7 @@ test('insertExtensionBundlesConfig inserts new entry', (t) =>
         {
           name: 'a',
           version: 'x',
-          options: {hasCss: true},
+          options: {npm: true},
         },
         {
           name: 'z',
