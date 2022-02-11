@@ -436,8 +436,6 @@ async function buildExtension(name, version, hasCss, options) {
   }
 
   if (hasCss) {
-    mkdirSync('build');
-    mkdirSync('build/css');
     await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
