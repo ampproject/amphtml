@@ -928,7 +928,9 @@ export class AmpSlideScroll extends AMP.BaseElement {
   hideRestOfTheSlides_(indexArr) {
     const {noOfSlides_} = this;
     for (let i = 0; i < noOfSlides_; i++) {
-      if (!this.slideWrappers_[i].classList.contains(ClassNames.SLIDES_ITEM_SHOW)) {
+      if (
+        !this.slideWrappers_[i].classList.contains(ClassNames.SLIDES_ITEM_SHOW)
+      ) {
         continue;
       }
       // Hide if not shown anymore

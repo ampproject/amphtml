@@ -222,7 +222,7 @@ function buildSlideScrollCarousel(element) {
 
   /** @type {HTMLDivElement[]} */
   const slideWrappers = [];
-  slides.forEach((slide, i) => {
+  slides.forEach((slide) => {
     slide.classList.add(ClassNames.SLIDE);
 
     const slideWrapper = doc.createElement('div');
