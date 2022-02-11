@@ -49,7 +49,7 @@ function getExportAll(filename) {
 /** @typedef {{source: string, cdn?: string, npm?: string}} */
 let MappingEntryDef;
 
-/** @return {MappingEntryDef[]}}} */
+/** @return {Promise<MappingEntryDef[]>}}} */
 const getAllRemappings = once(async () => {
   // IMPORTANT: cdn mappings must start with ./dist/
 
@@ -72,17 +72,23 @@ const getAllRemappings = once(async () => {
     (
       await Promise.all(
         [...coreBentoRemappings, ...componentRemappings].map(
-          async ({cdn, npm, source}) => {
-            const resolved = await resolveExactModuleFile(source);
-            if (resolved) {
-              return {source: resolved, cdn, npm};
-            }
-          }
+          resolveMappingEntry
         )
       )
     ).filter(Boolean)
   );
 });
+
+/**
+ * @param {MappingEntryDef} mapping
+ * @return {Promise<MappingEntryDef|undefined>}
+ */
+async function resolveMappingEntry({cdn, npm, source}) {
+  const resolved = await resolveExactModuleFile(source);
+  if (resolved) {
+    return {source: resolved, cdn, npm};
+  }
+}
 
 /**
  * @param {'npm'|'cdn'} type
