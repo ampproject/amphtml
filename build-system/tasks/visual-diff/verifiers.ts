@@ -122,7 +122,7 @@ export async function waitForPageLoad(
  *
  * Timeout is set to CSS_SELECTOR_RETRY_MS * CSS_SELECTOR_RETRY_ATTEMPTS ms.
  *
- * @param page page to check the visibility of elements in.
+ * @param page to check the visibility of elements in.
  * @param selector CSS selector for elements to wait on.
  * @param options with key 'visible' OR 'hidden' set to true.
  * @param timeoutMillis how long to retry.
