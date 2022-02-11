@@ -20,7 +20,7 @@ import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
 const TAG = 'amp-brightcove';
 
 class AmpBrightcove extends setSuperClass(BaseElement, AmpVideoBaseElement) {
-  /** @override @nocollapse */
+  /** @override  */
   static getPreconnects() {
     return ['https://players.brightcove.net'];
   }

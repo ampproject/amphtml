@@ -18,7 +18,7 @@ import {getMode} from '../../../src/mode';
 const TYPE = 'facebook';
 
 class AmpFacebook extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     return createLoaderLogo(element);
   }
@@ -76,7 +76,7 @@ class AmpFacebook extends AMP.BaseElement {
     const embedAs = this.element.getAttribute('data-embed-as');
     if (embedAs === 'comment') {
       this.user().warn(
-        'BENTO-LIGTHBOX',
+        'AMP-FACEBOOK',
         'Embedded Comments have been deprecated: https://developers.facebook.com/docs/plugins/embedded-comments'
       );
       return;

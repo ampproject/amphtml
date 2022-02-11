@@ -108,15 +108,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
           shouldFlip
         );
 
-        const dotEl = this.shoppingTagEl_.querySelector(
-          '.i-amphtml-amp-story-shopping-tag-dot'
-        );
-
-        dotEl.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-dot-flipped',
-          shouldFlip
-        );
-
         this.shoppingTagEl_.classList.toggle(
           'i-amphtml-amp-story-shopping-tag-visible',
           true
