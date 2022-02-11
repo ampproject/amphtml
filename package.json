@@ -16,10 +16,10 @@
   },
   "dependencies": {
     "@ampproject/animations": "0.2.2",
-    "@ampproject/bento-compiler": "0.0.13",
+    "@ampproject/bento-compiler": "0.0.14",
     "@ampproject/toolbox-cache-url": "2.8.0",
     "@ampproject/viewer-messaging": "1.1.2",
-    "@ampproject/worker-dom": "0.32.1",
+    "@ampproject/worker-dom": "0.33.0",
     "@webcomponents/webcomponentsjs": "2.6.0",
     "dompurify": "2.3.3",
     "google-closure-library": "20210808.0.0",
