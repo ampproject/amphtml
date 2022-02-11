@@ -342,7 +342,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   renderPlpTemplate_(shoppingDataForPage) {
-    console.log(shoppingDataForPage);
     return (
       <div class="i-amphtml-amp-story-shopping-plp">
         <div class="i-amphtml-amp-story-shopping-plp-header">
