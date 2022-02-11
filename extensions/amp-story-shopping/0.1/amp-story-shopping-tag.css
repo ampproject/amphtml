@@ -11,9 +11,10 @@ amp-story-shopping-tag {
   min-width: 1px !important;
   height: 36px !important;
 
-  --i-amphtml-shopping-tag-bg-color: rgba(125, 125, 125, 0.75);
-  --i-amphtml-shopping-tag-animate-in-duration: 2s;
-}
+  --i-amphtml-shopping-tag-bg-color: rgba(125, 125, 125, .75) !important;
+  --i-amphtml-shopping-tag-animation-sequence-duration: 2s !important;
+  --i-amphtml-shopping-tag-animate-out-delay: 5s !important;
+ }
 
 .i-amphtml-amp-story-shopping-product-tag-text {
   font-weight: 600 !important;
@@ -51,9 +52,9 @@ amp-story-shopping-tag {
 }
 
 .i-amphtml-amp-story-shopping-tag-dot {
-  --dot-size: 16px;
-  width: var(--dot-size) !important;
-  height: var(--dot-size) !important;
+  --i-amphtml-tag-dot-size: 16px !important;
+  width: var(--i-amphtml-tag-dot-size) !important;
+  height: var(--i-amphtml-tag-dot-size) !important;
   border-radius: 100% !important;
   position: relative !important;
   display: flex !important;
@@ -67,31 +68,30 @@ amp-story-shopping-tag {
   content: '' !important;
   position: absolute !important;
   border-radius: inherit !important;
-  width: var(--dot-size) !important;
-  height: var(--dot-size) !important;
+  width: var(--i-amphtml-tag-dot-size) !important;
+  height: var(--i-amphtml-tag-dot-size) !important;
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-dot:before {
-  animation: animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animate-in-duration) forwards, dot-pulse-before 2.5s 1.5s infinite !important;
+  animation: animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards, 
+    pulse-dot-before 2.5s 1.5s infinite !important;
 }
 
 @keyframes animate-in-sequence-dot-before {
   0% {
-    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
     transform: scale(0);
   }
-  20% {
-  }
-  40% {}
   60% {
     transform: scale(1);
   }
-  60.001% {}
-  100% {}
+  100% {
+    transform: scale(1);
+  }
 }
 
-@keyframes dot-pulse-before {
+@keyframes pulse-dot-before {
   0% {
     animation-timing-function: cubic-bezier(.83,0,.71,.99);
     transform: scale(1);
@@ -111,31 +111,31 @@ amp-story-shopping-tag {
   content: '' !important;
   position: absolute !important;
   border-radius: inherit !important;
-  width: calc(var(--dot-size) * .5) !important;
-  height: calc(var(--dot-size) * .5) !important;
-  box-shadow: 0px 2px 8px var(--i-amphtml-shopping-tag-bg-color) !important;
+  width: calc(var(--i-amphtml-tag-dot-size) * .5) !important;
+  height: calc(var(--i-amphtml-tag-dot-size) * .5) !important;
+  box-shadow: 0 2px 8px var(--i-amphtml-shopping-tag-bg-color) !important;
   background-color: white !important;
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-dot:after {
-  animation: animate-in-sequence-dot-after var(--i-amphtml-shopping-tag-animate-in-duration) forwards, dot-pulse-after 2.5s 1.8s infinite !important;
+  animation: animate-in-sequence-dot-after var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards, 
+    pulse-dot-after 2.5s 1.8s infinite !important;
 }
 
 @keyframes animate-in-sequence-dot-after {
   0% {
-    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
     transform: scale(0);
   }
-  20% {}
   40% {
     transform: scale(1);
   }
-  60% {}
-  60.001% {}
-  100% {}
+  100% {
+    transform: scale(1);
+  }
 }
 
-@keyframes dot-pulse-after {
+@keyframes pulse-dot-after {
   0% {
     animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
     transform: scale(1);
@@ -152,9 +152,9 @@ amp-story-shopping-tag {
 }
 
 .i-amphtml-amp-story-shopping-tag-pill {
-  --icon-size: 24px;
-  --pill-padding-inline-start: 6px;
-  --pill-transfrom-origin-at-image-center: calc(var(--pill-padding-inline-start) + var(--icon-size) * .5);
+  --icon-size: 24px !important;
+  --pill-padding-inline-start: 6px !important;
+  --pill-transfrom-origin-at-image-center: calc(var(--pill-padding-inline-start) + var(--icon-size) * .5) !important;
   display: flex !important;
   align-items: center !important;
   border-radius: 18px !important;
@@ -162,65 +162,67 @@ amp-story-shopping-tag {
   overflow: hidden !important;
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   padding-inline-start: var(--pill-padding-inline-start) !important;
-  padding-inline-end: 12px;
+  padding-inline-end: 12px !important;
   transform-origin: var(--pill-transfrom-origin-at-image-center);
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-pill {
-  animation: animate-in-sequence-pill var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+  animation: animate-in-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards, 
+    animate-out-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
+
+  /* Values that need to change to support RTL. */
+  --clip-path-start-circle-supports-rtl: circle(calc(var(--icon-size) * .5) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5)) !important;
+  --clip-path-end-circle-supports-rtl: circle(calc(var(--icon-size) * .5 + var(--pill-padding-inline-start)) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5)) !important;
+  --clip-path-inset-offset-supports-rtl: inset(0 calc(100% - 36px) 0 0 round 30px) !important;
 }
 
 [active][dir=rtl] .i-amphtml-amp-story-shopping-tag-pill {
-  animation: animate-in-sequence-pill-rtl var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+  --clip-path-start-circle-supports-rtl: circle(calc(var(--icon-size) * .5) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5)) !important;
+  --clip-path-end-circle-supports-rtl: circle(calc(var(--icon-size) * .5 + var(--pill-padding-inline-start)) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5)) !important;
+  --clip-path-inset-offset-supports-rtl: inset(0 0 0 calc(100% - 36px) round 30px) !important;
+
   /* Transform orign from center of icon (right side) in RTL. */
-  transform-origin: calc(100% - var(--pill-transfrom-origin-at-image-center));
+  transform-origin: calc(100% - var(--pill-transfrom-origin-at-image-center)) !important;
 }
 
 @keyframes animate-in-sequence-pill {
   0% {
-    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
-    clip-path: circle(calc(var(--icon-size) * .5) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5));
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    clip-path: var(--clip-path-start-circle-supports-rtl);
     transform: scale(0);
   }
   20% {
-    clip-path: circle(calc(var(--icon-size) * .5) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5));
+    clip-path: var(--clip-path-start-circle-supports-rtl);
   }
   40% {
     transform: scale(1);
   }
   60% {
-    clip-path: circle(calc(var(--icon-size) * .5 + var(--pill-padding-inline-start)) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5));
+    clip-path: var(--clip-path-end-circle-supports-rtl);
   }
   60.001% {
-    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
-    clip-path: inset(0px calc(100% - 36px) 0px 0px round 30px);
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    clip-path: var(--clip-path-inset-offset-supports-rtl);
   }
   100% {
-    clip-path: inset(0px 0px 0px 0px round 30px);
+    clip-path: inset(0 0 0 0 round 30px);
   }
 }
 
-@keyframes animate-in-sequence-pill-rtl {
+@keyframes animate-out-sequence-pill {
   0% {
-    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
-    clip-path: circle(calc(var(--icon-size) * 0.5) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5));
-    transform: scale(0);
-  }
-  20% {
-    clip-path: circle(calc(var(--icon-size) * 0.5) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5));
+    clip-path: inset(0 0 0 0 round 30px);
   }
   40% {
-    transform: scale(1);
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    clip-path: var(--clip-path-inset-offset-supports-rtl);
   }
   60% {
-    clip-path: circle(calc(var(--icon-size) * 0.5 + var(--pill-padding-inline-start)) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5));
-  }
-  60.001% {
-    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
-    clip-path: inset(0px 0px 0px calc(100% - 36px) round 30px);
+    transform: scale(1);
   }
   100% {
-    clip-path: inset(0px 0px 0px 0px round 30px);
+    transform: scale(0);
+    clip-path: var(--clip-path-inset-offset-supports-rtl);
   }
 }
 
@@ -236,14 +238,33 @@ amp-story-shopping-tag {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background-color: rgba(0, 0, 0, 0.6) !important;
+  background-color: rgba(0, 0, 0, .6) !important;
   border-radius: 100% !important;
   flex-shrink: 0 !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg width="12" height="12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.49 5.755 6.24.505a1.16 1.16 0 0 0-.823-.338H1.334A1.17 1.17 0 0 0 .167 1.333v4.084c0 .32.128.612.344.828l5.25 5.25c.21.21.502.338.823.338.32 0 .612-.128.822-.344l4.083-4.083a1.14 1.14 0 0 0 .345-.823c0-.32-.134-.618-.345-.828ZM2.208 3.083a.874.874 0 1 1 0-1.75.874.874 0 1 1 0 1.75Z" fill="#fff"/></svg>') !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
   flex-shrink: 0 !important;
-  margin-inline-end: 4px;
+  margin-inline-end: 4px !important;
+  animation: animate-out-sequence-pill-image var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
+}
+
+@keyframes animate-out-sequence-pill-image {
+  0% {
+  }
+  40% {
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    transform: scale(1);
+  }
+  40.001% {
+  }
+  60% {
+  }
+  80% {
+  }
+  100% {
+    transform: scale(0);
+  }
 }
 
 .i-amphtml-amp-story-shopping-tag-pill-text {
@@ -255,11 +276,11 @@ amp-story-shopping-tag {
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
   max-height: 32px !important;
-  opacity: 0;
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-pill-text {
-  animation: animate-in-sequence-text var(--i-amphtml-shopping-tag-animate-in-duration) forwards;
+  animation: animate-in-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards, 
+    animate-out-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
 }
 
 @keyframes animate-in-sequence-text {
@@ -267,11 +288,22 @@ amp-story-shopping-tag {
   20% {}
   40% {}
   60% {
-    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
     opacity: 0;
   }
   60.001% {}
   100% {
     opacity: 1;
+  }
+}
+
+@keyframes animate-out-sequence-text {
+  0% {
+    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
+    opacity: 1;    
+  }
+  40% {opacity: 0;}
+  100% {
+    opacity: 0;
   }
 }
