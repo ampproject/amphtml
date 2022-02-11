@@ -19,6 +19,13 @@ function massageSourcemaps(mapChain, options) {
   if (map.file) {
     map.file = path.basename(map.file);
   }
+  map.sources = map.sources.map((s) => {
+    if (s?.startsWith('../')) {
+      return s.slice('../'.length);
+    }
+    return s;
+  });
+
   return map;
 }
 
