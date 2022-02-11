@@ -41,6 +41,10 @@ To treat warnings as errors, replace the last line of the validation closure wit
 
 ## Release Notes
 
+### 1.0.7
+
+-   Update amphtml-validator dependency to 1.0.35
+
 ### 1.0.6
 
 -   Use fancy-log log.info (#30744)
