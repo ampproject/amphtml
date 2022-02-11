@@ -98,13 +98,13 @@ amp-story-shopping-tag {
   }
   40% {
     transform: scale(.8);
-  }         
+  }
   90% {
     transform: scale(1);
-  }  
+  }
   100% {
     transform: scale(1);
-  }  
+  }
 }
 
 .i-amphtml-amp-story-shopping-tag-dot:after {
@@ -142,10 +142,10 @@ amp-story-shopping-tag {
   }
   40% {
     transform: scale(.8);
-  }         
+  }
   90% {
     transform: scale(1);
-  }  
+  }
   100% {
     transform: scale(1);
   }
@@ -167,7 +167,7 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-pill {
-  animation: animate-in-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards, 
+  animation: animate-in-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
     animate-out-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
 
   /* Values that need to change to support RTL. */
@@ -279,7 +279,7 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-pill-text {
-  animation: animate-in-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards, 
+  animation: animate-in-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
     animate-out-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
 }
 
@@ -300,7 +300,7 @@ amp-story-shopping-tag {
 @keyframes animate-out-sequence-text {
   0% {
     animation-timing-function: cubic-bezier(.85, 0, .15, 1);
-    opacity: 1;    
+    opacity: 1;
   }
   40% {opacity: 0;}
   100% {
