@@ -236,11 +236,7 @@ function maybeToNpmEsmName(name) {
  * @param {string} destFilename
  */
 function handleBundleError(err, continueOnError, destFilename) {
-  let message = err.toString();
-  if (err.stack) {
-    // Drop the node_modules call stack, which begins with '    at'.
-    message = err.stack.replace(/    at[^]*/, '').trim();
-  }
+  const message = err.stack || err.toString();
   log(red('ERROR:'), message, '\n');
   const reasonMessage = `Could not compile ${cyan(destFilename)}`;
   if (continueOnError) {
@@ -347,7 +343,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: 'external',
-        sourceRoot: path.dirname(destFile),
         sourcesContent: !!argv.full_sourcemaps,
         outfile: destFile,
         define: experimentDefines,
@@ -375,7 +370,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     const {outputFiles} = result;
 
     let code = outputFiles.find(({path}) => !path.endsWith('.map')).text;
-    let map = JSON.parse(
+    const map = JSON.parse(
       result.outputFiles.find(({path}) => path.endsWith('.map')).text
     );
     const mapChain = [map];
@@ -402,12 +397,13 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       code = result.code;
       mapChain.unshift(result.map);
     }
-    map = massageSourcemaps(mapChain, options);
 
-    const sourceMapComment = `\n//# sourceMappingURL=${destFilename}.map`;
     await Promise.all([
-      fs.outputFile(destFile, `${code}\n${sourceMapComment}`),
-      fs.outputJson(`${destFile}.map`, map),
+      fs.outputFile(
+        destFile,
+        `${code}\n//# sourceMappingURL=${destFilename}.map`
+      ),
+      fs.outputJson(`${destFile}.map`, massageSourcemaps(mapChain, options)),
     ]);
 
     await finishBundle(destDir, destFilename, options, startTime);
@@ -534,6 +530,11 @@ async function minify(code, options = {}) {
     output: {
       beautify: !!argv.pretty_print,
       keep_quoted_props: true,
+      // The AMP Cache will prepend content on the first line during serving
+      // (for AMP_CONFIG and AMP_EXP). In order for these to not affect
+      // the sourcemap, we must ensure there is no other content on the first
+      // line. If you remove this you will annoy Justin. Don't do it.
+      preamble: ';',
     },
     sourceMap: true,
     toplevel: true,
