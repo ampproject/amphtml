@@ -18,7 +18,7 @@ import {
   getTimingDataSync,
 } from './variable-source';
 
-import {getPawSignal} from '../gma-sdk';
+import {getPawSignal} from '../../ads/google/gma-sdk';
 import {getTrackImpressionPromise} from '../impression';
 import {
   installServiceInEmbedDoc,

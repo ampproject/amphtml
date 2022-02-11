@@ -5,7 +5,7 @@
 
 import {dev} from '#utils/log';
 
-import {getRandom} from './3p-frame';
+import {getRandom} from '../../src/3p-frame';
 
 function getPawSignalsSdkRefWindow(win) {
   // Check if the APIs are available, if not, see if they can be found in
