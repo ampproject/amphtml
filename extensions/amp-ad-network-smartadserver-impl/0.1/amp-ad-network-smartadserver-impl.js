@@ -96,7 +96,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             ...urlParams,
             'gdpr_consent': consentString,
             'pgDomain': Services.documentInfoForDoc(this.element).canonicalUrl,
-            'tmstp': Date.now(),
+            'tmstp': this.sentinel,
           },
           MAX_URL_LENGTH,
           TRUNCATION_PARAM
@@ -188,7 +188,10 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
    */
   addListener() {
     const messageListener = (event) => {
-      if (event.data.type === 'collapse') {
+      if (
+        event.data.sentinel === this.sentinel &&
+        event.data.type === 'collapse'
+      ) {
         this.collapseIframe();
         this.win.removeEventListener('message', messageListener);
       }
