@@ -65,7 +65,7 @@ amp-story-shopping-tag {
 
 .i-amphtml-amp-story-shopping-tag-dot:before {
   content: '' !important;
-  position: absolute;
+  position: absolute !important;
   border-radius: inherit !important;
   width: var(--dot-size) !important;
   height: var(--dot-size) !important;
@@ -73,21 +73,21 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-dot:before {
-  animation: animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animate-in-sequence-duration) forwards !important;
+  animation: animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
 }
 
 @keyframes animate-in-sequence-dot-before {
   0% {
+    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
     transform: scale(0);
   }
   20% {
-    transform: scale(0);
   }
-  45% {
+  40% {}
+  60% {
     transform: scale(1);
   }
-  50% {}
-  50.001% {}
+  60.001% {}
   100% {}
 }
 
@@ -107,14 +107,15 @@ amp-story-shopping-tag {
 
 @keyframes animate-in-sequence-dot-after {
   0% {
+    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
     transform: scale(0);
   }
   20% {}
-  45% {
+  40% {
     transform: scale(1);
   }
-  50% {}
-  50.001% {}
+  60% {}
+  60.001% {}
   100% {}
 }
 
@@ -126,7 +127,7 @@ amp-story-shopping-tag {
   align-items: center !important;
   border-radius: 18px !important;
   height: 100% !important;
-  overflow: hidden;
+  overflow: hidden !important;
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   padding-inline-start: var(--pill-padding-inline-start) !important;
   padding-inline-end: 12px;
@@ -145,19 +146,21 @@ amp-story-shopping-tag {
 
 @keyframes animate-in-sequence-pill {
   0% {
+    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
     clip-path: circle(calc(var(--icon-size) * .5) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5));
     transform: scale(0);
   }
   20% {
     clip-path: circle(calc(var(--icon-size) * .5) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5));
   }
-  45% {
+  40% {
     transform: scale(1);
   }
-  50% {
+  60% {
     clip-path: circle(calc(var(--icon-size) * .5 + var(--pill-padding-inline-start)) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5));
   }
-  50.001% {
+  60.001% {
+    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
     clip-path: inset(0px calc(100% - 36px) 0px 0px round 30px);
   }
   100% {
@@ -167,19 +170,21 @@ amp-story-shopping-tag {
 
 @keyframes animate-in-sequence-pill-rtl {
   0% {
+    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
     clip-path: circle(calc(var(--icon-size) * 0.5) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5));
     transform: scale(0);
   }
   20% {
     clip-path: circle(calc(var(--icon-size) * 0.5) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5));
   }
-  45% {
+  40% {
     transform: scale(1);
   }
-  50% {
+  60% {
     clip-path: circle(calc(var(--icon-size) * 0.5 + var(--pill-padding-inline-start)) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5));
   }
-  50.001% {
+  60.001% {
+    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
     clip-path: inset(0px 0px 0px calc(100% - 36px) round 30px);
   }
   100% {
@@ -228,11 +233,12 @@ amp-story-shopping-tag {
 @keyframes animate-in-sequence-text {
   0% {}
   20% {}
-  45% {}
-  50% {
+  40% {}
+  60% {
+    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
     opacity: 0;
   }
-  50.001% {}
+  60.001% {}
   100% {
     opacity: 1;
   }
