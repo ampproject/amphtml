@@ -9,49 +9,17 @@ const Remapping = require('@ampproject/remapping');
 const remapping = /** @type {*} */ (Remapping);
 
 /**
- * @param {!Array<string|object>} sourcemaps
- * @param {Map<string, string|object>} babelMaps
+ * @param {Array<Object|string>} mapChain
  * @param {*} options
- * @return {string}
+ * @return {Object}
  */
-function massageSourcemaps(sourcemaps, babelMaps, options) {
-  const root = process.cwd();
-  const remapped = remapping(
-    sourcemaps,
-    (f) => {
-      if (f.includes('__SOURCE__')) {
-        return null;
-      }
-      const file = path.join(root, f);
-      // The Babel tranformed file and the original file have the same path,
-      // which makes it difficult to distinguish during remapping's load phase.
-      // We perform some manual path mangling to destingish the babel files
-      // (which have a sourcemap) from the actual source file by pretending the
-      // source file exists in the '__SOURCE__' root directory.
-      const map = babelMaps.get(file);
-      if (!map) {
-        throw new Error(`failed to find sourcemap for babel file "${f}"`);
-      }
-      return {
-        ...map,
-        sourceRoot: path.posix.join('/__SOURCE__/', path.dirname(f)),
-      };
-    },
-    !argv.full_sourcemaps
-  );
-
-  remapped.sources = remapped.sources.map((source) => {
-    if (source?.startsWith('/__SOURCE__/')) {
-      return source.slice('/__SOURCE__/'.length);
-    }
-    return source;
-  });
-  remapped.sourceRoot = getSourceRoot(options);
-  if (remapped.file) {
-    remapped.file = path.basename(remapped.file);
+function massageSourcemaps(mapChain, options) {
+  const map = remapping(mapChain, () => null, !argv.full_sourcemaps);
+  map.sourceRoot = getSourceRoot(options);
+  if (map.file) {
+    map.file = path.basename(map.file);
   }
-
-  return remapped.toString();
+  return map;
 }
 
 /**

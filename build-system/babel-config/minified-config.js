@@ -77,7 +77,7 @@ function getMinifiedConfig() {
   return {
     compact: false,
     plugins,
-    sourceMaps: true,
+    sourceMaps: 'both',
     presets: [presetTypescript, presetEnv],
     retainLines: true,
     assumptions: {

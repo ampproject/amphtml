@@ -7,7 +7,6 @@ const {TransformCache, batchedRead, md5} = require('./transform-cache');
  * @typedef {{
  *   filename: string,
  *   code: string,
- *   map: *,
  * }}
  */
 let CacheMessageDef;
@@ -26,14 +25,13 @@ let transformCache;
  * @param {{
  *   preSetup?: function():void,
  *   postLoad?: function():void,
- *   babelMaps?: Map<string, *>,
  * }} callbacks
  * @return {!Object}
  */
 function getEsbuildBabelPlugin(
   callerName,
   enableCache,
-  {preSetup = () => {}, postLoad = () => {}, babelMaps} = {}
+  {preSetup = () => {}, postLoad = () => {}} = {}
 ) {
   /**
    * @param {string} filename
@@ -59,7 +57,7 @@ function getEsbuildBabelPlugin(
       .then((result) => {
         const {code, map} = /** @type {!babel.BabelFileResult} */ (result);
         debug('post-babel', filename, code, map);
-        return {filename, code: code || '', map};
+        return {filename, code: code || ''};
       });
 
     if (enableCache) {
@@ -99,7 +97,6 @@ function getEsbuildBabelPlugin(
             rehash,
             getFileBabelOptions(babelOptions, filename)
           );
-          babelMaps?.set(filename, transformed.map);
           return {contents: transformed.code};
         }
       );
