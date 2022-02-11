@@ -659,8 +659,7 @@ async function buildNpmBinaries(extDir, name, options) {
         entryPoint: await getBentoBuildFilename(
           extDir,
           getBentoName(name),
-          'web-component',
-          options
+          'web-component'
         ),
         outfile: 'web-component.js',
         wrapper: '',
@@ -718,7 +717,7 @@ async function buildBentoExtensionJs(dir, name, options) {
     remapDependencies,
     wrapper: 'none',
     outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
-    filename: await getBentoBuildFilename(dir, name, 'standalone', options),
+    filename: await getBentoBuildFilename(dir, name, 'standalone'),
   });
 }
 
@@ -728,11 +727,10 @@ async function buildBentoExtensionJs(dir, name, options) {
  * configuration.
  * @param {string} dir
  * @param {string} name
- * @param {string} mode
- * @param {Object} options
+ * @param {'standalone'|'web-component'} mode
  * @return {Promise<string>}
  */
-async function getBentoBuildFilename(dir, name, mode, options) {
+async function getBentoBuildFilename(dir, name, mode) {
   const modes = {
     'standalone': {
       basename: name,
@@ -744,12 +742,6 @@ async function getBentoBuildFilename(dir, name, mode, options) {
     },
   };
   const {basename, toExport} = modes[mode];
-  if (!basename) {
-    throw new Error(
-      `Unknown bento mode "${mode}" (${name}:${options.version})\n` +
-        `Expected one of: ${Object.keys(modes).join(', ')}`
-    );
-  }
   const existingFilename = await findJsSourceFilename(basename, dir);
   if (existingFilename) {
     return existingFilename;
@@ -767,7 +759,7 @@ async function getBentoBuildFilename(dir, name, mode, options) {
 
 /**
  * @param {string} name
- * @param {string} toExport
+ * @param {boolean} toExport
  * @param {string} outputFilename
  * @return {string}
  */
