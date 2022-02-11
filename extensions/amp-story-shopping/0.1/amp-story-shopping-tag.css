@@ -73,10 +73,10 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-dot:before {
-  animation: animate-in-dot-before var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+  animation: animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animate-in-sequence-duration) forwards !important;
 }
 
-@keyframes animate-in-dot-before {
+@keyframes animate-in-sequence-dot-before {
   0% {
     transform: scale(0);
   }
@@ -86,12 +86,9 @@ amp-story-shopping-tag {
   45% {
     transform: scale(1);
   }
-  50% {
-  }
-  50.001% {
-  }
-  100% {
-  }
+  50% {}
+  50.001% {}
+  100% {}
 }
 
 .i-amphtml-amp-story-shopping-tag-dot:after {
@@ -105,24 +102,20 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-dot:after {
-  animation: animate-in-dot-after var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+  animation: animate-in-sequence-dot-after var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
 }
 
-@keyframes animate-in-dot-after {
+@keyframes animate-in-sequence-dot-after {
   0% {
     transform: scale(0);
   }
-  20% {
-  }
+  20% {}
   45% {
     transform: scale(1);
   }
-  50% {
-  }
-  50.001% {
-  }
-  100% {
-  }
+  50% {}
+  50.001% {}
+  100% {}
 }
 
 .i-amphtml-amp-story-shopping-tag-pill {
@@ -141,16 +134,16 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-pill {
-  animation: animate-in-pill var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+  animation: animate-in-sequence-pill var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
 }
 
 [active][dir=rtl] .i-amphtml-amp-story-shopping-tag-pill {
-  animation: animate-in-pill-rtl var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
+  animation: animate-in-sequence-pill-rtl var(--i-amphtml-shopping-tag-animate-in-duration) forwards !important;
   /* Transform orign from center of icon (right side) in RTL. */
   transform-origin: calc(100% - var(--pill-transfrom-origin-at-image-center));
 }
 
-@keyframes animate-in-pill {
+@keyframes animate-in-sequence-pill {
   0% {
     clip-path: circle(calc(var(--icon-size) * .5) at calc(var(--pill-padding-inline-start) + var(--icon-size) * .5));
     transform: scale(0);
@@ -172,7 +165,7 @@ amp-story-shopping-tag {
   }
 }
 
-@keyframes animate-in-pill-rtl {
+@keyframes animate-in-sequence-pill-rtl {
   0% {
     clip-path: circle(calc(var(--icon-size) * 0.5) at calc(100% - var(--pill-padding-inline-start) - var(--icon-size) * .5));
     transform: scale(0);
@@ -229,13 +222,17 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-pill-text {
-  animation: animate-in-text 1s 1s forwards;
+  animation: animate-in-sequence-text var(--i-amphtml-shopping-tag-animate-in-duration) forwards;
 }
 
-@keyframes animate-in-text {
-  0% {
+@keyframes animate-in-sequence-text {
+  0% {}
+  20% {}
+  45% {}
+  50% {
     opacity: 0;
   }
+  50.001% {}
   100% {
     opacity: 1;
   }
