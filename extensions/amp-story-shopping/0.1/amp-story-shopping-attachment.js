@@ -171,13 +171,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       'amp-story-page'
     );
 
+    const shoppingDataPerPage = Object.entries(shoppingData[pageElement.id]);
+
     let productForPdp = shoppingData.activeProductData;
     // If no active product and only one product on page, use the one product for the PDP.
-    if (
-      !shoppingData.activeProductData &&
-      shoppingData[pageElement.id].length === 1
-    ) {
-      productForPdp = shoppingData[pageElement.id][0];
+    if (!shoppingData.activeProductData && shoppingDataPerPage.length === 1) {
+      productForPdp = shoppingDataPerPage[0];
     }
 
     // templateId string used to key already built templates.
@@ -191,7 +190,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     const template = this.getTemplate_(
       templateId,
       productForPdp,
-      shoppingData[pageElement.id]
+      shoppingDataPerPage
     );
     template.setAttribute('active', '');
     this.resetScroll_(template);
@@ -343,6 +342,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   renderPlpTemplate_(shoppingDataForPage) {
+    console.log(shoppingDataForPage);
     return (
       <div class="i-amphtml-amp-story-shopping-plp">
         <div class="i-amphtml-amp-story-shopping-plp-header">
