@@ -496,36 +496,38 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
   describe('web stories: inlined video', async () => {
     it('should use the inlined source for the first video in the story instead of sending an XHR request', async () => {
+      console.log('test #1');
+
       // Set up an inlined source response for the first video in the story
-      const storyEl = createStoryForInlineResponseTesting();
+      const storyEl = createStoryForInlineVideoTesting();
       env.win.document.body.appendChild(storyEl);
       setUpInlinedVideoResponse();
 
       const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
       // Fetch the sources for the first video in the story
-      const videoEl = env.win.document.getElementById('video1');
+      const videoEl = storyEl.querySelectorAll('amp-video')[0];
       await fetchCachedSources(videoEl, env.ampdoc);
 
-      const addedSources = videoEl.querySelectorAll('source');
-      expect(xhrSpy).to.have.not.been.called();
-      expect(addedSources).to.have.lengthOf(1); // obtained from inlined source
+      expect(xhrSpy).to.have.not.been.called;
+      const inlinedSources = videoEl.querySelectorAll('source[src="inlined_video_response.mp4"]');
+      expect(inlinedSources).to.have.lengthOf(1);
     });
 
     it('should send an XHR request for any video that is not the very first one within the story', async () => {
       // Set up an inlined source response for the first video in the story
-      const storyEl = createStoryForInlineResponseTesting();
+      const storyEl = createStoryForInlineVideoTesting();
       env.win.document.body.appendChild(storyEl);
       setUpInlinedVideoResponse();
 
       const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
-      // Fetch the sources for the second video on the first story page
-      const videoEl2 = env.win.document.getElementById('video2');
+      // Fetch the sources for video #2: the 2nd video on the first story page
+      const videoEl2 = storyEl.querySelectorAll('amp-video')[1];
       await fetchCachedSources(videoEl2, env.ampdoc);
 
-      // Fetch the sources for the first video on the second story page
-      const videoEl3 = env.win.document.getElementById('video3');
+      // Fetch the sources for video #3: the 1st video on the 2nd story page
+      const videoEl3 = storyEl.querySelectorAll('amp-video')[2];
       await fetchCachedSources(videoEl3, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
@@ -538,13 +540,13 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
 
     it('should send XHR request if inline config not provided', async () => {
       // Create story without setting an inlined source response
-      const storyEl = createStoryForInlineResponseTesting();
+      const storyEl = createStoryForInlineVideoTesting();
       env.win.document.body.appendChild(storyEl);
 
       const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
       // Fetch the sources for the first video in the story
-      const videoEl = env.win.document.getElementById('video1');
+      const videoEl = storyEl.querySelectorAll('amp-video')[0];
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
@@ -553,15 +555,19 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     });
 
     it('should send XHR request if inlined video response fails to parse', async () => {
-      // Set up an inlined source response for the first video in the story
-      const storyEl = createStoryForInlineResponseTesting();
+      // Set up an improperly configured response for the first video in the story
+      const storyEl = createStoryForInlineVideoTesting();
       env.win.document.body.appendChild(storyEl);
-      setUpInlinedVideoResponse(true /* responseShouldFailToParse */);
+      const scriptEl = createElementWithAttributes(env.win.document, 'script', {
+        'id': 'amp-google-video-cache-response',
+        'type': 'application/json',
+      });
+      scriptEl.textContent = '{"faulty": [{}]}';
 
       const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
 
       // Fetch the sources for the first video in the story
-      const videoEl = env.win.document.getElementById('video1');
+      const videoEl = storyEl.querySelectorAll('amp-video')[0];
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
@@ -587,7 +593,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     return videoEl;
   }
 
-  function createStoryForInlineResponseTesting() {
+  function createStoryForInlineVideoTesting() {
     const storyEl = env.win.document.createElement('amp-story');
     const storyPageEl1 = env.win.document.createElement('amp-story-page');
     const storyPageEl2 = env.win.document.createElement('amp-story-page');
@@ -597,37 +603,38 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     // Place two videos on the first page. video #1 is nested more deeply than
     // video #2, but it should still be considered the first video on the page.
     const gridLayerEl = env.win.document.createElement('amp-story-grid-layer');
-    const videoEl1 = createVideo([{id: 'video1', src: 'video1.mp4'}]);
+    const videoEl1 = createVideo([{src: 'video1.mp4'}]);
     gridLayerEl.appendChild(videoEl1);
     storyPageEl1.appendChild(gridLayerEl);
 
     // Place video #2 on the first page.
-    const videoEl2 = createVideo([{id: 'video2', src: 'video2.mp4'}]);
+    const videoEl2 = createVideo([{src: 'video2.mp4'}]);
     storyPageEl1.appendChild(videoEl2);
 
     // Place video #3 on the second page.
-    const videoEl3 = createVideo([{id: 'video3', src: 'video3.mp4'}]);
+    const videoEl3 = createVideo([{src: 'video3.mp4'}]);
     storyPageEl2.appendChild(videoEl3);
 
     return storyEl;
   }
 
-  function setUpInlinedVideoResponse(responseShouldFailToParse = false) {
+  function setUpInlinedVideoResponse() {
     const scriptEl = createElementWithAttributes(env.win.document, 'script', {
       'id': 'amp-google-video-cache-response',
       'type': 'application/json',
     });
     scriptEl.textContent = `
       {
-        ${responseShouldFailToParse ? "wrong_key" : "sources"}:  [
+        "sources": [
           {
-            "url": "video1.mp4",
+            "url": "inlined_video_response.mp4",
             "codec": "h264",
             "type": "video/mp4",
             "bitrate_kbps": 400
-          },
+          }
         ],
         "has_audio": false
       }`;
+    env.win.document.head.appendChild(scriptEl);
   }
 });

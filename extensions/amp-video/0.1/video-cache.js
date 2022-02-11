@@ -249,7 +249,6 @@ function requestCachedVideoSources(videoEl, ampdoc) {
  */
 function shouldUseInlineVideoResponse(videoEl, win) {
   // Google video cache inlines the first video of the first web story page.
-  const firstVid =
-      win.document.querySelector('amp-story-page:first-of-type amp-video');
+  const firstVid = win.document.querySelector('amp-story-page:first-of-type amp-video');
   return videoEl === firstVid;
 }
