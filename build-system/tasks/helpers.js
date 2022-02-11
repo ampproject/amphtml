@@ -530,8 +530,8 @@ async function minify(code, options = {}) {
     output: {
       beautify: !!argv.pretty_print,
       keep_quoted_props: true,
-      // We naively prepend content on the first line of during dists and
-      // serving (for AMP_CONFIG and AMP_EXP). In order for these to not affect
+      // The AMP Cache will prepend content on the first line during serving
+      // (for AMP_CONFIG and AMP_EXP). In order for these to not affect
       // the sourcemap, we must ensure there is no other content on the first
       // line. If you remove this you will annoy Justin. Don't do it.
       preamble: ';',
