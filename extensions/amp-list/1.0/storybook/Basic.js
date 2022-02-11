@@ -117,7 +117,7 @@ export const InfiniteScrollTest = (args) => {
           border: '1px solid currentColor',
         }}
       >
-        Here, <code>viewportBuffer = 0</code> so items stop loading at the
+        Here, <code>viewportBuffer = -0.3</code> so items stop loading at the
         bottom of the viewport.
         <br />
         Total number of pages loaded: {pages}
@@ -127,7 +127,7 @@ export const InfiniteScrollTest = (args) => {
         loadMore="auto"
         src="Page 1"
         fetchJson={fetchJsonInfinite}
-        viewportBuffer={0}
+        viewportBuffer={-0.3}
         wrapper={(list) => {
           setPages(list.length); // Track the total size
           return <div>{list}</div>;

@@ -15,11 +15,21 @@ import {useAmpContext} from '#preact/context';
 import {useInfiniteQuery} from '#preact/hooks/useInfiniteQuery';
 import {xhrUtils} from '#preact/utils/xhr';
 
+import {useStyles} from './component.jss';
+
 const defaultItemTemplate = (item) => <p>{String(item)}</p>;
 const defaultWrapperTemplate = (list) => <div>{list}</div>;
 const defaultErrorTemplate = (error) => `Error: ${error.message}`;
-const defaultLoadingTemplate = () => `Loading...`;
-const defaultLoadMoreTemplate = () => <button>Load more</button>;
+const defaultLoadMoreTemplate = (styles) => (
+  <button>
+    Load more <span class={styles.loadMoreIcon} />
+  </button>
+);
+const defaultLoadingTemplate = (styles) => (
+  <span>
+    Loading <span class={styles.loadMoreSpinner} />
+  </span>
+);
 
 /**
  * Retrieves the key from the object.
@@ -89,9 +99,9 @@ export function BentoListWithRef(
     viewportBuffer = 2.0, // When loadMore === 'auto', keep loading up to 2 viewports of data
     template: itemTemplate = defaultItemTemplate,
     wrapperTemplate = defaultWrapperTemplate,
+    loadMoreTemplate = defaultLoadMoreTemplate,
     loadingTemplate = defaultLoadingTemplate,
     errorTemplate = defaultErrorTemplate,
-    loadMoreTemplate = defaultLoadMoreTemplate,
     ...rest
   },
   ref
@@ -164,9 +174,9 @@ export function BentoListWithRef(
     });
   }, [pages, itemsKey, maxItems, itemTemplate]);
 
-  const showLoading = loading && (pages.length === 0 || resetOnRefresh);
-  const showResults = list.length !== 0 && !showLoading;
-  const showLoadMore = loadMoreMode === 'manual' && hasMore;
+  const showLoading = loading;
+  const showResults = list.length !== 0;
+  const showLoadMore = loadMoreMode === 'manual' && hasMore && !loading;
 
   useImperativeHandle(
     ref,
@@ -177,14 +187,18 @@ export function BentoListWithRef(
     [reset]
   );
 
+  const styles = useStyles();
+
   return (
     <ContainWrapper aria-live="polite" {...rest}>
       <Fragment test-id="contents">
-        {showLoading && loadingTemplate?.()}
         {showResults && augment(wrapperTemplate(list), {'role': 'list'})}
         {error && errorTemplate?.(error)}
+        {showLoading && loadingTemplate?.(styles)}
         {showLoadMore &&
-          augment(loadMoreTemplate(), {onClick: () => loadMore()})}
+          augment(loadMoreTemplate(styles), {
+            onClick: () => loadMore(),
+          })}
         {loadMoreMode === 'auto' && <span ref={bottomRef} />}
       </Fragment>
     </ContainWrapper>
