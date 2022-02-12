@@ -758,7 +758,7 @@ extension, its files and its examples. You will need to add an entry in the top-
 exports.extensionBundles = [
 ...
   {name: 'amp-kaltura-player', version: '0.1'},
-  {name: 'amp-carousel', version: '0.1', options: {hasCss: true}},
+  {name: 'amp-carousel', version: '0.1'},
 ...
 ];
 ```

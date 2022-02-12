@@ -113,9 +113,6 @@ exports.extensionBundles = [
   {
     "name": "amp-carousel",
     "version": "0.1",
-    "options": {
-      "hasCss": true
-    }
   },
   {
     "name": "amp-kaltura-player",
@@ -149,10 +146,7 @@ exports.extensionBundles = [
 ...
   {
     "name": "amp-my-element",
-    "version": "0.1",
-    "options": {
-      "hasCss": true
-    }
+    "version": "0.1"
   },
   {
     "name": "amp-my-element",
