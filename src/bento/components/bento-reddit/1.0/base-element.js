@@ -1,7 +1,6 @@
 import {BentoReddit} from '#bento/components/bento-reddit/1.0/component';
 
 import {PreactBaseElement} from '#preact/base-element';
-import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 export class BaseElement extends PreactBaseElement {}
 
