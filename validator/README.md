@@ -41,12 +41,12 @@ This is only useful development - e.g. when making changes to
 
 1. Start an interactive docker container. Note that you will be the `root` user inside the docker container.
     ```bash
-    docker run -it -u root cimg/openjdk:17.0-node bash
+    docker run -it -u root ubuntu:20.04 bash
     ```
 1. Run following commands in the container.
     ```bash
     apt update
-    apt install -y python sudo
+    apt install -y curl gpg python sudo
     git clone https://github.com/ampproject/amphtml.git
     cd amphtml
     npm install

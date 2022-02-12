@@ -58,10 +58,9 @@ executors:
     docker:
       - image: cimg/node:lts-browsers
     resource_class: xlarge
-  jdk-docker-xlarge:
-    docker:
-      - image: cimg/openjdk:17.0-node
-    resource_class: xlarge
+  machine-xlarge:
+    machine:
+      image: ubuntu-2004:202111-02
   macos-medium:
     macos:
       xcode: 12.4.0
@@ -267,7 +266,7 @@ jobs:
       - teardown_vm
   validator_tests:
     executor:
-      name: jdk-docker-xlarge
+      name: machine-xlarge
     steps:
       - setup_vm
       - run:
