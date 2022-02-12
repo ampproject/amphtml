@@ -92,7 +92,6 @@ const DEFAULT_EXTENSION_SET = ['amp-loader', 'amp-auto-lightbox'];
  *   version?: string,
  *   hasCss?: boolean,
  *   loadPriority?: string,
- *   binaries?: Array<ExtensionBinaryDef>,
  *   npm?: boolean,
  *   wrapper?: string,
  * }}
@@ -451,9 +450,6 @@ async function buildExtension(name, version, hasCss, options) {
   if (options.npm) {
     await buildNpmBinaries(extDir, name, options);
     await buildNpmCss(extDir, options);
-  }
-  if (options.binaries) {
-    await buildBinaries(extDir, options.binaries, options);
   }
   if (name === 'amp-analytics') {
     await analyticsVendorConfigs(options);
