@@ -115,7 +115,7 @@ function parseEnvs(env) {
 async function storybook() {
   const {build = false, 'storybook_env': storybookEnv = 'preact'} = argv;
   const envs = parseEnvs(storybookEnv);
-  if (!build && envs.includes('amp')) {
+  if (envs.includes('amp')) {
     await runAmpDevBuildServer();
   }
   if (!build) {

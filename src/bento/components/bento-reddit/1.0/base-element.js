@@ -1,6 +1,7 @@
-import {PreactBaseElement} from '#preact/base-element';
+import {BentoReddit} from '#bento/components/bento-reddit/1.0/component';
 
-import {BentoReddit} from './component';
+import {PreactBaseElement} from '#preact/base-element';
+import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -10,7 +11,7 @@ BaseElement['Component'] = BentoReddit;
 /** @override */
 BaseElement['props'] = {
   'src': {attr: 'data-src'},
-  'embedType': {attr: 'data-src'},
+  'embedType': {attr: 'data-embedtype'},
   'uuid': {attr: 'data-uuid'},
   'embedCreated': {attr: 'data-embedcreated'},
   'embedParent': {attr: 'data-embedparent'},

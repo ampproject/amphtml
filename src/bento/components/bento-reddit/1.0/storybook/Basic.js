@@ -1,6 +1,6 @@
-import * as Preact from '#preact';
+import {BentoReddit} from '#bento/components/bento-reddit/1.0/component';
 
-import {BentoReddit} from '../component';
+import * as Preact from '#preact';
 
 export default {
   title: 'Reddit',
@@ -9,10 +9,14 @@ export default {
 
 export const _default = () => {
   return (
-    <BentoReddit
-      style={{width: 300, height: 200}}
-      src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
-    ></BentoReddit>
+    <div>
+      <h1>HELLO FRESH</h1>
+      <BentoReddit
+        style={{width: 300, height: 200}}
+        embedAs="comment"
+        src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
+      ></BentoReddit>
+    </div>
   );
 };
 // options={{"src":"https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"}}

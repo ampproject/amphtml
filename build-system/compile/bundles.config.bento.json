@@ -13,5 +13,13 @@
     "options": {
       "hasCss": true
     }
+  },
+  {
+    "name": "bento-reddit",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
   }
 ]
