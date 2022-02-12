@@ -59,10 +59,7 @@ This is only useful development - e.g. when making changes to
 In `amphtml/validator` folder, run
 
 ```bash
-bazel build --cxxopt='-Wno-error=return-type' \
-            --cxxopt='-Wno-error=unused-but-set-variable' \
-            --cxxopt='-Wno-error=unused-variable' \
-            cpp/engine/wasm:validator_js_bin
+bazel build cpp/engine/wasm:validator_js_bin
 ```
 
 This creates `bazel-bin/cpp/engine/wasm/validator_js_bin.js`, which is
