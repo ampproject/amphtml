@@ -1,5 +1,9 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {
+  childElementByTag,
+  closestAncestorElementBySelector,
+} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
@@ -88,6 +92,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   flipTagIfOffscreen_(pageSize) {
+    if (!this.shoppingTagEl_) {
+      return;
+    }
     const storyPageWidth = pageSize.width;
 
     let shouldFlip;
@@ -225,7 +232,22 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
-    if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
+
+    const pageElement = closestAncestorElementBySelector(
+      this.element,
+      'amp-story-page'
+    );
+
+    const pageAttachment = childElementByTag(
+      pageElement,
+      'amp-story-shopping-attachment'
+    );
+
+    if (
+      this.hasAppendedInnerShoppingTagEl_ ||
+      !this.tagData_ ||
+      !pageAttachment
+    ) {
       return;
     }
 
