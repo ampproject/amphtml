@@ -13,8 +13,11 @@ import {addParamsToUrl} from '../../../src/url';
 const TAG = 'amp-google-read-aloud-player';
 
 /** @private @const */
-const IFRAME_BASE_URL =
+const DEFAULT_IFRAME_BASE_URL =
   'https://www.gstatic.com/readaloud/player/web/api/iframe/index.html';
+
+/** @private @const */
+const BASE_SRC_DATA_PARAM_NAME = 'data-base-src';
 
 /** @private @const */
 const SANDBOX = [
@@ -40,7 +43,7 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     Services.preconnectFor(this.win).url(
       this.getAmpDoc(),
-      IFRAME_BASE_URL,
+      this.getIframeBaseSrc_(),
       opt_onLayout
     );
   }
@@ -90,15 +93,23 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
   }
 
   /** @return {string} */
+  getIframeBaseSrc_() {
+    const baseSrc = this.element.getAttribute(BASE_SRC_DATA_PARAM_NAME);
+    return baseSrc ?? DEFAULT_IFRAME_BASE_URL;
+  }
+
+  /** @return {string} */
   getIframeSrc_() {
-    const src = addParamsToUrl(
-      IFRAME_BASE_URL,
-      getDataParamsFromAttributes(
-        this.element,
-        /* opt_computeParamNameFunc = */ undefined,
-        '^(.+)'
-      )
+    const dataParams = getDataParamsFromAttributes(
+      this.element,
+      /* opt_computeParamNameFunc = */ undefined,
+      '^(.+)'
     );
+
+    // Deletes `base-src` as this param is only used by the extension and not by the iframe.
+    delete dataParams['baseSrc'];
+
+    const src = addParamsToUrl(this.getIframeBaseSrc_(), dataParams);
 
     return `${src}#ampGoogleReadAloudPlayer=1`;
   }

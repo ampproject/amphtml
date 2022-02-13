@@ -18,6 +18,7 @@ const INTRO = 'http://www.example.com/intro.mp3';
 const OUTRO = 'http://www.example.com/outro.mp3';
 const AD_TAG_URL = 'http://www.example.com/ad';
 const VOICE = 'SOME_VOICE';
+const BASE_SRC = 'https://localhost:8080/';
 
 const LAYOUT_ATTRS = {
   height: 60,
@@ -134,6 +135,24 @@ describes.realWin(
             `intro=${encodeURIComponent(INTRO)}&` +
             `outro=${encodeURIComponent(OUTRO)}&` +
             `adTagUrl=${encodeURIComponent(AD_TAG_URL)}`
+        );
+      });
+
+      it('sets optinal iframe base src', async () => {
+        const element = await createAndRenderGoogleReadAloudPlayer({
+          'data-api-key': API_KEY,
+          'data-tracking-ids': TRACKING_IDS,
+          'data-voice': VOICE,
+          'data-base-src': BASE_SRC,
+        });
+
+        const iframe = element.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.contain(
+          `${BASE_SRC}?` +
+            `apiKey=${API_KEY}&` +
+            `trackingIds=${TRACKING_IDS}&` +
+            `voice=${VOICE}`
         );
       });
 
