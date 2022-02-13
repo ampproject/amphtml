@@ -122,3 +122,8 @@ Include an `amp-google-read-aloud-player` on your AMP document:
   data-voice="<YOUR_VOICE>"
 ></amp-google-read-aloud-player>
 ```
+
+## Validation
+
+See [amp-google-read-aloud-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-google-read-aloud-player/validator-amp-google-read-aloud-player.protoascii)
+in the AMP validator specification.
