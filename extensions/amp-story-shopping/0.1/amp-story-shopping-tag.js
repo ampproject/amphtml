@@ -49,8 +49,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     /** @param {!ShoppingConfigDataDef} tagData */
     this.tagData_ = null;
 
-    /** @param {boolean} element */
-    this.hasShoppingAttachment_ = false;
+    /** @param {!AmpElement} element */
+    this.shoppingAttachment_ = null;
 
     /** @param {!AmpElement} element */
     this.shoppingTagEl_ = null;
@@ -69,8 +69,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       'amp-story-shopping-attachment'
     );
 
-    this.hasShoppingAttachment_ = pageAttachment;
-    if (!this.hasShoppingAttachment_) {
+    this.shoppingAttachment_ = pageAttachment;
+    if (!this.shoppingAttachment_) {
       return;
     }
 
@@ -88,7 +88,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.hasShoppingAttachment_) {
+    if (!this.shoppingAttachment_) {
       return;
     }
 
