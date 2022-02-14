@@ -13,8 +13,10 @@ import {
 /** @const {!Object<string, !Array<function>>} */
 export const PRODUCT_VALIDATION_CONFIG = {
   /* Required Attrs */
+  'productUrl': [validateRequired, validateString],
   'productId': [validateRequired, validateString],
   'productTitle': [validateRequired, validateString],
+  'productBrand': [validateRequired, validateString],
   'productPrice': [validateRequired, validateNumber],
   'productImages': [validateRequired, validateURLs],
   'productPriceCurrency': [validateRequired, validateString],
@@ -28,6 +30,15 @@ export const PRODUCT_VALIDATION_CONFIG = {
   'shippingText': [validateNumber],
 };
 
+const essentialFieldsAccum = [];
+const essentialFields = [
+  'productPrice',
+  'productTitle',
+  'productImages',
+  'productBrand',
+  'productId',
+];
+
 /**
  * @typedef {{
  *  items: !Array<!ShoppingConfigDataDef>,
@@ -40,8 +51,11 @@ let ShoppingConfigResponseDef;
  * @param {string} field
  * @param {?string=} value
  */
-export function validateRequired(field, value = null) {
-  if (value == null) {
+export function validateRequired(field, value = undefined) {
+  if (value === undefined) {
+    if (essentialFields.includes(field)) {
+      essentialFieldsAccum.push(field);
+    }
     throw Error(`Field ${field} is required.`);
   }
 }
@@ -51,8 +65,8 @@ export function validateRequired(field, value = null) {
  * @param {string} field
  * @param {?string=} str
  */
-export function validateString(field, str = null) {
-  if (typeof str !== 'string') {
+export function validateString(field, str = undefined) {
+  if (typeof str !== 'string' && str !== undefined) {
     throw Error(`${field} ${str} is not a string.`);
   }
 }
@@ -62,8 +76,8 @@ export function validateString(field, str = null) {
  * @param {string} field
  * @param {?number=} number
  */
-export function validateNumber(field, number = null) {
-  if (number != null && isNaN(number)) {
+export function validateNumber(field, number = undefined) {
+  if (typeof number !== 'number' && number !== undefined) {
     throw Error(`Value ${number} for field ${field} is not a number`);
   }
 }
@@ -73,19 +87,15 @@ export function validateNumber(field, number = null) {
  * @param {string} field
  * @param {?Array<string>=} url
  */
-export function validateURLs(field, url = null) {
-  if (url == null) {
+export function validateURLs(field, url = undefined) {
+  if (url === undefined) {
     return;
   }
 
   const urls = Array.isArray(url) ? url : [url];
 
   urls.forEach((url) => {
-    if (url.url != null) {
-      assertHttpsUrl(url.url, `amp-story-shopping-config ${field}`);
-    } else {
-      assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
-    }
+    assertHttpsUrl(url.url ?? url, `amp-story-shopping-config ${field}`);
   });
 }
 
@@ -119,7 +129,18 @@ export function getShoppingConfig(pageElement) {
   const element = pageElement.querySelector('amp-story-shopping-config');
   return getElementConfig(element).then((config) => {
     config['items'].forEach((item) => validateConfig(item));
-    return keyByProductTagId(config);
+
+    if (essentialFieldsAccum.length > 0) {
+      user().warn(
+        'AMP-STORY-SHOPPING-CONFIG',
+        `Essential fields ${JSON.stringify(
+          essentialFieldsAccum
+        )} are missing. Please add them in the shopping config. See the error messages above for more details.`
+      );
+      return;
+    } else {
+      return keyByProductTagId(config);
+    }
   });
 }
 /**
