@@ -8,8 +8,7 @@ export function broadstreetads(global, data) {
   validateData(
     data,
     ['network', 'zone', 'width', 'height'],
-    ['keywords', 'place'],
-    ['initurl', 'initoptions']
+    ['keywords', 'place', 'initurl', 'initoptions']
   );
 
   data.place = data.place || 0;
