@@ -2472,9 +2472,6 @@ export class AmpStory extends AMP.BaseElement {
     } else if (this.element.querySelector('amp-analytics')) {
       extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
     }
-    if (this.element.querySelector('amp-geo')) {
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-geo');
-    }
   }
 }
 
