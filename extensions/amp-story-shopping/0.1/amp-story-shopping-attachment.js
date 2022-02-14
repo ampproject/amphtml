@@ -182,7 +182,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   updateTemplate_(shoppingData) {
-    console.log(this.pageEl_.id);
     const shoppingDataForPage = this.shoppingTags_.map(
       (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
     );
