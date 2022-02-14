@@ -1,5 +1,6 @@
 const globby = require('globby');
-const {forbiddenTermsGlobal} = require('../../../test-configs/forbidden-terms');
+const {yellow} = require('kleur/colors');
+const {logWithoutTimestamp} = require('../../../common/logging');
 
 /**
  * Remove disabled Storybook files from an evaluated glob pattern.
@@ -9,6 +10,9 @@ const {forbiddenTermsGlobal} = require('../../../test-configs/forbidden-terms');
  * @return {string[]}
  */
 function globExcludeDisabledStorybookFiles(inclusionPattern) {
+  const {
+    forbiddenTermsGlobal,
+  } = require('../../../test-configs/forbidden-terms');
   const forbiddenTerm = `@storybook/${''}addon-knobs`;
   const forbiddenTermsEntry = forbiddenTermsGlobal[forbiddenTerm];
   if (!forbiddenTermsEntry?.allowlist?.length) {
@@ -20,10 +24,21 @@ function globExcludeDisabledStorybookFiles(inclusionPattern) {
     );
   }
   const excluded = new Set(forbiddenTermsEntry.allowlist);
-  return globby.sync(inclusionPattern).filter((filename) => {
+  const prefiltered = globby.sync(inclusionPattern);
+  const filtered = prefiltered.filter((filename) => {
     const relativeToRoot = filename.replace(/^([.]{1,2}\/)+/, '');
     return !excluded.has(relativeToRoot);
   });
+  const excludedTotal = prefiltered.length - filtered.length;
+  if (excludedTotal > 0) {
+    logWithoutTimestamp(
+      yellow(
+        `WARNING: ${excludedTotal} Storybook files have been disabled due to usage of "${forbiddenTerm}"` +
+          `\nSee allowlist for "${forbiddenTerm}" in build-system/test-configs/forbidden-terms.js`
+      )
+    );
+  }
+  return filtered;
 }
 
 module.exports = {
