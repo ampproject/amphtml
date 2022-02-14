@@ -15,8 +15,8 @@ const jobName = 'validator-tests.js';
  */
 function pushBuildWorkflow() {
   timedExecOrDie('amp validator-webui');
-  timedExecOrDie('amp validator');
   timedExecOrDie('amp validator-cpp');
+  timedExecOrDie('amp validator');
   timedExecOrDie('amp validate-html-fixtures');
 }
 
@@ -43,6 +43,10 @@ function prBuildWorkflow() {
     timedExecOrDie('amp validator-webui');
   }
 
+  if (buildTargetsInclude(Targets.VALIDATOR)) {
+    timedExecOrDie('amp validator-cpp');
+  }
+
   if (
     buildTargetsInclude(
       Targets.HTML_FIXTURES,
@@ -51,10 +55,6 @@ function prBuildWorkflow() {
     )
   ) {
     timedExecOrDie('amp validator');
-  }
-
-  if (buildTargetsInclude(Targets.VALIDATOR)) {
-    timedExecOrDie('amp validator-cpp');
   }
 
   if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
