@@ -105,47 +105,75 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     // Update template on attachment state update or shopping data update.
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
-      (isOpen) => this.checkClearActiveProductData_(isOpen),
+      (isOpen) => this.onAttachmentStateUpdate_(isOpen),
       true /** callToInitialize */
     );
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
-      (shoppingData) => {
-        if (this.isOnActivePage_()) {
-          this.checkOpenAttachment_(shoppingData);
-          this.updateTemplate_(shoppingData);
-        }
-      },
+      (shoppingData) => this.onShoppingDataUpdate_(shoppingData),
       true /** callToInitialize */
     );
   }
 
   /**
-   * Active product data is cleared after the attachment closes so that content does not jump.
+   * Handles clearing active product data and updating the template
+   * when there is no active product data.
    * @param {boolean} isOpen
    * @private
    */
-  checkClearActiveProductData_(isOpen) {
+  onAttachmentStateUpdate_(isOpen) {
+    if (!this.isOnActivePage_()) {
+      return;
+    }
+    // If template is closing, check to clear active product data and return early.
     if (!isOpen) {
-      Services.timerFor(this.win).delay(
-        () =>
-          this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-            'activeProductData': null,
-          }),
-        DRAGGABLE_DRAWER_TRANSITION_MS
-      );
+      this.checkClearActiveProductData_();
+      return;
+    }
+    // It femplate is opening and there is no active product data, update the template.
+    // This happens when the "Shop Now" CTA is clicked.
+    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
+    if (!shoppingData.activeProductData) {
+      this.updateTemplate_(shoppingData);
     }
   }
 
   /**
-   * If active data is set, open the attachment.
-   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
+   * Handles template changes when there is activeProductData.
+   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
-  checkOpenAttachment_(shoppingData) {
-    if (shoppingData.activeProductData) {
-      this.attachmentEl_.getImpl().then((impl) => impl.open());
+  onShoppingDataUpdate_(shoppingData) {
+    if (!shoppingData.activeProductData || !this.isOnActivePage_()) {
+      return;
     }
+    const isOpen = this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
+    if (isOpen) {
+      // If open, update the template.
+      // This happens when a product card is clicked in the PLP template.
+      this.updateTemplate_(shoppingData);
+    } else {
+      // Otherwise, open the attachment and then update the template.
+      // This happens when clicking a shopping tag.
+      this.attachmentEl_.getImpl().then((impl) => {
+        impl.open();
+        this.updateTemplate_(shoppingData);
+      });
+    }
+  }
+
+  /**
+   * Active product data is cleared after the attachment closes so that content does not jump.
+   * @private
+   */
+  checkClearActiveProductData_() {
+    Services.timerFor(this.win).delay(
+      () =>
+        this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+          'activeProductData': null,
+        }),
+      DRAGGABLE_DRAWER_TRANSITION_MS
+    );
   }
 
   /**
@@ -154,8 +182,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   updateTemplate_(shoppingData) {
-    const productOnPageToConfig = shoppingData[this.pageEl_.id];
-    const shoppingDataPerPage = Object.values(productOnPageToConfig);
+    console.log(this.pageEl_.id);
+    const shoppingDataForPage = this.shoppingTags_.map(
+      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
+    );
 
     let productForPdp = shoppingData.activeProductData;
     // If no active product and only one product on page, use the one product for the PDP.
