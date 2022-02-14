@@ -36,12 +36,11 @@ function newDiff(vnode) {
  * Reimplements forwardRef without dragging in everything from preact/compat.
  * See https://github.com/preactjs/preact/issues/3295
  *
- * @param {*} Component
- * @return {ReturnType<import('preact/compat').forwardRef>}
+ * @type {import('preact/compat').forwardRef}
  */
-export function forwardRef(Component) {
+export const forwardRef = function (Component) {
   /**
-   * @param {JsonObject} props
+   * @param {*} props
    * @return {*}
    */
   function Forward(props) {
@@ -70,7 +69,7 @@ export function forwardRef(Component) {
   }
 
   return /** @type {*} */ (Forward);
-}
+};
 
 /**
  * @type {typeof import('preact').toChildArray} children

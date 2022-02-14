@@ -52,7 +52,7 @@ const CanPlay = contextProp('CanPlay', {
  * @const
  */
 const LoadingProp = contextProp('Loading', {
-  defaultValue: /** @type {Loading_Enum} */ Loading_Enum.AUTO,
+  defaultValue: /** @type {Loading_Enum} */ (Loading_Enum.AUTO),
   recursive: true,
   deps: [CanRender],
   compute: (contextNode, inputs, parentValue, canRender) =>

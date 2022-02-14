@@ -85,7 +85,6 @@ import {AmpStoryHint} from './amp-story-hint';
 import {InfoDialog} from './amp-story-info-dialog';
 import {getLocalizationService} from './amp-story-localization-service';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
-import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryShare} from './amp-story-share';
 import {
   Action,
@@ -198,7 +197,7 @@ const DEFAULT_THEME_COLOR = '#202125';
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
@@ -303,6 +302,15 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.viewer_ = Services.viewerForDoc(this.element);
+
+    const needsDvhPolyfill =
+      !this.win.CSS?.supports?.('height: 1dvh') &&
+      !getStyle(this.win.document.documentElement, '--story-dvh');
+
+    if (needsDvhPolyfill) {
+      this.polyfillDvh_(this.getViewport().getSize());
+      this.getViewport().onResize((size) => this.polyfillDvh_(size));
+    }
 
     this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
@@ -903,18 +911,6 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   layoutStory_() {
-    const needsDvhPolyfill =
-      !this.win.CSS?.supports?.('height: 1dvh') &&
-      !getStyle(this.win.document.documentElement, '--story-dvh');
-
-    const onResize = (size) => {
-      needsDvhPolyfill && this.polyfillDvh_(size);
-      this.onViewportResize_();
-    };
-
-    this.getViewport().onResize(onResize);
-
-    onResize(this.getViewport().getSize());
     const initialPageId = this.getInitialPageId_();
 
     this.buildSystemLayer_(initialPageId);
@@ -1287,6 +1283,19 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    if (
+      isExperimentOn(this.win, 'amp-story-paywall-exp') &&
+      targetPage.isPaywallProtected()
+    ) {
+      if (this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE)) {
+        // Subscription dialog is already triggered.
+        return Promise.resolve();
+      }
+      this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
+
+      // TODO(#37285): add SubscriptionService to actually trigger the subscription dialog.
+    }
+
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
     if (!targetPage.isAd()) {
@@ -1508,19 +1517,6 @@ export class AmpStory extends AMP.BaseElement {
     }
     setImportantStyles(this.win.document.documentElement, {
       '--story-dvh': px(height / 100),
-    });
-  }
-
-  /**
-   * Handles resize events and sets the store service's width and height.
-   * @private
-   */
-  onViewportResize_() {
-    const page = this.element.querySelector(`amp-story-page[active]`);
-    const layoutBox = page?./*OK*/ getLayoutBox();
-    this.storeService_.dispatch(Action.SET_PAGE_SIZE, {
-      width: layoutBox?.width,
-      height: layoutBox?.height,
     });
   }
 
@@ -2465,5 +2461,4 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
-  AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

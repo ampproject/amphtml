@@ -30,12 +30,12 @@ function setRef(ref, value) {
 
 /**
  * Combines refs to pass into `ref` prop.
- * @param {import('preact').Ref<T>[]} refs
- * @return {function(T):void}
- * @template T
+ * @param {import('preact').Ref<*>[]} refs
+ * @return {import('preact').Ref<*>}
  */
 export function useMergeRefs(refs) {
   return useCallback(
+    /** @param {Element} element */
     (element) => {
       for (let i = 0; i < refs.length; i++) {
         setRef(refs[i], element);
@@ -53,8 +53,10 @@ export function useMergeRefs(refs) {
  * This passes through the value during development, because we render on Preact.
  * It's an annotation so that we can convert these values when we transform the
  * React build.
- * @param {string} name
- * @return {string}
+ *
+ * @param {T} name
+ * @return {T}
+ * @template {string} T
  */
 export function propName(name) {
   return name;

@@ -28,7 +28,7 @@ const KEYBOARD_SELECT_MODES = {
 };
 
 export class AmpSelector extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }

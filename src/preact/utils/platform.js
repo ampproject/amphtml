@@ -91,7 +91,7 @@ export const platformUtils = {
    */
   isStandalone() {
     return (
-      (this.isIos() && self.navigator.standalone) ||
+      (this.isIos() && /** @type {*} */ (self.navigator).standalone) ||
       (this.isChrome() && self.matchMedia('(display-mode: standalone)').matches)
     );
   },

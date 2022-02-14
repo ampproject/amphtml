@@ -60,7 +60,7 @@ const renderHeaderElement = () => {
  * @abstract
  */
 export class DraggableDrawer extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return false;
   }
