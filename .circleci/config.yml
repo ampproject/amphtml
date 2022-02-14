@@ -61,6 +61,7 @@ executors:
   machine-xlarge:
     machine:
       image: ubuntu-2004:202111-02
+    resource_class: xlarge
   macos-medium:
     macos:
       xcode: 12.4.0
