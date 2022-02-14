@@ -10,24 +10,32 @@ import {
   ShoppingConfigDataDef,
 } from '../../amp-story/1.0/amp-story-store-service';
 
-/** @const {!Object<string, !Array<function>>} */
-export const PRODUCT_VALIDATION_CONFIG = {
-  /* Required Attrs */
-  'productUrl': [validateRequired, validateString],
-  'productId': [validateRequired, validateString],
-  'productTitle': [validateRequired, validateString],
-  'productBrand': [validateRequired, validateString],
-  'productPrice': [validateRequired, validateNumber],
-  'productImages': [validateRequired, validateURLs],
-  'productPriceCurrency': [validateRequired, validateString],
-  /* Optional Attrs */
-  'productColor': [validateString],
-  'productSize': [validateString],
-  'productIcon': [validateURLs],
-  'productTagText': [validateString],
-  'reviewsData': [validateURLs],
-  'ctaText': [validateNumber],
-  'shippingText': [validateNumber],
+/** @const {!Object<!Object<string, !Array<function>>>} */
+export const VALIDATION_OBJECTS = {
+  'aggregateRating': {
+    'ratingValue': [validateRequired, validateNumber],
+    'reviewCount': [validateRequired, validateNumber],
+    'reviewUrl': [validateRequired, validateURLs],
+  },
+  'proudctValidationConfig': {
+    /* Required Attrs */
+    'productUrl': [validateRequired, validateString],
+    'productId': [validateRequired, validateString],
+    'productTitle': [validateRequired, validateString],
+    'productBrand': [validateRequired, validateString],
+    'productPrice': [validateRequired, validateNumber],
+    'productImages': [validateRequired, validateURLs],
+    'productPriceCurrency': [validateRequired, validateString],
+    'aggregateRating': [validateRequired, validateObject],
+    /* Optional Attrs */
+    'productColor': [validateString],
+    'productSize': [validateString],
+    'productIcon': [validateURLs],
+    'productTagText': [validateString],
+    'reviewsData': [validateURLs],
+    'ctaText': [validateNumber],
+    'shippingText': [validateNumber],
+  },
 };
 
 const essentialFieldsAccum = [];
@@ -45,6 +53,15 @@ const essentialFields = [
  * }}
  */
 let ShoppingConfigResponseDef;
+
+/**
+ * Validates an Object using its field name as a key for one of the validation objects above.
+ * @param {string} field
+ * @param {?Object=} value
+ */
+export function validateObject(field, value = undefined) {
+  validateConfig(value, VALIDATION_OBJECTS[field]);
+}
 
 /**
  * Validates if a required field exists for shopping config attributes
@@ -102,10 +119,14 @@ export function validateURLs(field, url = undefined) {
 /**
  * Validates shopping config.
  * @param {!ShoppingConfigDataDef} shoppingConfig
+ * @param {!Object<string, !Array<function>>} validationObject
  */
-export function validateConfig(shoppingConfig) {
-  Object.keys(PRODUCT_VALIDATION_CONFIG).forEach((configKey) => {
-    const validationFunctions = PRODUCT_VALIDATION_CONFIG[configKey];
+export function validateConfig(
+  shoppingConfig,
+  validationObject = VALIDATION_OBJECTS['proudctValidationConfig']
+) {
+  Object.keys(validationObject).forEach((configKey) => {
+    const validationFunctions = validationObject[configKey];
     validationFunctions.forEach((fn) => {
       try {
         fn(configKey, shoppingConfig[configKey]);

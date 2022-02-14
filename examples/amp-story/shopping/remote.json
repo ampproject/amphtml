@@ -11,8 +11,8 @@
         "/examples/visual-tests/amp-story/img/shopping/shopping-product.jpg"
       ],
       "aggregateRating": {
-        "ratingValue": "4.4",
-        "reviewCount": "89",
+        "ratingValue": 4.4,
+        "reviewCount": 89,
         "reviewUrl": "https://www.google.com"
       }
     }
