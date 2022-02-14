@@ -415,7 +415,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    */
   function remapDependenciesPlugin() {
     const remaps = Object.entries(options.remapDependencies).map(
-      ([path, value]) => ({regex: new RegExp(`^${path}(\.[jt]s)?$`), value})
+      ([path, value]) => ({regex: new RegExp(`^${path}(\.[jt]sx?)?$`), value})
     );
     const external = options.externalDependencies;
     return {
