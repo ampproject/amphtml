@@ -82,11 +82,15 @@ const VOID_ELEMENTS = new Set([
 
 /**
  * Returns true of node is a void element.
+ * @see https://developer.mozilla.org/en-US/docs/Glossary/Empty_element
+ *
  * @param {Node} node
  * @return {boolean}
  */
 function isVoidElement(node) {
-  return node.nodeType === Node.ELEMENT_NODE && VOID_ELEMENTS.has(node);
+  return (
+    node.nodeType === Node.ELEMENT_NODE && VOID_ELEMENTS.has(node.nodeName)
+  );
 }
 
 /**

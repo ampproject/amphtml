@@ -6,7 +6,7 @@ import {buildDom} from '#builtins/amp-layout/build-dom';
 import {createElementWithAttributes} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 
-import {getDeterministicOuterHTML as getOuterHtml} from '#testing/helpers';
+import {getDeterministicOuterHTML} from '#testing/helpers';
 
 describes.realWin('amp-layout', {amp: true}, (env) => {
   async function getAmpLayout(attrs, innerHTML) {
@@ -85,8 +85,8 @@ describes.realWin('amp-layout', {amp: true}, (env) => {
     buildDom(browserAmpLayout);
     buildDom(workerDomAmpLayout);
 
-    const browserHtml = getOuterHtml(browserAmpLayout);
-    const workerDomHtml = getOuterHtml(workerDomAmpLayout);
+    const browserHtml = getDeterministicOuterHTML(browserAmpLayout);
+    const workerDomHtml = getDeterministicOuterHTML(workerDomAmpLayout);
     expect(browserHtml).to.equal(workerDomHtml);
   });
 
