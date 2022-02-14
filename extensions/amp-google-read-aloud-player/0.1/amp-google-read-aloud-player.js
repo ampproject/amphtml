@@ -17,7 +17,7 @@ const DEFAULT_IFRAME_BASE_URL =
   'https://www.gstatic.com/readaloud/player/web/api/iframe/index.html';
 
 /** @private @const */
-const BASE_SRC_DATA_PARAM_NAME = 'data-base-src';
+const BASE_SRC_PARAM_NAME = 'base-src';
 
 /** @private @const */
 const SANDBOX = [
@@ -94,7 +94,7 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
 
   /** @return {string} */
   getIframeBaseSrc_() {
-    const baseSrc = this.element.getAttribute(BASE_SRC_DATA_PARAM_NAME);
+    const baseSrc = this.element.getAttribute(BASE_SRC_PARAM_NAME);
     return baseSrc ?? DEFAULT_IFRAME_BASE_URL;
   }
 
@@ -105,9 +105,6 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
       /* opt_computeParamNameFunc = */ undefined,
       '^(.+)'
     );
-
-    // Deletes `base-src` as this param is only used by the extension and not by the iframe.
-    delete dataParams['baseSrc'];
 
     const src = addParamsToUrl(this.getIframeBaseSrc_(), dataParams);
 
