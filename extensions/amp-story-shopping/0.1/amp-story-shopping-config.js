@@ -17,7 +17,7 @@ export const VALIDATION_OBJECTS = {
     'reviewCount': [validateRequired, validateNumber],
     'reviewUrl': [validateRequired, validateURLs],
   },
-  'proudctValidationConfig': {
+  'productValidationConfig': {
     /* Required Attrs */
     'productUrl': [validateRequired, validateString],
     'productId': [validateRequired, validateString],
@@ -123,7 +123,7 @@ export function validateURLs(field, url = undefined) {
  */
 export function validateConfig(
   shoppingConfig,
-  validationObject = VALIDATION_OBJECTS['proudctValidationConfig']
+  validationObject = VALIDATION_OBJECTS['productValidationConfig']
 ) {
   Object.keys(validationObject).forEach((configKey) => {
     const validationFunctions = validationObject[configKey];

@@ -10,7 +10,7 @@ import {
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {
-  PRODUCT_VALIDATION_CONFIG,
+  VALIDATION_OBJECTS,
   getShoppingConfig,
   storeShoppingConfig,
   validateNumber,
@@ -162,7 +162,9 @@ describes.realWin(
 
       await createAmpStoryShoppingConfig(null, invalidConfig);
 
-      for (const [key, value] of Object.entries(PRODUCT_VALIDATION_CONFIG)) {
+      for (const [key, value] of Object.entries(
+        VALIDATION_OBJECTS['productValidationConfig']
+      )) {
         if (value.includes(validateRequired)) {
           expect(() => {
             validateRequired(key, invalidConfig['items'][0][key]);
