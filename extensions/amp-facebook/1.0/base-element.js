@@ -74,10 +74,6 @@ function parseEmbed(element) {
       ' "post", "video", "comments", "like", or "page", but was: %s',
     embedAs
   );
-  userAssert(
-    embedAs !== 'comment',
-    'Embedded Comments have been deprecated: https://developers.facebook.com/docs/plugins/embedded-comments'
-  );
   return embedAs;
 }
 

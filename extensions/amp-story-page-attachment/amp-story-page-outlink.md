@@ -38,7 +38,7 @@ It must have the `layout="nodisplay"` attribute.
 The `<amp-story-page-outlink>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute.
 
 [tip type="important"]
-Both [`amp-story-page-outlink`](amp-story-page-outlink.md) and [`amp-story-page-attachment`](amp-story-page-attachment.md) must be the last child tag of an [`amp-story-page`](amp-story-page.md). Because of this, you may include neither or one, but not both.
+Both [`amp-story-page-outlink`](amp-story-page-outlink.md) and [`amp-story-page-attachment`](amp-story-page-attachment.md) must be the last child tag of an [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page?format=stories). Because of this, you may include neither or one, but not both.
 [/tip]
 
 ## `Custom Text` (optional)
@@ -147,5 +147,5 @@ Specifying `cta-image=none` will remove the default link icon.
 ```
 
 [tip type="note"]
-The functionality of `amp-story-page-outlink` used to be supported by [`amp-story-page-attachment`](https://amp.dev/documentation/components/amp-story-page-attachment/?format=stories). Please use `amp-story-page-outlink` for one-tap outlinking UI.
+The functionality of `amp-story-page-outlink` used to be supported by [`amp-story-page-attachment`](amp-story-page-attachment.md). Please use `amp-story-page-outlink` for one-tap outlinking UI.
 [/tip]

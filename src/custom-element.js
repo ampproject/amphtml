@@ -1800,6 +1800,11 @@ function createBaseCustomElementClass(win, elementConnectedCallback) {
     mutatedAttributesCallback(mutations) {
       if (this.impl_) {
         this.impl_.mutatedAttributesCallback(mutations);
+      } else if (this.R1()) {
+        // If amp-bind is trying to mutate an uninitialized BaseElement, it is probably about time
+        // to initialize it.
+        const scheduler = getSchedulerForDoc(this);
+        scheduler.scheduleAsap(this);
       }
     }
 
