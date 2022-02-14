@@ -65,7 +65,7 @@ export function AnimationTemplate(props) {
         <button on="tap:anim1.cancel">Cancel</button>
       </div>
       <div style={CONTAINER_STYLE}>
-        <pre style={INFO_STYLE}>{JSON.stringify(speec, null, 2)}</pre>
+        <pre style={INFO_STYLE}>{JSON.stringify(spec, null, 2)}</pre>
 
         {children}
       </div>
