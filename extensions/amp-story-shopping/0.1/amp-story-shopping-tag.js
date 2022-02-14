@@ -58,6 +58,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    /* This prevents the shopping tag component from building if there is no shopping attachment. */
     const pageElement = closestAncestorElementBySelector(
       this.element,
       'amp-story-page'
