@@ -48,10 +48,31 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     /** @param {!ShoppingConfigDataDef} tagData */
     this.tagData_ = null;
+
+    /** @param {boolean} element */
+    this.hasShoppingAttachment_ = false;
+
+    /** @param {!AmpElement} element */
+    this.shoppingTagEl_ = null;
   }
 
   /** @override */
   buildCallback() {
+    const pageElement = closestAncestorElementBySelector(
+      this.element,
+      'amp-story-page'
+    );
+
+    const pageAttachment = childElementByTag(
+      pageElement,
+      'amp-story-shopping-attachment'
+    );
+
+    this.hasShoppingAttachment_ = pageAttachment;
+    if (!this.hasShoppingAttachment_) {
+      return;
+    }
+
     loadFonts(this.win, FONTS_TO_LOAD);
     this.element.setAttribute('role', 'button');
 
@@ -66,6 +87,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!this.hasShoppingAttachment_) {
+      return;
+    }
+
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
       (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
@@ -233,21 +258,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   createAndAppendInnerShoppingTagEl_(shoppingData) {
     this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
 
-    const pageElement = closestAncestorElementBySelector(
-      this.element,
-      'amp-story-page'
-    );
-
-    const pageAttachment = childElementByTag(
-      pageElement,
-      'amp-story-shopping-attachment'
-    );
-
-    if (
-      this.hasAppendedInnerShoppingTagEl_ ||
-      !this.tagData_ ||
-      !pageAttachment
-    ) {
+    if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
 
