@@ -17,6 +17,7 @@ import {Layout_Enum} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {
   closestAncestorElementBySelector,
+  matches,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
 import {toggle} from '#core/dom/style';
@@ -154,7 +155,7 @@ export const NavigationDirection = {
  * an <amp-story>.
  */
 export class AmpStoryPage extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed(element) {
     return isPrerenderActivePage(element);
   }
@@ -191,6 +192,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.errorMessageEl_ = null;
 
     const deferred = new Deferred();
+
+    /** @const {boolean} */
+    this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
 
     /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
     this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsService(
@@ -419,6 +423,16 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
+   * Return true if the current AmpStoryPage is protected by a paywall.
+   * 'limited-content' is for the paywall dialog page, where a paywall would trigger based on both time advance or click events.
+   * 'content' is for all the remaining locked pages.
+   * @return {boolean}
+   */
+  isPaywallProtected() {
+    return this.element.hasAttribute('subscriptions-section');
+  }
+
+  /**
    * Updates the state of the page.
    * @param {!PageState} state
    */
@@ -520,12 +534,22 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.muteAllMedia();
 
-    this.renderOpenAttachmentUI_();
+    this.installPageAttachmentExtension_();
 
     return Promise.all([
       this.waitForMediaLayout_().then(() => this.markPageAsLoaded_()),
       this.mediaPoolPromise_,
     ]);
+  }
+
+  /** @override */
+  onLayoutMeasure() {
+    // TODO(#37528): Replace with ResizeObserver API.
+    const {height, width} = this.getLayoutSize();
+    if (!this.isFirstPage_ || height === 0 || width === 0) {
+      return;
+    }
+    this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
   }
 
   /**
@@ -1523,21 +1547,15 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Renders the open attachment UI affordance.
+   * Installs the page attachment extension.
    * @private
    */
-  renderOpenAttachmentUI_() {
-    // AttachmentEl can be any component that extends draggable drawer.
-    const attachmentEl = this.element.querySelector(
+  installPageAttachmentExtension_() {
+    const elementsThatRequireExtension = this.element.querySelector(
       'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
     );
 
-    if (
-      !attachmentEl ||
-      (attachmentEl.tagName === 'AMP-STORY-SHOPPING-ATTACHMENT' &&
-        this.element.getElementsByTagName('amp-story-shopping-tag').length ===
-          0)
-    ) {
+    if (!elementsThatRequireExtension) {
       return;
     }
 

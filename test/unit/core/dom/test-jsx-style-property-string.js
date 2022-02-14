@@ -1,4 +1,4 @@
-import {jsxStylePropertyString} from '#core/dom/jsx-style-property-string';
+import {jsxStylePropertyString} from '#core/dom/jsx/style-property-string';
 
 describes.sandboxed('jsxStylePropertyString', {}, () => {
   it('returns empty string with nullish', () => {
