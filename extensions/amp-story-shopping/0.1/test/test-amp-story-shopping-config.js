@@ -272,4 +272,5 @@ describes.realWin(
           invalidConfig['items'][0]['productImages'][0]
       );
     });
+  }
 );
