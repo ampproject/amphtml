@@ -94,8 +94,8 @@ describes.realWin(
               '/examples/visual-tests/amp-story/img/shopping/shopping-product.jpg',
             ],
             'aggregateRating': {
-              'ratingValue': '4.4',
-              'reviewCount': '89',
+              'ratingValue': 4.4,
+              'reviewCount': 89,
               'reviewUrl': 'https://www.google.com',
             },
           },
@@ -186,6 +186,11 @@ describes.realWin(
               '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
               '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
             ],
+            'aggregateRating': {
+              'ratingValue': 4.4,
+              'reviewCount': 89,
+              'reviewUrl': 'https://www.google.com',
+            },
           },
         ],
       };
@@ -214,6 +219,11 @@ describes.realWin(
               '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
               '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
             ],
+            'aggregateRating': {
+              'ratingValue': 4.4,
+              'reviewCount': 89,
+              'reviewUrl': 'https://www.google.com',
+            },
           },
         ],
       };
@@ -239,6 +249,11 @@ describes.realWin(
             'productPrice': 19,
             'productPriceCurrency': 'JPY',
             'productImages': ['http://pizazz', 'http://zapp'],
+            'aggregateRating': {
+              'ratingValue': 4.4,
+              'reviewCount': 89,
+              'reviewUrl': 'https://www.google.com',
+            },
           },
         ],
       };
