@@ -6,7 +6,7 @@ import {setStyles} from '#core/dom/style';
  * @param {string} text
  * @return {boolean}
  */
-export function copyTextToClipboard(win, text) {
+export function depricatedCopyTextToClipboard(win, text) {
   let copySuccessful = false;
   const doc = win.document;
 
@@ -51,6 +51,33 @@ export function copyTextToClipboard(win, text) {
  * @param {Document} doc
  * @return {boolean}
  */
-export function isCopyingToClipboardSupported(doc) {
+export function isDepricatedCopyingToClipboardSupported(doc) {
   return doc.queryCommandSupported('copy');
+}
+
+/**
+ * @param {Window} win
+ * @param {string} text
+ * @param {*} successCallback
+ * @param {*} failCallback
+ */
+export function copyTextToClipboard(win, text, successCallback, failCallback) {
+  win.navigator.clipboard.writeText(text).then(
+    function () {
+      /* clipboard successfully set */
+      successCallback();
+    },
+    function () {
+      /* clipboard write failed */
+      failCallback();
+    }
+  );
+}
+
+/**
+ * @param {Document} doc
+ * @return {boolean}
+ */
+export function isCopyingToClipboardSupported(doc) {
+  return !!doc.defaultView?.navigator.clipboard;
 }
