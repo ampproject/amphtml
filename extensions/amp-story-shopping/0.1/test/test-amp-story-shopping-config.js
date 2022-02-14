@@ -14,6 +14,7 @@ import {
   getShoppingConfig,
   storeShoppingConfig,
   validateNumber,
+  validateObject,
   validateRequired,
   validateString,
   validateURLs,
@@ -177,6 +178,7 @@ describes.realWin(
       const invalidConfig = {
         'items': [
           {
+            'productUrl': 'https://www.google.com',
             'productId': 'city-pop',
             'productTitle': 123,
             /* Not a string, will fail string type test */
@@ -210,6 +212,7 @@ describes.realWin(
       const invalidConfig = {
         'items': [
           {
+            'productUrl': 'https://www.google.com',
             'productId': 'city-pop',
             'productTitle': 'Adventure',
             'productPrice': 'two dozen watermelons',
@@ -244,6 +247,7 @@ describes.realWin(
       const invalidConfig = {
         'items': [
           {
+            'productUrl': 'https://www.google.com',
             'productId': 'city-pop',
             'productTitle': 'Adventure',
             'productPrice': 19,
@@ -268,5 +272,4 @@ describes.realWin(
           invalidConfig['items'][0]['productImages'][0]
       );
     });
-  }
 );
