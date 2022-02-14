@@ -248,6 +248,27 @@ export class StandardActions {
     }
 
     /**
+     * Raises a status event for copy task result
+     * @param {*} eventName
+     * @param {*} eventResult
+     * @param {*} invocation
+     */
+    const triggerEvent = function (eventName, eventResult, invocation) {
+      const eventValue = /** @type {!JsonObject} */ ({
+        data: /** @type {!JsonObject} */ {type: eventResult},
+      });
+      const copyEvent = createCustomEvent(win, `${eventName}`, eventValue);
+
+      const action_ = Services.actionServiceForDoc(invocation.caller);
+      action_.trigger(
+        invocation.caller,
+        eventName,
+        copyEvent,
+        ActionTrust_Enum.HIGH
+      );
+    };
+
+    /**
      * Trigger Event based on copy action
      *  - If content got copied to the clipboard successfully, it will
      *  fire `copy-success` event with data type `success`.
@@ -260,27 +281,24 @@ export class StandardActions {
      */
     let eventName = CopyEvents.COPY_ERROR;
     if (isCopyingToClipboardSupported(win.document)) {
-      if (copyTextToClipboard(win, textToCopy)) {
-        eventName = CopyEvents.COPY_SUCCESS;
-        eventResult = 'success';
-      } else {
-        eventResult = 'error';
-      }
+      copyTextToClipboard(
+        win,
+        textToCopy,
+        () => {
+          eventName = CopyEvents.COPY_SUCCESS;
+          eventResult = 'success';
+          triggerEvent(eventName, eventResult, invocation);
+        },
+        () => {
+          eventResult = 'error';
+          triggerEvent(eventName, eventResult, invocation);
+        }
+      );
     } else {
       eventResult = 'browser';
+      triggerEvent(eventName, eventResult, invocation);
     }
-    const eventValue = /** @type {!JsonObject} */ ({
-      data: /** @type {!JsonObject} */ {type: eventResult},
-    });
-    const copyEvent = createCustomEvent(win, `${eventName}`, eventValue);
 
-    const action_ = Services.actionServiceForDoc(invocation.caller);
-    action_.trigger(
-      invocation.caller,
-      eventName,
-      copyEvent,
-      ActionTrust_Enum.HIGH
-    );
     return null;
   }
 
