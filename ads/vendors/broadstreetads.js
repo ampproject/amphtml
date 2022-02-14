@@ -37,7 +37,7 @@ export function broadstreetads(global, data) {
       softKeywords: true,
       width: data.width,
       zoneId: data.zone,
-      options: data.initoptions
+      options: data.initoptions,
     });
   });
   loadScript(global, initUrl);
