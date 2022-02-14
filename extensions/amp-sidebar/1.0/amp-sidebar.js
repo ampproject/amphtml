@@ -1,6 +1,5 @@
 import {isExperimentOn} from '#experiments';
 
-import * as Preact from '#preact';
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service/';
