@@ -78,12 +78,12 @@ export function validateRequired(field, value = undefined) {
 }
 
 /**
- * Validates string length of shopping config attributes
+ * Validates if string type for shopping config attributes
  * @param {string} field
  * @param {?string=} str
  */
 export function validateString(field, str = undefined) {
-  if (typeof str !== 'string' && str !== undefined) {
+  if (typeof str !== 'string') {
     throw Error(`${field} ${str} is not a string.`);
   }
 }
@@ -94,7 +94,7 @@ export function validateString(field, str = undefined) {
  * @param {?number=} number
  */
 export function validateNumber(field, number = undefined) {
-  if (typeof number !== 'number' && number !== undefined) {
+  if (typeof number !== 'number') {
     throw Error(`Value ${number} for field ${field} is not a number`);
   }
 }
@@ -117,7 +117,7 @@ export function validateURLs(field, url = undefined) {
 }
 
 /**
- * Validates shopping config.
+ * Validates the shopping config of a single product.
  * @param {!ShoppingConfigDataDef} shoppingConfig
  * @param {!Object<string, !Array<function>>} validationObject
  */
@@ -129,7 +129,13 @@ export function validateConfig(
     const validationFunctions = validationObject[configKey];
     validationFunctions.forEach((fn) => {
       try {
-        fn(configKey, shoppingConfig[configKey]);
+        /* This check skips optional attribute validation */
+        if (
+          shoppingConfig[configKey] !== undefined ||
+          validationFunctions.includes(validateRequired)
+        ) {
+          fn(configKey, shoppingConfig[configKey]);
+        }
       } catch (err) {
         user().warn('AMP-STORY-SHOPPING-CONFIG', `${err}`);
       }
@@ -149,7 +155,7 @@ export let KeyedShoppingConfigDef;
 export function getShoppingConfig(pageElement) {
   const element = pageElement.querySelector('amp-story-shopping-config');
   return getElementConfig(element).then((config) => {
-    config['items'].forEach((item) => validateConfig(item));
+    config['items'].forEach((itemConfig) => validateConfig(itemConfig));
 
     if (essentialFieldsAccum.length > 0) {
       user().warn(
@@ -158,7 +164,7 @@ export function getShoppingConfig(pageElement) {
           essentialFieldsAccum
         )} are missing. Please add them in the shopping config. See the error messages above for more details.`
       );
-      return;
+      return null;
     } else {
       return keyByProductTagId(config);
     }
