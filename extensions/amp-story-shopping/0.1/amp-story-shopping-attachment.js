@@ -116,20 +116,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
-   * Active product data is cleared after the attachment closes so that content does not jump.
-   * @private
-   */
-  checkClearActiveProductData_() {
-    Services.timerFor(this.win).delay(
-      () =>
-        this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-          'activeProductData': null,
-        }),
-      DRAGGABLE_DRAWER_TRANSITION_MS
-    );
-  }
-
-  /**
    * Handles clearing active product data and updating the template
    * when there is no active product data.
    * @param {boolean} isOpen
@@ -174,6 +160,20 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         this.updateTemplate_(shoppingData);
       });
     }
+  }
+
+  /**
+   * Active product data is cleared after the attachment closes so that content does not jump.
+   * @private
+   */
+  checkClearActiveProductData_() {
+    Services.timerFor(this.win).delay(
+      () =>
+        this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+          'activeProductData': null,
+        }),
+      DRAGGABLE_DRAWER_TRANSITION_MS
+    );
   }
 
   /**
