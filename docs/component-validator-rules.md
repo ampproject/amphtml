@@ -441,8 +441,8 @@ There are two alternative ways to do this.
 
 1. Option 2
 
-    Wait PR checks to fail.
-    The error message in CircleCI includes the expected content of the `.out` file.
+    Wait for the PR checks on CircleCI to fail.
+    The error message in the logs will include the expected content of the `.out` file.
 
 After generating the `.out` file, you should check it's contents that it gives the correct validation results/errors. If you only added valid examples, this file should contain a single line:
 
