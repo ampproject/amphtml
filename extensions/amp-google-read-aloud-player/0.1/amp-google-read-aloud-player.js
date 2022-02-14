@@ -17,7 +17,7 @@ const DEFAULT_IFRAME_BASE_URL =
   'https://www.gstatic.com/readaloud/player/web/api/iframe/index.html';
 
 /** @private @const */
-const BASE_SRC_PARAM_NAME = 'base-src';
+const BASE_SRC_PARAM_NAME = 'src';
 
 /** @private @const */
 const SANDBOX = [
@@ -100,13 +100,14 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
 
   /** @return {string} */
   getIframeSrc_() {
-    const dataParams = getDataParamsFromAttributes(
-      this.element,
-      /* opt_computeParamNameFunc = */ undefined,
-      '^(.+)'
+    const src = addParamsToUrl(
+      this.getIframeBaseSrc_(),
+      getDataParamsFromAttributes(
+        this.element,
+        /* opt_computeParamNameFunc = */ undefined,
+        '^(.+)'
+      )
     );
-
-    const src = addParamsToUrl(this.getIframeBaseSrc_(), dataParams);
 
     return `${src}#ampGoogleReadAloudPlayer=1`;
   }

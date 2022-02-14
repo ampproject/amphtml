@@ -143,7 +143,7 @@ describes.realWin(
           'data-api-key': API_KEY,
           'data-tracking-ids': TRACKING_IDS,
           'data-voice': VOICE,
-          'base-src': BASE_SRC,
+          'src': BASE_SRC,
         });
 
         const iframe = element.querySelector('iframe');
