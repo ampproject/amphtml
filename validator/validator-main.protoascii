@@ -2942,6 +2942,35 @@ tags: {
   mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "INPUT [type=image]"
+  attrs: {
+    name: "type"
+    value_casei: "image"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[type]"
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "input-common-attr"
+  attr_lists: "name-attr"
+  mandatory_ancestor: "FORM [method=POST]"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
+}
 # 4.10.6 The button element
 tags: {
   html_format: AMP

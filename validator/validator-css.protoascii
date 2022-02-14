@@ -464,16 +464,7 @@ declaration_list {
   declaration: { name: "pitch" }
   declaration: { name: "pitch-range" }
   declaration: { name: "place-items" }
-  # CSS property `position` with values `fixed` and `sticky` are not allowed.
-  # From https://www.w3schools.com/cssref/pr_class_position.asp
-  declaration: {
-    name: "position"
-    value_casei: "absolute"
-    value_casei: "inherit"
-    value_casei: "initial"
-    value_casei: "relative"
-    value_casei: "static"
-  }
+  declaration: { name: "position" }
   declaration: { name: "quotes" }
   declaration: { name: "resize" }
   declaration: { name: "richness" }
