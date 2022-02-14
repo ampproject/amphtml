@@ -36,9 +36,19 @@ const INFO_STYLE = {
   overflow: 'auto',
 };
 
-export const animationFillArgType = {options: FILL_OPTIONS};
+export const animationFillArgType = {
+  name: 'fill',
+  options: FILL_OPTIONS,
+  control: {type: 'select'},
+  defaultValue: 'both',
+};
 
-export const animationDirectionArgType = {options: DIRECTION_OPTIONS};
+export const animationDirectionArgType = {
+  name: 'duration',
+  options: DIRECTION_OPTIONS,
+  control: {type: 'select'},
+  defaultValue: 'alternate',
+};
 
 /**
  * @param {!Object} props

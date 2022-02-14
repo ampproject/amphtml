@@ -50,6 +50,7 @@ export default {
     fill: animationFillArgType,
     direction: animationDirectionArgType,
     keyframesName: {
+      name: 'keyframesName',
       control: {type: 'select'},
       options: keyframesOptions,
     },
