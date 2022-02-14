@@ -50,7 +50,7 @@ module.exports = {
       }
 
       const [nextComment] = context.getCommentsAfter(node);
-      const [nextCommentStart] = nextComment.range;
+      const [nextCommentStart] = nextComment?.range ?? [];
       if (
         nextComment &&
         text.substr(end, nextCommentStart - end).indexOf('\n') < 0
