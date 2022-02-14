@@ -117,9 +117,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   flipTagIfOffscreen_(pageSize) {
-    if (!this.shoppingTagEl_) {
-      return;
-    }
     const storyPageWidth = pageSize.width;
 
     let shouldFlip;
