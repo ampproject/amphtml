@@ -46,7 +46,11 @@ function getVendorJsPropertyName_(style, titleCase) {
 }
 
 /**
- * A small set of curated properties that are valid with setProp
+ * A small set of curated properties that are valid with setProperty.
+ * Within worker-dom, only `.setProperty` properly reflects into the attribute.
+ * If we solve that, or decide to always use setProperty, this kludge can be removed.
+ *
+ * TODO(https://github.com/ampproject/worker-dom/issues/1134)
  */
 const SHOULD_USE_SET_PROPERTY = new Set(['width', 'height', 'order', 'hidden']);
 
