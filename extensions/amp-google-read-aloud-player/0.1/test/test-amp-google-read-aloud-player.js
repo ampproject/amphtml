@@ -138,7 +138,7 @@ describes.realWin(
         );
       });
 
-      it('sets optinal iframe base src', async () => {
+      it('sets optional iframe base src', async () => {
         const element = await createAndRenderGoogleReadAloudPlayer({
           'data-api-key': API_KEY,
           'data-tracking-ids': TRACKING_IDS,
