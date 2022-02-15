@@ -43,7 +43,10 @@ describes.realWin(
       schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
     });
 
-    function getAmpScrollableCarousel(addToDom = true, doc = env.win.document) {
+    function getAmpScrollableCarousel({
+      doc = env.win.document,
+      addToDom = true,
+    }) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
         'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
@@ -245,7 +248,7 @@ describes.realWin(
           .stub(Services, 'inputFor')
           .returns({onMouseDetected: () => {}});
 
-        const el1 = await getAmpScrollableCarousel(/* addToDom */ false);
+        const el1 = await getAmpScrollableCarousel({addToDom: false});
         const el2 = el1.cloneNode(/* deep */ true);
         const impl = new AmpScrollableCarousel(el1);
         impl.setupBehavior_ = () => {};
@@ -256,14 +259,14 @@ describes.realWin(
       });
 
       it('buildDom should behave same in browser and in WorkerDOM', async () => {
-        const browserCarousel = await getAmpScrollableCarousel(
-          /* addToDom */ false,
-          env.win.doc
-        );
-        const workerCarousel = await getAmpScrollableCarousel(
-          /* addToDom */ false,
-          createWorkerDomDoc()
-        );
+        const browserCarousel = await getAmpScrollableCarousel({
+          addToDom: false,
+          doc: env.win.doc,
+        });
+        const workerCarousel = await getAmpScrollableCarousel({
+          addToDom: false,
+          doc: createWorkerDomDoc(),
+        });
 
         buildDom(browserCarousel);
         buildDom(workerCarousel);
@@ -274,7 +277,7 @@ describes.realWin(
       });
 
       it('buildCallback should assign ivars even when server rendered', async () => {
-        const el1 = await getAmpScrollableCarousel(/* addToDom */ false);
+        const el1 = await getAmpScrollableCarousel({addToDom: false});
         buildDom(el1);
         el1.setAttribute('i-amphtml-ssr', '');
         const impl = new AmpScrollableCarousel(el1);
@@ -286,13 +289,13 @@ describes.realWin(
       });
 
       it('buildDom should throw if invalid server rendered dom', async () => {
-        const carousel = await getAmpScrollableCarousel(/* addToDom */ false);
+        const carousel = await getAmpScrollableCarousel({addToDom: false});
         carousel.setAttribute('i-amphtml-ssr', '');
         expect(() => buildDom(carousel)).throws(/Invalid server render/);
       });
 
       it('buildDom should not modify dom for server rendered element', async () => {
-        const carousel = await getAmpScrollableCarousel(/* addToDom */ false);
+        const carousel = await getAmpScrollableCarousel({addToDom: false});
         buildDom(carousel);
         carousel.setAttribute('i-amphtml-ssr', '');
 

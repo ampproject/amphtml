@@ -37,22 +37,24 @@ describes.realWin(
     });
 
     /**
-     * @param {boolean=} opt_hasLooping
-     * @param {number=} opt_slideCount
-     * @param {boolean=} opt_attachToDom
-     * @param {boolean=} opt_hasAutoplay
-     * @param {boolean=} opt_autoplayLoops
-     * @param {Document=} opt_doc
+     * @param {{
+     *  doc?: !Document,
+     *  hasLooping?: boolean,
+     *  slideCount?: number,
+     *  attachToDom?: boolean,
+     *  hasAutoplay?: boolean,
+     *  autoplayLoops?: boolean,
+     * }} param0
      * @return {Element}
      */
-    function getAmpSlideScroll(
-      opt_hasLooping,
-      opt_slideCount = 5,
-      opt_attachToDom = true,
-      opt_hasAutoplay = false,
-      opt_autoplayLoops,
-      doc = env.win.document
-    ) {
+    function getAmpSlideScroll({
+      doc = env.win.document,
+      hasLooping = false,
+      slideCount = 5,
+      attachToDom = true,
+      hasAutoplay = false,
+      autoplayLoops,
+    }) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
         'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
@@ -62,18 +64,18 @@ describes.realWin(
       ampSlideScroll.setAttribute('height', '300');
       ampSlideScroll.style.setProperty('position', 'relative');
       ampSlideScroll.setAttribute('controls', '');
-      if (opt_hasLooping) {
+      if (hasLooping) {
         ampSlideScroll.setAttribute('loop', '');
       }
-      if (opt_hasAutoplay) {
-        if (!opt_autoplayLoops) {
+      if (hasAutoplay) {
+        if (!autoplayLoops) {
           ampSlideScroll.setAttribute('autoplay', '');
         } else {
-          ampSlideScroll.setAttribute('autoplay', opt_autoplayLoops);
+          ampSlideScroll.setAttribute('autoplay', autoplayLoops);
         }
       }
 
-      for (let i = 0; i < opt_slideCount; i++) {
+      for (let i = 0; i < slideCount; i++) {
         const img = doc.createElement('amp-img');
         img.setAttribute('src', imgUrl);
         img.setAttribute('width', '400');
@@ -86,7 +88,7 @@ describes.realWin(
         ampSlideScroll.appendChild(img);
       }
 
-      if (opt_attachToDom) {
+      if (attachToDom) {
         doc.body.appendChild(ampSlideScroll);
         return ampSlideScroll
           .buildInternal()
@@ -593,7 +595,7 @@ describes.realWin(
     });
 
     it('should custom snap to the correct slide - special case', async () => {
-      const ampSlideScroll = await getAmpSlideScroll(null, 2);
+      const ampSlideScroll = await getAmpSlideScroll({slideCount: 2});
       const impl = await ampSlideScroll.getImpl();
 
       const animateScrollLeftSpy = env.sandbox.spy(impl, 'animateScrollLeft_');
@@ -712,7 +714,7 @@ describes.realWin(
 
     describe('Looping', () => {
       it('should create container and wrappers and show initial slides', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS)).to.be
@@ -725,7 +727,7 @@ describes.realWin(
 
       // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
       it.skip('should show the correct slides when looping', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         const owners = Services.ownersForDoc(impl.element);
@@ -842,7 +844,10 @@ describes.realWin(
       });
 
       it('show correct slides when looping with `autoplay` for 2 slides', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true, 2);
+        const ampSlideScroll = await getAmpSlideScroll({
+          hasLooping: true,
+          slideCount: 2,
+        });
         const impl = await ampSlideScroll.getImpl();
 
         const owners = Services.ownersForDoc(impl.element);
@@ -911,14 +916,23 @@ describes.realWin(
       });
 
       it('do not set `autoplay` status if `autoplay=0` specified', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(false, 3, true, true, 0);
+        const ampSlideScroll = await getAmpSlideScroll({
+          hasLooping: false,
+          slideCount: 3,
+          hasAutoplay: false,
+          autoplayLoops: 0,
+        });
         const impl = await ampSlideScroll.getImpl();
         const setupAutoplaySpy = env.sandbox.spy(impl, 'setupAutoplay_');
         expect(setupAutoplaySpy).to.not.have.been.called;
       });
 
       it('removes `autoplay` status after provided loops are made', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(false, 3, true, true, 2);
+        const ampSlideScroll = await getAmpSlideScroll({
+          slideCount: 3,
+          hasAutoplay: true,
+          autoplayLoops: 2,
+        });
         const impl = await ampSlideScroll.getImpl();
 
         const removeAutoplaySpy = env.sandbox.spy(impl, 'removeAutoplay_');
@@ -934,7 +948,12 @@ describes.realWin(
       });
 
       it('sets the correct scrollLeft for looping carousel', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true, 7, false, true);
+        const ampSlideScroll = await getAmpSlideScroll({
+          hasLooping: true,
+          slideCount: 7,
+          attachToDom: false,
+          hasAutoplay: true,
+        });
         doc.body.appendChild(ampSlideScroll);
         await ampSlideScroll.buildInternal();
         const impl = await ampSlideScroll.getImpl();
@@ -948,7 +967,7 @@ describes.realWin(
 
       // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
       it.skip('should hide unwanted slides when looping', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         const owners = Services.ownersForDoc(impl.element);
@@ -1060,7 +1079,7 @@ describes.realWin(
       });
 
       it('should show/hide the correct controls when looping', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
         const controls = impl.controls_;
         const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
@@ -1079,7 +1098,10 @@ describes.realWin(
       });
 
       it('should set the correct scrollLeft when there is only one slide', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true, 1);
+        const ampSlideScroll = await getAmpSlideScroll({
+          hasLooping: true,
+          slideCount: 1,
+        });
         const impl = await ampSlideScroll.getImpl();
 
         impl.noOfSlides_ = 1;
@@ -1088,7 +1110,7 @@ describes.realWin(
       });
 
       it('should update to the right slide on scroll', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
@@ -1129,7 +1151,7 @@ describes.realWin(
       });
 
       it('should get the correct next slide index for a scrollLeft', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         // Already at slide 0;
@@ -1163,7 +1185,7 @@ describes.realWin(
       });
 
       it('should custom snap to the correct slide', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         const animateScrollLeftSpy = env.sandbox.spy(
@@ -1193,7 +1215,7 @@ describes.realWin(
       });
 
       it('should go to the correct slide on button click', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
@@ -1213,7 +1235,7 @@ describes.realWin(
 
       // TODO(#17197): This test triggers sinonjs/sinon issues 1709 and 1321.
       it.skip('should update slide when `slide` attribute is mutated', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
         expectAsyncConsoleError(/Invalid \[slide\] value:/, 1);
 
@@ -1232,7 +1254,7 @@ describes.realWin(
       });
 
       it('should trigger `slideChange` action when user changes slides', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
@@ -1255,7 +1277,7 @@ describes.realWin(
       });
 
       it('should fire `slideChange` DOM event with high trust when user changes slides', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         let event;
@@ -1273,7 +1295,7 @@ describes.realWin(
       });
 
       it('should goToSlide on action', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         expectAsyncConsoleError(/Invalid \[slide\] value:/, 4);
@@ -1307,7 +1329,7 @@ describes.realWin(
       });
 
       it('should handle carousel snapping & hiding race', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(true);
+        const ampSlideScroll = await getAmpSlideScroll({hasLooping: true});
         const impl = await ampSlideScroll.getImpl();
 
         // simluate carousel hidding
@@ -1318,11 +1340,11 @@ describes.realWin(
       });
 
       it('should NOT call showSlide_ before layout', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(
-          true,
-          5,
-          /* opt_attachToDom */ false
-        );
+        const ampSlideScroll = await getAmpSlideScroll({
+          hasLooping: true,
+          slideCount: 5,
+          attachToDom: false,
+        });
 
         // Layout happens asynchronously after attaching to DOM, so we can
         // test pre-layoutCallback logic now.
@@ -1348,7 +1370,11 @@ describes.realWin(
       });
 
       it('should NOT call showSlide_ before re-layout', async () => {
-        const ampSlideScroll = await getAmpSlideScroll(false, 5, false);
+        const ampSlideScroll = await getAmpSlideScroll({
+          hasLooping: true,
+          slideCount: 5,
+          attachToDom: false,
+        });
         doc.body.appendChild(ampSlideScroll);
         await ampSlideScroll.buildInternal();
 
@@ -1396,7 +1422,7 @@ describes.realWin(
       it('should add disabled CSS snap class for iOS 10.3', async () => {
         env.sandbox.stub(platform, 'isIos').returns(true);
         env.sandbox.stub(platform, 'getIosVersionString').returns('10.3');
-        const el = await getAmpSlideScroll(false, 3);
+        const el = await getAmpSlideScroll({hasLooping: false, slideCount: 3});
         const slidesContainer = el.querySelector('.i-amphtml-slides-container');
         expect(
           slidesContainer.classList.contains('i-amphtml-slidescroll-no-snap')
@@ -1406,7 +1432,7 @@ describes.realWin(
       it('shoud not contain disabled snap class for non iOS 10.3', async () => {
         env.sandbox.stub(platform, 'isIos').returns(true);
         env.sandbox.stub(platform, 'getIosVersionString').returns('10.4');
-        const el = await getAmpSlideScroll(false, 3);
+        const el = await getAmpSlideScroll({hasLooping: false, slideCount: 3});
         const slidesContainer = el.querySelector('.i-amphtml-slides-container');
         expect(
           slidesContainer.classList.contains('i-amphtml-slidescroll-no-snap')
@@ -1416,7 +1442,7 @@ describes.realWin(
       it('shoud add disabled CSS snap class for for non iOS', async () => {
         env.sandbox.stub(platform, 'isIos').returns(false);
         env.sandbox.stub(platform, 'getIosVersionString').returns('10.4');
-        const el = await getAmpSlideScroll(false, 3);
+        const el = await getAmpSlideScroll({hasLooping: false, slideCount: 3});
         const slidesContainer = el.querySelector('.i-amphtml-slides-container');
         expect(
           slidesContainer.classList.contains('i-amphtml-slidescroll-no-snap')
@@ -1439,7 +1465,10 @@ describes.realWin(
 
       describe('when not looping', () => {
         it('should have the correct values on the first index', function* () {
-          const el = yield getAmpSlideScroll(false, 3);
+          const el = await getAmpSlideScroll({
+            hasLooping: false,
+            slideCount: 3,
+          });
           expect(getPrevTitle(el)).to.equal(
             'Previous item in carousel (1 of 3)'
           );
@@ -1447,7 +1476,10 @@ describes.realWin(
         });
 
         it('should have the correct values on the last index', async () => {
-          const el = await getAmpSlideScroll(false, 3);
+          const el = await getAmpSlideScroll({
+            hasLooping: false,
+            slideCount: 3,
+          });
           const impl = await el.getImpl();
           impl.showSlide_(2);
           expect(getPrevTitle(el)).to.equal(
@@ -1459,7 +1491,7 @@ describes.realWin(
 
       describe('when looping', () => {
         it('should have the correct values on the first index', function* () {
-          const el = yield getAmpSlideScroll(true, 3);
+          const el = await getAmpSlideScroll({hasLooping: true, slideCount: 3});
           expect(getPrevTitle(el)).to.equal(
             'Previous item in carousel (3 of 3)'
           );
@@ -1467,7 +1499,7 @@ describes.realWin(
         });
 
         it('should have the correct values on the last index', async () => {
-          const el = await getAmpSlideScroll(true, 3);
+          const el = await getAmpSlideScroll({hasLooping: true, slideCount: 3});
           const impl = await el.getImpl();
           impl.showSlide_(2);
           expect(getPrevTitle(el)).to.equal(
@@ -1480,11 +1512,10 @@ describes.realWin(
 
     describe('buildDom', () => {
       it('buildDom and buildCallback should result in the same outerHTML', async () => {
-        const el1 = await getAmpSlideScroll(
-          /* hasLooping */ true,
-          /* slideCount */ undefined,
-          /* attachToDom */ false
-        );
+        const el1 = await getAmpSlideScroll({
+          hasLooping: true,
+          attachToDom: false,
+        });
         const el2 = el1.cloneNode(/* deep */ true);
         const impl = new AmpSlideScroll(el1);
         impl.setupSlideBehavior_ = () => {};
@@ -1495,19 +1526,15 @@ describes.realWin(
       });
 
       it('buildDom should behave same in browser and in WorkerDOM', async () => {
-        const browserCarousel = await getAmpSlideScroll(
-          /* hasLooping */ true,
-          /* slideCount */ undefined,
-          /* attachToDom */ false
-        );
-        const workerCarousel = await getAmpSlideScroll(
-          /* hasLooping */ true,
-          /* slideCount */ undefined,
-          /* attachToDom */ false,
-          /* opt_hasAutoPlay */ undefined,
-          /* opt_autoplayLoops */ undefined,
-          createWorkerDomDoc()
-        );
+        const browserCarousel = await getAmpSlideScroll({
+          looping: true,
+          attachToDom: false,
+        });
+        const workerCarousel = await getAmpSlideScroll({
+          looping: true,
+          attachToDom: false,
+          doc: createWorkerDomDoc(),
+        });
         buildDom(browserCarousel);
         buildDom(workerCarousel);
 
@@ -1517,11 +1544,10 @@ describes.realWin(
       });
 
       it('buildCallback should assign ivars even when server rendered', async () => {
-        const el1 = await getAmpSlideScroll(
-          /* hasLooping */ true,
-          /* slideCount */ undefined,
-          /* attachToDom */ false
-        );
+        const el1 = await getAmpSlideScroll({
+          looping: true,
+          attachToDom: false,
+        });
         buildDom(el1);
         el1.setAttribute('i-amphtml-ssr', '');
         const impl = new AmpSlideScroll(el1);
@@ -1534,21 +1560,19 @@ describes.realWin(
       });
 
       it('buildDom should throw if invalid server rendered dom', async () => {
-        const carousel = await getAmpSlideScroll(
-          /* hasLooping */ true,
-          /* slideCount */ undefined,
-          /* attachToDom */ false
-        );
+        const carousel = await getAmpSlideScroll({
+          looping: true,
+          attachToDom: false,
+        });
         carousel.setAttribute('i-amphtml-ssr', '');
         expect(() => buildDom(carousel)).throws(/Invalid server render/);
       });
 
       it('buildDom should not modify dom for server rendered element', async () => {
-        const carousel = await getAmpSlideScroll(
-          /* hasLooping */ true,
-          /* slideCount */ undefined,
-          /* attachToDom */ false
-        );
+        const carousel = await getAmpSlideScroll({
+          looping: true,
+          attachToDom: false,
+        });
         buildDom(carousel);
         carousel.setAttribute('i-amphtml-ssr', '');
 
