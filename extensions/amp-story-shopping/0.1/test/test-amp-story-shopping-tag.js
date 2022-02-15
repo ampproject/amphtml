@@ -73,28 +73,23 @@ describes.realWin(
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
     }
 
-    it('should build and layout shopping tag component', async () => {
-      expect(() => shoppingTag.buildCallback()).to.not.throw();
-      expect(() => shoppingTag.layoutCallback()).to.not.throw();
-
+    async function createShoppingTag() {
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
       await setUpShoppingData();
-      env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
-        expect(shoppingTag.element.textContent).to.be.not.empty;
-      });
+
+      expect(() => shoppingTag.buildCallback()).to.not.throw();
+      expect(() => shoppingTag.layoutCallback()).to.not.throw();
+    }
+
+    it('should build and layout shopping tag component', async () => {
+      await createShoppingTag();
+      expect(shoppingTag.shoppingTagEl_).to.be.not.null;
     });
 
     it('should not build shopping tag if page attachment is missing', async () => {
       pageEl.removeChild(attachmentElement);
-
-      expect(() => shoppingTag.buildCallback()).to.not.throw();
-      expect(() => shoppingTag.layoutCallback()).to.not.throw();
-
-      shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
-      await setUpShoppingData();
-      env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
-        expect(shoppingTag.element.textContent).to.be.empty;
-      });
+      await createShoppingTag();
+      expect(shoppingTag.shoppingTagEl_).to.be.null;
     });
 
     it('should process config data and set text container content if data not null', async () => {
