@@ -84,7 +84,7 @@ describes.realWin(
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
     });
 
-    it('should not build shopping tag if page attachment is removed', async () => {
+    it('should not build shopping tag if page attachment is removed', () => {
       const createAndAppendInnerShoppingTagElStub = env.sandbox.stub(
         shoppingTag,
         'createAndAppendInnerShoppingTagEl_'
@@ -92,8 +92,8 @@ describes.realWin(
 
       pageEl.removeChild(attachmentElement);
 
-      await shoppingTag.buildCallback();
-      await shoppingTag.layoutCallback();
+      shoppingTag.buildCallback();
+      shoppingTag.layoutCallback();
 
       expect(createAndAppendInnerShoppingTagElStub).to.not.be.called;
     });
