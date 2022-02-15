@@ -48,7 +48,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    loadFonts(this.win, FONTS_TO_LOAD);
     this.element.setAttribute('role', 'button');
 
     return Promise.all([
@@ -62,6 +61,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    loadFonts(this.win, FONTS_TO_LOAD);
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
       (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
@@ -105,15 +105,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       () => {
         this.shoppingTagEl_.classList.toggle(
           'i-amphtml-amp-story-shopping-tag-inner-flipped',
-          shouldFlip
-        );
-
-        const dotEl = this.shoppingTagEl_.querySelector(
-          '.i-amphtml-amp-story-shopping-tag-dot'
-        );
-
-        dotEl.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-dot-flipped',
           shouldFlip
         );
 

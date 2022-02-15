@@ -1,35 +1,26 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {number, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-wordpress-embed-1_0',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-wordpress-embed', version: '1.0'}],
     experiments: ['bento'],
   },
+  args: {
+    'data-url': 'https://wordpress.org/news/2021/06/gutenberg-highlights',
+    width: 500,
+    height: 200,
+    layout: 'fixed',
+  },
 };
 
-export const BasicEmbedExample = () => {
-  const url = text(
-    'url',
-    'https://wordpress.org/news/2021/06/gutenberg-highlights'
-  );
-  const width = number('width', 500);
-  const height = number('height', 200);
-  const layout = text('layout', 'fixed');
-
+export const BasicEmbedExample = (args) => {
   return (
     <>
-      <amp-wordpress-embed
-        data-url={url}
-        width={width}
-        height={height}
-        layout={layout}
-      >
+      <amp-wordpress-embed {...args}>
         <button overflow>Load more</button>
       </amp-wordpress-embed>
       <p>text below</p>
@@ -37,23 +28,10 @@ export const BasicEmbedExample = () => {
   );
 };
 
-export const WithPlaceholderAndFallback = () => {
-  const url = text(
-    'url',
-    'https://wordpress.org/news/2021/06/gutenberg-highlights'
-  );
-  const width = number('width', 500);
-  const height = number('height', 200);
-  const layout = text('layout', 'fixed');
-
+export const WithPlaceholderAndFallback = (args) => {
   return (
     <>
-      <amp-wordpress-embed
-        data-url={url}
-        width={width}
-        height={height}
-        layout={layout}
-      >
+      <amp-wordpress-embed {...args}>
         <div placeholder style="background:red">
           Placeholder. Loading content...
         </div>
@@ -65,8 +43,4 @@ export const WithPlaceholderAndFallback = () => {
       <p>text below</p>
     </>
   );
-};
-
-BasicEmbedExample.story = {
-  name: 'Basic example',
 };
