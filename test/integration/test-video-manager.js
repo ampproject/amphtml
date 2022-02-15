@@ -356,6 +356,9 @@ describes.sandboxed
           width: null,
           height: null,
           opacity: null,
+          setProperty(name, value) {
+            video.style[name] = value;
+          },
         },
         muted: null,
         playsinline: null,

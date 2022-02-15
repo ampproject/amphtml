@@ -2,12 +2,18 @@ const babel = require('@babel/core');
 const path = require('path');
 const {debug} = require('../compile/debug-compilation-lifecycle');
 const {TransformCache, batchedRead, md5} = require('./transform-cache');
+const Remapping = require('@ampproject/remapping');
+
+/** @type {Remapping.default} */
+const remapping = /** @type {*} */ (Remapping);
+
+const argv = require('minimist')(process.argv.slice(2));
 
 /**
  * @typedef {{
  *   filename: string,
  *   code: string,
- *   map: *,
+ *   map: Object,
  * }}
  */
 let CacheMessageDef;
@@ -26,15 +32,16 @@ let transformCache;
  * @param {{
  *   preSetup?: function():void,
  *   postLoad?: function():void,
- *   babelMaps?: Map<string, *>,
  * }} callbacks
  * @return {!Object}
  */
 function getEsbuildBabelPlugin(
   callerName,
   enableCache,
-  {preSetup = () => {}, postLoad = () => {}, babelMaps} = {}
+  {preSetup = () => {}, postLoad = () => {}} = {}
 ) {
+  const babelMaps = new Map();
+
   /**
    * @param {string} filename
    * @param {string} contents
@@ -66,7 +73,7 @@ function getEsbuildBabelPlugin(
       transformCache.set(hash, promise);
     }
 
-    return promise.finally(postLoad);
+    return promise;
   }
 
   return {
@@ -75,33 +82,122 @@ function getEsbuildBabelPlugin(
     async setup(build) {
       preSetup();
 
-      const babelOptions =
-        babel.loadOptions({caller: {name: callerName}}) || {};
+      const {initialOptions} = build;
+      const {sourcemap} = initialOptions;
+      const inlineSourcemap = sourcemap === 'inline' || sourcemap === 'both';
+      if (inlineSourcemap) {
+        initialOptions.sorucemap = true;
+      }
 
-      build.onLoad({filter: /\.[cm]?js$/, namespace: ''}, async (file) => {
-        const filename = file.path;
-        const {contents, hash} = await batchedRead(filename);
-        const rehash = md5(
-          JSON.stringify({
-            callerName,
+      build.onLoad(
+        {filter: /\.(cjs|mjs|js|jsx|ts|tsx)$/, namespace: ''},
+        async (file) => {
+          const filename = file.path;
+          const babelOptions = /** @type {*} */ (
+            babel.loadOptions({caller: {name: callerName}, filename}) || {}
+          );
+          babelOptions.sourceMaps = true;
+
+          const {contents, hash} = await batchedRead(filename);
+          const rehash = md5(
+            JSON.stringify({
+              callerName,
+              filename,
+              hash,
+              babelOptions,
+              argv: process.argv.slice(2),
+            })
+          );
+
+          const transformed = await transformContents(
             filename,
-            hash,
-            babelOptions,
-            argv: process.argv.slice(2),
-          })
+            contents,
+            rehash,
+            getFileBabelOptions(babelOptions, filename)
+          );
+
+          babelMaps.set(filename, transformed.map);
+          postLoad?.();
+          return {contents: transformed.code};
+        }
+      );
+
+      build.onEnd(async (result) => {
+        const {outputFiles} = result;
+        const code = outputFiles.find(({path}) => !path.endsWith('.map'));
+        const map = outputFiles.find(({path}) => path.endsWith('.map'));
+
+        if (!map) {
+          return;
+        }
+
+        const root = path.dirname(map.path);
+        const remapped = remapping(
+          map.text,
+          (f, ctx) => {
+            // The Babel tranformed file and the original file have the same
+            // path, which makes it difficult to distinguish during remapping's
+            // load phase. To prevent an infinite recursion, we check if the
+            // importer is ourselves (which is nonsensical) and early exit.
+            if (f === ctx.importer) {
+              return null;
+            }
+
+            const file = path.join(root, f);
+            const map = babelMaps.get(file);
+            if (!map) {
+              if (file.includes('/node_modules/')) {
+                // Excuse node_modules since they may have been marked external
+                // (and so not processed by babel).
+                return null;
+              }
+              throw new Error(`failed to find sourcemap for babel file "${f}"`);
+            }
+            return map;
+          },
+          !argv.full_sourcemaps
         );
 
-        const transformed = await transformContents(
-          filename,
-          contents,
-          rehash,
-          getFileBabelOptions(babelOptions, filename)
-        );
-        babelMaps?.set(filename, transformed.map);
-        return {contents: transformed.code};
+        const sourcemapJson = remapped.toString();
+        replaceOutputFile(outputFiles, map, sourcemapJson);
+        if (inlineSourcemap) {
+          const base64 = Buffer.from(sourcemapJson).toString('base64');
+          replaceOutputFile(
+            outputFiles,
+            code,
+            code.text.replace(
+              /sourceMappingURL=.*/,
+              `sourceMappingURL=data:application/json;charset=utf-8;base64,${base64}`
+            )
+          );
+        }
       });
     },
   };
+}
+
+/**
+ * @param {Array<import('esbuild').OutputFile>} outputFiles
+ * @param {import('esbuild').OutputFile} original
+ * @param {string} text
+ */
+function replaceOutputFile(outputFiles, original, text) {
+  const index = outputFiles.indexOf(original);
+  if (index === -1) {
+    throw new Error(`couldn't find outputFile ${original.path}`);
+  }
+
+  let contents;
+  const file = {
+    path: original.path,
+    text,
+    get contents() {
+      // eslint-disable-next-line local/no-forbidden-terms
+      const te = new TextEncoder();
+      return (contents ||= te.encode(text));
+    },
+  };
+  outputFiles[index] = file;
 }
 
 const CJS_TRANSFORMS = new Set([

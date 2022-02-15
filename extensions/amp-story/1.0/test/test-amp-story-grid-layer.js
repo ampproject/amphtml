@@ -1,12 +1,14 @@
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
+
+import {CSS} from '../../../../build/amp-story-1.0.css';
+import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {MediaType} from '../media-pool';
-import {Services} from '#service';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {setStyles} from '#core/dom/style';
-import {CSS} from '../../../../build/amp-story-1.0.css';
 
 describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   let win;

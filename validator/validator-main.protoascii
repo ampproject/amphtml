@@ -1852,6 +1852,9 @@ tags: {
     name: "decoding"
     value_casei: "async"
   }
+  attrs: {
+    name: "sizes"
+  }
   attr_lists: "img-attrs"
   attr_lists: "mandatory-src-or-srcset"
 }
@@ -1901,6 +1904,9 @@ tags: {
   attrs: {
     name: "decoding"
     value_casei: "async"
+  }
+  attrs: {
+    name: "sizes"
   }
   attr_lists: "img-attrs"
   attr_lists: "mandatory-src-or-srcset"
@@ -2936,6 +2942,35 @@ tags: {
   mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "INPUT [type=image]"
+  attrs: {
+    name: "type"
+    value_casei: "image"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[type]"
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "input-common-attr"
+  attr_lists: "name-attr"
+  mandatory_ancestor: "FORM [method=POST]"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
+}
 # 4.10.6 The button element
 tags: {
   html_format: AMP
@@ -3871,6 +3906,13 @@ tags: {  # <amp-img>
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "crossorigin" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
@@ -3910,6 +3952,13 @@ tags: {  # <amp-img i-amphtml-ssr>
   }
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
@@ -4110,6 +4159,13 @@ tags: {
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "height" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "referrerpolicy" }

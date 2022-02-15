@@ -850,7 +850,7 @@ export class Resource {
     devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
 
     if (this.state_ != ResourceState_Enum.LAYOUT_SCHEDULED) {
-      const err = dev().createError(
+      const err = dev().createExpectedError(
         'startLayout called but not LAYOUT_SCHEDULED',
         'currently: ',
         this.state_

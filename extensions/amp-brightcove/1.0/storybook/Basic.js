@@ -1,4 +1,5 @@
 import * as Preact from '#preact';
+
 import {BentoBrightcove} from '../component';
 
 export default {

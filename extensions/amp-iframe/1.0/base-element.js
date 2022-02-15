@@ -1,5 +1,6 @@
-import {BentoIframe} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoIframe} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 

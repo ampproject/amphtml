@@ -1,13 +1,15 @@
-import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {layoutRectLtwh, rectIntersection} from '#core/dom/layout/rect';
+
 import {Services} from '#service';
+
+import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
+import {setParentWindow} from '../../../../src/service-helpers';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
   provideVisibilityManager,
 } from '../visibility-manager';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
-import {layoutRectLtwh, rectIntersection} from '#core/dom/layout/rect';
-import {setParentWindow} from '../../../../src/service-helpers';
 
 class IntersectionObserverStub {
   constructor(callback, options) {

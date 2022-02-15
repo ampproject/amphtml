@@ -88,7 +88,7 @@ const mode = {
 export let GeoDef;
 
 export class AmpGeo extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }

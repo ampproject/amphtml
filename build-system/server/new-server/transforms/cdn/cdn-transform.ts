@@ -1,17 +1,19 @@
-
-
+import {parse} from 'path';
 import posthtml from 'posthtml';
+
+import {CDNURLToLocalHostRelativeAbsoluteDist} from '../utilities/cdn';
 import {
   getCdnUrlAttr,
   isJsonScript,
   isValidOrigin,
   tryGetUrl,
 } from '../utilities/cdn-tag';
-import {CDNURLToLocalHostRelativeAbsoluteDist} from '../utilities/cdn';
 import {OptionSet} from '../utilities/option-set';
-import {parse} from 'path';
 
-function maybeModifyCdnUrl(node: posthtml.Node, options: OptionSet): posthtml.Node {
+function maybeModifyCdnUrl(
+  node: posthtml.Node,
+  options: OptionSet
+): posthtml.Node {
   // Make sure to call `isJsonScript` before `tryGetUrl`. We bail out early if
   // the node is of type="application/json" since it wouldn't have a URL.
   if (isJsonScript(node)) {
@@ -50,11 +52,9 @@ export default function (
   options: OptionSet = {}
 ): (tree: posthtml.Node) => void {
   return function (tree: posthtml.Node) {
-    tree.match([
-      {tag: 'script'},
-      {tag: 'link', attrs: {rel: 'stylesheet'}},
-    ], (node) => {
-      return maybeModifyCdnUrl(node, options);
-    });
+    tree.match(
+      [{tag: 'script'}, {tag: 'link', attrs: {rel: 'stylesheet'}}],
+      (node) => maybeModifyCdnUrl(node, options)
+    );
   };
 }
