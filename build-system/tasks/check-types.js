@@ -8,6 +8,22 @@ const {compileJison} = require('./compile-jison');
 const {cyan, green} = require('kleur/colors');
 const {execOrThrow} = require('../common/exec');
 const {log} = require('../common/logging');
+const {updateSubpackages} = require('../common/update-packages');
+const fastGlob = require('fast-glob');
+const path = require('path');
+
+/**
+ * Helper that updates build-system subpackages so their types can be verified.
+ * Skips npm checks during CI (already done while running each task).
+ */
+function updateBuildSystemSubpackages() {
+  const packageFiles = fastGlob.sync('build-system/tasks/*/package.json');
+  for (const packageFile of packageFiles) {
+    const packageDir = path.dirname(packageFile);
+    updateSubpackages(packageDir, /* skipNpmChecks */ true);
+  }
+}
+
 
 /**
  * Object of targets to check with TypeScript.
@@ -15,6 +31,7 @@ const {log} = require('../common/logging');
  * @type {Object<string, string>}
  */
 const TSC_TYPECHECK_TARGETS = {
+  'build-system': 'build-system',
   'carousel': 'extensions/amp-carousel/0.1',
   'compiler': 'src/compiler',
   'core': 'src/core',
@@ -46,6 +63,7 @@ async function checkTypes() {
   // Prepare build environment
   process.env.NODE_ENV = 'production';
   await Promise.all([compileCss(), compileJison()]);
+  updateBuildSystemSubpackages();
 
   // Use the list of targets if provided, otherwise check all targets
   const targets = argv.targets

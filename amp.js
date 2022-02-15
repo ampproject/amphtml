@@ -25,7 +25,6 @@ createTask('build');
 createTask('bundle-size', 'bundleSize');
 createTask('check-analytics-vendors-list', 'checkAnalyticsVendorsList');
 createTask('check-asserts', 'checkAsserts');
-createTask('check-build-system', 'checkBuildSystem');
 createTask('check-exact-versions', 'checkExactVersions');
 createTask('check-ignore-lists', 'checkIgnoreLists');
 createTask('check-invalid-whitespaces', 'checkInvalidWhitespaces');

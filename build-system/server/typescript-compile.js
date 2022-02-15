@@ -18,8 +18,7 @@ const esbuildOptions = /** @type {esbuild.BuildOptions} */ ({
 });
 
 /**
- * Builds the new server by converting typescript transforms to JS. This JS
- * output is not type-checked as part of `amp check-build-system`.
+ * Builds the new server by converting typescript transforms to JS.
  * @return {Promise<void>}
  */
 async function buildNewServer() {

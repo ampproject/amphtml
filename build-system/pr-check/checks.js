@@ -20,7 +20,6 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp prettify');
   timedExecOrDie('amp check-json-schemas');
   timedExecOrDie('amp ava');
-  timedExecOrDie('amp check-build-system');
   timedExecOrDie('amp check-ignore-lists');
   timedExecOrDie('amp babel-plugin-tests');
   timedExecOrDie('amp check-exact-versions');
@@ -70,10 +69,6 @@ function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.AVA)) {
     timedExecOrDie('amp ava');
-  }
-
-  if (buildTargetsInclude(Targets.BUILD_SYSTEM)) {
-    timedExecOrDie('amp check-build-system');
   }
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
