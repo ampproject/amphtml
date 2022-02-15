@@ -1,4 +1,8 @@
+import {createDocument as createWorkerDomDoc} from '@ampproject/worker-dom/dist/server-lib.mjs';
+
 import {createElementWithAttributes} from '#core/dom';
+
+import {getDeterministicOuterHTML} from '#testing/helpers';
 
 import {AmpFitText, calculateFontSize_, updateOverflow_} from '../amp-fit-text';
 import {buildDom} from '../build-dom';
@@ -51,6 +55,28 @@ describes.realWin(
       buildDom(fitText2);
 
       expect(fitText1.outerHTML).to.equal(fitText2.outerHTML);
+    });
+
+    it('buildDom should behave same in browser and in WorkerDOM', async () => {
+      const browserFitText = createElementWithAttributes(doc, 'amp-fit-text', {
+        width: '111px',
+        height: '222px',
+      });
+      const workerFitText = createElementWithAttributes(
+        createWorkerDomDoc(),
+        'amp-fit-text',
+        {
+          width: '111px',
+          height: '222px',
+        }
+      );
+
+      buildDom(browserFitText);
+      buildDom(workerFitText);
+
+      const browserHtml = getDeterministicOuterHTML(browserFitText);
+      const workerHtml = getDeterministicOuterHTML(workerFitText);
+      expect(workerHtml).to.equal(browserHtml);
     });
 
     it('buildCallback should assign ivars even when server rendered', async () => {

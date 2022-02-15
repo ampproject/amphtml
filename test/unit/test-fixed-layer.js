@@ -274,7 +274,7 @@ describes.sandboxed('FixedLayer', {}, (env) => {
             elem.style[privProp] = `${value} !${priority}`;
           } else if (
             elem.style[privProp] ||
-            !endsWith(elem.computedStyle[prop], '!important')
+            !elem.computedStyle[prop]?.endsWith('!important')
           ) {
             if (
               prop === 'transition' &&
