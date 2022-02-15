@@ -1,5 +1,3 @@
-import {date, select, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
 import {BentoDateDisplay} from '../component';
@@ -7,23 +5,31 @@ import {BentoDateDisplay} from '../component';
 export default {
   title: 'DateDisplay',
   component: BentoDateDisplay,
-  decorators: [withKnobs],
+  argTypes: {
+    dateTime: {
+      name: 'Date/time',
+      control: {type: 'date'},
+    },
+    displayIn: {
+      name: 'Display in',
+      defaultValue: 'utc',
+      options: ['utc', 'local'],
+      control: {type: 'select'},
+    },
+    locale: {
+      name: 'Locale',
+      defaultValue: 'en-US',
+      options: ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'],
+      control: {type: 'select'},
+    },
+  },
 };
 
-const DISPLAY_IN_OPTIONS = ['utc', 'local'];
-const LOCALES = ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'];
-
-export const _default = () => {
-  const dateTime = date('Date/time', new Date());
-  const displayIn = select(
-    'Display in',
-    DISPLAY_IN_OPTIONS,
-    DISPLAY_IN_OPTIONS[0]
-  );
-  const locale = select('Locale', LOCALES, LOCALES[0]);
+export const _default = ({dateTime, displayIn, locale, ...args}) => {
   return (
     <BentoDateDisplay
-      datetime={dateTime}
+      {...args}
+      dateTime={dateTime}
       displayIn={displayIn}
       locale={locale}
       render={(date) => (
@@ -33,14 +39,7 @@ export const _default = () => {
   );
 };
 
-export const defaultRenderer = () => {
-  const displayIn = select(
-    'Display in',
-    DISPLAY_IN_OPTIONS,
-    DISPLAY_IN_OPTIONS[0]
-  );
-  const dateTime = date('Date/time', new Date());
-  const locale = select('Locale', LOCALES, LOCALES[0]);
+export const defaultRenderer = ({dateTime, displayIn, locale}) => {
   return (
     <BentoDateDisplay
       datetime={dateTime}
