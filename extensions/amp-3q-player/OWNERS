@@ -4,7 +4,13 @@
 {
   rules: [
     {
-      owners: [{name: 'ampproject/wg-components'}],
+      owners: [
+        {name: '3QSDN/amphtml'},
+        {
+          name: 'JuliusThms',
+          notify: true,
+        }
+        ],
     },
   ],
 }
