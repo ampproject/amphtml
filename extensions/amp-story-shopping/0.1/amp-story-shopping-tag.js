@@ -73,7 +73,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       return;
     }
 
-    loadFonts(this.win, FONTS_TO_LOAD);
     this.element.setAttribute('role', 'button');
 
     return Promise.all([
