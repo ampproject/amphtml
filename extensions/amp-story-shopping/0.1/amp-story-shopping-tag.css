@@ -14,6 +14,8 @@ amp-story-shopping-tag {
   --i-amphtml-shopping-tag-bg-color: rgba(125, 125, 125, .75) !important;
   --i-amphtml-shopping-tag-animation-sequence-duration: 2s !important;
   --i-amphtml-shopping-tag-animate-out-delay: 5s !important;
+  --i-amphtml-shopping-tag-dot-pulse-duration: 2.5s !important;
+  --i-amphtml-shopping-tag-dot-pulse-delay: 1.5s !important;
  }
 
 .i-amphtml-amp-story-shopping-product-tag-text {
@@ -74,11 +76,11 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-dot:before {
-  animation: animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards, 
-    pulse-dot-before 2.5s 1.5s infinite !important;
+  animation: i-amphtml-animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards, 
+    i-amphtml-pulse-dot-before var(--i-amphtml-shopping-tag-dot-pulse-duration) var(--i-amphtml-shopping-tag-dot-pulse-delay) infinite !important;
 }
 
-@keyframes animate-in-sequence-dot-before {
+@keyframes i-amphtml-animate-in-sequence-dot-before {
   0% {
     animation-timing-function: cubic-bezier(.85, 0, .15, 1);
     transform: scale(0);
@@ -91,7 +93,7 @@ amp-story-shopping-tag {
   }
 }
 
-@keyframes pulse-dot-before {
+@keyframes i-amphtml-pulse-dot-before {
   0% {
     animation-timing-function: cubic-bezier(.83,0,.71,.99);
     transform: scale(1);
@@ -118,11 +120,11 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-dot:after {
-  animation: animate-in-sequence-dot-after var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards, 
-    pulse-dot-after 2.5s 1.8s infinite !important;
+  animation: i-amphtml-animate-in-sequence-dot-after var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards, 
+    i-amphtml-pulse-dot-after var(--i-amphtml-shopping-tag-dot-pulse-duration) calc(var(--i-amphtml-shopping-tag-dot-pulse-delay) * 1.2) infinite !important;
 }
 
-@keyframes animate-in-sequence-dot-after {
+@keyframes i-amphtml-animate-in-sequence-dot-after {
   0% {
     animation-timing-function: cubic-bezier(.85, 0, .15, 1);
     transform: scale(0);
@@ -135,7 +137,7 @@ amp-story-shopping-tag {
   }
 }
 
-@keyframes pulse-dot-after {
+@keyframes i-amphtml-pulse-dot-after {
   0% {
     animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
     transform: scale(1);
@@ -167,8 +169,8 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-pill {
-  animation: animate-in-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
-    animate-out-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
+  animation: i-amphtml-animate-in-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
+    i-amphtml-animate-out-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
 
   /* Values that need to change to support RTL. */
   --clip-path-start-circle-supports-rtl: circle(calc(var(--i-amphtml-pill-icon-size) * .5) at calc(var(--i-amphtml-pill-padding-inline-start) + var(--i-amphtml-pill-icon-size) * .5)) !important;
@@ -185,7 +187,7 @@ amp-story-shopping-tag {
   transform-origin: calc(100% - var(--i-amphtml-pill-transfrom-origin)) !important;
 }
 
-@keyframes animate-in-sequence-pill {
+@keyframes i-amphtml-animate-in-sequence-pill {
   0% {
     animation-timing-function: cubic-bezier(.85, 0, .15, 1);
     clip-path: var(--clip-path-start-circle-supports-rtl);
@@ -209,7 +211,7 @@ amp-story-shopping-tag {
   }
 }
 
-@keyframes animate-out-sequence-pill {
+@keyframes i-amphtml-animate-out-sequence-pill {
   0% {
     clip-path: inset(0 0 0 0 round 30px);
   }
@@ -249,21 +251,16 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-pill-image {
-  animation: animate-out-sequence-pill-image var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
+  animation: i-amphtml-animate-out-sequence-pill-image var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
 }
 
-@keyframes animate-out-sequence-pill-image {
+@keyframes i-amphtml-animate-out-sequence-pill-image {
   0% {
+    transform: scale(1);
   }
   40% {
     animation-timing-function: cubic-bezier(.85, 0, .15, 1);
     transform: scale(1);
-  }
-  40.001% {
-  }
-  60% {
-  }
-  80% {
   }
   100% {
     transform: scale(0);
@@ -282,13 +279,12 @@ amp-story-shopping-tag {
 }
 
 [active] .i-amphtml-amp-story-shopping-tag-pill-text {
-  animation: animate-in-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
-    animate-out-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
+  animation: i-amphtml-animate-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
+    i-amphtml-animate-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) reverse !important;
 }
 
-@keyframes animate-in-sequence-text {
+@keyframes i-amphtml-animate-sequence-text {
   0% {
-    animation-timing-function: cubic-bezier(.85, 0, .15, 1);
     opacity: 0; 
   }
   60% {
@@ -296,17 +292,8 @@ amp-story-shopping-tag {
     opacity: 0;
   }
   100% {
-    opacity: 1;
-  }
-}
-
-@keyframes animate-out-sequence-text {
-  0% {
+    /* Applies timing function from begining when in reverse. */
     animation-timing-function: cubic-bezier(.85, 0, .15, 1);
     opacity: 1;
-  }
-  40% {opacity: 0;}
-  100% {
-    opacity: 0;
   }
 }
