@@ -61,13 +61,9 @@ describes.realWin(
       );
 
       const story = win.document.createElement('amp-story');
-
       win.document.body.appendChild(story);
-
       story.appendChild(pageEl);
-
       pageEl.appendChild(attachmentElement);
-
       win.document.body.appendChild(pageEl);
 
       shoppingTag = await element.getImpl();
