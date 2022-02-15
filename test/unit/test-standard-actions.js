@@ -1067,7 +1067,24 @@ describes.realWin('copy action', {amp: true}, (env) => {
     return {satisfiesTrust: () => true, ...obj};
   }
 
-  it('should copy from DIV using navigator.clipboard api', async () => {
+  it('should copy `static text` using navigator.clipboard api', async () => {
+    env.sandbox.spy(env.win.navigator.clipboard, 'writeText');
+    const doc = win.document;
+
+    const invocation = trustedInvocation({
+      args: {'text': 'Hello World!'},
+      tagOrTarget: 'AMP',
+      node: doc,
+      caller: doc,
+    });
+    standardActions.handleCopy_(invocation);
+
+    await expect(env.win.navigator.clipboard.writeText).to.be.calledWith(
+      'Hello World!'
+    );
+  });
+
+  it('should copy `DIV Content` using navigator.clipboard api', async () => {
     env.sandbox.spy(env.win.navigator.clipboard, 'writeText');
     const divElement = win.document.createElement('div');
     divElement.textContent = 'Hello World!';
@@ -1075,6 +1092,22 @@ describes.realWin('copy action', {amp: true}, (env) => {
     const invocation = trustedInvocation({
       node: divElement,
       caller: divElement,
+    });
+    standardActions.handleCopy_(invocation);
+
+    await expect(env.win.navigator.clipboard.writeText).to.be.calledWith(
+      'Hello World!'
+    );
+  });
+
+  it('should copy `INPUT Value` using navigator.clipboard api', async () => {
+    env.sandbox.spy(env.win.navigator.clipboard, 'writeText');
+    const inputElement = win.document.createElement('input');
+    inputElement.value = 'Hello World!';
+
+    const invocation = trustedInvocation({
+      node: inputElement,
+      caller: inputElement,
     });
     standardActions.handleCopy_(invocation);
 
