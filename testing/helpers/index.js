@@ -95,11 +95,11 @@ function isVoidElement(node) {
 
 /**
  * Returns the outerHTML for an element, but with lexicographically sorted attributes.
- * @param {Node} node
+ * @param {Element} node
  * @return {string}
  */
 export function getDeterministicOuterHTML(node) {
-  const tag = node.localName || node.tagName;
+  const tag = node.localName;
   const attributes = Array.from(node.attributes)
     .map(({name, value}) => `${name}="${value}"`)
     .sort()
@@ -107,9 +107,9 @@ export function getDeterministicOuterHTML(node) {
   const start = `<${tag} ${attributes}>`;
   const contents = Array.from(node.childNodes).map((childNode) => {
     if (childNode.nodeType === Node.ELEMENT_NODE) {
-      return getDeterministicOuterHTML(childNode);
+      return getDeterministicOuterHTML(/** @type {Element} */ (childNode));
     }
-    return childNode.innerHTML || childNode.textContent;
+    return childNode.textContent;
   });
 
   if (!contents && isVoidElement(node)) {
