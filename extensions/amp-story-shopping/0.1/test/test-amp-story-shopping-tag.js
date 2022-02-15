@@ -2,7 +2,6 @@ import {createElementWithAttributes} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 
 import '../amp-story-shopping';
-
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
@@ -27,6 +26,8 @@ describes.realWin(
     let shoppingTag;
     let storeService;
     let localizationService;
+    let attachmentElement;
+    let pageEl;
 
     beforeEach(async () => {
       win = env.win;
@@ -46,7 +47,7 @@ describes.realWin(
     });
 
     async function createAmpStoryShoppingTag() {
-      const pageEl = win.document.createElement('amp-story-page');
+      pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
       element = createElementWithAttributes(
         win.document,
@@ -54,7 +55,21 @@ describes.realWin(
         {'layout': 'container'}
       );
       pageEl.appendChild(element);
+
+      attachmentElement = win.document.createElement(
+        'amp-story-shopping-attachment'
+      );
+
+      const story = win.document.createElement('amp-story');
+
+      win.document.body.appendChild(story);
+
+      story.appendChild(pageEl);
+
+      pageEl.appendChild(attachmentElement);
+
       win.document.body.appendChild(pageEl);
+
       shoppingTag = await element.getImpl();
     }
 
@@ -67,6 +82,20 @@ describes.realWin(
 
     it('should build and layout shopping tag component', () => {
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
+    });
+
+    it('should not build shopping tag if page attachment is removed', async () => {
+      const createAndAppendInnerShoppingTagElStub = env.sandbox.stub(
+        shoppingTag,
+        'createAndAppendInnerShoppingTagEl_'
+      );
+
+      pageEl.removeChild(attachmentElement);
+
+      await shoppingTag.buildCallback();
+      await shoppingTag.layoutCallback();
+
+      expect(createAndAppendInnerShoppingTagElStub).to.not.be.called;
     });
 
     it('should process config data and set text container content if data not null', async () => {
