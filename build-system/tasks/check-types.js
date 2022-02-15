@@ -24,7 +24,6 @@ function updateBuildSystemSubpackages() {
   }
 }
 
-
 /**
  * Object of targets to check with TypeScript.
  *
