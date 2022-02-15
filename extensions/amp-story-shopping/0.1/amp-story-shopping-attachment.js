@@ -16,8 +16,6 @@ import {
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
 
-const DRAGGABLE_DRAWER_TRANSITION_MS = 400;
-
 /** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
   {
@@ -113,25 +111,22 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       (shoppingData) => this.onShoppingDataUpdate_(shoppingData),
       true /** callToInitialize */
     );
+    // Listen to transiton end events on attachment to check to clear active data.
+    this.attachmentEl_.addEventListener('transitionend', () =>
+      this.clearActiveProductDataIfClosed_()
+    );
   }
 
   /**
-   * Handles clearing active product data and updating the template
-   * when there is no active product data.
+   * Triggers template update if opening without active product data.
+   * This happens when the "Shop Now" CTA is clicked.
    * @param {boolean} isOpen
    * @private
    */
   onAttachmentStateUpdate_(isOpen) {
-    if (!this.isOnActivePage_()) {
+    if (!this.isOnActivePage_() || !isOpen) {
       return;
     }
-    // If template is closing, check to clear active product data and return early.
-    if (!isOpen) {
-      this.checkClearActiveProductData_();
-      return;
-    }
-    // It femplate is opening and there is no active product data, update the template.
-    // This happens when the "Shop Now" CTA is clicked.
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
     if (!shoppingData.activeProductData) {
       this.updateTemplate_(shoppingData);
@@ -140,6 +135,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Handles template changes when there is activeProductData.
+   * This happens when a product tag or PLP card is clicked.
    * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
@@ -166,14 +162,13 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * Active product data is cleared after the attachment closes so that content does not jump.
    * @private
    */
-  checkClearActiveProductData_() {
-    Services.timerFor(this.win).delay(
-      () =>
-        this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-          'activeProductData': null,
-        }),
-      DRAGGABLE_DRAWER_TRANSITION_MS
-    );
+  clearActiveProductDataIfClosed_() {
+    const isOpen = this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
+    if (!isOpen) {
+      this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+        'activeProductData': null,
+      });
+    }
   }
 
   /**
