@@ -142,6 +142,7 @@ const targetMatchers = {
     return (
       file == 'build-system/tasks/check-build-system.js' ||
       file == 'build-system/tsconfig.json' ||
+      file.startsWith('testing/') ||
       (file.startsWith('build-system') &&
         (file.endsWith('.js') ||
           file.endsWith('.ts') ||
