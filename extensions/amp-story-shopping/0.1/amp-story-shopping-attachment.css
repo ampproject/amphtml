@@ -16,7 +16,7 @@ amp-story-shopping-attachment a {
   text-decoration: none !important;
 }
 
-amp-story-shopping-attachment button { 
+amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header { 
   background: none !important;
   border: none !important;
   padding: 0 !important;
@@ -36,7 +36,7 @@ amp-story-shopping-attachment button {
 .i-amphtml-amp-story-shopping-sub-section-header {
   font-weight: 600 !important;
   font-size: 1.5em !important;
-  margin: var(--i-amphtml-shopping-attachment-vertical-padding) 0 !important;
+  padding: var(--i-amphtml-shopping-attachment-vertical-padding) 0 !important;
 }
 
 /* PLP (Product Listing Page). */
@@ -160,9 +160,6 @@ amp-story-shopping-attachment button {
   filter: invert(1) !important;
 }
 
-.i-amphtml-amp-story-shopping-sub-section-header {
-
-}
 /* PDP reviews */
 
 .i-amphtml-amp-story-shopping-pdp-reviews {
@@ -262,16 +259,12 @@ amp-story-shopping-attachment button {
 
 .i-amphtml-amp-story-shopping-pdp-details-header {
   cursor: pointer !important;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
 }
 
-.i-amphtml-amp-story-shopping-pdp-details-header-text {
-  pointer-events: none;
-}
-
-.i-amphtml-amp-story-shopping-pdp-details-header-caret {
+.i-amphtml-amp-story-shopping-pdp-details-header-arrow {
   padding: 0 0.5em;
   height: 0.6em;
   fill: none;
@@ -279,12 +272,12 @@ amp-story-shopping-attachment button {
   pointer-events: none;
 }
 
-.i-amphtml-amp-story-shopping-pdp-details .i-amphtml-amp-story-shopping-pdp-details-header-caret path {
+.i-amphtml-amp-story-shopping-pdp-details .i-amphtml-amp-story-shopping-pdp-details-header-arrow path {
   d: path("M.5,.5 L5,5.2 L9.5,.5");
   transition: d 0.3s;
 }
 
-.i-amphtml-amp-story-shopping-pdp-details[active] .i-amphtml-amp-story-shopping-pdp-details-header-caret path {
+.i-amphtml-amp-story-shopping-pdp-details[active] .i-amphtml-amp-story-shopping-pdp-details-header-arrow path {
   d: path("M.5,5.2 L5,.8 L9.5,5.2");
 }
 

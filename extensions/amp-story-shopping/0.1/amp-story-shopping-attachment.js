@@ -286,6 +286,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   renderPdpTemplate_(activeProductData) {
+    console.log(activeProductData.productDetails);
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
@@ -349,7 +350,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               class="i-amphtml-amp-story-shopping-pdp-details-header"
               onClick={(e) => this.onDetailsHeaderClick_(e.target)}
             >
-              <span class="i-amphtml-amp-story-shopping-pdp-details-header-text i-amphtml-amp-story-shopping-sub-section-header">
+              <span class="i-amphtml-amp-story-shopping-sub-section-header">
                 {this.localizationService_.getLocalizedString(
                   LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_DETAILS,
                   this.element
@@ -357,7 +358,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               </span>
               <svg
                 viewBox="0 0 10 6"
-                class="i-amphtml-amp-story-shopping-pdp-details-header-caret"
+                class="i-amphtml-amp-story-shopping-pdp-details-header-arrow"
               >
                 <path />
               </svg>
