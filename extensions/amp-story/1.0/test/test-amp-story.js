@@ -1510,5 +1510,50 @@ describes.realWin(
         ).to.be.false;
       });
     });
+
+    describe('resource loading for first page', () => {
+      let pages;
+      let performanceImpl;
+      beforeEach(async () => {
+        performanceImpl = new Performance(env.win);
+        env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
+        pages = await createStoryWithPages(2, ['page-1', 'page-2'], false);
+        env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
+      });
+
+      it('should position the active page so it preloads', async () => {
+        story.buildCallback();
+        await story.layoutCallback();
+
+        // Check page 0 is loaded with distance 0.
+        expect(pages[0].getAttribute('distance')).to.be.equal('0');
+      });
+
+      it('should not position the inactive page so it preloads before the active page is loaded', async () => {
+        const signals = new Signals();
+        pages[0].signals = () => signals;
+        story.buildCallback();
+        await story.layoutCallback();
+
+        // Check page 1 is not loaded.
+        expect(pages[1].hasAttribute('distance')).to.be.false;
+      });
+
+      it('should position the inactive page so it preloads after the active page is loaded', async () => {
+        const signals = new Signals();
+        pages[0].signals = () => signals;
+        story.buildCallback();
+        await story.layoutCallback();
+
+        // Check page 1 is not loaded.
+        expect(pages[1].hasAttribute('distance')).to.be.false;
+
+        signals.signal(CommonSignals_Enum.LOAD_END);
+        await nextTick();
+
+        // Check page 1 is loaded with distance 1.
+        expect(pages[1].getAttribute('distance')).to.be.equal('1');
+      });
+    });
   }
 );
