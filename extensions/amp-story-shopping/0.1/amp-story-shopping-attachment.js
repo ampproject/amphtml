@@ -65,7 +65,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.shoppingTags_ = Array.from(
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
-    loadFonts(this.win, FONTS_TO_LOAD);
 
     const pageElement = this.element.parentElement;
     getShoppingConfig(pageElement).then((config) =>
@@ -81,7 +80,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (this.shoppingTags_.length === 0) {
       return;
     }
-    loadFonts(this.win, FONTS_TO_LOAD);
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -109,7 +107,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (this.shoppingTags_.length === 0) {
       return;
     }
-
+    loadFonts(this.win, FONTS_TO_LOAD);
     // Update template on attachment state update or shopping data update.
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
