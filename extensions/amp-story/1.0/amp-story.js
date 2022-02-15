@@ -2459,7 +2459,6 @@ export class AmpStory extends AMP.BaseElement {
    * Installs extensions that can be lazy-loaded.
    */
   installLateExtensions_() {
-    // TODO(mszylkowski): Make these components valid without importing extension if experiment improves LCP.
     const extensionsFor = Services.extensionsFor(this.win);
     const ampdoc = this.getAmpDoc();
 
