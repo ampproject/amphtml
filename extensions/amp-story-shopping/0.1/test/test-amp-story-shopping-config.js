@@ -14,7 +14,6 @@ import {
   getShoppingConfig,
   storeShoppingConfig,
   validateNumber,
-  validateObject,
   validateRequired,
   validateString,
   validateURLs,
