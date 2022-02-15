@@ -25,7 +25,7 @@ export default {
   },
 };
 
-export const _default = ({dateTime, displayIn, locale, ...args}) => {
+export const Default = ({dateTime, displayIn, locale, ...args}) => {
   return (
     <BentoDateDisplay
       {...args}
@@ -39,7 +39,9 @@ export const _default = ({dateTime, displayIn, locale, ...args}) => {
   );
 };
 
-export const defaultRenderer = ({dateTime, displayIn, locale}) => {
+Default.storyName = 'default';
+
+export const DefaultRenderer = ({dateTime, displayIn, locale}) => {
   return (
     <BentoDateDisplay
       datetime={dateTime}
@@ -48,3 +50,5 @@ export const defaultRenderer = ({dateTime, displayIn, locale}) => {
     />
   );
 };
+
+DefaultRenderer.storyName = 'default renderer';

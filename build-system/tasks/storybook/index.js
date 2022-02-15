@@ -102,13 +102,6 @@ function buildStorybook(env) {
 function parseEnvs(env) {
   return /** @type {StorybookEnv[]} */ (
     env.split(',').filter((env) => {
-      if (env === 'amp') {
-        log(
-          yellow('AMP environment for storybook is temporarily disabled.\n') +
-            'See https://github.com/ampproject/storybook-addon-amp/issues/57'
-        );
-        return false;
-      }
       return env === 'amp' || env === 'preact' || env === 'react';
     })
   );
