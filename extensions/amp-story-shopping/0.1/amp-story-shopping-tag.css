@@ -43,7 +43,7 @@ amp-story-shopping-tag {
   opacity: 0 !important;
 }
 
-.i-amphtml-amp-story-shopping-tag-visible {
+.i-amphtml-amp-story-shopping-tag-visible[active] {
   opacity: 1 !important;
 }
 
@@ -75,7 +75,7 @@ amp-story-shopping-tag {
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
 }
 
-[active] .i-amphtml-amp-story-shopping-tag-dot:before {
+.i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-dot:before {
   animation: i-amphtml-animate-in-sequence-dot-before var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
     i-amphtml-pulse-dot-before var(--i-amphtml-shopping-tag-dot-pulse-duration) var(--i-amphtml-shopping-tag-dot-pulse-delay) infinite !important;
 }
@@ -119,7 +119,7 @@ amp-story-shopping-tag {
   background-color: white !important;
 }
 
-[active] .i-amphtml-amp-story-shopping-tag-dot:after {
+.i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-dot:after {
   animation: i-amphtml-animate-in-sequence-dot-after var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
     i-amphtml-pulse-dot-after var(--i-amphtml-shopping-tag-dot-pulse-duration) calc(var(--i-amphtml-shopping-tag-dot-pulse-delay) * 1.2) infinite !important;
 }
@@ -165,10 +165,10 @@ amp-story-shopping-tag {
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   padding-inline-start: var(--i-amphtml-pill-padding-inline-start) !important;
   padding-inline-end: 12px !important;
-  transform-origin: var(--i-amphtml-pill-transfrom-origin);
+  transform-origin: var(--i-amphtml-pill-transfrom-origin) !important;
 }
 
-[active] .i-amphtml-amp-story-shopping-tag-pill {
+.i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-pill {
   animation: i-amphtml-animate-in-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
     i-amphtml-animate-out-sequence-pill var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
 
@@ -178,7 +178,7 @@ amp-story-shopping-tag {
   --clip-path-inset-offset-supports-rtl: inset(0 calc(100% - 36px) 0 0 round 30px) !important;
 }
 
-[active][dir=rtl] .i-amphtml-amp-story-shopping-tag-pill {
+.i-amphtml-amp-story-shopping-tag-inner[active][dir=rtl] .i-amphtml-amp-story-shopping-tag-pill {
   --clip-path-start-circle-supports-rtl: circle(calc(var(--i-amphtml-pill-icon-size) * .5) at calc(100% - var(--i-amphtml-pill-padding-inline-start) - var(--i-amphtml-pill-icon-size) * .5)) !important;
   --clip-path-end-circle-supports-rtl: circle(calc(var(--i-amphtml-pill-icon-size) * .5 + var(--i-amphtml-pill-padding-inline-start)) at calc(100% - var(--i-amphtml-pill-padding-inline-start) - var(--i-amphtml-pill-icon-size) * .5)) !important;
   --clip-path-inset-offset-supports-rtl: inset(0 0 0 calc(100% - 36px) round 30px) !important;
@@ -250,7 +250,7 @@ amp-story-shopping-tag {
   margin-inline-end: 4px !important;
 }
 
-[active] .i-amphtml-amp-story-shopping-tag-pill-image {
+.i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-pill-image {
   animation: i-amphtml-animate-out-sequence-pill-image var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) forwards !important;
 }
 
@@ -278,7 +278,7 @@ amp-story-shopping-tag {
   max-height: 32px !important;
 }
 
-[active] .i-amphtml-amp-story-shopping-tag-pill-text {
+.i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-pill-text {
   animation: i-amphtml-animate-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) forwards,
     i-amphtml-animate-sequence-text var(--i-amphtml-shopping-tag-animation-sequence-duration) var(--i-amphtml-shopping-tag-animate-out-delay) reverse !important;
 }

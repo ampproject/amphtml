@@ -122,12 +122,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * @param {!string} id
+   * Toggling the active attribute to make the animations play on the active page.
+   * @param {string} currentPageId
    * @private
    */
-  toggleShoppingTagActive_(id) {
-    const isActive = id === this.pageEl_.id;
-    toggleAttribute(this.shoppingTagEl_, 'active', isActive);
+  toggleShoppingTagActive_(currentPageId) {
+    const isActive = currentPageId === this.pageEl_.id;
+    this.mutateElement(() =>
+      toggleAttribute(this.shoppingTagEl_, 'active', isActive)
+    );
   }
 
   /**
