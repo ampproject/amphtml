@@ -3,8 +3,8 @@ amp-story-shopping-attachment {
   width: 100% !important;
   font-family: 'Poppins', sans-serif !important;
   font-size: calc(var(--story-page-vmin) * 3) !important; /* override with ems for pixel perfect layout */
-  --i-amphtml-shopping-attachment-horizontal-padding: 1.5em !important;
-  --i-amphtml-shopping-attachment-vertical-padding: 1.2em !important;
+  --i-amphtml-shopping-attachment-horizontal-spacing: 1.5em !important;
+  --i-amphtml-shopping-attachment-vertical-spacing: 1.2em !important;
   --i-amphtml-shopping-three-percent-overlay: rgba(0, 0, 0,  .03) !important;
 }
 
@@ -16,6 +16,7 @@ amp-story-shopping-attachment a {
   text-decoration: none !important;
 }
 
+/* Button reset. */
 amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header { 
   background: none !important;
   border: none !important;
@@ -36,13 +37,13 @@ amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header {
 .i-amphtml-amp-story-shopping-sub-section-header {
   font-weight: 600 !important;
   font-size: 1.5em !important;
-  padding: var(--i-amphtml-shopping-attachment-vertical-padding) 0 !important;
+  padding: var(--i-amphtml-shopping-attachment-vertical-spacing) 0 !important;
 }
 
 /* PLP (Product Listing Page). */
 
 .i-amphtml-amp-story-shopping-plp {
-  padding: 0 var(--i-amphtml-shopping-attachment-horizontal-padding) !important;
+  padding: 0 var(--i-amphtml-shopping-attachment-horizontal-spacing) !important;
 }
 
 .i-amphtml-amp-story-shopping-plp-cards {
@@ -52,7 +53,7 @@ amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header {
 }
 
 .i-amphtml-amp-story-shopping-plp-card {
-  width: calc(50% - var(--i-amphtml-shopping-attachment-horizontal-padding) / 2) !important;
+  width: calc(50% - var(--i-amphtml-shopping-attachment-horizontal-spacing) / 2) !important;
   margin-bottom: 3em !important;
   cursor: pointer !important;
 }
@@ -104,7 +105,7 @@ amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header {
 }
 
 .i-amphtml-amp-story-shopping-pdp-header {
-  margin: 1.5em var(--i-amphtml-shopping-attachment-horizontal-padding) 2em !important;
+  margin: 1.5em var(--i-amphtml-shopping-attachment-horizontal-spacing) 2em !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-header-brand {
@@ -205,7 +206,7 @@ amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header {
 
 /* Only adds bottom margin if carousel is last child. */
 .i-amphtml-amp-story-shopping-pdp-carousel:last-child {
-  margin-bottom: var(--i-amphtml-shopping-attachment-vertical-padding) !important;
+  margin-bottom: var(--i-amphtml-shopping-attachment-vertical-spacing) !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel::-webkit-scrollbar {
@@ -213,7 +214,7 @@ amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header {
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card {
-  margin-inline-start: calc(var(--i-amphtml-shopping-attachment-horizontal-padding) / 2) !important;
+  margin-inline-start: calc(var(--i-amphtml-shopping-attachment-horizontal-spacing) / 2) !important;
   scroll-snap-align: center !important;
   flex-shrink: 0 !important;
   background-color: var(--i-amphtml-shopping-three-percent-overlay) !important;
@@ -226,18 +227,18 @@ amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header {
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
-  margin-inline-start: var(--i-amphtml-shopping-attachment-horizontal-padding) !important;
+  margin-inline-start: var(--i-amphtml-shopping-attachment-horizontal-spacing) !important;
   border-radius: 1.1em 0 0 1.1em !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:last-child {
-  margin-inline-end: var(--i-amphtml-shopping-attachment-horizontal-padding) !important;
+  margin-inline-end: var(--i-amphtml-shopping-attachment-horizontal-spacing) !important;
   border-radius: 0 1.1em 1.1em 0 !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:only-child {
-  width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-padding) * 2) !important;
-  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-padding) * 2)!important;
+  width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
+  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2)!important;
   border-radius: 1.1em !important;
   cursor: auto !important;
 }
@@ -250,11 +251,10 @@ amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header {
   border-radius: 1.1em 0 0 1.1em !important;
 }
 
-
 /* PDP deatils */
 
 .i-amphtml-amp-story-shopping-pdp-details {
-  padding: 0 var(--i-amphtml-shopping-attachment-horizontal-padding) !important;
+  padding: 0 var(--i-amphtml-shopping-attachment-horizontal-spacing) !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-details-header {
@@ -297,5 +297,5 @@ amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header {
 .i-amphtml-amp-story-shopping-pdp-details-text:after {
   content: '' !important;
   display: block !important;
-  padding-bottom: var(--i-amphtml-shopping-attachment-vertical-padding) !important;
+  padding-bottom: var(--i-amphtml-shopping-attachment-vertical-spacing) !important;
 }

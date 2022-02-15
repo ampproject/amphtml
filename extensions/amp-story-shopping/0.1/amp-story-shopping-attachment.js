@@ -286,7 +286,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   renderPdpTemplate_(activeProductData) {
-    console.log(activeProductData.productDetails);
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
@@ -343,7 +342,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             ></div>
           ))}
         </div>
-
         {activeProductData.productDetails && (
           <div class="i-amphtml-amp-story-shopping-pdp-details">
             <button
@@ -363,7 +361,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
                 <path />
               </svg>
             </button>
-
             <span class="i-amphtml-amp-story-shopping-pdp-details-text">
               {activeProductData.productDetails}
             </span>
