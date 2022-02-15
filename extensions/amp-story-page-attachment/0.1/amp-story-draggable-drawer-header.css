@@ -18,7 +18,6 @@
   --i-amphtml-draggable-drawer-header-twenty-percent-gray: rgba(0, 0, 0, .2) !important;
   --i-amphtml-draggable-drawer-header-font-family: 'Roboto', sans-serif !important;
   --i-amphtml-draggable-drawer-header-font-size: 18px !important;
-  --i-amphtml-draggable-drawer-header-title-height: 44px !important;
   background: var(--i-amphtml-draggable-drawer-background-color) !important;
 }
 
