@@ -41,6 +41,7 @@ const Targets = {
   DEV_DASHBOARD: 'DEV_DASHBOARD',
   DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
+  EXTENSIONS: 'EXTENSIONS',
   HTML_FIXTURES: 'HTML_FIXTURES',
   IGNORE_LIST: 'IGNORE_LIST',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
@@ -167,6 +168,12 @@ const targetMatchers = {
         return minimatch(file, pattern);
       })
     );
+  },
+  [Targets.EXTENSIONS]: (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return file.startsWith('extensions');
   },
   [Targets.HTML_FIXTURES]: (file) => {
     return (

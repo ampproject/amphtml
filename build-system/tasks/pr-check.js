@@ -89,8 +89,17 @@ async function prCheck() {
 
   if (buildTargetsInclude(Targets.RUNTIME)) {
     runCheck('amp dep-check');
-    runCheck('amp check-types');
     runCheck('amp check-sourcemaps');
+  }
+
+  if (
+    buildTargetsInclude(
+      Targets.RUNTIME,
+      Targets.BUILD_SYSTEM,
+      Targets.EXTENSIONS
+    )
+  ) {
+    runCheck('amp check-types');
   }
 
   if (buildTargetsInclude(Targets.RUNTIME, Targets.UNIT_TEST)) {
