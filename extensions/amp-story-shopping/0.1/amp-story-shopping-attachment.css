@@ -22,13 +22,13 @@ amp-story-shopping-attachment a {
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  animation: i-amphtml-fade-out .3s forwards !important; 
+  animation: i-amphtml-fade-out .3s forwards !important;
 }
 
 .i-amphtml-amp-story-shopping[active] {
   margin-top: 0px !important;
   position: relative !important;
-  animation: i-amphtml-fade-in .3s forwards !important; 
+  animation: i-amphtml-fade-in .3s forwards !important;
 }
 
 @keyframes i-amphtml-fade-in {
@@ -46,7 +46,7 @@ amp-story-shopping-attachment a {
   }
   99.9% {
     opacity: 0;
-  }  
+  }
   100% {
     opacity: 0;
     /* Hides content after transition. */
