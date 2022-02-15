@@ -3,7 +3,7 @@ import {withAmp} from '@ampproject/storybook-addon';
 import * as Preact from '#preact';
 
 export default {
-  title: 'amp-accordion-1_0',
+  title: 'amp-accordion-1_0/Bind',
   decorators: [withAmp],
   parameters: {
     extensions: [

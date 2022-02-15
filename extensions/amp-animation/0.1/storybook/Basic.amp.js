@@ -37,7 +37,7 @@ const BLOCK_STYLE = {
 };
 
 export default {
-  title: 'Animation',
+  title: 'amp-animation-1_0',
   decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-animation', version: 0.1}],
