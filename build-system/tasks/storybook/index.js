@@ -13,6 +13,7 @@ const {log} = require('../../common/logging');
 const {writeFileSync} = require('fs-extra');
 const {yellow} = require('kleur/colors');
 const {updateSubpackages} = require('../../common/update-packages');
+const {bootstrapThirdPartyFrames} = require('../helpers');
 
 /** @typedef {'amp'|'preact'|'react'} StorybookEnv */
 
@@ -42,6 +43,12 @@ function startStorybook(env) {
     [
       'npx',
       'start-storybook',
+      // TODO(alanorozco): --static-dir is deprecated and should be removed in
+      // favor of staticDirs in main.js
+      // https://storybook.js.org/docs/react/configure/images-and-assets
+      // However, we can't yet use staticDirs due to a Storybook bug in the
+      // current version. Remove this once we upgrade to 6.4.
+      `--static-dir ${repoDir}/`,
       `--config-dir .`,
       `--port ${port}`,
       '--quiet',
@@ -78,6 +85,12 @@ function buildStorybook(env) {
     [
       'npx',
       'build-storybook',
+      // TODO(alanorozco): --static-dir is deprecated and should be removed in
+      // favor of staticDirs in main.js
+      // https://storybook.js.org/docs/react/configure/images-and-assets
+      // However, we can't yet use staticDirs due to a Storybook bug in the
+      // current version. Remove this once we upgrade to 6.4.
+      `--static-dir ${repoDir}/`,
       `--config-dir .`,
       `--output-dir ${repoDir}/examples/storybook/${env}`,
       '--quiet',
@@ -115,11 +128,16 @@ function parseEnvs(env) {
 async function storybook() {
   const {build = false, 'storybook_env': storybookEnv = 'preact'} = argv;
   const envs = parseEnvs(storybookEnv);
-  if (!build && envs.includes('amp')) {
-    await runAmpDevBuildServer();
-  }
   if (!build) {
     createCtrlcHandler('storybook');
+    if (envs.includes('amp')) {
+      await runAmpDevBuildServer();
+    } else {
+      // Proxy frames require an .html file output from the function below.
+      // runAmpDevBuildServer() does this implicitly, so it's not required to
+      // call directly in that case.
+      await bootstrapThirdPartyFrames({});
+    }
   }
   for (const env of envs) {
     updateSubpackages(envDir(env));
