@@ -273,11 +273,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     const detailsContainer = detailsHeader.closest(
       '.i-amphtml-amp-story-shopping-pdp-details'
     );
-    toggleAttribute(
-      detailsContainer,
-      'active',
-      !detailsContainer.hasAttribute('active')
+    const detailsText = detailsContainer.querySelector(
+      '.i-amphtml-amp-story-shopping-pdp-details-text'
     );
+    const toggleActive = !detailsContainer.hasAttribute('active');
+    toggleAttribute(detailsContainer, 'active', toggleActive);
+    detailsText.setAttribute('aria-hidden', !toggleActive);
   }
 
   /**
@@ -358,10 +359,13 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
                 viewBox="0 0 10 6"
                 class="i-amphtml-amp-story-shopping-pdp-details-header-arrow"
               >
-                <path />
+                <path d="M.5,.5 L5,5.2 L9.5,.5" />
               </svg>
             </button>
-            <span class="i-amphtml-amp-story-shopping-pdp-details-text">
+            <span
+              class="i-amphtml-amp-story-shopping-pdp-details-text"
+              aria-hidden="true"
+            >
               {activeProductData.productDetails}
             </span>
           </div>
