@@ -92,13 +92,7 @@ async function prCheck() {
     runCheck('amp check-sourcemaps');
   }
 
-  if (
-    buildTargetsInclude(
-      Targets.RUNTIME,
-      Targets.BUILD_SYSTEM,
-      Targets.EXTENSIONS
-    )
-  ) {
+  if (buildTargetsInclude(Targets.JS_FILES)) {
     runCheck('amp check-types');
   }
 

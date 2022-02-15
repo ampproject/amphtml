@@ -41,11 +41,11 @@ const Targets = {
   DEV_DASHBOARD: 'DEV_DASHBOARD',
   DOCS: 'DOCS',
   E2E_TEST: 'E2E_TEST',
-  EXTENSIONS: 'EXTENSIONS',
   HTML_FIXTURES: 'HTML_FIXTURES',
   IGNORE_LIST: 'IGNORE_LIST',
   INTEGRATION_TEST: 'INTEGRATION_TEST',
   INVALID_WHITESPACES: 'INVALID_WHITESPACES',
+  JS_FILES: 'JS_FILES',
   JSON_FILES: 'JSON_FILES',
   LINT: 'LINT',
   LINT_RULES: 'LINT_RULES',
@@ -169,12 +169,6 @@ const targetMatchers = {
       })
     );
   },
-  [Targets.EXTENSIONS]: (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return file.startsWith('extensions');
-  },
   [Targets.HTML_FIXTURES]: (file) => {
     return (
       fileLists.htmlFixtureFiles.includes(file) ||
@@ -208,6 +202,9 @@ const targetMatchers = {
       file == 'build-system/tasks/check-invalid-whitespaces.js' ||
       file.startsWith('build-system/test-configs')
     );
+  },
+  [Targets.JS_FILES]: (file) => {
+    return /(jsx?|tsx?)$/.test(file);
   },
   [Targets.JSON_FILES]: (file) => {
     return (
