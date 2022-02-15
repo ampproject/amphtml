@@ -19,7 +19,7 @@ tags: {  # <amp-google-read-aloud-player>
   attrs: {
     name: "data-tracking-ids"
     mandatory: true;
-    value_regex_casei: "^UA-\\d+-\\d+(\\s*,\\s*UA-\\d+-\\d+)*";
+    value_regex_casei: "^UA-\\d+-\\d+(\\s*,\\s*UA-\\d+-\\d+)*$";
   }
   attrs: {
     name: "data-voice"
@@ -41,6 +41,7 @@ tags: {  # <amp-google-read-aloud-player>
   }
   attrs: {
     name: "data-locale"
+    value_regex_casei: "[a-z]{2}";
   }
   attrs: {
     name: "data-intro"
@@ -53,7 +54,6 @@ tags: {  # <amp-google-read-aloud-player>
     name: "data-outro"
     value_url {
       protocol: 'https';
-      protocol: 'http';
       allow_relative: false;
     }
   }
@@ -61,7 +61,6 @@ tags: {  # <amp-google-read-aloud-player>
     name: "data-ad-tag-url"
     value_url {
       protocol: 'https';
-      protocol: 'http';
       allow_relative: false;
     }
   }
