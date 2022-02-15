@@ -42,10 +42,6 @@ function startStorybook(env) {
     [
       'npx',
       'start-storybook',
-      // TODO(alanorozco): --static-dir is deprecated and should be removed in
-      // favor of staticDirs in main.js once we upgrade to 6.4
-      // https://storybook.js.org/docs/react/configure/images-and-assets
-      `--static-dir ${repoDir}/`,
       `--config-dir .`,
       `--port ${port}`,
       '--quiet',
