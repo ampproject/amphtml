@@ -160,5 +160,8 @@
   },
   "99": {
     "string": "El formulari s'ha enviat correctament"
+  },
+  "101": {
+    "string": "Compra ara"
   }
 }
