@@ -59,17 +59,11 @@ describes.realWin(
       attachmentElement = win.document.createElement(
         'amp-story-shopping-attachment'
       );
-
       const story = win.document.createElement('amp-story');
-
       win.document.body.appendChild(story);
-
       story.appendChild(pageEl);
-
       pageEl.appendChild(attachmentElement);
-
       win.document.body.appendChild(pageEl);
-
       shoppingTag = await element.getImpl();
     }
 
@@ -85,17 +79,12 @@ describes.realWin(
     });
 
     it('should not build shopping tag if page attachment is removed', () => {
-      const createAndAppendInnerShoppingTagElStub = env.sandbox.stub(
-        shoppingTag,
-        'createAndAppendInnerShoppingTagEl_'
-      );
-
       pageEl.removeChild(attachmentElement);
 
       shoppingTag.buildCallback();
       shoppingTag.layoutCallback();
 
-      expect(createAndAppendInnerShoppingTagElStub).to.not.be.called;
+      expect(shoppingTag.element.textContent).to.be.empty;
     });
 
     it('should process config data and set text container content if data not null', async () => {
