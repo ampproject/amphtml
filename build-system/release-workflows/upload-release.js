@@ -104,12 +104,16 @@ function logProgress_(totalFiles, processedFiles) {
 /**
  * Compresses a single file with Brotli and writes it to ${path}.br.
  * @param {string} path
+ * @param {number} sizeHint
  * @return {Promise<void>}
  */
-async function brotliCompressFile_(path) {
+async function brotliCompressFile_(path, sizeHint) {
   const fileBuffer = fs.readFileSync(path);
   const compressedBuffer = zlib.brotliCompressSync(fileBuffer, {
-    params: {[zlib.constants.BROTLI_PARAM_QUALITY]: 11},
+    params: {
+      [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
+      [zlib.constants.BROTLI_PARAM_SIZE_HINT]: sizeHint,
+    },
   });
   return fs.writeFileSync(`${path}.br`, compressedBuffer);
 }
@@ -135,7 +139,7 @@ async function brotliCompressAll_() {
     }
 
     compressPromises.push(
-      brotliCompressFile_(path).then(() => {
+      brotliCompressFile_(path, stats.size).then(() => {
         logProgress_(totalFiles, ++compressedFiles);
       })
     );
