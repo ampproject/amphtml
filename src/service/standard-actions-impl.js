@@ -271,11 +271,11 @@ export class StandardActions {
     /**
      * Trigger Event based on copy action
      *  - If content got copied to the clipboard successfully, it will
-     *  fire `copy-success` event with data type `success`.
+     *    fire `copy-success` event with data type `success`.
      *  - If there's any error in copying, it will
-     *  fire `copy-error` event with data type `error`.
+     *    fire `copy-error` event with data type `error`.
      *  - If browser is not supporting the copy function/action, it
-     *  will fire `copy-error` event with data type `browser`.
+     *    will fire `copy-error` event with data type `browser`.
      *
      *  Example: <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy</button>
      */
