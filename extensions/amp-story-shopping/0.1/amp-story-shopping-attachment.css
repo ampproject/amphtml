@@ -22,16 +22,16 @@ amp-story-shopping-attachment a {
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
-  animation: fade-out .3s forwards !important; 
+  animation: i-amphtml-fade-out .3s forwards !important; 
 }
 
 .i-amphtml-amp-story-shopping[active] {
   margin-top: 0px !important;
   position: relative !important;
-  animation: fade-in .3s forwards !important; 
+  animation: i-amphtml-fade-in .3s forwards !important; 
 }
 
-@keyframes fade-in {
+@keyframes i-amphtml-fade-in {
   0% {
     opacity: 0;
   }
@@ -40,7 +40,7 @@ amp-story-shopping-attachment a {
   }
 }
 
-@keyframes fade-out {
+@keyframes i-amphtml-fade-out {
   0% {
     opacity: 1;
   }
