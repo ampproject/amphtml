@@ -7,10 +7,10 @@ export default {
   decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-iframe', version: '1.0'}],
-    // experiments: ['bento'],
+    experiments: ['bento'],
   },
   argTypes: {
-    dateTime: {
+    src: {
       name: 'iframe src',
       defaultValue: 'https://www.wikipedia.org/',
       control: {type: 'text'},
