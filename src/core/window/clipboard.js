@@ -2,11 +2,18 @@ import {removeElement} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 
 /**
- * @param {Window} win
- * @param {string} text
- * @return {boolean}
+ * Copies provided text to clipboard using deprecated API: document.execCommand('copy')
+ * @param {Window} win Window context
+ * @param {string} text Text to copy
+ * @param {*} successCallback Executes when copying is successful
+ * @param {*} failCallback Executes when copying is failed
  */
-export function depricatedCopyTextToClipboard(win, text) {
+export function deprecatedCopyTextToClipboard(
+  win,
+  text,
+  successCallback,
+  failCallback
+) {
   let copySuccessful = false;
   const doc = win.document;
 
@@ -44,40 +51,51 @@ export function depricatedCopyTextToClipboard(win, text) {
 
   removeElement(textarea);
 
-  return copySuccessful;
+  if (copySuccessful) {
+    successCallback();
+  } else {
+    failCallback();
+  }
 }
 
 /**
- * @param {Document} doc
- * @return {boolean}
+ * @param {Document} doc Document context
+ * @return {boolean} Returns true if copying support is available with deprecated API
  */
-export function isDepricatedCopyingToClipboardSupported(doc) {
+export function isDeprecatedCopyingToClipboardSupported(doc) {
   return doc.queryCommandSupported('copy');
 }
 
 /**
- * @param {Window} win
- * @param {string} text
- * @param {*} successCallback
- * @param {*} failCallback
+ * Copies provided text to clipboard using 'navigator.clipboard' API
+ * @param {Window} win Window context
+ * @param {string} text Text to copy
+ * @param {*} successCallback Executes when copying is successful
+ * @param {*} failCallback Executes when copying is failed
  */
 export function copyTextToClipboard(win, text, successCallback, failCallback) {
   win.navigator.clipboard.writeText(text).then(
     function () {
-      /* clipboard successfully set */
+      /* Clipboard successfully set using 'navigator.clipboard' */
       successCallback();
     },
     function () {
-      /* clipboard write failed */
-      failCallback();
+      /*
+        Clipboard write failed using 'navigator.clipboard',
+        Try using deprecated method as a fallback support.
+      */
+      deprecatedCopyTextToClipboard(win, text, successCallback, failCallback);
     }
   );
 }
 
 /**
- * @param {Document} doc
- * @return {boolean}
+ * @param {Document} doc Document context
+ * @return {boolean} Returns true if copying support is available with new (or with deprecated) API
  */
 export function isCopyingToClipboardSupported(doc) {
-  return !!doc.defaultView?.navigator.clipboard;
+  return (
+    !!doc.defaultView?.navigator?.clipboard ||
+    isDeprecatedCopyingToClipboardSupported(doc)
+  );
 }
