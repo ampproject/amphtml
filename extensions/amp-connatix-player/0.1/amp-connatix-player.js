@@ -3,7 +3,7 @@ import {
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
-import {removeElement} from '#core/dom';
+import {getDataParamsFromAttributes, removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
@@ -272,6 +272,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
       'url': Services.documentInfoForDoc(element).sourceUrl,
+      ...getDataParamsFromAttributes(element),
     };
     const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);

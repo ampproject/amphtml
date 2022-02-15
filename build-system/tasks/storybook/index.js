@@ -11,8 +11,8 @@ const {isCiBuild} = require('../../common/ci');
 const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {writeFileSync} = require('fs-extra');
-const {yellow} = require('kleur/colors');
 const {updateSubpackages} = require('../../common/update-packages');
+const {bootstrapThirdPartyFrames} = require('../helpers');
 
 /** @typedef {'amp'|'preact'|'react'} StorybookEnv */
 
@@ -42,6 +42,10 @@ function startStorybook(env) {
     [
       'npx',
       'start-storybook',
+      // TODO(alanorozco): --static-dir is deprecated and should be removed in
+      // favor of staticDirs in main.js once we upgrade to 6.4
+      // https://storybook.js.org/docs/react/configure/images-and-assets
+      `--static-dir ${repoDir}/`,
       `--config-dir .`,
       `--port ${port}`,
       '--quiet',
@@ -97,13 +101,6 @@ function buildStorybook(env) {
 function parseEnvs(env) {
   return /** @type {StorybookEnv[]} */ (
     env.split(',').filter((env) => {
-      if (env === 'amp') {
-        log(
-          yellow('AMP environment for storybook is temporarily disabled.\n') +
-            'See https://github.com/ampproject/storybook-addon-amp/issues/57'
-        );
-        return false;
-      }
       return env === 'amp' || env === 'preact' || env === 'react';
     })
   );
@@ -115,11 +112,16 @@ function parseEnvs(env) {
 async function storybook() {
   const {build = false, 'storybook_env': storybookEnv = 'preact'} = argv;
   const envs = parseEnvs(storybookEnv);
-  if (!build && envs.includes('amp')) {
-    await runAmpDevBuildServer();
-  }
   if (!build) {
     createCtrlcHandler('storybook');
+    if (envs.includes('amp')) {
+      await runAmpDevBuildServer();
+    } else {
+      // Proxy frames require an .html file output from the function below.
+      // runAmpDevBuildServer() does this implicitly, so it's not required to
+      // call directly in that case.
+      await bootstrapThirdPartyFrames({});
+    }
   }
   for (const env of envs) {
     updateSubpackages(envDir(env));
