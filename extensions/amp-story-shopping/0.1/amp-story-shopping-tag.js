@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {
@@ -6,15 +7,11 @@ import {
 } from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
-import {devAssert} from '#utils/log';
-
-import {toggleAttribute} from '#core/dom';
-
 import {Services} from '#service';
 
-import {formatI18nNumber, loadFonts} from './amp-story-shopping';
+import {devAssert} from '#utils/log';
 
-import {closestAncestorElementBySelector} from '#core/dom/query';
+import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
