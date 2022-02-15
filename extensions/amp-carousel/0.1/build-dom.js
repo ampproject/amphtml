@@ -232,7 +232,7 @@ function buildSlideScrollCarousel(element) {
     slideWrappers.push(slideWrapper);
   });
   // Initialize the first slide to be shown.
-  slides[0]?.classList.add(ClassNames.SLIDES_ITEM_SHOW);
+  slideWrappers[0]?.classList.add(ClassNames.SLIDES_ITEM_SHOW);
 
   return {slidesContainer, slides, slideWrappers};
 }
