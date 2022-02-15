@@ -159,7 +159,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
-   * Active product data is cleared after the attachment closes so that content does not jump.
+   * Clear active product data after the attachment closes so that content does not jump.
    * @private
    */
   clearActiveProductDataIfClosed_() {
