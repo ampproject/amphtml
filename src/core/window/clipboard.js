@@ -67,26 +67,35 @@ export function isDeprecatedCopyingToClipboardSupported(doc) {
 }
 
 /**
- * Copies provided text to clipboard using 'navigator.clipboard' API
+ * Copies provided text to clipboard using 'navigator.clipboard' API.
+ * It will try to use deprecated API if 'navigator.clipboard' is not supported.
  * @param {Window} win Window context
  * @param {string} text Text to copy
  * @param {*} successCallback Executes when copying is successful
  * @param {*} failCallback Executes when copying is failed
  */
 export function copyTextToClipboard(win, text, successCallback, failCallback) {
-  win.navigator.clipboard.writeText(text).then(
-    function () {
-      /* Clipboard successfully set using 'navigator.clipboard' */
-      successCallback();
-    },
-    function () {
-      /*
-        Clipboard write failed using 'navigator.clipboard',
-        Try using deprecated method as a fallback support.
-      */
-      deprecatedCopyTextToClipboard(win, text, successCallback, failCallback);
-    }
-  );
+  /** Check which method is supported for the browser */
+  if (!!navigator?.clipboard) {
+    /*
+      Try copying with `navigator.clipboard` method as a fallback support.
+    */
+    win.navigator.clipboard.writeText(text).then(
+      function () {
+        /* Clipboard successfully set using 'navigator.clipboard' */
+        successCallback();
+      },
+      function () {
+        /* Clipboard write failed using 'navigator.clipboard' */
+        failCallback();
+      }
+    );
+  } else if (isDeprecatedCopyingToClipboardSupported(win.document)) {
+    /*
+      Try copying with deprecated method as a fallback support.
+    */
+    deprecatedCopyTextToClipboard(win, text, successCallback, failCallback);
+  }
 }
 
 /**
