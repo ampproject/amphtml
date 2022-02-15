@@ -277,8 +277,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       '.i-amphtml-amp-story-shopping-pdp-details-text'
     );
     const toggleActive = !detailsContainer.hasAttribute('active');
-    toggleAttribute(detailsContainer, 'active', toggleActive);
-    detailsText.setAttribute('aria-hidden', !toggleActive);
+    this.mutateElement(() => {
+      toggleAttribute(detailsContainer, 'active', toggleActive);
+      detailsText.setAttribute('aria-hidden', !toggleActive);
+    });
   }
 
   /**
