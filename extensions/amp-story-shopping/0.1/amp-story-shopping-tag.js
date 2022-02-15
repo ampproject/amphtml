@@ -106,32 +106,27 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) => {
-      this.onRtlStateUpdate_(rtlState);
-    });
-
-    this.storeService_.subscribe(
-      StateProperty.PAGE_SIZE,
-      (pageSizeState) => {
-        this.flipTagIfOffscreen_(pageSizeState);
-      },
-      true /** callToInitialize */
+    this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) =>
+      this.onRtlStateUpdate_(rtlState)
     );
 
     this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
-      (id) => {
-        this.setShoppingTagActive(id === this.pageEl_.id);
-      },
+      StateProperty.PAGE_SIZE,
+      (pageSizeState) => this.flipTagIfOffscreen_(pageSizeState),
       true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, (id) =>
+      this.toggleShoppingTagActive_(id)
     );
   }
 
   /**
-   * Activate or deactivate shopping tag
-   * @param {boolean} isActive
+   * @param {!string} id
+   * @private
    */
-  setShoppingTagActive(isActive) {
+  toggleShoppingTagActive_(id) {
+    const isActive = id === this.pageEl_.id;
     toggleAttribute(this.shoppingTagEl_, 'active', isActive);
   }
 
