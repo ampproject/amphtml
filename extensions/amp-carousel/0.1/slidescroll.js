@@ -938,9 +938,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
         if (this.shouldLoop_) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
-        dev()
-          .assertElement(this.slideWrappers_[i])
-          .classList.remove(ClassNames.SLIDES_ITEM_SHOW);
+        this.slideWrappers_[i].classList.remove(ClassNames.SLIDES_ITEM_SHOW);
         this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide
