@@ -76,15 +76,14 @@ describes.realWin(
       src = null,
       config = defaultInlineConfig
     ) {
-      pageElement.appendChild(
+      const shoppingAttachment = (
         <amp-story-shopping-attachment layout="nodisplay" src={src}>
           <script type="application/json">{JSON.stringify(config)}</script>
         </amp-story-shopping-attachment>
       );
+      pageElement.appendChild(shoppingAttachment);
 
-      return getShoppingConfig(
-        pageElement.getElementsByTagName('amp-story-shopping-attachment')[0]
-      );
+      return getShoppingConfig(shoppingAttachment);
     }
 
     it('throws on no config', async () => {
