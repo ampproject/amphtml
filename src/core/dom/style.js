@@ -46,6 +46,15 @@ function getVendorJsPropertyName_(style, titleCase) {
 }
 
 /**
+ * A small set of curated properties that are valid with setProperty.
+ * Within worker-dom, only `.setProperty` properly reflects into the attribute.
+ * If we solve that, or decide to always use setProperty, this kludge can be removed.
+ *
+ * TODO(https://github.com/ampproject/worker-dom/issues/1134)
+ */
+const SHOULD_USE_SET_PROPERTY = new Set(['width', 'height', 'order', 'hidden']);
+
+/**
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
@@ -60,6 +69,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
     // CSS vars are returned as is.
     return camelCase;
   }
+
   if (!propertyNameCache) {
     propertyNameCache = map();
   }
@@ -116,7 +126,7 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
     return;
   }
   const styleValue = opt_units ? value + opt_units : value;
-  if (isVar(propertyName)) {
+  if (isVar(propertyName) || SHOULD_USE_SET_PROPERTY.has(propertyName)) {
     element.style.setProperty(propertyName, styleValue);
   } else {
     /** @type {*} */ (element.style)[propertyName] = styleValue;
