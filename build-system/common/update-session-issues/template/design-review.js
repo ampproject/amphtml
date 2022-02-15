@@ -10,7 +10,7 @@ const timeRotationUtc = [
   [/* wed */ 3, '21:00', 'Americas'],
 ];
 
-const timeRotationStart = new Date('2021-03-02');
+const timeRotationStart = new Date('2022-03-02');
 
 // All previous weeks have already been handled.
 const generateWeeksFromNow = 3;
