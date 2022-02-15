@@ -66,7 +66,7 @@ describes.realWin(
       shoppingTag = await tagEl.getImpl();
     }
 
-    async function shoppingDataDispatchStoreService() {
+    async function setUpShoppingData() {
       const shoppingData = {
         'sunglasses': {'productTitle': 'Spectacular Spectacles'},
       };
@@ -78,7 +78,7 @@ describes.realWin(
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
 
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
-      await shoppingDataDispatchStoreService();
+      await setUpShoppingData();
       env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
         expect(shoppingTag.element.textContent).to.be.not.empty;
       });
@@ -91,7 +91,7 @@ describes.realWin(
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
 
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
-      await shoppingDataDispatchStoreService();
+      await setUpShoppingData();
       env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
         expect(shoppingTag.element.textContent).to.be.empty;
       });
@@ -99,7 +99,7 @@ describes.realWin(
 
     it('should process config data and set text container content if data not null', async () => {
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
-      await shoppingDataDispatchStoreService();
+      await setUpShoppingData();
       env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
         expect(shoppingTag.element.textContent).to.equal(
           'Spectacular Spectacles'
@@ -109,7 +109,7 @@ describes.realWin(
 
     it('should not process config data and set text container content if id not found', async () => {
       shoppingTag.element.setAttribute('data-product-id', 'hat');
-      await shoppingDataDispatchStoreService();
+      await setUpShoppingData();
       expect(shoppingTag.element.textContent).to.be.empty;
       expect(shoppingTag.isLayoutSupported(Layout_Enum.CONTAINER)).to.be.true;
     });
