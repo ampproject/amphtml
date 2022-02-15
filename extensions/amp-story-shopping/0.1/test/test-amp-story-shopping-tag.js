@@ -22,7 +22,7 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let element;
+    let tagEl;
     let shoppingTag;
     let storeService;
     let localizationService;
@@ -43,18 +43,18 @@ describes.realWin(
         .stub(Services, 'localizationServiceForOrNull')
         .returns(Promise.resolve(localizationService));
 
-      await createAmpStoryShoppingTag();
+      await setUpStoryWithShoppingTag();
     });
 
-    async function createAmpStoryShoppingTag() {
+    async function setUpStoryWithShoppingTag() {
       pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
-      element = createElementWithAttributes(
+      tagEl = createElementWithAttributes(
         win.document,
         'amp-story-shopping-tag',
         {'layout': 'container'}
       );
-      pageEl.appendChild(element);
+      pageEl.appendChild(tagEl);
 
       attachmentElement = win.document.createElement(
         'amp-story-shopping-attachment'
@@ -63,8 +63,7 @@ describes.realWin(
       win.document.body.appendChild(story);
       story.appendChild(pageEl);
       pageEl.appendChild(attachmentElement);
-      win.document.body.appendChild(pageEl);
-      shoppingTag = await element.getImpl();
+      shoppingTag = await tagEl.getImpl();
     }
 
     async function shoppingDataDispatchStoreService() {
@@ -74,17 +73,28 @@ describes.realWin(
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
     }
 
-    it('should build and layout shopping tag component', () => {
+    it('should build and layout shopping tag component', async () => {
+      expect(() => shoppingTag.buildCallback()).to.not.throw();
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
+
+      shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
+      await shoppingDataDispatchStoreService();
+      env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
+        expect(shoppingTag.element.textContent).to.be.not.empty;
+      });
     });
 
-    it('should not build shopping tag if page attachment is removed', () => {
+    it('should not build shopping tag if page attachment is missing', async () => {
       pageEl.removeChild(attachmentElement);
 
-      shoppingTag.buildCallback();
-      shoppingTag.layoutCallback();
+      expect(() => shoppingTag.buildCallback()).to.not.throw();
+      expect(() => shoppingTag.layoutCallback()).to.not.throw();
 
-      expect(shoppingTag.element.textContent).to.be.empty;
+      shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
+      await shoppingDataDispatchStoreService();
+      env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
+        expect(shoppingTag.element.textContent).to.be.empty;
+      });
     });
 
     it('should process config data and set text container content if data not null', async () => {
