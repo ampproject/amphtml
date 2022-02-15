@@ -1,164 +1,222 @@
 {
   "2": {
-    "string": "അടുത്തത് ടാപ്പ് ചെയ്യുക"
+    "string": "അടുത്തത് ടാപ്പ് ചെയ്യുക",
+    "description": "Label indicating that users can navigate to the next page, in the amp-story hint UI."
   },
   "3": {
-    "string": "പിന്നിലേക്ക് ടാപ്പ് ചെയ്യുക"
+    "string": "പിന്നിലേക്ക് ടാപ്പ് ചെയ്യുക",
+    "description": "Label indicating that users can navigate to the previous page, in the amp-story hint UI."
   },
   "4": {
-    "string": "ക്ലിപ്പ്‌ബോർഡിലേക്ക് ലിങ്ക് പകർത്താനായില്ല :("
+    "string": "ക്ലിപ്പ്‌ബോർഡിലേക്ക് ലിങ്ക് പകർത്താനായില്ല :(",
+    "description": "String shown in a failure message to inform the user that a link could not be successfully copied to their clipboard."
   },
   "5": {
-    "string": "ലിങ്ക് പകർത്തി!"
+    "string": "ലിങ്ക് പകർത്തി!",
+    "description": "String shown in a confirmation message to inform the user that a link was successfully copied to their clipboard."
   },
   "6": {
-    "string": "ഇമെയിൽ"
+    "string": "ഇമെയിൽ",
+    "description": "Button label for the share target that shares a link via email."
   },
   "7": {
-    "string": "Facebook"
+    "string": "Facebook",
+    "description": "Button label for the share target that shares a link via Facebook."
   },
   "9": {
-    "string": "ലിങ്ക് നേടുക"
+    "string": "ലിങ്ക് നേടുക",
+    "description": "Button label for the share target that shares a link via by copying it to the user's clipboard."
   },
   "10": {
-    "string": "LinkedIn"
+    "string": "LinkedIn",
+    "description": "Button label for the share target that shares a link via LinkedIn."
   },
   "11": {
-    "string": "Pinterest"
+    "string": "Pinterest",
+    "description": "Button label for the share target that shares a link via Pinterest."
   },
   "12": {
-    "string": "SMS"
+    "string": "SMS",
+    "description": "Button label for the share target that shares a link via SMS."
   },
   "14": {
-    "string": "Tumblr"
+    "string": "Tumblr",
+    "description": "Button label for the share target that shares a link via Tumblr."
   },
   "15": {
-    "string": "Twitter"
+    "string": "Twitter",
+    "description": "Button label for the share target that shares a link via Twitter."
   },
   "16": {
-    "string": "WhatsApp"
+    "string": "WhatsApp",
+    "description": "Button label for the share target that shares a link via WhatsApp."
   },
   "21": {
-    "string": "ഞങ്ങൾക്ക് ഖേദമുണ്ട്, നിങ്ങളുടെ ബ്രൗസർ ഈ പേജ് അനുഭവത്തെ പിന്തുണയ്ക്കുന്നില്ല"
+    "string": "ഞങ്ങൾക്ക് ഖേദമുണ്ട്, നിങ്ങളുടെ ബ്രൗസർ ഈ പേജ് അനുഭവത്തെ പിന്തുണയ്ക്കുന്നില്ല",
+    "description": "Text for a warning screen that informs the user that their browser does not support stories."
   },
   "22": {
-    "string": "അംഗീകരിക്കുക"
+    "string": "അംഗീകരിക്കുക",
+    "description": "Label for a button that allows the user to consent to providing their cookie access."
   },
   "23": {
-    "string": "നിരസിക്കുക"
+    "string": "നിരസിക്കുക",
+    "description": "Label for a button that allows the user to disconsent to providing their cookie access."
   },
   "25": {
-    "string": "ഒറിജിനൽ ഡൊമെയ്‌നിൽ കാണുക:"
+    "string": "ഒറിജിനൽ ഡൊമെയ്‌നിൽ കാണുക:",
+    "description": "Label for a heading of a dialog that shows the user the domain from which the story is served."
   },
   "26": {
-    "string": "AMP ഫലങ്ങൾ സംബന്ധിച്ച് കൂടുതൽ"
+    "string": "AMP ഫലങ്ങൾ സംബന്ധിച്ച് കൂടുതൽ",
+    "description": "Label for a link to documentation on how AMP links are handled."
   },
   "27": {
-    "string": "എന്തായാലും തുടരുക"
+    "string": "എന്തായാലും തുടരുക",
+    "description": "Button label to allow the user to continue even if they are not using a supportive browser."
   },
   "34": {
-    "string": "വീഡിയോ പ്ലേ ചെയ്യുക"
+    "string": "വീഡിയോ പ്ലേ ചെയ്യുക",
+    "description": "Label for a button to play the video visible on the page."
   },
   "35": {
-    "string": "മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക"
+    "string": "മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യുക",
+    "description": "Label for a button to open a drawer containing additional content via a \"swipe up\" user gesture."
   },
   "63": {
-    "string": "Line"
+    "string": "Line",
+    "description": "Button label for the share target that shares a link via Line."
   },
   "64": {
-    "string": "അപ്‌ഡേറ്റ് ചെയ്തു"
+    "string": "അപ്‌ഡേറ്റ് ചെയ്തു",
+    "description": "Label that indicates that additional content has been added to a story"
   },
   "65": {
-    "string": "വീഡിയോ പ്ലേ ചെയ്യുന്നത് പരാജയപ്പെട്ടു"
+    "string": "വീഡിയോ പ്ലേ ചെയ്യുന്നത് പരാജയപ്പെട്ടു",
+    "description": "Label indicating that the video visible on the page failed to play."
   },
   "66": {
-    "string": "സ്റ്റോറി മ്യൂട്ട് ചെയ്യുക"
+    "string": "സ്റ്റോറി മ്യൂട്ട് ചെയ്യുക",
+    "description": "Label for the mute button that turns off the sound in the story"
   },
   "67": {
-    "string": "സ്റ്റോറി അൺമ്യൂട്ട് ചെയ്യുക"
+    "string": "സ്റ്റോറി അൺമ്യൂട്ട് ചെയ്യുക",
+    "description": "Label for the unmute button that turns the sound in the story back on"
   },
   "68": {
-    "string": "സ്റ്റോറി വിവരങ്ങൾ"
+    "string": "സ്റ്റോറി വിവരങ്ങൾ",
+    "description": "Label for the information button that pulls up relevant information about the story content"
   },
   "69": {
-    "string": "സ്റ്റോറി പങ്കിടുക"
+    "string": "സ്റ്റോറി പങ്കിടുക",
+    "description": "Label for the share button that pulls up a panel of options for sharing the story"
   },
   "71": {
-    "string": "A"
+    "string": "A",
+    "description": "Label for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)"
   },
   "72": {
-    "string": "B"
+    "string": "B",
+    "description": "Label for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)"
   },
   "73": {
-    "string": "C"
+    "string": "C",
+    "description": "Label for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)"
   },
   "74": {
-    "string": "D"
+    "string": "D",
+    "description": "Label for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)"
   },
   "75": {
-    "string": "D"
+    "string": "D",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
   },
   "76": {
-    "string": "D"
+    "string": "D",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
   },
   "77": {
-    "string": "D"
+    "string": "D",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
   },
   "78": {
-    "string": "ടിപ്പ് 2-ൽ 2"
+    "string": "ടിപ്പ് 2-ൽ 2",
+    "description": "Label for a hint indicating progress on a multistep onboarding user education tutorial."
   },
   "79": {
-    "string": "അടുത്ത സ്റ്റോറിയിലേക്ക് പോകാൻ സ്വൈപ്പ് ചെയ്യുക"
+    "string": "അടുത്ത സ്റ്റോറിയിലേക്ക് പോകാൻ സ്വൈപ്പ് ചെയ്യുക",
+    "description": "Instruction on how to use the product, within an onboarding user education tutorial."
   },
   "80": {
-    "string": "മനസ്സിലായി"
+    "string": "മനസ്സിലായി",
+    "description": "Label for a button dismissing or advancing to the next step of an onboarding user education tutorial."
   },
   "81": {
-    "string": "സൂചന"
+    "string": "സൂചന",
+    "description": "Label for a hint in the context of an onboarding user education tutorial."
   },
   "83": {
-    "string": "ആക്റ്റിവേറ്റ് ചെയ്യുക"
+    "string": "ആക്റ്റിവേറ്റ് ചെയ്യുക",
+    "description": "Label for the activate button to ask for device orientation permission"
   },
   "84": {
-    "string": "സ്കോർ:"
+    "string": "സ്കോർ:",
+    "description": "Label for the results component preceding the score in percentages"
   },
   "85": {
-    "string": "സ്റ്റോറി തൽക്കാലം നിർത്തുക"
+    "string": "സ്റ്റോറി തൽക്കാലം നിർത്തുക",
+    "description": "Label for a button that pauses the media content on the story"
   },
   "86": {
-    "string": "സ്റ്റോറി പ്ലേ ചെയ്യുക"
+    "string": "സ്റ്റോറി പ്ലേ ചെയ്യുക",
+    "description": "Label for a button that plays the media content on the story"
   },
   "87": {
-    "string": "അടയ്ക്കുക"
+    "string": "അടയ്ക്കുക",
+    "description": "Label for a button that closes the full page experience and takes the user back to where they were originally"
   },
   "88": {
-    "string": "ഒഴിവാക്കി അടുത്തതിലേക്ക് പോവുക"
+    "string": "ഒഴിവാക്കി അടുത്തതിലേക്ക് പോവുക",
+    "description": "Label for a button that advances to the next element in the carousel"
   },
   "89": {
-    "string": "നിങ്ങളുടെ പ്രതികരണം ഇതിലേക്ക് അയയ്ക്കും"
+    "string": "നിങ്ങളുടെ പ്രതികരണം ഇതിലേക്ക് അയയ്ക്കും",
+    "description": "Text displayed to users after clicking a button that reveals a disclaimer, telling them more about where their user data will be stored, after they interact with a poll or quiz."
   },
   "90": {
-    "string": "അടുത്ത സ്റ്റോറി"
+    "string": "അടുത്ത സ്റ്റോറി",
+    "description": "Label for a button that advances to the next element in the carousel."
   },
   "91": {
-    "string": "അടുത്ത പേജ്"
+    "string": "അടുത്ത പേജ്",
+    "description": "Label for a button that advances to the next page of the story."
   },
   "92": {
-    "string": "വീണ്ടും പ്ലേ ചെയ്യുക"
+    "string": "വീണ്ടും പ്ലേ ചെയ്യുക",
+    "description": "Label for a button that replays the story."
   },
   "93": {
-    "string": "മുമ്പത്തെ പേജ്"
+    "string": "മുമ്പത്തെ പേജ്",
+    "description": "Label for a button that returns the user to the previous page of the story."
   },
   "96": {
-    "string": "അടുത്തറിയാൻ ഉപകരണം നീക്കുക"
+    "string": "അടുത്തറിയാൻ ഉപകരണം നീക്കുക",
+    "description": "Text displayed to users on gyroscope activation of an amp-story-360 component, telling them to move their device to experience the gyroscope effect."
   },
   "97": {
-    "string": "തുറക്കുന്നു"
+    "string": "തുറക്കുന്നു",
+    "description": "Text displayed to users on tap of outlink button."
   },
   "98": {
-    "string": "ഫോം സമർപ്പിച്ചിട്ടില്ല, വീണ്ടും ശ്രമിക്കുക"
+    "string": "ഫോം സമർപ്പിച്ചിട്ടില്ല, വീണ്ടും ശ്രമിക്കുക",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission fails."
   },
   "99": {
-    "string": "ഫോം വിജയകരമായി സമർപ്പിച്ചു"
+    "string": "ഫോം വിജയകരമായി സമർപ്പിച്ചു",
+    "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
+  },
+  "101": {
+    "string": "ഇപ്പോൾ ഷോപ്പ് ചെയ്യൂ",
+    "description": "ഷോപ്പിംഗ് CTA ബട്ടണിനുള്ള ലേബൽ."
   }
 }
