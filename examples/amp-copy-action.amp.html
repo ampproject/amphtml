@@ -144,7 +144,7 @@
           &#60;div id="divTarget"&#62;
             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
           &#60;/div&#62;
-          
+
           &#60;!-- Copy Action Button --&#62;
           &#60;button on="tap:divTarget.copy();
                       copy-success:divCopySuccess.show();
@@ -195,7 +195,7 @@
                       copy-error:inputCopyError.show()"&#62;
             Copy Input Value
           &#60;/button&#62;
-          
+
           &#60;!-- Target to show on 'copy-success' --&#62;
           &#60;span id="inputCopySuccess" hidden class="copy-success"&#62;Value copied successfully!&#60;/span&#62;
           &#60;!-- Target to show on 'copy-error' --&#62;
@@ -233,7 +233,7 @@
                           copy-success:staticTextCopySuccess.show()"&#62;
             Copy Static Text
           &#60;/button&#62;
-          
+
           &#60;!-- Target to show on 'copy-success' --&#62;
           &#60;span id="staticTextCopySuccess" hidden class="copy-success"&#62;
             StaticText copied successfully!
@@ -264,7 +264,7 @@
                           copy-success:AMP.setState({eventResult: event.data.type})"&#62;
             Copy Action
           &#60;/button&#62;
-          
+
           &#60;!-- Dynamically checking copy 'eventResult' --&#62;
           &#60;p hidden [hidden]="false"
                  [class]="(eventResult != 'error')?'copy-success':'copy-error'"
