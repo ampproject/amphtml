@@ -259,7 +259,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
             if (!tagData) {
               return;
             }
-            unlisten();
+            unlisten?.();
             resolve(
               new AmpStoryShoppingTagReady(
                 this.element,
