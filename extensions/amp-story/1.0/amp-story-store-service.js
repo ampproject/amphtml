@@ -500,6 +500,7 @@ export class AmpStoryStoreService {
    * @param  {!Function} listener
    * @param  {boolean=} callToInitialize Whether the listener should be
    *                                     triggered with current value.
+   * @return {!UnlistenDef}
    */
   subscribe(key, listener, callToInitialize = false) {
     if (!hasOwn(this.state_, key)) {
@@ -509,11 +510,10 @@ export class AmpStoryStoreService {
     if (!this.listeners_[key]) {
       this.listeners_[key] = new Observable();
     }
-    this.listeners_[key].add(listener);
-
     if (callToInitialize) {
       listener(this.get(key));
     }
+    return this.listeners_[key].add(listener);
   }
 
   /**

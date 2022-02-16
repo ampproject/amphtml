@@ -251,7 +251,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         return;
       }
       return new Promise((resolve) => {
-        storeService.subscribe(
+        const unlisten = storeService.subscribe(
           StateProperty.SHOPPING_DATA,
           (shoppingData) => {
             const productId = this.element.getAttribute('data-product-id');
@@ -259,6 +259,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
             if (!tagData) {
               return;
             }
+            unlisten();
             resolve(
               new AmpStoryShoppingTagReady(
                 this.element,
