@@ -247,7 +247,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       if (!storeService || !localizationService) {
         return;
       }
-      return this.updgradeWithServices_(storeService, localizationService);
+      return this.upgradeWhenDataReady_(storeService, localizationService);
     });
   }
 
@@ -257,7 +257,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @return {!Promise<!AmpStoryShoppingTagReady>}
    * @private
    */
-  updgradeWithServices_(storeService, localizationService) {
+  upgradeWhenDataReady_(storeService, localizationService) {
     return new Promise((resolve) => {
       storeService.subscribe(
         StateProperty.SHOPPING_DATA,
