@@ -95,6 +95,11 @@ describes.sandboxed('DOM - style helpers', {}, (env) => {
     expect(st.camelCaseToTitleCase(str)).to.equal('TheQuickBrownFox');
   });
 
+  it('camelCaseToHyphenCase', () => {
+    const str = 'paddingTop';
+    expect(st.camelCaseToTitleCase(str)).to.equal('padding-top');
+  });
+
   it('removeAlphaFromColor', () => {
     expect(st.removeAlphaFromColor('rgba(1, 1, 1, 0)')).to.equal(
       'rgba(1, 1, 1, 1)'

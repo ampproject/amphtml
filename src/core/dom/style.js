@@ -28,6 +28,14 @@ export function camelCaseToTitleCase(camelCase) {
 }
 
 /**
+ * @param {string} camelCase camel cased string
+ * @return {string} hyphen-cased string
+ */
+export function camelCaseToHyphenCase(camelCase) {
+  return camelCase.replace(/[A-Z]/g, (match) => '-' + match.toLowerCase());
+}
+
+/**
   Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
@@ -44,15 +52,6 @@ function getVendorJsPropertyName_(style, titleCase) {
   }
   return '';
 }
-
-/**
- * A small set of curated properties that are valid with setProperty.
- * Within worker-dom, only `.setProperty` properly reflects into the attribute.
- * If we solve that, or decide to always use setProperty, this kludge can be removed.
- *
- * TODO(https://github.com/ampproject/worker-dom/issues/1134)
- */
-const SHOULD_USE_SET_PROPERTY = new Set(['width', 'height', 'order', 'hidden']);
 
 /**
  * Returns the possibly prefixed JavaScript property name of a style property
@@ -126,11 +125,7 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
     return;
   }
   const styleValue = opt_units ? value + opt_units : value;
-  if (isVar(propertyName) || SHOULD_USE_SET_PROPERTY.has(propertyName)) {
-    element.style.setProperty(propertyName, styleValue);
-  } else {
-    /** @type {*} */ (element.style)[propertyName] = styleValue;
-  }
+  element.style.setProperty(camelCaseToHyphenCase(propertyName), styleValue);
 }
 
 /**
