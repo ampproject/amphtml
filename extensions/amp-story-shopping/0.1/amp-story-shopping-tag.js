@@ -30,6 +30,15 @@ const FONTS_TO_LOAD = [
   },
 ];
 
+/**
+ * @param {Element} tagElement
+ * @param {!KeyedShoppingConfigDef} shoppingData
+ * @return {?ShoppingConfigDataDef|undefined}
+ */
+export function getShoppingTagData(tagElement, shoppingData) {
+  return shoppingData[tagElement.dataset.productId];
+}
+
 class AmpStoryShoppingTagReady extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
@@ -254,8 +263,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         const unlisten = storeService.subscribe(
           StateProperty.SHOPPING_DATA,
           (shoppingData) => {
-            const {productId} = this.element.dataset;
-            const tagData = shoppingData[productId];
+            const tagData = getShoppingTagData(shoppingData, this.element);
             if (!tagData) {
               return;
             }

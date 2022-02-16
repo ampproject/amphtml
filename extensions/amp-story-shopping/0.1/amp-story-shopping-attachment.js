@@ -9,6 +9,7 @@ import {
   getShoppingConfig,
   storeShoppingConfig,
 } from './amp-story-shopping-config';
+import {getShoppingTagData} from './amp-story-shopping-tag';
 
 import {
   Action,
@@ -160,8 +161,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   updateTemplate_(shoppingData) {
-    const shoppingDataForPage = this.shoppingTags_.map(
-      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
+    const shoppingDataForPage = this.shoppingTags_.map((shoppingTag) =>
+      getShoppingTagData(shoppingData, shoppingTag)
     );
 
     let productForPdp = shoppingData.activeProductData;
