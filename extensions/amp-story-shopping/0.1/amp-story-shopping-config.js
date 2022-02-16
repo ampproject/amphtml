@@ -38,7 +38,6 @@ export const VALIDATION_OBJECTS = {
   },
 };
 
-const essentialFieldsAccum = [];
 const essentialFields = [
   'productPrice',
   'productTitle',
@@ -70,9 +69,6 @@ export function validateObject(field, value = undefined) {
  */
 export function validateRequired(field, value = undefined) {
   if (value === undefined) {
-    if (essentialFields.includes(field)) {
-      essentialFieldsAccum.push(field);
-    }
     throw Error(`Field ${field} is required.`);
   }
 }
@@ -120,11 +116,14 @@ export function validateURLs(field, url = undefined) {
  * Validates the shopping config of a single product.
  * @param {!ShoppingConfigDataDef} shoppingConfig
  * @param {!Object<string, !Array<function>>} validationObject
+ * @return {boolean}
  */
 export function validateConfig(
   shoppingConfig,
   validationObject = VALIDATION_OBJECTS['productValidationConfig']
 ) {
+  let isValidConfig = true;
+
   Object.keys(validationObject).forEach((configKey) => {
     const validationFunctions = validationObject[configKey];
     validationFunctions.forEach((fn) => {
@@ -137,10 +136,15 @@ export function validateConfig(
           fn(configKey, shoppingConfig[configKey]);
         }
       } catch (err) {
+        if (essentialFields.includes(configKey)) {
+          isValidConfig = false;
+        }
         user().warn('AMP-STORY-SHOPPING-CONFIG', `${err}`);
       }
     });
   });
+
+  return isValidConfig;
 }
 
 /** @typedef {!Object<string, !ShoppingConfigDataDef> */
@@ -155,14 +159,15 @@ export let KeyedShoppingConfigDef;
 export function getShoppingConfig(pageElement) {
   const element = pageElement.querySelector('amp-story-shopping-config');
   return getElementConfig(element).then((config) => {
-    config['items'].forEach((itemConfig) => validateConfig(itemConfig));
+    const areConfigsValid = config['items'].reduce((item1, item2) => {
+      return item1 && validateConfig(item2);
+    }, true);
 
-    if (essentialFieldsAccum.length > 0) {
+    config['items'].forEach((itemConfig) => validateConfig(itemConfig));
+    if (!areConfigsValid) {
       user().warn(
         'AMP-STORY-SHOPPING-CONFIG',
-        `Essential fields ${JSON.stringify(
-          essentialFieldsAccum
-        )} are missing. Please add them in the shopping config. See the error messages above for more details.`
+        `Essential fields X are missing. Please add them in the shopping config. See the error messages above for more details.`
       );
       return null;
     } else {
