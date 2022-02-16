@@ -1576,7 +1576,7 @@ describes.realWin(
         element.appendChild(<amp-story-auto-ads></amp-story-auto-ads>);
 
         const signals = new Signals();
-        pages[0].signals = () => signals;
+        env.sandbox.stub(pages[0], 'signals').returns(() => signals);
         story.buildCallback();
         await story.layoutCallback();
 
@@ -1594,6 +1594,7 @@ describes.realWin(
           'amp-story-auto-ads'
         );
       });
+
       it('should install amp-analytics if a config is provided', async () => {
         const pages = await createStoryWithPages(2, ['cover', 'page-1']);
         const extensionsFor = Services.extensionsFor(win);
@@ -1618,6 +1619,7 @@ describes.realWin(
           'amp-analytics'
         );
       });
+
       it('should install amp-analytics and auto-analytics if a config for auto-analytics is provided', async () => {
         const pages = await createStoryWithPages(2, ['cover', 'page-1']);
         const extensionsFor = Services.extensionsFor(win);

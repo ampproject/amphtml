@@ -2457,6 +2457,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Installs extensions that can be lazy-loaded.
+   * @private
    */
   installLateExtensions_() {
     const extensionsFor = Services.extensionsFor(this.win);
