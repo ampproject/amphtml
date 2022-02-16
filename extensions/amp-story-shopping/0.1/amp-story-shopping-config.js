@@ -67,7 +67,7 @@ export function validateObject(field, value = undefined) {
  * @param {string} field
  * @param {?string=} value
  */
-export function validateRequired(field, value = undefined) {
+function validateRequired(field, value = undefined) {
   if (value === undefined) {
     throw Error(`Field ${field} is required.`);
   }
@@ -78,7 +78,7 @@ export function validateRequired(field, value = undefined) {
  * @param {string} field
  * @param {?string=} str
  */
-export function validateString(field, str = undefined) {
+function validateString(field, str = undefined) {
   if (typeof str !== 'string') {
     throw Error(`${field} ${str} is not a string.`);
   }
@@ -89,7 +89,7 @@ export function validateString(field, str = undefined) {
  * @param {string} field
  * @param {?number=} number
  */
-export function validateNumber(field, number = undefined) {
+function validateNumber(field, number = undefined) {
   if (typeof number !== 'number') {
     throw Error(`Value ${number} for field ${field} is not a number`);
   }
@@ -100,7 +100,7 @@ export function validateNumber(field, number = undefined) {
  * @param {string} field
  * @param {?Array<string>=} url
  */
-export function validateURLs(field, url = undefined) {
+function validateURLs(field, url = undefined) {
   if (url === undefined) {
     return;
   }
