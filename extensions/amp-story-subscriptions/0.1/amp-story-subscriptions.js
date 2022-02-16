@@ -1,4 +1,3 @@
-import {iterateCursor} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
