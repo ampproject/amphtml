@@ -219,7 +219,6 @@ export class StandardActions {
   /**
    * Handles the copy to clipboard action
    * @param {!./action-impl.ActionInvocation} invocation
-   * @return {!null}
    */
   handleCopy_(invocation) {
     /** @enum {string} */
@@ -298,8 +297,6 @@ export class StandardActions {
       eventResult = 'browser';
       triggerEvent(eventName, eventResult, invocation);
     }
-
-    return null;
   }
 
   /**
