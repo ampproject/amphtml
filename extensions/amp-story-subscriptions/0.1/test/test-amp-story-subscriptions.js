@@ -1,5 +1,4 @@
 import '../amp-story-subscriptions';
-import {expect} from 'chai';
 
 import * as Preact from '#core/dom/jsx';
 
@@ -63,7 +62,7 @@ describes.realWin(
       win = env.win;
       doc = win.document;
 
-      toggleExperiment(win, 'amp-story-paywall-exp', true);
+      toggleExperiment(win, 'enable-amp-story-subscriptions', true);
 
       storeService = new AmpStoryStoreService(win);
       env.sandbox

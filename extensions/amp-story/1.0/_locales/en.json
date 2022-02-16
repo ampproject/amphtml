@@ -222,5 +222,13 @@
   "102": {
     "string": "Featured in this story",
     "description": "Label for a list of products that are featured in the story."
+  },
+  "103": {
+    "string": "Already a subscriber?",
+    "description": "Label for checking if the user is already a subscriber of the publisher site or not."
+  },
+  "104": {
+    "string": "Sign in",
+    "description": "Label for the sign in button to redirect users to publisher site to sign in."
   }
 }
