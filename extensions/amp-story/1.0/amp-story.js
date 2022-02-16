@@ -178,6 +178,12 @@ const MINIMUM_AD_MEDIA_ELEMENTS = 2;
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
+/**
+ * The index of the page where the paywall would be triggered.
+ * @const {number}
+ */
+const PAYWALL_PAGE_INDEX = 2;
+
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
   [MediaType.AUDIO]: 4,
@@ -1285,7 +1291,7 @@ export class AmpStory extends AMP.BaseElement {
 
     if (
       isExperimentOn(this.win, 'enable-amp-story-subscriptions') &&
-      targetPage.isPaywallProtected() &&
+      pageIndex >= PAYWALL_PAGE_INDEX &&
       !this.storeService_.get(StateProperty.SUBSCRIPTIONS_GRANTED)
     ) {
       this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);

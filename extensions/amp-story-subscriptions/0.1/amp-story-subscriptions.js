@@ -16,18 +16,6 @@ import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
 const TAG = 'amp-story-subscriptions';
 
-/**
- * The attribute name used in amp-subscriptions to indicate the content is locked or not.
- * @const {string}
- */
-const SUBSCRIPTIONS_SECTION = 'subscriptions-section';
-
-/**
- * The index of the limited-content page, which is the page where the paywall would be triggered.
- * @const {number}
- */
-const FIRST_PAYWALL_STORY_PAGE_INDEX = 2;
-
 /** @const {!Array<!Object>} fontFaces */
 const fontsToLoad = [
   {
@@ -67,25 +55,11 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     this.localizationService_ = null;
 
     /** @private {?../../../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
-    this.subscriptionsService_ = null;
+    this.subscriptionService_ = null;
   }
 
   /** @override */
   buildCallback() {
-    // Mark pages with required attributes to be treated as paywall protected pages.
-    // 'limited-content' is for the paywall dialog page, where a paywall would trigger based on both time advance or click events.
-    // 'content' is for all the remaining locked pages.
-    iterateCursor(
-      this.element.parentElement.getElementsByTagName('amp-story-page'),
-      (pageEl, index) => {
-        if (index == FIRST_PAYWALL_STORY_PAGE_INDEX) {
-          pageEl.setAttribute(SUBSCRIPTIONS_SECTION, 'limited-content');
-        } else if (index > FIRST_PAYWALL_STORY_PAGE_INDEX) {
-          pageEl.setAttribute(SUBSCRIPTIONS_SECTION, 'content');
-        }
-      }
-    );
-
     this.loadFonts_();
 
     return Promise.all([
@@ -96,8 +70,8 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.storeService_ = storeService;
       this.localizationService_ = localizationService;
 
-      this.subscriptionsService_ = subscriptionService;
-      this.subscriptionsService_
+      this.subscriptionService_ = subscriptionService;
+      this.subscriptionService_
         .getGrantStatus()
         .then((granted) =>
           this.storeService_.dispatch(
@@ -211,8 +185,12 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     );
 
     if (isDialogVisible) {
-      this.subscriptionsService_.selectAndActivatePlatform();
-      this.subscriptionsService_.addOnEntitlementResolvedCallback((e) => {
+      // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
+      // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
+      this.subscriptionService_.selectAndActivatePlatform();
+      this.subscriptionService_.addOnEntitlementResolvedCallback((e) => {
+        // When the user finishes any of the actions, e.g. log in or subscribe, this callback would be executed.
+        // If the new response is granted from publisher backend, disable paywall and update states.
         const {entitlement} = e;
         if (
           this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE) &&
@@ -228,6 +206,8 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
           );
         }
       });
+    } else {
+      this.subscriptionService_.getDialog().close();
     }
   }
 
