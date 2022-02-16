@@ -5,15 +5,9 @@ import {setStyles} from '#core/dom/style';
  * Copies provided text to clipboard using deprecated API: document.execCommand('copy')
  * @param {Window} win Window context
  * @param {string} text Text to copy
- * @param {*} successCallback Executes when copying is successful
- * @param {*} failCallback Executes when copying is failed
+ * @return {boolean} Return true on copy-success
  */
-export function deprecatedCopyTextToClipboard(
-  win,
-  text,
-  successCallback,
-  failCallback
-) {
+export function deprecatedCopyTextToClipboard(win, text) {
   let copySuccessful = false;
   const doc = win.document;
 
@@ -51,11 +45,7 @@ export function deprecatedCopyTextToClipboard(
 
   removeElement(textarea);
 
-  if (copySuccessful) {
-    successCallback();
-  } else {
-    failCallback();
-  }
+  return copySuccessful;
 }
 
 /**
@@ -94,7 +84,16 @@ export function copyTextToClipboard(win, text, successCallback, failCallback) {
     /*
       Try copying with deprecated method as a fallback support.
     */
-    deprecatedCopyTextToClipboard(win, text, successCallback, failCallback);
+    if (deprecatedCopyTextToClipboard(win, text)) {
+      /* Clipboard successfully set using deprecated API */
+      successCallback();
+    } else {
+      /* Clipboard write failed using deprecated API */
+      failCallback();
+    }
+  } else {
+    /** Browser that do not support any of copy API or disabled by user */
+    failCallback();
   }
 }
 
