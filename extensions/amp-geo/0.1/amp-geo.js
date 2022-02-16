@@ -39,7 +39,7 @@ import {Services} from '#service';
 import {dev, user, userAssert} from '#utils/log';
 
 import {GEO_IN_GROUP} from './amp-geo-in-group';
-import {US_CA_CODE, ampGeoPresets} from './amp-geo-presets';
+import {ampGeoPresets} from './amp-geo-presets';
 
 import {urls} from '../../../src/config';
 import {getMode} from '../../../src/mode';
@@ -172,7 +172,6 @@ export class AmpGeo extends AMP.BaseElement {
     const preRenderMatch =
       docElem?.className.match(PRE_RENDER_REGEX) ||
       bodyElem.className.match(PRE_RENDER_REGEX);
-
     // Trim the spaces off the patched country.
     // This is guaranteed to always match
     // - Correctly patched will have the two-char country code and whitespace.
@@ -214,12 +213,8 @@ export class AmpGeo extends AMP.BaseElement {
       // We have a valid 2 letter ISO country
       this.mode_ = mode.GEO_HOT_PATCH;
       this.country_ = trimmedGeoMatch[1].toLowerCase();
-      if (
-        trimmedGeoMatch[2] &&
-        trimmedGeoMatch[2].toLowerCase() === US_CA_CODE
-      ) {
-        // Has subdivision code support (us-ca only)
-        this.subdivision_ = US_CA_CODE;
+      if (trimmedGeoMatch[2]) {
+        this.subdivision_ = trimmedGeoMatch[2].toLowerCase();
       }
     } else if (trimmedGeoMatch[0] === '' && urls.geoApi) {
       // We were not patched, but an API is available
@@ -242,8 +237,8 @@ export class AmpGeo extends AMP.BaseElement {
             // Country is required and guaranteed to exist if data is available.
             this.country_ = country;
             // Subdivision is optional and only us-ca is currently supported.
-            if (subdivision && `${country}-${subdivision}` === US_CA_CODE) {
-              this.subdivision_ = US_CA_CODE;
+            if (subdivision) {
+              this.subdivision_ = `${country}-${subdivision}`;
             }
           } else {
             // if API request fails, leave the country at the default 'unknown'
@@ -427,7 +422,7 @@ export class AmpGeo extends AMP.BaseElement {
       .map((c) => c.toLowerCase());
     return (
       expandedGroup.includes(this.country_) ||
-      (expandedGroup.includes(US_CA_CODE) && this.subdivision_ == US_CA_CODE)
+      expandedGroup.includes(`${this.country_}-${this.subdivision_}`)
     );
   }
 
