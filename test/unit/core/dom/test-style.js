@@ -75,7 +75,7 @@ describes.sandboxed('DOM - style helpers', {}, (env) => {
       transitionDurationImportant: '1s',
     });
     expect(spy).to.have.been.calledWith(
-      'WebkitTransitionDurationImportant',
+      '-webkit-transition-duration-important',
       '1s',
       'important'
     );
@@ -108,6 +108,10 @@ describes.sandboxed('DOM - style helpers', {}, (env) => {
     expect(st.camelCaseToHyphenCase('WebkitTransition')).to.equal(
       '-webkit-transition'
     );
+    expect(st.camelCaseToHyphenCase('webkitTransition')).to.equal(
+      '-webkit-transition'
+    );
+    expect(st.camelCaseToHyphenCase('oTransition')).to.equal('-o-transition');
   });
 
   it('removeAlphaFromColor', () => {
