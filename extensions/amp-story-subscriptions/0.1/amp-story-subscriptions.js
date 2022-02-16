@@ -12,6 +12,7 @@ import {
   Action,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
 const TAG = 'amp-story-subscriptions';
 
@@ -149,10 +150,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
             <div class="i-amphtml-story-subscriptions-publisher-button-text">
               {this.element.getAttribute('publisher-button-text')}
             </div>
-            <img
-              class="i-amphtml-story-subscriptions-publisher-logo"
-              data-src={this.element.getAttribute('publisher-logo-url')}
-            ></img>
+            <img class="i-amphtml-story-subscriptions-publisher-logo"></img>
           </div>
         </div>
         <div class="i-amphtml-story-subscriptions-signin">
@@ -172,15 +170,17 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const logoSrc = getStoryAttributeSrc(
+      this.element,
+      'publisher-logo-src',
+      /* warn */ true
+    );
     const publisherLogoEl = dev().assertElement(
       this.element.querySelector(
         '.i-amphtml-story-subscriptions-publisher-logo'
       )
     );
-    publisherLogoEl.setAttribute(
-      'src',
-      publisherLogoEl.getAttribute('data-src')
-    );
+    publisherLogoEl.setAttribute('src', logoSrc);
   }
 
   /** @override */

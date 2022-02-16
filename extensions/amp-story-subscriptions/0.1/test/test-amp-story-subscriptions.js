@@ -148,6 +148,19 @@ describes.realWin(
       ).to.equal('NOT granted');
     });
 
+    it('should require publisher-logo-src to be a URL', () => {
+      storyEl.setAttribute('publisher-logo-src', 'foo:bar');
+
+      allowConsoleError(() => {
+        expect(() => {
+          storySubscriptions.buildCallback();
+          storySubscriptions.layoutCallback();
+        }).to.throw(
+          'amp-story publisher-logo-src must start with "https://" or "//"'
+        );
+      });
+    });
+
     it('should display the blocking paywall on state update', async () => {
       storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
 
