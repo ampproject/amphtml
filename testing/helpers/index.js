@@ -117,3 +117,11 @@ export function getDeterministicOuterHTML(node) {
   }
   return start + contents + `</${tag}>`;
 }
+
+/**
+ * @param {string} hyphenCase camel cased string
+ * @return {string} camelCased string
+ */
+export function hypenCaseToCamelCase(hyphenCase) {
+  return hyphenCase.replace(/-./g, (match) => match.slice(1).toUpperCase());
+}
