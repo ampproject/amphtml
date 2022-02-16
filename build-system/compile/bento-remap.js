@@ -109,7 +109,7 @@ function getRemapBentoDependencies(isMinified) {
     return remappings;
   }
   return Object.fromEntries(
-    Object.entries(isMinified).map(([source, cdn]) => [
+    Object.entries(remappings).map(([source, cdn]) => [
       source,
       cdn.replace('.mjs', '.max.mjs'),
     ])
