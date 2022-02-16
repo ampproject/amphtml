@@ -406,7 +406,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         </div>
         <div class="i-amphtml-amp-story-shopping-plp-cards">
           {shoppingDataForPage.map((data) => (
-            <div
+            <button
               class="i-amphtml-amp-story-shopping-plp-card"
               role="button"
               onClick={() => this.onPlpCardClick_(data)}
@@ -431,7 +431,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
                   data['productPrice']
                 )}
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
