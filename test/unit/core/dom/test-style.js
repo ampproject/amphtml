@@ -24,9 +24,17 @@ describes.sandboxed('DOM - style helpers', {}, (env) => {
   });
 
   it('setStyle with vendor prefix', () => {
-    const element = {style: {WebkitTransitionDuration: ''}};
+    const element = {
+      style: {
+        WebkitTransitionDuration: '',
+        setProperty: (name, value) => {
+          element.style[name] = value;
+        },
+      },
+    };
+
     st.setStyle(element, 'transitionDuration', '1s', undefined, true);
-    expect(element.style.WebkitTransitionDuration).to.equal('1s');
+    expect(element.style['-webkit-transition-duration']).to.equal('1s');
   });
 
   it('setStyle with custom var', () => {
@@ -97,7 +105,7 @@ describes.sandboxed('DOM - style helpers', {}, (env) => {
 
   it('camelCaseToHyphenCase', () => {
     const str = 'paddingTop';
-    expect(st.camelCaseToTitleCase(str)).to.equal('padding-top');
+    expect(st.camelCaseToHyphenCase(str)).to.equal('padding-top');
   });
 
   it('removeAlphaFromColor', () => {
