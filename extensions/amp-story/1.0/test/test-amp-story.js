@@ -1573,16 +1573,17 @@ describes.realWin(
       it('should install auto-ads if a config is provided', async () => {
         const pages = await createStoryWithPages(2, ['cover', 'page-1']);
         const extensionsFor = Services.extensionsFor(win);
-        const installSpy = env.sandbox.spy(
-          extensionsFor,
-          'installExtensionForDoc'
-        );
         element.appendChild(<amp-story-auto-ads></amp-story-auto-ads>);
 
         const signals = new Signals();
         pages[0].signals = () => signals;
         story.buildCallback();
         await story.layoutCallback();
+
+        const installSpy = env.sandbox.spy(
+          extensionsFor,
+          'installExtensionForDoc'
+        );
 
         // Signal that the first page finished loading.
         signals.signal(CommonSignals_Enum.LOAD_END);
@@ -1596,16 +1597,17 @@ describes.realWin(
       it('should install amp-analytics if a config is provided', async () => {
         const pages = await createStoryWithPages(2, ['cover', 'page-1']);
         const extensionsFor = Services.extensionsFor(win);
-        const installSpy = env.sandbox.spy(
-          extensionsFor,
-          'installExtensionForDoc'
-        );
         element.appendChild(<amp-analytics></amp-analytics>);
 
         const signals = new Signals();
         pages[0].signals = () => signals;
         story.buildCallback();
         await story.layoutCallback();
+
+        const installSpy = env.sandbox.spy(
+          extensionsFor,
+          'installExtensionForDoc'
+        );
 
         // Signal that the first page finished loading.
         signals.signal(CommonSignals_Enum.LOAD_END);
@@ -1619,10 +1621,6 @@ describes.realWin(
       it('should install amp-analytics and auto-analytics if a config for auto-analytics is provided', async () => {
         const pages = await createStoryWithPages(2, ['cover', 'page-1']);
         const extensionsFor = Services.extensionsFor(win);
-        const installSpy = env.sandbox.spy(
-          extensionsFor,
-          'installExtensionForDoc'
-        );
         element.appendChild(
           <amp-story-auto-analytics></amp-story-auto-analytics>
         );
@@ -1631,6 +1629,11 @@ describes.realWin(
         pages[0].signals = () => signals;
         story.buildCallback();
         await story.layoutCallback();
+
+        const installSpy = env.sandbox.spy(
+          extensionsFor,
+          'installExtensionForDoc'
+        );
 
         // Signal that the first page finished loading.
         signals.signal(CommonSignals_Enum.LOAD_END);
