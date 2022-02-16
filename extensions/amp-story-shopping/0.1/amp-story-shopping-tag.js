@@ -31,11 +31,11 @@ const FONTS_TO_LOAD = [
 ];
 
 /**
- * @param {Element} tagElement
  * @param {!KeyedShoppingConfigDef} shoppingData
+ * @param {Element} tagElement
  * @return {?ShoppingConfigDataDef|undefined}
  */
-export function getShoppingTagData(tagElement, shoppingData) {
+export function getShoppingTagData(shoppingData, tagElement) {
   return shoppingData[tagElement.dataset.productId];
 }
 
