@@ -500,12 +500,12 @@ export class AmpStoryStoreService {
    * @param  {!Function} listener
    * @param  {boolean=} callToInitialize Whether the listener should be
    *                                     triggered with current value.
-   * @return {!UnlistenDef}
+   * @return {?UnlistenDef}
    */
   subscribe(key, listener, callToInitialize = false) {
     if (!hasOwn(this.state_, key)) {
       dev().error(TAG, "Can't subscribe to unknown state %s.", key);
-      return;
+      return null;
     }
     if (!this.listeners_[key]) {
       this.listeners_[key] = new Observable();
