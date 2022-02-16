@@ -18,72 +18,6 @@
       src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"
     ></script>
     <style amp-custom>
-      .column {
-        padding: 20px;
-      }
-
-      .column div {
-        padding-bottom: 10px;
-      }
-    </style>
-    <style amp-boilerplate>
-      body {
-        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-        animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-      }
-
-      @-webkit-keyframes -amp-start {
-        from {
-          visibility: hidden;
-        }
-
-        to {
-          visibility: visible;
-        }
-      }
-
-      @-moz-keyframes -amp-start {
-        from {
-          visibility: hidden;
-        }
-
-        to {
-          visibility: visible;
-        }
-      }
-
-      @-ms-keyframes -amp-start {
-        from {
-          visibility: hidden;
-        }
-
-        to {
-          visibility: visible;
-        }
-      }
-
-      @-o-keyframes -amp-start {
-        from {
-          visibility: hidden;
-        }
-
-        to {
-          visibility: visible;
-        }
-      }
-
-      @keyframes -amp-start {
-        from {
-          visibility: hidden;
-        }
-
-        to {
-          visibility: visible;
-        }
-      }
-
       .row {
         margin: 5px auto;
         width: 50%;
@@ -138,16 +72,64 @@
         left: 0;
       }
     </style>
-    <noscript>
-      <style amp-boilerplate>
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      }
+      @-webkit-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-moz-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-ms-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-o-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+    </style>
+    <noscript
+      ><style amp-boilerplate>
         body {
           -webkit-animation: none;
           -moz-animation: none;
           -ms-animation: none;
           animation: none;
         }
-      </style>
-    </noscript>
+      </style></noscript
+    >
   </head>
 
   <body>
@@ -156,7 +138,86 @@
     </div>
     <div class="row">
       <h1>Copy DIV Content</h1>
-      <div class="code" style='background-color: rgb(255, 255, 255); font-family: Menlo, Monaco, "Courier New", monospace; font-weight: normal; font-size: 12px; line-height: 18px; white-space: pre;'><span style="color: rgb(106, 115, 125);">&lt;!-- &apos;divTarget&apos; to Copy --&gt;</span><br><span style="color: rgb(36, 41, 46);">&lt;</span><span style="color: rgb(34, 134, 58);">div</span><span style="color: rgb(36, 41, 46);">&nbsp;</span><span style="color: rgb(111, 66, 193);">id</span><span style="color: rgb(36, 41, 46);">=</span><span style="color: rgb(3, 47, 98);">&quot;divTarget&quot;</span><span style="color: rgb(36, 41, 46);">&gt;</span><br><span style="color: rgb(36, 41, 46);">&nbsp; Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span><br><span style="color: rgb(36, 41, 46);">&lt;/</span><span style="color: rgb(34, 134, 58);">div</span><span style="color: rgb(36, 41, 46);">&gt;</span><br><br><span style="color: rgb(106, 115, 125);">&lt;!-- Copy Action Button --&gt;</span><br><span style="color: rgb(36, 41, 46);">&lt;</span><span style="color: rgb(34, 134, 58);">button</span> <span style="color: rgb(111, 66, 193);">on</span><span style="color: rgb(36, 41, 46);">=</span><span style="color: rgb(3, 47, 98);">&quot;tap:divTarget.copy();<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; copy-success:divCopySuccess.show();<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; copy-error:divCopyError.show()&quot;</span><span style="color: rgb(36, 41, 46);">&gt;</span><br><span style="color: rgb(36, 41, 46);">&nbsp; Copy DIV Content</span><br><span style="color: rgb(36, 41, 46);">&lt;/</span><span style="color: rgb(34, 134, 58);">button</span><span style="color: rgb(36, 41, 46);">&gt;</span><br><br><span style="color: rgb(106, 115, 125);">&lt;!-- Target to show on &apos;copy-success&apos; --&gt;</span><br><span style="color: rgb(36, 41, 46);">&lt;</span><span style="color: rgb(34, 134, 58);">span</span><span style="color: rgb(36, 41, 46);">&nbsp;</span><span style="color: rgb(111, 66, 193);">id</span><span style="color: rgb(36, 41, 46);">=</span><span style="color: rgb(3, 47, 98);">&quot;divCopySuccess&quot;</span><span style="color: rgb(36, 41, 46);">&nbsp;</span><span style="color: rgb(111, 66, 193);">hidden</span><span style="color: rgb(36, 41, 46);">&nbsp;</span><span style="color: rgb(111, 66, 193);">class</span><span style="color: rgb(36, 41, 46);">=</span><span style="color: rgb(3, 47, 98);">&quot;copy-success&quot;</span><span style="color: rgb(36, 41, 46);">&gt;</span><span style="color: rgb(36, 41, 46);">Content copied!</span><span style="color: rgb(36, 41, 46);">&lt;/</span><span style="color: rgb(34, 134, 58);">span</span><span style="color: rgb(36, 41, 46);">&gt;</span><br><span style="color: rgb(106, 115, 125);">&lt;!-- Target to show on &apos;copy-error&apos; --&gt;</span><br><span style="color: rgb(36, 41, 46);">&lt;</span><span style="color: rgb(34, 134, 58);">span</span><span style="color: rgb(36, 41, 46);">&nbsp;</span><span style="color: rgb(111, 66, 193);">id</span><span style="color: rgb(36, 41, 46);">=</span><span style="color: rgb(3, 47, 98);">&quot;divCopyError&quot;</span><span style="color: rgb(36, 41, 46);">&nbsp;</span><span style="color: rgb(111, 66, 193);">hidden</span><span style="color: rgb(36, 41, 46);">&nbsp;</span><span style="color: rgb(111, 66, 193);">class</span><span style="color: rgb(36, 41, 46);">=</span><span style="color: rgb(3, 47, 98);">&quot;copy-error&quot;</span><span style="color: rgb(36, 41, 46);">&gt;</span><span style="color: rgb(36, 41, 46);">Error while copying!</span><span style="color: rgb(36, 41, 46);">&lt;/</span><span style="color: rgb(34, 134, 58);">span</span><span style="color: rgb(36, 41, 46);">&gt;</span></div>
+      <div
+        class="code"
+        style="
+          background-color: rgb(255, 255, 255);
+          font-family: Menlo, Monaco, 'Courier New', monospace;
+          font-weight: normal;
+          font-size: 12px;
+          line-height: 18px;
+          white-space: pre;
+        "
+      >
+        <span style="color: rgb(106, 115, 125)"
+          >&lt;!-- &apos;divTarget&apos; to Copy --&gt;</span
+        ><br /><span style="color: rgb(36, 41, 46)">&lt;</span
+        ><span style="color: rgb(34, 134, 58)">div</span
+        ><span style="color: rgb(36, 41, 46)">&nbsp;</span
+        ><span style="color: rgb(111, 66, 193)">id</span
+        ><span style="color: rgb(36, 41, 46)">=</span
+        ><span style="color: rgb(3, 47, 98)">&quot;divTarget&quot;</span
+        ><span style="color: rgb(36, 41, 46)">&gt;</span><br /><span
+          style="color: rgb(36, 41, 46)"
+          >&nbsp; Lorem ipsum dolor sit amet, consectetur adipiscing elit.</span
+        ><br /><span style="color: rgb(36, 41, 46)">&lt;/</span
+        ><span style="color: rgb(34, 134, 58)">div</span
+        ><span style="color: rgb(36, 41, 46)">&gt;</span><br /><br /><span
+          style="color: rgb(106, 115, 125)"
+          >&lt;!-- Copy Action Button --&gt;</span
+        ><br /><span style="color: rgb(36, 41, 46)">&lt;</span
+        ><span style="color: rgb(34, 134, 58)">button</span>
+        <span style="color: rgb(111, 66, 193)">on</span
+        ><span style="color: rgb(36, 41, 46)">=</span
+        ><span style="color: rgb(3, 47, 98)"
+          >&quot;tap:divTarget.copy();<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          &nbsp; copy-success:divCopySuccess.show();<br />&nbsp; &nbsp; &nbsp;
+          &nbsp; &nbsp; &nbsp; copy-error:divCopyError.show()&quot;</span
+        ><span style="color: rgb(36, 41, 46)">&gt;</span><br /><span
+          style="color: rgb(36, 41, 46)"
+          >&nbsp; Copy DIV Content</span
+        ><br /><span style="color: rgb(36, 41, 46)">&lt;/</span
+        ><span style="color: rgb(34, 134, 58)">button</span
+        ><span style="color: rgb(36, 41, 46)">&gt;</span><br /><br /><span
+          style="color: rgb(106, 115, 125)"
+          >&lt;!-- Target to show on &apos;copy-success&apos; --&gt;</span
+        ><br /><span style="color: rgb(36, 41, 46)">&lt;</span
+        ><span style="color: rgb(34, 134, 58)">span</span
+        ><span style="color: rgb(36, 41, 46)">&nbsp;</span
+        ><span style="color: rgb(111, 66, 193)">id</span
+        ><span style="color: rgb(36, 41, 46)">=</span
+        ><span style="color: rgb(3, 47, 98)">&quot;divCopySuccess&quot;</span
+        ><span style="color: rgb(36, 41, 46)">&nbsp;</span
+        ><span style="color: rgb(111, 66, 193)">hidden</span
+        ><span style="color: rgb(36, 41, 46)">&nbsp;</span
+        ><span style="color: rgb(111, 66, 193)">class</span
+        ><span style="color: rgb(36, 41, 46)">=</span
+        ><span style="color: rgb(3, 47, 98)">&quot;copy-success&quot;</span
+        ><span style="color: rgb(36, 41, 46)">&gt;</span
+        ><span style="color: rgb(36, 41, 46)">Content copied!</span
+        ><span style="color: rgb(36, 41, 46)">&lt;/</span
+        ><span style="color: rgb(34, 134, 58)">span</span
+        ><span style="color: rgb(36, 41, 46)">&gt;</span><br /><span
+          style="color: rgb(106, 115, 125)"
+          >&lt;!-- Target to show on &apos;copy-error&apos; --&gt;</span
+        ><br /><span style="color: rgb(36, 41, 46)">&lt;</span
+        ><span style="color: rgb(34, 134, 58)">span</span
+        ><span style="color: rgb(36, 41, 46)">&nbsp;</span
+        ><span style="color: rgb(111, 66, 193)">id</span
+        ><span style="color: rgb(36, 41, 46)">=</span
+        ><span style="color: rgb(3, 47, 98)">&quot;divCopyError&quot;</span
+        ><span style="color: rgb(36, 41, 46)">&nbsp;</span
+        ><span style="color: rgb(111, 66, 193)">hidden</span
+        ><span style="color: rgb(36, 41, 46)">&nbsp;</span
+        ><span style="color: rgb(111, 66, 193)">class</span
+        ><span style="color: rgb(36, 41, 46)">=</span
+        ><span style="color: rgb(3, 47, 98)">&quot;copy-error&quot;</span
+        ><span style="color: rgb(36, 41, 46)">&gt;</span
+        ><span style="color: rgb(36, 41, 46)">Error while copying!</span
+        ><span style="color: rgb(36, 41, 46)">&lt;/</span
+        ><span style="color: rgb(34, 134, 58)">span</span
+        ><span style="color: rgb(36, 41, 46)">&gt;</span>
+      </div>
       <div class="sample">
         <!-- 'divTarget' to Copy -->
         <div id="divTarget">
@@ -183,7 +244,1579 @@
     </div>
     <div class="row">
       <h1>Copy INPUT Value</h1>
-      <div class="code" style="color: #24292e;background-color: #ffffff;font-family: Menlo, Monaco, 'Courier New', monospace;font-weight: normal;font-size: 12px;line-height: 18px;white-space: pre;"><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(106, 115, 125);'>&lt;!-- &apos;inputTarget&apos; to Copy --&gt;</span><br><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&lt;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>input</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>id</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>=</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(3, 47, 98);'>&quot;inputTarget&quot;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>value</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>=</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(3, 47, 98);'>&quot;Sample Input Value&quot;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;/&gt;</span><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(106, 115, 125);'>&lt;!-- Copy Action Button --&gt;</span><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&lt;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>button</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>on</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>=</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(3, 47, 98);'>&quot;tap:inputTarget.copy();<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; copy-success:inputCopySuccess.show();<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; copy-error:inputCopyError.show()&quot;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&gt;</span><br><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp; Copy Input Value</span><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&lt;/</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>button</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&gt;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'><br><br></span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(106, 115, 125);'>&lt;!-- Target to show on &apos;copy-success&apos; --&gt;</span><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&lt;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>span</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>id</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>=</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(3, 47, 98);'>&quot;inputCopySuccess&quot;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>hidden</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>class</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>=</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(3, 47, 98);'>&quot;copy-success&quot;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&gt;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>Value copied successfully!</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&lt;/</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>span</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&gt;</span><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(106, 115, 125);'>&lt;!-- Target to show on &apos;copy-error&apos; --&gt;</span><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&lt;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>span</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>id</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>=</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(3, 47, 98);'>&quot;inputCopyError&quot;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>hidden</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>class</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>=</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(3, 47, 98);'>&quot;copy-error&quot;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&gt;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>Error while copying!</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&lt;/</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>span</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&gt;</span></div>
+      <div
+        class="code"
+        style="
+          color: #24292e;
+          background-color: #ffffff;
+          font-family: Menlo, Monaco, 'Courier New', monospace;
+          font-weight: normal;
+          font-size: 12px;
+          line-height: 18px;
+          white-space: pre;
+        "
+      >
+        <span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(106, 115, 125);
+          "
+          >&lt;!-- &apos;inputTarget&apos; to Copy --&gt;</span
+        ><br /><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&lt;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >input</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >id</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >=</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(3, 47, 98);
+          "
+          >&quot;inputTarget&quot;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >value</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >=</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(3, 47, 98);
+          "
+          >&quot;Sample Input Value&quot;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;/&gt;</span
+        ><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(106, 115, 125);
+          "
+          >&lt;!-- Copy Action Button --&gt;</span
+        ><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&lt;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >button</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >on</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >=</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(3, 47, 98);
+          "
+          >&quot;tap:inputTarget.copy();<br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          &nbsp; copy-success:inputCopySuccess.show();<br />&nbsp; &nbsp; &nbsp;
+          &nbsp; &nbsp; &nbsp; copy-error:inputCopyError.show()&quot;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&gt;</span
+        ><br /><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp; Copy Input Value</span
+        ><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&lt;/</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >button</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&gt;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          ><br /><br /></span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(106, 115, 125);
+          "
+          >&lt;!-- Target to show on &apos;copy-success&apos; --&gt;</span
+        ><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&lt;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >span</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >id</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >=</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(3, 47, 98);
+          "
+          >&quot;inputCopySuccess&quot;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >hidden</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >class</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >=</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(3, 47, 98);
+          "
+          >&quot;copy-success&quot;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&gt;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >Value copied successfully!</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&lt;/</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >span</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&gt;</span
+        ><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(106, 115, 125);
+          "
+          >&lt;!-- Target to show on &apos;copy-error&apos; --&gt;</span
+        ><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&lt;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >span</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >id</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >=</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(3, 47, 98);
+          "
+          >&quot;inputCopyError&quot;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >hidden</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >class</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >=</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(3, 47, 98);
+          "
+          >&quot;copy-error&quot;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&gt;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >Error while copying!</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&lt;/</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >span</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&gt;</span
+        >
+      </div>
       <div class="sample">
         <!-- 'inputTarget' to Copy -->
         <input id="inputTarget" value="Sample Input Value" />
@@ -209,7 +1842,801 @@
 
     <div class="row">
       <h1>Copy Static Text</h1>
-      <div class="code" style="color: #24292e;background-color: #ffffff;font-family: Menlo, Monaco, 'Courier New', monospace;font-weight: normal;font-size: 12px;line-height: 18px;white-space: pre;"><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(106, 115, 125);'>&lt;!-- Copy Action Button --&gt;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'><br>&lt;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>button</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>on</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>=</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(3, 47, 98);'>&quot;tap:AMP.copy(text=&apos;Hello AMP!&apos;);<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; copy-success:staticTextCopySuccess.show()&quot;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&gt;</span><br><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'> Copy Static Text</span><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&lt;/</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>button</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&gt;</span><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(106, 115, 125);'>&lt;!-- Target to show on &apos;copy-success&apos; --&gt;</span><br style="color: rgb(36, 41, 46); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&lt;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>span</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>id</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>=</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(3, 47, 98);'>&quot;staticTextCopySuccess&quot;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>hidden</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&nbsp;</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(111, 66, 193);'>class</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>=</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(3, 47, 98);'>&quot;copy-success&quot;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&gt;</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>StaticText copied successfully!</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&lt;/</span><span style='font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; color: rgb(34, 134, 58);'>span</span><span style='color: rgb(36, 41, 46); font-family: Menlo, Monaco, "Courier New", monospace; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: pre; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;'>&gt;</span></div>
+      <div
+        class="code"
+        style="
+          color: #24292e;
+          background-color: #ffffff;
+          font-family: Menlo, Monaco, 'Courier New', monospace;
+          font-weight: normal;
+          font-size: 12px;
+          line-height: 18px;
+          white-space: pre;
+        "
+      >
+        <span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(106, 115, 125);
+          "
+          >&lt;!-- Copy Action Button --&gt;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          ><br />&lt;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >button</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >on</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >=</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(3, 47, 98);
+          "
+          >&quot;tap:AMP.copy(text=&apos;Hello AMP!&apos;);<br />&nbsp; &nbsp;
+          &nbsp; &nbsp; &nbsp; &nbsp;
+          copy-success:staticTextCopySuccess.show()&quot;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&gt;</span
+        ><br /><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        >
+          Copy Static Text</span
+        ><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&lt;/</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >button</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&gt;</span
+        ><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(106, 115, 125);
+          "
+          >&lt;!-- Target to show on &apos;copy-success&apos; --&gt;</span
+        ><br
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+        /><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&lt;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >span</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >id</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >=</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(3, 47, 98);
+          "
+          >&quot;staticTextCopySuccess&quot;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >hidden</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&nbsp;</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(111, 66, 193);
+          "
+          >class</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >=</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(3, 47, 98);
+          "
+          >&quot;copy-success&quot;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&gt;</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >StaticText copied successfully!</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&lt;/</span
+        ><span
+          style="
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+            color: rgb(34, 134, 58);
+          "
+          >span</span
+        ><span
+          style="
+            color: rgb(36, 41, 46);
+            font-family: Menlo, Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            font-style: normal;
+            font-variant-ligatures: normal;
+            font-variant-caps: normal;
+            font-weight: 400;
+            letter-spacing: normal;
+            orphans: 2;
+            text-align: start;
+            text-indent: 0px;
+            text-transform: none;
+            white-space: pre;
+            widows: 2;
+            word-spacing: 0px;
+            -webkit-text-stroke-width: 0px;
+            text-decoration-thickness: initial;
+            text-decoration-style: initial;
+            text-decoration-color: initial;
+          "
+          >&gt;</span
+        >
+      </div>
       <div class="sample">
         <!-- Copy Action Button -->
         <button
@@ -226,7 +2653,62 @@
     </div>
     <div class="row">
       <h1>Dynamically modifying class & text based on 'eventResult'</h1>
-      <div style="color: #24292e;background-color: #ffffff;font-family: Menlo, Monaco, 'Courier New', monospace;font-weight: normal;font-size: 12px;line-height: 18px;white-space: pre;"><span style="color: #6a737d;">&lt;!-- Copy Action Button --&gt;</span><span style="color: #24292e;"><br>&lt;</span><span style="color: #22863a;">button</span><span style="color: #24292e;">&nbsp;</span><span style="color: #6f42c1;">on</span><span style="color: #24292e;">=</span><span style="color: #032f62;">&quot;tap:AMP.copy(text=&apos;Copy static text&apos;);<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; copy-error:AMP.setState({eventResult: event.data.type});<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;copy-success:AMP.setState({eventResult: event.data.type})&quot;</span><span style="color: #24292e;">&gt;</span><br><span style="color: #24292e;">&nbsp; Copy Action</span><br><span style="color: #24292e;">&lt;/</span><span style="color: #22863a;">button</span><span style="color: #24292e;">&gt;</span><br><br><span style="color: #6a737d;">&lt;!-- Dynamically adding class and text based on&nbsp;copy &apos;eventResult&apos; --&gt;</span><br><span style="color: #24292e;">&lt;</span><span style="color: #22863a;">p</span><span style="color: #24292e;">&nbsp;</span><span style="color: #6f42c1;">[hidden]</span><span style="color: #24292e;">=</span><span style="color: #032f62;">&apos;false&apos;&nbsp;hidden</span><span style="color: #24292e;"><br></span><span style="color: #6f42c1;">&nbsp; &nbsp;[class]</span><span style="color: #24292e;">=</span><span style="color: #032f62;">&quot;(eventResult != &apos;error&apos;)?&apos;copy-success&apos;:&apos;copy-error&apos;&quot;</span><span style="color: #24292e;"><br></span><span style="color: #6f42c1;">&nbsp; &nbsp;[text]</span><span style="color: #24292e;">=</span><span style="color: #032f62;">&quot;(eventResult != &apos;error&apos;)?&apos;Copied!&apos;:&apos;Error while copying!&apos;&quot;</span><span style="color: #24292e;">&nbsp;</span><span style="color: #b31d28;font-style: italic;">/</span><span style="color: #24292e;">&gt;</span></div>
+      <div
+        style="
+          color: #24292e;
+          background-color: #ffffff;
+          font-family: Menlo, Monaco, 'Courier New', monospace;
+          font-weight: normal;
+          font-size: 12px;
+          line-height: 18px;
+          white-space: pre;
+        "
+      >
+        <span style="color: #6a737d">&lt;!-- Copy Action Button --&gt;</span
+        ><span style="color: #24292e"><br />&lt;</span
+        ><span style="color: #22863a">button</span
+        ><span style="color: #24292e">&nbsp;</span
+        ><span style="color: #6f42c1">on</span
+        ><span style="color: #24292e">=</span
+        ><span style="color: #032f62"
+          >&quot;tap:AMP.copy(text=&apos;Copy static text&apos;);<br />&nbsp;
+          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          copy-error:AMP.setState({eventResult: event.data.type});<br />
+          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          &nbsp;copy-success:AMP.setState({eventResult:
+          event.data.type})&quot;</span
+        ><span style="color: #24292e">&gt;</span><br /><span
+          style="color: #24292e"
+          >&nbsp; Copy Action</span
+        ><br /><span style="color: #24292e">&lt;/</span
+        ><span style="color: #22863a">button</span
+        ><span style="color: #24292e">&gt;</span><br /><br /><span
+          style="color: #6a737d"
+          >&lt;!-- Dynamically adding class and text based on&nbsp;copy
+          &apos;eventResult&apos; --&gt;</span
+        ><br /><span style="color: #24292e">&lt;</span
+        ><span style="color: #22863a">p</span
+        ><span style="color: #24292e">&nbsp;</span
+        ><span style="color: #6f42c1">[hidden]</span
+        ><span style="color: #24292e">=</span
+        ><span style="color: #032f62">&apos;false&apos;&nbsp;hidden</span
+        ><span style="color: #24292e"><br /></span
+        ><span style="color: #6f42c1">&nbsp; &nbsp;[class]</span
+        ><span style="color: #24292e">=</span
+        ><span style="color: #032f62"
+          >&quot;(eventResult !=
+          &apos;error&apos;)?&apos;copy-success&apos;:&apos;copy-error&apos;&quot;</span
+        ><span style="color: #24292e"><br /></span
+        ><span style="color: #6f42c1">&nbsp; &nbsp;[text]</span
+        ><span style="color: #24292e">=</span
+        ><span style="color: #032f62"
+          >&quot;(eventResult !=
+          &apos;error&apos;)?&apos;Copied!&apos;:&apos;Error while
+          copying!&apos;&quot;</span
+        ><span style="color: #24292e">&nbsp;</span
+        ><span style="color: #b31d28; font-style: italic">/</span
+        ><span style="color: #24292e">&gt;</span>
+      </div>
 
       <div class="sample">
         <!-- Copy Action Button -->
