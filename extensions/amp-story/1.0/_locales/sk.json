@@ -160,5 +160,8 @@
   },
   "99": {
     "string": "Formulár bol úspešne odoslaný"
+  },
+  "101": {
+    "string": "Nakupovať teraz"
   }
 }

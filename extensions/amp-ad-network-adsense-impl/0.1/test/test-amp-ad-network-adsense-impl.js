@@ -458,7 +458,7 @@ describes.realWin(
         impl.iframe = {
           contentWindow: window,
           nodeType: 1,
-          style: {},
+          style: {setProperty: () => {}},
         };
         impl.element.setAttribute('data-ad-client', 'ca-adsense');
 
