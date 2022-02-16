@@ -58,7 +58,7 @@ let ShoppingConfigResponseDef;
  * @param {string} field
  * @param {?Object=} value
  */
-export function validateObject(field, value = undefined) {
+function validateObject(field, value = undefined) {
   validateConfig(value, VALIDATION_OBJECTS[field]);
 }
 
