@@ -126,9 +126,13 @@ describes.realWin(
         const config = {foo: {bar: true}};
 
         await storeShoppingConfig(pageElement, config);
-
-        expect(storeService.dispatch.withArgs(Action.ADD_SHOPPING_DATA, config))
-          .to.have.been.calledOnce;
+        const pageIdToConfig = {[pageElement.id]: config};
+        expect(
+          storeService.dispatch.withArgs(
+            Action.ADD_SHOPPING_DATA,
+            pageIdToConfig
+          )
+        ).to.have.been.calledOnce;
       });
     });
   }
