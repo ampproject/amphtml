@@ -8,7 +8,10 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {dev} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-subscriptions-0.1.css';
-import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {
+  Action,
+  StateProperty,
+} from '../../amp-story/1.0/amp-story-store-service';
 
 const TAG = 'amp-story-subscriptions';
 
@@ -61,6 +64,9 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
+
+    /** @private {?../../../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
+    this.subscriptionsService_ = null;
   }
 
   /** @override */
@@ -84,9 +90,20 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
       Services.localizationServiceForOrNull(this.element),
-    ]).then(([storeService, localizationService]) => {
+      Services.subscriptionsServiceForDoc(this.element),
+    ]).then(([storeService, localizationService, subscriptionService]) => {
       this.storeService_ = storeService;
       this.localizationService_ = localizationService;
+
+      this.subscriptionsService_ = subscriptionService;
+      this.subscriptionsService_
+        .getGrantStatus()
+        .then((granted) =>
+          this.storeService_.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_GRANTED,
+            granted
+          )
+        );
 
       // Create a paywall dialog element that have required attributes to be able to be
       // rendered by amp-subscriptions.
@@ -177,7 +194,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.SUBSCRIPTIONS_DIALOG_STATE,
-      (isDialogVisible) => this.onSubscriptionStateChange_(isDialogVisible)
+      (isDialogVisible) => this.onSubscriptionsStateChange_(isDialogVisible)
     );
   }
 
@@ -185,13 +202,33 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
    * @param {boolean} isDialogVisible
    * @private
    */
-  onSubscriptionStateChange_(isDialogVisible) {
+  onSubscriptionsStateChange_(isDialogVisible) {
     this.mutateElement(() =>
       this.element.classList.toggle(
         'i-amphtml-story-subscriptions-visible',
         isDialogVisible
       )
     );
+
+    if (isDialogVisible) {
+      this.subscriptionsService_.selectAndActivatePlatform();
+      this.subscriptionsService_.addOnEntitlementResolvedCallback((e) => {
+        const {entitlement} = e;
+        if (
+          this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE) &&
+          entitlement.granted
+        ) {
+          this.storeService_.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_GRANTED,
+            true
+          );
+          this.storeService_.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_DIALOG,
+            false
+          );
+        }
+      });
+    }
   }
 
   /** @private */

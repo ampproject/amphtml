@@ -193,6 +193,7 @@ const StateProperty = mangleObjectValues({
 
   // AMP Story paywall states.
   SUBSCRIPTIONS_DIALOG_STATE: 'subscriptionsDialogState',
+  SUBSCRIPTIONS_GRANTED: 'subscriptionsGranted',
 });
 
 export {StateProperty};
@@ -227,6 +228,7 @@ const Action = mangleObjectValues({
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_SUBSCRIPTIONS_DIALOG: 'toggleSubscriptionsDialog',
+  TOGGLE_SUBSCRIPTIONS_GRANTED: 'toggleSubscriptionsGranted',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
 });
@@ -454,6 +456,11 @@ const actions = (state, action, data) => {
         [StateProperty.SUBSCRIPTIONS_DIALOG_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
       });
+    case Action.TOGGLE_SUBSCRIPTIONS_GRANTED:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SUBSCRIPTIONS_GRANTED]: !!data,
+      });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -592,6 +599,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_SIZE]: null,
       [StateProperty.PREVIEW_STATE]: false,
       [StateProperty.SUBSCRIPTIONS_DIALOG_STATE]: false,
+      [StateProperty.SUBSCRIPTIONS_GRANTED]: true,
     });
   }
 

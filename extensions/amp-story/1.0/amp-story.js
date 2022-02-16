@@ -297,12 +297,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {boolean} whether the styles were rewritten */
     this.didRewriteStyles_ = false;
-
-    /** @private {?../../../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
-    this.subscriptionsService_ = null;
-
-    /** @private {boolean} whether the user is granted the access to the paywalled story */
-    this.granted_ = true;
   }
 
   /** @override */
@@ -349,17 +343,6 @@ export class AmpStory extends AMP.BaseElement {
         'en-xa',
         createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
       );
-
-    if (this.isPaywallStory_()) {
-      Services.subscriptionsServiceForDoc(this.element).then(
-        (subscriptionsService) => {
-          this.subscriptionsService_ = subscriptionsService;
-          this.subscriptionsService_.getGrantStatus().then((granted) => {
-            this.granted_ = granted;
-          });
-        }
-      );
-    }
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
@@ -1303,28 +1286,9 @@ export class AmpStory extends AMP.BaseElement {
     if (
       isExperimentOn(this.win, 'enable-amp-story-subscriptions') &&
       targetPage.isPaywallProtected() &&
-      !this.granted_
+      !this.storeService_.get(StateProperty.SUBSCRIPTIONS_GRANTED)
     ) {
-      if (this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE)) {
-        // Do nothing when the subscription dialog is already triggered.
-        return Promise.resolve();
-      }
       this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
-
-      this.subscriptionsService_.selectAndActivatePlatform();
-      this.subscriptionsService_.addOnEntitlementResolvedCallback((e) => {
-        const {entitlement} = e;
-        if (
-          this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE) &&
-          entitlement.granted
-        ) {
-          this.granted_ = true;
-          this.storeService_.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG,
-            false
-          );
-        }
-      });
       return Promise.resolve();
     }
 
@@ -2484,14 +2448,6 @@ export class AmpStory extends AMP.BaseElement {
       (e) => matches(e, 'a.i-amphtml-story-page-open-attachment[href]'),
       this.element
     );
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
-  isPaywallStory_() {
-    return this.element.querySelector('amp-story-subscriptions') != null;
   }
 }
 
