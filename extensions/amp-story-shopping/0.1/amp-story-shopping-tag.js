@@ -1,14 +1,11 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
-import {
-  childElementByTag,
-  closestAncestorElementBySelector,
-} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
+import {KeyedShoppingConfigDef} from './amp-story-shopping-config';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
@@ -33,24 +30,24 @@ const FONTS_TO_LOAD = [
   },
 ];
 
-export class AmpStoryShoppingTag extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
+class AmpStoryShoppingTagReady extends AMP.BaseElement {
+  /**
+   * @param {!AmpElement} element
+   * @param {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} storeService
+   * @param {!../../../src/service/localization.LocalizationService} localizationService
+   * @param {!ShoppingConfigDataDef} tagData
+   */
+  constructor(element, storeService, localizationService, tagData) {
     super(element);
-    /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
+    /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = storeService;
 
-    /** @param {boolean} element */
-    this.hasAppendedInnerShoppingTagEl_ = false;
+    /** @private {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = localizationService;
 
     /** @param {!ShoppingConfigDataDef} tagData */
-    this.tagData_ = null;
-
-    /** @param {?AmpElement} element */
-    this.shoppingAttachment_ = null;
+    this.tagData_ = tagData;
 
     /** @param {!AmpElement} element */
     this.shoppingTagEl_ = null;
@@ -58,44 +55,14 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /* This is used to prevent the shopping tag component from building if there is no shopping attachment. */
-    const pageElement = closestAncestorElementBySelector(
-      this.element,
-      'amp-story-page'
-    );
-
-    this.shoppingAttachment_ = childElementByTag(
-      pageElement,
-      'amp-story-shopping-attachment'
-    );
-
-    if (!this.shoppingAttachment_) {
-      return;
-    }
-
     this.element.setAttribute('role', 'button');
-
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win),
-      Services.localizationServiceForOrNull(this.element),
-    ]).then(([storeService, localizationService]) => {
-      this.storeService_ = storeService;
-      this.localizationService_ = localizationService;
-    });
   }
 
   /** @override */
   layoutCallback() {
-    if (!this.shoppingAttachment_) {
-      return;
-    }
-
     loadFonts(this.win, FONTS_TO_LOAD);
-    this.storeService_.subscribe(
-      StateProperty.SHOPPING_DATA,
-      (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
-      true /** callToInitialize */
-    );
+
+    this.createAndAppendInnerShoppingTagEl_();
 
     this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) => {
       this.onRtlStateUpdate_(rtlState);
@@ -249,15 +216,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * @param {!ShoppingDataDef} shoppingData
    * @private
    */
-  createAndAppendInnerShoppingTagEl_(shoppingData) {
-    this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
-    if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
-      return;
-    }
-
+  createAndAppendInnerShoppingTagEl_() {
     this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
 
@@ -268,11 +229,55 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
           this.shoppingTagEl_,
           shoppingTagCSS
         );
-        this.hasAppendedInnerShoppingTagEl_ = true;
       },
       () => {
         this.styleTagText_();
       }
     );
+  }
+}
+
+export class AmpStoryShoppingTag extends AMP.BaseElement {
+  /** @override */
+  upgradeCallback() {
+    return Promise.all([
+      Services.storyStoreServiceForOrNull(this.win),
+      Services.localizationServiceForOrNull(this.element),
+    ]).then(([storeService, localizationService]) => {
+      if (!storeService || !localizationService) {
+        return;
+      }
+      return this.updgradeWithServices_(storeService, localizationService);
+    });
+  }
+
+  /**
+   * @param {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} storeService
+   * @param {?../../../src/service/localization.LocalizationService} localizationService
+   * @return {!Promise<!AmpStoryShoppingTagReady>}
+   * @private
+   */
+  updgradeWithServices_(storeService, localizationService) {
+    return new Promise((resolve) => {
+      storeService.subscribe(
+        StateProperty.SHOPPING_DATA,
+        (shoppingData) => {
+          const productId = this.element.getAttribute('data-product-id');
+          const tagData = shoppingData[productId];
+          if (!tagData) {
+            return;
+          }
+          resolve(
+            new AmpStoryShoppingTagReady(
+              this.element,
+              storeService,
+              localizationService,
+              tagData
+            )
+          );
+        },
+        /* callToInitialize */ true
+      );
+    });
   }
 }
