@@ -9,14 +9,11 @@ import {
   Action,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import * as AmpStoryShoppingConfig from '../amp-story-shopping-config';
 import {
   VALIDATION_OBJECTS,
   getShoppingConfig,
   storeShoppingConfig,
-  validateNumber,
-  validateRequired,
-  validateString,
-  validateURLs,
 } from '../amp-story-shopping-config';
 
 const keyedDefaultInlineConfig = {
@@ -160,14 +157,19 @@ describes.realWin(
         'items': [{}],
       };
 
+      const validateRequiredSpy = env.sandbox.spy(
+        AmpStoryShoppingConfig,
+        'validateRequired'
+      );
+
       await createAmpStoryShoppingConfig(null, invalidConfig);
 
       for (const [key, value] of Object.entries(
         VALIDATION_OBJECTS['productValidationConfig']
       )) {
-        if (value.includes(validateRequired)) {
+        if (value.includes(validateRequiredSpy)) {
           expect(() => {
-            validateRequired(key, invalidConfig['items'][0][key]);
+            validateRequiredSpy(key, invalidConfig['items'][0][key]);
           }).to.throw(`Field ${key} is required.`);
         }
       }
@@ -196,9 +198,15 @@ describes.realWin(
         ],
       };
 
+      const validateStringSpy = env.sandbox.spy(
+        AmpStoryShoppingConfig,
+        'validateString'
+      );
+
       await createAmpStoryShoppingConfig(null, invalidConfig);
+
       expect(() => {
-        validateString(
+        validateStringSpy(
           'productTitle',
           invalidConfig['items'][0]['productTitle']
         );
@@ -230,10 +238,15 @@ describes.realWin(
         ],
       };
 
+      const validateNumberSpy = env.sandbox.spy(
+        AmpStoryShoppingConfig,
+        'validateNumber'
+      );
+
       await createAmpStoryShoppingConfig(null, invalidConfig);
 
       expect(() => {
-        validateNumber(
+        validateNumberSpy(
           'productPrice',
           invalidConfig['items'][0]['productPrice']
         );
@@ -261,8 +274,15 @@ describes.realWin(
         ],
       };
 
+      const validateURLsSpy = env.sandbox.spy(
+        AmpStoryShoppingConfig,
+        'validateURLs'
+      );
+
+      await createAmpStoryShoppingConfig(null, invalidConfig);
+
       expect(() => {
-        validateURLs(
+        validateURLsSpy(
           'productImages',
           invalidConfig['items'][0]['productImages']
         );

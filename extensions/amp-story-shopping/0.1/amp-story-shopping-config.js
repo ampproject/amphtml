@@ -105,6 +105,8 @@ export function validateURLs(field, url = undefined) {
     return;
   }
 
+  console.log(url);
+
   const urls = Array.isArray(url) ? url : [url];
 
   urls.forEach((url) => {
