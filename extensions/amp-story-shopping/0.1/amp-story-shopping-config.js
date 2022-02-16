@@ -163,7 +163,6 @@ export function getShoppingConfig(pageElement) {
       return item1 && validateConfig(item2);
     }, true);
 
-    config['items'].forEach((itemConfig) => validateConfig(itemConfig));
     if (!areConfigsValid) {
       user().warn(
         'AMP-STORY-SHOPPING-CONFIG',
