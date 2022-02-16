@@ -43,17 +43,15 @@ function readJsconfigPaths() {
 
 /**
  * Import map configuration.
+ * @param {Object} [extraAliases]
  * @return {Object}
  */
-function getImportResolver() {
+function getImportResolver(extraAliases = {}) {
   return {
     root: ['.'],
     alias: {
       ...readJsconfigPaths(),
-      'react': 'preact/compat',
-      'react-dom': 'preact/compat',
-      'react-dom/test-utils': 'preact/test-utils',
-      'react/jsx-runtime': 'preact/jsx-runtime',
+      ...extraAliases,
     },
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     stripExtensions: [],
@@ -81,10 +79,11 @@ function getRelativeAliasMap(rootDir) {
 
 /**
  * Import resolver Babel plugin configuration.
+ * @param {Object} [extraAliases]
  * @return {!Array}
  */
-function getImportResolverPlugin() {
-  return ['module-resolver', getImportResolver()];
+function getImportResolverPlugin(extraAliases) {
+  return ['module-resolver', getImportResolver(extraAliases)];
 }
 
 /**
