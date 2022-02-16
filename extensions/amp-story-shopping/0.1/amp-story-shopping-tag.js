@@ -238,7 +238,10 @@ class AmpStoryShoppingTagReady extends AMP.BaseElement {
 }
 
 export class AmpStoryShoppingTag extends AMP.BaseElement {
-  /** @override */
+  /**
+   * Upgrades to AmpStoryShoppingTagReady when services and tag data are ready.
+   * @override
+   */
   upgradeCallback() {
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -247,37 +250,27 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       if (!storeService || !localizationService) {
         return;
       }
-      return this.upgradeWhenDataReady_(storeService, localizationService);
-    });
-  }
-
-  /**
-   * @param {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} storeService
-   * @param {?../../../src/service/localization.LocalizationService} localizationService
-   * @return {!Promise<!AmpStoryShoppingTagReady>}
-   * @private
-   */
-  upgradeWhenDataReady_(storeService, localizationService) {
-    return new Promise((resolve) => {
-      storeService.subscribe(
-        StateProperty.SHOPPING_DATA,
-        (shoppingData) => {
-          const productId = this.element.getAttribute('data-product-id');
-          const tagData = shoppingData[productId];
-          if (!tagData) {
-            return;
-          }
-          resolve(
-            new AmpStoryShoppingTagReady(
-              this.element,
-              storeService,
-              localizationService,
-              tagData
-            )
-          );
-        },
-        /* callToInitialize */ true
-      );
+      return new Promise((resolve) => {
+        storeService.subscribe(
+          StateProperty.SHOPPING_DATA,
+          (shoppingData) => {
+            const productId = this.element.getAttribute('data-product-id');
+            const tagData = shoppingData[productId];
+            if (!tagData) {
+              return;
+            }
+            resolve(
+              new AmpStoryShoppingTagReady(
+                this.element,
+                storeService,
+                localizationService,
+                tagData
+              )
+            );
+          },
+          /* callToInitialize */ true
+        );
+      });
     });
   }
 }
