@@ -1,6 +1,5 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
-import {closestAncestorElementBySelector} from '#core/dom/query';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -68,12 +67,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
     loadFonts(this.win, FONTS_TO_LOAD);
 
-    const pageElement = closestAncestorElementBySelector(
-      this.element,
-      'amp-story-page'
-    );
-    getShoppingConfig(pageElement).then((config) =>
-      storeShoppingConfig(pageElement, config)
+    getShoppingConfig(this.pageEl_).then((config) =>
+      storeShoppingConfig(this.pageEl_, config)
     );
 
     this.attachmentEl_ = (
@@ -151,7 +146,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * If active data is set, open the attachment.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
   checkOpenAttachment_(shoppingData) {
@@ -162,20 +157,15 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Updates template based on shopping data.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
   updateTemplate_(shoppingData) {
-    const pageElement = closestAncestorElementBySelector(
-      this.element,
-      'amp-story-page'
-    );
-
-    const shoppingDataPerPage = Object.values(shoppingData[pageElement.id]);
+    const shoppingDataPerPage = Object.values(shoppingData[this.pageEl_.id]);
 
     let productForPdp = shoppingData.activeProductData;
     // If no active product and only one product on page, use the one product for the PDP.
-    if (!shoppingData.activeProductData && shoppingDataPerPage.length === 1) {
+    if (!productForPdp && shoppingDataPerPage.length === 1) {
       productForPdp = shoppingDataPerPage[0];
     }
 
