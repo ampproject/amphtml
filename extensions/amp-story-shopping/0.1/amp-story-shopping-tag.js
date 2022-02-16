@@ -235,18 +235,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
 
-    this.measureMutateElement(
-      () => {
-        createShadowRootWithStyle(
-          this.element,
-          this.shoppingTagEl_,
-          shoppingTagCSS
-        );
-        this.hasAppendedInnerShoppingTagEl_ = true;
-      },
-      () => {
-        this.styleTagText_();
-      }
+    createShadowRootWithStyle(
+      this.element,
+      this.shoppingTagEl_,
+      shoppingTagCSS
     );
+    this.styleTagText_();
+    this.hasAppendedInnerShoppingTagEl_ = true;
   }
 }
