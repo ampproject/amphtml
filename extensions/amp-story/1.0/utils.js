@@ -356,6 +356,12 @@ export function isTransformed(ampdoc) {
  * @return {AMP.BaseElement.constructor}
  */
 export function dependsOnStoryServices(klass) {
+  if (getMode().test) {
+    // Unit tests mock or install the services internally, so returning the
+    // class directly allows us to instantiate elements without placing them
+    // inside an <amp-story>.
+    return klass;
+  }
   return class extends AMP.BaseElement {
     /**
      * @override
