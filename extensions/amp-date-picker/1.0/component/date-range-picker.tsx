@@ -470,6 +470,7 @@ function DateRangePickerWithRef(
 
   return (
     <ContainWrapper
+      class="amp-date-picker-calendar-container"
       ref={containerRef}
       data-startdate={startDateInput.date && formatDate(startDateInput.date)}
       data-enddate={endDateInput.date && formatDate(endDateInput.date)}

@@ -247,6 +247,7 @@ function SingleDatePickerWithRef(
 
   return (
     <ContainWrapper
+      class="amp-date-picker-calendar-container"
       ref={containerRef}
       data-date={
         dateInput.date && getFormattedDate(dateInput.date, format, locale)

@@ -1,3 +1,5 @@
+import {Locale} from 'date-fns';
+
 export type DateSelector = Array<Date | string>;
 export type DatePickerMode = 'static' | 'overlay';
 export type DatePickerType = 'single' | 'range';
