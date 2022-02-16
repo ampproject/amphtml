@@ -104,8 +104,10 @@ describes.sandboxed('DOM - style helpers', {}, (env) => {
   });
 
   it('camelCaseToHyphenCase', () => {
-    const str = 'paddingTop';
-    expect(st.camelCaseToHyphenCase(str)).to.equal('padding-top');
+    expect(st.camelCaseToHyphenCase('paddingTop')).to.equal('padding-top');
+    expect(st.camelCaseToHyphenCase('WebkitTransition')).to.equal(
+      '-webkit-transition'
+    );
   });
 
   it('removeAlphaFromColor', () => {
