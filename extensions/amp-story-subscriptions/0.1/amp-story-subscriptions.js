@@ -186,6 +186,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     if (isDialogVisible) {
       // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
       // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
+      // To note, it's a blocking call that would wait until entitlements from all platforms get resolved.
       this.subscriptionService_.selectAndActivatePlatform();
       this.subscriptionService_.addOnEntitlementResolvedCallback((e) => {
         // When the user finishes any of the actions, e.g. log in or subscribe, this callback would be executed.
