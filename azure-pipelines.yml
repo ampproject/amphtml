@@ -43,7 +43,7 @@ steps:
   displayName: 'npm install'
 
 - script: |
-    amp release --flavor=base --dedup_v0 --output-dir=$(Build.ArtifactStagingDirectory)/$(env)/
+    amp release --flavor=base --dedup_v0 --output_dir=$(Build.ArtifactStagingDirectory)/$(env)/
   displayName: 'build release'
 
 - task: PublishBuildArtifacts@1
