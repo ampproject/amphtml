@@ -1511,11 +1511,10 @@ describes.realWin(
       });
     });
 
-    describe('experiment for story-load-first-page-only', () => {
+    describe('resource loading for first page', () => {
       let pages;
       let performanceImpl;
       beforeEach(async () => {
-        toggleExperiment(win, 'story-load-first-page-only', true);
         performanceImpl = new Performance(env.win);
         env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
         pages = await createStoryWithPages(2, ['page-1', 'page-2'], false);
@@ -1554,17 +1553,6 @@ describes.realWin(
 
         // Check page 1 is loaded with distance 1.
         expect(pages[1].getAttribute('distance')).to.be.equal('1');
-      });
-
-      it('should enable the CSI experiment', async () => {
-        const enableSpy = env.sandbox.spy(
-          performanceImpl,
-          'addEnabledExperiment'
-        );
-        story.buildCallback();
-        await story.layoutCallback();
-
-        expect(enableSpy).to.be.calledWith('story-load-first-page-only');
       });
     });
   }
