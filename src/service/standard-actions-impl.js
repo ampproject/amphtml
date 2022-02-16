@@ -221,16 +221,16 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleCopy_(invocation) {
+    const {args, node} = invocation;
+    const win = getWin(node);
+
     /** @enum {string} */
     const CopyEvents = {
       COPY_ERROR: 'copy-error',
       COPY_SUCCESS: 'copy-success',
     };
-    let eventResult;
-    const {args, node} = invocation;
-    const win = getWin(node);
-
     let textToCopy;
+
     if (invocation.tagOrTarget === 'AMP') {
       /**
        * Copy Static Text
@@ -278,24 +278,27 @@ export class StandardActions {
      *
      *  Example: <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy</button>
      */
-    let eventName = CopyEvents.COPY_ERROR;
     if (isCopyingToClipboardSupported(win.document)) {
       copyTextToClipboard(
         win,
         textToCopy,
         () => {
-          eventName = CopyEvents.COPY_SUCCESS;
-          eventResult = 'success';
-          triggerEvent(eventName, eventResult, invocation);
+          triggerEvent(CopyEvents.COPY_SUCCESS, 'success', invocation);
         },
         () => {
-          eventResult = 'error';
-          triggerEvent(eventName, eventResult, invocation);
+          /**
+           * Trigger `COPY_ERROR` event with 'error' event result
+           * to indicate error while copying.
+           */
+          triggerEvent(CopyEvents.COPY_ERROR, 'error', invocation);
         }
       );
     } else {
-      eventResult = 'browser';
-      triggerEvent(eventName, eventResult, invocation);
+      /**
+       * Trigger `COPY_ERROR` event with 'unsupported' event result
+       * to indicate copy is not supported or disabled by user.
+       */
+      triggerEvent(CopyEvents.COPY_ERROR, 'unsupported', invocation);
     }
   }
 
