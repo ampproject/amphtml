@@ -60,13 +60,22 @@ describes.realWin(
 
     async function shoppingDataDispatchStoreService() {
       const shoppingData = {
-        'sunglasses': {'productTitle': 'Spectacular Spectacles'},
+        'page1': {'sunglasses': {'productTitle': 'Spectacular Spectacles'}},
       };
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
     }
 
-    it('should build and layout shopping tag component', () => {
+    async function createShoppingTag() {
+      shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
+      await shoppingDataDispatchStoreService();
+
+      expect(() => shoppingTag.buildCallback()).to.not.throw();
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
+    }
+
+    it('should build and layout shopping tag component', async () => {
+      await createShoppingTag();
+      expect(shoppingTag.shoppingTagEl_).to.be.not.null;
     });
 
     it('should process config data and set text container content if data not null', async () => {
