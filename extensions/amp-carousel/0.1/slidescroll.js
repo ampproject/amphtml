@@ -31,7 +31,6 @@ import {
 import {CarouselControls} from './carousel-controls';
 
 /** @const {string} */
-const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
 
 /** @const {number} */
 const NATIVE_SNAP_TIMEOUT = 200;
@@ -842,7 +841,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
       if (this.shouldLoop_) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
       }
-      this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
+      this.slideWrappers_[showIndex].classList.add(ClassNames.SLIDES_ITEM_SHOW);
       const owners = Services.ownersForDoc(this.element);
       if (showIndex == newIndex) {
         owners.scheduleLayout(this.element, this.slides_[showIndex]);
@@ -929,7 +928,9 @@ export class AmpSlideScroll extends AMP.BaseElement {
   hideRestOfTheSlides_(indexArr) {
     const {noOfSlides_} = this;
     for (let i = 0; i < noOfSlides_; i++) {
-      if (!this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
+      if (
+        !this.slideWrappers_[i].classList.contains(ClassNames.SLIDES_ITEM_SHOW)
+      ) {
         continue;
       }
       // Hide if not shown anymore
@@ -937,9 +938,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
         if (this.shouldLoop_) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
-        dev()
-          .assertElement(this.slideWrappers_[i])
-          .classList.remove(SHOWN_CSS_CLASS);
+        this.slideWrappers_[i].classList.remove(ClassNames.SLIDES_ITEM_SHOW);
         this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide

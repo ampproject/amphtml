@@ -132,6 +132,7 @@ function getEsbuildBabelPlugin(
         }
 
         const root = path.dirname(map.path);
+        const nodeMods = path.normalize('/node_modules/');
         const remapped = remapping(
           map.text,
           (f, ctx) => {
@@ -146,7 +147,7 @@ function getEsbuildBabelPlugin(
             const file = path.join(root, f);
             const map = babelMaps.get(file);
             if (!map) {
-              if (file.includes('/node_modules/')) {
+              if (file.includes(nodeMods)) {
                 // Excuse node_modules since they may have been marked external
                 // (and so not processed by babel).
                 return null;

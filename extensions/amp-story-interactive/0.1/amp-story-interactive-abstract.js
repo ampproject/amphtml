@@ -259,7 +259,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   buildCallback(concreteCSS = '') {
-    this.loadFonts_();
     this.options_ = this.parseOptions_();
     this.element.classList.add('i-amphtml-story-interactive-component');
     this.adjustGridLayer_();
@@ -397,6 +396,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.loadFonts_();
     this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()
