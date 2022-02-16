@@ -167,7 +167,7 @@ export function getShoppingConfig(pageElement) {
     if (!areConfigsValid) {
       user().warn(
         'AMP-STORY-SHOPPING-CONFIG',
-        `Essential fields X are missing. Please add them in the shopping config. See the error messages above for more details.`
+        `Essential fields are missing. Please add them in the shopping config. See the error messages above for more details.`
       );
       return null;
     } else {
