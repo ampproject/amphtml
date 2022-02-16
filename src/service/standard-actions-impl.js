@@ -248,9 +248,9 @@ export class StandardActions {
 
     /**
      * Raises a status event for copy task result
-     * @param {*} eventName
-     * @param {*} eventResult
-     * @param {*} invocation
+     * @param {string} eventName
+     * @param {string} eventResult
+     * @param {!./action-impl.ActionInvocation} invocation
      */
     const triggerEvent = function (eventName, eventResult, invocation) {
       const eventValue = /** @type {!JsonObject} */ ({
