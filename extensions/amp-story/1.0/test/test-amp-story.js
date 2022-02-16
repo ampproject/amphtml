@@ -1571,81 +1571,66 @@ describes.realWin(
 
     describe('lazy load non-critical extensions after first page is loaded', () => {
       it('should install auto-ads if a config is provided', async () => {
-        const pages = await createStoryWithPages(2, ['cover', 'page-1']);
+        await createStoryWithPages(2, ['cover', 'page-1']);
         const extensionsFor = Services.extensionsFor(win);
-        element.appendChild(<amp-story-auto-ads></amp-story-auto-ads>);
-
-        const signals = new Signals();
-        env.sandbox.stub(pages[0], 'signals').returns(() => signals);
-        story.buildCallback();
-        await story.layoutCallback();
-
         const installSpy = env.sandbox.spy(
           extensionsFor,
           'installExtensionForDoc'
         );
+        element.appendChild(<amp-story-auto-ads></amp-story-auto-ads>);
+        await story.layoutCallback();
 
         // Signal that the first page finished loading.
-        signals.signal(CommonSignals_Enum.LOAD_END);
-        await nextTick();
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals_Enum.LOAD_END);
 
-        expect(installSpy).to.have.been.calledWithExactly(
+        expect(installSpy).to.have.been.calledWith(
           ampdoc,
           'amp-story-auto-ads'
         );
       });
 
       it('should install amp-analytics if a config is provided', async () => {
-        const pages = await createStoryWithPages(2, ['cover', 'page-1']);
+        await createStoryWithPages(2, ['cover', 'page-1']);
         const extensionsFor = Services.extensionsFor(win);
-        element.appendChild(<amp-analytics></amp-analytics>);
-
-        const signals = new Signals();
-        pages[0].signals = () => signals;
-        story.buildCallback();
-        await story.layoutCallback();
-
         const installSpy = env.sandbox.spy(
           extensionsFor,
           'installExtensionForDoc'
         );
+        element.appendChild(<amp-analytics></amp-analytics>);
+        await story.layoutCallback();
 
         // Signal that the first page finished loading.
-        signals.signal(CommonSignals_Enum.LOAD_END);
-        await nextTick();
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals_Enum.LOAD_END);
 
-        expect(installSpy).to.have.been.calledWithExactly(
-          ampdoc,
+        expect(installSpy).to.have.been.calledWith(
+          env.sandbox.match.any,
           'amp-analytics'
         );
       });
 
       it('should install amp-analytics and auto-analytics if a config for auto-analytics is provided', async () => {
-        const pages = await createStoryWithPages(2, ['cover', 'page-1']);
+        await createStoryWithPages(2, ['cover', 'page-1']);
         const extensionsFor = Services.extensionsFor(win);
-        element.appendChild(
-          <amp-story-auto-analytics></amp-story-auto-analytics>
-        );
-
-        const signals = new Signals();
-        pages[0].signals = () => signals;
-        story.buildCallback();
-        await story.layoutCallback();
-
         const installSpy = env.sandbox.spy(
           extensionsFor,
           'installExtensionForDoc'
         );
+        element.appendChild(
+          <amp-story-auto-analytics></amp-story-auto-analytics>
+        );
+        await story.layoutCallback();
 
         // Signal that the first page finished loading.
-        signals.signal(CommonSignals_Enum.LOAD_END);
-        await nextTick();
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals_Enum.LOAD_END);
 
-        expect(installSpy).to.have.been.calledWithExactly(
-          ampdoc,
-          'amp-analytics'
-        );
-        expect(installSpy).to.have.been.calledWithExactly(
+        expect(installSpy).to.have.been.calledWith(ampdoc, 'amp-analytics');
+        expect(installSpy).to.have.been.calledWith(
           ampdoc,
           'amp-story-auto-analytics'
         );
