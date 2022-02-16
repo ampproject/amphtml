@@ -232,16 +232,16 @@ export class StandardActions {
     let textToCopy;
 
     if (invocation.tagOrTarget === 'AMP') {
-      /**
-       * Copy Static Text
-       *  Example: AMP.copy(text='TextToCopy');
-       */
+      //
+      // Copy Static Text
+      //  Example: AMP.copy(text='TextToCopy');
+      //
       textToCopy = args['text'].trim();
     } else {
-      /**
-       * Copy Target Element Text
-       *  Example: targetId.copy();
-       */
+      //
+      // Copy Target Element Text
+      //  Example: targetId.copy();
+      //
       const target = devAssertElement(invocation.node);
       textToCopy = (target.value ?? target.textContent).trim();
     }
@@ -267,17 +267,17 @@ export class StandardActions {
       );
     };
 
-    /**
-     * Trigger Event based on copy action
-     *  - If content got copied to the clipboard successfully, it will
-     *    fire `copy-success` event with data type `success`.
-     *  - If there's any error in copying, it will
-     *    fire `copy-error` event with data type `error`.
-     *  - If browser is not supporting the copy function/action, it
-     *    will fire `copy-error` event with data type `browser`.
-     *
-     *  Example: <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy</button>
-     */
+    //
+    // Trigger Event based on copy action
+    //  - If content got copied to the clipboard successfully, it will
+    //    fire `copy-success` event with data type `success`.
+    //  - If there's any error in copying, it will
+    //    fire `copy-error` event with data type `error`.
+    //  - If browser is not supporting the copy function/action, it
+    //    will fire `copy-error` event with data type `browser`.
+    //
+    //  Example: <button on="tap:AMP.copy(text='Hello AMP');copy-success:copied.show()">Copy</button>
+    //
     if (isCopyingToClipboardSupported(win.document)) {
       copyTextToClipboard(
         win,
@@ -286,18 +286,12 @@ export class StandardActions {
           triggerEvent(CopyEvents.COPY_SUCCESS, 'success', invocation);
         },
         () => {
-          /**
-           * Trigger `COPY_ERROR` event with 'error' event result
-           * to indicate error while copying.
-           */
+          // Error encountered while copying.
           triggerEvent(CopyEvents.COPY_ERROR, 'error', invocation);
         }
       );
     } else {
-      /**
-       * Trigger `COPY_ERROR` event with 'unsupported' event result
-       * to indicate copy is not supported or disabled by user.
-       */
+      // Copy is disabled or not supported by user.
       triggerEvent(CopyEvents.COPY_ERROR, 'unsupported', invocation);
     }
   }

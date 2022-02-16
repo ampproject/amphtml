@@ -65,30 +65,17 @@ export function isDeprecatedCopyingToClipboardSupported(doc) {
  * @param {function():void} failCallback Executes when copying is failed
  */
 export function copyTextToClipboard(win, text, successCallback, failCallback) {
-  /** Check which method is supported for the browser */
+  // Check which method is supported for the browser
   if (win.navigator?.clipboard) {
-    /*
-      Try copying with `navigator.clipboard` method as a fallback support.
-    */
-    win.navigator.clipboard.writeText(text).then(
-      /* Clipboard successfully set using 'navigator.clipboard' */
-      successCallback,
-      /* Clipboard write failed using 'navigator.clipboard' */
-      failCallback
-    );
-  } else if (isDeprecatedCopyingToClipboardSupported(win.document)) {
-    /*
-      Try copying with deprecated method as a fallback support.
-    */
-    if (deprecatedCopyTextToClipboard(win, text)) {
-      /* Clipboard successfully set using deprecated API */
-      successCallback();
-    } else {
-      /* Clipboard write failed using deprecated API */
-      failCallback();
-    }
+    // Try copying with `navigator.clipboard` API
+    win.navigator.clipboard.writeText(text).then(successCallback, failCallback);
+  } else if (
+    // Try copying with deprecated API as a fallback support
+    isDeprecatedCopyingToClipboardSupported(win.document) &&
+    deprecatedCopyTextToClipboard(win, text)
+  ) {
+    successCallback();
   } else {
-    /** Browser that do not support any of copy API or disabled by user */
     failCallback();
   }
 }
