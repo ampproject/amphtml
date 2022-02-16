@@ -4,11 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        {name: 'ampproject/wg-infra'},
-        {name: 'ampproject/wg-bento'},
-        {name: 'alanorozco', notify: true},
-      ],
+      owners: [{name: 'ampproject/wg-components'}],
     },
   ],
 }
