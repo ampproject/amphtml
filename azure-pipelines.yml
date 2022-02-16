@@ -27,7 +27,7 @@ steps:
     targetType: 'inline'
     script: |
       $json = '{
-       "cdnUrl": $(cdnUrl)
+       "cdnUrl": "$(cdnUrl)"
       }'
         
       $json | Out-File custom-config.json
