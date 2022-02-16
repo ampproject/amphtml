@@ -66,7 +66,7 @@ export function isDeprecatedCopyingToClipboardSupported(doc) {
  */
 export function copyTextToClipboard(win, text, successCallback, failCallback) {
   /** Check which method is supported for the browser */
-  if (!!win.navigator?.clipboard) {
+  if (win.navigator?.clipboard) {
     /*
       Try copying with `navigator.clipboard` method as a fallback support.
     */
