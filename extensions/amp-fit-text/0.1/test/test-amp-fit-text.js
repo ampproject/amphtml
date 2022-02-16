@@ -1,5 +1,7 @@
 import {createElementWithAttributes} from '#core/dom';
 
+import {hypenCaseToCamelCase} from '#testing/helpers';
+
 import {AmpFitText, calculateFontSize_, updateOverflow_} from '../amp-fit-text';
 import {buildDom} from '../build-dom';
 
@@ -218,7 +220,11 @@ describes.realWin('amp-fit-text updateOverflow', {}, (env) => {
     doc = win.document;
     classToggles = {};
     content = {
-      style: {},
+      style: {
+        setProperty(name, value) {
+          content.style[hypenCaseToCamelCase(name)] = value;
+        },
+      },
       classList: {
         toggle: (className, on) => {
           classToggles[className] = on;
