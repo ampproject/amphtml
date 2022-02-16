@@ -240,7 +240,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       this.shoppingTagEl_,
       shoppingTagCSS
     );
-    this.styleTagText_();
     this.hasAppendedInnerShoppingTagEl_ = true;
+    this.styleTagText_();
   }
 }
