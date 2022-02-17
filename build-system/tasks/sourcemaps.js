@@ -9,12 +9,22 @@ const Remapping = require('@ampproject/remapping');
 const remapping = /** @type {*} */ (Remapping);
 
 /**
+ * @return {boolean}
+ */
+function includeSourcesContent() {
+  if (argv._.includes('dist')) {
+    return !!argv.full_sourcemaps;
+  }
+  return true;
+}
+
+/**
  * @param {Array<Object|string>} mapChain
  * @param {*} options
  * @return {Object}
  */
 function massageSourcemaps(mapChain, options) {
-  const map = remapping(mapChain, () => null, !argv.full_sourcemaps);
+  const map = remapping(mapChain, () => null, !includeSourcesContent());
   map.sourceRoot = getSourceRoot(options);
   if (map.file) {
     map.file = path.basename(map.file);
@@ -50,4 +60,5 @@ function getSourceRoot(options) {
 
 module.exports = {
   massageSourcemaps,
+  includeSourcesContent,
 };

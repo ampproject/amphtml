@@ -11,7 +11,6 @@ const {isCiBuild} = require('../../common/ci');
 const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
 const {writeFileSync} = require('fs-extra');
-const {yellow} = require('kleur/colors');
 const {updateSubpackages} = require('../../common/update-packages');
 const {bootstrapThirdPartyFrames} = require('../helpers');
 
@@ -43,10 +42,6 @@ function startStorybook(env) {
     [
       'npx',
       'start-storybook',
-      // TODO(alanorozco): --static-dir is deprecated and should be removed in
-      // favor of staticDirs in main.js once we upgrade to 6.4
-      // https://storybook.js.org/docs/react/configure/images-and-assets
-      `--static-dir ${repoDir}/`,
       `--config-dir .`,
       `--port ${port}`,
       '--quiet',

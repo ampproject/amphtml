@@ -100,6 +100,14 @@ For example, the following is possible in AMP:
     <td><code>tap</code></td>
     <td>Fired when the element is clicked/tapped.</td>
   </tr>
+  <tr>
+    <td><code>copy-success</code></td>
+    <td>Fired when the content/text is successfully copied into the clipboard.</td>
+  </tr>
+  <tr>
+    <td><code>copy-error</code></td>
+    <td>Fired when there's an error while copying the content. If there's an error while copying the content, the <code>event.data.type</code> will be set to the <code>error</code> value. If the browser is not supporting the copy method, the <code>event.data.type</code> will be set to the <code>browser</code> value.</td>
+  </tr>
 </table>
 
 ### Input elements <a name="input-elements"></a>
@@ -742,6 +750,10 @@ actions that apply to the whole document.
       <p>Merges an object literal into the bindable state and pushes a new entry onto browser history stack. Popping the entry will restore the previous values of variables (in this example, <code>foo</code>).    </td>
   </tr>
   <tr>
+    <td><code>copy(text='content')</code></td>
+    <td>
+      <p>Copy any content to the clipboard. <code>text</code> is optional, and if is set it will copy those content/value into the clipboard.</p>
+    </td>
     <td><code>toggleTheme()</code></td>
     <td>Toggles the amp-dark-mode class on the body element when called and sets users preference to the localStorage. The amp-dark-mode class is added by default to body based on the <code>prefers-color-scheme</code> value. Use <code>data-prefers-dark-mode-class</code> attribute on body tag to override the class to be used for dark mode.</td>
   </tr>
