@@ -6,6 +6,8 @@ import {registerServiceBuilder} from 'src/service-helpers';
 
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
+import {mutateElementStub} from '#testing/helpers/service';
+
 describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   let attachmentEl;
   let attachment;
@@ -37,6 +39,8 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     attachmentEl.getAmpDoc = () => new AmpDocSingle(win);
     pageEl.appendChild(attachmentEl);
     attachment = new AmpStoryPageAttachment(attachmentEl);
+
+    env.sandbox.stub(attachment, 'mutateElement').callsFake(mutateElementStub);
 
     // Set up the outlink element for outlink testing.
     outlinkEl = win.document.createElement('amp-story-page-outlink');
@@ -82,7 +86,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     expect(closeButtonEl.getAttribute('tabindex')).to.eql('-1');
   });
 
-  it('header close button should should remove tabindex attribute when open', async () => {
+  it('header close button should not have tabindex attribute when open', async () => {
     await attachment.buildCallback();
     await attachment.layoutCallback();
 
