@@ -76,7 +76,6 @@ describes.realWin(
     async function setupShoppingTagAndData() {
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
       await setUpShoppingData();
-
       expect(() => shoppingTag.buildCallback()).to.not.throw();
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
     }
