@@ -359,7 +359,7 @@ export function dependsOnStoryServices(klass) {
   return class extends AMP.BaseElement {
     /**
      * @override
-     * @return {!Promise}
+     * @return {AMP.BaseElement|Promise<AMP.BaseElement>}
      */
     upgradeCallback() {
       const storyEl = closestAncestorElementBySelector(
