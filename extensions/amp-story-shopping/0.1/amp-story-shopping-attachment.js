@@ -146,7 +146,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * If active data is set, open the attachment.
-   * @param {!Object<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
   checkOpenAttachment_(shoppingData) {
@@ -157,11 +157,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Updates template based on shopping data.
-   * @param {!Object<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
   updateTemplate_(shoppingData) {
-    const shoppingDataPerPage = Object.values(shoppingData[this.pageEl_.id]);
+    const productOnPageToConfig = shoppingData[this.pageEl_.id];
+    const shoppingDataPerPage = Object.values(productOnPageToConfig);
 
     let productForPdp = shoppingData.activeProductData;
     // If no active product and only one product on page, use the one product for the PDP.

@@ -65,16 +65,11 @@ describes.realWin(
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
     }
 
-    async function createShoppingTag() {
+    it('should build and layout shopping tag component', async () => {
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
       await shoppingDataDispatchStoreService();
-
       expect(() => shoppingTag.buildCallback()).to.not.throw();
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
-    }
-
-    it('should build and layout shopping tag component', async () => {
-      await createShoppingTag();
       expect(shoppingTag.shoppingTagEl_).to.be.not.null;
     });
 

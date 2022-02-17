@@ -45,6 +45,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     /** @param {!ShoppingConfigDataDef} tagData */
     this.tagData_ = null;
+
+    /** @private {?Element} */
+    this.shoppingTagEl_ = null;
   }
 
   /** @override */
