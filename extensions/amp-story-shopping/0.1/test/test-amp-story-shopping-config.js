@@ -82,15 +82,15 @@ describes.realWin(
         </amp-story-shopping-attachment>
       );
       pageElement.appendChild(shoppingAttachment);
-
       return getShoppingConfig(shoppingAttachment);
     }
 
     it('throws on no config', async () => {
       expectAsyncConsoleError(async () => {
         expect(() => {
-          pageElement.appendChild(<amp-story-shopping-attachment />);
-          return getShoppingConfig(pageElement);
+          const shoppingAttachment = <amp-story-shopping-attachment />;
+          pageElement.appendChild(shoppingAttachment);
+          return getShoppingConfig(shoppingAttachment);
         }).to.throw(/<script> tag with type=\"application\/json\"​​​/);
       });
     });
@@ -157,10 +157,11 @@ describes.realWin(
       });
 
       it('dispatches ADD_SHOPPING_DATA', async () => {
-        const config = {foo: {bar: true}};
+        const dummyConfig = {foo: {bar: true}};
 
-        await storeShoppingConfig(pageElement, config);
-        const pageIdToConfig = {[pageElement.id]: config};
+        await storeShoppingConfig(pageElement, dummyConfig);
+
+        const pageIdToConfig = {[pageElement.id]: dummyConfig};
         expect(
           storeService.dispatch.withArgs(
             Action.ADD_SHOPPING_DATA,
