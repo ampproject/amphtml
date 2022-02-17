@@ -110,12 +110,10 @@ describes.realWin(
     };
 
     const keyedDefaultInlineConfig = {
-      'page1': {
-        'lamp': defaultInlineConfig.items[0],
-        'art': defaultInlineConfig.items[1],
-        'chair': defaultInlineConfig.items[2],
-        'flowers': defaultInlineConfig.items[3],
-      },
+      'lamp': defaultInlineConfig.items[0],
+      'art': defaultInlineConfig.items[1],
+      'chair': defaultInlineConfig.items[2],
+      'flowers': defaultInlineConfig.items[3],
     };
 
     beforeEach(async () => {
