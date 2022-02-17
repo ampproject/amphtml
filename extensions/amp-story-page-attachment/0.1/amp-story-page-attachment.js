@@ -425,7 +425,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     this.toggleBackgroundOverlay_(true);
-    this.toggleCloseButtonTabIndex_(false);
+    this.toggleCloseButtonTabIndex_(true);
 
     this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
     this.analyticsService_.triggerEvent(
