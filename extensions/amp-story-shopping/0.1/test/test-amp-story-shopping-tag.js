@@ -2,7 +2,6 @@ import {createElementWithAttributes} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 
 import '../amp-story-shopping';
-
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
@@ -23,10 +22,12 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let element;
+    let tagEl;
     let shoppingTag;
     let storeService;
     let localizationService;
+    let attachmentElement;
+    let pageEl;
 
     beforeEach(async () => {
       win = env.win;
@@ -42,40 +43,58 @@ describes.realWin(
         .stub(Services, 'localizationServiceForOrNull')
         .returns(Promise.resolve(localizationService));
 
-      await createAmpStoryShoppingTag();
+      await setUpStoryWithShoppingTag();
     });
 
-    async function createAmpStoryShoppingTag() {
-      const pageEl = win.document.createElement('amp-story-page');
+    async function setUpStoryWithShoppingTag() {
+      pageEl = win.document.createElement('amp-story-page');
       pageEl.id = 'page1';
-      element = createElementWithAttributes(
+      tagEl = createElementWithAttributes(
         win.document,
         'amp-story-shopping-tag',
         {'layout': 'container'}
       );
-      pageEl.appendChild(element);
-      win.document.body.appendChild(pageEl);
-      shoppingTag = await element.getImpl();
+      pageEl.appendChild(tagEl);
+
+      attachmentElement = win.document.createElement(
+        'amp-story-shopping-attachment'
+      );
+      const story = win.document.createElement('amp-story');
+      win.document.body.appendChild(story);
+      story.appendChild(pageEl);
+      pageEl.appendChild(attachmentElement);
+      shoppingTag = await tagEl.getImpl();
     }
 
-    async function shoppingDataDispatchStoreService() {
+    async function setUpShoppingData() {
       const shoppingData = {
         'page1': {'sunglasses': {'productTitle': 'Spectacular Spectacles'}},
       };
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
     }
 
-    it('should build and layout shopping tag component', async () => {
+    async function setupShoppingTagAndData() {
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
-      await shoppingDataDispatchStoreService();
+      await setUpShoppingData();
+
       expect(() => shoppingTag.buildCallback()).to.not.throw();
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
+    }
+
+    it('should build and layout shopping tag component', async () => {
+      await setupShoppingTagAndData();
       expect(shoppingTag.shoppingTagEl_).to.be.not.null;
+    });
+
+    it('should not build shopping tag if page attachment is missing', async () => {
+      pageEl.removeChild(attachmentElement);
+      await setupShoppingTagAndData();
+      expect(shoppingTag.shoppingTagEl_).to.be.null;
     });
 
     it('should process config data and set text container content if data not null', async () => {
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
-      await shoppingDataDispatchStoreService();
+      await setUpShoppingData();
       env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
         expect(shoppingTag.element.textContent).to.equal(
           'Spectacular Spectacles'
@@ -85,7 +104,7 @@ describes.realWin(
 
     it('should not process config data and set text container content if id not found', async () => {
       shoppingTag.element.setAttribute('data-product-id', 'hat');
-      await shoppingDataDispatchStoreService();
+      await setUpShoppingData();
       expect(shoppingTag.element.textContent).to.be.empty;
       expect(shoppingTag.isLayoutSupported(Layout_Enum.CONTAINER)).to.be.true;
     });

@@ -65,22 +65,14 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.shoppingTags_ = Array.from(
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
-    loadFonts(this.win, FONTS_TO_LOAD);
 
     getShoppingConfig(this.pageEl_).then((config) =>
       storeShoppingConfig(this.pageEl_, config)
     );
 
-    this.attachmentEl_ = (
-      <amp-story-page-attachment
-        layout="nodisplay"
-        theme={this.element.getAttribute('theme')}
-      ></amp-story-page-attachment>
-    );
     if (this.shoppingTags_.length === 0) {
       return;
     }
-    loadFonts(this.win, FONTS_TO_LOAD);
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -96,10 +88,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           cta-text={this.localizationService_.getLocalizedString(
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
           )}
-        ></amp-story-page-attachment>
+        >
+          {this.templateContainer_}
+        </amp-story-page-attachment>
       );
       this.element.appendChild(this.attachmentEl_);
-      this.attachmentEl_.appendChild(this.templateContainer_);
     });
   }
 
@@ -108,7 +101,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (this.shoppingTags_.length === 0) {
       return;
     }
-
+    loadFonts(this.win, FONTS_TO_LOAD);
     // Update template on attachment state update or shopping data update.
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
