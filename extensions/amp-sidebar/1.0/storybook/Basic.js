@@ -1,5 +1,3 @@
-import {boolean, color, select, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
 import {BentoSidebar} from '../component';
@@ -9,7 +7,6 @@ import '../component.jss';
 export default {
   title: 'Sidebar',
   component: BentoSidebar,
-  decorators: [withKnobs],
 };
 
 /**
@@ -49,7 +46,7 @@ function BentoSidebarWithActions(props) {
   );
 }
 
-export const _default = () => {
+export const _default = (args) => {
   const sideConfigurations = ['left', 'right', undefined];
   const side = select('side', sideConfigurations, sideConfigurations[0]);
   const foregroundColor = color('color');
@@ -59,6 +56,7 @@ export const _default = () => {
   return (
     <main>
       <BentoSidebarWithActions
+        {...args}
         side={side}
         style={{color: foregroundColor, backgroundColor}}
         backdropStyle={{backgroundColor: backdropColor}}
@@ -67,7 +65,7 @@ export const _default = () => {
   );
 };
 
-export const scroll = () => {
+export const scroll = (args) => {
   const sideConfigurations = ['left', 'right', undefined];
   const side = select('side', sideConfigurations, sideConfigurations[0]);
   const foregroundColor = color('color');
