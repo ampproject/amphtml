@@ -6,11 +6,10 @@ import {
   BentoAccordionHeader,
   BentoAccordionSection,
 } from '#bento/components/bento-accordion/1.0/component';
+import {BentoYoutube} from '#bento/components/bento-youtube/1.0/component';
 
 import * as Preact from '#preact';
 import {useRef, useState} from '#preact';
-
-import {BentoYoutube} from '../component';
 
 export default {
   title: 'YouTube',

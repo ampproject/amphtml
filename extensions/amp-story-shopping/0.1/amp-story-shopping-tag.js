@@ -1,5 +1,9 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {
+  childElementByTag,
+  closestAncestorElementBySelector,
+} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
@@ -44,10 +48,31 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     /** @param {!ShoppingConfigDataDef} tagData */
     this.tagData_ = null;
+
+    /** @param {?AmpElement} element */
+    this.shoppingAttachment_ = null;
+
+    /** @param {!AmpElement} element */
+    this.shoppingTagEl_ = null;
   }
 
   /** @override */
   buildCallback() {
+    /* This is used to prevent the shopping tag component from building if there is no shopping attachment. */
+    const pageElement = closestAncestorElementBySelector(
+      this.element,
+      'amp-story-page'
+    );
+
+    this.shoppingAttachment_ = childElementByTag(
+      pageElement,
+      'amp-story-shopping-attachment'
+    );
+
+    if (!this.shoppingAttachment_) {
+      return;
+    }
+
     this.element.setAttribute('role', 'button');
 
     return Promise.all([
@@ -61,6 +86,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!this.shoppingAttachment_) {
+      return;
+    }
+
     loadFonts(this.win, FONTS_TO_LOAD);
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
@@ -167,8 +196,13 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
     const ratioOfLineHeightToFontSize = 1.5;
     const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
-    const height = textEl./*OK*/ clientHeight;
-    const numLines = Math.ceil(height / lineHeight);
+
+    let numLines = 1;
+
+    this.measureElement(() => {
+      const height = textEl./*OK*/ clientHeight;
+      numLines = Math.ceil(height / lineHeight);
+    });
 
     this.mutateElement(() => {
       pillEl.classList.toggle(
@@ -232,18 +266,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
 
-    this.measureMutateElement(
-      () => {
-        createShadowRootWithStyle(
-          this.element,
-          this.shoppingTagEl_,
-          shoppingTagCSS
-        );
-        this.hasAppendedInnerShoppingTagEl_ = true;
-      },
-      () => {
-        this.styleTagText_();
-      }
+    createShadowRootWithStyle(
+      this.element,
+      this.shoppingTagEl_,
+      shoppingTagCSS
     );
+    this.hasAppendedInnerShoppingTagEl_ = true;
+    this.styleTagText_();
   }
 }
