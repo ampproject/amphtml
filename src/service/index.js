@@ -1,3 +1,8 @@
+// This lint rule must be enabled on this file only.
+// It checks that all Services properties are arrow function expressions.
+// This allows unused getters to be stripped out from the bundle.
+/* eslint local/service-getters: 2 */
+
 import {
   getElementServiceForDoc,
   getElementServiceIfAvailable,
