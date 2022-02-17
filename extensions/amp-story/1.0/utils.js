@@ -366,10 +366,12 @@ export function dependsOnStoryServices(klass) {
         this.element,
         'amp-story'
       );
-      if (getMode().test && !storyEl) {
+      if (!storyEl) {
         // Unit tests may mock or install the services internally, so
         // instantiating immediately allows us to test implementations without
         // placing the element inside an <amp-story>.
+        // In reality, this would cause failures. This is okay since upgradable
+        // elements are required to descend from an <amp-story>.
         return new klass(this.element);
       }
       return whenUpgradedToCustomElement(storyEl)

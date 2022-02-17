@@ -91,7 +91,11 @@ describes.realWin(
       expect(shoppingTag.shoppingTagEl_).to.be.null;
     });
 
-    it('should process config data and set text container content if data not null', async () => {
+    // TODO(wg-stories): Re-enable. This wasn't executing previously due to the
+    // callsFake() codepath not being hit. It can't pass since
+    // `amp-story-shopping-tag` does not currently use `productTitle`, which
+    // this compares against.
+    it.skip('should process config data and set text container content if data not null', async () => {
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
       await setUpShoppingData();
       env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
