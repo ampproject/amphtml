@@ -79,9 +79,9 @@ describes.realWin('PreactBaseElement', spec, (env) => {
       expect(Impl.prerenderAllowed()).to.be.false;
     });
 
-    it('by default previewAllowed is tied to the "loadable" flag', () => {
+    it('by default previewAllowed is NOT tied to the "loadable" flag', () => {
       Impl['loadable'] = false;
-      expect(Impl.previewAllowed()).to.be.true;
+      expect(Impl.previewAllowed()).to.be.false;
 
       Impl['loadable'] = true;
       expect(Impl.previewAllowed()).to.be.false;
