@@ -1,8 +1,8 @@
+import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
+
 import {isExperimentOn} from '#experiments';
 
 import {userAssert} from '#utils/log';
-
-import {AmpVideoBaseElement} from './video-base-element';
 
 import {CSS} from '../../../build/amp-video-1.0.css';
 

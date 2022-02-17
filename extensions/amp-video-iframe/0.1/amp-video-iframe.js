@@ -1,3 +1,5 @@
+import {BUBBLE_MESSAGE_EVENTS} from '#bento/apis/video-iframe-api';
+
 import {Deferred} from '#core/data-structures/promise';
 import {
   dispatchCustomEvent,
@@ -34,7 +36,6 @@ import {
   MIN_VISIBILITY_RATIO_FOR_AUTOPLAY,
   VideoEvents_Enum,
 } from '../../../src/video-interface';
-import {BUBBLE_MESSAGE_EVENTS} from '../amp-video-iframe-api';
 
 /** @private @const */
 const TAG = 'amp-video-iframe';
