@@ -1,4 +1,4 @@
-import {createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import '../amp-story-shopping';
@@ -26,8 +26,6 @@ describes.realWin(
     let shoppingTag;
     let storeService;
     let localizationService;
-    let attachmentElement;
-    let pageEl;
 
     beforeEach(async () => {
       win = env.win;
@@ -40,29 +38,22 @@ describes.realWin(
 
       localizationService = new LocalizationService(win.document.body);
       env.sandbox
-        .stub(Services, 'localizationServiceForOrNull')
-        .returns(Promise.resolve(localizationService));
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
 
       await setUpStoryWithShoppingTag();
     });
 
     async function setUpStoryWithShoppingTag() {
-      pageEl = win.document.createElement('amp-story-page');
-      pageEl.id = 'page1';
-      tagEl = createElementWithAttributes(
-        win.document,
-        'amp-story-shopping-tag',
-        {'layout': 'container'}
+      tagEl = (
+        <amp-story-shopping-tag layout="container"></amp-story-shopping-tag>
       );
-      pageEl.appendChild(tagEl);
-
-      attachmentElement = win.document.createElement(
-        'amp-story-shopping-attachment'
+      env.win.document.body.appendChild(
+        <amp-story-page id="page1">
+          {tagEl}
+          <amp-story-shopping-attachment></amp-story-shopping-attachment>
+        </amp-story-page>
       );
-      const story = win.document.createElement('amp-story');
-      win.document.body.appendChild(story);
-      story.appendChild(pageEl);
-      pageEl.appendChild(attachmentElement);
       shoppingTag = await tagEl.getImpl();
     }
 
@@ -86,16 +77,12 @@ describes.realWin(
     });
 
     it('should not build shopping tag if page attachment is missing', async () => {
-      pageEl.removeChild(attachmentElement);
+      env.win.document.querySelector('amp-story-shopping-attachment').remove();
       await setupShoppingTagAndData();
       expect(shoppingTag.shoppingTagEl_).to.be.null;
     });
 
-    // TODO(wg-stories): Re-enable. This wasn't executing previously due to the
-    // callsFake() codepath not being hit. It can't pass since
-    // `amp-story-shopping-tag` does not currently use `productTitle`, which
-    // this compares against.
-    it.skip('should process config data and set text container content if data not null', async () => {
+    it('should process config data and set text container content if data not null', async () => {
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
       await setUpShoppingData();
       env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
