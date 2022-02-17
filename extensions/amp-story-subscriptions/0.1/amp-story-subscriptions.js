@@ -10,6 +10,7 @@ import {CSS} from '../../../build/amp-story-subscriptions-0.1.css';
 import {
   Action,
   StateProperty,
+  SubscriptionsState,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
@@ -70,14 +71,12 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.localizationService_ = localizationService;
 
       this.subscriptionService_ = subscriptionService;
-      this.subscriptionService_
-        .getGrantStatus()
-        .then((granted) =>
-          this.storeService_.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_GRANTED,
-            granted
-          )
-        );
+      this.subscriptionService_.getGrantStatus().then((granted) => {
+        const state = granted
+          ? SubscriptionsState.GRANTED
+          : SubscriptionsState.BLOCKED;
+        this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_STATE, state);
+      });
 
       // Create a paywall dialog element that have required attributes to be able to be
       // rendered by amp-subscriptions.
@@ -166,7 +165,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.SUBSCRIPTIONS_DIALOG_STATE,
+      StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
       (isDialogVisible) => this.onSubscriptionsStateChange_(isDialogVisible)
     );
   }
@@ -193,15 +192,15 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         // If the new response is granted from publisher backend, disable paywall and update states.
         const {entitlement} = e;
         if (
-          this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE) &&
+          this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE) &&
           entitlement.granted
         ) {
           this.storeService_.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_GRANTED,
-            true
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.GRANTED
           );
           this.storeService_.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG,
+            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
             false
           );
         }

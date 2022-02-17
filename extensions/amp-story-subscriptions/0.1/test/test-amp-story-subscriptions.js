@@ -14,6 +14,7 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
+  SubscriptionsState,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {SubscriptionService} from '../../../amp-subscriptions/0.1/amp-subscriptions';
 import {AmpStorySubscriptions} from '../amp-story-subscriptions';
@@ -162,7 +163,7 @@ describes.realWin(
     });
 
     it('should display the blocking paywall on state update', async () => {
-      storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
+      storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE, true);
 
       await afterRenderPromise(win);
       expect(storySubscriptions.element).to.have.class(
@@ -171,14 +172,16 @@ describes.realWin(
     });
 
     it('should display the blocking paywall when switching to a paywall protected page', async () => {
-      await story.switchTo_('page-1');
+      await story.switchTo_('page-2');
 
       env.sandbox
         .stub(storeService, 'get')
-        .withArgs(StateProperty.SUBSCRIPTIONS_DIALOG_STATE)
-        .returns(false);
+        .withArgs(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
+        .returns(false)
+        .withArgs(StateProperty.SUBSCRIPTIONS_STATE)
+        .returns(SubscriptionsState.BLOCKED);
 
-      await story.switchTo_('page-2');
+      await story.switchTo_('page-3');
 
       await afterRenderPromise(win);
       expect(storySubscriptions.element).to.have.class(

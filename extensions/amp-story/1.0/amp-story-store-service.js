@@ -55,6 +55,16 @@ export const EmbeddedComponentState = {
 };
 
 /**
+ * Subscription states for the paywall-enabled stories.
+ * @enum {number}
+ */
+export const SubscriptionsState = {
+  UNKNOWN: 0,
+  GRANTED: 1,
+  BLOCKED: 2,
+};
+
+/**
  * @typedef {{
  *    element: !Element,
  *    state: !EmbeddedComponentState,
@@ -135,7 +145,8 @@ export let ShoppingDataDef;
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
  *    pageSize: {width: number, height: number},
- *    subscriptionsDialogState: boolean,
+ *    subscriptionsDialogUiState: boolean,
+ *    subscriptionsState: SubscriptionsState,
  * }}
  */
 export let State;
@@ -192,8 +203,8 @@ const StateProperty = mangleObjectValues({
   PAGE_SIZE: 'pageSize',
 
   // AMP Story paywall states.
-  SUBSCRIPTIONS_DIALOG_STATE: 'subscriptionsDialogState',
-  SUBSCRIPTIONS_GRANTED: 'subscriptionsGranted',
+  SUBSCRIPTIONS_DIALOG_UI_STATE: 'subscriptionsDialogUiState',
+  SUBSCRIPTIONS_STATE: 'subscriptionsState',
 });
 
 export {StateProperty};
@@ -227,8 +238,8 @@ const Action = mangleObjectValues({
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
-  TOGGLE_SUBSCRIPTIONS_DIALOG: 'toggleSubscriptionsDialog',
-  TOGGLE_SUBSCRIPTIONS_GRANTED: 'toggleSubscriptionsGranted',
+  TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE: 'toggleSubscriptionsDialogUiState',
+  TOGGLE_SUBSCRIPTIONS_STATE: 'toggleSubscriptionsState',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
 });
@@ -450,16 +461,16 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.VIEWER_CUSTOM_CONTROLS]: data,
       });
-    case Action.TOGGLE_SUBSCRIPTIONS_DIALOG:
+    case Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE:
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.SUBSCRIPTIONS_DIALOG_STATE]: !!data,
+        [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
       });
-    case Action.TOGGLE_SUBSCRIPTIONS_GRANTED:
+    case Action.TOGGLE_SUBSCRIPTIONS_STATE:
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.SUBSCRIPTIONS_GRANTED]: !!data,
+        [StateProperty.SUBSCRIPTIONS_STATE]: !!data,
       });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
@@ -598,8 +609,8 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
       [StateProperty.PREVIEW_STATE]: false,
-      [StateProperty.SUBSCRIPTIONS_DIALOG_STATE]: false,
-      [StateProperty.SUBSCRIPTIONS_GRANTED]: true,
+      [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: false,
+      [StateProperty.SUBSCRIPTIONS_STATE]: SubscriptionsState.UNKNOWN,
     });
   }
 
