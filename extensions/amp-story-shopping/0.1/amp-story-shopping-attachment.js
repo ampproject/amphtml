@@ -66,7 +66,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
 
-    getShoppingConfig(this.pageEl_).then((config) =>
+    getShoppingConfig(this.element).then((config) =>
       storeShoppingConfig(this.pageEl_, config)
     );
 

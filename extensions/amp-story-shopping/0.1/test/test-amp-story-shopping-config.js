@@ -21,18 +21,50 @@ describes.realWin(
     let pageElement;
 
     const defaultInlineConfig = {
-      items: [
+      'items': [
         {
-          'productId': 'city-pop',
-          'productTitle': 'Plastic Love',
-          'productPrice': 19,
-          'productPriceCurrency': 'JPY',
+          'productId': 'lamp',
+          'productTitle': 'Brass Lamp',
+          'productBrand': 'Lamp Co',
+          'productPrice': 799.0,
+          'productPriceCurrency': 'USD',
+          'productImages': ['https://source.unsplash.com/Ry9WBo3qmoc/500x500'],
+        },
+        {
+          'productId': 'art',
+          'productTitle': 'Abstract Art',
+          'productBrand': 'V. Artsy',
+          'productPrice': 1200.0,
+          'productPriceCurrency': 'INR',
+          'productImages': ['https://source.unsplash.com/BdVQU-NDtA8/500x500'],
+        },
+        {
+          'productId': 'chair',
+          'productTitle': 'Yellow chair',
+          'productBrand': 'Chair Co.',
+          'productPrice': 1000.0,
+          'productPriceCurrency': 'BRL',
+          'productTagText': 'The perfectly imperfect yellow chair',
+          'productImages': ['https://source.unsplash.com/DgQGKKLaVhY/500x500'],
+        },
+        {
+          'productId': 'flowers',
+          'productTitle': 'Flowers',
+          'productBrand': 'Very Long Flower Company Name',
+          'productPrice': 10.0,
+          'productPriceCurrency': 'USD',
+          'productIcon':
+            '/examples/visual-tests/amp-story/img/shopping/icon.png',
+          'productImages': ['https://source.unsplash.com/SavQfLRm4Do/500x500'],
         },
       ],
     };
 
     const keyedDefaultInlineConfig = {
-      'city-pop': defaultInlineConfig.items[0],
+      'lamp': defaultInlineConfig.items[0],
+      'art': defaultInlineConfig.items[1],
+      'chair': defaultInlineConfig.items[2],
+      'flowers': defaultInlineConfig.items[3],
     };
 
     beforeEach(async () => {
@@ -44,18 +76,20 @@ describes.realWin(
       src = null,
       config = defaultInlineConfig
     ) {
-      pageElement.appendChild(
-        <amp-story-shopping-config layout="nodisplay" src={src}>
+      const shoppingAttachment = (
+        <amp-story-shopping-attachment layout="nodisplay" src={src}>
           <script type="application/json">{JSON.stringify(config)}</script>
-        </amp-story-shopping-config>
+        </amp-story-shopping-attachment>
       );
-      return getShoppingConfig(pageElement);
+      pageElement.appendChild(shoppingAttachment);
+
+      return getShoppingConfig(shoppingAttachment);
     }
 
     it('throws on no config', async () => {
       expectAsyncConsoleError(async () => {
         expect(() => {
-          pageElement.appendChild(<amp-story-shopping-config />);
+          pageElement.appendChild(<amp-story-shopping-attachment />);
           return getShoppingConfig(pageElement);
         }).to.throw(/<script> tag with type=\"application\/json\"​​​/);
       });
