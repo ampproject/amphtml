@@ -366,7 +366,7 @@ export function dependsOnStoryServices(klass) {
         this.element,
         'amp-story'
       );
-      if (!storyEl) {
+      if (getMode(this.win).test && !storyEl) {
         // Unit tests may mock or install the services internally, so returning
         // the instance immediately allows us to instantiate elements when
         // they're not placed inside an <amp-story>.
