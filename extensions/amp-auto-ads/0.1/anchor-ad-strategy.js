@@ -1,5 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -137,13 +137,9 @@ export class AnchorAdStrategy {
     delete attributes.sticky; // To ensure that no sticky attribute will be wrapped inside an amp-sticky-ad element.
     const doc = this.ampdoc.win.document;
     const ampAd = createElementWithAttributes(doc, 'amp-ad', attributes);
-    const stickyAd = createElementWithAttributes(
-      doc,
-      'amp-sticky-ad',
-      dict({
-        'layout': 'nodisplay',
-      })
-    );
+    const stickyAd = createElementWithAttributes(doc, 'amp-sticky-ad', {
+      'layout': 'nodisplay',
+    });
     stickyAd.appendChild(ampAd);
     const body = this.ampdoc.getBody();
     body.insertBefore(stickyAd, body.firstChild);

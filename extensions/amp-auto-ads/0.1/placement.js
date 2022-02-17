@@ -4,7 +4,7 @@ import {
   closestAncestorElementBySelector,
   scopedQuerySelectorAll,
 } from '#core/dom/query';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 

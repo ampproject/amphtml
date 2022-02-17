@@ -122,13 +122,10 @@ export class AmpAutoAds extends AMP.BaseElement {
         configObj,
         this.customAnalytics_
       );
-      const attributes = /** @type {!JsonObject} */ (
-        Object.assign(
-          dict({}),
-          this.adNetwork_.getAttributes(),
-          getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
-        )
-      );
+      const attributes = /** @type {!JsonObject} */ ({
+        ...this.adNetwork_.getAttributes(),
+        ...getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES),
+      });
       const sizing = this.adNetwork_.getSizing();
       const adConstraints =
         getAdConstraintsFromConfigObj(ampdoc, configObj) ||
