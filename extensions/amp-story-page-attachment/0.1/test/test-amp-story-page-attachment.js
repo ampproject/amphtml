@@ -71,7 +71,18 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     expect(anchorEl.getAttribute('target')).to.eql('_top');
   });
 
-  it('should remove tabindex attribute from close button in header when open', async () => {
+  it('header close button should have a negative tabindex attribute by default', async () => {
+    await attachment.buildCallback();
+    await attachment.layoutCallback();
+
+    const closeButtonEl = attachmentEl.querySelector(
+      '.i-amphtml-story-page-attachment-close-button'
+    );
+
+    expect(closeButtonEl.getAttribute('tabindex')).to.eql('-1');
+  });
+
+  it('header close button should should remove tabindex attribute when open', async () => {
     await attachment.buildCallback();
     await attachment.layoutCallback();
 
