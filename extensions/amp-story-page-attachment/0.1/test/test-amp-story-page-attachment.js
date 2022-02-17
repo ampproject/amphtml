@@ -1,12 +1,12 @@
+import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
 
 import {AmpStoryStoreService} from 'extensions/amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from 'src/service-helpers';
 
+import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
-
-import {mutateElementStub} from '#testing/helpers/service';
 
 describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   let attachmentEl;
@@ -34,13 +34,26 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
       return storeService;
     });
 
+    const analytics = new StoryAnalyticsService(win, win.document.body);
+    registerServiceBuilder(win, 'story-analytics', function () {
+      return analytics;
+    });
+
+    const ownersMock = {
+      scheduleLayout: () => {},
+      scheduleResume: () => {},
+    };
+    env.sandbox.stub(Services, 'ownersForDoc').returns(ownersMock);
+
     // Set up the attachment element for inline attachment testing.
     attachmentEl = win.document.createElement('amp-story-page-attachment');
     attachmentEl.getAmpDoc = () => new AmpDocSingle(win);
     pageEl.appendChild(attachmentEl);
     attachment = new AmpStoryPageAttachment(attachmentEl);
 
-    env.sandbox.stub(attachment, 'mutateElement').callsFake(mutateElementStub);
+    env.sandbox
+      .stub(attachment, 'mutateElement')
+      .callsFake((fn) => Promise.resolve(fn()));
 
     // Set up the outlink element for outlink testing.
     outlinkEl = win.document.createElement('amp-story-page-outlink');
@@ -89,6 +102,9 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   it('header close button should not have tabindex attribute when open', async () => {
     await attachment.buildCallback();
     await attachment.layoutCallback();
+
+    env.sandbox.stub(attachment.analyticsService_, 'triggerEvent');
+    env.sandbox.stub(attachment.historyService_, 'push');
 
     attachment.open(false);
 
