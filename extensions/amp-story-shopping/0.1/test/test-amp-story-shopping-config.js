@@ -23,31 +23,70 @@ describes.realWin(
     const defaultInlineConfig = {
       'items': [
         {
+          'productUrl': 'https://www.google.com',
           'productId': 'lamp',
           'productTitle': 'Brass Lamp',
           'productBrand': 'Lamp Co',
           'productPrice': 799.0,
           'productPriceCurrency': 'USD',
-          'productImages': ['https://source.unsplash.com/Ry9WBo3qmoc/500x500'],
+          'productImages': [
+            {
+              'url': 'https://source.unsplash.com/Ry9WBo3qmoc/500x500',
+              'alt': 'lamp 1',
+            },
+            {'url': 'https://source.unsplash.com/KP7p0-DRGbg', 'alt': 'lamp 2'},
+            {'url': 'https://source.unsplash.com/mFnbFaCIu1I', 'alt': 'lamp 3'},
+            {'url': 'https://source.unsplash.com/py9sH2rThWs', 'alt': 'lamp 4'},
+            {'url': 'https://source.unsplash.com/VDPauwJ_sHo', 'alt': 'lamp 5'},
+            {'url': 'https://source.unsplash.com/3LTht2nxd34', 'alt': 'lamp 6'},
+          ],
+          'aggregateRating': {
+            'ratingValue': '4.4',
+            'reviewCount': '89',
+            'reviewUrl': 'https://www.google.com',
+          },
         },
         {
+          'productUrl': 'https://www.google.com',
           'productId': 'art',
           'productTitle': 'Abstract Art',
           'productBrand': 'V. Artsy',
           'productPrice': 1200.0,
           'productPriceCurrency': 'INR',
-          'productImages': ['https://source.unsplash.com/BdVQU-NDtA8/500x500'],
+          'productImages': [
+            {
+              'url': 'https://source.unsplash.com/BdVQU-NDtA8/500x500',
+              'alt': 'art',
+            },
+          ],
+          'aggregateRating': {
+            'ratingValue': '4.4',
+            'reviewCount': '89',
+            'reviewUrl': 'https://www.google.com',
+          },
         },
         {
+          'productUrl': 'https://www.google.com',
           'productId': 'chair',
           'productTitle': 'Yellow chair',
           'productBrand': 'Chair Co.',
           'productPrice': 1000.0,
           'productPriceCurrency': 'BRL',
           'productTagText': 'The perfectly imperfect yellow chair',
-          'productImages': ['https://source.unsplash.com/DgQGKKLaVhY/500x500'],
+          'productImages': [
+            {
+              'url': 'https://source.unsplash.com/DgQGKKLaVhY/500x500',
+              'alt': 'chair',
+            },
+          ],
+          'aggregateRating': {
+            'ratingValue': '4.4',
+            'reviewCount': '89',
+            'reviewUrl': 'https://www.google.com',
+          },
         },
         {
+          'productUrl': 'https://www.google.com',
           'productId': 'flowers',
           'productTitle': 'Flowers',
           'productBrand': 'Very Long Flower Company Name',
@@ -55,7 +94,17 @@ describes.realWin(
           'productPriceCurrency': 'USD',
           'productIcon':
             '/examples/visual-tests/amp-story/img/shopping/icon.png',
-          'productImages': ['https://source.unsplash.com/SavQfLRm4Do/500x500'],
+          'productImages': [
+            {
+              'url': 'https://source.unsplash.com/SavQfLRm4Do/500x500',
+              'alt': 'flowers',
+            },
+          ],
+          'aggregateRating': {
+            'ratingValue': '4.4',
+            'reviewCount': '89',
+            'reviewUrl': 'https://www.google.com',
+          },
         },
       ],
     };
