@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
@@ -18,9 +19,8 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     const {win} = env;
 
     // Set up the story.
-    const storyEl = win.document.createElement('amp-story');
-    const pageEl = win.document.createElement('amp-story-page');
-    storyEl.getAmpDoc = () => new AmpDocSingle(win);
+    const storyEl = <amp-story></amp-story>;
+    const pageEl = <amp-story-page></amp-story-page>;
     win.document.body.appendChild(storyEl);
     storyEl.appendChild(pageEl);
 
@@ -40,7 +40,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     env.sandbox.stub(Services, 'ownersForDoc').returns(ownersMock);
 
     // Set up the attachment element for inline attachment testing.
-    attachmentEl = win.document.createElement('amp-story-page-attachment');
+    attachmentEl = <amp-story-page-attachment></amp-story-page-attachment>;
     attachmentEl.getAmpDoc = () => new AmpDocSingle(win);
     pageEl.appendChild(attachmentEl);
     attachment = new AmpStoryPageAttachment(attachmentEl);
@@ -50,10 +50,13 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
       .callsFake((fn) => Promise.resolve(fn()));
 
     // Set up the outlink element for outlink testing.
-    outlinkEl = win.document.createElement('amp-story-page-outlink');
+    outlinkEl = (
+      <amp-story-page-outlink>
+        <a></a>
+      </amp-story-page-outlink>
+    );
     outlinkEl.getAmpDoc = () => new AmpDocSingle(win);
     pageEl.appendChild(outlinkEl);
-    outlinkEl.appendChild(win.document.createElement('a'));
     outlink = new AmpStoryPageAttachment(outlinkEl);
   });
 
