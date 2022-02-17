@@ -11,7 +11,7 @@ export const _default = () => {
   return (
     <div>
       <BentoReddit
-        style={{width: 300, height: 200, border: '8px solid red'}}
+        style={{width: 300, height: 200}}
         embedType="post"
         src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
       ></BentoReddit>
