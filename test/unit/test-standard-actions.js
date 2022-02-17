@@ -1053,3 +1053,87 @@ describes.realWin('toggleTheme action', {amp: true}, (env) => {
     expect(setItemStub).to.be.calledOnce.and.calledWith('amp-dark-mode', 'yes');
   });
 });
+
+describes.realWin('copy action', {amp: true}, (env) => {
+  let ampdoc, standardActions, win;
+  beforeEach(() => {
+    ampdoc = new AmpDocSingle(window);
+    env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
+    standardActions = new StandardActions(ampdoc);
+    win = env.win;
+  });
+
+  function trustedInvocation(obj) {
+    return {satisfiesTrust: () => true, ...obj};
+  }
+
+  it('should copy `static text` using navigator.clipboard api', async () => {
+    env.sandbox.spy(env.win.navigator.clipboard, 'writeText');
+    const doc = win.document;
+
+    const invocation = trustedInvocation({
+      args: {'text': 'Hello World!'},
+      tagOrTarget: 'AMP',
+      node: doc,
+      caller: doc,
+    });
+    standardActions.handleCopy_(invocation);
+
+    await expect(env.win.navigator.clipboard.writeText).to.be.calledWith(
+      'Hello World!'
+    );
+  });
+
+  it('should copy `DIV Content` using navigator.clipboard api', async () => {
+    env.sandbox.spy(env.win.navigator.clipboard, 'writeText');
+    const divElement = win.document.createElement('div');
+    divElement.textContent = 'Hello World!';
+
+    const invocation = trustedInvocation({
+      node: divElement,
+      caller: divElement,
+    });
+    standardActions.handleCopy_(invocation);
+
+    await expect(env.win.navigator.clipboard.writeText).to.be.calledWith(
+      'Hello World!'
+    );
+  });
+
+  it('should copy `INPUT Value` using navigator.clipboard api', async () => {
+    env.sandbox.spy(env.win.navigator.clipboard, 'writeText');
+    const inputElement = win.document.createElement('input');
+    inputElement.value = 'Hello World!';
+
+    const invocation = trustedInvocation({
+      node: inputElement,
+      caller: inputElement,
+    });
+    standardActions.handleCopy_(invocation);
+
+    await expect(env.win.navigator.clipboard.writeText).to.be.calledWith(
+      'Hello World!'
+    );
+  });
+
+  it('should fall back to legacy "doc.execCommand" if clipboard is not on the window.navigator', async () => {
+    Object.defineProperties(env.win.navigator, {
+      clipboard: {
+        value: undefined,
+        writable: true,
+      },
+    });
+
+    env.sandbox.spy(env.win.document, 'execCommand');
+    const divElement = win.document.createElement('div');
+    divElement.textContent = 'Live long and prosper!';
+
+    const invocation = trustedInvocation({
+      node: divElement,
+      caller: divElement,
+    });
+    standardActions.handleCopy_(invocation);
+
+    await expect(env.win.document.execCommand).to.be.calledWith('copy');
+  });
+});

@@ -66,17 +66,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
 
-    const pageElement = this.element.parentElement;
-    getShoppingConfig(pageElement).then((config) =>
-      storeShoppingConfig(pageElement, config)
+    getShoppingConfig(this.element).then((config) =>
+      storeShoppingConfig(this.element, config)
     );
 
-    this.attachmentEl_ = (
-      <amp-story-page-attachment
-        layout="nodisplay"
-        theme={this.element.getAttribute('theme')}
-      ></amp-story-page-attachment>
-    );
     if (this.shoppingTags_.length === 0) {
       return;
     }
@@ -95,10 +88,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           cta-text={this.localizationService_.getLocalizedString(
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
           )}
-        ></amp-story-page-attachment>
+        >
+          {this.templateContainer_}
+        </amp-story-page-attachment>
       );
       this.element.appendChild(this.attachmentEl_);
-      this.attachmentEl_.appendChild(this.templateContainer_);
     });
   }
 

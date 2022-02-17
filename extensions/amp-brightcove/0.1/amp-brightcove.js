@@ -1,3 +1,8 @@
+import {
+  BRIGHTCOVE_EVENTS,
+  getBrightcoveIframeSrc,
+} from '#bento/apis/brightcove-api';
+
 import {Deferred} from '#core/data-structures/promise';
 import {
   dispatchCustomEvent,
@@ -31,7 +36,6 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {VideoEvents_Enum} from '../../../src/video-interface';
-import {BRIGHTCOVE_EVENTS, getBrightcoveIframeSrc} from '../brightcove-api';
 
 /** @private @const {string} */
 const TAG = 'amp-brightcove';

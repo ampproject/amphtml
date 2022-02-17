@@ -1,5 +1,6 @@
 'use strict';
 
+const config = require('../../../tsconfig.base.json');
 const fastGlob = require('fast-glob');
 const fs = require('fs');
 const listImportsExports = require('list-imports-exports');
@@ -71,6 +72,27 @@ function extractCssJsFileMap() {
 }
 
 /**
+ * Returns the full path of an import after resolving aliases if necessary.
+ * During prefix matching, wildcard characters if any are dropped.
+ * @param {string} jsFile
+ * @param {string} file
+ * @return {string}
+ */
+function resolveImportAliases(jsFile, file) {
+  const {paths} = config.compilerOptions;
+  const importAliases = Object.keys(paths);
+  for (const alias of importAliases) {
+    const aliasPrefix = alias.replace('*', '');
+    const actualPrefix = paths[alias][0].replace('*', '');
+    if (file.startsWith(aliasPrefix)) {
+      return file.replace(aliasPrefix, actualPrefix).replace('./', '');
+    }
+  }
+  const jsFileDir = path.dirname(jsFile);
+  return path.resolve(jsFileDir, file);
+}
+
+/**
  * Returns the list of files imported by a JS file
  *
  * @param {string} jsFile
@@ -78,17 +100,13 @@ function extractCssJsFileMap() {
  */
 function getImports(jsFile) {
   const jsFileContents = fs.readFileSync(jsFile, 'utf8');
-  const {imports} = listImportsExports.parse(jsFileContents, [
-    'importAssertions',
-  ]);
+  const parsePlugins = ['importAssertions'];
+  const {imports} = listImportsExports.parse(jsFileContents, parsePlugins);
   const files = [];
-  const jsFileDir = path.dirname(jsFile);
   imports.forEach(function (file) {
-    const fullPath = path.resolve(jsFileDir, `${file}.js`);
-    if (fs.existsSync(fullPath)) {
-      const relativePath = path.relative(ROOT_DIR, fullPath);
-      files.push(relativePath);
-    }
+    const fullPath = resolveImportAliases(jsFile, file);
+    const relativePath = path.relative(ROOT_DIR, fullPath);
+    files.push(relativePath);
   });
   return files;
 }
@@ -109,7 +127,10 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
     });
     jsFilesInDir.forEach((jsFile) => {
       const jsFilePath = `${cssFileDir}/${jsFile}`;
-      if (getImports(jsFilePath).includes(cssJsFileMap[cssFile])) {
+      const jsImports = getImports(jsFilePath);
+      if (
+        jsImports.some((jsImport) => jsImport.includes(cssJsFileMap[cssFile]))
+      ) {
         jsFiles.push(jsFilePath);
       }
     });
@@ -191,7 +212,7 @@ function unitTestsToRun() {
     const filesImported = getImports(testFile);
     return (
       filesImported.filter(function (file) {
-        return srcFiles.includes(file);
+        return srcFiles.some((srcFile) => srcFile.includes(file));
       }).length > 0
     );
   }

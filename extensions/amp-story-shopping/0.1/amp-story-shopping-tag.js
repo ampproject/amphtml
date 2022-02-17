@@ -1,5 +1,9 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {
+  childElementByTag,
+  closestAncestorElementBySelector,
+} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
@@ -44,10 +48,31 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     /** @param {!ShoppingConfigDataDef} tagData */
     this.tagData_ = null;
+
+    /** @param {?AmpElement} element */
+    this.shoppingAttachment_ = null;
+
+    /** @param {!AmpElement} element */
+    this.shoppingTagEl_ = null;
   }
 
   /** @override */
   buildCallback() {
+    /* This is used to prevent the shopping tag component from building if there is no shopping attachment. */
+    const pageElement = closestAncestorElementBySelector(
+      this.element,
+      'amp-story-page'
+    );
+
+    this.shoppingAttachment_ = childElementByTag(
+      pageElement,
+      'amp-story-shopping-attachment'
+    );
+
+    if (!this.shoppingAttachment_) {
+      return;
+    }
+
     this.element.setAttribute('role', 'button');
 
     return Promise.all([
@@ -61,6 +86,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!this.shoppingAttachment_) {
+      return;
+    }
+
     loadFonts(this.win, FONTS_TO_LOAD);
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
