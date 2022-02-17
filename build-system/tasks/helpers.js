@@ -21,6 +21,7 @@ const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
 const {resolvePath} = require('../babel-config/import-resolver');
+const {debug} = require('../compile/debug-compilation-lifecycle');
 const babel = require('@babel/core');
 
 /**
@@ -396,6 +397,12 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       });
       code = result.code;
       mapChain.unshift(result.map);
+      debug(
+        'post-terser',
+        path.join(process.cwd(), destFile),
+        code,
+        result.map
+      );
     }
 
     await Promise.all([
