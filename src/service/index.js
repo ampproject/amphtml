@@ -507,7 +507,7 @@ export const Services = {
    * @param {!Element} el
    * @return {!Promise<./service/localization.LocalizationService>}
    */
-  localizationServiceForOrNull(el) {
+  localizationServiceForOrNull: (el) => {
     return /** @type {!Promise<?./service/localization.LocalizationService>} */ (
       getServicePromiseForDoc(el, 'localization')
     );
