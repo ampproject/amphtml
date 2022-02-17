@@ -313,7 +313,7 @@ export class StoryAdPage {
       'id': this.id_,
     };
 
-    if (isExperimentOn(this.win, 'story-ad-auto-advance')) {
+    if (isExperimentOn(this.win_, 'story-ad-auto-advance')) {
       attributes['auto-advance-after'] = '10s';
     }
 
