@@ -25,19 +25,13 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     storyEl.appendChild(pageEl);
 
     const localizationService = new LocalizationService(win.document.body);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
-    });
+    registerServiceBuilder(win, 'localization', () => localizationService);
 
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function () {
-      return storeService;
-    });
+    registerServiceBuilder(win, 'story-store', () => storeService);
 
     const analytics = new StoryAnalyticsService(win, win.document.body);
-    registerServiceBuilder(win, 'story-analytics', function () {
-      return analytics;
-    });
+    registerServiceBuilder(win, 'story-analytics', () => analytics);
 
     const ownersMock = {
       scheduleLayout: () => {},
