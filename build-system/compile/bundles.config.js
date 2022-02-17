@@ -18,9 +18,7 @@ exports.jsBundles = {
     minifiedDestDir: './build/',
   },
   'bento.js': {
-    // This file is generated, so we find its source in the build/ dir
-    // See compileBentoRuntime() and generateBentoRuntimeEntrypoint()
-    srcDir: 'build/',
+    srcDir: './src/bento',
     srcFilename: 'bento.js',
     destDir: './dist',
     minifiedDestDir: './dist',
@@ -30,19 +28,6 @@ exports.jsBundles = {
       minifiedName: 'bento.js',
       // For backwards-compat:
       aliasName: 'custom-elements-polyfill.js',
-    },
-  },
-  'bento.core.js': {
-    // This file is generated, so we find its source in the build/ dir
-    // See compileBentoCore() and generateBentoCoreEntrypoint()
-    srcDir: 'build/',
-    srcFilename: 'bento.shared.js',
-    destDir: './src/bento/core/dist',
-    minifiedDestDir: './src/bento/core/dist',
-    options: {
-      includePolyfills: false,
-      toName: 'bento.core.max.js',
-      minifiedName: 'bento.core.js',
     },
   },
   'alp.max.js': {

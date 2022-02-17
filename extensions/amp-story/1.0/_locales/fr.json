@@ -160,5 +160,8 @@
   },
   "99": {
     "string": "Formulaire envoyé avec succès"
+  },
+  "101": {
+    "string": "Acheter maintenant"
   }
 }

@@ -13,8 +13,11 @@ import {addParamsToUrl} from '../../../src/url';
 const TAG = 'amp-google-read-aloud-player';
 
 /** @private @const */
-const IFRAME_BASE_URL =
+const DEFAULT_IFRAME_BASE_URL =
   'https://www.gstatic.com/readaloud/player/web/api/iframe/index.html';
+
+/** @private @const */
+const BASE_SRC_PARAM_NAME = 'src';
 
 /** @private @const */
 const SANDBOX = [
@@ -40,7 +43,7 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     Services.preconnectFor(this.win).url(
       this.getAmpDoc(),
-      IFRAME_BASE_URL,
+      this.getIframeBaseSrc_(),
       opt_onLayout
     );
   }
@@ -90,9 +93,15 @@ export class AmpGoogleReadAloudPlayer extends AMP.BaseElement {
   }
 
   /** @return {string} */
+  getIframeBaseSrc_() {
+    const baseSrc = this.element.getAttribute(BASE_SRC_PARAM_NAME);
+    return baseSrc ?? DEFAULT_IFRAME_BASE_URL;
+  }
+
+  /** @return {string} */
   getIframeSrc_() {
     const src = addParamsToUrl(
-      IFRAME_BASE_URL,
+      this.getIframeBaseSrc_(),
       getDataParamsFromAttributes(
         this.element,
         /* opt_computeParamNameFunc = */ undefined,

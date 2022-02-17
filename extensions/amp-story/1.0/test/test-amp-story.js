@@ -3,6 +3,7 @@ import {Keys_Enum} from '#core/constants/key-codes';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {setImportantStyles} from '#core/dom/style';
 
 import {toggleExperiment} from '#experiments';
@@ -1511,11 +1512,10 @@ describes.realWin(
       });
     });
 
-    describe('experiment for story-load-first-page-only', () => {
+    describe('resource loading for first page', () => {
       let pages;
       let performanceImpl;
       beforeEach(async () => {
-        toggleExperiment(win, 'story-load-first-page-only', true);
         performanceImpl = new Performance(env.win);
         env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
         pages = await createStoryWithPages(2, ['page-1', 'page-2'], false);
@@ -1555,16 +1555,73 @@ describes.realWin(
         // Check page 1 is loaded with distance 1.
         expect(pages[1].getAttribute('distance')).to.be.equal('1');
       });
+    });
 
-      it('should enable the CSI experiment', async () => {
-        const enableSpy = env.sandbox.spy(
-          performanceImpl,
-          'addEnabledExperiment'
+    describe('lazy load non-critical extensions after first page is loaded', () => {
+      it('should install auto-ads if a config is provided', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+        const extensionsFor = Services.extensionsFor(win);
+        const installSpy = env.sandbox.spy(
+          extensionsFor,
+          'installExtensionForDoc'
         );
-        story.buildCallback();
+        element.appendChild(<amp-story-auto-ads></amp-story-auto-ads>);
         await story.layoutCallback();
 
-        expect(enableSpy).to.be.calledWith('story-load-first-page-only');
+        // Signal that the first page finished loading.
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals_Enum.LOAD_END);
+
+        expect(installSpy).to.have.been.calledWith(
+          ampdoc,
+          'amp-story-auto-ads'
+        );
+      });
+
+      it('should install amp-analytics if a config is provided', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+        const extensionsFor = Services.extensionsFor(win);
+        const installSpy = env.sandbox.spy(
+          extensionsFor,
+          'installExtensionForDoc'
+        );
+        element.appendChild(<amp-analytics></amp-analytics>);
+        await story.layoutCallback();
+
+        // Signal that the first page finished loading.
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals_Enum.LOAD_END);
+
+        expect(installSpy).to.have.been.calledWith(
+          env.sandbox.match.any,
+          'amp-analytics'
+        );
+      });
+
+      it('should install amp-analytics and auto-analytics if a config for auto-analytics is provided', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+        const extensionsFor = Services.extensionsFor(win);
+        const installSpy = env.sandbox.spy(
+          extensionsFor,
+          'installExtensionForDoc'
+        );
+        element.appendChild(
+          <amp-story-auto-analytics></amp-story-auto-analytics>
+        );
+        await story.layoutCallback();
+
+        // Signal that the first page finished loading.
+        await story.activePage_.element
+          .signals()
+          .whenSignal(CommonSignals_Enum.LOAD_END);
+
+        expect(installSpy).to.have.been.calledWith(ampdoc, 'amp-analytics');
+        expect(installSpy).to.have.been.calledWith(
+          ampdoc,
+          'amp-story-auto-analytics'
+        );
       });
     });
   }
