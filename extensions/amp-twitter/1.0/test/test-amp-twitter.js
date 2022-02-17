@@ -60,10 +60,7 @@ describes.realWin(
       await waitForRender();
 
       const impl = await element.getImpl(false);
-      const forceChangeHeightStub = env.sandbox.stub(
-        impl,
-        'forceChangeHeight'
-      );
+      const forceChangeHeightStub = env.sandbox.stub(impl, 'forceChangeHeight');
       forceChangeHeightStub.returns(Promise.resolve());
 
       const mockEvent = new CustomEvent('message');
