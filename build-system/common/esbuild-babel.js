@@ -7,8 +7,6 @@ const Remapping = require('@ampproject/remapping');
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
 
-const argv = require('minimist')(process.argv.slice(2));
-
 /**
  * @typedef {{
  *   filename: string,
