@@ -121,8 +121,92 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 
 ### Attributes
 
+#### `data-embedtype`
+
+The type of the embed, either `post` or `comment`.
+
+#### `data-src`
+
+The permalink uri for the post or comment.
+
+#### `data-uuid`(optional)
+
+The provided UUID for the comment embed.
+Supported when `data-embedtype` is `comment`.
+
+#### `data-embedcreated` (optional)
+
+The datetime string for the comment embed.
+Supported when `data-embedtype` is `comment`.
+
+#### `data-embedparent` (optional)
+
+Indicates whether the parent comment for the embedded comment should be displayed.
+Supported when `data-embedtype` is `comment`.
+
+#### `data-embedlive` (optional)
+
+Indicates whether the embedded comment should update if the original comment is updated.
+Supported when `data-embedtype` is `comment`.
+
+#### title (optional)
+
+Define a `title` attribute for the component. The default is `Reddit`.
+
 ## Preact/React Component
 
 ### Import via npm
 
+```sh
+npm install @bentoproject/reddit
+```
+
+```javascript
+import React from 'react';
+import {BentoReddit} from '@bentoproject/reddit/react';
+import '@bentoproject/reddit/styles.css';
+
+function App() {
+  return (
+      <BentoReddit
+        style={{width: 300, height: 200, border: '8px solid red'}}
+        embedType="post"
+        src="https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed"
+      ></BentoReddit>
+  );
+}
+```
+
 ### Props
+
+#### `embedType`
+
+The type of the embed, either `post` or `comment`.
+
+#### `src`
+
+The permalink uri for the post or comment.
+
+#### `uuid`(optional)
+
+The provided UUID for the comment embed.
+Supported when `data-embedtype` is `comment`.
+
+#### `embedCreated` (optional)
+
+The datetime string for the comment embed.
+Supported when `data-embedtype` is `comment`.
+
+#### `embedParent` (optional)
+
+Indicates whether the parent comment for the embedded comment should be displayed.
+Supported when `data-embedtype` is `comment`.
+
+#### `embedLive` (optional)
+
+Indicates whether the embedded comment should update if the original comment is updated.
+Supported when `data-embedtype` is `comment`.
+
+#### title (optional)
+
+Define a `title` attribute for the component. The default is `"Reddit"`.

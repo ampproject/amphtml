@@ -24,7 +24,7 @@ export function RedditWithRef(
     requestResize,
     src,
     style,
-    title,
+    title = 'Reddit',
     uuid,
     ...rest
   },
