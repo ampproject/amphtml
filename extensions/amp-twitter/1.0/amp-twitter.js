@@ -19,7 +19,7 @@ class AmpTwitter extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     super(element);
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     const html = htmlFor(element);
     return {
@@ -40,7 +40,7 @@ class AmpTwitter extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     };
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();
     const {win} = ampdoc;

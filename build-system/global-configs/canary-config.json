@@ -12,9 +12,7 @@
   "ios-fixed-no-transfer": 1,
   "ads-initialIntersection": 1,
   "flexible-bitrate": 0.1,
-  "story-ad-auto-advance": 1,
   "story-ad-placements": 1,
-  "story-load-first-page-only": 1,
   "story-load-inactive-outside-viewport": 1,
   "story-disable-animations-first-page": 1,
   "amp-sticky-ad-to-amp-ad-v4": 0

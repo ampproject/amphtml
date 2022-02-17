@@ -1,17 +1,21 @@
+const {globExcludeDisabledStorybookFiles} = require('../disabled-stories');
+const {getStaticDirs} = require('../static-dirs');
+
 const rootDir = '../../../../..';
 
 module.exports = {
-  staticDirs: [rootDir],
+  staticDirs: getStaticDirs(rootDir),
   // Unlike the `amp` and `preact` environments, we search Storybook files only
-  // under extensions/. This is because only extensions have React build output.
-  stories: [`${rootDir}/extensions/**/*.*/storybook/!(*.amp).js`],
+  // under component paths. This is because only components have React build
+  // output, but directories in src/ outside src/bento/components/ do not.
+  stories: globExcludeDisabledStorybookFiles([
+    `${rootDir}/extensions/**/*.*/storybook/!(*.amp).js`,
+    `${rootDir}/src/bento/components/**/*.*/storybook/*.js`,
+  ]),
   addons: [
     '@storybook/addon-a11y',
     '@storybook/addon-viewport/register',
     '@storybook/addon-controls/register',
-    // TODO(#35923): Remove addon-knobs once all stories are migrated to
-    // addon-controls (args/argTypes).
-    '@storybook/addon-knobs',
   ],
   webpackFinal: (config) => {
     // Disable entry point size warnings.
