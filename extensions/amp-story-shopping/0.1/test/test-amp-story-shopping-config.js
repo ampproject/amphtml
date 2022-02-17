@@ -121,19 +121,17 @@ describes.realWin(
       env.win.document.body.appendChild(pageElement);
     });
 
-    async function createAmpStoryShoppingConfig(
+    function createAmpStoryShoppingConfig(
       src = null,
       config = defaultInlineConfig
     ) {
-      pageElement.appendChild(
+      const shoppingAttachment = (
         <amp-story-shopping-attachment layout="nodisplay" src={src}>
           <script type="application/json">{JSON.stringify(config)}</script>
         </amp-story-shopping-attachment>
       );
-      const shoppingConfig = await getShoppingConfig(
-        pageElement.querySelector('amp-story-shopping-attachment')
-      );
-      return shoppingConfig;
+      pageElement.appendChild(shoppingAttachment);
+      return getShoppingConfig(shoppingAttachment);
     }
 
     it('throws on no config', async () => {
