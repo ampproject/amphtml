@@ -168,16 +168,18 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     const ratioOfLineHeightToFontSize = 1.5;
     const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
 
+    let numLines = 1;
+
     this.measureElement(() => {
       const height = textEl./*OK*/ clientHeight;
-      const numLines = Math.ceil(height / lineHeight);
+      numLines = Math.ceil(height / lineHeight);
+    });
 
-      this.mutateElement(() => {
-        pillEl.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-pill-multi-line',
-          numLines > 1
-        );
-      });
+    this.mutateElement(() => {
+      pillEl.classList.toggle(
+        'i-amphtml-amp-story-shopping-tag-pill-multi-line',
+        numLines > 1
+      );
     });
   }
 
