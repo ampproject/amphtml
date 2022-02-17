@@ -45,13 +45,12 @@ function keyByProductTagId(config) {
 /**
  * @param {!Element} pageElement
  * @param {!KeyedShoppingConfigDef} config
- * @return {!Promise<!ShoppingConfigResponseDef>}
+ * @return {!ShoppingConfigResponseDef}
  */
 export function storeShoppingConfig(pageElement, config) {
   const win = pageElement.ownerDocument.defaultView;
-  return Services.storyStoreServiceForOrNull(win).then((storeService) => {
-    const pageIdToConfig = {[pageElement.id]: config};
-    storeService?.dispatch(Action.ADD_SHOPPING_DATA, pageIdToConfig);
-    return config;
-  });
+  const storeService = Services.storyStoreService(win);
+  const pageIdToConfig = {[pageElement.id]: config};
+  storeService?.dispatch(Action.ADD_SHOPPING_DATA, pageIdToConfig);
+  return config;
 }

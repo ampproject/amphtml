@@ -210,15 +210,13 @@ describes.realWin(
 
       beforeEach(async () => {
         storeService = {dispatch: env.sandbox.spy()};
-        env.sandbox
-          .stub(Services, 'storyStoreServiceForOrNull')
-          .resolves(storeService);
+        env.sandbox.stub(Services, 'storyStoreService').resolves(storeService);
       });
 
       it('dispatches ADD_SHOPPING_DATA', async () => {
         const dummyConfig = {foo: {bar: true}};
 
-        await storeShoppingConfig(pageElement, dummyConfig);
+        storeShoppingConfig(pageElement, dummyConfig);
 
         const pageIdToConfig = {[pageElement.id]: dummyConfig};
         expect(
