@@ -60,11 +60,11 @@ describes.realWin(
       await waitForRender();
 
       const impl = await element.getImpl(false);
-      const attemptChangeHeightStub = env.sandbox.stub(
+      const forceChangeHeightStub = env.sandbox.stub(
         impl,
-        'attemptChangeHeight'
+        'forceChangeHeight'
       );
-      attemptChangeHeightStub.returns(Promise.resolve());
+      forceChangeHeightStub.returns(Promise.resolve());
 
       const mockEvent = new CustomEvent('message');
       const sentinel = JSON.parse(
@@ -76,7 +76,7 @@ describes.realWin(
       mockEvent.source =
         element.shadowRoot.querySelector('iframe').contentWindow;
       win.dispatchEvent(mockEvent);
-      expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
+      expect(forceChangeHeightStub).to.be.calledOnce.calledWith(1000);
     });
 
     it('should replace iframe after tweetid mutation', async () => {
