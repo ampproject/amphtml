@@ -7,8 +7,6 @@ const Remapping = require('@ampproject/remapping');
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
 
-const argv = require('minimist')(process.argv.slice(2));
-
 /**
  * @typedef {{
  *   filename: string,
@@ -133,31 +131,27 @@ function getEsbuildBabelPlugin(
 
         const root = path.dirname(map.path);
         const nodeMods = path.normalize('/node_modules/');
-        const remapped = remapping(
-          map.text,
-          (f, ctx) => {
-            // The Babel tranformed file and the original file have the same
-            // path, which makes it difficult to distinguish during remapping's
-            // load phase. To prevent an infinite recursion, we check if the
-            // importer is ourselves (which is nonsensical) and early exit.
-            if (f === ctx.importer) {
+        const remapped = remapping(map.text, (f, ctx) => {
+          // The Babel tranformed file and the original file have the same
+          // path, which makes it difficult to distinguish during remapping's
+          // load phase. To prevent an infinite recursion, we check if the
+          // importer is ourselves (which is nonsensical) and early exit.
+          if (f === ctx.importer) {
+            return null;
+          }
+
+          const file = path.join(root, f);
+          const map = babelMaps.get(file);
+          if (!map) {
+            if (file.includes(nodeMods)) {
+              // Excuse node_modules since they may have been marked external
+              // (and so not processed by babel).
               return null;
             }
-
-            const file = path.join(root, f);
-            const map = babelMaps.get(file);
-            if (!map) {
-              if (file.includes(nodeMods)) {
-                // Excuse node_modules since they may have been marked external
-                // (and so not processed by babel).
-                return null;
-              }
-              throw new Error(`failed to find sourcemap for babel file "${f}"`);
-            }
-            return map;
-          },
-          !argv.full_sourcemaps
-        );
+            throw new Error(`failed to find sourcemap for babel file "${f}"`);
+          }
+          return map;
+        });
 
         const sourcemapJson = remapped.toString();
         replaceOutputFile(outputFiles, map, sourcemapJson);
