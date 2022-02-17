@@ -70,4 +70,17 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
 
     expect(anchorEl.getAttribute('target')).to.eql('_top');
   });
+
+  it('should remove tabindex attribute from close button in header when open', async () => {
+    await attachment.buildCallback();
+    await attachment.layoutCallback();
+
+    attachment.open(false);
+
+    const closeButtonEl = attachmentEl.querySelector(
+      '.i-amphtml-story-page-attachment-close-button'
+    );
+
+    expect(closeButtonEl.hasAttribute('tabindex')).to.be.false;
+  });
 });
