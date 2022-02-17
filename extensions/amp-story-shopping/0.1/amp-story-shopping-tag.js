@@ -196,8 +196,13 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
     const ratioOfLineHeightToFontSize = 1.5;
     const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
-    const height = textEl./*OK*/ clientHeight;
-    const numLines = Math.ceil(height / lineHeight);
+
+    let numLines = 1;
+
+    this.measureElement(() => {
+      const height = textEl./*OK*/ clientHeight;
+      numLines = Math.ceil(height / lineHeight);
+    });
 
     this.mutateElement(() => {
       pillEl.classList.toggle(
@@ -261,18 +266,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
 
-    this.measureMutateElement(
-      () => {
-        createShadowRootWithStyle(
-          this.element,
-          this.shoppingTagEl_,
-          shoppingTagCSS
-        );
-        this.hasAppendedInnerShoppingTagEl_ = true;
-      },
-      () => {
-        this.styleTagText_();
-      }
+    createShadowRootWithStyle(
+      this.element,
+      this.shoppingTagEl_,
+      shoppingTagCSS
     );
+    this.hasAppendedInnerShoppingTagEl_ = true;
+    this.styleTagText_();
   }
 }
