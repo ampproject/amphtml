@@ -5,13 +5,11 @@ var BentoRedditDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   embedCreated: (string|undefined),
+ *   embedLive: (string|undefined),
+ *   embedParent: (string|undefined),
+ *   uuid: (string|undefined),
+ *   title: (string|undefined)
  * }}
  */
 BentoRedditDef.Props;
-
-/** @interface */
-BentoRedditDef.RedditApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
-};

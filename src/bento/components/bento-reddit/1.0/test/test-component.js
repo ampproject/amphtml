@@ -5,8 +5,6 @@ import {BentoReddit} from '#bento/components/bento-reddit/1.0/component';
 
 import * as Preact from '#preact';
 
-// import {waitFor} from '#testing/test-helper';
-
 describes.sandboxed('Reddit preact component v1.0', {}, () => {
   const redditHref =
     'https://www.reddit.com/r/me_irl/comments/52rmir/me_irl/?ref=share&amp;ref_source=embed';

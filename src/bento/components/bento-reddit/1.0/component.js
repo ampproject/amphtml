@@ -30,12 +30,6 @@ export function RedditWithRef(
   },
   ref
 ) {
-  // const onMessage = useCallback((event) => {
-  //   console.log(event);
-  //   const data = deserializeMessage(event.data);
-  //   // console.log(e);
-  // }, []);
-
   const [height, setHeight] = useState(FULL_HEIGHT);
   const messageHandler = useCallback(
     (event) => {

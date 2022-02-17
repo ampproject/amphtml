@@ -4,8 +4,13 @@ const {getStaticDirs} = require('../static-dirs');
 const rootDir = '../../../../..';
 
 module.exports = {
+<<<<<<< Updated upstream
   staticDirs: getStaticDirs(rootDir),
   stories: globExcludeDisabledStorybookFiles([
+=======
+  staticDirs: [`${rootDir}/`],
+  stories: [
+>>>>>>> Stashed changes
     `${rootDir}/src/**/storybook/!(*.amp).js`,
     `${rootDir}/extensions/**/*.*/storybook/!(*.amp).js`,
   ]),
