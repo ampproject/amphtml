@@ -162,7 +162,10 @@ describes.realWin(
             'productPrice': 1200.0,
             'productPriceCurrency': 'JPY',
             'productImages': [
-              '/examples/visual-tests/amp-story/img/shopping/shopping-product.jpg',
+              {
+                'url': 'https://source.unsplash.com/BdVQU-NDtA8/500x500',
+                'alt': 'art',
+              },
             ],
             'aggregateRating': {
               'ratingValue': '4.4',
