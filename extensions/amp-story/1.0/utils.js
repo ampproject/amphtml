@@ -367,11 +367,9 @@ export function dependsOnStoryServices(klass) {
         'amp-story'
       );
       if (getMode().test && !storyEl) {
-        // Unit tests may mock or install the services internally, so returning
-        // the instance immediately allows us to instantiate elements when
-        // they're not placed inside an <amp-story>.
-        // In reality, doing this would fail. This is okay since elements whose
-        // implementations we wrap should be inside an <amp-story> in any case.
+        // Unit tests may mock or install the services internally, so
+        // instantiating immediately allows us to test implementations without
+        // placing the element inside an <amp-story>.
         return new klass(this.element);
       }
       return whenUpgradedToCustomElement(storyEl)
