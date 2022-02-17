@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.205 */
+/** Version: 0.1.22.206 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -443,30 +443,6 @@ function map(initial) {
     Object.assign(obj, initial);
   }
   return obj;
-}
-
-/**
- * Implements `Array.find()` method that's not yet available in all browsers.
- *
- * @param {?Array<T>} array
- * @param {function(T, number, !Array<T>):boolean} predicate
- * @return {?T}
- * @template T
- */
-function findInArray(array, predicate) {
-  if (!array) {
-    return null;
-  }
-  const len = array.length || 0;
-  if (len > 0) {
-    for (let i = 0; i < len; i++) {
-      const other = array[i];
-      if (predicate(other, i, array)) {
-        return other;
-      }
-    }
-  }
-  return null;
 }
 
 /**
@@ -1301,7 +1277,7 @@ class GaaMeteringRegwall {
    *
    * This method opens a metering regwall dialog,
    * where users can sign in with Google.
-   * 
+   * @nocollapse
    * @param {{ iframeUrl: string, caslUrl: string }} params
    * @return {!Promise<!GaaUserDef|!GoogleIdentityV1|!Object>}
    */
@@ -1338,7 +1314,7 @@ class GaaMeteringRegwall {
 
   /**
    * Removes the Regwall.
-   * 
+   * @nocollapse
    */
   static remove() {
     const regwallContainer = self.document.getElementById(REGWALL_CONTAINER_ID);
@@ -1351,7 +1327,7 @@ class GaaMeteringRegwall {
    * Signs out of Google Sign-In.
    * This is useful for developers who are testing their
    * SwG integrations.
-   * 
+   * @nocollapse
    * @return {!Promise}
    */
   static signOut() {
@@ -1363,7 +1339,7 @@ class GaaMeteringRegwall {
   /**
    * Renders the Regwall.
    * @private
-   * 
+   * @nocollapse
    * @param {{ iframeUrl: string, caslUrl: string }} params
    */
   static render_({iframeUrl, caslUrl}) {
@@ -1468,7 +1444,7 @@ class GaaMeteringRegwall {
   /**
    * Gets publisher name from page config.
    * @private
-   * 
+   * @nocollapse
    * @return {string}
    */
   static getPublisherNameFromPageConfig_() {
@@ -1492,28 +1468,31 @@ class GaaMeteringRegwall {
   /**
    * Gets publisher name from JSON-LD page config.
    * @private
-   * 
+   * @nocollapse
    * @return {string|undefined}
    */
   static getPublisherNameFromJsonLdPageConfig_() {
-    const ldJsonElements = self.document.querySelectorAll(
-      'script[type="application/ld+json"]'
+    // Get JSON from ld+json scripts.
+    const ldJsonScripts = Array.prototype.slice.call(
+      self.document.querySelectorAll('script[type="application/ld+json"]')
+    );
+    const jsonQueue = /** @type {!Array<*>} */ (
+      ldJsonScripts.map((script) => parseJson(script.textContent))
     );
 
-    for (const ldJsonElement of ldJsonElements) {
-      let ldJson = /** @type {*} */ (parseJson(ldJsonElement.textContent));
+    // Search for publisher name, breadth-first.
+    for (let i = 0; i < jsonQueue.length; i++) {
+      const json = /** @type {!Object<?,?>} */ (jsonQueue[i]);
 
-      if (!Array.isArray(ldJson)) {
-        ldJson = [ldJson];
-      }
-
-      const publisherName = findInArray(
-        ldJson,
-        (entry) => entry?.publisher?.name
-      )?.publisher.name;
-
+      // Return publisher name, if possible.
+      const publisherName = json?.publisher?.name;
       if (publisherName) {
         return publisherName;
+      }
+
+      // Explore JSON.
+      if (json && typeof json === 'object') {
+        jsonQueue.push(...Object.values(json));
       }
     }
   }
@@ -1521,7 +1500,7 @@ class GaaMeteringRegwall {
   /**
    * Gets publisher name from Microdata page config.
    * @private
-   * 
+   * @nocollapse
    * @return {string|undefined}
    */
   static getPublisherNameFromMicrodataPageConfig_() {
@@ -1540,7 +1519,7 @@ class GaaMeteringRegwall {
   /**
    * Adds a click listener on the publisher sign-in button.
    * @private
-   * 
+   * @nocollapse
    */
   static addClickListenerOnPublisherSignInButton_() {
     self.document
@@ -1561,7 +1540,7 @@ class GaaMeteringRegwall {
   /**
    * Returns the GAA user, after the user signs in.
    * @private
-   * 
+   * @nocollapse
    * @return {!Promise<!GoogleUserDef>}
    */
   static getGaaUser_() {
@@ -1586,7 +1565,7 @@ class GaaMeteringRegwall {
   /**
    * Logs button click events.
    * @private
-   * 
+   * @nocollapse
    */
   static logButtonClickEvents_() {
     // Listen for button event messages.
@@ -1607,7 +1586,7 @@ class GaaMeteringRegwall {
   /**
    * Sends intro post message to Google Sign-In iframe.
    * @private
-   * 
+   * @nocollapse
    * @param {{ iframeUrl: string }} params
    */
   static sendIntroMessageToGsiIframe_({iframeUrl}) {
@@ -1632,7 +1611,7 @@ class GaaMeteringRegwall {
 class GaaGoogleSignInButton {
   /**
    * Renders the Google Sign-In button.
-   * 
+   * @nocollapse
    * @param {{ allowedOrigins: !Array<string> }} params
    */
   static show({allowedOrigins}) {
@@ -1849,7 +1828,7 @@ const GOOGLE_3P_SIGN_IN_BUTTON_HTML = `
 class GaaGoogle3pSignInButton {
   /**
    * Renders the third party Google Sign-In button for external authentication.
-   * 
+   * @nocollapse
    * @param {{ allowedOrigins: !Array<string>, authorizationUrl: string }} params
    */
   static show({allowedOrigins, authorizationUrl}) {

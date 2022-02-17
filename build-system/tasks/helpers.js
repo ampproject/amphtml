@@ -14,7 +14,7 @@ const {
 const {cyan, green, red} = require('kleur/colors');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {massageSourcemaps} = require('./sourcemaps');
+const {includeSourcesContent, massageSourcemaps} = require('./sourcemaps');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
@@ -343,7 +343,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: 'external',
-        sourcesContent: !!argv.full_sourcemaps,
+        sourcesContent: includeSourcesContent(),
         outfile: destFile,
         define: experimentDefines,
         plugins,

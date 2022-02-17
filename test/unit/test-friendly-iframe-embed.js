@@ -973,7 +973,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
         tagName: 'IFRAME',
         nodeType: 1,
         ownerDocument: {defaultView: win},
-        style: {},
+        style: {setProperty: () => {}},
         setAttribute: () => {},
         addEventListener: (eventType, listener) => {
           if (eventType == 'load') {
@@ -985,7 +985,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       contentWindow = new FakeWindow();
       contentDocument = contentWindow.document;
       contentWindow.frameElement = iframe;
-      contentBody = {nodeType: 1, style: {}};
+      contentBody = {nodeType: 1, style: {setProperty: () => {}}};
       container = {
         appendChild: () => {},
       };
