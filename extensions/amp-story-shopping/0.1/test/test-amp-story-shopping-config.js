@@ -131,7 +131,8 @@ describes.realWin(
         </amp-story-shopping-attachment>
       );
       pageElement.appendChild(shoppingAttachment);
-      return getShoppingConfig(shoppingAttachment);
+      const shoppingConfig = await getShoppingConfig(shoppingAttachment);
+      return shoppingConfig;
     }
 
     it('throws on no config', async () => {
