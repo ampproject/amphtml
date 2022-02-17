@@ -356,12 +356,6 @@ export function isTransformed(ampdoc) {
  * @return {AMP.BaseElement.constructor}
  */
 export function dependsOnStoryServices(klass) {
-  if (getMode().test) {
-    // Unit tests mock or install the services internally, so returning the
-    // class directly allows us to instantiate elements without placing them
-    // inside an <amp-story>.
-    return klass;
-  }
   return class extends AMP.BaseElement {
     /**
      * @override
@@ -372,6 +366,14 @@ export function dependsOnStoryServices(klass) {
         this.element,
         'amp-story'
       );
+      if (!storyEl) {
+        // Unit tests may mock or install the services internally, so returning
+        // the instance immediately allows us to instantiate elements when
+        // they're not placed inside an <amp-story>.
+        // In reality, doing this would fail. This is okay since elements whose
+        // implementations we wrap should be inside an <amp-story> in any case.
+        return new klass(this.element);
+      }
       return whenUpgradedToCustomElement(storyEl)
         .then(() => storyEl.getImpl())
         .then(() => new klass(this.element));
