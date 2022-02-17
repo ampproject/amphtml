@@ -210,7 +210,7 @@ describes.realWin(
 
       beforeEach(async () => {
         storeService = {dispatch: env.sandbox.spy()};
-        env.sandbox.stub(Services, 'storyStoreService').resolves(storeService);
+        env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
       });
 
       it('dispatches ADD_SHOPPING_DATA', async () => {
