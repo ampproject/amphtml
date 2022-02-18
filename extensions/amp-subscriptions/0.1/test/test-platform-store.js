@@ -1,3 +1,7 @@
+import {expect} from 'chai';
+
+import {Deferred} from '#core/data-structures/promise';
+
 import {user} from '#utils/log';
 
 import {Entitlement, GrantReason} from '../entitlement';
@@ -1006,6 +1010,25 @@ describes.realWin('Platform store', {}, (env) => {
     it('should reset a given platform', () => {
       platformStore.resetPlatform(platformKey);
       expect(platform.reset).to.be.calledOnce;
+    });
+  });
+
+  describe('resetPlatformStore', () => {
+    it('the entitlement callback added through public API should persist even after the platform store gets reset', async () => {
+      const isCallbackCalled = new Deferred();
+      platformStore.addOnEntitlementResolvedCallback(() => {
+        isCallbackCalled.resolve(true);
+      });
+
+      const newStore = platformStore.resetPlatformStore();
+      newStore.resolveEntitlement(
+        'platform1',
+        new Entitlement({
+          service: 'platform1',
+          granted: false,
+        })
+      );
+      await expect(isCallbackCalled.promise).to.eventually.equal(true);
     });
   });
 });
