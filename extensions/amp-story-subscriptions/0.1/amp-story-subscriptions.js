@@ -71,11 +71,14 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.localizationService_ = localizationService;
 
       this.subscriptionService_ = subscriptionService;
-      this.subscriptionService_.getGrantStatus().then((granted) => {
-        const state = granted
-          ? SubscriptionsState.GRANTED
-          : SubscriptionsState.BLOCKED;
-        this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_STATE, state);
+      this.subscriptionService_
+        .getGrantStatus()
+        .then((granted) => this.handleGrantStatusUpdate_(granted));
+      this.subscriptionService_.addOnEntitlementResolvedCallback((e) => {
+        // When the user finishes any of the actions, e.g. log in or subscribe, this callback would be executed.
+        // If the new response is granted from publisher backend, disable paywall and update states.
+        const {entitlement} = e;
+        this.handleGrantStatusUpdate_(entitlement.granted);
       });
 
       // Create a paywall dialog element that have required attributes to be able to be
@@ -85,6 +88,17 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
       this.initializeListeners_();
     });
+  }
+
+  /**
+   * @param {boolean} granted
+   * @private
+   */
+  handleGrantStatusUpdate_(granted) {
+    const state = granted
+      ? SubscriptionsState.GRANTED
+      : SubscriptionsState.BLOCKED;
+    this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_STATE, state);
   }
 
   /**
@@ -166,47 +180,50 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
-      (isDialogVisible) => this.onSubscriptionsStateChange_(isDialogVisible)
+      (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
+    );
+    this.storeService_.subscribe(
+      StateProperty.SUBSCRIPTIONS_STATE,
+      (subscriptionsState) =>
+        this.onSubscriptionsStateChange_(subscriptionsState)
     );
   }
 
   /**
-   * @param {boolean} isDialogVisible
+   * @param {boolean} showDialog
    * @private
    */
-  onSubscriptionsStateChange_(isDialogVisible) {
+  onSubscriptionsDialogUiStateChange_(showDialog) {
     this.mutateElement(() =>
       this.element.classList.toggle(
         'i-amphtml-story-subscriptions-visible',
-        isDialogVisible
+        showDialog
       )
     );
 
-    if (isDialogVisible) {
+    if (showDialog) {
       // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
       // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
       // To note, it's a blocking call that would wait until entitlements from all platforms get resolved.
       this.subscriptionService_.selectAndActivatePlatform();
-      this.subscriptionService_.addOnEntitlementResolvedCallback((e) => {
-        // When the user finishes any of the actions, e.g. log in or subscribe, this callback would be executed.
-        // If the new response is granted from publisher backend, disable paywall and update states.
-        const {entitlement} = e;
-        if (
-          this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE) &&
-          entitlement.granted
-        ) {
-          this.storeService_.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_STATE,
-            SubscriptionsState.GRANTED
-          );
-          this.storeService_.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            false
-          );
-        }
-      });
     } else {
       this.subscriptionService_.getDialog().close();
+    }
+  }
+
+  /**
+   * @param {SubscriptionsState} subscriptionsState
+   * @private
+   */
+  onSubscriptionsStateChange_(subscriptionsState) {
+    if (
+      subscriptionsState == SubscriptionsState.GRANTED &&
+      this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
+    ) {
+      this.storeService_.dispatch(
+        Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+        false
+      );
     }
   }
 

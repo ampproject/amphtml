@@ -2506,7 +2506,7 @@ export class AmpStory extends AMP.BaseElement {
       extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
     }
   }
-  
+
   /**
    * @private
    * @return {boolean}
