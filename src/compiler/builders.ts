@@ -26,6 +26,7 @@ function wrap(buildDom: BuildDom): BuildDom {
     applyStaticLayout(element as AmpElement);
     buildDom(element);
     element.setAttribute('i-amphtml-ssr', '');
+    element.classList.add('i-amphtml-element');
   };
 }
 

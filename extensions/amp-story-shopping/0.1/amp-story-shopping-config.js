@@ -151,13 +151,12 @@ export function validateConfig(
 export let KeyedShoppingConfigDef;
 
 /**
- * Gets Shopping config from an <amp-story-page> element.
+ * Gets Shopping config from an element.
  * The config is validated and keyed by 'product-tag-id'.
- * @param {!Element} pageElement <amp-story-page>
+ * @param {!Element} element <amp-story-shopping-attachment>
  * @return {!Promise<!KeyedShoppingConfigDef>}
  */
-export function getShoppingConfig(pageElement) {
-  const element = pageElement.querySelector('amp-story-shopping-config');
+export function getShoppingConfig(element) {
   return getElementConfig(element).then((config) => {
     const areConfigsValid = config['items'].reduce((item1, item2) => {
       return item1 && validateConfig(item2);
@@ -194,7 +193,8 @@ function keyByProductTagId(config) {
 export function storeShoppingConfig(pageElement, config) {
   const win = pageElement.ownerDocument.defaultView;
   return Services.storyStoreServiceForOrNull(win).then((storeService) => {
-    storeService?.dispatch(Action.ADD_SHOPPING_DATA, config);
+    const pageIdToConfig = {[pageElement.id]: config};
+    storeService?.dispatch(Action.ADD_SHOPPING_DATA, pageIdToConfig);
     return config;
   });
 }

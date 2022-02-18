@@ -1,11 +1,14 @@
+const {globExcludeDisabledStorybookFiles} = require('../disabled-stories');
+const {getStaticDirs} = require('../static-dirs');
+
 const rootDir = '../../../../..';
 
 module.exports = {
-  staticDirs: [rootDir],
-  stories: [
+  staticDirs: getStaticDirs(rootDir),
+  stories: globExcludeDisabledStorybookFiles([
     `${rootDir}/src/builtins/storybook/*.amp.js`,
     `${rootDir}/extensions/**/*.*/storybook/*.amp.js`,
-  ],
+  ]),
   addons: [
     // TODO(alanorozco): AMP previews are loaded inside an iframe, so the a11y
     // addon is not able to inspect the tree inside it. Its results are incorrect,
@@ -14,9 +17,6 @@ module.exports = {
     // '@storybook/addon-a11y',
     '@storybook/addon-viewport/register',
     '@storybook/addon-controls/register',
-    // TODO(#35923): Remove addon-knobs once all stories are migrated to
-    // addon-controls (args/argTypes).
-    '@storybook/addon-knobs',
     '@ampproject/storybook-addon',
   ],
   webpackFinal: (config) => {

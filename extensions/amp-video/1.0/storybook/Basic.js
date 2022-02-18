@@ -6,12 +6,11 @@ import {
   BentoAccordionHeader,
   BentoAccordionSection,
 } from '#bento/components/bento-accordion/1.0/component';
+import {BentoVideo} from '#bento/components/bento-video/1.0/component';
 
 import * as Preact from '#preact';
 
-import {BentoVideo} from '../component';
-
-import '../component.jss';
+import '#bento/components/bento-video/1.0/component.jss';
 
 export default {
   title: 'Video',

@@ -65,23 +65,14 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.shoppingTags_ = Array.from(
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
-    loadFonts(this.win, FONTS_TO_LOAD);
 
-    const pageElement = this.element.parentElement;
-    getShoppingConfig(pageElement).then((config) =>
-      storeShoppingConfig(pageElement, config)
+    getShoppingConfig(this.element).then((config) =>
+      storeShoppingConfig(this.pageEl_, config)
     );
 
-    this.attachmentEl_ = (
-      <amp-story-page-attachment
-        layout="nodisplay"
-        theme={this.element.getAttribute('theme')}
-      ></amp-story-page-attachment>
-    );
     if (this.shoppingTags_.length === 0) {
       return;
     }
-    loadFonts(this.win, FONTS_TO_LOAD);
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -97,10 +88,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           cta-text={this.localizationService_.getLocalizedString(
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
           )}
-        ></amp-story-page-attachment>
+        >
+          {this.templateContainer_}
+        </amp-story-page-attachment>
       );
       this.element.appendChild(this.attachmentEl_);
-      this.attachmentEl_.appendChild(this.templateContainer_);
     });
   }
 
@@ -109,7 +101,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (this.shoppingTags_.length === 0) {
       return;
     }
-
+    loadFonts(this.win, FONTS_TO_LOAD);
     // Update template on attachment state update or shopping data update.
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
@@ -147,7 +139,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * If active data is set, open the attachment.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
   checkOpenAttachment_(shoppingData) {
@@ -158,18 +150,17 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Updates template based on shopping data.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
   updateTemplate_(shoppingData) {
-    const shoppingDataForPage = this.shoppingTags_.map(
-      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
-    );
+    const productOnPageToConfig = shoppingData[this.pageEl_.id];
+    const shoppingDataPerPage = Object.values(productOnPageToConfig);
 
     let productForPdp = shoppingData.activeProductData;
     // If no active product and only one product on page, use the one product for the PDP.
-    if (!shoppingData.activeProductData && shoppingDataForPage.length === 1) {
-      productForPdp = shoppingDataForPage[0];
+    if (!productForPdp && shoppingDataPerPage.length === 1) {
+      productForPdp = shoppingDataPerPage[0];
     }
 
     // templateId string used to key already built templates.
@@ -183,7 +174,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     const template = this.getTemplate_(
       templateId,
       productForPdp,
-      shoppingDataForPage
+      shoppingDataPerPage
     );
     template.setAttribute('active', '');
     this.resetScroll_(template);
