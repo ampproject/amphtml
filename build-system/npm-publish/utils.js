@@ -14,6 +14,27 @@ function getExtensions() {
 }
 
 /**
+ * Get bento components to be published on npm
+ * @return {Array<any>}
+ */
+function getComponents() {
+  const bundles = require('../compile/bundles.config.bento.json');
+  const extensions = bundles.map((bundle) => ({
+    'extension': bundle.name,
+    'version': bundle.version,
+  }));
+  return extensions;
+}
+
+/**
+ * Get bento components and extensions to be published on npm
+ * @return {Array<any>}
+ */
+function getExtensionsAndComponents() {
+  return [...getExtensions(), ...getComponents()];
+}
+
+/**
  * Get semver from extension version and amp version
  * See build-system/compile/internal-version.js for versioning description
  * @param {string} extensionVersion
@@ -28,6 +49,8 @@ function getSemver(extensionVersion, ampVersion) {
 }
 
 module.exports = {
+  getComponents,
   getExtensions,
+  getExtensionsAndComponents,
   getSemver,
 };

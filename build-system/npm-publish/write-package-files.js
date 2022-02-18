@@ -3,7 +3,6 @@
  * Creates npm package files for a given component and AMP version.
  */
 
-const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
 const fastGlob = require('fast-glob');
 const marked = require('marked');
 const path = require('path');
@@ -15,8 +14,19 @@ const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
 
+const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
 const packageName = getNameWithoutComponentPrefix(extension);
-const dir = `extensions/${extension}/${extensionVersion}`;
+
+/**
+ * Gets the directory of the component or extension.
+ * @return {string}
+ */
+function getDir() {
+  if (extension.startsWith('bento')) {
+    return `src/bento/components/${extension}/${extensionVersion}`;
+  }
+  return `extensions/${extension}/${extensionVersion}`;
+}
 
 /**
  * Determines whether to skip
@@ -24,7 +34,7 @@ const dir = `extensions/${extension}/${extensionVersion}`;
  */
 async function shouldSkip() {
   try {
-    await stat(dir);
+    await stat(getDir());
     return false;
   } catch {
     log(`${extension} ${extensionVersion} : skipping, does not exist`);
@@ -38,7 +48,7 @@ async function shouldSkip() {
  * @return {Promise<string[]>}
  */
 async function getStylesheets() {
-  const extDir = `${dir}/dist`.split('/').join(path.sep);
+  const extDir = `${getDir()}/dist`.split('/').join(path.sep);
   const files = await fastGlob(path.join(extDir, '**', '*.css'));
   return files.map((file) => path.relative(extDir, file));
 }
@@ -96,7 +106,7 @@ async function getFirstParagraphOrSentence(markdown, maxLengthChars) {
 async function getDescription() {
   let description;
   try {
-    const markdown = await readFile(`${dir}/README.md`, 'utf8');
+    const markdown = await readFile(`${getDir()}/README.md`, 'utf8');
     description = await getFirstParagraphOrSentence(markdown, 200);
   } catch {}
   return description || `Bento ${packageName} Component`;
@@ -171,7 +181,7 @@ async function writePackageJson({useBentoCore}) {
   }
 
   try {
-    await writeFile(`${dir}/package.json`, JSON.stringify(json, null, 2));
+    await writeFile(`${getDir()}/package.json`, JSON.stringify(json, null, 2));
     log(
       json.name,
       extensionVersion,
@@ -192,7 +202,7 @@ async function writePackageJson({useBentoCore}) {
 async function writeReactJs() {
   const content = "module.exports = require('./dist/component-react');";
   try {
-    await writeFile(`${dir}/react.js`, content);
+    await writeFile(`${getDir()}/react.js`, content);
     log(packageName, extensionVersion, ': created react.js');
   } catch (e) {
     log(e);

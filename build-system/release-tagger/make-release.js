@@ -10,7 +10,7 @@ const {
   getPullRequestsBetweenCommits,
   getRef,
 } = require('./utils');
-const {getExtensions, getSemver} = require('../npm-publish/utils');
+const {getExtensionsAndComponents, getSemver} = require('../npm-publish/utils');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
 
 const prereleaseConfig = {
@@ -48,7 +48,7 @@ function _formatPullRequestLine(pr) {
  * @return {PackageMetadata}
  */
 function _createPackageSections(prs) {
-  const bundles = getExtensions();
+  const bundles = getExtensionsAndComponents();
   const majors = [...new Set(bundles.map((b) => b.version))];
   /** @type PackageMetadata */
   const metadata = {};
