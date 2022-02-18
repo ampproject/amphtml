@@ -160,5 +160,8 @@
   },
   "99": {
     "string": "Az űrlap sikeresen elküldve"
+  },
+  "101": {
+    "string": "Vásárolj most"
   }
 }

@@ -394,6 +394,14 @@ describes.sandboxed('amp-img', {}, (env) => {
     expect(AmpImg.prerenderAllowed(el)).to.equal(true);
   });
 
+  it('should allow preview by default', () => {
+    const el = document.createElement('amp-img');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('width', 100);
+    el.setAttribute('height', 100);
+    expect(AmpImg.previewAllowed(el)).to.equal(true);
+  });
+
   it('should propogate src as the final attribute', () => {
     expect(
       ATTRIBUTES_TO_PROPAGATE[ATTRIBUTES_TO_PROPAGATE.length - 1]

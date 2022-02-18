@@ -125,11 +125,9 @@ feature_tests/forms.html:114:2 The attribute 'target' in tag 'form' is set to th
 |      <option value="1">English</option>
 |    </select>
 |    <textarea name="comment"></textarea>
-|    <!-- Invalid: input can not be type="image". -->
+|    <!-- Valid: input can be type="image". -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-|      <input type="image" name="image">
->>     ^~~~~~~~~
-feature_tests/forms.html:125:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form/)
+|      <input type="image" name="image" src="https://site.example/image.example">
 |    </form>
 |    <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">

@@ -62,3 +62,66 @@ export async function awaitFrameAfter(ms) {
   await sleep(ms);
   await afterRenderPromise();
 }
+
+const VOID_ELEMENTS = new Set([
+  'AREA',
+  'BASE',
+  'BR',
+  'COL',
+  'EMBED',
+  'HR',
+  'IMG',
+  'INPUT',
+  'LINK',
+  'META',
+  'PARAM',
+  'SOURCE',
+  'TRACK',
+  'WBR',
+]);
+
+/**
+ * Returns true of node is a void element.
+ * @see https://developer.mozilla.org/en-US/docs/Glossary/Empty_element
+ *
+ * @param {Node} node
+ * @return {boolean}
+ */
+function isVoidElement(node) {
+  return (
+    node.nodeType === Node.ELEMENT_NODE && VOID_ELEMENTS.has(node.nodeName)
+  );
+}
+
+/**
+ * Returns the outerHTML for an element, but with lexicographically sorted attributes.
+ * @param {Element} node
+ * @return {string}
+ */
+export function getDeterministicOuterHTML(node) {
+  const tag = node.localName;
+  const attributes = Array.from(node.attributes)
+    .map(({name, value}) => `${name}="${value}"`)
+    .sort()
+    .join(' ');
+  const start = `<${tag} ${attributes}>`;
+  const contents = Array.from(node.childNodes).map((childNode) => {
+    if (childNode.nodeType === Node.ELEMENT_NODE) {
+      return getDeterministicOuterHTML(/** @type {Element} */ (childNode));
+    }
+    return childNode.textContent;
+  });
+
+  if (!contents && isVoidElement(node)) {
+    return start;
+  }
+  return start + contents + `</${tag}>`;
+}
+
+/**
+ * @param {string} hyphenCase camel cased string
+ * @return {string} camelCased string
+ */
+export function hypenCaseToCamelCase(hyphenCase) {
+  return hyphenCase.replace(/-./g, (match) => match.slice(1).toUpperCase());
+}
