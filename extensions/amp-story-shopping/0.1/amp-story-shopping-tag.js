@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {
@@ -7,6 +8,8 @@ import {
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
+
+import {devAssert} from '#utils/log';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
@@ -54,6 +57,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     /** @private {!AmpElement} element */
     this.shoppingTagEl_ = null;
+    /** @private {?Element} */
+    this.pageEl_ = null;
   }
 
   /** @override */
@@ -74,6 +79,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     }
 
     this.element.setAttribute('role', 'button');
+
+    this.pageEl_ = devAssert(
+      closestAncestorElementBySelector(this.element, 'amp-story-page')
+    );
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -97,16 +106,30 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) => {
-      this.onRtlStateUpdate_(rtlState);
-    });
+    this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) =>
+      this.onRtlStateUpdate_(rtlState)
+    );
 
     this.storeService_.subscribe(
       StateProperty.PAGE_SIZE,
-      (pageSizeState) => {
-        this.flipTagIfOffscreen_(pageSizeState);
-      },
+      (pageSizeState) => this.flipTagIfOffscreen_(pageSizeState),
       true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, (id) =>
+      this.toggleShoppingTagActive_(id)
+    );
+  }
+
+  /**
+   * Toggling the active attribute to make the animations play on the active page.
+   * @param {string} currentPageId
+   * @private
+   */
+  toggleShoppingTagActive_(currentPageId) {
+    const isActive = currentPageId === this.pageEl_.id;
+    this.mutateElement(() =>
+      toggleAttribute(this.shoppingTagEl_, 'active', isActive)
     );
   }
 
