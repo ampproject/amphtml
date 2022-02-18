@@ -23,6 +23,8 @@ export {
   useImperativeHandle,
 } from 'preact/hooks';
 
+export {forwardRef} from 'preact/compat';
+
 /**
  * @param {*} props
  * @return {import('preact').ComponentChildren}
