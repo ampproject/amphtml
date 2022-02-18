@@ -362,7 +362,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         {activeProductData.productDetails && (
           <div class="i-amphtml-amp-story-shopping-pdp-details">
             <button
-              class="i-amphtml-amp-story-shopping-pdp-details-header"
+              class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-pdp-details-header"
               onClick={(e) => this.onDetailsHeaderClick_(e.target)}
             >
               <span class="i-amphtml-amp-story-shopping-sub-section-header">
@@ -407,7 +407,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         <div class="i-amphtml-amp-story-shopping-plp-cards">
           {shoppingDataForPage.map((data) => (
             <button
-              class="i-amphtml-amp-story-shopping-plp-card"
+              class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-plp-card"
               role="button"
               onClick={() => this.onPlpCardClick_(data)}
             >

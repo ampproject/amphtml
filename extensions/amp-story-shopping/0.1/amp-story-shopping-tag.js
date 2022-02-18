@@ -11,6 +11,7 @@ import {Services} from '#service';
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
+import {CSS as shoppingSharedCSS} from '../../../build/amp-story-shopping-shared-0.1.css';
 import {
   Action,
   ShoppingConfigDataDef,
@@ -219,7 +220,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   renderShoppingTagTemplate_() {
     return (
       <button
-        class="i-amphtml-amp-story-shopping-tag-inner"
+        class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-tag-inner"
         role="button"
         onClick={() => this.onClick_()}
       >
@@ -277,7 +278,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     createShadowRootWithStyle(
       this.element,
       this.shoppingTagEl_,
-      shoppingTagCSS
+      shoppingSharedCSS + shoppingTagCSS
     );
     this.hasAppendedInnerShoppingTagEl_ = true;
     this.styleTagText_();
