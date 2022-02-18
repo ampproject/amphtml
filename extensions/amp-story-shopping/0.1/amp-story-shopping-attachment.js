@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
@@ -255,6 +256,25 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   * Expands or collabses the content of the details section.
+   * @param {!Element} detailsHeader
+   * @private
+   */
+  onDetailsHeaderClick_(detailsHeader) {
+    const detailsContainer = detailsHeader.closest(
+      '.i-amphtml-amp-story-shopping-pdp-details'
+    );
+    const detailsText = detailsContainer.querySelector(
+      '.i-amphtml-amp-story-shopping-pdp-details-text'
+    );
+    const toggleActive = !detailsContainer.hasAttribute('active');
+    this.mutateElement(() => {
+      toggleAttribute(detailsContainer, 'active', toggleActive);
+      detailsText.setAttribute('aria-hidden', !toggleActive);
+    });
+  }
+
+  /**
    * @param {!ShoppingConfigDataDef} activeProductData
    * @return {Element}
    * @private
@@ -316,6 +336,33 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             ></div>
           ))}
         </div>
+        {activeProductData.productDetails && (
+          <div class="i-amphtml-amp-story-shopping-pdp-details">
+            <button
+              class="i-amphtml-amp-story-shopping-pdp-details-header"
+              onClick={(e) => this.onDetailsHeaderClick_(e.target)}
+            >
+              <span class="i-amphtml-amp-story-shopping-sub-section-header">
+                {this.localizationService_.getLocalizedString(
+                  LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_DETAILS,
+                  this.element
+                )}
+              </span>
+              <svg
+                viewBox="0 0 10 6"
+                class="i-amphtml-amp-story-shopping-pdp-details-header-arrow"
+              >
+                <path d="M.5,.5 L5,5.2 L9.5,.5" />
+              </svg>
+            </button>
+            <span
+              class="i-amphtml-amp-story-shopping-pdp-details-text"
+              aria-hidden="true"
+            >
+              {activeProductData.productDetails}
+            </span>
+          </div>
+        )}
       </div>
     );
   }
@@ -328,7 +375,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   renderPlpTemplate_(shoppingDataForPage) {
     return (
       <div class="i-amphtml-amp-story-shopping-plp">
-        <div class="i-amphtml-amp-story-shopping-plp-header">
+        <div class="i-amphtml-amp-story-shopping-sub-section-header">
           {this.localizationService_.getLocalizedString(
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER,
             this.element
