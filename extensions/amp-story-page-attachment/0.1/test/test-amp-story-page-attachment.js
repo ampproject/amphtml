@@ -1,4 +1,5 @@
 import * as Preact from '#core/dom/jsx';
+
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
 import {LocalizationService} from '#service/localization';
@@ -25,13 +26,19 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     storyEl.appendChild(pageEl);
 
     const localizationService = new LocalizationService(win.document.body);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function () {
+      return localizationService;
+    });
 
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
     const analytics = new StoryAnalyticsService(win, win.document.body);
-    registerServiceBuilder(win, 'story-analytics', () => analytics);
+    registerServiceBuilder(win, 'story-analytics', function () {
+      return analytics;
+    });
 
     const ownersMock = {
       scheduleLayout: () => {},
