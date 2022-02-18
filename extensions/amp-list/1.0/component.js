@@ -12,7 +12,6 @@ import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {useIsInViewport} from '#preact/component/intersection-observer';
 import {useAmpContext} from '#preact/context';
-import {useEventDelegation} from '#preact/hooks/useEventDelegation';
 import {useInfiniteQuery} from '#preact/hooks/useInfiniteQuery';
 import {xhrUtils} from '#preact/utils/xhr';
 
@@ -185,13 +184,14 @@ export function BentoListWithRef(
     });
   }, [pages, itemsKey, maxItems, itemTemplate]);
 
-  const containerRef = useRef(null);
-  useEventDelegation(
-    containerRef,
-    '[load-more-button], [load-more-retry]',
-    'click',
-    () => loadMore()
-  );
+  const handleContainerClick = (ev) => {
+    const loadMoreButton = ev.target.closest(
+      '[load-more-button], [load-more-retry]'
+    );
+    if (loadMoreButton) {
+      loadMore();
+    }
+  };
 
   const showLoading = loading;
   const showResults = list.length !== 0;
@@ -209,7 +209,7 @@ export function BentoListWithRef(
   const styles = useStyles();
 
   return (
-    <ContainWrapper aria-live="polite" {...rest} ref={containerRef}>
+    <ContainWrapper aria-live="polite" {...rest} onClick={handleContainerClick}>
       <Fragment test-id="contents">
         {showResults && augment(wrapperTemplate(list), {'role': 'list'})}
         {showLoading && loadingTemplate(styles)}

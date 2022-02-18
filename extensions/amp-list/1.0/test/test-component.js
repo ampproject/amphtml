@@ -271,7 +271,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         await waitForData(component);
       });
 
-      it.only('should render a "See More" button', async () => {
+      it('should render a "See More" button', async () => {
         expect(component.find('button').html()).to.equal(
           `<button load-more-button="true"><label>See More</label></button>`
         );
@@ -283,16 +283,18 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         expect(snapshot(component)).to.equal(expectedPage1);
 
         // Load page 2:
-        component.find('button[load-more-button]').getDOMNode().click();
-        console.log('simulated click, why no click?');
-
+        simulateClickWithPropagation(
+          component.find('button[load-more-button]')
+        );
         expect(fetchJson).callCount(2).calledWith('page-2.json');
         expect(snapshot(component)).to.equal(expectedPage1);
         await waitForData(component, 2);
         expect(snapshot(component)).to.equal(expectedPage2);
 
         // Load page 3:
-        component.find('button[load-more-button]').simulate('click');
+        simulateClickWithPropagation(
+          component.find('button[load-more-button]')
+        );
         expect(fetchJson).callCount(3).calledWith('page-3.json');
         expect(snapshot(component)).to.equal(expectedPage2);
         await waitForData(component, 3);
@@ -310,6 +312,8 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         component.setProps({}); // trigger a rerender
       }
 
+      const expectedLoading =
+        '<div><span aria-label="Loading"></span></div><span></span>';
       const expectedPage1 = `<div><div>one</div><div>two</div><div>three</div></div><span></span>`;
       const expectedPage2 = `<div><div>one</div><div>two</div><div>three</div><div>four</div><div>five</div></div><span></span>`;
       const expectedPage3 = `<div><div>one</div><div>two</div><div>three</div><div>four</div><div>five</div><div>six</div><div>seven</div><div>eight</div><div>nine</div></div><span></span>`;
@@ -319,7 +323,7 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
         component = mount(<BentoList src="" loadMore="auto" />);
       });
       it('should automatically load the first page', async () => {
-        expect(snapshot(component)).to.equal('Loading...<span></span>');
+        expect(snapshot(component)).to.equal(expectedLoading);
 
         await waitForData(component, 1);
 
@@ -393,14 +397,14 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
       expect(snapshot(component)).to.equal(expectedPage1);
 
       // Load page 2:
-      component.find('button[load-more-button]').simulate('click');
+      simulateClickWithPropagation(component.find('button[load-more-button]'));
       expect(fetchJson).callCount(2).calledWith('page-2.json');
       expect(snapshot(component)).to.equal(expectedPage1);
       await waitForData(component, 2);
       expect(snapshot(component)).to.equal(expectedPage2);
 
       // Load page 3:
-      component.find('button[load-more-button]').simulate('click');
+      simulateClickWithPropagation(component.find('button[load-more-button]'));
       expect(fetchJson).callCount(3).calledWith('page-3.json');
       expect(snapshot(component)).to.equal(expectedPage2);
       await waitForData(component, 3);
@@ -437,3 +441,8 @@ describes.sandboxed('BentoList preact component v1.0', {}, (env) => {
     });
   });
 });
+
+function simulateClickWithPropagation(wrapper) {
+  // Unlike `wrapper.simulate('click')`, this approach will propagate through DOM ancestors:
+  wrapper.getDOMNode().click();
+}
