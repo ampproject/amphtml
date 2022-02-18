@@ -1,5 +1,3 @@
-import {expect} from 'chai';
-
 import {Services} from '#service';
 
 import * as utilsStory from '#utils/story';
@@ -1444,7 +1442,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
     });
   });
 
-  describe('maybeSelectAndActivatePlatform', () => {
+  describe('maybeRenderDialogForSelectedPlatform', () => {
     it('should select and activate platform if not free and not embedded in the viewer', async () => {
       const selectAndActivatePlatformStub = env.sandbox.stub(
         subscriptionService,

@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 import {user} from '#utils/log';
 
 import {Entitlement, GrantReason} from '../entitlement';
@@ -1010,7 +1012,7 @@ describes.realWin('Platform store', {}, (env) => {
   });
 
   describe('resetPlatformStore', () => {
-    it.only('the entitlement callback added through public API should persist even after the platform store gets reset', async () => {
+    it('the entitlement callback added through public API should persist even after the platform store gets reset', async () => {
       const callbackSpy = env.sandbox.spy();
       platformStore.addOnEntitlementResolvedCallback(callbackSpy);
 
@@ -1021,10 +1023,6 @@ describes.realWin('Platform store', {}, (env) => {
       });
       newStore.resolveEntitlement('platform1', newEntitlement);
       expect(callbackSpy).to.have.been.calledOnce;
-      expect(callbackSpy).to.have.been.calledOnceWithExactly({
-        platfromKey: 'platform1',
-        entitlement: newEntitlement,
-      });
     });
   });
 });
