@@ -134,9 +134,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
-   * Handles template changes when there is activeProductData.
-   * This happens when a product tag or PLP card is clicked.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * If active data is set, open the attachment.
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
   onShoppingDataUpdate_(shoppingData) {
@@ -177,9 +176,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   updateTemplate_(shoppingData) {
-    const shoppingDataForPage = this.shoppingTags_.map(
-      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
-    );
+    const productOnPageToConfig = shoppingData[this.pageEl_.id];
+    const shoppingDataPerPage = Object.values(productOnPageToConfig);
 
     let productForPdp = shoppingData.activeProductData;
     // If no active product and only one product on page, use the one product for the PDP.
