@@ -11,6 +11,7 @@ import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   getStoreService,
+  StateProperty,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {expect} from 'chai';
 
@@ -212,6 +213,17 @@ describes.realWin(
       expect(
         attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-pdp')
       ).to.not.be.null;
+    });
+
+    it('should clear active product data on drawer transition end', async () => {
+      await shoppingImpl.layoutCallback();
+      await attachmentChildImpl.layoutCallback();
+      dispatchActiveProductData();
+      attachmentChildEl.dispatchEvent(new Event('transitionend'));
+      const activeProductData = storeService.get(
+        StateProperty.SHOPPING_DATA
+      ).activeProductData;
+      expect(activeProductData).to.be.null;
     });
   }
 );
