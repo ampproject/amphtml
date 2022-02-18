@@ -13,6 +13,7 @@ import {
   Action,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {expect} from 'chai';
 
 describes.realWin(
   'amp-story-shopping-attachment-v0.1',
@@ -168,34 +169,38 @@ describes.realWin(
       ).to.not.be.null;
     });
 
-    // it('should build PLP with data from tag on page', async () => {
-    //   // await dispatchTestShoppingData();
-    //   const attachmentChildEl = shoppingEl.querySelector(
-    //     'amp-story-page-attachment'
-    //   );
-    //   const attachmentChildImpl = await attachmentChildEl.getImpl();
-    //     const cardTitl =
-    //   expect(
-    //     pageEl.querySelector(
-    //       '.amp-story-shopping-plp-card .amp-story-shopping-plp-card-title'
-    //     ).textContent
-    //   ).to.equal('Spectacular Spectacles');
-    // });
+    it('should open attachment when active product data is set', async () => {
+      await shoppingImpl.layoutCallback();
+      await attachmentChildImpl.layoutCallback();
 
-    // it('should build PDP with productDetails if productDetails are defined', async () => {
-    //   await shoppingImpl.layoutCallback();
-    //   const detailsEl = shoppingEl.querySelector(
-    //     '.i-amphtml-amp-story-shopping-pdp-details'
-    //   );
-    //   expect(detailsEl).to.exist;
-    // });
+      storeService.dispatch(Action.ADD_SHOPPING_DATA, {
+        activeProductData: shoppingData.items[0],
+      });
+      // Simulating the getImpl in amp-story-shopping-attachment's
+      // onShoppingDataUpdate_ method
+      await attachmentChildEl.getImpl();
 
-    // it('should not build productDetails in pdp if productDetails are defined', async () => {
-    //   await shoppingImpl.layoutCallback();
-    //   const detailsEl = shoppingEl.querySelector(
-    //     '.i-amphtml-amp-story-shopping-pdp-details'
-    //   );
-    //   expect(detailsEl).to.not.exist;
-    // });
+      expect(
+        attachmentChildEl.classList.contains(
+          'i-amphtml-story-draggable-drawer-open'
+        )
+      ).to.be.true;
+    });
+
+    it('should build PDP if active active product data', async () => {
+      await shoppingImpl.layoutCallback();
+      await attachmentChildImpl.layoutCallback();
+      storeService.dispatch(Action.ADD_SHOPPING_DATA, {
+        activeProductData: shoppingData.items[0],
+      });
+      await attachmentChildEl.getImpl();
+      expect(
+        attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-pdp')
+      ).to.not.be.null;
+    });
+
+    // it('should build PDP on PLP card click')
+
+    // it('should default to PDP if only one product tag is on the page')
   }
 );
