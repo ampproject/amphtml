@@ -1,5 +1,4 @@
 import * as Preact from '#core/dom/jsx';
-// import {expect} from 'chai';
 import {Services} from '#service';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 
@@ -57,8 +56,8 @@ describes.realWin(
             {url: 'https://source.unsplash.com/3LTht2nxd34', alt: 'lamp 6'},
           ],
           aggregateRating: {
-            ratingValue: '4.4',
-            reviewCount: '89',
+            ratingValue: 4.4,
+            reviewCount: 89,
             reviewUrl: 'https://www.google.com',
           },
           productDetails:
@@ -78,8 +77,8 @@ describes.realWin(
             },
           ],
           aggregateRating: {
-            ratingValue: '4.4',
-            reviewCount: '89',
+            ratingValue: 4.4,
+            reviewCount: 89,
             reviewUrl: 'https://www.google.com',
           },
           productDetails:
@@ -113,14 +112,14 @@ describes.realWin(
       story.appendChild(pageEl);
 
       // Set up shopping tags.
-      const tagEl = (
+      const lampShoppingTagEl = (
         <amp-story-shopping-tag data-product-id="lamp"></amp-story-shopping-tag>
       );
-      pageEl.appendChild(tagEl);
-      const tagEl2 = (
+      pageEl.appendChild(lampShoppingTagEl);
+      const artShoppingTagEl = (
         <amp-story-shopping-tag data-product-id="art"></amp-story-shopping-tag>
       );
-      pageEl.appendChild(tagEl2);
+      pageEl.appendChild(artShoppingTagEl);
 
       // Set up shopping attachment.
       shoppingEl = (
@@ -152,6 +151,12 @@ describes.realWin(
       storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 1});
     });
 
+    function dispatchActiveProductData() {
+      storeService.dispatch(Action.ADD_SHOPPING_DATA, {
+        activeProductData: shoppingData.items[0],
+      });
+    }
+
     it('should build shopping attachment component', () => {
       expect(() => shoppingImpl.layoutCallback()).to.not.throw();
     });
@@ -172,14 +177,10 @@ describes.realWin(
     it('should open attachment when active product data is set', async () => {
       await shoppingImpl.layoutCallback();
       await attachmentChildImpl.layoutCallback();
-
-      storeService.dispatch(Action.ADD_SHOPPING_DATA, {
-        activeProductData: shoppingData.items[0],
-      });
+      dispatchActiveProductData();
       // Simulating the getImpl in amp-story-shopping-attachment's
       // onShoppingDataUpdate_ method
       await attachmentChildEl.getImpl();
-
       expect(
         attachmentChildEl.classList.contains(
           'i-amphtml-story-draggable-drawer-open'
@@ -187,20 +188,44 @@ describes.realWin(
       ).to.be.true;
     });
 
-    it('should build PDP if active active product data', async () => {
+    it('should build PDP if active product data', async () => {
       await shoppingImpl.layoutCallback();
       await attachmentChildImpl.layoutCallback();
-      storeService.dispatch(Action.ADD_SHOPPING_DATA, {
-        activeProductData: shoppingData.items[0],
-      });
+      dispatchActiveProductData();
+      // Simulating the getImpl in amp-story-shopping-attachment's
+      // onShoppingDataUpdate_ method
       await attachmentChildEl.getImpl();
       expect(
         attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-pdp')
       ).to.not.be.null;
     });
 
-    // it('should build PDP on PLP card click')
+    it('should build PDP on PLP card click', async () => {
+      await shoppingImpl.layoutCallback();
+      await attachmentChildImpl.layoutCallback();
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+      const plpCard = attachmentChildEl.querySelector(
+        '.i-amphtml-amp-story-shopping-plp-card'
+      );
+      plpCard.dispatchEvent(new Event('click'));
+      expect(
+        attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-pdp')
+      ).to.not.be.null;
+    });
 
-    // it('should default to PDP if only one product tag is on the page')
+    it('should default to PDP on open if only one product for the page', async () => {
+      await shoppingImpl.layoutCallback();
+      await attachmentChildImpl.layoutCallback();
+      // Override to simulate data for one product on the page.
+      storeService.dispatch(Action.ADD_SHOPPING_DATA, {
+        page1: {
+          [shoppingData.productId]: shoppingData.items[0],
+        },
+      });
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+      expect(
+        attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-pdp')
+      ).to.not.be.null;
+    });
   }
 );
