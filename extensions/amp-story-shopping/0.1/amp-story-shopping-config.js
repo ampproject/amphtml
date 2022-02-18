@@ -18,13 +18,12 @@ let ShoppingConfigResponseDef;
 export let KeyedShoppingConfigDef;
 
 /**
- * Gets Shopping config from an <amp-story-page> element.
+ * Gets Shopping config from an element.
  * The config is validated and keyed by 'product-tag-id'.
- * @param {!Element} pageElement <amp-story-page>
+ * @param {!Element} element <amp-story-shopping-attachment>
  * @return {!Promise<!KeyedShoppingConfigDef>}
  */
-export function getShoppingConfig(pageElement) {
-  const element = pageElement.querySelector('amp-story-shopping-config');
+export function getShoppingConfig(element) {
   return getElementConfig(element).then((config) => {
     //TODO(#36412): Add call to validate config here.
     return keyByProductTagId(config);
