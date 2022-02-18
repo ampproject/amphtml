@@ -48,7 +48,7 @@ amp-story-shopping-tag {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  /* Opacity 0 initially to avoid showing tag flip on initilization. */
+  /* Opacity 0 initially to avoid showing tag flip on initialization. */
   opacity: 0 !important;
 }
 
