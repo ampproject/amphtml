@@ -32,6 +32,7 @@ t.run('Viewer Visibility State', {}, () => {
       let docHidden;
       let docVisibilityState;
       let prerenderAllowed;
+      let previewAllowed;
 
       function visChangeEventName() {
         const hiddenName = getVendorJsPropertyName(
@@ -125,6 +126,8 @@ t.run('Viewer Visibility State', {}, () => {
         const upgradedImg = await whenUpgradedToCustomElement(ampImg);
         prerenderAllowed = env.sandbox.stub(upgradedImg, 'prerenderAllowed');
         prerenderAllowed.returns(false);
+        previewAllowed = env.sandbox.stub(upgradedImg, 'previewAllowed');
+        previewAllowed.returns(false);
 
         if (R1_IMG_DEFERRED_BUILD) {
           win.document.body.appendChild(upgradedImg);
@@ -156,6 +159,17 @@ t.run('Viewer Visibility State', {}, () => {
           it('does layout when going to PRERENDER', async () => {
             changeViewerVisibilityState(VisibilityState_Enum.PAUSED);
             changeViewerVisibilityState(VisibilityState_Enum.PRERENDER);
+            await waitForNextPass();
+
+            expect(layoutCallback).to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
+          });
+
+          it('calls layout when going to PREVIEW', async () => {
+            previewAllowed.returns(true);
+            changeViewerVisibilityState(VisibilityState_Enum.PREVIEW);
             await waitForNextPass();
 
             expect(layoutCallback).to.have.been.called;
@@ -214,6 +228,17 @@ t.run('Viewer Visibility State', {}, () => {
             await waitForNextPass();
 
             expect(layoutCallback).not.to.have.been.called;
+            expect(unlayoutCallback).not.to.have.been.called;
+            expect(pauseCallback).not.to.have.been.called;
+            expect(resumeCallback).not.to.have.been.called;
+          });
+
+          it('calls layout when going to PREVIEW', async () => {
+            previewAllowed.returns(true);
+            changeViewerVisibilityState(VisibilityState_Enum.PREVIEW);
+            await waitForNextPass();
+
+            expect(layoutCallback).to.have.been.called;
             expect(unlayoutCallback).not.to.have.been.called;
             expect(pauseCallback).not.to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;

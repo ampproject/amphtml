@@ -68,27 +68,26 @@ describes.realWin(
 
     async function setUpShoppingData() {
       const shoppingData = {
-        'sunglasses': {'productTitle': 'Spectacular Spectacles'},
+        'page1': {'sunglasses': {'productTitle': 'Spectacular Spectacles'}},
       };
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
     }
 
-    async function createShoppingTag() {
+    async function setupShoppingTagAndData() {
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
       await setUpShoppingData();
-
       expect(() => shoppingTag.buildCallback()).to.not.throw();
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
     }
 
     it('should build and layout shopping tag component', async () => {
-      await createShoppingTag();
+      await setupShoppingTagAndData();
       expect(shoppingTag.shoppingTagEl_).to.be.not.null;
     });
 
     it('should not build shopping tag if page attachment is missing', async () => {
       pageEl.removeChild(attachmentElement);
-      await createShoppingTag();
+      await setupShoppingTagAndData();
       expect(shoppingTag.shoppingTagEl_).to.be.null;
     });
 

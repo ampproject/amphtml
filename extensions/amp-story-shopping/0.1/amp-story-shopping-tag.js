@@ -43,16 +43,16 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
-    /** @param {boolean} element */
+    /** @private {boolean} element */
     this.hasAppendedInnerShoppingTagEl_ = false;
 
-    /** @param {!ShoppingConfigDataDef} tagData */
+    /** @private {!ShoppingConfigDataDef} tagData */
     this.tagData_ = null;
 
-    /** @param {?AmpElement} element */
+    /** @private {?AmpElement} element */
     this.shoppingAttachment_ = null;
 
-    /** @param {!AmpElement} element */
+    /** @private {!AmpElement} element */
     this.shoppingTagEl_ = null;
   }
 
@@ -196,8 +196,13 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
     const ratioOfLineHeightToFontSize = 1.5;
     const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
-    const height = textEl./*OK*/ clientHeight;
-    const numLines = Math.ceil(height / lineHeight);
+
+    let numLines = 1;
+
+    this.measureElement(() => {
+      const height = textEl./*OK*/ clientHeight;
+      numLines = Math.ceil(height / lineHeight);
+    });
 
     this.mutateElement(() => {
       pillEl.classList.toggle(
@@ -253,7 +258,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
-    this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
+    const pageElement = closestAncestorElementBySelector(
+      this.element,
+      'amp-story-page'
+    );
+
+    this.tagData_ =
+      shoppingData[pageElement.id][
+        this.element.getAttribute('data-product-id')
+      ];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
@@ -261,18 +274,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
 
-    this.measureMutateElement(
-      () => {
-        createShadowRootWithStyle(
-          this.element,
-          this.shoppingTagEl_,
-          shoppingTagCSS
-        );
-        this.hasAppendedInnerShoppingTagEl_ = true;
-      },
-      () => {
-        this.styleTagText_();
-      }
+    createShadowRootWithStyle(
+      this.element,
+      this.shoppingTagEl_,
+      shoppingTagCSS
     );
+    this.hasAppendedInnerShoppingTagEl_ = true;
+    this.styleTagText_();
   }
 }

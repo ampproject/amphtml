@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
@@ -67,7 +68,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
 
     getShoppingConfig(this.element).then((config) =>
-      storeShoppingConfig(this.element, config)
+      storeShoppingConfig(this.pageEl_, config)
     );
 
     if (this.shoppingTags_.length === 0) {
@@ -139,7 +140,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * If active data is set, open the attachment.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
   checkOpenAttachment_(shoppingData) {
@@ -150,18 +151,17 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Updates template based on shopping data.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
   updateTemplate_(shoppingData) {
-    const shoppingDataForPage = this.shoppingTags_.map(
-      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
-    );
+    const productOnPageToConfig = shoppingData[this.pageEl_.id];
+    const shoppingDataPerPage = Object.values(productOnPageToConfig);
 
     let productForPdp = shoppingData.activeProductData;
     // If no active product and only one product on page, use the one product for the PDP.
-    if (!shoppingData.activeProductData && shoppingDataForPage.length === 1) {
-      productForPdp = shoppingDataForPage[0];
+    if (!productForPdp && shoppingDataPerPage.length === 1) {
+      productForPdp = shoppingDataPerPage[0];
     }
 
     // templateId string used to key already built templates.
@@ -175,7 +175,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     const template = this.getTemplate_(
       templateId,
       productForPdp,
-      shoppingDataForPage
+      shoppingDataPerPage
     );
     template.setAttribute('active', '');
     this.resetScroll_(template);
@@ -256,6 +256,25 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   * Expands or collabses the content of the details section.
+   * @param {!Element} detailsHeader
+   * @private
+   */
+  onDetailsHeaderClick_(detailsHeader) {
+    const detailsContainer = detailsHeader.closest(
+      '.i-amphtml-amp-story-shopping-pdp-details'
+    );
+    const detailsText = detailsContainer.querySelector(
+      '.i-amphtml-amp-story-shopping-pdp-details-text'
+    );
+    const toggleActive = !detailsContainer.hasAttribute('active');
+    this.mutateElement(() => {
+      toggleAttribute(detailsContainer, 'active', toggleActive);
+      detailsText.setAttribute('aria-hidden', !toggleActive);
+    });
+  }
+
+  /**
    * @param {!ShoppingConfigDataDef} activeProductData
    * @return {Element}
    * @private
@@ -317,6 +336,33 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             ></div>
           ))}
         </div>
+        {activeProductData.productDetails && (
+          <div class="i-amphtml-amp-story-shopping-pdp-details">
+            <button
+              class="i-amphtml-amp-story-shopping-pdp-details-header"
+              onClick={(e) => this.onDetailsHeaderClick_(e.target)}
+            >
+              <span class="i-amphtml-amp-story-shopping-sub-section-header">
+                {this.localizationService_.getLocalizedString(
+                  LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_DETAILS,
+                  this.element
+                )}
+              </span>
+              <svg
+                viewBox="0 0 10 6"
+                class="i-amphtml-amp-story-shopping-pdp-details-header-arrow"
+              >
+                <path d="M.5,.5 L5,5.2 L9.5,.5" />
+              </svg>
+            </button>
+            <span
+              class="i-amphtml-amp-story-shopping-pdp-details-text"
+              aria-hidden="true"
+            >
+              {activeProductData.productDetails}
+            </span>
+          </div>
+        )}
       </div>
     );
   }
@@ -329,7 +375,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   renderPlpTemplate_(shoppingDataForPage) {
     return (
       <div class="i-amphtml-amp-story-shopping-plp">
-        <div class="i-amphtml-amp-story-shopping-plp-header">
+        <div class="i-amphtml-amp-story-shopping-sub-section-header">
           {this.localizationService_.getLocalizedString(
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER,
             this.element
