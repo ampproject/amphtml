@@ -28,7 +28,6 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let pageEl;
     let shoppingEl;
     let shoppingImpl;
     let storeService;
@@ -51,9 +50,6 @@ describes.realWin(
             },
             {url: 'https://source.unsplash.com/KP7p0-DRGbg', alt: 'lamp 2'},
             {url: 'https://source.unsplash.com/mFnbFaCIu1I', alt: 'lamp 3'},
-            {url: 'https://source.unsplash.com/py9sH2rThWs', alt: 'lamp 4'},
-            {url: 'https://source.unsplash.com/VDPauwJ_sHo', alt: 'lamp 5'},
-            {url: 'https://source.unsplash.com/3LTht2nxd34', alt: 'lamp 6'},
           ],
           aggregateRating: {
             ratingValue: 4.4,
@@ -89,50 +85,40 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      storeService = getStoreService(win);
+      // Services and stubs.
       registerServiceBuilder(win, 'performance', () => ({
         isPerformanceTrackingOn: () => false,
       }));
+      storeService = getStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
       env.sandbox.stub(win.history, 'replaceState');
-
       const analytics = new StoryAnalyticsService(win, win.document.body);
       registerServiceBuilder(win, 'story-analytics', () => analytics);
-
       const ownersMock = {
         scheduleLayout: () => {},
         scheduleResume: () => {},
       };
       env.sandbox.stub(Services, 'ownersForDoc').returns(ownersMock);
 
-      // Set up story.
-      const story = <amp-story></amp-story>;
+      // Set up template.
+      const story = (
+        <amp-story>
+          <amp-story-page id="page1">
+            <amp-story-shopping-tag data-product-id="lamp"></amp-story-shopping-tag>
+            <amp-story-shopping-tag data-product-id="art"></amp-story-shopping-tag>
+            <amp-story-shopping-attachment>
+              <script type="application/json">
+                {JSON.stringify(shoppingData)}
+              </script>
+            </amp-story-shopping-attachment>
+          </amp-story-page>
+        </amp-story>
+      );
       win.document.body.appendChild(story);
-      pageEl = <amp-story-page id="page1"></amp-story-page>;
-      story.appendChild(pageEl);
-
-      // Set up shopping tags.
-      const lampShoppingTagEl = (
-        <amp-story-shopping-tag data-product-id="lamp"></amp-story-shopping-tag>
-      );
-      pageEl.appendChild(lampShoppingTagEl);
-      const artShoppingTagEl = (
-        <amp-story-shopping-tag data-product-id="art"></amp-story-shopping-tag>
-      );
-      pageEl.appendChild(artShoppingTagEl);
-
-      // Set up shopping attachment.
-      shoppingEl = (
-        <amp-story-shopping-attachment>
-          <script type="application/json">
-            {JSON.stringify(shoppingData)}
-          </script>
-        </amp-story-shopping-attachment>
-      );
-      pageEl.appendChild(shoppingEl);
-
+      shoppingEl = story.querySelector('amp-story-shopping-attachment');
       shoppingImpl = await shoppingEl.getImpl();
 
+      // shoppingImpl stubs.
       env.sandbox
         .stub(shoppingImpl, 'mutateElement')
         .callsFake((fn) => Promise.resolve(fn()));
