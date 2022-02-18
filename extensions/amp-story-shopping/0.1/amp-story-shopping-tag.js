@@ -10,8 +10,8 @@ import {Services} from '#service';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
-import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {CSS as shoppingSharedCSS} from '../../../build/amp-story-shopping-shared-0.1.css';
+import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
   Action,
   ShoppingConfigDataDef,
