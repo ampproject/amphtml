@@ -117,19 +117,26 @@ describes.realWin(
     };
 
     beforeEach(async () => {
-      pageElement = <amp-story-page id="page1"></amp-story-page>;
-      env.win.document.body.appendChild(pageElement);
+      pageElement = env.win.document.createElement('amp-story-page');
+      pageElement.id = 'page1';
     });
 
     async function createAmpStoryShoppingConfig(
       src = undefined,
       config = defaultInlineConfig
     ) {
-      const shoppingAttachment = (
-        <amp-story-shopping-attachment layout="nodisplay" src={src}>
-          <script type="application/json">{JSON.stringify(config)}</script>
-        </amp-story-shopping-attachment>
+      const shoppingAttachment = env.win.document.createElement(
+        'amp-story-shopping-attachment'
       );
+      shoppingAttachment.setAttribute('layout', 'nodisplay');
+      shoppingAttachment.setAttribute('src', src);
+      shoppingAttachment.appendChild(
+        <script type="application/json">{JSON.stringify(config)}</script>
+      );
+      const story = env.win.document.createElement('amp-story');
+      env.win.document.body.appendChild(story);
+      story.appendChild(pageElement);
+
       pageElement.appendChild(shoppingAttachment);
       return getShoppingConfig(shoppingAttachment);
     }
