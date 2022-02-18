@@ -132,9 +132,7 @@ describes.realWin(
       // Attachment child stubs.
       attachmentChildEl = shoppingEl.querySelector('amp-story-page-attachment');
       attachmentChildImpl = await attachmentChildEl.getImpl();
-      env.sandbox
-        .stub(attachmentChildImpl.historyService_, 'push')
-        .callsFake(() => Promise.resolve());
+      env.sandbox.stub(attachmentChildImpl.historyService_, 'push').resolves();
       env.sandbox
         .stub(attachmentChildImpl, 'mutateElement')
         .callsFake((fn) => Promise.resolve(fn()));
@@ -163,7 +161,7 @@ describes.realWin(
       storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
       expect(
         attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-plp')
-      ).to.not.be.null;
+      ).to.exist;
     });
 
     it('should open attachment when active product data is set', async () => {
@@ -173,11 +171,8 @@ describes.realWin(
       // Simulating the getImpl in amp-story-shopping-attachment's
       // onShoppingDataUpdate_ method
       await attachmentChildEl.getImpl();
-      expect(
-        attachmentChildEl.classList.contains(
-          'i-amphtml-story-draggable-drawer-open'
-        )
-      ).to.be.true;
+      const drawerState = storeService.get(StateProperty.PAGE_ATTACHMENT_STATE);
+      expect(drawerState).to.be.true;
     });
 
     it('should build PDP if active product data', async () => {
