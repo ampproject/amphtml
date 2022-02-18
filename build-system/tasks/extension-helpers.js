@@ -630,6 +630,18 @@ async function buildBentoCss(name, versions, minifiedAmpCss) {
 async function buildNpmBinaries(extDir, name, options) {
   let {npm} = options;
   if (npm === true) {
+    // remap all shared modules to the @bentoproject/core package and declare as external
+    // todo(kvchari): currently only used for bento standalone, investigate using for preact & react
+    const bentoEntryPoint = await getBentoBuildFilename(
+      extDir,
+      getBentoName(name),
+      'web-component',
+      options
+    );
+    const fullEntryPoint = path.join(extDir, bentoEntryPoint);
+    const remap = getRemapBentoNpmDependencies(fullEntryPoint);
+    const external = [...new Set(Object.values(remap))];
+
     npm = {
       preact: {
         entryPoint: 'component.js',
@@ -652,22 +664,14 @@ async function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
       bento: {
-        entryPoint: await getBentoBuildFilename(
-          extDir,
-          getBentoName(name),
-          'web-component',
-          options
-        ),
+        entryPoint: bentoEntryPoint,
         outfile: 'web-component.js',
         wrapper: '',
+
+        remap,
+        external,
       },
     };
-    if (options.useBentoCore) {
-      // remap all shared modules to the @bentoproject/
-      const fullEntryPoint = path.join(extDir, npm.bento.entryPoint);
-      npm.bento.remap = getRemapBentoNpmDependencies(fullEntryPoint);
-      npm.bento.external = Object.values(npm.bento.remap);
-    }
   }
   const binaries = Object.values(npm);
   return buildBinaries(extDir, binaries, options);
