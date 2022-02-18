@@ -15,11 +15,32 @@ import {useAmpContext} from '#preact/context';
 import {useInfiniteQuery} from '#preact/hooks/useInfiniteQuery';
 import {xhrUtils} from '#preact/utils/xhr';
 
-const defaultItemTemplate = (item) => <p>{String(item)}</p>;
+import {useStyles} from './component.jss';
+
+const defaultItemTemplate = (item) => <div>{String(item)}</div>;
 const defaultWrapperTemplate = (list) => <div>{list}</div>;
-const defaultErrorTemplate = (error) => `Error: ${error.message}`;
-const defaultLoadingTemplate = () => `Loading...`;
-const defaultLoadMoreTemplate = () => <button>Load more</button>;
+const defaultErrorTemplate = (styles, unusedError) => (
+  <div>
+    {'Unable to Load More '}
+    <button load-more-retry>
+      <label>
+        <span class={styles.loadMoreIcon} /> Retry
+      </label>
+    </button>
+  </div>
+);
+const defaultLoadMoreTemplate = () => (
+  <div>
+    <button load-more-button>
+      <label>See More</label>
+    </button>
+  </div>
+);
+const defaultLoadingTemplate = (styles) => (
+  <div>
+    <span aria-label="Loading" class={styles.loadMoreSpinner} />
+  </div>
+);
 
 /**
  * Retrieves the key from the object.
@@ -83,15 +104,14 @@ export function BentoListWithRef(
     fetchJson = xhrUtils.fetchJson,
     itemsKey = 'items',
     maxItems = 0,
-    resetOnRefresh = false,
     loadMore: loadMoreMode = 'none',
     loadMoreBookmark = 'load-more-src',
     viewportBuffer = 2.0, // When loadMore === 'auto', keep loading up to 2 viewports of data
     template: itemTemplate = defaultItemTemplate,
     wrapperTemplate = defaultWrapperTemplate,
+    loadMoreTemplate = defaultLoadMoreTemplate,
     loadingTemplate = defaultLoadingTemplate,
     errorTemplate = defaultErrorTemplate,
-    loadMoreTemplate = defaultLoadMoreTemplate,
     ...rest
   },
   ref
@@ -164,9 +184,18 @@ export function BentoListWithRef(
     });
   }, [pages, itemsKey, maxItems, itemTemplate]);
 
-  const showLoading = loading && (pages.length === 0 || resetOnRefresh);
-  const showResults = list.length !== 0 && !showLoading;
-  const showLoadMore = loadMoreMode === 'manual' && hasMore;
+  const handleContainerClick = (ev) => {
+    const loadMoreButton = ev.target.closest(
+      '[load-more-button], [load-more-retry]'
+    );
+    if (loadMoreButton) {
+      loadMore();
+    }
+  };
+
+  const showLoading = loading;
+  const showResults = list.length !== 0;
+  const showLoadMore = loadMoreMode === 'manual' && hasMore && !loading;
 
   useImperativeHandle(
     ref,
@@ -177,14 +206,15 @@ export function BentoListWithRef(
     [reset]
   );
 
+  const styles = useStyles();
+
   return (
-    <ContainWrapper aria-live="polite" {...rest}>
+    <ContainWrapper aria-live="polite" {...rest} onClick={handleContainerClick}>
       <Fragment test-id="contents">
-        {showLoading && loadingTemplate?.()}
         {showResults && augment(wrapperTemplate(list), {'role': 'list'})}
-        {error && errorTemplate?.(error)}
-        {showLoadMore &&
-          augment(loadMoreTemplate(), {onClick: () => loadMore()})}
+        {showLoading && loadingTemplate(styles)}
+        {showLoadMore && loadMoreTemplate(styles)}
+        {error && errorTemplate(styles, error)}
         {loadMoreMode === 'auto' && <span ref={bottomRef} />}
       </Fragment>
     </ContainWrapper>

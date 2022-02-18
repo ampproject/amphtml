@@ -681,7 +681,7 @@
     "name": "amp-list",
     "version": "1.0",
     "options": {
-      "hasCss": true,
+      "hasCss": false,
       "npm": true,
       "bento": true
     }
