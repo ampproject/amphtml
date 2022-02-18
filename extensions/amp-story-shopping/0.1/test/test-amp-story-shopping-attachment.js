@@ -3,17 +3,10 @@ import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 
-import {createElementWithAttributes} from '#core/dom';
 import '../../../amp-story/1.0/amp-story';
 import '../../../amp-story/1.0/amp-story-page';
 import '../amp-story-shopping';
 import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
-
-import {
-  measureElementStub,
-  measureMutateElementStub,
-  mutateElementStub,
-} from '#testing/helpers/service';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
@@ -150,6 +143,9 @@ describes.realWin(
       env.sandbox
         .stub(attachmentChildImpl.historyService_, 'push')
         .callsFake(() => Promise.resolve());
+      env.sandbox
+        .stub(attachmentChildImpl, 'mutateElement')
+        .callsFake((fn) => Promise.resolve(fn()));
 
       // Set page to active.
       storeService.dispatch(Action.CHANGE_PAGE, {id: 'page1', index: 1});
@@ -163,23 +159,14 @@ describes.realWin(
       expect(attachmentChildEl.getAttribute('cta-text')).to.equal('Shop Now');
     });
 
-    it('should open attachment', async () => {
-      env.sandbox.stub(attachmentChildImpl, 'mutateElement').callsFake(() => {
-        expect(pageEl.querySelector('.i-amphtml-story-draggable-drawer-open'))
-          .to.not.be.null;
-      });
+    it('should build PLP on attachment state open if no active product data', async () => {
+      await shoppingImpl.layoutCallback();
+      await attachmentChildImpl.layoutCallback();
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+      expect(
+        attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-plp')
+      ).to.not.be.null;
     });
-
-    // it('should build PLP on CTA click', async () => {
-    //   // await dispatchTestShoppingData();
-    //   attachmentChildImpl.open();
-
-    //   // await attachmentChildImpl.buildCallback();
-    //   // await attachmentChildImpl.layoutCallback();
-    //   // debugger;
-
-    //   expect(pageEl.querySelector('.amp-story-shopping-plp')).to.not.be.null;
-    // });
 
     // it('should build PLP with data from tag on page', async () => {
     //   // await dispatchTestShoppingData();
