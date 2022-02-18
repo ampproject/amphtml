@@ -1,5 +1,3 @@
-import {expect} from 'chai';
-
 import {user} from '#utils/log';
 
 import {Entitlement, GrantReason} from '../entitlement';
