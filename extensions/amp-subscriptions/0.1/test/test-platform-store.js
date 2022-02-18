@@ -1016,9 +1016,14 @@ describes.realWin('Platform store', {}, (env) => {
   describe('resetPlatformStore', () => {
     it('the entitlement callback added through public API should persist even after the platform store gets reset', async () => {
       const isCallbackCalled = new Deferred();
-      platformStore.addOnEntitlementResolvedCallback(() => {
-        isCallbackCalled.resolve(true);
-      });
+      const callback = () => isCallbackCalled.resolve(true);
+
+      const callbackObservableSpy = env.sandbox.spy(
+        platformStore.externalOnEntitlementResolvedCallbacks_,
+        'add'
+      );
+      platformStore.addOnEntitlementResolvedCallback(callback);
+      expect(callbackObservableSpy.withArgs(callback)).to.be.calledOnce;
 
       const newStore = platformStore.resetPlatformStore();
       newStore.resolveEntitlement(
