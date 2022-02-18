@@ -67,7 +67,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
 
     getShoppingConfig(this.element).then((config) =>
-      storeShoppingConfig(this.element, config)
+      storeShoppingConfig(this.pageEl_, config)
     );
 
     if (this.shoppingTags_.length === 0) {
@@ -139,7 +139,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * If active data is set, open the attachment.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
   checkOpenAttachment_(shoppingData) {
@@ -150,18 +150,17 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Updates template based on shopping data.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
   updateTemplate_(shoppingData) {
-    const shoppingDataForPage = this.shoppingTags_.map(
-      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
-    );
+    const productOnPageToConfig = shoppingData[this.pageEl_.id];
+    const shoppingDataPerPage = Object.values(productOnPageToConfig);
 
     let productForPdp = shoppingData.activeProductData;
     // If no active product and only one product on page, use the one product for the PDP.
-    if (!shoppingData.activeProductData && shoppingDataForPage.length === 1) {
-      productForPdp = shoppingDataForPage[0];
+    if (!productForPdp && shoppingDataPerPage.length === 1) {
+      productForPdp = shoppingDataPerPage[0];
     }
 
     // templateId string used to key already built templates.
@@ -175,7 +174,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     const template = this.getTemplate_(
       templateId,
       productForPdp,
-      shoppingDataForPage
+      shoppingDataPerPage
     );
     template.setAttribute('active', '');
     this.resetScroll_(template);

@@ -43,16 +43,16 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
-    /** @param {boolean} element */
+    /** @private {boolean} element */
     this.hasAppendedInnerShoppingTagEl_ = false;
 
-    /** @param {!ShoppingConfigDataDef} tagData */
+    /** @private {!ShoppingConfigDataDef} tagData */
     this.tagData_ = null;
 
-    /** @param {?AmpElement} element */
+    /** @private {?AmpElement} element */
     this.shoppingAttachment_ = null;
 
-    /** @param {!AmpElement} element */
+    /** @private {!AmpElement} element */
     this.shoppingTagEl_ = null;
   }
 
@@ -258,7 +258,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   createAndAppendInnerShoppingTagEl_(shoppingData) {
-    this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
+    const pageElement = closestAncestorElementBySelector(
+      this.element,
+      'amp-story-page'
+    );
+
+    this.tagData_ =
+      shoppingData[pageElement.id][
+        this.element.getAttribute('data-product-id')
+      ];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
