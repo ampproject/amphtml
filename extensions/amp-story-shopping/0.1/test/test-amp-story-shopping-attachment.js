@@ -147,6 +147,11 @@ describes.realWin(
       });
     }
 
+    async function layoutShoppingImplAndAttachmentChildImpl() {
+      await shoppingImpl.layoutCallback();
+      await attachmentChildImpl.layoutCallback();
+    }
+
     it('should build shopping attachment component', () => {
       expect(() => shoppingImpl.layoutCallback()).to.not.throw();
     });
@@ -156,8 +161,7 @@ describes.realWin(
     });
 
     it('should build PLP on attachment state open if no active product data', async () => {
-      await shoppingImpl.layoutCallback();
-      await attachmentChildImpl.layoutCallback();
+      await layoutShoppingImplAndAttachmentChildImpl();
       storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
       expect(
         attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-plp')
@@ -165,8 +169,7 @@ describes.realWin(
     });
 
     it('should open attachment when active product data is set', async () => {
-      await shoppingImpl.layoutCallback();
-      await attachmentChildImpl.layoutCallback();
+      await layoutShoppingImplAndAttachmentChildImpl();
       dispatchActiveProductData();
       // Simulating the getImpl in amp-story-shopping-attachment's
       // onShoppingDataUpdate_ method
@@ -176,8 +179,7 @@ describes.realWin(
     });
 
     it('should build PDP if active product data', async () => {
-      await shoppingImpl.layoutCallback();
-      await attachmentChildImpl.layoutCallback();
+      await layoutShoppingImplAndAttachmentChildImpl();
       dispatchActiveProductData();
       // Simulating the getImpl in amp-story-shopping-attachment's
       // onShoppingDataUpdate_ method
@@ -188,8 +190,7 @@ describes.realWin(
     });
 
     it('should build PDP on PLP card click', async () => {
-      await shoppingImpl.layoutCallback();
-      await attachmentChildImpl.layoutCallback();
+      await layoutShoppingImplAndAttachmentChildImpl();
       storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
       const plpCard = attachmentChildEl.querySelector(
         '.i-amphtml-amp-story-shopping-plp-card'
@@ -201,8 +202,7 @@ describes.realWin(
     });
 
     it('should default to PDP on open if only one product for the page', async () => {
-      await shoppingImpl.layoutCallback();
-      await attachmentChildImpl.layoutCallback();
+      await layoutShoppingImplAndAttachmentChildImpl();
       // Override to simulate data for one product on the page.
       storeService.dispatch(Action.ADD_SHOPPING_DATA, {
         page1: {
@@ -216,8 +216,7 @@ describes.realWin(
     });
 
     it('should clear active product data on drawer transition end', async () => {
-      await shoppingImpl.layoutCallback();
-      await attachmentChildImpl.layoutCallback();
+      await layoutShoppingImplAndAttachmentChildImpl();
       dispatchActiveProductData();
       attachmentChildEl.dispatchEvent(new Event('transitionend'));
       const {activeProductData} = storeService.get(StateProperty.SHOPPING_DATA);
