@@ -184,7 +184,7 @@ describes.realWin(
       await attachmentChildEl.getImpl();
       expect(
         attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-pdp')
-      ).to.not.be.null;
+      ).to.exist;
     });
 
     it('should build PDP on PLP card click', async () => {
@@ -197,7 +197,7 @@ describes.realWin(
       plpCard.dispatchEvent(new Event('click'));
       expect(
         attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-pdp')
-      ).to.not.be.null;
+      ).to.exist;
     });
 
     it('should default to PDP on open if only one product for the page', async () => {
@@ -212,7 +212,7 @@ describes.realWin(
       storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
       expect(
         attachmentChildEl.querySelector('.i-amphtml-amp-story-shopping-pdp')
-      ).to.not.be.null;
+      ).to.exist;
     });
 
     it('should clear active product data on drawer transition end', async () => {
