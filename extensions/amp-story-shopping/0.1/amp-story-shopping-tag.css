@@ -183,7 +183,7 @@ amp-story-shopping-tag {
   --clip-path-end-circle-supports-rtl: circle(calc(var(--i-amphtml-pill-icon-size) * .5 + var(--i-amphtml-pill-padding-inline-start)) at calc(100% - var(--i-amphtml-pill-padding-inline-start) - var(--i-amphtml-pill-icon-size) * .5)) !important;
   --clip-path-inset-offset-supports-rtl: inset(0 0 0 calc(100% - 36px) round 30px) !important;
 
-  /* Transform orign from center of icon (right side) in RTL. */
+  /* Transform origin from center of icon (right side) in RTL. */
   transform-origin: calc(100% - var(--i-amphtml-pill-transfrom-origin)) !important;
 }
 
