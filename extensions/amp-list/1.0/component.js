@@ -12,6 +12,7 @@ import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {useIsInViewport} from '#preact/component/intersection-observer';
 import {useAmpContext} from '#preact/context';
+import {useEventDelegation} from '#preact/hooks/useEventDelegation';
 import {useInfiniteQuery} from '#preact/hooks/useInfiniteQuery';
 import {xhrUtils} from '#preact/utils/xhr';
 
@@ -22,7 +23,7 @@ const defaultWrapperTemplate = (list) => <div>{list}</div>;
 const defaultErrorTemplate = (styles, unusedError) => (
   <div>
     {'Unable to Load More '}
-    <button>
+    <button load-more-retry>
       <label>
         <span class={styles.loadMoreIcon} /> Retry
       </label>
@@ -31,14 +32,14 @@ const defaultErrorTemplate = (styles, unusedError) => (
 );
 const defaultLoadMoreTemplate = () => (
   <div>
-    <button>
+    <button load-more-button>
       <label>See More</label>
     </button>
   </div>
 );
 const defaultLoadingTemplate = (styles) => (
   <div>
-    <span class={styles.loadMoreSpinner} />
+    <span aria-label="Loading" class={styles.loadMoreSpinner} />
   </div>
 );
 
@@ -104,7 +105,6 @@ export function BentoListWithRef(
     fetchJson = xhrUtils.fetchJson,
     itemsKey = 'items',
     maxItems = 0,
-    resetOnRefresh = false,
     loadMore: loadMoreMode = 'none',
     loadMoreBookmark = 'load-more-src',
     viewportBuffer = 2.0, // When loadMore === 'auto', keep loading up to 2 viewports of data
@@ -185,6 +185,14 @@ export function BentoListWithRef(
     });
   }, [pages, itemsKey, maxItems, itemTemplate]);
 
+  const containerRef = useRef(null);
+  useEventDelegation(
+    containerRef,
+    '[load-more-button], [load-more-retry]',
+    'click',
+    () => loadMore()
+  );
+
   const showLoading = loading;
   const showResults = list.length !== 0;
   const showLoadMore = loadMoreMode === 'manual' && hasMore && !loading;
@@ -201,15 +209,12 @@ export function BentoListWithRef(
   const styles = useStyles();
 
   return (
-    <ContainWrapper aria-live="polite" {...rest}>
+    <ContainWrapper aria-live="polite" {...rest} ref={containerRef}>
       <Fragment test-id="contents">
         {showResults && augment(wrapperTemplate(list), {'role': 'list'})}
-        {error && errorTemplate(styles, error)}
         {showLoading && loadingTemplate(styles)}
-        {showLoadMore &&
-          augment(loadMoreTemplate(styles), {
-            onClick: () => loadMore(),
-          })}
+        {showLoadMore && loadMoreTemplate(styles)}
+        {error && errorTemplate(styles, error)}
         {loadMoreMode === 'auto' && <span ref={bottomRef} />}
       </Fragment>
     </ContainWrapper>

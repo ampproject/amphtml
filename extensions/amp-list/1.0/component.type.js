@@ -17,7 +17,6 @@ BentoListDef.CssStyles;
  *   fetchItems?: (function(): Promise<*>),
  *   itemsKey?: string,
  *   maxItems?: number,
- *   resetOnRefresh?: boolean,
  *   loadMore?: 'manual' | 'none' | 'auto',
  *   loadMoreBookmark?: string,
  *   viewportBuffer?: number,
