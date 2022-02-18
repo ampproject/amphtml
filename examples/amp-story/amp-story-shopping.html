@@ -121,14 +121,6 @@
           </script>
         </amp-story-shopping-attachment>
       </amp-story-page>
-      <amp-story-page id="remote-dark-theme">
-        <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
-        </amp-story-grid-layer>
-      </amp-story-page>
       <amp-story-page id="inline-dark-theme">
         <!--
           Dark theme example of Inline config. Multiple product tags with icon defined.
@@ -250,6 +242,18 @@
           }
         </script>
       </amp-story-shopping-attachment>
+      </amp-story-page>
+       <!--
+          Example of:
+          CTA Button not rendering due to no page attachment.
+        -->
+      <amp-story-page id="remote-dark-theme">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
   </body>
