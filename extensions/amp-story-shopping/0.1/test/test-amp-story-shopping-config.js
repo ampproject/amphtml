@@ -121,8 +121,8 @@ describes.realWin(
       env.win.document.body.appendChild(pageElement);
     });
 
-    function createAmpStoryShoppingConfig(
-      src = null,
+    async function createAmpStoryShoppingConfig(
+      src = undefined,
       config = defaultInlineConfig
     ) {
       const shoppingAttachment = (
