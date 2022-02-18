@@ -134,7 +134,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
-   * If active data is set, open the attachment.
+   * Handles template changes when there is activeProductData.
+   * This happens when a product tag or PLP card is clicked.
    * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
