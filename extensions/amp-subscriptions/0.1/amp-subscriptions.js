@@ -209,10 +209,10 @@ export class SubscriptionService {
   }
 
   /**
-   * Maybe select and activate all platforms. Do nothing if the viewer can authorize the user.
+   * Maybe renders and opens the dialog using the cached entitlements. Do nothing if the viewer can authorize the user.
    * @return {!Promise}
    */
-  maybeSelectAndActivatePlatform() {
+  maybeRenderDialogForSelectedPlatform() {
     return this.initialize_().then(() => {
       if (this.doesViewerProvideAuth_ || this.platformConfig_['alwaysGrant']) {
         return;

@@ -1,11 +1,7 @@
-import {expect} from 'chai';
-
-import {Deferred} from '#core/data-structures/promise';
-
 import {user} from '#utils/log';
 
 import {Entitlement, GrantReason} from '../entitlement';
-import {PlatformStore} from '../platform-store';
+import {EntitlementChangeEventDef, PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
 
 describes.realWin('Platform store', {}, (env) => {
@@ -1014,26 +1010,21 @@ describes.realWin('Platform store', {}, (env) => {
   });
 
   describe('resetPlatformStore', () => {
-    it('the entitlement callback added through public API should persist even after the platform store gets reset', async () => {
-      const isCallbackCalled = new Deferred();
-      const callback = () => isCallbackCalled.resolve(true);
-
-      const callbackObservableSpy = env.sandbox.spy(
-        platformStore.externalOnEntitlementResolvedCallbacks_,
-        'add'
-      );
-      platformStore.addOnEntitlementResolvedCallback(callback);
-      expect(callbackObservableSpy.withArgs(callback)).to.be.calledOnce;
+    it.only('the entitlement callback added through public API should persist even after the platform store gets reset', async () => {
+      const callbackSpy = env.sandbox.spy();
+      platformStore.addOnEntitlementResolvedCallback(callbackSpy);
 
       const newStore = platformStore.resetPlatformStore();
-      newStore.resolveEntitlement(
-        'platform1',
-        new Entitlement({
-          service: 'platform1',
-          granted: false,
-        })
-      );
-      await expect(isCallbackCalled.promise).to.eventually.equal(true);
+      const newEntitlement = new Entitlement({
+        service: 'platform1',
+        granted: false,
+      });
+      newStore.resolveEntitlement('platform1', newEntitlement);
+      expect(callbackSpy).to.have.been.calledOnce;
+      expect(callbackSpy).to.have.been.calledOnceWithExactly({
+        platfromKey: 'platform1',
+        entitlement: newEntitlement,
+      });
     });
   });
 });
