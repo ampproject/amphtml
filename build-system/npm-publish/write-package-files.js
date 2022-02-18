@@ -123,10 +123,9 @@ async function getDescription() {
 
 /**
  * Write package.json
- * @param {{useBentoCore: boolean}} options
  * @return {Promise<void>}
  */
-async function writePackageJson({useBentoCore}) {
+async function writePackageJson() {
   const version = getSemver(extensionVersion, ampVersion);
   if (ampVersion.length != 13 || !valid(version) || !valid(corePkgVersion)) {
     log(
@@ -186,11 +185,10 @@ async function writePackageJson({useBentoCore}) {
       preact: '^10.2.1',
       react: '^17.0.0',
     },
+    dependencies: {
+      [corePkgName]: corePkgVersion,
+    },
   };
-  if (useBentoCore) {
-    json.dependencies = json.dependencies || {};
-    json.dependencies[corePkgName] = corePkgVersion;
-  }
 
   try {
     await writeFile(`${dir}/package.json`, JSON.stringify(json, null, 2));
@@ -253,7 +251,7 @@ async function main() {
   if (await shouldSkip()) {
     return;
   }
-  await writePackageJson({useBentoCore: false});
+  await writePackageJson();
   await writeReactJs();
   await copyCssToRoot();
 }
