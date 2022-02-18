@@ -1,7 +1,7 @@
 import {user} from '#utils/log';
 
 import {Entitlement, GrantReason} from '../entitlement';
-import {EntitlementChangeEventDef, PlatformStore} from '../platform-store';
+import {PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
 
 describes.realWin('Platform store', {}, (env) => {
