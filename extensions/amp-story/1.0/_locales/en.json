@@ -230,13 +230,5 @@
   "104": {
     "string": "reviews",
     "description": "Button label prompting users to read about peoples assessments of an item."
-  },
-  "105": {
-    "string": "Already a subscriber?",
-    "description": "Label for checking if the user is already a subscriber of the publisher site or not."
-  },
-  "106": {
-    "string": "Sign in",
-    "description": "Label for the sign in button to redirect users to publisher site to sign in."
   }
 }

@@ -25,7 +25,7 @@ amp-story-subscriptions::before {
   left: 0 !important;
   height: 100% !important;
   width: 100% !important;
-  background: black !important;
+  background: #000000 !important;
   opacity: 0 !important;
   pointer-events: auto !important;
   transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1) !important;
@@ -34,87 +34,4 @@ amp-story-subscriptions::before {
 amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
   opacity: 0.55 !important;
   transition: opacity 0.2s cubic-bezier(0, 0, 0.2, 1) !important;
-}
-
-/** Make the dialog wrapper from amp-subscriptions round corner. */
-amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
-  border-radius: 16px 16px 0px 0px !important;
-  font-family: Poppins, sans-serif !important;
-}
-
-.i-amphtml-story-subscriptions-banner {
-  position: relative !important;
-  width: 100% !important;
-  background: #EBDEC9 !important;
-  border-radius: 16px 16px 0px 0px !important;
-  font-size: 24px !important;
-  text-align: center !important;
-  padding: 23px 0 !important;
-}
-
-.i-amphtml-story-subscriptions-title {
-  width: 100% !important;
-  font-style: normal !important;
-  font-weight: bold !important;
-  font-size: 20px !important;
-  text-align: center !important;
-  color: black !important;
-  margin-top: 31px !important;
-}
-
-.i-amphtml-story-subscriptions-subtitle-first, .i-amphtml-story-subscriptions-subtitle-second {
-  width: 100% !important;
-  font-style: normal !important;
-  font-size: 16px !important;
-  text-align: center !important;
-  color: black !important;
-}
-
-.i-amphtml-story-subscriptions-subtitle-first {
-  margin-top: 14px !important;
-}
-
-.i-amphtml-story-subscriptions-signin {
-  text-align: center !important;
-  margin-bottom: 35px !important;
-}
-
-.i-ampthml-story-subscriptions-button-container {
-  display: flex !important;
-  margin-top: 35px !important;
-  margin-bottom: 41px !important;
-  justify-content: center !important;
-  padding: 0 10px !important;
-  font-family: Google Sans, sans-serif !important;
-}
-
-.i-amphtml-story-subscriptions-button-google {
-  margin: 0 10px !important;
-}
-
-.i-amphtml-story-subscriptions-button-publisher {
-  background: black !important;
-  margin: 0 10px !important;
-  border-radius: 100px !important;
-  height: 40px !important;
-  width: 142px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.i-amphtml-story-subscriptions-button-publisher .i-amphtml-story-subscriptions-publisher-button-text {
-  margin-left: 5px !important;
-  margin-right: 5px !important;
-  color: white !important;
-}
-
-.i-amphtml-story-subscriptions-button-publisher .i-amphtml-story-subscriptions-publisher-logo {
-  width: 27px !important;
-  height: 27px !important;
-}
-
-.i-amphtml-story-subscriptions-signin a {
-  text-decoration: underline !important;
-  font-weight: bold !important;
 }
