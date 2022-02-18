@@ -8,6 +8,22 @@
     }
   },
   {
+    "name": "bento-brightcove",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-dailymotion",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "bento-jwplayer",
     "version": "1.0",
     "options": {
@@ -20,6 +36,38 @@
     "options": {
       "hasCss": true,
       "npm": true
+    }
+  },
+  {
+    "name": "bento-video",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-video-iframe",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-vimeo",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-youtube",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
     }
   }
 ]

@@ -28,8 +28,8 @@ that were generated using the Google Cloud Console won’t work.
   </tr>
     <tr>
     <td width="20%"><strong>data-tracking-ids (required)</strong></td>
-    <td>The list of the Google Analytics tracking IDs to send the player metrics to (comma
-separated).
+    <td>The list of the <a href="https://support.google.com/analytics/answer/7372977">
+Google Analytics tracking IDs</a> to send the player metrics to (comma separated).
 <br><br>
 You are required to have a Google Analytics tracking ID in order to use this player during the
 pilot period. The tracking ID will be provided to you by Google.
@@ -122,3 +122,8 @@ Include an `amp-google-read-aloud-player` on your AMP document:
   data-voice="<YOUR_VOICE>"
 ></amp-google-read-aloud-player>
 ```
+
+## Validation
+
+See [amp-google-read-aloud-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-google-read-aloud-player/validator-amp-google-read-aloud-player.protoascii)
+in the AMP validator specification.

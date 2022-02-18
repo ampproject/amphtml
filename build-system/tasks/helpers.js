@@ -14,13 +14,14 @@ const {
 const {cyan, green, red} = require('kleur/colors');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {massageSourcemaps} = require('./sourcemaps');
+const {includeSourcesContent, massageSourcemaps} = require('./sourcemaps');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
 const {resolvePath} = require('../babel-config/import-resolver');
+const {debug} = require('../compile/debug-compilation-lifecycle');
 const babel = require('@babel/core');
 
 /**
@@ -343,7 +344,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         entryPoints: [entryPoint],
         bundle: true,
         sourcemap: 'external',
-        sourcesContent: !!argv.full_sourcemaps,
+        sourcesContent: includeSourcesContent(),
         outfile: destFile,
         define: experimentDefines,
         plugins,
@@ -396,6 +397,12 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       });
       code = result.code;
       mapChain.unshift(result.map);
+      debug(
+        'post-terser',
+        path.join(process.cwd(), destFile),
+        code,
+        result.map
+      );
     }
 
     await Promise.all([

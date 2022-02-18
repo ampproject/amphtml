@@ -186,7 +186,8 @@ export class Scheduler {
     if (
       vs == VisibilityState_Enum.VISIBLE ||
       vs == VisibilityState_Enum.HIDDEN ||
-      vs == VisibilityState_Enum.PRERENDER
+      vs == VisibilityState_Enum.PRERENDER ||
+      vs == VisibilityState_Enum.PREVIEW
     ) {
       this.targets_.forEach((_, target) => this.maybeBuild_(target));
     }
@@ -274,7 +275,9 @@ export class Scheduler {
         // Hidden (hidden tab) allows full build.
         vs == VisibilityState_Enum.HIDDEN ||
         // Prerender can only proceed when allowed.
-        (vs == VisibilityState_Enum.PRERENDER && target.prerenderAllowed()));
+        (vs == VisibilityState_Enum.PRERENDER && target.prerenderAllowed()) ||
+        // Preview can only proceed when allowed.
+        (vs == VisibilityState_Enum.PREVIEW && target.previewAllowed()));
     if (!toBuild) {
       return;
     }
