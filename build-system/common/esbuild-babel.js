@@ -1,7 +1,7 @@
 const babel = require('@babel/core');
 const path = require('path');
 const {debug} = require('../compile/debug-compilation-lifecycle');
-const {includeSourcesContent} = require('./sourcemaps');
+const {includeSourcesContent} = require('../tasks/sourcemaps');
 const {TransformCache, batchedRead, md5} = require('./transform-cache');
 const Remapping = require('@ampproject/remapping');
 
