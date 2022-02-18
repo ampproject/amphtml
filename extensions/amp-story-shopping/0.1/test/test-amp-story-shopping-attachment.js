@@ -1,19 +1,18 @@
 import * as Preact from '#core/dom/jsx';
+
 import {Services} from '#service';
-import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 
 import '../../../amp-story/1.0/amp-story';
 import '../../../amp-story/1.0/amp-story-page';
 import '../amp-story-shopping';
 import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
-
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
-  getStoreService,
   StateProperty,
+  getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {expect} from 'chai';
+import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 
 describes.realWin(
   'amp-story-shopping-attachment-v0.1',
@@ -87,14 +86,20 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       // Services and stubs.
-      registerServiceBuilder(win, 'performance', () => ({
-        isPerformanceTrackingOn: () => false,
-      }));
+      registerServiceBuilder(win, 'performance', function () {
+        return {
+          isPerformanceTrackingOn: () => false,
+        };
+      });
       storeService = getStoreService(win);
-      registerServiceBuilder(win, 'story-store', () => storeService);
+      registerServiceBuilder(win, 'story-store', function () {
+        return storeService;
+      });
       env.sandbox.stub(win.history, 'replaceState');
       const analytics = new StoryAnalyticsService(win, win.document.body);
-      registerServiceBuilder(win, 'story-analytics', () => analytics);
+      registerServiceBuilder(win, 'story-analytics', function () {
+        return analytics;
+      });
       const ownersMock = {
         scheduleLayout: () => {},
         scheduleResume: () => {},
@@ -220,9 +225,7 @@ describes.realWin(
       await attachmentChildImpl.layoutCallback();
       dispatchActiveProductData();
       attachmentChildEl.dispatchEvent(new Event('transitionend'));
-      const activeProductData = storeService.get(
-        StateProperty.SHOPPING_DATA
-      ).activeProductData;
+      const {activeProductData} = storeService.get(StateProperty.SHOPPING_DATA);
       expect(activeProductData).to.be.null;
     });
   }
