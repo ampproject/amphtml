@@ -12,7 +12,8 @@ import {cleanHtml} from './utils';
 
 const CONTENTS = 'div > div'; // TODO: find a better way to find the component's contents
 function snapshot(element) {
-  return cleanHtml(element.shadowRoot.querySelector(CONTENTS).innerHTML);
+  const keep = ['aria-label'];
+  return cleanHtml(element.shadowRoot.querySelector(CONTENTS).innerHTML, keep);
 }
 
 function delay(ms = 50) {
@@ -43,8 +44,8 @@ describes.realWin(
       await element.buildInternal();
       await waitFor(() => element.isConnected, 'element connected');
       await waitFor(
-        () => element.shadowRoot.querySelector(CONTENTS).textContent,
-        'element rendered'
+        () => element.shadowRoot.querySelector(CONTENTS).innerHTML,
+        'element initial render'
       );
       return element;
     }
@@ -60,7 +61,7 @@ describes.realWin(
       });
     });
 
-    const expectedLoading = `Loading...`;
+    const expectedLoading = '<div><span aria-label="Loading"></span></div>';
     const expectedPage1 = `<div><span>one</span><span>two</span><span>three</span></div>`;
 
     it('renders the Loading state, then renders the results', async () => {
