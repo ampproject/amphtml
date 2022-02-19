@@ -16,17 +16,6 @@ amp-story-shopping-attachment a {
   text-decoration: none !important;
 }
 
-/* Button reset. */
-amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header {
-  background: none !important;
-  border: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  width: 100% !important;
-  font-family: inherit !important;
-  font-size: inherit !important;
-}
-
 .i-amphtml-amp-story-shopping {
   display: none !important;
 }
@@ -263,6 +252,7 @@ amp-story-shopping-attachment .i-amphtml-amp-story-shopping-pdp-details-header {
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
+  width: 100% !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-details-header-arrow {

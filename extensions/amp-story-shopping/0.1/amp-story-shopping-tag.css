@@ -24,7 +24,7 @@ amp-story-shopping-tag {
   line-height: 15.4px !important;
 }
 
-/* Maintains the correct image and text order inside the tag in RTL mode */
+/* Maintains the correct image and text order inside the tag in RTL mode. */
 [dir=rtl].i-amphtml-amp-story-shopping-tag-inner {
   flex-flow: row-reverse !important;
 }
@@ -39,7 +39,7 @@ amp-story-shopping-tag {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  /*opacity 0 initially to avoid showing tag flip on initilization */
+  /* Opacity 0 initially to avoid showing tag flip on initialization. */
   opacity: 0 !important;
 }
 
