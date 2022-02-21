@@ -23,7 +23,7 @@ interface CommonDatePickerProps {
   initialVisibleMonth: Date;
   locale: Locale;
   max?: Date;
-  min: Date;
+  min?: Date;
   mode: DatePickerMode;
   monthFormat: string;
   numberOfMonths: number;
@@ -32,6 +32,7 @@ interface CommonDatePickerProps {
   openAfterSelect: boolean;
   weekDayFormat: string;
   children?: Element;
+  today: Date;
   type: DatePickerType;
 }
 

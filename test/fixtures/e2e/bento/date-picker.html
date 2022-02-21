@@ -12,11 +12,38 @@
       async
       src="https://cdn.ampproject.org/v0/bento-date-picker-1.0.js"
     ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.ampproject.org/v0/bento-date-picker-1.0.css"
+    />
   </head>
   <body>
-    <bento-date-picker initial-visible-month="2022-01-01">
-      <input type="text" id="date" />
+    <bento-date-picker
+      id="bento-single-date-picker"
+      initial-visible-month="2022-01-01"
+      today="2022-01-01"
+      min="2022-01-01"
+      input-selector="#date"
+    >
+      <input type="text" id="date" placeholder="Choose a date" />
+      <button id="clear-single">Clear</button>
+      <button id="today">Today</button>
+      <button id="tomorrow">Tomorrow</button>
     </bento-date-picker>
-    <script></script>
+    <script>
+      async function runDatePicker() {
+        const singleDatePicker = document.querySelector(
+          '#bento-single-date-picker'
+        );
+        await customElements.whenDefined('bento-date-picker');
+        const api = await singleDatePicker.getApi();
+        console.log(api);
+
+        document.querySelector('#clear-single').onclick = () => api.clear();
+        document.querySelector('#today').onclick = () => api.today();
+        document.querySelector('#tomorrow').onclick = () => api.today(1);
+      }
+      runDatePicker();
+    </script>
   </body>
 </html>

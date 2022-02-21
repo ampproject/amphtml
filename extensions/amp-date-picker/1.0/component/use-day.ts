@@ -15,6 +15,7 @@ type DayContextValue = Pick<
   | 'maximumNights'
   | 'minimumNights'
   | 'highlighted'
+  | 'today'
 >;
 
 const DayContext = createContext<DayContextValue | null>(null);
@@ -34,9 +35,12 @@ export function useDay() {
     highlighted,
     max,
     maximumNights,
-    min,
+    min: optionalMin,
     minimumNights,
+    today,
   } = context;
+
+  const min = optionalMin || today;
 
   const blockedDates = useMemo(() => {
     return new DatesList(blocked);

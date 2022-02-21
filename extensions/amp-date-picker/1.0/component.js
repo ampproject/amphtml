@@ -1,1 +1,1 @@
-export * from './component/component.tsx';
+export * from './component/component';

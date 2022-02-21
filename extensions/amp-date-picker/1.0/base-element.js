@@ -13,27 +13,6 @@ BaseElement['Component'] = BentoDatePicker;
 
 /** @override */
 BaseElement['props'] = {
-  'children': {passthrough: true},
-  'mode': {attr: 'mode'},
-  'type': {attr: 'type'},
-  'inputSelector': {attr: 'input-selector'},
-  'startInputSelector': {attr: 'start-input-selector'},
-  'end-input-selector': {attr: 'end-input-selector'},
-  'min': {attr: 'min', parseAttr: parseDate},
-  'max': {attr: 'max', parseAttr: parseDate},
-  'monthFormat': {attr: 'month-format'},
-  'format': {attr: 'format'},
-  'weekDayFormat': {attr: 'week-day-format'},
-  'locale': {attr: 'locale', parseAttr: parseLocale},
-  'maximumNights': {attr: 'maximum-nights', parseAttr: parseInt},
-  'minimumNights': {attr: 'minimum-nights', parseAttr: parseInt},
-  'numberOfMonths': {attr: 'number-of-months', parseAttr: parseInt},
-  // Not implemented
-  'firstDayOfWeek': {attr: 'first-day-of-week', parseAttr: parseInt},
-  'blocked': {attr: 'blocked', parseAttr: parseDateList},
-  'highlighted': {attr: 'highlighted', parseAttr: parseDateList},
-  // Not implemented
-  'daySize': {attr: 'day-size', parseAttr: parseInt},
   'allowBlockedEndDate': {
     attr: 'allow-blocked-end-date',
     parseAttr: parseBooleanAttribute,
@@ -42,21 +21,44 @@ BaseElement['props'] = {
     attr: 'allow-blocked-ranges',
     parseAttr: parseBooleanAttribute,
   },
+  'blocked': {attr: 'blocked', parseAttr: parseDateList},
+  'children': {passthrough: true},
+  // Not implemented
+  'daySize': {attr: 'day-size', parseAttr: parseInt},
+  'end-input-selector': {attr: 'end-input-selector'},
+  // Not implemented
+  'firstDayOfWeek': {attr: 'first-day-of-week', parseAttr: parseInt},
+  'format': {attr: 'format'},
   // Not implemented
   'fullscreen': {attr: 'fullscreen', parseAttr: parseBooleanAttribute},
-  'openAfterSelect': {
-    attr: 'open-after-select',
-    parseAttr: parseBooleanAttribute,
-  },
-  'openAfterClear': {
-    attr: 'open-after-clear',
-    parseAttr: parseBooleanAttribute,
-  },
   // Not implemented
   'hideKeyboardShortcutsPanel': {
     attr: 'hide-keyboard-shortcuts-panel',
     parseAttr: parseBooleanAttribute,
   },
+  'highlighted': {attr: 'highlighted', parseAttr: parseDateList},
+  'initialVisibleMonth': {attr: 'initial-visible-month', parseAttr: parseDate},
+  'inputSelector': {attr: 'input-selector'},
+  'locale': {attr: 'locale', parseAttr: parseLocale},
+  'max': {attr: 'max', parseAttr: parseDate},
+  'maximumNights': {attr: 'maximum-nights', parseAttr: parseInt},
+  'min': {attr: 'min', parseAttr: parseDate},
+  'minimumNights': {attr: 'minimum-nights', parseAttr: parseInt},
+  'mode': {attr: 'mode'},
+  'monthFormat': {attr: 'month-format'},
+  'numberOfMonths': {attr: 'number-of-months', parseAttr: parseInt},
+  'openAfterClear': {
+    attr: 'open-after-clear',
+    parseAttr: parseBooleanAttribute,
+  },
+  'openAfterSelect': {
+    attr: 'open-after-select',
+    parseAttr: parseBooleanAttribute,
+  },
+  'startInputSelector': {attr: 'start-input-selector'},
+  'today': {attr: 'today', parseAttr: parseDate},
+  'type': {attr: 'type'},
+  'weekDayFormat': {attr: 'week-day-format'},
 };
 
 /** @override */

@@ -2,12 +2,20 @@ import {addDays} from 'date-fns';
 
 import {useCallback, useRef, useState} from '#preact';
 
-import {getCurrentDate} from '../date-helpers';
+import {getCurrentDate, getFormattedDate} from '../date-helpers';
+
+interface DatePickerInputProps {
+  formatDate?: (date: Date) => string;
+  today?: Date;
+}
 
 /**
  * Baseline functions for a date input field
  */
-export function useDatePickerInput(formatDate: (date: Date) => string) {
+export function useDatePickerInput({
+  formatDate = getFormattedDate,
+  today = getCurrentDate(),
+}: DatePickerInputProps) {
   const ref = useRef<HTMLInputElement>(null);
   const [date, setDate] = useState<Date>();
 
@@ -36,10 +44,10 @@ export function useDatePickerInput(formatDate: (date: Date) => string) {
    */
   const setToToday = useCallback(
     (offset = 0) => {
-      const todayWithOffset = addDays(getCurrentDate(), offset);
+      const todayWithOffset = addDays(today, offset);
       handleSetDate(todayWithOffset);
     },
-    [handleSetDate]
+    [handleSetDate, today]
   );
 
   return {date, setDate, ref, handleSetDate, clear, setToToday};

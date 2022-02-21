@@ -14,13 +14,17 @@ import {
   selectDate,
 } from './test-helpers';
 
-import {BentoDatePicker} from '../component/component.tsx';
+import {BentoDatePicker} from '../component/component';
 import * as helpers from '../date-helpers';
+
+const TODAY = new Date(2022, 0);
 
 const DEFAULT_PROPS = {
   mode: 'static',
   layout: 'fixed-height',
   height: 360,
+  initialVisibleMonth: TODAY,
+  today: TODAY,
 };
 
 function DatePicker(props = {}) {
@@ -40,11 +44,11 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     it('should use the value of a single input at load-time', () => {
       const wrapper = mount(
         <DatePicker inputSelector="#date">
-          <input type="text" id="date" value="2021-01-01" />
+          <input type="text" id="date" value="2022-01-01" />
         </DatePicker>
       );
 
-      expect(isSelectedDate(wrapper, new Date(2021, 0, 1))).to.be.true;
+      expect(isSelectedDate(wrapper, new Date(2022, 0, 1))).to.be.true;
     });
 
     it('should use the value of a range input at load-time', () => {
@@ -54,13 +58,13 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           startInputSelector="#startdate"
           endInputSelector="#enddate"
         >
-          <input type="text" id="startdate" value="2021-01-01" />
-          <input type="text" id="enddate" value="2021-01-02" />
+          <input type="text" id="startdate" value="2022-01-01" />
+          <input type="text" id="enddate" value="2022-01-02" />
         </DatePicker>
       );
 
-      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
-      expect(isSelectedEndDate(wrapper, new Date(2021, 0, 2))).to.be.true;
+      expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2022, 0, 2))).to.be.true;
     });
   });
 
@@ -176,43 +180,22 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('showing the date picker in static mode for a single date', () => {
-    beforeEach(() => {
-      env.sandbox
-        .stub(helpers, 'getCurrentDate')
-        .callsFake(() => new Date(2021, 0));
-    });
-
     it('shows the calendar view by default', () => {
-      const wrapper = mount(
-        <DatePicker
-          type="single"
-          mode="static"
-          layout="fixed-height"
-          height={360}
-        />
-      );
+      const wrapper = mount(<DatePicker type="single" />);
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
     });
 
     it('can select a date', () => {
-      const wrapper = mount(
-        <DatePicker
-          type="single"
-          mode="static"
-          layout="fixed-height"
-          height={360}
-          initialVisibleMonth={new Date(2021, 0)}
-        />
-      );
+      const wrapper = mount(<DatePicker type="single" />);
 
-      selectDate(wrapper, new Date(2021, 0, 1));
+      selectDate(wrapper, new Date(2022, 0, 1));
 
-      expect(isSelectedDate(wrapper, new Date(2021, 0, 1))).to.be.true;
+      expect(isSelectedDate(wrapper, new Date(2022, 0, 1))).to.be.true;
     });
 
     it('sets the selected date as the input value', () => {
-      const date = new Date(2021, 0, 1);
+      const date = new Date(2022, 0, 1);
       const wrapper = mount(
         <form>
           <DatePicker
@@ -229,11 +212,11 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       const input = wrapper.find('input[type="hidden"]');
 
-      expect(input.getDOMNode().value).to.equal('2021-01-01');
+      expect(input.getDOMNode().value).to.equal('2022-01-01');
     });
 
     it('sets the selected date in the calendar state', () => {
-      const date = new Date(2021, 0, 1);
+      const date = new Date(2022, 0, 1);
       const wrapper = mount(
         <DatePicker
           type="single"
@@ -258,11 +241,11 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           mode="static"
           layout="fixed-height"
           height={360}
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
         />
       );
 
-      expect(wrapper.text()).to.contain('January 2021');
+      expect(wrapper.text()).to.contain('January 2022');
     });
 
     it('can advance to the next month', () => {
@@ -272,13 +255,13 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           mode="static"
           layout="fixed-height"
           height={360}
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
         />
       );
 
       wrapper.find('button[aria-label="Go to next month"]').simulate('click');
 
-      expect(wrapper.text()).to.contain('February 2021');
+      expect(wrapper.text()).to.contain('February 2022');
     });
 
     it('can go back to the previous month', () => {
@@ -288,7 +271,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           mode="static"
           layout="fixed-height"
           height={360}
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
         />
       );
 
@@ -296,7 +279,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         .find('button[aria-label="Go to previous month"]')
         .simulate('click');
 
-      expect(wrapper.text()).to.contain('December 2020');
+      expect(wrapper.text()).to.contain('December 2021');
     });
 
     it('allows the user to configure the number of months', () => {
@@ -318,12 +301,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('showing the date picker in static mode for a date range', () => {
-    beforeEach(() => {
-      env.sandbox
-        .stub(helpers, 'getCurrentDate')
-        .callsFake(() => new Date(2021, 0));
-    });
-
     it('shows the calendar view by default', () => {
       const wrapper = mount(
         <DatePicker
@@ -344,15 +321,15 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           mode="static"
           layout="fixed-height"
           height={360}
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
         />
       );
 
-      selectDate(wrapper, new Date(2021, 0, 1));
-      selectDate(wrapper, new Date(2021, 0, 2));
+      selectDate(wrapper, new Date(2022, 0, 1));
+      selectDate(wrapper, new Date(2022, 0, 2));
 
-      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
-      expect(isSelectedEndDate(wrapper, new Date(2021, 0, 2))).to.be.true;
+      expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2022, 0, 2))).to.be.true;
     });
 
     it('sets the selected date as the input value', () => {
@@ -363,24 +340,24 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
             mode="static"
             layout="fixed-height"
             height={360}
-            initialVisibleMonth={new Date(2021, 0)}
+            initialVisibleMonth={new Date(2022, 0)}
           />
         </form>
       );
 
-      selectDate(wrapper, new Date(2021, 0, 1));
-      selectDate(wrapper, new Date(2021, 0, 2));
+      selectDate(wrapper, new Date(2022, 0, 1));
+      selectDate(wrapper, new Date(2022, 0, 2));
 
       const startDateInput = wrapper.find('input[name="start-date"]');
       const endDateInput = wrapper.find('input[name="end-date"]');
 
-      expect(startDateInput.getDOMNode().value).to.equal('2021-01-01');
-      expect(endDateInput.getDOMNode().value).to.equal('2021-01-02');
+      expect(startDateInput.getDOMNode().value).to.equal('2022-01-01');
+      expect(endDateInput.getDOMNode().value).to.equal('2022-01-02');
     });
 
     it('sets the selected date in the calendar state', () => {
-      const startDate = new Date(2021, 0, 1);
-      const endDate = new Date(2021, 0, 2);
+      const startDate = new Date(2022, 0, 1);
+      const endDate = new Date(2022, 0, 2);
       const wrapper = mount(
         <DatePicker
           type="range"
@@ -413,11 +390,11 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           mode="static"
           layout="fixed-height"
           height={360}
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
         />
       );
 
-      expect(wrapper.text()).to.contain('January 2021');
+      expect(wrapper.text()).to.contain('January 2022');
     });
 
     it('allows the user to configure the number of months', () => {
@@ -439,12 +416,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('showing the date picker in overlay mode for a single date', () => {
-    beforeEach(() => {
-      env.sandbox
-        .stub(helpers, 'getCurrentDate')
-        .callsFake(() => new Date(2022, 0));
-    });
-
     it('throws an error if there is no inputSelector specified', () => {
       const onErrorSpy = env.sandbox.spy();
       mount(
@@ -534,11 +505,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('showing the date picker in overlay mode for a date range', () => {
-    beforeEach(() => {
-      env.sandbox
-        .stub(helpers, 'getCurrentDate')
-        .callsFake(() => new Date(2022, 0));
-    });
     it('throws an error if there is no inputSelector specified', () => {
       const onErrorSpy = env.sandbox.spy();
       mount(<DatePicker type="range" mode="overlay" onError={onErrorSpy} />);
@@ -631,12 +597,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
   describe('blocked dates for a single date picker', () => {
     it('disables blocked dates in the calendar view', () => {
-      const blockedDate = new Date(2021, 0, 5);
+      const blockedDate = new Date(2022, 0, 5);
       const formattedDate = format(blockedDate, DATE_FORMAT);
       const wrapper = mount(
         <DatePicker
           type="single"
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
           blocked={[blockedDate]}
         ></DatePicker>
       );
@@ -649,11 +615,11 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
 
     it('does not allow the user to select a disabled date', () => {
-      const blockedDate = new Date(2021, 0, 5);
+      const blockedDate = new Date(2022, 0, 5);
       const wrapper = mount(
         <DatePicker
           type="single"
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
           blocked={[blockedDate]}
         ></DatePicker>
       );
@@ -664,7 +630,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         (date) => `Not available. ${format(date, DATE_FORMAT)}`
       );
 
-      expect(wrapper.exists('[data-date="2021-01-05"]')).to.be.false;
+      expect(wrapper.exists('[data-date="2022-01-05"]')).to.be.false;
     });
 
     it('disables dates using RFC 5545 RRULEs', () => {
@@ -732,18 +698,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   });
 
   describe('blocked dates for a range', () => {
-    beforeEach(() => {
-      env.sandbox
-        .stub(helpers, 'getCurrentDate')
-        .callsFake(() => new Date(2021, 0));
-    });
-
     it('does not allow the user to select a blocked start date', () => {
-      const blockedDate = new Date(2021, 0, 5);
+      const blockedDate = new Date(2022, 0, 5);
       const wrapper = mount(
         <DatePicker
           type="single"
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
           blocked={[blockedDate]}
         ></DatePicker>
       );
@@ -758,93 +718,87 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
 
     it('does not allow the user to select a blocked end date', () => {
-      const blockedDate = new Date(2021, 0, 5);
+      const blockedDate = new Date(2022, 0, 5);
       const wrapper = mount(
         <DatePicker
           type="range"
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
           blocked={[blockedDate]}
         ></DatePicker>
       );
 
-      selectDate(wrapper, new Date(2021, 0, 1));
+      selectDate(wrapper, new Date(2022, 0, 1));
       selectDate(
         wrapper,
         blockedDate,
         (date) => `Not available. ${format(date, DATE_FORMAT)}`
       );
 
-      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
+      expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
       expect(isSelectedEndDate(wrapper, blockedDate)).to.be.false;
     });
 
     it('allows the user to select a range containing the blocked date if allowBlockedRanges is true', () => {
-      const blockedDate = new Date(2021, 0, 5);
+      const blockedDate = new Date(2022, 0, 5);
       const wrapper = mount(
         <DatePicker
           type="range"
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
           blocked={[blockedDate]}
           allowBlockedRanges
         ></DatePicker>
       );
 
-      selectDate(wrapper, new Date(2021, 0, 1));
-      selectDate(wrapper, new Date(2021, 0, 6));
+      selectDate(wrapper, new Date(2022, 0, 1));
+      selectDate(wrapper, new Date(2022, 0, 6));
 
-      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
-      expect(isSelectedEndDate(wrapper, new Date(2021, 0, 6))).to.be.true;
+      expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2022, 0, 6))).to.be.true;
     });
 
     it('does not allow the user to select a range containing a blocked date by default', () => {
-      const blockedDate = new Date(2021, 0, 5);
+      const blockedDate = new Date(2022, 0, 5);
       const wrapper = mount(
         <DatePicker
           type="range"
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
           blocked={[blockedDate]}
         ></DatePicker>
       );
 
-      selectDate(wrapper, new Date(2021, 0, 1));
-      selectDate(wrapper, new Date(2021, 0, 6));
+      selectDate(wrapper, new Date(2022, 0, 1));
+      selectDate(wrapper, new Date(2022, 0, 6));
 
-      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
-      expect(isSelectedEndDate(wrapper, new Date(2021, 0, 6))).to.be.false;
+      expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2022, 0, 6))).to.be.false;
     });
 
     it('allows the user to select a range containing the first blocked date if allowBlockedEndDate is true', () => {
-      const blockedDate = new Date(2021, 0, 5);
+      const blockedDate = new Date(2022, 0, 5);
       const wrapper = mount(
         <DatePicker
           type="range"
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
           blocked={[blockedDate]}
           allowBlockedEndDate
         ></DatePicker>
       );
 
-      selectDate(wrapper, new Date(2021, 0, 1));
-      selectDate(wrapper, new Date(2021, 0, 5));
+      selectDate(wrapper, new Date(2022, 0, 1));
+      selectDate(wrapper, new Date(2022, 0, 5));
 
-      expect(isSelectedStartDate(wrapper, new Date(2021, 0, 1))).to.be.true;
-      expect(isSelectedEndDate(wrapper, new Date(2021, 0, 5))).to.be.true;
+      expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2022, 0, 5))).to.be.true;
     });
   });
 
   describe('highlighted dates for a single date picker', () => {
-    beforeEach(() => {
-      env.sandbox
-        .stub(helpers, 'getCurrentDate')
-        .callsFake(() => new Date(2021, 0));
-    });
-
     it('shows a highlighted attribute', () => {
-      const highlightedDate = new Date(2021, 0, 5);
+      const highlightedDate = new Date(2022, 0, 5);
       const wrapper = mount(
         <DatePicker
           type="single"
-          initialVisibleMonth={new Date(2021, 0)}
+          initialVisibleMonth={new Date(2022, 0)}
           highlighted={[highlightedDate]}
         ></DatePicker>
       );
@@ -906,14 +860,10 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       });
     });
 
-    it("defaults the min today's date if no min is specified", () => {
-      env.sandbox
-        .stub(helpers, 'getCurrentDate')
-        .callsFake(() => new Date(2022, 0, 3));
-
+    it("defaults the min to today's date if no min is specified", () => {
       const expectedDisbledDates = [new Date(2022, 0, 1), new Date(2022, 0, 2)];
       const wrapper = mount(
-        <DatePicker type="single" initialVisibleMonth={new Date(2022, 0)} />
+        <DatePicker type="single" today={new Date(2022, 0, 3)} />
       );
       expectedDisbledDates.forEach((date) => {
         const formattedDate = format(date, DATE_FORMAT);
@@ -976,13 +926,13 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
 
     it("defaults the min today's date if no min is specified", () => {
-      env.sandbox
-        .stub(helpers, 'getCurrentDate')
-        .callsFake(() => new Date(2022, 0, 3));
-
       const expectedDisbledDates = [new Date(2022, 0, 1), new Date(2022, 0, 2)];
       const wrapper = mount(
-        <DatePicker type="range" initialVisibleMonth={new Date(2022, 0)} />
+        <DatePicker
+          type="range"
+          initialVisibleMonth={new Date(2022, 0)}
+          today={new Date(2022, 0, 3)}
+        />
       );
       expectedDisbledDates.forEach((date) => {
         const formattedDate = format(date, DATE_FORMAT);
@@ -1171,14 +1121,11 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
             ref={ref}
             initialVisibleMonth={new Date(2022, 0)}
             inputSelector="[name=date]"
+            today={new Date(2022, 0, 21)}
           >
             <input name="date" value="2022-01-01" />
           </BentoDatePicker>
         );
-
-        env.sandbox
-          .stub(helpers, 'getCurrentDate')
-          .callsFake(() => new Date(2022, 0, 21));
       });
 
       it('can clear the date for a single date picker', () => {
@@ -1245,15 +1192,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
             initialVisibleMonth={new Date(2022, 0)}
             startInputSelector="[name=startdate]"
             endInputSelector="[name=enddate]"
+            today={new Date(2022, 0, 21)}
           >
             <input name="startdate" value="2022-01-01" />
             <input name="enddate" value="2022-01-02" />
           </BentoDatePicker>
         );
-
-        env.sandbox
-          .stub(helpers, 'getCurrentDate')
-          .callsFake(() => new Date(2022, 0, 21));
       });
 
       it('can clear the start and end dates', () => {

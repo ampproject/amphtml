@@ -61,6 +61,7 @@ function DateRangePickerWithRef(
     openAfterClear,
     openAfterSelect,
     startInputSelector,
+    today,
     weekDayFormat,
   }: DateRangePickerProps,
   ref: Ref<DateRangePickerAPI>
@@ -85,8 +86,8 @@ function DateRangePickerWithRef(
     [format, locale]
   );
 
-  const startDateInput = useDatePickerInput(formatDate);
-  const endDateInput = useDatePickerInput(formatDate);
+  const startDateInput = useDatePickerInput({formatDate, today});
+  const endDateInput = useDatePickerInput({formatDate, today});
 
   /**
    * Sets the selected date, month, and input value
@@ -504,6 +505,7 @@ function DateRangePickerWithRef(
             weekDayFormat={weekDayFormat}
             onMonthChange={setMonth}
             numberOfMonths={numberOfMonths}
+            today={today}
           />
         )}
       </DatePickerContext.Provider>

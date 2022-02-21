@@ -5,6 +5,7 @@ import {ComponentProps, Ref} from 'preact';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {
   closestAncestorElementBySelector,
+  querySelectorInSlot,
   scopedQuerySelector,
 } from '#core/dom/query';
 
@@ -26,7 +27,7 @@ import {useDatePickerState} from './use-date-picker-state';
 import {useDay} from './use-day';
 
 import {DateFieldNameByType, FORM_INPUT_SELECTOR, TAG} from '../constants';
-import {getCurrentDate, getFormattedDate} from '../date-helpers';
+import {getFormattedDate} from '../date-helpers';
 import {parseDate} from '../parsers';
 import {SingleDatePickerAPI, SingleDatePickerProps} from '../types';
 
@@ -44,6 +45,7 @@ function SingleDatePickerWithRef(
     onError,
     openAfterClear,
     openAfterSelect,
+    today,
     weekDayFormat,
   }: SingleDatePickerProps,
   ref: Ref<SingleDatePickerAPI>
@@ -58,9 +60,10 @@ function SingleDatePickerWithRef(
   const {isOpen, transitionTo} = useDatePickerState(mode);
   const {blockedDates} = useDay();
 
-  const dateInput = useDatePickerInput((date) =>
-    getFormattedDate(date, format, locale)
-  );
+  const dateInput = useDatePickerInput({
+    formatDate: (date) => getFormattedDate(date, format, locale),
+    today,
+  });
 
   /**
    * Sets the selected date, month, and input value
@@ -167,10 +170,24 @@ function SingleDatePickerWithRef(
       containerRef.current!,
       FORM_INPUT_SELECTOR
     ) as HTMLFormElement;
-    const inputElement = scopedQuerySelector(
+    let inputElement;
+
+    inputElement = scopedQuerySelector(
       containerRef.current!,
       inputSelector
     ) as HTMLInputElement;
+
+    // This is required for bento mode
+    if (!inputElement) {
+      const slot = containerRef.current?.querySelector('slot');
+      if (slot) {
+        inputElement = querySelectorInSlot(
+          slot,
+          inputSelector
+        ) as HTMLInputElement;
+      }
+    }
+
     if (inputElement) {
       dateInput.ref.current = inputElement;
       if (inputElement.value) {
@@ -272,7 +289,7 @@ function SingleDatePickerWithRef(
             monthFormat={monthFormat}
             weekDayFormat={weekDayFormat}
             onMonthChange={setMonth}
-            today={getCurrentDate()}
+            today={today}
             numberOfMonths={numberOfMonths}
           />
         )}
