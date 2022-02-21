@@ -1,5 +1,5 @@
 import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
-import {setStyles} from '#core/dom/style';
+import {resetStyles, setStyles} from '#core/dom/style';
 
 import * as Preact from '#preact';
 import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
@@ -51,16 +51,19 @@ function BentoTwitterWithRef(
         if (requestResize) {
           requestResize(height);
 
-          // Remove the position style from embed after the resize is complete.
-          setStyles(iframeRef.current.node.getRootNode().host, {
-            position: '',
-            opacity: '',
-            top: '',
-            bottom: '',
-            left: '',
-            right: '',
-            pointerEvents: '',
-          });
+          if (iframeRef.current.node.getRootNode().host) {
+            // Remove the position style from embed after the resize is complete.
+            resetStyles(iframeRef.current.node.getRootNode().host, [
+              'position',
+              'opacity',
+              'top',
+              'bottom',
+              'left',
+              'right',
+              'pointerEvents',
+            ]);
+          }
+
           setHeight(FULL_HEIGHT);
         } else {
           setHeight(height);
@@ -101,10 +104,15 @@ function BentoTwitterWithRef(
   );
 
   useEffect(() => {
+    const {host} = iframeRef.current.node.getRootNode();
+    if (!host) {
+      return;
+    }
+
     // This style is added as part of a workaround to fix the component resizing issue because
     // the resizing happens only when the embed comes into viewport and most of the time the
     // attemptChangeHeight request is gets rejected.
-    setStyles(iframeRef.current.node.getRootNode().host, {
+    setStyles(host, {
       position: 'fixed',
       opacity: '0',
       top: '0',
@@ -113,7 +121,7 @@ function BentoTwitterWithRef(
       right: '0',
       pointerEvents: 'none',
     });
-  }, [iframeRef]);
+  });
 
   return (
     <ProxyIframeEmbed
