@@ -24,7 +24,6 @@ import {BentoDatePickerProps} from '../types';
 type PropertiesWithDefaults =
   | 'endInputSelector'
   | 'format'
-  | 'initialVisibleMonth'
   | 'inputSelector'
   | 'locale'
   | 'maximumNights'
@@ -41,7 +40,6 @@ type PropertiesWithDefaults =
 const DEFAULT_PROPS: Pick<BentoDatePickerProps, PropertiesWithDefaults> = {
   endInputSelector: DEFAULT_END_INPUT_SELECTOR,
   format: ISO_8601,
-  initialVisibleMonth: getCurrentDate(),
   inputSelector: DEFAULT_INPUT_SELECTOR,
   locale: DEFAULT_LOCALE,
   mode: 'static',
@@ -65,18 +63,7 @@ function BentoDatePickerWithRef(
     [props]
   );
 
-  const {
-    allowBlockedEndDate,
-    blocked,
-    highlighted,
-    max,
-    maximumNights,
-    min,
-    minimumNights,
-    onError,
-    today,
-    type,
-  } = propsWithDefaults;
+  const {onError, type} = propsWithDefaults;
 
   const DatePicker: FunctionalComponent = useMemo(() => {
     switch (type) {
@@ -95,18 +82,7 @@ function BentoDatePickerWithRef(
   }, [type, onError]);
 
   return (
-    <DayContext.Provider
-      value={{
-        blocked,
-        highlighted,
-        allowBlockedEndDate,
-        min,
-        max,
-        maximumNights,
-        minimumNights,
-        today,
-      }}
-    >
+    <DayContext.Provider value={propsWithDefaults}>
       <DatePicker ref={ref} {...propsWithDefaults} />
     </DayContext.Provider>
   );

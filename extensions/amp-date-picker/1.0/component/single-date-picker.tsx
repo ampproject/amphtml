@@ -52,10 +52,11 @@ function SingleDatePickerWithRef(
 ) {
   const containerRef = useRef<HTMLElement>(null);
 
+  const defaultMonth = initialVisibleMonth || today;
   const [hiddenInputProps, setHiddenInputProps] =
     useState<ComponentProps<'input'>>();
 
-  const [month, setMonth] = useState<Date>(initialVisibleMonth);
+  const [month, setMonth] = useState<Date>(defaultMonth);
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
   const {blockedDates} = useDay();
@@ -119,12 +120,12 @@ function SingleDatePickerWithRef(
    */
   const clear = useCallback(() => {
     dateInput.clear();
-    setMonth(initialVisibleMonth);
+    setMonth(defaultMonth);
 
     if (openAfterClear) {
       transitionTo('overlay-open-input');
     }
-  }, [initialVisibleMonth, dateInput, transitionTo, openAfterClear]);
+  }, [defaultMonth, dateInput, transitionTo, openAfterClear]);
 
   /**
    * Generate a name for a hidden input.

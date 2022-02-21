@@ -20,7 +20,7 @@ interface CommonDatePickerProps {
   format: string;
   highlighted: DateSelector;
   id?: string;
-  initialVisibleMonth: Date;
+  initialVisibleMonth?: Date;
   locale: Locale;
   max?: Date;
   min?: Date;

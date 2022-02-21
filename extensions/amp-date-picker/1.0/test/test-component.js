@@ -23,7 +23,6 @@ const DEFAULT_PROPS = {
   mode: 'static',
   layout: 'fixed-height',
   height: 360,
-  initialVisibleMonth: TODAY,
   today: TODAY,
 };
 

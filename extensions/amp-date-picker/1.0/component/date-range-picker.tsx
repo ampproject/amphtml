@@ -73,8 +73,10 @@ function DateRangePickerWithRef(
   const [endHiddenInputProps, setEndHiddenInputProps] =
     useState<ComponentProps<'input'>>();
   const [focusedInput, setFocusedInput] = useState<DateFieldType>();
+
+  const defaultMonth = initialVisibleMonth || today;
   // This allow the calendar to navigate to a new month when the date changes
-  const [month, setMonth] = useState<Date>(initialVisibleMonth);
+  const [month, setMonth] = useState<Date>(defaultMonth);
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
   const {blockedDates} = useDay();
@@ -260,7 +262,7 @@ function DateRangePickerWithRef(
    * Resets the date and input value and returns to the initial month
    */
   const clear = useCallback(() => {
-    setMonth(initialVisibleMonth);
+    setMonth(defaultMonth);
     startDateInput.clear();
     endDateInput.clear();
 
@@ -268,7 +270,7 @@ function DateRangePickerWithRef(
       transitionTo('overlay-open-input');
     }
   }, [
-    initialVisibleMonth,
+    defaultMonth,
     startDateInput,
     endDateInput,
     openAfterClear,
