@@ -1,9 +1,9 @@
 import {mount} from 'enzyme';
 
+import {VideoIframeInternal} from '#bento/components/bento-video/1.0/video-iframe';
+
 import * as Preact from '#preact';
 import {createRef} from '#preact';
-
-import {VideoIframeInternal} from '../video-iframe';
 
 function dispatchMessage(window, opt_event) {
   const event = window.document.createEvent('Event');

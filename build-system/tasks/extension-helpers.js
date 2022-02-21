@@ -39,8 +39,9 @@ const {renameSelectorsToBentoTagNames} = require('./css/bento-css');
 const {TransformCache, batchedRead} = require('../common/transform-cache');
 const {watch} = require('chokidar');
 const {
-  getSharedBentoModules,
-} = require('../compile/generate/shared-bento-symbols');
+  getRemapBentoDependencies,
+  getRemapBentoNpmDependencies,
+} = require('../compile/bento-remap');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -512,12 +513,11 @@ async function buildNpmBentoWebComponentCss(extDir, options) {
   const srcFilepath = path.resolve(
     `build/css/${getBentoName(options.name)}-${options.version}.css`
   );
-  if (await fs.pathExists(srcFilepath)) {
-    const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
-    await fs.copyFile(srcFilepath, destFilepath);
-  } else {
+  if (!(await fs.pathExists(srcFilepath))) {
     await buildExtensionCss(extDir, options.name, options.version, options);
   }
+  const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
+  await fs.copyFile(srcFilepath, destFilepath);
 }
 
 /** @type {TransformCache<string>} */
@@ -666,8 +666,8 @@ async function buildNpmBinaries(extDir, name, options) {
     };
     if (options.useBentoCore) {
       // remap all shared modules to the @bentoproject/core package and declare as external
-      npm.bento.remap = getSharedBentoPackageRemap();
-      npm.bento.external = ['@bentoproject/core'];
+      npm.bento.remap = getRemapBentoNpmDependencies();
+      npm.bento.external = Object.values(npm.bento.remap);
     }
   }
   const binaries = Object.values(npm);
@@ -703,31 +703,19 @@ function buildBinaries(extDir, binaries, options) {
 }
 
 /**
- * Creates configuration to remap shared bento modules
- * Returns an Object of the form: `{'path/to/shared/module': '@bentoproject/core'}`.
- * Uses require.resolve() to normalize directories to the appropriate index file
- * @return {Object}
- */
-function getSharedBentoPackageRemap() {
-  const remap = Object.fromEntries(
-    getSharedBentoModules().map((p) => [p, '@bentoproject/core'])
-  );
-  return remap;
-}
-
-/**
  * @param {string} dir
  * @param {string} name
  * @param {!Object} options
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(dir, name, options) {
+  const remapDependencies = getRemapBentoDependencies(options.minify);
   await buildExtensionJs(dir, name, {
     ...options,
-    wrapper: 'bento',
-    babelCaller: options.minify
-      ? 'bento-element-minified'
-      : 'bento-element-unminified',
+    externalDependencies: Object.values(remapDependencies),
+    remapDependencies,
+    wrapper: 'none',
+    outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
     filename: await getBentoBuildFilename(dir, name, 'standalone', options),
   });
 }

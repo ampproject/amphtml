@@ -59,7 +59,7 @@ export let PresetDetails;
  * Grid layer template templating system.
  */
 export class AmpStoryGridLayer extends AmpStoryBaseLayer {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed(element) {
     return isPrerenderActivePage(element.parentElement);
   }

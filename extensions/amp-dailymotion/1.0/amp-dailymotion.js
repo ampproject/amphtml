@@ -1,12 +1,11 @@
+import {BaseElement} from '#bento/components/bento-dailymotion/1.0/base-element';
+import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
+
 import {isExperimentOn} from '#experiments';
 
 import {setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
-
-import {AmpVideoBaseElement} from 'extensions/amp-video/1.0/video-base-element';
-
-import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-dailymotion-1.0.css';
 

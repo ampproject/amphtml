@@ -9,6 +9,7 @@ declare namespace AMP {
     static R1(): boolean;
     static deferredMount(el?: AmpElement): boolean;
     static prerenderAllowed(el?: AmpElement): boolean;
+    static previewAllowed(el?: AmpElement): boolean;
     static usesLoading(el?: AmpElement): boolean;
     static createLoaderLogoCallback(el?: AmpElement): {
       content?: Element;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.204 */
+/** Version: 0.1.22.206 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -51,8 +51,8 @@ const I18N_STRINGS = {
     'it': 'Con Google puoi avere di più',
     'ja': 'Google からのプレゼント',
     'kn': 'Google ನಿಂದ ಹೆಚ್ಚಿನ ಪ್ರಯೋಜನ ಪಡೆಯಿರಿ',
-    'lt': 'Get more with Google',
-    'lv': 'Get more with Google',
+    'lt': 'Gaukite daugiau su „Google“',
+    'lv': 'Iegūstiet vairāk ar Google',
     'ml': 'Google ഉപയോഗിച്ച് കൂടുതൽ പ്രയോജനങ്ങൾ നേടൂ',
     'mr': 'Google वापरून बरेच काही मिळवा',
     'nl': 'Krijg meer met Google',
@@ -61,18 +61,18 @@ const I18N_STRINGS = {
     'pt-pt': 'Obtenha mais com a Google',
     'ro': 'Mai multe beneficii cu Google',
     'sk': 'Získajte viac s&nbsp;Googlom',
-    'sl': 'Get more with Google',
+    'sl': 'Izkoristite več z Googlom',
     'sv': 'Få mer med Google',
     'ta': 'Google மூலம் மேலும் பல கட்டுரைகளைப் படியுங்கள்',
     'te': 'Googleతో మరిన్ని ప్రయోజనాలను పొందండి',
   },
   'SHOWCASE_REGWALL_DESCRIPTION': {
-    'bg': '<strong></strong>За съдържанието обикновено се изисква плащане, но Google ви дава безплатен достъп до тази и други статии, когато се регистрирате за <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> с профила си в Google.',
+    'bg': '<strong></strong>За съдържанието обикновено се изисква плащане, но Google ви дава достъп без парично заплащане до тази и други статии, когато се регистрирате за <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> с профила си в Google.',
     'bn': '<strong></strong>এই কন্টেন্ট অ্যাক্সেস করার জন্য সাধারণত পেমেন্ট করতে হয় কিন্তু Google আপনাকে এই নিবন্ধ ফ্রিতে অ্যাক্সেস করতে এবং সেইসাথে অনেক কিছু পেতে সাহায্য করছে। এই সুবিধা পাওয়ার জন্য Google অ্যাকাউন্ট ব্যবহার করে আপনাকে <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>-এ রেজিস্টার করতে হবে।',
     'cs': '<strong></strong>Tento obsah je obvykle zpoplatněn, ale pokud se do publikace <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> zaregistrujete pomocí účtu Google, získáte od Googlu přístup zdarma.',
     'da': '<strong></strong>Du skal normalt betale for at få adgang til dette indhold, men hvis du tilmelder dig <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> med din Google-konto, giver Google dig gratis adgang til artiklen og andet indhold.',
     'de': '<strong></strong>Dieser Inhalt ist normalerweise kostenpflichtig. Google gewährt dir jedoch kostenlos Zugriff auf diesen Artikel und andere Inhalte, wenn du dich mit deinem Google-Konto bei <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> registrierst.',
-    'el': '<strong></strong>Συνήθως απαιτείται πληρωμή για αυτό το περιεχόμενο, αλλά η Google σας προσφέρει δωρεάν πρόσβαση σε αυτό το άρθρο και σε πολλά ακόμη, εάν εγγραφείτε στην έκδοση <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> με χρήση του Λογαριασμού σας Google.',
+    'el': '<strong></strong>Συνήθως απαιτείται πληρωμή για αυτό το περιεχόμενο, αλλά η Google σας προσφέρει πρόσβαση χωρίς χρέωση σε αυτό το άρθρο και σε πολλά ακόμη, εάν εγγραφείτε στην έκδοση <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> με χρήση του Λογαριασμού σας Google.',
     'en': '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
     'es': '<strong></strong>Normalmente, es necesario pagar para ver este contenido, pero Google te ofrece acceso gratuito a este y otros artículos si te registras en <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> con tu cuenta de Google.',
     'es-419':
@@ -82,23 +82,23 @@ const I18N_STRINGS = {
     'fr': '<strong></strong>Ce contenu est généralement payant, mais vous pouvez lire cet article et d\'autres contenus gratuitement grâce à Google en vous inscrivant sur <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> avec votre compte Google.',
     'fr-ca':
       '<strong></strong>Ce contenu est généralement payant, mais Google vous offre un accès gratuit à cet article et à d\'autres si vous vous inscrivez à <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> à l\'aide de votre compte Google.',
-    'hi': '<strong></strong>इस कॉन्टेंट को पढ़ने के लिए पैसे चुकाने पड़ते हैं, लेकिन आप Google की मदद से इस लेख और अन्य कॉन्टेंट को मुफ़्त में पढ़ सकते हैं. इसके लिए, आपको Google खाते का इस्तेमाल करके, <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> में रजिस्टर करना होगा.',
-    'it': '<strong></strong>Generalmente questi contenuti sono a pagamento, ma Google ti offre accesso gratuito a questo articolo e ad altri articoli se ti registri a <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando il tuo Account Google.',
+    'hi': '<strong></strong>आम तौर पर, इस कॉन्टेंट को पढ़ने के लिए पैसे चुकाने पड़ते हैं. हालांकि, Google की मदद से, इस लेख और अन्य कॉन्टेंट को मुफ़्त में ऐक्सेस किया जा सकता है. इसके लिए, आपको Google खाते का इस्तेमाल करके, <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> में रजिस्टर करना होगा.',
+    'it': '<strong></strong>Generalmente questi contenuti sono a pagamento, ma Google ti offre accesso gratuito a questo e ad altri articoli se ti registri a <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando il tuo Account Google.',
     'ja': '<strong></strong>通常、この記事をお読みいただくにはお支払いが必要ですが、お使いの Google アカウントで <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> に登録すると、この記事を無料でお読みいただけます。',
     'kn': '<strong></strong>ಸಾಮಾನ್ಯವಾಗಿ ಈ ವಿಷಯಕ್ಕಾಗಿ ಹಣ ಪಾವತಿಸಬೇಕಾಗುತ್ತದೆ, ಆದರೆ ನೀವು <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> ಗೆ ನಿಮ್ಮ Google ಖಾತೆಯ ಮೂಲಕ ನೋಂದಾಯಿಸಿಕೊಂಡಾಗ Google ಈ ಲೇಖನ ಮತ್ತು ಇನ್ನಷ್ಟು ವಿಷಯಗಳಿಗೆ ನಿಮಗೆ ಉಚಿತವಾದ ಪ್ರವೇಶವನ್ನು ನೀಡುತ್ತದೆ.',
-    'lt': '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
-    'lv': '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
+    'lt': '<strong></strong>Šis turinys paprastai yra mokamas, tačiau „Google“ suteikia jums prieigą prie šio straipsnio ir kt. be papildomo mokesčio, kai užsiregistruojate „<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>“ naudodami savo „Google“ paskyrą.',
+    'lv': '<strong></strong>Parasti šis ir maksas saturs, taču Google piešķirs jums bezmaksas piekļuvi šim un citiem rakstiem, ja reģistrēsieties izdevumam <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> ar savu Google kontu.',
     'ml': '<strong></strong>സാധാരണ ഈ ഉള്ളടക്കത്തിന് പണം നൽകേണ്ടതുണ്ട്, എന്നാൽ Google അക്കൗണ്ട് ഉപയോഗിച്ച് <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> എന്നതിൽ രജിസ്‌റ്റർ ചെയ്യുമ്പോൾ, ഈ ലേഖനത്തിലേക്കും മറ്റും Google നിങ്ങൾക്ക് സൗജന്യ ആക്‌സസ് നൽകുന്നു.',
     'mr': '<strong></strong>या आशयासाठी सामान्यतः पेमेंट आवश्यक असते पण तुम्ही तुमचे Google खाते वापरून <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> मध्ये नोंदणी करता तेव्हा, Google तुम्हाला या लेखाचा आणि आणखी बऱ्याच आशयाचा विनामूल्य ॲक्सेस देते.',
     'nl': '<strong></strong>Voor deze content moet je eigenlijk betalen. Maar Google geeft je kosteloos toegang tot dit artikel en andere content als je je registreert bij <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> via je Google-account.',
     'pl': '<strong></strong>Te treści zazwyczaj wymagają opłaty, ale dzięki Google możesz bezpłatnie przeczytać ten artykuł i&nbsp;korzystać z&nbsp;innych materiałów po zarejestrowaniu się w&nbsp;publikacji <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> za pomocą konta Google.',
     'pt-br':
-      '<strong></strong>Normalmente, é preciso pagar por este conteúdo. Porém, basta você se registrar na publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando sua Conta do Google para ter acesso gratuito a esta matéria e muito mais.',
+      '<strong></strong>Normalmente, é preciso pagar por este conteúdo. Porém, basta você se registrar na publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> usando sua Conta do Google para ter acesso a esta matéria e muito mais sem custos financeiros.',
     'pt-pt':
       '<strong></strong>Geralmente, este conteúdo requer um pagamento, mas a Google concede-lhe acesso gratuito a este artigo e muito mais ao registar-se na publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> com a sua Conta Google.',
-    'ro': '<strong></strong>Acest conținut este de obicei cu plată, dar Google vă oferă acces gratuit la acest articol și la altele când vă înregistrați la <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> folosind Contul Google.',
-    'sk': '<strong></strong>Tento obsah je obvykle platený, ale ak sa do publikácie <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> zaregistrujete účtom Google, získate od Googlu zdarma prístup k&nbsp;tomuto článku a&nbsp;ďalšie výhody.',
-    'sl': '<strong></strong>This content usually requires payment, but Google is giving you free access to this article and more when you register with <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> using your Google Account.',
+    'ro': '<strong></strong>Acest conținut este de obicei cu plată, dar Google vă oferă acces fără costuri la acest articol și la altele când vă înregistrați la <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> folosind Contul Google.',
+    'sk': '<strong></strong>Tento obsah je obvykle platený, ale ak sa do publikácie <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> zaregistrujete účtom Google, získate od Googlu bezplatný prístup k&nbsp;tomuto článku a&nbsp;ďalšie výhody.',
+    'sl': '<strong></strong>Za to vsebino je običajno zahtevano plačilo, vendar vam Google omogoča dostop do tega članka in drugega brez stroškov, če se z računom Google registrirate pri publikaciji <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>.',
     'sv': '<strong></strong>Det krävs vanligtvis betalning för det här innehållet, men Google ger dig gratis åtkomst till artikeln och annat innehåll när du registrerar dig hos <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> med ditt Google-konto.',
     'ta': '<strong></strong>வழக்கமாக இந்த உள்ளடக்கத்தை வாசிக்க கட்டணம் செலுத்த வேண்டியிருக்கும். ஆனால் <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> இல் உங்கள் Google கணக்கைப் பயன்படுத்திப் பதிவுசெய்யும்போது இந்தக் கட்டுரைக்கும் மேலும் பலவற்றுக்கும் Google இலவச அணுகலை வழங்குகிறது.',
     'te': '<strong></strong>ఈ కంటెంట్‌కు మీరు సాధారణంగా పేమెంట్ చేయాల్సి ఉంటుంది, కానీ మీరు Google ఖాతాను ఉపయోగించి <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>తో రిజిస్టర్ చేసుకున్నప్పుడు, ఈ వార్తా కథనానికి ఇంకా మరెన్నో వాటికి Google, ఉచిత యాక్సెస్‌ను ఇస్తుంది.',
@@ -120,8 +120,8 @@ const I18N_STRINGS = {
     'it': 'Hai già un account?',
     'ja': 'すでにアカウントをお持ちですか？',
     'kn': 'ಈಗಾಗಲೇ ಖಾತೆಯೊಂದನ್ನು ಹೊಂದಿದ್ದೀರಾ?',
-    'lt': 'Already have an account?',
-    'lv': 'Already have an account?',
+    'lt': 'Jau turite paskyrą?',
+    'lv': 'Vai jums jau ir konts?',
     'ml': 'മുമ്പേ അക്കൗണ്ടുണ്ടോ?',
     'mr': 'आधीपासून खाते आहे?',
     'nl': 'Heb je al een account?',
@@ -130,7 +130,7 @@ const I18N_STRINGS = {
     'pt-pt': 'Já tem uma conta?',
     'ro': 'Aveți deja un cont?',
     'sk': 'Už máte účet?',
-    'sl': 'Already have an account?',
+    'sl': 'Že imate račun?',
     'sv': 'Har du redan ett konto?',
     'ta': 'ஏற்கெனவே கணக்கு உள்ளதா?',
     'te': 'ఇప్పటికే ఖాతా ఉందా?',
@@ -152,8 +152,8 @@ const I18N_STRINGS = {
     'it': 'Accedi con Google',
     'ja': 'Google でログイン',
     'kn': 'Google ಖಾತೆ ಬಳಸಿಕೊಂಡು ಸೈನ್ ಇನ್ ಮಾಡಿ',
-    'lt': 'Sign in with Google',
-    'lv': 'Sign in with Google',
+    'lt': 'Prisijungimas naudojant „Google“',
+    'lv': 'Pierakstīšanās ar Google kontu',
     'ml': 'Google ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക',
     'mr': 'Google वापरून साइन इन करा',
     'nl': 'Inloggen met Google',
@@ -162,7 +162,7 @@ const I18N_STRINGS = {
     'pt-pt': 'Iniciar sessão com o Google',
     'ro': 'Conectați-vă cu Google',
     'sk': 'Prihlásiť sa účtom Google',
-    'sl': 'Sign in with Google',
+    'sl': 'Prijavite se z Googlom',
     'sv': 'Logga in med Google',
     'ta': 'Google மூலம் உள்நுழைக',
     'te': 'Googleతో సైన్ ఇన్ చేయండి',
@@ -185,8 +185,8 @@ const I18N_STRINGS = {
     'it': 'Rileggi i <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>termini della legge CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> di <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'ja': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> の <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL 規約<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>を見る',
     'kn': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> ನ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL ನಿಯಮಗಳು<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> ಅನ್ನು ಪರಿಶೀಲಿಸಿ',
-    'lt': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'lv': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'lt': 'Peržiūrėkite „<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>“ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL sąlygas<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'lv': 'Pārskatīt izdevuma <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL noteikumus<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
     'ml': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> എന്നതിന്റെ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL നിബന്ധനകൾ<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> അവലോകനം ചെയ്യുക',
     'mr': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> च्या <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL अटी<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> यांचे पुनरावलोकन करा',
     'nl': 'Bekijk de <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL-voorwaarden<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> van <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
@@ -197,7 +197,7 @@ const I18N_STRINGS = {
       'Analise os <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>termos da CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> da publicação <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'ro': 'Examinați <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>Termenii CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> ai <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'sk': 'Prečítajte si <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>podmienky CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> publikácie <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
-    'sl': 'Review <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>\'s <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL terms<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'sl': 'Preglejte <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>pogoje CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> za publikacijo <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'sv': 'Läs <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>villkoren i lagstiftningen CASL<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> för <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
     'ta': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> இன் <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL விதிமுறைகளைப்<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> பாருங்கள்',
     'te': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>‌కు సంబంధించిన <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL నియమాల<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>ను రివ్యూ చేయండి',
@@ -443,30 +443,6 @@ function map(initial) {
     Object.assign(obj, initial);
   }
   return obj;
-}
-
-/**
- * Implements `Array.find()` method that's not yet available in all browsers.
- *
- * @param {?Array<T>} array
- * @param {function(T, number, !Array<T>):boolean} predicate
- * @return {?T}
- * @template T
- */
-function findInArray(array, predicate) {
-  if (!array) {
-    return null;
-  }
-  const len = array.length || 0;
-  if (len > 0) {
-    for (let i = 0; i < len; i++) {
-      const other = array[i];
-      if (predicate(other, i, array)) {
-        return other;
-      }
-    }
-  }
-  return null;
 }
 
 /**
@@ -1496,24 +1472,27 @@ class GaaMeteringRegwall {
    * @return {string|undefined}
    */
   static getPublisherNameFromJsonLdPageConfig_() {
-    const ldJsonElements = self.document.querySelectorAll(
-      'script[type="application/ld+json"]'
+    // Get JSON from ld+json scripts.
+    const ldJsonScripts = Array.prototype.slice.call(
+      self.document.querySelectorAll('script[type="application/ld+json"]')
+    );
+    const jsonQueue = /** @type {!Array<*>} */ (
+      ldJsonScripts.map((script) => parseJson(script.textContent))
     );
 
-    for (const ldJsonElement of ldJsonElements) {
-      let ldJson = /** @type {*} */ (parseJson(ldJsonElement.textContent));
+    // Search for publisher name, breadth-first.
+    for (let i = 0; i < jsonQueue.length; i++) {
+      const json = /** @type {!Object<?,?>} */ (jsonQueue[i]);
 
-      if (!Array.isArray(ldJson)) {
-        ldJson = [ldJson];
-      }
-
-      const publisherName = findInArray(
-        ldJson,
-        (entry) => entry?.publisher?.name
-      )?.publisher.name;
-
+      // Return publisher name, if possible.
+      const publisherName = json?.publisher?.name;
       if (publisherName) {
         return publisherName;
+      }
+
+      // Explore JSON.
+      if (json && typeof json === 'object') {
+        jsonQueue.push(...Object.values(json));
       }
     }
   }
@@ -1932,6 +1911,17 @@ class GaaGoogle3pSignInButton {
       ) {
         self.parent.postMessage(e.data, e.origin);
       }
+    });
+  }
+  /**
+   * Notify Google Intervention of a complete sign-in event.
+   * @param {{ gaaUser: GaaUserDef}} params
+   */
+  static gaaNotifySignIn({gaaUser}) {
+    self.opener.postMessage({
+      stamp: POST_MESSAGE_STAMP,
+      command: POST_MESSAGE_COMMAND_USER,
+      gaaUser,
     });
   }
 }
