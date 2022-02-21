@@ -56,8 +56,10 @@ const TAG = 'amp-geo';
  */
 const COUNTRY = '{{AMP_ISO_COUNTRY_HOTPATCH}}';
 const COUNTRY_PREFIX = 'amp-iso-country-';
+const SUBDIVISION_PREFIX = 'amp-iso-subdivision-';
 const GROUP_PREFIX = 'amp-geo-group-';
 const PRE_RENDER_REGEX = new RegExp(`${COUNTRY_PREFIX}(\\w+)`);
+const PRE_RENDER_SUBDIVISION_REGEX = new RegExp(`${SUBDIVISION_PREFIX}(\\w+)`);
 const GEO_ID = 'ampGeo';
 const SERVICE_TAG = 'geo';
 const API_TIMEOUT = 60; // Seconds
@@ -209,10 +211,19 @@ export class AmpGeo extends AMP.BaseElement {
       // pre-rendered by a publisher case or cache case.
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
+
+      const preRenderSubdivisionMatch =
+        docElem?.className.match(PRE_RENDER_SUBDIVISION_REGEX) ||
+        bodyElem.className.match(PRE_RENDER_SUBDIVISION_REGEX);
+
+      if (preRenderSubdivisionMatch) {
+        this.subdivision_ = preRenderSubdivisionMatch[1];
+      }
     } else if (trimmedGeoMatch[1]) {
       // We have a valid 2 letter ISO country
       this.mode_ = mode.GEO_HOT_PATCH;
       this.country_ = trimmedGeoMatch[1].toLowerCase();
+
       if (trimmedGeoMatch[2]) {
         this.subdivision_ = trimmedGeoMatch[2].toLowerCase();
       }
@@ -505,6 +516,7 @@ export class AmpGeo extends AMP.BaseElement {
 
             states.ISOCountryGroups = this.matchedGroups_;
             classesToAdd.push(COUNTRY_PREFIX + this.country_);
+            classesToAdd.push(SUBDIVISION_PREFIX + this.subdivision_);
 
             // Let the runtime know we're mutating the AMP body
             // Actual change happens in callback so runtime can
