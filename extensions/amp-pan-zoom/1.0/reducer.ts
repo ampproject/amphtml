@@ -4,6 +4,8 @@ import {scale as cssScale, px, translate} from '#core/dom/style';
 import {numeric} from '#core/dom/transition';
 import {boundValue, distance} from '#core/math';
 
+import {useMemo, useState} from '#preact';
+
 const PAN_ZOOM_CURVE = bezierCurve(0.4, 0, 0.2, 1.4);
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
 const DEFAULT_MAX_SCALE = 3;
@@ -11,56 +13,9 @@ const DEFAULT_INITIAL_SCALE = 1;
 const MAX_ANIMATION_DURATION = 250;
 const DEFAULT_ORIGIN = 0;
 
-export const ACTIONS = {
-  INITIALIZE_BOUNDS: 'INITIALIZE_BOUNDS',
-  SET_DIMENSIONS: 'SET_DIMENSIONS',
-  SET_CONTENT_BOX_OFFSETS: 'SET_CONTENT_BOX_OFFSETS',
-  CLEAR_DIMENSIONS: 'CLEAR_DIMENSIONS',
-  UPDATE_PAN_ZOOM: 'UPDATE_PAN_ZOOM',
-  UPDATE_PAN_ZOOM_BOUNDS: 'UPDATE_PAN_ZOOM_BOUNDS',
-  SET_ZOOM_BOUNDS: 'SET_ZOOM_BOUNDS',
-  UPDATE_CONTENT_DIMENSIONS: 'UPDATE_CONTENT_DIMENSIONS',
-  RESET_CONTENT_DIMENSIONS: 'RESET_CONTENT_DIMENSIONS',
-  TRANSFORM: 'TRANSFORM',
-  SET_IS_ZOOMED: 'SET_IS_ZOOMED',
-  SET_IS_PANNABLE: 'SET_IS_PANNABLE',
-  MOVE: 'MOVE',
-  MOVE_RELEASE: 'MOVE_RELEASE',
-};
-
 const initialRect = new DOMRect(0, 0, 0, 0);
 
-type InitialState = {
-  maxX: number;
-  minX: number;
-  startX: number;
-  posX: number;
-
-  maxY: number;
-  minY: number;
-  startY: number;
-  posY: number;
-
-  minScale: number;
-  maxScale: number;
-  scale: number;
-
-  width: number;
-  sourceWidth: number;
-  height: number;
-  sourceHeight: number;
-  transform: string;
-
-  contentBox: DOMRect;
-  containerBox: DOMRect;
-
-  isPannable: boolean;
-  isZoomed: boolean;
-};
-
-type State = InitialState;
-
-const initialState: InitialState = {
+const initialState = {
   maxX: 0,
   minX: 0,
   startX: 0,
@@ -75,9 +30,9 @@ const initialState: InitialState = {
   maxScale: DEFAULT_MAX_SCALE,
   scale: 1,
 
-  width: 0,
+  width: '',
   sourceWidth: 0,
-  height: 0,
+  height: '',
   sourceHeight: 0,
   transform: '',
 
@@ -87,6 +42,16 @@ const initialState: InitialState = {
   isPannable: false,
   isZoomed: false,
 };
+
+type InitialState = typeof initialState;
+
+type PanZoomConfig = {
+  initialScale: number;
+  initialX: number;
+  initialY: number;
+  maxScale: number;
+};
+type State = InitialState & PanZoomConfig;
 
 const updatePanZoomBoundaries = (state: State, newScale: number) => {
   const {containerBox, contentBox} = state;
@@ -190,9 +155,11 @@ const measure = (
 
 const setContentBox = (contentBox: DOMRect, containerBox: DOMRect) => {
   return {
-    ...contentBox,
+    // ...contentBox,
     top: contentBox.top - containerBox.top,
     left: contentBox.left - containerBox.left,
+    width: contentBox.width,
+    height: contentBox.height,
   };
 };
 
@@ -294,7 +261,7 @@ const getKeyframes = (posX, posY, scale) => {
   return [{transform: translate(posX, posY) + cssScale(scale)}];
 };
 
-export function initReducer(config) {
+export function initReducer(config: PanZoomConfig): State {
   const {initialScale, initialX, initialY, maxScale} = config;
   return {
     ...initialState,
@@ -305,89 +272,97 @@ export function initReducer(config) {
   };
 }
 
-export function panZoomReducer(state: InitialState, action) {
-  switch (action.type) {
-    case ACTIONS.INITIALIZE_BOUNDS:
-      return {
-        ...state,
-        contentBox: action.payload.contentBox,
-        containerBox: action.payload.containerBox,
-      };
-    case ACTIONS.SET_DIMENSIONS:
-      return {
-        ...state,
-        height: px(state.contentBox?.height),
-        width: px(state.contentBox?.width),
-      };
-    case ACTIONS.CLEAR_DIMENSIONS:
-      return {
-        ...state,
-        height: '',
-        width: '',
-      };
-    case ACTIONS.UPDATE_PAN_ZOOM:
-      const transformString = `translate(${state.posX}px ${state.posY}px) scale(${state.scale})`;
-      return {
-        ...state,
-        transform: transformString,
-      };
-    case ACTIONS.UPDATE_PAN_ZOOM_BOUNDS:
-      return {
-        ...state,
-        ...updatePanZoomBoundaries(state, action.payload.scale),
-      };
-    case ACTIONS.SET_CONTENT_BOX_OFFSETS:
-      return {
-        ...state,
-        ...setContentBox(action.payload.contentBox, state.containerBox),
-      };
-    case ACTIONS.SET_IS_PANNABLE:
-      // temp work around for clicking on zoom button
-      if (!state.isZoomed) {
-        return state;
-      } else {
-        return {
+type PickState<keys extends keyof State> = Required<Pick<State, keys>>;
+
+export function usePanZoomState(config: PanZoomConfig) {
+  const [state, setState] = useState(() => initReducer(config));
+  const actions = useMemo(() => {
+    return {
+      INITIALIZE_BOUNDS(payload: PickState<'contentBox' | 'containerBox'>) {
+        setState((state) => ({
           ...state,
-          isPannable: action.payload.isPannable,
-        };
-      }
-    case ACTIONS.SET_IS_ZOOMED:
-      return {
-        ...state,
-        isZoomed: action.payload.isZoomed,
-      };
-    case ACTIONS.UPDATE_CONTENT_DIMENSIONS:
-      return {
-        ...state,
-        ...updatePanZoomBoundaries(state, action.payload.scale),
-      };
-    case ACTIONS.MOVE:
-      return {
-        ...state,
-        ...move(
-          state,
-          action.payload.posX,
-          action.payload.posY,
-          action.payload.element
-        ),
-      };
-    case ACTIONS.MOVE_RELEASE:
-      return {
-        ...state,
-        isPannable: false,
-      };
-    case ACTIONS.TRANSFORM:
-      return {
-        ...state,
-        ...updatePanZoomBoundaries(state, action.payload.scale),
-        ...transform(
-          state,
-          action.payload.x,
-          action.payload.y,
-          action.payload.scale
-        ),
-      };
-    default:
-      return state;
-  }
+          contentBox: payload.contentBox,
+          containerBox: payload.containerBox,
+        }));
+      },
+      SET_DIMENSIONS() {
+        setState((state) => ({
+          ...state,
+          height: px(state.contentBox?.height),
+          width: px(state.contentBox?.width),
+        }));
+      },
+      CLEAR_DIMENSIONS() {
+        setState((state) => ({
+          ...state,
+          height: '',
+          width: '',
+        }));
+      },
+      UPDATE_PAN_ZOOM() {
+        setState((state) => {
+          return {
+            ...state,
+            transform: `translate(${state.posX}px ${state.posY}px) scale(${state.scale})`,
+          };
+        });
+      },
+      UPDATE_PAN_ZOOM_BOUNDS(payload: PickState<'scale'>) {
+        setState((state) => ({
+          ...state,
+          ...updatePanZoomBoundaries(state, payload.scale),
+        }));
+      },
+      SET_CONTENT_BOX_OFFSETS(payload: PickState<'contentBox'>) {
+        setState((state) => ({
+          ...state,
+          ...setContentBox(payload.contentBox, state.containerBox),
+        }));
+      },
+      SET_IS_PANNABLE(payload: PickState<'isPannable'>) {
+        setState((state) =>
+          // temp work around for clicking on zoom button
+          state.isZoomed
+            ? state
+            : {
+                ...state,
+                isPannable: payload.isPannable,
+              }
+        );
+      },
+      SET_IS_ZOOMED(payload: PickState<'isZoomed'>) {
+        setState((state) => ({
+          ...state,
+          isZoomed: payload.isZoomed,
+        }));
+      },
+      UPDATE_CONTENT_DIMENSIONS(payload: PickState<'scale'>) {
+        setState((state) => ({
+          ...state,
+          ...updatePanZoomBoundaries(state, payload.scale),
+        }));
+      },
+      MOVE(payload: PickState<'posX' | 'posY'> & {element: HTMLElement}) {
+        setState((state) => ({
+          ...state,
+          ...move(state, payload.posX, payload.posY, payload.element),
+        }));
+      },
+      MOVE_RELEASE() {
+        setState((state) => ({
+          ...state,
+          isPannable: false,
+        }));
+      },
+      TRANSFORM(payload: PickState<'posX' | 'posY' | 'scale'>) {
+        setState((state) => ({
+          ...state,
+          ...updatePanZoomBoundaries(state, payload.scale),
+          ...transform(state, payload.posX, payload.posY, payload.scale),
+        }));
+      },
+    };
+  }, [setState]);
+
+  return [state, actions] as const;
 }
