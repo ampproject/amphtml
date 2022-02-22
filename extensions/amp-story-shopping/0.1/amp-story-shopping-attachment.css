@@ -9,7 +9,7 @@ amp-story-shopping-attachment {
   --i-amphtml-amp-story-shopping-pdp-carousel-height: calc(var(--story-page-vh) * 80 - var(--story-page-vw) * 60) !important;
 }
 
-[desktop][supports-landscape] amp-story-shopping-attachment {
+amp-story[desktop][supports-landscape] amp-story-shopping-attachment {
   font-size: calc(18px) !important; /* Text should not be responsive in desktop supports landscape mode. */
   --i-amphtml-amp-story-shopping-pdp-carousel-height: 32em !important;
 }
