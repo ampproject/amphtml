@@ -111,13 +111,9 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
       />
     );
 
-    let api = ref.current;
-    expect(api.readyState).to.equal('loading');
     expect(onReadyState).to.not.be.called;
 
     await wrapper.find('iframe').invoke('onLoad')();
-    api = ref.current;
-    expect(api.readyState).to.equal('complete');
     expect(onReadyState).to.be.calledOnce.calledWith('complete');
   });
 
