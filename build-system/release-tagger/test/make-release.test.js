@@ -1,6 +1,6 @@
 const nock = require('nock');
 const test = require('ava');
-const {getExtensions} = require('../../npm-publish/utils');
+const {getExtensionsAndComponents} = require('../../npm-publish/utils');
 const {makeRelease} = require('../make-release');
 
 test.before(() => nock.disableNetConnect());
@@ -20,7 +20,7 @@ test('create', async (t) => {
     '<a href="https://github.com/ampproject/amphtml/commit/3abcdef">' +
     '<code>3abc</code></a> - Update packages';
 
-  const packages = getExtensions().map((e) => e.extension);
+  const packages = getExtensionsAndComponents().map((e) => e.extension);
 
   const rest = nock('https://api.github.com')
     // https://docs.github.com/en/rest/reference/git#get-a-reference
@@ -186,7 +186,7 @@ test('cherry-pick', async (t) => {
     '<a href="https://github.com/ampproject/amphtml/commit/2abcdef">' +
     '<code>2abc</code></a> - Cherry pick fix';
 
-  const packages = getExtensions().map((e) => e.extension);
+  const packages = getExtensionsAndComponents().map((e) => e.extension);
 
   const rest = nock('https://api.github.com')
     // https://docs.github.com/en/rest/reference/git#get-a-reference
