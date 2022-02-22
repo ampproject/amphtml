@@ -6,13 +6,13 @@ amp-story-shopping-attachment {
   --i-amphtml-shopping-attachment-horizontal-spacing: 1.5em !important;
   --i-amphtml-shopping-attachment-vertical-spacing: 1.2em !important;
   --i-amphtml-shopping-three-percent-overlay: rgba(0, 0, 0,  .03) !important;
-  --i-amphtml-amp-story-shopping-pdp-carousel-height: calc(var(--story-page-vh) * 80 - var(--story-page-vw) * 60) !important;
+  --i-amphtml-shopping-pdp-carousel-height: calc(var(--story-page-vh) * 80 - var(--story-page-vw) * 60) !important;
 }
 
 amp-story[desktop][supports-landscape] amp-story-shopping-attachment {
   /* Sets static values in desktop supports landscape mode. */
   font-size: calc(18px) !important; 
-  --i-amphtml-amp-story-shopping-pdp-carousel-height: 32em !important;
+  --i-amphtml-shopping-pdp-carousel-height: 32em !important;
 }
 
 amp-story-shopping-attachment[theme="dark"] {
@@ -196,7 +196,7 @@ amp-story-shopping-attachment a {
   display: flex !important;
   overflow-x: auto !important;
   scroll-snap-type: x mandatory !important;
-  height: var(--i-amphtml-amp-story-shopping-pdp-carousel-height) !important;
+  height: var(--i-amphtml-shopping-pdp-carousel-height) !important;
   max-height: 100vw !important;
 }
 
@@ -219,7 +219,7 @@ amp-story-shopping-attachment a {
   background-repeat: no-repeat !important;
   cursor: pointer !important;
   width: calc(var(--story-page-vw) * 100 - 7.5em) !important;
-  max-width: calc(var(--i-amphtml-amp-story-shopping-pdp-carousel-height) * 1.25) !important;
+  max-width: calc(var(--i-amphtml-shopping-pdp-carousel-height) * 1.25) !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
