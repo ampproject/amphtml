@@ -183,9 +183,4 @@ export const EXPERIMENTS = [
     name: 'Load first page before loading inactive pages',
     spec: 'https://github.com/ampproject/amphtml/issues/35219',
   },
-  {
-    id: 'story-load-inactive-outside-viewport',
-    name: 'Load inactive pages outside the viewport to prevent them from counting towards LCP when invisible',
-    spec: 'https://github.com/ampproject/amphtml/pull/35323',
-  },
 ];
