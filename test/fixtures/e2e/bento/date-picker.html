@@ -18,6 +18,7 @@
     />
   </head>
   <body>
+    <h1>Single Date Picker</h1>
     <bento-date-picker
       id="bento-single-date-picker"
       today="2022-01-01"
@@ -28,20 +29,44 @@
       <button id="today">Today</button>
       <button id="tomorrow">Tomorrow</button>
     </bento-date-picker>
+    <h1>Date Range Picker</h1>
+    <bento-date-picker
+      id="bento-range-date-picker"
+      type="range"
+      today="2022-01-01"
+      start-input-selector="#start-date"
+      end-input-selector="#end-date"
+    >
+      <input type="text" id="start-date" placeholder="Start date" />
+      <input type="text" id="end-date" placeholder="End date" />
+      <button id="clear-range">Clear</button>
+      <button id="start-today">Set Start to Today</button>
+      <button id="end-today">Set End to Today</button>
+    </bento-date-picker>
     <script>
-      async function runDatePicker() {
+      async function runSingleDatePicker() {
         const singleDatePicker = document.querySelector(
           '#bento-single-date-picker'
         );
         await customElements.whenDefined('bento-date-picker');
         const api = await singleDatePicker.getApi();
-        console.log(api);
 
         document.querySelector('#clear-single').onclick = () => api.clear();
         document.querySelector('#today').onclick = () => api.today();
         document.querySelector('#tomorrow').onclick = () => api.today(1);
       }
-      runDatePicker();
+      async function runRangeDatepicker() {
+        const rangeDatePicker = document.querySelector(
+          '#bento-range-date-picker'
+        );
+        await customElements.whenDefined('bento-date-picker');
+        const api = await rangeDatePicker.getApi();
+
+        document.querySelector('#clear-range').onclick = () => api.clear();
+        document.querySelector('#start-today').onclick = () => api.startToday();
+        document.querySelector('#end-today').onclick = () => api.endToday();
+      }
+      runSingleDatePicker();
     </script>
   </body>
 </html>

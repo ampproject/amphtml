@@ -1,4 +1,9 @@
-import {DayPicker, DayPickerProps} from 'react-day-picker';
+import {
+  DayPicker,
+  DayPickerProps,
+  SelectRangeEventHandler,
+  SelectSingleEventHandler,
+} from 'react-day-picker';
 
 import * as Preact from '#preact';
 import {useCallback} from '#preact';
@@ -11,6 +16,7 @@ import {getFormattedDate} from '../date-helpers';
 interface BaseDatePickerProps extends DayPickerProps {
   monthFormat: string;
   weekDayFormat: string;
+  onSelect: SelectSingleEventHandler | SelectRangeEventHandler;
 }
 
 export function BaseDatePicker({

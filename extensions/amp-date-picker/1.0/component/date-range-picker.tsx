@@ -9,11 +9,12 @@ import {
 // TODO: Fix this
 // eslint-disable-next-line local/no-import
 import {ComponentProps, Ref} from 'preact';
-import {Matcher} from 'react-day-picker';
+import {DateRange, Matcher} from 'react-day-picker';
 
 import {Keys_Enum} from '#core/constants/key-codes';
 import {
   closestAncestorElementBySelector,
+  querySelectorInSlot,
   scopedQuerySelector,
 } from '#core/dom/query';
 
@@ -145,7 +146,7 @@ function DateRangePickerWithRef(
    * accounting for the `allow-blocked-end-date` attribute.
    */
   const isBlockedRange = useCallback(
-    (startDate: Date, endDate: Date) => {
+    (startDate?: Date, endDate?: Date) => {
       if (!startDate || !endDate) {
         return;
       }
@@ -180,25 +181,38 @@ function DateRangePickerWithRef(
    * Sets a date range if it is available. Closes the date picker in overlay mode.
    */
   const selectDateRange = useCallback(
-    ({from: startDate, to: endDate}: {from: Date; to: Date}) => {
+    ({from: startDate, to: endDate}: DateRange) => {
       const disabledAfter = getDisabledAfter(startDate);
       const disabledBefore = getDisabledBefore(startDate);
-      const isAfterDisabledDate =
-        disabledAfter && isAfter(endDate, disabledAfter);
-      const isBeforeDisabledDate =
-        disabledBefore &&
-        !isSameDay(startDate, endDate) &&
-        isBefore(endDate, disabledBefore);
+
+      let isAfterDisabledDate = false;
+      let isBeforeDisabledDate = false;
+
+      if (disabledAfter && endDate) {
+        isAfterDisabledDate = isAfter(endDate, disabledAfter);
+      }
+
+      if (disabledBefore && startDate && endDate) {
+        isBeforeDisabledDate =
+          !isSameDay(startDate, endDate) && isBefore(endDate, disabledBefore);
+      }
+
       const isOutsideRange = isAfterDisabledDate || isBeforeDisabledDate;
+
       if (isBlockedRange(startDate, endDate) || isOutsideRange) {
         return;
       }
+
       // TODO: Clarify this logic
-      if (focusedInput === 'start-input' && isSameDay(startDate, endDate)) {
-        handleSetStartDate(startDate);
+      if (focusedInput === 'start-input') {
+        if (startDate && endDate && isSameDay(startDate, endDate)) {
+          handleSetStartDate(startDate);
+        }
       } else if (focusedInput === 'end-input') {
-        handleSetEndDate(endDate);
-      } else {
+        if (endDate) {
+          handleSetEndDate(endDate);
+        }
+      } else if (startDate && endDate) {
         handleSetStartDate(startDate);
         handleSetEndDate(endDate);
         if (!openAfterSelect && mode === 'overlay') {
@@ -338,14 +352,41 @@ function DateRangePickerWithRef(
       containerRef.current!,
       FORM_INPUT_SELECTOR
     ) as HTMLFormElement;
-    const startDateInputElement = scopedQuerySelector(
+    let startDateInputElement;
+    let endDateInputElement;
+
+    startDateInputElement = scopedQuerySelector(
       containerRef.current!,
       startInputSelector
     ) as HTMLInputElement;
-    const endDateInputElement = scopedQuerySelector(
+
+    // This is required for bento mode
+    if (!startDateInputElement) {
+      const slot = containerRef.current?.querySelector('slot');
+      if (slot) {
+        startDateInputElement = querySelectorInSlot(
+          slot,
+          startInputSelector
+        ) as HTMLInputElement;
+      }
+    }
+
+    endDateInputElement = scopedQuerySelector(
       containerRef.current!,
       endInputSelector
     ) as HTMLInputElement;
+
+    // This is required for bento mode
+    if (!endDateInputElement) {
+      const slot = containerRef.current?.querySelector('slot');
+      if (slot) {
+        endDateInputElement = querySelectorInSlot(
+          slot,
+          endInputSelector
+        ) as HTMLInputElement;
+      }
+    }
+
     if (startDateInputElement) {
       startDateInput.ref.current = startDateInputElement;
       if (startDateInputElement.value) {
@@ -497,8 +538,6 @@ function DateRangePickerWithRef(
           <BaseDatePicker
             mode="range"
             selected={dateRange}
-            // TODO: This might be a bug in ReactDayPicker types
-            // @ts-ignore
             onSelect={selectDateRange}
             locale={locale}
             disabled={disabledMatchers}

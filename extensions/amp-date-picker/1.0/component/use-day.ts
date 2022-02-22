@@ -65,7 +65,7 @@ export function useDay() {
   // the selected start date
   // https://react-day-picker-next.netlify.app/api/types/DateAfter
   const getDisabledAfter = useCallback(
-    (startDate: Date) => {
+    (startDate?: Date) => {
       if (!maximumNights || !startDate) {
         return;
       }
@@ -78,7 +78,7 @@ export function useDay() {
   // the selected start date
   // https://react-day-picker-next.netlify.app/api/types/DateAfter
   const getDisabledBefore = useCallback(
-    (startDate: Date) => {
+    (startDate?: Date) => {
       if (!startDate) {
         return;
       }
