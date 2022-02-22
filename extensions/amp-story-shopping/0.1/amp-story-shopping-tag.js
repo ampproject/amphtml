@@ -117,8 +117,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, (id) =>
-      this.toggleShoppingTagActive_(id)
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      (id) => this.toggleShoppingTagActive_(id),
+      true /** callToInitialize */
     );
   }
 
