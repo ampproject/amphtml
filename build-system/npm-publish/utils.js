@@ -19,11 +19,11 @@ function getExtensions() {
  */
 function getComponents() {
   const bundles = require('../compile/bundles.config.bento.json');
-  const extensions = bundles.map((bundle) => ({
+  const components = bundles.map((bundle) => ({
     'extension': bundle.name,
     'version': bundle.version,
   }));
-  return extensions;
+  return components;
 }
 
 /**
