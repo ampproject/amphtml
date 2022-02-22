@@ -107,8 +107,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) =>
-      this.onRtlStateUpdate_(rtlState)
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      (rtlState) => this.onRtlStateUpdate_(rtlState),
+      true /** callToInitialize */
     );
 
     this.storeService_.subscribe(
