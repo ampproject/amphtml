@@ -9,8 +9,6 @@ import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
-import {devAssert} from '#utils/log';
-
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
 import {CSS as shoppingSharedCSS} from '../../../build/amp-story-shopping-shared-0.1.css';
@@ -41,11 +39,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
+    /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win);
+
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = Services.localizationForDoc(this.element);
 
     /** @private {boolean} element */
     this.hasAppendedInnerShoppingTagEl_ = false;
@@ -64,14 +63,14 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /* This is used to prevent the shopping tag component from building if there is no shopping attachment. */
-    const pageElement = closestAncestorElementBySelector(
+    this.pageEl_ = closestAncestorElementBySelector(
       this.element,
       'amp-story-page'
     );
 
+    /* This is used to prevent the shopping tag component from building if there is no shopping attachment. */
     this.shoppingAttachment_ = childElementByTag(
-      pageElement,
+      this.pageEl_,
       'amp-story-shopping-attachment'
     );
 
@@ -80,18 +79,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     }
 
     this.element.setAttribute('role', 'button');
-
-    this.pageEl_ = devAssert(
-      closestAncestorElementBySelector(this.element, 'amp-story-page')
-    );
-
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win),
-      Services.localizationServiceForOrNull(this.element),
-    ]).then(([storeService, localizationService]) => {
-      this.storeService_ = storeService;
-      this.localizationService_ = localizationService;
-    });
   }
 
   /** @override */

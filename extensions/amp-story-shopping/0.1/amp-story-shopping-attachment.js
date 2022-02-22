@@ -48,11 +48,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private @const {!Element} */
     this.templateContainer_ = <div></div>;
 
-    /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
+    /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win);
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = Services.localizationForDoc(this.element);
 
     /** @private {!Map<string, Element>} */
     this.builtTemplates_ = {};
@@ -73,26 +73,18 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
 
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win),
-      Services.localizationServiceForOrNull(this.element),
-    ]).then(([storeService, localizationService]) => {
-      this.storeService_ = storeService;
-      this.localizationService_ = localizationService;
-
-      this.attachmentEl_ = (
-        <amp-story-page-attachment
-          layout="nodisplay"
-          theme={this.element.getAttribute('theme')}
-          cta-text={this.localizationService_.getLocalizedString(
-            LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
-          )}
-        >
-          {this.templateContainer_}
-        </amp-story-page-attachment>
-      );
-      this.element.appendChild(this.attachmentEl_);
-    });
+    this.attachmentEl_ = (
+      <amp-story-page-attachment
+        layout="nodisplay"
+        theme={this.element.getAttribute('theme')}
+        cta-text={this.localizationService_.getLocalizedString(
+          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+        )}
+      >
+        {this.templateContainer_}
+      </amp-story-page-attachment>
+    );
+    this.element.appendChild(this.attachmentEl_);
   }
 
   /** @override */
