@@ -107,8 +107,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) =>
-      this.onRtlStateUpdate_(rtlState)
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      (rtlState) => this.onRtlStateUpdate_(rtlState),
+      true /** callToInitialize */
     );
 
     this.storeService_.subscribe(
@@ -117,8 +119,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, (id) =>
-      this.toggleShoppingTagActive_(id)
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      (id) => this.toggleShoppingTagActive_(id),
+      true /** callToInitialize */
     );
   }
 
