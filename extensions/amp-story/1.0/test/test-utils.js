@@ -1,4 +1,7 @@
-import {UPGRADE_TO_CUSTOMELEMENT_RESOLVER} from '#core/dom/amp-element-helpers';
+import {
+  UPGRADE_TO_CUSTOMELEMENT_PROMISE,
+  UPGRADE_TO_CUSTOMELEMENT_RESOLVER,
+} from '#core/dom/amp-element-helpers';
 import * as Preact from '#core/dom/jsx';
 
 import {StateProperty} from '../amp-story-store-service';
@@ -184,6 +187,7 @@ describes.fakeWin('amp-story utils', {}, (env) => {
       story.getImpl = () => Promise.resolve();
       story[UPGRADE_TO_CUSTOMELEMENT_RESOLVER](story);
       delete story[UPGRADE_TO_CUSTOMELEMENT_RESOLVER];
+      delete story[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
 
       const upgraded = await upgradedPromise;
 
