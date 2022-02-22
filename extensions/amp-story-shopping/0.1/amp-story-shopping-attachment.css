@@ -14,7 +14,6 @@ amp-story-shopping-attachment {
   --i-amphtml-amp-story-shopping-pdp-carousel-height: 32em !important;
 }
 
-
 amp-story-shopping-attachment[theme="dark"] {
   --i-amphtml-shopping-three-percent-overlay: rgba(255, 255, 255, .03) !important;
 }
