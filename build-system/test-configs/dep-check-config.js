@@ -219,7 +219,7 @@ exports.rules = [
       'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
 
       // <amp-list> and <amp-render> share some logic
-      'extensions/amp-list/1.0/**->extensions/amp-render/1.0/shared/amp-fetch-utils.js',
+      'extensions/amp-list/1.0/amp-list.js**->extensions/amp-render/1.0/shared/amp-fetch-utils.js',
 
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
