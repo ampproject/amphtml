@@ -1,17 +1,10 @@
-import type {VNode} from 'preact';
+import type {ComponentChildren, Ref} from 'preact';
 
 import {bezierCurve} from '#core/data-structures/curve';
 import {scale as cssScale, setStyles, translate} from '#core/dom/style';
 
 import * as Preact from '#preact';
-import {
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '#preact';
+import {useEffect, useImperativeHandle, useLayoutEffect, useRef} from '#preact';
 import {Children, forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {logger} from '#preact/logger';
@@ -39,8 +32,8 @@ const ELIGIBLE_TAGS = new Set([
 
 const useZoomAnimation = () => {};
 
-type PanZoomProps = {
-  children?: VNode;
+export type BentoPanZoomProps = {
+  children?: ComponentChildren;
   controls?: boolean;
   initialScale?: number;
   initialX?: number;
@@ -50,16 +43,21 @@ type PanZoomProps = {
   resetOnResize?: boolean;
 };
 
+export type BentoPanZoomApi = {
+  transform(scale: number, x: number, y: number): void;
+};
+
 function classNames(...args: Array<string | false | null | 0>) {
   return args.filter(Boolean).join(' ');
 }
 
 /**
- * @param {!BentoPanZoom.Props} props
- * @param {{current: ?BentoPanZoom.PanZoomApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function BentoPanZoomWithRef(props, ref) {
+export function BentoPanZoomWithRef(
+  props: BentoPanZoomProps,
+  ref: Ref<BentoPanZoomApi>
+) {
   const {
     children,
     controls,

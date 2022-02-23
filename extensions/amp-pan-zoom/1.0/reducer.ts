@@ -6,6 +6,8 @@ import {boundValue, distance} from '#core/math';
 
 import {useMemo, useState} from '#preact';
 
+import {BentoPanZoomProps} from './component-ts';
+
 const PAN_ZOOM_CURVE = bezierCurve(0.4, 0, 0.2, 1.4);
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
 const DEFAULT_MAX_SCALE = 3;
@@ -44,12 +46,10 @@ const initialState = {
 
 type InitialState = typeof initialState;
 
-type PanZoomConfig = {
-  initialScale: number;
-  initialX: number;
-  initialY: number;
-  maxScale: number;
-};
+type PanZoomConfig = Pick<
+  BentoPanZoomProps,
+  'initialScale' | 'initialX' | 'initialY' | 'maxScale'
+>;
 type State = InitialState & PanZoomConfig;
 
 const updatePanZoomBoundaries = (state: State, newScale: number) => {
