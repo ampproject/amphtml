@@ -2,16 +2,10 @@ import '../amp-date-picker';
 import {expect} from 'chai';
 
 import {createElementWithAttributes} from '#core/dom';
-import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 
 import {waitFor} from '#testing/helpers/service';
-
-const DEFAULT_ATTRS = {
-  layout: 'fixed-height',
-  height: '360',
-};
 
 describes.realWin(
   'amp-date-picker-v1.0',
@@ -23,7 +17,6 @@ describes.realWin(
   (env) => {
     let document;
     let win;
-    let html;
 
     const DEFAULT_ATTRS = {
       layout: 'fixed-height',
@@ -46,7 +39,6 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       document = win.document;
-      html = htmlFor(document);
 
       toggleExperiment(win, 'bento-date-picker', true, true);
     });
@@ -58,27 +50,6 @@ describes.realWin(
 
       expect(element.parentNode).to.equal(document.body);
       expect(element.children).to.have.lengthOf(0);
-    });
-
-    describe('initial dates', () => {
-      it('should use the value of a single input at runtime', async () => {
-        const input = document.createElement('input');
-        input.id = 'date';
-        input.value = '2022-01-01';
-        document.body.appendChild(input);
-
-        const {element} = createDatePicker({
-          layout: 'fixed-height',
-          height: 360,
-          'input-selector': '#date',
-        });
-
-        await waitFor(() => element.isConnected, 'element connected');
-
-        // expect(element.attributes.getNamedItem('data-date')).equals(
-        //   '2022-01-01'
-        // );
-      });
     });
   }
 );

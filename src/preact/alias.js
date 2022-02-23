@@ -9,8 +9,9 @@ export {
   useMemo,
   useCallback,
   useImperativeHandle,
-  forwardRef,
   createContext,
 } from '.';
+
+export {forwardRef} from 'preact/compat';
 
 export default preactModules;

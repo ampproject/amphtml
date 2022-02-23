@@ -3,9 +3,7 @@ import {enUS} from 'date-fns/locale';
 import * as Preact from '#preact';
 import {useRef} from '#preact';
 
-import {BentoDatePicker} from '../component/component.tsx';
-import {useDatePicker} from '../component/use-date-picker';
-import {getFormattedDate} from '../date-helpers';
+import {BentoDatePicker} from '../component/component';
 import {localeMap} from '../parsers';
 import '../amp-date-picker.css';
 
@@ -36,15 +34,6 @@ export default {
   },
 };
 
-const DateDisplay = () => {
-  const {selectedDate} = useDatePicker();
-  return (
-    <p>
-      The selected date is {getFormattedDate(selectedDate, 'MMMM dd, yyyy')}
-    </p>
-  );
-};
-
 export const _default = (args) => {
   const datePickerRef = useRef();
   return (
@@ -55,7 +44,6 @@ export const _default = (args) => {
       <button onClick={() => datePickerRef.current?.today({offset: 1})}>
         Tomorrow
       </button>
-      <DateDisplay />
     </BentoDatePicker>
   );
 };

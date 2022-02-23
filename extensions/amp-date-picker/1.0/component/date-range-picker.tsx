@@ -174,25 +174,19 @@ function DateRangePickerWithRef(
     ({from: startDate, to: endDate}: DateRange) => {
       const disabledAfter = getDisabledAfter(startDate);
       const disabledBefore = getDisabledBefore(startDate);
-
       let isAfterDisabledDate = false;
       let isBeforeDisabledDate = false;
-
       if (disabledAfter && endDate) {
         isAfterDisabledDate = isAfter(endDate, disabledAfter);
       }
-
       if (disabledBefore && startDate && endDate) {
         isBeforeDisabledDate =
           !isSameDay(startDate, endDate) && isBefore(endDate, disabledBefore);
       }
-
       const isOutsideRange = isAfterDisabledDate || isBeforeDisabledDate;
-
       if (isBlockedRange(startDate, endDate) || isOutsideRange) {
         return;
       }
-
       // TODO: Clarify this logic
       if (focusedInput === 'start-input') {
         if (startDate && endDate && isSameDay(startDate, endDate)) {
