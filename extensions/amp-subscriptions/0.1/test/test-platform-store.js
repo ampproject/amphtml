@@ -1,7 +1,7 @@
 import {user} from '#utils/log';
 
 import {Entitlement, GrantReason} from '../entitlement';
-import {PlatformStore} from '../platform-store';
+import {EntitlementChangeEventDef, PlatformStore} from '../platform-store';
 import {SubscriptionPlatform} from '../subscription-platform';
 
 describes.realWin('Platform store', {}, (env) => {
@@ -1020,7 +1020,10 @@ describes.realWin('Platform store', {}, (env) => {
         granted: false,
       });
       newStore.resolveEntitlement('platform1', newEntitlement);
-      expect(callbackSpy).to.have.been.calledOnce;
+      expect(callbackSpy).to.have.been.calledOnceWithExactly({
+        platformKey: 'platform1',
+        entitlement: newEntitlement,
+      });
     });
   });
 });
