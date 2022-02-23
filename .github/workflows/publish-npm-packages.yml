@@ -1,13 +1,30 @@
 name: Publish Bento Packages on npm
 on:
+  # to be triggered by ampproject/cdn-configuration promote workflows
+  workflow_call:
+    inputs:
+      amp-version:
+        description: 'AMP version'
+        required: true
+        type: string
+      tag:
+        description: 'npm package tag'
+        required: true
+        type: string
+
+  # to be run manually
   workflow_dispatch:
     inputs:
-      ampversion:
+      amp-version:
         description: 'AMP version'
         required: true
       tag:
-        description: 'npm package tag (latest | nightly)'
+        description: 'npm package tag'
         required: true
+        type: choice
+        options:
+          - latest
+          - nightly
 env:
   SCRIPTS_REPO: 'https://raw.githubusercontent.com/ampproject/amphtml/main'
   SCRIPTS_DIR: 'build-system/npm-publish'
@@ -19,11 +36,11 @@ jobs:
     steps:
       - name: Print inputs
         run: |
-          echo "AMP version: ${{ github.event.inputs.ampversion }}"
+          echo "AMP version: ${{ github.event.inputs.amp-version }}"
           echo "npm tag: ${{ github.event.inputs.tag }}"
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.events.inputs.ampversion }}
+          ref: ${{ github.events.inputs.amp-version }}
       - name: Get latest scripts
         run: wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-extensions.js" -O ${{ env.SCRIPTS_DIR }}/get-extensions.js
       - name: Get extensions to publish
@@ -42,7 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.events.inputs.ampversion }}
+          ref: ${{ github.events.inputs.amp-version }}
       - uses: actions/setup-node@v2
         with:
           registry-url: https://registry.npmjs.org
@@ -56,7 +73,7 @@ jobs:
         run: |
           npm ci
           node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }}
-          node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }} ${{ matrix.version }}
+          node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.amp-version }} ${{ matrix.version }}
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: npm publish ./extensions/${{ matrix.extension }}/${{ matrix.version }} --access public --tag ${{ github.event.inputs.tag }}
