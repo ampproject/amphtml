@@ -43,6 +43,7 @@ describes.realWin('Resources', {amp: true}, (env) => {
       isInViewport,
       layoutPriority,
       prerenderAllowed,
+      previewAllowed,
       renderOutsideViewport,
       state,
       taskId,
@@ -55,6 +56,7 @@ describes.realWin('Resources', {amp: true}, (env) => {
       isFixed: false,
       isInViewport: true,
       prerenderAllowed: false,
+      previewAllowed: false,
       renderOutsideViewport: false,
       idleRenderOutsideViewport: false,
       layoutPriority: LayoutPriority_Enum.CONTENT,
@@ -75,6 +77,7 @@ describes.realWin('Resources', {amp: true}, (env) => {
     env.sandbox.stub(resource, 'isFixed').returns(isFixed);
     env.sandbox.stub(resource, 'isInViewport').returns(isInViewport);
     env.sandbox.stub(resource, 'prerenderAllowed').returns(prerenderAllowed);
+    env.sandbox.stub(resource, 'previewAllowed').returns(previewAllowed);
     env.sandbox
       .stub(resource, 'renderOutsideViewport')
       .returns(renderOutsideViewport);
@@ -324,26 +327,42 @@ describes.realWin('Resources', {amp: true}, (env) => {
     }
   );
 
-  it('should schedule prerenderable resource when document is in prerender', () => {
+  it(
+    'should not schedule non-previewable resource when' +
+      ' document is in preview',
+    () => {
+      const resource = createResource({
+        state: ResourceState_Enum.READY_FOR_LAYOUT,
+      });
+      resources.visible_ = false;
+      env.sandbox
+        .stub(resources.ampdoc, 'getVisibilityState')
+        .returns(VisibilityState_Enum.PREVIEW);
+      resources.scheduleLayoutOrPreload(resource, true);
+      expect(resources.queue_.getSize()).to.equal(0);
+    }
+  );
+
+  it('should schedule previewable resource when document is in preview', () => {
     const resource = createResource({
       state: ResourceState_Enum.READY_FOR_LAYOUT,
-      prerenderAllowed: true,
+      previewAllowed: true,
       renderOutsideViewport: true,
       layoutPriority: LayoutPriority_Enum.METADATA,
     });
     resources.visible_ = false;
     env.sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
-      .returns(VisibilityState_Enum.PRERENDER);
+      .returns(VisibilityState_Enum.PREVIEW);
     resources.scheduleLayoutOrPreload(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
   });
 
-  it('should not schedule prerenderable resource when document is hidden', () => {
+  it('should not schedule previewable resource when document is hidden', () => {
     const resource = createResource({
       state: ResourceState_Enum.READY_FOR_LAYOUT,
-      prerenderAllowed: true,
+      previewAllowed: true,
       renderOutsideViewport: true,
       layoutPriority: LayoutPriority_Enum.METADATA,
     });
@@ -625,6 +644,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     element.layoutCallback = () => Promise.resolve();
     element.viewportCallback = sandbox.spy();
     element.prerenderAllowed = () => true;
+    element.previewAllowed = () => true;
     element.renderOutsideViewport = () => true;
     element.isRelayoutNeeded = () => true;
     element.pause = () => {};
@@ -977,6 +997,44 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource1.getState()).to.equal(ResourceState_Enum.READY_FOR_LAYOUT);
   });
 
+  it('should schedule resource preview when doc in preview mode', () => {
+    resources.scheduleLayoutOrPreload(resource1, true);
+    expect(resources.queue_.getSize()).to.equal(1);
+    expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
+
+    resources.visible_ = false;
+    sandbox.stub(resources.ampdoc, 'getVisibilityState').returns('preview');
+    sandbox.stub(resource1, 'isInViewport').returns(true);
+    sandbox.stub(resource1, 'previewAllowed').returns(true);
+
+    const measureSpy = sandbox.spy(resource1, 'measure');
+    const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
+    resources.work_();
+    expect(resources.exec_.getSize()).to.equal(1);
+    expect(measureSpy).to.be.calledOnce;
+    expect(layoutCanceledSpy).to.not.be.called;
+    expect(resource1.getState()).to.equal(ResourceState_Enum.LAYOUT_SCHEDULED);
+  });
+
+  it('should not schedule resource preview', () => {
+    resources.scheduleLayoutOrPreload(resource1, true);
+    expect(resources.queue_.getSize()).to.equal(1);
+    expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
+
+    resources.visible_ = false;
+    sandbox.stub(resources.ampdoc, 'getVisibilityState').returns('preview');
+    sandbox.stub(resource1, 'isInViewport').returns(true);
+    sandbox.stub(resource1, 'previewAllowed').returns(false);
+
+    const measureSpy = sandbox.spy(resource1, 'measure');
+    const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
+    resources.work_();
+    expect(resources.exec_.getSize()).to.equal(0);
+    expect(measureSpy).to.be.calledOnce;
+    expect(layoutCanceledSpy).to.be.calledOnce;
+    expect(resource1.getState()).to.equal(ResourceState_Enum.READY_FOR_LAYOUT);
+  });
+
   it('should schedule resource execution when doc is hidden', () => {
     resources.scheduleLayoutOrPreload(resource1, true);
     expect(resources.queue_.getSize()).to.equal(1);
@@ -1066,6 +1124,24 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
 
     resource1.element.isBuilt = () => false;
     resource1.prerenderAllowed = () => false;
+    resource1.state_ = ResourceState_Enum.NOT_BUILT;
+    resource1.build = sandbox.spy();
+    resource2.element.idleRenderOutsideViewport = () => false;
+
+    resources.discoverWork_();
+
+    expect(resource1.build).to.not.be.called;
+  });
+
+  it('should NOT build non-previewable resources in preview', () => {
+    sandbox
+      .stub(resources.ampdoc, 'getVisibilityState')
+      .returns(VisibilityState_Enum.PREVIEW);
+    sandbox.stub(resources, 'schedule_');
+    resources.documentReady_ = true;
+
+    resource1.element.isBuilt = () => false;
+    resource1.previewAllowed = () => false;
     resource1.state_ = ResourceState_Enum.NOT_BUILT;
     resource1.build = sandbox.spy();
     resource2.element.idleRenderOutsideViewport = () => false;

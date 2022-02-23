@@ -132,6 +132,7 @@ async function buildBentoComponent(name, version, hasCss, options = {}) {
     return;
   }
   const componentsDir = `src/bento/components/${name}/${version}`;
+  mkdirSync(`${componentsDir}/dist`, {recursive: true});
   if (options.watch) {
     await watchBentoComponent(componentsDir, name, version, hasCss, options);
   }
