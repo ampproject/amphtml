@@ -1,17 +1,42 @@
-import * as preactModules from '.';
+import {forwardRef} from 'preact/compat';
+
+import {
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from '.';
 
 export {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  forwardRef,
+  createElement,
+};
+
+export default {
   useState,
   useRef,
   useEffect,
   useLayoutEffect,
   useContext,
-  useMemo,
   useCallback,
-  useImperativeHandle,
   createContext,
-} from '.';
-
-export {forwardRef} from './compat';
-
-export default preactModules;
+  useImperativeHandle,
+  useMemo,
+  forwardRef,
+  createElement,
+};

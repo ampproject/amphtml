@@ -1,4 +1,5 @@
 import {isValid} from 'date-fns';
+import {forwardRef} from 'preact/compat';
 
 import {Keys_Enum} from '#core/constants/key-codes';
 
@@ -10,7 +11,6 @@ import {
   useState,
 } from '#preact';
 import * as Preact from '#preact';
-import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {Ref} from '#preact/types';
 
