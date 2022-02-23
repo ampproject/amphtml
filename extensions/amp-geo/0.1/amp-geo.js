@@ -202,6 +202,7 @@ export class AmpGeo extends AMP.BaseElement {
     const preRenderMatch =
       docElem?.className.match(PRE_RENDER_REGEX) ||
       bodyElem.className.match(PRE_RENDER_REGEX);
+
     // Trim the spaces off the patched country.
     // This is guaranteed to always match
     // - Correctly patched will have the two-char country code and whitespace.
