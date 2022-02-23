@@ -21,7 +21,7 @@
 
 import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag, iterateCursor} from '#core/dom';
-import {isArray, isEnumValue, isObject} from '#core/types';
+import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 import {getHashParams} from '#core/types/string/url';
 
@@ -78,14 +78,6 @@ const mode = {
   GEO_PRERENDER: 1, // We've been prerendered by an AMP Cache or publisher CMS
   GEO_OVERRIDE: 2, //  We've been overriden in test by #amp-geo=xx
   GEO_API: 3, //       Query API when cache patching unavailable
-};
-
-/**
- * @enum {string}
- */
-const countriesWithSubdivision = {
-  US: 'us',
-  CA: 'ca',
 };
 
 /**
@@ -229,10 +221,7 @@ export class AmpGeo extends AMP.BaseElement {
       if (overrideGeoMatch[1]) {
         this.country_ = overrideGeoMatch[1];
 
-        if (
-          overrideGeoMatch[2] &&
-          this.areSubdivisionsAllowed_(this.country_)
-        ) {
+        if (overrideGeoMatch[2]) {
           this.subdivision_ = overrideGeoMatch[2];
         }
 
@@ -247,21 +236,19 @@ export class AmpGeo extends AMP.BaseElement {
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
 
-      if (this.areSubdivisionsAllowed_(this.country_)) {
-        const preRenderSubdivisionMatch =
-          docElem?.className.match(PRE_RENDER_SUBDIVISION_REGEX) ||
-          bodyElem.className.match(PRE_RENDER_SUBDIVISION_REGEX);
+      const preRenderSubdivisionMatch =
+        docElem?.className.match(PRE_RENDER_SUBDIVISION_REGEX) ||
+        bodyElem.className.match(PRE_RENDER_SUBDIVISION_REGEX);
 
-        if (preRenderSubdivisionMatch) {
-          this.subdivision_ = preRenderSubdivisionMatch[1];
-        }
+      if (preRenderSubdivisionMatch) {
+        this.subdivision_ = preRenderSubdivisionMatch[1];
       }
     } else if (trimmedGeoMatch[1]) {
       // We have a valid 2 letter ISO country
       this.mode_ = mode.GEO_HOT_PATCH;
       this.country_ = trimmedGeoMatch[1].toLowerCase();
 
-      if (trimmedGeoMatch[2] && this.areSubdivisionsAllowed_(this.country_)) {
+      if (trimmedGeoMatch[2]) {
         this.subdivision_ = trimmedGeoMatch[2].toLowerCase();
       }
     } else if (trimmedGeoMatch[0] === '' && urls.geoApi) {
@@ -285,7 +272,7 @@ export class AmpGeo extends AMP.BaseElement {
             // Country is required and guaranteed to exist if data is available.
             this.country_ = country;
 
-            if (subdivision && this.areSubdivisionsAllowed_(this.country_)) {
+            if (subdivision) {
               this.subdivision_ = `${country}-${subdivision}`;
             }
           } else {
@@ -297,16 +284,6 @@ export class AmpGeo extends AMP.BaseElement {
             );
           }
         });
-  }
-
-  /**
-   * Ensure that subdivisions allowed for a specific country
-   * @param {string} country
-   * @return {boolean}
-   * @private
-   */
-  areSubdivisionsAllowed_(country) {
-    return isEnumValue(countriesWithSubdivision, country);
   }
 
   /**

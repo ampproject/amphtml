@@ -56,8 +56,9 @@ describes.realWin(
         anz: ['au', 'NZ'],
         uscaGroup: ['preset-us-ca'],
         california: ['us-ca'],
-        invalid: ['ru-ta'],
+        tatarstan: ['ru-ta'],
         myGroup: ['ru'],
+        invalid: ['ru-svee'],
       },
     };
 
@@ -365,7 +366,7 @@ describes.realWin(
       });
     });
 
-    it('should not allow ru-ta subdivision', () => {
+    it('should allow ru-ta subdivision', () => {
       setGeoOverrideHash('ru ru-ta');
       addConfigElement(
         'script',
@@ -375,21 +376,45 @@ describes.realWin(
       geo.buildCallback();
 
       return Services.geoForDocOrNull(el).then((geo) => {
-        expect(geo.ISOSubdivision).to.equal('unknown');
-        expectElementHasClass(doc.body, ['amp-geo-group-myGroup'], true);
+        expect(geo.ISOSubdivision).to.equal('ru-ta');
         expectElementHasClass(
-          doc.documentElement,
-          ['amp-geo-group-myGroup'],
+          doc.body,
+          ['amp-geo-group-myGroup', 'amp-geo-group-tatarstan'],
           true
         );
         expectElementHasClass(
+          doc.documentElement,
+          ['amp-geo-group-myGroup', 'amp-geo-group-tatarstan'],
+          true
+        );
+      });
+    });
+
+    it('should allow subdivisions that have max 3 symbol length', () => {
+      setGeoOverrideHash('ru ru-svee');
+      addConfigElement(
+        'script',
+        'application/json',
+        JSON.stringify(configWithInvalidCountry)
+      );
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOSubdivision).to.equal('ru-sve');
+        expectElementHasClass(
           doc.body,
-          ['amp-geo-group-invalid', 'amp-iso-subdivision-ru-ta'],
-          false
+          ['amp-geo-group-myGroup', 'amp-iso-subdivision-ru-sve'],
+          true
         );
         expectElementHasClass(
           doc.documentElement,
-          ['amp-geo-group-invalid', 'amp-iso-subdivision-ru-ta'],
+          ['amp-geo-group-myGroup', 'amp-iso-subdivision-ru-sve'],
+          true
+        );
+        expectElementHasClass(doc.body, ['amp-geo-group-invalid'], false);
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-geo-group-invalid'],
           false
         );
       });
