@@ -40,6 +40,27 @@
       <button id="start-today">Set Start to Today</button>
       <button id="end-today">Set End to Today</button>
     </bento-date-picker>
+    <h1>Overlay Single Picker</h1>
+    <bento-date-picker
+      id="bento-single-date-picker-overlay"
+      today="2022-01-01"
+      input-selector="#date-overlay"
+      mode="overlay"
+    >
+      <input type="text" id="date-overlay" placeholder="Choose a date" />
+    </bento-date-picker>
+    <h1>Overlay Range Picker</h1>
+    <bento-date-picker
+      id="bento-range-date-picker-overlay"
+      type="range"
+      today="2022-01-01"
+      start-input-selector="#start-date-overlay"
+      end-input-selector="#end-date-overlay"
+      mode="overlay"
+    >
+      <input type="text" id="start-date-overlay" placeholder="Start date" />
+      <input type="text" id="end-date-overlay" placeholder="End date" />
+    </bento-date-picker>
     <script>
       async function runSingleDatePicker() {
         const singleDatePicker = document.querySelector(

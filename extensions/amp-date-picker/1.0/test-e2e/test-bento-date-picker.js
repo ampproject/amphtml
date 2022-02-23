@@ -214,5 +214,59 @@ describes.endtoend(
           .to.be.null;
       });
     });
+
+    describe('single date picker in overlay mode', () => {
+      it('should be able to select a date', async () => {
+        const input = await controller.findElement('#date-overlay');
+        controller.click(input);
+
+        const element = await controller.findElement(
+          '#bento-single-date-picker-overlay'
+        );
+        await controller.switchToShadowRoot(element);
+
+        const calendar = await controller.findElement(
+          '.amp-date-picker-calendar-container'
+        );
+
+        const dateButton = await controller.findElement(
+          'button[aria-label="Sunday, January 2, 2022"]'
+        );
+        controller.click(dateButton);
+
+        await expect(
+          controller.getElementAttribute(calendar, 'data-date')
+        ).to.equal('2022-01-02');
+      });
+    });
+
+    describe.skip('range date picker in overlay mode', () => {
+      it('should be able to select the start date followed by the end date', async () => {
+        const element = await controller.findElement(
+          '#bento-range-date-picker-overlay'
+        );
+        await controller.switchToShadowRoot(element);
+
+        const calendar = await controller.findElement(
+          '.amp-date-picker-calendar-container'
+        );
+
+        const startDateButton = await controller.findElement(
+          'button[aria-label="Sunday, January 2, 2022"]'
+        );
+        const endDateButton = await controller.findElement(
+          'button[aria-label="Monday, January 3, 2022"]'
+        );
+        controller.click(startDateButton);
+        controller.click(endDateButton);
+
+        await expect(
+          controller.getElementAttribute(calendar, 'data-startdate')
+        ).to.equal('2022-01-02');
+        await expect(
+          controller.getElementAttribute(calendar, 'data-enddate')
+        ).to.equal('2022-01-03');
+      });
+    });
   }
 );
