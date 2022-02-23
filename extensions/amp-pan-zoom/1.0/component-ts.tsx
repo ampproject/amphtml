@@ -17,7 +17,9 @@ import {ContainWrapper} from '#preact/component';
 import {logger} from '#preact/logger';
 
 import {useStyles} from './component.jss';
+import {useDraggable} from './hooks/use-draggable';
 import {usePanZoomState} from './reducer';
+
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';
 const DEFAULT_MAX_SCALE = 3;
@@ -47,6 +49,11 @@ type PanZoomProps = {
   onTransformEnd?: (scale: number, x: number, y: number) => void;
   resetOnResize?: boolean;
 };
+
+function classNames(...args: Array<string | false | null | 0>) {
+  return args.filter(Boolean).join(' ');
+}
+
 /**
  * @param {!BentoPanZoom.Props} props
  * @param {{current: ?BentoPanZoom.PanZoomApi}} ref
@@ -65,22 +72,20 @@ export function BentoPanZoomWithRef(props, ref) {
     ...rest
   } = props;
   const styles = useStyles();
-  const childrenArray = useMemo(() => Children.toArray(children), [children]);
 
-  const contentRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLElement>(null);
-
-  const [state, actions] = usePanZoomState(props);
-  // const [state, dispatch] = useReducer(panZoomReducer, props, initReducer);
-  const [mousePos, setMousePos] = useState({mousePosX: 0, mousePosY: 0});
-
+  // Warn if there are too many children:
   useEffect(() => {
+    const childrenArray = Children.toArray(children);
     if (childrenArray.length !== 1) {
       // this should also potentially check child types?
       logger.error('BENTO-PAN-ZOOM', 'Component should only have one child');
     }
-  }, [childrenArray]);
+  }, [children]);
 
+  const [state, actions] = usePanZoomState(props);
+
+  const contentRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!containerRef.current && !contentRef.current) {
       return;
@@ -97,8 +102,7 @@ export function BentoPanZoomWithRef(props, ref) {
       return;
     }
 
-    const element = contentRef.current!;
-    setStyles(element, {
+    setStyles(contentRef.current!, {
       transform: translate(state.posX, state.posY) + cssScale(state.scale),
     });
   }, [state.posX, state.posY, state.scale]);
@@ -123,47 +127,26 @@ export function BentoPanZoomWithRef(props, ref) {
   //     });
   // };
 
-  const onMouseMove = (e: MouseEvent) => {
-    // Prevent swiping by accident
-    e.preventDefault();
-
-    if (!state.isPannable) {
-      return;
+  useDraggable<{posX: number; posY: number; clientX: number; clientY: number}>(
+    contentRef,
+    {
+      dragStart({clientX, clientY}) {
+        actions.SET_IS_PANNABLE({isPannable: true});
+        const {posX, posY} = state;
+        return {posX, posY, clientX, clientY};
+      },
+      dragMove({clientX, clientY}, start) {
+        actions.MOVE({
+          posX: start.posX + clientX - start.clientX,
+          posY: start.posY + clientY - start.clientY,
+          element: contentRef.current!,
+        });
+      },
+      dragEnd: (unusedInfo, unusedStart) => {
+        actions.MOVE_RELEASE();
+      },
     }
-
-    const {clientX, clientY} = e;
-    const deltaX = clientX - mousePos.mousePosX;
-    const deltaY = clientY - mousePos.mousePosY;
-
-    actions.MOVE({
-      posX: deltaX,
-      posY: deltaY,
-      element: contentRef.current!,
-    });
-  };
-
-  const onMouseDown = (e: MouseEvent) => {
-    // Return early for right click
-    if (e.button === 2) {
-      return;
-    }
-
-    e.preventDefault();
-
-    const {clientX, clientY} = e;
-
-    actions.SET_IS_PANNABLE({isPannable: true});
-    setMousePos({
-      mousePosX: clientX,
-      mousePosY: clientY,
-    });
-  };
-
-  const onMouseUp = (e: MouseEvent) => {
-    e.preventDefault();
-
-    actions.MOVE_RELEASE();
-  };
+  );
 
   useImperativeHandle(
     ref,
@@ -179,7 +162,6 @@ export function BentoPanZoomWithRef(props, ref) {
     [actions]
   );
 
-  const showPanCursor = state.isZoomed ? styles.ampPanZoomPannable : '';
   const buttonClass = state.isZoomed
     ? styles.ampPanZoomOutIcon
     : styles.ampPanZoomInIcon;
@@ -187,22 +169,22 @@ export function BentoPanZoomWithRef(props, ref) {
     <ContainWrapper
       {...rest}
       ref={containerRef}
-      onMouseMove={onMouseMove}
       class={styles.ampPanZoom}
       contentClassName={styles.ampPanZoomContent}
       layout
     >
       <div
         ref={contentRef}
-        onMouseDown={onMouseDown}
-        onMouseUp={onMouseUp}
-        class={`${styles.ampPanZoomChild} ${showPanCursor}`}
+        class={classNames(
+          styles.ampPanZoomChild,
+          state.isZoomed && styles.ampPanZoomPannable
+        )}
       >
         {children}
       </div>
 
       <div
-        class={`${styles.ampPanZoomButton} ${buttonClass}`}
+        class={classNames(styles.ampPanZoomButton, buttonClass)}
         onClick={handleZoomButtonClick}
       />
     </ContainWrapper>

@@ -34,7 +34,6 @@ const initialState = {
   sourceWidth: 0,
   height: '',
   sourceHeight: 0,
-  transform: '',
 
   contentBox: initialRect,
   containerBox: initialRect,
@@ -190,7 +189,7 @@ const transform = (state: State, x: number, y: number, scale: number) => {
   return setZoomParams(state, scale, newX, newY, true);
 };
 
-const move = (state: State, x: number, y: number, element: any) => {
+const move = (state: State, x: number, y: number, element: HTMLElement) => {
   const newX = boundX(state, x, false);
   const newY = boundY(state, y, false);
   return setZoomParams(state, state.scale, newX, newY, false, element);
@@ -209,7 +208,7 @@ const setZoomParams = (
   newPosX: number,
   newPosY: number,
   animate: boolean,
-  elementRef?: any
+  elementRef?: HTMLElement
 ) => {
   const {posX, posY, scale} = state;
   const ds = newScale - scale;
@@ -298,14 +297,6 @@ export function usePanZoomState(config: PanZoomConfig) {
           height: '',
           width: '',
         }));
-      },
-      UPDATE_PAN_ZOOM() {
-        setState((state) => {
-          return {
-            ...state,
-            transform: `translate(${state.posX}px ${state.posY}px) scale(${state.scale})`,
-          };
-        });
       },
       UPDATE_PAN_ZOOM_BOUNDS(payload: PickState<'scale'>) {
         setState((state) => ({
