@@ -1,9 +1,11 @@
-import {addDays, format, isAfter, isBefore, subDays} from 'date-fns';
+import {addDays, isAfter, isBefore, subDays} from 'date-fns';
 
 import {createContext, useCallback, useContext, useMemo} from '#preact';
 
 import {DatesList} from './dates-list';
 
+import {getFormattedDate} from '../date-helpers';
+import {parseDate as _parseDate} from '../parsers';
 import {BentoDatePickerProps} from '../types';
 
 const DatePickerContext = createContext<BentoDatePickerProps | null>(null);
@@ -20,7 +22,9 @@ export function useDatePickerContext() {
   const {
     allowBlockedEndDate,
     blocked,
+    format,
     highlighted,
+    locale,
     max,
     maximumNights,
     min: optionalMin,
@@ -30,6 +34,16 @@ export function useDatePickerContext() {
 
   const min = optionalMin || today;
 
+  const formatDate = useCallback(
+    (date: Date) => getFormattedDate(date, format, locale),
+    [format, locale]
+  );
+
+  const parseDate = useCallback(
+    (value: string) => _parseDate(value, format, locale),
+    [format, locale]
+  );
+
   const blockedDates = useMemo(() => {
     return new DatesList(blocked);
   }, [blocked]);
@@ -37,10 +51,6 @@ export function useDatePickerContext() {
   const highlightedDates = useMemo(() => {
     return new DatesList(highlighted);
   }, [highlighted]);
-
-  const getFormattedDate = useCallback((date: Date) => {
-    return format(date, DATE_FORMAT);
-  }, []);
 
   const isOutsideRange = useCallback(
     (date: Date) => {
@@ -98,14 +108,14 @@ export function useDatePickerContext() {
 
   const getLabel = useCallback(
     (date: Date) => {
-      const formattedDate = getFormattedDate(date);
+      const formattedDate = getFormattedDate(date, DATE_FORMAT, locale);
       if (isDisabled(date)) {
         return `Not available. ${formattedDate}`;
       }
 
       return formattedDate;
     },
-    [isDisabled, getFormattedDate]
+    [isDisabled, locale]
   );
 
   return {
@@ -116,6 +126,8 @@ export function useDatePickerContext() {
     getDisabledBefore,
     blockedDates,
     highlightedDates,
+    parseDate,
+    formatDate,
     ...context,
   };
 }

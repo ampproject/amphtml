@@ -28,8 +28,6 @@ import {useDatePickerContext} from './use-date-picker-context';
 import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
 
-import {getFormattedDate} from '../date-helpers';
-import {parseDate as _parseDate} from '../parsers';
 import {
   DateFieldType,
   DateRangePickerAPI,
@@ -42,7 +40,6 @@ function DateRangePickerWithRef(
     allowBlockedRanges,
     children,
     endInputSelector,
-    format,
     initialVisibleMonth,
     locale,
     mode,
@@ -66,18 +63,14 @@ function DateRangePickerWithRef(
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
 
-  const {blockedDates, getDisabledAfter, getDisabledBefore, isDisabled} =
-    useDatePickerContext();
-
-  const formatDate = useCallback(
-    (date: Date) => getFormattedDate(date, format, locale),
-    [format, locale]
-  );
-
-  const parseDate = useCallback(
-    (value: string) => _parseDate(value, format, locale),
-    [format, locale]
-  );
+  const {
+    blockedDates,
+    formatDate,
+    getDisabledAfter,
+    getDisabledBefore,
+    isDisabled,
+    parseDate,
+  } = useDatePickerContext();
 
   const startDateInput = useDatePickerInput({
     inputSelector: startInputSelector,

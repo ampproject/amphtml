@@ -19,8 +19,6 @@ import {useDatePickerContext} from './use-date-picker-context';
 import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
 
-import {getFormattedDate} from '../date-helpers';
-import {parseDate as _parseDate} from '../parsers';
 import {SingleDatePickerAPI, SingleDatePickerProps} from '../types';
 
 function SingleDatePickerWithRef(
@@ -47,12 +45,7 @@ function SingleDatePickerWithRef(
   const [month, setMonth] = useState<Date>(defaultMonth);
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
-  const {blockedDates} = useDatePickerContext();
-
-  const parseDate = useCallback(
-    (value: string) => _parseDate(value, format, locale),
-    [format, locale]
-  );
+  const {blockedDates, formatDate, parseDate} = useDatePickerContext();
 
   const dateInput = useDatePickerInput({
     inputSelector,
@@ -191,9 +184,7 @@ function SingleDatePickerWithRef(
     <ContainWrapper
       class="amp-date-picker-calendar-container"
       ref={containerRef}
-      data-date={
-        dateInput.date && getFormattedDate(dateInput.date, format, locale)
-      }
+      data-date={dateInput.date && formatDate(dateInput.date)}
     >
       {children}
       {dateInput.hiddenInputComponent}
