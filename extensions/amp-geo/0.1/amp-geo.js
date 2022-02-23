@@ -59,7 +59,9 @@ const COUNTRY_PREFIX = 'amp-iso-country-';
 const SUBDIVISION_PREFIX = 'amp-iso-subdivision-';
 const GROUP_PREFIX = 'amp-geo-group-';
 const PRE_RENDER_REGEX = new RegExp(`${COUNTRY_PREFIX}(\\w+)`);
-const PRE_RENDER_SUBDIVISION_REGEX = new RegExp(`${SUBDIVISION_PREFIX}(\\w+)`);
+const PRE_RENDER_SUBDIVISION_REGEX = new RegExp(
+  `${SUBDIVISION_PREFIX}(\\w{2}-\\w{2})`
+);
 const GEO_ID = 'ampGeo';
 const SERVICE_TAG = 'geo';
 const API_TIMEOUT = 60; // Seconds
@@ -78,10 +80,28 @@ const mode = {
   GEO_API: 3, //       Query API when cache patching unavailable
 };
 
+/**
+ * Countries
+ * @enum {string}
+ */
+const countries = {
+  US: 'us',
+  CA: 'ca',
+};
+
+/**
+ * Values
+ * @enum {string}
+ */
+const values = {
+  UNKNOWN: 'unknown',
+};
+
 // TODO(zhouyx@): Rename if we have generic subdivision group support
 /**
  * @typedef {{
  *   ISOCountry: string,
+ *   ISOSubdivision: string,
  *   matchedISOCountryGroups: !Array<string>,
  *   allISOCountryGroups: !Array<string>,
  *   isInCountryGroup: (function(string):GEO_IN_GROUP),
@@ -104,9 +124,9 @@ export class AmpGeo extends AMP.BaseElement {
     /** @private {boolean} */
     this.error_ = false;
     /** @private {string} */
-    this.country_ = 'unknown';
+    this.country_ = values.UNKNOWN;
     /** @private {string} */
-    this.subdivision_ = 'unknown';
+    this.subdivision_ = values.UNKNOWN;
     /** @private {Array<string>} */
     this.matchedGroups_ = [];
     /** @private {Array<string>} */
@@ -158,6 +178,14 @@ export class AmpGeo extends AMP.BaseElement {
   }
 
   /**
+   * @return {string}
+   * @private
+   */
+  getHotPatchCountry_() {
+    return COUNTRY;
+  }
+
+  /**
    * findCountry_, sets this.country_ and this.mode_
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @return {Promise}
@@ -185,7 +213,9 @@ export class AmpGeo extends AMP.BaseElement {
     // 'xx xx-xx  ': trimmedGeoMatch is ["xx xx-xx  ", "xx", "xx-xx"];
     // '          ': trimmedGeoMatch is ["          ", undefined, undefined];
     // '{{AMP_ISO_COUNTRY_HOTPATCH}}':  ["", undefined, undefined]
-    const trimmedGeoMatch = GEO_HOTPATCH_STR_REGEX.exec(COUNTRY);
+    const trimmedGeoMatch = GEO_HOTPATCH_STR_REGEX.exec(
+      this.getHotPatchCountry_()
+    );
 
     // default country is 'unknown' which is also the zero length case
     const geoOverride = getHashParams(this.win)['amp-geo'];
@@ -195,12 +225,17 @@ export class AmpGeo extends AMP.BaseElement {
       const overrideGeoMatch = GEO_HOTPATCH_STR_REGEX.exec(
         geoOverride.toLowerCase()
       );
+
       if (overrideGeoMatch[1]) {
         this.country_ = overrideGeoMatch[1];
-        if (overrideGeoMatch[2]) {
-          // Allow subdivision_ to be customized for testing, not checking us-ca
+
+        if (
+          overrideGeoMatch[2] &&
+          this.areSubdivisionsAllowed_(this.country_)
+        ) {
           this.subdivision_ = overrideGeoMatch[2];
         }
+
         this.mode_ = mode.GEO_OVERRIDE;
       }
     } else if (
@@ -212,19 +247,21 @@ export class AmpGeo extends AMP.BaseElement {
       this.mode_ = mode.GEO_PRERENDER;
       this.country_ = preRenderMatch[1];
 
-      const preRenderSubdivisionMatch =
-        docElem?.className.match(PRE_RENDER_SUBDIVISION_REGEX) ||
-        bodyElem.className.match(PRE_RENDER_SUBDIVISION_REGEX);
+      if (this.areSubdivisionsAllowed_(this.country_)) {
+        const preRenderSubdivisionMatch =
+          docElem?.className.match(PRE_RENDER_SUBDIVISION_REGEX) ||
+          bodyElem.className.match(PRE_RENDER_SUBDIVISION_REGEX);
 
-      if (preRenderSubdivisionMatch) {
-        this.subdivision_ = preRenderSubdivisionMatch[1];
+        if (preRenderSubdivisionMatch) {
+          this.subdivision_ = preRenderSubdivisionMatch[1];
+        }
       }
     } else if (trimmedGeoMatch[1]) {
       // We have a valid 2 letter ISO country
       this.mode_ = mode.GEO_HOT_PATCH;
       this.country_ = trimmedGeoMatch[1].toLowerCase();
 
-      if (trimmedGeoMatch[2]) {
+      if (trimmedGeoMatch[2] && this.areSubdivisionsAllowed_(this.country_)) {
         this.subdivision_ = trimmedGeoMatch[2].toLowerCase();
       }
     } else if (trimmedGeoMatch[0] === '' && urls.geoApi) {
@@ -247,8 +284,8 @@ export class AmpGeo extends AMP.BaseElement {
             const {country, subdivision} = data;
             // Country is required and guaranteed to exist if data is available.
             this.country_ = country;
-            // Subdivision is optional and only us-ca is currently supported.
-            if (subdivision) {
+
+            if (subdivision && this.areSubdivisionsAllowed_(this.country_)) {
               this.subdivision_ = `${country}-${subdivision}`;
             }
           } else {
@@ -260,6 +297,16 @@ export class AmpGeo extends AMP.BaseElement {
             );
           }
         });
+  }
+
+  /**
+   * Ensure that subdivisions allowed for a specific country
+   * @param {string} country
+   * @return {boolean}
+   * @private
+   */
+  areSubdivisionsAllowed_(country) {
+    return countries.CA === country || countries.US === country;
   }
 
   /**
@@ -420,10 +467,15 @@ export class AmpGeo extends AMP.BaseElement {
             isArray(ampGeoPresets[country]),
             `<amp-geo> preset ${country} not found`
           );
+
           return countries.concat(ampGeoPresets[country]);
         }
         // Otherwise we add the country to the list
-        if (country == 'unknown' || /^[a-zA-Z]{2}$/.test(country)) {
+        if (
+          country == values.UNKNOWN ||
+          /^[a-zA-Z]{2}$/.test(country) ||
+          /^[a-zA-Z]{2}-[a-zA-Z]{2}$/.test(country)
+        ) {
           countries.push(country);
         } else {
           user().error(TAG, ' country %s not valid, will be ignored', country);
@@ -433,7 +485,8 @@ export class AmpGeo extends AMP.BaseElement {
       .map((c) => c.toLowerCase());
     return (
       expandedGroup.includes(this.country_) ||
-      expandedGroup.includes(`${this.country_}-${this.subdivision_}`)
+      (this.subdivision_ !== values.UNKNOWN &&
+        expandedGroup.includes(this.subdivision_))
     );
   }
 
@@ -500,6 +553,7 @@ export class AmpGeo extends AMP.BaseElement {
           case mode.GEO_API:
             // Build the AMP State, add classes
             states.ISOCountry = this.country_;
+            states.ISOSubdivision = this.subdivision_;
 
             const classesToAdd = this.matchedGroups_.map((group) => {
               states[group] = true;
@@ -516,7 +570,10 @@ export class AmpGeo extends AMP.BaseElement {
 
             states.ISOCountryGroups = this.matchedGroups_;
             classesToAdd.push(COUNTRY_PREFIX + this.country_);
-            classesToAdd.push(SUBDIVISION_PREFIX + this.subdivision_);
+
+            if (this.subdivision_ !== values.UNKNOWN) {
+              classesToAdd.push(SUBDIVISION_PREFIX + this.subdivision_);
+            }
 
             // Let the runtime know we're mutating the AMP body
             // Actual change happens in callback so runtime can
@@ -570,6 +627,7 @@ export class AmpGeo extends AMP.BaseElement {
 
         return {
           ISOCountry: this.country_,
+          ISOSubdivision: this.subdivision_,
           matchedISOCountryGroups: this.matchedGroups_,
           allISOCountryGroups: this.definedGroups_,
           /* API */
