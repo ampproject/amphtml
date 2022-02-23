@@ -13,10 +13,6 @@ export default {
     experiments: ['bento'],
   },
   argTypes: {
-    dateTime: {
-      name: 'Date/time',
-      control: {type: 'date'},
-    },
     displayIn: {
       name: 'Display in',
       defaultValue: 'utc',
@@ -32,7 +28,10 @@ export default {
     template: {
       name: 'Template',
       defaultValue: 'template1',
-      options: ['template1', 'template2'],
+      options: [
+        'template1',
+        'template2',
+      ],
       control: {type: 'select'},
     },
   },
@@ -42,7 +41,7 @@ export const Default = ({dateTime, displayIn, locale, ...args}) => {
   return (
     <amp-date-display
       {...args}
-      datetime={dateTime}
+      datetime={'now'}
       display-in={displayIn}
       locale={locale}
       layout="responsive"
@@ -63,7 +62,7 @@ export const DefaultRenderer = ({dateTime, displayIn, locale, ...args}) => {
   return (
     <amp-date-display
       {...args}
-      datetime={dateTime}
+      datetime={'now'}
       display-in={displayIn}
       locale={locale}
       layout="responsive"
@@ -90,7 +89,7 @@ export const ExternalTemplate = ({
       </template>
       <amp-date-display
         {...args}
-        datetime={dateTime}
+        datetime={'now'}
         display-in={displayIn}
         locale={locale}
         template={template}

@@ -5,14 +5,21 @@ import {BentoIframe} from '../component';
 export default {
   title: 'Iframe',
   component: BentoIframe,
+  argTypes: {
+    src: {
+      name: 'iframe src',
+      defaultValue: 'https://www.wikipedia.org/',
+      control: {type: 'text'},
+    },
+  },
 };
 
-export const _default = () => {
+export const _default = ({src}) => {
   return (
     <BentoIframe
       style={{width: 800, height: 600}}
       iframeStyle={{border: '1px solid black'}}
-      src="https://www.wikipedia.org/"
+      src={src}
       title="Wikipedia"
     ></BentoIframe>
   );
@@ -45,6 +52,7 @@ export const WithIntersectingIframe = () => {
 export const WithResizableIframe = () => {
   return (
     <div>
+      <h1>Scroll down</h1>
       <div
         style={{
           width: '100%',
@@ -69,6 +77,7 @@ export const WithResizableIframe = () => {
 export const WithSendIntersectionsPostMessage = () => {
   return (
     <div>
+      <h1>Scroll down</h1>
       <div
         style={{
           width: '100%',
