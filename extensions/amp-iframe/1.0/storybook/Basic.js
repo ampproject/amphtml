@@ -42,8 +42,6 @@ export const WithIntersectingIframe = () => {
   );
 };
 
-WithIntersectingIframe.storyName = 'Resizable iframe in viewport';
-
 export const WithResizableIframe = () => {
   return (
     <div>
@@ -68,8 +66,6 @@ export const WithResizableIframe = () => {
   );
 };
 
-WithResizableIframe.storyName = 'Resizable iframe outside viewport';
-
 export const WithSendIntersectionsPostMessage = () => {
   return (
     <div>
@@ -91,5 +87,3 @@ export const WithSendIntersectionsPostMessage = () => {
     </div>
   );
 };
-
-WithSendIntersectionsPostMessage.storyName = 'Send intersections';
