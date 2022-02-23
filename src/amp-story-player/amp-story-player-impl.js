@@ -896,12 +896,14 @@ export class AmpStoryPlayer {
 
   /** Sends a message muting the current story. */
   mute() {
+    // console.log('player: mute()');
     const story = this.stories_[this.currentIdx_];
     this.updateMutedState_(story, true);
   }
 
   /** Sends a message unmuting the current story. */
   unmute() {
+    // console.log('player: unmute()');
     const story = this.stories_[this.currentIdx_];
     this.updateMutedState_(story, false);
   }
@@ -1053,6 +1055,7 @@ export class AmpStoryPlayer {
    * @private
    */
   next_() {
+    // console.log('next_()');
     if (
       !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
@@ -1079,6 +1082,7 @@ export class AmpStoryPlayer {
    * @private
    */
   previous_() {
+    // console.log('previous_()');
     if (
       !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ - 1)
@@ -1107,6 +1111,7 @@ export class AmpStoryPlayer {
    * @param {{animate: boolean?}} options
    */
   go(storyDelta, pageDelta = 0, options = {}) {
+    // console.log('go_()');
     if (storyDelta === 0 && pageDelta === 0) {
       return;
     }
@@ -1196,6 +1201,7 @@ export class AmpStoryPlayer {
    * @private
    */
   render_(startingIdx = this.currentIdx_) {
+    // console.log('render_()');
     const renderPromises = [];
 
     for (let i = 0; i < this.stories_.length; i++) {
@@ -1587,6 +1593,7 @@ export class AmpStoryPlayer {
    * @private
    */
   onMutedStateUpdate_(muted) {
+    console.log('onMutedStateUpdate_(muted = ' + muted + ')');
     this.element_.dispatchEvent(
       createCustomEvent(this.win_, 'amp-story-muted-state', {muted})
     );

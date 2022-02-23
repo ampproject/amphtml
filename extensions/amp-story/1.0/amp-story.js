@@ -453,6 +453,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   pause_() {
+    console.log('amp-story.js: pause()');
     this.setPausedStateToRestore_();
     if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
       this.pauseBackgroundAudio_();
@@ -472,6 +473,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   resume_() {
+    console.log('amp-story.js: resume_()');
     this.restorePausedState_();
     if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
       this.playBackgroundAudio_();
@@ -2102,6 +2104,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   mute_() {
+    console.log('amp-story.js: mute_()');
     this.pauseBackgroundAudio_();
     if (this.activePage_) {
       this.activePage_.muteAllMedia();
@@ -2113,6 +2116,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   pauseBackgroundAudio_() {
+    console.log('amp-story.js: pauseBackgroundAudio_()');
     if (!this.backgroundAudioEl_) {
       return;
     }
@@ -2124,6 +2128,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   unmute_() {
+    console.log('amp-story.js: unmute_()');
     const unmuteAllMedia = () => {
       this.playBackgroundAudio_();
       if (this.activePage_) {
@@ -2139,6 +2144,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   playBackgroundAudio_() {
+    console.log('amp-story.js: playBackgroundAudio_()');
     if (!this.backgroundAudioEl_) {
       return;
     }
