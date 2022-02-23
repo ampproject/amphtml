@@ -33,6 +33,23 @@ steps:
       $json | Out-File custom-config.json
     workingDirectory: '$(Build.SourcesDirectory)/build-system/global-configs/'
     pwsh: true
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      $json = '[
+        {
+          "flavorType": "custom_release",
+          "name": "Custom Release",
+          "environment": "AMP",
+          "rtvPrefixes": [ "01" ],
+          "command": "amp dist --noconfig"
+        }
+      ]'
+        
+      $json | Out-File custom-flavors-config.json
+    workingDirectory: '$(Build.SourcesDirectory)/build-system/global-configs/'
+    pwsh: true
 - task: NodeTool@0
   inputs:
     versionSpec: '16.x'
@@ -43,7 +60,7 @@ steps:
   displayName: 'npm install'
 
 - script: |
-    amp release --flavor=base --dedup_v0 --output_dir=$(Build.ArtifactStagingDirectory)/$(env)/
+    amp release --flavor=custom_release --dedup_v0 --output_dir=$(Build.ArtifactStagingDirectory)/$(env)/
   displayName: 'build release'
 
 - task: PublishBuildArtifacts@1
