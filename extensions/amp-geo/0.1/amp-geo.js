@@ -21,7 +21,7 @@
 
 import {Deferred} from '#core/data-structures/promise';
 import {isJsonScriptTag, iterateCursor} from '#core/dom';
-import {isArray, isObject} from '#core/types';
+import {isArray, isEnumValue, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 import {getHashParams} from '#core/types/string/url';
 
@@ -81,10 +81,9 @@ const mode = {
 };
 
 /**
- * Countries
  * @enum {string}
  */
-const countries = {
+const countriesWithSubdivision = {
   US: 'us',
   CA: 'ca',
 };
@@ -307,7 +306,7 @@ export class AmpGeo extends AMP.BaseElement {
    * @private
    */
   areSubdivisionsAllowed_(country) {
-    return countries.CA === country || countries.US === country;
+    return isEnumValue(countriesWithSubdivision, country);
   }
 
   /**
