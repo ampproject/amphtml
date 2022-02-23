@@ -1,6 +1,4 @@
 import {isValid} from 'date-fns';
-// eslint-disable-next-line local/no-import
-import {Ref} from 'preact';
 
 import {Keys_Enum} from '#core/constants/key-codes';
 
@@ -14,6 +12,7 @@ import {
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
+import {Ref} from '#preact/types';
 
 import {BaseDatePicker} from './base-date-picker';
 import {useDatePickerContext} from './use-date-picker-context';

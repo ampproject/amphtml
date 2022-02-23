@@ -1,6 +1,4 @@
 import {addDays} from 'date-fns';
-// eslint-disable-next-line local/no-import
-import {ComponentProps} from 'preact';
 
 import {
   closestAncestorElementBySelector,
@@ -10,6 +8,7 @@ import {
 
 import * as Preact from '#preact';
 import {useCallback, useMemo, useRef, useState} from '#preact';
+import {ComponentProps} from '#preact/types';
 
 import {useDatePickerContext} from './use-date-picker-context';
 
