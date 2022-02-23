@@ -11,7 +11,7 @@ on:
         description: 'npm package tag'
         required: true
         type: string
-        
+
   # to be run manually
   workflow_dispatch:
     inputs:
