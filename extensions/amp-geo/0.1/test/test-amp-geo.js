@@ -804,26 +804,30 @@ describes.realWin(
     it('should respect pre-rendered geo subscription tags in the body', () => {
       addConfigElement('script');
       doc.body.classList.add(
-        'amp-iso-country-us',
-        'amp-iso-subdivision-us-ca',
+        'amp-iso-country-ca',
+        'amp-iso-subdivision-ca-mb',
         'amp-geo-group-nafta'
       );
       geo.buildCallback();
 
       return Services.geoForDocOrNull(el).then((geo) => {
-        expect(geo.ISOCountry).to.equal('us');
-        expect(geo.ISOSubdivision).to.equal('us-ca');
+        expect(geo.ISOCountry).to.equal('ca');
+        expect(geo.ISOSubdivision).to.equal('ca-mb');
         expectElementHasClass(
           doc.body,
           [
-            'amp-iso-country-us',
-            'amp-iso-subdivision-us-ca',
+            'amp-iso-country-ca',
+            'amp-iso-subdivision-ca-mb',
             'amp-geo-group-nafta',
           ],
           true
         );
         expectElementHasClass(
-          doc.body[('amp-iso-country-unknown', 'amp-geo-group-anz')],
+          doc.body[
+            ('amp-iso-country-unknown',
+            'amp-geo-group-anz',
+            'amp-geo-group-canadaSubdivisions')
+          ],
           false
         );
       });

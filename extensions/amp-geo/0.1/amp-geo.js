@@ -60,12 +60,12 @@ const SUBDIVISION_PREFIX = 'amp-iso-subdivision-';
 const GROUP_PREFIX = 'amp-geo-group-';
 const PRE_RENDER_REGEX = new RegExp(`${COUNTRY_PREFIX}(\\w+)`);
 const PRE_RENDER_SUBDIVISION_REGEX = new RegExp(
-  `${SUBDIVISION_PREFIX}(\\w{2}-\\w{2})`
+  `${SUBDIVISION_PREFIX}(\\w{2}-\\w{1,3})`
 );
 const GEO_ID = 'ampGeo';
 const SERVICE_TAG = 'geo';
 const API_TIMEOUT = 60; // Seconds
-const GEO_HOTPATCH_STR_REGEX = /^(?:(\w{2})(?:\s(\w{2}-\w{2}))?)?\s*/;
+const GEO_HOTPATCH_STR_REGEX = /^(?:(\w{2})(?:\s(\w{2}-\w{1,3}))?)?\s*/;
 
 const STRIP_RE = new RegExp('^' + COUNTRY_PREFIX + '|^' + GROUP_PREFIX, 'i');
 
@@ -470,11 +470,12 @@ export class AmpGeo extends AMP.BaseElement {
 
           return countries.concat(ampGeoPresets[country]);
         }
+
         // Otherwise we add the country to the list
         if (
           country == values.UNKNOWN ||
           /^[a-zA-Z]{2}$/.test(country) ||
-          /^[a-zA-Z]{2}-[a-zA-Z]{2}$/.test(country)
+          /^[a-zA-Z]{2}-[0-9a-zA-Z]{1,3}$/.test(country)
         ) {
           countries.push(country);
         } else {
