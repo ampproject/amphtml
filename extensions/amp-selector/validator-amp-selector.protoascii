@@ -99,6 +99,7 @@ tags: {
   html_format: AMP4EMAIL
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
+  descriptive_name : "amp-selector [option] descendant"
   attrs: {
     name: "disabled"
     value: ""
@@ -119,6 +120,9 @@ tags: {
   html_format: AMP4EMAIL
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR child"
+  descriptive_name : "amp-selector child"
+  # This is used recursively so that the "AMP-SELECTOR option" can be any
+  # depth below the main <amp-sepector>:
   reference_points: {
     tag_spec_name: "AMP-SELECTOR option"
   }

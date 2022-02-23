@@ -5,6 +5,8 @@ import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
   A4AVarNames,
   createCta,
+  getStoryAdMacroTags,
+  getStoryAdMetaTags,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
   maybeCreateAttribution,
@@ -20,14 +22,15 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
     doc = win.document;
   });
 
-  describe('getStoryAdMetadataFromDoc', () => {
+  describe('meta tags', () => {
     it('returns metadata for amp-* values', () => {
       const adDoc = doc.implementation.createHTMLDocument();
       adDoc.head.innerHTML = `
+        <meta name="other-tag" content="random-val">
         <meta name="amp-cta-type" content="SHOP">
         <meta name="amp-cta-url" content="https://www.kittens.com">
       `;
-      const result = getStoryAdMetadataFromDoc(adDoc);
+      const result = getStoryAdMetadataFromDoc(getStoryAdMetaTags(adDoc));
       expect(result).to.eql({
         'cta-type': 'SHOP',
         'cta-url': 'https://www.kittens.com',
@@ -37,17 +40,38 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
     it('returns metadata for amp4ads-vars-* values', () => {
       const adDoc = doc.implementation.createHTMLDocument();
       adDoc.head.innerHTML = `
+        <meta name="other-tag" content="random-val">
         <meta name="amp4ads-vars-cta-type" content="SHOP">
         <meta name="amp4ads-vars-cta-url" content="https://www.kittens.com">
         <meta name="amp4ads-vars-attribution-icon" content="https://www.kittens.com/img1">
         <meta name="amp4ads-vars-attribution-url" content="https://www.kittens.com/moreinfo">
       `;
-      const result = getStoryAdMetadataFromDoc(adDoc);
+      const result = getStoryAdMetadataFromDoc(getStoryAdMetaTags(adDoc));
       expect(result).to.eql({
         'cta-type': 'SHOP',
         'cta-url': 'https://www.kittens.com',
         'attribution-icon': 'https://www.kittens.com/img1',
         'attribution-url': 'https://www.kittens.com/moreinfo',
+      });
+    });
+
+    it('getStoryAdMacroTags should return all tags', () => {
+      const adDoc = doc.implementation.createHTMLDocument();
+      adDoc.head.innerHTML = `
+        <meta name="other-tag" content="random-val">
+        <meta name="invalid-tag-name-*" content="random-val">
+        <meta name="amp4ads-vars-cta-type" content="SHOP">
+        <meta name="amp4ads-vars-cta-url" content="https://www.kittens.com">
+        <meta name="amp4ads-vars-attribution-icon" content="https://www.kittens.com/img1">
+        <meta name="amp4ads-vars-attribution-url" content="https://www.kittens.com/moreinfo">
+      `;
+      const result = getStoryAdMacroTags(getStoryAdMetaTags(adDoc));
+      expect(result).to.eql({
+        'other-tag': 'random-val',
+        'amp4ads-vars-cta-type': 'SHOP',
+        'amp4ads-vars-cta-url': 'https://www.kittens.com',
+        'amp4ads-vars-attribution-icon': 'https://www.kittens.com/img1',
+        'amp4ads-vars-attribution-url': 'https://www.kittens.com/moreinfo',
       });
     });
   });

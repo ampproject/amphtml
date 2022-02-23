@@ -166,6 +166,10 @@ const adConfig = jsonConfiguration({
 
   'adreactor': {},
 
+  'ads2bid': {
+    renderStartImplemented: true,
+  },
+
   'adsensor': {
     prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
     clientIdScope: 'amp_ecid_adensor',
@@ -1274,10 +1278,9 @@ const adConfig = jsonConfiguration({
   },
 
   'teads': {
-    prefetch: 'https://s8t.teads.tv/media/format/v3/teads-format.min.js',
+    prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
       'https://cdn2.teads.tv',
-      'https://a.teads.tv',
       'https://t.teads.tv',
       'https://r.teads.tv',
     ],

@@ -16,7 +16,22 @@ const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
 
 const packageName = getNameWithoutComponentPrefix(extension);
-const dir = `extensions/${extension}/${extensionVersion}`;
+
+/**
+ * Gets the directory of the component or extension.
+ * @return {string}
+ */
+function getDir() {
+  return extension.startsWith('bento')
+    ? `src/bento/components/${extension}/${extensionVersion}`
+    : `extensions/${extension}/${extensionVersion}`;
+}
+
+/**
+ * The directory of the component or extension.
+ * @type {string}
+ */
+const dir = getDir();
 
 /**
  * Determines whether to skip
@@ -104,9 +119,10 @@ async function getDescription() {
 
 /**
  * Write package.json
+ * @param {{useBentoCore: boolean}} options
  * @return {Promise<void>}
  */
-async function writePackageJson() {
+async function writePackageJson({useBentoCore}) {
   const version = getSemver(extensionVersion, ampVersion);
   if (!valid(version) || ampVersion.length != 13) {
     log(
@@ -165,6 +181,9 @@ async function writePackageJson() {
       react: '^17.0.0',
     },
   };
+  if (useBentoCore) {
+    json.dependencies = {'@bentoproject/core': `tbd`};
+  }
 
   try {
     await writeFile(`${dir}/package.json`, JSON.stringify(json, null, 2));
@@ -227,7 +246,7 @@ async function main() {
   if (await shouldSkip()) {
     return;
   }
-  await writePackageJson();
+  await writePackageJson({useBentoCore: false});
   await writeReactJs();
   await copyCssToRoot();
 }

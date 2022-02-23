@@ -1,10 +1,15 @@
 import {createElementWithAttributes, iterateCursor} from '#core/dom';
 import {map} from '#core/types/object';
+import {getWin} from '#core/window';
 
 import {getExperimentBranch} from '#experiments';
 import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
+import {Services} from '#service';
+
 import {dev, user} from '#utils/log';
+
+import {getAmpdoc} from 'src/service-helpers';
 
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
 import {CSS as ctaButtonCSS} from '../../../build/amp-story-auto-ads-cta-button-0.1.css';
@@ -57,25 +62,23 @@ const DataAttrs = {
 };
 
 /**
- * Finds all meta tags starting with `amp4ads-vars-` or `amp-cta`.
+ * Finds all meta tags like `amp4ads-vars-` or `amp-cta`.
  * @param {Document} doc
- * @return {!IArrayLike}
+ * @return {!NodeList}
  */
 export function getStoryAdMetaTags(doc) {
-  const selector = 'meta[name^=amp4ads-vars-],meta[name^=amp-cta-]';
-  return doc.querySelectorAll(selector);
+  return doc.querySelectorAll('meta[name]');
 }
 
 /**
  * Creates object containing information extracted from the creative
  * that is needed to render story ad ui e.g. cta, attribution, etc.
- * @param {!Document} doc
+ * @param {!NodeList} metaTags
  * @return {StoryAdUIMetadata}
  */
-export function getStoryAdMetadataFromDoc(doc) {
-  const storyMetaTags = getStoryAdMetaTags(doc);
+export function getStoryAdMetadataFromDoc(metaTags) {
   const vars = map();
-  iterateCursor(storyMetaTags, (tag) => {
+  iterateCursor(metaTags, (tag) => {
     const {content, name} = tag;
     if (name.startsWith(CTA_META_PREFIX)) {
       const key = name.split('amp-')[1];
@@ -86,6 +89,24 @@ export function getStoryAdMetadataFromDoc(doc) {
     }
   });
   return vars;
+}
+
+/**
+ * Returns an object conntaining all meta tags that
+ * qualifies as a macro (name=>value)
+ * @param {!NodeList} metaTags
+ * @return {!Object}
+ */
+export function getStoryAdMacroTags(metaTags) {
+  const result = map();
+  iterateCursor(metaTags, (tag) => {
+    const {content, name} = tag;
+    // If the meta tag name is not alphanumerical, we would ignore it.
+    if (/^[a-zA-Z0-9\-_]+$/.test(name)) {
+      result[name] = content;
+    }
+  });
+  return result;
 }
 
 /**
@@ -214,6 +235,12 @@ function createPageOutlink_(doc, uiMetadata, container) {
       );
     }
   }
+
+  Services.extensionsFor(getWin(doc)).installExtensionForDoc(
+    getAmpdoc(doc),
+    'amp-story-page-attachment',
+    '0.1'
+  );
 
   pageOutlink.className = 'i-amphtml-story-page-outlink-container';
 

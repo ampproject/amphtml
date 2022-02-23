@@ -18,7 +18,7 @@ import {getMode} from '../../../src/mode';
 const TYPE = 'facebook';
 
 class AmpFacebook extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     return createLoaderLogo(element);
   }
@@ -74,10 +74,17 @@ class AmpFacebook extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const embedAs = this.element.getAttribute('data-embed-as');
+    if (embedAs === 'comment') {
+      this.user().warn(
+        'AMP-FACEBOOK',
+        'Embedded Comments have been deprecated: https://developers.facebook.com/docs/plugins/embedded-comments'
+      );
+      return;
+    }
     userAssert(
-      !embedAs || ['post', 'video', 'comment'].indexOf(embedAs) !== -1,
+      !embedAs || ['post', 'video'].indexOf(embedAs) !== -1,
       'Attribute data-embed-as for <amp-facebook> value is wrong, should be' +
-        ' "post", "video" or "comment" but was: %s',
+        ' "post" or "video" but was: %s',
       embedAs
     );
     const iframe = getIframe(this.win, this.element, TYPE);

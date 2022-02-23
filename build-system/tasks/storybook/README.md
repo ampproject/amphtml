@@ -50,7 +50,7 @@ const MyStory = (args) => {
 MyStory.args = {
   width: 500,
   height: 200,
-  layout: 'responsive'
+  layout: 'responsive',
   'data-foo': 'bar',
 };
 ```

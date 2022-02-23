@@ -1,4 +1,5 @@
 import {devAssert} from '#core/assert';
+import {toggleAttribute} from '#core/dom';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
@@ -59,7 +60,7 @@ const renderHeaderElement = () => {
  * @abstract
  */
 export class DraggableDrawer extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return false;
   }
@@ -237,7 +238,7 @@ export class DraggableDrawer extends AMP.BaseElement {
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();
 
-    this.headerEl.toggleAttribute('desktop', !isMobile);
+    toggleAttribute(this.headerEl, 'desktop', !isMobile);
   }
 
   /**

@@ -1,5 +1,5 @@
 import {devAssert} from '#core/assert';
-import {removeElement} from '#core/dom';
+import {removeElement, toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {closest, closestAncestorElementBySelector} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
@@ -149,7 +149,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     if (!this.openAttachmentEl_) {
       this.openAttachmentEl_ = renderPageAttachmentUI(
-        this.storyEl_,
+        this.pageEl_,
         this.element
       );
 
@@ -200,6 +200,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
             LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
           )}
           role="button"
+          onClick={() => this.close_()}
+          tabindex="-1"
         ></button>
         {titleText && (
           <span class="i-amphtml-story-page-attachment-title">{titleText}</span>
@@ -340,11 +342,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @param {boolean} isActive
    */
   setOpenAttachmentActive(isActive) {
-    if (isActive) {
-      this.openAttachmentEl_.setAttribute('active', '');
-    } else {
-      this.openAttachmentEl_.removeAttribute('äctive');
-    }
+    toggleAttribute(this.openAttachmentEl_, 'active', isActive);
   }
 
   /**
@@ -352,17 +350,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    */
   initializeListeners_() {
     super.initializeListeners_();
-
-    const closeButtonEl = this.headerEl.querySelector(
-      '.i-amphtml-story-page-attachment-close-button'
-    );
-    if (closeButtonEl) {
-      closeButtonEl.addEventListener(
-        'click',
-        () => this.close_(),
-        true /** useCapture */
-      );
-    }
 
     // Always open links in a new tab.
     this.contentEl.addEventListener(
@@ -438,6 +425,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     this.toggleBackgroundOverlay_(true);
+    this.toggleCloseButtonTabIndex_(true);
 
     this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
     this.analyticsService_.triggerEvent(
@@ -519,6 +507,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     super.closeInternal_(shouldAnimate);
 
     this.toggleBackgroundOverlay_(false);
+    this.toggleCloseButtonTabIndex_(false);
 
     this.storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, false);
     this.storeService.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
@@ -558,6 +547,24 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         'i-amphtml-story-page-attachment-active',
         isActive
       );
+    });
+  }
+
+  /**
+   * Handles tab-ability of header close button.
+   * @param {boolean} isActive
+   * @private
+   */
+  toggleCloseButtonTabIndex_(isActive) {
+    const closeButton = this.headerEl.querySelector(
+      '.i-amphtml-story-page-attachment-close-button'
+    );
+    this.mutateElement(() => {
+      if (isActive) {
+        closeButton.removeAttribute('tabindex');
+      } else {
+        closeButton.setAttribute('tabindex', -1);
+      }
     });
   }
 

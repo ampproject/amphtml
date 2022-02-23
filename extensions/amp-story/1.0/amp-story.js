@@ -85,7 +85,6 @@ import {AmpStoryHint} from './amp-story-hint';
 import {InfoDialog} from './amp-story-info-dialog';
 import {getLocalizationService} from './amp-story-localization-service';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
-import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryShare} from './amp-story-share';
 import {
   Action,
@@ -198,7 +197,7 @@ const DEFAULT_THEME_COLOR = '#202125';
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
@@ -304,6 +303,15 @@ export class AmpStory extends AMP.BaseElement {
   buildCallback() {
     this.viewer_ = Services.viewerForDoc(this.element);
 
+    const needsDvhPolyfill =
+      !this.win.CSS?.supports?.('height: 1dvh') &&
+      !getStyle(this.win.document.documentElement, '--story-dvh');
+
+    if (needsDvhPolyfill) {
+      this.polyfillDvh_(this.getViewport().getSize());
+      this.getViewport().onResize((size) => this.polyfillDvh_(size));
+    }
+
     this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
@@ -346,14 +354,6 @@ export class AmpStory extends AMP.BaseElement {
     // (layoutCallback not called) when accessed from any viewer using
     // prerendering, because of a height incorrectly set to 0.
     this.mutateElement(() => {});
-
-    if (
-      !this.win.CSS?.supports?.('height: 1dvh') &&
-      !getStyle(this.win.document.documentElement, '--story-dvh')
-    ) {
-      this.getViewport().onResize((size) => this.polyfillDvh_(size));
-      this.polyfillDvh_(this.getViewport().getSize());
-    }
 
     const pageId = this.getInitialPageId_();
     if (pageId) {
@@ -405,9 +405,6 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
     const performanceService = Services.performanceFor(this.win);
-    if (isExperimentOn(this.win, 'story-load-first-page-only')) {
-      performanceService.addEnabledExperiment('story-load-first-page-only');
-    }
     if (
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
       isPreviewMode(this.win) ||
@@ -946,7 +943,17 @@ export class AmpStory extends AMP.BaseElement {
         );
 
         if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
-          this.activePage_.openAttachment(false /** shouldAnimate */);
+          const attachmentEl = this.activePage_.element.querySelector(
+            'amp-story-page-attachment, amp-story-page-outlink'
+          );
+
+          if (attachmentEl) {
+            whenUpgradedToCustomElement(attachmentEl)
+              .then(() => attachmentEl.getImpl())
+              .then((attachmentImpl) =>
+                attachmentImpl.open(false /** shouldAnimate */)
+              );
+          }
         }
 
         if (
@@ -962,6 +969,7 @@ export class AmpStory extends AMP.BaseElement {
     this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS).then(() => {
       this.markStoryAsLoaded_();
       this.initializeLiveStory_();
+      this.installLateExtensions_();
     });
 
     this.maybeLoadStoryEducation_();
@@ -1273,6 +1281,19 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    if (
+      isExperimentOn(this.win, 'amp-story-paywall-exp') &&
+      targetPage.isPaywallProtected()
+    ) {
+      if (this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_STATE)) {
+        // Subscription dialog is already triggered.
+        return Promise.resolve();
+      }
+      this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
+
+      // TODO(#37285): add SubscriptionService to actually trigger the subscription dialog.
+    }
+
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
     if (!targetPage.isAd()) {
@@ -1366,18 +1387,16 @@ export class AmpStory extends AMP.BaseElement {
     ];
 
     return new Promise((resolve) => {
-      targetPage.beforeVisible().then(() => {
-        // Recursively executes one step per frame.
-        const unqueueStepInRAF = () => {
-          steps.shift().call(this);
-          if (!steps.length) {
-            return resolve();
-          }
-          this.win.requestAnimationFrame(() => unqueueStepInRAF());
-        };
+      // Recursively executes one step per frame.
+      const unqueueStepInRAF = () => {
+        steps.shift().call(this);
+        if (!steps.length) {
+          return resolve();
+        }
+        this.win.requestAnimationFrame(() => unqueueStepInRAF());
+      };
 
-        unqueueStepInRAF();
-      });
+      unqueueStepInRAF();
     });
   }
 
@@ -1490,11 +1509,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   polyfillDvh_(size) {
-    const {height, width} = size;
-    if (height === 0 && width === 0) {
+    const {height} = size;
+    if (height === 0) {
       return;
     }
-    this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
     setImportantStyles(this.win.document.documentElement, {
       '--story-dvh': px(height / 100),
     });
@@ -1880,10 +1898,7 @@ export class AmpStory extends AMP.BaseElement {
     };
 
     this.mutateElement(() => {
-      if (
-        !isExperimentOn(this.win, 'story-load-first-page-only') ||
-        !prioritizeActivePage
-      ) {
+      if (!prioritizeActivePage) {
         return preloadAllPages();
       }
 
@@ -2433,6 +2448,25 @@ export class AmpStory extends AMP.BaseElement {
       this.element
     );
   }
+
+  /**
+   * Installs extensions that can be lazy-loaded.
+   * @private
+   */
+  installLateExtensions_() {
+    const extensionsFor = Services.extensionsFor(this.win);
+    const ampdoc = this.getAmpDoc();
+
+    if (this.element.querySelector('amp-story-auto-ads')) {
+      extensionsFor.installExtensionForDoc(ampdoc, 'amp-story-auto-ads');
+    }
+    if (this.element.querySelector('amp-story-auto-analytics')) {
+      extensionsFor.installExtensionForDoc(ampdoc, 'amp-story-auto-analytics');
+      extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
+    } else if (this.element.querySelector('amp-analytics')) {
+      extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
+    }
+  }
 }
 
 AMP.extension('amp-story', '1.0', (AMP) => {
@@ -2441,5 +2475,4 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
-  AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

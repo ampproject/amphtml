@@ -13,5 +13,9 @@
       pattern: 'dep-check-config.js',
       owners: [{name: '*'}],
     },
+    {
+      pattern: 'forbidden-terms.js',
+      owners: [{name: 'ampproject/wg-components'}],
+    },
   ],
 }
