@@ -46,6 +46,11 @@ export class WunderkindNetworkConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
     const attributes = {
       'type': 'wunderkind',
