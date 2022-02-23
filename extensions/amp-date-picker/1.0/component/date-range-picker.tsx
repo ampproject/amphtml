@@ -8,17 +8,11 @@ import {
 } from 'date-fns';
 // TODO: Fix this
 // eslint-disable-next-line local/no-import
-import {ComponentProps, Ref} from 'preact';
+import {Ref} from 'preact';
 import {DateRange, Matcher} from 'react-day-picker';
 
 import {Keys_Enum} from '#core/constants/key-codes';
-import {
-  closestAncestorElementBySelector,
-  querySelectorInSlot,
-  scopedQuerySelector,
-} from '#core/dom/query';
 
-import * as Preact from '#preact';
 import {
   useCallback,
   useEffect,
@@ -27,18 +21,17 @@ import {
   useRef,
   useState,
 } from '#preact';
+import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 
 import {BaseDatePicker} from './base-date-picker';
-import {DatePickerContext} from './use-date-picker';
+import {useDatePickerContext} from './use-date-picker-context';
 import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
-import {useDay} from './use-day';
 
-import {DateFieldNameByType, FORM_INPUT_SELECTOR, TAG} from '../constants';
 import {getFormattedDate} from '../date-helpers';
-import {parseDate} from '../parsers';
+import {parseDate as _parseDate} from '../parsers';
 import {
   DateFieldType,
   DateRangePickerAPI,
@@ -52,13 +45,11 @@ function DateRangePickerWithRef(
     children,
     endInputSelector,
     format,
-    id,
     initialVisibleMonth,
     locale,
     mode,
     monthFormat,
     numberOfMonths,
-    onError,
     openAfterClear,
     openAfterSelect,
     startInputSelector,
@@ -69,10 +60,6 @@ function DateRangePickerWithRef(
 ) {
   const containerRef = useRef<HTMLElement>(null);
 
-  const [startHiddenInputProps, setStartHiddenInputProps] =
-    useState<ComponentProps<'input'>>();
-  const [endHiddenInputProps, setEndHiddenInputProps] =
-    useState<ComponentProps<'input'>>();
   const [focusedInput, setFocusedInput] = useState<DateFieldType>();
 
   const defaultMonth = initialVisibleMonth || today;
@@ -80,17 +67,29 @@ function DateRangePickerWithRef(
   const [month, setMonth] = useState<Date>(defaultMonth);
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
-  const {blockedDates} = useDay();
 
-  const {getDisabledAfter, getDisabledBefore, isDisabled} = useDay();
+  const {blockedDates, getDisabledAfter, getDisabledBefore, isDisabled} =
+    useDatePickerContext();
 
   const formatDate = useCallback(
     (date: Date) => getFormattedDate(date, format, locale),
     [format, locale]
   );
 
-  const startDateInput = useDatePickerInput({formatDate, today});
-  const endDateInput = useDatePickerInput({formatDate, today});
+  const parseDate = useCallback(
+    (value: string) => _parseDate(value, format, locale),
+    [format, locale]
+  );
+
+  const startDateInput = useDatePickerInput({
+    inputSelector: startInputSelector,
+    type: 'start-input',
+  });
+
+  const endDateInput = useDatePickerInput({
+    inputSelector: endInputSelector,
+    type: 'end-input',
+  });
 
   /**
    * Sets the selected date, month, and input value
@@ -234,38 +233,9 @@ function DateRangePickerWithRef(
   );
 
   /**
-   * Generate a name for a hidden input.
-   * Date pickers not in a form don't need named hidden inputs.
-   */
-  const getHiddenInputId = useCallback(
-    (form: HTMLFormElement, type: DateFieldType) => {
-      const name = DateFieldNameByType.get(type)!;
-      if (!form) {
-        return '';
-      }
-
-      if (!form.elements.namedItem(name)) {
-        return name;
-      }
-
-      const alternativeName = `${id}-${name}`;
-      if (id && !form.elements.namedItem(alternativeName)) {
-        return alternativeName;
-      }
-
-      onError(
-        `Multiple date-pickers with implicit ${TAG} fields need to have IDs`
-      );
-
-      return '';
-    },
-    [id, onError]
-  );
-
-  /**
    * Formats date range for react-day-picker
    */
-  const dateRange = useMemo(() => {
+  const dateRange = useMemo<DateRange>(() => {
     return {
       from: startDateInput.date,
       to: endDateInput.date,
@@ -313,16 +283,12 @@ function DateRangePickerWithRef(
         return;
       }
 
-      const date = parseDate(
-        (target as HTMLInputElement).value,
-        format,
-        locale
-      );
+      const date = parseDate((target as HTMLInputElement).value);
       if (date && isValid(date)) {
         startDateInput.setDate(date);
       }
     },
-    [format, locale, startDateInput]
+    [startDateInput, parseDate]
   );
 
   /**
@@ -335,94 +301,18 @@ function DateRangePickerWithRef(
         return;
       }
 
-      const date = parseDate(
-        (target as HTMLInputElement).value,
-        format,
-        locale
-      );
+      const date = parseDate((target as HTMLInputElement).value);
       if (date && isValid(date)) {
         endDateInput.setDate(date);
       }
     },
-    [format, locale, endDateInput]
+    [endDateInput, parseDate]
   );
 
   useEffect(() => {
-    const form = closestAncestorElementBySelector(
-      containerRef.current!,
-      FORM_INPUT_SELECTOR
-    ) as HTMLFormElement;
-    let startDateInputElement;
-    let endDateInputElement;
+    startDateInput.initialize(containerRef.current!);
+    endDateInput.initialize(containerRef.current!);
 
-    startDateInputElement = scopedQuerySelector(
-      containerRef.current!,
-      startInputSelector
-    ) as HTMLInputElement;
-
-    // This is required for bento mode
-    if (!startDateInputElement) {
-      const slot = containerRef.current?.querySelector('slot');
-      if (slot) {
-        startDateInputElement = querySelectorInSlot(
-          slot,
-          startInputSelector
-        ) as HTMLInputElement;
-      }
-    }
-
-    endDateInputElement = scopedQuerySelector(
-      containerRef.current!,
-      endInputSelector
-    ) as HTMLInputElement;
-
-    // This is required for bento mode
-    if (!endDateInputElement) {
-      const slot = containerRef.current?.querySelector('slot');
-      if (slot) {
-        endDateInputElement = querySelectorInSlot(
-          slot,
-          endInputSelector
-        ) as HTMLInputElement;
-      }
-    }
-
-    if (startDateInputElement) {
-      startDateInput.ref.current = startDateInputElement;
-      if (startDateInputElement.value) {
-        const parsedDate = parseDate(
-          startDateInputElement.value,
-          format,
-          locale
-        );
-        if (parsedDate) {
-          startDateInput.setDate(parsedDate);
-        }
-      }
-    } else if (mode === 'static' && !!form) {
-      setStartHiddenInputProps({
-        type: 'hidden',
-        name: getHiddenInputId(form, 'start-input'),
-      });
-    }
-    if (endDateInputElement) {
-      endDateInput.ref.current = endDateInputElement;
-      if (endDateInputElement.value) {
-        const parsedDate = parseDate(endDateInputElement.value, format, locale);
-        if (parsedDate) {
-          endDateInput.setDate(parsedDate);
-        }
-      }
-    } else if (mode === 'static' && !!form) {
-      setEndHiddenInputProps({
-        type: 'hidden',
-        name: getHiddenInputId(form, 'end-input'),
-      });
-    } else if (mode === 'overlay') {
-      onError(
-        `Overlay range pickers must specify "startInputSelector" and "endInputSelector"`
-      );
-    }
     // This should only be called on first render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -519,37 +409,24 @@ function DateRangePickerWithRef(
       data-startdate={startDateInput.date && formatDate(startDateInput.date)}
       data-enddate={endDateInput.date && formatDate(endDateInput.date)}
     >
-      <DatePickerContext.Provider
-        value={{
-          selectedStartDate: startDateInput.date,
-          selectedEndDate: endDateInput.date,
-          type: 'range',
-          focusedInput,
-        }}
-      >
-        {children}
-        {startHiddenInputProps && (
-          <input ref={startDateInput.ref} {...startHiddenInputProps} />
-        )}
-        {endHiddenInputProps && (
-          <input ref={endDateInput.ref} {...endHiddenInputProps} />
-        )}
-        {isOpen && (
-          <BaseDatePicker
-            mode="range"
-            selected={dateRange}
-            onSelect={selectDateRange}
-            locale={locale}
-            disabled={disabledMatchers}
-            month={month}
-            monthFormat={monthFormat}
-            weekDayFormat={weekDayFormat}
-            onMonthChange={setMonth}
-            numberOfMonths={numberOfMonths}
-            today={today}
-          />
-        )}
-      </DatePickerContext.Provider>
+      {children}
+      {startDateInput.hiddenInputComponent}
+      {endDateInput.hiddenInputComponent}
+      {isOpen && (
+        <BaseDatePicker
+          mode="range"
+          selected={dateRange}
+          onSelect={selectDateRange}
+          locale={locale}
+          disabled={disabledMatchers}
+          month={month}
+          monthFormat={monthFormat}
+          weekDayFormat={weekDayFormat}
+          onMonthChange={setMonth}
+          numberOfMonths={numberOfMonths}
+          today={today}
+        />
+      )}
     </ContainWrapper>
   );
 }

@@ -6,7 +6,7 @@ import {forwardRef} from '#preact/compat';
 
 import {DateRangePicker} from './date-range-picker';
 import {SingleDatePicker} from './single-date-picker';
-import {DayContext} from './use-day';
+import {DatePickerContext} from './use-date-picker-context';
 
 import {
   DEFAULT_END_INPUT_SELECTOR,
@@ -82,9 +82,9 @@ function BentoDatePickerWithRef(
   }, [type, onError]);
 
   return (
-    <DayContext.Provider value={propsWithDefaults}>
+    <DatePickerContext.Provider value={propsWithDefaults}>
       <DatePicker ref={ref} {...propsWithDefaults} />
-    </DayContext.Provider>
+    </DatePickerContext.Provider>
   );
 }
 

@@ -547,7 +547,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
     });
 
-    it('closes the calendar after a date has been selected by default', () => {
+    it.skip('closes the calendar after a date has been selected by default', () => {
       const wrapper = mount(
         <DatePicker
           type="range"

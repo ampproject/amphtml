@@ -6,28 +6,16 @@ import {DatesList} from './dates-list';
 
 import {BentoDatePickerProps} from '../types';
 
-type DayContextValue = Pick<
-  BentoDatePickerProps,
-  | 'allowBlockedEndDate'
-  | 'blocked'
-  | 'min'
-  | 'max'
-  | 'maximumNights'
-  | 'minimumNights'
-  | 'highlighted'
-  | 'today'
->;
-
-const DayContext = createContext<DayContextValue | null>(null);
-export {DayContext};
+const DatePickerContext = createContext<BentoDatePickerProps | null>(null);
+export {DatePickerContext};
 
 // Example: Wednesday, December 1, 2021
 const DATE_FORMAT = 'cccc, LLLL d, yyyy';
 
-export function useDay() {
-  const context = useContext(DayContext);
+export function useDatePickerContext() {
+  const context = useContext(DatePickerContext);
   if (!context) {
-    throw new Error('Must be wrapped in DayContext.Provider component');
+    throw new Error('Must be wrapped in DayPickerContext.Provider component');
   }
   const {
     allowBlockedEndDate,
@@ -128,5 +116,6 @@ export function useDay() {
     getDisabledBefore,
     blockedDates,
     highlightedDates,
+    ...context,
   };
 }

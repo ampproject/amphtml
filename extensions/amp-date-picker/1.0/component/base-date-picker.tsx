@@ -9,7 +9,7 @@ import * as Preact from '#preact';
 import {useCallback} from '#preact';
 
 import {DayButton} from './day-button';
-import {useDay} from './use-day';
+import {useDatePickerContext} from './use-date-picker-context';
 
 import {getFormattedDate} from '../date-helpers';
 
@@ -25,7 +25,7 @@ export function BaseDatePicker({
   weekDayFormat,
   ...rest
 }: BaseDatePickerProps) {
-  const {isDisabled} = useDay();
+  const {isDisabled} = useDatePickerContext();
 
   const formatMonth = useCallback(
     (date: Date) => {
