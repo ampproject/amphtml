@@ -190,11 +190,11 @@ export class AmpScript extends AMP.BaseElement {
     }
 
     const {height, width} = this.getLayoutSize();
-    if (width === 0 && height === 0) {
+    if (width * height === 0 && !this.nodom_) {
       this.reportedZeroSize_ = true;
       user().warn(
         TAG,
-        'Skipped initializing amp-script due to zero width and height.',
+        'Skipped initializing amp-script due to zero width or height.',
         this.element
       );
     }

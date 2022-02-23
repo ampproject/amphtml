@@ -12,6 +12,6 @@ export {
   createContext,
 } from '.';
 
-export {forwardRef} from 'preact/compat';
+export {forwardRef} from './compat';
 
 export default preactModules;

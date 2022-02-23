@@ -9,6 +9,12 @@ export const VisibilityState_Enum = {
   PRERENDER: 'prerender',
 
   /**
+   * The AMP document is being displayed in a preview mode before being shown.
+   * External resources should not be loaded, to preserve privacy.
+   */
+  PREVIEW: 'preview',
+
+  /**
    * The AMP document is currently active and visible.
    */
   VISIBLE: 'visible',
