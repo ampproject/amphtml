@@ -126,6 +126,11 @@ export class PreactBaseElement extends BaseElement {
     return !this.usesLoading();
   }
 
+  /** @override */
+  static previewAllowed() {
+    return false;
+  }
+
   /**
    * Override to provide the Component definition.
    *

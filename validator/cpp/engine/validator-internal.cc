@@ -150,7 +150,7 @@ namespace {
 // Sorts and eliminates duplicates in |v|.
 template <typename T>
 void SortAndUniquify(vector<T>* v) {
-  std::sort(v->begin(), v->end());
+  std::stable_sort(v->begin(), v->end());
   v->erase(std::unique(v->begin(), v->end()), v->end());
 }
 
@@ -3294,7 +3294,7 @@ void ValidateAttrValueProperties(const ParsedAttrSpec& parsed_attr_spec,
            mandatory_value_properties_seen);
 
   // To reduce churn emit errors sorted by names instead of memory addresses.
-  std::sort(not_seen.begin(), not_seen.end(),
+  std::stable_sort(not_seen.begin(), not_seen.end(),
             [](const PropertySpec* lhs, const PropertySpec* rhs) {
               return lhs->name() < rhs->name();
             });
@@ -4631,7 +4631,7 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
     missing_attrs.push_back(attr_name);
   }
   // Sort this list for stability across implementations.
-  std::sort(missing_attrs.begin(), missing_attrs.end());
+  std::stable_sort(missing_attrs.begin(), missing_attrs.end());
   for (const std::string& missing_attr : missing_attrs) {
     context.AddError(ValidationError::MANDATORY_ATTR_MISSING,
                      context.line_col(),
@@ -4736,7 +4736,7 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
     }
     if (parsed_tag_spec.spec().mandatory()) mandatory_tagspecs_.push_back(ii);
   }
-  std::sort(mandatory_tagspecs_.begin(), mandatory_tagspecs_.end());
+  std::stable_sort(mandatory_tagspecs_.begin(), mandatory_tagspecs_.end());
 
   error_codes_.resize(ValidationError::Code_MAX + 1);
   for (const ErrorSpecificity& error_specificity : rules_.error_specificity()) {
