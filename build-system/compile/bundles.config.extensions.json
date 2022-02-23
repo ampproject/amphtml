@@ -687,6 +687,15 @@
     }
   },
   {
+    "name": "amp-list",
+    "version": "1.0",
+    "options": {
+      "hasCss": false,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-live-list",
     "version": "0.1",
     "latestVersion": "0.1",

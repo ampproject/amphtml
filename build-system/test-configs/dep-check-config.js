@@ -155,7 +155,7 @@ exports.rules = [
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
 
-      // And a few mrore things depend on a4a.
+      // And a few more things depend on a4a.
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/name-frame-renderer.js',
@@ -211,6 +211,9 @@ exports.rules = [
 
       // <amp-date-display> versions share these date format helpers
       'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
+
+      // <amp-list> and <amp-render> share some logic
+      'extensions/amp-list/1.0/amp-list.js**->extensions/amp-render/1.0/shared/amp-fetch-utils.js',
 
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
