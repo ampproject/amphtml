@@ -11,29 +11,29 @@ export default {
       {name: 'amp-mustache', version: '0.2'},
     ],
     experiments: ['bento'],
-    argTypes: {
-      dateTime: {
-        name: 'Date/time',
-        control: {type: 'date'},
-      },
-      displayIn: {
-        name: 'Display in',
-        defaultValue: 'utc',
-        options: ['utc', 'local'],
-        control: {type: 'select'},
-      },
-      locale: {
-        name: 'Locale',
-        defaultValue: 'en-US',
-        options: ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'],
-        control: {type: 'select'},
-      },
-      template: {
-        name: 'Template',
-        defaultValue: 'template1',
-        options: ['template1', 'template2'],
-        control: {type: 'select'},
-      },
+  },
+  argTypes: {
+    dateTime: {
+      name: 'Date/time',
+      control: {type: 'date'},
+    },
+    displayIn: {
+      name: 'Display in',
+      defaultValue: 'utc',
+      options: ['utc', 'local'],
+      control: {type: 'select'},
+    },
+    locale: {
+      name: 'Locale',
+      defaultValue: 'en-US',
+      options: ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'],
+      control: {type: 'select'},
+    },
+    template: {
+      name: 'Template',
+      defaultValue: 'template1',
+      options: ['template1', 'template2'],
+      control: {type: 'select'},
     },
   },
 };
@@ -59,8 +59,6 @@ export const Default = ({dateTime, displayIn, locale, ...args}) => {
   );
 };
 
-Default.storyName = 'default';
-
 export const DefaultRenderer = ({dateTime, displayIn, locale, ...args}) => {
   return (
     <amp-date-display
@@ -74,8 +72,6 @@ export const DefaultRenderer = ({dateTime, displayIn, locale, ...args}) => {
     />
   );
 };
-
-DefaultRenderer.storyName = 'default renderer';
 
 export const ExternalTemplate = ({
   dateTime,
@@ -105,5 +101,3 @@ export const ExternalTemplate = ({
     </div>
   );
 };
-
-ExternalTemplate.storyName = 'external template';

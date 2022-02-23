@@ -722,11 +722,11 @@ const forbiddenTermsGlobal = {
       'The @storybook/addon-knobs package has been deprecated. Use Controls instead (`args` and `argTypes`). https://storybook.js.org/docs/react/essentials/controls',
     allowlist: [
       // TODO(#35923): Update existing files to use Controls instead.
-      'extensions/amp-date-display/1.0/storybook/Basic.amp.js',
-      'extensions/amp-date-display/1.0/storybook/Basic.js',
-      'extensions/amp-iframe/0.1/storybook/Basic.amp.js',
-      'extensions/amp-iframe/1.0/storybook/Basic.amp.js',
-      'extensions/amp-image-slider/0.1/storybook/Basic.amp.js',
+      // 'extensions/amp-date-display/1.0/storybook/Basic.amp.js',
+      // 'extensions/amp-date-display/1.0/storybook/Basic.js',
+      // 'extensions/amp-iframe/0.1/storybook/Basic.amp.js',
+      // 'extensions/amp-iframe/1.0/storybook/Basic.amp.js',
+      // 'extensions/amp-image-slider/0.1/storybook/Basic.amp.js',
       'extensions/amp-inline-gallery/1.0/storybook/Basic.js',
       'extensions/amp-lightbox/1.0/storybook/Basic.amp.js',
       'extensions/amp-lightbox/1.0/storybook/Basic.js',

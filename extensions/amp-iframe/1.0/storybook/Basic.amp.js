@@ -18,17 +18,15 @@ export default {
   },
 };
 
-export const WithSrc = () => {
+export const WithSrc = ({src}) => {
   return (
     <amp-iframe
       width="800"
       height="600"
-      src="https://www.wikipedia.org/"
+      src={src}
     ></amp-iframe>
   );
 };
-
-WithSrc.storyName = 'amp-iframe with src attribute';
 
 export const WithPlaceholder = ({src}) => {
   return (
@@ -38,8 +36,6 @@ export const WithPlaceholder = ({src}) => {
     </amp-iframe>
   );
 };
-
-WithPlaceholder.storyName = 'amp-iframe with placeholder';
 
 export const WithResizableIframe = () => {
   return (
@@ -58,8 +54,6 @@ export const WithResizableIframe = () => {
     </div>
   );
 };
-
-WithResizableIframe.storyName = 'resizable amp-iframe';
 
 export const WithContentBelow = () => {
   return (
@@ -83,8 +77,6 @@ export const WithContentBelow = () => {
   );
 };
 
-WithContentBelow.storyName = 'resizeable amp-iframe with content below';
-
 export const WithOverflowButton = () => {
   return (
     <div>
@@ -103,5 +95,3 @@ export const WithOverflowButton = () => {
     </div>
   );
 };
-
-WithOverflowButton.storyName = 'resizeable amp-iframe with overflow';

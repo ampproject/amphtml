@@ -31,8 +31,6 @@ export const Default = ({first, second}) => {
   );
 };
 
-Default.storyName = 'default';
-
 export const CustomHints = ({first, second}) => {
   return (
     <amp-image-slider width="600" height="300" layout="fixed">
@@ -63,5 +61,3 @@ export const CustomHints = ({first, second}) => {
     </amp-image-slider>
   );
 };
-
-CustomHints.storyName = 'custom-hints';
