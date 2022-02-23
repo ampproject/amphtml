@@ -11,9 +11,10 @@ import {BentoDatePickerProps} from '../types';
 const DatePickerContext = createContext<BentoDatePickerProps | null>(null);
 export {DatePickerContext};
 
-// Example: Wednesday, December 1, 2021
+/** Example: Wednesday, December 1, 2021 */
 const DATE_FORMAT = 'cccc, LLLL d, yyyy';
 
+/** Provides access to props and shared helpers */
 export function useDatePickerContext() {
   const context = useContext(DatePickerContext);
   if (!context) {
@@ -59,9 +60,11 @@ export function useDatePickerContext() {
     [min, max]
   );
 
-  // This disable days based on the maximumNights prop and
-  // the selected start date
-  // https://react-day-picker-next.netlify.app/api/types/DateAfter
+  /**
+   * Disables days based on the maximumNights prop and the
+   * selected start date
+   * https://react-day-picker-next.netlify.app/api/types/DateAfter
+   */
   const getDisabledAfter = useCallback(
     (startDate?: Date) => {
       if (!maximumNights || !startDate) {
@@ -72,9 +75,11 @@ export function useDatePickerContext() {
     [maximumNights]
   );
 
-  // This disable days based on the maximumNights prop and
-  // the selected start date
-  // https://react-day-picker-next.netlify.app/api/types/DateAfter
+  /**
+   * Disables days based on the maximumNights prop and the
+   * selected start date
+   * https://react-day-picker-next.netlify.app/api/types/DateAfter
+   */
   const getDisabledBefore = useCallback(
     (startDate?: Date) => {
       if (!startDate) {

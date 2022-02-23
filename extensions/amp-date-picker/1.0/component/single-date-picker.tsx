@@ -24,7 +24,6 @@ import {SingleDatePickerAPI, SingleDatePickerProps} from '../types';
 function SingleDatePickerWithRef(
   {
     children,
-    format,
     initialVisibleMonth,
     inputSelector,
     locale,

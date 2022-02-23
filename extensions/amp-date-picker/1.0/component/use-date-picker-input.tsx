@@ -13,8 +13,6 @@ import {ComponentProps} from '#preact/types';
 import {useDatePickerContext} from './use-date-picker-context';
 
 import {DateFieldNameByType, FORM_INPUT_SELECTOR, TAG} from '../constants';
-import {getFormattedDate} from '../date-helpers';
-import {parseDate as _parseDate} from '../parsers';
 import {DateFieldType} from '../types';
 
 interface DatePickerInputProps {
@@ -30,11 +28,11 @@ export function useDatePickerInput({
   type,
 }: DatePickerInputProps) {
   const {
-    format,
+    formatDate,
     id,
-    locale,
     mode,
     onError,
+    parseDate,
     today,
     type: datePickerType,
   } = useDatePickerContext();
@@ -45,16 +43,9 @@ export function useDatePickerInput({
   const [hiddenInputProps, setHiddenInputProps] =
     useState<ComponentProps<'input'>>();
 
-  const formatDate = useCallback(
-    (date: Date) => getFormattedDate(date, format, locale),
-    [format, locale]
-  );
-
-  const parseDate = useCallback(
-    (value: string) => _parseDate(value, format, locale),
-    [format, locale]
-  );
-
+  /**
+   * Sets a date in state and update the input value
+   */
   const handleSetDate = useCallback(
     (date: Date) => {
       setDate(date);
@@ -122,6 +113,10 @@ export function useDatePickerInput({
     [onError, id, type]
   );
 
+  /**
+   * Gets the user-provided input element if it exists. If the component is being
+   * rendered in Bento mode, it queries the slot for the input.
+   */
   const getInputElement = useCallback(
     (containerEl: HTMLElement) => {
       let inputElement: HTMLInputElement | null;
@@ -147,6 +142,12 @@ export function useDatePickerInput({
     [inputSelector]
   );
 
+  /**
+   * Initializes the input field based on the container and the selector.
+   * If the user provides a input, the user provided input will be set as the
+   * input ref. If the component is inside a form and the user has not provided
+   * an input field, it sets hidden input props and returns a hidden input attribute.
+   */
   const initialize = useCallback(
     (containerEl: HTMLElement) => {
       const form = closestAncestorElementBySelector(
