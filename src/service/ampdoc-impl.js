@@ -613,6 +613,12 @@ export class AmpDoc {
       console.log('');
       visibilityState = parentVisibilityState;
     } else if (
+      visibilityStateOverride == VisibilityState_Enum.PREVIEW ||
+      naturalVisibilityState == VisibilityState_Enum.PREVIEW ||
+      parentVisibilityState == VisibilityState_Enum.PREVIEW
+    ) {
+      visibilityState = VisibilityState_Enum.PREVIEW;
+    } else if (
       visibilityStateOverride == VisibilityState_Enum.PRERENDER ||
       naturalVisibilityState == VisibilityState_Enum.PRERENDER ||
       parentVisibilityState == VisibilityState_Enum.PRERENDER

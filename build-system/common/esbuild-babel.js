@@ -1,13 +1,12 @@
 const babel = require('@babel/core');
 const path = require('path');
 const {debug} = require('../compile/debug-compilation-lifecycle');
+const {includeSourcesContent} = require('../tasks/sourcemaps');
 const {TransformCache, batchedRead, md5} = require('./transform-cache');
 const Remapping = require('@ampproject/remapping');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
-
-const argv = require('minimist')(process.argv.slice(2));
 
 /**
  * @typedef {{
@@ -60,12 +59,10 @@ function getEsbuildBabelPlugin(
       }
     }
 
-    debug('pre-babel', filename, contents);
     const promise = babel
       .transformAsync(contents, babelOptions)
       .then((result) => {
         const {code, map} = /** @type {!babel.BabelFileResult} */ (result);
-        debug('post-babel', filename, code, map);
         return {filename, code: code || '', map};
       });
 
@@ -109,16 +106,18 @@ function getEsbuildBabelPlugin(
             })
           );
 
-          const transformed = await transformContents(
+          debug('pre-babel', filename, contents);
+          const {code, map} = await transformContents(
             filename,
             contents,
             rehash,
             getFileBabelOptions(babelOptions, filename)
           );
 
-          babelMaps.set(filename, transformed.map);
+          debug('post-babel', filename, code, map);
+          babelMaps.set(filename, map);
           postLoad?.();
-          return {contents: transformed.code};
+          return {contents: code};
         }
       );
 
@@ -128,6 +127,7 @@ function getEsbuildBabelPlugin(
         const map = outputFiles.find(({path}) => path.endsWith('.map'));
 
         if (!map) {
+          debug('post-esbuild', code.path, code.text);
           return;
         }
 
@@ -156,8 +156,10 @@ function getEsbuildBabelPlugin(
             }
             return map;
           },
-          !argv.full_sourcemaps
+          !includeSourcesContent()
         );
+
+        debug('post-esbuild', code.path, code.text, remapped);
 
         const sourcemapJson = remapped.toString();
         replaceOutputFile(outputFiles, map, sourcemapJson);

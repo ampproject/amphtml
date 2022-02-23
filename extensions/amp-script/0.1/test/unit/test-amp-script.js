@@ -157,7 +157,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     expect(script.workerDom_.callFunction).calledWithExactly('fetchData', true);
   });
 
-  describe('Initialization skipped warning due to zero height/width', () => {
+  describe('Initialization skipped warning due to zero size', () => {
     it('should not warn when there is positive width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
       env.sandbox.stub(script, 'getLayoutSize').returns({height: 1, width: 1});
@@ -165,14 +165,16 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       expect(warnStub).to.have.callCount(0);
     });
 
-    it('should warn if there is zero width/height', () => {
+    it('should warn if there is zero size', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
-      env.sandbox.stub(script, 'getLayoutSize').returns({height: 0, width: 0});
+      env.sandbox
+        .stub(script, 'getLayoutSize')
+        .returns({height: 100, width: 0});
       script.onLayoutMeasure();
 
       expect(warnStub).calledWith(
         'amp-script',
-        'Skipped initializing amp-script due to zero width and height.',
+        'Skipped initializing amp-script due to zero width or height.',
         script.element
       );
       expect(warnStub).to.have.callCount(1);
