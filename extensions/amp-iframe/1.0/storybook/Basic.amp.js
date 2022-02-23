@@ -19,13 +19,7 @@ export default {
 };
 
 export const WithSrc = ({src}) => {
-  return (
-    <amp-iframe
-      width="800"
-      height="600"
-      src={src}
-    ></amp-iframe>
-  );
+  return <amp-iframe width="800" height="600" src={src}></amp-iframe>;
 };
 
 export const WithPlaceholder = ({src}) => {
