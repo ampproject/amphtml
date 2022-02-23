@@ -1,5 +1,3 @@
-import {forwardRef} from 'preact/compat';
-
 import {
   createContext,
   createElement,
@@ -12,6 +10,7 @@ import {
   useRef,
   useState,
 } from '.';
+import {forwardRef} from './compat';
 
 export {
   createContext,

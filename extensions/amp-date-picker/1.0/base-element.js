@@ -25,7 +25,7 @@ BaseElement['props'] = {
   'children': {passthrough: true},
   // Not implemented
   'daySize': {attr: 'day-size', parseAttr: parseInt},
-  'end-input-selector': {attr: 'end-input-selector'},
+  'endInputSelector': {attr: 'end-input-selector'},
   // Not implemented
   'firstDayOfWeek': {attr: 'first-day-of-week', parseAttr: parseInt},
   'format': {attr: 'format'},

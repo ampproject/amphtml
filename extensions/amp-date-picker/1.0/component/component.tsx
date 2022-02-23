@@ -1,7 +1,6 @@
-import {forwardRef} from 'preact/compat';
-
 import * as Preact from '#preact';
 import {useMemo} from '#preact';
+import {forwardRef} from '#preact/compat';
 import {FunctionalComponent, Ref} from '#preact/types';
 
 import {DateRangePicker} from './date-range-picker';

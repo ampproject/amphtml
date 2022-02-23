@@ -1,4 +1,3 @@
-import {expect} from 'chai';
 import {format} from 'date-fns';
 import {mount} from 'enzyme';
 import {RRule} from 'rrule';
@@ -15,7 +14,6 @@ import {
 } from './test-helpers';
 
 import {BentoDatePicker} from '../component/component';
-import * as helpers from '../date-helpers';
 
 const TODAY = new Date(2022, 0);
 
@@ -968,9 +966,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
 
     it('blocks all subsequent dates if maximum nights is specified', () => {
-      env.sandbox
-        .stub(helpers, 'getCurrentDate')
-        .callsFake(() => new Date(2022, 0, 1));
       const wrapper = mount(
         <DatePicker
           type="range"
@@ -994,9 +989,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     });
 
     it('does not allow the user to select an end date that is before the minimumNights threshhold', () => {
-      env.sandbox
-        .stub(helpers, 'getCurrentDate')
-        .callsFake(() => new Date(2022, 0, 1));
       const wrapper = mount(
         <DatePicker
           type="range"

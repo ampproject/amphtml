@@ -6,7 +6,6 @@ import {
   isSameDay,
   isValid,
 } from 'date-fns';
-import {forwardRef} from 'preact/compat';
 import {DateRange, Matcher} from 'react-day-picker';
 
 import {Keys_Enum} from '#core/constants/key-codes';
@@ -20,6 +19,7 @@ import {
   useState,
 } from '#preact';
 import * as Preact from '#preact';
+import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {Ref} from '#preact/types';
 
@@ -55,7 +55,8 @@ function DateRangePickerWithRef(
 ) {
   const containerRef = useRef<HTMLElement>(null);
 
-  const [focusedInput, setFocusedInput] = useState<DateFieldType>();
+  const [focusedInput, setFocusedInput] =
+    useState<DateFieldType>('start-input');
 
   const defaultMonth = initialVisibleMonth || today;
   // This allow the calendar to navigate to a new month when the date changes
@@ -86,7 +87,10 @@ function DateRangePickerWithRef(
    * Sets the selected date, month, and input value
    */
   const handleSetStartDate = useCallback(
-    (date: Date) => {
+    (date?: Date) => {
+      if (!date) {
+        return;
+      }
       startDateInput.handleSetDate(date);
       setMonth(date);
     },
@@ -97,7 +101,10 @@ function DateRangePickerWithRef(
    * Sets the selected date, month, and input value
    */
   const handleSetEndDate = useCallback(
-    (date: Date) => {
+    (date?: Date) => {
+      if (!date) {
+        return;
+      }
       endDateInput.handleSetDate(date);
       setMonth(date);
     },
@@ -172,36 +179,43 @@ function DateRangePickerWithRef(
    */
   const selectDateRange = useCallback(
     ({from: startDate, to: endDate}: DateRange) => {
-      const disabledAfter = getDisabledAfter(startDate);
-      const disabledBefore = getDisabledBefore(startDate);
-      let isAfterDisabledDate = false;
-      let isBeforeDisabledDate = false;
-      if (disabledAfter && endDate) {
-        isAfterDisabledDate = isAfter(endDate, disabledAfter);
-      }
-      if (disabledBefore && startDate && endDate) {
-        isBeforeDisabledDate =
-          !isSameDay(startDate, endDate) && isBefore(endDate, disabledBefore);
-      }
-      const isOutsideRange = isAfterDisabledDate || isBeforeDisabledDate;
-      if (isBlockedRange(startDate, endDate) || isOutsideRange) {
+      const isFinalSelection = !openAfterSelect && focusedInput === 'end-input';
+      const isSame = startDate && endDate && isSameDay(startDate, endDate);
+
+      if (isBlockedRange(startDate, endDate)) {
         return;
       }
-      // TODO: Clarify this logic
+
+      const disabledAfter = getDisabledAfter(startDate);
+      const disabledBefore = getDisabledBefore(startDate);
+
+      const isAfterDisabledDate =
+        disabledAfter && endDate && isAfter(endDate, disabledAfter);
+      if (isAfterDisabledDate) {
+        return;
+      }
+
+      const isBeforeDisabledDate =
+        disabledBefore &&
+        endDate &&
+        !isSame &&
+        isBefore(endDate, disabledBefore);
+      if (isBeforeDisabledDate) {
+        return;
+      }
+
       if (focusedInput === 'start-input') {
-        if (startDate && endDate && isSameDay(startDate, endDate)) {
-          handleSetStartDate(startDate);
-        }
-      } else if (focusedInput === 'end-input') {
-        if (endDate) {
-          handleSetEndDate(endDate);
-        }
-      } else if (startDate && endDate) {
         handleSetStartDate(startDate);
+      } else if (focusedInput === 'end-input') {
         handleSetEndDate(endDate);
-        if (!openAfterSelect && mode === 'overlay') {
-          transitionTo('overlay-closed');
-        }
+      }
+
+      if (isSame) {
+        setFocusedInput('end-input');
+      }
+
+      if (isFinalSelection && mode === 'overlay') {
+        transitionTo('overlay-closed');
       }
     },
     [
@@ -358,7 +372,7 @@ function DateRangePickerWithRef(
     startInputEl?.addEventListener('keydown', handleInputKeydown);
     endInputEl?.addEventListener('keydown', handleInputKeydown);
     return () => {
-      document.addEventListener('click', handleClick);
+      document.removeEventListener('click', handleClick);
       document.removeEventListener('keydown', handleDocumentKeydown);
       startInputEl?.removeEventListener('focus', handleFocus);
       endInputEl?.removeEventListener('focus', handleFocus);
