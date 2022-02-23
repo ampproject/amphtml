@@ -1,4 +1,3 @@
-import {expect} from 'chai';
 import {mount} from 'enzyme';
 
 import {BentoReddit} from '#bento/components/bento-reddit/1.0/component';
