@@ -11,7 +11,7 @@ amp-story-shopping-attachment {
 
 amp-story[desktop][supports-landscape] amp-story-shopping-attachment {
   /* Sets static values in desktop supports landscape mode. */
-  font-size: calc(18px) !important; 
+  font-size: calc(18px) !important;
   --i-amphtml-shopping-pdp-carousel-height: 32em !important;
 }
 
