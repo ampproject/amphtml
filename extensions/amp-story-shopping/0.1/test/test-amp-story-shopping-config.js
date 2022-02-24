@@ -357,13 +357,13 @@ describes.realWin(
       const invalidConfig = {
         'items': [
           {
-            'productUrl': 'https://www.google.com',
+            'productUrl': 'http://zapp',
             'productId': 'city-pop',
             'productTitle': 'Adventure',
             'productBrand': 'Vinyl',
             'productPrice': 19,
             'productPriceCurrency': 'JPY',
-            'productImages': ['http://zapp'],
+            'productImages': ['https://zapp'],
             'aggregateRating': {
               'ratingValue': 4.4,
               'reviewCount': 89,

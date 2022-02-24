@@ -28,11 +28,8 @@ export const VALIDATION_OBJECTS = {
     'productPriceCurrency': [validateRequired, validateString],
     'aggregateRating': [validateRequired, validateObject],
     /* Optional Attrs */
-    'productColor': [validateString],
-    'productSize': [validateString],
     'productIcon': [validateURLs],
     'productTagText': [validateString],
-    'reviewsData': [validateURLs],
     'ctaText': [validateNumber],
     'shippingText': [validateNumber],
   },
@@ -109,6 +106,9 @@ export function validateURLs(field, url = undefined) {
 
   urls.forEach((url) => {
     assertHttpsUrl(url.url ?? url, `amp-story-shopping-config ${field}`);
+    if (url.alt) {
+      validateString('alt', url.alt);
+    }
   });
 }
 
