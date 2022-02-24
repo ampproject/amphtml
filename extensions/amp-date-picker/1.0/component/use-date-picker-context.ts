@@ -130,6 +130,7 @@ export function useDatePickerContext() {
   const getLabel = useCallback(
     (date: Date) => {
       const formattedDate = getFormattedDate(date, DATE_FORMAT, locale);
+      // TODO: Implement other labels from defaultPhrases.js
       if (isDisabled(date)) {
         return `Not available. ${formattedDate}`;
       }
