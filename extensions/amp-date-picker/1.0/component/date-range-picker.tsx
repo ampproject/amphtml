@@ -41,15 +41,11 @@ function DateRangePickerWithRef(
     children,
     endInputSelector,
     initialVisibleMonth,
-    locale,
     mode,
-    monthFormat,
-    numberOfMonths,
     openAfterClear,
     openAfterSelect,
     startInputSelector,
     today,
-    weekDayFormat,
   }: DateRangePickerProps,
   ref: Ref<DateRangePickerAPI>
 ) {
@@ -422,14 +418,9 @@ function DateRangePickerWithRef(
           mode="range"
           selected={dateRange}
           onSelect={selectDateRange}
-          locale={locale}
           disabled={disabledMatchers}
           month={month}
-          monthFormat={monthFormat}
-          weekDayFormat={weekDayFormat}
           onMonthChange={setMonth}
-          numberOfMonths={numberOfMonths}
-          today={today}
         />
       )}
     </ContainWrapper>

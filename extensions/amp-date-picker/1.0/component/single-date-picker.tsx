@@ -26,14 +26,10 @@ function SingleDatePickerWithRef(
     children,
     initialVisibleMonth,
     inputSelector,
-    locale,
     mode,
-    monthFormat,
-    numberOfMonths,
     openAfterClear,
     openAfterSelect,
     today,
-    weekDayFormat,
   }: SingleDatePickerProps,
   ref: Ref<SingleDatePickerAPI>
 ) {
@@ -197,13 +193,8 @@ function SingleDatePickerWithRef(
           mode="single"
           selected={dateInput.date}
           onSelect={selectDate}
-          locale={locale}
           month={month}
-          monthFormat={monthFormat}
-          weekDayFormat={weekDayFormat}
           onMonthChange={setMonth}
-          today={today}
-          numberOfMonths={numberOfMonths}
         />
       )}
     </ContainWrapper>

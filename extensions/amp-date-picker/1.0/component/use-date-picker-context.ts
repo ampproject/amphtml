@@ -30,7 +30,9 @@ export function useDatePickerContext() {
     maximumNights,
     min: optionalMin,
     minimumNights,
+    monthFormat,
     today,
+    weekDayFormat,
   } = context;
 
   const min = optionalMin || today;
@@ -43,6 +45,20 @@ export function useDatePickerContext() {
   const parseDate = useCallback(
     (value: string) => _parseDate(value, format, locale),
     [format, locale]
+  );
+
+  const formatMonth = useCallback(
+    (date: Date) => {
+      return getFormattedDate(date, monthFormat, locale);
+    },
+    [monthFormat, locale]
+  );
+
+  const formatWeekday = useCallback(
+    (date: Date) => {
+      return getFormattedDate(date, weekDayFormat, locale);
+    },
+    [weekDayFormat, locale]
   );
 
   const blockedDates = useMemo(() => {
@@ -133,6 +149,8 @@ export function useDatePickerContext() {
     highlightedDates,
     parseDate,
     formatDate,
+    formatMonth,
+    formatWeekday,
     ...context,
   };
 }

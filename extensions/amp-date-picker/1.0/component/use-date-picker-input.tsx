@@ -77,11 +77,16 @@ export function useDatePickerInput({
     [handleSetDate, today]
   );
 
+  /**
+   * Returns the hidden input component if it exists.
+   * If the props have not been set, this means that there is
+   * a user-defined input component.
+   */
   const hiddenInputComponent = useMemo(() => {
     if (!hiddenInputProps) {
       return null;
     }
-    return <input ref={ref} {...hiddenInputProps} />;
+    return <input type="hidden" ref={ref} {...hiddenInputProps} />;
   }, [hiddenInputProps]);
 
   /**
@@ -176,7 +181,6 @@ export function useDatePickerInput({
         }
       } else if (mode === 'static' && !!form) {
         setHiddenInputProps({
-          type: 'hidden',
           name: getHiddenInputId(form),
         });
       }

@@ -6,40 +6,23 @@ import {
 } from 'react-day-picker';
 
 import * as Preact from '#preact';
-import {useCallback} from '#preact';
 
 import {DayButton} from './day-button';
 import {useDatePickerContext} from './use-date-picker-context';
 
-import {getFormattedDate} from '../date-helpers';
-
 interface BaseDatePickerProps extends DayPickerProps {
-  monthFormat: string;
-  weekDayFormat: string;
   onSelect: SelectSingleEventHandler | SelectRangeEventHandler;
 }
 
-export function BaseDatePicker({
-  locale,
-  monthFormat,
-  weekDayFormat,
-  ...rest
-}: BaseDatePickerProps) {
-  const {isDisabled} = useDatePickerContext();
-
-  const formatMonth = useCallback(
-    (date: Date) => {
-      return getFormattedDate(date, monthFormat, locale);
-    },
-    [monthFormat, locale]
-  );
-
-  const formatWeekday = useCallback(
-    (date: Date) => {
-      return getFormattedDate(date, weekDayFormat, locale);
-    },
-    [weekDayFormat, locale]
-  );
+export function BaseDatePicker(props: BaseDatePickerProps) {
+  const {
+    formatMonth,
+    formatWeekday,
+    isDisabled,
+    locale,
+    numberOfMonths,
+    today,
+  } = useDatePickerContext();
 
   return (
     <DayPicker
@@ -51,7 +34,9 @@ export function BaseDatePicker({
         formatWeekdayName: formatWeekday,
       }}
       locale={locale}
-      {...rest}
+      numberOfMonths={numberOfMonths}
+      today={today}
+      {...props}
     />
   );
 }
