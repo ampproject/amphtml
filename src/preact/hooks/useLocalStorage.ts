@@ -1,12 +1,10 @@
 import {useCallback, useState} from '#preact';
 import {logger} from '#preact/logger';
 
-/**
- * @param {string} key
- * @param {*=} defaultValue
- * @return {{ "0": any, "1": function(any): void }}
- */
-export function useLocalStorage(key, defaultValue = null) {
+export function useLocalStorage<T>(
+  key: string,
+  defaultValue: T
+): readonly [T, (newValue: T) => void] {
   // Keep track of the state locally:
   const [value, setValue] = useState(() => {
     try {
@@ -19,7 +17,7 @@ export function useLocalStorage(key, defaultValue = null) {
   });
 
   const storeValue = useCallback(
-    (/** @type {any} */ newValue) => {
+    (newValue: T) => {
       try {
         const json = JSON.stringify(newValue);
         self.localStorage?.setItem(key, json);
@@ -36,5 +34,5 @@ export function useLocalStorage(key, defaultValue = null) {
     [key]
   );
 
-  return [value, storeValue];
+  return [value, storeValue] as const;
 }
