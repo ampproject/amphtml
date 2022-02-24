@@ -106,9 +106,6 @@ export function validateURLs(field, url = undefined) {
 
   urls.forEach((url) => {
     assertHttpsUrl(url.url ?? url, `amp-story-shopping-config ${field}`);
-    if (url.alt) {
-      validateString('alt', url.alt);
-    }
   });
 }
 
