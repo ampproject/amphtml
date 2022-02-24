@@ -80,13 +80,7 @@ const mode = {
   GEO_API: 3, //       Query API when cache patching unavailable
 };
 
-/**
- * Values
- * @enum {string}
- */
-const values = {
-  UNKNOWN: 'unknown',
-};
+const VALUE_UNKNOWN = 'unknown';
 
 // TODO(zhouyx@): Rename if we have generic subdivision group support
 /**
@@ -115,9 +109,9 @@ export class AmpGeo extends AMP.BaseElement {
     /** @private {boolean} */
     this.error_ = false;
     /** @private {string} */
-    this.country_ = values.UNKNOWN;
+    this.country_ = VALUE_UNKNOWN;
     /** @private {string} */
-    this.subdivision_ = values.UNKNOWN;
+    this.subdivision_ = VALUE_UNKNOWN;
     /** @private {Array<string>} */
     this.matchedGroups_ = [];
     /** @private {Array<string>} */
@@ -450,7 +444,7 @@ export class AmpGeo extends AMP.BaseElement {
 
         // Otherwise we add the country to the list
         if (
-          country == values.UNKNOWN ||
+          country == VALUE_UNKNOWN ||
           /^[a-zA-Z]{2}$/.test(country) ||
           /^[a-zA-Z]{2}-[0-9a-zA-Z]{1,3}$/.test(country)
         ) {
@@ -463,7 +457,7 @@ export class AmpGeo extends AMP.BaseElement {
       .map((c) => c.toLowerCase());
     return (
       expandedGroup.includes(this.country_) ||
-      (this.subdivision_ !== values.UNKNOWN &&
+      (this.subdivision_ !== VALUE_UNKNOWN &&
         expandedGroup.includes(this.subdivision_))
     );
   }
@@ -549,7 +543,7 @@ export class AmpGeo extends AMP.BaseElement {
             states.ISOCountryGroups = this.matchedGroups_;
             classesToAdd.push(COUNTRY_PREFIX + this.country_);
 
-            if (this.subdivision_ !== values.UNKNOWN) {
+            if (this.subdivision_ !== VALUE_UNKNOWN) {
               classesToAdd.push(SUBDIVISION_PREFIX + this.subdivision_);
             }
 
