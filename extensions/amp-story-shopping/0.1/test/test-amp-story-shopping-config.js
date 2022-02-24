@@ -6,6 +6,7 @@ import {user} from '#utils/log';
 
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import * as url from '../../../../src/url';
 import {
   Action,
   getStoreService,
@@ -372,11 +373,11 @@ describes.realWin(
         ],
       };
       const errorString = `Error: amp-story-shopping-config productImages source must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${invalidConfig['items'][0]['productImages'][0]}`;
-      const spy = env.sandbox.spy(user(), 'warn');
+      const spy = env.sandbox.spy(url, 'assertHttpsUrl');
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(spy).to.have.been.calledWith(
-        'AMP-STORY-SHOPPING-CONFIG',
-        errorString
+        `${invalidConfig['items'][0]['productImages'][0]}`,
+        'amp-story-shopping-config productImages'
       );
     });
   }
