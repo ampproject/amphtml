@@ -803,8 +803,6 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment.js"
     },
     {
-      // TODO(wg-stories): Re-enable as part of https://go.amp.dev/pr/37600
-      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-shopping.html",
       "name": "amp-story-shopping UI",
       "viewport": {"width": 320, "height": 900},
@@ -812,8 +810,6 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
     },
     {
-      // TODO(wg-stories): Re-enable as part of https://go.amp.dev/pr/37600
-      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-shopping-rtl.html",
       "name": "amp-story-shopping UI RTL",
       "viewport": {"width": 320, "height": 900},
@@ -821,12 +817,17 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
     },
     {
-      // TODO(wg-stories): Re-enable as part of https://go.amp.dev/pr/37600
-      "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-shopping-lang-de.html",
       "name": "amp-story-shopping UI number format based on language",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [".i-amphtml-story-loaded"]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-shopping-landscape.html",
+      "name": "amp-story-shopping UI in desktop supports landscape mode",
+      "viewport": {"width": 1500, "height": 1000},
+      "loading_complete_selectors": [".i-amphtml-story-loaded"],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
     }
   ]
 }
