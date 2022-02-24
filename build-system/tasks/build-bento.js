@@ -35,8 +35,8 @@ function maybeInitializeBentoComponents(componentsObject) {
 }
 
 /**
- * Process the command line arguments --nocomponents, --components, and
- * --components_from and return a list of the referenced components.
+ * Process the command line arguments --noextensions, --components, and
+ * --extensions_from and return a list of the referenced components.
  *
  * @param {boolean} preBuild Used for lazy building of components.
  * @return {!Array<string>}
@@ -57,7 +57,7 @@ function getBentoComponentsToBuild(preBuild = false) {
   }
   if (
     !preBuild &&
-    !argv.nocomponents &&
+    !argv.noextensions &&
     !argv.extensions &&
     !argv.extensions_from &&
     !argv.core_runtime_only
@@ -132,6 +132,7 @@ async function buildBentoComponent(name, version, hasCss, options = {}) {
     return;
   }
   const componentsDir = `src/bento/components/${name}/${version}`;
+  mkdirSync(`${componentsDir}/dist`, {recursive: true});
   if (options.watch) {
     await watchBentoComponent(componentsDir, name, version, hasCss, options);
   }

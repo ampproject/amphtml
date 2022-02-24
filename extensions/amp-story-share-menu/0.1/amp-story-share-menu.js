@@ -91,37 +91,27 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = Services.localizationForDoc(this.element);
 
-    /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
+    /** @private @const {!../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win);
   }
 
   /**
    * Builds and appends the component in the story. Could build either the
    * amp-social-share button to display the native system sharing, or a fallback
    * UI.
-   * @return {!Promise}
    */
   buildCallback() {
     if (this.rootEl_) {
       return;
     }
 
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win).then(
-        (service) => (this.storeService_ = service)
-      ),
-      Services.localizationServiceForOrNull(this.element).then(
-        (service) => (this.localizationService_ = service)
-      ),
-    ]).then(() => {
-      const providersList = this.buildProvidersList_();
-      this.rootEl_ = this.buildDialog_(providersList);
-      createShadowRootWithStyle(this.element, this.rootEl_, CSS);
-      this.initializeListeners_();
-    });
+    const providersList = this.buildProvidersList_();
+    this.rootEl_ = this.buildDialog_(providersList);
+    createShadowRootWithStyle(this.element, this.rootEl_, CSS);
+    this.initializeListeners_();
   }
 
   /**
@@ -336,15 +326,20 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
     const url = Services.documentInfoForDoc(
       getAmpdoc(this.storyEl_)
     ).canonicalUrl;
-    if (!copyTextToClipboard(this.win, url)) {
-      const failureString = this.localizationService_.getLocalizedString(
-        LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
-      );
-      Toast.show(this.storyEl_, failureString);
-      return;
-    }
 
-    Toast.show(this.storyEl_, this.buildCopySuccessfulToast_(url));
+    copyTextToClipboard(
+      this.win,
+      url,
+      () => {
+        Toast.show(this.storyEl_, this.buildCopySuccessfulToast_(url));
+      },
+      () => {
+        const failureString = this.localizationService_.getLocalizedString(
+          LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
+        );
+        Toast.show(this.storyEl_, failureString);
+      }
+    );
   }
 
   /**

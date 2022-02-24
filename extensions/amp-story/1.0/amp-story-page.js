@@ -155,7 +155,7 @@ export const NavigationDirection = {
  * an <amp-story>.
  */
 export class AmpStoryPage extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed(element) {
     return isPrerenderActivePage(element);
   }
@@ -1331,7 +1331,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     return waitForElementsWithUnresolvedAudio(this.element).then(() =>
       Array.prototype.some.call(
         ampVideoEls,
-        (video) => !video.hasAttribute('noaudio')
+        (video) =>
+          !video.hasAttribute('noaudio') &&
+          parseFloat(video.getAttribute('volume')) !== 0
       )
     );
   }

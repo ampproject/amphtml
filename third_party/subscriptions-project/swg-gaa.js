@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.205 */
+/** Version: 0.1.22.207 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -443,30 +443,6 @@ function map(initial) {
     Object.assign(obj, initial);
   }
   return obj;
-}
-
-/**
- * Implements `Array.find()` method that's not yet available in all browsers.
- *
- * @param {?Array<T>} array
- * @param {function(T, number, !Array<T>):boolean} predicate
- * @return {?T}
- * @template T
- */
-function findInArray(array, predicate) {
-  if (!array) {
-    return null;
-  }
-  const len = array.length || 0;
-  if (len > 0) {
-    for (let i = 0; i < len; i++) {
-      const other = array[i];
-      if (predicate(other, i, array)) {
-        return other;
-      }
-    }
-  }
-  return null;
 }
 
 /**
@@ -1496,24 +1472,27 @@ class GaaMeteringRegwall {
    * @return {string|undefined}
    */
   static getPublisherNameFromJsonLdPageConfig_() {
-    const ldJsonElements = self.document.querySelectorAll(
-      'script[type="application/ld+json"]'
+    // Get JSON from ld+json scripts.
+    const ldJsonScripts = Array.prototype.slice.call(
+      self.document.querySelectorAll('script[type="application/ld+json"]')
+    );
+    const jsonQueue = /** @type {!Array<*>} */ (
+      ldJsonScripts.map((script) => parseJson(script.textContent))
     );
 
-    for (const ldJsonElement of ldJsonElements) {
-      let ldJson = /** @type {*} */ (parseJson(ldJsonElement.textContent));
+    // Search for publisher name, breadth-first.
+    for (let i = 0; i < jsonQueue.length; i++) {
+      const json = /** @type {!Object<?,?>} */ (jsonQueue[i]);
 
-      if (!Array.isArray(ldJson)) {
-        ldJson = [ldJson];
-      }
-
-      const publisherName = findInArray(
-        ldJson,
-        (entry) => entry?.publisher?.name
-      )?.publisher.name;
-
+      // Return publisher name, if possible.
+      const publisherName = json?.publisher?.name;
       if (publisherName) {
         return publisherName;
+      }
+
+      // Explore JSON.
+      if (json && typeof json === 'object') {
+        jsonQueue.push(...Object.values(json));
       }
     }
   }

@@ -322,6 +322,16 @@ cc_library(
     ],
 )
 
+cc_binary(
+    name = "update-tests",
+    srcs = ["update-tests.cc"],
+    copts = ["-std=c++17"],
+    deps = [
+        ":testing-utils",
+        ":validator",
+    ],
+)
+
 cc_test(
     name = "validator_test",
     srcs = ["validator_test.cc"],

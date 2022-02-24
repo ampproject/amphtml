@@ -92,6 +92,23 @@ export class Templates {
   }
 
   /**
+   * Resolves to a reusable template renderer.
+   *
+   * @param {!Element} templateElement
+   * @return {Promise<{
+   *   renderAsString: function(*=): string
+   * }>}
+   */
+  getTemplateRenderer(templateElement) {
+    return this.getImplementation_(templateElement).then((impl) => {
+      const renderer = {
+        renderAsString: (data) => impl.renderAsString(data),
+      };
+      return renderer;
+    });
+  }
+
+  /**
    * Renders the specified template element using the supplied array of data
    * and returns an array of resulting elements.
    * @param {!Element} templateElement
