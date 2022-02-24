@@ -353,10 +353,12 @@ function DateRangePickerWithRef(
       }
     };
     const handleClick = (event: MouseEvent) => {
+      const containsShadowRoot = !!(event.target as Element)?.shadowRoot;
       const clickWasInDatePicker =
         event.target === startInputEl ||
         event.target === endInputEl ||
-        containerEl.contains(event.target as Node);
+        containerEl.contains(event.target as Node) ||
+        containsShadowRoot;
       if (!clickWasInDatePicker) {
         transitionTo('overlay-closed');
       }

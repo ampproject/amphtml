@@ -240,8 +240,11 @@ describes.endtoend(
       });
     });
 
-    describe.skip('range date picker in overlay mode', () => {
+    describe('range date picker in overlay mode', () => {
       it('should be able to select the start date followed by the end date', async () => {
+        const input = await controller.findElement('#start-date-overlay');
+        controller.click(input);
+
         const element = await controller.findElement(
           '#bento-range-date-picker-overlay'
         );
