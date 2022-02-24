@@ -638,26 +638,26 @@ async function buildNpmBinaries(extDir, name, options) {
     const external = [...new Set(Object.values(remap))];
 
     npm = {
-      preact: {
-        entryPoint: 'component.js',
-        outfile: 'component-preact.js',
-        external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
-        remap: {'preact/dom': 'preact'},
-        wrapper: '',
-      },
-      react: {
-        babelCaller: options.minify ? 'react-minified' : 'react-unminified',
-        entryPoint: 'component.js',
-        outfile: 'component-react.js',
-        external: ['react', 'react-dom'],
-        remap: {
-          'preact': 'react',
-          '.*/preact/compat': 'react',
-          'preact/hooks': 'react',
-          'preact/dom': 'react-dom',
-        },
-        wrapper: '',
-      },
+      // preact: {
+      //   entryPoint: 'component.js',
+      //   outfile: 'component-preact.js',
+      //   external: ['preact', 'preact/dom', 'preact/compat', 'preact/hooks'],
+      //   remap: {'preact/dom': 'preact'},
+      //   wrapper: '',
+      // },
+      // react: {
+      //   babelCaller: options.minify ? 'react-minified' : 'react-unminified',
+      //   entryPoint: 'component.js',
+      //   outfile: 'component-react.js',
+      //   external: ['react', 'react-dom'],
+      //   remap: {
+      //     'preact': 'react',
+      //     '.*/preact/compat': 'react',
+      //     'preact/hooks': 'react',
+      //     'preact/dom': 'react-dom',
+      //   },
+      //   wrapper: '',
+      // },
       bento: {
         entryPoint: await getBentoBuildFilename(
           extDir,

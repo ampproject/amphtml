@@ -441,6 +441,27 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
             importPath = './index';
           }
 
+          const bentoCoreModules = [
+            'core/context',
+            'preact',
+            'preact/base-element',
+            'preact/compat',
+            'preact/component',
+            'preact/context',
+            'preact/slot',
+          ];
+
+          let shouldRemap = false;
+          // importing bento/core module that should be remapped
+          if (
+            bentoCoreModules.some((mod) => importPath.includes(mod)) &&
+            !importPath.includes('preact/utils') &&
+            !importPath.includes('preact/bento-ce')
+          ) {
+            console.log('should remap', importPath);
+            shouldRemap = true;
+          }
+
           let dep;
           // Use resolvePath() the path to normalize files/directories.
           // If file, gets filepath; if directory, gets the index filepath
@@ -460,10 +481,14 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
               continue;
             }
             const isExternal = external.includes(value);
+            // console.log('remapping', args.path);
             return {
               path: isExternal ? value : resolvePath(value),
               external: isExternal,
             };
+          }
+          if (shouldRemap) {
+            console.log('error: did not remap', args);
           }
         });
       },
