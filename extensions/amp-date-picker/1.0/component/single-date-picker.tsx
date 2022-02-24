@@ -141,8 +141,13 @@ function SingleDatePickerWithRef(
       }
     };
     const handleClick = (event: MouseEvent) => {
+      // This is necessary for bento mode, since .contains does not work with
+      // elements in the shadow DOM
+      const containsShadowRoot = !!(event.target as Element)?.shadowRoot;
       const clickWasInDatePicker =
-        event.target === inputEl || containerEl.contains(event.target as Node);
+        event.target === inputEl ||
+        containerEl.contains(event.target as Node) ||
+        containsShadowRoot;
       if (!clickWasInDatePicker) {
         transitionTo('overlay-closed');
       }

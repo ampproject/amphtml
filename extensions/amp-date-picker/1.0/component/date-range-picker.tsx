@@ -353,6 +353,8 @@ function DateRangePickerWithRef(
       }
     };
     const handleClick = (event: MouseEvent) => {
+      // This is necessary for bento mode, since .contains does not work with
+      // elements in the shadow DOM
       const containsShadowRoot = !!(event.target as Element)?.shadowRoot;
       const clickWasInDatePicker =
         event.target === startInputEl ||
