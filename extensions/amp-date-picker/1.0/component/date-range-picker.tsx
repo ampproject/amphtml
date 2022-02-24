@@ -214,7 +214,7 @@ function DateRangePickerWithRef(
         setFocusedInput('end-input');
       }
 
-      if (isFinalSelection && mode === 'overlay') {
+      if (isFinalSelection) {
         transitionTo('overlay-closed');
       }
     },
@@ -227,7 +227,6 @@ function DateRangePickerWithRef(
       focusedInput,
       transitionTo,
       openAfterSelect,
-      mode,
     ]
   );
 
@@ -264,12 +263,14 @@ function DateRangePickerWithRef(
     ref,
     () => ({
       clear,
-      setDates: (startDate: Date, endDate: Date) =>
-        selectDateRange({from: startDate, to: endDate}),
+      setDates: (startDate: Date, endDate: Date) => {
+        handleSetStartDate(startDate);
+        handleSetEndDate(endDate);
+      },
       startToday: startDateInput.setToToday,
       endToday: endDateInput.setToToday,
     }),
-    [clear, selectDateRange, startDateInput, endDateInput]
+    [clear, startDateInput, endDateInput, handleSetStartDate, handleSetEndDate]
   );
 
   /**

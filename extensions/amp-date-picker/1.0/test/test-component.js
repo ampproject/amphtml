@@ -1,3 +1,4 @@
+import {expect} from 'chai';
 import {format} from 'date-fns';
 import {mount} from 'enzyme';
 import {RRule} from 'rrule';
@@ -409,6 +410,26 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(wrapper.find('[aria-label="Calendar"]').last().text()).to.contain(
         'February 2022'
       );
+    });
+
+    it('remains visible after the user has selected dates', () => {
+      const wrapper = mount(
+        <DatePicker
+          type="range"
+          mode="static"
+          layout="fixed-height"
+          height={360}
+          initialVisibleMonth={new Date(2022, 0)}
+        />
+      );
+
+      selectDate(wrapper, new Date(2022, 0, 1));
+      selectDate(wrapper, new Date(2022, 0, 2));
+
+      expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
+      expect(isSelectedEndDate(wrapper, new Date(2022, 0, 2))).to.be.true;
+
+      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
     });
   });
 

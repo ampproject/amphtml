@@ -21,6 +21,9 @@ export default {
       options: Object.keys(localeMap),
       control: {type: 'select'},
     },
+    initialVisibleMonth: {
+      control: {type: 'date'},
+    },
   },
   args: {
     type: 'single',
@@ -31,6 +34,8 @@ export default {
     mode: 'static',
     maximumNights: 0,
     numberOfMonths: 1,
+    openAfterClear: false,
+    openAfterSelect: false,
   },
 };
 
@@ -59,5 +64,4 @@ export const WithRangeInput = (args) => {
 
 WithRangeInput.args = {
   type: 'range',
-  mode: 'overlay',
 };
