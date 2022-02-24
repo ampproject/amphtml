@@ -14,7 +14,6 @@ const {
   esbuildCompile,
   maybeToEsmName,
   maybeToNpmEsmName,
-  mkdirSync,
   watchDebounceDelay,
 } = require('./helpers');
 const {
@@ -436,8 +435,7 @@ async function buildExtension(name, version, hasCss, options) {
   }
 
   if (hasCss) {
-    mkdirSync('build');
-    mkdirSync('build/css');
+    await fs.mkdir('build/css', {recursive: true});
     await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
@@ -681,8 +679,6 @@ async function buildNpmBinaries(extDir, name, options) {
  * @return {!Promise}
  */
 function buildBinaries(extDir, binaries, options) {
-  mkdirSync(`${extDir}/dist`);
-
   const promises = binaries.map((binary) => {
     const {babelCaller, entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
