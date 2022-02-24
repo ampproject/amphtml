@@ -59,7 +59,6 @@ function DateRangePickerWithRef(
     useState<DateFieldType>('start-input');
 
   const defaultMonth = initialVisibleMonth || today;
-  // This allow the calendar to navigate to a new month when the date changes
   const [month, setMonth] = useState<Date>(defaultMonth);
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
@@ -264,6 +263,8 @@ function DateRangePickerWithRef(
     () => ({
       clear,
       setDates: (startDate: Date, endDate: Date) => {
+        // Note: This function does not set the month or respect blocked dates
+        // to maintain feature parity with the original amp date picker.
         handleSetStartDate(startDate);
         handleSetEndDate(endDate);
       },

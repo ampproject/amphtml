@@ -64,7 +64,7 @@ function BentoDatePickerWithRef(
 
   const {onError, type} = propsWithDefaults;
 
-  const DatePicker: FunctionalComponent = useMemo(() => {
+  const DatePicker: FunctionalComponent | null = useMemo(() => {
     switch (type) {
       case 'single': {
         return SingleDatePicker;
@@ -74,15 +74,14 @@ function BentoDatePickerWithRef(
       }
       default: {
         onError('Invalid date picker type');
-        // This needs to return a default component to avoid a type error
-        return () => <></>;
+        return null;
       }
     }
   }, [type, onError]);
 
   return (
     <DatePickerContext.Provider value={propsWithDefaults}>
-      <DatePicker ref={ref} {...propsWithDefaults} />
+      {DatePicker && <DatePicker ref={ref} {...propsWithDefaults} />}
     </DatePickerContext.Provider>
   );
 }
