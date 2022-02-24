@@ -2,17 +2,19 @@ import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 
+import {user} from '#utils/log';
+
 import * as configData from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import * as AmpStoryShoppingConfig from '../amp-story-shopping-config';
 import {
   VALIDATION_OBJECTS,
   getShoppingConfig,
   storeShoppingConfig,
+  validateRequired,
 } from '../amp-story-shopping-config';
 
 describes.realWin(
@@ -267,20 +269,20 @@ describes.realWin(
         'items': [{}],
       };
 
-      const validateRequiredSpy = env.sandbox.spy(
-        AmpStoryShoppingConfig,
-        'validateRequired'
-      );
-
       await createAmpStoryShoppingConfig(null, invalidConfig);
+
+      const spy = env.sandbox.spy(user(), 'warn');
 
       for (const [key, value] of Object.entries(
         VALIDATION_OBJECTS['productValidationConfig']
       )) {
-        if (value.includes(validateRequiredSpy)) {
-          expect(() => {
-            validateRequiredSpy(key, invalidConfig['items'][0][key]);
-          }).to.throw(`Field ${key} is required.`);
+        if (value.includes(validateRequired)) {
+          const errorString = `Error: Field ${key} is required.`;
+          await createAmpStoryShoppingConfig(null, invalidConfig);
+          expect(spy).to.have.been.calledWith(
+            'AMP-STORY-SHOPPING-CONFIG',
+            errorString
+          );
         }
       }
     });
@@ -291,7 +293,7 @@ describes.realWin(
           {
             'productUrl': 'https://www.google.com',
             'productId': 'city-pop',
-            'productTitle': 123,
+            'productBrand': 'Vinyl',
             /* Not a string, will fail string type test */
             'productPrice': 19,
             'productPriceCurrency': 'JPY',
@@ -307,21 +309,12 @@ describes.realWin(
           },
         ],
       };
-
-      const validateStringSpy = env.sandbox.spy(
-        AmpStoryShoppingConfig,
-        'validateString'
-      );
-
+      const errorString = `Error: productTitle ${invalidConfig['items'][0]['productTitle']} is not a string.`;
+      const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
-
-      expect(() => {
-        validateStringSpy(
-          'productTitle',
-          invalidConfig['items'][0]['productTitle']
-        );
-      }).to.throw(
-        `productTitle ${invalidConfig['items'][0]['productTitle']} is not a string.`
+      expect(spy).to.have.been.calledWith(
+        'AMP-STORY-SHOPPING-CONFIG',
+        errorString
       );
     });
 
@@ -331,6 +324,7 @@ describes.realWin(
           {
             'productUrl': 'https://www.google.com',
             'productId': 'city-pop',
+            'productBrand': 'Vinyl',
             'productTitle': 'Adventure',
             'productPrice': 'two dozen watermelons',
             /* Not an actual price */
@@ -348,33 +342,27 @@ describes.realWin(
         ],
       };
 
-      const validateNumberSpy = env.sandbox.spy(
-        AmpStoryShoppingConfig,
-        'validateNumber'
-      );
-
+      const errorString = `Error: Value ${invalidConfig['items'][0]['productPrice']} for field productPrice is not a number`;
+      const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
-
-      expect(() => {
-        validateNumberSpy(
-          'productPrice',
-          invalidConfig['items'][0]['productPrice']
-        );
-      }).to.throw(
-        `Value ${invalidConfig['items'][0]['productPrice']} for field productPrice is not a number`
+      expect(spy).to.have.been.calledWith(
+        'AMP-STORY-SHOPPING-CONFIG',
+        errorString
       );
     });
 
     it('test config invalid url array', async () => {
+      expectAsyncConsoleError(errorString, 1);
       const invalidConfig = {
         'items': [
           {
             'productUrl': 'https://www.google.com',
             'productId': 'city-pop',
             'productTitle': 'Adventure',
+            'productBrand': 'Vinyl',
             'productPrice': 19,
             'productPriceCurrency': 'JPY',
-            'productImages': ['http://pizazz', 'http://zapp'],
+            'productImages': ['http://zapp'],
             'aggregateRating': {
               'ratingValue': 4.4,
               'reviewCount': 89,
@@ -383,22 +371,12 @@ describes.realWin(
           },
         ],
       };
-
-      const validateURLsSpy = env.sandbox.spy(
-        AmpStoryShoppingConfig,
-        'validateURLs'
-      );
-
+      const errorString = `Error: amp-story-shopping-config productImages source must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${invalidConfig['items'][0]['productImages'][0]}`;
+      const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
-
-      expect(() => {
-        validateURLsSpy(
-          'productImages',
-          invalidConfig['items'][0]['productImages']
-        );
-      }).to.throw(
-        'amp-story-shopping-config productImages source must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ' +
-          invalidConfig['items'][0]['productImages'][0]
+      expect(spy).to.have.been.calledWith(
+        'AMP-STORY-SHOPPING-CONFIG',
+        errorString
       );
     });
   }
