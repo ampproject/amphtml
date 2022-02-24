@@ -41,8 +41,8 @@ describes.realWin(
             {'url': 'https://source.unsplash.com/3LTht2nxd34', 'alt': 'lamp 6'},
           ],
           'aggregateRating': {
-            'ratingValue': '4.4',
-            'reviewCount': '89',
+            'ratingValue': 4.4,
+            'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
         },
@@ -60,8 +60,8 @@ describes.realWin(
             },
           ],
           'aggregateRating': {
-            'ratingValue': '4.4',
-            'reviewCount': '89',
+            'ratingValue': 4.4,
+            'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
         },
@@ -80,8 +80,8 @@ describes.realWin(
             },
           ],
           'aggregateRating': {
-            'ratingValue': '4.4',
-            'reviewCount': '89',
+            'ratingValue': 4.4,
+            'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
         },
@@ -101,8 +101,8 @@ describes.realWin(
             },
           ],
           'aggregateRating': {
-            'ratingValue': '4.4',
-            'reviewCount': '89',
+            'ratingValue': 4.4,
+            'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
         },
@@ -175,8 +175,8 @@ describes.realWin(
               },
             ],
             'aggregateRating': {
-              'ratingValue': '4.4',
-              'reviewCount': '89',
+              'ratingValue': 4.4,
+              'reviewCount': 89,
               'reviewUrl': 'https://www.google.com',
             },
           },
@@ -210,15 +210,13 @@ describes.realWin(
 
       beforeEach(async () => {
         storeService = {dispatch: env.sandbox.spy()};
-        env.sandbox
-          .stub(Services, 'storyStoreServiceForOrNull')
-          .resolves(storeService);
+        env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
       });
 
       it('dispatches ADD_SHOPPING_DATA', async () => {
         const dummyConfig = {foo: {bar: true}};
 
-        await storeShoppingConfig(pageElement, dummyConfig);
+        storeShoppingConfig(pageElement, dummyConfig);
 
         const pageIdToConfig = {[pageElement.id]: dummyConfig};
         expect(

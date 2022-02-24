@@ -16,7 +16,22 @@ const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
 
 const packageName = getNameWithoutComponentPrefix(extension);
-const dir = `extensions/${extension}/${extensionVersion}`;
+
+/**
+ * Gets the directory of the component or extension.
+ * @return {string}
+ */
+function getDir() {
+  return extension.startsWith('bento')
+    ? `src/bento/components/${extension}/${extensionVersion}`
+    : `extensions/${extension}/${extensionVersion}`;
+}
+
+/**
+ * The directory of the component or extension.
+ * @type {string}
+ */
+const dir = getDir();
 
 /**
  * Determines whether to skip

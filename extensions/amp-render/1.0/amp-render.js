@@ -9,19 +9,12 @@ import {Services} from '#service';
 import {dev, user, userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
+import {FetchJsonUtil, isAmpStateSrc} from './shared/amp-fetch-utils';
 
-import {
-  BatchFetchOptionsDef,
-  UrlReplacementPolicy_Enum,
-  batchFetchJsonFor,
-} from '../../../src/batched-json';
-import {getSourceOrigin, isAmpScriptUri} from '../../../src/url';
+import {isAmpScriptUri} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-render';
-
-/** @const {string} */
-const AMP_STATE_URI_SCHEME = 'amp-state:';
 
 /** @enum {string}  */
 const Binding = {
@@ -30,44 +23,6 @@ const Binding = {
   NEVER: 'never',
   NO: 'no',
 };
-
-/**
- * Returns true if element's src points to amp-state.
- * @param {?string} src
- * @return {boolean}
- */
-const isAmpStateSrc = (src) => src && src.startsWith(AMP_STATE_URI_SCHEME);
-
-/**
- * Gets the json from an "amp-state:" uri. For example, src="amp-state:json.path".
- * TODO: this is similar to the implementation in amp-list. Move it
- * to a common file and import it.
- * @param {!AmpElement} element
- * @param {string} src
- * @return {Promise<!JsonObject>}
- */
-function getAmpStateJson(element, src) {
-  return Services.bindForDocOrNull(element)
-    .then((bind) => {
-      userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
-      const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-      return bind.getStateAsync(ampStatePath).catch((err) => {
-        const stateKey = ampStatePath.split('.')[0];
-        user().error(
-          TAG,
-          `'amp-state' element with id '${stateKey}' was not found.`
-        );
-        throw err;
-      });
-    })
-    .then((json) => {
-      userAssert(
-        json !== undefined,
-        `[amp-render] No data was found at provided uri: ${src}`
-      );
-      return json;
-    });
-}
 
 /**
  * @param {string} bindingValue
@@ -103,7 +58,7 @@ function getTemplateNonEmptyNodeCount(doc, template) {
     const div = doc.createElement('div');
     div./*OK*/ innerHTML = template./*OK*/ innerHTML;
     childNodes = div.childNodes;
-  } else if (template.tagName == 'TEMPLATE') {
+  } else if (template.tagName === 'TEMPLATE') {
     childNodes = template.content.childNodes;
   }
   return toArray(childNodes).reduce(
@@ -131,77 +86,6 @@ export class AmpRender extends setSuperClass(
 
     /** @private {?Element} */
     this.template_ = null;
-
-    /** @private {?string} */
-    this.initialSrc_ = null;
-
-    /** @private {?string} */
-    this.src_ = null;
-  }
-
-  /**
-   * @return {!UrlReplacementPolicy_Enum}
-   * @private
-   */
-  getPolicy_() {
-    const src = this.element.getAttribute('src');
-    // Require opt-in for URL variable replacements on CORS fetches triggered
-    // by [src] mutation. @see spec/amp-var-substitutions.md
-    // TODO(dmanek): Update spec/amp-var-substitutions.md with this information
-    // and add a `Substitution` sections in this component's markdown file.
-    let policy = UrlReplacementPolicy_Enum.OPT_IN;
-    if (
-      src == this.initialSrc_ ||
-      getSourceOrigin(src) == getSourceOrigin(this.getAmpDoc().win.location)
-    ) {
-      policy = UrlReplacementPolicy_Enum.ALL;
-    }
-    return policy;
-  }
-
-  /**
-   * @param {boolean} shouldRefresh true to force refresh of browser cache.
-   * @return {!BatchFetchOptionsDef} options object to pass to `batchFetchJsonFor` method.
-   * @private
-   */
-  buildOptionsObject_(shouldRefresh = false) {
-    return {
-      xssiPrefix: this.element.getAttribute('xssi-prefix'),
-      expr: this.element.getAttribute('key') ?? '.',
-      refresh: shouldRefresh,
-      urlReplacement: this.getPolicy_(),
-    };
-  }
-
-  /**
-   * Returns a function to fetch json from remote url, amp-state or
-   * amp-script.
-   *
-   * @return {Function}
-   */
-  getFetchJsonFn() {
-    const {element} = this;
-    const src = element.getAttribute('src');
-    if (!src) {
-      // TODO(dmanek): assert that src is provided instead of silently failing below.
-      return () => {};
-    }
-    if (isAmpStateSrc(src)) {
-      return (src) => getAmpStateJson(element, src);
-    }
-    if (isAmpScriptUri(src)) {
-      return (src) =>
-        Services.scriptForDocOrNull(element).then((ampScriptService) => {
-          userAssert(ampScriptService, 'AMP-SCRIPT is not installed');
-          return ampScriptService.fetch(src);
-        });
-    }
-    return (unusedSrc, shouldRefresh = false) =>
-      batchFetchJsonFor(
-        element.getAmpDoc(),
-        element,
-        this.buildOptionsObject_(shouldRefresh)
-      );
   }
 
   /** @override */
@@ -254,8 +138,8 @@ export class AmpRender extends setSuperClass(
 
   /** @override */
   init() {
-    this.initialSrc_ = this.element.getAttribute('src');
-    this.src_ = this.initialSrc_;
+    this.src_ = this.element.getAttribute('src');
+    this.fetchUtil_ = new FetchJsonUtil(TAG, this.element, this.src_);
 
     const hasAriaLive = this.element.hasAttribute('aria-live');
     if (!hasAriaLive) {
@@ -282,7 +166,7 @@ export class AmpRender extends setSuperClass(
       'ariaLiveValue': hasAriaLive
         ? this.element.getAttribute('aria-live')
         : 'polite',
-      'getJson': this.getFetchJsonFn(),
+      'getJson': this.fetchUtil_.getFetchJsonCallback(),
     };
   }
 
@@ -333,7 +217,7 @@ export class AmpRender extends setSuperClass(
       return;
     }
     this.src_ = src;
-    this.mutateProps({'getJson': this.getFetchJsonFn()});
+    this.mutateProps({'getJson': this.fetchUtil_.getFetchJsonCallback()});
   }
 
   /**
@@ -366,7 +250,7 @@ export class AmpRender extends setSuperClass(
 
     // Only overwrite `render` when template is ready to minimize FOUC.
     templates.whenReady(template).then(() => {
-      if (template != this.template_) {
+      if (template !== this.template_) {
         // A new template has been set while the old one was initializing.
         return;
       }
