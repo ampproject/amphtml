@@ -445,8 +445,7 @@ export class AmpGeo extends AMP.BaseElement {
         // Otherwise we add the country to the list
         if (
           country == VALUE_UNKNOWN ||
-          /^[a-zA-Z]{2}$/.test(country) ||
-          /^[a-zA-Z]{2}-[0-9a-zA-Z]{1,3}$/.test(country)
+          /^[a-zA-Z]{2}(?:-[0-9a-zA-Z]{1,3})?$/.test(country)
         ) {
           countries.push(country);
         } else {
