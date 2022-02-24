@@ -36,6 +36,7 @@
     "react-jss": "10.8.2",
     "resize-observer-polyfill": "1.5.1",
     "rrule": "2.6.8",
+    "task-runner-js": "2.1.4",
     "timeago.js": "4.0.2",
     "web-activities": "1.24.0",
     "web-animations-js": "2.3.2"
