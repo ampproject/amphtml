@@ -8,7 +8,8 @@ export default {
   argTypes: {
     dateTime: {
       name: 'Date/time',
-      control: {type: 'date'},
+      defaultValue: '2017-08-02T15:05:05.000',
+      control: {type: 'text'},
     },
     displayIn: {
       name: 'Display in',
@@ -28,27 +29,24 @@ export default {
 export const Default = ({dateTime, displayIn, locale, ...args}) => {
   return (
     <BentoDateDisplay
-      {...args}
       dateTime={dateTime}
       displayIn={displayIn}
       locale={locale}
       render={(date) => (
         <div>{`ISO: ${date.iso}; locale: ${date.localeString}`}</div>
       )}
+      {...args}
     />
   );
 };
 
-Default.storyName = 'default';
-
-export const DefaultRenderer = ({dateTime, displayIn, locale}) => {
+export const DefaultRenderer = ({dateTime, displayIn, locale, ...args}) => {
   return (
     <BentoDateDisplay
       datetime={dateTime}
       displayIn={displayIn}
       locale={locale}
+      {...args}
     />
   );
 };
-
-DefaultRenderer.storyName = 'default renderer';
