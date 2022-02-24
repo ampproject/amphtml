@@ -27,6 +27,17 @@ function getComponents() {
 }
 
 /**
+ *
+ * @return {{name: string, version: string}}
+ */
+function getCore() {
+  return {
+    'name': 'core',
+    'version': '0.1',
+  };
+}
+
+/**
  * Get bento components and extensions to be published on npm
  * @return {Array<any>}
  */
@@ -53,4 +64,5 @@ module.exports = {
   getExtensions,
   getExtensionsAndComponents,
   getSemver,
+  getCore,
 };

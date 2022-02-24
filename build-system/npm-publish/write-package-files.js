@@ -14,6 +14,10 @@ const {getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
+const {
+  name: corePkgName,
+  version: corePkgVersion,
+} = require('../../src/bento/core/package.json');
 
 const packageName = getNameWithoutComponentPrefix(extension);
 
@@ -124,14 +128,16 @@ async function getDescription() {
  */
 async function writePackageJson({useBentoCore}) {
   const version = getSemver(extensionVersion, ampVersion);
-  if (!valid(version) || ampVersion.length != 13) {
+  if (ampVersion.length != 13 || !valid(version) || !valid(corePkgVersion)) {
     log(
       'Invalid semver version',
       version,
       'or AMP version',
       ampVersion,
       'or extension version',
-      extensionVersion
+      extensionVersion,
+      'or core package version',
+      corePkgVersion
     );
     process.exitCode = 1;
     return;
@@ -182,7 +188,8 @@ async function writePackageJson({useBentoCore}) {
     },
   };
   if (useBentoCore) {
-    json.dependencies = {'@bentoproject/core': `tbd`};
+    json.dependencies = json.dependencies || {};
+    json.dependencies[corePkgName] = corePkgVersion;
   }
 
   try {

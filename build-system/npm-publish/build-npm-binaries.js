@@ -3,12 +3,17 @@
  * Builds npm binaries for specified Bento components.
  */
 
-const [extension] = process.argv.slice(2);
+const [extensionOrCore] = process.argv.slice(2);
 const {timedExecOrDie} = require('../pr-check/utils');
 const {updatePackages} = require('../common/update-packages');
 
+const shouldBuildCore = !extensionOrCore || extensionOrCore === 'core';
+const ampExtensionsOption = shouldBuildCore
+  ? '--noextensions'
+  : `--extensions=${extensionOrCore}`;
+
 updatePackages();
-timedExecOrDie(`amp build --extensions=${extension} --core_runtime_only`);
-timedExecOrDie(`amp build --extensions=${extension} --core_runtime_only --esm`);
-timedExecOrDie(`amp dist --extensions=${extension} --core_runtime_only`);
-timedExecOrDie(`amp dist --extensions=${extension} --core_runtime_only --esm`);
+timedExecOrDie(`amp build ${ampExtensionsOption} --bento_runtime_only`);
+timedExecOrDie(`amp build ${ampExtensionsOption} --bento_runtime_only --esm`);
+timedExecOrDie(`amp dist ${ampExtensionsOption} --bento_runtime_only`);
+timedExecOrDie(`amp dist ${ampExtensionsOption} --bento_runtime_only --esm`);
