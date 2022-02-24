@@ -111,7 +111,7 @@ Alternatively, you may also make the light-weight pre-upgrade styles available i
 
 ```html
 <style>
-  bento-facebook {
+  bento-reddit{
     display: block;
     overflow: hidden;
     position: relative;
