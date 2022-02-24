@@ -1200,7 +1200,9 @@ describes.realWin(
       });
 
       describe('amp-story-subscriptions navigation', () => {
-        it('should continue navigating to locked pages after the subscription state gets resolved to granted', async () => {
+        let subscriptionsEl;
+
+        beforeEach(async () => {
           toggleExperiment(win, 'amp-story-subscriptions', true);
 
           await createStoryWithPages(4, [
@@ -1209,7 +1211,7 @@ describes.realWin(
             'page-2',
             'page-3',
           ]);
-          const subscriptionsEl = win.document.createElement(
+          subscriptionsEl = win.document.createElement(
             'amp-story-subscriptions'
           );
           story.element.appendChild(subscriptionsEl);
@@ -1217,10 +1219,9 @@ describes.realWin(
           // buildCallback() could be omitted as long as createStoryWithPages()
           // is called because the getImpl() call inside it.
           await story.layoutCallback();
-          expect(
-            story.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE)
-          ).to.equal(SubscriptionsState.UNKNOWN);
+        });
 
+        it('should continue navigating to locked pages after the subscription state gets resolved to granted', async () => {
           // Block access with pending subscriptions state.
           await story.switchTo_('page-1');
           story.switchTo_('page-2');
@@ -1239,24 +1240,6 @@ describes.realWin(
         });
 
         it('should block and switch dialog UI state after the subscription state gets resolved to blocked', async () => {
-          toggleExperiment(win, 'amp-story-subscriptions', true);
-
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-          const subscriptionsEl = win.document.createElement(
-            'amp-story-subscriptions'
-          );
-          story.element.appendChild(subscriptionsEl);
-
-          await story.layoutCallback();
-          expect(
-            story.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE)
-          ).to.equal(SubscriptionsState.UNKNOWN);
-
           // Block access with pending subscriptions state.
           await story.switchTo_('page-1');
           story.switchTo_('page-2');
@@ -1285,20 +1268,6 @@ describes.realWin(
         });
 
         it('should be able to navigate to next locked page once status becomes granted', async () => {
-          toggleExperiment(win, 'amp-story-subscriptions', true);
-
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-          const subscriptionsEl = win.document.createElement(
-            'amp-story-subscriptions'
-          );
-          story.element.appendChild(subscriptionsEl);
-
-          await story.layoutCallback();
           story.storeService_.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1329,21 +1298,6 @@ describes.realWin(
         });
 
         it('tapping left should hide the paywall and go to the previous page', async () => {
-          toggleExperiment(win, 'amp-story-subscriptions', true);
-
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-          const subscriptionsEl = win.document.createElement(
-            'amp-story-subscriptions'
-          );
-          story.element.appendChild(subscriptionsEl);
-
-          await story.layoutCallback();
-          expect(story.activePage_.element.id).to.equal('cover');
           story.storeService_.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1374,24 +1328,6 @@ describes.realWin(
         });
 
         it('tapping right while blocking on entitlement should not make another attempt to navigate', async () => {
-          toggleExperiment(win, 'amp-story-subscriptions', true);
-
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-          const subscriptionsEl = win.document.createElement(
-            'amp-story-subscriptions'
-          );
-          story.element.appendChild(subscriptionsEl);
-
-          await story.layoutCallback();
-          expect(
-            story.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE)
-          ).to.equal(SubscriptionsState.UNKNOWN);
-
           // Block access with pending subscriptions state.
           await story.switchTo_('page-1');
           story.switchTo_('page-2');
