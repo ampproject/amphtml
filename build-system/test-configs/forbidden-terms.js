@@ -722,11 +722,7 @@ const forbiddenTermsGlobal = {
       'The @storybook/addon-knobs package has been deprecated. Use Controls instead (`args` and `argTypes`). https://storybook.js.org/docs/react/essentials/controls',
     allowlist: [
       // TODO(#35923): Update existing files to use Controls instead.
-      'extensions/amp-inline-gallery/1.0/storybook/Basic.js',
-      'extensions/amp-lightbox/1.0/storybook/Basic.amp.js',
       'extensions/amp-lightbox/1.0/storybook/Basic.js',
-      'extensions/amp-lightbox-gallery/1.0/storybook/Basic.amp.js',
-      'extensions/amp-lightbox-gallery/1.0/storybook/Basic.js',
       'extensions/amp-selector/1.0/storybook/Basic.amp.js',
       'extensions/amp-selector/1.0/storybook/Basic.js',
       'extensions/amp-sidebar/0.1/storybook/Basic.amp.js',
@@ -734,8 +730,6 @@ const forbiddenTermsGlobal = {
       'extensions/amp-sidebar/1.0/storybook/Basic.js',
       'extensions/amp-soundcloud/1.0/storybook/Basic.amp.js',
       'extensions/amp-soundcloud/1.0/storybook/Basic.js',
-      'extensions/amp-stream-gallery/1.0/storybook/Basic.amp.js',
-      'extensions/amp-stream-gallery/1.0/storybook/Basic.js',
       'extensions/amp-timeago/1.0/storybook/Basic.js',
       'extensions/amp-video/1.0/storybook/Basic.amp.js',
       'extensions/amp-video/1.0/storybook/Basic.js',
