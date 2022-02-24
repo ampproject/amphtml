@@ -88,11 +88,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     }
 
     loadFonts(this.win, FONTS_TO_LOAD);
-    this.storeService_.subscribe(
-      StateProperty.SHOPPING_DATA,
-      (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
-      true /** callToInitialize */
-    );
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
@@ -270,18 +265,18 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
   /**
    * @param {!ShoppingDataDef} shoppingData
-   * @private
    */
-  createAndAppendInnerShoppingTagEl_(shoppingData) {
-    const pageElement = closestAncestorElementBySelector(
-      this.element,
-      'amp-story-page'
-    );
+  createAndAppendInnerShoppingTagEl(shoppingData) {
+    //const pageElement = closestAncestorElementBySelector(
+    //  this.element,
+    //  'amp-story-page'
+    //);
 
-    this.tagData_ =
-      shoppingData[pageElement.id][
-        this.element.getAttribute('data-product-id')
-      ];
+    //console.log('shoppingData', shoppingData);
+    //console.log(this.element.getAttribute('data-product-id'));
+    //console.log('pageElement', pageElement.id);
+
+    this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }

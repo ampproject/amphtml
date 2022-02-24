@@ -65,9 +65,16 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
 
-    getShoppingConfig(this.element).then((config) =>
-      storeShoppingConfig(this.pageEl_, config)
-    );
+    getShoppingConfig(this.element).then((config) => {
+      const keyedShoppingConfig = storeShoppingConfig(this.pageEl_, config);
+      this.shoppingTags_.forEach((shoppingTag) => {
+        shoppingTag.getImpl().then((shoppingTagImpl) => {
+          shoppingTagImpl.createAndAppendInnerShoppingTagEl(
+            keyedShoppingConfig
+          );
+        });
+      });
+    });
 
     if (this.shoppingTags_.length === 0) {
       return;
