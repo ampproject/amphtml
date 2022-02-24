@@ -18,7 +18,7 @@ import {Slot, createSlot} from './slot';
  * The following combinations are allowed.
  * - `attr`, (optionally) `type`, and (optionally) `media` can be specified when
  *   an attribute maps to a component prop 1:1.
- * - `parseAttr` can be specified to parse the `attr` value bfore passing it
+ * - `parseAttr` can be specified to parse the `attr` value before passing it
  *   into the component.
  * - `attrs` and `parseAttrs` can be specified when multiple attributes map
  *   to a single prop.
