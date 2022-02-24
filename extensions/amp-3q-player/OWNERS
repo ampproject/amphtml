@@ -6,5 +6,10 @@
     {
       owners: [{name: 'aywar2000'}, {name: 'ampproject/wg-components'}], 
     },
+
+    {
+      pattern: "package.json",
+      owners: [{ name: "aywar2000" }],
+    },
   ],
 }
