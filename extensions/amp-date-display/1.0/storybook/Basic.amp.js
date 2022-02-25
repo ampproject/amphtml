@@ -15,8 +15,8 @@ export default {
   argTypes: {
     dateTime: {
       name: 'Date/time',
-      defaultValue: '2017-08-02T15:05:05.000',
-      control: {type: 'text'},
+      control: {type: 'date'},
+      defaultValue: 1234567890000,
     },
     displayIn: {
       name: 'Display in',
@@ -40,6 +40,7 @@ export default {
 };
 
 export const Default = ({dateTime, displayIn, locale, ...args}) => {
+  dateTime = new Date(dateTime);
   return (
     <amp-date-display
       datetime={dateTime}
@@ -61,6 +62,7 @@ export const Default = ({dateTime, displayIn, locale, ...args}) => {
 };
 
 export const DefaultRenderer = ({dateTime, displayIn, locale, ...args}) => {
+  dateTime = new Date(dateTime);
   return (
     <amp-date-display
       datetime={dateTime}
@@ -81,6 +83,7 @@ export const ExternalTemplate = ({
   template,
   ...args
 }) => {
+  dateTime = new Date(dateTime);
   return (
     <div>
       <template type="amp-mustache" id="template1">
