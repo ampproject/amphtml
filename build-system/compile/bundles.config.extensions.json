@@ -205,6 +205,14 @@
     }
   },
   {
+    "name": "amp-autocomplete",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-base-carousel",
     "version": "0.1",
     "latestVersion": "0.1",
