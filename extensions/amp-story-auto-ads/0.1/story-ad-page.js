@@ -312,8 +312,6 @@ export class StoryAdPage {
       'i-amphtml-loading': '',
       'id': this.id_,
     };
-    
-    attributes['auto-advance-after'] = '10s';
 
     const page = createElementWithAttributes(
       this.doc_,
@@ -404,6 +402,7 @@ export class StoryAdPage {
     // TODO(ccordry): do we still need this? Its a pain to always stub in tests.
     this.pageElement_.getImpl().then((impl) => impl.delegateVideoAutoplay());
 
+    this.pageElement_.getImpl().then((impl) => impl.setAutoAdvance_('10s'));
     // Remove loading attribute once loaded so that desktop CSS will position
     // offscren with all other pages.
     this.pageElement_.removeAttribute(PageAttributes.LOADING);

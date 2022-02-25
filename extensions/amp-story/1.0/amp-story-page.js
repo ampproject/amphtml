@@ -365,6 +365,20 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.element.setAttribute('auto-advance-after', duration + 's');
   }
 
+  setAutoAdvance_(autoAdvanceStr) {
+    this.advancement_.stop()
+
+    this.element.setAttribute('auto-advance-after', autoAdvanceStr);
+    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    this.advancement_.addPreviousListener(() => this.previous());
+    this.advancement_.addAdvanceListener(() =>
+      this.next(/* opt_isAutomaticAdvance */ true)
+    );
+    this.advancement_.addProgressListener((progress) =>
+      this.emitProgress_(progress)
+    );
+  }
+
   /**
    * Returns the first amp-video in the amp-story-page if there is one, otherwise
    * returns null.
