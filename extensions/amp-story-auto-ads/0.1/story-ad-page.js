@@ -389,10 +389,6 @@ export class StoryAdPage {
 
     const videoAdEl = this.adDoc_.querySelector('amp-video');
     if (videoAdEl) {
-      console.log({ el: videoAdEl});
-      if (!videoAdEl.id) {
-        videoAdEl.id = 'video-ad';
-      }
       videoAdEl.getImpl()
         .then(videoImpl => this.pageElement_.getImpl()
           .then((impl) => 
