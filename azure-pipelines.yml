@@ -1,0 +1,70 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- main
+
+strategy:
+  matrix:
+    prod:
+      env: 'production'
+      cdnUrl: 'https://web.usestoryteller.com/amp'
+    staging:
+      env: 'staging'
+      cdnUrl: 'https://storytellerstaging.azureedge.net/amp'
+    dev:
+      env: 'dev'
+      cdnUrl: 'https://storytellerdev.azureedge.net/amp'
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      $json = '{
+       "cdnUrl": "$(cdnUrl)"
+      }'
+        
+      $json | Out-File custom-config.json
+    workingDirectory: '$(Build.SourcesDirectory)/build-system/global-configs/'
+    pwsh: true
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      $json = '[
+        {
+          "flavorType": "custom_release",
+          "name": "Custom Release",
+          "environment": "AMP",
+          "rtvPrefixes": [ "01" ],
+          "command": "amp dist --noconfig"
+        }
+      ]'
+        
+      $json | Out-File custom-flavors-config.json
+    workingDirectory: '$(Build.SourcesDirectory)/build-system/global-configs/'
+    pwsh: true
+- task: NodeTool@0
+  inputs:
+    versionSpec: '16.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm ci
+  displayName: 'npm install'
+
+- script: |
+    amp release --flavor=custom_release --dedup_v0 --output_dir=$(Build.ArtifactStagingDirectory)/$(env)/
+  displayName: 'build release'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
