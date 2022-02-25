@@ -6,10 +6,10 @@ export default {
   title: 'DateDisplay',
   component: BentoDateDisplay,
   argTypes: {
-    dateTime: {
+    datetime: {
       name: 'Date/time',
-      defaultValue: '2017-08-02T15:05:05.000',
-      control: {type: 'text'},
+      control: {type: 'date'},
+      defaultValue: 1234567890000
     },
     displayIn: {
       name: 'Display in',
@@ -26,10 +26,10 @@ export default {
   },
 };
 
-export const Default = ({dateTime, displayIn, locale, ...args}) => {
+export const Default = ({datetime, displayIn, locale, ...args}) => {
   return (
     <BentoDateDisplay
-      dateTime={dateTime}
+      datetime={datetime}
       displayIn={displayIn}
       locale={locale}
       render={(date) => (
@@ -40,10 +40,10 @@ export const Default = ({dateTime, displayIn, locale, ...args}) => {
   );
 };
 
-export const DefaultRenderer = ({dateTime, displayIn, locale, ...args}) => {
+export const DefaultRenderer = ({datetime, displayIn, locale, ...args}) => {
   return (
     <BentoDateDisplay
-      datetime={dateTime}
+      datetime={datetime}
       displayIn={displayIn}
       locale={locale}
       {...args}
