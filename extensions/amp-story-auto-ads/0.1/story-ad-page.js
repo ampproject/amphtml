@@ -312,10 +312,8 @@ export class StoryAdPage {
       'i-amphtml-loading': '',
       'id': this.id_,
     };
-
-    if (isExperimentOn(this.win_, 'story-ad-auto-advance')) {
-      attributes['auto-advance-after'] = '10s';
-    }
+    
+    attributes['auto-advance-after'] = '10s';
 
     const page = createElementWithAttributes(
       this.doc_,

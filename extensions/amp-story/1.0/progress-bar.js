@@ -419,9 +419,6 @@ export class ProgressBar {
    * TODO(#33969) clean up experiment is launched.
    */
   onAdStateUpdate_(adState) {
-    if (!isExperimentOn(this.win_, 'story-ad-auto-advance')) {
-      return;
-    }
     // Set CSS signal that we are in the experiment.
     // TODO(#33969) Unneeded when we actually launch.
     if (!this.root_.hasAttribute('i-amphtml-ad-progress-exp')) {

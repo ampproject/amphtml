@@ -309,10 +309,6 @@ export function createCta(doc, buttonFitter, container, uiMetadata) {
       return null;
     }
 
-    if (isExperimentOn(doc.defaultView, 'story-ad-auto-advance')) {
-      return createPageOutlink_(doc, uiMetadata, container);
-    } else {
-      return createCtaLayer_(a, doc, container);
-    }
+    return createPageOutlink_(doc, uiMetadata, container);
   });
 }
