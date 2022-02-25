@@ -1448,7 +1448,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService,
         'selectAndActivatePlatform_'
       );
-      await subscriptionService.initialize_();
       await subscriptionService.maybeRenderDialogForSelectedPlatform();
       expect(selectAndActivatePlatformStub).to.be.calledOnce;
     });
@@ -1463,7 +1462,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService,
         'selectAndActivatePlatform_'
       );
-      await subscriptionService.initialize_();
       await subscriptionService.maybeRenderDialogForSelectedPlatform();
       expect(selectAndActivatePlatformStub).not.to.be.called;
     });
@@ -1478,7 +1476,6 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
         subscriptionService,
         'selectAndActivatePlatform_'
       );
-      await subscriptionService.initialize_();
       await subscriptionService.maybeRenderDialogForSelectedPlatform();
       expect(selectAndActivatePlatformStub).not.to.be.called;
     });
