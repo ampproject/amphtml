@@ -379,6 +379,14 @@ export class StoryAdPage {
   }
 
   setAutoAdvance_() {
+    const autoAdvancedMetaTag = document.querySelector('meta[name="auto-advance-after"]');
+    if (autoAdvancedMetaTag) {
+      const autoAdvanceValue = autoAdvancedMetaTag.content;
+      this.pageElement_.getImpl().then((impl) => impl.setAutoAdvance_(autoAdvanceValue));
+      
+      return;
+    }
+
     const videoAdEl = this.adDoc_.querySelector('amp-video');
     if (videoAdEl) {
       console.log({ el: videoAdEl});

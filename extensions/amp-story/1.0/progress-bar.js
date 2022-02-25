@@ -443,7 +443,6 @@ export class ProgressBar {
    * Create ad progress segment that will be shown when ad is visible.
    */
   createAdSegment_(animationDuration) {
-    console.log(animationDuration);
     const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
     // Fill in segment before ad segment.
     this.updateProgressByIndex_(index, 1, false);
