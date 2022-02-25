@@ -388,7 +388,7 @@ export class StoryAdPage {
     }
 
     const videoAdEl = this.adDoc_.querySelector('amp-video');
-    if (videoAdEl) {
+    if (videoAdEl && !videoAdEl.hasAttribute('loop')) {
       videoAdEl.getImpl()
         .then(videoImpl => this.pageElement_.getImpl()
           .then((impl) => 
