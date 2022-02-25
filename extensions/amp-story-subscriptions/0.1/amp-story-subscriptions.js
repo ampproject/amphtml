@@ -12,6 +12,7 @@ import {
   StateProperty,
   SubscriptionsState,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {AmpStoryViewerMessagingHandler} from '../../amp-story/1.0/amp-story-viewer-messaging-handler';
 import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
 const TAG = 'amp-story-subscriptions';
@@ -56,11 +57,21 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.dialogEl_ = null;
+
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
+
+    /** @private {?AmpStoryViewerMessagingHandler} */
+    this.viewerMessagingHandler_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.loadFonts_();
+    this.viewer_ = Services.viewerForDoc(this.element);
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
+      : null;
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
@@ -190,6 +201,45 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       (subscriptionsState) =>
         this.onSubscriptionsStateChange_(subscriptionsState)
     );
+
+    if (this.viewer_.isEmbedded()) {
+      const bannerEl = dev().assertElement(
+        this.dialogEl_.querySelector('.i-amphtml-story-subscriptions-banner')
+      );
+      bannerEl.appendChild(
+        <div class="i-amphtml-story-subscriptions-banner-button">
+          Next Story
+        </div>
+      );
+
+      const ampSubscriptionsEl =
+        this.element.parentElement.parentElement.querySelector(
+          'amp-subscriptions-dialog'
+        );
+      ampSubscriptionsEl.addEventListener('click', (event) =>
+        this.onNextStoryButtonClick_(event)
+      );
+    }
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  onNextStoryButtonClick_(event) {
+    if (
+      event.target.classList.contains(
+        'i-amphtml-story-subscriptions-banner-button'
+      )
+    ) {
+      const advancementMode = this.storeService_.get(
+        StateProperty.ADVANCEMENT_MODE
+      );
+      this.viewerMessagingHandler_.send('selectDocument', {
+        'next': true,
+        'advancementMode': advancementMode,
+      });
+    }
   }
 
   /**
