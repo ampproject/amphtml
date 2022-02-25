@@ -1,6 +1,3 @@
-import '../amp-story-subscriptions';
-import {expect} from 'chai';
-
 import * as Preact from '#core/dom/jsx';
 
 import {toggleExperiment} from '#experiments';
@@ -26,7 +23,7 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story:1.0', 'amp-story-subscriptions:0.1'],
+      extensions: ['amp-story-subscriptions:0.1'],
     },
   },
   (env) => {
