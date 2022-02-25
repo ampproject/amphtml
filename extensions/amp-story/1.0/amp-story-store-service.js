@@ -467,7 +467,6 @@ const actions = (state, action, data) => {
         [StateProperty.PAUSED_STATE]: !!data,
       });
     case Action.TOGGLE_SUBSCRIPTIONS_STATE:
-      console.log('receive toggle state: ' + data);
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.SUBSCRIPTIONS_STATE]: data,
