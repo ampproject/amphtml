@@ -379,7 +379,7 @@ export class StoryAdPage {
   }
 
   setAutoAdvance_() {
-    const autoAdvancedMetaTag = document.querySelector('meta[name="auto-advance-after"]');
+    const autoAdvancedMetaTag = this.adDoc_.querySelector('meta[name="auto-advance-after"]');
     if (autoAdvancedMetaTag) {
       const autoAdvanceValue = autoAdvancedMetaTag.content;
       this.pageElement_.getImpl().then((impl) => impl.setAutoAdvance_(autoAdvanceValue));
