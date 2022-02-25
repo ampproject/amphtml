@@ -30,7 +30,7 @@ import {
   maybeCreateAttribution,
   validateCtaMetadata,
 } from './story-ad-ui';
-import {getFrameDoc, localizeCtaText} from './utils';
+import {getFrameDoc, getUniqueId, localizeCtaText} from './utils';
 
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
@@ -378,6 +378,22 @@ export class StoryAdPage {
     });
   }
 
+  setAutoAdvance_() {
+    const videoAdEl = this.adDoc_.querySelector('amp-video');
+    if (videoAdEl) {
+      console.log({ el: videoAdEl});
+      if (!videoAdEl.id) {
+        videoAdEl.id = 'video-ad';
+      }
+      videoAdEl.getImpl()
+        .then(videoImpl => this.pageElement_.getImpl()
+          .then((impl) => 
+            impl.setAutoAdvance_(videoImpl.video_.duration + 's')));
+
+      this.pageElement_.getImpl().then((impl) => impl.setAutoAdvance_(videoAdEl.id));
+    }
+  }
+
   /**
    * Returns the iframe containing the creative if it exists.
    * @return {?HTMLIFrameElement}
@@ -402,11 +418,6 @@ export class StoryAdPage {
     // TODO(ccordry): do we still need this? Its a pain to always stub in tests.
     this.pageElement_.getImpl().then((impl) => impl.delegateVideoAutoplay());
 
-    this.pageElement_.getImpl().then((impl) => impl.setAutoAdvance_('10s'));
-    // Remove loading attribute once loaded so that desktop CSS will position
-    // offscren with all other pages.
-    this.pageElement_.removeAttribute(PageAttributes.LOADING);
-
     this.analyticsEvent_(AnalyticsEvents.AD_LOADED, {
       [AnalyticsVars.AD_LOADED]: Date.now(),
     });
@@ -416,7 +427,12 @@ export class StoryAdPage {
         /** @type {!HTMLIFrameElement} */ (this.adFrame_)
       );
     }
-
+    
+    this.setAutoAdvance_();
+    
+    // Remove loading attribute once loaded so that desktop CSS will position
+    // offscren with all other pages.    
+    this.pageElement_.removeAttribute(PageAttributes.LOADING);
     this.loaded_ = true;
 
     this.loadCallbacks_.forEach((cb) => cb());
