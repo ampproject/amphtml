@@ -9,7 +9,7 @@ export default {
     datetime: {
       name: 'Date/time',
       control: {type: 'date'},
-      defaultValue: 1234567890000
+      defaultValue: 1234567890000,
     },
     displayIn: {
       name: 'Display in',
