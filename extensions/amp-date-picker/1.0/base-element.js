@@ -4,7 +4,7 @@ import {PreactBaseElement} from '#preact/base-element';
 
 import {BentoDatePicker} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
-import {parseDate, parseDateList, parseLocale} from './parsers';
+import {parseDate, parseDateList, parseLocale, parseNumber} from './parsers';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -24,10 +24,10 @@ BaseElement['props'] = {
   'blocked': {attr: 'blocked', parseAttr: parseDateList},
   'children': {passthrough: true},
   // Not implemented
-  'daySize': {attr: 'day-size', parseAttr: parseInt},
+  'daySize': {attr: 'day-size', parseAttr: parseNumber},
   'endInputSelector': {attr: 'end-input-selector'},
   // Not implemented
-  'firstDayOfWeek': {attr: 'first-day-of-week', parseAttr: parseInt},
+  'firstDayOfWeek': {attr: 'first-day-of-week', parseAttr: parseNumber},
   'format': {attr: 'format'},
   // Not implemented
   'fullscreen': {attr: 'fullscreen', parseAttr: parseBooleanAttribute},
@@ -41,12 +41,12 @@ BaseElement['props'] = {
   'inputSelector': {attr: 'input-selector'},
   'locale': {attr: 'locale', parseAttr: parseLocale},
   'max': {attr: 'max', parseAttr: parseDate},
-  'maximumNights': {attr: 'maximum-nights', parseAttr: parseInt},
+  'maximumNights': {attr: 'maximum-nights', parseAttr: parseNumber},
   'min': {attr: 'min', parseAttr: parseDate},
-  'minimumNights': {attr: 'minimum-nights', parseAttr: parseInt},
+  'minimumNights': {attr: 'minimum-nights', parseAttr: parseNumber},
   'mode': {attr: 'mode'},
   'monthFormat': {attr: 'month-format'},
-  'numberOfMonths': {attr: 'number-of-months', parseAttr: parseInt},
+  'numberOfMonths': {attr: 'number-of-months', parseAttr: parseNumber},
   'openAfterClear': {
     attr: 'open-after-clear',
     parseAttr: parseBooleanAttribute,
