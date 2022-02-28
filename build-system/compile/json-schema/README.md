@@ -9,11 +9,13 @@ A file may import a [JSON Schema](https://json-schema.org/) validation function 
   "properties": {
     "title": {"type": "string"}
   },
-  "required": "title"
+  "required": ["title"]
 }
 ```
 
 ### `source.js`
+
+> **Note:** the name of the imported file must end with `.schema.json`
 
 ```js
 import validateProduct from './product.schema.json';
