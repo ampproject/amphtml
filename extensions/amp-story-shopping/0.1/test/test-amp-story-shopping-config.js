@@ -12,8 +12,8 @@ import {
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {
-  VALIDATION_OBJECTS,
   getShoppingConfig,
+  productValidationConfig,
   storeShoppingConfig,
   validateRequired,
 } from '../amp-story-shopping-config';
@@ -272,9 +272,7 @@ describes.realWin(
 
       const spy = env.sandbox.spy(user(), 'warn');
 
-      for (const [key, value] of Object.entries(
-        VALIDATION_OBJECTS['productValidationConfig']
-      )) {
+      for (const [key, value] of Object.entries(productValidationConfig)) {
         if (value.includes(validateRequired)) {
           const errorString = `Error: Field ${key} is required.`;
           await createAmpStoryShoppingConfig(null, invalidConfig);

@@ -11,37 +11,32 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {!Object<!Object<string, !Array<function>>>} */
-export const VALIDATION_OBJECTS = {
-  'aggregateRating': {
-    'ratingValue': [validateRequired, validateNumber],
-    'reviewCount': [validateRequired, validateNumber],
-    'reviewUrl': [validateRequired, validateURLs],
-  },
-  'productValidationConfig': {
-    /* Required Attrs */
-    'productUrl': [validateRequired, validateString],
-    'productId': [validateRequired, validateString],
-    'productTitle': [validateRequired, validateString],
-    'productBrand': [validateRequired, validateString],
-    'productPrice': [validateRequired, validateNumber],
-    'productImages': [validateRequired, validateURLs],
-    'productPriceCurrency': [validateRequired, validateString],
-    'aggregateRating': [validateRequired, validateObject],
-    /* Optional Attrs */
-    'productIcon': [validateURLs],
-    'productTagText': [validateString],
-    'ctaText': [validateNumber],
-    'shippingText': [validateNumber],
-  },
+
+const aggregateRatingValidation = {
+  'ratingValue': [validateRequired, validateNumber],
+  'reviewCount': [validateRequired, validateNumber],
+  'reviewUrl': [validateRequired, validateURLs],
 };
 
-const essentialFields = [
-  'productPrice',
-  'productTitle',
-  'productImages',
-  'productBrand',
-  'productId',
-];
+export const productValidationConfig = {
+  /* Required Attrs */
+  'productUrl': [validateRequired, validateString],
+  'productId': [validateRequired, validateString],
+  'productTitle': [validateRequired, validateString],
+  'productBrand': [validateRequired, validateString],
+  'productPrice': [validateRequired, validateNumber],
+  'productImages': [validateRequired, validateURLs],
+  'productPriceCurrency': [validateRequired, validateString],
+  'aggregateRating': [
+    validateRequired,
+    createValidateConfig(aggregateRatingValidation),
+  ],
+  /* Optional Attrs */
+  'productIcon': [validateURLs],
+  'productTagText': [validateString],
+  'ctaText': [validateNumber],
+  'shippingText': [validateNumber],
+};
 
 /**
  * @typedef {{
@@ -51,12 +46,12 @@ const essentialFields = [
 let ShoppingConfigResponseDef;
 
 /**
- * Validates an Object using its field name as a key for one of the validation objects above.
- * @param {string} field
- * @param {?Object=} value
+ * Validates an Object using the validateConfig function.
+ * @param {?Object=} validation
+ * @return {boolean}
  */
-function validateObject(field, value = undefined) {
-  validateConfig(value, VALIDATION_OBJECTS[field]);
+function createValidateConfig(validation) {
+  return (field, value) => validateConfig(value, validation);
 }
 
 /**
@@ -64,7 +59,7 @@ function validateObject(field, value = undefined) {
  * @param {string} field
  * @param {?string=} value
  */
-export function validateRequired(field, value = undefined) {
+export function validateRequired(field, value) {
   if (value === undefined) {
     throw Error(`Field ${field} is required.`);
   }
@@ -75,7 +70,7 @@ export function validateRequired(field, value = undefined) {
  * @param {string} field
  * @param {?string=} str
  */
-export function validateString(field, str = undefined) {
+export function validateString(field, str) {
   if (typeof str !== 'string') {
     throw Error(`${field} ${str} is not a string.`);
   }
@@ -86,8 +81,11 @@ export function validateString(field, str = undefined) {
  * @param {string} field
  * @param {?number=} number
  */
-export function validateNumber(field, number = undefined) {
-  if (typeof number !== 'number') {
+export function validateNumber(field, number) {
+  if (
+    (typeof number === 'string' && !/^[0-9.,]+$/.test(number)) ||
+    (typeof number !== 'string' && typeof number !== 'number')
+  ) {
     throw Error(`Value ${number} for field ${field} is not a number`);
   }
 }
@@ -97,7 +95,7 @@ export function validateNumber(field, number = undefined) {
  * @param {string} field
  * @param {?Array<string>=} url
  */
-export function validateURLs(field, url = undefined) {
+export function validateURLs(field, url) {
   if (url === undefined) {
     return;
   }
@@ -106,6 +104,9 @@ export function validateURLs(field, url = undefined) {
 
   urls.forEach((url) => {
     assertHttpsUrl(url.url ?? url, `amp-story-shopping-config ${field}`);
+    if (field === 'productImages') {
+      validateString('productImages alt', url.alt);
+    }
   });
 }
 
@@ -117,7 +118,7 @@ export function validateURLs(field, url = undefined) {
  */
 export function validateConfig(
   shoppingConfig,
-  validationObject = VALIDATION_OBJECTS['productValidationConfig']
+  validationObject = productValidationConfig
 ) {
   let isValidConfig = true;
 
@@ -133,9 +134,7 @@ export function validateConfig(
           fn(configKey, shoppingConfig[configKey]);
         }
       } catch (err) {
-        if (essentialFields.includes(configKey)) {
-          isValidConfig = false;
-        }
+        isValidConfig = false;
         user().warn('AMP-STORY-SHOPPING-CONFIG', `${err}`);
       }
     });
@@ -155,19 +154,28 @@ export let KeyedShoppingConfigDef;
  */
 export function getShoppingConfig(element) {
   return getElementConfig(element).then((config) => {
+    const shoppingTagIndicesToRemove = [];
+    let currentShoppingTagIndex = 0;
     const areConfigsValid = config['items'].reduce((item1, item2) => {
-      return item1 && validateConfig(item2);
+      const isValidConfig = validateConfig(item2);
+      if (!isValidConfig) {
+        shoppingTagIndicesToRemove.push(currentShoppingTagIndex);
+      }
+      currentShoppingTagIndex++;
+      return item1 && isValidConfig;
     }, true);
 
     if (!areConfigsValid) {
       user().warn(
         'AMP-STORY-SHOPPING-CONFIG',
-        `Essential fields are missing. Please add them in the shopping config. See the error messages above for more details.`
+        `Required fields are missing. Please add them in the shopping config. See the error messages above for more details.`
       );
-      return null;
-    } else {
-      return keyByProductTagId(config);
+      for (const index of shoppingTagIndicesToRemove) {
+        config['items'].splice(index, 1);
+      }
     }
+
+    return keyByProductTagId(config);
   });
 }
 /**
