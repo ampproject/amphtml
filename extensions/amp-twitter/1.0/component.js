@@ -1,11 +1,14 @@
+import objstr from 'obj-str';
+
 import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
-import {resetStyles, setStyles} from '#core/dom/style';
 
 import * as Preact from '#preact';
-import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
+import {useCallback, useMemo, useRef, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {useValueRef} from '#preact/component';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
+
+import {useStyles} from './component.jss';
 
 /** @const {string} */
 const TYPE = 'twitter';
@@ -42,6 +45,8 @@ function BentoTwitterWithRef(
   const onLoadRef = useValueRef(onLoad);
   const onErrorRef = useValueRef(onError);
   const iframeRef = useRef(ref);
+  const classes = useStyles();
+  const [isLoading, setIsLoading] = useState(true);
 
   const messageHandler = useCallback(
     (event) => {
@@ -51,18 +56,8 @@ function BentoTwitterWithRef(
         if (requestResize) {
           requestResize(height);
 
-          if (iframeRef.current.node.getRootNode().host) {
-            // Remove the position style from embed after the resize is complete.
-            resetStyles(iframeRef.current.node.getRootNode().host, [
-              'position',
-              'opacity',
-              'top',
-              'bottom',
-              'left',
-              'right',
-              'pointerEvents',
-            ]);
-          }
+          // Remove the load wrapper styling from embed after the resize is complete.
+          setIsLoading(false);
 
           setHeight(FULL_HEIGHT);
         } else {
@@ -103,26 +98,6 @@ function BentoTwitterWithRef(
     ]
   );
 
-  useEffect(() => {
-    const {host} = iframeRef.current.node.getRootNode();
-    if (!host) {
-      return;
-    }
-
-    // This style is added as part of a workaround to fix the component resizing issue because
-    // the resizing happens only when the embed comes into viewport and most of the time the
-    // attemptChangeHeight request is gets rejected.
-    setStyles(host, {
-      position: 'fixed',
-      opacity: '0',
-      top: '0',
-      bottom: '0',
-      left: '0',
-      right: '0',
-      pointerEvents: 'none',
-    });
-  });
-
   return (
     <ProxyIframeEmbed
       allowfullscreen
@@ -134,6 +109,9 @@ function BentoTwitterWithRef(
       messageHandler={messageHandler}
       options={options}
       type={TYPE}
+      class={objstr({
+        [classes.loadWrapper]: isLoading,
+      })}
       style={height ? {...style, height} : style}
     />
   );
