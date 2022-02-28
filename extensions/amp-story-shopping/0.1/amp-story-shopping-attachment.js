@@ -375,10 +375,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               aria-hidden="true"
             >
               {activeProductData.productDetails
-                // Removes spaces after \n.
-                .replace(/\n\ +/g, '\n')
-                // Replaces two+ consecutive newlines with two newlines.
-                .replace(/\n\n+/g, '\n\n')}
+                // Replaces two newlines with 0 or more spaces between them with two newlines.
+                .replace(/\n\s*\n/g, '\n\n')}
             </span>
           </div>
         )}
