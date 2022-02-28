@@ -60,13 +60,13 @@ async function ajvBatchedRead(filename) {
 async function getCompiledJsonSchemaFilename(filename) {
   const {contents, hash} = await ajvBatchedRead(filename);
   const transformCache = getTransformCache();
-  const outputFilename = `build/${filename}.js`;
   const cached = await transformCache.get(hash);
   let output = cached;
   if (!output) {
     output = avjCompile(filename, contents);
     transformCache.set(hash, Promise.resolve(output));
   }
+  const outputFilename = `build/${filename}.js`;
   if (!cached || !(await pathExists(outputFilename))) {
     await outputFile(outputFilename, output);
   }
@@ -80,7 +80,7 @@ async function getCompiledJsonSchemaFilename(filename) {
  */
 function avjCompile(filename, contents) {
   const schema = JSON.parse(contents);
-  const validate = ajv().compile(schema);
+  const validateAjv = ajv().compile(schema);
   const validateFnName = escapeJsIdentifier(
     `validate_${basename(filename, '.json')}`
   );
@@ -92,15 +92,15 @@ function avjCompile(filename, contents) {
        * @return {{params?: object, message?: string, data?: any}[]}
        * https://ajv.js.org/api.html#error-objects
        */
-      export default function __validateName__(data) {
+      export default function __validateFnName__(data) {
         return validateAjv(data) ? [] : [...validateAjv.errors]
       }
     `)
-      .replace('__validateName__', validateFnName)
+      .replace('__validateFnName__', validateFnName)
       // validateAjv returns a boolean, and modifies a property of the function
       // for errors. The default instead returns an array of errors, which is
       // empty when the input is valid.
-      .replace('__validateAjv__', validate.toString())
+      .replace('__validateAjv__', validateAjv.toString())
   );
 }
 
