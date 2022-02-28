@@ -8,6 +8,14 @@
     }
   },
   {
+    "name": "bento-base-carousel",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "bento-brightcove",
     "version": "1.0",
     "latestVersion": "0.1",
@@ -24,8 +32,32 @@
     }
   },
   {
+    "name": "bento-inline-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "bento-jwplayer",
     "version": "1.0",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-lightbox",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-lightbox-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
@@ -34,8 +66,7 @@
     "name": "bento-reddit",
     "version": "1.0",
     "options": {
-      "hasCss": true,
-      "npm": true
+      "hasCss": true
     }
   },
   {
