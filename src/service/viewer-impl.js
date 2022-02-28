@@ -515,7 +515,10 @@ export class ViewerImpl {
    * @private
    */
   setVisibilityState_(state) {
+    console.log(`setVisibilityState_(${state})`);
+
     if (!state) {
+      console.log('  early return');
       return;
     }
 
@@ -692,6 +695,7 @@ export class ViewerImpl {
   /** @override */
   receiveMessage(eventType, data, unusedAwaitResponse) {
     if (eventType == 'visibilitychange') {
+      console.log(`receiveMessage(${eventType})`);
       this.setVisibilityState_(data['state']);
       return Promise.resolve();
     }
@@ -897,7 +901,9 @@ export class ViewerImpl {
    * made visible by the viewer.
    */
   visibleOnUserAction_() {
+    console.log('visibleOnUserAction_');
     if (this.ampdoc.getVisibilityState() == VisibilityState_Enum.VISIBLE) {
+      console.log('  early return');
       return;
     }
     const unlisten = [];

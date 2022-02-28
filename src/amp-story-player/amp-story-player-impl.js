@@ -300,7 +300,10 @@ export class AmpStoryPlayer {
    * @private
    */
   initializeAndAddStory_(story) {
+    console.log(`amp-story-player-impl.initializeAndAddStory_(story)`);
+    console.log(`  story: ${story.href}}`);
     story.idx = this.stories_.length;
+    console.log(`  story.idx: ${story.idx}`);
     story.distance = story.idx - this.currentIdx_;
     story.connectedDeferred = new Deferred();
     this.stories_.push(story);
@@ -850,6 +853,11 @@ export class AmpStoryPlayer {
    * @private
    */
   initStoryContentLoadedPromise_(story) {
+    const shortHref = story.href.substring(story.href.length - 30)
+
+    console.log('    initStoryContentLoadedPromise_() for story: ' + shortHref);
+
+    console.log('    initializing this.currentStoryLoadDeferred_ for story: ' + shortHref);
     this.currentStoryLoadDeferred_ = new Deferred();
 
     story.messagingPromise.then((messaging) =>
@@ -858,6 +866,7 @@ export class AmpStoryPlayer {
         // event anymore, which is why we need this sync property.
         story.storyContentLoaded = true;
         this.currentStoryLoadDeferred_.resolve();
+        console.log('    resolving currentStoryLoadDeferred_ for story: ' + shortHref);
       })
     );
   }
@@ -896,14 +905,12 @@ export class AmpStoryPlayer {
 
   /** Sends a message muting the current story. */
   mute() {
-    // console.log('player: mute()');
     const story = this.stories_[this.currentIdx_];
     this.updateMutedState_(story, true);
   }
 
   /** Sends a message unmuting the current story. */
   unmute() {
-    // console.log('player: unmute()');
     const story = this.stories_[this.currentIdx_];
     this.updateMutedState_(story, false);
   }
@@ -1055,7 +1062,7 @@ export class AmpStoryPlayer {
    * @private
    */
   next_() {
-    // console.log('next_()');
+    console.log('next_()');
     if (
       !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
@@ -1082,7 +1089,7 @@ export class AmpStoryPlayer {
    * @private
    */
   previous_() {
-    // console.log('previous_()');
+    console.log('previous_()');
     if (
       !this.isCircularWrappingEnabled_ &&
       this.isIndexOutofBounds_(this.currentIdx_ - 1)
@@ -1111,7 +1118,7 @@ export class AmpStoryPlayer {
    * @param {{animate: boolean?}} options
    */
   go(storyDelta, pageDelta = 0, options = {}) {
-    // console.log('go_()');
+    console.log('go_()');
     if (storyDelta === 0 && pageDelta === 0) {
       return;
     }
@@ -1171,21 +1178,32 @@ export class AmpStoryPlayer {
    * @private
    */
   currentStoryPromise_(story) {
+    const shortHref = story.href.substring(story.href.length - 30)
+
+    console.log('    currentStoryPromise_(story) for story: ' + shortHref);
+
+    console.log('    this.stories_[this.currentIdx_]: ' + this.stories_[this.currentIdx_]);
+    console.log('    this.stories_[this.currentIdx_].storyContentLoaded: ' + this.stories_[this.currentIdx_].storyContentLoaded);
     if (this.stories_[this.currentIdx_].storyContentLoaded) {
+      console.log('        returning Promise.resolve() for story: ' + shortHref);
       return Promise.resolve();
     }
 
     if (story.distance !== 0) {
+      console.log('        returning this.currentStoryLoadDeferred_.promise for story: ' + shortHref);
+      console.log('        this.currentStoryLoadDeferred_: ' + this.currentStoryLoadDeferred_);
       return this.currentStoryLoadDeferred_.promise;
     }
 
     if (this.currentStoryLoadDeferred_) {
+      console.log('        rejecting this.currentStoryLoadDeferred_ for story: ' + shortHref);
       // Cancel previous story load promise.
       this.currentStoryLoadDeferred_.reject(
         `[${LOG_TYPE_ENUM.DEV}] Cancelling previous story load promise.`
       );
     }
 
+    console.log('        calling this.initStoryContentLoadedPromise_ and then returning Promise.resolve() for story: ' + shortHref);
     this.initStoryContentLoadedPromise_(story);
     return Promise.resolve();
   }
@@ -1201,14 +1219,20 @@ export class AmpStoryPlayer {
    * @private
    */
   render_(startingIdx = this.currentIdx_) {
-    // console.log('render_()');
+    console.log('render_()');
     const renderPromises = [];
 
     for (let i = 0; i < this.stories_.length; i++) {
+      console.log('  iteration #' + i);
+
       const story = this.stories_[(i + startingIdx) % this.stories_.length];
+
+      const shortHref = story.href.substring(story.href.length - 30)
 
       const oldDistance = story.distance;
       story.distance = Math.abs(this.currentIdx_ - story.idx);
+      console.log(`    story.href: ${shortHref}`);
+      console.log(`    story.distance = Math.abs(${this.currentIdx_}(this.currentIdx_) - ${story.idx}(story.idx))`);
 
       // 1. Determine whether iframe should be in DOM tree or not.
       if (oldDistance <= 1 && story.distance > 1) {
@@ -1221,34 +1245,51 @@ export class AmpStoryPlayer {
 
       // Only create renderPromises for neighbor stories.
       if (story.distance > 1) {
+        console.log(`    Not creating a render promise because story.distance (${story.distance}) > 1`);
         continue;
       }
 
       renderPromises.push(
         // 1. Wait for current story to load before evaluating neighbor stories.
         this.currentStoryPromise_(story)
-          .then(() => this.maybeGetCacheUrl_(story.href))
+          .then(() => console.log(`    currentStoryPromise_() CALL OCCURRED FOR STORY.HREF: ${shortHref}`))
+          .then(() => {
+            console.log(`    maybeGetCacheUrl_() call for story.href: ${shortHref}`);
+            return this.maybeGetCacheUrl_(story.href);
+          })
           // 2. Set iframe src when appropiate
           .then((storyUrl) => {
+            console.log(`    sanitizedUrlsAreEquals_() call for story.href: ${shortHref}`);
             if (!this.sanitizedUrlsAreEquals_(storyUrl, story.iframe.src)) {
               this.setSrc_(story, storyUrl);
             }
           })
           // 3. Waits for player to be visible before updating visibility
           // state.
-          .then(() => this.visibleDeferred_.promise)
+          .then(() => {
+            console.log(`    this.visibleDeferred_.promise call for story.href: ${shortHref}`);
+            return this.visibleDeferred_.promise;
+          })
           // 4. Update the visibility state of the story.
           .then(() => {
+            console.log(`    visibility state block of calls for story.href: ${shortHref}`);
             if (story.distance === 0 && this.playing_) {
+              console.log('Updating visibility state to VISIBLE because (story.distance === 0 && this.playing_) is TRUE: ' + shortHref);
               this.updateVisibilityState_(story, VisibilityState_Enum.VISIBLE);
+            } else {
+              console.log('Not updating visibility state to VISIBLE because (story.distance === 0 && this.playing_) is FALSE: ' + shortHref);
             }
 
             if (oldDistance === 0 && story.distance === 1) {
+              console.log('Updating visibility state to INACTIVE because (oldDistance === 0 && story.distance === 1) is TRUE: ' + shortHref);
               this.updateVisibilityState_(story, VisibilityState_Enum.INACTIVE);
+            } else {
+              console.log(`Not updating visibility state to INACTIVE because (oldDistance(${oldDistance}) === 0 && story.distance(${story.distance}) === 1) is FALSE: ${shortHref}`);
             }
           })
           // 5. Finally update the story position.
           .then(() => {
+            console.log(`    updatePosition_() call for story.href: ${shortHref}`);
             this.updatePosition_(story);
 
             if (story.distance === 0) {
@@ -1256,6 +1297,8 @@ export class AmpStoryPlayer {
             }
           })
           .catch((err) => {
+            console.log(`ERROR for story: ${shortHref}`);
+            console.log('render error: ' + err);
             if (err.includes(LOG_TYPE_ENUM.DEV)) {
               return;
             }
@@ -1407,6 +1450,7 @@ export class AmpStoryPlayer {
    * @private
    */
   updateVisibilityState_(story, visibilityState) {
+    console.log('    updateVisibilityState_()');
     story.messagingPromise.then((messaging) =>
       messaging.sendRequest('visibilitychange', {state: visibilityState}, true)
     );
@@ -1593,7 +1637,6 @@ export class AmpStoryPlayer {
    * @private
    */
   onMutedStateUpdate_(muted) {
-    console.log('onMutedStateUpdate_(muted = ' + muted + ')');
     this.element_.dispatchEvent(
       createCustomEvent(this.win_, 'amp-story-muted-state', {muted})
     );
