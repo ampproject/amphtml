@@ -298,6 +298,7 @@ import {zedo} from '#ads/vendors/zedo';
 import {zen} from '#ads/vendors/zen';
 import {zergnet} from '#ads/vendors/zergnet';
 import {zucks} from '#ads/vendors/zucks';
+import {_4wmarketplace} from '#ads/vendors/4wmarketplace';
 
 init(window);
 user().warn(
@@ -591,5 +592,6 @@ register('zedo', zedo);
 register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
+register('4wmarketplace', _4wmarketplace);
 
 window.draw3p = draw3p;

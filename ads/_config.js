@@ -1500,6 +1500,9 @@ const adConfig = jsonConfiguration({
   },
 
   'sulvo': {},
+
+  '4wmarketplace': {},
+
 });
 
 export {adConfig};
