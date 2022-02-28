@@ -30,12 +30,6 @@ export default {
       options: ['en-US', 'en-GB', 'fr', 'ru', 'ar', 'he', 'ja'],
       control: {type: 'select'},
     },
-    template: {
-      name: 'Template',
-      defaultValue: 'template1',
-      options: ['template1', 'template2'],
-      control: {type: 'select'},
-    },
   },
 };
 
@@ -104,4 +98,13 @@ export const ExternalTemplate = ({
       ></amp-date-display>
     </div>
   );
+};
+
+ExternalTemplate.argTypes = {
+  template: {
+    name: 'Template',
+    defaultValue: 'template1',
+    options: ['template1', 'template2'],
+    control: {type: 'select'},
+  }
 };
