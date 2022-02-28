@@ -232,4 +232,5 @@ e2e.flags = {
   'report': 'Write test result report to a local file',
   'coverage': 'Collect coverage data from instrumented code',
   'filelist': 'Run tests specified in this comma-separated list of test files',
+  'esm': 'esm',
 };

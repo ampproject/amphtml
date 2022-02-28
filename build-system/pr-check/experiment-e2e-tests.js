@@ -31,7 +31,7 @@ function runExperimentTests(config) {
     const reportFlag = isPushBuild() ? '--report' : '';
     generateCircleCiShardTestFileList(e2eTestPaths);
     timedExecOrThrow(
-      `amp e2e --nobuild --minified --headless ${experimentFlag} ${defineFlag} ${reportFlag} --filelist ${FILELIST_PATH}`
+      `amp e2e --esm --nobuild --minified --headless ${experimentFlag} ${defineFlag} ${reportFlag} --filelist ${FILELIST_PATH}`
     );
   } catch (e) {
     if (e.status) {

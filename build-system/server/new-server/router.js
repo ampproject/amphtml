@@ -2,7 +2,7 @@ const router = require('express').Router();
 // @ts-ignore
 const {transform} = require('./transforms/dist/transform');
 
-router.get('/examples/*.html', async (req, res, next) => {
+const transformHtml = async (req, res, next) => {
   let transformedHTML;
 
   // ?transform=0 or ?transform=false will force an opt-out of the
@@ -29,6 +29,8 @@ router.get('/examples/*.html', async (req, res, next) => {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
   }
   res.end(transformedHTML);
-});
+};
+router.get('/examples/*.html', transformHtml);
+router.get('/test/fixtures/**/*.html', transformHtml);
 
 module.exports = router;
