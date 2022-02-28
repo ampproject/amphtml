@@ -11,6 +11,7 @@ import {
   StateProperty,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import * as shoppingConfig from '../amp-story-shopping-config';
 
 describes.realWin(
   'amp-story-shopping-tag-v0.1',
@@ -73,7 +74,9 @@ describes.realWin(
 
     it('should build and layout shopping tag component', async () => {
       await setupShoppingTagAndData();
-      expect(shoppingTag.shoppingTagEl_).to.be.not.null;
+      env.sandbox.stub(shoppingConfig, 'getShoppingConfig').callsFake(() => {
+        expect(shoppingTag.shoppingTagEl_).to.be.not.null;
+      });
     });
 
     it('should not build shopping tag if page attachment is missing', async () => {
