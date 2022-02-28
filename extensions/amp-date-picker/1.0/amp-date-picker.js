@@ -17,22 +17,19 @@ class AmpDatePicker extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   init() {
     this.registerApiAction('clear', (api) => api./*OK*/ clear());
     this.registerApiAction('today', (api, invocation) =>
-      api./*OK*/ today(invocation.args && invocation.args['offset'])
+      api./*OK*/ today(invocation.args?.['offset'])
     );
     this.registerApiAction('startToday', (api, invocation) =>
-      api./*OK*/ startToday(invocation.args && invocation.args['offset'])
+      api./*OK*/ startToday(invocation.args?.['offset'])
     );
     this.registerApiAction('endToday', (api, invocation) =>
-      api./*OK*/ endToday(invocation.args && invocation.args['offset'])
+      api./*OK*/ endToday(invocation.args?.['offset'])
     );
     this.registerApiAction('setDate', (api, invocation) =>
-      api./*OK*/ setDate(invocation.args && invocation.args['date'])
+      api./*OK*/ setDate(invocation.args?.['date'])
     );
     this.registerApiAction('setDates', (api, invocation) =>
-      api./*OK*/ setDates(
-        invocation.args && invocation.args['start'],
-        invocation.args && invocation.args['end']
-      )
+      api./*OK*/ setDates(invocation.args?.['start'], invocation.args?.['end'])
     );
 
     return super.init();
