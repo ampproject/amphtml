@@ -1,11 +1,13 @@
 @import '../../../third_party/react-day-picker/style.css';
 
-.amp-date-picker-calendar-container * {
+.amp-date-picker-calendar-container {
   --rdp-background-color: #e4e7e7;
   --rdp-accent-color: #0654ab;
   --rdp-outline-selected: #0654ab;
   --rdp-outline: #e4e7e7;
+}
 
+.amp-date-picker-calendar-container * {
   box-sizing: border-box;
 }
 
