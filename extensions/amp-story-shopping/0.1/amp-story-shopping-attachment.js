@@ -374,7 +374,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               class="i-amphtml-amp-story-shopping-pdp-details-text"
               aria-hidden="true"
             >
-              {activeProductData.productDetails}
+              {activeProductData.productDetails
+                .replace(/\n\ +/g, '\n')
+                .replace(/\n\n+/g, '\n\n')}
             </span>
           </div>
         )}
