@@ -25,6 +25,7 @@ const babel = require('@babel/core');
 const {
   remapDependenciesPlugin,
 } = require('./remap-dependencies-plugin/remap-dependencies');
+const {esbuildJsonSchemaPlugin} = require('../compile/json-schema');
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -328,7 +329,7 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     babelCaller,
     /* enableCache */ true
   );
-  const plugins = [babelPlugin];
+  const plugins = [esbuildJsonSchemaPlugin, babelPlugin];
 
   if (options.remapDependencies) {
     const {externalDependencies: externals, remapDependencies: remaps} =

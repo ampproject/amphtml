@@ -1,0 +1,10 @@
+{
+  "not": {
+    "oneOf": [
+      false,
+      {
+        "type": "string"
+      }
+    ]
+  }
+}
