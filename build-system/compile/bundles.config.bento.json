@@ -39,6 +39,14 @@
     }
   },
   {
+    "name": "bento-resize-guard",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
+  },
+  {
     "name": "bento-video",
     "version": "1.0",
     "latestVersion": "0.1",
