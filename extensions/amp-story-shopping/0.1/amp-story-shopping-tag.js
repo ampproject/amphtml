@@ -119,6 +119,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   toggleShoppingTagActive_(currentPageId) {
+    if (!this.shoppingTagEl_) {
+      return;
+    }
     const isActive = currentPageId === this.pageEl_.id;
     this.mutateElement(() =>
       toggleAttribute(this.shoppingTagEl_, 'active', isActive)
@@ -132,6 +135,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   flipTagIfOffscreen_(pageSize) {
+    if (!this.shoppingTagEl_) {
+      return;
+    }
     const storyPageWidth = pageSize.width;
 
     let shouldFlip;
@@ -166,6 +172,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   onRtlStateUpdate_(rtlState) {
+    if (!this.shoppingTagEl_) {
+      return;
+    }
     this.mutateElement(() => {
       rtlState
         ? this.shoppingTagEl_.setAttribute('dir', 'rtl')
@@ -278,10 +287,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       'amp-story-page'
     );
 
+    if (!shoppingData[pageElement.id]) {
+      return;
+    }
+
     this.tagData_ =
       shoppingData[pageElement.id][
         this.element.getAttribute('data-product-id')
       ];
+
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
@@ -296,5 +310,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
     this.hasAppendedInnerShoppingTagEl_ = true;
     this.styleTagText_();
+
+    this.toggleShoppingTagActive_(
+      this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
+    );
+
+    this.flipTagIfOffscreen_(this.storeService_.get(StateProperty.PAGE_SIZE));
   }
 }
