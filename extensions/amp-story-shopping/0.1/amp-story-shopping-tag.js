@@ -277,18 +277,15 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       this.element,
       'amp-story-page'
     );
-
     this.tagData_ =
+      shoppingData[pageElement.id] &&
       shoppingData[pageElement.id][
         this.element.getAttribute('data-product-id')
       ];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
-
-    this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
-
     createShadowRootWithStyle(
       this.element,
       this.shoppingTagEl_,
@@ -296,5 +293,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
     this.hasAppendedInnerShoppingTagEl_ = true;
     this.styleTagText_();
+    this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
+    this.flipTagIfOffscreen_(this.storeService_.get(StateProperty.PAGE_SIZE));
+    this.toggleShoppingTagActive_(pageElement.id);
   }
 }
