@@ -1,6 +1,7 @@
 # Wraps AMP Validator into a WebAssembly library,
 # which can be used by javascript files.
 
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
 load("@io_bazel_rules_closure//closure:defs.bzl", "closure_js_binary", "closure_js_library")
 
@@ -71,4 +72,9 @@ closure_js_binary(
     deps = [
         ":validator_js_lib",
     ],
+)
+
+build_test(
+    name = "validator_js_test",
+    targets = [":validator_js_bin"],
 )
