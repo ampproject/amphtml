@@ -185,9 +185,8 @@ tags: {  # <amp-video> in amp-story
   }
   attrs: {
     name: "volume"
-    # Disallow 0 to prevent shipping unnecessary audio track when the video is muted.
-    # Volume must be in the range [0.1, 1].
-    value_regex: "^((0?\\.[1-9]+)?|1(\\.0*)?)$"
+    # Volume must be in the range [0, 1].
+    value_regex: "^(0(\\.0*)?|(0?\\.[0-9]+)?|1(\\.0*)?)$"
   }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"

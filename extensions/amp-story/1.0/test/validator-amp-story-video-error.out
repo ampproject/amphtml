@@ -39,15 +39,15 @@ amp-story/1.0/test/validator-amp-story-video-error.html:23:8 The mandatory attri
 |      </amp-story-page>
 |      <amp-story-page id="2" background-audio="path/to/my.mp3" auto-advance-after="any-value">
 |        <amp-story-grid-layer template="horizontal">
-|          <!-- This should fail because amp-video volume should be within [0.1, 1]. -->
+|          <!-- This should fail because amp-video volume should be within [0, 1]. -->
 |          <amp-video width="480"
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-video-error.html:38:8 The attribute 'volume' in tag 'amp-video' is set to the invalid value '0'. (see https://amp.dev/documentation/components/amp-video/)
+amp-story/1.0/test/validator-amp-story-video-error.html:38:8 The attribute 'volume' in tag 'amp-video' is set to the invalid value '-1'. (see https://amp.dev/documentation/components/amp-video/)
 |                     height="270"
 |                     poster="/foo.jpg"
 |                     src="/video/tokyo.mp4"
 |                     layout="responsive"
-|                     volume="0">
+|                     volume="-1">
 |               <div fallback>
 |                 <p>Your browser doesn't support HTML5 video.</p>
 |               </div>
@@ -58,7 +58,7 @@ amp-story/1.0/test/validator-amp-story-video-error.html:38:8 The attribute 'volu
 |      </amp-story-page>
 |      <amp-story-page id="3" background-audio="path/to/my.mp3" auto-advance-after="any-value">
 |        <amp-story-grid-layer template="horizontal">
-|          <!-- This should fail because amp-video volume should be within [0.1, 1]. -->
+|          <!-- This should fail because amp-video volume should be within [0, 1]. -->
 |          <amp-video width="480"
 >>         ^~~~~~~~~
 amp-story/1.0/test/validator-amp-story-video-error.html:55:8 The attribute 'volume' in tag 'amp-video' is set to the invalid value '1.01'. (see https://amp.dev/documentation/components/amp-video/)
@@ -67,6 +67,44 @@ amp-story/1.0/test/validator-amp-story-video-error.html:55:8 The attribute 'volu
 |                     src="/video/tokyo.mp4"
 |                     layout="responsive"
 |                     volume="1.01">
+|               <div fallback>
+|                 <p>Your browser doesn't support HTML5 video.</p>
+|               </div>
+|               <source type="video/mp4" src="/video/tokyo.mp4">
+|               <source type="video/webm" src="/video/tokyo.webm">
+|           </amp-video>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="4" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+|        <amp-story-grid-layer template="horizontal">
+|          <!-- This should not fail because amp-video volume is within [0, 1]. -->
+|          <amp-video width="480"
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-video-error.html:72:8 The mandatory attribute 'autoplay' is missing in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video/)
+|                     height="270"
+|                     poster="/foo.jpg"
+|                     src="/video/tokyo.mp4"
+|                     layout="responsive"
+|                     volume="0.42">
+|               <div fallback>
+|                 <p>Your browser doesn't support HTML5 video.</p>
+|               </div>
+|               <source type="video/mp4" src="/video/tokyo.mp4">
+|               <source type="video/webm" src="/video/tokyo.webm">
+|           </amp-video>
+|        </amp-story-grid-layer>
+|      </amp-story-page>
+|      <amp-story-page id="5" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+|        <amp-story-grid-layer template="horizontal">
+|          <!-- This should not fail because amp-video volume is within [0, 1]. -->
+|          <amp-video width="480"
+>>         ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-video-error.html:89:8 The mandatory attribute 'autoplay' is missing in tag 'amp-video'. (see https://amp.dev/documentation/components/amp-video/)
+|                     height="270"
+|                     poster="/foo.jpg"
+|                     src="/video/tokyo.mp4"
+|                     layout="responsive"
+|                     volume="0">
 |               <div fallback>
 |                 <p>Your browser doesn't support HTML5 video.</p>
 |               </div>
