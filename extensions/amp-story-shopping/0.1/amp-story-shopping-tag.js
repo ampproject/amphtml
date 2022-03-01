@@ -86,29 +86,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     if (!this.shoppingAttachment_) {
       return;
     }
-
     loadFonts(this.win, FONTS_TO_LOAD);
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
-      (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
-      (rtlState) => this.onRtlStateUpdate_(rtlState),
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.PAGE_SIZE,
-      (pageSizeState) => this.flipTagIfOffscreen_(pageSizeState),
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
-      (id) => this.toggleShoppingTagActive_(id),
+      (shoppingData) =>
+        this.tryToCreateAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
   }
@@ -120,11 +102,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   toggleShoppingTagActive_(currentPageId) {
     const isActive = currentPageId === this.pageEl_.id;
-    if (this.shoppingTagEl_) {
-      this.mutateElement(() =>
-        toggleAttribute(this.shoppingTagEl_, 'active', isActive)
-      );
-    }
+    this.mutateElement(() =>
+      toggleAttribute(this.shoppingTagEl_, 'active', isActive)
+    );
   }
 
   /**
@@ -149,12 +129,12 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
         shouldFlip = offsetLeft + offsetWidth > storyPageWidth;
       },
       () => {
-        this.shoppingTagEl_?.classList.toggle(
+        this.shoppingTagEl_.classList.toggle(
           'i-amphtml-amp-story-shopping-tag-inner-flipped',
           shouldFlip
         );
 
-        this.shoppingTagEl_?.classList.toggle(
+        this.shoppingTagEl_.classList.toggle(
           'i-amphtml-amp-story-shopping-tag-visible',
           true
         );
@@ -170,8 +150,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   onRtlStateUpdate_(rtlState) {
     this.mutateElement(() => {
       rtlState
-        ? this.shoppingTagEl_?.setAttribute('dir', 'rtl')
-        : this.shoppingTagEl_?.removeAttribute('dir');
+        ? this.shoppingTagEl_.setAttribute('dir', 'rtl')
+        : this.shoppingTagEl_.removeAttribute('dir');
     });
   }
 
@@ -271,17 +251,40 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
+   * Initialize listeners (data,orinetation,visibility) for the shopping tag on creation.
+   * @private
+   */
+  initializeTagStateListeners_() {
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      (rtlState) => this.onRtlStateUpdate_(rtlState),
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.PAGE_SIZE,
+      (pageSizeState) => this.flipTagIfOffscreen_(pageSizeState),
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      (id) => this.toggleShoppingTagActive_(id),
+      true /** callToInitialize */
+    );
+  }
+
+  /**
    * @param {!ShoppingDataDef} shoppingData
    * @private
    */
-  createAndAppendInnerShoppingTagEl_(shoppingData) {
+  tryToCreateAndAppendInnerShoppingTagEl_(shoppingData) {
     const pageElement = closestAncestorElementBySelector(
       this.element,
       'amp-story-page'
     );
     this.tagData_ =
-      shoppingData[pageElement.id] &&
-      shoppingData[pageElement.id][
+      shoppingData[pageElement.id]?.[
         this.element.getAttribute('data-product-id')
       ];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
@@ -295,8 +298,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
     this.hasAppendedInnerShoppingTagEl_ = true;
     this.styleTagText_();
-    this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
-    this.flipTagIfOffscreen_(this.storeService_.get(StateProperty.PAGE_SIZE));
-    this.toggleShoppingTagActive_(pageElement.id);
+    this.initializeTagStateListeners_();
   }
 }
