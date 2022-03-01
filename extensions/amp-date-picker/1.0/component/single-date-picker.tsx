@@ -82,10 +82,6 @@ function SingleDatePickerWithRef(
   const handleInput = useCallback(
     (e: InputEvent) => {
       const {target} = e;
-      if ((target as HTMLInputElement).type === 'hidden') {
-        return;
-      }
-
       const date = parseDate((target as HTMLInputElement).value);
       if (date && isValid(date)) {
         selectDate(date);

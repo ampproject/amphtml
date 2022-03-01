@@ -281,10 +281,6 @@ function DateRangePickerWithRef(
   const handleStartInput = useCallback(
     (e: InputEvent) => {
       const {target} = e;
-      if ((target as HTMLInputElement).type === 'hidden') {
-        return;
-      }
-
       const date = parseDate((target as HTMLInputElement).value);
       if (date && isValid(date)) {
         startDateInput.setDate(date);
@@ -299,10 +295,6 @@ function DateRangePickerWithRef(
   const handleEndInput = useCallback(
     (e: InputEvent) => {
       const {target} = e;
-      if ((target as HTMLInputElement).type === 'hidden') {
-        return;
-      }
-
       const date = parseDate((target as HTMLInputElement).value);
       if (date && isValid(date)) {
         endDateInput.setDate(date);
