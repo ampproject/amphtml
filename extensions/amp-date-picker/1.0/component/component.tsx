@@ -1,5 +1,4 @@
 import * as Preact from '#preact';
-import {useMemo} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {FunctionalComponent, Ref} from '#preact/types';
 
@@ -18,78 +17,67 @@ import {
   ISO_8601,
 } from '../constants';
 import {getCurrentDate} from '../date-helpers';
-import {BentoDatePickerProps} from '../types';
+import {
+  BentoDatePickerProps,
+  DateRangePickerAPI,
+  SingleDatePickerAPI,
+} from '../types';
 
-type PropertiesWithDefaults =
-  | 'endInputSelector'
-  | 'format'
-  | 'highlighted'
-  | 'inputSelector'
-  | 'locale'
-  | 'maximumNights'
-  | 'minimumNights'
-  | 'mode'
-  | 'monthFormat'
-  | 'numberOfMonths'
-  | 'onError'
-  | 'startInputSelector'
-  | 'today'
-  | 'type'
-  | 'weekDayFormat';
-
-const DEFAULT_PROPS: Pick<BentoDatePickerProps, PropertiesWithDefaults> = {
-  endInputSelector: DEFAULT_END_INPUT_SELECTOR,
-  format: ISO_8601,
-  inputSelector: DEFAULT_INPUT_SELECTOR,
-  locale: DEFAULT_LOCALE,
-  mode: 'static',
-  monthFormat: DEFAULT_MONTH_FORMAT,
-  onError: DEFAULT_ON_ERROR,
-  startInputSelector: DEFAULT_START_INPUT_SELECTOR,
-  today: getCurrentDate(),
-  type: 'single',
-  weekDayFormat: DEFAULT_WEEK_DAY_FORMAT,
-  maximumNights: 0,
-  minimumNights: 1,
-  numberOfMonths: 1,
-  highlighted: [],
+const datePickerForType: {
+  [key: string]: FunctionalComponent<BentoDatePickerProps>;
+} = {
+  single: SingleDatePicker,
+  range: DateRangePicker,
 };
 
-export type BaseComponentProps = Omit<
-  BentoDatePickerProps,
-  PropertiesWithDefaults
-> &
-  Partial<Pick<BentoDatePickerProps, PropertiesWithDefaults>>;
-
 function BentoDatePickerWithRef(
-  props: BaseComponentProps,
-  ref: Ref<HTMLInputElement>
+  {
+    endInputSelector = DEFAULT_END_INPUT_SELECTOR,
+    format = ISO_8601,
+    inputSelector = DEFAULT_INPUT_SELECTOR,
+    locale = DEFAULT_LOCALE,
+    mode = 'static',
+    monthFormat = DEFAULT_MONTH_FORMAT,
+    onError = DEFAULT_ON_ERROR,
+    startInputSelector = DEFAULT_START_INPUT_SELECTOR,
+    today = getCurrentDate(),
+    type = 'single',
+    weekDayFormat = DEFAULT_WEEK_DAY_FORMAT,
+    maximumNights = 0,
+    minimumNights = 1,
+    numberOfMonths = 1,
+    ...rest
+  }: BentoDatePickerProps,
+  ref: Ref<SingleDatePickerAPI | DateRangePickerAPI>
 ) {
-  const propsWithDefaults = useMemo(
-    () => ({...DEFAULT_PROPS, ...props}),
-    [props]
-  );
+  const propsWithDefaults = {
+    endInputSelector,
+    format,
+    inputSelector,
+    locale,
+    mode,
+    monthFormat,
+    onError,
+    startInputSelector,
+    today,
+    type,
+    weekDayFormat,
+    maximumNights,
+    minimumNights,
+    numberOfMonths,
+    ...rest,
+  };
 
-  const {onError, type} = propsWithDefaults;
+  const DatePicker = datePickerForType[type];
 
-  const DatePicker: FunctionalComponent | null = useMemo(() => {
-    switch (type) {
-      case 'single': {
-        return SingleDatePicker;
-      }
-      case 'range': {
-        return DateRangePicker;
-      }
-      default: {
-        onError('Invalid date picker type');
-        return null;
-      }
-    }
-  }, [type, onError]);
+  if (!DatePicker) {
+    onError('Invalid date picker type');
+    return null;
+  }
 
   return (
     <DatePickerContext.Provider value={propsWithDefaults}>
-      {DatePicker && <DatePicker ref={ref} {...propsWithDefaults} />}
+      <DatePicker ref={ref} {...propsWithDefaults} />
     </DatePickerContext.Provider>
   );
 }

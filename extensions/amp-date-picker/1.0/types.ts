@@ -19,36 +19,36 @@ export type Range = {
 
 interface CommonDatePickerProps {
   blocked?: DateSelector;
-  format: string;
-  highlighted: DateSelector;
+  format?: string;
+  highlighted?: DateSelector;
   id?: string;
   initialVisibleMonth?: Date;
-  locale: Locale;
+  locale?: Locale;
   max?: Date;
   min?: Date;
-  mode: DatePickerMode;
-  monthFormat: string;
-  numberOfMonths: number;
-  onError: (message: string) => void;
+  mode?: DatePickerMode;
+  monthFormat?: string;
+  numberOfMonths?: number;
+  onError?: (message: string) => void;
   openAfterClear?: boolean;
   openAfterSelect?: boolean;
-  weekDayFormat: string;
+  weekDayFormat?: string;
   children?: ComponentChildren;
-  today: Date;
+  today?: Date;
   type: DatePickerType;
 }
 
 export interface DateRangePickerProps extends CommonDatePickerProps {
   allowBlockedEndDate?: boolean;
   allowBlockedRanges?: boolean;
-  endInputSelector: string;
-  startInputSelector: string;
-  maximumNights: number;
-  minimumNights: number;
+  endInputSelector?: string;
+  startInputSelector?: string;
+  maximumNights?: number;
+  minimumNights?: number;
 }
 
 export interface SingleDatePickerProps extends CommonDatePickerProps {
-  inputSelector: string;
+  inputSelector?: string;
 }
 
 export type BentoDatePickerProps = SingleDatePickerProps & DateRangePickerProps;

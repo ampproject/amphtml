@@ -29,6 +29,11 @@ import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
 
 import {
+  DEFAULT_END_INPUT_SELECTOR,
+  DEFAULT_START_INPUT_SELECTOR,
+} from '../constants';
+import {getCurrentDate} from '../date-helpers';
+import {
   DateFieldType,
   DateRangePickerAPI,
   DateRangePickerProps,
@@ -39,13 +44,13 @@ function DateRangePickerWithRef(
     allowBlockedEndDate,
     allowBlockedRanges,
     children,
-    endInputSelector,
+    endInputSelector = DEFAULT_END_INPUT_SELECTOR,
     initialVisibleMonth,
-    mode,
+    mode = 'static',
     openAfterClear,
     openAfterSelect,
-    startInputSelector,
-    today,
+    startInputSelector = DEFAULT_START_INPUT_SELECTOR,
+    today = getCurrentDate(),
   }: DateRangePickerProps,
   ref: Ref<DateRangePickerAPI>
 ) {

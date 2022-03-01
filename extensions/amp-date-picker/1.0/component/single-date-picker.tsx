@@ -19,17 +19,19 @@ import {useDatePickerContext} from './use-date-picker-context';
 import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
 
+import {DEFAULT_INPUT_SELECTOR} from '../constants';
+import {getCurrentDate} from '../date-helpers';
 import {SingleDatePickerAPI, SingleDatePickerProps} from '../types';
 
 function SingleDatePickerWithRef(
   {
     children,
     initialVisibleMonth,
-    inputSelector,
-    mode,
+    inputSelector = DEFAULT_INPUT_SELECTOR,
+    mode = 'static',
     openAfterClear,
     openAfterSelect,
-    today,
+    today = getCurrentDate(),
   }: SingleDatePickerProps,
   ref: Ref<SingleDatePickerAPI>
 ) {

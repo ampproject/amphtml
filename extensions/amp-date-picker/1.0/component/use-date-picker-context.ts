@@ -4,7 +4,7 @@ import {createContext, useCallback, useContext, useMemo} from '#preact';
 
 import {DatesList} from './dates-list';
 
-import {getFormattedDate} from '../date-helpers';
+import {getCurrentDate, getFormattedDate} from '../date-helpers';
 import {parseDate as _parseDate} from '../parsers';
 import {BentoDatePickerProps} from '../types';
 
@@ -29,9 +29,9 @@ export function useDatePickerContext() {
     max,
     maximumNights,
     min: optionalMin,
-    minimumNights,
+    minimumNights = 1,
     monthFormat,
-    today,
+    today = getCurrentDate(),
     weekDayFormat,
   } = context;
 
