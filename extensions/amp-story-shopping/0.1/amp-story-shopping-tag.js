@@ -90,7 +90,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
       (shoppingData) =>
-        this.tryToCreateAndAppendInnerShoppingTagEl_(shoppingData),
+        this.maybeCreateAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
   }
@@ -251,7 +251,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * Initialize listeners (data,orinetation,visibility) for the shopping tag on creation.
+   * Initialize listeners (data, orientation, visibility) for the shopping tag on creation.
    * @private
    */
   initializeTagStateListeners_() {
@@ -278,7 +278,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @param {!ShoppingDataDef} shoppingData
    * @private
    */
-  tryToCreateAndAppendInnerShoppingTagEl_(shoppingData) {
+  maybeCreateAndAppendInnerShoppingTagEl_(shoppingData) {
     const pageElement = closestAncestorElementBySelector(
       this.element,
       'amp-story-page'
