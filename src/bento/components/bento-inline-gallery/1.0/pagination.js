@@ -1,10 +1,10 @@
+import {CarouselContext} from '#bento/components/bento-base-carousel/1.0/carousel-context';
+
 import * as Preact from '#preact';
 import {useContext} from '#preact';
 import {Wrapper} from '#preact/component';
 
 import {useStyles} from './pagination.jss';
-
-import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 
 /**
  * @param {!BentoInlineGalleryDef.PaginationProps} props

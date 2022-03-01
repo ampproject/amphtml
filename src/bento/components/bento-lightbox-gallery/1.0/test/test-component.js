@@ -1,12 +1,13 @@
 import {mount} from 'enzyme';
 
-import * as Preact from '#preact';
-
-import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
+import {BentoBaseCarousel} from '#bento/components/bento-base-carousel/1.0/component';
 import {
   BentoLightboxGalleryProvider,
   WithBentoLightboxGallery,
-} from '../component';
+} from '#bento/components/bento-lightbox-gallery/1.0/component';
+
+import * as Preact from '#preact';
+
 import {useStyles} from '../component.jss';
 
 describes.sandboxed('BentoLightboxGallery preact component', {}, () => {

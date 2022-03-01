@@ -387,7 +387,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               class="i-amphtml-amp-story-shopping-pdp-details-text"
               aria-hidden="true"
             >
-              {activeProductData.productDetails}
+              {activeProductData.productDetails
+                // Replaces two newlines with 0 or more spaces between them with two newlines.
+                .replace(/\n\s*\n/g, '\n\n')}
             </span>
           </div>
         )}

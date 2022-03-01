@@ -1,5 +1,4 @@
-import {forceExperimentBranch} from '#experiments';
-import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+import {toggleExperiment} from '#experiments';
 
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {
@@ -249,11 +248,7 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
 
     beforeEach(() => {
       buttonFitter = new ButtonTextFitter(env.ampdoc);
-      forceExperimentBranch(
-        win,
-        StoryAdSegmentExp.ID,
-        StoryAdSegmentExp.NO_ADVANCE_AD
-      );
+      toggleExperiment(win, 'story-ad-auto-advance', true);
     });
 
     it('createCta page outlink custom theme element', () => {

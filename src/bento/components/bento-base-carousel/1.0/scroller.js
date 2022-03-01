@@ -1,3 +1,5 @@
+import {WithBentoLightboxGallery} from '#bento/components/bento-lightbox-gallery/1.0/component';
+
 import {setStyle} from '#core/dom/style';
 import {mod} from '#core/math';
 import {debounce} from '#core/types/function';
@@ -21,8 +23,6 @@ import {
   getPercentageOffsetFromAlignment,
   scrollContainerToElement,
 } from './dimensions';
-
-import {WithBentoLightboxGallery} from '../../amp-lightbox-gallery/1.0/component';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
