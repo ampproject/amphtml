@@ -21,6 +21,10 @@ test('create', async (t) => {
     '<code>3abc</code></a> - Update packages';
 
   const packages = getExtensionsAndComponents().map((e) => e.extension);
+  const packageChanged = new Set(['bento-accordion']);
+  const packagesNotChanged = packages.filter(
+    (package) => !packageChanged.has(package)
+  );
 
   const rest = nock('https://api.github.com')
     // https://docs.github.com/en/rest/reference/git#get-a-reference
@@ -51,8 +55,12 @@ test('create', async (t) => {
         '<a href="https://github.com/ampproject/amphtml/compare/' +
         '2107210123000...2107280123000">\n' +
         '<code>2107210123000...2107280123000</code>\n</a>\n</p>\n\n' +
-        '<h2>npm packages @ 1.2107280123.0</h2>\n\n\n' +
-        `<b>Packages not changed:</b> <i>${packages.join(', ')}</i>\n\n` +
+        '<h2>npm packages @ 1.2107280123.0</h2>\n' +
+        `<b>${Array.from(packageChanged).join(', ')}</b>\n` +
+        `<ul><li>${pr3}</li></ul>\n\n` +
+        `<b>Packages not changed:</b> <i>${packagesNotChanged.join(
+          ', '
+        )}</i>\n\n` +
         '<h2>Changes by component</h2>\n' +
         `<details><summary>ads (1)</summary>${pr1}</details>` +
         `<details><summary>amp-test1 (1)</summary>${pr1}</details>` +
@@ -161,6 +169,10 @@ test('create', async (t) => {
                   },
                   {
                     'path': 'extensions/amp-test2/readme.md',
+                  },
+                  {
+                    'path':
+                      'src/bento/components/bento-accordion/1.0/README.md',
                   },
                 ],
               },

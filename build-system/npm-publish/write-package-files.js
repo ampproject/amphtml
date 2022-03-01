@@ -19,19 +19,21 @@ const packageName = getNameWithoutComponentPrefix(extension);
 
 /**
  * Gets the directory of the component or extension.
+ * @param {string} extension
+ * @param {string} version
  * @return {string}
  */
-function getDir() {
+function getDir(extension, version) {
   return extension.startsWith('bento')
-    ? `src/bento/components/${extension}/${extensionVersion}`
-    : `extensions/${extension}/${extensionVersion}`;
+    ? `src/bento/components/${extension}/${version}`
+    : `extensions/${extension}/${version}`;
 }
 
 /**
  * The directory of the component or extension.
  * @type {string}
  */
-const dir = getDir();
+const dir = getDir(extension, extensionVersion);
 
 /**
  * Determines whether to skip
@@ -173,9 +175,9 @@ async function writePackageJson({useBentoCore}) {
     repository: {
       type: 'git',
       url: 'https://github.com/ampproject/amphtml.git',
-      directory: `extensions/${extension}/${extensionVersion}`,
+      directory: dir,
     },
-    homepage: `https://github.com/ampproject/amphtml/tree/main/extensions/${extension}/${extensionVersion}`,
+    homepage: `https://github.com/ampproject/amphtml/tree/main/${dir}`,
     peerDependencies: {
       preact: '^10.2.1',
       react: '^17.0.0',
@@ -224,7 +226,8 @@ async function writeReactJs() {
  */
 async function copyCssToRoot() {
   try {
-    const extDir = path.join('extensions', extension, '1.0');
+    // TODO(rileyajones) learn why this was hardcoded as version '1.0'.
+    const extDir = getDir(extension, '1.0');
     const preactCssDist = path.join(extDir, 'dist', 'styles.css');
     if (await pathExists(preactCssDist)) {
       const preactCssRoot = path.join(extDir, 'styles.css');
