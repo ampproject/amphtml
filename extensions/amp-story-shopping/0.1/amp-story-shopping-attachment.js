@@ -201,7 +201,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
     if (detailsContainer) {
       const open = shoppingDataPerPage.length === 1;
-      this.toggleDetailsText(detailsContainer, open);
+      this.toggleDetailsText_(detailsContainer, open);
     }
 
     // If template has not been appended to the dom, append it and assign it to built templates.
@@ -281,11 +281,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Expands or collapses details text.
-   * @param {!Element} detailsHeader
-   * @param {!boolean} open
+   * @param {!Element} detailsContainer
+   * @param {boolean} open
    * @private
    */
-  toggleDetailsText(detailsContainer, open) {
+  toggleDetailsText_(detailsContainer, open) {
     const detailsText = detailsContainer.querySelector(
       '.i-amphtml-amp-story-shopping-pdp-details-text'
     );
@@ -306,7 +306,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         '.i-amphtml-amp-story-shopping-pdp-details'
       );
       const open = !detailsContainer.hasAttribute('active');
-      this.toggleDetailsText(detailsContainer, open);
+      this.toggleDetailsText_(detailsContainer, open);
     };
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
