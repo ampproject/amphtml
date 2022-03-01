@@ -952,6 +952,13 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-slikeplayer",
+    "version": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "amp-smartlinks",
     "version": "0.1",
     "latestVersion": "0.1"
