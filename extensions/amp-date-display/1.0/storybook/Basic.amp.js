@@ -106,5 +106,5 @@ ExternalTemplate.argTypes = {
     defaultValue: 'template1',
     options: ['template1', 'template2'],
     control: {type: 'select'},
-  }
+  },
 };
