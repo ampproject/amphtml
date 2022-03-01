@@ -53,6 +53,9 @@ amp-story-shopping-attachment a {
   }
   99.9% {
     opacity: 0;
+    display: block;
+    height: auto;
+    overflow: visible;
   }
   100% {
     opacity: 0;
