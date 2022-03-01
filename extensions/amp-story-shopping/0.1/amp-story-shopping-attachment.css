@@ -232,7 +232,7 @@ amp-story-shopping-attachment a {
   border-radius: 0 1.1em 1.1em 0 !important;
 }
 
-.i-amphtml-amp-story-shopping-pdp-carousel-card:only-child, 
+.i-amphtml-amp-story-shopping-pdp-carousel-card:only-child,
 [dir=rtl] .i-amphtml-amp-story-shopping-pdp-carousel-card:only-child {
   width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
   max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2)!important;
