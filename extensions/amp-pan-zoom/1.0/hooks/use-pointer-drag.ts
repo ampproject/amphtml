@@ -3,24 +3,28 @@ import type {RefObject} from 'preact';
 import {useEffect} from '#preact';
 import {useValueRef} from '#preact/component';
 
-export type PointerDragEvent = {
+export type PointerDragEvent<TDragData> = {
   clientX: MouseEvent['clientX'];
   clientY: MouseEvent['clientY'];
-  first: boolean;
-  last: boolean;
+  data: TDragData;
 };
-export type PointerDragCallback<TDragStartInfo> = (
-  ev: PointerDragEvent,
-  start: TDragStartInfo
-) => TDragStartInfo;
+export type PointerType = 'mouse' | 'pen' | 'touch';
 
-const LEFT_CLICK = 0;
+export type PointerDragCallbacks<TDragData> = {
+  pointerType?: PointerType;
+  button?: 'left';
+  onStart(ev: Omit<PointerDragEvent<TDragData>, 'data'>): TDragData;
+  onMove(ev: PointerDragEvent<TDragData>): TDragData | void;
+  onStop(ev: PointerDragEvent<TDragData>): void;
+};
 
-export function usePointerDrag<TDragStartInfo>(
+const LEFT_BUTTON = 0;
+
+export function usePointerDrag<TDragData>(
   elementRef: RefObject<HTMLElement>,
-  callback: PointerDragCallback<TDragStartInfo>
+  config: PointerDragCallbacks<TDragData>
 ) {
-  const callbackRef = useValueRef(callback);
+  const configRef = useValueRef(config);
 
   useEffect(() => {
     const element = elementRef.current;
@@ -28,10 +32,17 @@ export function usePointerDrag<TDragStartInfo>(
       return;
     }
 
-    let start: TDragStartInfo | null = null;
+    let data: TDragData | null = null;
     const eventCleanup = addEventListeners(element, {
       'pointerdown': (ev) => {
-        if (ev.button !== LEFT_CLICK) {
+        const config = configRef.current;
+
+        const isWrongPointerType =
+          config.pointerType && ev.pointerType !== config.pointerType;
+        const isWrongButton =
+          config.button === 'left' && ev.button !== LEFT_BUTTON;
+
+        if (isWrongPointerType || isWrongButton) {
           return;
         }
         ev.preventDefault();
@@ -40,28 +51,30 @@ export function usePointerDrag<TDragStartInfo>(
 
         const {clientX, clientY} = ev;
 
-        start = callbackRef.current(
-          {clientX, clientY, first: true, last: false},
-          null as unknown as TDragStartInfo
-        );
+        data = configRef.current.onStart({clientX, clientY});
       },
 
       'pointermove': (ev) => {
-        if (!start) {
+        if (!element.hasPointerCapture(ev.pointerId)) {
           return;
         }
         ev.preventDefault();
 
         const {clientX, clientY} = ev;
 
-        start = callbackRef.current(
-          {clientX, clientY, first: false, last: false},
-          start
-        );
+        const newData = configRef.current.onMove({
+          clientX,
+          clientY,
+          data: data!,
+        });
+
+        if (newData) {
+          data = newData;
+        }
       },
 
       'pointerup': (ev) => {
-        if (ev.button !== LEFT_CLICK || !start) {
+        if (!element.hasPointerCapture(ev.pointerId)) {
           return;
         }
         ev.preventDefault();
@@ -70,16 +83,13 @@ export function usePointerDrag<TDragStartInfo>(
 
         const {clientX, clientY} = ev;
 
-        callbackRef.current(
-          {clientX, clientY, first: false, last: true},
-          start
-        );
-        start = null;
+        configRef.current.onStop({clientX, clientY, data: data!});
+        data = null;
       },
     });
 
     return eventCleanup;
-  }, [elementRef, callbackRef]);
+  }, [elementRef, configRef]);
 }
 
 // Fixes the return type of Object.keys:

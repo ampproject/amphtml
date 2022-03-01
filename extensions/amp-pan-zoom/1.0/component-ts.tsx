@@ -133,27 +133,25 @@ export function BentoPanZoomWithRef(
     clientX: number;
     clientY: number;
   };
-  usePointerDrag<StartDragInfo>(
-    contentRef,
-    ({clientX, clientY, first, last}, start: StartDragInfo) => {
-      if (first) {
-        actions.SET_IS_PANNABLE({isPannable: true});
-        start = {posX: state.posX, posY: state.posY, clientX, clientY};
-      }
 
+  usePointerDrag<StartDragInfo>(contentRef, {
+    button: 'left',
+    // pointerType: 'mouse',
+    onStart({clientX, clientY}) {
+      actions.SET_IS_PANNABLE({isPannable: true});
+      return {posX: state.posX, posY: state.posY, clientX, clientY};
+    },
+    onMove({clientX, clientY, data: start}) {
       actions.MOVE({
         posX: start.posX + clientX - start.clientX,
         posY: start.posY + clientY - start.clientY,
         element: contentRef.current!,
       });
-
-      if (last) {
-        actions.MOVE_RELEASE();
-      }
-
-      return start;
-    }
-  );
+    },
+    onStop(unusedEv) {
+      actions.MOVE_RELEASE();
+    },
+  });
 
   useGestures(contentRef, {
     tapZoom(ev, startInfo: {scale: number}) {
