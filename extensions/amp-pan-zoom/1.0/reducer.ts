@@ -419,8 +419,10 @@ export function usePanZoomState(config: PanZoomConfig) {
           } = payload;
           const newScale = boundScale(state, scale, allowExtent);
           const newPosition = updateScale(state, anchorX, anchorY, newScale);
+          const isZoomed = newScale !== 1;
           return {
             ...state,
+            isZoomed,
             ...boundPosition(state, newPosition, allowExtent),
           };
         });

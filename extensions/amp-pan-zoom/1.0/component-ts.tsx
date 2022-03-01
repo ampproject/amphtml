@@ -108,6 +108,7 @@ export function BentoPanZoomWithRef(
     setStyles(contentRef.current!, {
       transformOrigin: '0 0',
       transform: translate(state.posX, state.posY) + cssScale(state.scale),
+      touchAction: state.isZoomed ? 'none' : 'pan-x pan-y',
     });
   }, [state.posX, state.posY, state.scale]);
 
