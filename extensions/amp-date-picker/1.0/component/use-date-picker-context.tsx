@@ -1,40 +1,80 @@
 import {addDays, isAfter, isBefore, subDays} from 'date-fns';
 
+import * as Preact from '#preact';
 import {createContext, useCallback, useContext, useMemo} from '#preact';
 
 import {DatesList} from './dates-list';
 
+import {
+  DEFAULT_END_INPUT_SELECTOR,
+  DEFAULT_INPUT_SELECTOR,
+  DEFAULT_LOCALE,
+  DEFAULT_MONTH_FORMAT,
+  DEFAULT_ON_ERROR,
+  DEFAULT_START_INPUT_SELECTOR,
+  DEFAULT_WEEK_DAY_FORMAT,
+  ISO_8601,
+} from '../constants';
 import {getCurrentDate, getFormattedDate} from '../date-helpers';
 import {parseDate as _parseDate} from '../parsers';
-import {BentoDatePickerProps} from '../types';
+import {BentoDatePickerProps, DatePickerMode} from '../types';
 
-const DatePickerContext = createContext<BentoDatePickerProps | null>(null);
-export {DatePickerContext};
+interface DatePickerHelperFunctions {
+  getLabel(date: Date): string;
+  isDisabled(date: Date): boolean;
+  isHighlighted(date: Date): boolean;
+  getDisabledAfter(startDate?: Date): Date | null;
+  getDisabledBefore(startDate?: Date): Date | null;
+  blockedDates: DatesList;
+  highlightedDates: DatesList;
+  parseDate(value: string): Date | null;
+  formatDate(date: Date): string;
+  formatMonth(date: Date): string;
+  formatWeekday(date: Date): string;
+}
+
+// Since we are providing defualts, this adds type safety for the single and range components
+interface RequiredProps {
+  today: Date;
+  mode: DatePickerMode;
+  inputSelector: string;
+  startInputSelector: string;
+  endInputSelector: string;
+}
+
+type DatePickerContextType = BentoDatePickerProps &
+  DatePickerHelperFunctions &
+  RequiredProps;
+
+const DatePickerContext = createContext<DatePickerContextType | null>(null);
 
 /** Example: Wednesday, December 1, 2021 */
 const DATE_FORMAT = 'cccc, LLLL d, yyyy';
 
-/** Provides access to props and shared helpers */
-export function useDatePickerContext() {
-  const context = useContext(DatePickerContext);
-  if (!context) {
-    throw new Error('Must be wrapped in DayPickerContext.Provider component');
-  }
-  const {
-    allowBlockedEndDate,
-    blocked,
-    format,
-    highlighted,
-    locale,
-    max,
-    maximumNights,
-    min: optionalMin,
-    minimumNights = 1,
-    monthFormat,
-    today = getCurrentDate(),
-    weekDayFormat,
-  } = context;
-
+export function DatePickerProvider({
+  allowBlockedEndDate,
+  allowBlockedRanges,
+  children,
+  endInputSelector = DEFAULT_END_INPUT_SELECTOR,
+  format = ISO_8601,
+  inputSelector = DEFAULT_INPUT_SELECTOR,
+  locale = DEFAULT_LOCALE,
+  max,
+  mode = 'static',
+  monthFormat = DEFAULT_MONTH_FORMAT,
+  onError = DEFAULT_ON_ERROR,
+  startInputSelector = DEFAULT_START_INPUT_SELECTOR,
+  today = getCurrentDate(),
+  type = 'single',
+  weekDayFormat = DEFAULT_WEEK_DAY_FORMAT,
+  maximumNights = 0,
+  minimumNights = 1,
+  numberOfMonths = 1,
+  min: optionalMin,
+  blocked,
+  highlighted,
+  ...rest
+}: BentoDatePickerProps) {
   const min = optionalMin || today;
 
   const formatDate = useCallback(
@@ -84,7 +124,7 @@ export function useDatePickerContext() {
   const getDisabledAfter = useCallback(
     (startDate?: Date) => {
       if (!maximumNights || !startDate) {
-        return;
+        return null;
       }
       return addDays(startDate, maximumNights);
     },
@@ -99,7 +139,7 @@ export function useDatePickerContext() {
   const getDisabledBefore = useCallback(
     (startDate?: Date) => {
       if (!startDate) {
-        return;
+        return null;
       }
       return addDays(startDate, minimumNights);
     },
@@ -140,18 +180,43 @@ export function useDatePickerContext() {
     [isDisabled, locale]
   );
 
-  return {
-    getLabel,
-    isDisabled,
-    isHighlighted,
-    getDisabledAfter,
-    getDisabledBefore,
-    blockedDates,
-    highlightedDates,
-    parseDate,
-    formatDate,
-    formatMonth,
-    formatWeekday,
-    ...context,
-  };
+  return (
+    <DatePickerContext.Provider
+      value={{
+        allowBlockedEndDate,
+        allowBlockedRanges,
+        endInputSelector,
+        inputSelector,
+        isDisabled,
+        isHighlighted,
+        getLabel,
+        getDisabledAfter,
+        getDisabledBefore,
+        blockedDates,
+        highlightedDates,
+        parseDate,
+        formatDate,
+        formatMonth,
+        formatWeekday,
+        numberOfMonths,
+        mode,
+        onError,
+        startInputSelector,
+        today,
+        type,
+        ...rest,
+      }}
+    >
+      {children}
+    </DatePickerContext.Provider>
+  );
+}
+
+/** Provides access to props and shared helpers */
+export function useDatePickerContext() {
+  const context = useContext(DatePickerContext);
+  if (!context) {
+    throw new Error('Must be wrapped in DayPickerContext.Provider component');
+  }
+  return context;
 }

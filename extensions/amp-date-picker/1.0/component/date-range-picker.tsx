@@ -10,6 +10,7 @@ import {DateRange, Matcher} from 'react-day-picker';
 
 import {Keys_Enum} from '#core/constants/key-codes';
 
+import * as Preact from '#preact';
 import {
   useCallback,
   useEffect,
@@ -18,42 +19,39 @@ import {
   useRef,
   useState,
 } from '#preact';
-import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
-import {Ref} from '#preact/types';
+import {Ref, RenderableProps} from '#preact/types';
 
 import {BaseDatePicker} from './base-date-picker';
 import {useDatePickerContext} from './use-date-picker-context';
 import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
 
-import {
-  DEFAULT_END_INPUT_SELECTOR,
-  DEFAULT_START_INPUT_SELECTOR,
-} from '../constants';
-import {getCurrentDate} from '../date-helpers';
-import {
-  DateFieldType,
-  DateRangePickerAPI,
-  DateRangePickerProps,
-} from '../types';
+import {DateFieldType, DateRangePickerAPI} from '../types';
 
 function DateRangePickerWithRef(
-  {
-    allowBlockedEndDate,
-    allowBlockedRanges,
-    children,
-    endInputSelector = DEFAULT_END_INPUT_SELECTOR,
-    initialVisibleMonth,
-    mode = 'static',
-    openAfterClear,
-    openAfterSelect,
-    startInputSelector = DEFAULT_START_INPUT_SELECTOR,
-    today = getCurrentDate(),
-  }: DateRangePickerProps,
+  {children}: RenderableProps<{}>,
   ref: Ref<DateRangePickerAPI>
 ) {
+  const {
+    allowBlockedEndDate,
+    allowBlockedRanges,
+    blockedDates,
+    endInputSelector,
+    formatDate,
+    getDisabledAfter,
+    getDisabledBefore,
+    initialVisibleMonth,
+    isDisabled,
+    mode,
+    openAfterClear,
+    openAfterSelect,
+    parseDate,
+    startInputSelector,
+    today,
+  } = useDatePickerContext();
+
   const containerRef = useRef<HTMLElement>(null);
 
   const [focusedInput, setFocusedInput] =
@@ -63,16 +61,6 @@ function DateRangePickerWithRef(
   const [month, setMonth] = useState<Date>(defaultMonth);
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
-
-  const {
-    blockedDates,
-    formatDate,
-    getDisabledAfter,
-    getDisabledBefore,
-    isDisabled,
-    parseDate,
-  } = useDatePickerContext();
-
   const startDateInput = useDatePickerInput({
     inputSelector: startInputSelector,
     type: 'start-input',

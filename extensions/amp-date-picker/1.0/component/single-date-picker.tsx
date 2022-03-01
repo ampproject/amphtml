@@ -12,7 +12,7 @@ import {
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
-import {Ref} from '#preact/types';
+import {Ref, RenderableProps} from '#preact/types';
 
 import {BaseDatePicker} from './base-date-picker';
 import {useDatePickerContext} from './use-date-picker-context';
@@ -20,21 +20,24 @@ import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
 
 import {DEFAULT_INPUT_SELECTOR} from '../constants';
-import {getCurrentDate} from '../date-helpers';
-import {SingleDatePickerAPI, SingleDatePickerProps} from '../types';
+import {SingleDatePickerAPI} from '../types';
 
 function SingleDatePickerWithRef(
-  {
-    children,
-    initialVisibleMonth,
-    inputSelector = DEFAULT_INPUT_SELECTOR,
-    mode = 'static',
-    openAfterClear,
-    openAfterSelect,
-    today = getCurrentDate(),
-  }: SingleDatePickerProps,
+  {children}: RenderableProps<{}>,
   ref: Ref<SingleDatePickerAPI>
 ) {
+  const {
+    blockedDates,
+    formatDate,
+    parseDate,
+    initialVisibleMonth,
+    inputSelector = DEFAULT_INPUT_SELECTOR,
+    mode,
+    openAfterClear,
+    openAfterSelect,
+    today,
+  } = useDatePickerContext();
+
   const containerRef = useRef<HTMLElement>(null);
 
   const defaultMonth = initialVisibleMonth || today;
@@ -42,7 +45,6 @@ function SingleDatePickerWithRef(
   const [month, setMonth] = useState<Date>(defaultMonth);
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
-  const {blockedDates, formatDate, parseDate} = useDatePickerContext();
 
   const dateInput = useDatePickerInput({
     inputSelector,

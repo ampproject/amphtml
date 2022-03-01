@@ -4,4 +4,5 @@ export type {
   ComponentType,
   FunctionalComponent,
   Ref,
+  RenderableProps,
 } from 'preact';
