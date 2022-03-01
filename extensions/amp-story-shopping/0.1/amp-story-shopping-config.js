@@ -154,7 +154,7 @@ export function validateConfig(
     const validationFunctions = validationObject[configKey];
     validationFunctions.forEach((fn) => {
       try {
-        /* This check skips optional attribute validation */
+        /* This check will skip optional attribute validation checks when they are not present in the config */
         if (
           shoppingConfig[configKey] !== undefined ||
           validationFunctions.includes(validateRequired)
@@ -162,7 +162,9 @@ export function validateConfig(
           fn(configKey, shoppingConfig[configKey]);
         }
       } catch (err) {
-        isValidConfig = false;
+        if (validationFunctions.includes(validateRequired)) {
+          isValidConfig = false;
+        }
         user().warn('AMP-STORY-SHOPPING-CONFIG', `${optParentFieldName}${err}`);
       }
     });
