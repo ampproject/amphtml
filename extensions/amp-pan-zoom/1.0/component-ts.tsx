@@ -137,7 +137,6 @@ export function BentoPanZoomWithRef(
 
   usePointerDrag<StartDragInfo>(contentRef, {
     button: 'left',
-    // pointerType: 'mouse',
     onStart({clientX, clientY}) {
       actions.SET_IS_PANNABLE({isPannable: true});
       return {posX: state.posX, posY: state.posY, clientX, clientY};
@@ -155,48 +154,11 @@ export function BentoPanZoomWithRef(
   });
 
   useGestures(contentRef, {
-    tapZoom(ev, startInfo: {scale: number}) {
-      console.log('TAP_ZOOM', ev);
-      const {
-        centerClientX,
-        centerClientY,
-        deltaX,
-        deltaY,
-        first,
-        last,
-        velocityX,
-        velocityY,
-      } = ev.data;
-
-      if (first) {
-        actions.SET_IS_PANNABLE({isPannable: true});
-        startInfo = {
-          scale: state.scale,
-        };
-      }
-
-      const TAP_ZOOM_SCALE = 20; // drag this many px to double the scale
-      const newScale = startInfo.scale * (1 + deltaY / TAP_ZOOM_SCALE);
-
-      const {anchorX, anchorY} = getElementPosition(
-        centerClientX,
-        centerClientY,
-        state.containerBox
-      );
-      actions.UPDATE_SCALE({anchorX, anchorY, scale: newScale});
-
-      if (last) {
-        actions.MOVE_RELEASE();
-      }
-
-      return startInfo;
-    },
     pinch(ev) {
       console.log('PINCH', ev);
       toggleZoom();
     },
     doubletap(ev) {
-      // console.log('DOUBLE-TAP', ev.data);
       const {clientX, clientY} = ev.data;
       const {anchorX, anchorY} = getElementPosition(
         clientX,
