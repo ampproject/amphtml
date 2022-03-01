@@ -32,7 +32,7 @@ export const productValidationConfig = {
   'productPrice': [validateRequired, validateNumber],
   'productImages': [
     validateRequired,
-    createValidateConfig(productImagesValidation),
+    createValidateConfigArray(productImagesValidation),
   ],
   'productPriceCurrency': [validateRequired, validateString],
   'aggregateRating': [
@@ -66,14 +66,19 @@ let isValidConfigSection_ = true;
  */
 function createValidateConfig(validation) {
   return (field, value) => {
-    // Handles Arrays of Objects
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        isValidConfigSection_ &&= validateConfig(item, validation, field + ' ');
-      }
-      // Handles Objects
-    } else {
-      isValidConfigSection_ &&= validateConfig(value, validation);
+    isValidConfigSection_ &&= validateConfig(value, validation, field + ' ');
+  };
+}
+
+/**
+ * Validates an Array of Objects using the validateConfig function.
+ * @param {?Object=} validation
+ * @return {boolean}
+ */
+function createValidateConfigArray(validation) {
+  return (field, value) => {
+    for (const item of value) {
+      isValidConfigSection_ &&= validateConfig(item, validation, field + ' ');
     }
   };
 }
