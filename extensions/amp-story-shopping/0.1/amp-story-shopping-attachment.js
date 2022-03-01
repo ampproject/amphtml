@@ -314,21 +314,23 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               )}
             </span>
           </div>
-          <span class="i-amphtml-amp-story-shopping-pdp-reviews">
-            {activeProductData.aggregateRating.ratingValue} (
-            <a
-              class="i-amphtml-amp-story-shopping-pdp-reviews-link"
-              href={activeProductData.aggregateRating.reviewUrl}
-              target="_top"
-            >
-              {activeProductData.aggregateRating.reviewCount + ' '}
-              {this.localizationService_.getLocalizedString(
-                LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL,
-                this.element
-              )}
-            </a>
-            )
-          </span>
+          {activeProductData.aggregateRating && (
+            <span class="i-amphtml-amp-story-shopping-pdp-reviews">
+              {activeProductData.aggregateRating.ratingValue} (
+              <a
+                class="i-amphtml-amp-story-shopping-pdp-reviews-link"
+                href={activeProductData.aggregateRating.reviewUrl}
+                target="_top"
+              >
+                {activeProductData.aggregateRating.reviewCount + ' '}
+                {this.localizationService_.getLocalizedString(
+                  LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL,
+                  this.element
+                )}
+              </a>
+              )
+            </span>
+          )}
           <a
             class="i-amphtml-amp-story-shopping-pdp-cta"
             href={activeProductData.productUrl}
