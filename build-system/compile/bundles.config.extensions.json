@@ -175,6 +175,7 @@
   {
     "name": "amp-app-banner",
     "version": "1.0",
+    "latestVersion": "0.1",
     "options": {
       "hasCss": true,
       "npm": true,
@@ -479,6 +480,7 @@
   {
     "name": "amp-gist",
     "version": "1.0",
+    "latestVersion": "0.1",
     "options": {
       "hasCss": true,
       "bento": true,
@@ -492,7 +494,8 @@
   },
   {
     "name": "amp-google-read-aloud-player",
-    "version": "0.1"
+    "version": "0.1",
+    "latestVersion": "0.1"
   },
   {
     "name": "amp-gwd-animation",
@@ -681,6 +684,7 @@
   {
     "name": "amp-list",
     "version": "1.0",
+    "latestVersion": "0.1",
     "options": {
       "hasCss": false,
       "npm": true,
@@ -1063,6 +1067,7 @@
   {
     "name": "amp-story-page-attachment",
     "version": "0.1",
+    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
@@ -1102,6 +1107,7 @@
   {
     "name": "amp-story-subscriptions",
     "version": "0.1",
+    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
