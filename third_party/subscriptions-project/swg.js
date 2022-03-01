@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.205 */
+/** Version: 0.1.22.207 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5020,7 +5020,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.205',
+    '_client': 'SwG 0.1.22.207',
   });
 }
 
@@ -6350,7 +6350,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.205',
+        '_client': 'SwG 0.1.22.207',
         'supportsEventManager': true,
       },
       args || {}
@@ -6767,6 +6767,11 @@ const ExperimentFlags = {
    * Experiment flag for logging audience activity.
    */
   LOGGING_AUDIENCE_ACTIVITY: 'logging-audience-activity',
+
+  /**
+   * Experiment flag for swapping the location of the counter and the main CTA in Amplio blogs.
+   */
+  TWG_SWAP_COUNTER_AND_CTA: 'counter_cta_swap_enable_experiment',
 };
 
 /**
@@ -7258,7 +7263,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.205');
+    context.setClientVersion('SwG 0.1.22.207');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7669,6 +7674,12 @@ const SWG_I18N_STRINGS = {
     'zh-hk': '您之前已訂閱。',
     'zh-tw': '你已經訂閱了。',
   },
+  'REGWALL_ACCOUNT_CREATED_LANG_MAP': {
+    'en': 'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+  },
+  'NEWSLETTER_SIGNED_UP_LANG_MAP': {
+    'en': 'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+  },
 };
 
 /**
@@ -7761,12 +7772,7 @@ class SmartSubscriptionButtonApi {
    */
   handleSmartBoxClick_(smartBoxMessage) {
     if (smartBoxMessage && smartBoxMessage.getIsClicked()) {
-      if (!this.callback_) {
-        throw new Error('No callback!');
-      }
       this.callback_();
-
-      return;
     }
   }
 
@@ -17785,14 +17791,14 @@ class WaitForSubscriptionLookupApi {
 
 /**
  * @implements {DepsDef}
- * @implements {Subscriptions}
+ * @implements {SubscriptionsInterface}
  */
 class ConfiguredRuntime {
   /**
-   * @param {!Window|!Document|!Doc} winOrDoc
+   * @param {!Window|!Document|!DocInterface} winOrDoc
    * @param {!../model/page-config.PageConfig} pageConfig
    * @param {{
-   *     fetcher: (!Fetcher|undefined),
+   *     fetcher: (!FetcherInterface|undefined),
    *     configPromise: (!Promise|undefined),
    *     enableGoogleAnalytics: (boolean|undefined),
    *     useArticleEndpoint: (boolean|undefined)
@@ -17810,7 +17816,7 @@ class ConfiguredRuntime {
     /** @private @const {!ClientEventManager} */
     this.eventManager_ = new ClientEventManager(integr.configPromise);
 
-    /** @private @const {!Doc} */
+    /** @private @const {!DocInterface} */
     this.doc_ = resolveDoc(winOrDoc);
 
     /** @private @const {!Window} */
@@ -17837,7 +17843,7 @@ class ConfiguredRuntime {
     /** @private @const {!JsError} */
     this.jserror_ = new JsError(this.doc_);
 
-    /** @private @const {!Fetcher} */
+    /** @private @const {!FetcherInterface} */
     this.fetcher_ = integr.fetcher || new XhrFetcher(this.win_);
 
     /** @private @const {!Storage} */

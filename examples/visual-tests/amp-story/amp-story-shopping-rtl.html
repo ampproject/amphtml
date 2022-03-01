@@ -35,10 +35,19 @@
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
       <amp-story-page id="inline-light-theme">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="chair" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="flowers" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
         <!--
           Example of Inline config. Multiple product tags with icon defined.
         -->
-        <amp-story-shopping-config layout="nodisplay">
+        <amp-story-shopping-attachment>
           <script type="application/json">
             {
                 "items" : [
@@ -58,10 +67,11 @@
                        {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 6"}
                     ],
                     "aggregateRating": {
-                      "ratingValue": "4.4",
-                      "reviewCount": "89",
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
-                    }
+                    },
+                    "productDetails": "One newline after this. \n Two newlines after this. \n\n  Five consecutive newlines after this, should become 2 newlines. \n\n\n\n\n Many consecutive newlines with different spacing and tabs after this, should become 2 newlines. \n          \n\n   \n  \n \n  \n \n I hope it works!"
                    },
                    {
                     "productUrl": "https://www.google.com",
@@ -72,10 +82,11 @@
                     "productPriceCurrency": "INR",
                     "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "art"}],
                     "aggregateRating": {
-                      "ratingValue": "4.4",
-                      "reviewCount": "89",
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
-                    }
+                    },
+                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
                    },
                    {
                     "productUrl": "https://www.google.com",
@@ -87,10 +98,11 @@
                     "productTagText": "The perfectly imperfect yellow chair",
                     "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "chair"}],
                     "aggregateRating": {
-                      "ratingValue": "4.4",
-                      "reviewCount": "89",
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
-                    }
+                    },
+                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
                    },
                    {
                     "productUrl": "https://www.google.com",
@@ -102,31 +114,30 @@
                     "productIcon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
                     "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "flowers"}],
                     "aggregateRating": {
-                      "ratingValue": "4.4",
-                      "reviewCount": "89",
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
                     }
                    }
                 ]
               }
           </script>
-        </amp-story-shopping-config>
-        <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-product-id="chair" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-product-id="flowers" ></amp-story-shopping-tag>
-        </amp-story-grid-layer>
-        <amp-story-shopping-attachment></amp-story-shopping-attachment>
+        </amp-story-shopping-attachment>
       </amp-story-page>
       <amp-story-page id="inline-dark-theme">
         <!--
           Dark theme example of Inline config. Multiple product tags with icon defined.
         -->
-        <amp-story-shopping-config layout="nodisplay">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="chair" ></amp-story-shopping-tag>
+          <amp-story-shopping-tag data-product-id="flowers" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
+        <amp-story-shopping-attachment theme="dark">
           <script type="application/json">
             {
                 "items" : [
@@ -146,8 +157,8 @@
                        {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 6"}
                     ],
                     "aggregateRating": {
-                      "ratingValue": "4.4",
-                      "reviewCount": "89",
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
                     }
                    },
@@ -160,8 +171,8 @@
                     "productPriceCurrency": "INR",
                     "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "art"}],
                     "aggregateRating": {
-                      "ratingValue": "4.4",
-                      "reviewCount": "89",
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
                     }
                    },
@@ -175,8 +186,8 @@
                     "productTagText": "The perfectly imperfect yellow chair",
                     "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "chair"}],
                     "aggregateRating": {
-                      "ratingValue": "4.4",
-                      "reviewCount": "89",
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
                     }
                    },
@@ -190,98 +201,62 @@
                     "productIcon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
                     "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "flowers"}],
                     "aggregateRating": {
-                      "ratingValue": "4.4",
-                      "reviewCount": "89",
+                      "ratingValue": 4.4,
+                      "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
                     }
                    }
                 ]
               }
           </script>
-        </amp-story-shopping-config>
+        </amp-story-shopping-attachment>
+      </amp-story-page>
+      <amp-story-page id="remote-with-product">
         <amp-story-grid-layer template="fill">
           <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-product-id="chair" ></amp-story-shopping-tag>
-          <amp-story-shopping-tag data-product-id="flowers" ></amp-story-shopping-tag>
-        </amp-story-grid-layer>
-        <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
-      </amp-story-page>
-      <amp-story-page id="remote-dark-theme">
-        <!--
-          Example of Remote JSON with inline fallback. Single product tag without icon.
-        -->
-        <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
-          <script type="application/json">
-            {
-                "items" : [
-                   {
-                    "productUrl": "https://www.google.com",
-                    "productId": "art",
-                    "productTitle": "Abstract Art",
-                    "productBrand": "V. Artsy",
-                    "productPrice": 1200.00,
-                    "productPriceCurrency": "JPY",
-                    "productImages": ["/examples/visual-tests/amp-story/img/cat1.jpg"],
-                    "aggregateRating": {
-                      "ratingValue": "4.4",
-                      "reviewCount": "89",
-                      "reviewUrl": "https://www.google.com"
-                    }
-                   }
-                ]
-              }
-          </script>
-        </amp-story-shopping-config>
-        <amp-story-grid-layer template="fill">
-
-          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
         </amp-story-grid-layer>
-        <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
-      </amp-story-page>
-      <amp-story-page id="remote-with-product">
         <!--
           Example of:
           CTA Button rendering due to remote product tag existing, but no inline.
         -->
-        <amp-story-shopping-config layout="nodisplay" src="/examples/amp-story/shopping/remote.json" >
+        <amp-story-shopping-attachment theme="dark" src="/examples/amp-story/shopping/remote.json">
           <script type="application/json">
             {
               "items" : []
             }
           </script>
-        </amp-story-shopping-config>
-        <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
-        </amp-story-grid-layer>
-        <amp-story-grid-layer template="vertical">
-          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
-        </amp-story-grid-layer>
-        <amp-story-shopping-attachment theme="dark"></amp-story-shopping-attachment>
+        </amp-story-shopping-attachment>
       </amp-story-page>
       <amp-story-page id="inline-no-product">
+      <amp-story-grid-layer template="fill">
+        <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+      </amp-story-grid-layer>
         <!--
           Example of:
           CTA Button not rendering due to no product tags.
         -->
-      <amp-story-shopping-config layout="nodisplay">
+      <amp-story-shopping-attachment>
         <script type="application/json">
           {
             "items" : []
           }
         </script>
-      </amp-story-shopping-config>
-
-      <amp-story-grid-layer template="fill">
-        <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
-      </amp-story-grid-layer>
-      <amp-story-shopping-attachment></amp-story-shopping-attachment>
+      </amp-story-shopping-attachment>
+      </amp-story-page>
+       <!--
+          Example of:
+          CTA Button not rendering due to no shopping attachment.
+        -->
+      <amp-story-page id="remote-dark-theme">
+        <amp-story-grid-layer template="fill">
+          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
+        </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
   </body>

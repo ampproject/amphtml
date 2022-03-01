@@ -1,9 +1,10 @@
 const {globExcludeDisabledStorybookFiles} = require('../disabled-stories');
+const {getStaticDirs} = require('../static-dirs');
 
 const rootDir = '../../../../..';
 
 module.exports = {
-  staticDirs: [rootDir],
+  staticDirs: getStaticDirs(rootDir),
   // Unlike the `amp` and `preact` environments, we search Storybook files only
   // under component paths. This is because only components have React build
   // output, but directories in src/ outside src/bento/components/ do not.

@@ -155,7 +155,7 @@ exports.rules = [
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/signature-verifier.js',
 
-      // And a few mrore things depend on a4a.
+      // And a few more things depend on a4a.
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-network-base.js',
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/amp-ad-type-defs.js',
       'extensions/amp-ad-custom/0.1/amp-ad-custom.js->extensions/amp-a4a/0.1/name-frame-renderer.js',
@@ -178,9 +178,6 @@ exports.rules = [
       // Ads needs iframe transports
       'extensions/amp-ad-exit/0.1/config.js->extensions/amp-analytics/0.1/iframe-transport-vendors.js',
 
-      // <amp-brightcove> versions share this message API definition.
-      'extensions/amp-brightcove/**->extensions/amp-brightcove/brightcove-api.js',
-
       // Amp carousel (and friends) depending on base carousel
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/action-source.js',
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/carousel.js',
@@ -188,51 +185,23 @@ exports.rules = [
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/0.1/carousel-events.js',
-      'extensions/amp-inline-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
-      'extensions/amp-inline-gallery/1.0/pagination-base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
 
-      'extensions/amp-inline-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/carousel-context.js',
-      'extensions/amp-inline-gallery/1.0/pagination.js->extensions/amp-base-carousel/1.0/carousel-context.js',
-      'extensions/amp-inline-gallery/1.0/thumbnails-base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
-      'extensions/amp-inline-gallery/1.0/thumbnails-base-element.js->extensions/amp-base-carousel/1.0/carousel-props.js',
-      'extensions/amp-inline-gallery/1.0/thumbnails.js->extensions/amp-base-carousel/1.0/component.js',
-      'extensions/amp-inline-gallery/1.0/thumbnails.js->extensions/amp-base-carousel/1.0/carousel-context.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/action-source.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/responsive-attributes.js',
-      'extensions/amp-stream-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
-      'extensions/amp-stream-gallery/1.0/component.js->extensions/amp-base-carousel/1.0/component.js',
-
-      // <amp-dailymotion> versions share this message API definition.
-      'extensions/amp-dailymotion/**->extensions/amp-dailymotion/dailymotion-api.js',
-
-      // Autolightboxing dependencies
-      'extensions/amp-base-carousel/1.0/scroller.js->extensions/amp-lightbox-gallery/1.0/component.js',
-      'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-lightbox/1.0/component.js',
-      'extensions/amp-lightbox-gallery/1.0/provider.js->extensions/amp-base-carousel/1.0/component.js',
-      'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-lightbox/1.0/component.jss.js',
-      'extensions/amp-lightbox-gallery/1.0/base-element.js->extensions/amp-base-carousel/1.0/component.jss.js',
 
       // <amp-date-display> versions share these date format helpers
       'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
+
+      // <amp-list> and <amp-render> share some logic
+      'extensions/amp-list/1.0/amp-list.js**->extensions/amp-render/1.0/shared/amp-fetch-utils.js',
 
       // Facebook components
       'extensions/amp-facebook/1.0/amp-facebook.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
-
-      // AmpVideoBaseElement, BentoVideoBaseElement, VideoIframe and VideoWrapper are meant to be shared.
-      'extensions/**->extensions/amp-video/1.0/video-base-element.js',
-      'extensions/**->extensions/amp-video/1.0/base-element.js',
-      'extensions/**->extensions/amp-video/1.0/video-iframe.js',
-
-      // <amp-video-iframe> versions share this message API definition.
-      'extensions/amp-video-iframe/**->extensions/amp-video-iframe/amp-video-iframe-api.js',
-
-      // <amp-vimeo> versions share this message API definition.
-      'extensions/amp-vimeo/**->extensions/amp-vimeo/vimeo-api.js',
 
       // Amp geo in group enum
       'extensions/amp-a4a/0.1/amp-a4a.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
@@ -504,9 +473,6 @@ exports.rules = [
     mustNotDependOn: 'extensions/**/*.js',
     allowlist: [
       // Do not add to this allowlist.
-      // These files are here temporarily while all the bento components are moved out of extensions.
-      'src/bento/components/bento-jwplayer/1.0/component.js->extensions/amp-video/1.0/video-iframe.js',
-      'src/bento/components/bento-jwplayer/1.0/base-element.js->extensions/amp-video/1.0/base-element.js',
     ],
   },
   {

@@ -426,6 +426,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (this.isSsr_) {
       return requestForBatchFetch(
         this.element,
+        this.element.getAttribute('src'),
         policy,
         /* refresh */ false
       ).then((request) => {

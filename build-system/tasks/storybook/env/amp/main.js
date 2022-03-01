@@ -1,9 +1,10 @@
 const {globExcludeDisabledStorybookFiles} = require('../disabled-stories');
+const {getStaticDirs} = require('../static-dirs');
 
 const rootDir = '../../../../..';
 
 module.exports = {
-  staticDirs: [rootDir],
+  staticDirs: getStaticDirs(rootDir),
   stories: globExcludeDisabledStorybookFiles([
     `${rootDir}/src/builtins/storybook/*.amp.js`,
     `${rootDir}/extensions/**/*.*/storybook/*.amp.js`,
