@@ -11,18 +11,19 @@ import {
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {!Object<!Object<string, !Array<function>>>} */
-
-const productImagesValidation = {
+const productImagesValidationConfig = {
   'url': [validateRequired, validateURLs],
   'alt': [validateRequired, validateString],
 };
 
-const aggregateRatingValidation = {
+/** @const {!Object<!Object<string, !Array<function>>>} */
+const aggregateRatingValidationConfig = {
   'ratingValue': [validateRequired, validateNumber],
   'reviewCount': [validateRequired, validateNumber],
   'reviewUrl': [validateRequired, validateURLs],
 };
 
+/** @const {!Object<!Object<string, !Array<function>>>} */
 export const productValidationConfig = {
   /* Required Attrs */
   'productUrl': [validateRequired, validateURLs],
@@ -32,11 +33,13 @@ export const productValidationConfig = {
   'productPrice': [validateRequired, validateNumber],
   'productImages': [
     validateRequired,
-    createValidateConfigArray(productImagesValidation),
+    createValidateConfigArray(productImagesValidationConfig),
   ],
   'productPriceCurrency': [validateRequired, validateString],
   /* Optional Attrs */
-  'aggregateRating': [createValidateConfigObject(aggregateRatingValidation)],
+  'aggregateRating': [
+    createValidateConfigObject(aggregateRatingValidationConfig),
+  ],
   'productIcon': [validateURLs],
   'productTagText': [validateString],
   'ctaText': [validateNumber],
