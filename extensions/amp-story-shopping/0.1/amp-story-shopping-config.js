@@ -12,6 +12,11 @@ import {
 
 /** @const {!Object<!Object<string, !Array<function>>>} */
 
+const productImagesValidation = {
+  'url': [validateRequired, validateURLs],
+  'alt': [validateRequired, validateString],
+};
+
 const aggregateRatingValidation = {
   'ratingValue': [validateRequired, validateNumber],
   'reviewCount': [validateRequired, validateNumber],
@@ -25,7 +30,10 @@ export const productValidationConfig = {
   'productTitle': [validateRequired, validateString],
   'productBrand': [validateRequired, validateString],
   'productPrice': [validateRequired, validateNumber],
-  'productImages': [validateRequired, validateURLs],
+  'productImages': [
+    validateRequired,
+    createValidateConfig(productImagesValidation),
+  ],
   'productPriceCurrency': [validateRequired, validateString],
   'aggregateRating': [
     validateRequired,
@@ -46,12 +54,27 @@ export const productValidationConfig = {
 let ShoppingConfigResponseDef;
 
 /**
+ * Used for keeping track of intermediary invalid config results within Objects or Arrays of Objects.
+ */
+let isValidConfigSection = true;
+
+/**
  * Validates an Object using the validateConfig function.
  * @param {?Object=} validation
  * @return {boolean}
  */
 function createValidateConfig(validation) {
-  return (field, value) => validateConfig(value, validation);
+  return (field, value) => {
+    // Handles Arrays of Objects
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        isValidConfigSection &&= validateConfig(item, validation, field + ' ');
+      }
+      // Handles Objects
+    } else {
+      isValidConfigSection &&= validateConfig(value, validation);
+    }
+  };
 }
 
 /**
@@ -104,9 +127,6 @@ export function validateURLs(field, url) {
 
   urls.forEach((url) => {
     assertHttpsUrl(url.url ?? url, `amp-story-shopping-config ${field}`);
-    if (field === 'productImages') {
-      validateString('productImages alt', url.alt);
-    }
   });
 }
 
@@ -114,11 +134,13 @@ export function validateURLs(field, url) {
  * Validates the shopping config of a single product.
  * @param {!ShoppingConfigDataDef} shoppingConfig
  * @param {!Object<string, !Array<function>>} validationObject
+ * @param {?string} optParentFieldName
  * @return {boolean}
  */
 export function validateConfig(
   shoppingConfig,
-  validationObject = productValidationConfig
+  validationObject = productValidationConfig,
+  optParentFieldName = ''
 ) {
   let isValidConfig = true;
 
@@ -135,7 +157,7 @@ export function validateConfig(
         }
       } catch (err) {
         isValidConfig = false;
-        user().warn('AMP-STORY-SHOPPING-CONFIG', `${err}`);
+        user().warn('AMP-STORY-SHOPPING-CONFIG', `${optParentFieldName}${err}`);
       }
     });
   });
@@ -157,7 +179,9 @@ export function getShoppingConfig(element) {
     const shoppingTagIndicesToRemove = [];
     let currentShoppingTagIndex = 0;
     const areConfigsValid = config['items'].reduce((item1, item2) => {
-      const isValidConfig = validateConfig(item2);
+      isValidConfigSection = true;
+      let isValidConfig = validateConfig(item2);
+      isValidConfig &&= isValidConfigSection;
       if (!isValidConfig) {
         shoppingTagIndicesToRemove.push(currentShoppingTagIndex);
       }
