@@ -35,10 +35,7 @@ export const productValidationConfig = {
     createValidateConfigArray(productImagesValidation),
   ],
   'productPriceCurrency': [validateRequired, validateString],
-  'aggregateRating': [
-    validateRequired,
-    createValidateConfigObject(aggregateRatingValidation),
-  ],
+  'aggregateRating': [createValidateConfigObject(aggregateRatingValidation)],
   /* Optional Attrs */
   'productIcon': [validateURLs],
   'productTagText': [validateString],
