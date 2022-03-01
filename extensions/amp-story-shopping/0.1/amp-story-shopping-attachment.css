@@ -240,8 +240,8 @@ amp-story-shopping-attachment a {
   border-radius: 1.1em 0 0 1.1em !important;
 }
 
-.i-amphtml-amp-story-shopping-pdp-carousel-card:only-child,
-[dir=rtl] .i-amphtml-amp-story-shopping-pdp-carousel-card:only-child {
+/* Override when it's the first and last child. */
+.i-amphtml-amp-story-shopping-pdp-carousel-card:first-child:last-child {
   width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
   max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2)!important;
   border-radius: 1.1em !important;
