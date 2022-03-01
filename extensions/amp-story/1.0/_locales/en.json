@@ -230,5 +230,9 @@
   "104": {
     "string": "reviews",
     "description": "Button label prompting users to read about peoples assessments of an item."
+  },
+  "105": {
+    "string": "Details",
+    "description": "Button label prompting users to read about details of a product."
   }
 }

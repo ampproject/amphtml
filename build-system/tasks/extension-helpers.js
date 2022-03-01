@@ -14,7 +14,6 @@ const {
   esbuildCompile,
   maybeToEsmName,
   maybeToNpmEsmName,
-  mkdirSync,
   watchDebounceDelay,
 } = require('./helpers');
 const {
@@ -436,8 +435,7 @@ async function buildExtension(name, version, hasCss, options) {
   }
 
   if (hasCss) {
-    mkdirSync('build');
-    mkdirSync('build/css');
+    await fs.mkdir('build/css', {recursive: true});
     await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
@@ -665,8 +663,9 @@ async function buildNpmBinaries(extDir, name, options) {
       },
     };
     if (options.useBentoCore) {
-      // remap all shared modules to the @bentoproject/core package and declare as external
-      npm.bento.remap = getRemapBentoNpmDependencies();
+      // remap all shared modules to the @bentoproject/
+      const fullEntryPoint = path.join(extDir, npm.bento.entryPoint);
+      npm.bento.remap = getRemapBentoNpmDependencies(fullEntryPoint);
       npm.bento.external = Object.values(npm.bento.remap);
     }
   }
@@ -681,8 +680,6 @@ async function buildNpmBinaries(extDir, name, options) {
  * @return {!Promise}
  */
 function buildBinaries(extDir, binaries, options) {
-  mkdirSync(`${extDir}/dist`);
-
   const promises = binaries.map((binary) => {
     const {babelCaller, entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
@@ -703,13 +700,30 @@ function buildBinaries(extDir, binaries, options) {
 }
 
 /**
+ * @param {string} nameWithoutExtension
+ * @param {?string|void} cwd
+ * @return {Promise<string|undefined>}
+ */
+async function findJsSourceFilename(nameWithoutExtension, cwd) {
+  const [filename] = await fastGlob(
+    `${nameWithoutExtension}.{js,ts,tsx}`,
+    cwd ? {cwd} : undefined
+  );
+  return filename;
+}
+
+/**
  * @param {string} dir
  * @param {string} name
  * @param {!Object} options
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(dir, name, options) {
-  const remapDependencies = getRemapBentoDependencies(options.minify);
+  const entryPoint = await findJsSourceFilename(path.join(dir, name));
+  const remapDependencies = getRemapBentoDependencies(
+    entryPoint,
+    options.minify
+  );
   await buildExtensionJs(dir, name, {
     ...options,
     externalDependencies: Object.values(remapDependencies),

@@ -1,5 +1,4 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
@@ -7,28 +6,97 @@ const CONTROLS = ['auto', 'always', 'never'];
 
 export default {
   title: 'amp-stream-gallery-1_0',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 
   parameters: {
-    extensions: [{name: 'amp-stream-gallery', version: '1.0'}],
-
+    extensions: [
+      {name: 'amp-stream-gallery', version: '1.0'},
+      {name: 'amp-base-carousel', version: '1.0'},
+    ],
     experiments: ['bento'],
+  },
+
+  argTypes: {
+    slideCount: {
+      name: 'slide count',
+      control: {type: 'number', min: 3, max: 99},
+      defaultValue: 15,
+    },
+    extraSpace: {
+      name: 'extra space around?',
+      control: {type: 'boolean'},
+      defaultValue: true,
+    },
+    controls: {
+      name: 'controls',
+      control: {type: 'select'},
+      defaultValue: CONTROLS,
+    },
+    loop: {
+      name: 'loop',
+      control: {type: 'boolean'},
+      defaultValue: true,
+    },
+    snap: {
+      name: 'snap',
+      control: {type: 'boolean'},
+      defaultValue: true,
+    },
+    slideAlign: {
+      name: 'slide align',
+      control: {type: 'select'},
+      defaultValue: ['start', 'center'],
+    },
+    minItemWidth: {
+      name: 'min item width',
+      control: {type: 'number', min: 1},
+      defaultValue: 130,
+    },
+    maxItemWidth: {
+      name: 'max item width',
+      control: {type: 'number', min: 1},
+      defaultValue: 180,
+    },
+    minVisibleCount: {
+      name: 'min visible count',
+      control: {type: 'number', min: 1},
+      defaultValue: 2.5,
+    },
+    maxVisibleCount: {
+      name: 'max visible count',
+      control: {type: 'number', min: 1},
+      defaultValue: 5,
+    },
+    peek: {
+      name: 'peek',
+      control: {type: 'number', min: 1},
+      defaultValue: 0,
+    },
+    outsetArrows: {
+      name: 'outset arrows',
+      control: {type: 'boolean'},
+      defaultValue: true,
+    },
+    width: {type: 'number'},
+    height: {type: 'number'},
   },
 };
 
-export const Default = () => {
-  const slideCount = number('slide count', 15, {min: 3, max: 99});
-  const extraSpace = boolean('extra space around?', true);
-  const controls = select('controls', CONTROLS);
-  const loop = boolean('loop', true);
-  const snap = boolean('snap', true);
-  const slideAlign = select('slide align', ['start', 'center']);
-  const minItemWidth = number('min item width', 130, {min: 1});
-  const maxItemWidth = number('max item width', 180, {min: 1});
-  const minVisibleCount = number('min visible count', 2.5, {min: 1});
-  const maxVisibleCount = number('max visible count', 5, {min: 1});
-  const peek = number('peek', 0, {min: 1});
-  const outsetArrows = boolean('outset arrows', true);
+export const Default = ({
+  controls,
+  extraSpace,
+  loop,
+  maxItemWidth,
+  maxVisibleCount,
+  minItemWidth,
+  minVisibleCount,
+  outsetArrows,
+  peek,
+  slideAlign,
+  slideCount,
+  snap,
+  ...args
+}) => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <>
@@ -48,6 +116,7 @@ export const Default = () => {
         peek={peek}
         slide-align={slideAlign}
         snap={snap}
+        {...args}
       >
         {Array.from({length: slideCount}, (x, i) => {
           const v = colorIncrement * (i + 1);
@@ -75,13 +144,18 @@ export const Default = () => {
   );
 };
 
-export const customArrows = () => {
-  const width = number('width', 400);
-  const height = number('height', 200);
-  const slideCount = number('slide count', 7, {min: 0, max: 99});
+export const CustomArrows = ({height, slideCount, width, ...args}) => {
+  width = width ?? 400;
+  height = height ?? 200;
+
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
-    <amp-stream-gallery max-visible-count={3} width={width} height={height}>
+    <amp-stream-gallery
+      max-visible-count={3}
+      width={width}
+      height={height}
+      {...args}
+    >
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
         return (

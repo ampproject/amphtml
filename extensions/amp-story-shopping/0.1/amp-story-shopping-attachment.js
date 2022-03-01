@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
@@ -15,8 +16,6 @@ import {
   ShoppingConfigDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
-
-const DRAGGABLE_DRAWER_TRANSITION_MS = 400;
 
 /** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
@@ -49,11 +48,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private @const {!Element} */
     this.templateContainer_ = <div></div>;
 
-    /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
+    /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win);
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = Services.localizationForDoc(this.element);
 
     /** @private {!Map<string, Element>} */
     this.builtTemplates_ = {};
@@ -66,35 +65,26 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
 
-    const pageElement = this.element.parentElement;
-    getShoppingConfig(pageElement).then((config) =>
-      storeShoppingConfig(pageElement, config)
+    getShoppingConfig(this.element).then((config) =>
+      storeShoppingConfig(this.pageEl_, config)
     );
 
     if (this.shoppingTags_.length === 0) {
       return;
     }
 
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win),
-      Services.localizationServiceForOrNull(this.element),
-    ]).then(([storeService, localizationService]) => {
-      this.storeService_ = storeService;
-      this.localizationService_ = localizationService;
-
-      this.attachmentEl_ = (
-        <amp-story-page-attachment
-          layout="nodisplay"
-          theme={this.element.getAttribute('theme')}
-          cta-text={this.localizationService_.getLocalizedString(
-            LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
-          )}
-        >
-          {this.templateContainer_}
-        </amp-story-page-attachment>
-      );
-      this.element.appendChild(this.attachmentEl_);
-    });
+    this.attachmentEl_ = (
+      <amp-story-page-attachment
+        layout="nodisplay"
+        theme={this.element.getAttribute('theme')}
+        cta-text={this.localizationService_.getLocalizedString(
+          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+        )}
+      >
+        {this.templateContainer_}
+      </amp-story-page-attachment>
+    );
+    this.element.appendChild(this.attachmentEl_);
   }
 
   /** @override */
@@ -106,63 +96,87 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     // Update template on attachment state update or shopping data update.
     this.storeService_.subscribe(
       StateProperty.PAGE_ATTACHMENT_STATE,
-      (isOpen) => this.checkClearActiveProductData_(isOpen),
+      (isOpen) => this.onAttachmentStateUpdate_(isOpen),
       true /** callToInitialize */
     );
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
-      (shoppingData) => {
-        if (this.isOnActivePage_()) {
-          this.checkOpenAttachment_(shoppingData);
-          this.updateTemplate_(shoppingData);
-        }
-      },
+      (shoppingData) => this.onShoppingDataUpdate_(shoppingData),
       true /** callToInitialize */
+    );
+    // Listen to transiton end events on attachment to check to clear active data.
+    this.attachmentEl_.addEventListener('transitionend', () =>
+      this.clearActiveProductDataIfClosed_()
     );
   }
 
   /**
-   * Active product data is cleared after the attachment closes so that content does not jump.
+   * Triggers template update if opening without active product data.
+   * This happens when the "Shop Now" CTA is clicked.
    * @param {boolean} isOpen
    * @private
    */
-  checkClearActiveProductData_(isOpen) {
-    if (!isOpen) {
-      Services.timerFor(this.win).delay(
-        () =>
-          this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-            'activeProductData': null,
-          }),
-        DRAGGABLE_DRAWER_TRANSITION_MS
-      );
+  onAttachmentStateUpdate_(isOpen) {
+    if (!this.isOnActivePage_() || !isOpen) {
+      return;
+    }
+    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
+    if (!shoppingData.activeProductData) {
+      this.updateTemplate_(shoppingData);
     }
   }
 
   /**
-   * If active data is set, open the attachment.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * Handles template changes when there is activeProductData.
+   * This happens when a product tag or PLP card is clicked.
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
-  checkOpenAttachment_(shoppingData) {
-    if (shoppingData.activeProductData) {
-      this.attachmentEl_.getImpl().then((impl) => impl.open());
+  onShoppingDataUpdate_(shoppingData) {
+    if (!shoppingData.activeProductData || !this.isOnActivePage_()) {
+      return;
+    }
+    const isOpen = this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
+    if (isOpen) {
+      // If open, update the template.
+      // This happens when a product card is clicked in the PLP template.
+      this.updateTemplate_(shoppingData);
+    } else {
+      // Otherwise, open the attachment and then update the template.
+      // This happens when clicking a shopping tag.
+      this.attachmentEl_.getImpl().then((impl) => {
+        impl.open();
+        this.updateTemplate_(shoppingData);
+      });
+    }
+  }
+
+  /**
+   * Clear active product data after the attachment closes so that content does not jump.
+   * @private
+   */
+  clearActiveProductDataIfClosed_() {
+    const isOpen = this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
+    if (!isOpen) {
+      this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+        'activeProductData': null,
+      });
     }
   }
 
   /**
    * Updates template based on shopping data.
-   * @param {!Array<!ShoppingConfigDataDef>} shoppingData
+   * @param {!Object<string, !ShoppingConfigDataDef>} shoppingData
    * @private
    */
   updateTemplate_(shoppingData) {
-    const shoppingDataForPage = this.shoppingTags_.map(
-      (shoppingTag) => shoppingData[shoppingTag.getAttribute('data-product-id')]
-    );
+    const productOnPageToConfig = shoppingData[this.pageEl_.id];
+    const shoppingDataPerPage = Object.values(productOnPageToConfig);
 
     let productForPdp = shoppingData.activeProductData;
     // If no active product and only one product on page, use the one product for the PDP.
-    if (!shoppingData.activeProductData && shoppingDataForPage.length === 1) {
-      productForPdp = shoppingDataForPage[0];
+    if (!productForPdp && shoppingDataPerPage.length === 1) {
+      productForPdp = shoppingDataPerPage[0];
     }
 
     // templateId string used to key already built templates.
@@ -176,7 +190,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     const template = this.getTemplate_(
       templateId,
       productForPdp,
-      shoppingDataForPage
+      shoppingDataPerPage
     );
     template.setAttribute('active', '');
     this.resetScroll_(template);
@@ -257,6 +271,25 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   * Expands or collabses the content of the details section.
+   * @param {!Element} detailsHeader
+   * @private
+   */
+  onDetailsHeaderClick_(detailsHeader) {
+    const detailsContainer = detailsHeader.closest(
+      '.i-amphtml-amp-story-shopping-pdp-details'
+    );
+    const detailsText = detailsContainer.querySelector(
+      '.i-amphtml-amp-story-shopping-pdp-details-text'
+    );
+    const toggleActive = !detailsContainer.hasAttribute('active');
+    this.mutateElement(() => {
+      toggleAttribute(detailsContainer, 'active', toggleActive);
+      detailsText.setAttribute('aria-hidden', !toggleActive);
+    });
+  }
+
+  /**
    * @param {!ShoppingConfigDataDef} activeProductData
    * @return {Element}
    * @private
@@ -318,6 +351,33 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             ></div>
           ))}
         </div>
+        {activeProductData.productDetails && (
+          <div class="i-amphtml-amp-story-shopping-pdp-details">
+            <button
+              class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-pdp-details-header"
+              onClick={(e) => this.onDetailsHeaderClick_(e.target)}
+            >
+              <span class="i-amphtml-amp-story-shopping-sub-section-header">
+                {this.localizationService_.getLocalizedString(
+                  LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_DETAILS,
+                  this.element
+                )}
+              </span>
+              <svg
+                viewBox="0 0 10 6"
+                class="i-amphtml-amp-story-shopping-pdp-details-header-arrow"
+              >
+                <path d="M.5,.5 L5,5.2 L9.5,.5" />
+              </svg>
+            </button>
+            <span
+              class="i-amphtml-amp-story-shopping-pdp-details-text"
+              aria-hidden="true"
+            >
+              {activeProductData.productDetails}
+            </span>
+          </div>
+        )}
       </div>
     );
   }
@@ -330,7 +390,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   renderPlpTemplate_(shoppingDataForPage) {
     return (
       <div class="i-amphtml-amp-story-shopping-plp">
-        <div class="i-amphtml-amp-story-shopping-plp-header">
+        <div class="i-amphtml-amp-story-shopping-sub-section-header">
           {this.localizationService_.getLocalizedString(
             LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER,
             this.element
@@ -338,8 +398,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         </div>
         <div class="i-amphtml-amp-story-shopping-plp-cards">
           {shoppingDataForPage.map((data) => (
-            <div
-              class="i-amphtml-amp-story-shopping-plp-card"
+            <button
+              class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-plp-card"
               role="button"
               onClick={() => this.onPlpCardClick_(data)}
             >
@@ -363,7 +423,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
                   data['productPrice']
                 )}
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

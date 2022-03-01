@@ -43,8 +43,8 @@ describes.realWin('amp-story-share-menu', {amp: true}, (env) => {
 
     const localizationService = new LocalizationService(win.document.body);
     env.sandbox
-      .stub(Services, 'localizationServiceForOrNull')
-      .returns(Promise.resolve(localizationService));
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
 
     hostEl = win.document.createElement('div');
     ampStory = win.document.createElement('amp-story');
