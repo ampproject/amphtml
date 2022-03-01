@@ -164,7 +164,7 @@ describes.realWin(
       expect(result).to.deep.eql(keyedDefaultInlineConfig);
     });
 
-    it.only('does use remote config when src attribute is provided', async () => {
+    it('does use remote config when src attribute is provided', async () => {
       const remoteUrl = 'https://foo.example';
       const expectedRemoteResult =
         // matches remote.json
