@@ -288,6 +288,8 @@ amp-story-shopping-attachment a {
 .i-amphtml-amp-story-shopping-pdp-details[active] .i-amphtml-amp-story-shopping-pdp-details-text {
   height: auto !important;
   opacity: 1 !important;
+  /* Renders \n as newlines in product data text. */
+  white-space: pre-line !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-details-text:after {
