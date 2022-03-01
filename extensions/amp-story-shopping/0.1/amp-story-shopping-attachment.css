@@ -243,7 +243,7 @@ amp-story-shopping-attachment a {
 /* Override when it's the only child. First and last selectors are used for specificity. */
 .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child:last-child {
   width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
-  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2)!important;
+  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
   border-radius: 1.1em !important;
   cursor: auto !important;
 }
