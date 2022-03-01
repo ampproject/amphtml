@@ -46,7 +46,7 @@ function BentoSidebarWithActions(props) {
   );
 }
 
-export const _default = ({
+export const Default = ({
   backdropColor,
   backgroundColor,
   foregroundColor,
@@ -63,7 +63,7 @@ export const _default = ({
   );
 };
 
-_default.argTypes = {
+Default.argTypes = {
   side: {
     name: 'side',
     defaultValue: 'left',

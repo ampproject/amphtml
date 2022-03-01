@@ -54,8 +54,6 @@ export const WithAmpImg = () => {
   );
 };
 
-WithAmpImg.storyName = 'with <amp-img>';
-
 export const WithUl = () => {
   return (
     <amp-selector class="sample-selector" layout="container">
@@ -68,8 +66,6 @@ export const WithUl = () => {
     </amp-selector>
   );
 };
-
-WithUl.storyName = 'with <ul>';
 
 export const Actions = (args) => {
   return (
@@ -118,8 +114,6 @@ Actions.argTypes = {
   },
 };
 
-Actions.storyName = 'actions';
-
 export const Responsive = () => {
   return (
     <amp-selector layout="responsive" width="100" height="100">
@@ -132,5 +126,3 @@ export const Responsive = () => {
     </amp-selector>
   );
 };
-
-Responsive.storyName = 'responsive';
