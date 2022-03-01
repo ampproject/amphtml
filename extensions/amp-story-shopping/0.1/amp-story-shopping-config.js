@@ -37,7 +37,7 @@ export const productValidationConfig = {
   'productPriceCurrency': [validateRequired, validateString],
   'aggregateRating': [
     validateRequired,
-    createValidateConfig(aggregateRatingValidation),
+    createValidateConfigObject(aggregateRatingValidation),
   ],
   /* Optional Attrs */
   'productIcon': [validateURLs],
@@ -64,7 +64,7 @@ let isValidConfigSection_ = true;
  * @param {?Object=} validation
  * @return {boolean}
  */
-function createValidateConfig(validation) {
+function createValidateConfigObject(validation) {
   return (field, value) => {
     isValidConfigSection_ &&= validateConfig(value, validation, field + ' ');
   };
