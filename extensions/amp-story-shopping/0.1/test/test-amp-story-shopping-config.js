@@ -54,7 +54,7 @@ describes.realWin(
           'productTitle': 'Abstract Art',
           'productBrand': 'V. Artsy',
           'productPrice': 1200.0,
-          'productPriceCurrency': 'INR',
+          'productPriceCurrency': 'JPY',
           'productImages': [
             {
               'url': 'https://source.unsplash.com/BdVQU-NDtA8/500x500',
@@ -164,7 +164,7 @@ describes.realWin(
       expect(result).to.deep.eql(keyedDefaultInlineConfig);
     });
 
-    it('does use remote config when src attribute is provided', async () => {
+    it.only('does use remote config when src attribute is provided', async () => {
       const remoteUrl = 'https://foo.example';
       const expectedRemoteResult =
         // matches remote.json
