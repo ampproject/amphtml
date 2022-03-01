@@ -6,7 +6,7 @@ import {boundValue, distance} from '#core/math';
 
 import {useMemo, useState} from '#preact';
 
-import {BentoPanZoomProps} from './component-ts';
+import type {BentoPanZoomProps} from './component-ts';
 
 const PAN_ZOOM_CURVE = bezierCurve(0.4, 0, 0.2, 1.4);
 const ANIMATION_EASE_IN = 'cubic-bezier(0,0,.21,1)';
@@ -18,13 +18,11 @@ const DEFAULT_ORIGIN = 0;
 const initialRect = new DOMRect(0, 0, 0, 0);
 
 const initialState = {
-  maxX: 0,
-  minX: 0,
+  /** @deprecated */
   startX: 0,
   posX: 0,
 
-  maxY: 0,
-  minY: 0,
+  /** @deprecated */
   startY: 0,
   posY: 0,
 
@@ -32,26 +30,34 @@ const initialState = {
   maxScale: DEFAULT_MAX_SCALE,
   scale: 1,
 
+  /** @deprecated */
   width: '',
+  /** @deprecated */
   sourceWidth: 0,
+  /** @deprecated */
   height: '',
+  /** @deprecated */
   sourceHeight: 0,
 
   contentBox: initialRect,
   containerBox: initialRect,
 
+  /** @deprecated */
   isPannable: false,
+  /** @deprecated */
   isZoomed: false,
 };
 
 type InitialState = typeof initialState;
 
+/** @deprecated */
 type PanZoomConfig = Pick<
   BentoPanZoomProps,
   'initialScale' | 'initialX' | 'initialY' | 'maxScale'
 >;
 type State = InitialState & PanZoomConfig;
 
+/** @deprecated */
 const updatePanZoomBoundaries = (state: State, newScale: number) => {
   const {containerBox, contentBox} = state;
   const {
@@ -85,6 +91,7 @@ const updatePanZoomBoundaries = (state: State, newScale: number) => {
   };
 };
 
+/** @deprecated */
 const updateContentDimensions = (
   sourceHeight: number,
   sourceWidth: number,
@@ -108,8 +115,10 @@ const updateContentDimensions = (
   return layoutRectLtwh(0, 0, Math.round(width), Math.round(height));
 };
 
+/** @deprecated */
 const resetContentDimensions = () => {};
 
+/** @deprecated */
 const updateMaxScale = (
   maxScale: number,
   aspectRatio: number,
@@ -127,6 +136,7 @@ const updateMaxScale = (
   return maxScale;
 };
 
+/** @deprecated */
 const measure = (
   state: State,
   contentWidth: number,
@@ -152,6 +162,7 @@ const measure = (
   };
 };
 
+/** @deprecated */
 const setContentBox = (contentBox: DOMRect, containerBox: DOMRect) => {
   return {
     // ...contentBox,
@@ -168,20 +179,23 @@ const boundScale = (state: State, newScale: number, allowExtent: boolean) => {
   return boundValue(newScale, minScale, maxScale, extent);
 };
 
+/** @deprecated */
 const boundX = (state: State, newPosX: number, allowExtent: boolean) => {
-  const {containerBox, maxX, minX, scale} = state;
-  const maxExtent = containerBox.width * 0.25;
-  const extent = allowExtent && scale > 1 ? maxExtent : 0;
-  return boundValue(newPosX, minX, maxX, extent);
+  const {containerBox, scale} = state;
+  const extent = allowExtent && scale > 1 ? containerBox.width * 0.25 : 0;
+  const minX = containerBox.width * (scale - 1);
+  return boundValue(newPosX, minX, 0, extent);
 };
 
+/** @deprecated */
 const boundY = (state: State, newPosY: number, allowExtent: boolean) => {
-  const {containerBox, maxY, minY, scale} = state;
-  const maxExtent = containerBox.height * 0.25;
-  const extent = allowExtent && scale > 1 ? maxExtent : 0;
-  return boundValue(newPosY, minY, maxY, extent);
+  const {containerBox, scale} = state;
+  const extent = allowExtent && scale > 1 ? containerBox.height * 0.25 : 0;
+  const minY = containerBox.height * (scale - 1);
+  return boundValue(newPosY, minY, 0, extent);
 };
 
+/** @deprecated */
 const transform = (state: State, x: number, y: number, scale: number) => {
   const newX = boundX(state, x, false);
   const newY = boundY(state, y, false);
@@ -189,12 +203,55 @@ const transform = (state: State, x: number, y: number, scale: number) => {
   return setZoomParams(state, scale, newX, newY, true);
 };
 
+/** @deprecated */
 const move = (state: State, x: number, y: number, element: HTMLElement) => {
   const newX = boundX(state, x, false);
   const newY = boundY(state, y, false);
   return setZoomParams(state, state.scale, newX, newY, false, element);
 };
 
+const updateScale = (
+  state: State,
+  anchorX: number,
+  anchorY: number,
+  newScale: number
+) => {
+  const {
+    contentBox: {height, width},
+    posX,
+    posY,
+    scale,
+  } = state;
+
+  const ds = newScale / scale;
+
+  const newPosX = anchorX - (anchorX - posX) * ds;
+  const newPosY = anchorY - (anchorY - posY) * ds;
+
+  return {posX: newPosX, posY: newPosY, scale: newScale};
+};
+
+const boundPosition = (
+  state: State,
+  newState: Pick<State, 'posX' | 'posY' | 'scale'>,
+  allowExtent: boolean
+) => {
+  const {containerBox} = state;
+  const {posX, posY, scale} = newState;
+
+  const extentX = allowExtent && scale > 1 ? containerBox.width * 0.25 : 0;
+  const extentY = allowExtent && scale > 1 ? containerBox.height * 0.25 : 0;
+  const minX = containerBox.width * (1 - scale);
+  const minY = containerBox.height * (1 - scale);
+
+  return {
+    posX: boundValue(posX, minX, 0, extentX),
+    posY: boundValue(posY, minY, 0, extentY),
+    scale,
+  };
+};
+
+/** @deprecated */
 const moveRelease = (state: State, x: number, y: number, animate: boolean) => {
   const newX = boundX(state, x, false);
   const newY = boundY(state, y, false);
@@ -202,6 +259,7 @@ const moveRelease = (state: State, x: number, y: number, animate: boolean) => {
 };
 
 // this needs to return a promise or at least a thenable
+/** @deprecated */
 const setZoomParams = (
   state: State,
   newScale: number,
@@ -256,10 +314,12 @@ const setZoomParams = (
 //   easing: ANIMATION_EASE_IN,
 // }
 
+/** @deprecated */
 const getKeyframes = (posX, posY, scale) => {
   return [{transform: translate(posX, posY) + cssScale(scale)}];
 };
 
+/** @deprecated */
 export function initReducer(config: PanZoomConfig): State {
   const {initialScale, initialX, initialY, maxScale} = config;
   return {
@@ -284,6 +344,7 @@ export function usePanZoomState(config: PanZoomConfig) {
           containerBox: payload.containerBox,
         }));
       },
+      /** @deprecated */
       SET_DIMENSIONS() {
         setState((state) => ({
           ...state,
@@ -291,6 +352,7 @@ export function usePanZoomState(config: PanZoomConfig) {
           width: px(state.contentBox?.width),
         }));
       },
+      /** @deprecated */
       CLEAR_DIMENSIONS() {
         setState((state) => ({
           ...state,
@@ -298,12 +360,14 @@ export function usePanZoomState(config: PanZoomConfig) {
           width: '',
         }));
       },
+      /** @deprecated */
       UPDATE_PAN_ZOOM_BOUNDS(payload: PickState<'scale'>) {
         setState((state) => ({
           ...state,
           ...updatePanZoomBoundaries(state, payload.scale),
         }));
       },
+      /** @deprecated */
       SET_CONTENT_BOX_OFFSETS(payload: PickState<'contentBox'>) {
         setState((state) => ({
           ...state,
@@ -327,6 +391,7 @@ export function usePanZoomState(config: PanZoomConfig) {
           isZoomed: payload.isZoomed,
         }));
       },
+      /** @deprecated */
       UPDATE_CONTENT_DIMENSIONS(payload: PickState<'scale'>) {
         setState((state) => ({
           ...state,
@@ -336,8 +401,29 @@ export function usePanZoomState(config: PanZoomConfig) {
       MOVE(payload: PickState<'posX' | 'posY'> & {element: HTMLElement}) {
         setState((state) => ({
           ...state,
-          ...move(state, payload.posX, payload.posY, payload.element),
+          ...boundPosition(state, {...payload, scale: state.scale}, false),
+          // ...move(state, payload.posX, payload.posY, payload.element),
         }));
+      },
+      UPDATE_SCALE(payload: {
+        anchorX?: number;
+        anchorY?: number;
+        scale: number;
+      }) {
+        setState((state) => {
+          const allowExtent = false;
+          const {
+            anchorX = state.containerBox.width / 2,
+            anchorY = state.containerBox.height / 2,
+            scale,
+          } = payload;
+          const newScale = boundScale(state, scale, allowExtent);
+          const newPosition = updateScale(state, anchorX, anchorY, newScale);
+          return {
+            ...state,
+            ...boundPosition(state, newPosition, allowExtent),
+          };
+        });
       },
       MOVE_RELEASE() {
         setState((state) => ({
@@ -345,6 +431,7 @@ export function usePanZoomState(config: PanZoomConfig) {
           isPannable: false,
         }));
       },
+      /** @deprecated */
       TRANSFORM(payload: PickState<'posX' | 'posY' | 'scale'>) {
         setState((state) => ({
           ...state,

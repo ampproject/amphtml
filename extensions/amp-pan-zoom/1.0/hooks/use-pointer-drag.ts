@@ -3,23 +3,24 @@ import type {RefObject} from 'preact';
 import {useEffect} from '#preact';
 import {useValueRef} from '#preact/component';
 
-export type DraggableEvent = Pick<
-  MouseEvent,
-  'clientX' | 'clientY' | 'currentTarget'
->;
-export type DraggableCallbacks<TDragStartInfo> = {
-  dragStart(ev: DraggableEvent): TDragStartInfo;
-  dragMove(ev: DraggableEvent, start: TDragStartInfo): void;
-  dragEnd(ev: DraggableEvent, start: TDragStartInfo): void;
+export type PointerDragEvent = {
+  clientX: MouseEvent['clientX'];
+  clientY: MouseEvent['clientY'];
+  first: boolean;
+  last: boolean;
 };
+export type PointerDragCallback<TDragStartInfo> = (
+  ev: PointerDragEvent,
+  start: TDragStartInfo
+) => TDragStartInfo;
 
 const LEFT_CLICK = 0;
 
-export function useDraggable<TDragStartInfo>(
+export function usePointerDrag<TDragStartInfo>(
   elementRef: RefObject<HTMLElement>,
-  config: DraggableCallbacks<TDragStartInfo>
+  callback: PointerDragCallback<TDragStartInfo>
 ) {
-  const configRef = useValueRef(config);
+  const callbackRef = useValueRef(callback);
 
   useEffect(() => {
     const element = elementRef.current;
@@ -37,7 +38,12 @@ export function useDraggable<TDragStartInfo>(
 
         element.setPointerCapture(ev.pointerId);
 
-        start = configRef.current.dragStart(ev);
+        const {clientX, clientY} = ev;
+
+        start = callbackRef.current(
+          {clientX, clientY, first: true, last: false},
+          null as unknown as TDragStartInfo
+        );
       },
 
       'pointermove': (ev) => {
@@ -46,7 +52,12 @@ export function useDraggable<TDragStartInfo>(
         }
         ev.preventDefault();
 
-        configRef.current.dragMove(ev, start);
+        const {clientX, clientY} = ev;
+
+        start = callbackRef.current(
+          {clientX, clientY, first: false, last: false},
+          start
+        );
       },
 
       'pointerup': (ev) => {
@@ -57,13 +68,18 @@ export function useDraggable<TDragStartInfo>(
 
         element.releasePointerCapture(ev.pointerId);
 
-        configRef.current.dragEnd(ev, start);
+        const {clientX, clientY} = ev;
+
+        callbackRef.current(
+          {clientX, clientY, first: false, last: true},
+          start
+        );
         start = null;
       },
     });
 
     return eventCleanup;
-  }, [elementRef, configRef]);
+  }, [elementRef, callbackRef]);
 }
 
 // Fixes the return type of Object.keys:

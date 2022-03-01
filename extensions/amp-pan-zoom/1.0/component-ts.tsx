@@ -1,3 +1,4 @@
+import {useDrag, useMove, usePinch} from '@use-gesture/react';
 import type {ComponentChildren, Ref} from 'preact';
 
 import {bezierCurve} from '#core/data-structures/curve';
@@ -7,10 +8,11 @@ import * as Preact from '#preact';
 import {useEffect, useImperativeHandle, useLayoutEffect, useRef} from '#preact';
 import {Children, forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
+import {useGestures} from '#preact/hooks/useGestures';
 import {logger} from '#preact/logger';
 
 import {useStyles} from './component.jss';
-import {useDraggable} from './hooks/use-draggable';
+import {usePointerDrag} from './hooks/use-pointer-drag';
 import {usePanZoomState} from './reducer';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
@@ -46,6 +48,17 @@ export type BentoPanZoomProps = {
 export type BentoPanZoomApi = {
   transform(scale: number, x: number, y: number): void;
 };
+
+function getElementPosition(
+  clientX: number,
+  clientY: number,
+  elBounds: DOMRect
+) {
+  return {
+    anchorX: clientX - elBounds.x,
+    anchorY: clientY - elBounds.y,
+  };
+}
 
 function classNames(...args: Array<string | false | null | 0>) {
   return args.filter(Boolean).join(' ');
@@ -85,34 +98,23 @@ export function BentoPanZoomWithRef(
   const contentRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    if (!containerRef.current && !contentRef.current) {
-      return;
-    }
-
     actions.INITIALIZE_BOUNDS({
-      contentBox: containerRef.current!./*REVIEW*/ getBoundingClientRect(),
-      containerBox: contentRef.current!./*REVIEW*/ getBoundingClientRect(),
+      containerBox: containerRef.current!./*REVIEW*/ getBoundingClientRect(),
+      contentBox: contentRef.current!./*REVIEW*/ getBoundingClientRect(),
     });
   }, [actions]);
 
   useLayoutEffect(() => {
-    if (!containerRef.current && !contentRef.current) {
-      return;
-    }
-
     setStyles(contentRef.current!, {
+      transformOrigin: '0 0',
       transform: translate(state.posX, state.posY) + cssScale(state.scale),
     });
   }, [state.posX, state.posY, state.scale]);
 
-  const handleZoomButtonClick = () => {
-    if (!state.isZoomed) {
-      actions.SET_IS_ZOOMED({isZoomed: true});
-      actions.TRANSFORM({posX: 0, posY: 0, scale: maxScale});
-    } else {
-      actions.SET_IS_ZOOMED({isZoomed: false});
-      actions.TRANSFORM({posX: 0, posY: 0, scale: DEFAULT_MIN_SCALE});
-    }
+  const toggleZoom = () => {
+    const newScale =
+      state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
+    actions.UPDATE_SCALE({scale: newScale});
   };
 
   // const resetContentDimensions = () => {
@@ -125,26 +127,105 @@ export function BentoPanZoomWithRef(
   //     });
   // };
 
-  useDraggable<{posX: number; posY: number; clientX: number; clientY: number}>(
+  type StartDragInfo = {
+    posX: number;
+    posY: number;
+    clientX: number;
+    clientY: number;
+  };
+  usePointerDrag<StartDragInfo>(
     contentRef,
-    {
-      dragStart({clientX, clientY}) {
+    ({clientX, clientY, first, last}, start: StartDragInfo) => {
+      if (first) {
         actions.SET_IS_PANNABLE({isPannable: true});
-        const {posX, posY} = state;
-        return {posX, posY, clientX, clientY};
-      },
-      dragMove({clientX, clientY}, start) {
-        actions.MOVE({
-          posX: start.posX + clientX - start.clientX,
-          posY: start.posY + clientY - start.clientY,
-          element: contentRef.current!,
-        });
-      },
-      dragEnd: (unusedInfo, unusedStart) => {
+        start = {posX: state.posX, posY: state.posY, clientX, clientY};
+      }
+
+      actions.MOVE({
+        posX: start.posX + clientX - start.clientX,
+        posY: start.posY + clientY - start.clientY,
+        element: contentRef.current!,
+      });
+
+      if (last) {
         actions.MOVE_RELEASE();
-      },
+      }
+
+      return start;
     }
   );
+
+  useGestures(contentRef, {
+    tapZoom(ev, startInfo: {scale: number}) {
+      console.log('TAP_ZOOM', ev);
+      const {
+        centerClientX,
+        centerClientY,
+        deltaX,
+        deltaY,
+        first,
+        last,
+        velocityX,
+        velocityY,
+      } = ev.data;
+
+      if (first) {
+        actions.SET_IS_PANNABLE({isPannable: true});
+        startInfo = {
+          scale: state.scale,
+        };
+      }
+
+      const TAP_ZOOM_SCALE = 20; // drag this many px to double the scale
+      const newScale = startInfo.scale * (1 + deltaY / TAP_ZOOM_SCALE);
+
+      const {anchorX, anchorY} = getElementPosition(
+        centerClientX,
+        centerClientY,
+        state.containerBox
+      );
+      actions.UPDATE_SCALE({anchorX, anchorY, scale: newScale});
+
+      if (last) {
+        actions.MOVE_RELEASE();
+      }
+
+      return startInfo;
+    },
+    pinch(ev) {
+      console.log('PINCH', ev);
+      toggleZoom();
+    },
+    doubletap(ev) {
+      // console.log('DOUBLE-TAP', ev.data);
+      const {clientX, clientY} = ev.data;
+      const {anchorX, anchorY} = getElementPosition(
+        clientX,
+        clientY,
+        state.contentBox
+      );
+      const newScale =
+        state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
+
+      actions.UPDATE_SCALE({
+        anchorX,
+        anchorY,
+        scale: newScale,
+      });
+    },
+  });
+
+  const handleDoubleClick = (ev: MouseEvent) => {
+    const {clientX, clientY} = ev;
+    const {anchorX, anchorY} = getElementPosition(
+      clientX,
+      clientY,
+      state.contentBox
+    );
+    const newScale =
+      state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
+    actions.UPDATE_SCALE({anchorX, anchorY, scale: newScale});
+  };
 
   useImperativeHandle(
     ref,
@@ -160,9 +241,6 @@ export function BentoPanZoomWithRef(
     [actions]
   );
 
-  const buttonClass = state.isZoomed
-    ? styles.ampPanZoomOutIcon
-    : styles.ampPanZoomInIcon;
   return (
     <ContainWrapper
       {...rest}
@@ -173,6 +251,7 @@ export function BentoPanZoomWithRef(
     >
       <div
         ref={contentRef}
+        onDoubleClick={handleDoubleClick}
         class={classNames(
           styles.ampPanZoomChild,
           state.isZoomed && styles.ampPanZoomPannable
@@ -182,8 +261,11 @@ export function BentoPanZoomWithRef(
       </div>
 
       <div
-        class={classNames(styles.ampPanZoomButton, buttonClass)}
-        onClick={handleZoomButtonClick}
+        class={classNames(
+          styles.ampPanZoomButton,
+          state.isZoomed ? styles.ampPanZoomOutIcon : styles.ampPanZoomInIcon
+        )}
+        onClick={toggleZoom}
       />
     </ContainWrapper>
   );

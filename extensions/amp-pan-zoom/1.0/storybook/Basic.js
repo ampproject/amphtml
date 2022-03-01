@@ -6,7 +6,7 @@ export default {
   title: 'PanZoom',
   component: BentoPanZoom,
   args: {
-    style: {width: 300, height: 200},
+    style: {width: 400, height: 225},
   },
 };
 
@@ -20,7 +20,7 @@ export const _default = (args) => {
 };
 
 export const WithImage = (args) => (
-  <BentoPanZoom {...args}>
+  <BentoPanZoom {...args} maxScale={5}>
     <img
       height="225"
       width="400"
