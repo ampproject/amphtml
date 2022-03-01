@@ -295,8 +295,14 @@ describes.realWin(
             'productPrice': 19,
             'productPriceCurrency': 'JPY',
             'productImages': [
-              '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
-              '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
+              {
+                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
+                alt: 'nest-mini-icon',
+              },
+              {
+                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
+                alt: 'nest-mini-icon',
+              },
             ],
             'aggregateRating': {
               'ratingValue': 4.4,
@@ -327,8 +333,14 @@ describes.realWin(
             /* Not an actual price */
             'productPriceCurrency': 'JPY',
             'productImages': [
-              '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
-              '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
+              {
+                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
+                alt: 'nest-mini-icon',
+              },
+              {
+                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
+                alt: 'nest-mini-icon',
+              },
             ],
             'aggregateRating': {
               'ratingValue': 4.4,
@@ -359,7 +371,7 @@ describes.realWin(
             'productBrand': 'Vinyl',
             'productPrice': 19,
             'productPriceCurrency': 'JPY',
-            'productImages': ['https://zapp'],
+            'productImages': [{url: 'https://zapp', alt: 'zapp'}],
             'aggregateRating': {
               'ratingValue': 4.4,
               'reviewCount': 89,
@@ -372,8 +384,8 @@ describes.realWin(
       const spy = env.sandbox.spy(url, 'assertHttpsUrl');
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(spy).to.have.been.calledWith(
-        `${invalidConfig['items'][0]['productImages'][0]}`,
-        'amp-story-shopping-config productImages'
+        `${invalidConfig['items'][0]['productUrl']}`,
+        'amp-story-shopping-config productUrl'
       );
     });
   }

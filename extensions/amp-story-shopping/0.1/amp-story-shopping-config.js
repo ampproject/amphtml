@@ -25,7 +25,7 @@ const aggregateRatingValidation = {
 
 export const productValidationConfig = {
   /* Required Attrs */
-  'productUrl': [validateRequired, validateString],
+  'productUrl': [validateRequired, validateURLs],
   'productId': [validateRequired, validateString],
   'productTitle': [validateRequired, validateString],
   'productBrand': [validateRequired, validateString],
@@ -132,7 +132,7 @@ export function validateURLs(field, url) {
   const urls = Array.isArray(url) ? url : [url];
 
   urls.forEach((url) => {
-    assertHttpsUrl(url.url ?? url, `amp-story-shopping-config ${field}`);
+    assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
   });
 }
 
