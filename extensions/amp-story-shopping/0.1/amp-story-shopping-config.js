@@ -195,8 +195,11 @@ export function getShoppingConfig(element) {
         'AMP-STORY-SHOPPING-CONFIG',
         `Required fields are missing. Please add them in the shopping config. See the error messages above for more details.`
       );
+      let indexOffset = 0;
       for (const index of shoppingTagIndicesToRemove) {
-        config['items'].splice(index, 1);
+        //need to keep track of accumulated indices to make sure that the splice index is correct!
+        config['items'].splice(index + indexOffset, 1);
+        indexOffset--;
       }
     }
 
