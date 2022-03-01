@@ -1,8 +1,7 @@
 import {
   DayPicker,
-  DayPickerProps,
-  SelectRangeEventHandler,
-  SelectSingleEventHandler,
+  DayPickerRangeProps,
+  DayPickerSingleProps,
 } from 'react-day-picker';
 
 import * as Preact from '#preact';
@@ -10,9 +9,7 @@ import * as Preact from '#preact';
 import {DayButton} from './day-button';
 import {useDatePickerContext} from './use-date-picker-context';
 
-interface BaseDatePickerProps extends DayPickerProps {
-  onSelect: SelectSingleEventHandler | SelectRangeEventHandler;
-}
+type BaseDatePickerProps = DayPickerSingleProps | DayPickerRangeProps;
 
 export function BaseDatePicker(props: BaseDatePickerProps) {
   const {
