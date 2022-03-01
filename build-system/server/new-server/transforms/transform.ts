@@ -7,7 +7,7 @@ import transformCss from './css/css-transform';
 import transformModules from './modules/modules-transform';
 
 const argv = minimist(process.argv.slice(2));
-const FOR_TESTING = argv._.includes('integration');
+const FOR_TESTING = argv._.includes('integration') || argv._.includes('e2e');
 // Use 9876 if running integration tests as this is the KARMA_SERVER_PORT
 const PORT = FOR_TESTING ? 9876 : argv.port ?? 8000;
 const ESM = !!argv.esm;

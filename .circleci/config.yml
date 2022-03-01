@@ -588,7 +588,7 @@ workflows:
           name: '⛓️ End-to-End Tests'
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (Test)'
+            - 'Module Build (Test)'
       - browser_tests_safari:
           name: 'Browser Tests (Safari)'
           <<: *push_and_pr_builds
