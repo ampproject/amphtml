@@ -25,7 +25,7 @@ const DEFAULT_PROPS = {
   today: TODAY,
 };
 
-function DatePicker(props = {}) {
+function DatePicker(props) {
   const combinedProps = {...DEFAULT_PROPS, ...props};
   return <BentoDatePicker {...combinedProps}></BentoDatePicker>;
 }
@@ -196,13 +196,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       const date = new Date(2022, 0, 1);
       const wrapper = mount(
         <form>
-          <DatePicker
-            type="single"
-            mode="static"
-            layout="fixed-height"
-            height={360}
-            initialVisibleMonth={date}
-          />
+          <DatePicker type="single" mode="static" initialVisibleMonth={date} />
         </form>
       );
 
@@ -216,13 +210,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     it('sets the selected date in the calendar state', () => {
       const date = new Date(2022, 0, 1);
       const wrapper = mount(
-        <DatePicker
-          type="single"
-          mode="static"
-          layout="fixed-height"
-          height={360}
-          initialVisibleMonth={date}
-        />
+        <DatePicker type="single" mode="static" initialVisibleMonth={date} />
       );
 
       selectDate(wrapper, date);
@@ -237,8 +225,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="single"
           mode="static"
-          layout="fixed-height"
-          height={360}
           initialVisibleMonth={new Date(2022, 0)}
         />
       );
@@ -251,8 +237,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="single"
           mode="static"
-          layout="fixed-height"
-          height={360}
           initialVisibleMonth={new Date(2022, 0)}
         />
       );
@@ -267,8 +251,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="single"
           mode="static"
-          layout="fixed-height"
-          height={360}
           initialVisibleMonth={new Date(2022, 0)}
         />
       );
@@ -300,14 +282,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
   describe('showing the date picker in static mode for a date range', () => {
     it('shows the calendar view by default', () => {
-      const wrapper = mount(
-        <DatePicker
-          type="range"
-          mode="static"
-          layout="fixed-height"
-          height={360}
-        />
-      );
+      const wrapper = mount(<DatePicker type="range" mode="static" />);
 
       expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
     });
@@ -317,8 +292,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="range"
           mode="static"
-          layout="fixed-height"
-          height={360}
           initialVisibleMonth={new Date(2022, 0)}
         />
       );
@@ -336,8 +309,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           <DatePicker
             type="range"
             mode="static"
-            layout="fixed-height"
-            height={360}
             initialVisibleMonth={new Date(2022, 0)}
           />
         </form>
@@ -360,8 +331,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="range"
           mode="static"
-          layout="fixed-height"
-          height={360}
           initialVisibleMonth={startDate}
         />
       );
@@ -386,8 +355,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="range"
           mode="static"
-          layout="fixed-height"
-          height={360}
           initialVisibleMonth={new Date(2022, 0)}
         />
       );
@@ -417,8 +384,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="range"
           mode="static"
-          layout="fixed-height"
-          height={360}
           initialVisibleMonth={new Date(2022, 0)}
         />
       );
@@ -436,14 +401,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
   describe('showing the date picker in overlay mode for a single date', () => {
     it('throws an error if there is no inputSelector specified', () => {
       const onErrorSpy = env.sandbox.spy();
-      mount(
-        <DatePicker
-          type="single"
-          mode="overlay"
-          layout="container"
-          onError={onErrorSpy}
-        />
-      );
+      mount(<DatePicker type="single" mode="overlay" onError={onErrorSpy} />);
 
       expect(onErrorSpy).to.have.been.calledWith(
         'Overlay single pickers must specify "inputSelector"'
@@ -452,12 +410,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
     it('hides the calendar view by default', () => {
       const wrapper = mount(
-        <DatePicker
-          type="single"
-          mode="overlay"
-          layout="container"
-          inputSelector="[name=date]"
-        >
+        <DatePicker type="single" mode="overlay" inputSelector="[name=date]">
           <input type="text" name="date" />
         </DatePicker>
       );
@@ -467,12 +420,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
     it('shows the calendar on input focus', () => {
       const wrapper = mount(
-        <DatePicker
-          type="single"
-          mode="overlay"
-          layout="container"
-          inputSelector="[name=date]"
-        >
+        <DatePicker type="single" mode="overlay" inputSelector="[name=date]">
           <input type="text" name="date" />
         </DatePicker>
       );
@@ -487,7 +435,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="single"
           mode="overlay"
-          layout="container"
           inputSelector="[name=date]"
           initialVisibleMonth={new Date(2022, 0)}
         >
@@ -506,7 +453,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="single"
           mode="overlay"
-          layout="container"
           inputSelector="[name=date]"
           initialVisibleMonth={new Date(2022, 0)}
           openAfterSelect
@@ -991,8 +937,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="range"
           mode="static"
-          layout="fixed-height"
-          height={360}
           initialVisibleMonth={new Date(2022, 0)}
           maximumNights={1}
           startInputSelector="[name=startdate]"
@@ -1014,8 +958,6 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         <DatePicker
           type="range"
           mode="static"
-          layout="fixed-height"
-          height={360}
           initialVisibleMonth={new Date(2022, 0)}
           minimumNights={2}
           startInputSelector="[name=startdate]"

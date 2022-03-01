@@ -1,5 +1,7 @@
 import {Locale} from 'date-fns';
 
+import {ComponentChildren} from '#preact/types';
+
 export type DateSelector = Array<Date | string>;
 export type DatePickerMode = 'static' | 'overlay';
 export type DatePickerType = 'single' | 'range';
@@ -28,17 +30,17 @@ interface CommonDatePickerProps {
   monthFormat: string;
   numberOfMonths: number;
   onError: (message: string) => void;
-  openAfterClear: boolean;
-  openAfterSelect: boolean;
+  openAfterClear?: boolean;
+  openAfterSelect?: boolean;
   weekDayFormat: string;
-  children?: Element;
+  children?: ComponentChildren;
   today: Date;
   type: DatePickerType;
 }
 
 export interface DateRangePickerProps extends CommonDatePickerProps {
-  allowBlockedEndDate: boolean;
-  allowBlockedRanges: boolean;
+  allowBlockedEndDate?: boolean;
+  allowBlockedRanges?: boolean;
   endInputSelector: string;
   startInputSelector: string;
   maximumNights: number;

@@ -1,6 +1,7 @@
 export type {
-  ComponentType,
-  Ref,
-  FunctionalComponent,
+  ComponentChildren,
   ComponentProps,
+  ComponentType,
+  FunctionalComponent,
+  Ref,
 } from 'preact';

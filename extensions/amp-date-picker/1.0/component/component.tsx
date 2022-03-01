@@ -23,6 +23,7 @@ import {BentoDatePickerProps} from '../types';
 type PropertiesWithDefaults =
   | 'endInputSelector'
   | 'format'
+  | 'highlighted'
   | 'inputSelector'
   | 'locale'
   | 'maximumNights'
@@ -51,10 +52,17 @@ const DEFAULT_PROPS: Pick<BentoDatePickerProps, PropertiesWithDefaults> = {
   maximumNights: 0,
   minimumNights: 1,
   numberOfMonths: 1,
+  highlighted: [],
 };
 
+export type BaseComponentProps = Omit<
+  BentoDatePickerProps,
+  PropertiesWithDefaults
+> &
+  Partial<Pick<BentoDatePickerProps, PropertiesWithDefaults>>;
+
 function BentoDatePickerWithRef(
-  props: Omit<BentoDatePickerProps, PropertiesWithDefaults>,
+  props: BaseComponentProps,
   ref: Ref<HTMLInputElement>
 ) {
   const propsWithDefaults = useMemo(
