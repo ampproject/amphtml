@@ -55,8 +55,9 @@ let ShoppingConfigResponseDef;
 
 /**
  * Used for keeping track of intermediary invalid config results within Objects or Arrays of Objects.
+ * @private {boolean}
  */
-let isValidConfigSection = true;
+let isValidConfigSection_ = true;
 
 /**
  * Validates an Object using the validateConfig function.
@@ -68,11 +69,11 @@ function createValidateConfig(validation) {
     // Handles Arrays of Objects
     if (Array.isArray(value)) {
       for (const item of value) {
-        isValidConfigSection &&= validateConfig(item, validation, field + ' ');
+        isValidConfigSection_ &&= validateConfig(item, validation, field + ' ');
       }
       // Handles Objects
     } else {
-      isValidConfigSection &&= validateConfig(value, validation);
+      isValidConfigSection_ &&= validateConfig(value, validation);
     }
   };
 }
@@ -179,9 +180,9 @@ export function getShoppingConfig(element) {
     const shoppingTagIndicesToRemove = [];
     let currentShoppingTagIndex = 0;
     const areConfigsValid = config['items'].reduce((item1, item2) => {
-      isValidConfigSection = true;
+      isValidConfigSection_ = true;
       let isValidConfig = validateConfig(item2);
-      isValidConfig &&= isValidConfigSection;
+      isValidConfig &&= isValidConfigSection_;
       if (!isValidConfig) {
         shoppingTagIndicesToRemove.push(currentShoppingTagIndex);
       }
