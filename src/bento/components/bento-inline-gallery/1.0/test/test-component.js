@@ -1,11 +1,11 @@
 import {mount} from 'enzyme';
 
-import * as Preact from '#preact';
+import {BentoBaseCarousel} from '#bento/components/bento-base-carousel/1.0/component';
+import {BentoInlineGallery} from '#bento/components/bento-inline-gallery/1.0/component';
+import {BentoInlineGalleryPagination} from '#bento/components/bento-inline-gallery/1.0/pagination';
+import {BentoInlineGalleryThumbnails} from '#bento/components/bento-inline-gallery/1.0/thumbnails';
 
-import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
-import {BentoInlineGallery} from '../component';
-import {BentoInlineGalleryPagination} from '../pagination';
-import {BentoInlineGalleryThumbnails} from '../thumbnails';
+import * as Preact from '#preact';
 
 describes.sandboxed('InlineGallery preact component', {}, () => {
   describe('BentoInlineGalleryPagination component', () => {
