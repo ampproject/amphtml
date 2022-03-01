@@ -167,6 +167,7 @@
 
 .i-amphtml-story-ad-progress-value {
   animation-name: i-amphtml-story-ad-value !important;
+  animation-duration: 10s;
   animation-timing-function: linear !important;
   background-color: #fbc02d !important;
   height: 100% !important;
