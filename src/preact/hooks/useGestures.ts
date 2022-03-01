@@ -1,16 +1,23 @@
 import type {RefObject} from 'preact';
+import {ClassType} from 'react';
 
 import {useEffect} from '#preact';
 import {useValueRef} from '#preact/component';
 
-import {Gesture, GestureRecognizer, Gestures} from '../../gesture';
+import {Gesture, Gestures} from '../../gesture';
 import {
+  DoubletapDef,
   DoubletapRecognizer,
+  GestureRecognizer,
+  PinchDef,
   PinchRecognizer,
+  SwipeDef,
   SwipeXRecognizer,
   SwipeXYRecognizer,
   SwipeYRecognizer,
+  TapDef,
   TapRecognizer,
+  TapzoomDef,
   TapzoomRecognizer,
 } from '../../gesture-recognizers';
 
@@ -24,19 +31,21 @@ const gestureRecognizers = {
   tapZoom: TapzoomRecognizer,
 };
 
-type GestureHandlers<TStartInfo> = {
-  [P in keyof typeof gestureRecognizers]: typeof gestureRecognizers[P] extends GestureRecognizer<
-    infer TData
-  >
-    ? (gestureData: Gesture<TData>, start: TStartInfo) => TStartInfo
-    : (gestureData: Gesture<unknown>, start: TStartInfo) => TStartInfo;
+type GestureHandlers = {
+  doubletap: (ev: Gesture<DoubletapDef>) => void;
+  pinch: (ev: Gesture<PinchDef>) => void;
+  swipeX: (ev: Gesture<SwipeDef>) => void;
+  swipeXY: (ev: Gesture<SwipeDef>) => void;
+  swipeY: (ev: Gesture<SwipeDef>) => void;
+  tap: (ev: Gesture<TapDef>) => void;
+  tapZoom: (ev: Gesture<TapzoomDef>) => void;
 };
 
 const keys = Object.keys as <TObj>(obj: TObj) => Array<keyof TObj>;
 
 export function useGestures(
   elementRef: RefObject<HTMLElement>,
-  handlers: Partial<GestureHandlers<unknown>>
+  handlers: Partial<GestureHandlers>
 ) {
   const handlersRef = useValueRef(handlers);
 
@@ -46,25 +55,20 @@ export function useGestures(
       return;
     }
 
+    const handlers = handlersRef.current;
+
     const gestures = Gestures.get(element);
     keys(handlers).forEach((key) => {
       const recognizer = gestureRecognizers[key];
-      let initialData: unknown = null;
-      gestures.onGesture(recognizer, (ev) => {
-        if (ev.data.first) {
-          initialData = null;
-        }
-        initialData = handlersRef.current[key]!(ev, initialData);
-        if (ev.data.last) {
-          initialData = null;
-        }
+      gestures.onGesture(recognizer as any, (ev) => {
+        handlersRef.current[key]!(ev);
       });
     });
 
     return () => {
       keys(handlers).forEach((key) => {
         const recognizer = gestureRecognizers[key];
-        gestures.removeGesture(recognizer);
+        gestures.removeGesture(recognizer as any);
       });
     };
   }, []);
