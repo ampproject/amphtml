@@ -281,7 +281,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
 
     this.tagData_ =
-      shoppingData[pageElement.id][
+      shoppingData[pageElement.id]?.[
         this.element.getAttribute('data-product-id')
       ];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
