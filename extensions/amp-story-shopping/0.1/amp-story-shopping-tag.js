@@ -93,7 +93,9 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
+  }
 
+  initializeTagStateListeners_() {
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
       (rtlState) => this.onRtlStateUpdate_(rtlState),
@@ -296,5 +298,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
     this.hasAppendedInnerShoppingTagEl_ = true;
     this.styleTagText_();
+    this.initializeTagStateListeners_();
   }
 }
