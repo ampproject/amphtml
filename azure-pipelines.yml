@@ -6,15 +6,15 @@ strategy:
     prod:
       env: 'production'
       cdnUrl: 'https://web.usestoryteller.com/amp'
-      cdnRegex: '/^https:\/\/([a-zA-Z0-9_-]+\.)?web\.usestoryteller\.com$/'
+      cdnRegex: '\/^https:\\\/\\\/([a-zA-Z0-9_-]+\\.)?web\\.usestoryteller.com\\.net$\/'
     staging:
       env: 'staging'
       cdnUrl: 'https://storytellerstaging.azureedge.net/amp'
-      cdnRegex: '/^https:\/\/([a-zA-Z0-9_-]+\.)?storytellerstaging\.azureedge\.net$/'
+      cdnRegex: '\/^https:\\\/\\\/([a-zA-Z0-9_-]+\\.)?storytellerstaging\\.azureedge\\.net$\/'
     dev:
       env: 'dev'
       cdnUrl: 'https://storytellerdev.azureedge.net/amp'
-      cdnRegex: '/^https:\/\/([a-zA-Z0-9_-]+\.)?storytellerdev\.azureedge\.net$/'
+      cdnRegex: '\/^https:\\\/\\\/([a-zA-Z0-9_-]+\\.)?storytellerdev\\.azureedge\\.net$\/'
 
 pool:
   vmImage: ubuntu-latest
