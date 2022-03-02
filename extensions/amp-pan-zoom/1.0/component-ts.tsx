@@ -74,9 +74,9 @@ export function BentoPanZoomWithRef(
   const {
     children,
     controls,
-    initialScale = DEFAULT_INITIAL_SCALE,
-    initialX = DEFAULT_ORIGIN,
-    initialY = DEFAULT_ORIGIN,
+    initialScale,
+    initialX,
+    initialY,
     maxScale = DEFAULT_MAX_SCALE,
     onTransformEnd,
     resetOnResize,

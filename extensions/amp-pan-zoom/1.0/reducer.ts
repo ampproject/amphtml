@@ -48,14 +48,12 @@ const initialState = {
   canZoom: true,
 };
 
-type InitialState = typeof initialState;
+type State = typeof initialState;
 
-/** @deprecated */
 type PanZoomConfig = Pick<
   BentoPanZoomProps,
   'initialScale' | 'initialX' | 'initialY' | 'maxScale'
 >;
-type State = InitialState & PanZoomConfig;
 
 /** @deprecated */
 const updatePanZoomBoundaries = (state: State, newScale: number) => {
@@ -321,13 +319,18 @@ const getKeyframes = (posX, posY, scale) => {
 
 /** @deprecated */
 export function initReducer(config: PanZoomConfig): State {
-  const {initialScale, initialX, initialY, maxScale} = config;
+  const {
+    initialScale = DEFAULT_INITIAL_SCALE,
+    initialX = DEFAULT_ORIGIN,
+    initialY = DEFAULT_ORIGIN,
+    maxScale = DEFAULT_MAX_SCALE,
+  } = config;
   return {
     ...initialState,
-    initialScale: initialScale || DEFAULT_INITIAL_SCALE,
-    initialX: initialX || DEFAULT_ORIGIN,
-    initialY: initialY || DEFAULT_ORIGIN,
-    maxScale: maxScale || DEFAULT_MAX_SCALE,
+    posX: initialX,
+    posY: initialY,
+    scale: initialScale,
+    maxScale,
   };
 }
 
