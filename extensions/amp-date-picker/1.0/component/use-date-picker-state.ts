@@ -22,37 +22,33 @@ export function useDatePickerState(mode: DatePickerMode) {
     /**
      * Set up the state machine
      */
-    function initializeStateMachine() {
-      const sm = stateMachineRef.current;
-      const OVERLAY_CLOSED = 'overlay-closed';
-      const OVERLAY_OPEN_INPUT = 'overlay-open-input';
-      const STATIC = 'static';
-      const OVERLAY_OPEN_PICKER = 'overlay-open-picker';
+    const sm = stateMachineRef.current;
+    const OVERLAY_CLOSED = 'overlay-closed';
+    const OVERLAY_OPEN_INPUT = 'overlay-open-input';
+    const STATIC = 'static';
+    const OVERLAY_OPEN_PICKER = 'overlay-open-picker';
 
-      sm.addTransition(STATIC, STATIC, noop);
+    sm.addTransition(STATIC, STATIC, noop);
 
-      if (mode === 'overlay') {
-        sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, () => {
-          setIsOpen(true);
-        });
+    if (mode === 'overlay') {
+      sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_INPUT, () => {
+        setIsOpen(true);
+      });
 
-        sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, () => {
-          setIsOpen(true);
-        });
+      sm.addTransition(OVERLAY_CLOSED, OVERLAY_OPEN_PICKER, () => {
+        setIsOpen(true);
+      });
 
-        sm.addTransition(OVERLAY_CLOSED, OVERLAY_CLOSED, noop);
+      sm.addTransition(OVERLAY_CLOSED, OVERLAY_CLOSED, noop);
 
-        sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, () => {
-          setIsOpen(true);
-        });
+      sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_OPEN_PICKER, () => {
+        setIsOpen(true);
+      });
 
-        sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, () => {
-          setIsOpen(false);
-        });
-      }
+      sm.addTransition(OVERLAY_OPEN_INPUT, OVERLAY_CLOSED, () => {
+        setIsOpen(false);
+      });
     }
-
-    initializeStateMachine();
   }, [mode]);
 
   return {isOpen, transitionTo};
