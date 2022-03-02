@@ -1,9 +1,9 @@
 import {mount} from 'enzyme';
 
+import {BentoSocialShare} from '#bento/components/bento-social-share/1.0/component';
+
 import * as Preact from '#preact';
 import {Wrapper} from '#preact/component';
-
-import {BentoSocialShare} from '../component';
 
 describes.sandboxed('BentoSocialShare 1.0 preact component', {}, (env) => {
   const originalWarn = console.warn;

@@ -1,5 +1,7 @@
 import {mount} from 'enzyme';
 
+import {BentoFacebook} from '#bento/components/bento-facebook/1.0/component';
+
 import {serializeMessage} from '#core/3p-frame-messaging';
 
 import {createRef} from '#preact';
@@ -8,13 +10,14 @@ import {WithAmpContext} from '#preact/context';
 
 import {waitFor} from '#testing/helpers/service';
 
-import {BentoTwitter} from '../component';
+describes.sandboxed('BentoFacebook preact component', {}, (env) => {
+  const href =
+    'https://www.facebook.com/NASA/photos/a.67899501771/10159193669016772/';
 
-describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
   it('should render', () => {
     const wrapper = mount(
-      <BentoTwitter
-        tweetid="1356304203044499462"
+      <BentoFacebook
+        href={href}
         style={{
           'width': '500px',
           'height': '600px',
@@ -23,7 +26,6 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     );
 
     const iframe = wrapper.find('iframe');
-
     expect(iframe.prop('src')).to.equal(
       'http://ads.localhost:9876/dist.3p/current/frame.max.html'
     );
@@ -34,8 +36,8 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
   it('should call given requestResize', () => {
     const requestResizeSpy = env.sandbox.spy();
     const wrapper = mount(
-      <BentoTwitter
-        tweetid="1356304203044499462"
+      <BentoFacebook
+        href={href}
         style={{
           'width': '500px',
           'height': '600px',
@@ -63,8 +65,8 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
 
   it('should change height', async () => {
     const wrapper = mount(
-      <BentoTwitter
-        tweetid="1356304203044499462"
+      <BentoFacebook
+        href={href}
         style={{
           'width': '500px',
           'height': '600px',
@@ -100,9 +102,9 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     const ref = createRef();
     const onReadyState = env.sandbox.spy();
     const wrapper = mount(
-      <BentoTwitter
+      <BentoFacebook
         ref={ref}
-        tweetid="1356304203044499462"
+        href={href}
         style={{
           'width': '500px',
           'height': '600px',
@@ -125,9 +127,9 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     const ref = createRef();
     const wrapper = mount(
       <WithAmpContext playable={true}>
-        <BentoTwitter
+        <BentoFacebook
           ref={ref}
-          tweetid="1356304203044499462"
+          href={href}
           style={{
             'width': '500px',
             'height': '600px',
@@ -143,66 +145,53 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
     expect(spy.set).to.be.calledOnce;
   });
 
-  it('should call onLoad when loaded', () => {
-    const onLoadSpy = env.sandbox.spy();
-    const onErrorSpy = env.sandbox.spy();
-
+  it('should not sandbox iframe', async () => {
+    const ref = createRef();
     const wrapper = mount(
-      <BentoTwitter
-        tweetid="1356304203044499462"
-        height="500"
-        width="500"
-        onLoad={onLoadSpy}
-        onError={onErrorSpy}
-      ></BentoTwitter>
+      <BentoFacebook
+        ref={ref}
+        href={href}
+        embedAs="video"
+        style={{
+          'width': '500px',
+          'height': '600px',
+        }}
+      />
     );
 
-    const iframe = wrapper.find('iframe').getDOMNode();
-    const {sentinel} = JSON.parse(iframe.getAttribute('name')).attributes;
-    const mockEvent = new CustomEvent('message');
-    mockEvent.data = serializeMessage('embed-size', sentinel, {height: '1000'});
-    mockEvent.source = iframe.contentWindow;
-    window.dispatchEvent(mockEvent);
-
-    expect(onLoadSpy).to.have.been.calledOnce;
-    expect(onErrorSpy).not.to.have.been.called;
+    const iframe = wrapper.find('iframe');
+    expect(iframe.prop('sandbox')).to.be.undefined;
   });
 
-  it('should call onError when error', () => {
-    const onErrorSpy = env.sandbox.spy();
-    const onLoadSpy = env.sandbox.spy();
-
+  it('should propagate specified locale', async () => {
+    const ref = createRef();
     const wrapper = mount(
-      <BentoTwitter
-        tweetid="00000000111111"
-        height="500"
-        width="500"
-        onError={onErrorSpy}
-        onLoad={onLoadSpy}
-      ></BentoTwitter>
+      <BentoFacebook
+        ref={ref}
+        href={href}
+        locale="fr_FR"
+        style={{
+          'width': '500px',
+          'height': '600px',
+        }}
+      />
     );
 
-    const iframe = wrapper.find('iframe').getDOMNode();
-    const {sentinel} = JSON.parse(iframe.getAttribute('name')).attributes;
-    const mockEvent = new CustomEvent('message');
-    mockEvent.data = serializeMessage('no-content', sentinel);
-    mockEvent.source = iframe.contentWindow;
-    window.dispatchEvent(mockEvent);
-
-    expect(onErrorSpy).to.have.been.calledOnce;
-    expect(onLoadSpy).not.to.have.been.called;
+    const iframe = wrapper.find('iframe');
+    expect(iframe.prop('name')).to.contain('"locale":"fr_FR"');
   });
 
   it('should pass the loading attribute to the underlying iframe', () => {
     const wrapper = mount(
-      <BentoTwitter
-        tweetid="00000000111111"
+      <BentoFacebook
+        href={href}
+        locale="fr_FR"
         style={{
           'width': '500px',
           'height': '600px',
         }}
         loading="lazy"
-      ></BentoTwitter>
+      />
     );
 
     const iframe = wrapper.find('iframe').getDOMNode();
@@ -211,13 +200,14 @@ describes.sandboxed('Twitter preact component v1.0', {}, (env) => {
 
   it('should set data-loading="auto" if no value is specified', () => {
     const wrapper = mount(
-      <BentoTwitter
-        tweetid="00000000111111"
+      <BentoFacebook
+        href={href}
+        locale="fr_FR"
         style={{
           'width': '500px',
           'height': '600px',
         }}
-      ></BentoTwitter>
+      />
     );
 
     const iframe = wrapper.find('iframe').getDOMNode();

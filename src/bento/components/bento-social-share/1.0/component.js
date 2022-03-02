@@ -9,8 +9,8 @@ import {useStyles} from './component.jss';
 import {getSocialConfig} from './social-share-config';
 import {BentoSocialShareIcon} from './social-share-svgs';
 
-import {openWindowDialog} from '../../../src/open-window-dialog';
-import {addParamsToUrl} from '../../../src/url';
+import {openWindowDialog} from '../../../../open-window-dialog';
+import {addParamsToUrl} from '../../../../url';
 
 const NAME = 'BentoSocialShare';
 const DEFAULT_WIDTH = 60;
