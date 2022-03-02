@@ -93,7 +93,7 @@ app.use((req, res, next) => {
   if (req.query.csp) {
     res.set({
       'content-security-policy':
-        "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cdn.ampproject.org/rtv/ https://cdn.materialdesignicons.com https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com https://p.typekit.net https://use.fontawesome.com https://use.typekit.net; report-uri https://csp-collector.appspot.com/csp/amp",
+        "default-src * blob: data:; script-src https://ampjs.org/rtv/ https://ampjs.org/v0.js https://ampjs.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://ampjs.org/rtv/ https://cdn.materialdesignicons.com https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com https://p.typekit.net https://use.fontawesome.com https://use.typekit.net; report-uri https://csp-collector.appspot.com/csp/amp",
     });
   }
   next();
@@ -528,7 +528,7 @@ async function proxyToAmpProxy(req, res, mode) {
     body = body
       .replace(
         '</head>',
-        '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
+        '<script async host-service="amp-mraid" src="https://ampjs.org/v0/amp-mraid-0.1.js">' +
           '</script>' +
           '</head>'
       )
@@ -967,7 +967,7 @@ app.get('/iframe-echo-message', (req, res) => {
  *
  * Example delay loading amp-form script by 5 seconds:
  * <script async custom-element="amp-form"
- *    src="https://cdn.ampproject.org/v0/amp-form-0.1.js?sleep=5"></script>
+ *    src="https://ampjs.org/v0/amp-form-0.1.js?sleep=5"></script>
  */
 app.use(['/dist/v0/amp-*.(m?js)', '/dist/amp*.(m?js)'], (req, _res, next) => {
   const sleep = parseInt(req.query.sleep || 0, 10) * 1000;
@@ -1013,7 +1013,7 @@ app.get(
           file = file
             .replace(
               '</head>',
-              '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
+              '<script async host-service="amp-mraid" src="https://ampjs.org/v0/amp-mraid-0.1.js">' +
                 '</script>' +
                 '</head>'
             )
@@ -1386,7 +1386,7 @@ app.get(
   async (req, res, next) => {
     const mode = SERVE_MODE;
     const fileName = path.basename(req.path).replace('.max.', '.');
-    let filePath = 'https://cdn.ampproject.org/v0/' + fileName;
+    let filePath = 'https://ampjs.org/v0/' + fileName;
     if (await passthroughServeModeCdn(res, filePath)) {
       return;
     }
@@ -1476,9 +1476,7 @@ app.use('/shadow/', (req, res) => {
   const {url} = req;
   const isProxyUrl = /^\/proxy\//.test(url);
 
-  const baseHref = isProxyUrl
-    ? 'https://cdn.ampproject.org/'
-    : `${path.dirname(url)}/`;
+  const baseHref = isProxyUrl ? 'https://ampjs.org/' : `${path.dirname(url)}/`;
 
   const viewerHtml = renderShadowViewer({
     src: '//' + req.hostname + '/' + req.url.replace(/^\//, ''),
@@ -1517,10 +1515,10 @@ function addViewerIntegrationScript(ampJsVersionString, file) {
       '.js"></script>';
   } else {
     // Viewer integration script from runtime, such as
-    // https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js
+    // https://ampjs.org/v0/amp-viewer-integration-0.1.js
     viewerScript =
       '<script async ' +
-      'src="https://cdn.ampproject.org/v0/amp-viewer-integration-' +
+      'src="https://ampjs.org/v0/amp-viewer-integration-' +
       ampJsVersion +
       '.js" data-amp-report-test="viewer-integr.js"></script>';
   }
@@ -1590,7 +1588,7 @@ app.use(
     const {vendor} = req.params;
     const serveMode = SERVE_MODE;
 
-    const cdnUrl = `https://cdn.ampproject.org/v0/analytics-vendors/${vendor}.json`;
+    const cdnUrl = `https://ampjs.org/v0/analytics-vendors/${vendor}.json`;
     if (await passthroughServeModeCdn(res, cdnUrl)) {
       return;
     }

@@ -5,7 +5,7 @@
  * Example:
  * <code>
  * <script async host-service="amp-mraid"
- *         src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js"></script>
+ *         src="https://ampjs.org/v0/amp-mraid-0.1.js"></script>
  * <code>
  *
  * By default, if amp-mraid determines its not running in a mobile app it falls
@@ -15,7 +15,7 @@
  *
  * <code>
  * <script async host-service="amp-mraid" no-fallback
- *         src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js"></script>
+ *         src="https://ampjs.org/v0/amp-mraid-0.1.js"></script>
  * </code>
  *
  */
@@ -85,7 +85,7 @@ export class MraidInitializer {
     // them see post-resolution URLs.  Platforms just check if the URL ends with
     // "/mraid.js".
     //
-    // We use cdn.ampproject.org so we can learn how often this happens from
+    // We use ampjs.org so we can learn how often this happens from
     // server logs for 404s.
     const mraidJs = document.createElement('script');
     mraidJs.setAttribute('type', 'text/javascript');

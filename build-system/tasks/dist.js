@@ -53,6 +53,7 @@ const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
 /**
  * Used while building the experiments page.
  */
+// TODO(danielrozenberg): replace default hostname with ampjs.org.
 const hostname = argv.hostname || 'cdn.ampproject.org';
 
 /**

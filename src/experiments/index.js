@@ -2,7 +2,7 @@
  * @fileoverview Experiments system allows a developer to opt-in to test
  * features that are not yet fully tested.
  *
- * Experiments page: https://cdn.ampproject.org/experiments.html
+ * Experiments page: https://ampjs.org/experiments.html
  */
 
 import {devAssert} from '#core/assert';

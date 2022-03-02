@@ -63,6 +63,7 @@ export const thirdPartyFrameRegex = pure(
     : env('thirdPartyFrameRegex')) || /^d-\d+\.ampproject\.net$/
 );
 
+// TODO(danielrozenberg): replace default hostname with ampjs.org.
 export const cdn = pure(
   env('cdnUrl') || getMetaUrl('runtime-host') || 'https://cdn.ampproject.org'
 );

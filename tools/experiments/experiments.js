@@ -125,7 +125,7 @@ function build() {
     experimentsTable.appendChild(buildExperimentRow(experiment));
   });
 
-  if (host === 'cdn.ampproject.org') {
+  if (host === 'cdn.ampproject.org' || host === 'ampjs.org') {
     const experimentsDesc = document.getElementById('experiments-desc');
     experimentsDesc.setAttribute('hidden', '');
     experimentsTable.setAttribute('hidden', '');

@@ -6,7 +6,6 @@ const {JSDOM} = require('jsdom');
 const {replaceUrls} = require('./app-utils');
 const {getServeMode} = require('./app-utils');
 
-
 const sourceFile = 'test/manual/amp-video.amp.html';
 
 // These are taken from the respective example or validation files.
@@ -30,7 +29,8 @@ const requiredAttrs = {
   'amp-dailymotion': {'data-videoid': 'x2m8jpp'},
   'amp-gfycat': {'data-gfyid': 'TautWhoppingCougar'},
   'amp-ima-video': {
-    'data-tag': 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=&debug_experiment_id=1269069638',
+    'data-tag':
+      'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=&debug_experiment_id=1269069638',
     'data-poster': '/examples/img/ima-poster.png',
   },
   'amp-mowplayer': {'data-mediaid': 'meeqmaqg5js'},
@@ -72,11 +72,7 @@ const requiredInnerHtml = {
 /**
  * Please keep these alphabetically sorted.
  */
-const optionalAttrs = [
-  'autoplay',
-  'controls',
-  'rotate-to-fullscreen',
-];
+const optionalAttrs = ['autoplay', 'controls', 'rotate-to-fullscreen'];
 
 /**
  * Please keep these alpahbetically sorted.
@@ -99,7 +95,6 @@ const availableExtensions = [
   // TODO(alanorozco): Reenable with valid params, if possible.
   // 'amp-nexxtv-player',
 ];
-
 
 const clientScript = `
 var urlParams = new URLSearchParams(window.location.search);
@@ -207,22 +202,20 @@ function replaceExtension(params, withExtension) {
 main();
 `;
 
-
 function getSubstitutable(doc) {
   return doc.querySelector('[data-substitutable]');
 }
-
 
 function renderExtensionDropdown(doc, opt_extension) {
   const select = doc.createElement('select');
 
   const usedExtension =
-      opt_extension || getSubstitutable(doc).tagName.toLowerCase();
+    opt_extension || getSubstitutable(doc).tagName.toLowerCase();
 
-  availableExtensions.forEach(extension => {
+  availableExtensions.forEach((extension) => {
     const option = doc.createElement('option');
     option.setAttribute('value', extension);
-    option./*OK*/innerHTML = extension;
+    option./*OK*/ innerHTML = extension;
 
     if (extension == usedExtension) {
       option.setAttribute('selected', '');
@@ -234,12 +227,11 @@ function renderExtensionDropdown(doc, opt_extension) {
   return select;
 }
 
-
 function renderOptionalAttrsCheckboxes(doc) {
   const fragment = doc.createDocumentFragment();
   const substitutable = getSubstitutable(doc);
 
-  optionalAttrs.forEach(attr => {
+  optionalAttrs.forEach((attr) => {
     const id = `optional-attr-${attr}`;
     const label = doc.createElement('label');
     const input = doc.createElement('input');
@@ -255,7 +247,7 @@ function renderOptionalAttrsCheckboxes(doc) {
     }
 
     label.appendChild(input);
-    label./*OK*/innerHTML += ` ${attr}`;
+    label./*OK*/ innerHTML += ` ${attr}`;
 
     fragment.appendChild(label);
   });
@@ -263,20 +255,20 @@ function renderOptionalAttrsCheckboxes(doc) {
   return fragment;
 }
 
-
 function replaceTagName(node, withTagName) {
   const {tagName} = node;
 
-  node./*OK*/outerHTML =
-      node./*OK*/outerHTML
-          .replace(new RegExp(`^\<${tagName}`, 'i'), `<${withTagName}`)
-          .replace(new RegExp(`\</${tagName}\>$`, 'i'), `</${withTagName}>`);
+  node./*OK*/ outerHTML = node./*OK*/ outerHTML
+    .replace(new RegExp(`^\<${tagName}`, 'i'), `<${withTagName}`)
+    .replace(new RegExp(`\</${tagName}\>$`, 'i'), `</${withTagName}>`);
 }
 
-
 function replaceCustomElementScript(
-  doc, fromExtension, toExtension, version = '0.1') {
-
+  doc,
+  fromExtension,
+  toExtension,
+  version = '0.1'
+) {
   const selector = `script[custom-element=${fromExtension}]`;
   const script = doc.querySelector(selector);
 
@@ -284,17 +276,20 @@ function replaceCustomElementScript(
 
   // TODO(alanorozco): Use config.urls.cdn value. This file is not available
   // under the Node.JS context.
-  script.setAttribute('src',
-      `https://cdn.ampproject.org/v0/${toExtension}-${version}.js`);
+  script.setAttribute(
+    'src',
+    `https://ampjs.org/v0/${toExtension}-${version}.js`
+  );
 }
-
 
 function removeAttrs(node) {
-  node.getAttribute('data-removable-attrs').split(',').forEach(attr => {
-    node.removeAttribute(attr);
-  });
+  node
+    .getAttribute('data-removable-attrs')
+    .split(',')
+    .forEach((attr) => {
+      node.removeAttribute(attr);
+    });
 }
-
 
 function replaceExtension(doc, toExtension) {
   const substitutable = getSubstitutable(doc);
@@ -311,22 +306,22 @@ function replaceExtension(doc, toExtension) {
 
   if (requiredAttrs[toExtensionLowerCase]) {
     const attrs = requiredAttrs[toExtensionLowerCase];
-    Object.keys(attrs).forEach(attr => {
+    Object.keys(attrs).forEach((attr) => {
       substitutable.setAttribute(attr, attrs[attr]);
     });
   }
 
-  substitutable./*OK*/innerHTML = requiredInnerHtml[toExtensionLowerCase] || '';
+  substitutable./*OK*/ innerHTML =
+    requiredInnerHtml[toExtensionLowerCase] || '';
 
   // `replaceTagName` has to run at the end since it manipulates `outerHTML`.
   replaceTagName(substitutable, toExtension);
 }
 
-
 function setOptionalAttrs(req, doc) {
   const substitutable = getSubstitutable(doc);
 
-  optionalAttrs.forEach(attr => {
+  optionalAttrs.forEach((attr) => {
     if (!req.query[attr]) {
       return;
     }
@@ -338,52 +333,52 @@ function setOptionalAttrs(req, doc) {
   });
 }
 
-
 function appendClientScript(doc) {
   const script = doc.createElement('script');
-  script./*OK*/innerHTML = clientScript;
+  script./*OK*/ innerHTML = clientScript;
   doc.body.appendChild(script);
 }
-
 
 function isValidExtension(extension) {
   return availableExtensions.includes(extension);
 }
 
-
 function runVideoTestBench(req, res, next) {
-  fs.promises.readFile(sourceFile).then(contents => {
-    const dom = new JSDOM(contents);
-    const {window} = dom;
-    const doc = window.document;
+  fs.promises
+    .readFile(sourceFile)
+    .then((contents) => {
+      const dom = new JSDOM(contents);
+      const {window} = dom;
+      const doc = window.document;
 
-    const {extension} = req.query;
+      const {extension} = req.query;
 
-    setOptionalAttrs(req, doc);
+      setOptionalAttrs(req, doc);
 
-    if (extension) {
-      if (!isValidExtension(extension)) {
-        res.status(403);
-        res.end('Invalid extension parameter.');
-        return;
+      if (extension) {
+        if (!isValidExtension(extension)) {
+          res.status(403);
+          res.end('Invalid extension parameter.');
+          return;
+        }
+        replaceExtension(doc, extension);
       }
-      replaceExtension(doc, extension);
-    }
 
-    const dropdownContainer = doc.querySelector('.dropdown-container');
-    dropdownContainer.appendChild(renderExtensionDropdown(doc), extension);
+      const dropdownContainer = doc.querySelector('.dropdown-container');
+      dropdownContainer.appendChild(renderExtensionDropdown(doc), extension);
 
-    const optionalAttrsContainer =
-        doc.querySelector('.optional-attrs-container');
-    optionalAttrsContainer.appendChild(renderOptionalAttrsCheckboxes(doc));
+      const optionalAttrsContainer = doc.querySelector(
+        '.optional-attrs-container'
+      );
+      optionalAttrsContainer.appendChild(renderOptionalAttrsCheckboxes(doc));
 
-    appendClientScript(doc);
+      appendClientScript(doc);
 
-    return res.end(replaceUrls(getServeMode(), dom.serialize()));
-  }).catch(() => {
-    next();
-  });
+      return res.end(replaceUrls(getServeMode(), dom.serialize()));
+    })
+    .catch(() => {
+      next();
+    });
 }
-
 
 module.exports = runVideoTestBench;

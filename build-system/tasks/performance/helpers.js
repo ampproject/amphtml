@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
 
-const CDN_URL = 'https://cdn.ampproject.org/';
+const CDN_URL = 'https://ampjs.org/';
 const V0_PATH = '/dist/v0.js';
 const INABOX_PATH = '/dist/amp4ads-v0.js';
 const LOCAL_PATH_REGEXP = /dist\/(v0\/amp-[A-Za-z\-0-9\.]+.js)/;

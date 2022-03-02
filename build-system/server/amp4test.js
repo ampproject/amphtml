@@ -238,7 +238,7 @@ function composeDocument(config) {
       boilerplate =
         '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
       runtime = cdn
-        ? 'https://cdn.ampproject.org/v0.js'
+        ? 'https://ampjs.org/v0.js'
         : `/dist/${minified ? 'v0' : 'amp'}.js`;
       break;
     case 'amp4ads':
@@ -246,7 +246,7 @@ function composeDocument(config) {
       boilerplate =
         '<style amp4ads-boilerplate>body{visibility:hidden}</style>';
       runtime = cdn
-        ? 'https://cdn.ampproject.org/amp4ads-v0.js'
+        ? 'https://ampjs.org/amp4ads-v0.js'
         : `/dist/${minified ? 'amp4ads-v0' : 'amp-inabox'}.js`;
       break;
     case 'amp4email':
@@ -254,7 +254,7 @@ function composeDocument(config) {
       boilerplate =
         '<style amp4email-boilerplate>body{visibility:hidden}</style>';
       runtime = cdn
-        ? 'https://cdn.ampproject.org/v0.js'
+        ? 'https://ampjs.org/v0.js'
         : `/dist/${minified ? 'v0' : 'amp'}.js`;
       break;
     default:
@@ -271,7 +271,7 @@ function composeDocument(config) {
         const name = tuple[0];
         const version = tuple[1] || '0.1';
         const src = cdn
-          ? `https://cdn.ampproject.org/v0/${name}-${version}.js`
+          ? `https://ampjs.org/v0/${name}-${version}.js`
           : `/dist/v0/${name}-${version}.${minified ? '' : 'max.'}js`;
         const type = CUSTOM_TEMPLATES.includes(name)
           ? 'custom-template'
@@ -313,7 +313,7 @@ function composeDocument(config) {
         return {
           'custom-element': ce,
           // TODO: Should this be a local URL i.e. /dist/v0/...?
-          'src': `https://cdn.ampproject.org/v0/${ce}-0.1.js`,
+          'src': `https://ampjs.org/v0/${ce}-0.1.js`,
         };
       });
     }

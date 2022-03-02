@@ -23,7 +23,7 @@ const SCRIPT = `
         if (!window.AMP_SHADOW) {
           window.AMP_SHADOW = true;
           this._installScript(
-            'https://cdn.ampproject.org/shadow-v0.js');
+            'https://ampjs.org/shadow-v0.js');
         }
 
         this._amp = null;

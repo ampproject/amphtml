@@ -1,8 +1,10 @@
 import {basename, format, parse} from 'path';
 import {URL} from 'url';
 
-// eslint-disable-next-line local/no-forbidden-terms
-export const VALID_CDN_ORIGIN = 'https://cdn.ampproject.org';
+export const VALID_CDN_ORIGINS = [
+  'https://ampjs.org',
+  'https://cdn.ampproject.org',
+];
 
 export const AMP_MAIN_BINARIES_RENAMES = new Map([
   ['v0', 'amp'],

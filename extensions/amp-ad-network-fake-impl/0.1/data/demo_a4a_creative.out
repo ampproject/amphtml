@@ -17,7 +17,7 @@ export const data = {
       font-size: small;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async src="https://ampjs.org/v0.js"></script>
 </head>
 <body>
 <amp-img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Rabbit-2.jpg" width="256" height="300"></amp-img>
@@ -62,7 +62,7 @@ export const data = {
       font-size: small;
     }
   </style>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async src="https://ampjs.org/v0.js"></script>
 </head>
 <body>
 <amp-img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Rabbit-2.jpg" width="256" height="300"></amp-img>

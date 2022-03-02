@@ -70,11 +70,11 @@
       "extensions": [
         {
           "custom-element": "amp-animation",
-          "src": "https://cdn.ampproject.org/v0/amp-animation-0.1.js"
+          "src": "https://ampjs.org/v0/amp-animation-0.1.js"
         },
         {
           "custom-element": "amp-position-observer",
-          "src": "https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"
+          "src": "https://ampjs.org/v0/amp-position-observer-0.1.js"
         }
       ]
     }

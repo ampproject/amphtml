@@ -2,7 +2,7 @@ import {extname, format, parse} from 'path';
 import posthtml from 'posthtml';
 import {URL} from 'url';
 
-import {VALID_CDN_ORIGIN} from './cdn';
+import {VALID_CDN_ORIGINS} from './cdn';
 
 export interface ScriptNode extends posthtml.Node {
   tag: 'script';
@@ -22,7 +22,7 @@ export function isValidOrigin(
   url: URL,
   looseOriginUrlCheck?: boolean
 ): boolean {
-  return looseOriginUrlCheck || url.origin === VALID_CDN_ORIGIN;
+  return looseOriginUrlCheck || VALID_CDN_ORIGINS.includes(url.origin);
 }
 
 export function getCdnUrlAttr(node: posthtml.Node): string | null {

@@ -21,7 +21,7 @@ const ExtensionScript = ({isTemplate, name, version}) =>
     <script
       async
       ${isTemplate ? 'custom-template' : 'custom-element'}="${name}"
-      src="https://cdn.ampproject.org/v0/${name}-${version || '0.1'}.js"
+      src="https://ampjs.org/v0/${name}-${version || '0.1'}.js"
     ></script>
   `;
 
@@ -66,7 +66,7 @@ const AmpDoc = ({body, canonical, css, head}) => {
           : ''}
         <link rel="canonical" href="${canonical}" />
         ${boilerPlate}
-        <script async src="https://cdn.ampproject.org/v0.js"></script>
+        <script async src="https://ampjs.org/v0.js"></script>
         ${head || ''}
       </head>
       <body>
