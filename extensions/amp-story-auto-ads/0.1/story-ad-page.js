@@ -30,13 +30,14 @@ import {
   maybeCreateAttribution,
   validateCtaMetadata,
 } from './story-ad-ui';
-import {getFrameDoc, localizeCtaText} from './utils';
+import {getFrameDoc, getUniqueId, localizeCtaText} from './utils';
 
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
+  Action,
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
@@ -313,10 +314,6 @@ export class StoryAdPage {
       'id': this.id_,
     };
 
-    if (isExperimentOn(this.win_, 'story-ad-auto-advance')) {
-      attributes['auto-advance-after'] = '10s';
-    }
-
     const page = createElementWithAttributes(
       this.doc_,
       'amp-story-page',
@@ -382,6 +379,38 @@ export class StoryAdPage {
     });
   }
 
+  setAutoAdvance_() {
+    const autoAdvancedMetaTag = this.adDoc_.querySelector('meta[name="auto-advance-after"]');
+    if (autoAdvancedMetaTag) {
+      const autoAdvanceValue = autoAdvancedMetaTag.content;
+      this.pageElement_.getImpl().then((impl) => impl.setAutoAdvance_(autoAdvanceValue));
+      
+      return;
+    }
+
+    const videoAdEl = this.adDoc_.querySelector('amp-video');
+    if (videoAdEl && !videoAdEl.hasAttribute('loop')) {
+      videoAdEl.getImpl()
+        .then(videoImpl => this.pageElement_.getImpl()
+          .then((impl) => 
+            impl.setAutoAdvance_(videoImpl.video_.duration + 's')));
+
+      this.pageElement_.getImpl().then((impl) => impl.setAutoAdvance_(videoAdEl.id));
+    }
+  }
+
+  setPageAudioState_() {
+    const hasVideoEls = !!this.adDoc_.querySelectorAll('video').length
+
+    if (hasVideoEls) {
+      this.pageElement_.getImpl()
+        .then((impl) => {
+          console.log(impl);
+          impl.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true)
+        })
+    }
+  }
+
   /**
    * Returns the iframe containing the creative if it exists.
    * @return {?HTMLIFrameElement}
@@ -406,10 +435,6 @@ export class StoryAdPage {
     // TODO(ccordry): do we still need this? Its a pain to always stub in tests.
     this.pageElement_.getImpl().then((impl) => impl.delegateVideoAutoplay());
 
-    // Remove loading attribute once loaded so that desktop CSS will position
-    // offscren with all other pages.
-    this.pageElement_.removeAttribute(PageAttributes.LOADING);
-
     this.analyticsEvent_(AnalyticsEvents.AD_LOADED, {
       [AnalyticsVars.AD_LOADED]: Date.now(),
     });
@@ -420,6 +445,11 @@ export class StoryAdPage {
       );
     }
 
+    this.setAutoAdvance_();
+    
+    // Remove loading attribute once loaded so that desktop CSS will position
+    // offscren with all other pages.    
+    this.pageElement_.removeAttribute(PageAttributes.LOADING);
     this.loaded_ = true;
 
     this.loadCallbacks_.forEach((cb) => cb());

@@ -419,21 +419,30 @@ export class ProgressBar {
    * TODO(#33969) clean up experiment is launched.
    */
   onAdStateUpdate_(adState) {
-    if (!isExperimentOn(this.win_, 'story-ad-auto-advance')) {
-      return;
-    }
     // Set CSS signal that we are in the experiment.
     // TODO(#33969) Unneeded when we actually launch.
     if (!this.root_.hasAttribute('i-amphtml-ad-progress-exp')) {
       this.root_.setAttribute('i-amphtml-ad-progress-exp', '');
     }
-    adState ? this.createAdSegment_() : this.removeAdSegment_();
+
+    const adPage = this.storyEl_.impl_.activePage_.element;
+
+    let adDuration = '0s';
+    if (adPage.hasAttribute('auto-advance-after')) {
+      autoAdvanceAttr = adPage.getAttribute('auto-advance-after');
+      const advanceTime = parseInt(autoAdvanceAttr.slice(0, -1));
+      if (!isNaN(advanceTime)) {
+        adDuration = autoAdvanceAttr;
+      }
+    }
+
+    adState ? this.createAdSegment_(adDuration) : this.removeAdSegment_();
   }
 
   /**
    * Create ad progress segment that will be shown when ad is visible.
    */
-  createAdSegment_() {
+  createAdSegment_(animationDuration) {
     const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
     // Fill in segment before ad segment.
     this.updateProgressByIndex_(index, 1, false);
@@ -443,7 +452,7 @@ export class ProgressBar {
         index + 2
       )})`
     );
-    const adSegment = <div class="i-amphtml-story-ad-progress-value"></div>;
+    const adSegment = <div class="i-amphtml-story-ad-progress-value" style={{animationDuration}}></div>;
     this.currentAdSegment_ = adSegment;
     progressEl.appendChild(adSegment);
   }
