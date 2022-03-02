@@ -233,9 +233,8 @@ function DateRangePickerWithRef(
   /**
    * For inputs that are valid dates, update the date-picker value.
    */
-  const handleStartInput = useCallback(
-    (e: InputEvent) => {
-      const {target} = e;
+  const handleStartChange = useCallback(
+    ({target}: InputEvent) => {
       const date = parseDate((target as HTMLInputElement).value);
       if (date && isValid(date)) {
         startDateInput.setDate(date);
@@ -247,9 +246,8 @@ function DateRangePickerWithRef(
   /**
    * For inputs that are valid dates, update the date-picker value.
    */
-  const handleEndInput = useCallback(
-    (e: InputEvent) => {
-      const {target} = e;
+  const handleEndChange = useCallback(
+    ({target}: InputEvent) => {
       const date = parseDate((target as HTMLInputElement).value);
       if (date && isValid(date)) {
         endDateInput.setDate(date);
@@ -321,8 +319,8 @@ function DateRangePickerWithRef(
     }
     startInputEl?.addEventListener('focus', handleFocus);
     endInputEl?.addEventListener('focus', handleFocus);
-    startInputEl?.addEventListener('change', handleStartInput);
-    endInputEl?.addEventListener('change', handleEndInput);
+    startInputEl?.addEventListener('change', handleStartChange);
+    endInputEl?.addEventListener('change', handleEndChange);
     startInputEl?.addEventListener('keydown', handleInputKeydown);
     endInputEl?.addEventListener('keydown', handleInputKeydown);
     return () => {
@@ -330,16 +328,16 @@ function DateRangePickerWithRef(
       document.removeEventListener('keydown', handleDocumentKeydown);
       startInputEl?.removeEventListener('focus', handleFocus);
       endInputEl?.removeEventListener('focus', handleFocus);
-      startInputEl?.removeEventListener('change', handleStartInput);
-      endInputEl?.removeEventListener('change', handleEndInput);
+      startInputEl?.removeEventListener('change', handleStartChange);
+      endInputEl?.removeEventListener('change', handleEndChange);
       startInputEl?.removeEventListener('keydown', handleInputKeydown);
       endInputEl?.removeEventListener('keydown', handleInputKeydown);
     };
   }, [
     transitionTo,
     mode,
-    handleStartInput,
-    handleEndInput,
+    handleStartChange,
+    handleEndChange,
     startDateInput.ref,
     endDateInput.ref,
   ]);
