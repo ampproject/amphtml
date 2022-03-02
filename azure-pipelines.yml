@@ -1,8 +1,3 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
 - main
 
@@ -11,12 +6,15 @@ strategy:
     prod:
       env: 'production'
       cdnUrl: 'https://web.usestoryteller.com/amp'
+      cdnRegex: '/^https:\/\/([a-zA-Z0-9_-]+\.)?web\.usestoryteller\.com$/'
     staging:
       env: 'staging'
       cdnUrl: 'https://storytellerstaging.azureedge.net/amp'
+      cdnRegex: '/^https:\/\/([a-zA-Z0-9_-]+\.)?storytellerstaging\.azureedge\.net$/'
     dev:
       env: 'dev'
       cdnUrl: 'https://storytellerdev.azureedge.net/amp'
+      cdnRegex: '/^https:\/\/([a-zA-Z0-9_-]+\.)?storytellerdev\.azureedge\.net$/'
 
 pool:
   vmImage: ubuntu-latest
@@ -27,9 +25,10 @@ steps:
     targetType: 'inline'
     script: |
       $json = '{
-       "cdnUrl": "$(cdnUrl)"
+       "cdnUrl": "$(cdnUrl)",
+       "cdnProxyRegex": "$(cdnRegex)"
       }'
-        
+
       $json | Out-File custom-config.json
     workingDirectory: '$(Build.SourcesDirectory)/build-system/global-configs/'
     pwsh: true
@@ -46,7 +45,7 @@ steps:
           "command": "amp dist --noconfig"
         }
       ]'
-        
+
       $json | Out-File custom-flavors-config.json
     workingDirectory: '$(Build.SourcesDirectory)/build-system/global-configs/'
     pwsh: true
