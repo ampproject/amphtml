@@ -32,7 +32,23 @@
     }
   },
   {
+    "name": "bento-facebook",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "bento-inline-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-instagram",
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
@@ -65,6 +81,31 @@
   {
     "name": "bento-reddit",
     "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-social-share",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-soundcloud",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-twitter",
+    "version": "1.0",
+    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }
