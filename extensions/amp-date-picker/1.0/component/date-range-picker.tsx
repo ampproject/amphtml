@@ -1,11 +1,4 @@
-import {
-  addDays,
-  differenceInDays,
-  isAfter,
-  isBefore,
-  isSameDay,
-  isValid,
-} from 'date-fns';
+import {isAfter, isBefore, isSameDay, isValid} from 'date-fns';
 import {DateRange, Matcher} from 'react-day-picker';
 
 import {Keys_Enum} from '#core/constants/key-codes';
@@ -28,6 +21,7 @@ import {useDatePickerContext} from './use-date-picker-context';
 import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
 
+import {iterateDateRange} from '../date-helpers';
 import {DateFieldType, DateRangePickerAPI} from '../types';
 
 function DateRangePickerWithRef(
@@ -100,33 +94,6 @@ function DateRangePickerWithRef(
   );
 
   /**
-   * Iterate over the dates between a start and end date.
-   */
-  const iterateDateRange = useCallback(
-    (startDate: Date, endDate: Date, cb: (date: Date) => void) => {
-      const normalizedEndDate = endDate || startDate;
-      if (
-        isSameDay(startDate, normalizedEndDate) ||
-        isAfter(startDate, normalizedEndDate)
-      ) {
-        return;
-      }
-
-      if (isSameDay(startDate, endDate)) {
-        return cb(startDate);
-      }
-
-      const days = differenceInDays(normalizedEndDate, startDate);
-      cb(startDate);
-
-      for (let i = 0; i < days; i++) {
-        cb(addDays(startDate, i + 1));
-      }
-    },
-    []
-  );
-
-  /**
    * Detect if a blocked date is between the start and end date, inclusively,
    * accounting for the `allow-blocked-end-date` attribute.
    */
@@ -159,7 +126,7 @@ function DateRangePickerWithRef(
       // be selected.
       return blockedCount > 0;
     },
-    [blockedDates, allowBlockedRanges, iterateDateRange, allowBlockedEndDate]
+    [blockedDates, allowBlockedRanges, allowBlockedEndDate]
   );
 
   /**

@@ -1,4 +1,11 @@
-import {format, startOfToday} from 'date-fns';
+import {
+  addDays,
+  differenceInDays,
+  format,
+  isAfter,
+  isSameDay,
+  startOfToday,
+} from 'date-fns';
 
 import {DEFAULT_LOCALE, ISO_8601} from './constants';
 
@@ -24,4 +31,27 @@ export function getFormattedDate(
  */
 export function getCurrentDate() {
   return startOfToday();
+}
+
+/**
+ * Iterate over the dates between a start and end date.
+ */
+export function iterateDateRange(
+  startDate: Date,
+  endDate: Date,
+  cb: (date: Date, i: number) => void
+) {
+  const normalizedEndDate = endDate || startDate;
+  if (
+    isSameDay(startDate, normalizedEndDate) ||
+    isAfter(startDate, normalizedEndDate)
+  ) {
+    return;
+  }
+
+  const days = differenceInDays(normalizedEndDate, startDate);
+
+  for (let i = 0; i < days; i++) {
+    cb(addDays(startDate, i + 1), i);
+  }
 }
