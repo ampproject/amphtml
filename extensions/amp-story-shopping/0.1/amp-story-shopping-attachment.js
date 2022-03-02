@@ -195,6 +195,15 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     template.setAttribute('active', '');
     this.resetScroll_(template);
 
+    // Ensure details text is closed, unless there is only one product on the page.
+    const detailsContainer = template.querySelector(
+      '.i-amphtml-amp-story-shopping-pdp-details'
+    );
+    if (detailsContainer) {
+      const shouldOpen = shoppingDataPerPage.length === 1;
+      this.toggleDetailsText_(detailsContainer, shouldOpen);
+    }
+
     // If template has not been appended to the dom, append it and assign it to built templates.
     if (!template.isConnected) {
       this.builtTemplates_[templateId] = template;
@@ -271,21 +280,18 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
-   * Expands or collabses the content of the details section.
-   * @param {!Element} detailsHeader
+   * Expands or collapses details text.
+   * @param {!Element} detailsContainer
+   * @param {boolean} shouldOpen
    * @private
    */
-  onDetailsHeaderClick_(detailsHeader) {
-    const detailsContainer = detailsHeader.closest(
-      '.i-amphtml-amp-story-shopping-pdp-details'
-    );
+  toggleDetailsText_(detailsContainer, shouldOpen) {
     const detailsText = detailsContainer.querySelector(
       '.i-amphtml-amp-story-shopping-pdp-details-text'
     );
-    const toggleActive = !detailsContainer.hasAttribute('active');
     this.mutateElement(() => {
-      toggleAttribute(detailsContainer, 'active', toggleActive);
-      detailsText.setAttribute('aria-hidden', !toggleActive);
+      toggleAttribute(detailsContainer, 'active', shouldOpen);
+      detailsText.setAttribute('aria-hidden', !shouldOpen);
     });
   }
 
@@ -295,6 +301,13 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   renderPdpTemplate_(activeProductData) {
+    const onDetailsHeaderClick = (el) => {
+      const detailsContainer = el.closest(
+        '.i-amphtml-amp-story-shopping-pdp-details'
+      );
+      const shouldOpen = !detailsContainer.hasAttribute('active');
+      this.toggleDetailsText_(detailsContainer, shouldOpen);
+    };
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
@@ -357,7 +370,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           <div class="i-amphtml-amp-story-shopping-pdp-details">
             <button
               class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-pdp-details-header"
-              onClick={(e) => this.onDetailsHeaderClick_(e.target)}
+              onClick={(e) => onDetailsHeaderClick(e.target)}
             >
               <span class="i-amphtml-amp-story-shopping-sub-section-header">
                 {this.localizationService_.getLocalizedString(
