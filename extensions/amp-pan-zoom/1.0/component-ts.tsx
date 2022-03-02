@@ -154,35 +154,6 @@ export function BentoPanZoomWithRef(
   });
 
   useGestures(contentRef, {
-    pinch(ev) {
-      console.log('PINCH', ev);
-      const {
-        centerClientX,
-        centerClientY,
-        deltaX,
-        deltaY,
-        dir,
-        distance,
-        first,
-        last,
-        velocityX,
-        velocityY,
-      } = ev.data;
-
-      const {anchorX, anchorY} = getElementPosition(
-        centerClientX,
-        centerClientY,
-        state.contentBox
-      );
-      const newScale = state.scale + distance / 500;
-      console.log({anchorX, anchorY, newScale});
-
-      actions.UPDATE_SCALE({
-        anchorX,
-        anchorY,
-        scale: newScale,
-      });
-    },
     doubletap(ev) {
       const {clientX, clientY} = ev.data;
       const {anchorX, anchorY} = getElementPosition(
