@@ -18,6 +18,11 @@ const ampPanZoomContent = {
 const ampPanZoomChild = {
   position: 'absolute',
   willChange: 'transform',
+  transition: 'transform 0.3s ease-out',
+};
+
+const ampPanZoomDragging = {
+  transition: 'none',
 };
 
 const ampPanZoomPannable = {
@@ -54,6 +59,7 @@ const JSS = {
   ampPanZoomChild,
   ampPanZoomContent,
   ampPanZoomPannable,
+  ampPanZoomDragging,
   ampPanZoomButton,
   ampPanZoomInIcon,
   ampPanZoomOutIcon,

@@ -1,4 +1,3 @@
-import {useDrag, useMove, usePinch} from '@use-gesture/react';
 import type {ComponentChildren, Ref} from 'preact';
 
 import {bezierCurve} from '#core/data-structures/curve';
@@ -138,6 +137,7 @@ export function BentoPanZoomWithRef(
   usePointerDrag<StartDragInfo>(contentRef, {
     button: 'left',
     onStart({clientX, clientY}) {
+      actions.SET_DRAGGING(true);
       actions.SET_IS_PANNABLE({isPannable: true});
       return {posX: state.posX, posY: state.posY, clientX, clientY};
     },
@@ -149,6 +149,7 @@ export function BentoPanZoomWithRef(
       });
     },
     onStop(unusedEv) {
+      actions.SET_DRAGGING(false);
       actions.MOVE_RELEASE();
     },
   });
@@ -211,7 +212,8 @@ export function BentoPanZoomWithRef(
         onDblClick={handleDoubleClick}
         class={classNames(
           styles.ampPanZoomChild,
-          state.isZoomed && styles.ampPanZoomPannable
+          state.isZoomed && styles.ampPanZoomPannable,
+          state.isDragging && styles.ampPanZoomDragging
         )}
       >
         {children}

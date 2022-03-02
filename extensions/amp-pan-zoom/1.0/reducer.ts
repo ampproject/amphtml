@@ -46,6 +46,7 @@ const initialState = {
   isPannable: false,
   isZoomed: false,
   canZoom: true,
+  isDragging: false,
 };
 
 type State = typeof initialState;
@@ -377,6 +378,10 @@ export function usePanZoomState(config: PanZoomConfig) {
           ...setContentBox(payload.contentBox, state.containerBox),
         }));
       },
+      SET_DRAGGING(isDragging: boolean) {
+        setState((state) => ({...state, isDragging}));
+      },
+      /** @deprecated */
       SET_IS_PANNABLE(payload: PickState<'isPannable'>) {
         setState((state) =>
           // temp work around for clicking on zoom button
@@ -432,6 +437,7 @@ export function usePanZoomState(config: PanZoomConfig) {
           };
         });
       },
+      /** @deprecated */
       MOVE_RELEASE() {
         setState((state) => ({
           ...state,
