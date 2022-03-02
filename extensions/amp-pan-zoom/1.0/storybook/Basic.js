@@ -20,7 +20,18 @@ export const _default = (args) => {
 };
 
 export const WithImage = (args) => (
-  <BentoPanZoom {...args} maxScale={5}>
+  <BentoPanZoom {...args}>
+    <img
+      height="225"
+      width="400"
+      alt="Destiny artwork"
+      src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no"
+    />
+  </BentoPanZoom>
+);
+
+export const InitialScale = (args) => (
+  <BentoPanZoom {...args} initialScale={3} initialX={-400} initialY={-75}>
     <img
       height="225"
       width="400"
