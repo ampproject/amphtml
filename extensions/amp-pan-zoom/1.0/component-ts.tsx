@@ -1,6 +1,5 @@
 import type {ComponentChildren, Ref} from 'preact';
 
-import {bezierCurve} from '#core/data-structures/curve';
 import {scale as cssScale, setStyles, translate} from '#core/dom/style';
 
 import * as Preact from '#preact';
@@ -14,13 +13,9 @@ import {useStyles} from './component.jss';
 import {usePointerDrag} from './hooks/use-pointer-drag';
 import {usePanZoomState} from './reducer';
 
-const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-pan-zoom';
 const DEFAULT_MAX_SCALE = 3;
 const DEFAULT_MIN_SCALE = 1;
-const DEFAULT_INITIAL_SCALE = 1;
-const MAX_ANIMATION_DURATION = 250;
-const DEFAULT_ORIGIN = 0;
 
 const ELIGIBLE_TAGS = new Set([
   'svg',
@@ -30,8 +25,6 @@ const ELIGIBLE_TAGS = new Set([
   // 'AMP-LAYOUT',
   // 'AMP-SELECTOR',
 ]);
-
-const useZoomAnimation = () => {};
 
 export type BentoPanZoomProps = {
   children?: ComponentChildren;
@@ -137,8 +130,7 @@ export function BentoPanZoomWithRef(
   usePointerDrag<StartDragInfo>(contentRef, {
     button: 'left',
     onStart({clientX, clientY}) {
-      actions.SET_DRAGGING(true);
-      actions.SET_IS_PANNABLE({isPannable: true});
+      actions.DRAGGING_START();
       return {posX: state.posX, posY: state.posY, clientX, clientY};
     },
     onMove({clientX, clientY, data: start}) {
@@ -149,8 +141,7 @@ export function BentoPanZoomWithRef(
       });
     },
     onStop(unusedEv) {
-      actions.SET_DRAGGING(false);
-      actions.MOVE_RELEASE();
+      actions.DRAGGING_RELEASE();
     },
   });
 
