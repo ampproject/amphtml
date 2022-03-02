@@ -57,16 +57,17 @@ test('create', async (t) => {
         '<code>2107210123000...2107280123000</code>\n</a>\n</p>\n\n' +
         '<h2>npm packages @ 1.2107280123.0</h2>\n' +
         `<b>${Array.from(packageChanged).join(', ')}</b>\n` +
-        `<ul><li>${pr3}</li></ul>\n\n` +
+        `<ul><li>${pr2}</li></ul>\n\n` +
         `<b>Packages not changed:</b> <i>${packagesNotChanged.join(
           ', '
         )}</i>\n\n` +
         '<h2>Changes by component</h2>\n' +
         `<details><summary>ads (1)</summary>${pr1}</details>` +
         `<details><summary>amp-test1 (1)</summary>${pr1}</details>` +
+        `<details><summary>bento-accordion (1)</summary>${pr2}</details>` +
         `<details><summary>build-system (1)</summary>${pr2}</details>` +
         `<details><summary>package updates (1)</summary>${pr3}</details>` +
-        `<details><summary>src (1)</summary>${pr1}</details>` +
+        `<details><summary>src (2)</summary>${pr1}<br />${pr2}</details>` +
         `<details><summary>third_party (2)</summary>${pr1}<br />${pr2}</details>` +
         `<details><summary>validator (1)</summary>${pr1}</details>`,
     })
@@ -143,6 +144,10 @@ test('create', async (t) => {
                   {
                     'path': 'third_party/tasks/e2e/readme.md',
                   },
+                  {
+                    'path':
+                      'src/bento/components/bento-accordion/1.0/README.md',
+                  },
                 ],
               },
               mergeCommit: {
@@ -169,10 +174,6 @@ test('create', async (t) => {
                   },
                   {
                     'path': 'extensions/amp-test2/readme.md',
-                  },
-                  {
-                    'path':
-                      'src/bento/components/bento-accordion/1.0/README.md',
                   },
                 ],
               },

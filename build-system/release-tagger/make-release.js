@@ -114,7 +114,7 @@ function _createComponentSections(prs) {
     for (const node of pr.files.nodes) {
       const componentName = getComponentNameFromPath(node.path);
       if (componentName) {
-        if (!Object.keys(sections).includes(componentName)) {
+        if (!sections[componentName]) {
           sections[componentName] = new Set();
         }
         sections[componentName].add(_formatPullRequestLine(pr));
@@ -161,10 +161,6 @@ function isComponentPath(path, name, version) {
  * @return {string|undefined}
  */
 function getComponentNameFromPath(path) {
-  if (!isComponentPath(path)) {
-    return;
-  }
-
   if (path.startsWith('extensions/')) {
     return path.split('/')[1];
   }

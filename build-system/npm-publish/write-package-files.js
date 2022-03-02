@@ -226,7 +226,6 @@ async function writeReactJs() {
  */
 async function copyCssToRoot() {
   try {
-    // TODO(rileyajones) learn why this was hardcoded as version '1.0'.
     const extDir = getDir(extension, '1.0');
     const preactCssDist = path.join(extDir, 'dist', 'styles.css');
     if (await pathExists(preactCssDist)) {
