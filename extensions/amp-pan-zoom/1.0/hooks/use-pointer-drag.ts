@@ -41,8 +41,10 @@ export function usePointerDrag<TDragData>(
           config.pointerType && ev.pointerType !== config.pointerType;
         const isWrongButton =
           config.button === 'left' && ev.button !== LEFT_BUTTON;
+        const isModifierHeld =
+          ev.metaKey || ev.shiftKey || ev.altKey || ev.ctrlKey;
 
-        if (isWrongPointerType || isWrongButton) {
+        if (isWrongPointerType || isWrongButton || isModifierHeld) {
           return;
         }
         ev.preventDefault();

@@ -1,5 +1,3 @@
-// import {GestureRecognizer} from './gesture';
-
 export declare abstract class GestureRecognizer<TGestureData> {}
 
 /**
@@ -63,6 +61,7 @@ export type PinchDef = {
   centerClientX: number;
   centerClientY: number;
   dir: number;
+  distance: number;
   deltaX: number;
   deltaY: number;
   velocityX: number;
