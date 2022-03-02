@@ -8,6 +8,7 @@ import * as Preact from '#preact';
 import {
   DATE_FORMAT,
   getDateButton,
+  isCalendarVisible,
   isSelectedDate,
   isSelectedEndDate,
   isSelectedStartDate,
@@ -181,7 +182,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     it('shows the calendar view by default', () => {
       const wrapper = mount(<DatePicker type="single" />);
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+      expect(isCalendarVisible(wrapper)).to.be.true;
     });
 
     it('can select a date', () => {
@@ -284,7 +285,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
     it('shows the calendar view by default', () => {
       const wrapper = mount(<DatePicker type="range" mode="static" />);
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+      expect(isCalendarVisible(wrapper)).to.be.true;
     });
 
     it('can select a date range', () => {
@@ -394,7 +395,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(isSelectedStartDate(wrapper, new Date(2022, 0, 1))).to.be.true;
       expect(isSelectedEndDate(wrapper, new Date(2022, 0, 2))).to.be.true;
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+      expect(isCalendarVisible(wrapper)).to.be.true;
     });
   });
 
@@ -415,7 +416,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         </DatePicker>
       );
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+      expect(isCalendarVisible(wrapper)).to.be.false;
     });
 
     it('shows the calendar on input focus', () => {
@@ -427,7 +428,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       wrapper.find('input[name="date"]').simulate('focus');
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+      expect(isCalendarVisible(wrapper)).to.be.true;
     });
 
     it('closes the calendar after a date has been selected by default', () => {
@@ -445,7 +446,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       wrapper.find('input[name="date"]').simulate('focus');
       selectDate(wrapper, new Date(2022, 0, 27));
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+      expect(isCalendarVisible(wrapper)).to.be.false;
     });
 
     it('leaves the calendar open after a date has been selected if openAfterSelect is true', () => {
@@ -464,7 +465,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       wrapper.find('input[name="date"]').simulate('focus');
       selectDate(wrapper, new Date(2022, 0, 27));
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+      expect(isCalendarVisible(wrapper)).to.be.true;
     });
   });
 
@@ -491,7 +492,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
         </DatePicker>
       );
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+      expect(isCalendarVisible(wrapper)).to.be.false;
     });
 
     it('shows the calendar on input focus', () => {
@@ -509,7 +510,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
 
       wrapper.find('input[name="start-date"]').simulate('focus');
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+      expect(isCalendarVisible(wrapper)).to.be.true;
     });
 
     it('closes the calendar after a date has been selected by default', () => {
@@ -529,11 +530,11 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       wrapper.find('input[name="start-date"]').simulate('focus');
       selectDate(wrapper, new Date(2022, 0, 27));
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+      expect(isCalendarVisible(wrapper)).to.be.true;
 
       selectDate(wrapper, new Date(2022, 0, 28));
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+      expect(isCalendarVisible(wrapper)).to.be.false;
     });
 
     it('leaves the calendar open after a date has been selected if openAfterSelect is true', () => {
@@ -555,7 +556,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       selectDate(wrapper, new Date(2022, 0, 27));
       selectDate(wrapper, new Date(2022, 0, 28));
 
-      expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+      expect(isCalendarVisible(wrapper)).to.be.true;
     });
   });
 
@@ -1103,12 +1104,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           </BentoDatePicker>
         );
 
-        expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+        expect(isCalendarVisible(wrapper)).to.be.false;
 
         ref.current.clear();
         wrapper.update();
 
-        expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+        expect(isCalendarVisible(wrapper)).to.be.true;
       });
 
       it('can set the date', () => {
@@ -1184,12 +1185,12 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
           </BentoDatePicker>
         );
 
-        expect(wrapper.exists('[aria-label="Calendar"]')).to.be.false;
+        expect(isCalendarVisible(wrapper)).to.be.false;
 
         ref.current.clear();
         wrapper.update();
 
-        expect(wrapper.exists('[aria-label="Calendar"]')).to.be.true;
+        expect(isCalendarVisible(wrapper)).to.be.true;
       });
 
       it('can set the start and end dates', () => {

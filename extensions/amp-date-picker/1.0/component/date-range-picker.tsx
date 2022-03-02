@@ -364,17 +364,15 @@ function DateRangePickerWithRef(
       {children}
       {startDateInput.hiddenInputComponent}
       {endDateInput.hiddenInputComponent}
-      {isOpen && (
-        <BaseDatePicker
-          mode="range"
-          isOpen={isOpen}
-          selected={dateRange}
-          onSelect={selectDateRange}
-          disabled={disabledMatchers}
-          month={month}
-          onMonthChange={setMonth}
-        />
-      )}
+      <BaseDatePicker
+        mode="range"
+        isOpen={isOpen}
+        selected={dateRange}
+        onSelect={selectDateRange}
+        disabled={disabledMatchers}
+        month={month}
+        onMonthChange={setMonth}
+      />
     </ContainWrapper>
   );
 }

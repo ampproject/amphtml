@@ -188,16 +188,14 @@ function SingleDatePickerWithRef(
     >
       {children}
       {dateInput.hiddenInputComponent}
-      {isOpen && (
-        <BaseDatePicker
-          mode="single"
-          isOpen={isOpen}
-          selected={dateInput.date}
-          onSelect={selectDate}
-          month={month}
-          onMonthChange={setMonth}
-        />
-      )}
+      <BaseDatePicker
+        mode="single"
+        isOpen={isOpen}
+        selected={dateInput.date}
+        onSelect={selectDate}
+        month={month}
+        onMonthChange={setMonth}
+      />
     </ContainWrapper>
   );
 }

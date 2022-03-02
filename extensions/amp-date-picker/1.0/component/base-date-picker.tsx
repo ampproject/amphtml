@@ -30,6 +30,7 @@ export function BaseDatePicker({isOpen, ...props}: BaseDatePickerProps) {
   return (
     <div
       aria-label="Calendar"
+      hidden={!isOpen}
       class={objStr({
         [classes.mounted]: isOpen,
         [classes.unmounted]: !isOpen,
