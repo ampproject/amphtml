@@ -200,8 +200,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       '.i-amphtml-amp-story-shopping-pdp-details'
     );
     if (detailsContainer) {
-      const open = shoppingDataPerPage.length === 1;
-      this.toggleDetailsText_(detailsContainer, open);
+      const shouldOpen = shoppingDataPerPage.length === 1;
+      this.toggleDetailsText_(detailsContainer, shouldOpen);
     }
 
     // If template has not been appended to the dom, append it and assign it to built templates.
@@ -282,16 +282,16 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /**
    * Expands or collapses details text.
    * @param {!Element} detailsContainer
-   * @param {boolean} open
+   * @param {boolean} shouldOpen
    * @private
    */
-  toggleDetailsText_(detailsContainer, open) {
+  toggleDetailsText_(detailsContainer, shouldOpen) {
     const detailsText = detailsContainer.querySelector(
       '.i-amphtml-amp-story-shopping-pdp-details-text'
     );
     this.mutateElement(() => {
-      toggleAttribute(detailsContainer, 'active', open);
-      detailsText.setAttribute('aria-hidden', !open);
+      toggleAttribute(detailsContainer, 'active', shouldOpen);
+      detailsText.setAttribute('aria-hidden', !shouldOpen);
     });
   }
 
@@ -301,12 +301,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   renderPdpTemplate_(activeProductData) {
-    const onDeatailsHeaderClick = (el) => {
+    const onDetailsHeaderClick = (el) => {
       const detailsContainer = el.closest(
         '.i-amphtml-amp-story-shopping-pdp-details'
       );
-      const open = !detailsContainer.hasAttribute('active');
-      this.toggleDetailsText_(detailsContainer, open);
+      const shouldOpen = !detailsContainer.hasAttribute('active');
+      this.toggleDetailsText_(detailsContainer, shouldOpen);
     };
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
@@ -368,7 +368,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           <div class="i-amphtml-amp-story-shopping-pdp-details">
             <button
               class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-pdp-details-header"
-              onClick={(e) => onDeatailsHeaderClick(e.target)}
+              onClick={(e) => onDetailsHeaderClick(e.target)}
             >
               <span class="i-amphtml-amp-story-shopping-sub-section-header">
                 {this.localizationService_.getLocalizedString(
