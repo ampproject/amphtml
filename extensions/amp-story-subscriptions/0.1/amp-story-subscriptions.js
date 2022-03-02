@@ -142,47 +142,66 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   renderSubscriptionsDialogTemplate_() {
     return (
       <div subscriptions-dialog subscriptions-display="NOT granted">
-        <div class="i-amphtml-story-subscriptions-banner">
-          {this.element.getAttribute('banner-text')}
-        </div>
-        <div class="i-amphtml-story-subscriptions-title">
-          {this.element.getAttribute('title')}
-        </div>
-        <div class="i-amphtml-story-subscriptions-subtitle-first">
-          {this.element.getAttribute('subtitle-first')}
-        </div>
-        <div class="i-amphtml-story-subscriptions-subtitle-second">
-          {this.element.getAttribute('subtitle-second')}
-        </div>
-        <div class="i-ampthml-story-subscriptions-button-container">
-          <div
-            class="i-ampthml-story-subscriptions-button-google"
-            subscriptions-action="subscribe"
-            subscriptions-display="NOT granted"
-            subscriptions-service="subscribe.google.com"
-            subscriptions-decorate
-          ></div>
-          <div
-            class="i-amphtml-story-subscriptions-button-publisher"
-            subscriptions-action="subscribe"
-            subscriptions-display="NOT granted"
-          >
-            <div class="i-amphtml-story-subscriptions-publisher-button-text">
-              {this.element.getAttribute('publisher-button-text')}
+        <div class="i-amphtml-story-subscriptions-dialog-banner"></div>
+        <div class="i-amphtml-story-subscriptions-dialog-content">
+          <div class="i-amphtml-story-subscriptions-publisher-text">
+            <div class="i-amphtml-story-subscriptions-price">
+              {this.element.getAttribute('price')}
             </div>
-            <img class="i-amphtml-story-subscriptions-publisher-logo"></img>
+            <div class="i-amphtml-story-subscriptions-title">
+              {this.element.getAttribute('title')}
+            </div>
+            <div class="i-amphtml-story-subscriptions-subtitle-first">
+              {this.element.getAttribute('subtitle-first')}
+            </div>
+            <div class="i-amphtml-story-subscriptions-subtitle-second">
+              {this.element.getAttribute('subtitle-second')}
+            </div>
           </div>
-        </div>
-        <div class="i-amphtml-story-subscriptions-signin">
-          {this.localizationService_.getLocalizedString(
-            LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION
-          )}
-          &nbsp;
-          <a subscriptions-action="login" subscriptions-display="NOT granted">
+          <div class="i-amphtml-story-subscriptions-button-container">
+            <div class="i-amphtml-story-subscriptions-publisher-button-container">
+              <div
+                class="i-amphtml-story-subscriptions-publisher-button"
+                subscriptions-action="subscribe"
+                subscriptions-display="NOT granted"
+              >
+                <img class="i-amphtml-story-subscriptions-publisher-logo"></img>
+                <div class="i-amphtml-story-subscriptions-publisher-button-text">
+                  {this.localizationService_.getLocalizedString(
+                    LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_CTA
+                  )}
+                  &nbsp;
+                  {getStoryAttributeSrc(
+                    this.element,
+                    'publisher',
+                    /* warn */ true
+                  )}
+                </div>
+              </div>
+            </div>
+            <div class="i-amphtml-story-subscriptions-google-button-container">
+              <div
+                class="i-amphtml-story-subscriptions-google-button"
+                subscriptions-action="subscribe"
+                subscriptions-display="NOT granted"
+                subscriptions-service="subscribe.google.com"
+                subscriptions-decorate="false"
+              >
+                Subscribe with Google
+              </div>
+            </div>
+          </div>
+          <div class="i-amphtml-story-subscriptions-signin">
             {this.localizationService_.getLocalizedString(
-              LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SIGN_IN
+              LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION
             )}
-          </a>
+            &nbsp;
+            <a subscriptions-action="login" subscriptions-display="NOT granted">
+              {this.localizationService_.getLocalizedString(
+                LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SIGN_IN
+              )}
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -208,7 +227,9 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       );
       bannerEl.appendChild(
         <div class="i-amphtml-story-subscriptions-banner-button">
-          Next Story
+          {this.localizationService_.getLocalizedString(
+            LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SKIP
+          )}
         </div>
       );
 

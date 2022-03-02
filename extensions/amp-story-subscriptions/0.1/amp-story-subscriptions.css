@@ -40,78 +40,131 @@ amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
 amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   border-radius: 16px 16px 0px 0px !important;
   font-family: Poppins, sans-serif !important;
+  background: white !important;
+  color: black !important;
 }
 
-.i-amphtml-story-subscriptions-banner {
+.i-amphtml-story-subscriptions-dialog-banner {
   position: relative !important;
   width: 100% !important;
-  background: #EBDEC9 !important;
   border-radius: 16px 16px 0px 0px !important;
   font-size: 24px !important;
   text-align: center !important;
-  padding: 23px 0 !important;
+  height: 44px !important;
+  background: #EDEDED !important;
+}
+
+.i-amphtml-story-subscriptions-dialog-content {
+  position: relative !important;
+  margin: 28px 28px 24px 28px !important;
+}
+
+.i-amphtml-story-subscriptions-publisher-text {
+  position: relative !important;
+  margin-bottom: 41px !important;
+}
+
+.i-amphtml-story-subscriptions-price, .i-amphtml-story-subscriptions-title,
+.i-amphtml-story-subscriptions-subtitle-first, .i-amphtml-story-subscriptions-subtitle-second {
+  overflow: hidden !important;
+  white-space: nowrap;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.i-amphtml-story-subscriptions-price {
+  width: 100% !important;
+  font-size: 24px !important;
+  margin-top: 28px !important;
+  letter-spacing: -0.4px !important;
+  height: 41px !important;
 }
 
 .i-amphtml-story-subscriptions-title {
   width: 100% !important;
-  font-style: normal !important;
   font-weight: bold !important;
   font-size: 20px !important;
-  text-align: center !important;
-  color: black !important;
-  margin-top: 31px !important;
+  letter-spacing: -0.25px !important;
+  height: 41px !important;
 }
 
 .i-amphtml-story-subscriptions-subtitle-first, .i-amphtml-story-subscriptions-subtitle-second {
   width: 100% !important;
   font-style: normal !important;
   font-size: 16px !important;
-  text-align: center !important;
-  color: black !important;
+  letter-spacing: -0.25px !important;
+  height: 22px !important;
 }
 
-.i-amphtml-story-subscriptions-subtitle-first {
-  margin-top: 14px !important;
-}
-
-.i-amphtml-story-subscriptions-signin {
-  text-align: center !important;
-  margin-bottom: 35px !important;
-}
-
-.i-ampthml-story-subscriptions-button-container {
+.i-amphtml-story-subscriptions-button-container {
   display: flex !important;
-  margin-top: 35px !important;
-  margin-bottom: 41px !important;
-  justify-content: center !important;
-  padding: 0 10px !important;
+  justify-content: space-between !important;
+  flex-direction: column !important;
+  margin-bottom: 40px !important;
+  height: 92px !important;
   font-family: Google Sans, sans-serif !important;
 }
 
-.i-amphtml-story-subscriptions-button-google {
-  margin: 0 10px !important;
+.i-amphtml-story-subscriptions-publisher-button-container, .i-amphtml-story-subscriptions-google-button-container {
+  display: flex !important;
+  justify-content: center !important;
 }
 
-.i-amphtml-story-subscriptions-button-publisher {
-  background: black !important;
-  margin: 0 10px !important;
-  border-radius: 100px !important;
+.i-amphtml-story-subscriptions-publisher-button {
+  display: flex !important;
+  justify-content: center !important;
+
+  width: 212px !important;
   height: 40px !important;
-  width: 142px !important;
+  
+  background: black !important;
+  border-radius: 51px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
 
-.i-amphtml-story-subscriptions-button-publisher .i-amphtml-story-subscriptions-publisher-button-text {
-  margin-left: 5px !important;
-  margin-right: 5px !important;
-  color: white !important;
-}
-
-.i-amphtml-story-subscriptions-button-publisher .i-amphtml-story-subscriptions-publisher-logo {
+.i-amphtml-story-subscriptions-publisher-logo {
+  margin-right: 11px !important;
   width: 27px !important;
   height: 27px !important;
+  border-radius: 50% !important;
+  margin-left: -16px !important;
+}
+
+.i-amphtml-story-subscriptions-publisher-button-text {
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.15px;
+
+  color: white !important;
+  font-size: 13px !important;
+}
+
+/* TODO: replace this with a single svg file since this is a static button */
+.i-amphtml-story-subscriptions-google-button {
+  display: flex !important;
+  justify-content: center !important;
+
+  width: 212px !important;
+  height: 40px !important;
+  
+  background: #F2F2F2 !important;
+  border-radius: 51px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+}
+
+.i-amphtml-story-subscriptions-signin {
+  display: flex !important;
+  justify-content: center !important;
+  height: 20px !important;
+  margin-bottom: 24px !important;
+  font-size: 12px !important;
 }
 
 .i-amphtml-story-subscriptions-signin a {

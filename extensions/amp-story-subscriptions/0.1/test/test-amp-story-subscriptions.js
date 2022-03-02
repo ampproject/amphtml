@@ -1,11 +1,9 @@
-import '../amp-story-subscriptions';
-import {expect} from 'chai';
-
 import * as Preact from '#core/dom/jsx';
 
 import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
 
 import {afterRenderPromise} from '#testing/helpers';
 
@@ -26,7 +24,7 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story:1.0', 'amp-story-subscriptions:0.1'],
+      extensions: ['amp-story-subscriptions:0.1'],
     },
   },
   (env) => {
@@ -50,6 +48,11 @@ describes.realWin(
         .stub(Services, 'storyStoreServiceForOrNull')
         .returns(Promise.resolve(storeService));
       env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
+
+      const localizationService = new LocalizationService(doc.body);
+      env.sandbox
+        .stub(Services, 'localizationServiceForOrNull')
+        .returns(Promise.resolve(localizationService));
 
       // Stub out functions not needed for the tests.
       env.sandbox.stub(win.history, 'replaceState');
