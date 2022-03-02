@@ -251,13 +251,6 @@ function checkOriginForSettingCookie(win, options, name) {
     !isProxyOrigin(win.location.href),
     `Should never attempt to set cookie on proxy origin: ${name}`
   );
-  const current = parseUrlDeprecated(win.location.href).hostname.toLowerCase();
-  const proxy = parseUrlDeprecated(urls.cdn).hostname.toLowerCase();
-  userAssert(
-    !(current == proxy || endsWith(current, '.' + proxy)),
-    'Should never attempt to set cookie on proxy origin. (in depth check): ' +
-      name
-  );
 }
 
 /**
