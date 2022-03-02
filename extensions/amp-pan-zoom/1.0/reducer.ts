@@ -44,8 +44,8 @@ const initialState = {
 
   /** @deprecated */
   isPannable: false,
-  /** @deprecated */
   isZoomed: false,
+  canZoom: true,
 };
 
 type InitialState = typeof initialState;
@@ -420,9 +420,11 @@ export function usePanZoomState(config: PanZoomConfig) {
           const newScale = boundScale(state, scale, allowExtent);
           const newPosition = updateScale(state, anchorX, anchorY, newScale);
           const isZoomed = newScale !== 1;
+          const canZoom = newScale !== state.maxScale;
           return {
             ...state,
             isZoomed,
+            canZoom,
             ...boundPosition(state, newPosition, allowExtent),
           };
         });

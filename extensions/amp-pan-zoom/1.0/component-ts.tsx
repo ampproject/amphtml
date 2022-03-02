@@ -208,7 +208,7 @@ export function BentoPanZoomWithRef(
     >
       <div
         ref={contentRef}
-        onDoubleClick={handleDoubleClick}
+        onDblClick={handleDoubleClick}
         class={classNames(
           styles.ampPanZoomChild,
           state.isZoomed && styles.ampPanZoomPannable
@@ -220,7 +220,7 @@ export function BentoPanZoomWithRef(
       <div
         class={classNames(
           styles.ampPanZoomButton,
-          state.isZoomed ? styles.ampPanZoomOutIcon : styles.ampPanZoomInIcon
+          state.canZoom ? styles.ampPanZoomInIcon : styles.ampPanZoomOutIcon
         )}
         onClick={toggleZoom}
       />
