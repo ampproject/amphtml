@@ -37,6 +37,7 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
+  Action,
   StateProperty,
   UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
@@ -398,6 +399,18 @@ export class StoryAdPage {
     }
   }
 
+  setPageAudioState_() {
+    const hasVideoEls = !!this.adDoc_.querySelectorAll('video').length
+
+    if (hasVideoEls) {
+      this.pageElement_.getImpl()
+        .then((impl) => {
+          console.log(impl);
+          impl.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true)
+        })
+    }
+  }
+
   /**
    * Returns the iframe containing the creative if it exists.
    * @return {?HTMLIFrameElement}
@@ -431,7 +444,7 @@ export class StoryAdPage {
         /** @type {!HTMLIFrameElement} */ (this.adFrame_)
       );
     }
-    
+
     this.setAutoAdvance_();
     
     // Remove loading attribute once loaded so that desktop CSS will position
