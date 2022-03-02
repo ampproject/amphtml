@@ -1,6 +1,15 @@
 import {Deferred} from '#core/data-structures/promise';
+import {dispatchCustomEvent} from '#core/dom';
+import {isLayoutSizeDefined} from '#core/dom/layout';
+import {once} from '#core/types/function';
+
 import {Services} from '#service';
-import { VideoEvents_Enum } from '../../../src/video-interface';
+import {installVideoManagerForDoc} from '#service/video-manager-impl';
+
+import {getData, listen} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
+
+import {disableScrollingOnIframe} from '../../../src/iframe-helper';
 import {
   addUnsafeAllowAutoplay,
   createFrameFor,
@@ -8,16 +17,7 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {userAssert} from '#utils/log';
-import {disableScrollingOnIframe} from '../../../src/iframe-helper';
-import {
-  dispatchCustomEvent
-} from '#core/dom';
-import {getData, listen} from '#utils/event-helper';
-import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '#core/dom/layout';
-import {once} from '#core/types/function';
-
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-slikeplayer';
 
@@ -25,37 +25,36 @@ const TAG = 'amp-slikeplayer';
  * @implements {../../../src/video-interface.VideoInterface}
  */
 
- /**
+/**
  @enum {string}
  * @private
  */
 
- const SlEvent = {
+const SlEvent = {
   'ready': VideoEvents_Enum.LOAD,
   'play': VideoEvents_Enum.PLAYING,
   'pause': VideoEvents_Enum.PAUSE,
   'complete': VideoEvents_Enum.ENDED,
   'visible': VideoEvents_Enum.VISIBILITY,
   'adStart': VideoEvents_Enum.AD_START,
-  'adEnd': VideoEvents_Enum.AD_END
+  'adEnd': VideoEvents_Enum.AD_END,
 };
 
 export class AmpSlikeplayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
-
     super(element);
- 
-     /** @private {string} */
-     this.apikey_ = '';
- 
-     /** @private {string} */
-     this.videoid_ = '';
 
-     /** @private {?HTMLIFrameElement} */
-     this.iframe_ = null;
+    /** @private {string} */
+    this.apikey_ = '';
 
-     /** @private {?Promise} */
+    /** @private {string} */
+    this.videoid_ = '';
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+
+    /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
     /** @private {?function(Element)} */
@@ -64,38 +63,28 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     /** @private {function(Object)} */
     this.onReadyOnce_ = once((detail) => this.onReady_(detail));
 
-     /** @private {string} */
-     this.config_ = null;
- 
-     /** @private {string} */
-     this.poster_ = '';
- 
-     /** @private {string} */
-     this.splayer_ = '';
- 
-     /** @private {string} */
-     this.baseUrl_ = 'https://tvid.in/sdk/amp/ampembed.html';
- 
-     /** @private {number} */
-     this.duration_ = 1;
+    /** @private {string} */
+    this.config_ = null;
 
-     /** @private {number} */
-     this.currentTime_ = 0;
- 
-     /** @private {Array<(Array<number>|null)>} */
-     this.playedRanges_ = [];
+    /** @private {string} */
+    this.poster_ = '';
 
- 
-     /**@private {string}*/
-     this.autoplay_ = 'true';
+    /** @private {string} */
+    this.baseUrl_ = 'https://tvid.in/sdk/amp/ampembed.html';
 
-      /** @private {function()} */
+    /** @private {number} */
+    this.duration_ = 1;
+
+    /** @private {number} */
+    this.currentTime_ = 0;
+
+    /** @private {function()} */
     this.onMessage_ = this.onMessage_.bind(this);
   }
 
   /** @override */
   buildCallback() {
-    const { element } = this;
+    const {element} = this;
     const deferred = new Deferred();
 
     this.playerReadyPromise_ = deferred.promise;
@@ -106,14 +95,14 @@ export class AmpSlikeplayer extends AMP.BaseElement {
       'The data-apikey attribute is required for <amp-slikeplayer> %s',
       element
     );
-    
+
     this.videoid_ = userAssert(
       element.getAttribute('data-videoid'),
       'The data-videoid attribute is required for <amp-slikeplayer> %s',
       element
     );
-    
-    this.baseUrl_ = element.getAttribute('data-iframe-src') || this.baseUrl_; 
+
+    this.baseUrl_ = element.getAttribute('data-iframe-src') || this.baseUrl_;
     this.config_ = element.getAttribute('data-config') || '';
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
@@ -144,7 +133,11 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&${this.config_}&baseurl=${window.location.origin}`;
+    let src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&baseurl=${window.location.origin}`;
+
+    if (this.config_) {
+      src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&${this.config_}&baseurl=${window.location.origin}`;
+    }
 
     const frame = disableScrollingOnIframe(
       createFrameFor(this, src, this.element.id)
@@ -156,14 +149,14 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     this.iframe_ = /** @type {HTMLIFrameElement} */ (frame);
     return this.loadPromise(this.iframe_);
   }
-  
+
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
 
-   /** @override */
-   supportsPlatform() {
+  /** @override */
+  supportsPlatform() {
     return true;
   }
 
@@ -172,17 +165,18 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     return false;
   }
 
+  /** @private */
+  onReady_() {
+    const {element} = this;
+    this.playerReadyResolver_(this.iframe_);
+    dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
+  }
+
   /**
-   * @param {!Event} event
+   * @param {string} messageEvent
    * @private
    */
-
-   onReady_(detail) {
-     const { element } = this;
-     this.playerReadyResolver_(this.iframe_);
-     dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
-   }
-   onMessage_(messageEvent) {
+  onMessage_(messageEvent) {
     if (
       !this.iframe_ ||
       !messageEvent ||
@@ -190,7 +184,6 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     ) {
       return;
     }
-    
 
     const messageData = getData(messageEvent);
     if (!isJsonOrObj(messageData)) {
@@ -219,111 +212,108 @@ export class AmpSlikeplayer extends AMP.BaseElement {
         case 'playedRanges':
           break;
         case 'time':
-          const { currentTime } = detail;
+          const {currentTime} = detail;
           this.currentTime_ = currentTime;
           break;
         case 'adTime':
-          const { position } = detail;
+          const {position} = detail;
           this.currentTime_ = position;
         default:
           break;
       }
     }
   }
- /**
-  * @override
-  */
- postMessage_(message) {
-   if (this.iframe_ && this.iframe_.contentWindow) {
-     this.iframe_.contentWindow./*OK*/ postMessage(message);
-   }
- }
+  /**
+   * @override
+   */
+  postMessage_(message) {
+    if (this.iframe_ && this.iframe_.contentWindow) {
+      this.iframe_.contentWindow./*OK*/ postMessage(message);
+    }
+  }
 
- sendCommand_(method, optParams) {
-}
+  /**
+   * @override
+   */
+  play() {
+    this.postMessage_('play', '');
+  }
 
- /**
-  * @override
-  */
- play() {
-   this.postMessage_('play' , "");
- }
+  /**
+   * @override
+   */
+  pause() {
+    this.postMessage_('pause', '');
+  }
 
- /**
-  * @override
-  */
- pause() {
-   this.postMessage_('pause', "");
- }
+  /**
+   * @override
+   */
+  mute() {
+    this.postMessage_('mute', '');
+  }
 
- /**
-  * @override
-  */
- mute() {
-   this.postMessage_('mute', "");
- }
+  /**
+   * @override
+   */
+  unmute() {
+    this.postMessage_('unmute', '');
+  }
 
- /**
-  * @override
-  */
- unmute() {
-   this.postMessage_('unmute', "");
- }
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
 
-   /** @override */
-preimplementsAutoFullscreen() {
-  return false;
-}
-
-
-   /** @override */
-preimplementsMediaSessionAPI() {
-  return false;
-}
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
 
   /** @override */
   getMetadata() {
     //Not Implemented
   }
 
- /** @override */
- getCurrentTime() {
-   // Not supported.
-    return this.currentTime_ || 0
- }
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return this.currentTime_ || 0;
+  }
 
- /** @override */
- getDuration() {
-   return this.duration_ || 1;
- }
+  /** @override */
+  getDuration() {
+    return this.duration_ || 1;
+  }
 
- /** @override */
- getPlayedRanges() {
-   return [];
- }
+  /** @override */
+  getPlayedRanges() {
+    return [];
+  }
 
- /** @override */
- seekTo(unusedTimeSeconds) {
-   //to be implemented
- }
-
- postMessage_(method, optParams) {
-  this.playerReadyPromise_.then(() => {
-    if (!this.iframe_ || !this.iframe_.contentWindow) {
-      return;
-    }
-    this.iframe_.contentWindow./*OK*/ postMessage(
-    JSON.stringify(
-      {
-        'method': method,
-        'optParams': optParams,
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    //to be implemented
+  }
+  /**
+   * @param {string} method
+   * @param {string} [optParams]
+   * @private
+   */
+  postMessage_(method, optParams) {
+    this.playerReadyPromise_.then(() => {
+      if (!this.iframe_ || !this.iframe_.contentWindow) {
+        return;
       }
-    ),
-    '*'
-  );
-  });
-}
-
+      this.iframe_.contentWindow./*OK*/ postMessage(
+        JSON.stringify({
+          'method': method,
+          'optParams': optParams,
+        }),
+        '*'
+      );
+    });
+  }
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {

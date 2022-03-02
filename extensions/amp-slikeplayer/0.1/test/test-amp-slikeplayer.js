@@ -1,5 +1,4 @@
 import '../amp-slikeplayer';
-import {htmlFor} from '#core/dom/static-template';
 
 describes.realWin(
   'amp-slikeplayer-v0.1',
@@ -16,15 +15,6 @@ describes.realWin(
       win = env.win;
       doc = win.document;
     });
-    // let win;
-    // let doc;
-    // let html;
-
-    // beforeEach(() => {
-    //   win = env.win;
-    //   doc = win.document;
-    //   html = htmlFor(doc);
-    // });
 
     async function getSlike(attributes, opt_responsive) {
       const slikeplayer = doc.createElement('amp-slikeplayer');
@@ -33,52 +23,70 @@ describes.realWin(
       }
       slikeplayer.setAttribute('width', '320');
       slikeplayer.setAttribute('height', '180');
-       if (opt_responsive) {
+      if (opt_responsive) {
         slikeplayer.setAttribute('layout', 'responsive');
-       }
-       
-       doc.body.appendChild(slikeplayer);
-       await slikeplayer.buildInternal();
-       await slikeplayer.layoutCallback();
-       return slikeplayer;
-     }
- 
-     it('renders', async () => {
-       const slikeplayer = await getSlike({
-        'data-apikey': 'slike373googleamp5accuzkglo',
-        'data-videoid': '1xp5a1wkul',
-        'data-config':'playlist=true&playlisturl=//videoplayer.indiatimes.com/dev/playlistcallback.js'
-        }, true);
-       const iframe = slikeplayer.querySelector('iframe');
-       expect(iframe).to.not.be.null;
-       expect(iframe.tagName).to.equal('IFRAME');
-       expect(iframe.src).to.equal('https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&config=playlist=true&playlisturl=//videoplayer.indiatimes.com/dev/playlistcallback.js&baseurl='+window.location.origin);
-     });
- 
-     it('renders responsively', async () => {
-       const slikeplayer = await getSlike({
-        'data-apikey': 'slike373googleamp5accuzkglo',
-        'data-videoid': '1xp5a1wkul'
-      }, true);
-       const iframe = slikeplayer.querySelector('iframe');
-       expect(iframe).to.not.be.null;
-       expect(iframe.tagName).to.equal('IFRAME');
-       expect(iframe.src).to.equal('https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&baseurl='+window.location.origin);
+      }
 
-      });
- 
-     it('requires data-videoid', () => {
-       return getSlike( {
-        'data-apikey': 'slike373googleamp5accuzkglo'
-      }, true).should.eventually.be.rejectedWith(
-         /The data-videoid attribute is required for/
-       );
-     });
+      doc.body.appendChild(slikeplayer);
+      await slikeplayer.buildInternal();
+      await slikeplayer.layoutCallback();
+      return slikeplayer;
+    }
 
-     it('requires data-apikey', () => {
-      return getSlike({
-        'data-videoid': '1xp5a1wkul'
-      }, true).should.eventually.be.rejectedWith(
+    it('renders', async () => {
+      const slikeplayer = await getSlike(
+        {
+          'data-apikey': 'slike373googleamp5accuzkglo',
+          'data-videoid': '1xp5a1wkul',
+          'data-config':
+            'playlist=true&playlisturl=//videoplayer.indiatimes.com/dev/playlistcallback.js',
+        },
+        true
+      );
+      const iframe = slikeplayer.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&playlist=true&playlisturl=//videoplayer.indiatimes.com/dev/playlistcallback.js&baseurl=' +
+          window.location.origin
+      );
+    });
+
+    it('renders responsively', async () => {
+      const slikeplayer = await getSlike(
+        {
+          'data-apikey': 'slike373googleamp5accuzkglo',
+          'data-videoid': '1xp5a1wkul',
+        },
+        true
+      );
+      const iframe = slikeplayer.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+        'https://tvid.in/sdk/amp/ampembed.html#apikey=slike373googleamp5accuzkglo&videoid=1xp5a1wkul&baseurl=' +
+          window.location.origin
+      );
+    });
+
+    it('requires data-videoid', () => {
+      return getSlike(
+        {
+          'data-apikey': 'slike373googleamp5accuzkglo',
+        },
+        true
+      ).should.eventually.be.rejectedWith(
+        /The data-videoid attribute is required for/
+      );
+    });
+
+    it('requires data-apikey', () => {
+      return getSlike(
+        {
+          'data-videoid': '1xp5a1wkul',
+        },
+        true
+      ).should.eventually.be.rejectedWith(
         /The data-apikey attribute is required for/
       );
     });
