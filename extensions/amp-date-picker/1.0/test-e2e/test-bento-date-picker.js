@@ -25,10 +25,10 @@ describes.endtoend(
         const element = await controller.findElement('bento-date-picker');
         await controller.switchToShadowRoot(element);
 
-        const calendar = await controller.findElement(
-          '.amp-date-picker-calendar-container'
+        const datePicker = await controller.findElement(
+          '[data-testid="date-picker"]'
         );
-        await expect(controller.isElementDisplayed(calendar)).to.be.true;
+        await expect(controller.isElementDisplayed(datePicker)).to.be.true;
 
         const dateButton = await controller.findElement(
           'button[aria-label="Sunday, January 2, 2022"]'
@@ -36,7 +36,7 @@ describes.endtoend(
         controller.click(dateButton);
 
         await expect(
-          controller.getElementAttribute(calendar, 'data-date')
+          controller.getElementAttribute(datePicker, 'data-date')
         ).to.equal('2022-01-02');
       });
 
@@ -49,12 +49,12 @@ describes.endtoend(
         );
         controller.click(dateButton);
 
-        const calendar = await controller.findElement(
-          '.amp-date-picker-calendar-container'
+        const datePicker = await controller.findElement(
+          '[data-testid="date-picker"]'
         );
 
         await expect(
-          controller.getElementAttribute(calendar, 'data-date')
+          controller.getElementAttribute(datePicker, 'data-date')
         ).to.equal('2022-01-02');
 
         await controller.switchToLight();
@@ -62,7 +62,7 @@ describes.endtoend(
         const clearButton = await controller.findElement('button#clear-single');
         controller.click(clearButton);
 
-        await expect(controller.getElementAttribute(calendar, 'data-date')).to
+        await expect(controller.getElementAttribute(datePicker, 'data-date')).to
           .be.null;
       });
 
@@ -74,12 +74,12 @@ describes.endtoend(
         const element = await controller.findElement('bento-date-picker');
         await controller.switchToShadowRoot(element);
 
-        const calendar = await controller.findElement(
-          '.amp-date-picker-calendar-container'
+        const datePicker = await controller.findElement(
+          '[data-testid="date-picker"]'
         );
 
         await expect(
-          controller.getElementAttribute(calendar, 'data-date')
+          controller.getElementAttribute(datePicker, 'data-date')
         ).to.equal('2022-01-01');
       });
 
@@ -91,12 +91,12 @@ describes.endtoend(
         const element = await controller.findElement('bento-date-picker');
         await controller.switchToShadowRoot(element);
 
-        const calendar = await controller.findElement(
-          '.amp-date-picker-calendar-container'
+        const datePicker = await controller.findElement(
+          '[data-testid="date-picker"]'
         );
 
         await expect(
-          controller.getElementAttribute(calendar, 'data-date')
+          controller.getElementAttribute(datePicker, 'data-date')
         ).to.equal('2022-01-02');
       });
     });
@@ -111,10 +111,10 @@ describes.endtoend(
 
         await controller.switchToShadowRoot(element);
 
-        const calendar = await controller.findElement(
-          '.amp-date-picker-calendar-container'
+        const datePicker = await controller.findElement(
+          '[data-testid="date-picker"]'
         );
-        await expect(controller.isElementDisplayed(calendar)).to.be.true;
+        await expect(controller.isElementDisplayed(datePicker)).to.be.true;
 
         const dateButton = await controller.findElement(
           'button[aria-label="Sunday, January 2, 2022"]'
@@ -122,7 +122,7 @@ describes.endtoend(
         controller.click(dateButton);
 
         await expect(
-          controller.getElementAttribute(calendar, 'data-startdate')
+          controller.getElementAttribute(datePicker, 'data-startdate')
         ).to.equal('2022-01-02');
       });
 
@@ -135,10 +135,10 @@ describes.endtoend(
 
         await controller.switchToShadowRoot(element);
 
-        const calendar = await controller.findElement(
-          '.amp-date-picker-calendar-container'
+        const datePicker = await controller.findElement(
+          '[data-testid="date-picker"]'
         );
-        await expect(controller.isElementDisplayed(calendar)).to.be.true;
+        await expect(controller.isElementDisplayed(datePicker)).to.be.true;
 
         const dateButton = await controller.findElement(
           'button[aria-label="Monday, January 3, 2022"]'
@@ -146,7 +146,7 @@ describes.endtoend(
         controller.click(dateButton);
 
         await expect(
-          controller.getElementAttribute(calendar, 'data-enddate')
+          controller.getElementAttribute(datePicker, 'data-enddate')
         ).to.equal('2022-01-03');
       });
 
@@ -156,8 +156,8 @@ describes.endtoend(
         );
         await controller.switchToShadowRoot(element);
 
-        const calendar = await controller.findElement(
-          '.amp-date-picker-calendar-container'
+        const datePicker = await controller.findElement(
+          '[data-testid="date-picker"]'
         );
 
         const startDateButton = await controller.findElement(
@@ -170,10 +170,10 @@ describes.endtoend(
         controller.click(endDateButton);
 
         await expect(
-          controller.getElementAttribute(calendar, 'data-startdate')
+          controller.getElementAttribute(datePicker, 'data-startdate')
         ).to.equal('2022-01-02');
         await expect(
-          controller.getElementAttribute(calendar, 'data-enddate')
+          controller.getElementAttribute(datePicker, 'data-enddate')
         ).to.equal('2022-01-03');
       });
 
@@ -183,8 +183,8 @@ describes.endtoend(
         );
         await controller.switchToShadowRoot(element);
 
-        const calendar = await controller.findElement(
-          '.amp-date-picker-calendar-container'
+        const datePicker = await controller.findElement(
+          '[data-testid="date-picker"]'
         );
 
         const startDateButton = await controller.findElement(
@@ -197,10 +197,10 @@ describes.endtoend(
         controller.click(endDateButton);
 
         await expect(
-          controller.getElementAttribute(calendar, 'data-startdate')
+          controller.getElementAttribute(datePicker, 'data-startdate')
         ).to.equal('2022-01-02');
         await expect(
-          controller.getElementAttribute(calendar, 'data-enddate')
+          controller.getElementAttribute(datePicker, 'data-enddate')
         ).to.equal('2022-01-03');
 
         await controller.switchToLight();
@@ -208,9 +208,10 @@ describes.endtoend(
         const clearButton = await controller.findElement('button#clear-range');
         controller.click(clearButton);
 
-        await expect(controller.getElementAttribute(calendar, 'data-startdate'))
-          .to.be.null;
-        await expect(controller.getElementAttribute(calendar, 'data-enddate'))
+        await expect(
+          controller.getElementAttribute(datePicker, 'data-startdate')
+        ).to.be.null;
+        await expect(controller.getElementAttribute(datePicker, 'data-enddate'))
           .to.be.null;
       });
     });
@@ -225,8 +226,8 @@ describes.endtoend(
         );
         await controller.switchToShadowRoot(element);
 
-        const calendar = await controller.findElement(
-          '.amp-date-picker-calendar-container'
+        const datePicker = await controller.findElement(
+          '[data-testid="date-picker"]'
         );
 
         const dateButton = await controller.findElement(
@@ -235,7 +236,7 @@ describes.endtoend(
         controller.click(dateButton);
 
         await expect(
-          controller.getElementAttribute(calendar, 'data-date')
+          controller.getElementAttribute(datePicker, 'data-date')
         ).to.equal('2022-01-02');
       });
     });
@@ -250,8 +251,8 @@ describes.endtoend(
         );
         await controller.switchToShadowRoot(element);
 
-        const calendar = await controller.findElement(
-          '.amp-date-picker-calendar-container'
+        const datePicker = await controller.findElement(
+          '[data-testid="date-picker"]'
         );
 
         const startDateButton = await controller.findElement(
@@ -264,10 +265,10 @@ describes.endtoend(
         controller.click(endDateButton);
 
         await expect(
-          controller.getElementAttribute(calendar, 'data-startdate')
+          controller.getElementAttribute(datePicker, 'data-startdate')
         ).to.equal('2022-01-02');
         await expect(
-          controller.getElementAttribute(calendar, 'data-enddate')
+          controller.getElementAttribute(datePicker, 'data-enddate')
         ).to.equal('2022-01-03');
       });
     });

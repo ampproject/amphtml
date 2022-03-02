@@ -2,6 +2,7 @@ import {isValid} from 'date-fns';
 
 import {Keys_Enum} from '#core/constants/key-codes';
 
+import * as Preact from '#preact';
 import {
   useCallback,
   useEffect,
@@ -9,7 +10,6 @@ import {
   useRef,
   useState,
 } from '#preact';
-import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {Ref, RenderableProps} from '#preact/types';
@@ -41,7 +41,6 @@ function SingleDatePickerWithRef(
   const containerRef = useRef<HTMLElement>(null);
 
   const defaultMonth = initialVisibleMonth || today;
-
   const [month, setMonth] = useState<Date>(defaultMonth);
 
   const {isOpen, transitionTo} = useDatePickerState(mode);
@@ -182,6 +181,7 @@ function SingleDatePickerWithRef(
 
   return (
     <ContainWrapper
+      data-testid="date-picker"
       class="amp-date-picker-calendar-container"
       ref={containerRef}
       data-date={dateInput.date && formatDate(dateInput.date)}
@@ -191,6 +191,7 @@ function SingleDatePickerWithRef(
       {isOpen && (
         <BaseDatePicker
           mode="single"
+          isOpen={isOpen}
           selected={dateInput.date}
           onSelect={selectDate}
           month={month}

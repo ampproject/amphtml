@@ -356,6 +356,7 @@ function DateRangePickerWithRef(
   return (
     <ContainWrapper
       class="amp-date-picker-calendar-container"
+      data-testid="date-picker"
       ref={containerRef}
       data-startdate={startDateInput.date && formatDate(startDateInput.date)}
       data-enddate={endDateInput.date && formatDate(endDateInput.date)}
@@ -366,6 +367,7 @@ function DateRangePickerWithRef(
       {isOpen && (
         <BaseDatePicker
           mode="range"
+          isOpen={isOpen}
           selected={dateRange}
           onSelect={selectDateRange}
           disabled={disabledMatchers}

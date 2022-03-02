@@ -1,3 +1,4 @@
+import objStr from 'obj-str';
 import {
   DayPicker,
   DayPickerRangeProps,
@@ -9,9 +10,14 @@ import * as Preact from '#preact';
 import {DayButton} from './day-button';
 import {useDatePickerContext} from './use-date-picker-context';
 
-type BaseDatePickerProps = DayPickerSingleProps | DayPickerRangeProps;
+import {useStyles} from '../component.jss';
 
-export function BaseDatePicker(props: BaseDatePickerProps) {
+type BaseDatePickerProps = (DayPickerSingleProps | DayPickerRangeProps) & {
+  isOpen: boolean;
+};
+
+export function BaseDatePicker({isOpen, ...props}: BaseDatePickerProps) {
+  const classes = useStyles();
   const {
     formatMonth,
     formatWeekday,
@@ -22,18 +28,26 @@ export function BaseDatePicker(props: BaseDatePickerProps) {
   } = useDatePickerContext();
 
   return (
-    <DayPicker
+    <div
       aria-label="Calendar"
-      components={{Day: DayButton}}
-      disabled={[isDisabled]}
-      formatters={{
-        formatCaption: formatMonth,
-        formatWeekdayName: formatWeekday,
-      }}
-      locale={locale}
-      numberOfMonths={numberOfMonths}
-      today={today}
-      {...props}
-    />
+      class={objStr({
+        [classes.mounted]: isOpen,
+        [classes.unmounted]: !isOpen,
+        [classes.dayPicker]: true,
+      })}
+    >
+      <DayPicker
+        components={{Day: DayButton}}
+        disabled={[isDisabled]}
+        formatters={{
+          formatCaption: formatMonth,
+          formatWeekdayName: formatWeekday,
+        }}
+        locale={locale}
+        numberOfMonths={numberOfMonths}
+        today={today}
+        {...props}
+      />
+    </div>
   );
 }

@@ -702,7 +702,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(isSelectedEndDate(wrapper, blockedDate)).to.be.false;
     });
 
-    it.only('allows the user to select a range containing the blocked date if allowBlockedRanges is true', () => {
+    it('allows the user to select a range containing the blocked date if allowBlockedRanges is true', () => {
       const blockedDate = new Date(2022, 0, 5);
       const wrapper = mount(
         <DatePicker
@@ -720,7 +720,7 @@ describes.sandboxed('BentoDatePicker preact component v1.0', {}, (env) => {
       expect(isSelectedEndDate(wrapper, new Date(2022, 0, 6))).to.be.true;
     });
 
-    it.only('does not allow the user to select a range containing a blocked date by default', () => {
+    it('does not allow the user to select a range containing a blocked date by default', () => {
       const blockedDates = [new Date(2022, 0, 5), new Date(2022, 0, 4)];
       const wrapper = mount(
         <DatePicker
