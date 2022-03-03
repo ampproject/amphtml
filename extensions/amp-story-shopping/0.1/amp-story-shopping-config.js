@@ -60,7 +60,7 @@ let isValidConfigSection_ = true;
 /**
  * Validates an Object using the validateConfig function.
  * @param {?Object=} validation
- * @return {boolean}
+ * @return {Function}
  */
 function createValidateConfigObject(validation) {
   return (field, value) => {
@@ -71,7 +71,7 @@ function createValidateConfigObject(validation) {
 /**
  * Validates an Array of Objects using the validateConfig function.
  * @param {?Object=} validation
- * @return {boolean}
+ * @return {Function}
  */
 function createValidateConfigArray(validation) {
   return (field, value) => {
