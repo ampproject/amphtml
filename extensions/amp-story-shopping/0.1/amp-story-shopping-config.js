@@ -60,23 +60,23 @@ let isValidConfigSection_ = true;
 /**
  * Validates an Object using the validateConfig function.
  * @param {?Object=} validation
- * @return {Function}
+ * @return {boolean}
  */
 function createValidateConfigObject(validation) {
   return (field, value) => {
-    isValidConfigSection_ &&= validateConfig(value, validation, field + ' ');
+    isValidConfigSection_ &&= validateConfig(value, validation, field);
   };
 }
 
 /**
  * Validates an Array of Objects using the validateConfig function.
  * @param {?Object=} validation
- * @return {Function}
+ * @return {boolean}
  */
 function createValidateConfigArray(validation) {
   return (field, value) => {
     for (const item of value) {
-      isValidConfigSection_ &&= validateConfig(item, validation, field + ' ');
+      isValidConfigSection_ &&= validateConfig(item, validation, field);
     }
   };
 }
@@ -154,7 +154,7 @@ export function validateURLs(field, url) {
 export function validateConfig(
   shoppingConfig,
   validationObject = productValidationConfig,
-  optParentFieldName = ''
+  optParentFieldName = undefined
 ) {
   let isValidConfig = true;
 
@@ -171,7 +171,8 @@ export function validateConfig(
         }
       } catch (err) {
         isValidConfig = false;
-        user().warn('AMP-STORY-SHOPPING-CONFIG', `${optParentFieldName}${err}`);
+        const warning = optParentFieldName?.concat(' ', err) ?? err;
+        user().warn('AMP-STORY-SHOPPING-CONFIG', warning);
       }
     });
   });
