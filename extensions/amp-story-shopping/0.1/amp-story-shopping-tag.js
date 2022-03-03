@@ -175,17 +175,13 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   styleTagText_() {
-    const pillEl = this.element.shadowRoot?.querySelector(
-      '.amp-story-shopping-tag-pill'
+    const pillEl = this.element.shadowRoot.querySelector(
+      '.i-amphtml-amp-story-shopping-tag-pill'
     );
 
-    const textEl = this.element.shadowRoot?.querySelector(
-      '.amp-story-shopping-tag-pill-text'
+    const textEl = this.element.shadowRoot.querySelector(
+      '.i-amphtml-amp-story-shopping-tag-pill-text'
     );
-
-    if (!pillEl || !textEl) {
-      return;
-    }
 
     const fontSize = parseInt(
       computedStyle(window, textEl).getPropertyValue('font-size'),
@@ -297,7 +293,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       shoppingSharedCSS + shoppingTagCSS
     );
     this.hasAppendedInnerShoppingTagEl_ = true;
-    this.styleTagText_();
     this.initializeTagStateListeners_();
+    this.styleTagText_();
   }
 }
