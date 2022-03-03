@@ -1,4 +1,5 @@
 import {isValid} from 'date-fns';
+import objStr from 'obj-str';
 
 import {Keys_Enum} from '#core/constants/key-codes';
 
@@ -19,6 +20,7 @@ import {useDatePickerContext} from './use-date-picker-context';
 import {useDatePickerInput} from './use-date-picker-input';
 import {useDatePickerState} from './use-date-picker-state';
 
+import {useStyles} from '../component.jss';
 import {DEFAULT_INPUT_SELECTOR} from '../constants';
 import {SingleDatePickerAPI} from '../types';
 
@@ -39,6 +41,7 @@ function SingleDatePickerWithRef(
   } = useDatePickerContext();
 
   const containerRef = useRef<HTMLElement>(null);
+  const classes = useStyles();
 
   const defaultMonth = initialVisibleMonth || today;
   const [month, setMonth] = useState<Date>(defaultMonth);
@@ -182,7 +185,9 @@ function SingleDatePickerWithRef(
   return (
     <ContainWrapper
       data-testid="date-picker"
-      class="amp-date-picker-calendar-container"
+      class={objStr({
+        [classes.overlay]: mode === 'overlay',
+      })}
       ref={containerRef}
       data-date={dateInput.date && formatDate(dateInput.date)}
     >

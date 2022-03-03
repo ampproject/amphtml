@@ -254,14 +254,24 @@ const unmounted = {
   display: 'none',
 };
 
-const mounted = {
-  display: 'contents',
+const container = {};
+
+const overlay = {
+  position: 'relative',
+
+  '& .rdp': {
+    position: 'absolute',
+    top: 'calc(100% + 10px)',
+    left: '10px',
+    zIndex: 10,
+  },
 };
 
 const JSS = {
   dayPicker,
   unmounted,
-  mounted,
+  container,
+  overlay,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
