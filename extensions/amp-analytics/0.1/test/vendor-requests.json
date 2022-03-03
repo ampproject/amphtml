@@ -1,39 +1,39 @@
 {
-    "acquialift": {
-        "base": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx",
-        "basicCapture": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id(tc_ptid)_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_",
-        "pageview": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id(tc_ptid)_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Content View",
-        "click": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id(tc_ptid)_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Click-Through"
-    },
-    "adobeanalytics": {
-        "requestPath": "/b/ss/!reportSuites/2/amp-1.0/s_random_",
-        "basePrefix": "vid=z_client_id(adobe_amp_id)_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
-        "pageview": "https://!host/b/ss/!reportSuites/2/amp-1.0/s_random_?vid=z_client_id(adobe_amp_id)_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
-        "click": "https://!host/b/ss/!reportSuites/2/amp-1.0/s_random_?vid=z_client_id(adobe_amp_id)_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_&pe=lnk_o&pev1=!linkUrl&pev2=!linkName"
+  "acquialift": {
+    "base": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx",
+      "basicCapture": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id(tc_ptid)_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_",
+      "pageview": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id(tc_ptid)_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Content View",
+      "click": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id(tc_ptid)_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Click-Through"
+  },
+  "adobeanalytics": {
+    "requestPath": "/b/ss/!reportSuites/2/amp-1.0/s_random_",
+      "basePrefix": "vid=z_client_id(adobe_amp_id)_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
+      "pageview": "https://!host/b/ss/!reportSuites/2/amp-1.0/s_random_?vid=z_client_id(adobe_amp_id)_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
+      "click": "https://!host/b/ss/!reportSuites/2/amp-1.0/s_random_?vid=z_client_id(adobe_amp_id)_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_&pe=lnk_o&pev1=!linkUrl&pev2=!linkName"
     },
     "afsanalytics": {
-        "host": "//www.afsanalytics.com",
-        "base": "//www.afsanalytics.com/cgi_bin/",
-        "pageview": "//www.afsanalytics.com/cgi_bin/connect.cgi?usr=xxxxxxxxPauto&js=1&amp=1&title=_title_&url=_canonical_url_&refer=_document_referrer_&resolution=_screen_width_x_screen_height_&color=_screen_color_depth_&Tips=_random_",
-        "click": "//www.afsanalytics.com/cgi_bin/click.cgi?usr=xxxxxxxx&event=click&exit=clicked%20from%20AMP%20page"
+      "host": "//www.afsanalytics.com",
+      "base": "//www.afsanalytics.com/cgi_bin/",
+      "pageview": "//www.afsanalytics.com/cgi_bin/connect.cgi?usr=xxxxxxxxPauto&js=1&amp=1&title=_title_&url=_canonical_url_&refer=_document_referrer_&resolution=_screen_width_x_screen_height_&color=_screen_color_depth_&Tips=_random_",
+      "click": "//www.afsanalytics.com/cgi_bin/click.cgi?usr=xxxxxxxx&event=click&exit=clicked%20from%20AMP%20page"
     },
     "alexametrics": {
-        "base": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain",
-        "pageview": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain&jsv=amp-_amp_version_&frame_height=_viewport_height_&frame_width=_viewport_width_&title=_title_&time=_timestamp_&time_zone_offset=_timezone_&screen_params=_screen_width_x_screen_height_x_screen_color_depth_&ref_url=_document_referrer_&host_url=_source_url_&random_number=_random_&user_cookie=_client_id(__auc)_&user_cookie_flag=0&user_lang=_browser_language_&amp_doc_url=_ampdoc_url_"
+      "base": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain",
+      "pageview": "https://certify-amp.alexametrics.com/atrk.gif?account=!atrk_acct&domain=!domain&jsv=amp-_amp_version_&frame_height=_viewport_height_&frame_width=_viewport_width_&title=_title_&time=_timestamp_&time_zone_offset=_timezone_&screen_params=_screen_width_x_screen_height_x_screen_color_depth_&ref_url=_document_referrer_&host_url=_source_url_&random_number=_random_&user_cookie=_client_id(__auc)_&user_cookie_flag=0&user_lang=_browser_language_&amp_doc_url=_ampdoc_url_"
     },
     "amplitude": {
-        "host": "https://api.amplitude.com?api_key=!apiKey&device_id=_client_id(amplitude_amp_id)_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_",
-        "event": "https://api.amplitude.com/amp/event?api_key=!apiKey&device_id=_client_id(amplitude_amp_id)_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_"
+      "host": "https://api.amplitude.com?api_key=!apiKey&device_id=_client_id(amplitude_amp_id)_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_",
+      "event": "https://api.amplitude.com/amp/event?api_key=!apiKey&device_id=_client_id(amplitude_amp_id)_&library=amp%2F_amp_version_&time=_timestamp_&language=_browser_language_&user_agent=_user_agent_"
     },
     "appsflyer": {
-        "onelink": "https://amp.onelink.me/amp/v1/onelink?webAppId=!webAppId&afWebUserId=_cookie(afUserId)_&amp-afUserId=_client_id(amp-afUserId)_&amp-afRefUserId=_cookie(amp-afRefUserId)_",
-        "event": "https://amp.appsflyer.com/amp/v1/events?webAppId=!webAppId&afWebUserId=_cookie(afUserId)_&amp-afUserId=_client_id(amp-afUserId)_&amp-afRefUserId=_cookie(amp-afRefUserId)_"
+      "onelink": "https://amp.onelink.me/amp/v1/onelink?webAppId=!webAppId&afWebUserId=_cookie(afUserId)_&amp-afUserId=_client_id(amp-afUserId)_&amp-afRefUserId=_cookie(amp-afRefUserId)_",
+      "event": "https://amp.appsflyer.com/amp/v1/events?webAppId=!webAppId&afWebUserId=_cookie(afUserId)_&amp-afUserId=_client_id(amp-afUserId)_&amp-afRefUserId=_cookie(amp-afRefUserId)_"
     },
     "atinternet": {
-        "base": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
-        "suffix": "&medium=amp&&ref=_document_referrer_",
-        "pageview": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=!level2&medium=amp&&ref=_document_referrer_",
-        "click": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&pclick=_title_&s2click=!level2&p=!label&s2=!level2Click&type=click&click=!type&medium=amp&&ref=_document_referrer_"
+      "base": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
+      "suffix": "&medium=amp&&ref=_document_referrer_",
+      "pageview": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=!level2&medium=amp&&ref=_document_referrer_",
+      "click": "https://!log.xiti.com/hit.xiti?s=!site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&pclick=_title_&s2click=!level2&p=!label&s2=!level2Click&type=click&click=!type&medium=amp&&ref=_document_referrer_"
     },
     "baiduanalytics": {
         "host": "https://hm.baidu.com",
@@ -42,8 +42,8 @@
         "event": "https://hm.baidu.com/hm.gif?si=!token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=!category*!action*!label*!value&et=4&api=8_0"
     },
     "bisko": {
-        "pageview": "https://localhost:44393/api/v1/amp?Type=${onViewType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}",
-        "linkclick": "https://localhost:44393/api/v1/amp?Type=${onClickType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}"
+        "pageview": "https://bisko.gjirafa.tech/api/v1/amp?Type=${onViewType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}",
+        "linkclick": "https://bisko.gjirafa.tech/api/v1/amp?Type=${onClickType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}"
     },
     "blackcrowai": {
         "pageview": "https://api.blackcrow.ai/v1/js/events/view?page_referrer_url=_document_referrer_&visitor_id=_client_id(_ga)_&page_url=_source_url_&google_tracking_id=!google_tracking_id&device_info=_user_agent_&site_name=!site_name&page_id=amp&page_title=_title_"
