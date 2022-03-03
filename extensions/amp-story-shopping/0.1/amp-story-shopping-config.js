@@ -154,7 +154,7 @@ export function validateURLs(field, url) {
 export function validateConfig(
   shoppingConfig,
   validationObject = productValidationConfig,
-  optParentFieldName = undefined
+  optParentFieldName
 ) {
   let isValidConfig = true;
 
@@ -171,7 +171,7 @@ export function validateConfig(
         }
       } catch (err) {
         isValidConfig = false;
-        const warning = optParentFieldName?.concat(' ', err) ?? err;
+        const warning = optParentFieldName?.concat(` ${err}`) ?? `${err}`;
         user().warn('AMP-STORY-SHOPPING-CONFIG', warning);
       }
     });
