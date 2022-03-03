@@ -14,14 +14,14 @@
    },
     "trackClick": {
       "on": "click",
-        "selector": "a",
-        "request": "linkclick"
-    }
+      "selector": "a",
+      "request": "linkclick"
+   }
   },
   "vars": {
     "propertyId": 12710,
-      "onViewType": "pageview",
-      "onClickType": "linkclick"
+    "onViewType": "pageview",
+    "onClickType": "linkclick"
   },
   "extraUrlParams": {
     "Content.id": "1234",
@@ -29,12 +29,7 @@
     "Content.type": "article",
     "Content.description": "Samsung has released the newset Galaxy Note version for the users. It contains major changes and new features.",
     "Content.author": "Nick Smith",
-    "Content.category": [
-      [
-      "Technology",
-      "Smartphone"
-      ]
-    ],
+    "Content.category": [["Technology", "Smartphone"]],
     "Content.value": "Amazing news! The new Galaxy Note looks perfect!",
     "Content.quantity": 2,
     "Content.imageUrl": "https://magazine.com/apple-iphone-release",
