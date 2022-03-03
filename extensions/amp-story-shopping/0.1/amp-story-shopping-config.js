@@ -116,6 +116,7 @@ export function validateNumber(field, number) {
     throw Error(`Value ${number} for field ${field} is not a number`);
   }
 }
+
 /**
  * Validates currency in shopping config attributes
  * @param {string} field
