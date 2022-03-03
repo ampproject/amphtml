@@ -1,5 +1,3 @@
-import {boundValue} from '#core/math';
-
 import {useMemo, useState} from '#preact';
 
 import type {BentoPanZoomProps} from './component-ts';
@@ -18,7 +16,6 @@ const initialState = {
   maxScale: DEFAULT_MAX_SCALE,
   scale: 1,
 
-  contentBox: initialRect,
   containerBox: initialRect,
 
   isZoomed: false,
@@ -34,10 +31,25 @@ type PanZoomConfig = Pick<
   'initialScale' | 'initialX' | 'initialY' | 'maxScale'
 >;
 
+const boundValueSpring = (
+  val: number,
+  min: number,
+  max: number,
+  extent: number
+) => {
+  if (val < min) {
+    return min + (val - min) * extent;
+  }
+  if (val > max) {
+    return max + (val - max) * extent;
+  }
+  return val;
+};
+
 const boundScale = (state: State, newScale: number) => {
   const {allowExtent, maxScale, minScale} = state;
   const extent = allowExtent ? 0.25 : 0;
-  return boundValue(newScale, minScale, maxScale, extent);
+  return boundValueSpring(newScale, minScale, maxScale, extent);
 };
 
 const updateScaleFromAnchor = (
@@ -60,22 +72,23 @@ const updateScaleFromAnchor = (
 
 const updateView = (
   state: State,
-  newState: Pick<State, 'posX' | 'posY' | 'scale'>
+  newState: Partial<PickState<'posX' | 'posY' | 'scale'>>
 ) => {
   const {allowExtent, containerBox, maxScale, minScale} = state;
-  const {posX, posY, scale} = newState;
+  const {posX = state.posX, posY = state.posY, scale = state.scale} = newState;
 
   const extentScale = allowExtent ? 0.25 : 0;
-  const newScale = boundValue(scale, minScale, maxScale, extentScale);
+  const newScale = boundValueSpring(scale, minScale, maxScale, extentScale);
 
-  const extentX = allowExtent && newScale > 1 ? containerBox.width * 0.25 : 0;
-  const extentY = allowExtent && newScale > 1 ? containerBox.height * 0.25 : 0;
   const minX = containerBox.width * (1 - newScale);
   const minY = containerBox.height * (1 - newScale);
 
+  const extentX = allowExtent && newScale > 1 ? 0.25 : 0;
+  const extentY = allowExtent && newScale > 1 ? 0.25 : 0;
+
   return {
-    posX: boundValue(posX, minX, 0, extentX),
-    posY: boundValue(posY, minY, 0, extentY),
+    posX: boundValueSpring(posX, minX, 0, extentX),
+    posY: boundValueSpring(posY, minY, 0, extentY),
     scale: newScale,
     isZoomed: newScale !== 1,
     canZoom: newScale !== state.maxScale,
@@ -104,10 +117,9 @@ export function usePanZoomState(config: PanZoomConfig) {
   const [state, setState] = useState(() => initReducer(config));
   const actions = useMemo(() => {
     return {
-      INITIALIZE_BOUNDS(payload: PickState<'contentBox' | 'containerBox'>) {
+      INITIALIZE_BOUNDS(payload: PickState<'containerBox'>) {
         setState((state) => ({
           ...state,
-          contentBox: payload.contentBox,
           containerBox: payload.containerBox,
         }));
       },
@@ -135,10 +147,10 @@ export function usePanZoomState(config: PanZoomConfig) {
           };
         });
       },
-      MOVE(payload: PickState<'posX' | 'posY'> & {element: HTMLElement}) {
+      MOVE(payload: PickState<'posX' | 'posY'>) {
         setState((state) => ({
           ...state,
-          ...updateView(state, {...payload, scale: state.scale}),
+          ...updateView(state, payload),
         }));
       },
       UPDATE_SCALE(payload: {
