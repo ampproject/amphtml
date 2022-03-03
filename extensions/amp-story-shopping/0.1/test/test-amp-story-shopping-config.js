@@ -390,7 +390,7 @@ describes.realWin(
         ],
       };
 
-      const errorString = `Error: Value ${invalidConfig['items'][0]['productPriceCurrency']} for field productPriceCurrency is not a valid currency symbol`;
+      const errorString = `RangeError: Invalid currency code : ${invalidConfig['items'][0]['productPriceCurrency']}`;
       const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(spy).to.have.been.calledWith(
