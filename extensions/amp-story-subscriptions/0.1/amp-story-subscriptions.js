@@ -41,6 +41,12 @@ const fontsToLoad = [
   },
 ];
 
+/**
+ * The number of milliseconds to wait before showing the skip button on dialog banner.
+ * @const {number}
+ */
+const SKIP_BUTTON_DELAY_DURATION = 2000;
+
 export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -142,7 +148,14 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   renderSubscriptionsDialogTemplate_() {
     return (
       <div subscriptions-dialog subscriptions-display="NOT granted">
-        <div class="i-amphtml-story-subscriptions-dialog-banner"></div>
+        <div class="i-amphtml-story-subscriptions-dialog-banner">
+          <div class="i-amphtml-story-subscriptions-dialog-banner-button">
+            {this.localizationService_.getLocalizedString(
+              LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SKIP
+            )}
+            <div class="i-amphtml-story-subscriptions-dialog-banner-button-logo"></div>
+          </div>
+        </div>
         <div class="i-amphtml-story-subscriptions-dialog-content">
           <div class="i-amphtml-story-subscriptions-publisher-text">
             <div class="i-amphtml-story-subscriptions-price">
@@ -221,36 +234,23 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         this.onSubscriptionsStateChange_(subscriptionsState)
     );
 
-    if (this.viewer_.isEmbedded()) {
-      const bannerEl = dev().assertElement(
-        this.dialogEl_.querySelector('.i-amphtml-story-subscriptions-banner')
+    const ampSubscriptionsEl =
+      this.element.parentElement.parentElement.querySelector(
+        'amp-subscriptions-dialog'
       );
-      bannerEl.appendChild(
-        <div class="i-amphtml-story-subscriptions-banner-button">
-          {this.localizationService_.getLocalizedString(
-            LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SKIP
-          )}
-        </div>
-      );
-
-      const ampSubscriptionsEl =
-        this.element.parentElement.parentElement.querySelector(
-          'amp-subscriptions-dialog'
-        );
-      ampSubscriptionsEl.addEventListener('click', (event) =>
-        this.onNextStoryButtonClick_(event)
-      );
-    }
+    ampSubscriptionsEl.addEventListener('click', (event) =>
+      this.onSkipButtonClick_(event)
+    );
   }
 
   /**
    * @param {!Event} event
    * @private
    */
-  onNextStoryButtonClick_(event) {
+  onSkipButtonClick_(event) {
     if (
       event.target.classList.contains(
-        'i-amphtml-story-subscriptions-banner-button'
+        'i-amphtml-story-subscriptions-dialog-banner-button'
       )
     ) {
       const advancementMode = this.storeService_.get(
@@ -279,7 +279,21 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
       // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
       // To note, it's a blocking call that would wait until entitlements from all platforms get resolved.
-      this.subscriptionService_.selectAndActivatePlatform();
+      this.subscriptionService_.selectAndActivatePlatform().then(() => {
+        if (this.viewer_.isEmbedded()) {
+          setTimeout(() => {
+            const bannerEl = this.win.document.querySelector(
+              'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
+            );
+            bannerEl &&
+              this.mutateElement(() =>
+                bannerEl.classList.add(
+                  'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+                )
+              );
+          }, SKIP_BUTTON_DELAY_DURATION);
+        }
+      });
     } else {
       this.subscriptionService_.getDialog().close();
     }
