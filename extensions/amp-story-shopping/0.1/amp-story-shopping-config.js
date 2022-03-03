@@ -42,8 +42,6 @@ export const productValidationConfig = {
   ],
   'productIcon': [validateURLs],
   'productTagText': [validateString],
-  'ctaText': [validateNumber],
-  'shippingText': [validateNumber],
 };
 
 /**
@@ -162,9 +160,7 @@ export function validateConfig(
           fn(configKey, shoppingConfig[configKey]);
         }
       } catch (err) {
-        if (validationFunctions.includes(validateRequired)) {
-          isValidConfig = false;
-        }
+        isValidConfig = false;
         user().warn('AMP-STORY-SHOPPING-CONFIG', `${optParentFieldName}${err}`);
       }
     });
