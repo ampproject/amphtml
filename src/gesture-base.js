@@ -4,7 +4,7 @@ import {supportsPassiveEventListener} from '#core/dom/event-helper-listen';
 import {findIndex} from '#core/types/array';
 import {getWin, toWin} from '#core/window';
 
-import {Pass} from './pass-base';
+import {PassBase} from './pass-base';
 
 const PROP_ = '__AMP_Gestures';
 
@@ -80,7 +80,7 @@ export class Gestures {
     element,
     shouldNotPreventDefault = false,
     shouldStopPropagation = false,
-    PassClass = Pass
+    PassClass = PassBase
   ) {
     /** @private {!Element} */
     this.element_ = element;

@@ -3,6 +3,8 @@ import type {RefObject} from 'preact';
 import {useEffect} from '#preact';
 import {useValueRef} from '#preact/component';
 
+// gesture-base has no dependencies on Services, so it's safe to import
+// eslint-disable-next-line import/no-restricted-paths
 import {Gesture, Gestures} from '../../gesture-base';
 import {
   DoubletapDef,

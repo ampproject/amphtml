@@ -1,7 +1,10 @@
 import {Services} from '#service';
 
-import {Pass as PassBase} from './pass-base';
+import {PassBase} from './pass-base';
 
+/**
+ * This class is the same as PassBase but injects the Timer Service
+ */
 export class Pass extends PassBase {
   constructor(win, handler, opt_defaultDelay) {
     super(win, handler, opt_defaultDelay, Services.timerFor(win));
