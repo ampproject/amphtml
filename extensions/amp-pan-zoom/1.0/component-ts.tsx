@@ -1,9 +1,9 @@
 import type {ComponentChildren, Ref} from 'preact';
 
-import {scale as cssScale, setStyles, translate} from '#core/dom/style';
+import {scale as cssScale, px, translate} from '#core/dom/style';
 
 import * as Preact from '#preact';
-import {useEffect, useImperativeHandle, useLayoutEffect, useRef} from '#preact';
+import {useEffect, useImperativeHandle, useRef} from '#preact';
 import {Children, forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {useGestures} from '#preact/hooks/useGestures';
@@ -11,6 +11,7 @@ import {logger} from '#preact/logger';
 
 import {useStyles} from './component.jss';
 import {usePointerDrag} from './hooks/use-pointer-drag';
+import {useResizeObserver} from './hooks/use-resize-observer';
 import {usePanZoomState} from './reducer';
 
 const TAG = 'amp-pan-zoom';
@@ -44,8 +45,9 @@ export type BentoPanZoomApi = {
 function getElementPosition(
   clientX: number,
   clientY: number,
-  elBounds: DOMRect
+  element: HTMLElement
 ) {
+  const elBounds = element./* REVIEW */ getBoundingClientRect();
   return {
     anchorX: clientX - elBounds.x,
     anchorY: clientY - elBounds.y,
@@ -81,28 +83,31 @@ export function BentoPanZoomWithRef(
     const childrenArray = Children.toArray(children);
     if (childrenArray.length !== 1) {
       // this should also potentially check child types?
-      logger.error('BENTO-PAN-ZOOM', 'Component should only have one child');
+      logger.error(TAG, 'Component should only have one child');
     }
   }, [children]);
 
   const [state, actions] = usePanZoomState(props);
 
   const contentRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLElement>(null);
-  useEffect(() => {
-    actions.INITIALIZE_BOUNDS({
-      containerBox: containerRef.current!./*REVIEW*/ getBoundingClientRect(),
-      contentBox: contentRef.current!./*REVIEW*/ getBoundingClientRect(),
-    });
-  }, [actions]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    setStyles(contentRef.current!, {
-      transformOrigin: '0 0',
-      transform: translate(state.posX, state.posY) + cssScale(state.scale),
-      touchAction: state.isZoomed ? 'none' : 'pan-x pan-y',
+  const updateSizes = () => {
+    const contentBox = contentRef.current!./* REVIEW */ getBoundingClientRect();
+    const containerBox =
+      containerRef.current!./* REVIEW */ getBoundingClientRect();
+
+    actions.UPDATE_BOUNDS({
+      containerSize: containerBox,
+      contentSize: contentBox,
+      contentOffset: {
+        x: contentBox.x - containerBox.x,
+        y: contentBox.y - containerBox.y,
+      },
     });
-  }, [state.posX, state.posY, state.scale]);
+  };
+  useResizeObserver(contentRef, updateSizes);
+  useResizeObserver(containerRef, updateSizes);
 
   const toggleZoom = () => {
     const newScale =
@@ -110,24 +115,13 @@ export function BentoPanZoomWithRef(
     actions.UPDATE_SCALE({scale: newScale});
   };
 
-  // const resetContentDimensions = () => {
-  //   actions.CLEAR_DIMENSIONS();
-  // };
-
-  // const setContentBoxOffsets = () => {
-  //   actions.SET_CONTENT_BOX_OFFSETS({
-  //       contentBox: containerRef.current./*REVIEW*/ getBoundingClientRect(),
-  //     });
-  // };
-
   type StartDragInfo = {
     posX: number;
     posY: number;
     clientX: number;
     clientY: number;
   };
-
-  usePointerDrag<StartDragInfo>(contentRef, {
+  usePointerDrag<StartDragInfo>(containerRef, {
     button: 'left',
     onStart({clientX, clientY}) {
       actions.DRAGGING_START();
@@ -137,7 +131,6 @@ export function BentoPanZoomWithRef(
       actions.MOVE({
         posX: start.posX + clientX - start.clientX,
         posY: start.posY + clientY - start.clientY,
-        element: contentRef.current!,
       });
     },
     onStop(unusedEv) {
@@ -145,13 +138,13 @@ export function BentoPanZoomWithRef(
     },
   });
 
-  useGestures(contentRef, {
+  useGestures(containerRef, {
     doubletap(ev) {
       const {clientX, clientY} = ev.data;
       const {anchorX, anchorY} = getElementPosition(
         clientX,
         clientY,
-        state.contentBox
+        containerRef.current!
       );
       const newScale =
         state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
@@ -169,7 +162,7 @@ export function BentoPanZoomWithRef(
     const {anchorX, anchorY} = getElementPosition(
       clientX,
       clientY,
-      state.contentBox
+      ev.currentTarget as HTMLElement
     );
     const newScale =
       state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
@@ -190,27 +183,41 @@ export function BentoPanZoomWithRef(
     [actions]
   );
 
+  const panZoomStyles = {
+    transformOrigin:
+      px(-state.contentOffset.x) + ' ' + px(-state.contentOffset.y),
+    transform: translate(state.posX, state.posY) + cssScale(state.scale),
+    touchAction: state.isZoomed ? 'none' : 'pan-x pan-y',
+  };
+
   return (
     <ContainWrapper
       {...rest}
-      ref={containerRef}
-      class={styles.ampPanZoom}
-      contentClassName={styles.ampPanZoomContent}
       layout
+      contentClassName={styles.ampPanZoomWrapper}
     >
       <div
-        ref={contentRef}
-        onDblClick={handleDoubleClick}
         class={classNames(
-          styles.ampPanZoomChild,
-          state.isZoomed && styles.ampPanZoomPannable,
-          state.isDragging && styles.ampPanZoomDragging
+          styles.ampPanZoomContainer,
+          state.isZoomed && styles.ampPanZoomPannable
         )}
+        ref={containerRef}
+        onDblClick={handleDoubleClick}
       >
-        {children}
+        <div ref={contentRef}>
+          <div
+            class={classNames(
+              styles.ampPanZoomContent,
+              state.isDragging && styles.ampPanZoomDragging
+            )}
+            style={panZoomStyles}
+          >
+            {children}
+          </div>
+        </div>
       </div>
 
-      <div
+      <button
         class={classNames(
           styles.ampPanZoomButton,
           state.canZoom ? styles.ampPanZoomInIcon : styles.ampPanZoomOutIcon

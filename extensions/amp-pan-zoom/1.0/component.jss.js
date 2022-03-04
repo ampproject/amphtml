@@ -1,12 +1,10 @@
 import {createUseStyles} from 'react-jss';
-const ampPanZoom = {
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  overflow: 'hidden',
+const ampPanZoomWrapper = {
+  width: '100%',
+  height: '100%',
 };
 
-const ampPanZoomContent = {
+const ampPanZoomContainer = {
   width: '100%',
   height: '100%',
   display: 'flex',
@@ -15,8 +13,7 @@ const ampPanZoomContent = {
   overflow: 'hidden',
 };
 
-const ampPanZoomChild = {
-  position: 'absolute',
+const ampPanZoomContent = {
   willChange: 'transform',
   transition: 'transform 0.3s ease-out',
 };
@@ -40,6 +37,7 @@ const ampPanZoomButton = {
   boxShadow: '1px 1px 2px',
   backgroundColor: 'white',
   borderRadius: '3px',
+  border: 'none',
 };
 
 const ampPanZoomInIcon = {
@@ -55,9 +53,9 @@ const ampPanZoomOutIcon = {
 };
 
 const JSS = {
-  ampPanZoom,
-  ampPanZoomChild,
+  ampPanZoomWrapper,
   ampPanZoomContent,
+  ampPanZoomContainer,
   ampPanZoomPannable,
   ampPanZoomDragging,
   ampPanZoomButton,

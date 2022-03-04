@@ -6,8 +6,6 @@ const DEFAULT_MAX_SCALE = 3;
 const DEFAULT_INITIAL_SCALE = 1;
 const DEFAULT_ORIGIN = 0;
 
-const initialRect = new DOMRect(0, 0, 0, 0);
-
 const initialState = {
   posX: 0,
   posY: 0,
@@ -16,7 +14,9 @@ const initialState = {
   maxScale: DEFAULT_MAX_SCALE,
   scale: 1,
 
-  containerBox: initialRect,
+  contentOffset: {x: 0, y: 0},
+  containerSize: {width: 0, height: 0},
+  contentSize: {width: 0, height: 0},
 
   isZoomed: false,
   canZoom: true,
@@ -74,21 +74,41 @@ const updateView = (
   state: State,
   newState: Partial<PickState<'posX' | 'posY' | 'scale'>>
 ) => {
-  const {allowExtent, containerBox, maxScale, minScale} = state;
+  const {
+    allowExtent,
+    containerSize,
+    contentOffset,
+    contentSize,
+    maxScale,
+    minScale,
+  } = state;
   const {posX = state.posX, posY = state.posY, scale = state.scale} = newState;
 
   const extentScale = allowExtent ? 0.25 : 0;
   const newScale = boundValueSpring(scale, minScale, maxScale, extentScale);
 
-  const minX = containerBox.width * (1 - newScale);
-  const minY = containerBox.height * (1 - newScale);
+  // Calculate the bounds:
+  // Contain:
+  let minX = -contentOffset.x * newScale;
+  let maxX =
+    containerSize.width - (contentOffset.x + contentSize.width) * newScale;
+  let minY = -contentOffset.y * newScale;
+  let maxY =
+    containerSize.height - (contentOffset.y + contentSize.height) * newScale;
+  // If content is larger than container, we Cover:
+  if (contentSize.width * newScale > containerSize.width) {
+    [minX, maxX] = [maxX, minX]; // (swap)
+  }
+  if (contentSize.height * newScale > containerSize.height) {
+    [minY, maxY] = [maxY, minY]; // (swap)
+  }
 
   const extentX = allowExtent && newScale > 1 ? 0.25 : 0;
   const extentY = allowExtent && newScale > 1 ? 0.25 : 0;
 
   return {
-    posX: boundValueSpring(posX, minX, 0, extentX),
-    posY: boundValueSpring(posY, minY, 0, extentY),
+    posX: boundValueSpring(posX, minX, maxX, extentX),
+    posY: boundValueSpring(posY, minY, maxY, extentY),
     scale: newScale,
     isZoomed: newScale !== 1,
     canZoom: newScale !== state.maxScale,
@@ -117,10 +137,12 @@ export function usePanZoomState(config: PanZoomConfig) {
   const [state, setState] = useState(() => initReducer(config));
   const actions = useMemo(() => {
     return {
-      INITIALIZE_BOUNDS(payload: PickState<'containerBox'>) {
+      UPDATE_BOUNDS(
+        payload: PickState<'contentOffset' | 'containerSize' | 'contentSize'>
+      ) {
         setState((state) => ({
           ...state,
-          containerBox: payload.containerBox,
+          ...payload,
         }));
       },
       DRAGGING_START() {
@@ -160,8 +182,8 @@ export function usePanZoomState(config: PanZoomConfig) {
       }) {
         setState((state) => {
           const {
-            anchorX = state.containerBox.width / 2,
-            anchorY = state.containerBox.height / 2,
+            anchorX = state.containerSize.width / 2,
+            anchorY = state.containerSize.height / 2,
             scale,
           } = payload;
           return {
