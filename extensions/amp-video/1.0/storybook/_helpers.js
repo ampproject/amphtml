@@ -3,7 +3,7 @@ import * as Preact from '#preact';
 export const VideoElementWithActions = ({
   id,
   children,
-  actions = ['play', 'pause', 'mute', 'unmute', 'fullscreen'],
+  actions = ['play', 'pause', 'mute', 'unmute', 'fullscreen', 'togglePlay'],
 }) => (
   <div style="max-width: 800px">
     <p style={{display: 'flex'}}>

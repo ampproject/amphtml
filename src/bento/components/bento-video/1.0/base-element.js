@@ -4,7 +4,21 @@ import {CSS as CSS_AUTOPLAY} from './autoplay.jss';
 import {BentoVideo} from './component';
 import {CSS} from './component.jss';
 
-export class BentoVideoBaseElement extends PreactBaseElement {}
+export class BentoVideoBaseElement extends PreactBaseElement {
+  /** @override */
+  init() {
+    const {element} = this;
+    return {
+      'onPlayStateChange': (isPlaying) => {
+        if (isPlaying) {
+          this.triggerEvent(element, 'play');
+        } else {
+          this.triggerEvent(element, 'pause');
+        }
+      },
+    };
+  }
+}
 // export with alias for bento builds
 export {BentoVideoBaseElement as BaseElement};
 

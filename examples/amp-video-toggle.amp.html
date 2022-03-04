@@ -1,0 +1,140 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-1.0.js"></script>
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      max-width: 527px;
+      font-family: 'Questrial', Arial;
+    }
+    [fallback] {
+      display: block;
+      /* @alternative */ display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+    }
+    .spacer {
+      height: 100vh;
+    }
+
+    .btn-wrapper {
+      position: relative;
+      margin-left: 5px;
+    }
+
+    .btn {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    @keyframes play {
+        0% {
+            content: "Play";
+        }
+        100% {
+            content: "Pause";
+        }
+    }
+
+    @keyframes pause {
+        0% {
+            content: "Pause";
+        }
+        100% {
+            content: "Play";
+        }
+    }
+    p, h1, h2, h3 {
+      padding: 10px;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>amp-video</h1>
+  <amp-video
+      id="myVideo"
+      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+      width="720"
+      height="405"
+      layout="responsive"
+      on="play:play.start;pause:pause.start;">
+      controls>
+    <div placeholder>
+      This is a placeholder
+    </div>
+    <div fallback>
+      This is a fallback
+    </div>
+  </amp-video>
+  <h3>Actions</h3>
+  <amp-animation id = "play" layout = "nodisplay">
+    <script type = "application/json">
+       {
+          "fill": "both",
+          "direction": "alternate",
+          "animations": [
+             {
+                "selector": ".play-btn",
+                "keyframes": {
+                  "visibility": "collapse"
+                }
+             },
+             {
+                "selector": ".pause-btn",
+                "keyframes": {
+                  "visibility": "visible"
+                }
+             }
+          ]
+       }
+    </script>
+ </amp-animation>
+
+  <amp-animation id="pause" layout="nodisplay" trigger="visibility">
+    <script type = "application/json">
+       {
+          "fill": "both",
+          "direction": "alternate",
+          "animations": [
+              {
+                "selector": ".play-btn",
+                "keyframes": {
+                  "visibility": "visible"
+                }
+              },
+              {
+                  "selector": ".pause-btn",
+                  "keyframes": {
+                    "visibility": "collapse"
+                  }
+              }
+          ]
+       }
+    </script>
+ </amp-animation>
+  <button on="tap:myVideo.play">Play</button>
+  <button on="tap:myVideo.pause">Pause</button>
+  <button on="tap:myVideo.mute">Mute</button>
+  <button on="tap:myVideo.unmute">Unmute</button>
+  <button on="tap:myVideo.fullscreen">Fullscreen</button>
+  <span class="btn-wrapper">
+    <button on="tap:myVideo.togglePlay" class="btn play-btn">Play</button>
+    <button on="tap:myVideo.togglePlay" class="btn pause-btn">Pause</button>
+  </span>
+
+  <div class="spacer"></div>
+</body>
+</html>

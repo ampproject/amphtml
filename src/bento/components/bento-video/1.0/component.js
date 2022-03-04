@@ -74,6 +74,7 @@ function VideoWrapperWithRef(
     loop = false,
     mediasession = true,
     noaudio = false,
+    onPlayStateChange,
     onPlayingState,
     onReadyState,
     poster,
@@ -131,8 +132,9 @@ function VideoWrapperWithRef(
       if (onPlayingState) {
         onPlayingState(playing);
       }
+      onPlayStateChange?.(playing);
     },
-    [onPlayingStateRef]
+    [onPlayingStateRef, onPlayStateChange]
   );
 
   // Reset playing state when the video player is unmounted.
@@ -147,7 +149,9 @@ function VideoWrapperWithRef(
   }, [readyDeferred]);
 
   const pause = useCallback(() => {
-    readyDeferred.promise.then(() => playerRef.current?.pause());
+    readyDeferred.promise.then(() => {
+      playerRef.current?.pause();
+    });
   }, [readyDeferred]);
 
   const requestFullscreen = useCallback(() => {
@@ -155,6 +159,16 @@ function VideoWrapperWithRef(
       playerRef.current.requestFullscreen()
     );
   }, [readyDeferred]);
+
+  const togglePlay = useCallback(() => {
+    return readyDeferred.promise.then(() => {
+      if (playerRef.current.paused) {
+        play();
+      } else {
+        pause();
+      }
+    });
+  }, [readyDeferred, play, pause]);
 
   const userInteracted = useCallback(() => {
     setMuted(false);
@@ -203,6 +217,7 @@ function VideoWrapperWithRef(
       play,
       pause,
       requestFullscreen,
+      togglePlay,
       get currentTime() {
         if (!playerRef.current) {
           return 0;
@@ -238,6 +253,7 @@ function VideoWrapperWithRef(
       play,
       pause,
       requestFullscreen,
+      togglePlay,
       userInteracted,
       hasUserInteracted,
       autoplay,

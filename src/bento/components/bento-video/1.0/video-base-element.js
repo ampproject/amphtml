@@ -15,6 +15,7 @@ export class AmpVideoBaseElement extends setSuperClass(
     this.registerApiAction_('pause', (api) => api.pause());
     this.registerApiAction_('mute', (api) => api.mute());
     this.registerApiAction_('unmute', (api) => api.unmute());
+    this.registerApiAction_('togglePlay', (api) => api.togglePlay());
 
     // Ugly that this action has three names, but:
     // - requestFullscreen for consistency with Element.requestFullscreen
@@ -23,6 +24,18 @@ export class AmpVideoBaseElement extends setSuperClass(
     this.registerApiAction_('requestFullscreen', requestFullscreen);
     this.registerApiAction_('fullscreenenter', requestFullscreen);
     this.registerApiAction_('fullscreen', requestFullscreen);
+
+    const {element} = this;
+
+    return {
+      'onPlayStateChange': (isPlaying) => {
+        if (isPlaying) {
+          this.triggerEvent(element, 'play');
+        } else {
+          this.triggerEvent(element, 'pause');
+        }
+      },
+    };
   }
 
   /**
