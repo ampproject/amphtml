@@ -52,19 +52,17 @@ export const productValidationConfig = {
 let ShoppingConfigResponseDef;
 
 /**
- * Used for keeping track of intermediary invalid config results within Objects or Arrays of Objects.
- * @private {boolean}
- */
-let isValidConfigSection_ = true;
-
-/**
  * Validates an Object using the validateConfig function.
  * @param {?Object=} validation
  * @return {boolean}
  */
 function createValidateConfigObject(validation) {
   return (field, value) => {
-    isValidConfigSection_ &&= validateConfig(value, validation, field);
+    if (!validateConfig(value, validation, field)) {
+      throw Error(
+        `Value for field '${field}' is not vaild, see messages above for details`
+      );
+    }
   };
 }
 
@@ -75,8 +73,12 @@ function createValidateConfigObject(validation) {
  */
 function createValidateConfigArray(validation) {
   return (field, value) => {
+    let isValid = true;
     for (const item of value) {
-      isValidConfigSection_ &&= validateConfig(item, validation, field);
+      isValid &&= validateConfig(item, validation, field);
+    }
+    if (!isValid) {
+      `Value for field '${field}' is not vaild, see messages above for details`;
     }
   };
 }
@@ -191,42 +193,24 @@ export let KeyedShoppingConfigDef;
  */
 export function getShoppingConfig(element) {
   return getElementConfig(element).then((config) => {
-    const shoppingTagIndicesToRemove = [];
-    let currentShoppingTagIndex = 0;
-    const areConfigsValid = config['items'].reduce((item1, item2) => {
-      isValidConfigSection_ = true;
-      let isValidConfig = validateConfig(item2);
-      isValidConfig &&= isValidConfigSection_;
-      if (!isValidConfig) {
-        shoppingTagIndicesToRemove.push(currentShoppingTagIndex);
-      }
-      currentShoppingTagIndex++;
-      return item1 && isValidConfig;
-    }, true);
-
-    if (!areConfigsValid) {
+    const allItems = config['items'];
+    const validItems = allItems.filter((item) => validateConfig(item));
+    if (allItems.length != validItems.length) {
       user().warn(
         'AMP-STORY-SHOPPING-CONFIG',
         `Required fields are missing. Please add them in the shopping config. See the error messages above for more details.`
       );
-      let indexOffset = 0;
-      for (const index of shoppingTagIndicesToRemove) {
-        //need to keep track of accumulated indices to make sure that the splice index is correct!
-        config['items'].splice(index + indexOffset, 1);
-        indexOffset--;
-      }
     }
-
-    return keyByProductTagId(config);
+    return keyByProductTagId(validItems);
   });
 }
 /**
- * @param {!ShoppingConfigResponseDef} config
+ * @param {!ShoppingConfigResponseDef} configItems
  * @return {!KeyedShoppingConfigDef}
  */
-function keyByProductTagId(config) {
+function keyByProductTagId(configItems) {
   const keyed = {};
-  for (const item of config.items) {
+  for (const item of configItems) {
     keyed[item.productId] = item;
   }
   return keyed;
