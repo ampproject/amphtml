@@ -137,15 +137,23 @@ export function usePanZoomState(config: PanZoomConfig) {
   const [state, setState] = useState(() => initReducer(config));
   const actions = useMemo(() => {
     return {
-      UPDATE_BOUNDS(
+      updateBounds(
         payload: PickState<'contentOffset' | 'containerSize' | 'contentSize'>
       ) {
-        setState((state) => ({
-          ...state,
-          ...payload,
-        }));
+        setState((state) => {
+          const newState = {
+            ...state,
+            ...payload,
+          };
+          // Ensure the element is still in-bounds:
+          const newPosition = updateView(newState, newState);
+          return {
+            ...newState,
+            ...newPosition,
+          };
+        });
       },
-      DRAGGING_START() {
+      draggingStart() {
         setState((state) => {
           return {
             ...state,
@@ -154,7 +162,7 @@ export function usePanZoomState(config: PanZoomConfig) {
           };
         });
       },
-      DRAGGING_RELEASE() {
+      draggingRelease() {
         setState((state) => {
           const newState = {
             ...state,
@@ -169,13 +177,7 @@ export function usePanZoomState(config: PanZoomConfig) {
           };
         });
       },
-      MOVE(payload: PickState<'posX' | 'posY'>) {
-        setState((state) => ({
-          ...state,
-          ...updateView(state, payload),
-        }));
-      },
-      UPDATE_SCALE(payload: {
+      updateScale(payload: {
         anchorX?: number;
         anchorY?: number;
         scale: number;
@@ -195,7 +197,7 @@ export function usePanZoomState(config: PanZoomConfig) {
           };
         });
       },
-      TRANSFORM(payload: PickState<'posX' | 'posY' | 'scale'>) {
+      transform(payload: Partial<PickState<'posX' | 'posY' | 'scale'>>) {
         setState((state) => ({
           ...state,
           ...updateView(state, payload),

@@ -97,7 +97,7 @@ export function BentoPanZoomWithRef(
     const containerBox =
       containerRef.current!./* REVIEW */ getBoundingClientRect();
 
-    actions.UPDATE_BOUNDS({
+    actions.updateBounds({
       containerSize: containerBox,
       contentSize: contentBox,
       contentOffset: {
@@ -112,7 +112,7 @@ export function BentoPanZoomWithRef(
   const toggleZoom = () => {
     const newScale =
       state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
-    actions.UPDATE_SCALE({scale: newScale});
+    actions.updateScale({scale: newScale});
   };
 
   type StartDragInfo = {
@@ -124,17 +124,17 @@ export function BentoPanZoomWithRef(
   usePointerDrag<StartDragInfo>(containerRef, {
     button: 'left',
     onStart({clientX, clientY}) {
-      actions.DRAGGING_START();
+      actions.draggingStart();
       return {posX: state.posX, posY: state.posY, clientX, clientY};
     },
     onMove({clientX, clientY, data: start}) {
-      actions.MOVE({
+      actions.transform({
         posX: start.posX + clientX - start.clientX,
         posY: start.posY + clientY - start.clientY,
       });
     },
     onStop(unusedEv) {
-      actions.DRAGGING_RELEASE();
+      actions.draggingRelease();
     },
   });
 
@@ -149,7 +149,7 @@ export function BentoPanZoomWithRef(
       const newScale =
         state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
 
-      actions.UPDATE_SCALE({
+      actions.updateScale({
         anchorX,
         anchorY,
         scale: newScale,
@@ -166,14 +166,14 @@ export function BentoPanZoomWithRef(
     );
     const newScale =
       state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
-    actions.UPDATE_SCALE({anchorX, anchorY, scale: newScale});
+    actions.updateScale({anchorX, anchorY, scale: newScale});
   };
 
   useImperativeHandle(
     ref,
     () => /** @type {!BentoPanZoom.PanZoomApi} */ ({
       transform: (scale: number, x: number, y: number) => {
-        actions.TRANSFORM({
+        actions.transform({
           scale,
           posX: x,
           posY: y,
