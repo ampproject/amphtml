@@ -7,6 +7,8 @@ import {LocalizationService} from '#service/localization';
 
 import {afterRenderPromise} from '#testing/helpers';
 
+import {AdvancementMode} from 'extensions/amp-story/1.0/story-analytics';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
@@ -17,7 +19,10 @@ import {
 import {SubscriptionService} from '../../../amp-subscriptions/0.1/amp-subscriptions';
 import {Dialog} from '../../../amp-subscriptions/0.1/dialog';
 import {Entitlement} from '../../../amp-subscriptions/0.1/entitlement';
-import {AmpStorySubscriptions} from '../amp-story-subscriptions';
+import {
+  AmpStorySubscriptions,
+  SKIP_BUTTON_DELAY_DURATION,
+} from '../amp-story-subscriptions';
 
 describes.realWin(
   'amp-story-subscriptions-v0.1',
@@ -205,6 +210,67 @@ describes.realWin(
         'i-amphtml-story-subscriptions-visible'
       );
       expect(dialogSpy).to.be.calledOnce;
+    });
+
+    describe('skip button behaviors when embedded in a viewer', () => {
+      beforeEach(async () => {
+        const viewer = Services.viewerForDoc(env.ampdoc);
+        env.sandbox.stub(viewer, 'isEmbedded').withArgs().returns(true);
+        env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+
+        storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
+        await nextTick(); // wait to make sure AmpStorySubscriptions is built.
+
+        storeService.dispatch(
+          Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+          true
+        );
+
+        await afterRenderPromise(win);
+      });
+
+      it('should show skip button after delay', async () => {
+        await setTimeout(() => {
+          const buttonEl = this.win.document.querySelector(
+            'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
+          );
+          expect(buttonEl).to.have.class(
+            'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+          );
+        }, SKIP_BUTTON_DELAY_DURATION);
+      });
+
+      it('click on the button element should fire the event to navigate to next story', async () => {
+        await setTimeout(() => {
+          const advancementMode = AdvancementMode.MANUAL_ADVANCE;
+          env.sandbox
+            .stub(storeService, 'get')
+            .withArgs(StateProperty.ADVANCEMENT_MODE)
+            .returns(advancementMode);
+          const handlerSpy = env.sandbox.spy(
+            storySubscriptions.viewerMessagingHandler_,
+            'send'
+          );
+
+          const subscriptionsDialogEl = this.win.document.querySelector(
+            'amp-subscriptions-dialog'
+          );
+          subscriptionsDialogEl.click();
+          expect(handlerSpy).to.not.have.been.called;
+
+          const buttonEl = this.win.document.querySelector(
+            'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
+          );
+          buttonEl.click();
+          expect(handlerSpy).to.have.been.calledOnceWithExactly(
+            'selectDocument',
+            {
+              'next': true,
+              'advancementMode': advancementMode,
+            }
+          );
+        }, SKIP_BUTTON_DELAY_DURATION);
+      });
     });
   }
 );

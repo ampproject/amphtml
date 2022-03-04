@@ -45,7 +45,7 @@ const fontsToLoad = [
  * The number of milliseconds to wait before showing the skip button on dialog banner.
  * @const {number}
  */
-const SKIP_BUTTON_DELAY_DURATION = 2000;
+export const SKIP_BUTTON_DELAY_DURATION = 2000;
 
 export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -149,11 +149,14 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     return (
       <div subscriptions-dialog subscriptions-display="NOT granted">
         <div class="i-amphtml-story-subscriptions-dialog-banner">
-          <div class="i-amphtml-story-subscriptions-dialog-banner-button">
+          <div
+            class="i-amphtml-story-subscriptions-dialog-banner-button"
+            role="button"
+          >
             {this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SKIP
             )}
-            <div class="i-amphtml-story-subscriptions-dialog-banner-button-logo"></div>
+            <span class="i-amphtml-story-subscriptions-dialog-banner-button-logo"></span>
           </div>
         </div>
         <div class="i-amphtml-story-subscriptions-dialog-content">
@@ -250,7 +253,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   onSkipButtonClick_(event) {
     if (
       event.target.classList.contains(
-        'i-amphtml-story-subscriptions-dialog-banner-button'
+        'i-amphtml-story-subscriptions-dialog-banner-button-visible'
       )
     ) {
       const advancementMode = this.storeService_.get(
@@ -282,12 +285,12 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.subscriptionService_.selectAndActivatePlatform().then(() => {
         if (this.viewer_.isEmbedded()) {
           setTimeout(() => {
-            const bannerEl = this.win.document.querySelector(
+            const buttonEl = this.win.document.querySelector(
               'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
             );
-            bannerEl &&
+            buttonEl &&
               this.mutateElement(() =>
-                bannerEl.classList.add(
+                buttonEl.classList.add(
                   'i-amphtml-story-subscriptions-dialog-banner-button-visible'
                 )
               );
