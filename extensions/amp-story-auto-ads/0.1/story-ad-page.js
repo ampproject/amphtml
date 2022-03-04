@@ -379,35 +379,56 @@ export class StoryAdPage {
     });
   }
 
+  /**
+   * Sets auto advance for ad page
+   */
   setAutoAdvance_() {
-    const autoAdvancedMetaTag = this.adDoc_.querySelector('meta[name="auto-advance-after"]');
+    if (!this.adDoc_) {
+      return;
+    }
+    const autoAdvancedMetaTag = this.adDoc_?.querySelector(
+      'meta[name="auto-advance-after"]'
+    );
     if (autoAdvancedMetaTag) {
       const autoAdvanceValue = autoAdvancedMetaTag.content;
-      this.pageElement_.getImpl().then((impl) => impl.setAutoAdvance_(autoAdvanceValue));
-      
+      this.pageElement_
+        .getImpl()
+        .then((impl) => impl.setAutoAdvance_(autoAdvanceValue));
+
       return;
     }
 
     const videoAdEl = this.adDoc_.querySelector('amp-video');
     if (videoAdEl && !videoAdEl.hasAttribute('loop')) {
-      videoAdEl.getImpl()
-        .then(videoImpl => this.pageElement_.getImpl()
-          .then((impl) => 
-            impl.setAutoAdvance_(videoImpl.video_.duration + 's')));
+      videoAdEl
+        .getImpl()
+        .then((videoImpl) =>
+          this.pageElement_
+            .getImpl()
+            .then((impl) =>
+              impl.setAutoAdvance_(videoImpl.video_.duration + 's')
+            )
+        );
 
-      this.pageElement_.getImpl().then((impl) => impl.setAutoAdvance_(videoAdEl.id));
+      this.pageElement_
+        .getImpl()
+        .then((impl) => impl.setAutoAdvance_(videoAdEl.id));
     }
   }
 
-  setPageAudioState_() {
-    const hasVideoEls = !!this.adDoc_.querySelectorAll('video').length
+  /**
+   * Finds any video elements on page and shows audio button
+   */
+  setPageAudioState() {
+    if (!this.adDoc_) {
+      return;
+    }
+    const hasVideoEls = !!this.adDoc_.querySelectorAll('video').length;
 
     if (hasVideoEls) {
-      this.pageElement_.getImpl()
-        .then((impl) => {
-          console.log(impl);
-          impl.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true)
-        })
+      this.pageElement_.getImpl().then((impl) => {
+        impl.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+      });
     }
   }
 
@@ -446,9 +467,9 @@ export class StoryAdPage {
     }
 
     this.setAutoAdvance_();
-    
+
     // Remove loading attribute once loaded so that desktop CSS will position
-    // offscren with all other pages.    
+    // offscren with all other pages.
     this.pageElement_.removeAttribute(PageAttributes.LOADING);
     this.loaded_ = true;
 

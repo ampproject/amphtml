@@ -438,7 +438,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.placementAlgorithm_.onNewAdView(pageIndex);
     }
 
-    adPage.setPageAudioState_();
+    adPage.setPageAudioState();
 
     // Tell the iframe that it is visible.
     this.setVisibleAttribute_(adPage);
