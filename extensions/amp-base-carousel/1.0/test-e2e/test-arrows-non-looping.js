@@ -1,11 +1,11 @@
+import {useStyles} from '#bento/components/bento-base-carousel/1.0/component.jss';
+
 import {
   getCarousel,
   getNextArrow,
   getPrevArrow,
   getScrollingElement,
 } from './helpers';
-
-import {useStyles} from '../component.jss';
 
 /** The total number of slides in the carousel */
 const SLIDE_COUNT = 4;
