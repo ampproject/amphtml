@@ -1,11 +1,17 @@
+import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {
+  childElementByTag,
+  closestAncestorElementBySelector,
+} from '#core/dom/query';
 import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
+import {CSS as shoppingSharedCSS} from '../../../build/amp-story-shopping-shared-0.1.css';
 import {CSS as shoppingTagCSS} from '../../../build/amp-story-shopping-tag-0.1.css';
 import {
   Action,
@@ -33,51 +39,71 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private @const {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
+    /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = Services.storyStoreService(this.win);
 
-    /** @param {boolean} element */
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = Services.localizationForDoc(this.element);
+
+    /** @private {boolean} element */
     this.hasAppendedInnerShoppingTagEl_ = false;
 
-    /** @param {!ShoppingConfigDataDef} tagData */
+    /** @private {!ShoppingConfigDataDef} tagData */
     this.tagData_ = null;
+
+    /** @private {?AmpElement} element */
+    this.shoppingAttachment_ = null;
+
+    /** @private {!AmpElement} element */
+    this.shoppingTagEl_ = null;
+    /** @private {?Element} */
+    this.pageEl_ = null;
   }
 
   /** @override */
   buildCallback() {
-    loadFonts(this.win, FONTS_TO_LOAD);
-    this.element.setAttribute('role', 'button');
+    this.pageEl_ = closestAncestorElementBySelector(
+      this.element,
+      'amp-story-page'
+    );
 
-    return Promise.all([
-      Services.storyStoreServiceForOrNull(this.win),
-      Services.localizationServiceForOrNull(this.element),
-    ]).then(([storeService, localizationService]) => {
-      this.storeService_ = storeService;
-      this.localizationService_ = localizationService;
-    });
+    /* This is used to prevent the shopping tag component from building if there is no shopping attachment. */
+    this.shoppingAttachment_ = childElementByTag(
+      this.pageEl_,
+      'amp-story-shopping-attachment'
+    );
+
+    if (!this.shoppingAttachment_) {
+      return;
+    }
+
+    this.element.setAttribute('role', 'button');
   }
 
   /** @override */
   layoutCallback() {
+    if (!this.shoppingAttachment_) {
+      return;
+    }
+    loadFonts(this.win, FONTS_TO_LOAD);
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
-      (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
+      (shoppingData) =>
+        this.maybeCreateAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
+  }
 
-    this.storeService_.subscribe(StateProperty.RTL_STATE, (rtlState) => {
-      this.onRtlStateUpdate_(rtlState);
-    });
-
-    this.storeService_.subscribe(
-      StateProperty.PAGE_SIZE,
-      (pageSizeState) => {
-        this.flipTagIfOffscreen_(pageSizeState);
-      },
-      true /** callToInitialize */
+  /**
+   * Toggling the active attribute to make the animations play on the active page.
+   * @param {string} currentPageId
+   * @private
+   */
+  toggleShoppingTagActive_(currentPageId) {
+    const isActive = currentPageId === this.pageEl_.id;
+    this.mutateElement(() =>
+      toggleAttribute(this.shoppingTagEl_, 'active', isActive)
     );
   }
 
@@ -105,15 +131,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       () => {
         this.shoppingTagEl_.classList.toggle(
           'i-amphtml-amp-story-shopping-tag-inner-flipped',
-          shouldFlip
-        );
-
-        const dotEl = this.shoppingTagEl_.querySelector(
-          '.i-amphtml-amp-story-shopping-tag-dot'
-        );
-
-        dotEl.classList.toggle(
-          'i-amphtml-amp-story-shopping-tag-dot-flipped',
           shouldFlip
         );
 
@@ -176,8 +193,13 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
     const ratioOfLineHeightToFontSize = 1.5;
     const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
-    const height = textEl./*OK*/ clientHeight;
-    const numLines = Math.ceil(height / lineHeight);
+
+    let numLines = 1;
+
+    this.measureElement(() => {
+      const height = textEl./*OK*/ clientHeight;
+      numLines = Math.ceil(height / lineHeight);
+    });
 
     this.mutateElement(() => {
       pillEl.classList.toggle(
@@ -193,8 +215,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    */
   renderShoppingTagTemplate_() {
     return (
-      <div
-        class="i-amphtml-amp-story-shopping-tag-inner"
+      <button
+        class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-tag-inner"
         role="button"
         onClick={() => this.onClick_()}
       >
@@ -224,7 +246,31 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
               )}
           </span>
         </span>
-      </div>
+      </button>
+    );
+  }
+
+  /**
+   * Initialize listeners (data, orientation, visibility) for the shopping tag on creation.
+   * @private
+   */
+  initializeTagStateListeners_() {
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      (rtlState) => this.onRtlStateUpdate_(rtlState),
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.PAGE_SIZE,
+      (pageSizeState) => this.flipTagIfOffscreen_(pageSizeState),
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      (id) => this.toggleShoppingTagActive_(id),
+      true /** callToInitialize */
     );
   }
 
@@ -232,27 +278,26 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @param {!ShoppingDataDef} shoppingData
    * @private
    */
-  createAndAppendInnerShoppingTagEl_(shoppingData) {
-    this.tagData_ = shoppingData[this.element.getAttribute('data-product-id')];
+  maybeCreateAndAppendInnerShoppingTagEl_(shoppingData) {
+    const pageElement = closestAncestorElementBySelector(
+      this.element,
+      'amp-story-page'
+    );
+    this.tagData_ =
+      shoppingData[pageElement.id]?.[
+        this.element.getAttribute('data-product-id')
+      ];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
-
-    this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
-
-    this.measureMutateElement(
-      () => {
-        createShadowRootWithStyle(
-          this.element,
-          this.shoppingTagEl_,
-          shoppingTagCSS
-        );
-        this.hasAppendedInnerShoppingTagEl_ = true;
-      },
-      () => {
-        this.styleTagText_();
-      }
+    createShadowRootWithStyle(
+      this.element,
+      this.shoppingTagEl_,
+      shoppingSharedCSS + shoppingTagCSS
     );
+    this.hasAppendedInnerShoppingTagEl_ = true;
+    this.styleTagText_();
+    this.initializeTagStateListeners_();
   }
 }

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "packages specific to the preact storybook env",
   "devDependencies": {
-    "@storybook/preact": "6.3.12",
+    "@storybook/preact": "6.4.19",
     "preact-render-to-string": "5.1.19",
     "preact": "10.5.15"
   }

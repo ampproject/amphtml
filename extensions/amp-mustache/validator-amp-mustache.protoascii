@@ -219,7 +219,8 @@ tags: {
   disallowed_ancestor: "FORM DIV [submit-error][template]"
   disallowed_ancestor: "FORM DIV [submitting][template]"
   disallowed_ancestor: "FORM DIV [verify-error][template]"
-  # AMP4EMAIL addition.
+  # AMP4EMAIL addition. See the comment for AMP4EMAIL for the spec named
+  # "FORM DIV [submitting][template]".
   disallowed_ancestor: "FORM DIV [submitting]"
   requires_extension: "amp-mustache"
   attrs: {
@@ -536,7 +537,8 @@ tags: {
   disallowed_ancestor: "FORM DIV [submit-error][template]"
   disallowed_ancestor: "FORM DIV [submitting][template]"
   disallowed_ancestor: "FORM DIV [verify-error][template]"
-  # AMP4EMAIL addition.
+  # AMP4EMAIL addition. See the comment for AMP4EMAIL for the spec named
+  # "FORM DIV [submitting][template]".
   disallowed_ancestor: "FORM DIV [submitting]"
   requires_extension: "amp-mustache"
   attrs: {

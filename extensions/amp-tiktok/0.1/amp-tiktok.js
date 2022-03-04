@@ -76,7 +76,7 @@ export class AmpTiktok extends AMP.BaseElement {
     );
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     const html = htmlFor(element);
     const placeholder = childElementByAttr(element, 'placeholder');

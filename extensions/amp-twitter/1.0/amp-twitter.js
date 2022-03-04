@@ -1,11 +1,11 @@
+import {BaseElement} from '#bento/components/bento-twitter/1.0/base-element';
+
 import {userAssert} from '#core/assert';
 import {htmlFor} from '#core/dom/static-template';
 
 import {isExperimentOn} from '#experiments';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
-
-import {BaseElement} from './base-element';
 
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 
@@ -19,7 +19,7 @@ class AmpTwitter extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     super(element);
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     const html = htmlFor(element);
     return {
@@ -40,7 +40,7 @@ class AmpTwitter extends setSuperClass(BaseElement, AmpPreactBaseElement) {
     };
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();
     const {win} = ampdoc;

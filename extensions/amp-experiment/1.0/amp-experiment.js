@@ -19,7 +19,7 @@ import {getServicePromiseForDoc} from '../../../src/service-helpers';
 const TAG = 'amp-experiment';
 
 export class AmpExperiment extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     /*
      * Prerender is allowed because the client_id is only used to calculate

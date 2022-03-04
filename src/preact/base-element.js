@@ -106,24 +106,29 @@ const HAS_PASSTHROUGH = (def) => !!(def.passthrough || def.passthroughNonEmpty);
  * }} API_TYPE
  */
 export class PreactBaseElement extends BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static R1() {
     return true;
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static requiresShadowDom() {
     return this['usesShadowDom'];
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static usesLoading() {
     return this['loadable'];
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return !this.usesLoading();
+  }
+
+  /** @override */
+  static previewAllowed() {
+    return false;
   }
 
   /**

@@ -1,20 +1,18 @@
 const argv = require('minimist')(process.argv.slice(2));
 const debounce = require('../common/debounce');
 const {
+  buildBentoExtensionJs,
   buildBinaries,
   buildExtensionCss,
-  buildExtensionJs,
   buildNpmBinaries,
   buildNpmCss,
   declareExtension,
-  getBentoBuildFilename,
   getExtensionsFromArg,
 } = require('./extension-helpers');
 const {bentoBundles, verifyBentoBundles} = require('../compile/bundles.config');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
-const {getBentoName} = require('./bento-helpers');
 const {log} = require('../common/logging');
-const {mkdirSync} = require('fs');
+const {mkdir} = require('fs-extra');
 const {red} = require('kleur/colors');
 const {watch} = require('chokidar');
 
@@ -37,8 +35,8 @@ function maybeInitializeBentoComponents(componentsObject) {
 }
 
 /**
- * Process the command line arguments --nocomponents, --components, and
- * --components_from and return a list of the referenced components.
+ * Process the command line arguments --noextensions, --components, and
+ * --extensions_from and return a list of the referenced components.
  *
  * @param {boolean} preBuild Used for lazy building of components.
  * @return {!Array<string>}
@@ -59,7 +57,7 @@ function getBentoComponentsToBuild(preBuild = false) {
   }
   if (
     !preBuild &&
-    !argv.nocomponents &&
+    !argv.noextensions &&
     !argv.extensions &&
     !argv.extensions_from &&
     !argv.core_runtime_only
@@ -124,17 +122,9 @@ async function watchBentoComponent(
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
- * @param {!Array=} extraGlobs
  * @return {!Promise<void|void[]>}
  */
-async function buildBentoComponent(
-  name,
-  version,
-  hasCss,
-  options = {},
-  extraGlobs
-) {
-  options.extraGlobs = extraGlobs;
+async function buildBentoComponent(name, version, hasCss, options = {}) {
   options.npm = true;
   options.bento = true;
 
@@ -142,14 +132,15 @@ async function buildBentoComponent(
     return;
   }
   const componentsDir = `src/bento/components/${name}/${version}`;
+  await mkdir(`${componentsDir}/dist`, {recursive: true});
   if (options.watch) {
-    await watchBentoComponent(componentsDir, name, version, hasCss, options);
+    watchBentoComponent(componentsDir, name, version, hasCss, options);
   }
 
   /** @type {Promise<void>[]} */
   const promises = [];
   if (hasCss) {
-    mkdirSync('build/css', {recursive: true});
+    await mkdir('build/css', {recursive: true});
     promises.push(buildExtensionCss(componentsDir, name, version, options));
     if (options.compileOnlyCss) {
       return Promise.all(promises);
@@ -164,21 +155,7 @@ async function buildBentoComponent(
     return Promise.all(promises);
   }
 
-  const bentoName = getBentoName(name);
-  promises.push(
-    buildExtensionJs(componentsDir, bentoName, {
-      ...options,
-      wrapper: 'none',
-      filename: await getBentoBuildFilename(
-        componentsDir,
-        bentoName,
-        'standalone',
-        options
-      ),
-      // Include extension directory since our entrypoint may be elsewhere.
-      extraGlobs: [...(options.extraGlobs || []), `${componentsDir}/**/*.js`],
-    })
-  );
+  promises.push(buildBentoExtensionJs(componentsDir, name, options));
   return Promise.all(promises);
 }
 
@@ -197,13 +174,10 @@ async function buildBentoComponents(options) {
       (component) => options.compileOnlyCss || toBuild.includes(component.name)
     )
     .map((component) =>
-      buildBentoComponent(
-        component.name,
-        component.version,
-        component.hasCss,
-        {...options, ...component},
-        component.extraGlobs
-      )
+      buildBentoComponent(component.name, component.version, component.hasCss, {
+        ...options,
+        ...component,
+      })
     );
 
   await Promise.all(results);

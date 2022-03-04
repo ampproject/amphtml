@@ -1130,6 +1130,7 @@ describes.realWin(
         it('with just src', () => {
           video.setAttribute('src', 'video.mp4');
           expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+          expect(AmpVideo.previewAllowed(video)).to.be.false;
         });
 
         it('with just source', () => {
@@ -1137,6 +1138,7 @@ describes.realWin(
           source.setAttribute('src', 'video.mp4');
           video.appendChild(source);
           expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+          expect(AmpVideo.previewAllowed(video)).to.be.false;
         });
 
         it('with both src and source', () => {
@@ -1145,6 +1147,7 @@ describes.realWin(
           source.setAttribute('src', 'video.mp4');
           video.appendChild(source);
           expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+          expect(AmpVideo.previewAllowed(video)).to.be.false;
         });
       });
 
@@ -1156,6 +1159,7 @@ describes.realWin(
           );
           video.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
 
         it('with just cached source', () => {
@@ -1167,6 +1171,7 @@ describes.realWin(
           source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
           video.appendChild(source);
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
 
         it('with a mix or cached and non-cached', () => {
@@ -1186,6 +1191,7 @@ describes.realWin(
           video.appendChild(cachedSource);
 
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
       });
 
@@ -1194,6 +1200,7 @@ describes.realWin(
           video.setAttribute('src', 'https://example.com/video.mp4');
           video.setAttribute('poster', 'https://example.com/poster.jpg');
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
       });
 
@@ -1202,6 +1209,7 @@ describes.realWin(
           video.setAttribute('src', 'https://example.com/video.mp4');
           video.setAttribute('cache', 'google');
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
       });
 
