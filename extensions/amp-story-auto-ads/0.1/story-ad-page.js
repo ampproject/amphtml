@@ -386,11 +386,8 @@ export class StoryAdPage {
     if (!this.adDoc_) {
       return;
     }
-    const autoAdvancedMetaTag = this.adDoc_?.querySelector(
-      'meta[name="auto-advance-after"]'
-    );
-    if (autoAdvancedMetaTag) {
-      const autoAdvanceValue = autoAdvancedMetaTag.content;
+    const autoAdvanceValue = this.adDoc_?.body.dataset.autoAdvanceAfter;
+    if (autoAdvanceValue) {
       this.pageElement_
         .getImpl()
         .then((impl) => impl.setAutoAdvance_(autoAdvanceValue));
