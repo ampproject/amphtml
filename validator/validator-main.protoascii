@@ -2946,6 +2946,7 @@ tags: {
   html_format: AMP
   tag_name: "INPUT"
   spec_name: "INPUT [type=image]"
+  attrs: { name: "alt" }
   attrs: {
     name: "type"
     value_casei: "image"
@@ -2968,7 +2969,7 @@ tags: {
   }
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  mandatory_ancestor: "FORM [method=POST]"
+  mandatory_ancestor: "FORM"
   spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 # 4.10.6 The button element
