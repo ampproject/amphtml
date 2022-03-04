@@ -6,10 +6,12 @@ export {GestureRecognizer, Gesture} from './gesture-base';
 export class Gestures extends GesturesBase {
   static get = GesturesBase.get;
 
-  /**
-   * @override
-   */
-  getPass_() {
-    return Pass;
+  constructor(element, shouldNotPreventDefault, shouldStopPropagation) {
+    super(
+      element,
+      shouldNotPreventDefault,
+      shouldStopPropagation,
+      Pass // Override the default
+    );
   }
 }

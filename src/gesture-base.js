@@ -45,15 +45,6 @@ export class Gesture {
  */
 export class Gestures {
   /**
-   * Overridable
-   * @return {Pass}
-   * @protected
-   */
-  getPass_() {
-    return Pass;
-  }
-
-  /**
    * Creates if not yet created and returns the shared Gestures instance for
    * the specified element.
    * @param {!Element} element
@@ -83,8 +74,14 @@ export class Gestures {
    * @param {!Element} element
    * @param {boolean} shouldNotPreventDefault
    * @param {boolean} shouldStopPropagation
+   * @param {function} PassClass
    */
-  constructor(element, shouldNotPreventDefault, shouldStopPropagation) {
+  constructor(
+    element,
+    shouldNotPreventDefault = false,
+    shouldStopPropagation = false,
+    PassClass = Pass
+  ) {
     /** @private {!Element} */
     this.element_ = element;
 
@@ -119,9 +116,8 @@ export class Gestures {
      */
     this.wasEventing_ = false;
 
-    const Pass = this.getPass_();
     /** @private {!Pass} */
-    this.pass_ = new Pass(getWin(element), this.doPass_.bind(this));
+    this.pass_ = new PassClass(getWin(element), this.doPass_.bind(this));
 
     /** @private {!Observable} */
     this.pointerDownObservable_ = new Observable();

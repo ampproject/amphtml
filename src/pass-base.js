@@ -5,24 +5,15 @@
  */
 export class Pass {
   /**
-   *
-   * @param {!Window} win
-   * @return {{cancel, delay}}
-   * @protected
-   */
-  getTimer_(win) {
-    return {delay: win.setTimeout, cancel: win.clearTimeout};
-  }
-
-  /**
    * Creates a new Pass instance.
    * @param {!Window} win
    * @param {function()} handler Handler to be executed when pass is triggered.
    * @param {number=} opt_defaultDelay Default delay to be used when schedule
    *   is called without one.
+   * @param {{delay(): number; cancel(id: number): void}} timer_ For injecting the Timer Impl
    */
-  constructor(win, handler, opt_defaultDelay) {
-    this.timer_ = this.getTimer_(win);
+  constructor(win, handler, opt_defaultDelay, timer_ = null) {
+    this.timer_ = timer_ || {delay: win.setTimeout, cancel: win.clearTimeout};
 
     /** @private @const {function()} */
     this.handler_ = handler;
