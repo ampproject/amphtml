@@ -60,7 +60,7 @@ function createValidateConfigObject(validation) {
   return (field, value) => {
     if (!validateConfig(value, validation, field)) {
       throw Error(
-        `Value for field '${field}' is not vaild, see messages above for details`
+        `Value for field '${field}' is not vaild, see the error messages above for details`
       );
     }
   };
@@ -78,7 +78,7 @@ function createValidateConfigArray(validation) {
       isValid &&= validateConfig(item, validation, field);
     }
     if (!isValid) {
-      `Value for field '${field}' is not vaild, see messages above for details`;
+      `Value for field '${field}' is not vaild, see the error messages above for details`;
     }
   };
 }
