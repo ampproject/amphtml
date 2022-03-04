@@ -1,10 +1,9 @@
 import type {RefObject} from 'preact';
-import {ClassType} from 'react';
 
 import {useEffect} from '#preact';
 import {useValueRef} from '#preact/component';
 
-import {Gesture, Gestures} from '../../gesture';
+import {Gesture, Gestures} from '../../gesture-base';
 import {
   DoubletapDef,
   DoubletapRecognizer,

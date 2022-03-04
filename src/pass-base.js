@@ -1,11 +1,19 @@
-import {Services} from '#service';
-
 /**
  * Pass class helps to manage single-pass process. A pass is scheduled using
  * delay method. Only one pass can be pending at a time. If no pass is pending
  * the process is considered to be "idle".
  */
 export class Pass {
+  /**
+   *
+   * @param {!Window} win
+   * @return {{cancel, delay}}
+   * @protected
+   */
+  getTimer_(win) {
+    return {delay: win.setTimeout, cancel: win.clearTimeout};
+  }
+
   /**
    * Creates a new Pass instance.
    * @param {!Window} win
@@ -14,7 +22,7 @@ export class Pass {
    *   is called without one.
    */
   constructor(win, handler, opt_defaultDelay) {
-    this.timer_ = Services.timerFor(win);
+    this.timer_ = this.getTimer_(win);
 
     /** @private @const {function()} */
     this.handler_ = handler;

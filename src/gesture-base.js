@@ -4,7 +4,7 @@ import {supportsPassiveEventListener} from '#core/dom/event-helper-listen';
 import {findIndex} from '#core/types/array';
 import {getWin, toWin} from '#core/window';
 
-import {Pass} from './pass';
+import {Pass} from './pass-base';
 
 const PROP_ = '__AMP_Gestures';
 
@@ -45,6 +45,15 @@ export class Gesture {
  */
 export class Gestures {
   /**
+   * Overridable
+   * @return {Pass}
+   * @protected
+   */
+  getPass_() {
+    return Pass;
+  }
+
+  /**
    * Creates if not yet created and returns the shared Gestures instance for
    * the specified element.
    * @param {!Element} element
@@ -57,9 +66,10 @@ export class Gestures {
     opt_shouldNotPreventDefault = false,
     opt_shouldStopPropagation = false
   ) {
+    const GesturesClass = this;
     let res = element[PROP_];
     if (!res) {
-      res = new Gestures(
+      res = new GesturesClass(
         element,
         opt_shouldNotPreventDefault,
         opt_shouldStopPropagation
@@ -109,6 +119,7 @@ export class Gestures {
      */
     this.wasEventing_ = false;
 
+    const Pass = this.getPass_();
     /** @private {!Pass} */
     this.pass_ = new Pass(getWin(element), this.doPass_.bind(this));
 
