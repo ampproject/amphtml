@@ -1,5 +1,3 @@
-import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
-
 import {
   BentoAccordion,
   BentoAccordionContent,
@@ -15,35 +13,21 @@ import '#bento/components/bento-video/1.0/component.jss';
 export default {
   title: 'Video',
   component: BentoVideo,
-  decorators: [withKnobs],
-};
-
-const VideoTagPlayer = ({i}) => {
-  const group = `Player ${i + 1}`;
-
-  const width = text('width', '640px', group);
-  const height = text('height', '360px', group);
-
-  const ariaLabel = text('aria-label', 'Video Player', group);
-  const autoplay = boolean('autoplay', true, group);
-  const controls = boolean('controls', true, group);
-  const mediasession = boolean('mediasession', true, group);
-  const noaudio = boolean('noaudio', false, group);
-  const loop = boolean('loop', false, group);
-  const poster = text(
-    'poster',
-    'https://amp.dev/static/inline-examples/images/kitten-playing.png',
-    group
-  );
-
-  const artist = text('artist', '', group);
-  const album = text('album', '', group);
-  const artwork = text('artwork', '', group);
-  const title = text('title', '', group);
-
-  const sources = object(
-    'sources',
-    [
+  args: {
+    amount: 1,
+    spacerHeight: '80vh',
+    spacerAbove: '80vh',
+    spacerBelow: '80vh',
+    width: '640px',
+    height: '360px',
+    ariaLabel: 'Video Player',
+    autoplay: true,
+    controls: true,
+    mediasession: true,
+    noaudio: false,
+    loop: false,
+    poster: 'https://amp.dev/static/inline-examples/images/kitten-playing.png',
+    sources: [
       {
         src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
         type: 'video/webm',
@@ -53,28 +37,28 @@ const VideoTagPlayer = ({i}) => {
         type: 'video/mp4',
       },
     ],
-    group
-  );
+  },
+};
 
+const VideoTagPlayer = (args) => {
+  const {height, width} = args;
+
+  const ref = Preact.useRef();
   return (
-    <BentoVideo
-      component="video"
-      aria-label={ariaLabel}
-      autoplay={autoplay}
-      controls={controls}
-      mediasession={mediasession}
-      noaudio={noaudio}
-      loop={loop}
-      poster={poster}
-      artist={artist}
-      album={album}
-      artwork={artwork}
-      title={title}
-      style={{width, height}}
-      sources={sources.map((props) => (
-        <source {...props}></source>
-      ))}
-    />
+    <>
+      <BentoVideo
+        component="video"
+        {...args}
+        ref={ref}
+        style={{width, height}}
+        sources={args.sources.map((props) => (
+          <source {...props}></source>
+        ))}
+      />
+      <button onClick={() => ref.current.pause()}>pause</button>
+      <button onClick={() => ref.current.play()}>play</button>
+      <button onClick={() => ref.current.togglePlay()}>Toggle</button>
+    </>
   );
 };
 
@@ -90,15 +74,16 @@ const Spacer = ({height}) => {
   );
 };
 
-export const Default = () => {
-  const amount = number('Amount', 1, {}, 'Page');
-  const spacerHeight = text('Space', '80vh', 'Page');
-  const spaceAbove = boolean('Space above', false, 'Page');
-  const spaceBelow = boolean('Space below', false, 'Page');
-
+export const Default = ({
+  amount,
+  spaceAbove,
+  spaceBelow,
+  spacerHeight,
+  ...rest
+}) => {
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<VideoTagPlayer key={i} i={i} />);
+    players.push(<VideoTagPlayer {...rest} key={i} i={i} />);
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -113,9 +98,9 @@ export const Default = () => {
   );
 };
 
-export const InsideAccordion = () => {
-  const width = text('width', '320px');
-  const height = text('height', '180px');
+export const InsideAccordion = (args) => {
+  const {height, width} = args;
+
   return (
     <BentoAccordion expandSingleSection>
       <BentoAccordionSection key={1} expanded>

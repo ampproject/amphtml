@@ -1,5 +1,4 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
@@ -7,7 +6,7 @@ import {VideoElementWithActions} from './_helpers';
 
 export default {
   title: 'amp-video-1_0',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
   parameters: {
     extensions: [
       {name: 'amp-video', version: '1.0'},
@@ -15,34 +14,21 @@ export default {
     ],
     experiments: ['bento'],
   },
-};
-
-const AmpVideoWithKnobs = ({i, ...rest}) => {
-  const group = i ? `Player ${i + 1}` : undefined;
-
-  const width = text('width', '640px', group);
-  const height = text('height', '360px', group);
-
-  const ariaLabel = text('aria-label', 'Video Player', group);
-  const autoplay = boolean('autoplay', true, group);
-  const controls = boolean('controls', true, group);
-  const mediasession = boolean('mediasession', true, group);
-  const noaudio = boolean('noaudio', false, group);
-  const loop = boolean('loop', false, group);
-  const poster = text(
-    'poster',
-    'https://amp.dev/static/inline-examples/images/kitten-playing.png',
-    group
-  );
-
-  const artist = text('artist', '', group);
-  const album = text('album', '', group);
-  const artwork = text('artwork', '', group);
-  const title = text('title', '', group);
-
-  const sources = object(
-    'sources',
-    [
+  args: {
+    amount: 1,
+    spacerHeight: '80vh',
+    spacerAbove: '80vh',
+    spacerBelow: '80vh',
+    width: '640px',
+    height: '360px',
+    ariaLabel: 'Video Player',
+    autoplay: true,
+    controls: true,
+    mediasession: true,
+    noaudio: false,
+    loop: false,
+    poster: 'https://amp.dev/static/inline-examples/images/kitten-playing.png',
+    sources: [
       {
         src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
         type: 'video/webm',
@@ -52,27 +38,14 @@ const AmpVideoWithKnobs = ({i, ...rest}) => {
         type: 'video/mp4',
       },
     ],
-    group
-  );
+  },
+};
+
+const AmpVideoWithKnobs = (args) => {
+  const {sources} = args;
 
   return (
-    <amp-video
-      {...rest}
-      aria-label={ariaLabel}
-      autoplay={autoplay}
-      controls={controls}
-      mediasession={mediasession}
-      noaudio={noaudio}
-      loop={loop}
-      poster={poster}
-      artist={artist}
-      album={album}
-      artwork={artwork}
-      title={title}
-      layout="responsive"
-      width={width}
-      height={height}
-    >
+    <amp-video {...args} layout="responsive">
       {sources.map((props) => (
         <source {...props}></source>
       ))}
@@ -92,15 +65,12 @@ const Spacer = ({height}) => {
   );
 };
 
-export const Default = () => {
-  const amount = number('Amount', 1, {}, 'Page');
-  const spacerHeight = text('Space', '80vh', 'Page');
-  const spaceAbove = boolean('Space above', false, 'Page');
-  const spaceBelow = boolean('Space below', false, 'Page');
+export const Default = (args) => {
+  const {amount, spaceAbove, spaceBelow, spacerHeight} = args;
 
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<AmpVideoWithKnobs key={i} i={i} />);
+    players.push(<AmpVideoWithKnobs {...args} key={i} i={i} />);
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -115,19 +85,17 @@ export const Default = () => {
   );
 };
 
-export const Actions = () => {
+export const Actions = (args) => {
   const id = 'player';
   return (
     <VideoElementWithActions id={id}>
-      <AmpVideoWithKnobs id={id} />
+      <AmpVideoWithKnobs {...args} id={id} />
     </VideoElementWithActions>
   );
 };
 
-export const InsideAccordion = () => {
-  const width = number('width', 320);
-  const height = number('height', 180);
-  const autoplay = boolean('autoplay', false);
+export const InsideAccordion = (args) => {
+  const {autoplay, height, width} = args;
 
   return (
     <amp-accordion expand-single-section>
@@ -152,10 +120,8 @@ export const InsideAccordion = () => {
   );
 };
 
-export const InsideDetails = () => {
-  const width = number('width', 320);
-  const height = number('height', 180);
-  const autoplay = boolean('autoplay', false);
+export const InsideDetails = (args) => {
+  const {autoplay, height, width} = args;
 
   return (
     <details open>

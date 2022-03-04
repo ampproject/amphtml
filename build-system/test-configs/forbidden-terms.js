@@ -742,8 +742,6 @@ const forbiddenTermsGlobal = {
       'extensions/amp-stream-gallery/1.0/storybook/Basic.amp.js',
       'extensions/amp-stream-gallery/1.0/storybook/Basic.js',
       'extensions/amp-timeago/1.0/storybook/Basic.js',
-      'extensions/amp-video/1.0/storybook/Basic.amp.js',
-      'extensions/amp-video/1.0/storybook/Basic.js',
       'extensions/amp-video-iframe/1.0/storybook/Basic.amp.js',
       'extensions/amp-vimeo/1.0/storybook/Basic.amp.js',
       'extensions/amp-vimeo/1.0/storybook/Basic.js',
