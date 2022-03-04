@@ -12,7 +12,7 @@ import {logger} from '#preact/logger';
 import {useStyles} from './component.jss';
 import {usePointerDrag} from './hooks/use-pointer-drag';
 import {useResizeObserver} from './hooks/use-resize-observer';
-import {usePanZoomState} from './reducer';
+import {usePanZoomState} from './usePanZoomState';
 
 const TAG = 'amp-pan-zoom';
 const DEFAULT_MAX_SCALE = 3;
