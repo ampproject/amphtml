@@ -1,13 +1,30 @@
 name: Publish Bento Packages on npm
 on:
+  # to be triggered by ampproject/cdn-configuration promote workflows
+  workflow_call:
+    inputs:
+      amp-version:
+        description: 'AMP version'
+        required: true
+        type: string
+      tag:
+        description: 'npm package tag'
+        required: true
+        type: string
+
+  # to be run manually
   workflow_dispatch:
     inputs:
-      ampversion:
+      amp-version:
         description: 'AMP version'
         required: true
       tag:
-        description: 'npm package tag (latest | nightly)'
+        description: 'npm package tag'
         required: true
+        type: choice
+        options:
+          - latest
+          - nightly
 env:
   SCRIPTS_REPO: 'https://raw.githubusercontent.com/ampproject/amphtml/main'
   SCRIPTS_DIR: 'build-system/npm-publish'
@@ -19,11 +36,11 @@ jobs:
     steps:
       - name: Print inputs
         run: |
-          echo "AMP version: ${{ github.event.inputs.ampversion }}"
+          echo "AMP version: ${{ github.event.inputs.amp-version }}"
           echo "npm tag: ${{ github.event.inputs.tag }}"
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.events.inputs.ampversion }}
+          ref: ${{ github.events.inputs.amp-version }}
       - name: Get latest scripts
         run: wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-extensions.js" -O ${{ env.SCRIPTS_DIR }}/get-extensions.js
       - name: Get extensions to publish
@@ -31,10 +48,53 @@ jobs:
         run: |
           EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-extensions.js)
           echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
-  publish:
+  publish-core:
     if: github.repository == 'ampproject/amphtml'
     environment: bento_publishing
     needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.events.inputs.amp-version }}
+      - uses: actions/setup-node@v2
+        with:
+          node-version: lts/*
+      - name: Get latest scripts
+        run: |
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/utils.js" -O ${{ env.SCRIPTS_DIR }}/utils.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-core-version.js" -O ${{ env.SCRIPTS_DIR }}/get-core-version.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/build-npm-binaries.js" -O ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
+      - name: Build package
+        run: |
+          npm ci
+          node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
+          cd ./src/bento/core
+          CORE_VERSION=$(node ${{ env.SCRIPTS_DIR }}/get-core-version.js ${{ github.event.inputs.amp-version }})
+          npm version $CORE_VERSION --git-tag-version=false --allow-same-version=true
+      - name: Publish package for Nightly releases
+        if: github.event.inputs.tag != 'latest'
+        run: |
+          npm publish ./src/bento/core --access public --tag ${{ github.event.inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Tag package as latest for Stable releases
+        if: github.event.inputs.tag == 'latest'
+        run: |
+          NPM_PACKAGE=$(jq -r .name ./src/bento/core/package.json)
+          NPM_VERSION=$(jq -r .version ./src/bento/core/package.json)
+          echo "Processing ${NPM_PACKAGE}@${NPM_VERSION}"
+          if [[ $(npm view ${NPM_PACKAGE}@${NPM_VERSION}) ]]; then
+            npm dist-tag add ${NPM_PACKAGE}@${NPM_VERSION} latest
+          else
+            npm publish ./src/bento/core --access public --tag latest
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  publish:
+    if: github.repository == 'ampproject/amphtml'
+    environment: bento_publishing
+    needs: publish-core
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
@@ -42,11 +102,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.events.inputs.ampversion }}
+          ref: ${{ github.events.inputs.amp-version }}
       - uses: actions/setup-node@v2
         with:
           registry-url: https://registry.npmjs.org
-          node-version: 16
+          node-version: lts/*
       - name: Get latest scripts
         run: |
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/utils.js" -O ${{ env.SCRIPTS_DIR }}/utils.js
@@ -56,7 +116,7 @@ jobs:
         run: |
           npm ci
           node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }}
-          node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.ampversion }} ${{ matrix.version }}
+          node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.amp-version }} ${{ matrix.version }}
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: npm publish ./extensions/${{ matrix.extension }}/${{ matrix.version }} --access public --tag ${{ github.event.inputs.tag }}

@@ -167,6 +167,7 @@
 
 .i-amphtml-story-ad-progress-value {
   animation-name: i-amphtml-story-ad-value !important;
+  animation-duration: 10s;
   animation-timing-function: linear !important;
   background-color: #fbc02d !important;
   height: 100% !important;
@@ -241,6 +242,8 @@
 .i-amphtml-story-system-layer:not([desktop]):not(.i-amphtml-story-desktop-one-panel):not(.amp-mode-keyboard-active)
   .i-amphtml-paused-display
   button:not(:focus) {
+  margin: 0 !important;
+  padding: 0 !important;
   width: 0px !important;
   opacity: 0 !important;
   pointer-events: none !important;

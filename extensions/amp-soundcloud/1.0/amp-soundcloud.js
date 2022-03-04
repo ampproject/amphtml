@@ -1,10 +1,10 @@
+import {BaseElement} from '#bento/components/bento-soundcloud/1.0/base-element';
+
 import {isExperimentOn} from '#experiments';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-soundcloud';

@@ -2,10 +2,17 @@ amp-story-shopping-attachment {
   height: 100% !important;
   width: 100% !important;
   font-family: 'Poppins', sans-serif !important;
-  font-size: calc(var(--story-page-vmin) * 3) !important; /* override with ems for pixel perfect layout */
+  font-size: calc(var(--story-page-vmin) * 3) !important; /* Override with ems for pixel perfect layout. */
   --i-amphtml-shopping-attachment-horizontal-spacing: 1.5em !important;
   --i-amphtml-shopping-attachment-vertical-spacing: 1.2em !important;
   --i-amphtml-shopping-three-percent-overlay: rgba(0, 0, 0,  .03) !important;
+  --i-amphtml-shopping-pdp-carousel-height: calc(var(--story-page-vh) * 80 - var(--story-page-vw) * 60) !important;
+}
+
+amp-story[desktop][supports-landscape] amp-story-shopping-attachment {
+  /* Sets static values in desktop supports landscape mode. */
+  font-size: calc(18px) !important;
+  --i-amphtml-shopping-pdp-carousel-height: 32em !important;
 }
 
 amp-story-shopping-attachment[theme="dark"] {
@@ -189,8 +196,7 @@ amp-story-shopping-attachment a {
   display: flex !important;
   overflow-x: auto !important;
   scroll-snap-type: x mandatory !important;
-  --carousel-height: calc(var(--story-page-vh) * 80 - var(--story-page-vw) * 60) !important;
-  height: var(--carousel-height) !important;
+  height: var(--i-amphtml-shopping-pdp-carousel-height) !important;
   max-height: 100vw !important;
 }
 
@@ -213,7 +219,7 @@ amp-story-shopping-attachment a {
   background-repeat: no-repeat !important;
   cursor: pointer !important;
   width: calc(var(--story-page-vw) * 100 - 7.5em) !important;
-  max-width: calc(var(--carousel-height) * 1.25) !important;
+  max-width: calc(var(--i-amphtml-shopping-pdp-carousel-height) * 1.25) !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
@@ -226,19 +232,20 @@ amp-story-shopping-attachment a {
   border-radius: 0 1.1em 1.1em 0 !important;
 }
 
-.i-amphtml-amp-story-shopping-pdp-carousel-card:only-child {
-  width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
-  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2)!important;
-  border-radius: 1.1em !important;
-  cursor: auto !important;
-}
-
 [dir=rtl] .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
   border-radius: 0 1.1em 1.1em 0 !important;
 }
 
 [dir=rtl] .i-amphtml-amp-story-shopping-pdp-carousel-card:last-child {
   border-radius: 1.1em 0 0 1.1em !important;
+}
+
+/* Override when it's the only child. First and last selectors are used for specificity. */
+.i-amphtml-amp-story-shopping-pdp-carousel-card:first-child:last-child {
+  width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
+  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
+  border-radius: 1.1em !important;
+  cursor: auto !important;
 }
 
 /* PDP deatils */
@@ -282,6 +289,8 @@ amp-story-shopping-attachment a {
 .i-amphtml-amp-story-shopping-pdp-details[active] .i-amphtml-amp-story-shopping-pdp-details-text {
   height: auto !important;
   opacity: 1 !important;
+  /* Renders \n as newlines in product data text. */
+  white-space: pre-line !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-details-text:after {
