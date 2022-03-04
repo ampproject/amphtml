@@ -311,7 +311,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, null)
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=1&fmtid=22&tag=sas_22&out=amp-hb&schain=some-sco-string&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=1&fmtid=22&tag=sas_22&out=amp-hb&schain=some-sco-string&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
           );
         });
     });
@@ -329,7 +329,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
         .getAdUrl({}, null)
         .then((url) => {
           expect(url).to.match(
-            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=[0-9]+$/
+            /^https:\/\/www\.smartadserver\.com\/ac\?siteid=10&fmtid=3&tag=sas_3&out=amp-hb&pgDomain=[a-zA-Z0-9.%]+&tmstp=1-[0-9]+$/
           );
         });
     });
