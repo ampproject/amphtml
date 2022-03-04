@@ -27,7 +27,7 @@ const aggregateRatingValidationConfig = {
 export const productValidationConfig = {
   /* Required Attrs */
   'productUrl': [validateRequired, validateURLs],
-  'productId': [validateRequired, validateString],
+  'productId': [validateRequired, validateString, validateHTMLId],
   'productTitle': [validateRequired, validateString],
   'productBrand': [validateRequired, validateString],
   'productPrice': [validateRequired, validateNumber],
@@ -101,7 +101,19 @@ export function validateRequired(field, value) {
  */
 export function validateString(field, str) {
   if (typeof str !== 'string') {
-    throw Error(`${field} ${str} is not a string.`);
+    throw Error(`${field} ${str} is not a string`);
+  }
+}
+
+/**
+ * Validates if it is a valid HTML ID for shopping config attributes
+ * @param {string} field
+ * @param {?string=} id
+ */
+export function validateHTMLId(field, id) {
+  const checkID = /^[A-Za-z]+[\w\-\:\.]*$/;
+  if (!checkID.test(id)) {
+    throw Error(`${field} ${id} is not a valid HTML Id`);
   }
 }
 

@@ -267,11 +267,8 @@ describes.realWin(
       const invalidConfig = {
         'items': [{}],
       };
-
       await createAmpStoryShoppingConfig(null, invalidConfig);
-
       const spy = env.sandbox.spy(user(), 'warn');
-
       for (const [key, value] of Object.entries(productValidationConfig)) {
         if (value.includes(validateRequired)) {
           const errorString = `Error: Field ${key} is required.`;
@@ -291,7 +288,7 @@ describes.realWin(
             'productUrl': 'https://www.google.com',
             'productId': 'city-pop',
             'productBrand': 'Vinyl',
-            /* Not a string, will fail string type test */
+            /* productTitle is missing, so it is not a string, will fail string type test */
             'productPrice': 19,
             'productPriceCurrency': 'JPY',
             'productImages': [
@@ -312,7 +309,45 @@ describes.realWin(
           },
         ],
       };
-      const errorString = `Error: productTitle ${invalidConfig['items'][0]['productTitle']} is not a string.`;
+      const errorString = `Error: productTitle ${invalidConfig['items'][0]['productTitle']} is not a string`;
+      const spy = env.sandbox.spy(user(), 'warn');
+      await createAmpStoryShoppingConfig(null, invalidConfig);
+      expect(spy).to.have.been.calledWith(
+        'AMP-STORY-SHOPPING-CONFIG',
+        errorString
+      );
+    });
+
+    it('test config is a valid HTML id', async () => {
+      const invalidConfig = {
+        'items': [
+          {
+            'productUrl': 'https://www.google.com',
+            'productId': '1234city-pop',
+            /* productId starts iwth a number, so it is an invalid HTML Id. */
+            'productBrand': 'Vinyl',
+            'productTitle': 'Adventure',
+            'productPrice': 19,
+            'productPriceCurrency': 'JPY',
+            'productImages': [
+              {
+                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
+                alt: 'nest-mini-icon',
+              },
+              {
+                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
+                alt: 'nest-mini-icon',
+              },
+            ],
+            'aggregateRating': {
+              'ratingValue': 4.4,
+              'reviewCount': 89,
+              'reviewUrl': 'https://www.google.com',
+            },
+          },
+        ],
+      };
+      const errorString = `Error: productId ${invalidConfig['items'][0]['productId']} is not a valid HTML Id`;
       const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(spy).to.have.been.calledWith(
