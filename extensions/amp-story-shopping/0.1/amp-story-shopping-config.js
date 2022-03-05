@@ -12,7 +12,7 @@ import {
 
 /** @const {!Object<string, !Array<function>>} */
 const productImagesValidationConfig = {
-  'url': [validateRequired, validateURLs],
+  'url': [validateRequired, validateURL],
   'alt': [validateRequired, validateString],
 };
 
@@ -20,13 +20,13 @@ const productImagesValidationConfig = {
 const aggregateRatingValidationConfig = {
   'ratingValue': [validateRequired, validateNumber],
   'reviewCount': [validateRequired, validateNumber],
-  'reviewUrl': [validateRequired, validateURLs],
+  'reviewUrl': [validateRequired, validateURL],
 };
 
 /** @const {!Object<string, !Array<function>>} */
 export const productValidationConfig = {
   /* Required Attrs */
-  'productUrl': [validateRequired, validateURLs],
+  'productUrl': [validateRequired, validateURL],
   'productId': [validateRequired, validateString, validateHTMLId],
   'productTitle': [validateRequired, validateString],
   'productBrand': [validateRequired, validateString],
@@ -40,7 +40,7 @@ export const productValidationConfig = {
   'aggregateRating': [
     getObjectValidationFnForConfig(aggregateRatingValidationConfig),
   ],
-  'productIcon': [validateURLs],
+  'productIcon': [validateURL],
   'productTagText': [validateString],
 };
 
@@ -54,13 +54,13 @@ let ShoppingConfigResponseDef;
 /**
  * Returns a function that validates an object according to the given validation config.
  * @param {!Object<string, !Array<function>>} config
- * @return {boolean}
+ * @return {function(string, *): undefined}
  */
 function getObjectValidationFnForConfig(config) {
-  return (field, value) => {
-    if (!validateConfig(value, config, field)) {
+  return (field, shoppingConfigData) => {
+    if (!validateConfig(shoppingConfigData, config, field)) {
       throw Error(
-        `Value for field '${field}' is not vaild, see the error messages above for details`
+        `Value for field '${field}' is not valid, see the error messages above for details`
       );
     }
   };
@@ -68,18 +68,18 @@ function getObjectValidationFnForConfig(config) {
 
 /**
  * Returns a function that validates an object array according to the given validation config.
- * @param {!Array<!Object<string, !Array<function>>>} config
- * @return {boolean}
+ * @param {!Object<string, !Array<function>>} config
+ * @return {function(string, *): undefined}
  */
 function getObjectArrayValidationFnForConfig(config) {
-  return (field, value) => {
+  return (field, shoppingConfigDataArray) => {
     let isValid = true;
-    for (const item of value) {
+    for (const item of shoppingConfigDataArray) {
       isValid &&= validateConfig(item, config, field);
     }
     if (!isValid) {
       throw Error(
-        `Value for field '${field}' is not vaild, see the error messages above for details`
+        `Value for field '${field}' is not valid, see the error messages above for details`
       );
     }
   };
@@ -91,13 +91,13 @@ function getObjectArrayValidationFnForConfig(config) {
  * @param {?string=} value
  */
 export function validateRequired(field, value) {
-  if (value === undefined) {
+  if (value === undefined || value === null) {
     throw Error(`Field ${field} is required.`);
   }
 }
 
 /**
- * Validates if string type for shopping config attributes
+ * Throws an error if the given field is not a string.
  * @param {string} field
  * @param {?string=} str
  */
@@ -139,8 +139,13 @@ export function validateNumber(field, number) {
  * @param {?string=} currencyCode
  */
 export function validateCurrency(field, currencyCode) {
+  const testPrice = 0;
   // This will throw an error on invalid currency codes.
-  Intl.NumberFormat('en-EN', {currency: currencyCode}).format(0);
+  try {
+    Intl.NumberFormat('en-EN', {currency: currencyCode}).format(testPrice);
+  } catch (err) {
+    throw Error(`${field} ${currencyCode} is not a valid currency code`);
+  }
 }
 
 /**
@@ -148,40 +153,39 @@ export function validateCurrency(field, currencyCode) {
  * @param {string} field
  * @param {?Array<string>=} url
  */
-export function validateURLs(field, url) {
+export function validateURL(field, url) {
   if (url === undefined) {
     return;
   }
-  const urls = Array.isArray(url) ? url : [url];
-  urls.forEach((url) => {
-    assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
-  });
+  assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
 }
 
 /**
- * Validates the shopping config of a single product.
- * @param {!ShoppingConfigDataDef} shoppingConfig
+ * Uses the specified validation configuration to run validation against the user's shopping configuration.
+ * The user's config object.
+ * @param {!ShoppingConfigDataDef} validationConfig
+ * The object to validate against the user's config.
  * @param {!Object<string, !Array<function>>} validationObject
- * @param {?string} parentFieldName // Optional parent field name of the object for error messages.
+ * Optional parent field name of the object for error messages.
+ * @param {?string} parentFieldName
+ * returns a boolean indicating whether the validation was successful.
  * @return {boolean}
  */
 export function validateConfig(
-  shoppingConfig,
+  validationConfig,
   validationObject,
-  parentFieldName
+  parentFieldName = undefined
 ) {
   let isValidConfig = true;
 
   Object.keys(validationObject).forEach((configKey) => {
     const validationFunctions = validationObject[configKey];
-
     const isFieldRequired = validationFunctions.includes(validateRequired);
-    const isFieldPresent = shoppingConfig[configKey] !== undefined;
-
+    const isFieldPresent = validationConfig[configKey] !== undefined;
     validationFunctions.forEach((fn) => {
       if (isFieldRequired || isFieldPresent) {
         try {
-          fn(configKey, shoppingConfig[configKey]);
+          fn(configKey, validationConfig[configKey]);
         } catch (err) {
           isValidConfig = false;
           const warning = parentFieldName?.concat(` ${err}`) ?? `${err}`;
@@ -198,13 +202,13 @@ export function validateConfig(
 export let KeyedShoppingConfigDef;
 
 /**
- * Gets Shopping config from an element.
- * The config is validated and keyed by 'product-tag-id'.
- * @param {!Element} element <amp-story-shopping-attachment>
+ * Validates and returns the shopping config corresponding to the given amp-story-shopping-attachment element.
+ * @param {!Element} shoppingAttachmentEl <amp-story-shopping-attachment>
+ * An object with product ID keys that each have a `ShoppingConfigDataDef` value
  * @return {!Promise<!KeyedShoppingConfigDef>}
  */
-export function getShoppingConfig(element) {
-  return getElementConfig(element).then((config) => {
+export function getShoppingConfig(shoppingAttachmentEl) {
+  return getElementConfig(shoppingAttachmentEl).then((config) => {
     const allItems = config['items'];
     const validItems = allItems.filter((item) =>
       validateConfig(item, productValidationConfig)
@@ -212,12 +216,15 @@ export function getShoppingConfig(element) {
     if (allItems.length != validItems.length) {
       user().warn(
         'AMP-STORY-SHOPPING-CONFIG',
-        `Required fields are missing. Please add them in the shopping config. See the error messages above for more details.`
+        `Please fix: ${
+          allItems.length - validItems.length
+        } product(s) have invalid shopping configuration values. See the error messages above for more details.`
       );
     }
     return keyByProductTagId(validItems);
   });
 }
+
 /**
  * @param {!ShoppingConfigResponseDef} configItems
  * @return {!KeyedShoppingConfigDef}
