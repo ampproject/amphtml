@@ -202,9 +202,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
                 subscriptions-display="NOT granted"
                 subscriptions-service="subscribe.google.com"
                 subscriptions-decorate="false"
-              >
-                Subscribe with Google
-              </div>
+              ></div>
             </div>
           </div>
           <div class="i-amphtml-story-subscriptions-signin">
