@@ -9,7 +9,6 @@ import {Gesture, Gestures} from '../../gesture-base';
 import {
   DoubletapDef,
   DoubletapRecognizer,
-  GestureRecognizer,
   PinchDef,
   PinchRecognizer,
   SwipeDef,
@@ -20,6 +19,8 @@ import {
   TapRecognizer,
   TapzoomDef,
   TapzoomRecognizer,
+  // gesture-recognizers has no dependencies on Services, so it's safe to import
+  // eslint-disable-next-line import/no-restricted-paths
 } from '../../gesture-recognizers';
 
 const gestureRecognizers = {
@@ -72,5 +73,5 @@ export function useGestures(
         gestures.removeGesture(recognizer as any);
       });
     };
-  }, []);
+  }, [elementRef, handlersRef]);
 }

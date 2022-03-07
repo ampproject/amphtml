@@ -1,19 +1,23 @@
 import type {RefObject} from 'preact';
 
-import {getWin} from '#core/window';
-
 import {useEffect} from '#preact';
 import {useValueRef} from '#preact/component';
 
+/**
+ * Callback is called on initial render,
+ * and again whenever the element's size changes.
+ */
 export function useResizeObserver(
-  element: RefObject<HTMLElement>,
+  elementRef: RefObject<HTMLElement>,
   callback: (entry: ResizeObserverEntry) => void
 ) {
   const callbackRef = useValueRef(callback);
   useEffect(() => {
-    const el = element.current!;
-    const win = getWin(el);
-    const ro = new win.ResizeObserver((entries) => {
+    const el = elementRef.current;
+    if (!el) {
+      return;
+    }
+    const ro = new ResizeObserver((entries) => {
       callbackRef.current(entries[0]);
     });
     ro.observe(el);
@@ -21,5 +25,5 @@ export function useResizeObserver(
       ro.unobserve(el);
       ro.disconnect();
     };
-  }, [element, callbackRef]);
+  }, [elementRef, callbackRef]);
 }

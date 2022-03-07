@@ -7,12 +7,12 @@ import {useEffect, useImperativeHandle, useRef} from '#preact';
 import {Children, forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {useGestures} from '#preact/hooks/useGestures';
+import {usePointerDrag} from '#preact/hooks/usePointerDrag';
+import {useResizeObserver} from '#preact/hooks/useResizeObserver';
 import {logger} from '#preact/logger';
 
 import {useStyles} from './component.jss';
-import {usePointerDrag} from './hooks/use-pointer-drag';
-import {useResizeObserver} from './hooks/use-resize-observer';
-import {usePanZoomState} from './usePanZoomState';
+import {usePanZoomState} from './hooks/usePanZoomState';
 
 const TAG = 'amp-pan-zoom';
 const DEFAULT_MAX_SCALE = 3;

@@ -462,7 +462,7 @@ export class SwipeYRecognizer extends SwipeRecognizer {
  *   velocityY: number
  * }}
  */
-let TapzoomDef;
+export let TapzoomDef;
 
 /**
  * Recognizes a "tapzoom" gesture. This gesture will block other gestures

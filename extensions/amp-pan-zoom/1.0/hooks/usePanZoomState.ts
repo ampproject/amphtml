@@ -1,6 +1,6 @@
 import {useMemo, useState} from '#preact';
 
-import type {BentoPanZoomProps} from './component-ts';
+import type {BentoPanZoomProps} from '../component-ts';
 
 const DEFAULT_MAX_SCALE = 3;
 const DEFAULT_INITIAL_SCALE = 1;
@@ -31,6 +31,10 @@ type PanZoomConfig = Pick<
   'initialScale' | 'initialX' | 'initialY' | 'maxScale'
 >;
 
+/**
+ * Clamps the value between min and max,
+ * optionally a little "extent" past the bounds.
+ */
 const boundValueSpring = (
   val: number,
   min: number,
@@ -52,6 +56,13 @@ const boundScale = (state: State, newScale: number) => {
   return boundValueSpring(newScale, minScale, maxScale, extent);
 };
 
+/**
+ * Updates the scale, keeping the "anchor" position stationary
+ * @param state
+ * @param anchorX
+ * @param anchorY
+ * @param newScale
+ */
 const updateScaleFromAnchor = (
   state: State,
   anchorX: number,
@@ -70,6 +81,10 @@ const updateScaleFromAnchor = (
   return {posX: newPosX, posY: newPosY, scale: newScale};
 };
 
+/**
+ * Updates the position and scale, ensuring they stay in-bounds.
+ * Also updates various calculated properties.
+ */
 const updateView = (
   state: State,
   newState: Partial<PickState<'posX' | 'posY' | 'scale'>>

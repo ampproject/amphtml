@@ -20,6 +20,10 @@ export type PointerDragCallbacks<TDragData> = {
 
 const LEFT_BUTTON = 0;
 
+/**
+ * Allow for drag-and-drop functionality within a component.
+ * Works for touch and mouse events.
+ */
 export function usePointerDrag<TDragData>(
   elementRef: RefObject<HTMLElement>,
   config: PointerDragCallbacks<TDragData>
@@ -35,12 +39,11 @@ export function usePointerDrag<TDragData>(
     let data: TDragData | null = null;
     const eventCleanup = addEventListeners(element, {
       'pointerdown': (ev) => {
-        const config = configRef.current;
+        const {button, pointerType} = configRef.current;
 
         const isWrongPointerType =
-          config.pointerType && ev.pointerType !== config.pointerType;
-        const isWrongButton =
-          config.button === 'left' && ev.button !== LEFT_BUTTON;
+          pointerType && ev.pointerType !== pointerType;
+        const isWrongButton = button === 'left' && ev.button !== LEFT_BUTTON;
         const isModifierHeld =
           ev.metaKey || ev.shiftKey || ev.altKey || ev.ctrlKey;
 
