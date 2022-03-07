@@ -3,9 +3,15 @@
     "beacon": true,
     "xhrpost": false
   },
+  "vars": {
+    "propertyId": 12710,
+    "onViewType": "pageview",
+    "onClickType": "linkclick"
+  },
   "requests": {
-    "pageview": "https://bisko.gjirafa.tech/api/v1/amp?Type=${onViewType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}",
-    "linkclick": "https://bisko.gjirafa.tech/api/v1/amp?Type=${onClickType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}"
+    "host": "https://bisko.gjirafa.tech/api/v1/amp",  
+    "pageview": "${host}?Type=${onViewType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}",
+    "linkclick": "${host}?Type=${onClickType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}"
   },
   "triggers": {
     "trackPageview": {
@@ -18,9 +24,16 @@
       "request": "linkclick"
     }
   },
-  "vars": {
-    "propertyId": 12710,
-    "onViewType": "pageview",
-    "onClickType": "linkclick"
+  "extraUrlParams": {
+    "Content.id": "1234",
+    "Content.name": "Samsung releases new Galaxy Note version",
+    "Content.type": "article",
+    "Content.description": "Samsung has released the newset Galaxy Note version for the users. It contains major changes and new features.",
+    "Content.author": "Nick Smith",
+    "Content.category": [["Technology", "Smartphone"]],
+    "Content.value": "Amazing news! The new Galaxy Note looks perfect!",
+    "Content.quantity": 2,
+    "Content.imageUrl": "https://magazine.com/apple-iphone-release",
+    "Content.test": "test"
   }
 }
