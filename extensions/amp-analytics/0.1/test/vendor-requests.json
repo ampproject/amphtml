@@ -42,7 +42,6 @@
     "event": "https://hm.baidu.com/hm.gif?si=!token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=!category*!action*!label*!value&et=4&api=8_0"
   },
   "bisko": {
-    "host": "https://bisko.gjirafa.tech/api/v1/amp",
     "pageview": "https://bisko.gjirafa.tech/api/v1/amp?Type=${onViewType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}",
     "linkclick": "https://bisko.gjirafa.tech/api/v1/amp?Type=${onClickType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}"
   },

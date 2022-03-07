@@ -9,9 +9,8 @@
     "onClickType": "linkclick"
   },
   "requests": {
-    "host": "https://bisko.gjirafa.tech/api/v1/amp",
-    "pageview": "${host}?Type=${onViewType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}",
-    "linkclick": "${host}?Type=${onClickType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}"
+    "pageview": "https://bisko.gjirafa.tech/api/v1/amp?Type=${onViewType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}",
+    "linkclick": "https://bisko.gjirafa.tech/api/v1/amp?Type=${onClickType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}"
   },
   "triggers": {
     "trackPageview": {
