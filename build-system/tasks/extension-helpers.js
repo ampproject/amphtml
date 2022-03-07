@@ -662,11 +662,19 @@ async function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
     };
-    if (options.useBentoCore) {
-      // remap all shared modules to the @bentoproject/
-      const fullEntryPoint = path.join(extDir, npm.bento.entryPoint);
-      npm.bento.remap = getRemapBentoNpmDependencies(fullEntryPoint);
-      npm.bento.external = Object.values(npm.bento.remap);
+
+    // for each bento mode, remap all shared modules and declare them as external
+    // remaps "core" modules to @bentoproject/core
+    // rempas any cross-extension (e.g imports to bento-foo) imports to @bentoproject/foo
+    for (const mode in npm) {
+      const fullEntryPoint = path.join(extDir, npm[mode].entryPoint);
+      const bentoRemaps = getRemapBentoNpmDependencies(fullEntryPoint);
+      const bentoExternals = Object.values(bentoRemaps);
+      npm[mode].remap = {
+        ...(npm[mode].remap || {}),
+        ...bentoRemaps,
+      };
+      npm[mode].external = [...(npm[mode].external || []), ...bentoExternals];
     }
   }
   const binaries = Object.values(npm);

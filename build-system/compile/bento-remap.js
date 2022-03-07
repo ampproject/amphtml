@@ -6,6 +6,7 @@ const {once} = require('../common/once');
 const {bentoBundles} = require('./bundles.config');
 const glob = require('globby');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
+const {posix} = require('path');
 
 /**
  * @param {string} path
@@ -69,8 +70,16 @@ const getAllRemappings = once(() => {
   const componentRemappings = bentoBundles.map(({name, version}) => {
     const nameWithoutPrefix = getNameWithoutComponentPrefix(name);
     return {
-      source: `./src/bento/components/${name}/${version}/${name}`,
-      cdn: `./${name}-${version}.mjs`,
+      source: posix.join(
+        '.',
+        'src',
+        'bento',
+        'components',
+        name,
+        version,
+        name
+      ),
+      cdn: posix.join('.', `${name}-${version}.mjs`),
       npm:
         // Special: NPM builds depend on `mustache` directly
         nameWithoutPrefix === 'mustache'

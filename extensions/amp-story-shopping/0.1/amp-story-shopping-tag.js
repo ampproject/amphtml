@@ -86,29 +86,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     if (!this.shoppingAttachment_) {
       return;
     }
-
     loadFonts(this.win, FONTS_TO_LOAD);
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
-      (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
-      (rtlState) => this.onRtlStateUpdate_(rtlState),
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.PAGE_SIZE,
-      (pageSizeState) => this.flipTagIfOffscreen_(pageSizeState),
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
-      (id) => this.toggleShoppingTagActive_(id),
+      (shoppingData) =>
+        this.maybeCreateAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
   }
@@ -269,26 +251,46 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
+   * Initialize listeners (data, orientation, visibility) for the shopping tag on creation.
+   * @private
+   */
+  initializeTagStateListeners_() {
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      (rtlState) => this.onRtlStateUpdate_(rtlState),
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.PAGE_SIZE,
+      (pageSizeState) => this.flipTagIfOffscreen_(pageSizeState),
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      (id) => this.toggleShoppingTagActive_(id),
+      true /** callToInitialize */
+    );
+  }
+
+  /**
    * @param {!ShoppingDataDef} shoppingData
    * @private
    */
-  createAndAppendInnerShoppingTagEl_(shoppingData) {
+  maybeCreateAndAppendInnerShoppingTagEl_(shoppingData) {
     const pageElement = closestAncestorElementBySelector(
       this.element,
       'amp-story-page'
     );
-
     this.tagData_ =
-      shoppingData[pageElement.id][
+      shoppingData[pageElement.id]?.[
         this.element.getAttribute('data-product-id')
       ];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
-
-    this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
-
     createShadowRootWithStyle(
       this.element,
       this.shoppingTagEl_,
@@ -296,5 +298,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     );
     this.hasAppendedInnerShoppingTagEl_ = true;
     this.styleTagText_();
+    this.initializeTagStateListeners_();
   }
 }
