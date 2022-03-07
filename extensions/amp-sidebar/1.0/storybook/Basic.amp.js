@@ -60,6 +60,8 @@ _default.argTypes = {
   side: {
     name: 'side',
     defaultValue: 'left',
+    // The option `undefined` is necessary to emulate the behavior when `side`
+    // is not set by the user.
     options: ['left', 'right', undefined],
     control: {type: 'select'},
   },
