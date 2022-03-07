@@ -56,6 +56,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     /** @private {!Map<string, Element>} */
     this.builtTemplates_ = {};
+
+    /** @public {?Element} */
+    this.shoppingTagJustClicked = false;
   }
 
   /** @override */
@@ -120,10 +123,16 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (!this.isOnActivePage_() || !isOpen) {
       return;
     }
+
+    if (!this.shoppingTagJustClicked) {
+      console.log('1b) Fire Analytics Event CTA Shop Now Button click');
+    }
+
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
     if (!shoppingData.activeProductData) {
       this.updateTemplate_(shoppingData);
     }
+    this.shoppingTagJustClicked = false;
   }
 
   /**
@@ -254,7 +263,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onPlpCardClick_(shoppingData) {
-    console.log('1) Fire Analystics Even onPlpCardClick');
+    console.log('1c) Fire Analytics Event PLP card click');
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });

@@ -57,6 +57,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     /** @private {!AmpElement} element */
     this.shoppingTagEl_ = null;
+
     /** @private {?Element} */
     this.pageEl_ = null;
   }
@@ -159,6 +160,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   onClick_() {
+    console.log('1a) Fire Analytics Event Shopping Tag click');
+    this.shoppingAttachment_.getImpl().then((shoppingAttachmentImpl) => {
+      shoppingAttachmentImpl.shoppingTagJustClicked = true;
+    });
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': this.tagData_,
     });
