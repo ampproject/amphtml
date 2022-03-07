@@ -10,7 +10,7 @@ const path = require('path');
 const posthtml = require('posthtml');
 const {copyFile, pathExists, readFile} = require('fs-extra');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
-const {getSemver} = require('./utils');
+const {getPackageDir, getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
@@ -22,22 +22,10 @@ const {
 const packageName = getNameWithoutComponentPrefix(extension);
 
 /**
- * Gets the directory of the component or extension.
- * @param {string} extension
- * @param {string} version
- * @return {string}
- */
-function getDir(extension, version) {
-  return extension.startsWith('bento')
-    ? `src/bento/components/${extension}/${version}`
-    : `extensions/${extension}/${version}`;
-}
-
-/**
  * The directory of the component or extension.
  * @type {string}
  */
-const dir = getDir(extension, extensionVersion);
+const dir = getPackageDir(extension, extensionVersion);
 
 /**
  * Determines whether to skip

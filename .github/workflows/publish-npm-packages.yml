@@ -72,6 +72,7 @@ jobs:
           CORE_VERSION=$(node ${{ env.SCRIPTS_DIR }}/get-core-version.js ${{ github.event.inputs.amp-version }})
           cd ./src/bento/core
           npm version $CORE_VERSION --git-tag-version=false --allow-same-version=true
+          cd -
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: |
@@ -111,6 +112,7 @@ jobs:
         run: |
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/utils.js" -O ${{ env.SCRIPTS_DIR }}/utils.js
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/build-npm-binaries.js" -O ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-package-dir.js" -O ${{ env.SCRIPTS_DIR }}/get-package-dir.js
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/write-package-files.js" -O ${{ env.SCRIPTS_DIR }}/write-package-files.js
       - name: Build package
         run: |
@@ -125,13 +127,15 @@ jobs:
       - name: Tag package as latest for Stable releases
         if: github.event.inputs.tag == 'latest'
         run: |
-          NPM_PACKAGE=$(jq -r .name ./extensions/${{ matrix.extension }}/${{ matrix.version }}/package.json)
-          NPM_VERSION=$(jq -r .version ./extensions/${{ matrix.extension }}/${{ matrix.version }}/package.json)
+          cd $(node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }} ${{ matrix.version }})
+          NPM_PACKAGE=$(jq -r .name package.json)
+          NPM_VERSION=$(jq -r .version package.json)
           echo "Processing ${NPM_PACKAGE}@${NPM_VERSION}"
           if [[ $(npm view ${NPM_PACKAGE}@${NPM_VERSION}) ]]; then
             npm dist-tag add ${NPM_PACKAGE}@${NPM_VERSION} latest
           else
-            npm publish ./extensions/${{ matrix.extension }}/${{ matrix.version }} --access public --tag latest
+            npm publish --access public --tag latest
           fi
+          cd -
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
