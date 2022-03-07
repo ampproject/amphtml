@@ -296,6 +296,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   toggleDetailsText_(detailsContainer, shouldOpen) {
+    if (shouldOpen) {
+      console.log('3) Fire Analytics Event Product Details Expansion Click');
+    }
+
     const detailsText = detailsContainer.querySelector(
       '.i-amphtml-amp-story-shopping-pdp-details-text'
     );
@@ -303,6 +307,13 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       toggleAttribute(detailsContainer, 'active', shouldOpen);
       detailsText.setAttribute('aria-hidden', !shouldOpen);
     });
+  }
+  /**
+   * onclick event that fires when buy now is clicked.
+   * @private
+   */
+  onClickBuyNow_() {
+    console.log('2) Fire Analytics Event Buy Now click');
   }
 
   /**
@@ -358,6 +369,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             class="i-amphtml-amp-story-shopping-pdp-cta"
             href={activeProductData.productUrl}
             target="_top"
+            onClick={() => this.onClickBuyNow_()}
           >
             {this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL,
