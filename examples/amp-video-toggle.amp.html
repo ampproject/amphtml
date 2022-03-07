@@ -23,9 +23,6 @@
       background: rgba(0, 0, 0, 0.5);
       color: #fff;
     }
-    .spacer {
-      height: 100vh;
-    }
 
     .btn-wrapper {
       position: relative;
@@ -38,23 +35,6 @@
       left: 0;
     }
 
-    @keyframes play {
-        0% {
-            content: "Play";
-        }
-        100% {
-            content: "Pause";
-        }
-    }
-
-    @keyframes pause {
-        0% {
-            content: "Pause";
-        }
-        100% {
-            content: "Play";
-        }
-    }
     p, h1, h2, h3 {
       padding: 10px;
     }
@@ -101,7 +81,7 @@
           ]
        }
     </script>
- </amp-animation>
+  </amp-animation>
 
   <amp-animation id="pause" layout="nodisplay" trigger="visibility">
     <script type = "application/json">
@@ -124,7 +104,7 @@
           ]
        }
     </script>
- </amp-animation>
+  </amp-animation>
   <button on="tap:myVideo.play">Play</button>
   <button on="tap:myVideo.pause">Pause</button>
   <button on="tap:myVideo.mute">Mute</button>
@@ -134,7 +114,5 @@
     <button on="tap:myVideo.togglePlay" class="btn play-btn">Play</button>
     <button on="tap:myVideo.togglePlay" class="btn pause-btn">Pause</button>
   </span>
-
-  <div class="spacer"></div>
 </body>
 </html>
