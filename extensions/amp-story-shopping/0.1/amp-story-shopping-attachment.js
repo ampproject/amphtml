@@ -254,6 +254,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onPlpCardClick_(shoppingData) {
+    console.log('1) Fire Analystics Even onPlpCardClick');
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
