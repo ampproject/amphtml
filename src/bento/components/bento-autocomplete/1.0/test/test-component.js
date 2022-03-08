@@ -10,9 +10,17 @@ import {areOptionsVisible} from './test-helpers';
 import {BentoAutocomplete} from '../component';
 
 // TODO
-// It shows the list of options when the input value is empty if min characters is 0
+// it sets the item id to be autocomplete-selected?
+// It accepts a max-items prop and truncates the list of items (920)
+// it highlights the substring with a span with class autocomplete-partial (553)
+// it selects items on mousedown (658)
+// it selects items on enter (1318)
 // It accepts a list of objects as items and searches based on the filter value
 // It shows the list of options when the inline token is entered by the user
+// it hides the items when one is selected
+// it hides items on escape
+// it hides items on tab
+// something with backspace (1357)
 
 const defaultProps = {
   items: [],
@@ -194,6 +202,21 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(wrapper.exists('[data-value="Three"]')).to.be.true;
     });
 
+    it('sets attributes on each item', () => {
+      const wrapper = mount(
+        <Autocomplete id="id" filter="none" items={['one', 'two', 'three']}>
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = '';
+      input.simulate('input');
+
+      expect(wrapper.find('[role="option"]')).to.have.lengthOf(3);
+      expect(wrapper.find('[dir="auto"]')).to.have.lengthOf(3);
+    });
+
     it('does not show options if the minimum characters has not been met', () => {
       const wrapper = mount(
         <Autocomplete
@@ -211,6 +234,48 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('input');
 
       expect(areOptionsVisible(wrapper)).to.be.false;
+    });
+
+    // TODO: Simulate click or focus
+    it('shows options by default if minCharacters is 0', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          filter="prefix"
+          minChars={0}
+          items={['one', 'two', 'three']}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+
+      input.getDOMNode().value = '';
+      input.simulate('input');
+
+      expect(wrapper.exists('[data-value="one"]')).to.be.true;
+      expect(wrapper.exists('[data-value="two"]')).to.be.true;
+      expect(wrapper.exists('[data-value="three"]')).to.be.true;
+    });
+
+    it.skip('truncates items if max-items is set', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          maxItems={1}
+          filter="none"
+          items={['one', 'two', 'three']}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 't';
+      input.simulate('input');
+
+      expect(wrapper.find('[role="option"]')).to.have.lengthOf(1);
     });
   });
 
@@ -233,10 +298,20 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
 
       expect(input.getDOMNode().value).to.equal('two');
+      expect(input.getDOMNode().getAttribute('aria-activedescendant')).to.equal(
+        'id-0'
+      );
+      expect(wrapper.find('[data-value="two"]').prop('aria-selected')).to.be
+        .true;
 
       input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
 
       expect(input.getDOMNode().value).to.equal('three');
+      expect(input.getDOMNode().getAttribute('aria-activedescendant')).to.equal(
+        'id-1'
+      );
+      expect(wrapper.find('[data-value="three"]').prop('aria-selected')).to.be
+        .true;
     });
   });
 });

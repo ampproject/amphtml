@@ -66,6 +66,13 @@ export function BentoAutocomplete({
   const [data, setData] = useState<Item[]>(items);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
+  const getItemId = useCallback(
+    (index: number) => {
+      return `${id}-${index}`;
+    },
+    [id]
+  );
+
   const getSingleInputOrTextarea = useCallback(
     (element: HTMLElement) => {
       const possibleElements = element.querySelectorAll('input,textarea');
@@ -180,12 +187,17 @@ export function BentoAutocomplete({
       // }
       const index = activeIndex + delta;
       const newActiveIndex = mod(index, filteredData.length);
-      setActiveIndex(newActiveIndex);
       const newValue = filteredData[newActiveIndex];
+
+      setActiveIndex(newActiveIndex);
+      inputRef.current?.setAttribute(
+        'aria-activedescendant',
+        getItemId(newActiveIndex)
+      );
 
       inputRef.current!.value = newValue as string;
     },
-    [activeIndex, filteredData]
+    [activeIndex, filteredData, getItemId]
   );
 
   const handleKeyDown = useCallback(
@@ -227,15 +239,17 @@ export function BentoAutocomplete({
         role="listbox"
         hidden={!showAutocompleteOptions}
       >
-        {filteredData.map((item: Item) => {
+        {filteredData.map((item: Item, index: number) => {
           if (typeof item === 'string') {
             return (
               <div
                 key={item}
+                data-value={item}
+                id={getItemId(index)}
                 class="i-amphtml-autocomplete-item"
                 role="option"
-                data-value={item}
                 dir="auto"
+                aria-selected={activeIndex === index}
               >
                 {item}
               </div>
