@@ -26,7 +26,6 @@ import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
 
 import {isExperimentOn} from '#experiments';
-import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -314,12 +313,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
       'storyNextUp'
     );
-    if (
-      autoAdvanceAttr !== null ||
-      storyNextUpParam === null ||
-      // This is a special value that indicates we are in the viewer indicated control group.
-      storyNextUpParam === StoryAdSegmentTimes.SENTINEL
-    ) {
+    if (autoAdvanceAttr !== null || storyNextUpParam === null) {
       return;
     }
     this.element.setAttribute('auto-advance-after', storyNextUpParam);
@@ -1331,7 +1325,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     return waitForElementsWithUnresolvedAudio(this.element).then(() =>
       Array.prototype.some.call(
         ampVideoEls,
-        (video) => !video.hasAttribute('noaudio')
+        (video) =>
+          !video.hasAttribute('noaudio') &&
+          parseFloat(video.getAttribute('volume')) !== 0
       )
     );
   }

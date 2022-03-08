@@ -1,7 +1,6 @@
 import {expect} from 'chai';
 
-import {forceExperimentBranch} from '#experiments';
-import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
@@ -37,11 +36,7 @@ describes.realWin('amp-story-progress-bar', {amp: true}, (env) => {
 
   describe('story ad progress segment', async () => {
     it('should create/remove ad segment based on ad visibility', () => {
-      forceExperimentBranch(
-        win,
-        StoryAdSegmentExp.ID,
-        StoryAdSegmentExp.TEN_SECONDS
-      );
+      toggleExperiment(win, 'story-ad-auto-advance', true);
       expect(doc.querySelector('.i-amphtml-story-ad-progress-value')).not.to
         .exist;
       storeService.dispatch(Action.TOGGLE_AD, true);

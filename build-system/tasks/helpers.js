@@ -12,19 +12,17 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {cyan, green, red} = require('kleur/colors');
-const {
-  generateBentoCoreEntrypoint,
-  generateBentoRuntimeEntrypoint,
-} = require('../compile/generate/bento');
 const {getAmpConfigForFile} = require('./prepend-global');
 const {getEsbuildBabelPlugin} = require('../common/esbuild-babel');
-const {massageSourcemaps} = require('./sourcemaps');
+const {includeSourcesContent, massageSourcemaps} = require('./sourcemaps');
 const {isCiBuild} = require('../common/ci');
 const {jsBundles} = require('../compile/bundles.config');
 const {log, logLocalDev} = require('../common/logging');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {watch} = require('chokidar');
 const {resolvePath} = require('../babel-config/import-resolver');
+const {debug} = require('../compile/debug-compilation-lifecycle');
+const babel = require('@babel/core');
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -132,56 +130,22 @@ async function compileCoreRuntime(options) {
  * @return {Promise<void>}
  */
 async function compileBentoRuntimeAndCore(options) {
-  await Promise.all([compileBentoRuntime(options), compileBentoCore(options)]);
-}
-
-/**
- * @param {!Object} options
- * @return {Promise<void>}
- */
-async function compileBentoRuntime(options) {
-  const {srcDir, srcFilename} = jsBundles['bento.js'];
-  const filename = `${srcDir}/${srcFilename}`;
-  const fileSource = generateBentoRuntimeEntrypoint();
-  await fs.outputFile(filename, fileSource);
-  await doBuildJs(jsBundles, 'bento.js', options);
-}
-
-/**
- * @typedef {{
- *  minifiedName?: string;
- *  toName?: string;
- *  outputFormat?: string;
- *  esbuild?: boolean;
- *  minify?: boolean;
- *  watch?: boolean;
- *  onWatchBuild?: *;
- *  wrapper?: string;
- *  babelCaller?: string;
- *  remapDependencies?: Object;
- *  externalDependencies?: Array<string>
- * }} CompileBentoCoreOptions
- */
-
-/**
- * @param {CompileBentoCoreOptions} options
- * @return {Promise<void>}
- */
-async function compileBentoCore(options) {
-  const {options: bundleOpts, srcDir, srcFilename} = jsBundles['bento.core.js'];
-  const {minifiedName, toName} = bundleOpts;
-  const filename = `${srcDir}/${srcFilename}`;
-  const fileSource = generateBentoCoreEntrypoint();
-  await fs.outputFile(filename, fileSource);
-
-  const esm = argv.esm || argv.sxg || false;
-  await doBuildJs(jsBundles, 'bento.core.js', {
-    ...options,
-    toName: maybeToNpmEsmName(toName),
-    minifiedName: maybeToNpmEsmName(minifiedName),
-
-    outputFormat: esm ? 'esm' : 'cjs',
-  });
+  const bundleName = 'bento.js';
+  const {srcDir, srcFilename} = jsBundles[bundleName];
+  await Promise.all([
+    // cdn
+    doBuildJs(jsBundles, bundleName, {
+      ...options,
+      outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
+    }),
+    // npm
+    compileJs(srcDir, srcFilename, 'src/bento/core/dist', {
+      ...options,
+      toName: maybeToNpmEsmName('bento.core.max.js'),
+      minifiedName: maybeToNpmEsmName('bento.core.js'),
+      outputFormat: argv.esm ? 'esm' : 'cjs',
+    }),
+  ]);
 }
 
 /**
@@ -273,11 +237,7 @@ function maybeToNpmEsmName(name) {
  * @param {string} destFilename
  */
 function handleBundleError(err, continueOnError, destFilename) {
-  let message = err.toString();
-  if (err.stack) {
-    // Drop the node_modules call stack, which begins with '    at'.
-    message = err.stack.replace(/    at[^]*/, '').trim();
-  }
+  const message = err.stack || err.toString();
   log(red('ERROR:'), message, '\n');
   const reasonMessage = `Could not compile ${cyan(destFilename)}`;
   if (continueOnError) {
@@ -362,11 +322,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
-  const babelMaps = new Map();
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
-    /* enableCache */ true,
-    {babelMaps}
+    /* enableCache */ true
   );
   const plugins = [babelPlugin];
 
@@ -385,13 +343,17 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
       result = await esbuild.build({
         entryPoints: [entryPoint],
         bundle: true,
-        sourcemap: true,
-        sourceRoot: path.dirname(destFile),
-        sourcesContent: !!argv.full_sourcemaps,
+        sourcemap: 'external',
+        sourcesContent: includeSourcesContent(),
         outfile: destFile,
         define: experimentDefines,
         plugins,
-        format: options.outputFormat,
+        // When using `nomodule-loader` we build as ESM in order to preserve
+        // import statements. These are transformed in a post-build Babel step.
+        format:
+          options.outputFormat === 'nomodule-loader'
+            ? 'esm'
+            : options.outputFormat,
         banner,
         footer,
         // For es5 builds, ensure esbuild-injected code is transpiled.
@@ -405,20 +367,50 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     } else {
       result = await result.rebuild();
     }
-    let code = result.outputFiles.find(({path}) => !path.endsWith('.map')).text;
-    let map = result.outputFiles.find(({path}) => path.endsWith('.map')).text;
+
+    const {outputFiles} = result;
+
+    let code = outputFiles.find(({path}) => !path.endsWith('.map')).text;
+    const map = JSON.parse(
+      result.outputFiles.find(({path}) => path.endsWith('.map')).text
+    );
+    const mapChain = [map];
+
+    if (options.outputFormat === 'nomodule-loader') {
+      const result = await babel.transformAsync(code, {
+        caller: {name: 'nomodule-loader'},
+        filename: destFile,
+        sourceRoot: path.dirname(destFile),
+        sourceMaps: true,
+      });
+      if (!result) {
+        throw new Error('failed to babel');
+      }
+      code = result.code;
+      mapChain.unshift(result.map);
+    }
 
     if (options.minify) {
-      const {code: minified, map: minifiedMap} = await minify(code);
-      code = minified;
-      map = await massageSourcemaps([minifiedMap, map], babelMaps, options);
-    } else {
-      map = await massageSourcemaps([map], babelMaps, options);
+      const result = await minify(code, {
+        // toplevel clobbers the global namespace when with nomodule-loader
+        toplevel: options.outputFormat !== 'nomodule-loader',
+      });
+      code = result.code;
+      mapChain.unshift(result.map);
+      debug(
+        'post-terser',
+        path.join(process.cwd(), destFile),
+        code,
+        result.map
+      );
     }
 
     await Promise.all([
-      fs.outputFile(destFile, code),
-      fs.outputFile(`${destFile}.map`, map),
+      fs.outputFile(
+        destFile,
+        `${code}\n//# sourceMappingURL=${destFilename}.map`
+      ),
+      fs.outputJson(`${destFile}.map`, massageSourcemaps(mapChain, options)),
     ]);
 
     await finishBundle(destDir, destFilename, options, startTime);
@@ -430,7 +422,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
    */
   function remapDependenciesPlugin() {
     const remaps = Object.entries(options.remapDependencies).map(
-      ([path, value]) => ({regex: new RegExp(`^${path}$`), value})
+      ([path, value]) => ({
+        regex: new RegExp(`^${path}(\.js|\.jsx|\.ts|\.tsx)?$`),
+        value,
+      })
     );
     const external = options.externalDependencies;
     return {
@@ -525,9 +520,10 @@ const mangleIdentifier = {
  * Minify the code with Terser. Only used by the ESBuild.
  *
  * @param {string} code
+ * @param {terser.MinifyOptions} options
  * @return {!Promise<{code: string, map: *, error?: Error}>}
  */
-async function minify(code) {
+async function minify(code, options = {}) {
   /* eslint-disable local/camelcase */
   const terserOptions = {
     mangle: {
@@ -544,11 +540,17 @@ async function minify(code) {
     output: {
       beautify: !!argv.pretty_print,
       keep_quoted_props: true,
+      // The AMP Cache will prepend content on the first line during serving
+      // (for AMP_CONFIG and AMP_EXP). In order for these to not affect
+      // the sourcemap, we must ensure there is no other content on the first
+      // line. If you remove this you will annoy Justin. Don't do it.
+      preamble: ';',
     },
     sourceMap: true,
     toplevel: true,
     module: !!argv.esm,
     nameCache: argv.nomanglecache ? undefined : nameCache,
+    ...options,
   };
   /* eslint-enable local/camelcase */
 
@@ -724,21 +726,6 @@ async function thirdPartyBootstrap(input, outputName, options) {
 }
 
 /**
- *Creates directory in sync manner
- *
- * @param {string} path
- */
-function mkdirSync(path) {
-  try {
-    fs.mkdirSync(path);
-  } catch (e) {
-    if (e.code != 'EEXIST') {
-      throw e;
-    }
-  }
-}
-
-/**
  * Returns the list of dependencies for a given JS entrypoint by having esbuild
  * generate a metafile for it. Uses the set of babel plugins that would've been
  * used to compile the entrypoint.
@@ -763,8 +750,6 @@ async function getDependencies(entryPoint, options) {
 module.exports = {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoCore,
-  compileBentoRuntime,
   compileBentoRuntimeAndCore,
   compileCoreRuntime,
   compileJs,
@@ -774,7 +759,6 @@ module.exports = {
   maybePrintCoverageMessage,
   maybeToEsmName,
   maybeToNpmEsmName,
-  mkdirSync,
   printConfigHelp,
   printNobuildHelp,
   watchDebounceDelay,

@@ -1,8 +1,8 @@
 import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 
-import * as Preact from '#preact';
+import {BentoVimeo} from '#bento/components/bento-vimeo/1.0/component';
 
-import {BentoVimeo} from '../component';
+import * as Preact from '#preact';
 
 export default {
   title: 'Vimeo',

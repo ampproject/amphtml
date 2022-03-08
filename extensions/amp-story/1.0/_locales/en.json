@@ -222,5 +222,17 @@
   "102": {
     "string": "Featured in this story",
     "description": "Label for a list of products that are featured in the story."
+  },
+  "103": {
+    "string": "Buy now",
+    "description": "Button label prompting users to shop for something."
+  },
+  "104": {
+    "string": "reviews",
+    "description": "Button label prompting users to read about peoples assessments of an item."
+  },
+  "105": {
+    "string": "Details",
+    "description": "Button label prompting users to read about details of a product."
   }
 }

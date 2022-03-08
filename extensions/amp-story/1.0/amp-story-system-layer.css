@@ -167,6 +167,7 @@
 
 .i-amphtml-story-ad-progress-value {
   animation-name: i-amphtml-story-ad-value !important;
+  animation-duration: 10s;
   animation-timing-function: linear !important;
   background-color: #fbc02d !important;
   height: 100% !important;
@@ -225,7 +226,6 @@
 
 .i-amphtml-story-mute-audio-control,
 .i-amphtml-story-unmute-audio-control,
-.i-amphtml-paused-display,
 .i-amphtml-story-pause-control,
 .i-amphtml-story-play-control,
 .i-amphtml-story-mute-text,
@@ -235,13 +235,22 @@
   display: none !important;
 }
 
-[i-amphtml-current-page-has-audio]:not([muted]) .i-amphtml-story-mute-audio-control,
-[i-amphtml-current-page-has-audio][muted] .i-amphtml-story-unmute-audio-control {
-  display: block !important;
+/*
+  Visible to screen readers only. Screen readers will set :focus on iOS but not android,
+  therefore on android the button remains hidden but interactable.
+*/
+.i-amphtml-story-system-layer:not([desktop]):not(.i-amphtml-story-desktop-one-panel):not(.amp-mode-keyboard-active)
+  .i-amphtml-paused-display
+  button:not(:focus) {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 0px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-[desktop] .i-amphtml-paused-display,
-.i-amphtml-story-desktop-one-panel .i-amphtml-paused-display {
+[i-amphtml-current-page-has-audio]:not([muted]) .i-amphtml-story-mute-audio-control,
+[i-amphtml-current-page-has-audio][muted] .i-amphtml-story-unmute-audio-control {
   display: block !important;
 }
 
@@ -251,10 +260,6 @@
 
 .i-amphtml-story-has-playback-ui:not([paused]) .i-amphtml-story-pause-control,
 .i-amphtml-story-has-playback-ui[paused] .i-amphtml-story-play-control {
-  display: block !important;
-}
-
-.amp-mode-keyboard-active:not([desktop]) .i-amphtml-paused-display {
   display: block !important;
 }
 

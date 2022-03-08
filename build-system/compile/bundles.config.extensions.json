@@ -217,9 +217,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -252,9 +250,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -314,9 +310,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": true,
-      "hasCss": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -403,9 +397,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -481,6 +473,15 @@
     "name": "amp-gist",
     "version": "0.1",
     "latestVersion": "0.1"
+  },
+  {
+    "name": "amp-gist",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true,
+      "npm": true
+    }
   },
   {
     "name": "amp-google-document-embed",
@@ -571,9 +572,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -594,9 +593,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -645,9 +642,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -663,9 +658,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -679,6 +672,15 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-list",
+    "version": "1.0",
+    "options": {
+      "hasCss": false,
+      "npm": true,
+      "bento": true
     }
   },
   {
@@ -955,9 +957,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -970,9 +970,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -1175,9 +1173,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -1198,9 +1194,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -1221,9 +1215,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -1248,9 +1240,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {
@@ -1306,9 +1296,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   }
 ]

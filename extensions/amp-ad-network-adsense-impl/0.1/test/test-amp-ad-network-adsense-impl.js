@@ -8,6 +8,7 @@ import {
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import {camelCaseToHyphenCase} from '#core/dom/style';
 import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 import {toWin} from '#core/window';
 
@@ -458,7 +459,7 @@ describes.realWin(
         impl.iframe = {
           contentWindow: window,
           nodeType: 1,
-          style: {},
+          style: {setProperty: () => {}},
         };
         impl.element.setAttribute('data-ad-client', 'ca-adsense');
 
@@ -1536,7 +1537,12 @@ describes.realWin(
         };
         impl.iframe = {
           contentWindow: window,
-          style: {'visibility': 'hidden'},
+          style: {
+            'visibility': 'hidden',
+            setProperty: (name, value) => {
+              impl.iframe.style[camelCaseToHyphenCase(name)] = value;
+            },
+          },
         };
         win.postMessage('fill_sticky', '*');
         return renderPromise.then(() => {

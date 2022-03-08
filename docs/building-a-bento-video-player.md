@@ -82,7 +82,7 @@ Our `BaseElement` should be a superclass of `BentoVideoBaseElement`. In **`base-
 ```diff
   import {MyFantasticPlayer} from './component';
 - import {PreactBaseElement} from '#preact/base-element';
-+ import {BentoVideoBaseElement} from '../../amp-video/1.0/base-element';
++ import {BentoVideoBaseElement} from '#bento/components/video/1.0/base-element';
 
 - export class BaseElement extends PreactBaseElement {}
 + export class BaseElement extends BentoVideoBaseElement {}
@@ -94,7 +94,7 @@ into:
 // base-element.js
 // ...
 import {MyFantasticPlayer} from './component';
-import {BentoVideoBaseElement} from '../../amp-video/1.0/base-element';
+import {BentoVideoBaseElement} from '#bento/components/video/1.0/base-element';
 
 export class BaseElement extends BentoVideoBaseElement {}
 ```
@@ -104,7 +104,7 @@ Our `AmpFantasticPlayer` should be a superclass of `AmpVideoBaseElement`. in amp
 ```diff
 + import {setSuperClass} from '#preact/amp-base-element';
 
-+ import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
++ import {AmpVideoBaseElement} from '#bento/components/video/1.0/video-base-element';
 
 - class AmpFantasticPlayer extends BaseElement {}
 + class AmpFantasticPlayer extends setSuperClass(BaseElement, AmpVideoBaseElement) {}
@@ -115,7 +115,7 @@ into:
 ```js
 import {setSuperClass} from '#preact/amp-base-element';
 
-import {AmpVideoBaseElement} from '../../amp-video/1.0/video-base-element';
+import {AmpVideoBaseElement} from '#bento/components/video/1.0/video-base-element';
 
 class AmpFantasticPlayer extends setSuperClass(BaseElement, AmpVideoBaseElement) {}
 ```
@@ -124,7 +124,7 @@ This enables support for AMP actions and analytics, once we map attributes to th
 
 ### `props`
 
-[**`props`**](https://github.com/ampproject/amphtml/blob/main/docs/building-a-bento-amp-extension.md#preactbaseelementprops) map the AMP element's attributes to the Preact component props. Take a look at [`AmpVideoBaseElement`](../extensions/amp-video/1.0/video-base-element.js) for how most video properties are mapped. On your own `base-element.js`, you should specify any of them you support.
+[**`props`**](https://github.com/ampproject/amphtml/blob/main/docs/building-a-bento-amp-extension.md#preactbaseelementprops) map the AMP element's attributes to the Preact component props. Take a look at [`AmpVideoBaseElement`](../src/bento/components/bento-video/1.0/video-base-element.js) for how most video properties are mapped. On your own `base-element.js`, you should specify any of them you support.
 
 ```js
 // base-element.js
@@ -184,7 +184,7 @@ Your `FantasticPlayer` component should return a `VideoIframe` that's configured
 
 ```diff
 - import {ContainWrapper} from '#preact/component';
-+ import {VideoIframe} from '../../amp-video/1.0/video-iframe';
++ import {VideoIframe} from '#bento/components/video/1.0/video-iframe';
 
   function FantasticPlayerWithRef({...rest}, ref) {
 -   ...
@@ -213,7 +213,7 @@ So that our component returns a `<VideoIframe>`:
 ```js
 // component.js
 // ...
-import {VideoIframe} from '../../amp-video/1.0/video-iframe';
+import {VideoIframe} from '#bento/components/video/1.0/video-iframe';
 // ...
 function FantasticPlayerWithRef({...rest}, ref) {
   const src = 'https://example.com/fantastic';
@@ -332,7 +332,7 @@ Upstream events originated by the iframe are received as messages. You should de
 type OnMessageFunction = (event: MessageEvent) => void;
 ```
 
-> ⚠️ **This is an incomplete [`MessageEvent`](https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent).** It's a copy that contains `currentTarget` (the originating `<iframe>`), `target` (same as `currentTarget`) and `data` (the data sent by the iframe with `postMessage`). If you need to copy other properties, add them to the appropriate place in [`video-iframe.js`](../extensions/amp-video/1.0/video-iframe.js) and add `@alanorozco` as a reviewer on your pull request.
+> ⚠️ **This is an incomplete [`MessageEvent`](https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent).** It's a copy that contains `currentTarget` (the originating `<iframe>`), `target` (same as `currentTarget`) and `data` (the data sent by the iframe with `postMessage`). If you need to copy other properties, add them to the appropriate place in [`video-iframe.js`](../src/bento/components/bento-video/1.0/video-iframe.js) and add `@alanorozco` as a reviewer on your pull request.
 
 Here we implement the `canplay`, `play` and `pause` events for an iframe that posts them as the message `{"event": "play"}`.
 
@@ -384,7 +384,7 @@ Your `FantasticPlayer` component should return a `VideoWrapper` that's configure
 
 ```diff
 - import {ContainWrapper} from '#preact/component';
-+ import {VideoWrapper} from '../../amp-video/1.0/component';
++ import {VideoWrapper} from '#bento/components/video/1.0/component';
 
   function FantasticPlayerWithRef({...rest}, ref) {
 -   ...
@@ -402,7 +402,7 @@ So that our component returns a `<VideoWrapper>`:
 ```js
 // component.js
 // ...
-import {VideoWrapper} from '../../amp-video/1.0/component';
+import {VideoWrapper} from '#bento/components/video/1.0/component';
 
 // ...
 function FantasticPlayerWithRef({...rest}, ref) {
@@ -515,7 +515,7 @@ We set the wrapped method as the `<video>`'s actual event handler:
 +   onCanPlay={onVideoCanPlay}
 ```
 
-You may similarly choose to pass or override properties at the higher level, passed from `FantasticPlayer` into the `VideoWrapper` we instantiate. For a list of these properties [see `amp-video/1.0/component.type.js`](../extensions/amp-video/1.0/component.type.js)
+You may similarly choose to pass or override properties at the higher level, passed from `FantasticPlayer` into the `VideoWrapper` we instantiate. For a list of these properties [see `amp-video/1.0/component.type.js`](../src/bento/components/bento-video/1.0/component.type.js)
 
 #### Imperative handle
 
@@ -531,7 +531,7 @@ When we click the following button on an AMP document:
 
 We call the corresponding function `play`:
 
-> The AMP action `my-element.play` is declared to be forwarded to the Preact component's method. See the [`init()` method on `AmpVideoBaseElement`](../extensions/amp-video/1.0/video-base-element.js) for a list of the supported actions.
+> The AMP action `my-element.play` is declared to be forwarded to the Preact component's method. See the [`init()` method on `AmpVideoBaseElement`](../src/bento/components/bento-video/1.0/video-base-element.js) for a list of the supported actions.
 
 ```
 -> FantasticPlayer.play()
