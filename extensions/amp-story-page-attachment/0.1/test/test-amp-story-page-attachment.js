@@ -141,6 +141,6 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
 
     outlink.open();
 
-    expect(clickSpy).to.be.called;
+    expect(clickSpy).to.be.calledOnce;
   });
 });
