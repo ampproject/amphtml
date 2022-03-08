@@ -41,7 +41,7 @@ export default {
   },
 };
 
-const AmpVideoWithKnobs = (args) => {
+const AmpVideo = (args) => {
   const {sources} = args;
 
   return (
@@ -70,7 +70,7 @@ export const Default = (args) => {
 
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<AmpVideoWithKnobs {...args} key={i} i={i} />);
+    players.push(<AmpVideo {...args} key={i} i={i} />);
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -89,7 +89,7 @@ export const Actions = (args) => {
   const id = 'player';
   return (
     <VideoElementWithActions id={id}>
-      <AmpVideoWithKnobs {...args} id={id} />
+      <AmpVideo {...args} id={id} />
     </VideoElementWithActions>
   );
 };
