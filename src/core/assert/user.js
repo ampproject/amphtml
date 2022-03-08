@@ -12,45 +12,17 @@ import * as assertions from './base';
  * in src/log.js.
  * @param {T} shouldBeTruthy
  * @param {string} opt_message
- * @param {*=} opt_1 Optional argument (var arg as individual params for better
- * @param {*=} opt_2 Optional argument inlining)
- * @param {*=} opt_3 Optional argument
- * @param {*=} opt_4 Optional argument
- * @param {*=} opt_5 Optional argument
- * @param {*=} opt_6 Optional argument
- * @param {*=} opt_7 Optional argument
- * @param {*=} opt_8 Optional argument
- * @param {*=} opt_9 Optional argument
+ * @param {...*=} theRest Optional argument (var arg as individual params for better
  * @return {asserts shouldBeTruthy}
  * @template T
  * @throws {UserError} when shouldBeTruthy is not truthy.
  */
-export function userAssert(
-  shouldBeTruthy,
-  opt_message,
-  opt_1,
-  opt_2,
-  opt_3,
-  opt_4,
-  opt_5,
-  opt_6,
-  opt_7,
-  opt_8,
-  opt_9
-) {
+export function userAssert(shouldBeTruthy, opt_message, theRest) {
   return assertions.assert(
     USER_ERROR_SENTINEL,
     shouldBeTruthy,
     opt_message,
-    opt_1,
-    opt_2,
-    opt_3,
-    opt_4,
-    opt_5,
-    opt_6,
-    opt_7,
-    opt_8,
-    opt_9
+    theRest
   );
 }
 

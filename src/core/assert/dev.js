@@ -25,50 +25,17 @@ function devAssertDceCheck() {
  * src/log.js.
  * @param {*} shouldBeTruthy
  * @param {string=} opt_message
- * @param {*=} opt_1 Optional argument (var arg as individual params for better
- * @param {*=} opt_2 Optional argument inlining)
- * @param {*=} opt_3 Optional argument
- * @param {*=} opt_4 Optional argument
- * @param {*=} opt_5 Optional argument
- * @param {*=} opt_6 Optional argument
- * @param {*=} opt_7 Optional argument
- * @param {*=} opt_8 Optional argument
- * @param {*=} opt_9 Optional argument
+ * @param {*=} theRest Optional argument (var arg)
  * @return {asserts shouldBeTruthy}
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
-export function devAssert(
-  shouldBeTruthy,
-  opt_message,
-  opt_1,
-  opt_2,
-  opt_3,
-  opt_4,
-  opt_5,
-  opt_6,
-  opt_7,
-  opt_8,
-  opt_9
-) {
+export function devAssert(shouldBeTruthy, opt_message, ...theRest) {
   if (mode.isMinified()) {
     return /** @type {void} */ (shouldBeTruthy);
   }
   devAssertDceCheck();
 
-  return assertions.assert(
-    '',
-    shouldBeTruthy,
-    opt_message,
-    opt_1,
-    opt_2,
-    opt_3,
-    opt_4,
-    opt_5,
-    opt_6,
-    opt_7,
-    opt_8,
-    opt_9
-  );
+  return assertions.assert('', shouldBeTruthy, opt_message, ...theRest);
 }
 
 /**
