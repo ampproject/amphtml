@@ -1626,8 +1626,14 @@ describes.realWin(
       });
     });
 
-    describe.only('localization', () => {
-      it('should have the default localizations', async () => {
+    describe('localization', () => {
+      beforeEach(() => {
+        win.__AMP_MODE = {
+          rtvVersion: '123',
+        };
+      });
+
+      it('should install the default english localizations', async () => {
         await createStoryWithPages(1, ['cover']);
 
         expect(localizationService.getLocalizedString('35')).to.be.equal(
@@ -1635,7 +1641,7 @@ describes.realWin(
         );
       });
 
-      it('should use the correct language localizations', async () => {
+      it('should install the correct language localizations if specified', async () => {
         env.win.document.body.parentElement.setAttribute('lang', 'es');
         await createStoryWithPages(1, ['cover']);
 
@@ -1647,6 +1653,7 @@ describes.realWin(
       it('should use the inlined amp-story strings when available', async () => {
         const inlinedStrings = win.document.createElement('script');
         inlinedStrings.setAttribute('amp-strings', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '123');
         inlinedStrings.textContent = '{"35": "INLINED-STRING"}';
         win.document.head.appendChild(inlinedStrings);
 
@@ -1657,11 +1664,26 @@ describes.realWin(
         );
       });
 
+      it('should not use the inlined amp-story strings if incorrect RTV', async () => {
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-strings', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '1234');
+        inlinedStrings.textContent = '{"35": "INLINED-STRING"}';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'Swipe up'
+        );
+      });
+
       it('should use the inlined amp-story strings when available if the language is specified', async () => {
         env.win.document.body.parentElement.setAttribute('lang', 'es');
 
         const inlinedStrings = win.document.createElement('script');
         inlinedStrings.setAttribute('amp-strings', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '123');
         inlinedStrings.textContent = '{"35": "TEXTO-EN-LINEA"}';
         win.document.head.appendChild(inlinedStrings);
 

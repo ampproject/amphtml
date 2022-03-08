@@ -12,6 +12,7 @@
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
+
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
@@ -41,6 +42,7 @@ import {
   toggle,
 } from '#core/dom/style';
 import {isEsm} from '#core/mode';
+import {version} from '#core/mode/version';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
 import {map} from '#core/types/object';
@@ -348,7 +350,11 @@ export class AmpStory extends AMP.BaseElement {
     const inlineStrings = this.win.document.querySelector(
       'script[amp-strings="amp-story"]'
     );
-    if (inlineStrings) {
+    if (
+      inlineStrings &&
+      inlineStrings.getAttribute('i-amphtml-version') ==
+        getMode(this.win).rtvVersion
+    ) {
       getLocalizationService(this.element).registerLocalizedStringBundle(
         this.win.document.querySelector('[lang]')?.getAttribute('lang') || 'en',
         JSON.parse(inlineStrings.textContent)
