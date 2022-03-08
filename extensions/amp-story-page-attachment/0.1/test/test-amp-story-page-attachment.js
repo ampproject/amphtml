@@ -133,7 +133,6 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   it('should click on anchor when outlink open method is called', async () => {
     storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_ONE_PANEL);
     const anchorEl = outlinkEl.querySelector('amp-story-page-outlink a');
-    anchorEl.setAttribute('target', '_blank');
 
     const clickSpy = env.sandbox.spy(anchorEl, 'click');
 
