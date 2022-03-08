@@ -560,9 +560,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       '.i-amphtml-story-page-attachment-close-button'
     );
     // If attachment is outlink, there is no close button.
-    // if (!closeButton) {
-    //   return;
-    // }
+    if (!closeButton) {
+      return;
+    }
     this.mutateElement(() => {
       if (isActive) {
         closeButton.removeAttribute('tabindex');
