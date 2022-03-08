@@ -21,17 +21,5 @@
       "selector": "a",
       "request": "linkclick"
     }
-  },
-  "extraUrlParams": {
-    "Content.id": "1234",
-    "Content.name": "Samsung releases new Galaxy Note version",
-    "Content.type": "article",
-    "Content.description": "Samsung has released the newset Galaxy Note version for the users. It contains major changes and new features.",
-    "Content.author": "Nick Smith",
-    "Content.category": [["Technology", "Smartphone"]],
-    "Content.value": "Amazing news! The new Galaxy Note looks perfect!",
-    "Content.quantity": 2,
-    "Content.imageUrl": "https://magazine.com/apple-iphone-release",
-    "Content.test": "test"
   }
 }
