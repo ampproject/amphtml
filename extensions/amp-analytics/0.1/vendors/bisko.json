@@ -4,7 +4,6 @@
     "xhrpost": false
   },
   "vars": {
-    "propertyId": 12710,
     "onViewType": "pageview",
     "onClickType": "linkclick"
   },
