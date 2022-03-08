@@ -14,14 +14,9 @@ const TAG = 'amp-pan-zoom';
 class AmpPanZoom extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
-    this.registerApiAction('exampleToggle', (api) =>
-      api./*OK*/ exampleToggle()
+    this.registerApiAction('transform', (api, {args}) =>
+      api./*OK*/ transform(args['scale'], args['x'], args['y'])
     );
-
-    return {
-      // Extra props passed by wrapper AMP component
-      exampleTagNameProp: this.element.tagName,
-    };
   }
 
   /** @override */
