@@ -662,10 +662,19 @@ async function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
     };
-    if (options.useBentoCore) {
-      // remap all shared modules to the @bentoproject/core package and declare as external
-      npm.bento.remap = getRemapBentoNpmDependencies();
-      npm.bento.external = Object.values(npm.bento.remap);
+
+    // for each bento mode, remap all shared modules and declare them as external
+    // remaps "core" modules to @bentoproject/core
+    // rempas any cross-extension (e.g imports to bento-foo) imports to @bentoproject/foo
+    for (const mode in npm) {
+      const fullEntryPoint = path.join(extDir, npm[mode].entryPoint);
+      const bentoRemaps = getRemapBentoNpmDependencies(fullEntryPoint);
+      const bentoExternals = Object.values(bentoRemaps);
+      npm[mode].remap = {
+        ...(npm[mode].remap || {}),
+        ...bentoRemaps,
+      };
+      npm[mode].external = [...(npm[mode].external || []), ...bentoExternals];
     }
   }
   const binaries = Object.values(npm);
@@ -699,13 +708,30 @@ function buildBinaries(extDir, binaries, options) {
 }
 
 /**
+ * @param {string} nameWithoutExtension
+ * @param {?string|void} cwd
+ * @return {Promise<string|undefined>}
+ */
+async function findJsSourceFilename(nameWithoutExtension, cwd) {
+  const [filename] = await fastGlob(
+    `${nameWithoutExtension}.{js,ts,tsx}`,
+    cwd ? {cwd} : undefined
+  );
+  return filename;
+}
+
+/**
  * @param {string} dir
  * @param {string} name
  * @param {!Object} options
  * @return {!Promise}
  */
 async function buildBentoExtensionJs(dir, name, options) {
-  const remapDependencies = getRemapBentoDependencies(options.minify);
+  const entryPoint = await findJsSourceFilename(path.join(dir, name));
+  const remapDependencies = getRemapBentoDependencies(
+    entryPoint,
+    options.minify
+  );
   await buildExtensionJs(dir, name, {
     ...options,
     externalDependencies: Object.values(remapDependencies),

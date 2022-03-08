@@ -1,10 +1,11 @@
 import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
 
+import {BentoLightbox} from '#bento/components/bento-lightbox/1.0/component';
+
 import * as Preact from '#preact';
 import {useRef} from '#preact';
 
-import {BentoLightbox} from '../component';
-import '../component.jss';
+import '#bento/components/bento-lightbox/1.0/component.jss';
 
 export default {
   title: 'Lightbox',

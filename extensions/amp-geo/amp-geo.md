@@ -245,6 +245,12 @@ The country code is also available via AMP variable substitution:
 `AMP_GEO(ISOCountry)` or `${ampGeo(ISOCountry)}` returns the country code (or
 `unknown`).
 
+The subdivision code is also available via AMP variable substitution:
+
+`AMP_GEO` or `${ampGeo}` returns the list of matched groups (comma delimited).
+`AMP_GEO(ISOSubdivision)` or `${ampGeo(ISOSubdivision)}` returns the country
+subdivision (or `unknown`).
+
 ### Caching
 
 The `amp-geo` JavaScript file is served with a 30-minute cache lifetime

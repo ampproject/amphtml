@@ -27,6 +27,16 @@ function getComponents() {
 }
 
 /**
+ * Sets package config for @bentoproject/core.
+ * Follows interface used in bundle configs above
+ * @type {{name: string, version: string}}
+ */
+const coreConfig = {
+  name: 'core',
+  version: '0.1',
+};
+
+/**
  * Get bento components and extensions to be published on npm
  * @return {Array<any>}
  */
@@ -53,4 +63,5 @@ module.exports = {
   getExtensions,
   getExtensionsAndComponents,
   getSemver,
+  coreConfig,
 };
