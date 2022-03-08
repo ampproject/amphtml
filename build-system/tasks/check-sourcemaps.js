@@ -23,9 +23,9 @@ const sourcemapUrlMatcher =
 function maybeBuild() {
   if (!argv.nobuild) {
     log('Compiling', cyan('v0.js'), 'with full sourcemaps...');
-    execOrDie(distWithSourcemapsCmd);
+    execOrDie(distWithSourcemapsCmd, {'stdio': 'ignore'});
     log('Compiling', cyan('v0.mjs'), 'with full sourcemaps...');
-    execOrDie(distEsmWithSourcemapsCmd);
+    execOrDie(distEsmWithSourcemapsCmd, {'stdio': 'ignore'});
   }
 }
 
