@@ -86,6 +86,7 @@ describes.sandboxed
           expect(spy).to.have.been.calledWith('pause');
           expect(spy).to.have.been.calledWith('mute');
           expect(spy).to.have.been.calledWith('unmute');
+          expect(spy).to.have.been.calledWith('togglePlay');
         });
 
         it('should be paused if autoplay is not set', () => {
