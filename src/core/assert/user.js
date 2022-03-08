@@ -17,12 +17,12 @@ import * as assertions from './base';
  * @template T
  * @throws {UserError} when shouldBeTruthy is not truthy.
  */
-export function userAssert(shouldBeTruthy, opt_message, theRest) {
+export function userAssert(shouldBeTruthy, opt_message, ...theRest) {
   return assertions.assert(
     USER_ERROR_SENTINEL,
     shouldBeTruthy,
     opt_message,
-    theRest
+    ...theRest
   );
 }
 

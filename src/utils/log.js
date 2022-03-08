@@ -379,13 +379,13 @@ export class Log {
    * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
    *     not evaluate to true.
    * @param {!Array|string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @param {...*} _varArgs Arguments substituted into %s in the message.
    * @return {T} The value of shouldBeTrueish.
    * @throws {!Error} When `value` is falsey.
    * @template T
    * @closurePrimitive {asserts.truthy}
    */
-  assert(shouldBeTrueish, opt_message, var_args) {
+  assert(shouldBeTrueish, opt_message, ..._varArgs) {
     if (isArray(opt_message)) {
       return this.assert.apply(
         this,
@@ -641,36 +641,17 @@ function isFromEmbed(win, opt_element) {
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {!Array|string=} opt_message The assertion message
- * @param {*=} opt_1 Optional argument (Var arg as individual params for better
- * @param {*=} opt_2 Optional argument inlining)
- * @param {*=} opt_3 Optional argument
- * @param {*=} opt_4 Optional argument
- * @param {*=} opt_5 Optional argument
- * @param {*=} opt_6 Optional argument
- * @param {*=} opt_7 Optional argument
- * @param {*=} opt_8 Optional argument
- * @param {*=} opt_9 Optional argument
+ * @param {...*} varArgs Arguments substituted into %s in the message
  * @return {T} The value of shouldBeTrueish.
  * @throws {!Error} When `shouldBeTrueish` is falsey.
  * @template T
  * @closurePrimitive {asserts.truthy}
  */
-export function devAssert(
-  shouldBeTrueish,
-  opt_message,
-  opt_1,
-  opt_2,
-  opt_3,
-  opt_4,
-  opt_5,
-  opt_6,
-  opt_7,
-  opt_8,
-  opt_9
-) {
+export function devAssert(shouldBeTrueish) {
   if (mode.isMinified()) {
     return shouldBeTrueish;
   }
+
   if (self.__AMP_ASSERTION_CHECK) {
     // This will never execute regardless, but will be included on unminified
     // builds. It will be DCE'd away from minified builds, and so can be used to
@@ -680,19 +661,7 @@ export function devAssert(
       .log('__devAssert_sentinel__');
   }
 
-  return dev()./*Orig call*/ assert(
-    shouldBeTrueish,
-    opt_message,
-    opt_1,
-    opt_2,
-    opt_3,
-    opt_4,
-    opt_5,
-    opt_6,
-    opt_7,
-    opt_8,
-    opt_9
-  );
+  return dev()./*Orig call*/ assert(...arguments);
 }
 
 /**
@@ -710,44 +679,12 @@ export function devAssert(
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {!Array|string=} opt_message The assertion message
- * @param {*=} opt_1 Optional argument (Var arg as individual params for better
- * @param {*=} opt_2 Optional argument inlining)
- * @param {*=} opt_3 Optional argument
- * @param {*=} opt_4 Optional argument
- * @param {*=} opt_5 Optional argument
- * @param {*=} opt_6 Optional argument
- * @param {*=} opt_7 Optional argument
- * @param {*=} opt_8 Optional argument
- * @param {*=} opt_9 Optional argument
+ * @param {...*} theRest Optional argument (Var arg as individual params for better
  * @return {T} The value of shouldBeTrueish.
  * @throws {!Error} When `shouldBeTrueish` is falsey.
  * @template T
  * @closurePrimitive {asserts.truthy}
  */
-export function userAssert(
-  shouldBeTrueish,
-  opt_message,
-  opt_1,
-  opt_2,
-  opt_3,
-  opt_4,
-  opt_5,
-  opt_6,
-  opt_7,
-  opt_8,
-  opt_9
-) {
-  return user()./*Orig call*/ assert(
-    shouldBeTrueish,
-    opt_message,
-    opt_1,
-    opt_2,
-    opt_3,
-    opt_4,
-    opt_5,
-    opt_6,
-    opt_7,
-    opt_8,
-    opt_9
-  );
+export function userAssert(shouldBeTrueish, opt_message, ...theRest) {
+  return user()./*Orig call*/ assert(shouldBeTrueish, opt_message, ...theRest);
 }

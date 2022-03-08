@@ -24,18 +24,16 @@ function devAssertDceCheck() {
  * Throws an error if the first argument isn't trueish. Mirrors devAssert in
  * src/log.js.
  * @param {*} shouldBeTruthy
- * @param {string=} opt_message
- * @param {*=} theRest Optional argument (var arg)
  * @return {asserts shouldBeTruthy}
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
-export function devAssert(shouldBeTruthy, opt_message, ...theRest) {
+export function devAssert(shouldBeTruthy) {
   if (mode.isMinified()) {
     return /** @type {void} */ (shouldBeTruthy);
   }
   devAssertDceCheck();
 
-  return assertions.assert('', shouldBeTruthy, opt_message, ...theRest);
+  return assertions.assert.call(null, [''].concat(Array.from(arguments)));
 }
 
 /**

@@ -28,7 +28,6 @@ import {remove} from '#core/types/array';
  * @param {?string} sentinel
  * @param {*} shouldBeTruthy
  * @param {string} opt_message
- * @param {...*} theRest Arguments substituted into %s in the message
  * @return {asserts shouldBeTruthy}
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
@@ -36,7 +35,6 @@ export function assert(
   sentinel,
   shouldBeTruthy,
   opt_message = 'Assertion failed',
-  ...theRest
 ) {
   if (shouldBeTruthy) {
     return /** @type {void} */ (shouldBeTruthy);
@@ -47,14 +45,18 @@ export function assert(
     opt_message += sentinel;
   }
 
+  // Skip the first 3 arguments to isolate format params
+  // const messageArgs = Array.prototype.slice.call(arguments, 3);
+  // Index at which message args start
+  let i = 3;
+
   // Substitute provided values into format string in message
   const splitMessage = opt_message.split('%s');
   let message = splitMessage.shift();
   const messageArray = [message];
 
-  let i = 0;
   while (splitMessage.length) {
-    const subValue = theRest[i++];
+    const subValue = arguments[i++];
     const nextConstant = /** @type {NonNullable<*>} */ (splitMessage.shift());
 
     message += elementStringOrPassThru(subValue) + nextConstant;
