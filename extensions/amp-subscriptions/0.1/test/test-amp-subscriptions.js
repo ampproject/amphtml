@@ -1581,43 +1581,4 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, (env) => {
       ).to.eventually.equal(undefined);
     });
   });
-
-  describe('maybeRenderDialogForSelectedPlatform', () => {
-    it('should select and activate platform if not free and not embedded in the viewer', async () => {
-      const selectAndActivatePlatformStub = env.sandbox.stub(
-        subscriptionService,
-        'selectAndActivatePlatform_'
-      );
-      await subscriptionService.maybeRenderDialogForSelectedPlatform();
-      expect(selectAndActivatePlatformStub).to.be.calledOnce;
-    });
-
-    it('should not select and activate platform if the viewer does provide auth', async () => {
-      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
-        subscriptionService.doesViewerProvideAuth_ = true;
-        return Promise.resolve();
-      });
-
-      const selectAndActivatePlatformStub = env.sandbox.stub(
-        subscriptionService,
-        'selectAndActivatePlatform_'
-      );
-      await subscriptionService.maybeRenderDialogForSelectedPlatform();
-      expect(selectAndActivatePlatformStub).not.to.be.called;
-    });
-
-    it('should not select and activate platform if the platform config is alwaysGrant', async () => {
-      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
-        subscriptionService.platformConfig_ = freePlatformConfig;
-        return Promise.resolve();
-      });
-
-      const selectAndActivatePlatformStub = env.sandbox.stub(
-        subscriptionService,
-        'selectAndActivatePlatform_'
-      );
-      await subscriptionService.maybeRenderDialogForSelectedPlatform();
-      expect(selectAndActivatePlatformStub).not.to.be.called;
-    });
-  });
 });
