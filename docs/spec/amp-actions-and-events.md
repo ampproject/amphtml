@@ -310,6 +310,16 @@ The events below are dispatched by `amp-video`, `amp-video-iframe` and [3rd part
     <td></td>
   </tr>
   <tr>
+    <td><code>play</code>(low-trust)</td>
+    <td>Fired when the video is played by the user. On autoplay videos, this is fired as soon as the user interacts with the video. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><code>pause</code>(low-trust)</td>
+    <td>Fired when the video is paused by the user or the video ends.This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
+    <td></td>
+  </tr>
+  <tr>
     <td><code>timeUpdate</code>(low-trust)</td>
     <td>Fired when the playing position of a video has changed. Frequency of the event is controlled by AMP and is currently set at 1 second intervals. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
     <td><code>{time, percent}</code><code>time</code> indicates the current time in seconds, <code>percent</code> is a number between 0 and 1 and indicates current position as percentage of total time.</td>
@@ -671,6 +681,10 @@ The actions below are supported in `amp-video`, `amp-video-iframe` and [3rd part
   <tr>
     <td><code>fullscreenenter</code></td>
     <td>Takes the video to fullscreen.</td>
+  </tr>
+  <tr>
+    <td><code>togglePlay</code></td>
+    <td>Toggles the play state of a video..</td>
   </tr>
 </table>
 

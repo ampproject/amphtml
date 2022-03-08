@@ -105,6 +105,14 @@ Expands the video to fullscreen when possible.
 videoHandle.requestFullscreen();
 ```
 
+##### `togglePlay()`
+
+Toggles the play state of a video.
+
+```js
+videoHandle.togglePlay();
+```
+
 #### Properties
 
 It also exposes the following read-only properties:

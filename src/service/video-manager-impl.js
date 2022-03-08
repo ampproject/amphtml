@@ -251,6 +251,13 @@ export class VideoManager {
     registerAction('pause', () => video.pause());
     registerAction('mute', () => video.mute());
     registerAction('unmute', () => video.unmute());
+    registerAction('togglePlay', () => {
+      if (this.getPlayingState(video) == PlayingStates_Enum.PAUSED) {
+        tryPlay(video, /* isAutoplay */ false);
+      } else {
+        video.pause();
+      }
+    });
 
     // fullscreen/fullscreenenter are a special case.
     // - fullscreenenter is kept as a standard name for symmetry with internal
@@ -650,6 +657,10 @@ class VideoEntry {
 
     const {video} = this;
     const {element} = video;
+    const eventName = 'play';
+    const event = createCustomEvent(this.ampdoc_.win, eventName, {});
+    const actions = Services.actionServiceForDoc(element);
+    actions.trigger(element, eventName, event, ActionTrust_Enum.LOW);
 
     if (
       !video.preimplementsMediaSessionAPI() &&
@@ -685,6 +696,14 @@ class VideoEntry {
   videoPaused_() {
     analyticsEvent(this, VideoAnalyticsEvents_Enum.PAUSE);
     this.isPlaying_ = false;
+
+    const {video} = this;
+    const {element} = video;
+
+    const eventName = 'pause';
+    const event = createCustomEvent(this.ampdoc_.win, eventName, {});
+    const actions = Services.actionServiceForDoc(element);
+    actions.trigger(element, eventName, event, ActionTrust_Enum.LOW);
 
     // Prevent double-trigger of session if video is autoplay and the video
     // is paused by a the user scrolling the video out of view.
