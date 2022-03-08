@@ -454,7 +454,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
       const pageAttachmentChild = this.element.parentElement
         ?.querySelector('.i-amphtml-story-page-open-attachment-host')
-        .shadowRoot.querySelector('a.i-amphtml-story-page-open-attachment');
+        .shadowRoot?.querySelector('a.i-amphtml-story-page-open-attachment');
 
       if (pageOutlinkChild) {
         pageOutlinkChild.click();
