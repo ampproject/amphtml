@@ -60,7 +60,7 @@ export function BentoAutocomplete({
   const containerId = useRef<string>(
     id || `${Math.floor(Math.random() * 100)}_AMP_content_`
   );
-  const inputRef = useRef<HTMLElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState<string>('');
   const [data, setData] = useState<Item[]>(items);
@@ -105,7 +105,7 @@ export function BentoAutocomplete({
           inputElement.setAttribute('role', 'textbox');
         }
 
-        inputRef.current = inputElement as HTMLElement;
+        inputRef.current = inputElement as HTMLInputElement;
       }
     },
     [getSingleInputOrTextarea, onError]
@@ -160,13 +160,6 @@ export function BentoAutocomplete({
     return filteredData;
   }, [data, filter, inputValue, filterValue, onError]);
 
-  // const areResultsDisplayed = useMemo(() => {
-  //   return (
-  //     !containerRef.current?.hasAttribute('hidden') &&
-  //     containerRef.current?.children.length > 0
-  //   );
-  // }, []);
-
   const handleInput = useCallback((event: Event) => {
     const _inputValue = (event.target as HTMLInputElement).value;
 
@@ -180,50 +173,49 @@ export function BentoAutocomplete({
   //   );
   // }, []);
 
-  // const updateActiveItem = useCallback(
-  //   (delta: number) => {
-  //     if (delta === 0 || !areResultsDisplayed || enabledItems.length === 0) {
-  //       return;
-  //     }
-  //     const index = activeIndex + delta;
-  //     const newActiveIndex = mod(index, enabledItems.length);
-  //     const newActiveElement = enabledItems[newActiveIndex];
-  //     const newValue = newActiveElement.getAttribute('data-value');
+  const updateActiveItem = useCallback(
+    (delta: number) => {
+      // if (delta === 0 || !areResultsDisplayed || enabledItems.length === 0) {
+      //   return;
+      // }
+      const index = activeIndex + delta;
+      const newActiveIndex = mod(index, filteredData.length);
+      setActiveIndex(newActiveIndex);
+      const newValue = filteredData[newActiveIndex];
 
-  //     inputRef.current.value = newValue;
-  //   },
-  //   [areResultsDisplayed, enabledItems, activeIndex]
-  // );
+      inputRef.current!.value = newValue as string;
+    },
+    [activeIndex, filteredData]
+  );
 
-  // const handleKeyDown = useCallback(
-  //   (event: KeyboardEvent) => {
-  //     switch (event.key) {
-  //       case Keys_Enum.DOWN_ARROW:
-  //         event.preventDefault();
-  //         // This is returning false
-  //         if (areResultsDisplayed) {
-  //           if (activeIndex === enabledItems.length - 1) {
-  //             return;
-  //           }
-  //           updateActiveItem(1);
-  //         }
-  //     }
-  //   },
-  //   [areResultsDisplayed, enabledItems, updateActiveItem, activeIndex]
-  // );
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case Keys_Enum.DOWN_ARROW:
+          event.preventDefault();
+          if (showAutocompleteOptions) {
+            if (activeIndex === filteredData.length - 1) {
+              return;
+            }
+            updateActiveItem(1);
+          }
+      }
+    },
+    [showAutocompleteOptions, activeIndex, filteredData, updateActiveItem]
+  );
 
   useEffect(() => {
     setupInputElement(elementRef.current!);
     validateProps();
 
     inputRef.current?.addEventListener('input', handleInput);
-    // inputRef.current?.addEventListener('keydown', handleKeyDown);
+    inputRef.current?.addEventListener('keydown', handleKeyDown);
 
     return () => {
       inputRef.current?.removeEventListener('input', handleInput);
-      // inputRef.current?.removeEventListener('keydown', handleKeyDown);
+      inputRef.current?.removeEventListener('keydown', handleKeyDown);
     };
-  }, [setupInputElement, validateProps, handleInput]);
+  }, [setupInputElement, validateProps, handleInput, handleKeyDown]);
 
   return (
     <ContainWrapper ref={elementRef}>

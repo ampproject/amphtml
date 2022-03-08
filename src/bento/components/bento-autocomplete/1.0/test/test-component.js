@@ -215,7 +215,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
   });
 
   describe('selecting an item', () => {
-    it.skip('sets the input value to the first result on arrow down', () => {
+    it('sets the input value to the first result on arrow down', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
           <input type="text"></input>
@@ -233,6 +233,10 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
 
       expect(input.getDOMNode().value).to.equal('two');
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+
+      expect(input.getDOMNode().value).to.equal('three');
     });
   });
 });
