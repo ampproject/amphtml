@@ -3,30 +3,15 @@
   <!-- prettier-ignore -->
   <head>
     <title>amp-story-subscriptions player</title>
-    <meta charset="utf-8">
-    <link rel="canonical" href="amp-story-subscriptions-player.html">
-    <script async src="https://cdn.ampproject.org/v0.js"></script>
-    <script async custom-element="amp-subscriptions" src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js"></script>
-
-    <script async custom-element="amp-story"
-        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <script
-      async
-      custom-element="amp-subscriptions-google"
-      src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js"
-    ></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700" rel="stylesheet">
-
     <script async src="../../dist/amp-story-player.js"></script>
-    <link href="../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
     <style page>
       body {
         font-family: sans-serif;
       }
     </style>
     <style injected>
+      amp-story-player{position:relative;display:block}.i-amphtml-story-player-shadow-root-intermediary{width:100%;height:100%}amp-story-player a:first-of-type{width:100%;height:100%;background:var(--story-player-poster,#d3d3d3);background-size:100% 100%;display:block}amp-story-player.i-amphtml-story-player-loaded a{display:none}amp-story-player:after{content:" ";position:absolute;box-sizing:border-box;top:calc(50% - 32px);left:calc(50% - 32px);width:64px;height:64px;border-radius:50%;border-color:#fff transparent;border-style:solid;border-width:6px;filter:drop-shadow(0px 1px 3px rgba(0,0,0,0.25));animation-name:i-amphtml-story-player-spinner;animation-duration:4400ms;animation-timing-function:cubic-bezier(0.4,0,0.2,1);animation-iteration-count:infinite}@keyframes i-amphtml-story-player-spinner{12.5%{transform:rotate(135deg)}25%{transform:rotate(270deg)}37.5%{transform:rotate(405deg)}50%{transform:rotate(540deg)}62.5%{transform:rotate(675deg)}75%{transform:rotate(810deg)}87.5%{transform:rotate(945deg)}to{transform:rotate(1080deg)}}.i-amphtml-story-player-loaded:after{visibility:hidden}
+
       .story-player-iframe {
         background-size: cover;
         display: block;
@@ -72,111 +57,6 @@
         box-shadow:
           0 0 0 3px white,
           0 0 0 7px hsl(257, 79%, 60%);
-      }
-
-      .cover-title {
-        position: absolute;
-        width: 80%;
-        height: 117px;
-        left: 10%;
-        right: 10%;
-        top: 450px;
-
-        /* display: flex; */
-        align-items: center;
-        text-align: center;
-        letter-spacing: 0.5px;
-
-        color: #FFFFFF;
-      }
-      .cover-title p {
-        display: block;
-        font-family: Playfair Display;
-        font-style: normal;
-        font-weight: bold;
-        font-size: 50px;
-        line-height: 54px;
-      }
-      .cover-subtitle {
-        position: absolute;
-        width: 80%;
-        left: 10%;
-        right: 10%;
-        height: 44px;
-        top: 565px;
-      }
-      .cover-subtitle p {
-        font-family: Poppins;
-        font-style: normal;
-        font-weight: normal;
-        font-size: 14px;
-        line-height: 20px;
-        /* or 143% */
-
-        display: flex;
-        align-items: center;
-        text-align: center;
-        letter-spacing: 1px;
-
-        color: #FFFFFF;
-      }
-      #page-1 .text-section {
-        background: linear-gradient(0deg, #483614, #483614);
-        height: 384px;
-      }
-      #page-2 .text-section {
-        background: #8B2B30;
-        height: 292px;
-      }
-      #page-3 .text-section {
-        background: #324B3C;
-        height: 332px;
-      }
-      .text-section {
-        position: absolute;
-        width: 90%;
-        /* height: 30%; */
-        left: 5%;
-        right: 5%;
-        bottom: 5%;
-        margin: auto;
-      } 
-      .text-section h3 {
-        margin-top: 28px;
-        margin-left: 28px;
-        margin-right: 28px;
-
-        font-family: Poppins;
-        font-style: normal;
-        font-weight: normal;
-        font-size: 12px;
-        line-height: 16px;
-
-        align-items: center;
-        text-align: center;
-        letter-spacing: 4px;
-        text-transform: uppercase;
-
-        color: #FFFFFF;
-      }
-      .text-section p {
-        margin-top: 14px;
-        margin-left: 14px;
-        margin-right: 14px;
-
-        font-family: Poppins;
-        font-style: normal;
-        font-weight: normal;
-        font-size: 12px;
-        line-height: 20px;
-        /* or 167% */
-
-        letter-spacing: 0.5px;
-
-        color: #FFFFFF;
-      }
-      .text {
-        font-size: 1em;
       }
     </style>
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
