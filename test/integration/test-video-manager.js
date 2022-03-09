@@ -89,6 +89,32 @@ describes.sandboxed
           expect(spy).to.have.been.calledWith('togglePlay');
         });
 
+        it('should toggle video playing state on togglePlay action', async () => {
+          videoManager.register(impl);
+
+          const curState = videoManager.getPlayingState(impl);
+          expect(curState).to.equal(PlayingStates_Enum.PAUSED);
+
+          impl.executeAction({
+            method: 'togglePlay',
+            satisfiesTrust: () => true,
+          });
+
+          await listenOncePromise(video, VideoEvents_Enum.PLAYING).then(() => {
+            const curState = videoManager.getPlayingState(impl);
+            expect(curState).to.equal(PlayingStates_Enum.PLAYING_MANUAL);
+          });
+
+          impl.executeAction({
+            method: 'togglePlay',
+            satisfiesTrust: () => true,
+          });
+          await listenOncePromise(video, VideoEvents_Enum.PAUSE).then(() => {
+            const curState = videoManager.getPlayingState(impl);
+            expect(curState).to.equal(PlayingStates_Enum.PAUSED);
+          });
+        });
+
         it('should be paused if autoplay is not set', () => {
           videoManager.register(impl);
           const entry = videoManager.getEntry_(impl);
