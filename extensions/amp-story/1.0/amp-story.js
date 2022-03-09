@@ -2472,7 +2472,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * If there are inline strings, register as current document language.
+   * If there are inline localization strings, register as current document language.
    */
   registerInlineLocalizationStrings_() {
     const inlineStringsEl = this.win.document.querySelector(
