@@ -1170,7 +1170,7 @@ export class AmpStoryPlayer {
     );
 
     // Reset `this.currentStoryLoadDeferred_` and have it resolve only when the
-    // current story has loaded. 
+    // current story has loaded.
     this.currentStoryLoadDeferred_ = new Deferred();
     story.messagingPromise.then((messaging) =>
       messaging.registerHandler('storyContentLoaded', () => {
