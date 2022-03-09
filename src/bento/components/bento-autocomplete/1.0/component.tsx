@@ -1,3 +1,4 @@
+import objStr from 'obj-str';
 import {ComponentChildren} from 'preact';
 
 import {Keys_Enum} from '#core/constants/key-codes';
@@ -10,6 +11,8 @@ import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
 import {ContainWrapper} from '#preact/component';
 
 import fuzzysearch from '#third_party/fuzzysearch';
+
+import {useStyles} from './component.jss';
 
 const filterTypes = [
   'substring',
@@ -70,6 +73,7 @@ export function BentoAutocomplete({
   const [substring, setSubstring] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const [showOptions, _setShowOptions] = useState<boolean>(false);
+  const classes = useStyles();
 
   const setShowOptions = useCallback((shouldDisplay: boolean) => {
     if (!shouldDisplay) {
@@ -117,6 +121,7 @@ export function BentoAutocomplete({
             );
           }
         }
+        inputElement.classList.add(classes.input);
         inputElement.setAttribute('dir', 'auto');
         inputElement.setAttribute('aria-autocomplete', 'both');
         inputElement.setAttribute('aria-controls', containerId.current);
@@ -133,7 +138,7 @@ export function BentoAutocomplete({
         inputRef.current = inputElement as HTMLInputElement;
       }
     },
-    [getSingleInputOrTextarea, onError]
+    [getSingleInputOrTextarea, onError, classes.input]
   );
 
   const validateProps = useCallback(() => {
@@ -337,12 +342,12 @@ export function BentoAutocomplete({
   }, [setupInputElement, validateProps, handleInput, handleKeyDown]);
 
   return (
-    <ContainWrapper ref={elementRef}>
+    <ContainWrapper ref={elementRef} class={classes.autocomplete}>
       {children}
       <div
         ref={containerRef}
         id={containerId.current}
-        class="i-amphtml-autocomplete-results"
+        class={classes.autocompleteResults}
         role="listbox"
         hidden={!showAutocompleteOptions}
       >
@@ -353,7 +358,10 @@ export function BentoAutocomplete({
                 key={item}
                 data-value={item}
                 id={getItemId(index)}
-                class="i-amphtml-autocomplete-item"
+                class={objStr({
+                  [classes.autocompleteItem]: true,
+                  [classes.autocompleteItemActive]: index === activeIndex,
+                })}
                 role="option"
                 dir="auto"
                 aria-selected={activeIndex === index}
