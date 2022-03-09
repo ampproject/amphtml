@@ -1626,7 +1626,7 @@ describes.realWin(
       });
     });
 
-    describe.only('localization', () => {
+    describe('localization', () => {
       beforeEach(() => {
         win.__AMP_MODE = {
           rtvVersion: '123',
