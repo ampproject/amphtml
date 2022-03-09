@@ -346,7 +346,7 @@ export class AmpStory extends AMP.BaseElement {
         createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
       );
 
-    // If there are inline strings, register as current document language.
+    // If there are inline localization strings, register as current document language.
     const inlineStrings = this.win.document.querySelector(
       'script[amp-strings="amp-story"]'
     );
