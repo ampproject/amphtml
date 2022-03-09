@@ -16,8 +16,7 @@ const FALLBACK_LANGUAGE_CODE = 'en';
  */
 const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
 
-const testUrl =
-  'https://gist.githubusercontent.com/mszylkowski/3ed540186b18f4da4083e087bff36122/raw/a46b0204d5a7e12615a924b4ae192d9d77128bff/amp-story.es.json';
+const testUrl = 'https://cdn.ampproject.org/v0/amp-story.es.json';
 
 /**
  * Util function to retrieve the localization service. Ensures we can retrieve
