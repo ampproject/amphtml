@@ -1676,7 +1676,7 @@ export class AmpStoryPlayer {
 
   /**
    * React to storyContentLoaded events.
-   * @param {!Object} data
+   * @param {!StoryDef} story
    * @private
    */
   onStoryContentLoaded_(story) {
