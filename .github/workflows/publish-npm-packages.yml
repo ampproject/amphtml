@@ -127,7 +127,7 @@ jobs:
       - name: Tag package as latest for Stable releases
         if: github.event.inputs.tag == 'latest'
         run: |
-          cd $(node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }} ${{ matrix.version }})
+          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js
           NPM_PACKAGE=$(jq -r .name package.json)
           NPM_VERSION=$(jq -r .version package.json)
           echo "Processing ${NPM_PACKAGE}@${NPM_VERSION}"
