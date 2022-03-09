@@ -630,18 +630,6 @@ async function buildBentoCss(name, versions, minifiedAmpCss) {
 async function buildNpmBinaries(extDir, name, options) {
   let {npm} = options;
   if (npm === true) {
-    // remap all shared modules to the @bentoproject/core package and declare as external
-    // todo(kvchari): currently only used for bento standalone, investigate using for preact & react
-    const bentoEntryPoint = await getBentoBuildFilename(
-      extDir,
-      getBentoName(name),
-      'web-component',
-      options
-    );
-    const fullEntryPoint = path.join(extDir, bentoEntryPoint);
-    const remap = getRemapBentoNpmDependencies(fullEntryPoint);
-    const external = [...new Set(Object.values(remap))];
-
     npm = {
       preact: {
         entryPoint: 'component.js',
@@ -664,14 +652,30 @@ async function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
       bento: {
-        entryPoint: bentoEntryPoint,
+        entryPoint: await getBentoBuildFilename(
+          extDir,
+          getBentoName(name),
+          'web-component',
+          options
+        ),
         outfile: 'web-component.js',
         wrapper: '',
-
-        remap,
-        external,
       },
     };
+
+    // for each bento mode, remap all shared modules and declare them as external
+    // remaps "core" modules to @bentoproject/core
+    // rempas any cross-extension (e.g imports to bento-foo) imports to @bentoproject/foo
+    for (const mode in npm) {
+      const fullEntryPoint = path.join(extDir, npm[mode].entryPoint);
+      const bentoRemaps = getRemapBentoNpmDependencies(fullEntryPoint);
+      const bentoExternals = Object.values(bentoRemaps);
+      npm[mode].remap = {
+        ...(npm[mode].remap || {}),
+        ...bentoRemaps,
+      };
+      npm[mode].external = [...(npm[mode].external || []), ...bentoExternals];
+    }
   }
   const binaries = Object.values(npm);
   return buildBinaries(extDir, binaries, options);
