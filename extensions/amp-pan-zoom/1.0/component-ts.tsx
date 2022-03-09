@@ -1,4 +1,6 @@
 import type {ComponentChildren, Ref} from 'preact';
+import type {FC} from 'preact/compat';
+import * as ReactHammer from 'react-hammerjs';
 
 import {scale as cssScale, px, translate} from '#core/dom/style';
 
@@ -6,13 +8,18 @@ import * as Preact from '#preact';
 import {useEffect, useImperativeHandle, useRef} from '#preact';
 import {Children, forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
-import {useGestures} from '#preact/hooks/useGestures';
-import {usePointerDrag} from '#preact/hooks/usePointerDrag';
 import {useResizeObserver} from '#preact/hooks/useResizeObserver';
 import {logger} from '#preact/logger';
 
 import {useStyles} from './component.jss';
 import {usePanZoomState} from './hooks/usePanZoomState';
+
+/**
+ * Fix a few issues with importing <Hammer>:
+ */
+const Hammer: FC<Omit<ReactHammerProps, 'children'>> = (ReactHammer as any)
+  .default;
+type ReactHammerProps = ReactHammer.ReactHammerProps;
 
 const TAG = 'amp-pan-zoom';
 const DEFAULT_MAX_SCALE = 3;
@@ -121,53 +128,6 @@ export function BentoPanZoomWithRef(
     clientX: number;
     clientY: number;
   };
-  usePointerDrag<StartDragInfo>(containerRef, {
-    button: 'left',
-    onStart({clientX, clientY}) {
-      actions.draggingStart();
-      return {posX: state.posX, posY: state.posY, clientX, clientY};
-    },
-    onMove({clientX, clientY, data: start}) {
-      actions.transform({
-        posX: start.posX + clientX - start.clientX,
-        posY: start.posY + clientY - start.clientY,
-      });
-    },
-    onStop(unusedEv) {
-      actions.draggingRelease();
-    },
-  });
-
-  useGestures(containerRef, {
-    doubletap(ev) {
-      const {clientX, clientY} = ev.data;
-      const {anchorX, anchorY} = getElementPosition(
-        clientX,
-        clientY,
-        containerRef.current!
-      );
-      const newScale =
-        state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
-
-      actions.updateScale({
-        anchorX,
-        anchorY,
-        scale: newScale,
-      });
-    },
-  });
-
-  const handleDoubleClick = (ev: MouseEvent) => {
-    const {clientX, clientY} = ev;
-    const {anchorX, anchorY} = getElementPosition(
-      clientX,
-      clientY,
-      ev.currentTarget as HTMLElement
-    );
-    const newScale =
-      state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
-    actions.updateScale({anchorX, anchorY, scale: newScale});
-  };
 
   useImperativeHandle(
     ref,
@@ -187,7 +147,68 @@ export function BentoPanZoomWithRef(
     transformOrigin:
       px(-state.contentOffset.x) + ' ' + px(-state.contentOffset.y),
     transform: translate(state.posX, state.posY) + cssScale(state.scale),
-    touchAction: state.isZoomed ? 'none' : 'pan-x pan-y',
+  };
+
+  const hammerStartInfo = useRef<Pick<typeof state, 'posX' | 'posY'>>(null);
+  const hammerHandlers: Omit<ReactHammerProps, 'children'> = {
+    onDoubleTap: (ev) => {
+      const {center} = ev;
+      const element = containerRef.current!;
+      const {anchorX, anchorY} = getElementPosition(
+        center.x,
+        center.y,
+        element
+      );
+      actions.updateScale({anchorX, anchorY});
+    },
+
+    vertical: true,
+    onPanStart: (ev) => {
+      if (!state.isPannable) {
+        return;
+      }
+      actions.draggingStart();
+      hammerStartInfo.current = {
+        posX: state.posX,
+        posY: state.posY,
+      };
+    },
+    onPanEnd: (ev) => {
+      if (!state.isPannable) {
+        return;
+      }
+      actions.draggingRelease();
+    },
+    onPan: (ev) => {
+      if (!state.isPannable) {
+        return;
+      }
+      const {deltaX, deltaY} = ev;
+
+      actions.transform({
+        posX: hammerStartInfo.current!.posX + deltaX,
+        posY: hammerStartInfo.current!.posY + deltaY,
+      });
+    },
+
+    onPinch: (ev) => {
+      // TODO
+      console.log('onPinch', ev);
+    },
+    onPinchStart: (ev) => {
+      // TODO
+      console.log('onPinchStart', ev);
+    },
+    onPinchEnd: (ev) => {
+      // TODO
+      console.log('onPinchEnd', ev);
+    },
+    options: {
+      touchAction: state.isPannable ? 'none' : 'pan-x pan-y',
+      recognizers: {
+        pinch: {enable: true},
+      },
+    },
   };
 
   return (
@@ -195,27 +216,34 @@ export function BentoPanZoomWithRef(
       {...rest}
       layout
       contentClassName={styles.ampPanZoomWrapper}
+      contentRef={containerRef}
     >
-      <div
-        class={classNames(
-          styles.ampPanZoomContainer,
-          state.isZoomed && styles.ampPanZoomPannable
-        )}
-        ref={containerRef}
-        onDblClick={handleDoubleClick}
-      >
-        <div ref={contentRef}>
-          <div
-            class={classNames(
-              styles.ampPanZoomContent,
-              state.isDragging && styles.ampPanZoomDragging
-            )}
-            style={panZoomStyles}
-          >
-            {children}
+      <Hammer {...hammerHandlers}>
+        <div
+          class={classNames(
+            styles.ampPanZoomContainer,
+            state.isPannable && styles.ampPanZoomPannable
+          )}
+        >
+          <div ref={contentRef}>
+            <div
+              class={classNames(
+                styles.ampPanZoomContent,
+                state.isDragging && styles.ampPanZoomDragging
+              )}
+              style={panZoomStyles}
+              onPointerDown={(ev) => {
+                if (state.isPannable) {
+                  // Prevent images from being dragged, etc:
+                  ev.preventDefault();
+                }
+              }}
+            >
+              {children}
+            </div>
           </div>
         </div>
-      </div>
+      </Hammer>
 
       <button
         class={classNames(
