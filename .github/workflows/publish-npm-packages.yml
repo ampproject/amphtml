@@ -72,7 +72,6 @@ jobs:
           CORE_VERSION=$(node ${{ env.SCRIPTS_DIR }}/get-core-version.js ${{ github.event.inputs.amp-version }})
           cd ./src/bento/core
           npm version $CORE_VERSION --git-tag-version=false --allow-same-version=true
-          cd -
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: |
@@ -122,9 +121,8 @@ jobs:
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: |
-          cd $(node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }} ${{ matrix.version }})
+          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js ${{ matrix.extension }} ${{ matrix.version }})
           npm publish --access public --tag ${{ github.event.inputs.tag }}
-          cd -
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Tag package as latest for Stable releases
@@ -139,6 +137,5 @@ jobs:
           else
             npm publish --access public --tag latest
           fi
-          cd -
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
