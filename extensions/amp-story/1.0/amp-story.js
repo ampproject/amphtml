@@ -2476,7 +2476,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   registerInlineLocalizationStrings_() {
     const inlineStringsEl = this.win.document.querySelector(
-      'script[amp-strings="amp-story"]'
+      'script[amp-localization="amp-story"]'
     );
     if (
       !inlineStringsEl ||

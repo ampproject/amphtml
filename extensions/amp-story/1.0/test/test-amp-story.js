@@ -1652,7 +1652,7 @@ describes.realWin(
 
       it('should use the inlined amp-story strings when available', async () => {
         const inlinedStrings = win.document.createElement('script');
-        inlinedStrings.setAttribute('amp-strings', 'amp-story');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
         inlinedStrings.setAttribute('i-amphtml-version', '123');
         inlinedStrings.textContent = '{"35": "INLINED-STRING"}';
         win.document.head.appendChild(inlinedStrings);
@@ -1666,7 +1666,7 @@ describes.realWin(
 
       it('should not use the inlined amp-story strings if incorrect RTV', async () => {
         const inlinedStrings = win.document.createElement('script');
-        inlinedStrings.setAttribute('amp-strings', 'amp-story');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
         inlinedStrings.setAttribute('i-amphtml-version', '1234');
         inlinedStrings.textContent = '{"35": "INLINED-STRING"}';
         win.document.head.appendChild(inlinedStrings);
@@ -1682,7 +1682,7 @@ describes.realWin(
         env.win.document.body.parentElement.setAttribute('lang', 'es');
 
         const inlinedStrings = win.document.createElement('script');
-        inlinedStrings.setAttribute('amp-strings', 'amp-story');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
         inlinedStrings.setAttribute('i-amphtml-version', '123');
         inlinedStrings.textContent = '{"35": "TEXTO-EN-LINEA"}';
         win.document.head.appendChild(inlinedStrings);
@@ -1698,7 +1698,7 @@ describes.realWin(
         env.win.document.body.parentElement.setAttribute('lang', 'en');
 
         const inlinedStrings = win.document.createElement('script');
-        inlinedStrings.setAttribute('amp-strings', 'amp-story');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
         inlinedStrings.setAttribute('i-amphtml-version', '123');
         inlinedStrings.textContent = 'this: is not a JSON';
         win.document.head.appendChild(inlinedStrings);
