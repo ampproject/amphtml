@@ -27,6 +27,11 @@ export const StoryAnalyticsEvent = {
   STORY_CONTENT_LOADED: 'story-content-loaded',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
+  SHOPPING_TAG: 'story-shopping-tag',
+  SHOPPING_SHOP_NOW: 'story-shopping-shop-now',
+  SHOPPING_BUY_NOW: 'story-shopping-buy-now',
+  SHOPPING_PLP_CARD: 'story-shopping-plp-card',
+  SHOPPING_PRODUCT_DETAILS: 'story-shopping-product-details',
 };
 
 /**

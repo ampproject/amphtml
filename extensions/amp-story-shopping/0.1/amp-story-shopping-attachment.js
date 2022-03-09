@@ -1,6 +1,7 @@
 import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {ancestorElementsByTag} from '#core/dom/query';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -16,6 +17,10 @@ import {
   ShoppingConfigDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from '../../amp-story/1.0/story-analytics';
 
 /** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
@@ -57,8 +62,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {!Map<string, Element>} */
     this.builtTemplates_ = {};
 
-    /** @public {?Element} */
-    this.shoppingTagJustClicked = false;
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(
+      this.win,
+      ancestorElementsByTag(this.element, 'amp-story')[0]
+    );
   }
 
   /** @override */
@@ -124,15 +132,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
 
-    if (!this.shoppingTagJustClicked) {
-      console.log('1b) Fire Analytics Event CTA Shop Now Button click');
-    }
-
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
     if (!shoppingData.activeProductData) {
       this.updateTemplate_(shoppingData);
     }
-    this.shoppingTagJustClicked = false;
   }
 
   /**
@@ -263,7 +266,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onPlpCardClick_(shoppingData) {
-    console.log('1c) Fire Analytics Event PLP card click');
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_PLP_CARD);
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
@@ -297,7 +300,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    */
   toggleDetailsText_(detailsContainer, shouldOpen) {
     if (shouldOpen) {
-      console.log('3) Fire Analytics Event Product Details Expansion Click');
+      this.analyticsService_.triggerEvent(
+        StoryAnalyticsEvent.SHOPPING_PLP_CARD
+      );
     }
 
     const detailsText = detailsContainer.querySelector(
@@ -309,11 +314,14 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     });
   }
   /**
-   * onclick event that fires when buy now is clicked.
+   * onclick event that fires when buy now is clicked, has conversion tracking.
+   * @param {?string} conversionURL
+   * @return {boolean}
    * @private
    */
-  onClickBuyNow_() {
-    console.log('2) Fire Analytics Event Buy Now click');
+  onClickBuyNow_(conversionURL) {
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_BUY_NOW);
+    return gtagReportConversion(conversionURL);
   }
 
   /**
@@ -369,7 +377,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             class="i-amphtml-amp-story-shopping-pdp-cta"
             href={activeProductData.productUrl}
             target="_top"
-            onClick={() => this.onClickBuyNow_()}
+            onClick={() => this.onClickBuyNow_(activeProductData.productUrl)}
           >
             {this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL,
