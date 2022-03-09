@@ -848,29 +848,6 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Resolves currentStoryLoadDeferred_ when given story's content is finished
-   * loading.
-   * @param {!StoryDef} story
-   * @private
-   */
-  initStoryContentLoadedPromise_(story) {
-    this.currentStoryLoadDeferred_ = new Deferred();
-
-    if (story.storyContentLoaded) {
-      this.currentStoryLoadDeferred_.resolve();
-    }
-
-    story.messagingPromise.then((messaging) =>
-      messaging.registerHandler('storyContentLoaded', () => {
-        // Stories that already loaded won't dispatch a `storyContentLoaded`
-        // event anymore, which is why we need this sync property.
-        story.storyContentLoaded = true;
-        this.currentStoryLoadDeferred_.resolve();
-      })
-    );
-  }
-
-  /**
    * Shows the story provided by the URL in the player and go to the page if provided.
    * @param {?string} storyUrl
    * @param {string=} pageId
@@ -1175,10 +1152,14 @@ export class AmpStoryPlayer {
    */
   currentStoryPromise_(story) {
     if (this.stories_[this.currentIdx_].storyContentLoaded) {
+      // Return a promise signifying that the current story has loaded.
       return Promise.resolve();
     }
 
     if (story.distance !== 0) {
+      // When the current story has not yet loaded and the given story is not
+      // the current story, return a promise that will resolve only when the
+      // current story has loaded.
       return this.currentStoryLoadDeferred_.promise;
     }
 
@@ -1189,7 +1170,20 @@ export class AmpStoryPlayer {
       );
     }
 
-    this.initStoryContentLoadedPromise_(story);
+    // Reset `this.currentStoryLoadDeferred_` and have it resolve only when the
+    // current story has loaded. This method will
+    this.currentStoryLoadDeferred_ = new Deferred();
+    story.messagingPromise.then((messaging) =>
+      messaging.registerHandler('storyContentLoaded', () => {
+        // Stories that already loaded won't dispatch a `storyContentLoaded`
+        // event anymore, which is why we need this sync property.
+        story.storyContentLoaded = true;
+        this.currentStoryLoadDeferred_.resolve();
+      })
+    );
+
+    // Return a promise signifying that the given story is 1) the current story
+    // and 2) in the process of loading.
     return Promise.resolve();
   }
 
