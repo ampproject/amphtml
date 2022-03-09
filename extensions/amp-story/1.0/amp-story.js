@@ -2485,13 +2485,10 @@ export class AmpStory extends AMP.BaseElement {
     ) {
       return;
     }
-
     const stringsOrNull = tryParseJson(inlineStringsEl.textContent);
-
     if (!stringsOrNull) {
       return;
     }
-
     getLocalizationService(this.element).registerLocalizedStringBundle(
       this.win.document.querySelector('[lang]')?.getAttribute('lang') || 'en',
       stringsOrNull
