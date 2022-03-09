@@ -1185,7 +1185,7 @@ export class AmpStoryPlayer {
     if (this.currentStoryLoadDeferred_) {
       // Cancel previous story load promise.
       this.currentStoryLoadDeferred_.reject(
-        `currentStoryPromise_() [${LOG_TYPE_ENUM.DEV}] Cancelling previous story load promise.`
+        `[${LOG_TYPE_ENUM.DEV}] Cancelling previous story load promise.`
       );
     }
 
@@ -1229,9 +1229,7 @@ export class AmpStoryPlayer {
       renderPromises.push(
         // 1. Wait for current story to load before evaluating neighbor stories.
         this.currentStoryPromise_(story)
-          .then(() => {
-            return this.maybeGetCacheUrl_(story.href);
-          })
+          .then(() => this.maybeGetCacheUrl_(story.href))
           // 2. Set iframe src when appropiate
           .then((storyUrl) => {
             if (!this.sanitizedUrlsAreEquals_(storyUrl, story.iframe.src)) {
@@ -1240,9 +1238,7 @@ export class AmpStoryPlayer {
           })
           // 3. Waits for player to be visible before updating visibility
           // state.
-          .then(() => {
-            return this.visibleDeferred_.promise;
-          })
+          .then(() => this.visibleDeferred_.promise)
           // 4. Update the visibility state of the story.
           .then(() => {
             if (story.distance === 0 && this.playing_) {
