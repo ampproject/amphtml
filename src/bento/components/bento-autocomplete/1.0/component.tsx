@@ -76,6 +76,10 @@ export function BentoAutocomplete({
     _setShowOptions(shouldDisplay);
   }, []);
 
+  const setInputValue = useCallback((value: string) => {
+    inputRef.current!.value = value;
+  }, []);
+
   const getItemId = useCallback(
     (index: number) => {
       return `${id}-${index}`;
@@ -217,9 +221,15 @@ export function BentoAutocomplete({
         getItemId(newActiveIndex)
       );
 
-      inputRef.current!.value = newValue as string;
+      setInputValue(newValue as string);
     },
-    [activeIndex, filteredData, getItemId, showAutocompleteOptions]
+    [
+      activeIndex,
+      filteredData,
+      getItemId,
+      showAutocompleteOptions,
+      setInputValue,
+    ]
   );
 
   const handleKeyDown = useCallback(
@@ -249,6 +259,19 @@ export function BentoAutocomplete({
       updateActiveItem,
       setShowOptions,
     ]
+  );
+
+  const handleItemClick = useCallback(
+    (event: MouseEvent) => {
+      const element = event.target as HTMLElement;
+      const textValue =
+        element.getAttribute('data-value') || element.textContent || '';
+
+      setInputValue(textValue);
+      setActiveIndex(-1);
+      setShowOptions(false);
+    },
+    [setInputValue, setShowOptions]
   );
 
   const getItemChildren = useCallback(
@@ -313,6 +336,7 @@ export function BentoAutocomplete({
                 role="option"
                 dir="auto"
                 aria-selected={activeIndex === index}
+                onClick={handleItemClick}
               >
                 {getItemChildren(item)}
               </div>

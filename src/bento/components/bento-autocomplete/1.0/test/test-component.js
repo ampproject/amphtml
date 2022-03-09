@@ -11,10 +11,8 @@ import {BentoAutocomplete} from '../component';
 
 // TODO
 // it selects items on mousedown (658)
-// it selects items on enter (1318)
 // It accepts a list of objects as items and searches based on the filter value
 // It shows the list of options when the inline token is entered by the user
-// it hides the items when one is selected
 // it hides items on escape
 // it hides items on tab
 // something with backspace (1357)
@@ -322,7 +320,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
   });
 
   describe('selecting an item', () => {
-    it('selects a result on arrow down', () => {
+    it('updates the input value on arrow down', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
           <input type="text"></input>
@@ -369,6 +367,24 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
       input.simulate('keydown', {key: Keys_Enum.ENTER});
+
+      expect(input.getDOMNode().value).to.equal('two');
+      expect(areOptionsVisible(wrapper)).to.be.false;
+    });
+
+    it('selects an option on click', () => {
+      const wrapper = mount(
+        <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 't';
+      input.simulate('input');
+
+      const option = wrapper.find('[data-value="two"]');
+      option.simulate('click');
 
       expect(input.getDOMNode().value).to.equal('two');
       expect(areOptionsVisible(wrapper)).to.be.false;
