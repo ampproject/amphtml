@@ -1,5 +1,3 @@
-import type {RefObject} from 'preact';
-
 import {useRef} from '#preact';
 
 /**
@@ -7,8 +5,8 @@ import {useRef} from '#preact';
  * @return {{current: T}}
  * @template T
  */
-export function useValueRef<T>(current: T): RefObject<T> {
-  const valueRef = useRef<T>(null);
+export function useValueRef<T>(current: T): {current: T} {
+  const valueRef = useRef<T>(current);
   valueRef.current = current;
   return valueRef;
 }
