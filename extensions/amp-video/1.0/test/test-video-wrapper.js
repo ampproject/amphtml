@@ -215,6 +215,29 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     expect(onPlayingState).to.be.calledOnce.calledWith(true);
   });
 
+  it('should send playing state on events', async () => {
+    const onPlayingState = env.sandbox.spy();
+    const onPlayStateChange = env.sandbox.spy();
+    const ref = Preact.createRef();
+    const wrapper = mount(
+      <VideoWrapper
+        ref={ref}
+        component={TestPlayer}
+        onPlayStateChange={onPlayStateChange}
+      />
+    );
+    expect(onPlayingState).to.not.be.called;
+
+    ref.current.togglePlay();
+    await wrapper.find(TestPlayer).invoke('onPlaying')();
+    expect(onPlayStateChange).to.be.calledOnce.calledWith(true);
+
+    onPlayStateChange.resetHistory();
+    await wrapper.find(TestPlayer).invoke('onPause')();
+    ref.current.togglePlay();
+    expect(onPlayStateChange).to.be.calledOnce.calledWith(false);
+  });
+
   describe('MediaSession', () => {
     let navigator;
 
