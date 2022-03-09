@@ -10,7 +10,6 @@ import {areOptionsVisible} from './test-helpers';
 import {BentoAutocomplete} from '../component';
 
 // TODO
-// it selects items on mousedown (658)
 // It accepts a list of objects as items and searches based on the filter value
 // It shows the list of options when the inline token is entered by the user
 // it hides items on escape
@@ -354,7 +353,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         .true;
     });
 
-    it('hides the options on enter', () => {
+    it('hides the options on enter and sets the input to the selected item', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
           <input type="text"></input>
@@ -372,6 +371,24 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(areOptionsVisible(wrapper)).to.be.false;
     });
 
+    it('hides the options on escape and resets the text field to the original text', () => {
+      const wrapper = mount(
+        <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 't';
+      input.simulate('input');
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+      input.simulate('keydown', {key: Keys_Enum.ESCAPE});
+
+      expect(input.getDOMNode().value).to.equal('t');
+      expect(areOptionsVisible(wrapper)).to.be.false;
+    });
+
     it('selects an option on click', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
@@ -385,6 +402,29 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       const option = wrapper.find('[data-value="two"]');
       option.simulate('click');
+
+      expect(input.getDOMNode().value).to.equal('two');
+      expect(areOptionsVisible(wrapper)).to.be.false;
+    });
+
+    it('selects an option if highlightUserEntry is true', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          highlightUserEntry
+          filter="prefix"
+          items={['one', 'two', 'three']}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 'tw';
+      input.simulate('input');
+
+      const span = wrapper.find('.autocomplete-partial');
+      span.simulate('click', {bubbles: true});
 
       expect(input.getDOMNode().value).to.equal('two');
       expect(areOptionsVisible(wrapper)).to.be.false;

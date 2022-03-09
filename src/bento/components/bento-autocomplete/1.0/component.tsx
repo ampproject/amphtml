@@ -72,6 +72,10 @@ export function BentoAutocomplete({
   const [showOptions, _setShowOptions] = useState<boolean>(false);
 
   const setShowOptions = useCallback((shouldDisplay: boolean) => {
+    if (!shouldDisplay) {
+      // Reset the selection state
+      setActiveIndex(-1);
+    }
     inputRef.current?.setAttribute('aria-expanded', shouldDisplay.toString());
     _setShowOptions(shouldDisplay);
   }, []);
@@ -246,7 +250,11 @@ export function BentoAutocomplete({
           break;
         }
         case Keys_Enum.ENTER: {
-          setActiveIndex(-1);
+          setShowOptions(false);
+          break;
+        }
+        case Keys_Enum.ESCAPE: {
+          setInputValue(substring);
           setShowOptions(false);
           break;
         }
@@ -258,20 +266,33 @@ export function BentoAutocomplete({
       filteredData,
       updateActiveItem,
       setShowOptions,
+      setInputValue,
+      substring,
     ]
   );
 
+  const getItemElement: (element: HTMLElement | null) => HTMLElement | null =
+    useCallback((element) => {
+      if (!element) {
+        return null;
+      }
+      if (element.getAttribute('role') === 'option') {
+        return element as HTMLDivElement;
+      }
+      return getItemElement(element.parentElement);
+    }, []);
+
   const handleItemClick = useCallback(
     (event: MouseEvent) => {
-      const element = event.target as HTMLElement;
+      const element = getItemElement(event.target as HTMLElement);
       const textValue =
-        element.getAttribute('data-value') || element.textContent || '';
+        element?.getAttribute('data-value') || element?.textContent || '';
 
       setInputValue(textValue);
       setActiveIndex(-1);
       setShowOptions(false);
     },
-    [setInputValue, setShowOptions]
+    [setInputValue, setShowOptions, getItemElement]
   );
 
   const getItemChildren = useCallback(
