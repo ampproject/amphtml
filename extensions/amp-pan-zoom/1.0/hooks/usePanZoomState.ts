@@ -18,7 +18,7 @@ const initialState = {
   containerSize: {width: 0, height: 0},
   contentSize: {width: 0, height: 0},
 
-  isZoomed: false,
+  isPannable: false,
   canZoom: true,
   isDragging: false,
   allowExtent: false,
@@ -125,7 +125,7 @@ const updateView = (
     posX: boundValueSpring(posX, minX, maxX, extentX),
     posY: boundValueSpring(posY, minY, maxY, extentY),
     scale: newScale,
-    isZoomed: newScale !== 1,
+    isPannable: newScale !== 1,
     canZoom: newScale !== state.maxScale,
   };
 };
@@ -195,13 +195,15 @@ export function usePanZoomState(config: PanZoomConfig) {
       updateScale(payload: {
         anchorX?: number;
         anchorY?: number;
-        scale: number;
+        scale?: number;
       }) {
         setState((state) => {
           const {
             anchorX = state.containerSize.width / 2,
             anchorY = state.containerSize.height / 2,
-            scale,
+            scale = state.scale === state.maxScale
+              ? state.minScale
+              : state.scale + 1,
           } = payload;
           return {
             ...state,
@@ -216,6 +218,15 @@ export function usePanZoomState(config: PanZoomConfig) {
         setState((state) => ({
           ...state,
           ...updateView(state, payload),
+        }));
+      },
+      move(payload: {deltaX: number; deltaY: number}) {
+        setState((state) => ({
+          ...state,
+          ...updateView(state, {
+            posX: state.posX + payload.deltaX,
+            posY: state.posY + payload.deltaY,
+          }),
         }));
       },
     };
