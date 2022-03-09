@@ -76,8 +76,6 @@ export class FinalPageAlgorithm {
       return;
     }
 
-    console.log('insert');
-
     this.pageManager_
       .maybeInsertPageAfter(pageBeforeAdId, nextAdPage)
       .then((insertionState) => {
