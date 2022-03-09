@@ -316,7 +316,7 @@ export class AmpStory extends AMP.BaseElement {
     this.pendingSubscriptionsState_ = false;
 
     /** @private {?Deferred} A promise that is resolved once the subscription state is received */
-    this.subscriptionsStatePromise_ = null;
+    this.subscriptionsStatePromise_ = new Deferred();
 
     /** @private {?number} The timeout ID for the paywall timer */
     this.paywallTimeout_ = null;
@@ -385,8 +385,6 @@ export class AmpStory extends AMP.BaseElement {
       );
       page.setAttribute('active', '');
     }
-
-    this.subscriptionsStatePromise_ = new Deferred();
 
     this.initializeListeners_();
     this.initializePageIds_();
@@ -1324,6 +1322,8 @@ export class AmpStory extends AMP.BaseElement {
         // Hit a blocked page.
         if (subscriptionsState === SubscriptionsState.UNKNOWN) {
           if (this.pendingSubscriptionsState_) {
+            // If already waiting, return early. This is to prevent multiple clicks
+            // during waitingfrom causing duplicate navigation.
             return Promise.resolve();
           }
           // Block while waiting for entitlements.
