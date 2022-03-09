@@ -581,7 +581,7 @@ export class AmpDoc {
     let visibilityState;
     const visibilityStateOverride =
       this.visibilityStateOverride_ || VisibilityState_Enum.VISIBLE;
-      if (
+    if (
       visibilityStateOverride == VisibilityState_Enum.VISIBLE &&
       parentVisibilityState == VisibilityState_Enum.VISIBLE &&
       naturalVisibilityState == VisibilityState_Enum.VISIBLE

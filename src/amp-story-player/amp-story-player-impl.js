@@ -616,7 +616,7 @@ export class AmpStoryPlayer {
 
           messaging.registerHandler('storyContentLoaded', () => {
             story.storyContentLoaded = true;
-          })
+          });
 
           messaging.sendRequest(
             'onDocumentState',
@@ -853,11 +853,11 @@ export class AmpStoryPlayer {
    * @param {!StoryDef} story
    * @private
    */
-   initStoryContentLoadedPromise_(story) {
+  initStoryContentLoadedPromise_(story) {
     this.currentStoryLoadDeferred_ = new Deferred();
 
     if (story.storyContentLoaded) {
-      return this.currentStoryLoadDeferred_.resolve();
+      this.currentStoryLoadDeferred_.resolve();
     }
 
     story.messagingPromise.then((messaging) =>
@@ -868,7 +868,7 @@ export class AmpStoryPlayer {
         this.currentStoryLoadDeferred_.resolve();
       })
     );
-   }
+  }
 
   /**
    * Shows the story provided by the URL in the player and go to the page if provided.
@@ -1207,7 +1207,6 @@ export class AmpStoryPlayer {
     const renderPromises = [];
 
     for (let i = 0; i < this.stories_.length; i++) {
-
       const story = this.stories_[(i + startingIdx) % this.stories_.length];
 
       const oldDistance = story.distance;
