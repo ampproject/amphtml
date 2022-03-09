@@ -10,8 +10,6 @@ import {areOptionsVisible} from './test-helpers';
 import {BentoAutocomplete} from '../component';
 
 // TODO
-// it sets the item id to be autocomplete-selected?
-// it highlights the substring with a span with class autocomplete-partial (553)
 // it selects items on mousedown (658)
 // it selects items on enter (1318)
 // It accepts a list of objects as items and searches based on the filter value
@@ -20,6 +18,9 @@ import {BentoAutocomplete} from '../component';
 // it hides items on escape
 // it hides items on tab
 // something with backspace (1357)
+
+// Maybe TODO
+// it sets the item id to be autocomplete-selected
 
 const defaultProps = {
   items: [],
@@ -321,7 +322,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
   });
 
   describe('selecting an item', () => {
-    it('sets the input value to the first result on arrow down', () => {
+    it('selects a result on arrow down', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
           <input type="text"></input>
@@ -353,6 +354,24 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       );
       expect(wrapper.find('[data-value="three"]').prop('aria-selected')).to.be
         .true;
+    });
+
+    it('hides the options on enter', () => {
+      const wrapper = mount(
+        <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 't';
+      input.simulate('input');
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+      input.simulate('keydown', {key: Keys_Enum.ENTER});
+
+      expect(input.getDOMNode().value).to.equal('two');
+      expect(areOptionsVisible(wrapper)).to.be.false;
     });
   });
 });

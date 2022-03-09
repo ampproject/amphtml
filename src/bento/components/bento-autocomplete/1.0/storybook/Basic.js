@@ -22,17 +22,13 @@ export default {
     ],
     filter: 'prefix',
     minChars: 1,
+    highlightUserEntry: true,
   },
   argTypes: {
     filter: {
       control: {
         type: 'select',
         options: ['none', 'prefix', 'fuzzy', 'substring'],
-      },
-    },
-    minChars: {
-      control: {
-        type: 'number',
       },
     },
   },

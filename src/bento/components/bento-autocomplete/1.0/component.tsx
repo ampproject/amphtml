@@ -1,4 +1,3 @@
-import {truncate} from 'fs';
 import {ComponentChildren} from 'preact';
 
 import {Keys_Enum} from '#core/constants/key-codes';
@@ -56,7 +55,7 @@ export function BentoAutocomplete({
   onError = DEFAULT_ON_ERROR,
   filter = 'none',
   minChars = 1,
-  items = [],
+  items: data = [],
   filterValue = 'value',
   maxItems,
   highlightUserEntry = false,
@@ -67,9 +66,15 @@ export function BentoAutocomplete({
   );
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [inputValue, setInputValue] = useState<string>('');
-  const [data, setData] = useState<Item[]>(items);
+
+  const [substring, setSubstring] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [showOptions, _setShowOptions] = useState<boolean>(false);
+
+  const setShowOptions = useCallback((shouldDisplay: boolean) => {
+    inputRef.current?.setAttribute('aria-expanded', shouldDisplay.toString());
+    _setShowOptions(shouldDisplay);
+  }, []);
 
   const getItemId = useCallback(
     (index: number) => {
@@ -130,8 +135,11 @@ export function BentoAutocomplete({
   }, [filter, onError]);
 
   const showAutocompleteOptions = useMemo(() => {
-    return (data?.length && inputValue.length >= minChars) || false;
-  }, [data, inputValue, minChars]);
+    if (!showOptions || data?.length === 0) {
+      return false;
+    }
+    return substring.length >= minChars;
+  }, [data, substring, minChars, showOptions]);
 
   const truncateToMaxItems = useCallback(
     (data: Item[]) => {
@@ -148,7 +156,7 @@ export function BentoAutocomplete({
       return truncateToMaxItems(data);
     }
 
-    const normalizedValue = inputValue.toLocaleLowerCase();
+    const normalizedValue = substring.toLocaleLowerCase();
 
     const filteredData = data.filter((item: Item) => {
       if (typeof item === 'object') {
@@ -181,26 +189,24 @@ export function BentoAutocomplete({
     });
 
     return truncateToMaxItems(filteredData);
-  }, [data, filter, inputValue, filterValue, onError, truncateToMaxItems]);
+  }, [data, filter, substring, filterValue, onError, truncateToMaxItems]);
 
-  const handleInput = useCallback((event: Event) => {
-    const _inputValue = (event.target as HTMLInputElement).value;
+  const handleInput = useCallback(
+    (event: Event) => {
+      const inputValue = (event.target as HTMLInputElement).value;
 
-    // TODO: Use logic to derive this from the binding
-    setInputValue(_inputValue);
-  }, []);
-
-  // const enabledItems = useMemo(() => {
-  //   return containerRef.current?.querySelectorAll(
-  //     '.i-amphtml-autocomplete-item:not([data-disabled])'
-  //   );
-  // }, []);
+      // TODO: Use logic to derive this from the binding
+      setSubstring(inputValue);
+      setShowOptions(true);
+    },
+    [setShowOptions]
+  );
 
   const updateActiveItem = useCallback(
     (delta: number) => {
-      // if (delta === 0 || !areResultsDisplayed || enabledItems.length === 0) {
-      //   return;
-      // }
+      if (delta === 0 || !showAutocompleteOptions) {
+        return;
+      }
       const index = activeIndex + delta;
       const newActiveIndex = mod(index, filteredData.length);
       const newValue = filteredData[newActiveIndex];
@@ -213,13 +219,13 @@ export function BentoAutocomplete({
 
       inputRef.current!.value = newValue as string;
     },
-    [activeIndex, filteredData, getItemId]
+    [activeIndex, filteredData, getItemId, showAutocompleteOptions]
   );
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       switch (event.key) {
-        case Keys_Enum.DOWN_ARROW:
+        case Keys_Enum.DOWN_ARROW: {
           event.preventDefault();
           if (showAutocompleteOptions) {
             if (activeIndex === filteredData.length - 1) {
@@ -227,19 +233,32 @@ export function BentoAutocomplete({
             }
             updateActiveItem(1);
           }
+          break;
+        }
+        case Keys_Enum.ENTER: {
+          setActiveIndex(-1);
+          setShowOptions(false);
+          break;
+        }
       }
     },
-    [showAutocompleteOptions, activeIndex, filteredData, updateActiveItem]
+    [
+      showAutocompleteOptions,
+      activeIndex,
+      filteredData,
+      updateActiveItem,
+      setShowOptions,
+    ]
   );
 
   const getItemChildren = useCallback(
     (item: string) => {
       const lowerCaseItem = item.toLocaleLowerCase();
-      const lowerCaseSubstring = inputValue.toLocaleLowerCase();
+      const lowerCaseSubstring = substring.toLocaleLowerCase();
       if (
         highlightUserEntry &&
-        inputValue.length &&
-        inputValue.length <= item.length &&
+        substring.length &&
+        substring.length <= item.length &&
         includes(lowerCaseItem, lowerCaseSubstring)
       ) {
         const substringStart = lowerCaseItem.indexOf(lowerCaseSubstring);
@@ -247,6 +266,7 @@ export function BentoAutocomplete({
         return (
           <>
             {item.slice(0, substringStart)}
+            {/* TODO: Add JSS style */}
             <span class="autocomplete-partial">
               {item.slice(substringStart, substringEnd)}
             </span>
@@ -256,7 +276,7 @@ export function BentoAutocomplete({
       }
       return item;
     },
-    [highlightUserEntry, inputValue]
+    [highlightUserEntry, substring]
   );
 
   useEffect(() => {
