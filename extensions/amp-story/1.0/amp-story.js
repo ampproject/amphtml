@@ -42,10 +42,10 @@ import {
   toggle,
 } from '#core/dom/style';
 import {isEsm} from '#core/mode';
-import {version} from '#core/mode/version';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
 import {map} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
 import {parseQueryString} from '#core/types/string/url';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
@@ -345,21 +345,7 @@ export class AmpStory extends AMP.BaseElement {
         'en-xa',
         createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
       );
-
-    // If there are inline strings, register as current document language.
-    const inlineStrings = this.win.document.querySelector(
-      'script[amp-strings="amp-story"]'
-    );
-    if (
-      inlineStrings &&
-      inlineStrings.getAttribute('i-amphtml-version') ==
-        getMode(this.win).rtvVersion
-    ) {
-      getLocalizationService(this.element).registerLocalizedStringBundle(
-        this.win.document.querySelector('[lang]')?.getAttribute('lang') || 'en',
-        JSON.parse(inlineStrings.textContent)
-      );
-    }
+    this.registerInlineLocalizationStrings_();
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
@@ -2483,6 +2469,33 @@ export class AmpStory extends AMP.BaseElement {
     } else if (this.element.querySelector('amp-analytics')) {
       extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
     }
+  }
+
+  /**
+   * If there are inline strings, register as current document language.
+   */
+  registerInlineLocalizationStrings_() {
+    const inlineStringsEl = this.win.document.querySelector(
+      'script[amp-strings="amp-story"]'
+    );
+    if (
+      !inlineStringsEl ||
+      inlineStringsEl.getAttribute('i-amphtml-version') !=
+        getMode(this.win).rtvVersion
+    ) {
+      return;
+    }
+
+    const stringsOrNull = tryParseJson(inlineStringsEl.textContent);
+
+    if (!stringsOrNull) {
+      return;
+    }
+
+    getLocalizationService(this.element).registerLocalizedStringBundle(
+      this.win.document.querySelector('[lang]')?.getAttribute('lang') || 'en',
+      stringsOrNull
+    );
   }
 }
 

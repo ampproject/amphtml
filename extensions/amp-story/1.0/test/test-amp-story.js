@@ -1626,7 +1626,7 @@ describes.realWin(
       });
     });
 
-    describe('localization', () => {
+    describe.only('localization', () => {
       beforeEach(() => {
         win.__AMP_MODE = {
           rtvVersion: '123',
@@ -1691,6 +1691,22 @@ describes.realWin(
 
         expect(localizationService.getLocalizedString('35')).to.be.equal(
           'TEXTO-EN-LINEA'
+        );
+      });
+
+      it('should use the default strings if inlined JSON is corrupted', async () => {
+        env.win.document.body.parentElement.setAttribute('lang', 'en');
+
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-strings', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '123');
+        inlinedStrings.textContent = 'this: is not a JSON';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'Swipe up'
         );
       });
     });
