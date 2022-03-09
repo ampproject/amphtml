@@ -15,7 +15,7 @@ import {
  * Language code used if there is no language code specified by the document.
  * @const {string}
  */
-const FALLBACK_LANGUAGE_CODE = 'default';
+const FALLBACK_LANGUAGE_CODE = 'en';
 
 /**
  * @const {!RegExp}
@@ -53,7 +53,7 @@ function findLocalizedString(
  */
 export function getLanguageCodesFromString(languageCode) {
   if (!languageCode) {
-    return ['en', FALLBACK_LANGUAGE_CODE];
+    return [FALLBACK_LANGUAGE_CODE];
   }
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
   return matches.reduce(
@@ -67,6 +67,94 @@ export function getLanguageCodesFromString(languageCode) {
     },
     [FALLBACK_LANGUAGE_CODE]
   );
+}
+
+/**
+ * Finds the first valid language from a list of language codes
+ * @param {string[]} codesList
+ * @return {string}
+ */
+export function getValidLanguageCodeFromList(codesList) {
+  // List generated from running in Python
+  // [x.replace(".json", "") for x in os.listdir("./extensions/amp-story/1.0/_locales") if ".json" in x]
+  const allLanguages = [
+    'tr',
+    'mk',
+    'sl',
+    'hu',
+    'mr',
+    'lt',
+    'is',
+    'bn',
+    'nl',
+    'ms',
+    'ja',
+    'de',
+    'ru',
+    'pl',
+    'uk',
+    'fi',
+    'ta',
+    'fil',
+    'ur',
+    'zh-cn',
+    'sk',
+    'ml',
+    'en',
+    'ka',
+    'pa',
+    'my',
+    'pt-pt',
+    'km',
+    'it',
+    'sr',
+    'hr',
+    'es-419',
+    'zu',
+    'et',
+    'iw',
+    'kn',
+    'sq',
+    'ne',
+    'bs',
+    'fr',
+    'am',
+    'gu',
+    'el',
+    'bg',
+    'ro',
+    'hi',
+    'ca',
+    'mn',
+    'si',
+    'pt-br',
+    'ko',
+    'eu',
+    'gl',
+    'zh-tw',
+    'vi',
+    'fa',
+    'lo',
+    'cs',
+    'te',
+    'id',
+    'lv',
+    'no',
+    'af',
+    'sw',
+    'da',
+    'th',
+    'en-gb',
+    'sv',
+    'es',
+    'ar',
+  ];
+  for (let i = 0; i < codesList.length; i++) {
+    if (allLanguages.includes(codesList[i])) {
+      return codesList[i];
+    }
+  }
+  return FALLBACK_LANGUAGE_CODE;
 }
 
 /**

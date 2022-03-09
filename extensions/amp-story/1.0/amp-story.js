@@ -53,6 +53,10 @@ import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
+import {
+  getLanguageCodesFromString,
+  getValidLanguageCodeFromList,
+} from '#service/localization';
 import {createPseudoLocale} from '#service/localization/strings';
 
 import {getDetail} from '#utils/event-helper';
@@ -345,7 +349,9 @@ export class AmpStory extends AMP.BaseElement {
         'en-xa',
         createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
       );
-    this.registerInlineLocalizationStrings_();
+    if (!this.registerInlineLocalizationStrings_()) {
+      this.fetchLocalizationStrings_();
+    }
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
@@ -2473,6 +2479,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * If there are inline localization strings, register as current document language.
+   * @return {boolean}
    */
   registerInlineLocalizationStrings_() {
     const inlineStringsEl = this.win.document.querySelector(
@@ -2483,16 +2490,43 @@ export class AmpStory extends AMP.BaseElement {
       inlineStringsEl.getAttribute('i-amphtml-version') !=
         getMode(this.win).rtvVersion
     ) {
-      return;
+      return false;
     }
     const stringsOrNull = tryParseJson(inlineStringsEl.textContent);
+    const docLang = this.win.document
+      .querySelector('[lang]')
+      ?.getAttribute('lang');
+
     if (!stringsOrNull) {
-      return;
+      return false;
     }
     getLocalizationService(this.element).registerLocalizedStringBundle(
-      this.win.document.querySelector('[lang]')?.getAttribute('lang') || 'en',
+      docLang,
       stringsOrNull
     );
+    return true;
+  }
+
+  /**
+   * Fetches from the CDN or locally the localization strings.
+   */
+  fetchLocalizationStrings_() {
+    const docLang = this.win.document
+      .querySelector('[lang]')
+      ?.getAttribute('lang');
+    const langCodes = getLanguageCodesFromString(docLang);
+    const validLanguageCode = getValidLanguageCodeFromList(langCodes);
+    Services.xhrFor(this.win)
+      .fetchJson(
+        'https://cdn.ampproject.org/v0/amp-story.' + validLanguageCode + '.json'
+      )
+      .then((res) => res.json())
+      .then((json) =>
+        getLocalizationService(this.element).registerLocalizedStringBundle(
+          docLang,
+          json
+        )
+      );
   }
 }
 
