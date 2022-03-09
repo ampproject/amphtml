@@ -1,3 +1,5 @@
+import {BaseElement} from '#bento/components/bento-lightbox/1.0/base-element';
+
 import {
   ActionTrust_Enum,
   DEFAULT_ACTION,
@@ -6,12 +8,12 @@ import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 
@@ -19,7 +21,7 @@ import {CSS} from '../../../build/amp-lightbox-1.0.css';
 const TAG = 'amp-lightbox';
 
 /** @extends {PreactBaseElement<LightboxDef.Api>} */
-class AmpLightbox extends BaseElement {
+class AmpLightbox extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   constructor(element) {
     super(element);

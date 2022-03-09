@@ -1,15 +1,15 @@
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 
-import * as Preact from '#preact';
-import {useRef, useState} from '#preact';
-
 import {
   BentoAccordion,
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '../../../amp-accordion/1.0/component';
-import {BentoYoutube} from '../component';
+} from '#bento/components/bento-accordion/1.0/component';
+import {BentoYoutube} from '#bento/components/bento-youtube/1.0/component';
+
+import * as Preact from '#preact';
+import {useRef, useState} from '#preact';
 
 export default {
   title: 'YouTube',

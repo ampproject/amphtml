@@ -83,6 +83,4 @@ function extensionPayload(name, version, isModule, loadPriority) {
   );
 }
 
-exports.bento = '(self.BENTO=self.BENTO||[]).push(function(){<%= contents %>})';
-
 exports.none = '<%= contents %>';

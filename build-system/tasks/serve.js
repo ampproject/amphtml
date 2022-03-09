@@ -13,6 +13,7 @@ const {
   lazyBuild3pVendor,
   lazyBuildExtensions,
   lazyBuildJs,
+  preBuildBentoComponents,
   preBuildExtensions,
   preBuildRuntimeFiles,
 } = require('../server/lazy-build');
@@ -198,6 +199,7 @@ async function restartServer() {
 async function performPreBuildSteps() {
   await preBuildRuntimeFiles();
   await preBuildExtensions();
+  await preBuildBentoComponents();
 }
 
 /**

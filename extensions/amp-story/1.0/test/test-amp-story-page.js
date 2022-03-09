@@ -145,13 +145,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     expect(spy).to.have.been.calledOnce;
   });
 
-  it('should call renderOpenAttachmentUI_ in beforeVisible', async () => {
-    const spy = env.sandbox.spy(page, 'renderOpenAttachmentUI_');
-    page.buildCallback();
-    await page.layoutCallback();
-    expect(spy).to.have.been.calledTwice;
-  });
-
   it('should mark page as loaded after media is loaded', async () => {
     const waitForMediaLayoutSpy = env.sandbox.spy(page, 'waitForMediaLayout_');
     const markPageAsLoadedSpy = env.sandbox.spy(page, 'markPageAsLoaded_');
@@ -430,15 +423,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
 
     expect(element.getAttribute('auto-advance-after')).to.be.equal('20000ms');
-  });
-
-  it('should not use storyNextUp when in viewer control group', () => {
-    env.sandbox
-      .stub(Services.viewerForDoc(element), 'getParam')
-      .withArgs('storyNextUp')
-      .returns('999999ms');
-    page.buildCallback();
-    expect(element).not.to.have.attribute('auto-advance-after');
   });
 
   it('should stop the advancement when state becomes not active', async () => {

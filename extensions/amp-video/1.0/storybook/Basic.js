@@ -1,14 +1,16 @@
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 
-import * as Preact from '#preact';
-
 import {
   BentoAccordion,
   BentoAccordionContent,
   BentoAccordionHeader,
   BentoAccordionSection,
-} from '../../../amp-accordion/1.0/component';
-import {BentoVideo} from '../component';
+} from '#bento/components/bento-accordion/1.0/component';
+import {BentoVideo} from '#bento/components/bento-video/1.0/component';
+
+import * as Preact from '#preact';
+
+import '#bento/components/bento-video/1.0/component.jss';
 
 export default {
   title: 'Video',

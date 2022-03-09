@@ -109,10 +109,9 @@ const openLabelOrFallback = (element, attachmentEl, label) => {
   if (label) {
     return Promise.resolve(label.trim());
   }
-  return Services.localizationServiceForOrNull(element).then((service) =>
-    service.getLocalizedStringAsync(
-      LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-    )
+  const localizationService = Services.localizationForDoc(element);
+  return localizationService.getLocalizedStringAsync(
+    LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
   );
 };
 
@@ -204,10 +203,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     return (
       <div
         class="i-amphtml-story-inline-page-attachment-img"
-        // TODO(alanorozco): This style attr would be nicer as an object.
-        // We need to enable babel-plugin-jsx-style-object in the testing config
-        // so that we can verify results of style objects.
-        style={`background-image: url(${proxied}) !important`}
+        style={{backgroundImage: `url(${proxied}) !important`}}
       ></div>
     );
   };
@@ -233,8 +229,8 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     </a>
   );
   openLabelPromise.then((label) => {
-    inlineEl.setAttribute('aria-label', label);
     if (label !== 'none') {
+      inlineEl.setAttribute('aria-label', label);
       inlineEl.appendChild(
         <span class="i-amphtml-story-page-attachment-label">{label}</span>
       );

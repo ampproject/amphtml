@@ -18,7 +18,6 @@ import {ContainWrapper, useValueRef} from '#preact/component';
 import {useStyles} from './component.jss';
 import {useSidebarAnimation} from './sidebar-animations-hook';
 import {Side} from './sidebar-config';
-import {useToolbarHook} from './sidebar-toolbar-hook';
 
 /**
  * @param {!BentoSidebarDef.Props} props
@@ -124,7 +123,13 @@ function BentoSidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div class={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+    <div
+      class={objstr({
+        [classes.mounted]: mounted,
+        [classes.unmounted]: !mounted,
+      })}
+      part="wrapper"
+    >
       <ContainWrapper
         as={Comp}
         ref={sidebarRef}
@@ -139,7 +144,7 @@ function BentoSidebarWithRef(
           [classes.right]: side !== Side.LEFT,
         })}
         role="menu"
-        tabIndex="-1"
+        tabindex="-1"
         hidden={!side}
         {...rest}
       >
@@ -166,28 +171,3 @@ function BentoSidebarWithRef(
 const BentoSidebar = forwardRef(BentoSidebarWithRef);
 BentoSidebar.displayName = 'BentoSidebar'; // Make findable for tests.
 export {BentoSidebar};
-
-/**
- * @param {!BentoSidebarDef.BentoSidebarToolbarProps} props
- * @return {PreactDef.Renderable}
- */
-export function BentoSidebarToolbar({
-  children,
-  toolbar: mediaQueryProp,
-  toolbarTarget: toolbarTargetProp,
-  ...rest
-}) {
-  const ref = useRef(null);
-  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
-
-  return (
-    <nav
-      ref={ref}
-      toolbar={mediaQueryProp}
-      toolbar-target={toolbarTargetProp}
-      {...rest}
-    >
-      {children}
-    </nav>
-  );
-}

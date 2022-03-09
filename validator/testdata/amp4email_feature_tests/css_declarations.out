@@ -242,8 +242,7 @@ amp4email_feature_tests/css_declarations.html:9:0 Tag 'html' marked with attribu
 |        pitch-range: foo;
 |        place-items: foo;
 |        pointer-events: foo;
-|        /* position has special rules. Don't use `foo` */
-|        position: initial;
+|        position: foo;
 |        quotes: foo;
 |        resize: foo;
 |        richness: foo;

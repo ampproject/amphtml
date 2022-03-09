@@ -20,18 +20,30 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
 
     it('Uses implicit root.', () => {
       createViewportObserver(noop, win);
-      expect(ctorSpy).calledWith(noop, {threshold: undefined, root: undefined});
+      expect(ctorSpy).calledWith(noop, {
+        threshold: undefined,
+        root: undefined,
+        rootMargin: undefined,
+      });
     });
 
     it('Pass along threshold argument', () => {
       createViewportObserver(noop, win, {threshold: 0.5});
-      expect(ctorSpy).calledWith(noop, {threshold: 0.5, root: undefined});
+      expect(ctorSpy).calledWith(noop, {
+        threshold: 0.5,
+        root: undefined,
+        rootMargin: undefined,
+      });
     });
 
     it('Sets document root appropriately', () => {
       // Implicit root when not iframed.
       createViewportObserver(noop, win, {needsRootBounds: true});
-      expect(ctorSpy).calledWith(noop, {threshold: undefined, root: undefined});
+      expect(ctorSpy).calledWith(noop, {
+        threshold: undefined,
+        root: undefined,
+        rootMargin: undefined,
+      });
 
       // Document root when iframed.
       win.parent = {};
@@ -39,6 +51,7 @@ describes.sandboxed('DOM - layout - Viewport Observer', {}, (env) => {
       expect(ctorSpy).calledWith(noop, {
         threshold: undefined,
         root: win.document,
+        rootMargin: undefined,
       });
     });
   });

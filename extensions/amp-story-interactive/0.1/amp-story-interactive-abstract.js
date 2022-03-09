@@ -11,6 +11,7 @@ import {Services} from '#service';
 import {dev, devAssert} from '#utils/log';
 
 import {executeRequest} from 'extensions/amp-story/1.0/request-utils';
+import {installStylesForDoc} from 'src/style-installer';
 
 import {emojiConfetti} from './interactive-confetti';
 import {
@@ -19,7 +20,8 @@ import {
 } from './interactive-disclaimer';
 import {deduplicateInteractiveIds} from './utils';
 
-import {CSS} from '../../../build/amp-story-interactive-0.1.css';
+import {CSS as hostCss} from '../../../build/amp-story-interactive-host-0.1.css';
+import {CSS as shadowCss} from '../../../build/amp-story-interactive-shadow-0.1.css';
 import {
   addParamsToUrl,
   appendPathToUrl,
@@ -188,6 +190,20 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
     this.variableService_ = null;
+
+    // We install host CSS directly instead of during `registerElement` since
+    // components with different names extend from this class. As such, we'd
+    // unnnecessarily install the same styles once for each type of inheriting
+    // component present on the page.
+    // Instead, we ensure that we only install once by preserving the extension
+    // name "amp-story-interactive".
+    installStylesForDoc(
+      this.getAmpDoc(),
+      hostCss,
+      /* whenReady */ null,
+      /* isRuntimeCss */ false,
+      /* ext */ TAG
+    );
   }
 
   /**
@@ -243,7 +259,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   buildCallback(concreteCSS = '') {
-    this.loadFonts_();
     this.options_ = this.parseOptions_();
     this.element.classList.add('i-amphtml-story-interactive-component');
     this.adjustGridLayer_();
@@ -278,7 +293,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       createShadowRootWithStyle(
         this.element,
         dev().assertElement(this.rootEl_),
-        CSS + concreteCSS
+        shadowCss + concreteCSS
       );
       return Promise.resolve();
     });
@@ -381,6 +396,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.loadFonts_();
     this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()

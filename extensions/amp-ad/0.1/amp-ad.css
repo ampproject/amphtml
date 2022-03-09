@@ -64,7 +64,6 @@ amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'][height='fluid'] 
 
 amp-ad .amp-ad-close-button {
   position: absolute;
-  visibility: visible;
   width: 28px;
   height: 28px;
   right: 0;
@@ -132,6 +131,7 @@ amp-ad[sticky='top'] {
   max-height: 20% !important;
   background: #fff;
   padding-bottom: 5px;
+  top: 0;
 }
 
 amp-ad[sticky='bottom'] {

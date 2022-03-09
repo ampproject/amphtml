@@ -1,15 +1,7 @@
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {toggleAttribute} from '#core/dom';
-import {setStyle} from '#core/dom/style';
 
-import {forceExperimentBranch, getExperimentBranch} from '#experiments';
-import {
-  AdvanceExpToTime,
-  StoryAdAutoAdvance,
-  divertStoryAdAutoAdvance,
-} from '#experiments/story-ad-auto-advance';
+import {forceExperimentBranch} from '#experiments';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
-import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 
@@ -27,7 +19,6 @@ import {StoryAdPageManager} from './story-ad-page-manager';
 
 import {CSS} from '../../../build/amp-story-auto-ads-0.1.css';
 import {CSS as adBadgeCSS} from '../../../build/amp-story-auto-ads-ad-badge-0.1.css';
-import {CSS as progessBarCSS} from '../../../build/amp-story-auto-ads-progress-bar-0.1.css';
 import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css';
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
@@ -52,14 +43,7 @@ const MUSTACHE_TAG = 'amp-mustache';
  * @const {Object<string, string>}
  * @visibleForTesting
  */
-export const RELEVANT_PLAYER_EXPS = {
-  [StoryAdSegmentExp.CONTROL]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.NO_ADVANCE_BOTH]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.NO_ADVANCE_AD]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.TEN_SECONDS]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.TWELVE_SECONDS]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.FOURTEEN_SECONDS]: StoryAdSegmentExp.ID,
-};
+export const RELEVANT_PLAYER_EXPS = {};
 
 /** @enum {string} */
 export const Attributes = {
@@ -92,9 +76,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.adBadgeContainer_ = null;
-
-    /** @private {?Element} */
-    this.progressBarBackground_ = null;
 
     /** @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
@@ -156,7 +137,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.config_
         );
         divertStoryAdPlacements(this.win);
-        divertStoryAdAutoAdvance(this.win);
         this.placementAlgorithm_ = getPlacementAlgo(
           this.win,
           this.storeService_,
@@ -171,7 +151,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           STORY_AD_ANALYTICS
         );
         this.createAdOverlay_();
-        this.maybeCreateProgressBar_();
         this.initializeListeners_();
         this.initializePages_();
       });
@@ -323,14 +302,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.mutateElement(() => {
       if (isAd) {
         this.adBadgeContainer_.setAttribute(Attributes.AD_SHOWING, '');
-        // TODO(#33969) can no longer be null when launched.
-        this.progressBarBackground_ &&
-          this.progressBarBackground_.setAttribute(Attributes.AD_SHOWING, '');
       } else {
         this.adBadgeContainer_.removeAttribute(Attributes.AD_SHOWING);
-        // TODO(#33969) can no longer be null when launched.
-        this.progressBarBackground_ &&
-          this.progressBarBackground_.removeAttribute(Attributes.AD_SHOWING);
       }
     });
   }
@@ -359,15 +332,12 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       const {DESKTOP_FULLBLEED, DESKTOP_ONE_PANEL} = Attributes;
       this.adBadgeContainer_.removeAttribute(DESKTOP_FULLBLEED);
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
-      // TODO(#33969) can no longer be null when launched.
-      this.progressBarBackground_?.removeAttribute(DESKTOP_ONE_PANEL);
 
       if (uiState === UIType.DESKTOP_FULLBLEED) {
         this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
       }
       if (uiState === UIType.DESKTOP_ONE_PANEL) {
         this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
-        this.progressBarBackground_?.setAttribute(DESKTOP_ONE_PANEL, '');
       }
     });
   }
@@ -390,66 +360,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     createShadowRootWithStyle(root, this.adBadgeContainer_, adBadgeCSS);
 
     this.ampStory_.element.appendChild(root);
-  }
-
-  /**
-   * Create progress bar if auto advance exp is on.
-   * TODO(#33969) move to chosen UI and delete the others.
-   */
-  maybeCreateProgressBar_() {
-    const autoAdvanceExpBranch = getExperimentBranch(
-      this.win,
-      StoryAdAutoAdvance.ID
-    );
-    if (getExperimentBranch(this.win, StoryAdSegmentExp.ID)) {
-      // In the viewer controlled experiment progress bar is created by
-      // progress-bar.js
-      return;
-    } else if (
-      autoAdvanceExpBranch &&
-      autoAdvanceExpBranch !== StoryAdAutoAdvance.CONTROL
-    ) {
-      this.createProgressBar_(AdvanceExpToTime[autoAdvanceExpBranch]);
-    }
-  }
-
-  /**
-   * Create progress bar that will be shown when ad is advancing.
-   * @param {string} time
-   */
-  createProgressBar_(time) {
-    const progressBar = this.doc_.createElement('div');
-    progressBar.className = 'i-amphtml-story-ad-progress-bar';
-    setStyle(progressBar, 'animationDuration', time);
-
-    this.progressBarBackground_ = this.doc_.createElement('div');
-    this.progressBarBackground_.className =
-      'i-amphtml-story-ad-progress-background';
-
-    const host = this.doc_.createElement('div');
-    host.className = 'i-amphtml-story-ad-progress-bar-host';
-
-    this.progressBarBackground_.appendChild(progressBar);
-    createShadowRootWithStyle(host, this.progressBarBackground_, progessBarCSS);
-    this.ampStory_.element.appendChild(host);
-
-    // TODO(#33969) move this to init listeners when no longer conditional.
-    this.storeService_.subscribe(StateProperty.PAUSED_STATE, (isPaused) => {
-      this.onPauseStateUpdate_(isPaused);
-    });
-  }
-
-  /**
-   * If video is paused and ad is showing pause the progress bar.
-   * @param {boolean} isPaused
-   */
-  onPauseStateUpdate_(isPaused) {
-    const adShowing = this.storeService_.get(StateProperty.AD_STATE);
-    if (!adShowing) {
-      return;
-    }
-
-    toggleAttribute(this.progressBarBackground_, Attributes.PAUSED, isPaused);
   }
 
   /**

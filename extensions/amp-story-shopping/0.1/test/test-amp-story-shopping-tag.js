@@ -1,8 +1,7 @@
-import {createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import '../amp-story-shopping';
-
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
@@ -23,7 +22,7 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let element;
+    let tagEl;
     let shoppingTag;
     let storeService;
     let localizationService;
@@ -35,42 +34,58 @@ describes.realWin(
         return storeService;
       });
 
+      storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
+
       localizationService = new LocalizationService(win.document.body);
       env.sandbox
-        .stub(Services, 'localizationServiceForOrNull')
-        .returns(Promise.resolve(localizationService));
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
 
-      await createAmpStoryShoppingTag();
+      await setUpStoryWithShoppingTag();
     });
 
-    async function createAmpStoryShoppingTag() {
-      const pageEl = win.document.createElement('amp-story-page');
-      pageEl.id = 'page1';
-      element = createElementWithAttributes(
-        win.document,
-        'amp-story-shopping-tag',
-        {'layout': 'container'}
+    async function setUpStoryWithShoppingTag() {
+      tagEl = (
+        <amp-story-shopping-tag layout="container"></amp-story-shopping-tag>
       );
-      pageEl.appendChild(element);
-      win.document.body.appendChild(pageEl);
-      shoppingTag = await element.getImpl();
+      env.win.document.body.appendChild(
+        <amp-story-page id="page1">
+          {tagEl}
+          <amp-story-shopping-attachment></amp-story-shopping-attachment>
+        </amp-story-page>
+      );
+      shoppingTag = await tagEl.getImpl();
     }
 
-    async function shoppingDataDispatchStoreService() {
+    async function setUpShoppingData() {
       const shoppingData = {
-        'sunglasses': {'product-title': 'Spectacular Spectacles'},
+        'page1': {'sunglasses': {'productTitle': 'Spectacular Spectacles'}},
       };
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
     }
 
-    it('should build and layout shopping tag component', () => {
+    async function setupShoppingTagAndData() {
+      shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
+      await setUpShoppingData();
+      expect(() => shoppingTag.buildCallback()).to.not.throw();
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
+    }
+
+    it('should build and layout shopping tag component', async () => {
+      await setupShoppingTagAndData();
+      expect(shoppingTag.shoppingTagEl_).to.be.not.null;
+    });
+
+    it('should not build shopping tag if page attachment is missing', async () => {
+      env.win.document.querySelector('amp-story-shopping-attachment').remove();
+      await setupShoppingTagAndData();
+      expect(shoppingTag.shoppingTagEl_).to.be.null;
     });
 
     it('should process config data and set text container content if data not null', async () => {
-      shoppingTag.element.setAttribute('data-tag-id', 'sunglasses');
-      await shoppingDataDispatchStoreService();
-      env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
+      shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
+      await setUpShoppingData();
+      env.sandbox.stub(shoppingTag, 'measureMutateElement').callsFake(() => {
         expect(shoppingTag.element.textContent).to.equal(
           'Spectacular Spectacles'
         );
@@ -78,18 +93,18 @@ describes.realWin(
     });
 
     it('should not process config data and set text container content if id not found', async () => {
-      shoppingTag.element.setAttribute('data-tag-id', 'hat');
-      await shoppingDataDispatchStoreService();
+      shoppingTag.element.setAttribute('data-product-id', 'hat');
+      await setUpShoppingData();
       expect(shoppingTag.element.textContent).to.be.empty;
       expect(shoppingTag.isLayoutSupported(Layout_Enum.CONTAINER)).to.be.true;
     });
 
     it('should set active product in store service when shopping tag is clicked', async () => {
       const tagData = {
-        'product-tag-id': 'sunglasses',
-        'product-title': 'Spectacular Spectacles',
-        'product-price': '400',
-        'product-icon':
+        'productId': 'sunglasses',
+        'productTitle': 'Spectacular Spectacles',
+        'productPrice': '400',
+        'productIcon':
           '/examples/visual-tests/amp-story/img/shopping/nest-audio-icon.png',
       };
 

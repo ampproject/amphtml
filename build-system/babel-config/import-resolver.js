@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const moduleResolver = require('babel-plugin-module-resolver');
 
 const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.base.json');
 let tsConfigPaths = null;
@@ -48,7 +49,8 @@ function getImportResolver() {
   return {
     root: ['.'],
     alias: readJsconfigPaths(),
-    extensions: ['.js', '.jsx', '.ts', 'tsx'],
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    stripExtensions: [],
     babelOptions: {
       caller: {
         name: 'import-resolver',
@@ -79,8 +81,22 @@ function getImportResolverPlugin() {
   return ['module-resolver', getImportResolver()];
 }
 
+/**
+ * Resolves a filepath using the same logic as the rest of our build pipeline (babel module-resolver).
+ * The return value is a relative path from the amphtml folder.
+ *
+ * @param {string} filepath
+ * @return {string}
+ */
+function resolvePath(filepath) {
+  // 2nd arg is a file from which to make a relative path.
+  // The actual file doesn't need to exist. In this case it is process.cwd()/anything
+  return moduleResolver.resolvePath(filepath, 'anything', getImportResolver());
+}
+
 module.exports = {
   getImportResolver,
   getImportResolverPlugin,
   getRelativeAliasMap,
+  resolvePath,
 };

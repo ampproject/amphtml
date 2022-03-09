@@ -1,3 +1,6 @@
+import {BaseElement} from '#bento/components/bento-social-share/1.0/base-element';
+import {getSocialConfig} from '#bento/components/bento-social-share/1.0/social-share-config';
+
 import {getDataParamsFromAttributes} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
 import {toggle} from '#core/dom/style';
@@ -6,12 +9,11 @@ import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
-import {getSocialConfig} from './social-share-config';
 
 import {CSS} from '../../../build/amp-social-share-1.0.css';
 import {addParamsToUrl} from '../../../src/url';
@@ -114,7 +116,7 @@ const updateTypeConfig = (element, mutations, prevTypeValue) => {
   return typeConfig;
 };
 
-class AmpSocialShare extends BaseElement {
+class AmpSocialShare extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);

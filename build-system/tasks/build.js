@@ -1,7 +1,7 @@
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoRuntime,
+  compileBentoRuntimeAndCore,
   compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
@@ -10,10 +10,12 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
+const {buildBentoComponents} = require('./build-bento');
 const {buildExtensions} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
 const {compileCss} = require('./css');
 const {parseExtensionFlags} = require('./extension-helpers');
+const {buildStoryLocalization} = require('./build-story-localization');
 
 const argv = require('minimist')(process.argv.slice(2));
 
@@ -25,7 +27,11 @@ const argv = require('minimist')(process.argv.slice(2));
  * @return {Promise}
  */
 async function runPreBuildSteps(options) {
-  return Promise.all([compileCss(options), bootstrapThirdPartyFrames(options)]);
+  return Promise.all([
+    buildStoryLocalization(options),
+    compileCss(options),
+    bootstrapThirdPartyFrames(options),
+  ]);
 }
 
 /**
@@ -48,13 +54,11 @@ async function build() {
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
   } else if (argv.bento_runtime_only) {
-    await compileBentoRuntime(options);
+    await compileBentoRuntimeAndCore(options);
   } else {
     await compileAllJs(options);
   }
-
-  // This step internally parses the various extension* flags.
-  await buildExtensions(options);
+  await Promise.all([buildExtensions(options), buildBentoComponents(options)]);
 
   // This step is to be run only during a full `amp build`.
   if (!argv.core_runtime_only && !argv.bento_runtime_only) {
