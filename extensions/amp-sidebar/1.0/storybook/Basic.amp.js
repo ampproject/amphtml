@@ -1,18 +1,10 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {
-  boolean,
-  color,
-  number,
-  select,
-  text,
-  withKnobs,
-} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-sidebar-1_0',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [{name: 'amp-sidebar', version: '1.0'}],
@@ -20,13 +12,12 @@ export default {
   },
 };
 
-export const _default = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const backdropColor = color('backdrop color');
-
+export const _default = ({
+  backdropColor,
+  backgroundColor,
+  foregroundColor,
+  ...args
+}) => {
   return (
     <main>
       <style>
@@ -40,7 +31,7 @@ export const _default = () => {
           }
           `}
       </style>
-      <amp-sidebar layout="nodisplay" id="sidebar" side={side}>
+      <amp-sidebar layout="nodisplay" id="sidebar" {...args}>
         <div style={{margin: 8}}>
           <span>
             Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
@@ -65,14 +56,36 @@ export const _default = () => {
   );
 };
 
-export const toolbar = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const backdropColor = color('backdrop color');
-  const toolbarMedia = text('toolbar media', '(max-width: 500px)');
+_default.argTypes = {
+  side: {
+    name: 'side',
+    defaultValue: 'left',
+    // The option `undefined` is necessary to emulate the behavior when `side`
+    // is not set by the user.
+    options: ['left', 'right', undefined],
+    control: {type: 'select'},
+  },
+  foregroundColor: {
+    name: 'foregroundColor',
+    control: {type: 'color'},
+  },
+  backgroundColor: {
+    name: 'backgroundColor',
+    control: {type: 'color'},
+  },
+  backdropColor: {
+    name: 'backdropColor',
+    control: {type: 'color'},
+  },
+};
 
+export const toolbar = ({
+  backdropColor,
+  backgroundColor,
+  foregroundColor,
+  toolbarMedia,
+  ...args
+}) => {
   return (
     <main>
       <style>
@@ -86,7 +99,7 @@ export const toolbar = () => {
           }
           `}
       </style>
-      <amp-sidebar layout="nodisplay" id="sidebar" side={side}>
+      <amp-sidebar layout="nodisplay" id="sidebar" {...args}>
         <span>
           Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
           inermis reprehendunt.
@@ -116,23 +129,49 @@ export const toolbar = () => {
   );
 };
 
-export const styles = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const height = text('height', null);
-  const width = text('width', null);
-  const padding = text('padding', null);
-  const border = text('border', null);
-  const top = text('top', null);
-  const maxHeight = text('max-height', null);
-  const maxWidth = text('max-width', null);
-  const minWidth = text('min-width', null);
-  const outline = text('outline', null);
-  const zIndex = number('z-index', 2147483647);
-  const backdropColor = color('backdrop color');
+toolbar.args = {
+  toolbarMedia: '(max-width:500px)',
+};
 
+toolbar.argTypes = {
+  side: {
+    name: 'side',
+    defaultValue: 'left',
+    // The option `undefined` is necessary to emulate the behavior when `side`
+    // is not set by the user.
+    options: ['left', 'right', undefined],
+    control: {type: 'select'},
+  },
+  foregroundColor: {
+    name: 'foregroundColor',
+    control: {type: 'color'},
+  },
+  backgroundColor: {
+    name: 'backgroundColor',
+    control: {type: 'color'},
+  },
+  backdropColor: {
+    name: 'backdropColor',
+    control: {type: 'color'},
+  },
+};
+
+export const styles = ({
+  backdropColor,
+  backgroundColor,
+  border,
+  foregroundColor,
+  height,
+  maxHeight,
+  maxWidth,
+  minWidth,
+  outline,
+  padding,
+  top,
+  width,
+  zIndex,
+  ...args
+}) => {
   return (
     <main>
       <style>
@@ -156,7 +195,7 @@ export const styles = () => {
           }
           `}
       </style>
-      <amp-sidebar layout="nodisplay" id="sidebar" side={side}>
+      <amp-sidebar layout="nodisplay" id="sidebar" {...args}>
         <div style={{margin: 8}}>
           <span>
             Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
@@ -181,15 +220,78 @@ export const styles = () => {
   );
 };
 
-export const scroll = () => {
-  const sideConfigurations = ['left', 'right', undefined];
-  const side = select('side', sideConfigurations, sideConfigurations[0]);
-  const foregroundColor = color('color');
-  const backgroundColor = color('background');
-  const backdropColor = color('backdrop color');
-  const moreBackgroundContent = boolean('more background content', false);
-  const moreSidebarContent = boolean('more sidebar content', false);
+styles.argTypes = {
+  side: {
+    name: 'side',
+    defaultValue: 'left',
+    // The option `undefined` is necessary to emulate the behavior when `side`
+    // is not set by the user.
+    options: ['left', 'right', undefined],
+    control: {type: 'select'},
+  },
+  foregroundColor: {
+    name: 'foregroundColor',
+    control: {type: 'color'},
+  },
+  backgroundColor: {
+    name: 'backgroundColor',
+    control: {type: 'color'},
+  },
+  backdropColor: {
+    name: 'backdropColor',
+    control: {type: 'color'},
+  },
+  height: {
+    name: 'height',
+    control: {type: 'text'},
+  },
+  width: {
+    name: 'width',
+    control: {type: 'text'},
+  },
+  padding: {
+    name: 'padding',
+    control: {type: 'text'},
+  },
+  border: {
+    name: 'border',
+    control: {type: 'text'},
+  },
+  top: {
+    name: 'top',
+    control: {type: 'text'},
+  },
+  maxHeight: {
+    name: 'max-height',
+    control: {type: 'text'},
+  },
+  maxWidth: {
+    name: 'max-width',
+    control: {type: 'text'},
+  },
+  minWidth: {
+    name: 'min-width',
+    control: {type: 'text'},
+  },
+  outline: {
+    name: 'outline',
+    control: {type: 'text'},
+  },
+  zIndex: {
+    name: 'z-index',
+    defaultValue: 2147483647,
+    control: {type: 'number'},
+  },
+};
 
+export const scroll = ({
+  backdropColor,
+  backgroundColor,
+  foregroundColor,
+  moreBackgroundContent,
+  moreSidebarContent,
+  ...args
+}) => {
   return (
     <main>
       <style>
@@ -203,7 +305,7 @@ export const scroll = () => {
           }
           `}
       </style>
-      <amp-sidebar layout="nodisplay" id="sidebar" side={side}>
+      <amp-sidebar layout="nodisplay" id="sidebar" {...args}>
         <div style={{margin: 8}}>
           <span>
             Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at
@@ -483,4 +585,37 @@ export const scroll = () => {
       )}
     </main>
   );
+};
+
+scroll.argTypes = {
+  side: {
+    name: 'side',
+    defaultValue: 'left',
+    // The option `undefined` is necessary to emulate the behavior when `side`
+    // is not set by the user.
+    options: ['left', 'right', undefined],
+    control: {type: 'select'},
+  },
+  foregroundColor: {
+    name: 'foregroundColor',
+    control: {type: 'color'},
+  },
+  backgroundColor: {
+    name: 'backgroundColor',
+    control: {type: 'color'},
+  },
+  backdropColor: {
+    name: 'backdropColor',
+    control: {type: 'color'},
+  },
+  moreBackgroundContent: {
+    name: 'moreBackgroundContent',
+    defaultValue: 'false',
+    control: {type: 'boolean'},
+  },
+  moreBentoSidebarContent: {
+    name: 'moreBentoSidebarContent',
+    defaultValue: 'false',
+    control: {type: 'boolean'},
+  },
 };

@@ -723,11 +723,6 @@ const forbiddenTermsGlobal = {
     allowlist: [
       // TODO(#35923): Update existing files to use Controls instead.
       'extensions/amp-lightbox/1.0/storybook/Basic.js',
-      'extensions/amp-selector/1.0/storybook/Basic.amp.js',
-      'extensions/amp-selector/1.0/storybook/Basic.js',
-      'extensions/amp-sidebar/0.1/storybook/Basic.amp.js',
-      'extensions/amp-sidebar/1.0/storybook/Basic.amp.js',
-      'extensions/amp-sidebar/1.0/storybook/Basic.js',
       'extensions/amp-soundcloud/1.0/storybook/Basic.amp.js',
       'extensions/amp-soundcloud/1.0/storybook/Basic.js',
       'extensions/amp-timeago/1.0/storybook/Basic.js',
