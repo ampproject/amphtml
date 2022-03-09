@@ -234,7 +234,6 @@ export class AmpDoc {
    * @param {!AmpDocOptions=} opt_options
    */
   constructor(win, parent, opt_options) {
-    console.log('ampdoc constructor');
     /** @public @const {!Window} */
     this.win = win;
 
@@ -559,14 +558,11 @@ export class AmpDoc {
     if (this.visibilityStateOverride_ != visibilityState) {
       this.visibilityStateOverride_ = visibilityState;
       this.updateVisibilityState_();
-    } else {
-      console.log(`Not updating visibility state because this.visibilityStateOverride_(${this.visibilityStateOverride_}) != visibilityState(${visibilityState})`);
     }
   }
 
   /** @private */
   updateVisibilityState_() {
-    console.log('ampdoc-impl: updateVisibilityState_()');
     // Natural visibility state.
     const naturalVisibilityState = getDocumentVisibilityState(
       this.win.document
@@ -585,32 +581,27 @@ export class AmpDoc {
     let visibilityState;
     const visibilityStateOverride =
       this.visibilityStateOverride_ || VisibilityState_Enum.VISIBLE;
-      console.log('  naturalVS: ' + naturalVisibilityState + ';  parentVS: ' + parentVisibilityState + '  vSOverride: ' + visibilityStateOverride);
       if (
       visibilityStateOverride == VisibilityState_Enum.VISIBLE &&
       parentVisibilityState == VisibilityState_Enum.VISIBLE &&
       naturalVisibilityState == VisibilityState_Enum.VISIBLE
     ) {
-      console.log('');
       visibilityState = VisibilityState_Enum.VISIBLE;
     } else if (
       naturalVisibilityState == VisibilityState_Enum.HIDDEN &&
       visibilityStateOverride == VisibilityState_Enum.PAUSED
     ) {
       // Hidden document state overrides "paused".
-      console.log('');
       visibilityState = naturalVisibilityState;
     } else if (
       visibilityStateOverride == VisibilityState_Enum.PAUSED ||
       visibilityStateOverride == VisibilityState_Enum.INACTIVE
     ) {
-      console.log('');
       visibilityState = visibilityStateOverride;
     } else if (
       parentVisibilityState == VisibilityState_Enum.PAUSED ||
       parentVisibilityState == VisibilityState_Enum.INACTIVE
     ) {
-      console.log('');
       visibilityState = parentVisibilityState;
     } else if (
       visibilityStateOverride == VisibilityState_Enum.PREVIEW ||
@@ -623,14 +614,11 @@ export class AmpDoc {
       naturalVisibilityState == VisibilityState_Enum.PRERENDER ||
       parentVisibilityState == VisibilityState_Enum.PRERENDER
     ) {
-      console.log('');
       visibilityState = VisibilityState_Enum.PRERENDER;
     } else {
-      console.log('');
       visibilityState = VisibilityState_Enum.HIDDEN;
     }
 
-    console.log('if (' + this.visibilityState_ +  ' != ' + visibilityState + ')' );
     if (this.visibilityState_ != visibilityState) {
       if (visibilityState == VisibilityState_Enum.VISIBLE) {
         const {performance} = this.win;
@@ -656,7 +644,6 @@ export class AmpDoc {
       } else {
         this.signals_.reset(AmpDocSignals_Enum.NEXT_VISIBLE);
       }
-      console.log('Setting this.visibilityState_ : ' + visibilityState);
       this.visibilityState_ = visibilityState;
       this.visibilityStateHandlers_.fire();
     }

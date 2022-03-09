@@ -1174,9 +1174,6 @@ export class AmpStoryPlayer {
    * @private
    */
   currentStoryPromise_(story) {
-    const shortHref = story.href.substring(story.href.length - 30)
-
-
     if (this.stories_[this.currentIdx_].storyContentLoaded) {
       return Promise.resolve();
     }
@@ -1212,8 +1209,6 @@ export class AmpStoryPlayer {
     for (let i = 0; i < this.stories_.length; i++) {
 
       const story = this.stories_[(i + startingIdx) % this.stories_.length];
-
-      const shortHref = story.href.substring(story.href.length - 30)
 
       const oldDistance = story.distance;
       story.distance = Math.abs(this.currentIdx_ - story.idx);
