@@ -166,16 +166,16 @@ export class StoryAdPageManager {
   maybeInsertPageAfter(pageBeforeAdId, nextAdPage) {
     const pageBeforeAd = this.ampStory_.getPageById(pageBeforeAdId);
     const pageAfterAd = this.ampStory_.getNextPage(pageBeforeAd);
-    if (!pageAfterAd) {
-      return Promise.resolve(InsertionState.DELAYED);
-    }
+    // if (!pageAfterAd) {
+    //   return Promise.resolve(InsertionState.DELAYED);
+    // }
 
     // We will not insert an ad in any slot containing `next-page-no-ad` nor
     // two ads in a row.
     if (
       this.nextPageNoAd_(pageBeforeAd) ||
       pageBeforeAd.isAd() ||
-      pageAfterAd.isAd()
+      pageAfterAd?.isAd()
     ) {
       return Promise.resolve(InsertionState.DELAYED);
     }

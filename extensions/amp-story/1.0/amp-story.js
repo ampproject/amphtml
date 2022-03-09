@@ -2348,10 +2348,14 @@ export class AmpStory extends AMP.BaseElement {
     const pageBefore = this.getPageById(pageBeforeId);
     const pageBeforeEl = pageBefore.element;
 
-    const nextPage = this.getNextPage(pageBefore);
+    let nextPage = this.getNextPage(pageBefore);
 
     if (!nextPage) {
-      return false;
+      if (pageToBeInserted.isAd()) {
+        nextPage = pageToBeInserted;
+      } else {
+        return false;
+      }
     }
 
     const advanceAttr = isExperimentOn(this.win, 'amp-story-branching')

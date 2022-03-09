@@ -1,7 +1,7 @@
 import {getExperimentBranch} from '#experiments';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
 
-import {CountPagesAlgorithm} from './algorithm-count-pages';
+import {FinalPageAlgorithm} from './algorithm-final-page';
 import {PredeterminedPositionAlgorithm} from './algorithm-predetermined';
 
 /**
@@ -23,5 +23,5 @@ export function getPlacementAlgo(win, storeService, pageManager) {
       placementsExpBranch
     );
   }
-  return new CountPagesAlgorithm(storeService, pageManager);
+  return new FinalPageAlgorithm(storeService, pageManager);
 }
