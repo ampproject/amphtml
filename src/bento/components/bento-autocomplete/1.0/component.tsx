@@ -1,3 +1,4 @@
+import {truncate} from 'fs';
 import {ComponentChildren} from 'preact';
 
 import {Keys_Enum} from '#core/constants/key-codes';
@@ -35,6 +36,8 @@ interface BentoAutocompleteProps {
   minChars?: number;
   items?: Item[];
   filterValue?: string;
+  maxItems?: number;
+  highlightUserEntry?: boolean;
 }
 
 const DEFAULT_ON_ERROR = (message: string) => {
@@ -55,6 +58,8 @@ export function BentoAutocomplete({
   minChars = 1,
   items = [],
   filterValue = 'value',
+  maxItems,
+  highlightUserEntry = false,
 }: BentoAutocompleteProps) {
   const elementRef = useRef<HTMLElement>(null);
   const containerId = useRef<string>(
@@ -128,9 +133,19 @@ export function BentoAutocomplete({
     return (data?.length && inputValue.length >= minChars) || false;
   }, [data, inputValue, minChars]);
 
+  const truncateToMaxItems = useCallback(
+    (data: Item[]) => {
+      if (maxItems && maxItems < data.length) {
+        return data.slice(0, maxItems);
+      }
+      return data;
+    },
+    [maxItems]
+  );
+
   const filteredData = useMemo(() => {
     if (filter === 'none') {
-      return data;
+      return truncateToMaxItems(data);
     }
 
     const normalizedValue = inputValue.toLocaleLowerCase();
@@ -164,8 +179,9 @@ export function BentoAutocomplete({
           throw new Error(`Unexpected filter: ${filter}`);
       }
     });
-    return filteredData;
-  }, [data, filter, inputValue, filterValue, onError]);
+
+    return truncateToMaxItems(filteredData);
+  }, [data, filter, inputValue, filterValue, onError, truncateToMaxItems]);
 
   const handleInput = useCallback((event: Event) => {
     const _inputValue = (event.target as HTMLInputElement).value;
@@ -216,6 +232,33 @@ export function BentoAutocomplete({
     [showAutocompleteOptions, activeIndex, filteredData, updateActiveItem]
   );
 
+  const getItemChildren = useCallback(
+    (item: string) => {
+      const lowerCaseItem = item.toLocaleLowerCase();
+      const lowerCaseSubstring = inputValue.toLocaleLowerCase();
+      if (
+        highlightUserEntry &&
+        inputValue.length &&
+        inputValue.length <= item.length &&
+        includes(lowerCaseItem, lowerCaseSubstring)
+      ) {
+        const substringStart = lowerCaseItem.indexOf(lowerCaseSubstring);
+        const substringEnd = substringStart + lowerCaseSubstring.length;
+        return (
+          <>
+            {item.slice(0, substringStart)}
+            <span class="autocomplete-partial">
+              {item.slice(substringStart, substringEnd)}
+            </span>
+            {item.slice(substringEnd, item.length)}
+          </>
+        );
+      }
+      return item;
+    },
+    [highlightUserEntry, inputValue]
+  );
+
   useEffect(() => {
     setupInputElement(elementRef.current!);
     validateProps();
@@ -251,7 +294,7 @@ export function BentoAutocomplete({
                 dir="auto"
                 aria-selected={activeIndex === index}
               >
-                {item}
+                {getItemChildren(item)}
               </div>
             );
           }

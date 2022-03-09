@@ -11,7 +11,6 @@ import {BentoAutocomplete} from '../component';
 
 // TODO
 // it sets the item id to be autocomplete-selected?
-// It accepts a max-items prop and truncates the list of items (920)
 // it highlights the substring with a span with class autocomplete-partial (553)
 // it selects items on mousedown (658)
 // it selects items on enter (1318)
@@ -259,7 +258,26 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(wrapper.exists('[data-value="three"]')).to.be.true;
     });
 
-    it.skip('truncates items if max-items is set', () => {
+    it('truncates items if max-items is set', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          maxItems={1}
+          filter="substring"
+          items={['one', 'two', 'three']}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 't';
+      input.simulate('input');
+
+      expect(wrapper.find('[role="option"]')).to.have.lengthOf(1);
+    });
+
+    it('truncates items if max-items is set and filter is none', () => {
       const wrapper = mount(
         <Autocomplete
           id="id"
@@ -276,6 +294,29 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('input');
 
       expect(wrapper.find('[role="option"]')).to.have.lengthOf(1);
+    });
+
+    it('highlights the substring for the current input if highlightUserEntry is true', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          highlightUserEntry={true}
+          filter="substring"
+          items={['one', 'two', 'three']}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 'hr';
+      input.simulate('input');
+
+      const option = wrapper.find('[role="option"]');
+
+      expect(option.getDOMNode().innerHTML).to.equal(
+        `t<span class="autocomplete-partial">hr</span>ee`
+      );
     });
   });
 
