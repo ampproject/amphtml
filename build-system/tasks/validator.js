@@ -25,7 +25,7 @@ async function validator() {
  */
 async function validatorCpp() {
   const bazelCmd = [
-    'bazel test',
+    'bazel build',
     '--repo_env=CC=clang',
     "--cxxopt='-std=c++17'",
     '--discard_analysis_cache',
@@ -36,8 +36,8 @@ async function validatorCpp() {
     '--noshow_loading_progress',
     '--test_summary=detailed',
     '--verbose_failures',
-    'cpp/engine:validator_test',
-    'cpp/engine/wasm:validator_js_test',
+    // 'cpp/engine:validator_test',  DO NOT SUBMIT
+    'cpp/engine/wasm:validator_js_bin',
   ].join(' ');
   execOrDie(bazelCmd, {
     cwd: 'validator',
