@@ -37,10 +37,10 @@ const ELIGIBLE_TAGS = new Set([
 export type BentoPanZoomProps = {
   children?: ComponentChildren;
   controls?: boolean;
-  initialScale?: number;
-  initialX?: number;
-  initialY?: number;
-  maxScale?: number;
+  initialScale?: number | string;
+  initialX?: number | string;
+  initialY?: number | string;
+  maxScale?: number | string;
   onTransformEnd?: (scale: number, x: number, y: number) => void;
   resetOnResize?: boolean;
 };
@@ -74,11 +74,11 @@ export function BentoPanZoomWithRef(
 ) {
   const {
     children,
-    controls,
-    initialScale,
-    initialX,
-    initialY,
-    maxScale = DEFAULT_MAX_SCALE,
+    controls = true,
+    initialScale: unusedIS,
+    initialX: unusedIX,
+    initialY: unusedIY,
+    maxScale: unusedMaxScale,
     onTransformEnd,
     resetOnResize,
     ...rest
@@ -118,7 +118,7 @@ export function BentoPanZoomWithRef(
 
   const toggleZoom = () => {
     const newScale =
-      state.scale >= maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
+      state.scale >= state.maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
     actions.updateScale({scale: newScale});
   };
 
@@ -156,7 +156,7 @@ export function BentoPanZoomWithRef(
     },
 
     direction: 'DIRECTION_ALL',
-    onPanStart: (ev) => {
+    onPanStart: () => {
       if (!state.isPannable) {
         return;
       }
@@ -166,7 +166,7 @@ export function BentoPanZoomWithRef(
         posY: state.posY,
       };
     },
-    onPanEnd: (ev) => {
+    onPanEnd: () => {
       if (!state.isPannable) {
         return;
       }
@@ -238,13 +238,15 @@ export function BentoPanZoomWithRef(
         </div>
       </Hammer>
 
-      <button
-        class={classNames(
-          styles.ampPanZoomButton,
-          state.canZoom ? styles.ampPanZoomInIcon : styles.ampPanZoomOutIcon
-        )}
-        onClick={toggleZoom}
-      />
+      {controls && (
+        <button
+          class={classNames(
+            styles.ampPanZoomButton,
+            state.canZoom ? styles.ampPanZoomInIcon : styles.ampPanZoomOutIcon
+          )}
+          onClick={toggleZoom}
+        />
+      )}
     </ContainWrapper>
   );
 }
