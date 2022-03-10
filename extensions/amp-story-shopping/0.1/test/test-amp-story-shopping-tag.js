@@ -88,7 +88,6 @@ describes.realWin(
 
     it('should not build shopping tag if page attachment is missing', async () => {
       env.win.document.querySelector('amp-story-shopping-attachment').remove();
-
       await setupShoppingTagAndData();
       expect(shoppingTag.shoppingTagEl_).to.be.null;
     });
