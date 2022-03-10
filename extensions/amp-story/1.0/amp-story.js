@@ -2479,8 +2479,7 @@ export class AmpStory extends AMP.BaseElement {
       'script[amp-localization="amp-story"]'
     );
     if (
-      !inlineStringsEl ||
-      inlineStringsEl.getAttribute('i-amphtml-version') !=
+      inlineStringsEl?.getAttribute('i-amphtml-version') !==
         getMode(this.win).rtvVersion
     ) {
       return;
