@@ -5,10 +5,10 @@ import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 
+import {cleanHtml} from '#testing/helpers/cleanHtml';
 import {waitFor, whenCalled} from '#testing/helpers/service';
 
 import '../../../amp-mustache/0.2/amp-mustache';
-import {cleanHtml} from './utils';
 
 const CONTENTS = 'div > div'; // TODO: find a better way to find the component's contents
 function snapshot(element) {

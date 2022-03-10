@@ -4,9 +4,8 @@ import * as Preact from '#preact';
 import * as intersectionObserver from '#preact/component/intersection-observer';
 import {xhrUtils} from '#preact/utils/xhr';
 
+import {cleanHtml} from '#testing/helpers/cleanHtml';
 import {waitFor} from '#testing/helpers/service';
-
-import {cleanHtml} from './utils';
 
 import {BentoList} from '../component';
 
