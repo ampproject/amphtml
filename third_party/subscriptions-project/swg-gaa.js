@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.207 */
+/** Version: 0.1.22.208 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1915,6 +1915,7 @@ class GaaGoogle3pSignInButton {
   }
   /**
    * Notify Google Intervention of a complete sign-in event.
+   * @nocollapse
    * @param {{ gaaUser: GaaUserDef}} params
    */
   static gaaNotifySignIn({gaaUser}) {
