@@ -22,8 +22,6 @@ const Hammer: FC<Omit<ReactHammerProps, 'children'>> = (ReactHammer as any)
 type ReactHammerProps = ReactHammer.ReactHammerProps;
 
 const TAG = 'amp-pan-zoom';
-const DEFAULT_MAX_SCALE = 3;
-const DEFAULT_MIN_SCALE = 1;
 
 const ELIGIBLE_TAGS = new Set([
   'svg',
@@ -76,10 +74,10 @@ export function BentoPanZoomWithRef(
     children,
     controls = true,
     // These are here so they will be omitted from '...rest'
-    initialScale: unusedIS,
-    initialX: unusedIX,
-    initialY: unusedIY,
-    maxScale: unusedMaxScale,
+    initialScale, // eslint-disable-line @typescript-eslint/no-unused-vars
+    initialX, // eslint-disable-line @typescript-eslint/no-unused-vars
+    initialY, // eslint-disable-line @typescript-eslint/no-unused-vars
+    maxScale, // eslint-disable-line @typescript-eslint/no-unused-vars
     onTransformEnd,
     resetOnResize = false,
     ...rest
@@ -116,12 +114,6 @@ export function BentoPanZoomWithRef(
   };
   useResizeObserver(contentRef, updateSizes);
   useResizeObserver(containerRef, updateSizes);
-
-  const toggleZoom = () => {
-    const newScale =
-      state.scale >= state.maxScale ? DEFAULT_MIN_SCALE : state.scale + 1;
-    actions.updateScale({scale: newScale});
-  };
 
   useImperativeHandle(
     ref,
@@ -245,7 +237,7 @@ export function BentoPanZoomWithRef(
             styles.ampPanZoomButton,
             state.canZoom ? styles.ampPanZoomInIcon : styles.ampPanZoomOutIcon
           )}
-          onClick={toggleZoom}
+          onClick={() => actions.updateScale({})}
         />
       )}
     </ContainWrapper>
