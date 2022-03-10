@@ -40,25 +40,27 @@ describes.sandboxed('BentoPanZoom preact component v1.0', {}, (unusedEnv) => {
     expect(getParentStyle(wrapper).transform).to.include('scale(1)');
   });
 
-  it('maxScale can be used', () => {
-    const wrapper = mount(
-      <BentoPanZoom maxScale={6}>
-        <Contents />
-      </BentoPanZoom>
-    );
-    wrapper.find('button').simulate('click');
-    expect(getParentStyle(wrapper).transform).to.include('scale(2)');
-    wrapper.find('button').simulate('click');
-    expect(getParentStyle(wrapper).transform).to.include('scale(3)');
-    wrapper.find('button').simulate('click');
-    expect(getParentStyle(wrapper).transform).to.include('scale(4)');
-    wrapper.find('button').simulate('click');
-    expect(getParentStyle(wrapper).transform).to.include('scale(5)');
-    wrapper.find('button').simulate('click');
-    expect(getParentStyle(wrapper).transform).to.include('scale(6)');
-    // It should "loop" around once the max is reached:
-    wrapper.find('button').simulate('click');
-    expect(getParentStyle(wrapper).transform).to.include('scale(1)');
+  describe('maxScale', () => {
+    it('cannot be zoomed past maxScale', () => {
+      const wrapper = mount(
+        <BentoPanZoom maxScale={6}>
+          <Contents />
+        </BentoPanZoom>
+      );
+      wrapper.find('button').simulate('click');
+      expect(getParentStyle(wrapper).transform).to.include('scale(2)');
+      wrapper.find('button').simulate('click');
+      expect(getParentStyle(wrapper).transform).to.include('scale(3)');
+      wrapper.find('button').simulate('click');
+      expect(getParentStyle(wrapper).transform).to.include('scale(4)');
+      wrapper.find('button').simulate('click');
+      expect(getParentStyle(wrapper).transform).to.include('scale(5)');
+      wrapper.find('button').simulate('click');
+      expect(getParentStyle(wrapper).transform).to.include('scale(6)');
+      // It should "loop" around once the max is reached:
+      wrapper.find('button').simulate('click');
+      expect(getParentStyle(wrapper).transform).to.include('scale(1)');
+    });
   });
 
   describe('usePanZoomState', () => {

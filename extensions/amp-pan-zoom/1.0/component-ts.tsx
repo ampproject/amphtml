@@ -39,8 +39,6 @@ export type BentoPanZoomProps = {
   initialX?: number | string;
   initialY?: number | string;
   maxScale?: number | string;
-  onTransformEnd?: (scale: number, x: number, y: number) => void;
-  resetOnResize?: boolean;
 };
 
 export type BentoPanZoomApi = {
@@ -78,8 +76,6 @@ export function BentoPanZoomWithRef(
     initialX, // eslint-disable-line @typescript-eslint/no-unused-vars
     initialY, // eslint-disable-line @typescript-eslint/no-unused-vars
     maxScale, // eslint-disable-line @typescript-eslint/no-unused-vars
-    onTransformEnd,
-    resetOnResize = false,
     ...rest
   } = props;
   const styles = useStyles();
