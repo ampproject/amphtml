@@ -1,5 +1,3 @@
-import {date, number, select, text, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
 import {BentoTimeago} from '../component';
@@ -7,7 +5,28 @@ import {BentoTimeago} from '../component';
 export default {
   title: 'Timeago',
   component: BentoTimeago,
-  decorators: [withKnobs],
+  argTypes: {
+    dateTime: {
+      name: 'dateTime',
+      control: {type: 'date'},
+    },
+    cutoff: {
+      name: 'cutoff',
+      control: {type: 'number'},
+      defaultValue: 0,
+    },
+    placeholder: {
+      name: 'placeholder',
+      control: {type: 'text'},
+      defaultValue: 'Time passed!',
+    },
+    locale: {
+      name: 'locale',
+      control: {type: 'select'},
+      options: LOCALES,
+      defaultValue: navigator.language || 'en-US',
+    },
+  },
 };
 
 const LOCALES = [
@@ -22,15 +41,7 @@ const LOCALES = [
   'zH-Tw',
 ];
 
-export const _default = () => {
-  const dateTime = date('Date/time', new Date());
-  const cutoff = number('Cutoff (seconds)', 0);
-  const placeholder = text('Cutoff placeholder', 'Time passed!');
-  const userLocale = navigator.language || 'en-US';
-  const allLocales = [userLocale].concat(
-    LOCALES.filter((locale) => locale != userLocale)
-  );
-  const locale = select('Locale', allLocales, userLocale);
+export const _default = ({cutoff, dateTime, locale, placeholder}) => {
   return (
     <BentoTimeago
       datetime={dateTime}
@@ -41,15 +52,12 @@ export const _default = () => {
   );
 };
 
-export const WithIntersectionObserver = () => {
-  const dateTime = date('Date/time', new Date());
-  const cutoff = number('Cutoff (seconds)', 0);
-  const placeholder = text('Cutoff placeholder', 'Time passed!');
-  const userLocale = navigator.language || 'en-US';
-  const allLocales = [userLocale].concat(
-    LOCALES.filter((locale) => locale != userLocale)
-  );
-  const locale = select('Locale', allLocales, userLocale);
+export const WithIntersectionObserver = ({
+  cutoff,
+  dateTime,
+  locale,
+  placeholder,
+}) => {
   return (
     <div>
       <p>
@@ -174,3 +182,26 @@ export const WithIntersectionObserver = () => {
 };
 
 WithIntersectionObserver.storyName = 'IntersectionObserver';
+
+WithIntersectionObserver.argTypes = {
+  dateTime: {
+    name: 'dateTime',
+    control: {type: 'date'},
+  },
+  cutoff: {
+    name: 'cutoff',
+    control: {type: 'number'},
+    defaultValue: 0,
+  },
+  placeholder: {
+    name: 'placeholder',
+    control: {type: 'text'},
+    defaultValue: 'Time passed!',
+  },
+  locale: {
+    name: 'locale',
+    control: {type: 'select'},
+    options: LOCALES,
+    defaultValue: navigator.language || 'en-US',
+  },
+};
