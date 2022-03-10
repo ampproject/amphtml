@@ -2521,30 +2521,24 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Fetches from the CDN or locally the localization strings.
+   * Fetches from the CDN or localhost the localization strings.
    */
   fetchLocalizationStrings_() {
-    const docLang = this.win.document
-      .querySelector('[lang]')
-      ?.getAttribute('lang');
-    const langCodes = getLanguageCodesFromString(docLang);
-    const validLanguageCode = getValidLanguageCodeFromList(langCodes);
+    const localizationService = getLocalizationService(this.element);
+    const lang = localizationService.getLanguageCodesForElement(
+      this.element
+    )[0];
 
     const localizationUrl = `${calculateScriptBaseUrl(
       this.win.location,
       getMode(this.win).localDev
-    )}/v0/amp-story.${validLanguageCode}.json`;
-
-    console.log(urls);
+    )}/v0/amp-story.${lang}.json`;
 
     Services.xhrFor(this.win)
       .fetchJson(localizationUrl)
       .then((res) => res.json())
       .then((json) =>
-        getLocalizationService(this.element).registerLocalizedStringBundle(
-          docLang,
-          json
-        )
+        localizationService.registerLocalizedStringBundle(lang, json)
       );
   }
 }

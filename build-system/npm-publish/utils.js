@@ -45,6 +45,18 @@ function getExtensionsAndComponents() {
 }
 
 /**
+ * Gets the directory of the component or extension.
+ * @param {string} extension
+ * @param {string} version
+ * @return {string}
+ */
+function getPackageDir(extension, version) {
+  return extension.startsWith('bento')
+    ? `src/bento/components/${extension}/${version}`
+    : `extensions/${extension}/${version}`;
+}
+
+/**
  * Get semver from extension version and amp version
  * See build-system/compile/internal-version.js for versioning description
  * @param {string} extensionVersion
@@ -62,6 +74,7 @@ module.exports = {
   getComponents,
   getExtensions,
   getExtensionsAndComponents,
+  getPackageDir,
   getSemver,
   coreConfig,
 };
