@@ -8,6 +8,9 @@ import {waitFor} from '#testing/helpers/service';
 
 const CONTENTS = 'div > div';
 function snapshot(element) {
+  if (!element) {
+    return element;
+  }
   const keep = ['style'];
   const html = element.outerHTML;
   return cleanHtml(html, keep);
@@ -46,7 +49,7 @@ describes.realWin(
       );
       return {
         hammerEl: contents.firstChild,
-        zoomButton: contents.lastChild,
+        zoomButton: contents.querySelector('button'),
         contentWrapper,
       };
     }
@@ -78,6 +81,18 @@ describes.realWin(
       );
       expect(findParts(element).contentWrapper.getAttribute('style')).to.equal(
         `transform-origin: 0px 0px; transform: translate(0px, 0px) scale(1);`
+      );
+    });
+
+    it('should render the initial state', async () => {
+      const element = await mountElement(html`
+        <amp-pan-zoom initial-x="555" initial-y="444" initial-scale="3">
+          <div style="width: 1000px; height: 1000px;"></div>
+        </amp-pan-zoom>
+      `);
+
+      expect(findParts(element).contentWrapper.getAttribute('style')).to.equal(
+        `transform-origin: 0px 0px; transform: translate(555px, 444px) scale(3);`
       );
     });
   }

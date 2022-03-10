@@ -11,8 +11,9 @@ BaseElement['Component'] = BentoPanZoom;
 /** @override */
 BaseElement['props'] = {
   'children': {passthrough: true},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
+  'initialX': {attr: 'initial-x'},
+  'initialY': {attr: 'initial-y'},
+  'initialScale': {attr: 'initial-scale'},
 };
 
 /** @override */

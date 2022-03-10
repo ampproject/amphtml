@@ -139,10 +139,10 @@ function initReducer(config: PanZoomConfig): State {
   } = config;
   return {
     ...initialState,
-    posX: initialX,
-    posY: initialY,
-    scale: initialScale,
-    maxScale,
+    posX: Number(initialX),
+    posY: Number(initialY),
+    scale: Number(initialScale),
+    maxScale: Number(maxScale),
   };
 }
 
