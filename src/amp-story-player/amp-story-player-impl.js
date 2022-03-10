@@ -1144,23 +1144,20 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Returns a promise that makes sure current story gets loaded first before
-   * others. When this method is called with any story other than the current
-   * story, it will not resolve until the current story has finished loading.
+   * Returns a promise that makes sure that the current story gets loaded first
+   * before any others. When the given story is not the current story, it will
+   * block until the current story has finished loading. When the given story
+   * is the current story, then this method will not block.
    * @param {!StoryDef} story
    * @return {!Promise}
    * @private
    */
   currentStoryPromise_(story) {
     if (this.stories_[this.currentIdx_].storyContentLoaded) {
-      // Return a promise signifying that the current story has loaded.
       return Promise.resolve();
     }
 
     if (story.distance !== 0) {
-      // When the current story has not yet loaded and the given story is not
-      // the current story, return a promise that will resolve only when the
-      // current story has loaded.
       return this.currentStoryLoadDeferred_.promise;
     }
 
@@ -1169,8 +1166,6 @@ export class AmpStoryPlayer {
       `[${LOG_TYPE_ENUM.DEV}] Cancelling previous story load promise.`
     );
 
-    // Reset `this.currentStoryLoadDeferred_` and have it resolve only when the
-    // current story has loaded.
     this.currentStoryLoadDeferred_ = new Deferred();
     story.messagingPromise.then((messaging) =>
       messaging.registerHandler('storyContentLoaded', () => {
@@ -1181,8 +1176,6 @@ export class AmpStoryPlayer {
       })
     );
 
-    // Return a promise signifying that the given story is 1) the current story
-    // and 2) in the process of loading.
     return Promise.resolve();
   }
 
