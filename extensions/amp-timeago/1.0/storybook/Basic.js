@@ -2,6 +2,18 @@ import * as Preact from '#preact';
 
 import {BentoTimeago} from '../component';
 
+const LOCALES = [
+  'en-US',
+  'en-GB',
+  'fr',
+  'ru',
+  'ar',
+  'he',
+  'ja',
+  'ZhTw',
+  'zH-Tw',
+];
+
 export default {
   title: 'Timeago',
   component: BentoTimeago,
@@ -28,18 +40,6 @@ export default {
     },
   },
 };
-
-const LOCALES = [
-  'en-US',
-  'en-GB',
-  'fr',
-  'ru',
-  'ar',
-  'he',
-  'ja',
-  'ZhTw',
-  'zH-Tw',
-];
 
 export const _default = ({cutoff, dateTime, locale, placeholder}) => {
   return (
