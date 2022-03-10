@@ -14,6 +14,7 @@ BaseElement['props'] = {
   'initialX': {attr: 'initial-x'},
   'initialY': {attr: 'initial-y'},
   'initialScale': {attr: 'initial-scale'},
+  'maxScale': {attr: 'max-scale'},
 };
 
 /** @override */

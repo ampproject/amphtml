@@ -75,12 +75,13 @@ export function BentoPanZoomWithRef(
   const {
     children,
     controls = true,
+    // These are here so they will be omitted from '...rest'
     initialScale: unusedIS,
     initialX: unusedIX,
     initialY: unusedIY,
     maxScale: unusedMaxScale,
     onTransformEnd,
-    resetOnResize,
+    resetOnResize = false,
     ...rest
   } = props;
   const styles = useStyles();

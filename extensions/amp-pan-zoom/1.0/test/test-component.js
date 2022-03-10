@@ -7,6 +7,8 @@ import {usePanZoomState} from '../hooks/usePanZoomState';
 
 describes.sandboxed('BentoPanZoom preact component v1.0', {}, (unusedEnv) => {
   const Contents = () => <article style={{width: 200, height: 100}} />;
+  const getParentStyle = (wrapper) =>
+    wrapper.find(Contents).parent().prop('style');
 
   it('should render children and a zoom button', () => {
     const wrapper = mount(
@@ -21,20 +23,42 @@ describes.sandboxed('BentoPanZoom preact component v1.0', {}, (unusedEnv) => {
     expect(component.find('button')).to.have.lengthOf(1);
   });
 
-  it('clicking the zoom button should zoom the contents', () => {
+  it('clicking the zoom button should zoom the contents in a loop', () => {
     const wrapper = mount(
       <BentoPanZoom>
         <Contents />
       </BentoPanZoom>
     );
 
-    wrapper.find('button').simulate('click');
     // Without mocking out a lot of browser APIs, we can't assert very much:
-    const expectedScale = 'scale(2)';
-    expect(wrapper.find(Contents).parent().prop('style')).to.deep.equal({
-      transformOrigin: '0px 0px',
-      transform: `translate(0px, 0px)${expectedScale}`,
-    });
+    wrapper.find('button').simulate('click');
+    expect(getParentStyle(wrapper).transform).to.include('scale(2)');
+    wrapper.find('button').simulate('click');
+    expect(getParentStyle(wrapper).transform).to.include('scale(3)');
+    // It should "loop" around once the max is reached:
+    wrapper.find('button').simulate('click');
+    expect(getParentStyle(wrapper).transform).to.include('scale(1)');
+  });
+
+  it('maxScale can be used', () => {
+    const wrapper = mount(
+      <BentoPanZoom maxScale={6}>
+        <Contents />
+      </BentoPanZoom>
+    );
+    wrapper.find('button').simulate('click');
+    expect(getParentStyle(wrapper).transform).to.include('scale(2)');
+    wrapper.find('button').simulate('click');
+    expect(getParentStyle(wrapper).transform).to.include('scale(3)');
+    wrapper.find('button').simulate('click');
+    expect(getParentStyle(wrapper).transform).to.include('scale(4)');
+    wrapper.find('button').simulate('click');
+    expect(getParentStyle(wrapper).transform).to.include('scale(5)');
+    wrapper.find('button').simulate('click');
+    expect(getParentStyle(wrapper).transform).to.include('scale(6)');
+    // It should "loop" around once the max is reached:
+    wrapper.find('button').simulate('click');
+    expect(getParentStyle(wrapper).transform).to.include('scale(1)');
   });
 
   describe('usePanZoomState', () => {
