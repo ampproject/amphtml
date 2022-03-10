@@ -12,7 +12,6 @@ import {BentoAutocomplete} from '../component';
 // TODO
 // It accepts a list of objects as items and searches based on the filter value
 // It shows the list of options when the inline token is entered by the user
-// it hides items on escape
 // it hides items on tab
 // something with backspace (1357)
 

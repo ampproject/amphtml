@@ -40,6 +40,7 @@ interface BentoAutocompleteProps {
   filterValue?: string;
   maxItems?: number;
   highlightUserEntry?: boolean;
+  inline?: string;
 }
 
 const DEFAULT_ON_ERROR = (message: string) => {
@@ -62,6 +63,7 @@ export function BentoAutocomplete({
   filterValue = 'value',
   maxItems,
   highlightUserEntry = false,
+  inline,
 }: BentoAutocompleteProps) {
   const elementRef = useRef<HTMLElement>(null);
   const containerId = useRef<string>(
@@ -342,7 +344,12 @@ export function BentoAutocomplete({
   }, [setupInputElement, validateProps, handleInput, handleKeyDown]);
 
   return (
-    <ContainWrapper ref={elementRef} class={classes.autocomplete}>
+    <ContainWrapper
+      ref={elementRef}
+      class={classes.autocomplete}
+      // @ts-ignore
+      part="autocomplete"
+    >
       {children}
       <div
         ref={containerRef}
@@ -350,6 +357,8 @@ export function BentoAutocomplete({
         class={classes.autocompleteResults}
         role="listbox"
         hidden={!showAutocompleteOptions}
+        // @ts-ignore
+        part="results"
       >
         {filteredData.map((item: Item, index: number) => {
           if (typeof item === 'string') {
@@ -366,6 +375,8 @@ export function BentoAutocomplete({
                 dir="auto"
                 aria-selected={activeIndex === index}
                 onClick={handleItemClick}
+                // @ts-ignore
+                part="option"
               >
                 {getItemChildren(item)}
               </div>
