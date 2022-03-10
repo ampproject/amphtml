@@ -12,8 +12,10 @@ import {
   StateProperty,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
-
+import {
+  StoryAnalyticsEvent,
+  StoryAnalyticsService,
+} from '../../../amp-story/1.0/story-analytics';
 describes.realWin(
   'amp-story-shopping-attachment-v0.1',
   {
@@ -33,6 +35,7 @@ describes.realWin(
     let storeService;
     let attachmentChildEl;
     let attachmentChildImpl;
+    let analytics;
 
     const shoppingData = {
       items: [
@@ -96,7 +99,7 @@ describes.realWin(
         return storeService;
       });
       env.sandbox.stub(win.history, 'replaceState');
-      const analytics = new StoryAnalyticsService(win, win.document.body);
+      analytics = new StoryAnalyticsService(win, win.document.body);
       registerServiceBuilder(win, 'story-analytics', function () {
         return analytics;
       });
@@ -221,6 +224,60 @@ describes.realWin(
       attachmentChildEl.dispatchEvent(new Event('transitionend'));
       const {activeProductData} = storeService.get(StateProperty.SHOPPING_DATA);
       expect(activeProductData).to.be.null;
+    });
+
+    it('should call analytics service on Plp Card Click', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      await layoutShoppingImplAndAttachmentChildImpl();
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+      const plpCard = attachmentChildEl.querySelector(
+        '.i-amphtml-amp-story-shopping-plp-card'
+      );
+      plpCard.dispatchEvent(new Event('click'));
+
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.SHOPPING_PLP_CARD
+      );
+    });
+
+    async function setupPDP() {
+      await layoutShoppingImplAndAttachmentChildImpl();
+      // Override to simulate data for one product on the page.
+      storeService.dispatch(Action.ADD_SHOPPING_DATA, {
+        page1: {
+          [shoppingData.productId]: shoppingData.items[0],
+        },
+      });
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+    }
+
+    it('should call analytics service when product details expand on click', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      await setupPDP();
+
+      attachmentChildEl
+        .querySelector('.i-amphtml-amp-story-shopping-pdp')
+        .dispatchEvent(new Event('click'));
+
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS
+      );
+    });
+
+    it('should call analytics service on buy now button click', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      await setupPDP();
+
+      attachmentChildEl
+        .querySelector('.i-amphtml-amp-story-shopping-pdp-cta')
+        .dispatchEvent(new Event('click'));
+
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.SHOPPING_BUY_NOW
+      );
     });
   }
 );

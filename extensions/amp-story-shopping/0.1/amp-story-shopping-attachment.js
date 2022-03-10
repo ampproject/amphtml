@@ -301,7 +301,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   toggleDetailsText_(detailsContainer, shouldOpen) {
     if (shouldOpen) {
       this.analyticsService_.triggerEvent(
-        StoryAnalyticsEvent.SHOPPING_PLP_CARD
+        StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS
       );
     }
 
