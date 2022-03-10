@@ -168,18 +168,20 @@ function BentoLightboxWithActions({children, ...rest}) {
 }
 
 export const _default = ({backgroundColor, color, ...args}) => {
-  <div>
-    <BentoLightboxWithActions
-      id="lightbox"
-      style={{backgroundColor, color}}
-      {...args}
-    >
-      <p>
-        Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
-        aeque inermis reprehendunt.
-      </p>
-    </BentoLightboxWithActions>
-  </div>;
+  return (
+    <div>
+      <BentoLightboxWithActions
+        id="lightbox"
+        style={{backgroundColor, color}}
+        {...args}
+      >
+        <p>
+          Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
+          aeque inermis reprehendunt.
+        </p>
+      </BentoLightboxWithActions>
+    </div>
+  );
 };
 
 export const scrollable = ({backgroundColor, color, lotsOfText, ...args}) => {

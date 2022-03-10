@@ -2,8 +2,6 @@ import {BentoSoundcloud} from '#bento/components/bento-soundcloud/1.0/component'
 
 import * as Preact from '#preact';
 
-import {trackerTypeForTesting} from 'extensions/amp-analytics/0.1/events';
-
 import {rgba2hex} from './converter';
 
 export default {
@@ -62,7 +60,7 @@ playlist.args = {
   playlistId: '151584683',
 };
 
-playlist.argtypes = {
+playlist.argTypes = {
   componentColor: {
     name: 'componentColor',
     control: {type: 'color'},
