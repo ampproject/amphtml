@@ -15,7 +15,7 @@ import {
  * Language code used if there is no language code specified by the document.
  * @const {string}
  */
-const FALLBACK_LANGUAGE_CODE = 'en';
+const FALLBACK_LANGUAGE_CODE = 'default';
 
 /**
  * @const {!RegExp}
@@ -53,7 +53,7 @@ function findLocalizedString(
  */
 export function getLanguageCodesFromString(languageCode) {
   if (!languageCode) {
-    return [FALLBACK_LANGUAGE_CODE];
+    return ['en', FALLBACK_LANGUAGE_CODE];
   }
   const matches = languageCode.match(LANGUAGE_CODE_CHUNK_REGEX) || [];
   return matches.reduce(
