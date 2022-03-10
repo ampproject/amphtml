@@ -1236,7 +1236,6 @@ describes.realWin(
             );
             // Try to navigate to the first paywall page with state unknown so stays on current page.
             expect(story.activePage_.element.id).to.equal('page-1');
-            expect(story.pendingSubscriptionsState_).to.be.true;
           });
 
           it('should continue navigating to locked pages after the subscription state gets resolved to granted', async () => {
@@ -1298,18 +1297,6 @@ describes.realWin(
               true
             );
             expect(story.activePage_.element.id).to.equal('page-2');
-          });
-
-          it('tapping right while blocking on entitlement should not make another attempt to navigate', async () => {
-            const switchToSpy = env.sandbox.spy(story, 'switchTo_');
-            storeService.dispatch(
-              Action.TOGGLE_SUBSCRIPTIONS_STATE,
-              SubscriptionsState.BLOCKED
-            );
-            await nextTick();
-
-            // Should only try to navigate once, which is done by the handler added by the vvery first navigation attempt.
-            expect(switchToSpy).to.have.been.calledOnce;
           });
         });
 

@@ -312,9 +312,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {boolean} whether the styles were rewritten */
     this.didRewriteStyles_ = false;
 
-    /** @private {boolean} whether blocking on pending subscriptions state */
-    this.pendingSubscriptionsState_ = false;
-
     /** @private {?Deferred} A promise that is resolved once the subscription state is received */
     this.subscriptionsStatePromise_ = new Deferred();
 
@@ -1321,15 +1318,8 @@ export class AmpStory extends AMP.BaseElement {
       ) {
         // Hit a blocked page.
         if (subscriptionsState === SubscriptionsState.UNKNOWN) {
-          if (this.pendingSubscriptionsState_) {
-            // If already waiting, return early. This is to prevent multiple clicks
-            // during waitingfrom causing duplicate navigation.
-            return Promise.resolve();
-          }
           // Block while waiting for entitlements.
-          this.pendingSubscriptionsState_ = true;
           return this.subscriptionsStatePromise_.promise.then(() => {
-            this.pendingSubscriptionsState_ = false;
             return this.switchTo_(targetPageId, direction);
           });
         } else {
