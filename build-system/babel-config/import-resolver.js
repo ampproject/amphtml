@@ -41,6 +41,11 @@ function readJsconfigPaths() {
   return tsConfigPaths;
 }
 
+const moduleAliases = {
+  'react': './src/react',
+  'react-dom': './src/react/dom',
+};
+
 /**
  * Import map configuration.
  * @return {Object}
@@ -48,7 +53,10 @@ function readJsconfigPaths() {
 function getImportResolver() {
   return {
     root: ['.'],
-    alias: readJsconfigPaths(),
+    alias: {
+      ...readJsconfigPaths(),
+      ...moduleAliases,
+    },
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     stripExtensions: [],
     babelOptions: {
