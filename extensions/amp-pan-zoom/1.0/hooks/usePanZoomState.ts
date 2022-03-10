@@ -220,15 +220,6 @@ export function usePanZoomState(config: PanZoomConfig) {
           ...updateView(state, payload),
         }));
       },
-      move(payload: {deltaX: number; deltaY: number}) {
-        setState((state) => ({
-          ...state,
-          ...updateView(state, {
-            posX: state.posX + payload.deltaX,
-            posY: state.posY + payload.deltaY,
-          }),
-        }));
-      },
     };
   }, [setState]);
 

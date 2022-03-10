@@ -122,13 +122,6 @@ export function BentoPanZoomWithRef(
     actions.updateScale({scale: newScale});
   };
 
-  type StartDragInfo = {
-    posX: number;
-    posY: number;
-    clientX: number;
-    clientY: number;
-  };
-
   useImperativeHandle(
     ref,
     () => /** @type {!BentoPanZoom.PanZoomApi} */ ({
@@ -162,7 +155,7 @@ export function BentoPanZoomWithRef(
       actions.updateScale({anchorX, anchorY});
     },
 
-    vertical: true,
+    direction: 'DIRECTION_ALL',
     onPanStart: (ev) => {
       if (!state.isPannable) {
         return;

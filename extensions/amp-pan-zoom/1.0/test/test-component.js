@@ -34,7 +34,6 @@ describes.sandboxed('BentoPanZoom preact component v1.0', {}, (unusedEnv) => {
     expect(wrapper.find(Contents).parent().prop('style')).to.deep.equal({
       transformOrigin: '0px 0px',
       transform: `translate(0px, 0px)${expectedScale}`,
-      touchAction: 'none',
     });
   });
 
@@ -78,18 +77,20 @@ describes.sandboxed('BentoPanZoom preact component v1.0', {}, (unusedEnv) => {
         contentOffset: {x: 0, y: 0},
         containerSize: {width: 0, height: 0},
         contentSize: {width: 0, height: 0},
-        isZoomed: false,
+        isPannable: false,
         canZoom: true,
         isDragging: false,
         allowExtent: false,
       });
-      expect(Object.keys(result.current.actions)).to.deep.equal([
-        'updateBounds',
-        'draggingStart',
-        'draggingRelease',
-        'updateScale',
-        'transform',
-      ]);
+      expect(JSON.stringify(Object.keys(result.current.actions))).to.deep.equal(
+        JSON.stringify([
+          'updateBounds',
+          'draggingStart',
+          'draggingRelease',
+          'updateScale',
+          'transform',
+        ])
+      );
     });
 
     describe('dragging', () => {
