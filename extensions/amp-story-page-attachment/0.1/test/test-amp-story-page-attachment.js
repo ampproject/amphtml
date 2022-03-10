@@ -7,7 +7,10 @@ import {LocalizationService} from '#service/localization';
 import {AmpStoryStoreService} from 'extensions/amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from 'src/service-helpers';
 
-import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
+import {
+  StoryAnalyticsEvent,
+  StoryAnalyticsService,
+} from '../../../amp-story/1.0/story-analytics';
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
 describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
@@ -15,13 +18,15 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   let attachment;
   let outlinkEl;
   let outlink;
+  let analytics;
+  let pageEl;
 
   beforeEach(() => {
     const {win} = env;
 
     // Set up the story.
     const storyEl = <amp-story></amp-story>;
-    const pageEl = <amp-story-page></amp-story-page>;
+    pageEl = <amp-story-page></amp-story-page>;
     win.document.body.appendChild(storyEl);
     storyEl.appendChild(pageEl);
 
@@ -35,7 +40,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
       return storeService;
     });
 
-    const analytics = new StoryAnalyticsService(win, win.document.body);
+    analytics = new StoryAnalyticsService(win, win.document.body);
     registerServiceBuilder(win, 'story-analytics', function () {
       return analytics;
     });
@@ -117,5 +122,39 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     );
 
     expect(closeButtonEl.hasAttribute('tabindex')).to.be.false;
+  });
+
+  it('should call analytics with shopping attachment params if no shopping attachment', async () => {
+    await attachment.buildCallback();
+    await attachment.layoutCallback();
+
+    const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+    env.sandbox.stub(attachment.historyService_, 'push');
+
+    attachment.open(true);
+
+    expect(trigger).to.have.been.calledWith(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
+    );
+  });
+
+  it('should call analytics with shopping attachment params if has shopping attachment', async () => {
+    await attachment.buildCallback();
+    await attachment.layoutCallback();
+
+    const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+    env.sandbox.stub(attachment.historyService_, 'push');
+
+    pageEl.appendChild(
+      <amp-story-shopping-attachment></amp-story-shopping-attachment>
+    );
+
+    attachment.open(true);
+
+    expect(trigger).to.have.been.calledWith(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
+      null,
+      {'calledFrom': 'story-shopping-shop-now'}
+    );
   });
 });
