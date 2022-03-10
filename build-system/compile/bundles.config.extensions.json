@@ -323,8 +323,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": true,
-      "bento": true,
       "hasCss": true
     }
   },
@@ -338,8 +336,6 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "npm": true,
-      "bento": true,
       "hasCss": true
     }
   },
@@ -374,9 +370,7 @@
     "version": "1.0",
     "latestVersion": "0.1",
     "options": {
-      "hasCss": true,
-      "npm": true,
-      "bento": true
+      "hasCss": true
     }
   },
   {

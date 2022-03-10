@@ -1,7 +1,7 @@
-import * as Preact from '#preact';
+import {BentoEmbedlyCard} from '#bento/components/bento-embedly-card/1.0/component';
+import {BentoEmbedlyContext} from '#bento/components/bento-embedly-card/1.0/embedly-context';
 
-import {BentoEmbedlyCard} from '../component';
-import {BentoEmbedlyContext} from '../embedly-context';
+import * as Preact from '#preact';
 
 export default {
   title: 'EmbedlyCard',

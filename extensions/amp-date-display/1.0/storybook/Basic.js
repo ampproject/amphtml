@@ -1,6 +1,6 @@
-import * as Preact from '#preact';
+import {BentoDateDisplay} from '#bento/components/bento-date-display/1.0/component';
 
-import {BentoDateDisplay} from '../component';
+import * as Preact from '#preact';
 
 export default {
   title: 'DateDisplay',

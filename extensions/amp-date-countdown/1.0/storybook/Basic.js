@@ -1,6 +1,6 @@
-import * as Preact from '#preact';
+import {BentoDateCountdown} from '#bento/components/bento-date-countdown/1.0/component';
 
-import {BentoDateCountdown} from '../component';
+import * as Preact from '#preact';
 
 export default {
   title: 'DateCountdown',

@@ -1,3 +1,5 @@
+import {BaseElement} from '#bento/components/bento-date-display/1.0/base-element';
+
 import {isExperimentOn} from '#experiments';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
@@ -5,8 +7,6 @@ import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 import {Services} from '#service';
 
 import {dev, userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-date-display';

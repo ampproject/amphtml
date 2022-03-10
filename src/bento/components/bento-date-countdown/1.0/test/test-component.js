@@ -1,8 +1,8 @@
 import {mount} from 'enzyme';
 
-import * as Preact from '#preact';
+import {BentoDateCountdown} from '#bento/components/bento-date-countdown/1.0/component';
 
-import {BentoDateCountdown} from '../component';
+import * as Preact from '#preact';
 
 describes.sandboxed('DateCountdown 1.0 preact component', {}, (env) => {
   let sandbox;

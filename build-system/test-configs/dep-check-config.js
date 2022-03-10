@@ -192,9 +192,6 @@ exports.rules = [
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
       'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/responsive-attributes.js',
 
-      // <amp-date-display> versions share these date format helpers
-      'extensions/amp-date-display/**->extensions/amp-date-display/format.js',
-
       // <amp-list> and <amp-render> share some logic
       'extensions/amp-list/1.0/amp-list.js**->extensions/amp-render/1.0/shared/amp-fetch-utils.js',
 

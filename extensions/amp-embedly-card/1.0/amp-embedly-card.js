@@ -1,3 +1,9 @@
+import {
+  AmpEmbedlyKey,
+  TAG as KEY_TAG,
+} from '#bento/components/bento-embedly-card/1.0/amp-embedly-key';
+import {BaseElement} from '#bento/components/bento-embedly-card/1.0/base-element';
+
 import {Layout_Enum} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
@@ -5,9 +11,6 @@ import {isExperimentOn} from '#experiments';
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
-
-import {AmpEmbedlyKey, TAG as KEY_TAG} from './amp-embedly-key';
-import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-embedly-card';

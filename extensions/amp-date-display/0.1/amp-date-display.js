@@ -1,3 +1,5 @@
+import {getTimeZoneName} from '#bento/components/bento-date-display/format';
+
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {removeChildren} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
@@ -7,8 +9,6 @@ import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
-
-import {getTimeZoneName} from '../format';
 
 /** @const {string} */
 const TAG = 'amp-date-display';

@@ -1,3 +1,5 @@
+import {BaseElement} from '#bento/components/bento-date-countdown/1.0/base-element';
+
 import {isLayoutSizeDefined} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
@@ -7,8 +9,6 @@ import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 import {Services} from '#service';
 
 import {dev, userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-date-countdown';
