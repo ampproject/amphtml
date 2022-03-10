@@ -1,6 +1,5 @@
 const {buildBinaries} = require('../extension-helpers');
 
-const fastGlob = require('fast-glob');
 const {endBuildStep} = require('../helpers');
 const path = require('path');
 const {mkdirSync, writeFile} = require('fs-extra');
@@ -9,69 +8,61 @@ const {mkdirSync, writeFile} = require('fs-extra');
  * Build the Bento end to end page
  *
  * @param {!Object} options
+ * @param {string} bentoComponentName
+ * @param {'preact' | 'react'} testFor
  * @return {!Promise<void>}
  */
-async function buildBentoE2E(options) {
-  const e2eFixtures = await fastGlob(
-    'extensions/*/1.0/test-e2e/e2e-fixture.js'
+async function buildBentoE2E(options, bentoComponentName, testFor) {
+  await Promise.all(
+    buildEndToEndBinaries(options, bentoComponentName, testFor)
   );
-
-  const results = e2eFixtures.flatMap(buildEndToEndBinaries(options));
-  await Promise.all(results);
 }
 
 /**
  * This generates an array of promises for each component to create the e2e fixtures.
  *
  * @param {Object} options
- * @return {(fixturePath: string) => [Promise<any>, Promise<void>, Promise<void>]}
+ * @param {string} bentoComponentName
+ * @param {'preact' | 'react'} testFor
+ * @return {[Promise<any>, Promise<void>]}
  */
-function buildEndToEndBinaries(options) {
+function buildEndToEndBinaries(options, bentoComponentName, testFor) {
   const newOptions = {
     ...options,
     // outputting builds to test directory
     outputPath: 'test/fixtures/e2e/',
   };
-  return (fixturePath) => {
-    const bentoComponentName = fixturePath.match(/amp-(.*(?=\/\d))/)?.[1];
-
-    if (!bentoComponentName) {
-      throw new Error('component name not found for e2e testing');
-    }
-
-    return [
-      // build the js bundles to test
-      buildBinaries(
-        `extensions/amp-${bentoComponentName}/1.0/test-e2e`,
-        [
-          // Build preact options
-          {
-            entryPoint: 'e2e-fixture.js',
-            outfile: `bento-${bentoComponentName}-e2e-build-preact.js`,
-            wrapper: '',
+  const binaryConfig =
+    testFor === 'preact'
+      ? {
+          entryPoint: 'e2e-fixture.js',
+          outfile: `bento-${bentoComponentName}-e2e-build-preact.js`,
+          wrapper: '',
+        }
+      : {
+          babelCaller: 'react-unminified',
+          entryPoint: 'e2e-fixture.js',
+          external: [],
+          outfile: `bento-${bentoComponentName}-e2e-build-react.js`,
+          wrapper: '',
+          remap: {
+            'preact': 'react',
+            '.*/preact/compat': 'react',
+            'preact/hooks': 'react',
+            'preact/dom': 'react-dom',
           },
-          // Build react options
-          {
-            babelCaller: 'react-unminified',
-            entryPoint: 'e2e-fixture.js',
-            external: [],
-            outfile: `bento-${bentoComponentName}-e2e-build-react.js`,
-            wrapper: '',
-            remap: {
-              'preact': 'react',
-              '.*/preact/compat': 'react',
-              'preact/hooks': 'react',
-              'preact/dom': 'react-dom',
-            },
-          },
-        ],
-        newOptions
-      ),
-      // build the html pages to load the e2e SPA
-      buildEndToEndTestPage(bentoComponentName, 'preact', newOptions),
-      buildEndToEndTestPage(bentoComponentName, 'react', newOptions),
-    ];
-  };
+        };
+
+  return [
+    // build the js bundles to test
+    buildBinaries(
+      `extensions/amp-${bentoComponentName}/1.0/test-e2e`,
+      [binaryConfig],
+      newOptions
+    ),
+    // build the html pages to load the e2e SPA
+    buildEndToEndTestPage(bentoComponentName, testFor, newOptions),
+  ];
 }
 
 /**

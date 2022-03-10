@@ -1,6 +1,8 @@
 describes.endtoend(
   'bento-accordion react e2e',
   {
+    bentoComponentName: 'accordion',
+    testFor: 'react',
     version: '1.0',
     fixture: 'dist/bento-accordion-e2e-build-react.html',
     environments: ['single'],
@@ -10,6 +12,8 @@ describes.endtoend(
 describes.endtoend(
   'bento-accordion preact e2e',
   {
+    bentoComponentName: 'accordion',
+    testFor: 'preact',
     version: '1.0',
     fixture: 'dist/bento-accordion-e2e-build-preact.html',
     environments: ['single'],
