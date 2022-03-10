@@ -1,5 +1,7 @@
 import objStr from 'obj-str';
 
+import {TYPE} from '#bento/components/bento-mathml/1.0/utils';
+
 import {MessageType_Enum, deserializeMessage} from '#core/3p-frame-messaging';
 import {tryParseJson} from '#core/types/object/json';
 
@@ -10,7 +12,6 @@ import {useValueRef} from '#preact/component';
 import {ProxyIframeEmbed} from '#preact/component/3p-frame';
 
 import {useStyles} from './component.jss';
-import {TYPE} from './utils';
 
 const ORIGIN_MATCHER = () => true;
 

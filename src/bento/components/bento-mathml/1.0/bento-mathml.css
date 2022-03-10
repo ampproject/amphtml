@@ -1,0 +1,15 @@
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - size-defined element
+ */
+bento-mathml {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+bento-mathml[inline] {
+  display: inline-block;
+  vertical-align: middle;
+}

@@ -1,10 +1,13 @@
 import {mount} from 'enzyme';
 
+import {
+  BentoSelector,
+  BentoSelectorOption,
+} from '#bento/components/bento-selector/1.0/component';
+
 import {Keys_Enum} from '#core/constants/key-codes';
 
 import * as Preact from '#preact';
-
-import {BentoSelector, BentoSelectorOption} from '../component';
 
 describes.sandboxed('Selector preact component', {}, () => {
   describe('standalone option', () => {

@@ -1,8 +1,8 @@
 import {date, number, select, text, withKnobs} from '@storybook/addon-knobs';
 
-import * as Preact from '#preact';
+import {BentoTimeago} from '#bento/components/bento-timeago/1.0/component';
 
-import {BentoTimeago} from '../component';
+import * as Preact from '#preact';
 
 export default {
   title: 'Timeago',

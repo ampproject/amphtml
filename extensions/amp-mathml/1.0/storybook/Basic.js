@@ -1,8 +1,8 @@
+import {BentoMathml} from '#bento/components/bento-mathml/1.0/component';
+
 import * as Preact from '#preact';
 
-import {BentoMathml} from '../component';
-
-import '../component.jss';
+import '#bento/components/bento-mathml/1.0/component.jss';
 
 const formulas = {
   quadratic: '\\[x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.\\]',

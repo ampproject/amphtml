@@ -1,8 +1,8 @@
+import {BentoSidebar} from '#bento/components/bento-sidebar/1.0/component';
+
 import * as Preact from '#preact';
 
-import {BentoSidebar} from '../component';
-
-import '../component.jss';
+import '#bento/components/bento-sidebar/1.0/component.jss';
 
 export default {
   title: 'Sidebar',

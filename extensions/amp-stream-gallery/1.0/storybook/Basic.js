@@ -1,8 +1,8 @@
+import {BentoStreamGallery} from '#bento/components/bento-stream-gallery/1.0/component';
+
 import * as Preact from '#preact';
 
-import {BentoStreamGallery} from '../component';
-
-import '../component.jss';
+import '#bento/components/bento-stream-gallery/1.0/component.jss';
 
 const CONTROLS = ['auto', 'always', 'never'];
 

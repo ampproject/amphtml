@@ -1,8 +1,8 @@
 import {mount} from 'enzyme';
 
-import * as Preact from '#preact';
+import {BentoSidebar} from '#bento/components/bento-sidebar/1.0/component';
 
-import {BentoSidebar} from '../component';
+import * as Preact from '#preact';
 
 describes.sandboxed('BentoSidebar preact component', {}, (env) => {
   const isOpened = (sidebarElement) => {

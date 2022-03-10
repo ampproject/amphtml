@@ -1,6 +1,6 @@
-import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+import {BaseElement} from '#bento/components/bento-wordpress-embed/1.0/base-element';
 
-import {BaseElement} from './base-element';
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 /** @const {string} */
 const TAG = 'amp-wordpress-embed';

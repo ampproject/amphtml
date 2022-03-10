@@ -1,9 +1,12 @@
+import {
+  BentoSelector,
+  BentoSelectorOption,
+} from '#bento/components/bento-selector/1.0/component';
+
 import * as Preact from '#preact';
 import {useRef, useState} from '#preact';
 
-import '../component.jss';
-
-import {BentoSelector, BentoSelectorOption} from '../component';
+import '#bento/components/bento-selector/1.0/component.jss';
 
 export default {
   title: 'Selector',

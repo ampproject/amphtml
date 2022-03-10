@@ -1,8 +1,8 @@
 import {mount} from 'enzyme';
 
-import * as Preact from '#preact';
+import {BentoIframe} from '#bento/components/bento-iframe/1.0/component';
 
-import {BentoIframe} from '../component';
+import * as Preact from '#preact';
 
 describes.sandboxed('BentoIframe preact component v1.0', {}, (env) => {
   it('should render', () => {

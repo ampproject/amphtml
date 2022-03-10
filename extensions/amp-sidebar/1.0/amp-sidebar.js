@@ -1,3 +1,5 @@
+import {BaseElement} from '#bento/components/bento-sidebar/1.0/base-element';
+
 import {isExperimentOn} from '#experiments';
 
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
@@ -5,8 +7,6 @@ import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 import {Services} from '#service/';
 
 import {userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-sidebar-1.0.css';
 

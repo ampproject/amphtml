@@ -1,14 +1,14 @@
 import '../amp-fit-text';
 import {expect} from 'chai';
 
+import {useStyles} from '#bento/components/bento-fit-text/1.0/component.jss';
+
 import {createElementWithAttributes} from '#core/dom';
 import {computedStyle} from '#core/dom/style';
 
 import {toggleExperiment} from '#experiments';
 
 import {waitFor} from '#testing/helpers/service';
-
-import {useStyles} from '../component.jss';
 
 describes.realWin(
   'amp-fit-text component',

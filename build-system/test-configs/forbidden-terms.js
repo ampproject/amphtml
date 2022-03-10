@@ -906,7 +906,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'build-system/common/update-session-issues/index.js',
       'extensions/amp-timeago/0.1/amp-timeago.js',
-      'extensions/amp-timeago/1.0/component.js',
+      'src/bento/components/bento-timeago/1.0/component.js',
       'src/core/types/date.js',
     ],
   },

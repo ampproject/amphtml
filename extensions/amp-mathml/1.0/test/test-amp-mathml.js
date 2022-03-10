@@ -2,14 +2,14 @@ import '../amp-mathml';
 
 import {expect} from 'chai';
 
+import {QUADRATIC_FORMULA} from '#bento/components/bento-mathml/1.0/test/utils';
+
 import {createElementWithAttributes} from '#core/dom';
 
 import {toggleExperiment} from '#experiments';
 
 import {waitFor} from '#testing/helpers/service';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
-
-import {QUADRATIC_FORMULA} from './utils';
 
 describes.realWin(
   'amp-mathml-v1.0',

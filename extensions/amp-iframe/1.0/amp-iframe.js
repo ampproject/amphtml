@@ -1,3 +1,5 @@
+import {BaseElement} from '#bento/components/bento-iframe/1.0/base-element';
+
 import {measureIntersection} from '#core/dom/layout/intersection';
 
 import {isExperimentOn} from '#experiments';
@@ -5,8 +7,6 @@ import {isExperimentOn} from '#experiments';
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-iframe';

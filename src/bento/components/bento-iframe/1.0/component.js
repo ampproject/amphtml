@@ -13,7 +13,7 @@ import {
   cloneEntryForCrossOrigin,
 } from '#utils/intersection-observer-3p-host';
 
-import {postMessage} from '../../../src/iframe-helper';
+import {postMessage} from '../../../../iframe-helper';
 
 const NOOP = () => {};
 

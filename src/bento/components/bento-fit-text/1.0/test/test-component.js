@@ -1,12 +1,17 @@
 import {mount} from 'enzyme';
 
+import {
+  BentoFitText,
+  calculateFontSize,
+  setOverflowStyle,
+} from '#bento/components/bento-fit-text/1.0/component';
+
 import {computedStyle} from '#core/dom/style';
 
 import * as Preact from '#preact';
 
 import {waitFor} from '#testing/helpers/service';
 
-import {BentoFitText, calculateFontSize, setOverflowStyle} from '../component';
 import {useStyles} from '../component.jss';
 
 describes.realWin('BentoFitText preact component v1.0', {}, (env) => {
