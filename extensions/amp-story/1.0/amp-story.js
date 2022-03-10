@@ -2480,7 +2480,7 @@ export class AmpStory extends AMP.BaseElement {
     );
     if (
       inlineStringsEl?.getAttribute('i-amphtml-version') !==
-        getMode(this.win).rtvVersion
+      getMode(this.win).rtvVersion
     ) {
       return;
     }
@@ -2488,8 +2488,9 @@ export class AmpStory extends AMP.BaseElement {
     if (!stringsOrNull) {
       return;
     }
-    getLocalizationService(this.element).registerLocalizedStringBundle(
-      this.win.document.querySelector('[lang]')?.getAttribute('lang') || 'en',
+    const localizationService = getLocalizationService(this.element);
+    localizationService.registerLocalizedStringBundle(
+      localizationService.getLanguageCodesForElement(this.element)[0],
       stringsOrNull
     );
   }
