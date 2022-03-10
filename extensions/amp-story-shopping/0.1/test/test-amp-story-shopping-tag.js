@@ -11,6 +11,10 @@ import {
   StateProperty,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {
+  StoryAnalyticsEvent,
+  StoryAnalyticsService,
+} from '../../../amp-story/1.0/story-analytics';
 
 describes.realWin(
   'amp-story-shopping-tag-v0.1',
@@ -26,12 +30,18 @@ describes.realWin(
     let shoppingTag;
     let storeService;
     let localizationService;
+    let analytics;
 
     beforeEach(async () => {
       win = env.win;
       storeService = getStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
+      });
+
+      analytics = new StoryAnalyticsService(win, win.document.body);
+      registerServiceBuilder(win, 'story-analytics', function () {
+        return analytics;
       });
 
       storeService.dispatch(Action.SET_PAGE_SIZE, {width: 1000, height: 1000});
@@ -78,6 +88,7 @@ describes.realWin(
 
     it('should not build shopping tag if page attachment is missing', async () => {
       env.win.document.querySelector('amp-story-shopping-attachment').remove();
+
       await setupShoppingTagAndData();
       expect(shoppingTag.shoppingTagEl_).to.be.null;
     });
@@ -114,6 +125,18 @@ describes.realWin(
         expect(
           storeService.get(StateProperty.SHOPPING_DATA['activeProductData'])
         ).to.deep.equal(tagData);
+      });
+    });
+
+    it('should call analytics service on shopping tag click', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      await shoppingTag.element.click();
+
+      env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
+        expect(trigger).to.have.been.calledWith(
+          StoryAnalyticsEvent.SHOPPING_TAG
+        );
       });
     });
   }
