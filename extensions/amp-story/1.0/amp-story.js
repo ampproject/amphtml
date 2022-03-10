@@ -54,10 +54,6 @@ import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 import {calculateScriptBaseUrl} from '#service/extension-script';
-import {
-  getLanguageCodesFromString,
-  getValidLanguageCodeFromList,
-} from '#service/localization';
 import {createPseudoLocale} from '#service/localization/strings';
 
 import {getDetail} from '#utils/event-helper';
