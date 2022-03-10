@@ -123,7 +123,6 @@ import {
 import {AnalyticsVariable, getVariableService} from './variable-service';
 
 import {CSS} from '../../../build/amp-story-1.0.css';
-import {urls} from '../../../src/config';
 import {getConsentPolicyState} from '../../../src/consent';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
