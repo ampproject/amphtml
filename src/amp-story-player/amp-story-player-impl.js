@@ -615,7 +615,7 @@ export class AmpStoryPlayer {
           });
 
           messaging.registerHandler('storyContentLoaded', () => {
-            this.onStoryContentLoaded_(story);
+            story.storyContentLoaded = true;
           });
 
           messaging.sendRequest(
@@ -1665,15 +1665,6 @@ export class AmpStoryPlayer {
     } else if (data.previous) {
       this.previous_();
     }
-  }
-
-  /**
-   * React to storyContentLoaded events.
-   * @param {!StoryDef} story The story whose content has loaded.
-   * @private
-   */
-  onStoryContentLoaded_(story) {
-    story.storyContentLoaded = true;
   }
 
   /**
