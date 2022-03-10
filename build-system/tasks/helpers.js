@@ -410,7 +410,10 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
         destFile,
         `${code}\n//# sourceMappingURL=${destFilename}.map`
       ),
-      fs.outputJson(`${destFile}.map`, massageSourcemaps(mapChain, options)),
+      fs.outputJson(
+        `${destFile}.map`,
+        massageSourcemaps(mapChain, destFile, options)
+      ),
     ]);
 
     await finishBundle(destDir, destFilename, options, startTime);
