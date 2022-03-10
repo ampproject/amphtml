@@ -1,7 +1,11 @@
 import {devAssert} from '#core/assert';
 import {removeElement, toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
-import {closest, closestAncestorElementBySelector} from '#core/dom/query';
+import {
+  childElementByTag,
+  closest,
+  closestAncestorElementBySelector,
+} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {getHistoryState} from '#core/window/history';
 
@@ -428,10 +432,18 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     this.toggleCloseButtonTabIndex_(true);
 
     this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
-    this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
-    );
-    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_SHOP_NOW);
+
+    if (childElementByTag(this.pageEl_, 'amp-story-shopping-attachment')) {
+      this.analyticsService_.triggerEvent(
+        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
+        null,
+        {'calledFrom': 'story-shopping-shop-now'}
+      );
+    } else {
+      this.analyticsService_.triggerEvent(
+        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
+      );
+    }
 
     if (this.type_ === AttachmentType.OUTLINK) {
       this.openRemote_();

@@ -28,7 +28,6 @@ export const StoryAnalyticsEvent = {
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
   SHOPPING_TAG: 'story-shopping-tag',
-  SHOPPING_SHOP_NOW: 'story-shopping-shop-now',
   SHOPPING_BUY_NOW: 'story-shopping-buy-now',
   SHOPPING_PLP_CARD: 'story-shopping-plp-card',
   SHOPPING_PRODUCT_DETAILS: 'story-shopping-product-details',
@@ -128,14 +127,15 @@ export class StoryAnalyticsService {
   /**
    * @param {!StoryAnalyticsEvent} eventType
    * @param {Element=} element
+   * @param {?JsonObject} vars
    */
-  triggerEvent(eventType, element = null) {
+  triggerEvent(eventType, element = null, vars = null) {
     this.incrementPageEventCount_(eventType);
 
     triggerAnalyticsEvent(
       this.element_,
       eventType,
-      this.updateDetails(eventType, element)
+      vars ?? this.updateDetails(eventType, element)
     );
   }
 

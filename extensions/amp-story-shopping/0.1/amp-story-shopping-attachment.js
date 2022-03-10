@@ -320,8 +320,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onClickBuyNow_(conversionURL) {
-    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_BUY_NOW);
-    return gtagReportConversion(conversionURL);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.SHOPPING_BUY_NOW,
+      null,
+      {'conversionURL': conversionURL}
+    );
   }
 
   /**
