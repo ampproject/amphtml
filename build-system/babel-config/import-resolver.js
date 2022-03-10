@@ -41,6 +41,7 @@ function readJsconfigPaths() {
   return tsConfigPaths;
 }
 
+// Necessary for external modules that rely on React.
 const moduleAliases = {
   'react': './src/react',
   'react-dom': './src/react/dom',
