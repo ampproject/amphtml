@@ -9,8 +9,8 @@ import {
   useMemo,
   useRef,
   useState,
-} from '.';
-import {forwardRef} from './compat';
+} from '#preact';
+import {forwardRef} from '#preact/compat';
 
 export {
   createContext,
