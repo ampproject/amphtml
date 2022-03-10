@@ -1710,21 +1710,22 @@ describes.realWin(
         );
       });
 
-      it('should fetch the localization strings for the default laguage from the cdn', async () => {
-        toggleExperiment(env.win, 'story-remote-locales');
-
-        const fetchSpy = env.sandbox.spy(Services.xhrFor(env.win), 'fetchJson');
-
-        await createStoryWithPages(1, ['cover']);
-
-        expect(fetchSpy).to.be.calledOnceWithExactly(
-          'https://cdn.ampproject.org/v0/amp-story.en.json'
-        );
-      });
-
       describe('remote locales', () => {
         beforeEach(() => {
           toggleExperiment(env.win, 'story-remote-locales', true);
+        });
+
+        it('should fetch the localization strings for the default laguage from the cdn', async () => {
+          const fetchSpy = env.sandbox.spy(
+            Services.xhrFor(env.win),
+            'fetchJson'
+          );
+
+          await createStoryWithPages(1, ['cover']);
+
+          expect(fetchSpy).to.be.calledOnceWithExactly(
+            'https://cdn.ampproject.org/v0/amp-story.en.json'
+          );
         });
 
         it('should fetch the localization strings for the document laguage from the cdn', async () => {
