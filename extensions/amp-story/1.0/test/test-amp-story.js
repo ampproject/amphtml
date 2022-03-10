@@ -1709,6 +1709,77 @@ describes.realWin(
           'Swipe up'
         );
       });
+
+      it('should fetch the localization strings for the default laguage from the cdn', async () => {
+        toggleExperiment(env.win, 'story-remote-locales');
+
+        const fetchSpy = env.sandbox.spy(Services.xhrFor(env.win), 'fetchJson');
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(fetchSpy).to.be.calledOnceWithExactly(
+          'https://cdn.ampproject.org/v0/amp-story.en.json'
+        );
+      });
+
+      describe('remote locales', () => {
+        beforeEach(() => {
+          toggleExperiment(env.win, 'story-remote-locales', true);
+        });
+
+        it('should fetch the localization strings for the document laguage from the cdn', async () => {
+          env.win.document.body.parentElement.setAttribute('lang', 'es-419');
+
+          const fetchSpy = env.sandbox.spy(
+            Services.xhrFor(env.win),
+            'fetchJson'
+          );
+
+          await createStoryWithPages(1, ['cover']);
+
+          expect(fetchSpy).to.have.been.calledWith(
+            'https://cdn.ampproject.org/v0/amp-story.es-419.json'
+          );
+        });
+
+        it('should fetch the localization strings for the document laguage from the local dist if testing locally', async () => {
+          env.win.document.body.parentElement.setAttribute('lang', 'es-419');
+          env.win.__AMP_MODE.localDev = true;
+
+          const fetchSpy = env.sandbox.spy(
+            Services.xhrFor(env.win),
+            'fetchJson'
+          );
+
+          await createStoryWithPages(1, ['cover']);
+
+          expect(fetchSpy).to.have.been.calledWith(
+            '/dist/v0/amp-story.es-419.json'
+          );
+        });
+
+        it('should use the remote localization strings', async () => {
+          env.win.document.body.parentElement.setAttribute('lang', 'es-419');
+
+          const fetchMock = env.sandbox.mock(Services.xhrFor(env.win));
+          fetchMock.expects('fetchJson').returns(
+            Promise.resolve({
+              json: () => {
+                return Promise.resolve({
+                  '35': 'REMOTE-STRING',
+                });
+              },
+            })
+          );
+
+          await createStoryWithPages(1, ['cover']);
+
+          expect(localizationService.getLocalizedString('35')).to.be.equal(
+            'REMOTE-STRING'
+          );
+          fetchMock.verify();
+        });
+      });
     });
   }
 );

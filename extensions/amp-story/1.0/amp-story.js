@@ -2454,11 +2454,15 @@ export class AmpStory extends AMP.BaseElement {
    * Adds the localization string bundles to the localization service.
    */
   installLocalizationStrings_() {
-    if (this.registerInlineLocalizationStrings_()) {
+    const localizationService = getLocalizationService(this.element);
+    const storyLanguage = localizationService.getLanguageCodesForElement(
+      this.element
+    )[0];
+    if (this.registerInlineLocalizationStrings_(storyLanguage)) {
       return;
     }
     if (isExperimentOn(this.win, 'story-remote-locales')) {
-      this.fetchLocalizationStrings_();
+      this.fetchLocalizationStrings_(storyLanguage);
     } else {
       getLocalizationService(this.element)
         .registerLocalizedStringBundle('default', LocalizedStringsEn)
@@ -2492,29 +2496,27 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * If there are inline localization strings, register as current document language.
+   * @param {string} languageCode
    * @return {boolean}
    */
-  registerInlineLocalizationStrings_() {
+  registerInlineLocalizationStrings_(languageCode) {
     const inlineStringsEl = this.win.document.querySelector(
       'script[amp-localization="amp-story"]'
     );
     if (
-      !inlineStringsEl ||
-      inlineStringsEl.getAttribute('i-amphtml-version') !=
-        getMode(this.win).rtvVersion
+      inlineStringsEl?.getAttribute('i-amphtml-version') !==
+      getMode(this.win).rtvVersion
     ) {
       return false;
     }
     const stringsOrNull = tryParseJson(inlineStringsEl.textContent);
-    const docLang = this.win.document
-      .querySelector('[lang]')
-      ?.getAttribute('lang');
 
     if (!stringsOrNull) {
       return false;
     }
-    getLocalizationService(this.element).registerLocalizedStringBundle(
-      docLang,
+    const localizationService = getLocalizationService(this.element);
+    localizationService.registerLocalizedStringBundle(
+      languageCode,
       stringsOrNull
     );
     return true;
@@ -2522,23 +2524,21 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Fetches from the CDN or localhost the localization strings.
+   * @param {string} languageCode
    */
-  fetchLocalizationStrings_() {
+  fetchLocalizationStrings_(languageCode) {
     const localizationService = getLocalizationService(this.element);
-    const lang = localizationService.getLanguageCodesForElement(
-      this.element
-    )[0];
 
     const localizationUrl = `${calculateScriptBaseUrl(
       this.win.location,
       getMode(this.win).localDev
-    )}/v0/amp-story.${lang}.json`;
+    )}/v0/amp-story.${languageCode}.json`;
 
     Services.xhrFor(this.win)
       .fetchJson(localizationUrl)
       .then((res) => res.json())
       .then((json) =>
-        localizationService.registerLocalizedStringBundle(lang, json)
+        localizationService.registerLocalizedStringBundle(languageCode, json)
       );
   }
 }
