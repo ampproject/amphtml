@@ -41,3 +41,15 @@ export const _default = (args) => {
     </BentoAutocomplete>
   );
 };
+
+export const inline = (args) => {
+  return (
+    <BentoAutocomplete {...args}>
+      <textarea></textarea>
+    </BentoAutocomplete>
+  );
+};
+
+inline.args = {
+  inline: ':',
+};

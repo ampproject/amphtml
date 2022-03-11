@@ -1,5 +1,4 @@
 import objStr from 'obj-str';
-import {ComponentChildren} from 'preact';
 
 import {Keys_Enum} from '#core/constants/key-codes';
 import {mod} from '#core/math';
@@ -13,41 +12,14 @@ import {ContainWrapper} from '#preact/component';
 import fuzzysearch from '#third_party/fuzzysearch';
 
 import {useStyles} from './component.jss';
-
-const filterTypes = [
-  'substring',
-  'prefix',
-  'token-prefix',
-  'fuzzy',
-  'custom',
-  'none',
-] as const;
-
-type FilterType = typeof filterTypes[number];
-
-function isValidFilterType(filterType: any): filterType is FilterType {
-  return filterTypes.includes(filterType);
-}
-
-type Item = string | object;
-interface BentoAutocompleteProps {
-  id?: string;
-  onError?: (message: string) => void;
-  children?: ComponentChildren;
-  filter?: FilterType;
-  minChars?: number;
-  items?: Item[];
-  filterValue?: string;
-  maxItems?: number;
-  highlightUserEntry?: boolean;
-  inline?: string;
-}
-
-const DEFAULT_ON_ERROR = (message: string) => {
-  throw new Error(message);
-};
-
-const TAG = 'bento-autocomplete';
+import {DEFAULT_ON_ERROR, TAG} from './constants';
+import {
+  BentoAutocompleteProps,
+  InputElement,
+  Item,
+  isValidFilterType,
+} from './types';
+import {useAutocompleteBinding} from './use-autocomplete-binding';
 
 /**
  * @param {!BentoAutocomplete.Props} props
@@ -76,6 +48,8 @@ export function BentoAutocomplete({
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const [showOptions, _setShowOptions] = useState<boolean>(false);
   const classes = useStyles();
+
+  const binding = useAutocompleteBinding(inline);
 
   const setShowOptions = useCallback((shouldDisplay: boolean) => {
     if (!shouldDisplay) {
@@ -208,13 +182,15 @@ export function BentoAutocomplete({
 
   const handleInput = useCallback(
     (event: Event) => {
-      const inputValue = (event.target as HTMLInputElement).value;
-
-      // TODO: Use logic to derive this from the binding
-      setSubstring(inputValue);
-      setShowOptions(true);
+      if (binding.shouldAutocomplete(event.target as InputElement)) {
+        const substring = binding.getUserInputForUpdate(
+          event.target as InputElement
+        );
+        setSubstring(substring);
+        setShowOptions(true);
+      }
     },
-    [setShowOptions]
+    [setShowOptions, binding]
   );
 
   const updateActiveItem = useCallback(

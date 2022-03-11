@@ -429,4 +429,42 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(areOptionsVisible(wrapper)).to.be.false;
     });
   });
+
+  describe('inline autocomplete', () => {
+    it('displays options when the inline token is used', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          inline=":"
+          filter="prefix"
+          items={['one', 'two', 'three']}
+          // TODO: This should work automatically
+          minChars={0}
+        >
+          <textarea></textarea>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('textarea');
+
+      input.getDOMNode().value = 't';
+      input.simulate('input');
+
+      expect(areOptionsVisible(wrapper)).to.be.false;
+
+      input.getDOMNode().value = ':';
+      input.simulate('input');
+
+      expect(wrapper.exists('[data-value="one"]')).to.be.true;
+      expect(wrapper.exists('[data-value="two"]')).to.be.true;
+      expect(wrapper.exists('[data-value="three"]')).to.be.true;
+
+      input.getDOMNode().value = ':th';
+      input.simulate('input');
+
+      expect(wrapper.exists('[data-value="one"]')).to.be.false;
+      expect(wrapper.exists('[data-value="two"]')).to.be.false;
+      expect(wrapper.exists('[data-value="three"]')).to.be.true;
+    });
+  });
 });
