@@ -14,6 +14,10 @@ const initialState = {
   maxScale: DEFAULT_MAX_SCALE,
   scale: 1,
 
+  viewX: 0,
+  viewY: 0,
+  viewScale: 1,
+
   contentOffset: {x: 0, y: 0},
   containerSize: {width: 0, height: 0},
   contentSize: {width: 0, height: 0},
@@ -50,12 +54,6 @@ const boundValueSpring = (
   return val;
 };
 
-const boundScale = (state: State, newScale: number) => {
-  const {allowExtent, maxScale, minScale} = state;
-  const extent = allowExtent ? 0.25 : 0;
-  return boundValueSpring(newScale, minScale, maxScale, extent);
-};
-
 /**
  * Updates the scale, keeping the "anchor" position stationary
  * @param state
@@ -68,10 +66,8 @@ const updateScaleFromAnchor = (
   anchorX: number,
   anchorY: number,
   newScale: number
-) => {
+): PickState<'posX' | 'posY' | 'scale'> => {
   const {posX, posY, scale} = state;
-
-  newScale = boundScale(state, newScale);
 
   const ds = newScale / scale;
 
@@ -88,7 +84,7 @@ const updateScaleFromAnchor = (
 const updateView = (
   state: State,
   newState: Partial<PickState<'posX' | 'posY' | 'scale'>>
-) => {
+): Partial<State> => {
   const {
     allowExtent,
     containerSize,
@@ -118,13 +114,19 @@ const updateView = (
     [minY, maxY] = [maxY, minY]; // (swap)
   }
 
-  const extentX = allowExtent && newScale > 1 ? 0.25 : 0;
-  const extentY = allowExtent && newScale > 1 ? 0.25 : 0;
+  const extent = allowExtent && newScale > 1 ? 0.25 : 0;
+
+  const viewX = boundValueSpring(posX, minX, maxX, extent);
+  const viewY = boundValueSpring(posY, minY, maxY, extent);
+  const viewScale = newScale;
 
   return {
-    posX: boundValueSpring(posX, minX, maxX, extentX),
-    posY: boundValueSpring(posY, minY, maxY, extentY),
-    scale: newScale,
+    posX: allowExtent ? posX : viewX,
+    posY: allowExtent ? posY : viewY,
+    scale: allowExtent ? scale : viewScale,
+    viewX,
+    viewY,
+    viewScale,
     isPannable: newScale !== 1,
     canZoom: newScale !== state.maxScale,
   };
@@ -137,12 +139,17 @@ function initReducer(config: PanZoomConfig): State {
     initialY = DEFAULT_ORIGIN,
     maxScale = DEFAULT_MAX_SCALE,
   } = config;
-  return {
+  const state = {
     ...initialState,
     posX: Number(initialX),
     posY: Number(initialY),
     scale: Number(initialScale),
     maxScale: Number(maxScale),
+  };
+  return {
+    ...state,
+    // Ensure the view is within bounds:
+    ...updateView(state, state),
   };
 }
 
@@ -150,8 +157,8 @@ type PickState<keys extends keyof State> = Required<Pick<State, keys>>;
 
 export function usePanZoomState(config: PanZoomConfig) {
   const [state, setState] = useState(() => initReducer(config));
-  const actions = useMemo(() => {
-    return {
+  const actions = useMemo(
+    () => ({
       updateBounds(
         payload: PickState<'contentOffset' | 'containerSize' | 'contentSize'>
       ) {
@@ -160,11 +167,10 @@ export function usePanZoomState(config: PanZoomConfig) {
             ...state,
             ...payload,
           };
-          // Ensure the element is still in-bounds:
-          const newPosition = updateView(newState, newState);
           return {
             ...newState,
-            ...newPosition,
+            // Ensure the element is still in-bounds:
+            ...updateView(newState, newState),
           };
         });
       },
@@ -179,7 +185,7 @@ export function usePanZoomState(config: PanZoomConfig) {
       },
       draggingRelease() {
         setState((state) => {
-          const newState = {
+          const newState: State = {
             ...state,
             isDragging: false,
             allowExtent: false,
@@ -220,8 +226,9 @@ export function usePanZoomState(config: PanZoomConfig) {
           ...updateView(state, payload),
         }));
       },
-    };
-  }, [setState]);
+    }),
+    [setState]
+  );
 
   return [state, actions] as const;
 }

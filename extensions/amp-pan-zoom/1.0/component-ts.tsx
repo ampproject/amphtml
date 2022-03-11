@@ -128,10 +128,11 @@ export function BentoPanZoomWithRef(
   const panZoomStyles = {
     transformOrigin:
       px(-state.contentOffset.x) + ' ' + px(-state.contentOffset.y),
-    transform: translate(state.posX, state.posY) + cssScale(state.scale),
+    transform: translate(state.viewX, state.viewY) + cssScale(state.viewScale),
   };
 
-  const hammerStartInfo = useRef<Pick<typeof state, 'posX' | 'posY'>>(null);
+  const hammerStartInfo =
+    useRef<Pick<typeof state, 'posX' | 'posY' | 'scale'>>(null);
   const hammerHandlers: Omit<ReactHammerProps, 'children'> = {
     onDoubleTap: (ev) => {
       const {center} = ev;
@@ -150,10 +151,7 @@ export function BentoPanZoomWithRef(
         return;
       }
       actions.draggingStart();
-      hammerStartInfo.current = {
-        posX: state.posX,
-        posY: state.posY,
-      };
+      hammerStartInfo.current = state;
     },
     onPanEnd: () => {
       if (!state.isPannable) {
@@ -173,17 +171,22 @@ export function BentoPanZoomWithRef(
       });
     },
 
-    onPinch: (ev) => {
-      // TODO
-      console.log('onPinch', ev);
-    },
     onPinchStart: (ev) => {
-      // TODO
-      console.log('onPinchStart', ev);
+      actions.draggingStart();
+      hammerStartInfo.current = state;
     },
     onPinchEnd: (ev) => {
-      // TODO
-      console.log('onPinchEnd', ev);
+      actions.draggingRelease();
+    },
+    onPinch: (ev) => {
+      const {center, scale} = ev;
+      const {scale: startScale} = hammerStartInfo.current!;
+
+      actions.updateScale({
+        anchorX: center.x,
+        anchorY: center.y,
+        scale: startScale * scale,
+      });
     },
     options: {
       touchAction: state.isPannable ? 'none' : 'pan-x pan-y',
