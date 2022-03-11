@@ -111,25 +111,11 @@
         <script type="application/json">
           {
             "ad-attributes": {
-              "type": "custom",
-              "data-url": "https://ampbyexample.com/json/amp-story-auto-ads/"
+              "type":"doubleclick",
+              "data-slot":"/33813572/qa-ads"
             }
           }
         </script>
-
-        <template type="amp-mustache" id="image-template">
-          <amp-img class="fill-img" layout="fill" src="{{imgSrc}}"></amp-img>
-        </template>
-
-        <template type="amp-mustache" id="video-template">
-          <amp-video autoplay loop
-            width="400"
-            height="750"
-            poster="{{poster}}"
-            layout="fill">
-            <source src="{{videoSource}}" type="video/mp4">
-          </amp-video>
-        </template>
       </amp-story-auto-ads>
 
       <amp-story-page id="page-1" title="Lorem ipsum dolor sit amet">
@@ -285,7 +271,7 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-12">
+      <amp-story-page id="page-12" auto-advance-after="5s">
         <amp-story-grid-layer template="fill">
           <amp-img width="400" height="750" layout="fill" src="./img/roadshow.jpg"></amp-img>
         </amp-story-grid-layer>

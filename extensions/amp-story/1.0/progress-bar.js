@@ -441,6 +441,7 @@ export class ProgressBar {
 
   /**
    * Create ad progress segment that will be shown when ad is visible.
+   * @param animationDuration
    */
   createAdSegment_(animationDuration) {
     const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
@@ -449,11 +450,17 @@ export class ProgressBar {
     const progressEl = this.getRoot_()?.querySelector(
       `.i-amphtml-story-page-progress-bar:nth-child(${escapeCssSelectorNth(
         // +2 because of zero-index and we want the chip after the ad.
-        index + 2
+        index + 1
       )})`
     );
-    const adSegment = <div class="i-amphtml-story-ad-progress-value" style={{animationDuration}}></div>;
+    const adSegment = (
+      <div
+        class="i-amphtml-story-ad-progress-value"
+        style={{animationDuration}}
+      ></div>
+    );
     this.currentAdSegment_ = adSegment;
+    removeChildren(devAssert(progressEl));
     progressEl.appendChild(adSegment);
   }
 
@@ -461,6 +468,11 @@ export class ProgressBar {
    * Remove active ad progress segment when ad is navigated away from
    */
   removeAdSegment_() {
+    this.currentAdSegment_?.parentNode.appendChild(
+      <li class="i-amphtml-story-page-progress-bar">
+        <div class="i-amphtml-story-page-progress-value"></div>
+      </li>
+    );
     this.currentAdSegment_?.parentNode.removeChild(this.currentAdSegment_);
     this.currentAdSegment_ = null;
   }
