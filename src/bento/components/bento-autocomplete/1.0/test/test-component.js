@@ -11,7 +11,6 @@ import {BentoAutocomplete} from '../component';
 
 // TODO
 // It accepts a list of objects as items and searches based on the filter value
-// It shows the list of options when the inline token is entered by the user
 // it hides items on tab
 // something with backspace (1357)
 
@@ -315,6 +314,29 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         `t<span class="autocomplete-partial">hr</span>ee`
       );
     });
+
+    it('highlights the substrings for fuzzy search', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          highlightUserEntry={true}
+          filter="fuzzy"
+          items={['one', 'two', 'three']}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 'oe';
+      input.simulate('input');
+
+      const option = wrapper.find('[role="option"]');
+
+      expect(option.getDOMNode().innerHTML).to.equal(
+        `<span class="autocomplete-partial">o</span>n<span class="autocomplete-partial">e</span>`
+      );
+    });
   });
 
   describe('selecting an item', () => {
@@ -438,7 +460,6 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
           inline=":"
           filter="prefix"
           items={['one', 'two', 'three']}
-          // TODO: This should work automatically
           minChars={0}
         >
           <textarea></textarea>

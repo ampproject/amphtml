@@ -300,10 +300,27 @@ export function BentoAutocomplete({
             {item.slice(substringEnd, item.length)}
           </>
         );
+      } else if (
+        highlightUserEntry &&
+        substring.length &&
+        substring.length <= item.length &&
+        filter === 'fuzzy'
+      ) {
+        const lowerCaseSubstring = substring.toLocaleLowerCase();
+        return (
+          <>
+            {item.split('').map((char) => {
+              if (lowerCaseSubstring.includes(char.toLocaleLowerCase())) {
+                return <span class="autocomplete-partial">{char}</span>;
+              }
+              return char;
+            })}
+          </>
+        );
       }
       return item;
     },
-    [highlightUserEntry, substring]
+    [highlightUserEntry, substring, filter]
   );
 
   useEffect(() => {
