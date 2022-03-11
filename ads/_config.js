@@ -1501,7 +1501,9 @@ const adConfig = jsonConfiguration({
 
   'sulvo': {},
 
-  '4wmarketplace': {},
+  '4wmarketplace': {
+    renderStartImplemented: true,
+  },
 
 });
 
