@@ -1504,7 +1504,6 @@ const adConfig = jsonConfiguration({
   '4wmarketplace': {
     renderStartImplemented: true,
   },
-
 });
 
 export {adConfig};
