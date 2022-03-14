@@ -108,8 +108,8 @@ const integrationTestPaths = [
 
 const e2eTestPaths = [
   'test/e2e/*.js',
-  'extensions/**/test-e2e/*.js',
-  'src/bento/components/**/test-e2e/*.js',
+  'extensions/**/test-e2e/test-*.js',
+  'src/bento/components/**/test-e2e/test-*.js',
 ];
 
 const devDashboardTestPaths = ['build-system/server/app-index/test/**/*.js'];
