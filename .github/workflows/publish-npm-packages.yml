@@ -95,7 +95,7 @@ jobs:
   publish:
     if: github.repository == 'ampproject/amphtml'
     environment: bento_publishing
-    needs: publish-core
+    needs: [setup, publish-core]
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
