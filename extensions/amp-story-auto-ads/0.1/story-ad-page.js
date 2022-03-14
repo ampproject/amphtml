@@ -9,11 +9,7 @@ import {setStyle} from '#core/dom/style';
 import {map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {getExperimentBranch} from '#experiments';
-import {
-  BranchToTimeValues,
-  StoryAdSegmentExp,
-} from '#experiments/story-ad-progress-segment';
+import {isExperimentOn} from '#experiments';
 
 import {getData, listen} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
@@ -317,18 +313,8 @@ export class StoryAdPage {
       'id': this.id_,
     };
 
-    const segmentExpBranch = getExperimentBranch(
-      this.win_,
-      StoryAdSegmentExp.ID
-    );
-
-    if (
-      segmentExpBranch &&
-      segmentExpBranch !== StoryAdSegmentExp.CONTROL &&
-      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_BOTH &&
-      segmentExpBranch !== StoryAdSegmentExp.NO_ADVANCE_AD
-    ) {
-      attributes['auto-advance-after'] = BranchToTimeValues[segmentExpBranch];
+    if (isExperimentOn(this.win_, 'story-ad-auto-advance')) {
+      attributes['auto-advance-after'] = '10s';
     }
 
     const page = createElementWithAttributes(
