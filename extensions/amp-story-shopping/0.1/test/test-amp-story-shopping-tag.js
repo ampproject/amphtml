@@ -72,7 +72,6 @@ describes.realWin(
     }
 
     it('should build and layout shopping tag component', async () => {
-      env.sandbox.stub(shoppingTag, 'styleTagText_');
       await setupShoppingTagAndData();
       expect(shoppingTag.shoppingTagEl_).to.be.not.null;
     });

@@ -228,12 +228,6 @@ amp-story-shopping-tag {
   }
 }
 
-.i-amphtml-amp-story-shopping-tag-pill-multi-line {
-  border-radius: 10px !important;
-  margin-inline-start: 9px !important;
-  margin-inline-end: 4px !important;
-}
-
 .i-amphtml-amp-story-shopping-tag-pill-image {
   width: var(--i-amphtml-pill-icon-size) !important;
   height: var(--i-amphtml-pill-icon-size) !important;
