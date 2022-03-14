@@ -41,6 +41,7 @@ import {
   setImportantStyles,
   toggle,
 } from '#core/dom/style';
+import {devError} from '#core/error';
 import {isEsm} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
@@ -2534,7 +2535,10 @@ export class AmpStory extends AMP.BaseElement {
       .then((res) => res.json())
       .then((json) =>
         localizationService.registerLocalizedStringBundle(languageCode, json)
-      );
+      )
+      .catch((err) => {
+        devError(TAG, err, 'Bundle not found for language ' + languageCode);
+      });
   }
 }
 
