@@ -34,7 +34,7 @@ export function _4wmarketplace(global, data) {
         loadScript($4wm, 'https://adsr.4wnetwork.com/js/fwloader.js', () => {
                     window.addEventListener('message', (e) => {
                         if (e.data.message == "RESIZE_AMP" && typeof e.data.height != 'undefined') {
-                            $4wm.context.noContentAvailable(undefined, e.data.height);
+                            $4wm.context.requestResize(undefined, e.data.height);
                         }
                     });
                 });
@@ -59,7 +59,7 @@ export function _4wmarketplace(global, data) {
         loadScript($4wm, 'https://optimized-by.4wnetwork.com/js/sdk.min.js', () => {
             window.addEventListener('message', (e) => {
                 if (e.data.message == "RESIZE_AMP" && typeof e.data.height != 'undefined') {
-                    $4wm.context.noContentAvailable(undefined, e.data.height);
+                    $4wm.context.requestResize(undefined, e.data.height);
                 }
                 if (e.data.message == "CLOSE_AMP_STILL") {
                     $4wm.context.noContentAvailable();
