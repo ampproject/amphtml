@@ -207,13 +207,13 @@ amp-story-shopping-tag {
     clip-path: var(--clip-path-inset-offset-supports-rtl);
   }
   100% {
-    clip-path: inset(0 0 0 0 round 10px);
+    clip-path: inset(0 0 0 0 round 30px);
   }
 }
 
 @keyframes i-amphtml-animate-out-sequence-pill {
   0% {
-    clip-path: inset(0 0 0 0 round 10px);
+    clip-path: inset(0 0 0 0 round 30px);
   }
   40% {
     animation-timing-function: cubic-bezier(.85, 0, .15, 1);
