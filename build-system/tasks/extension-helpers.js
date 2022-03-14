@@ -734,7 +734,7 @@ async function buildBentoExtensionJs(dir, name, options) {
   );
   await buildExtensionJs(dir, name, {
     ...options,
-    externalDependencies: Object.values(remapDependencies),
+    externalDependencies: [...new Set(Object.values(remapDependencies))],
     remapDependencies,
     wrapper: 'none',
     outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
