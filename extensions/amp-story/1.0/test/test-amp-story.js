@@ -1738,7 +1738,7 @@ describes.realWin(
 
           await createStoryWithPages(1, ['cover']);
 
-          expect(fetchSpy).to.have.been.calledWith(
+          expect(fetchSpy).to.have.been.calledOnceWithExactly(
             'https://cdn.ampproject.org/v0/amp-story.es-419.json'
           );
         });
@@ -1754,7 +1754,7 @@ describes.realWin(
 
           await createStoryWithPages(1, ['cover']);
 
-          expect(fetchSpy).to.have.been.calledWith(
+          expect(fetchSpy).to.have.been.calledOnceWithExactly(
             '/dist/v0/amp-story.es-419.json'
           );
         });
@@ -1765,11 +1765,10 @@ describes.realWin(
           const fetchMock = env.sandbox.mock(Services.xhrFor(env.win));
           fetchMock.expects('fetchJson').returns(
             Promise.resolve({
-              json: () => {
-                return Promise.resolve({
+              json: () =>
+                Promise.resolve({
                   '35': 'REMOTE-STRING',
-                });
-              },
+                }),
             })
           );
 
