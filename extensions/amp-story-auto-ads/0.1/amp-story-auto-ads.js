@@ -2,7 +2,6 @@ import {CommonSignals_Enum} from '#core/constants/common-signals';
 
 import {forceExperimentBranch} from '#experiments';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
-import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 
@@ -44,14 +43,7 @@ const MUSTACHE_TAG = 'amp-mustache';
  * @const {Object<string, string>}
  * @visibleForTesting
  */
-export const RELEVANT_PLAYER_EXPS = {
-  [StoryAdSegmentExp.CONTROL]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.NO_ADVANCE_BOTH]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.NO_ADVANCE_AD]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.TEN_SECONDS]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.TWELVE_SECONDS]: StoryAdSegmentExp.ID,
-  [StoryAdSegmentExp.FOURTEEN_SECONDS]: StoryAdSegmentExp.ID,
-};
+export const RELEVANT_PLAYER_EXPS = {};
 
 /** @enum {string} */
 export const Attributes = {

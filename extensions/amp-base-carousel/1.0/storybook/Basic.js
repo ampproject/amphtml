@@ -1,8 +1,8 @@
+import {BentoBaseCarousel} from '#bento/components/bento-base-carousel/1.0/component';
+
 import * as Preact from '#preact';
 
-import {BentoBaseCarousel} from '../component';
-
-import '../component.jss';
+import '#bento/components/bento-base-carousel/1.0/component.jss';
 
 export default {
   title: 'BaseCarousel',

@@ -10,13 +10,22 @@ const path = require('path');
 const posthtml = require('posthtml');
 const {copyFile, pathExists, readFile} = require('fs-extra');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
-const {getSemver} = require('./utils');
+const {getPackageDir, getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
+const {
+  name: corePkgName,
+  version: corePkgVersion,
+} = require('../../src/bento/core/package.json');
 
 const packageName = getNameWithoutComponentPrefix(extension);
-const dir = `extensions/${extension}/${extensionVersion}`;
+
+/**
+ * The directory of the component or extension.
+ * @type {string}
+ */
+const dir = getPackageDir(extension, extensionVersion);
 
 /**
  * Determines whether to skip
@@ -104,19 +113,20 @@ async function getDescription() {
 
 /**
  * Write package.json
- * @param {{useBentoCore: boolean}} options
  * @return {Promise<void>}
  */
-async function writePackageJson({useBentoCore}) {
+async function writePackageJson() {
   const version = getSemver(extensionVersion, ampVersion);
-  if (!valid(version) || ampVersion.length != 13) {
+  if (!valid(version) || !valid(corePkgVersion) || ampVersion.length != 13) {
     log(
       'Invalid semver version',
       version,
       'or AMP version',
       ampVersion,
       'or extension version',
-      extensionVersion
+      extensionVersion,
+      'or core package version',
+      corePkgVersion
     );
     process.exitCode = 1;
     return;
@@ -158,17 +168,17 @@ async function writePackageJson({useBentoCore}) {
     repository: {
       type: 'git',
       url: 'https://github.com/ampproject/amphtml.git',
-      directory: `extensions/${extension}/${extensionVersion}`,
+      directory: dir,
     },
-    homepage: `https://github.com/ampproject/amphtml/tree/main/extensions/${extension}/${extensionVersion}`,
+    homepage: `https://github.com/ampproject/amphtml/tree/main/${dir}`,
     peerDependencies: {
       preact: '^10.2.1',
       react: '^17.0.0',
     },
+    dependencies: {
+      [corePkgName]: corePkgVersion,
+    },
   };
-  if (useBentoCore) {
-    json.dependencies = {'@bentoproject/core': `tbd`};
-  }
 
   try {
     await writeFile(`${dir}/package.json`, JSON.stringify(json, null, 2));
@@ -209,7 +219,7 @@ async function writeReactJs() {
  */
 async function copyCssToRoot() {
   try {
-    const extDir = path.join('extensions', extension, '1.0');
+    const extDir = getPackageDir(extension, '1.0');
     const preactCssDist = path.join(extDir, 'dist', 'styles.css');
     if (await pathExists(preactCssDist)) {
       const preactCssRoot = path.join(extDir, 'styles.css');
@@ -231,7 +241,7 @@ async function main() {
   if (await shouldSkip()) {
     return;
   }
-  await writePackageJson({useBentoCore: false});
+  await writePackageJson();
   await writeReactJs();
   await copyCssToRoot();
 }

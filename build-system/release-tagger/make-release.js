@@ -10,7 +10,7 @@ const {
   getPullRequestsBetweenCommits,
   getRef,
 } = require('./utils');
-const {getExtensions, getSemver} = require('../npm-publish/utils');
+const {getExtensionsAndComponents, getSemver} = require('../npm-publish/utils');
 const {GraphQlQueryResponseData} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
 
 const prereleaseConfig = {
@@ -48,7 +48,7 @@ function _formatPullRequestLine(pr) {
  * @return {PackageMetadata}
  */
 function _createPackageSections(prs) {
-  const bundles = getExtensions();
+  const bundles = getExtensionsAndComponents();
   const majors = [...new Set(bundles.map((b) => b.version))];
   /** @type PackageMetadata */
   const metadata = {};
@@ -65,7 +65,7 @@ function _createPackageSections(prs) {
   for (const pr of prs) {
     for (const node of pr.files.nodes) {
       for (const {extension, version} of bundles) {
-        if (node.path.startsWith(`extensions/${extension}/${version}`)) {
+        if (isComponentPath(node.path, extension, version)) {
           if (!Object.keys(metadata[version].packages).includes(extension)) {
             metadata[version].packages[extension] = new Set();
             metadata[version].unchanged.delete(extension);
@@ -112,12 +112,12 @@ function _createComponentSections(prs) {
 
     // components
     for (const node of pr.files.nodes) {
-      if (node.path.startsWith('extensions/')) {
-        const component = node.path.split('/')[1];
-        if (!Object.keys(sections).includes(component)) {
-          sections[component] = new Set();
+      const componentName = getComponentNameFromPath(node.path);
+      if (componentName) {
+        if (!sections[componentName]) {
+          sections[componentName] = new Set();
         }
-        sections[component].add(_formatPullRequestLine(pr));
+        sections[componentName].add(_formatPullRequestLine(pr));
       }
     }
   }
@@ -136,6 +136,38 @@ function _createComponentSections(prs) {
   }
 
   return sectionsMarkdown;
+}
+
+/**
+ * Determines if a path is a path to a component directory.
+ * @param {string} path
+ * @param {?string=} name
+ * @param {?string=} version
+ * @return {boolean}
+ */
+function isComponentPath(path, name, version) {
+  const nameDir = name ? `${name}/` : '';
+  const versionDir = version ? `${version}/` : '';
+  return (
+    path.startsWith(`extensions/${nameDir}${versionDir}`) ||
+    path.startsWith(`src/bento/components/${nameDir}${versionDir}`)
+  );
+}
+
+/**
+ * Gets the name of a component from its directory path.
+ * Returns undefined if the path is not a component directory.
+ * @param {string} path
+ * @return {string|undefined}
+ */
+function getComponentNameFromPath(path) {
+  if (path.startsWith('extensions/')) {
+    return path.split('/')[1];
+  }
+
+  if (path.startsWith('src/bento/components/')) {
+    return path.split('/')[3];
+  }
 }
 
 /**

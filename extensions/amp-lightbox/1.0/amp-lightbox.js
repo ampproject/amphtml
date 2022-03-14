@@ -1,3 +1,5 @@
+import {BaseElement} from '#bento/components/bento-lightbox/1.0/base-element';
+
 import {
   ActionTrust_Enum,
   DEFAULT_ACTION,
@@ -12,8 +14,6 @@ import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {userAssert} from '#utils/log';
-
-import {BaseElement} from './base-element';
 
 import {CSS} from '../../../build/amp-lightbox-1.0.css';
 
