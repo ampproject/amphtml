@@ -7,7 +7,7 @@ import {loadScript} from '#3p/3p';
 export function _4wmarketplace(global, data) {
   const $4wm = global;
   const containerDiv = $4wm.document.createElement('div');
-  const containerId = 'csacontainer';
+  const containerId = 'fwcontainer';
   containerDiv.id = containerId;
   $4wm.document.getElementById('c').appendChild(containerDiv);
 
@@ -26,6 +26,7 @@ export function _4wmarketplace(global, data) {
         excludeMobCss: data.excludeMobCss,
         css: data.css,
         class: data.class,
+        amp: 1,
       });
     });
     loadScript($4wm, 'https://adsr.4wnetwork.com/js/fwloader.js', () => {
@@ -42,6 +43,7 @@ export function _4wmarketplace(global, data) {
     const obj = {
       cid: containerId,
       ic: data.id,
+      amp: 1,
       format: data.format ? data.format : null,
       position: data.position ? data.position : null,
       dim: data.dim ? data.dim : null,
