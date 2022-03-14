@@ -1,3 +1,4 @@
+import {Observable} from '#core/data-structures/observable';
 import {closest} from '#core/dom/query';
 
 import {Services} from '#service';
@@ -89,6 +90,11 @@ export class LocalizationService {
      * @private @const {!Object<string, !LocalizedStringBundleDef>}
      */
     this.localizedStringBundles_ = {};
+
+    /** Fires the language code of a new language bundle that is registered.
+     * @private @const {!Observable<string>}
+     * */
+    this.bundleObserver_ = new Observable();
   }
 
   /**
@@ -124,6 +130,8 @@ export class LocalizationService {
       this.localizedStringBundles_[normalizedLangCode],
       localizedStringBundle
     );
+
+    this.bundleObserver_.fire(languageCode);
     return this;
   }
 
@@ -143,5 +151,58 @@ export class LocalizationService {
       languageCodes,
       localizedStringId
     );
+  }
+
+  /**
+   * Resolves with the localized string when the registered bundles contain them.
+   * @param {!LocalizedStringId_Enum} localizedStringId
+   * @param {!Element=} elementToUse
+   * @return {!Promise{?string}}
+   * @private
+   */
+  getLocalizedStringAsync_(localizedStringId, elementToUse = this.element_) {
+    const languageCodes = this.getLanguageCodesForElement(elementToUse);
+
+    const localizedString = findLocalizedString(
+      this.localizedStringBundles_,
+      languageCodes,
+      localizedStringId
+    );
+    if (localizedString) {
+      return Promise.resolve(localizedString);
+    }
+    return new Promise((res) => {
+      const remove = this.bundleObserver_.add((languageCode) => {
+        if (!languageCodes.includes(languageCode)) {
+          return;
+        }
+        const localizedString = findLocalizedString(
+          this.localizedStringBundles_,
+          languageCodes,
+          localizedStringId
+        );
+        if (localizedString) {
+          remove();
+          res(localizedString);
+        }
+      });
+    });
+  }
+
+  /**
+   * Localizes the text content of the element, or an attribute value if passed.
+   * @param {!Element} element
+   * @param {!LocalizedStringId_Enum} localizedStringId
+   * @param {?string=} attribute
+   * @return {!Promise}
+   */
+  localizeEl(element, localizedStringId, attribute = null) {
+    return this.getLocalizedStringAsync_(localizedStringId).then((val) => {
+      if (attribute === null) {
+        element.textContent = val;
+      } else {
+        element.setAttribute(attribute, val);
+      }
+    });
   }
 }
