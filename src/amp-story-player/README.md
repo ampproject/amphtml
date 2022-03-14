@@ -446,7 +446,7 @@ Follow our [roadmap on Github](https://github.com/ampproject/amphtml/projects/10
 
 ### Is the player ready to use? When will these features be ready?
 
-Yes! These features have been merged to the main repository, but since there is currently a [release freeze](https://github.com/ampproject/meta-tsc/issues/51) for AMP (October 26 - November 8, 2020), we recommend you to opt-in to the nightly release to try out the latest features. More information on that below.
+Yes! These features have been merged to the main repository, we recommend you to opt-in to the nightly release to try out the latest features. More information on that below.
 
 ### I want the bleeding-edge and latest features, how can I get them?
 
