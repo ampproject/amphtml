@@ -22,5 +22,9 @@
       "selector": "a",
       "request": "linkclick"
     }
+  },
+  "extraUrlParams": {
+    "Content.id": "1234",
+    "Content.name": "Samsung releases new Galaxy Note version"
   }
 }
