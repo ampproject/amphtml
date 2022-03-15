@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as Preact from '#preact';
 import {ContainWrapper, Wrapper} from '#preact/component';
 
@@ -7,7 +8,7 @@ export default {
 
 export const wrapper = ({ariaLabel, asProp, className, ...args}) => {
   return (
-    <Wrapper as={asProp} class={className} aria-label={ariaLabel}>
+    <Wrapper as={asProp} class={className} aria-label={ariaLabel} {...args}>
       content
     </Wrapper>
   );
@@ -16,31 +17,15 @@ export const wrapper = ({ariaLabel, asProp, className, ...args}) => {
 wrapper.args = {
   asProp: 'span',
   ariaLabel: 'aria Label',
+  className: '',
+  wrapperClassName: '',
 };
 
 wrapper.argTypes = {
-  asProp: {
-    name: 'asProp',
-    defaultValue: 'span',
-    control: {type: 'text'},
-  },
-  ariaLabel: {
-    name: 'ariaLabel',
-    defaultValue: 'ariaLabel',
-    control: {type: 'text'},
-  },
-  className: {
-    name: 'className',
-    control: {type: 'text'},
-  },
   style: {
     name: 'style',
     defaultValue: {border: '1px solid'},
     control: {type: 'object'},
-  },
-  wrapperClassName: {
-    name: 'wrapperClassName',
-    control: {type: 'text'},
   },
   wrapperStyle: {
     name: 'wrapperStyle',
@@ -61,25 +46,22 @@ export const containWrapper = ({ariaLabel, asProp, className, ...args}) => {
   );
 };
 
-wrapper.args = {
+containWrapper.args = {
   asProp: 'div',
   ariaLabel: 'aria Label',
+  className: '',
   contentClassName: 'content',
+  wrapperClassName: '',
+  size: true,
+  layout: true,
+  paint: true,
 };
 
-wrapper.argTypes = {
-  className: {
-    name: 'className',
-    control: {type: 'text'},
-  },
+containWrapper.argTypes = {
   style: {
     name: 'style',
     defaultValue: {border: '1px solid', width: 200, height: 50},
     control: {type: 'object'},
-  },
-  wrapperClassName: {
-    name: 'wrapperClassName',
-    control: {type: 'text'},
   },
   wrapperStyle: {
     name: 'wrapperStyle',
@@ -89,20 +71,5 @@ wrapper.argTypes = {
     name: 'contentStyle',
     defaultValue: {border: '1px dotted'},
     control: {type: 'object'},
-  },
-  size: {
-    name: 'size',
-    defaultValue: true,
-    control: {type: 'boolean'},
-  },
-  layout: {
-    name: 'layout',
-    defaultValue: true,
-    control: {type: 'boolean'},
-  },
-  paint: {
-    name: 'paint',
-    defaultValue: true,
-    control: {type: 'boolean'},
   },
 };

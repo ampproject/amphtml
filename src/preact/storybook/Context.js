@@ -18,17 +18,12 @@ export const _default = ({...args}) => {
   );
 };
 
+_default.args = {
+  renderable: true,
+  playable: true,
+};
+
 _default.argTypes = {
-  renderable: {
-    name: 'renderable',
-    defaultValue: true,
-    control: {type: 'boolean'},
-  },
-  playable: {
-    name: 'playable',
-    defaultValue: true,
-    control: {type: 'boolean'},
-  },
   loading: {
     name: 'loading',
     defaultValue: 'auto',
