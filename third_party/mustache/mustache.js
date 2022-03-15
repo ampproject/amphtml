@@ -760,6 +760,12 @@ function mustacheFactory (mustache) {
   // See https://github.com/janl/mustache.js/issues/244
   mustache.escape = escapeHtml;
 
+  // Export the sanitizing function for unescaped values.
+  mustache.sanitizeUnescaped = null;
+  mustache.setUnescapedSanitizer = function setUnescapedSanitizer(sanitizeUnescaped) {
+    mustache.sanitizeUnescaped = sanitizeUnescaped;
+  };
+
   // Export these mainly for testing, but also for advanced usage.
   mustache.Scanner = Scanner;
   mustache.Context = Context;
