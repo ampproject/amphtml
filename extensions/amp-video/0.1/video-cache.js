@@ -214,6 +214,9 @@ function requestCachedVideoSources(videoEl, ampdoc) {
     try {
       const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
       if (inlineResponseJson['sources']) {
+        Services.performanceFor(win).addEnabledExperiment(
+          'video-cache-inline-transcodes'
+        );
         return Promise.resolve(inlineResponseJson);
       }
     } catch (err) {
