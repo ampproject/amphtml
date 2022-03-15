@@ -13,30 +13,12 @@ export default {
   title: 'YouTube',
   component: BentoYoutube,
   args: {
+    width: 300,
+    height: 300,
+    autoplay: false,
+    loop: false,
     params: {},
     credentials: 'include',
-  },
-  argTypes: {
-    width: {
-      name: 'width',
-      control: {type: 'number'},
-      defaultValue: 300,
-    },
-    height: {
-      name: 'height',
-      control: {type: 'number'},
-      defaultValue: 300,
-    },
-    autoplay: {
-      name: 'autoplay',
-      control: {type: 'boolean'},
-      defaultValue: false,
-    },
-    loop: {
-      name: 'loop',
-      control: {type: 'boolean'},
-      defaultValue: false,
-    },
   },
 };
 

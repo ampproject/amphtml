@@ -7,28 +7,10 @@ export default {
   component: BentoVimeo,
   args: {
     videoid: '27246366',
-  },
-  argTypes: {
-    width: {
-      name: 'width',
-      control: {type: 'number'},
-      defaultValue: 320,
-    },
-    height: {
-      name: 'height',
-      control: {type: 'number'},
-      defaultValue: 180,
-    },
-    autoplay: {
-      name: 'autoplay',
-      control: {type: 'boolean'},
-      defaultValue: true,
-    },
-    doNotTrack: {
-      name: 'doNotTrack',
-      control: {type: 'boolean'},
-      defaultValue: false,
-    },
+    width: 320,
+    height: 180,
+    autoplay: true,
+    doNotTrack: false,
   },
 };
 

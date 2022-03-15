@@ -18,6 +18,11 @@ export default {
     width: '640px',
     height: '360px',
     ariaLabel: 'Video Player',
+    autoplay: true,
+    controls: true,
+    mediasession: true,
+    noaudio: false,
+    loop: false,
     poster: 'https://amp.dev/static/inline-examples/images/kitten-playing.png',
     artist: '',
     album: '',
@@ -33,33 +38,6 @@ export default {
         type: 'video/mp4',
       },
     ],
-  },
-  argTypes: {
-    autoplay: {
-      name: 'autoplay',
-      control: {type: 'boolean'},
-      defaultValue: true,
-    },
-    controls: {
-      name: 'controls',
-      control: {type: 'boolean'},
-      defaultValue: true,
-    },
-    mediasession: {
-      name: 'mediasession',
-      control: {type: 'boolean'},
-      defaultValue: true,
-    },
-    loop: {
-      name: 'loop',
-      control: {type: 'boolean'},
-      defaultValue: false,
-    },
-    noaudio: {
-      name: 'noaudio',
-      control: {type: 'boolean'},
-      defaultValue: false,
-    },
   },
 };
 
@@ -112,25 +90,10 @@ export const Default = ({
 };
 
 Default.args = {
+  amount: 1,
   spacerHeight: '80vh',
-};
-
-Default.argTypes = {
-  amount: {
-    name: 'amount',
-    control: {type: 'number'},
-    defaultValue: 1,
-  },
-  spaceAbove: {
-    name: 'spaceAbove',
-    control: {type: 'boolean'},
-    defaultValue: false,
-  },
-  spaceBelow: {
-    name: 'spaceBelow',
-    control: {type: 'boolean'},
-    defaultValue: false,
-  },
+  spacerAbove: false,
+  spacerBelow: false,
 };
 
 export const Actions = ({...args}) => {
@@ -160,22 +123,10 @@ export const InsideAccordion = ({...args}) => {
   );
 };
 
-InsideAccordion.argTypes = {
-  width: {
-    name: 'width',
-    control: {type: 'number'},
-    defaultValue: 320,
-  },
-  height: {
-    name: 'height',
-    control: {type: 'number'},
-    defaultValue: 180,
-  },
-  autoplay: {
-    name: 'autoplay',
-    control: {type: 'boolean'},
-    defaultValue: false,
-  },
+InsideAccordion.args = {
+  width: 320,
+  height: 180,
+  autoplay: false,
 };
 
 export const InsideDetails = ({...args}) => {
@@ -192,20 +143,8 @@ export const InsideDetails = ({...args}) => {
   );
 };
 
-InsideDetails.argTypes = {
-  width: {
-    name: 'width',
-    control: {type: 'number'},
-    defaultValue: 320,
-  },
-  height: {
-    name: 'height',
-    control: {type: 'number'},
-    defaultValue: 180,
-  },
-  autoplay: {
-    name: 'autoplay',
-    control: {type: 'boolean'},
-    defaultValue: false,
-  },
+InsideDetails.args = {
+  width: 320,
+  height: 180,
+  autoplay: false,
 };

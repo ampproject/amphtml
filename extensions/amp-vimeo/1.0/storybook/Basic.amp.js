@@ -14,18 +14,8 @@ export default {
   },
   args: {
     videoid: '27246366',
-  },
-  argTypes: {
-    autoplay: {
-      name: 'autoplay',
-      control: {type: 'boolean'},
-      defaultValue: true,
-    },
-    doNotTrack: {
-      name: 'doNotTrack',
-      control: {type: 'boolean'},
-      defaultValue: false,
-    },
+    autoplay: true,
+    doNotTrack: false,
   },
 };
 

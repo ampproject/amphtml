@@ -12,40 +12,19 @@ export default {
   args: {
     width: '640px',
     height: '360px',
+
     ariaLabel: 'Video Player',
+    autoplay: true,
+    controls: true,
+    mediasession: true,
+    noaudio: false,
+    loop: false,
     poster: 'https://amp.dev/static/inline-examples/images/kitten-playing.png',
     artist: '',
     album: '',
     artwork: '',
     title: '',
     src: 'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html',
-  },
-  argTypes: {
-    autoplay: {
-      name: 'autoplay',
-      control: {type: 'boolean'},
-      defaultValue: true,
-    },
-    controls: {
-      name: 'controls',
-      control: {type: 'boolean'},
-      defaultValue: true,
-    },
-    mediasession: {
-      name: 'mediasession',
-      control: {type: 'boolean'},
-      defaultValue: true,
-    },
-    loop: {
-      name: 'loop',
-      control: {type: 'boolean'},
-      defaultValue: false,
-    },
-    noaudio: {
-      name: 'noaudio',
-      control: {type: 'boolean'},
-      defaultValue: false,
-    },
   },
 };
 
@@ -116,25 +95,10 @@ export const Default = ({
 };
 
 Default.args = {
+  amount: 1,
   spacerHeight: '80vh',
-};
-
-Default.argTypes = {
-  amount: {
-    name: 'amount',
-    control: {type: 'number'},
-    defaultValue: 1,
-  },
-  spaceAbove: {
-    name: 'spaceAbove',
-    control: {type: 'boolean'},
-    defaultValue: false,
-  },
-  spaceBelow: {
-    name: 'spaceBelow',
-    control: {type: 'boolean'},
-    defaultValue: false,
-  },
+  spaceAbove: false,
+  spaceBelow: false,
 };
 
 const ActionButton = ({children, ...props}) => (
@@ -190,23 +154,8 @@ export const WithPlaceholderAndFallback = ({
 };
 
 WithPlaceholderAndFallback.args = {
+  amount: 1,
   spacerHeight: '80vh',
-};
-
-WithPlaceholderAndFallback.argTypes = {
-  amount: {
-    name: 'amount',
-    control: {type: 'number'},
-    defaultValue: 1,
-  },
-  spaceAbove: {
-    name: 'spaceAbove',
-    control: {type: 'boolean'},
-    defaultValue: false,
-  },
-  spaceBelow: {
-    name: 'spaceBelow',
-    control: {type: 'boolean'},
-    defaultValue: false,
-  },
+  spaceAbove: false,
+  spaceBelow: false,
 };

@@ -15,31 +15,13 @@ export default {
     experiments: ['bento'],
   },
   args: {
-    credentials: 'include',
     videoid: 'IAvf-rkzNck',
     layout: 'responsive',
-  },
-  argTypes: {
-    width: {
-      name: 'width',
-      control: {type: 'number'},
-      defaultValue: 300,
-    },
-    height: {
-      name: 'height',
-      control: {type: 'number'},
-      defaultValue: 300,
-    },
-    autoplay: {
-      name: 'autoplay',
-      control: {type: 'boolean'},
-      defaultValue: false,
-    },
-    loop: {
-      name: 'loop',
-      control: {type: 'boolean'},
-      defaultValue: false,
-    },
+    autoplay: false,
+    loop: false,
+    widht: 300,
+    height: 300,
+    credentials: 'include',
   },
 };
 
