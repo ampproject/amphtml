@@ -59,6 +59,7 @@ jobs:
           ref: ${{ github.events.inputs.amp-version }}
       - uses: actions/setup-node@v2
         with:
+          registry-url: https://registry.npmjs.org
           node-version: lts/*
       - name: Get latest scripts
         run: |
@@ -69,8 +70,8 @@ jobs:
         run: |
           npm ci
           node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
-          cd ./src/bento/core
           CORE_VERSION=$(node ${{ env.SCRIPTS_DIR }}/get-core-version.js ${{ github.event.inputs.amp-version }})
+          cd ./src/bento/core
           npm version $CORE_VERSION --git-tag-version=false --allow-same-version=true
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
@@ -94,7 +95,7 @@ jobs:
   publish:
     if: github.repository == 'ampproject/amphtml'
     environment: bento_publishing
-    needs: publish-core
+    needs: [setup, publish-core]
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
@@ -111,6 +112,7 @@ jobs:
         run: |
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/utils.js" -O ${{ env.SCRIPTS_DIR }}/utils.js
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/build-npm-binaries.js" -O ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
+          wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-package-dir.js" -O ${{ env.SCRIPTS_DIR }}/get-package-dir.js
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/write-package-files.js" -O ${{ env.SCRIPTS_DIR }}/write-package-files.js
       - name: Build package
         run: |
@@ -119,19 +121,22 @@ jobs:
           node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.amp-version }} ${{ matrix.version }}
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
-        run: npm publish ./extensions/${{ matrix.extension }}/${{ matrix.version }} --access public --tag ${{ github.event.inputs.tag }}
+        run: |
+          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js ${{ matrix.extension }} ${{ matrix.version }})
+          npm publish --access public --tag ${{ github.event.inputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Tag package as latest for Stable releases
         if: github.event.inputs.tag == 'latest'
         run: |
-          NPM_PACKAGE=$(jq -r .name ./extensions/${{ matrix.extension }}/${{ matrix.version }}/package.json)
-          NPM_VERSION=$(jq -r .version ./extensions/${{ matrix.extension }}/${{ matrix.version }}/package.json)
+          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js ${{ matrix.extension }} ${{ matrix.version }})
+          NPM_PACKAGE=$(jq -r .name package.json)
+          NPM_VERSION=$(jq -r .version package.json)
           echo "Processing ${NPM_PACKAGE}@${NPM_VERSION}"
           if [[ $(npm view ${NPM_PACKAGE}@${NPM_VERSION}) ]]; then
             npm dist-tag add ${NPM_PACKAGE}@${NPM_VERSION} latest
           else
-            npm publish ./extensions/${{ matrix.extension }}/${{ matrix.version }} --access public --tag latest
+            npm publish --access public --tag latest
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

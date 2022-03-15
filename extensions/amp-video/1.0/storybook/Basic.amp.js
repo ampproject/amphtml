@@ -15,10 +15,6 @@ export default {
     experiments: ['bento'],
   },
   args: {
-    amount: 1,
-    spacerHeight: '80vh',
-    spacerAbove: '80vh',
-    spacerBelow: '80vh',
     width: '640px',
     height: '360px',
     ariaLabel: 'Video Player',
@@ -28,6 +24,10 @@ export default {
     noaudio: false,
     loop: false,
     poster: 'https://amp.dev/static/inline-examples/images/kitten-playing.png',
+    artist: '',
+    album: '',
+    artwork: '',
+    title: '',
     sources: [
       {
         src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
@@ -41,11 +41,11 @@ export default {
   },
 };
 
-const AmpVideo = (args) => {
-  const {sources} = args;
+const AmpVideoWithControls = ({ariaLabel, i, sources, ...args}) => {
+  const group = i ? `Player ${i + 1}` : undefined;
 
   return (
-    <amp-video {...args} layout="responsive">
+    <amp-video aria-label={ariaLabel} layout="responsive" id={group} {...args}>
       {sources.map((props) => (
         <source {...props}></source>
       ))}
@@ -65,12 +65,16 @@ const Spacer = ({height}) => {
   );
 };
 
-export const Default = (args) => {
-  const {amount, spaceAbove, spaceBelow, spacerHeight} = args;
-
+export const Default = ({
+  amount,
+  spaceAbove,
+  spaceBelow,
+  spacerHeight,
+  ...args
+}) => {
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<AmpVideo {...args} key={i} i={i} />);
+    players.push(<AmpVideoWithControls key={i} i={i} {...args} />);
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -85,30 +89,29 @@ export const Default = (args) => {
   );
 };
 
-export const Actions = (args) => {
+Default.args = {
+  amount: 1,
+  spacerHeight: '80vh',
+  spacerAbove: false,
+  spacerBelow: false,
+};
+
+export const Actions = ({...args}) => {
   const id = 'player';
   return (
     <VideoElementWithActions id={id}>
-      <AmpVideo {...args} id={id} />
+      <AmpVideoWithControls id={id} {...args} />
     </VideoElementWithActions>
   );
 };
 
-export const InsideAccordion = (args) => {
-  const {autoplay, height, width} = args;
-
+export const InsideAccordion = ({...args}) => {
   return (
     <amp-accordion expand-single-section>
       <section expanded>
         <h2>Video</h2>
         <div>
-          <amp-video
-            autoplay={autoplay}
-            controls
-            loop
-            width={width}
-            height={height}
-          >
+          <amp-video controls loop {...args}>
             <source
               type="video/mp4"
               src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
@@ -120,19 +123,17 @@ export const InsideAccordion = (args) => {
   );
 };
 
-export const InsideDetails = (args) => {
-  const {autoplay, height, width} = args;
+InsideAccordion.args = {
+  width: 320,
+  height: 180,
+  autoplay: false,
+};
 
+export const InsideDetails = ({...args}) => {
   return (
     <details open>
       <summary>Video</summary>
-      <amp-video
-        autoplay={autoplay}
-        controls
-        loop
-        width={width}
-        height={height}
-      >
+      <amp-video controls loop {...args}>
         <source
           type="video/mp4"
           src="https://amp.dev/static/inline-examples/videos/kitten-playing.mp4"
@@ -140,4 +141,10 @@ export const InsideDetails = (args) => {
       </amp-video>
     </details>
   );
+};
+
+InsideDetails.args = {
+  width: 320,
+  height: 180,
+  autoplay: false,
 };

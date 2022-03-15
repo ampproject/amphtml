@@ -14,10 +14,6 @@ export default {
   title: 'Video',
   component: BentoVideo,
   args: {
-    amount: 1,
-    spacerHeight: '80vh',
-    spacerAbove: '80vh',
-    spacerBelow: '80vh',
     width: '640px',
     height: '360px',
     ariaLabel: 'Video Player',
@@ -27,6 +23,10 @@ export default {
     noaudio: false,
     loop: false,
     poster: 'https://amp.dev/static/inline-examples/images/kitten-playing.png',
+    artist: '',
+    album: '',
+    artwork: '',
+    title: '',
     sources: [
       {
         src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
@@ -37,11 +37,15 @@ export default {
         type: 'video/mp4',
       },
     ],
+
+    amount: 1,
+    spaceAbove: false,
+    spaceBelow: false,
   },
 };
 
-const VideoTagPlayer = (args) => {
-  const {height, width} = args;
+const VideoTagPlayer = ({height, i, sources, width, ...args}) => {
+  const group = `Player ${i + 1}`;
 
   const ref = Preact.useRef();
   return (
@@ -49,14 +53,15 @@ const VideoTagPlayer = (args) => {
       <BentoVideo
         component="video"
         {...args}
+        id={group}
         ref={ref}
         style={{width, height}}
-        sources={args.sources.map((props) => (
+        sources={sources.map((props) => (
           <source {...props}></source>
         ))}
       />
-      <button onClick={() => ref.current.pause()}>pause</button>
       <button onClick={() => ref.current.play()}>play</button>
+      <button onClick={() => ref.current.pause()}>pause</button>
       <button onClick={() => ref.current.togglePlay()}>Toggle</button>
     </>
   );
@@ -79,11 +84,11 @@ export const Default = ({
   spaceAbove,
   spaceBelow,
   spacerHeight,
-  ...rest
+  ...args
 }) => {
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<VideoTagPlayer {...rest} key={i} i={i} />);
+    players.push(<VideoTagPlayer key={i} i={i} {...args} />);
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -98,9 +103,14 @@ export const Default = ({
   );
 };
 
-export const InsideAccordion = (args) => {
-  const {height, width} = args;
+Default.args = {
+  amount: 1,
+  spacerHeight: '80vh',
+  spaceAbove: false,
+  spaceBelow: false,
+};
 
+export const InsideAccordion = ({height, width}) => {
   return (
     <BentoAccordion expandSingleSection>
       <BentoAccordionSection key={1} expanded>
@@ -141,4 +151,9 @@ export const InsideAccordion = (args) => {
       </BentoAccordionSection>
     </BentoAccordion>
   );
+};
+
+InsideAccordion.args = {
+  width: '320px',
+  height: '180px',
 };
