@@ -53,6 +53,8 @@ jobs:
     environment: bento_publishing
     needs: setup
     runs-on: ubuntu-latest
+    outputs:
+      core-version: ${{ steps.build-core.outputs.core-version }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -67,12 +69,14 @@ jobs:
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/get-core-version.js" -O ${{ env.SCRIPTS_DIR }}/get-core-version.js
           wget -q "${{ env.SCRIPTS_REPO }}/${{ env.SCRIPTS_DIR }}/build-npm-binaries.js" -O ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
       - name: Build package
+        id: build-core
         run: |
           npm ci
           node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js
           CORE_VERSION=$(node ${{ env.SCRIPTS_DIR }}/get-core-version.js ${{ github.event.inputs.amp-version }})
           cd ./src/bento/core
           npm version $CORE_VERSION --git-tag-version=false --allow-same-version=true
+          echo "::set-output name=core-version::${CORE_VERSION}"
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: |
@@ -118,7 +122,7 @@ jobs:
         run: |
           npm ci
           node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }}
-          node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.amp-version }} ${{ matrix.version }}
+          node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.amp-version }} ${{ matrix.version }} ${{ needs.publish-core.outputs.core-version }}
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: |
