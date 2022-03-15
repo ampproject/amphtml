@@ -718,6 +718,8 @@ const forbiddenTermsGlobal = {
     ],
     checkInTestFolder: true,
   },
+  'withA11y':
+    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
 };
 
 const bannedTermsHelpString =
