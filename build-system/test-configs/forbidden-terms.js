@@ -96,6 +96,9 @@ const forbiddenTermsGlobal = {
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
     checkInTestFolder: true,
+    allowlist: [
+      'build-system/tasks/remap-dependencies-plugin/test-remap-dependencies.js',
+    ],
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',

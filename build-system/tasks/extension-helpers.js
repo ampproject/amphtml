@@ -688,11 +688,14 @@ async function buildNpmBinaries(extDir, name, options) {
  * @return {!Promise}
  */
 function buildBinaries(extDir, binaries, options) {
+  // If outputPath is not defined, then use extDir
+  const {outputPath = extDir} = options;
+
   const promises = binaries.map((binary) => {
     const {babelCaller, entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
+    return esbuildCompile(extDir + '/', entryPoint, `${outputPath}/dist`, {
       ...options,
       toName: maybeToNpmEsmName(`${name}.max.js`),
       minifiedName: maybeToNpmEsmName(`${name}.js`),
@@ -734,7 +737,7 @@ async function buildBentoExtensionJs(dir, name, options) {
   );
   await buildExtensionJs(dir, name, {
     ...options,
-    externalDependencies: Object.values(remapDependencies),
+    externalDependencies: [...new Set(Object.values(remapDependencies))],
     remapDependencies,
     wrapper: 'none',
     outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
