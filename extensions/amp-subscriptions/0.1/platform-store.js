@@ -30,8 +30,15 @@ export class PlatformStore {
    * @param {!JsonObject|Object<string, number>} scoreConfig
    * @param {!./entitlement.Entitlement} fallbackEntitlement
    * @param {Object<string, !./subscription-platform.SubscriptionPlatform>=} opt_Platforms
+   * @param {!Observable<!EntitlementChangeEventDef>} opt_externalOnEntitlementResolvedCallbacks
    */
-  constructor(platformKeys, scoreConfig, fallbackEntitlement, opt_Platforms) {
+  constructor(
+    platformKeys,
+    scoreConfig,
+    fallbackEntitlement,
+    opt_Platforms,
+    opt_externalOnEntitlementResolvedCallbacks
+  ) {
     /** @private @const {!Object<string, !./subscription-platform.SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = opt_Platforms || {};
 
@@ -76,6 +83,12 @@ export class PlatformStore {
 
     /** @private @const {!Object<string, number>} */
     this.scoreConfig_ = Object.assign(DEFAULT_SCORE_CONFIG, scoreConfig);
+
+    /** @private @const {!Observable<!EntitlementChangeEventDef>} */
+    this.externalOnEntitlementResolvedCallbacks_ =
+      opt_externalOnEntitlementResolvedCallbacks
+        ? opt_externalOnEntitlementResolvedCallbacks
+        : new Observable();
   }
 
   /**
@@ -106,7 +119,8 @@ export class PlatformStore {
       this.platformKeys_,
       this.scoreConfig_,
       this.fallbackEntitlement_,
-      this.subscriptionPlatforms_
+      this.subscriptionPlatforms_,
+      this.externalOnEntitlementResolvedCallbacks_
     );
   }
 
@@ -196,6 +210,15 @@ export class PlatformStore {
   }
 
   /**
+   * This registers a callback which is called whenever a platform key is resolved
+   * with an entitlement.
+   * @param {function(!EntitlementChangeEventDef):void} callback
+   */
+  addOnEntitlementResolvedCallback(callback) {
+    this.externalOnEntitlementResolvedCallbacks_.add(callback);
+  }
+
+  /**
    * This resolves the entitlement to a platformKey
    * @param {string} platformKey
    * @param {!./entitlement.Entitlement} entitlement
@@ -221,6 +244,10 @@ export class PlatformStore {
       this.saveGrantEntitlement_(entitlement);
     }
     this.onEntitlementResolvedCallbacks_.fire({
+      platformKey,
+      entitlement,
+    });
+    this.externalOnEntitlementResolvedCallbacks_.fire({
       platformKey,
       entitlement,
     });

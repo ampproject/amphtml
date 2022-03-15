@@ -96,6 +96,9 @@ const forbiddenTermsGlobal = {
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
     checkInTestFolder: true,
+    allowlist: [
+      'build-system/tasks/remap-dependencies-plugin/test-remap-dependencies.js',
+    ],
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
@@ -462,7 +465,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments/index.js',
-      'src/preact/hooks/useLocalStorage.js',
+      'src/preact/hooks/useLocalStorage.ts',
       'src/service/cid-impl.js',
       'src/service/standard-actions-impl.js',
       'src/service/storage-impl.js',

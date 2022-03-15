@@ -387,7 +387,8 @@ export class AmpVideo extends AMP.BaseElement {
     // If not in prerender mode, propagate everything.
     let pendingOriginPromise;
     if (
-      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PRERENDER
+      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PRERENDER ||
+      this.getAmpDoc().getVisibilityState() == VisibilityState_Enum.PREVIEW
     ) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');

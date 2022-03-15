@@ -2,10 +2,17 @@ amp-story-shopping-attachment {
   height: 100% !important;
   width: 100% !important;
   font-family: 'Poppins', sans-serif !important;
-  font-size: calc(var(--story-page-vmin) * 3) !important; /* override with ems for pixel perfect layout */
-  --i-amphtml-shopping-attachment-horizontal-padding: 1.5em !important;
-  --i-amphtml-shopping-attachment-vertical-padding: 1.2em !important;
+  font-size: calc(var(--story-page-vmin) * 3) !important; /* Override with ems for pixel perfect layout. */
+  --i-amphtml-shopping-attachment-horizontal-spacing: 1.5em !important;
+  --i-amphtml-shopping-attachment-vertical-spacing: 1.2em !important;
   --i-amphtml-shopping-three-percent-overlay: rgba(0, 0, 0,  .03) !important;
+  --i-amphtml-shopping-pdp-carousel-height: calc(var(--story-page-vh) * 80 - var(--story-page-vw) * 60) !important;
+}
+
+amp-story[desktop][supports-landscape] amp-story-shopping-attachment {
+  /* Sets static values in desktop supports landscape mode. */
+  font-size: calc(18px) !important;
+  --i-amphtml-shopping-pdp-carousel-height: 32em !important;
 }
 
 amp-story-shopping-attachment[theme="dark"] {
@@ -24,16 +31,16 @@ amp-story-shopping-attachment a {
   display: block !important;
 }
 
+.i-amphtml-amp-story-shopping-sub-section-header {
+  font-weight: 600 !important;
+  font-size: 1.5em !important;
+  padding: var(--i-amphtml-shopping-attachment-vertical-spacing) 0 !important;
+}
+
 /* PLP (Product Listing Page). */
 
 .i-amphtml-amp-story-shopping-plp {
-  padding: 0 var(--i-amphtml-shopping-attachment-horizontal-padding) !important;
-}
-
-.i-amphtml-amp-story-shopping-plp-header {
-  font-weight: 600 !important;
-  font-size: 1.5em !important;
-  margin: var(--i-amphtml-shopping-attachment-vertical-padding) 0 !important;
+  padding: 0 var(--i-amphtml-shopping-attachment-horizontal-spacing) !important;
 }
 
 .i-amphtml-amp-story-shopping-plp-cards {
@@ -43,7 +50,7 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-plp-card {
-  width: calc(50% - var(--i-amphtml-shopping-attachment-horizontal-padding) / 2) !important;
+  width: calc(50% - var(--i-amphtml-shopping-attachment-horizontal-spacing) / 2) !important;
   margin-bottom: 3em !important;
   cursor: pointer !important;
 }
@@ -95,7 +102,7 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-pdp-header {
-  margin: 1.5em var(--i-amphtml-shopping-attachment-horizontal-padding) 2em !important;
+  margin: 1.5em var(--i-amphtml-shopping-attachment-horizontal-spacing) 2em !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-header-brand {
@@ -151,6 +158,8 @@ amp-story-shopping-attachment a {
   filter: invert(1) !important;
 }
 
+/* PDP reviews */
+
 .i-amphtml-amp-story-shopping-pdp-reviews {
   display: flex !important;
   align-items: center !important;
@@ -181,14 +190,19 @@ amp-story-shopping-attachment a {
   text-decoration: underline !important;
 }
 
+/* PDP carousel */
+
 .i-amphtml-amp-story-shopping-pdp-carousel {
   display: flex !important;
   overflow-x: auto !important;
   scroll-snap-type: x mandatory !important;
-  margin-bottom: var(--i-amphtml-shopping-attachment-vertical-padding) !important;
-  --carousel-height: calc(var(--story-page-vh) * 80 - var(--story-page-vw) * 60) !important;
-  height: var(--carousel-height) !important;
+  height: var(--i-amphtml-shopping-pdp-carousel-height) !important;
   max-height: 100vw !important;
+}
+
+/* Only adds bottom margin if carousel is last child. */
+.i-amphtml-amp-story-shopping-pdp-carousel:last-child {
+  margin-bottom: var(--i-amphtml-shopping-attachment-vertical-spacing) !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel::-webkit-scrollbar {
@@ -196,7 +210,7 @@ amp-story-shopping-attachment a {
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card {
-  margin-inline-start: calc(var(--i-amphtml-shopping-attachment-horizontal-padding) / 2) !important;
+  margin-inline-start: calc(var(--i-amphtml-shopping-attachment-horizontal-spacing) / 2) !important;
   scroll-snap-align: center !important;
   flex-shrink: 0 !important;
   background-color: var(--i-amphtml-shopping-three-percent-overlay) !important;
@@ -205,24 +219,17 @@ amp-story-shopping-attachment a {
   background-repeat: no-repeat !important;
   cursor: pointer !important;
   width: calc(var(--story-page-vw) * 100 - 7.5em) !important;
-  max-width: calc(var(--carousel-height) * 1.25) !important;
+  max-width: calc(var(--i-amphtml-shopping-pdp-carousel-height) * 1.25) !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
-  margin-inline-start: var(--i-amphtml-shopping-attachment-horizontal-padding) !important;
+  margin-inline-start: var(--i-amphtml-shopping-attachment-horizontal-spacing) !important;
   border-radius: 1.1em 0 0 1.1em !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-carousel-card:last-child {
-  margin-inline-end: var(--i-amphtml-shopping-attachment-horizontal-padding) !important;
+  margin-inline-end: var(--i-amphtml-shopping-attachment-horizontal-spacing) !important;
   border-radius: 0 1.1em 1.1em 0 !important;
-}
-
-.i-amphtml-amp-story-shopping-pdp-carousel-card:only-child {
-  width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-padding) * 2) !important;
-  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-padding) * 2)!important;
-  border-radius: 1.1em !important;
-  cursor: auto !important;
 }
 
 [dir=rtl] .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
@@ -231,4 +238,63 @@ amp-story-shopping-attachment a {
 
 [dir=rtl] .i-amphtml-amp-story-shopping-pdp-carousel-card:last-child {
   border-radius: 1.1em 0 0 1.1em !important;
+}
+
+/* Override when it's the only child. First and last selectors are used for specificity. */
+.i-amphtml-amp-story-shopping-pdp-carousel-card:first-child:last-child {
+  width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
+  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
+  border-radius: 1.1em !important;
+  cursor: auto !important;
+}
+
+/* PDP deatils */
+
+.i-amphtml-amp-story-shopping-pdp-details {
+  padding: 0 var(--i-amphtml-shopping-attachment-horizontal-spacing) !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-details-header {
+  cursor: pointer !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-details-header-arrow {
+  padding: 0 0.5em !important;
+  height: 0.6em !important;
+  fill: none !important;
+  stroke: var(--i-amphtml-draggable-drawer-text-color) !important;
+  pointer-events: none !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-details .i-amphtml-amp-story-shopping-pdp-details-header-arrow path {
+  transition: d 0.3s !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-details[active] .i-amphtml-amp-story-shopping-pdp-details-header-arrow path {
+  d: path("M.5,5.2 L5,.8 L9.5,5.2") !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-details .i-amphtml-amp-story-shopping-pdp-details-text {
+  display: block !important;
+  overflow: hidden !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  transition: opacity .3s !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-details[active] .i-amphtml-amp-story-shopping-pdp-details-text {
+  height: auto !important;
+  opacity: 1 !important;
+  /* Renders \n as newlines in product data text. */
+  white-space: pre-line !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-details-text:after {
+  content: '' !important;
+  display: block !important;
+  padding-bottom: var(--i-amphtml-shopping-attachment-vertical-spacing) !important;
 }

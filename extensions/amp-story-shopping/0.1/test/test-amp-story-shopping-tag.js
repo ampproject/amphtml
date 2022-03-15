@@ -1,4 +1,4 @@
-import {createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
 import '../amp-story-shopping';
@@ -26,8 +26,6 @@ describes.realWin(
     let shoppingTag;
     let storeService;
     let localizationService;
-    let attachmentElement;
-    let pageEl;
 
     beforeEach(async () => {
       win = env.win;
@@ -40,55 +38,47 @@ describes.realWin(
 
       localizationService = new LocalizationService(win.document.body);
       env.sandbox
-        .stub(Services, 'localizationServiceForOrNull')
-        .returns(Promise.resolve(localizationService));
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
 
       await setUpStoryWithShoppingTag();
     });
 
     async function setUpStoryWithShoppingTag() {
-      pageEl = win.document.createElement('amp-story-page');
-      pageEl.id = 'page1';
-      tagEl = createElementWithAttributes(
-        win.document,
-        'amp-story-shopping-tag',
-        {'layout': 'container'}
+      tagEl = (
+        <amp-story-shopping-tag layout="container"></amp-story-shopping-tag>
       );
-      pageEl.appendChild(tagEl);
-
-      attachmentElement = win.document.createElement(
-        'amp-story-shopping-attachment'
+      env.win.document.body.appendChild(
+        <amp-story-page id="page1">
+          {tagEl}
+          <amp-story-shopping-attachment></amp-story-shopping-attachment>
+        </amp-story-page>
       );
-      const story = win.document.createElement('amp-story');
-      win.document.body.appendChild(story);
-      story.appendChild(pageEl);
-      pageEl.appendChild(attachmentElement);
       shoppingTag = await tagEl.getImpl();
     }
 
     async function setUpShoppingData() {
       const shoppingData = {
-        'sunglasses': {'productTitle': 'Spectacular Spectacles'},
+        'page1': {'sunglasses': {'productTitle': 'Spectacular Spectacles'}},
       };
       storeService.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
     }
 
-    async function createShoppingTag() {
+    async function setupShoppingTagAndData() {
       shoppingTag.element.setAttribute('data-product-id', 'sunglasses');
       await setUpShoppingData();
-
       expect(() => shoppingTag.buildCallback()).to.not.throw();
       expect(() => shoppingTag.layoutCallback()).to.not.throw();
     }
 
     it('should build and layout shopping tag component', async () => {
-      await createShoppingTag();
+      await setupShoppingTagAndData();
       expect(shoppingTag.shoppingTagEl_).to.be.not.null;
     });
 
     it('should not build shopping tag if page attachment is missing', async () => {
-      pageEl.removeChild(attachmentElement);
-      await createShoppingTag();
+      env.win.document.querySelector('amp-story-shopping-attachment').remove();
+      await setupShoppingTagAndData();
       expect(shoppingTag.shoppingTagEl_).to.be.null;
     });
 

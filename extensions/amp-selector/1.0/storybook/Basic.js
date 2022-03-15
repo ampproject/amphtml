@@ -1,15 +1,13 @@
-import {select, withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 import {useRef, useState} from '#preact';
 
 import '../component.jss';
 
 import {BentoSelector, BentoSelectorOption} from '../component';
+
 export default {
   title: 'Selector',
   component: BentoSelector,
-  decorators: [withKnobs],
 };
 
 const imgStyle = {
@@ -69,19 +67,14 @@ function SelectorWithActions(props) {
   );
 }
 
-export const actionsAndOrder = () => {
-  const keyboardSelectMode = select(
-    'keyboard select mode',
-    ['none', 'focus', 'select'],
-    'select'
-  );
+export const actionsAndOrder = (args) => {
   return (
     <form>
       <SelectorWithActions
-        keyboardSelectMode={keyboardSelectMode}
         multiple
         name="poll"
         aria-label="Image menu"
+        {...args}
       >
         <BentoSelectorOption
           as="img"
@@ -120,6 +113,15 @@ export const actionsAndOrder = () => {
       </SelectorWithActions>
     </form>
   );
+};
+
+actionsAndOrder.argTypes = {
+  'keyboard-select-mode': {
+    name: 'keyboard-select-mode',
+    defaultValue: 'select',
+    options: ['none', 'focus', 'select'],
+    control: {type: 'select'},
+  },
 };
 
 export const OptionItems = () => {

@@ -12,7 +12,7 @@ const {
 const {bentoBundles, verifyBentoBundles} = require('../compile/bundles.config');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {log} = require('../common/logging');
-const {mkdirSync} = require('fs');
+const {mkdir} = require('fs-extra');
 const {red} = require('kleur/colors');
 const {watch} = require('chokidar');
 
@@ -132,14 +132,15 @@ async function buildBentoComponent(name, version, hasCss, options = {}) {
     return;
   }
   const componentsDir = `src/bento/components/${name}/${version}`;
+  await mkdir(`${componentsDir}/dist`, {recursive: true});
   if (options.watch) {
-    await watchBentoComponent(componentsDir, name, version, hasCss, options);
+    watchBentoComponent(componentsDir, name, version, hasCss, options);
   }
 
   /** @type {Promise<void>[]} */
   const promises = [];
   if (hasCss) {
-    mkdirSync('build/css', {recursive: true});
+    await mkdir('build/css', {recursive: true});
     promises.push(buildExtensionCss(componentsDir, name, version, options));
     if (options.compileOnlyCss) {
       return Promise.all(promises);
