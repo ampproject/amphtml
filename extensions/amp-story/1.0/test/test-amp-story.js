@@ -1710,36 +1710,44 @@ describes.realWin(
         );
       });
 
-      describe('remote locales', () => {
+      describe('remote localization strings', () => {
         beforeEach(() => {
-          toggleExperiment(env.win, 'story-remote-locales', true);
+          toggleExperiment(env.win, 'story-remote-localization', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(env.win, 'story-remote-localization', false);
         });
 
         it('should fetch the localization strings for the default laguage from the cdn', async () => {
-          const fetchSpy = env.sandbox.spy(
-            Services.xhrFor(env.win),
-            'fetchJson'
-          );
+          const fetchStub = env.sandbox
+            .stub(Services.xhrFor(env.win), 'fetchJson')
+            .resolves({
+              json: () => Promise.resolve({}),
+            });
 
           await createStoryWithPages(1, ['cover']);
 
-          expect(fetchSpy).to.be.calledOnceWithExactly(
-            'https://cdn.ampproject.org/v0/amp-story.en.json'
+          expect(fetchStub).to.be.calledOnceWithExactly(
+            'https://cdn.ampproject.org/v0/amp-story.en.json',
+            env.sandbox.match.any
           );
         });
 
         it('should fetch the localization strings for the document laguage from the cdn', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
 
-          const fetchSpy = env.sandbox.spy(
-            Services.xhrFor(env.win),
-            'fetchJson'
-          );
+          const fetchStub = env.sandbox
+            .stub(Services.xhrFor(env.win), 'fetchJson')
+            .resolves({
+              json: () => Promise.resolve({}),
+            });
 
           await createStoryWithPages(1, ['cover']);
 
-          expect(fetchSpy).to.have.been.calledOnceWithExactly(
-            'https://cdn.ampproject.org/v0/amp-story.es-419.json'
+          expect(fetchStub).to.have.been.calledOnceWithExactly(
+            'https://cdn.ampproject.org/v0/amp-story.es-419.json',
+            env.sandbox.match.any
           );
         });
 
@@ -1747,37 +1755,37 @@ describes.realWin(
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
           env.win.__AMP_MODE.localDev = true;
 
-          const fetchSpy = env.sandbox.spy(
-            Services.xhrFor(env.win),
-            'fetchJson'
-          );
+          const fetchStub = env.sandbox
+            .stub(Services.xhrFor(env.win), 'fetchJson')
+            .resolves({
+              json: () => Promise.resolve({}),
+            });
 
           await createStoryWithPages(1, ['cover']);
 
-          expect(fetchSpy).to.have.been.calledOnceWithExactly(
-            '/dist/v0/amp-story.es-419.json'
+          expect(fetchStub).to.have.been.calledOnceWithExactly(
+            '/dist/v0/amp-story.es-419.json',
+            env.sandbox.match.any
           );
         });
 
         it('should use the remote localization strings', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
 
-          const fetchMock = env.sandbox.mock(Services.xhrFor(env.win));
-          fetchMock.expects('fetchJson').returns(
-            Promise.resolve({
+          const fetchStub = env.sandbox
+            .stub(Services.xhrFor(env.win), 'fetchJson')
+            .resolves({
               json: () =>
                 Promise.resolve({
                   '35': 'REMOTE-STRING',
                 }),
-            })
-          );
+            });
 
           await createStoryWithPages(1, ['cover']);
 
           expect(localizationService.getLocalizedString('35')).to.be.equal(
             'REMOTE-STRING'
           );
-          fetchMock.verify();
         });
       });
     });

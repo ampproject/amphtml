@@ -2448,17 +2448,21 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Adds the localization string bundles to the localization service.
+   * @private
    */
   installLocalizationStrings_() {
     const localizationService = getLocalizationService(this.element);
     const storyLanguage = localizationService.getLanguageCodesForElement(
       this.element
     )[0];
-    if (this.registerInlineLocalizationStrings_(storyLanguage)) {
+    if (this.maybeRegisterInlineLocalizationStrings_(storyLanguage)) {
       return;
     }
-    if (isExperimentOn(this.win, 'story-remote-locales')) {
+    if (isExperimentOn(this.win, 'story-remote-localization')) {
       this.fetchLocalizationStrings_(storyLanguage);
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-remote-localization'
+      );
     } else {
       getLocalizationService(this.element)
         .registerLocalizedStringBundle('default', LocalizedStringsEn)
@@ -2494,8 +2498,9 @@ export class AmpStory extends AMP.BaseElement {
    * If there are inline localization strings, register as current document language.
    * @param {string} languageCode
    * @return {boolean}
+   * @private
    */
-  registerInlineLocalizationStrings_(languageCode) {
+  maybeRegisterInlineLocalizationStrings_(languageCode) {
     const inlineStringsEl = this.win.document.querySelector(
       'script[amp-localization="amp-story"]'
     );
@@ -2521,6 +2526,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Fetches from the CDN or localhost the localization strings.
    * @param {string} languageCode
+   * @private
    */
   fetchLocalizationStrings_(languageCode) {
     const localizationService = getLocalizationService(this.element);
@@ -2530,8 +2536,9 @@ export class AmpStory extends AMP.BaseElement {
       getMode(this.win).localDev
     )}/v0/amp-story.${languageCode}.json`;
 
+    // The cache fallbacks to english if language not found, locally it errors.
     Services.xhrFor(this.win)
-      .fetchJson(localizationUrl)
+      .fetchJson(localizationUrl, {prerenderSafe: true})
       .then((res) => res.json())
       .then((json) =>
         localizationService.registerLocalizedStringBundle(languageCode, json)
