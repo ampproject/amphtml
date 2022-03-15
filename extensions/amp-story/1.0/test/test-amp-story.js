@@ -1631,6 +1631,8 @@ describes.realWin(
         win.__AMP_MODE = {
           rtvVersion: '123',
         };
+        const performanceImpl = new Performance(env.win);
+        env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
       });
 
       it('should install the default english localizations', async () => {
@@ -1772,14 +1774,12 @@ describes.realWin(
         it('should use the remote localization strings', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
 
-          const fetchStub = env.sandbox
-            .stub(Services.xhrFor(env.win), 'fetchJson')
-            .resolves({
-              json: () =>
-                Promise.resolve({
-                  '35': 'REMOTE-STRING',
-                }),
-            });
+          env.sandbox.stub(Services.xhrFor(env.win), 'fetchJson').resolves({
+            json: () =>
+              Promise.resolve({
+                '35': 'REMOTE-STRING',
+              }),
+          });
 
           await createStoryWithPages(1, ['cover']);
 
