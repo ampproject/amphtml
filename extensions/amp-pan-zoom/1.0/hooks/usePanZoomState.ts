@@ -14,10 +14,6 @@ const initialState = {
   maxScale: DEFAULT_MAX_SCALE,
   scale: 1,
 
-  viewX: 0,
-  viewY: 0,
-  viewScale: 1,
-
   contentOffset: {x: 0, y: 0},
   containerSize: {width: 0, height: 0},
   contentSize: {width: 0, height: 0},
@@ -116,17 +112,10 @@ const updateView = (
 
   const extent = allowExtent && newScale > 1 ? 0.25 : 0;
 
-  const viewX = boundValueSpring(posX, minX, maxX, extent);
-  const viewY = boundValueSpring(posY, minY, maxY, extent);
-  const viewScale = newScale;
-
   return {
-    posX: allowExtent ? posX : viewX,
-    posY: allowExtent ? posY : viewY,
-    scale: allowExtent ? scale : viewScale,
-    viewX,
-    viewY,
-    viewScale,
+    posX: boundValueSpring(posX, minX, maxX, extent),
+    posY: boundValueSpring(posY, minY, maxY, extent),
+    scale: newScale,
     isPannable: newScale !== 1,
     canZoom: newScale !== state.maxScale,
   };

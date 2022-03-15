@@ -128,7 +128,7 @@ export function BentoPanZoomWithRef(
   const panZoomStyles = {
     transformOrigin:
       px(-state.contentOffset.x) + ' ' + px(-state.contentOffset.y),
-    transform: translate(state.viewX, state.viewY) + cssScale(state.viewScale),
+    transform: translate(state.posX, state.posY) + cssScale(state.scale),
   };
 
   const hammerStartInfo =
