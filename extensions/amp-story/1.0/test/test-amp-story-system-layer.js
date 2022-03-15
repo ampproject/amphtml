@@ -217,10 +217,9 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
 
   describe('localization', () => {
     it('should load the localized aria-labels for buttons if strings are available', async () => {
-      getLocalizationService(win.document.body).registerLocalizedStringBundle(
-        'en',
-        LocalizedStringsEn
-      );
+      getLocalizationService(win.document.body).registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
       systemLayer.build();
       await waitFor(
         () =>
@@ -236,10 +235,9 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
 
     it('should load the localized aria-labels for buttons if strings are available after building', async () => {
       systemLayer.build();
-      getLocalizationService(win.document.body).registerLocalizedStringBundle(
-        'en',
-        LocalizedStringsEn
-      );
+      getLocalizationService(win.document.body).registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
       await waitFor(
         () =>
           systemLayer.getShadowRoot().querySelectorAll('[aria-label]').length
@@ -254,14 +252,10 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
 
     it('should load the localized aria-labels for the correct language', async () => {
       win.document.body.setAttribute('lang', 'es');
-      getLocalizationService(win.document.body).registerLocalizedStringBundle(
-        'default',
-        LocalizedStringsEn
-      );
-      getLocalizationService(win.document.body).registerLocalizedStringBundle(
-        'es',
-        LocalizedStringsEs
-      );
+      getLocalizationService(win.document.body).registerLocalizedStringBundles({
+        'default': LocalizedStringsEn,
+        'es': LocalizedStringsEs,
+      });
 
       systemLayer.build();
 
@@ -278,10 +272,9 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
     });
 
     it('should load the localized text content', async () => {
-      getLocalizationService(win.document.body).registerLocalizedStringBundle(
-        'en',
-        LocalizedStringsEn
-      );
+      getLocalizationService(win.document.body).registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
       systemLayer.build();
 
       await waitFor(() =>

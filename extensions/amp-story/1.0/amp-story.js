@@ -2460,33 +2460,34 @@ export class AmpStory extends AMP.BaseElement {
     if (isExperimentOn(this.win, 'story-remote-locales')) {
       this.fetchLocalizationStrings_(storyLanguage);
     } else {
-      getLocalizationService(this.element)
-        .registerLocalizedStringBundle('default', LocalizedStringsEn)
-        .registerLocalizedStringBundle('ar', LocalizedStringsAr)
-        .registerLocalizedStringBundle('de', LocalizedStringsDe)
-        .registerLocalizedStringBundle('en', LocalizedStringsEn)
-        .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)
-        .registerLocalizedStringBundle('es', LocalizedStringsEs)
-        .registerLocalizedStringBundle('es-419', LocalizedStringsEs419)
-        .registerLocalizedStringBundle('fr', LocalizedStringsFr)
-        .registerLocalizedStringBundle('hi', LocalizedStringsHi)
-        .registerLocalizedStringBundle('id', LocalizedStringsId)
-        .registerLocalizedStringBundle('it', LocalizedStringsIt)
-        .registerLocalizedStringBundle('ja', LocalizedStringsJa)
-        .registerLocalizedStringBundle('ko', LocalizedStringsKo)
-        .registerLocalizedStringBundle('nl', LocalizedStringsNl)
-        .registerLocalizedStringBundle('no', LocalizedStringsNo)
-        .registerLocalizedStringBundle('pt-PT', LocalizedStringsPtPt)
-        .registerLocalizedStringBundle('pt-BR', LocalizedStringsPtBr)
-        .registerLocalizedStringBundle('ru', LocalizedStringsRu)
-        .registerLocalizedStringBundle('tr', LocalizedStringsTr)
-        .registerLocalizedStringBundle('vi', LocalizedStringsVi)
-        .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
-        .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw)
-        .registerLocalizedStringBundle(
-          'en-xa',
-          createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
-        );
+      getLocalizationService(this.element).registerLocalizedStringBundles({
+        'default': LocalizedStringsEn,
+        'ar': LocalizedStringsAr,
+        'de': LocalizedStringsDe,
+        'en': LocalizedStringsEn,
+        'en-GB': LocalizedStringsEnGb,
+        'es': LocalizedStringsEs,
+        'es-419': LocalizedStringsEs419,
+        'fr': LocalizedStringsFr,
+        'hi': LocalizedStringsHi,
+        'id': LocalizedStringsId,
+        'it': LocalizedStringsIt,
+        'ja': LocalizedStringsJa,
+        'ko': LocalizedStringsKo,
+        'nl': LocalizedStringsNl,
+        'no': LocalizedStringsNo,
+        'pt-PT': LocalizedStringsPtPt,
+        'pt-BR': LocalizedStringsPtBr,
+        'ru': LocalizedStringsRu,
+        'tr': LocalizedStringsTr,
+        'vi': LocalizedStringsVi,
+        'zh-CN': LocalizedStringsZhCn,
+        'zh-TW': LocalizedStringsZhTw,
+        'en-xa': createPseudoLocale(
+          LocalizedStringsEn,
+          (s) => `[${s} one two]`
+        ),
+      });
     }
   }
 
@@ -2511,10 +2512,9 @@ export class AmpStory extends AMP.BaseElement {
       return false;
     }
     const localizationService = getLocalizationService(this.element);
-    localizationService.registerLocalizedStringBundle(
-      languageCode,
-      stringsOrNull
-    );
+    localizationService.registerLocalizedStringBundles({
+      languageCode: stringsOrNull,
+    });
     return true;
   }
 
@@ -2534,7 +2534,7 @@ export class AmpStory extends AMP.BaseElement {
       .fetchJson(localizationUrl)
       .then((res) => res.json())
       .then((json) =>
-        localizationService.registerLocalizedStringBundle(languageCode, json)
+        localizationService.registerLocalizedStringBundles({languageCode: json})
       )
       .catch((err) => {
         devError(TAG, err, 'Bundle not found for language ' + languageCode);

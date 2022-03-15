@@ -55,11 +55,13 @@ describes.fakeWin('localization', {amp: true}, (env) => {
   describe('localization service', () => {
     it('should get string text', () => {
       const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('en', {
-        'test_string_id': {
-          string: 'test string content',
+      localizationService.registerLocalizedStringBundles({
+        'en': {
+          'test_string_id': {
+            string: 'test string content',
+          },
+          'test_string_unwrapped': 'test string in unwrapped format',
         },
-        'test_string_unwrapped': 'test string in unwrapped format',
       });
 
       expect(localizationService.getLocalizedString('test_string_id')).to.equal(
@@ -73,11 +75,13 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     it('should handle registration of uppercase locales', () => {
       env.win.document.documentElement.setAttribute('lang', 'zh-CN');
       const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('zh-CN', {
-        '123': {
-          string: '买票',
+      localizationService.registerLocalizedStringBundles({
+        'zh-CN': {
+          '123': {
+            string: '买票',
+          },
+          'test_string_unwrapped': 'test string in unwrapped format',
         },
-        'test_string_unwrapped': 'test string in unwrapped format',
       });
 
       expect(localizationService.getLocalizedString('123')).to.equal('买票');
@@ -139,9 +143,11 @@ describes.fakeWin('localization', {amp: true}, (env) => {
   describe('localize element async', () => {
     it('should set the text content if the bundle is installed for the default language', async () => {
       const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('en', {
-        'test_string_id': {
-          string: 'test string content',
+      localizationService.registerLocalizedStringBundles({
+        'en': {
+          'test_string_id': {
+            string: 'test string content',
+          },
         },
       });
 
@@ -154,12 +160,14 @@ describes.fakeWin('localization', {amp: true}, (env) => {
 
     it('should set the text content if the bundle is installed for the element language', async () => {
       const element = env.win.document.createElement('div');
-      element.setAttribute('lang', 'es');
+      win.document.body.parentElement.setAttribute('lang', 'es');
 
       const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('es', {
-        'test_string_id': {
-          string: 'contenido de prueba',
+      localizationService.registerLocalizedStringBundles({
+        'es': {
+          'test_string_id': {
+            string: 'contenido de prueba',
+          },
         },
       });
 
@@ -170,12 +178,14 @@ describes.fakeWin('localization', {amp: true}, (env) => {
 
     it('should set the text content if bundles are installed for fallback language', async () => {
       const element = env.win.document.createElement('div');
-      element.setAttribute('lang', 'es-419');
+      win.document.body.parentElement.setAttribute('lang', 'es-419');
 
       const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('es', {
-        'test_string_id': {
-          string: 'contenido de prueba',
+      localizationService.registerLocalizedStringBundles({
+        'es': {
+          'test_string_id': {
+            string: 'contenido de prueba',
+          },
         },
       });
 
@@ -187,10 +197,12 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     it('should set the attribute value if the attribute is provided', async () => {
       const localizationService = new LocalizationService(win.document.body);
       const element = env.win.document.createElement('div');
-      element.setAttribute('lang', 'es');
-      localizationService.registerLocalizedStringBundle('es', {
-        'test_string_id': {
-          string: 'contenido de prueba',
+      win.document.body.parentElement.setAttribute('lang', 'es');
+      localizationService.registerLocalizedStringBundles({
+        'es': {
+          'test_string_id': {
+            string: 'contenido de prueba',
+          },
         },
       });
 
@@ -207,14 +219,16 @@ describes.fakeWin('localization', {amp: true}, (env) => {
 
     it('should set the text content if the bundle is installed after localizing', async () => {
       const element = env.win.document.createElement('div');
-      element.setAttribute('lang', 'es');
+      win.document.body.parentElement.setAttribute('lang', 'es');
 
       const localizationService = new LocalizationService(win.document.body);
 
       localizationService.localizeEl(element, 'test_string_id');
-      localizationService.registerLocalizedStringBundle('es', {
-        'test_string_id': {
-          string: 'contenido de prueba',
+      localizationService.registerLocalizedStringBundles({
+        'es': {
+          'test_string_id': {
+            string: 'contenido de prueba',
+          },
         },
       });
 
@@ -225,18 +239,19 @@ describes.fakeWin('localization', {amp: true}, (env) => {
 
     it('should use the more specific language registered', async () => {
       const element = env.win.document.createElement('div');
-      element.setAttribute('lang', 'es');
+      win.document.body.parentElement.setAttribute('lang', 'es');
 
       const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('default', {
-        'test_string_id': {
-          string: 'test string content',
+      localizationService.registerLocalizedStringBundles({
+        'default': {
+          'test_string_id': {
+            string: 'test string content',
+          },
         },
-      });
-
-      localizationService.registerLocalizedStringBundle('es', {
-        'test_string_id': {
-          string: 'contenido de prueba',
+        'es': {
+          'test_string_id': {
+            string: 'contenido de prueba',
+          },
         },
       });
 
@@ -251,14 +266,16 @@ describes.fakeWin('localization', {amp: true}, (env) => {
       );
     });
 
-    it('should not update twice the element when a more specific language is registered', async () => {
+    it('should not update twice the element when a more specific language is registered later', async () => {
       const element = env.win.document.createElement('div');
-      element.setAttribute('lang', 'es');
+      win.document.body.setAttribute('lang', 'es');
 
       const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('default', {
-        'test_string_id': {
-          string: 'test string content',
+      localizationService.registerLocalizedStringBundles({
+        'default': {
+          'test_string_id': {
+            string: 'test string content',
+          },
         },
       });
 
@@ -268,9 +285,11 @@ describes.fakeWin('localization', {amp: true}, (env) => {
         'aria-label'
       );
 
-      localizationService.registerLocalizedStringBundle('es', {
-        'test_string_id': {
-          string: 'contenido de prueba',
+      localizationService.registerLocalizedStringBundles({
+        'es': {
+          'test_string_id': {
+            string: 'contenido de prueba',
+          },
         },
       });
 
@@ -295,14 +314,16 @@ describes.fakeWin('viewer localization', {amp: true}, (env) => {
 
     it('should take precedence over document language', () => {
       const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('fr', {
-        'test_string_id': {
-          string: 'oui',
+      localizationService.registerLocalizedStringBundles({
+        'fr': {
+          'test_string_id': {
+            string: 'oui',
+          },
         },
-      });
-      localizationService.registerLocalizedStringBundle('en', {
-        'test_string_id': {
-          string: 'yes',
+        'en': {
+          'test_string_id': {
+            string: 'yes',
+          },
         },
       });
 
@@ -313,14 +334,16 @@ describes.fakeWin('viewer localization', {amp: true}, (env) => {
 
     it('should fall back if string is not found', () => {
       const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('fr', {
-        'incorrect_test_string_id': {
-          string: 'non',
+      localizationService.registerLocalizedStringBundles({
+        'fr': {
+          'incorrect_test_string_id': {
+            string: 'non',
+          },
         },
-      });
-      localizationService.registerLocalizedStringBundle('en', {
-        'correct_test_string_id': {
-          string: 'yes',
+        'en': {
+          'correct_test_string_id': {
+            string: 'yes',
+          },
         },
       });
 
@@ -331,9 +354,11 @@ describes.fakeWin('viewer localization', {amp: true}, (env) => {
 
     it('should fall back if language code is not registered', () => {
       const localizationService = new LocalizationService(win.document.body);
-      localizationService.registerLocalizedStringBundle('en', {
-        'test_string_id': {
-          string: 'yes',
+      localizationService.registerLocalizedStringBundles({
+        'en': {
+          'test_string_id': {
+            string: 'yes',
+          },
         },
       });
 
