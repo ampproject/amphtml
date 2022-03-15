@@ -5,7 +5,6 @@ import {
   childElementByTag,
   closestAncestorElementBySelector,
 } from '#core/dom/query';
-import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
