@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
@@ -50,6 +52,7 @@ describes.realWin(
     let story;
     let replaceStateStub;
     let win;
+    let localizationService;
 
     const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
@@ -99,7 +102,7 @@ describes.realWin(
 
       replaceStateStub = env.sandbox.stub(win.history, 'replaceState');
 
-      const localizationService = new LocalizationService(win.document.body);
+      localizationService = new LocalizationService(win.document.body);
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);
@@ -1333,7 +1336,7 @@ describes.realWin(
       const clickRightEvent = new MouseEvent('click', {clientX: 200});
       const clickLeftEvent = new MouseEvent('click', {clientX: 10});
 
-      async function setUp() {
+      async function setUpSubscriptions() {
         await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
         subscriptionsEl = win.document.createElement('amp-story-subscriptions');
         story.element.appendChild(subscriptionsEl);
@@ -1361,13 +1364,17 @@ describes.realWin(
 
       describe('UNKNOWN subscription state before paywall page', () => {
         beforeEach(async () => {
-          await setUp();
+          await setUpSubscriptions();
         });
 
         it('should not navigate to subscription content while subscription state is unknown', async () => {
+          await nextTick();
           const page1 = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
+          expect(page1.element.id).to.equal('page-1');
+
+          // Attempt to go to page-2 but should stay on page-1 since the state is unknown.
           page1.element.dispatchEvent(clickRightEvent);
           await nextTick();
           const activePage = story.getPageById(
@@ -1457,7 +1464,7 @@ describes.realWin(
 
       describe('GRANTED subscription state before paywall page', () => {
         beforeEach(async () => {
-          await setUp();
+          await setUpSubscriptions();
         });
 
         it('should be able to navigate like normal story', async () => {
@@ -1485,7 +1492,7 @@ describes.realWin(
 
       describe('BLOCKED subscription state', () => {
         it('should be able to navigate to all locked pages once status becomes granted from blocked', async () => {
-          await setUp();
+          await setUpSubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1524,7 +1531,7 @@ describes.realWin(
         });
 
         it('tapping left before paywall shows should go to the previous page without showing the paywall', async () => {
-          await setUp();
+          await setUpSubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1550,7 +1557,7 @@ describes.realWin(
         });
 
         it('tapping left on paywall should hide the paywall and go to the previous page', async () => {
-          await setUp();
+          await setUpSubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1926,6 +1933,91 @@ describes.realWin(
         expect(installSpy).to.have.been.calledWith(
           ampdoc,
           'amp-story-auto-analytics'
+        );
+      });
+    });
+
+    describe('localization', () => {
+      beforeEach(() => {
+        win.__AMP_MODE = {
+          rtvVersion: '123',
+        };
+      });
+
+      it('should install the default english localizations', async () => {
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'Swipe up'
+        );
+      });
+
+      it('should install the correct language localizations if specified', async () => {
+        env.win.document.body.parentElement.setAttribute('lang', 'es');
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'Deslizar el dedo hacia arriba'
+        );
+      });
+
+      it('should use the inlined amp-story strings when available', async () => {
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '123');
+        inlinedStrings.textContent = '{"35": "INLINED-STRING"}';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'INLINED-STRING'
+        );
+      });
+
+      it('should not use the inlined amp-story strings if incorrect RTV', async () => {
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '1234');
+        inlinedStrings.textContent = '{"35": "INLINED-STRING"}';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'Swipe up'
+        );
+      });
+
+      it('should use the inlined amp-story strings when available if the language is specified', async () => {
+        env.win.document.body.parentElement.setAttribute('lang', 'es');
+
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '123');
+        inlinedStrings.textContent = '{"35": "TEXTO-EN-LINEA"}';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'TEXTO-EN-LINEA'
+        );
+      });
+
+      it('should use the default strings if inlined JSON is corrupted', async () => {
+        env.win.document.body.parentElement.setAttribute('lang', 'en');
+
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '123');
+        inlinedStrings.textContent = 'this: is not a JSON';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'Swipe up'
         );
       });
     });

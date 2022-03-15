@@ -2,7 +2,7 @@
 
 Embeds a [Reddit](https://reddit.com) post or a comment on a Reddit post.
 
-## Web Componento
+## Web Component
 
 You must include each Bento component's required CSS library before adding custom styles in order to guarantee proper loading. Or use the lightweight pre-uprgrade styles available inline. See [Layout and Style](#layout-and-style).
 
