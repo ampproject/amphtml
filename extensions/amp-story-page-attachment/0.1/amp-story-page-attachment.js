@@ -433,17 +433,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
 
-    if (childElementByTag(this.pageEl_, 'amp-story-shopping-attachment')) {
-      this.analyticsService_.triggerEvent(
-        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
-        null,
-        {'calledFrom': 'story-shopping-cta'}
-      );
-    } else {
-      this.analyticsService_.triggerEvent(
-        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
-      );
-    }
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
+    );
 
     if (this.type_ === AttachmentType.OUTLINK) {
       this.openRemote_();

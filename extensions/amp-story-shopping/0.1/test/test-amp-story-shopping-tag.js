@@ -126,29 +126,5 @@ describes.realWin(
         ).to.deep.equal(tagData);
       });
     });
-
-    it('should call analytics service on shopping tag click', async () => {
-      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
-
-      await shoppingTag.element.click();
-
-      env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
-        expect(trigger).to.have.been.calledWith(
-          StoryAnalyticsEvent.SHOPPING_TAG_CLICK
-        );
-      });
-    });
-
-    it('should call analytics service with PDP view on shopping tag click', async () => {
-      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
-
-      await shoppingTag.element.click();
-
-      env.sandbox.stub(shoppingTag, 'mutateElement').callsFake(() => {
-        expect(trigger).to.have.been.calledWith(
-          StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
-        );
-      });
-    });
   }
 );

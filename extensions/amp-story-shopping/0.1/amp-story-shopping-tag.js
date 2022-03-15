@@ -164,10 +164,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   onClick_() {
-    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_TAG_CLICK);
-    this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
-    );
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': this.tagData_,
     });

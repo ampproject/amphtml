@@ -135,39 +135,6 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     expect(closeButtonEl.hasAttribute('tabindex')).to.be.false;
   });
 
-  it('should call analytics with shopping attachment params if no shopping attachment', async () => {
-    await attachment.buildCallback();
-    await attachment.layoutCallback();
-
-    const trigger = env.sandbox.stub(analytics, 'triggerEvent');
-    env.sandbox.stub(attachment.historyService_, 'push');
-
-    attachment.open(true);
-
-    expect(trigger).to.have.been.calledWith(
-      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
-    );
-  });
-
-  it('should call analytics with shopping attachment params if has shopping attachment', async () => {
-    await attachment.buildCallback();
-    await attachment.layoutCallback();
-
-    const trigger = env.sandbox.stub(analytics, 'triggerEvent');
-    env.sandbox.stub(attachment.historyService_, 'push');
-
-    pageEl.appendChild(
-      <amp-story-shopping-attachment></amp-story-shopping-attachment>
-    );
-
-    attachment.open(true);
-
-    expect(trigger).to.have.been.calledWith(
-      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
-      null,
-      {'calledFrom': 'story-shopping-cta'}
-    );
-  });
   it('should click on anchor when outlink open method is called', async () => {
     storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_ONE_PANEL);
     const anchorEl = outlinkEl.querySelector('amp-story-page-outlink a');

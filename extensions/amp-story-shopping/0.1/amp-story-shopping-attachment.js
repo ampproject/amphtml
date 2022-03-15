@@ -125,6 +125,22 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
 
+    if (document.activeElement.tagName === 'AMP-STORY-SHOPPING-TAG') {
+      this.analyticsService_.triggerEvent(
+        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
+        null,
+        {'calledFrom': 'story-shopping-tag'}
+      );
+      this.analyticsService_.triggerEvent(
+        StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
+      );
+    } else {
+      this.analyticsService_.triggerEvent(
+        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
+        null,
+        {'calledFrom': 'story-shopping-cta'}
+      );
+    }
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
     if (!shoppingData.activeProductData) {
       this.updateTemplate_(shoppingData);
@@ -255,10 +271,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * On plp card click dispatch shopping data.
+   * @param e
    * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
-  onPlpCardClick_(shoppingData) {
+  onPlpCardClick_(e, shoppingData) {
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.SHOPPING_PLP_CARD_CLICK
     );
@@ -444,7 +461,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             <button
               class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-plp-card"
               role="button"
-              onClick={() => this.onPlpCardClick_(data)}
+              onClick={(e) => this.onPlpCardClick_(e, data)}
             >
               <div
                 class="i-amphtml-amp-story-shopping-plp-card-image"

@@ -6,6 +6,7 @@ import '../../../amp-story/1.0/amp-story';
 import '../../../amp-story/1.0/amp-story-page';
 import '../amp-story-shopping';
 import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
@@ -279,6 +280,36 @@ describes.realWin(
       expect(trigger).to.have.been.calledWith(
         StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK
       );
+    });
+
+    it('should call analytics service on attachment state update when clicking the cta', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      await setupPDP();
+
+      attachmentChildEl
+        .querySelector('.i-amphtml-amp-story-shopping-pdp-cta')
+        .dispatchEvent(new Event('click'));
+
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
+        null,
+        {'calledFrom': 'story-shopping-cta'}
+      );
+    });
+
+    it('should call analytics service on attachment state update when clicking the shopping tag', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      env.sandbox.stub(win.document.activeElement, 'tagName').callsFake(() => {
+        expect(trigger).to.have.been.calledWith(
+          StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
+          null,
+          {'calledFrom': 'story-shopping-tag'}
+        );
+      });
+
+      await setupPDP();
     });
   }
 );
