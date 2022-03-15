@@ -1344,15 +1344,13 @@ describes.realWin(
         // buildCallback() is implictly called by createStoryWithPages()
         await story.layoutCallback();
 
+        // This stub makes requestAnimationFrame a sync call so that each dispatch of click event
+        // can be a sync operation, which means it can be used as doing await switchTo call.
+        env.sandbox.stub(win, 'requestAnimationFrame').callsFake((cb) => cb());
         const cover = story.getPageById(
           storeService.get(StateProperty.CURRENT_PAGE_ID)
         );
         cover.element.dispatchEvent(clickRightEvent);
-
-        // This stub makes requestAnimationFrame a sync call so that each dispatch of click event
-        // can be a sync operation, which means it can be used as doing await switchTo call.
-        await nextTick();
-        env.sandbox.stub(win, 'requestAnimationFrame').callsFake((cb) => cb());
       }
 
       beforeEach(async () => {
@@ -1368,7 +1366,6 @@ describes.realWin(
         });
 
         it('should not navigate to subscription content while subscription state is unknown', async () => {
-          await nextTick();
           const page1 = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
