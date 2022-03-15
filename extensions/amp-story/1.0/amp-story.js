@@ -312,7 +312,12 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {boolean} whether the styles were rewritten */
     this.didRewriteStyles_ = false;
 
-    /** @private {?Deferred} A promise that is resolved once the subscription state is received */
+    /**
+     * @private {?./amp-story-page.AmpStoryPage} the page id to navigate to after receiving a granted state
+     */
+    this.pageAfterGranted_ = null;
+
+    /** @private {!Deferred} A promise that is resolved once the subscription state is received */
     this.subscriptionsStatePromise_ = new Deferred();
 
     /** @private {?number} The timeout ID for the paywall timer */
@@ -730,9 +735,35 @@ export class AmpStory extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.SUBSCRIPTIONS_STATE, () => {
-      this.subscriptionsStatePromise_.resolve();
-    });
+    this.storeService_.subscribe(
+      StateProperty.SUBSCRIPTIONS_STATE,
+      (subscriptionsState) => {
+        this.subscriptionsStatePromise_.resolve();
+        if (subscriptionsState === SubscriptionsState.GRANTED) {
+          this.storeService_.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+            false
+          );
+        }
+      }
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
+      (dialogState) => {
+        if (!dialogState) {
+          this.paywallTimeout_ && clearTimeout(this.paywallTimeout_);
+          if (
+            this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
+              SubscriptionsState.GRANTED &&
+            this.pageAfterGranted_
+          ) {
+            this.switchTo_(this.pageAfterGranted_, NavigationDirection.NEXT);
+            this.pageAfterGranted_ = null;
+          }
+        }
+      }
+    );
 
     this.win.document.addEventListener(
       'keydown',
@@ -1324,6 +1355,9 @@ export class AmpStory extends AMP.BaseElement {
           });
         } else {
           // Show the paywall if the access is not granted.
+          if (!this.pageAfterGranted_) {
+            this.pageAfterGranted_ = targetPageId;
+          }
           if (pageIndex === PAYWALL_PAGE_INDEX) {
             this.paywallTimeout_ = setTimeout(() => {
               this.storeService_.dispatch(
@@ -1331,6 +1365,12 @@ export class AmpStory extends AMP.BaseElement {
                 true
               );
             }, PAYWALL_DELAY_DURATION);
+          } else if (!this.activePage_) {
+            // For the initial switchTo call, need to switch to paywll page instead
+            return this.switchTo_(
+              this.pages_[PAYWALL_PAGE_INDEX].element.id,
+              direction
+            );
           } else {
             this.storeService_.dispatch(
               Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
@@ -1340,8 +1380,8 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
       } else {
-        // Reset paywall UI if visting a non-blocked page.
-        this.paywallTimeout_ && clearTimeout(this.paywallTimeout_);
+        // Hide paywall UI if visting a non-blocked page, e.g. navigate back to the previous story
+        // or to the blocked pages with granted status.
         this.storeService_.dispatch(
           Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
           false

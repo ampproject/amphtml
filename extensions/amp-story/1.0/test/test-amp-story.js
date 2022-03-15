@@ -17,7 +17,7 @@ import {poll} from '#testing/iframe';
 
 import * as consent from '../../../../src/consent';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import {AmpStory, PAYWALL_DELAY_DURATION} from '../amp-story';
+import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {PageState} from '../amp-story-page';
 import {
@@ -1199,245 +1199,6 @@ describes.realWin(
         });
       });
 
-      describe('amp-story-subscriptions navigation', () => {
-        let subscriptionsEl;
-        let storeService;
-
-        beforeEach(async () => {
-          toggleExperiment(win, 'amp-story-subscriptions', true);
-
-          storeService = new AmpStoryStoreService(win);
-          env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
-
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-          subscriptionsEl = win.document.createElement(
-            'amp-story-subscriptions'
-          );
-          story.element.appendChild(subscriptionsEl);
-
-          // buildCallback() could be omitted as long as createStoryWithPages()
-          // is called because the getImpl() call inside it.
-          await story.layoutCallback();
-        });
-
-        describe('unknown subscription state', () => {
-          beforeEach(async () => {
-            // Block access with pending subscriptions state.
-            story.activePage_.element.dispatchEvent(
-              new MouseEvent('click', {clientX: 200})
-            );
-            story.activePage_.element.dispatchEvent(
-              new MouseEvent('click', {clientX: 200})
-            );
-            // Try to navigate to the first paywall page with state unknown so stays on current page.
-            expect(story.activePage_.element.id).to.equal('page-1');
-          });
-
-          it('should continue navigating to locked pages after the subscription state gets resolved to granted', async () => {
-            // Once grant status resolves to true, goes back to normal story experiences.
-            storeService.dispatch(
-              Action.TOGGLE_SUBSCRIPTIONS_STATE,
-              SubscriptionsState.GRANTED
-            );
-            await nextTick();
-            expect(story.activePage_.element.id).to.equal('page-2');
-
-            story.activePage_.element.dispatchEvent(
-              new MouseEvent('click', {clientX: 200})
-            );
-            expect(story.activePage_.element.id).to.equal('page-3');
-          });
-
-          it('should block after predefined delay after the subscription state gets resolved to blocked', async () => {
-            // Once grant status resolves to false, blocks the access to all locked pages and show the paywall.
-            // Note: would still go to the paywall page, e.g. page-2.
-            const dispatchSpy = env.sandbox.spy(storeService, 'dispatch');
-            storeService.dispatch(
-              Action.TOGGLE_SUBSCRIPTIONS_STATE,
-              SubscriptionsState.BLOCKED
-            );
-            await nextTick();
-            expect(story.activePage_.element.id).to.equal('page-2');
-
-            await setTimeout(() => {
-              // Should show the paywall.
-              expect(dispatchSpy).to.have.been.calledWith(
-                Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-                true
-              );
-            }, PAYWALL_DELAY_DURATION);
-
-            story.activePage_.element.dispatchEvent(
-              new MouseEvent('click', {clientX: 200})
-            );
-            expect(story.activePage_.element.id).to.equal('page-2');
-          });
-
-          it('should block immediately on click event after the subscription state gets resolved to blocked', async () => {
-            // Once grant status resolves to false, blocks the access to all locked pages and show the paywall.
-            // Note: would still go to the paywall page, e.g. page-2.
-            const dispatchSpy = env.sandbox.spy(storeService, 'dispatch');
-            storeService.dispatch(
-              Action.TOGGLE_SUBSCRIPTIONS_STATE,
-              SubscriptionsState.BLOCKED
-            );
-            await nextTick();
-            expect(story.activePage_.element.id).to.equal('page-2');
-
-            story.activePage_.element.dispatchEvent(
-              new MouseEvent('click', {clientX: 200})
-            );
-            expect(dispatchSpy).to.have.been.calledWith(
-              Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-              true
-            );
-            expect(story.activePage_.element.id).to.equal('page-2');
-          });
-        });
-
-        it('should be able to navigate like normal story if subscription state resolves to granted before hitting the paywall page', async () => {
-          const dispatchSpy = env.sandbox.spy(storeService, 'dispatch');
-          storeService.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_STATE,
-            SubscriptionsState.GRANTED
-          );
-
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          expect(story.activePage_.element.id).to.equal('page-2');
-          expect(dispatchSpy).to.have.been.calledWith(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            false
-          );
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          expect(story.activePage_.element.id).to.equal('page-3');
-          expect(dispatchSpy).to.have.been.calledWith(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            false
-          );
-        });
-
-        it('should be able to navigate to all locked pages once status becomes granted', async () => {
-          storeService.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_STATE,
-            SubscriptionsState.BLOCKED
-          );
-
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          // Navigate to the first paywall page.
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          // Try to navigate to the second paywall page.
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          // Try to navigate to the second paywall page with blocked status so stay on the first paywall page.
-          expect(story.activePage_.element.id).to.equal('page-2');
-
-          // Should be able to navigate to next locked page once status becomes granted.
-          const dispatchSpy = env.sandbox.spy(storeService, 'dispatch');
-          storeService.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_STATE,
-            SubscriptionsState.GRANTED
-          );
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          expect(story.activePage_.element.id).to.equal('page-3');
-          expect(dispatchSpy).to.have.been.calledWith(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            false
-          );
-          // The timer is cleared so the time-based paywall showing should not happen.
-          expect(dispatchSpy).to.not.have.been.calledWith(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            true
-          );
-        });
-
-        it('tapping left before the timer ends should go to the previous page without showing paywal', async () => {
-          storeService.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_STATE,
-            SubscriptionsState.BLOCKED
-          );
-
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          const dispatchSpy = env.sandbox.spy(storeService, 'dispatch');
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          expect(story.activePage_.element.id).to.equal('page-2');
-          expect(dispatchSpy).to.not.have.been.calledWith(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            true
-          );
-
-          // Tapping left should hide the paywall and go to the previous page.
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 10})
-          );
-          expect(story.activePage_.element.id).to.equal('page-1');
-          expect(dispatchSpy).to.have.been.calledWith(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            false
-          );
-          // The timer is cleared so the time-based paywall showing should not happen.
-          expect(dispatchSpy).to.not.have.been.calledWith(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            true
-          );
-        });
-
-        it('tapping left should hide the paywall and go to the previous page', async () => {
-          storeService.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_STATE,
-            SubscriptionsState.BLOCKED
-          );
-
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          story.activePage_.element.dispatchEvent(
-            new MouseEvent('click', {clientX: 200})
-          );
-          expect(story.activePage_.element.id).to.equal('page-2');
-
-          // Tapping left on overflow should hide the paywall and go to the previous page.
-          const dispatchSpy = env.sandbox.spy(storeService, 'dispatch');
-          subscriptionsEl.dispatchEvent(new MouseEvent('click', {clientX: 10}));
-
-          expect(story.activePage_.element.id).to.equal('page-1');
-          expect(dispatchSpy).to.have.been.calledWith(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            false
-          );
-          // The timer is cleared so the time-based paywall showing should not happen.
-          expect(dispatchSpy).to.not.have.been.calledWith(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            true
-          );
-        });
-      });
-
       describe('touch events handlers', () => {
         const getTouchOptions = (x, y) => {
           const touch = new Touch({
@@ -1561,6 +1322,310 @@ describes.realWin(
             'foo {transform: ' +
               'translate3d(calc(-100 * var(--story-page-vh)), 0, 0);}'
           );
+        });
+      });
+    });
+
+    describe('amp-story-subscriptions navigation', () => {
+      let subscriptionsEl;
+      let storeService;
+
+      const clickRightEvent = new MouseEvent('click', {clientX: 200});
+      const clickLeftEvent = new MouseEvent('click', {clientX: 10});
+
+      async function setUp() {
+        await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
+        subscriptionsEl = win.document.createElement('amp-story-subscriptions');
+        story.element.appendChild(subscriptionsEl);
+
+        // buildCallback() is implictly called by createStoryWithPages()
+        await story.layoutCallback();
+
+        const cover = story.getPageById(
+          storeService.get(StateProperty.CURRENT_PAGE_ID)
+        );
+        cover.element.dispatchEvent(clickRightEvent);
+
+        // This stub makes requestAnimationFrame a sync call so that each dispatch of click event
+        // can be a sync operation, which means it can be used as doing await switchTo call.
+        await nextTick();
+        env.sandbox.stub(win, 'requestAnimationFrame').callsFake((cb) => cb());
+      }
+
+      beforeEach(async () => {
+        toggleExperiment(win, 'amp-story-subscriptions', true);
+
+        storeService = new AmpStoryStoreService(win);
+        env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
+      });
+
+      describe('UNKNOWN subscription state before paywall page', () => {
+        beforeEach(async () => {
+          await setUp();
+        });
+
+        it('should not navigate to subscription content while subscription state is unknown', async () => {
+          const page1 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page1.element.dispatchEvent(clickRightEvent);
+          await nextTick();
+          const activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-1');
+        });
+
+        it('should continue normal navigation after the subscription state gets resolved to granted', async () => {
+          const page1 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page1.element.dispatchEvent(clickRightEvent);
+          // Once grant status resolves to true, goes back to normal story experience.
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.GRANTED
+          );
+          await nextTick();
+          const page2 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(page2.element.id).to.equal('page-2');
+
+          page2.element.dispatchEvent(clickRightEvent);
+          const page3 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(page3.element.id).to.equal('page-3');
+        });
+
+        it('if state resolves to BLOCKED on the first locked page it shows UI after predefined delay', async () => {
+          const clock = env.sandbox.useFakeTimers();
+          const page1 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page1.element.dispatchEvent(clickRightEvent);
+          // Once grant status resolves to false, blocks the access to all locked pages and show the paywall.
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.BLOCKED
+          );
+          await nextTick();
+          const page2 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(page2.element.id).to.equal('page-2');
+
+          clock.tick(2500);
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.true;
+
+          // Should stay on page-2 blocking on paywall.
+          const activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-2');
+        });
+
+        it('if state resolves to BLOCKED and user navigates past the first locked page it shows UI immediately', async () => {
+          const page1 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page1.element.dispatchEvent(clickRightEvent);
+          // Once grant status resolves to false, blocks the access to all locked pages and show the paywall.
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.BLOCKED
+          );
+          await nextTick();
+          const page2 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(page2.element.id).to.equal('page-2');
+
+          page2.element.dispatchEvent(clickRightEvent);
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.true;
+
+          // Should stay on page-2 even if user clicks.
+          const activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-2');
+        });
+      });
+
+      describe('GRANTED subscription state before paywall page', () => {
+        beforeEach(async () => {
+          await setUp();
+        });
+
+        it('should be able to navigate like normal story', async () => {
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.GRANTED
+          );
+          const page1 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page1.element.dispatchEvent(clickRightEvent);
+          const page2 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page2.element.dispatchEvent(clickRightEvent);
+          const page3 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(page3.element.id).to.equal('page-3');
+
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.false;
+        });
+      });
+
+      describe('BLOCKED subscription state', () => {
+        it('should be able to navigate to all locked pages once status becomes granted from blocked', async () => {
+          await setUp();
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.BLOCKED
+          );
+
+          const page1 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page1.element.dispatchEvent(clickRightEvent);
+          const page2 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          // Try to navigate to the second paywall page with blocked status so stay on the first paywall page.
+          page2.element.dispatchEvent(clickRightEvent);
+          const activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-2');
+
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.true;
+
+          // Should be able to navigate to next locked page once status becomes granted.
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.GRANTED
+          );
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.false;
+
+          activePage.element.dispatchEvent(clickRightEvent);
+          const activePageAfterGranted = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePageAfterGranted.element.id).to.equal('page-3');
+        });
+
+        it('tapping left before paywall shows should go to the previous page without showing the paywall', async () => {
+          await setUp();
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.BLOCKED
+          );
+
+          const page1 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page1.element.dispatchEvent(clickRightEvent);
+
+          // Tapping left should hide the paywall and go to the previous page.
+          const page2 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page2.element.dispatchEvent(clickLeftEvent);
+
+          const activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-1');
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.false;
+        });
+
+        it('tapping left on paywall should hide the paywall and go to the previous page', async () => {
+          await setUp();
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.BLOCKED
+          );
+
+          const page1 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page1.element.dispatchEvent(clickRightEvent);
+
+          const page2 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page2.element.dispatchEvent(clickRightEvent);
+
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.true;
+
+          // Tapping left should hide the paywall and go to the previous page.
+          page2.element.dispatchEvent(clickLeftEvent);
+
+          const activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-1');
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.false;
+        });
+
+        it('should initialize with paywall page and navigate back to original page after granted if starting deep in story', async () => {
+          env.sandbox
+            .stub(win, 'requestAnimationFrame')
+            .callsFake((cb) => cb());
+          const clock = env.sandbox.useFakeTimers();
+
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.BLOCKED
+          );
+
+          win.location.hash = 'page=page-3';
+          await createStoryWithPages(4, [
+            'cover',
+            'page-1',
+            'page-2',
+            'page-3',
+          ]);
+          subscriptionsEl = win.document.createElement(
+            'amp-story-subscriptions'
+          );
+          story.element.appendChild(subscriptionsEl);
+          await story.layoutCallback();
+
+          // Initial active page should be the paywall page when it deeplinks to
+          // locked pages.
+          let activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-2');
+
+          clock.tick(2500);
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.true;
+
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.GRANTED
+          );
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.false;
+          // Should navigate back to original deeplinked page after granted.
+          activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-3');
         });
       });
     });
