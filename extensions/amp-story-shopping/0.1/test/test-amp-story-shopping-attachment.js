@@ -226,7 +226,7 @@ describes.realWin(
       expect(activeProductData).to.be.null;
     });
 
-    it('should call analytics service on Plp Card Click', async () => {
+    it('should call analytics service on PLP Card Click', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
       await layoutShoppingImplAndAttachmentChildImpl();
@@ -237,7 +237,22 @@ describes.realWin(
       plpCard.dispatchEvent(new Event('click'));
 
       expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.SHOPPING_PLP_CARD
+        StoryAnalyticsEvent.SHOPPING_PLP_CARD_CLICK
+      );
+    });
+
+    it('should call analytics service with PDP view on PLP Card Click', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      await layoutShoppingImplAndAttachmentChildImpl();
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+      const plpCard = attachmentChildEl.querySelector(
+        '.i-amphtml-amp-story-shopping-plp-card'
+      );
+      plpCard.dispatchEvent(new Event('click'));
+
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
       );
     });
 
@@ -252,20 +267,6 @@ describes.realWin(
       storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
     }
 
-    it('should call analytics service when product details expand on click', async () => {
-      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
-
-      await setupPDP();
-
-      attachmentChildEl
-        .querySelector('.i-amphtml-amp-story-shopping-pdp')
-        .dispatchEvent(new Event('click'));
-
-      expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS
-      );
-    });
-
     it('should call analytics service on buy now button click', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
@@ -276,7 +277,7 @@ describes.realWin(
         .dispatchEvent(new Event('click'));
 
       expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.SHOPPING_BUY_NOW
+        StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK
       );
     });
   }

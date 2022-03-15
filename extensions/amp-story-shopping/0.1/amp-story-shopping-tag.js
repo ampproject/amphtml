@@ -2,7 +2,6 @@ import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {
-  ancestorElementsByTag,
   childElementByTag,
   closestAncestorElementBySelector,
 } from '#core/dom/query';
@@ -20,10 +19,7 @@ import {
   ShoppingDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from '../../amp-story/1.0/story-analytics';
+import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /** @const {!Array<!Object>} fontFaces */
@@ -67,10 +63,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.pageEl_ = null;
 
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(
-      this.win,
-      ancestorElementsByTag(this.element, 'amp-story')[0]
-    );
+    this.analyticsService_ = Services.storyAnalyticsService(this.win);
   }
 
   /** @override */
@@ -171,7 +164,10 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
    * @private
    */
   onClick_() {
-    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_TAG);
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_TAG_CLICK);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
+    );
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': this.tagData_,
     });

@@ -1,7 +1,6 @@
 import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
-import {ancestorElementsByTag} from '#core/dom/query';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -17,10 +16,7 @@ import {
   ShoppingConfigDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from '../../amp-story/1.0/story-analytics';
+import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
 
 /** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
@@ -63,10 +59,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.builtTemplates_ = {};
 
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(
-      this.win,
-      ancestorElementsByTag(this.element, 'amp-story')[0]
-    );
+    this.analyticsService_ = Services.storyAnalyticsService(this.win);
   }
 
   /** @override */
@@ -266,7 +259,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onPlpCardClick_(shoppingData) {
-    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_PLP_CARD);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.SHOPPING_PLP_CARD_CLICK
+    );
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
+    );
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
@@ -299,12 +297,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   toggleDetailsText_(detailsContainer, shouldOpen) {
-    if (shouldOpen) {
-      this.analyticsService_.triggerEvent(
-        StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS
-      );
-    }
-
     const detailsText = detailsContainer.querySelector(
       '.i-amphtml-amp-story-shopping-pdp-details-text'
     );
@@ -313,6 +305,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       detailsText.setAttribute('aria-hidden', !shouldOpen);
     });
   }
+
   /**
    * onclick event that fires when buy now is clicked, has conversion tracking.
    * @param {?string} conversionURL
@@ -321,7 +314,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    */
   onClickBuyNow_(conversionURL) {
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.SHOPPING_BUY_NOW,
+      StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK,
       null,
       {'conversionURL': conversionURL}
     );

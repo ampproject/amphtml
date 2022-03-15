@@ -165,7 +165,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     expect(trigger).to.have.been.calledWith(
       StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
       null,
-      {'calledFrom': 'story-shopping-shop-now'}
+      {'calledFrom': 'story-shopping-cta'}
     );
   });
   it('should click on anchor when outlink open method is called', async () => {

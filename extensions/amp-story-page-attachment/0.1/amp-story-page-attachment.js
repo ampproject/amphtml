@@ -437,7 +437,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       this.analyticsService_.triggerEvent(
         StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
         null,
-        {'calledFrom': 'story-shopping-shop-now'}
+        {'calledFrom': 'story-shopping-cta'}
       );
     } else {
       this.analyticsService_.triggerEvent(
