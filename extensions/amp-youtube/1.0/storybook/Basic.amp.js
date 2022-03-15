@@ -19,7 +19,7 @@ export default {
     layout: 'responsive',
     autoplay: false,
     loop: false,
-    widht: 300,
+    width: 300,
     height: 300,
     credentials: 'include',
   },
