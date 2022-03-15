@@ -33,6 +33,8 @@ export const TrackId = ({componentColor, trackId, visual, ...args}) => {
 
 TrackId.args = {
   trackId: '864765493',
+  height: 180,
+  visual: true,
 };
 
 TrackId.argTypes = {
@@ -40,16 +42,6 @@ TrackId.argTypes = {
     name: 'componentColor',
     control: {type: 'color'},
     defaultValue: 'RGBA(255, 85, 0, 1)',
-  },
-  height: {
-    name: 'height',
-    defaultValue: 180,
-    control: {type: 'number'},
-  },
-  visual: {
-    name: 'visual',
-    defaultValue: true,
-    control: {type: 'boolean'},
   },
 };
 
