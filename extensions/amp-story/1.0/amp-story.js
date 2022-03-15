@@ -2513,7 +2513,7 @@ export class AmpStory extends AMP.BaseElement {
     }
     const localizationService = getLocalizationService(this.element);
     localizationService.registerLocalizedStringBundles({
-      languageCode: stringsOrNull,
+      [languageCode]: stringsOrNull,
     });
     return true;
   }
@@ -2534,7 +2534,9 @@ export class AmpStory extends AMP.BaseElement {
       .fetchJson(localizationUrl)
       .then((res) => res.json())
       .then((json) =>
-        localizationService.registerLocalizedStringBundles({languageCode: json})
+        localizationService.registerLocalizedStringBundles({
+          [languageCode]: json,
+        })
       )
       .catch((err) => {
         devError(TAG, err, 'Bundle not found for language ' + languageCode);

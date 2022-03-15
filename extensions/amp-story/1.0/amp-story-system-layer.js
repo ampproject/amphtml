@@ -156,13 +156,14 @@ const renderSystemLayerElement = (element, children) => (
 
 const localizeSystemLayer = (systemLayer, parentElement) => {
   const localizationService = getLocalizationService(parentElement);
-  systemLayer
-    .querySelectorAll('[data-aria-label]')
-    .forEach((el) =>
-      localizationService
-        .localizeEl(el, el.getAttribute('data-aria-label'), 'aria-label')
-        .then(() => el.removeAttribute('data-aria-label'))
+  systemLayer.querySelectorAll('[data-aria-label]').forEach((el) => {
+    localizationService.localizeEl(
+      el,
+      el.getAttribute('data-aria-label'),
+      'aria-label'
     );
+    el.removeAttribute('data-aria-label');
+  });
   localizationService.localizeEl(
     systemLayer.querySelector('.i-amphtml-story-has-new-page-text'),
     LocalizedStringId_Enum.AMP_STORY_HAS_NEW_PAGE_TEXT
