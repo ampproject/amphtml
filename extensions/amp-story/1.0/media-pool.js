@@ -894,32 +894,44 @@ export class MediaPool {
     if (mediaType == MediaType.VIDEO) {
       const ampVideoEl = domMediaEl.parentElement;
       if (ampVideoEl) {
-        const volume = ampVideoEl.getAttribute('volume');
-        if (volume) {
-          // Handle cross-browser differences (see https://googlechrome.github.io/samples/webaudio-method-chaining/).
-          if (typeof AudioContext === 'function') {
-            this.audioContext_ = this.audioContext_ || new AudioContext();
-          } else if (typeof webkitAudioContext === 'function') {
-            this.audioContext_ =
-              this.audioContext_ || new global.webkitAudioContext();
-          }
-
-          if (this.audioContext_) {
-            const audioSource =
-              this.audioSources_[domMediaEl.id] ||
-              this.audioContext_.createMediaElementSource(domMediaEl);
-            this.audioSources_[domMediaEl.id] = audioSource;
-            const gainNode = this.audioContext_.createGain();
-            gainNode.gain.value = parseFloat(volume);
-            audioSource
-              .connect(gainNode)
-              .connect(this.audioContext_.destination);
+        if (ampVideoEl.hasAttribute('noaudio')) {
+          this.setVolume_(domMediaEl, 0);
+        } else {
+          const volume = ampVideoEl.getAttribute('volume');
+          if (volume) {
+            this.setVolume_(domMediaEl, parseFloat(volume));
           }
         }
       }
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
+  }
+
+  /**
+   * Updates the volume of the provided media element.
+   * @param {!DomElementDef} domMediaEl The media element whose volume will be set.
+   * @param {number} volume The volume to be applied to the media element.
+   * @private
+   */
+  setVolume_(domMediaEl, volume) {
+    // Handle cross-browser differences (see https://googlechrome.github.io/samples/webaudio-method-chaining/).
+    if (typeof AudioContext === 'function') {
+      this.audioContext_ = this.audioContext_ || new AudioContext();
+    } else if (typeof webkitAudioContext === 'function') {
+      this.audioContext_ =
+        this.audioContext_ || new global.webkitAudioContext();
+    }
+
+    if (this.audioContext_) {
+      const audioSource =
+        this.audioSources_[domMediaEl.id] ||
+        this.audioContext_.createMediaElementSource(domMediaEl);
+      this.audioSources_[domMediaEl.id] = audioSource;
+      const gainNode = this.audioContext_.createGain();
+      gainNode.gain.value = volume;
+      audioSource.connect(gainNode).connect(this.audioContext_.destination);
+    }
   }
 
   /**
