@@ -26,6 +26,7 @@ export const track = ({componentColor, trackId, ...args}) => {
 
 track.args = {
   trackId: '864765493',
+  visual: true,
 };
 
 track.argTypes = {
@@ -33,11 +34,6 @@ track.argTypes = {
     name: 'componentColor',
     control: {type: 'color'},
     defaultValue: 'RGBA(255, 85, 0, 1)',
-  },
-  visual: {
-    name: 'visual',
-    defaultValue: true,
-    control: {type: 'boolean'},
   },
 };
 
@@ -58,6 +54,7 @@ export const playlist = ({componentColor, playlistId, ...args}) => {
 
 playlist.args = {
   playlistId: '151584683',
+  visual: true,
 };
 
 playlist.argTypes = {
@@ -65,10 +62,5 @@ playlist.argTypes = {
     name: 'componentColor',
     control: {type: 'color'},
     defaultValue: 'RGBA(255, 85, 0, 1)',
-  },
-  visual: {
-    name: 'visual',
-    defaultValue: true,
-    control: {type: 'boolean'},
   },
 };

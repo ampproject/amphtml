@@ -72,6 +72,8 @@ export const PlaylistId = ({componentColor, playlistId, visual, ...args}) => {
 
 PlaylistId.args = {
   playlistId: '151584683',
+  height: 180,
+  visual: true,
 };
 
 PlaylistId.argTypes = {
@@ -79,16 +81,6 @@ PlaylistId.argTypes = {
     name: 'componentColor',
     control: {type: 'color'},
     defaultValue: 'RGBA(255, 85, 0, 1)',
-  },
-  height: {
-    name: 'height',
-    defaultValue: 180,
-    control: {type: 'number'},
-  },
-  visual: {
-    name: 'visual',
-    defaultValue: true,
-    control: {type: 'boolean'},
   },
 };
 
@@ -136,6 +128,7 @@ MediaQuery.args = {
   trackId2: '582363801',
   media1: '(min-width: 650px)',
   media2: '(max-width: 649px)',
+  visual: true,
 };
 
 MediaQuery.argTypes = {
@@ -143,11 +136,6 @@ MediaQuery.argTypes = {
     name: 'componentColor',
     control: {type: 'color'},
     defaultValue: 'RGBA(255, 85, 0, 1)',
-  },
-  visual: {
-    name: 'visual',
-    defaultValue: 'true',
-    control: {type: 'boolean'},
   },
 };
 
@@ -177,6 +165,7 @@ export const ResponsiveLayout = ({
 ResponsiveLayout.args = {
   trackId: '864765493',
   sizes: '(min-width: 720px) 520px, 100vw',
+  visual: true,
 };
 
 ResponsiveLayout.argTypes = {
@@ -184,11 +173,6 @@ ResponsiveLayout.argTypes = {
     name: 'componentColor',
     control: {type: 'color'},
     defaultValue: 'RGBA(255, 85, 0, 1)',
-  },
-  visual: {
-    name: 'visual',
-    defaultValue: true,
-    control: {type: 'boolean'},
   },
 };
 
@@ -224,6 +208,8 @@ export const WithPlaceholderAndFallback = ({
 
 WithPlaceholderAndFallback.args = {
   trackId: '864765493',
+  height: 180,
+  visual: true,
 };
 
 WithPlaceholderAndFallback.argTypes = {
@@ -231,15 +217,5 @@ WithPlaceholderAndFallback.argTypes = {
     name: 'componentColor',
     control: {type: 'color'},
     defaultValue: 'RGBA(255, 85, 0, 1)',
-  },
-  height: {
-    name: 'height',
-    defaultValue: 180,
-    control: {type: 'number'},
-  },
-  visual: {
-    name: 'visual',
-    defaultValue: true,
-    control: {type: 'boolean'},
   },
 };

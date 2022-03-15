@@ -17,20 +17,14 @@ const LOCALES = [
 export default {
   title: 'Timeago',
   component: BentoTimeago,
+  args: {
+    cutoff: 0,
+    placeholder: 'Time passed!',
+  },
   argTypes: {
     dateTime: {
       name: 'dateTime',
       control: {type: 'date'},
-    },
-    cutoff: {
-      name: 'cutoff',
-      control: {type: 'number'},
-      defaultValue: 0,
-    },
-    placeholder: {
-      name: 'placeholder',
-      control: {type: 'text'},
-      defaultValue: 'Time passed!',
     },
     locale: {
       name: 'locale',
@@ -183,20 +177,15 @@ export const WithIntersectionObserver = ({
 
 WithIntersectionObserver.storyName = 'IntersectionObserver';
 
+WithIntersectionObserver.args = {
+  cutoff: 0,
+  placeholder: 'Time passed!',
+};
+
 WithIntersectionObserver.argTypes = {
   dateTime: {
     name: 'dateTime',
     control: {type: 'date'},
-  },
-  cutoff: {
-    name: 'cutoff',
-    control: {type: 'number'},
-    defaultValue: 0,
-  },
-  placeholder: {
-    name: 'placeholder',
-    control: {type: 'text'},
-    defaultValue: 'Time passed!',
   },
   locale: {
     name: 'locale',

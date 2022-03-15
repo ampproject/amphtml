@@ -326,6 +326,11 @@ export const scrollable = ({backgroundColor, color, lotsOfText, ...args}) => {
   );
 };
 
+scrollable.args = {
+  scrollable: true,
+  lotsOfText: true,
+};
+
 scrollable.argtypes = {
   animation: {
     name: 'animation',
@@ -341,15 +346,5 @@ scrollable.argtypes = {
   color: {
     name: 'color',
     control: {type: 'color'},
-  },
-  scrollable: {
-    name: 'scrollable',
-    control: {type: 'boolean'},
-    defaultValue: true,
-  },
-  lotsOfText: {
-    name: 'lotsOfText',
-    control: {type: 'boolean'},
-    defaultValue: true,
   },
 };
