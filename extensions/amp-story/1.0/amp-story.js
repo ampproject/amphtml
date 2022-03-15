@@ -1342,46 +1342,46 @@ export class AmpStory extends AMP.BaseElement {
     const subscriptionsState = this.storeService_.get(
       StateProperty.SUBSCRIPTIONS_STATE
     );
-    if (
-      isExperimentOn(this.win, 'amp-story-subscriptions') &&
-      this.isPaywallStory_()
-    ) {
+    if (this.isPaywallStory_()) {
       if (
         pageIndex >= PAYWALL_PAGE_INDEX &&
         subscriptionsState !== SubscriptionsState.GRANTED
       ) {
-        // Hit a blocked page.
+        // Block while waiting for upcoming entitlement.
         if (subscriptionsState === SubscriptionsState.UNKNOWN) {
-          // Block while waiting for entitlements.
           return this.subscriptionsStatePromise_.promise.then(() => {
             return this.switchTo_(targetPageId, direction);
           });
-        } else {
-          // Show the paywall if the access is not granted.
-          if (!this.pageAfterGranted_) {
-            this.pageAfterGranted_ = targetPageId;
-          }
-          if (pageIndex === PAYWALL_PAGE_INDEX) {
-            this.paywallTimeout_ = setTimeout(() => {
-              this.storeService_.dispatch(
-                Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-                true
-              );
-            }, PAYWALL_DELAY_DURATION);
-          } else if (!this.activePage_) {
-            // For the initial switchTo call, need to switch to paywll page instead
-            return this.switchTo_(
-              this.pages_[PAYWALL_PAGE_INDEX].element.id,
-              direction
-            );
-          } else {
+        }
+        if (!this.pageAfterGranted_) {
+          this.pageAfterGranted_ = targetPageId;
+        }
+
+        // Attempt to navigate to the locked pages after the paywall page(the first blocked page) with blocked state.
+        if (pageIndex > PAYWALL_PAGE_INDEX) {
+          // Show the paywall immediately if the active page is the paywall page.
+          if (this.getPageIndex(this.activePage_) === PAYWALL_PAGE_INDEX) {
             this.storeService_.dispatch(
               Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
               true
             );
             return Promise.resolve();
           }
+
+          // Switch to the paywall page instead.
+          return this.switchTo_(
+            this.pages_[PAYWALL_PAGE_INDEX].element.id,
+            direction
+          );
         }
+
+        // Navigate to the paywall page with blocked state, show the paywall after some delay.
+        this.paywallTimeout_ = setTimeout(() => {
+          this.storeService_.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+            true
+          );
+        }, PAYWALL_DELAY_DURATION);
       } else {
         // Hide paywall UI if visting a non-blocked page, e.g. navigate back to the previous story
         // or to the blocked pages with granted status.
@@ -2595,7 +2595,10 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean}
    */
   isPaywallStory_() {
-    return this.element.querySelector('amp-story-subscriptions') != null;
+    return (
+      isExperimentOn(this.win, 'amp-story-subscriptions') &&
+      this.element.querySelector('amp-story-subscriptions') != null
+    );
   }
 }
 

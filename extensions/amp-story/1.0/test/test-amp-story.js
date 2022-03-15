@@ -21,7 +21,7 @@ import * as consent from '../../../../src/consent';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
-import {PageState} from '../amp-story-page';
+import {NavigationDirection, PageState} from '../amp-story-page';
 import {
   Action,
   AmpStoryStoreService,
@@ -29,6 +29,7 @@ import {
   SubscriptionsState,
   UIType,
 } from '../amp-story-store-service';
+import {EventType, dispatch} from '../events';
 import {MediaType} from '../media-pool';
 import {AdvancementMode} from '../story-analytics';
 import * as utils from '../utils';
@@ -1582,6 +1583,43 @@ describes.realWin(
           expect(activePage.element.id).to.equal('page-1');
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.false;
+        });
+
+        it('should navigate to paywall page and navigate back to original page after granted with any switch events', async () => {
+          await setUpSubscriptions();
+          const clock = env.sandbox.useFakeTimers();
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.BLOCKED
+          );
+
+          dispatch(win, story.element, EventType.SWITCH_PAGE, {
+            'targetPageId': 'page-3',
+            'direction': NavigationDirection.NEXT,
+          });
+
+          // The active page should be the paywall page when it switches to
+          // locked pages after the paywall page.
+          let activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-2');
+
+          clock.tick(2500);
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.true;
+
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.GRANTED
+          );
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.false;
+          // Should navigate back to original target page after granted.
+          activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-3');
         });
 
         it('should initialize with paywall page and navigate back to original page after granted if starting deep in story', async () => {
