@@ -49,6 +49,7 @@ describes.realWin(
     let story;
     let replaceStateStub;
     let win;
+    let localizationService;
 
     const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
@@ -98,7 +99,7 @@ describes.realWin(
 
       replaceStateStub = env.sandbox.stub(win.history, 'replaceState');
 
-      const localizationService = new LocalizationService(win.document.body);
+      localizationService = new LocalizationService(win.document.body);
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);
@@ -1621,6 +1622,91 @@ describes.realWin(
         expect(installSpy).to.have.been.calledWith(
           ampdoc,
           'amp-story-auto-analytics'
+        );
+      });
+    });
+
+    describe('localization', () => {
+      beforeEach(() => {
+        win.__AMP_MODE = {
+          rtvVersion: '123',
+        };
+      });
+
+      it('should install the default english localizations', async () => {
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'Swipe up'
+        );
+      });
+
+      it('should install the correct language localizations if specified', async () => {
+        env.win.document.body.parentElement.setAttribute('lang', 'es');
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'Deslizar el dedo hacia arriba'
+        );
+      });
+
+      it('should use the inlined amp-story strings when available', async () => {
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '123');
+        inlinedStrings.textContent = '{"35": "INLINED-STRING"}';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'INLINED-STRING'
+        );
+      });
+
+      it('should not use the inlined amp-story strings if incorrect RTV', async () => {
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '1234');
+        inlinedStrings.textContent = '{"35": "INLINED-STRING"}';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'Swipe up'
+        );
+      });
+
+      it('should use the inlined amp-story strings when available if the language is specified', async () => {
+        env.win.document.body.parentElement.setAttribute('lang', 'es');
+
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '123');
+        inlinedStrings.textContent = '{"35": "TEXTO-EN-LINEA"}';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'TEXTO-EN-LINEA'
+        );
+      });
+
+      it('should use the default strings if inlined JSON is corrupted', async () => {
+        env.win.document.body.parentElement.setAttribute('lang', 'en');
+
+        const inlinedStrings = win.document.createElement('script');
+        inlinedStrings.setAttribute('amp-localization', 'amp-story');
+        inlinedStrings.setAttribute('i-amphtml-version', '123');
+        inlinedStrings.textContent = 'this: is not a JSON';
+        win.document.head.appendChild(inlinedStrings);
+
+        await createStoryWithPages(1, ['cover']);
+
+        expect(localizationService.getLocalizedString('35')).to.be.equal(
+          'Swipe up'
         );
       });
     });
