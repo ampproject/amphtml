@@ -129,7 +129,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.analyticsService_.triggerEvent(
         StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
         null,
-        {'calledFrom': 'story-shopping-tag'}
+        {'eventDetails': {'calledFrom': 'amp-story-shopping-tag'}}
       );
       this.analyticsService_.triggerEvent(
         StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
@@ -138,7 +138,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.analyticsService_.triggerEvent(
         StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
         null,
-        {'calledFrom': 'story-shopping-cta'}
+        {'eventDetails': {'calledFrom': 'story-shopping-cta'}}
       );
     }
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
@@ -332,7 +332,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK,
       null,
-      {'conversionURL': conversionURL}
+      {'eventDetails': {'conversionURL': conversionURL}}
     );
   }
 
