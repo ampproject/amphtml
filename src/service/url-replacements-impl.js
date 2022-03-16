@@ -800,7 +800,7 @@ export class GlobalVariableSource extends VariableSource {
    * @return {!Promise<string>}
    */
   getUach_(variable, win) {
-    if (this.cachedUach_[variable]) {
+    if (variable in this.cachedUach_) {
       return Promise.resolve(this.cachedUach_[variable]);
     } else {
       return (
