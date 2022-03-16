@@ -234,5 +234,13 @@
   "105": {
     "string": "Details",
     "description": "Button label prompting users to read about details of a product."
+  },
+  "106": {
+    "string": "Captions on",
+    "description": "Label for the captions button that indicates the captions are turned on"
+  },
+  "107": {
+    "string": "Captions off",
+    "description": "Label for the captions button that indicates the captions are turned off"
   }
 }
