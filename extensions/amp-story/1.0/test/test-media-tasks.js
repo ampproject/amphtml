@@ -117,6 +117,7 @@ describes.realWin('media-tasks', {}, (env) => {
       storyPageEl.appendChild(el);
       expect(storyPageEl.hasAttribute('active')).to.be.false;
 
+      el.muted = true;
       expect(el.muted).to.be.true;
 
       const task = new UnmuteTask();
