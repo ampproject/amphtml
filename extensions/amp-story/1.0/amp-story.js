@@ -315,14 +315,19 @@ export class AmpStory extends AMP.BaseElement {
     this.didRewriteStyles_ = false;
 
     /**
-     * @private {?./amp-story-page.AmpStoryPage} the page id to navigate to after receiving a granted state
+     * @private {?string} the page id to navigate to after receiving a granted state
      */
     this.pageAfterGranted_ = null;
 
-    /** @private {!Deferred} A promise that is resolved once the subscription state is received */
+    /**
+     * @private {boolean} whether the story is redirecting to the paywall page from deeplinking to a locked page
+     */
+    this.isRedirectToPaywallPage_ = false;
+
+    /** @private {!Deferred} a promise that is resolved once the subscription state is received */
     this.subscriptionsStatePromise_ = new Deferred();
 
-    /** @private {?number} The timeout ID for the paywall timer */
+    /** @private {?number} the timeout ID for the paywall timer */
     this.paywallTimeout_ = null;
   }
 
@@ -743,10 +748,7 @@ export class AmpStory extends AMP.BaseElement {
       (subscriptionsState) => {
         this.subscriptionsStatePromise_.resolve();
         if (subscriptionsState === SubscriptionsState.GRANTED) {
-          this.storeService_.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            false
-          );
+          this.hideSubscriptionsDialog_();
         }
       }
     );
@@ -755,15 +757,7 @@ export class AmpStory extends AMP.BaseElement {
       StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
       (dialogState) => {
         if (!dialogState) {
-          this.paywallTimeout_ && clearTimeout(this.paywallTimeout_);
-          if (
-            this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
-              SubscriptionsState.GRANTED &&
-            this.pageAfterGranted_
-          ) {
-            this.switchTo_(this.pageAfterGranted_, NavigationDirection.NEXT);
-            this.pageAfterGranted_ = null;
-          }
+          this.onHideSubscriptionsDialog_();
         }
       }
     );
@@ -1347,48 +1341,45 @@ export class AmpStory extends AMP.BaseElement {
         pageIndex >= PAYWALL_PAGE_INDEX &&
         subscriptionsState !== SubscriptionsState.GRANTED
       ) {
-        // Block while waiting for upcoming entitlement.
         if (subscriptionsState === SubscriptionsState.UNKNOWN) {
-          return this.subscriptionsStatePromise_.promise.then(() => {
-            return this.switchTo_(targetPageId, direction);
-          });
+          return this.blockOnPendingSubscriptionsState_(
+            targetPageId,
+            direction
+          );
         }
-        if (!this.pageAfterGranted_) {
+        if (!this.isRedirectToPaywallPage_) {
           this.pageAfterGranted_ = targetPageId;
         }
 
-        // Attempt to navigate to the locked pages after the paywall page(the first blocked page) with blocked state.
+        // Attempt to navigate to the locked pages after the paywall page.
         if (pageIndex > PAYWALL_PAGE_INDEX) {
           // Show the paywall immediately if the active page is the paywall page.
-          if (this.getPageIndex(this.activePage_) === PAYWALL_PAGE_INDEX) {
-            this.storeService_.dispatch(
-              Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-              true
-            );
+          if (this.isOnPaywallPage_()) {
+            this.showSubscriptionsDialog_();
             return Promise.resolve();
           }
 
-          // Switch to the paywall page instead.
+          // Redirect to the paywall page.
+          this.isRedirectToPaywallPage_ = true;
           return this.switchTo_(
             this.pages_[PAYWALL_PAGE_INDEX].element.id,
             direction
           );
         }
 
-        // Navigate to the paywall page with blocked state, show the paywall after some delay.
-        this.paywallTimeout_ = setTimeout(() => {
-          this.storeService_.dispatch(
-            Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-            true
-          );
-        }, PAYWALL_DELAY_DURATION);
+        if (this.isRedirectToPaywallPage_) {
+          this.showSubscriptionsDialog_();
+          this.isRedirectToPaywallPage_ = false;
+        } else {
+          this.paywallTimeout_ = setTimeout(() => {
+            this.showSubscriptionsDialog_();
+            this.paywallTimeout_ = null;
+          }, PAYWALL_DELAY_DURATION);
+        }
       } else {
         // Hide paywall UI if visting a non-blocked page, e.g. navigate back to the previous story
         // or to the blocked pages with granted status.
-        this.storeService_.dispatch(
-          Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-          false
-        );
+        this.hideSubscriptionsDialog_();
       }
     }
 
@@ -1563,6 +1554,73 @@ export class AmpStory extends AMP.BaseElement {
         toggle(this.element, true);
       }
     });
+  }
+
+  /** @private */
+  onHideSubscriptionsDialog_() {
+    this.paywallTimeout_ && clearTimeout(this.paywallTimeout_);
+    this.paywallTimeout_ = null;
+    if (this.pageAfterGranted_) {
+      if (
+        this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
+        SubscriptionsState.GRANTED
+      ) {
+        this.switchTo_(this.pageAfterGranted_, NavigationDirection.NEXT);
+      }
+      this.pageAfterGranted_ = null;
+    }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isPaywallStory_() {
+    return (
+      isExperimentOn(this.win, 'amp-story-subscriptions') &&
+      this.element.querySelector('amp-story-subscriptions') != null
+    );
+  }
+
+  /**
+   * Block while waiting to resolve subscriptions state.
+   * @param {string} targetPageId
+   * @param {!NavigationDirection} direction
+   * @return {!Promise}
+   * @private
+   */
+  blockOnPendingSubscriptionsState_(targetPageId, direction) {
+    return this.subscriptionsStatePromise_.promise.then(() => {
+      return this.switchTo_(targetPageId, direction);
+    });
+  }
+
+  /**
+   * @private
+   */
+  showSubscriptionsDialog_() {
+    this.storeService_.dispatch(
+      Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+      true
+    );
+  }
+
+  /**
+   * @private
+   */
+  hideSubscriptionsDialog_() {
+    this.storeService_.dispatch(
+      Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+      false
+    );
+  }
+
+  /**
+   *
+   * @return {boolean}
+   */
+  isOnPaywallPage_() {
+    return this.getPageIndex(this.activePage_) === PAYWALL_PAGE_INDEX;
   }
 
   /**
@@ -2587,17 +2645,6 @@ export class AmpStory extends AMP.BaseElement {
     localizationService.registerLocalizedStringBundle(
       localizationService.getLanguageCodesForElement(this.element)[0],
       stringsOrNull
-    );
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
-  isPaywallStory_() {
-    return (
-      isExperimentOn(this.win, 'amp-story-subscriptions') &&
-      this.element.querySelector('amp-story-subscriptions') != null
     );
   }
 }

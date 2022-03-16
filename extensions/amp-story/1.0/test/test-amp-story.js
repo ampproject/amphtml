@@ -1330,7 +1330,7 @@ describes.realWin(
       });
     });
 
-    describe('amp-story-subscriptions navigation', () => {
+    describe.only('amp-story-subscriptions navigation', () => {
       let subscriptionsEl;
       let storeService;
 
@@ -1489,7 +1489,41 @@ describes.realWin(
       });
 
       describe('BLOCKED subscription state', () => {
-        it('should be able to navigate to all locked pages once status becomes granted from blocked', async () => {
+        it('should resume to paywall page once status becomes granted from blocked if the paywall is triggered on time delay', async () => {
+          await setUpSubscriptions();
+          const clock = env.sandbox.useFakeTimers();
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.BLOCKED
+          );
+
+          const page1 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page1.element.dispatchEvent(clickRightEvent);
+          const page2 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(page2.element.id).to.equal('page-2');
+
+          clock.tick(2500);
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.true;
+
+          // Should be able to resume to paywall page once status becomes granted.
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.GRANTED
+          );
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.false;
+          const activePageAfterGranted = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePageAfterGranted.element.id).to.equal('page-2');
+        });
+
+        it('should resume to the page right after paywall page once status becomes granted from blocked if the paywall is triggered on tap', async () => {
           await setUpSubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
@@ -1509,19 +1543,16 @@ describes.realWin(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
           expect(activePage.element.id).to.equal('page-2');
-
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.true;
 
-          // Should be able to navigate to next locked page once status becomes granted.
+          // Should be able to navigate to the locked page right after the paywall page once status becomes granted.
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.GRANTED
           );
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.false;
-
-          activePage.element.dispatchEvent(clickRightEvent);
           const activePageAfterGranted = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
@@ -1539,7 +1570,6 @@ describes.realWin(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
           page1.element.dispatchEvent(clickRightEvent);
-
           // Tapping left should hide the paywall and go to the previous page.
           const page2 = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
@@ -1565,12 +1595,10 @@ describes.realWin(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
           page1.element.dispatchEvent(clickRightEvent);
-
           const page2 = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
           page2.element.dispatchEvent(clickRightEvent);
-
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.true;
 
@@ -1587,7 +1615,6 @@ describes.realWin(
 
         it('should navigate to paywall page and navigate back to original page after granted with any switch events', async () => {
           await setUpSubscriptions();
-          const clock = env.sandbox.useFakeTimers();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1604,8 +1631,6 @@ describes.realWin(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
           expect(activePage.element.id).to.equal('page-2');
-
-          clock.tick(2500);
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.true;
 
@@ -1626,8 +1651,6 @@ describes.realWin(
           env.sandbox
             .stub(win, 'requestAnimationFrame')
             .callsFake((cb) => cb());
-          const clock = env.sandbox.useFakeTimers();
-
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1648,10 +1671,68 @@ describes.realWin(
 
           // Initial active page should be the paywall page when it deeplinks to
           // locked pages.
-          let activePage = story.getPageById(
+          const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
-          expect(activePage.element.id).to.equal('page-2');
+          expect(paywallPage.element.id).to.equal('page-2');
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.true;
+
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.GRANTED
+          );
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.false;
+          // Should navigate back to original deeplinked page after granted.
+          const activePage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(activePage.element.id).to.equal('page-3');
+        });
+
+        it('should navigate back to paywall page after granted if starting deep in story but tap left on paywall page and tap right again back to paywall page', async () => {
+          const clock = env.sandbox.useFakeTimers();
+          env.sandbox
+            .stub(win, 'requestAnimationFrame')
+            .callsFake((cb) => cb());
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.BLOCKED
+          );
+
+          win.location.hash = 'page=page-3';
+          await createStoryWithPages(4, [
+            'cover',
+            'page-1',
+            'page-2',
+            'page-3',
+          ]);
+          subscriptionsEl = win.document.createElement(
+            'amp-story-subscriptions'
+          );
+          story.element.appendChild(subscriptionsEl);
+          await story.layoutCallback();
+
+          // Initial active page should be the paywall page when it deeplinks to
+          // locked pages.
+          let paywallPage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(paywallPage.element.id).to.equal('page-2');
+          expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
+            .to.be.true;
+
+          // Tap back to dismiss the paywall and tap right to trigger paywall again.
+          paywallPage.element.dispatchEvent(clickLeftEvent);
+          const page1 = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          page1.element.dispatchEvent(clickRightEvent);
+          paywallPage = story.getPageById(
+            storeService.get(StateProperty.CURRENT_PAGE_ID)
+          );
+          expect(paywallPage.element.id).to.equal('page-2');
 
           clock.tick(2500);
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
@@ -1663,11 +1744,11 @@ describes.realWin(
           );
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.false;
-          // Should navigate back to original deeplinked page after granted.
-          activePage = story.getPageById(
+          // Should navigate back to the paywall page instead of the original deeplinked page after granted.
+          const activePage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
-          expect(activePage.element.id).to.equal('page-3');
+          expect(activePage.element.id).to.equal('page-2');
         });
       });
     });
