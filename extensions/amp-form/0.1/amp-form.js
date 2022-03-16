@@ -1176,7 +1176,48 @@ export class AmpForm {
       }
       const navigator = Services.navigationForDoc(this.ampdoc_);
       navigator.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
+
+      if (this.shouldReload_(redirectTo)) {
+        window.location.reload();
+      }
     }
+  }
+
+  /**
+   * Checks whether to reload the page in case of self redirect and
+   * URL fragment does not exists in the DOM.
+   *
+   * @param {string} redirectTo
+   * @return {boolean}
+   */
+  shouldReload_(redirectTo) {
+    const currentURI = this.cleanURI(window.location.href);
+    const redirectURI = this.cleanURI(redirectTo);
+
+    if (currentURI !== redirectURI || redirectTo.indexOf('#') === -1) {
+      return false;
+    }
+
+    const hash = redirectTo.substring(
+      redirectTo.indexOf('#'),
+      redirectTo.length
+    );
+
+    // Bail out if the URL fragment is empty.
+    if (hash.length <= 1) {
+      return false;
+    }
+
+    return document.querySelectorAll(hash).length < 1;
+  }
+
+  /**
+   * Remove fragments from the URI.
+   * @param {string} url
+   * @return {string}
+   */
+  cleanURI(url) {
+    return url.indexOf('#') > 0 ? url.substring(0, url.indexOf('#')) : url;
   }
 
   /**

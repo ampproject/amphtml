@@ -319,6 +319,15 @@ app.use('/form/redirect-to/post', (req, res) => {
   res.end('{}');
 });
 
+app.use('/form/redirect-to/self', (req, res) => {
+  cors.assertCors(req, res, ['POST'], ['AMP-Redirect-To']);
+  res.setHeader(
+    'AMP-Redirect-To',
+    'http://localhost:8000/examples/forms.amp.html#dummy'
+  );
+  res.end('{}');
+});
+
 app.use('/form/echo-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();

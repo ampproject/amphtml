@@ -697,6 +697,19 @@
     </fieldset>
 </form>
 
+<h4 id="header3">Self Redirect After POST with reload. (works only if running on localhost)</h4>
+<form method="post"
+      action-xhr="http://iframe.localhost:8000/form/redirect-to/self"
+      target="_top">
+    <fieldset>
+        <label>
+            <span>Send us a message</span>
+            <input type="text" name="message" id="message1" required>
+        </label>
+        <input name="submit-button" type="submit" value="Send">
+    </fieldset>
+</form>
+
 <h4>Recursive Event-Action-Event-Action Test - Should only submit once</h4>
 <form method="post"
       id="myform"
