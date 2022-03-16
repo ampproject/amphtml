@@ -1,14 +1,19 @@
-import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
-import {AmpVideo, isCachedByCdn} from '../amp-video';
-import {Services} from '#service';
-import {VideoEvents_Enum} from '../../../../src/video-interface';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {dispatchCustomEvent} from '#core/dom';
-import {installPerformanceService} from '#service/performance-impl';
-import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {listenOncePromise} from '#utils/event-helper';
+
 import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+import {installPerformanceService} from '#service/performance-impl';
 import {xhrServiceForTesting} from '#service/xhr-impl';
+
+import {listenOncePromise} from '#utils/event-helper';
+
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
+import {VideoEvents_Enum} from '../../../../src/video-interface';
+import {AmpCacheUrlService} from '../../../amp-cache-url/0.1/amp-cache-url';
+import {AmpVideo, isCachedByCdn} from '../amp-video';
 
 describes.realWin(
   'amp-video',
@@ -1125,6 +1130,7 @@ describes.realWin(
         it('with just src', () => {
           video.setAttribute('src', 'video.mp4');
           expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+          expect(AmpVideo.previewAllowed(video)).to.be.false;
         });
 
         it('with just source', () => {
@@ -1132,6 +1138,7 @@ describes.realWin(
           source.setAttribute('src', 'video.mp4');
           video.appendChild(source);
           expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+          expect(AmpVideo.previewAllowed(video)).to.be.false;
         });
 
         it('with both src and source', () => {
@@ -1140,6 +1147,7 @@ describes.realWin(
           source.setAttribute('src', 'video.mp4');
           video.appendChild(source);
           expect(AmpVideo.prerenderAllowed(video)).to.be.false;
+          expect(AmpVideo.previewAllowed(video)).to.be.false;
         });
       });
 
@@ -1151,6 +1159,7 @@ describes.realWin(
           );
           video.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
 
         it('with just cached source', () => {
@@ -1162,6 +1171,7 @@ describes.realWin(
           source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
           video.appendChild(source);
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
 
         it('with a mix or cached and non-cached', () => {
@@ -1181,6 +1191,7 @@ describes.realWin(
           video.appendChild(cachedSource);
 
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
       });
 
@@ -1189,6 +1200,7 @@ describes.realWin(
           video.setAttribute('src', 'https://example.com/video.mp4');
           video.setAttribute('poster', 'https://example.com/poster.jpg');
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
       });
 
@@ -1197,6 +1209,7 @@ describes.realWin(
           video.setAttribute('src', 'https://example.com/video.mp4');
           video.setAttribute('cache', 'google');
           expect(AmpVideo.prerenderAllowed(video)).to.be.true;
+          expect(AmpVideo.previewAllowed(video)).to.be.true;
         });
       });
 

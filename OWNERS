@@ -9,7 +9,7 @@
         {name: 'cramforce', requestReviews: false},
         {name: 'dvoytenko', requestReviews: false},
         {name: 'jridgewell', requestReviews: false},
-        {name: 'kristoferbaxter', requestReviews: false},
+        {name: 'rsimha', requestReviews: false},
       ],
     },
     {
@@ -52,7 +52,11 @@
       owners: [{name: 'ampproject/wg-performance', required: true}],
     },
     {
-      pattern: '**/*.d.js',
+      pattern: '**/tsconfig.json',
+      owners: [{name: 'ampproject/wg-performance'}],
+    },
+    {
+      pattern: '**/*.d.ts',
       owners: [
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-performance'},

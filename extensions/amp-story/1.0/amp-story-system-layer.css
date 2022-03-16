@@ -1,5 +1,11 @@
 .i-amphtml-story-system-layer {
-  background: linear-gradient(180deg, #0004, #0002 33%, #0001 67%, #0000) !important;
+  background: linear-gradient(
+    180deg,
+    #0004,
+    #0002 33%,
+    #0001 67%,
+    #0000
+  ) !important;
   position: absolute !important;
   display: flex !important;
   justify-content: space-between !important;
@@ -8,14 +14,14 @@
   right: 0 !important;
   height: 140px !important;
   z-index: 100000 !important;
-  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transition: opacity 0.3s cubic-bezier(0, 0, 0.2, 1) !important;
   pointer-events: none !important;
   font-family: 'Roboto', sans-serif !important;
 }
 
 .i-amphtml-story-hidden.i-amphtml-story-system-layer {
   opacity: 0 !important;
-  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1) !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0, 1, 1) !important;
 }
 
 .i-amphtml-story-hidden.i-amphtml-story-system-layer * {
@@ -57,7 +63,7 @@
 
 .i-amphtml-story-attribution-logo {
   border-radius: 100% !important;
-  border: 1px solid #D4D4D4 !important;
+  border: 1px solid #d4d4d4 !important;
   width: 28px !important;
   height: 28px !important;
   object-fit: cover !important;
@@ -71,7 +77,7 @@
   font-size: 13px !important;
   font-weight: 500 !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.16) !important;
-  color: #FFFF !important;
+  color: #ffff !important;
 }
 
 .i-amphtml-story-system-layer-buttons,
@@ -93,7 +99,8 @@
   padding: 8px 4px 0 !important;
 }
 
-.i-amphtml-story-system-layer-buttons .i-amphtml-story-ui-hide-button.i-amphtml-story-button {
+.i-amphtml-story-system-layer-buttons
+  .i-amphtml-story-ui-hide-button.i-amphtml-story-button {
   display: none !important;
 }
 
@@ -140,9 +147,9 @@
 }
 
 [ad-showing]:not([i-amphtml-current-page-has-audio])
-.i-amphtml-story-mute-audio-control,
+  .i-amphtml-story-mute-audio-control,
 [ad-showing]:not([i-amphtml-current-page-has-audio])
-.i-amphtml-story-unmute-audio-control {
+  .i-amphtml-story-unmute-audio-control {
   visibility: hidden !important;
 }
 
@@ -167,6 +174,7 @@
 
 .i-amphtml-story-ad-progress-value {
   animation-name: i-amphtml-story-ad-value !important;
+  animation-duration: 10s;
   animation-timing-function: linear !important;
   background-color: #fbc02d !important;
   height: 100% !important;
@@ -189,18 +197,20 @@
   animation-play-state: paused !important;
 }
 
-[dir=rtl] .i-amphtml-story-page-progress-value,
-[dir=rtl] .i-amphtml-story-ad-progress-value {
+[dir='rtl'] .i-amphtml-story-page-progress-value,
+[dir='rtl'] .i-amphtml-story-ad-progress-value {
   transform-origin: right !important;
 }
 
-[i-amphtml-story-has-new-page="noshow"] .i-amphtml-story-has-new-page-notification-container {
+[i-amphtml-story-has-new-page='noshow']
+  .i-amphtml-story-has-new-page-notification-container {
   transition: opacity 1.5s, visibility 1.5s !important;
   opacity: 0 !important;
   visibility: hidden !important;
 }
 
-.i-amphtml-last-page-active[i-amphtml-story-has-new-page="show"] .i-amphtml-story-has-new-page-notification-container {
+.i-amphtml-last-page-active[i-amphtml-story-has-new-page='show']
+  .i-amphtml-story-has-new-page-notification-container {
   transition: opacity 1.5s, visibility 1.5s !important;
   opacity: 1 !important;
   visibility: visible !important;
@@ -225,7 +235,6 @@
 
 .i-amphtml-story-mute-audio-control,
 .i-amphtml-story-unmute-audio-control,
-.i-amphtml-paused-display,
 .i-amphtml-story-pause-control,
 .i-amphtml-story-play-control,
 .i-amphtml-story-mute-text,
@@ -237,18 +246,31 @@
   display: none !important;
 }
 
-[i-amphtml-current-page-has-audio]:not([muted]) .i-amphtml-story-mute-audio-control,
-[i-amphtml-current-page-has-audio][muted] .i-amphtml-story-unmute-audio-control {
+/*
+  Visible to screen readers only. Screen readers will set :focus on iOS but not android,
+  therefore on android the button remains hidden but interactable.
+*/
+.i-amphtml-story-system-layer:not([desktop]):not(.i-amphtml-story-desktop-one-panel):not(.amp-mode-keyboard-active)
+  .i-amphtml-paused-display
+  button:not(:focus) {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 0px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+[i-amphtml-current-page-has-captions]:not([captions-on])
+  .i-amphtml-story-nocaptions-control,
+[i-amphtml-current-page-has-captions][captions-on]
+  .i-amphtml-story-captions-control {
   display: block !important;
 }
 
-[i-amphtml-current-page-has-captions]:not([captions-on]) .i-amphtml-story-nocaptions-control,
-[i-amphtml-current-page-has-captions][captions-on] .i-amphtml-story-captions-control {
-  display: block !important;
-}
-
-[desktop] .i-amphtml-paused-display,
-.i-amphtml-story-desktop-one-panel .i-amphtml-paused-display {
+[i-amphtml-current-page-has-audio]:not([muted])
+  .i-amphtml-story-mute-audio-control,
+[i-amphtml-current-page-has-audio][muted]
+  .i-amphtml-story-unmute-audio-control {
   display: block !important;
 }
 
@@ -258,10 +280,6 @@
 
 .i-amphtml-story-has-playback-ui:not([paused]) .i-amphtml-story-pause-control,
 .i-amphtml-story-has-playback-ui[paused] .i-amphtml-story-play-control {
-  display: block !important;
-}
-
-.amp-mode-keyboard-active:not([desktop]) .i-amphtml-paused-display {
   display: block !important;
 }
 
@@ -279,7 +297,7 @@
 }
 
 .i-amphtml-story-captions-control {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#fff" d="M28.9 15.36h-9.8a5.39 5.39 0 0 0-5.38 5.38v6.54a5.38 5.38 0 0 0 5.37 5.36h9.82a5.38 5.38 0 0 0 5.37-5.36v-6.54a5.39 5.39 0 0 0-5.37-5.38Zm.92 6.13H28.2a1.1 1.1 0 0 0-1.1 1.1v2.81a1.12 1.12 0 0 0 1.1 1.12h1.62c.58 0 1.07.49 1.07 1.07 0 .58-.49 1.07-1.07 1.07H28.2a3.28 3.28 0 0 1-3.25-3.25V22.6a3.26 3.26 0 0 1 3.25-3.26h1.62c.54.06.97.53.97 1.08 0 .54-.43 1.01-.97 1.07Zm-8.06 0h-1.61a1.12 1.12 0 0 0-1.12 1.1v2.81a1.12 1.12 0 0 0 1.12 1.12h1.6c.59 0 1.07.49 1.07 1.07 0 .58-.48 1.07-1.06 1.07h-1.61a3.28 3.28 0 0 1-3.25-3.25V22.6a3.25 3.25 0 0 1 3.25-3.26h1.6c.55.06.97.53.97 1.08a1.1 1.1 0 0 1-.96 1.07Z"/></svg>') !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path fill="#fff" d="M28.9 15.4h-9.8a5.4 5.4 0 0 0-5.4 5.3v6.6a5.4 5.4 0 0 0 5.4 5.3h9.8a5.4 5.4 0 0 0 5.4-5.3v-6.6a5.4 5.4 0 0 0-5.4-5.3Zm1 6h-1.7a1.1 1.1 0 0 0-1.1 1.2v2.8a1.1 1.1 0 0 0 1.1 1.1h1.6c.6 0 1 .5 1 1 0 .7-.4 1.2-1 1.2h-1.6a3.3 3.3 0 0 1-3.3-3.3v-2.8a3.3 3.3 0 0 1 3.3-3.3h1.6c.6.1 1 .6 1 1.1 0 .6-.4 1-1 1Zm-8.1 0H20a1.1 1.1 0 0 0-1 1.2v2.8a1.1 1.1 0 0 0 1 1.1h1.6c.6 0 1.1.5 1.1 1 0 .7-.5 1.2-1 1.2h-1.6a3.3 3.3 0 0 1-3.3-3.3v-2.8a3.3 3.3 0 0 1 3.3-3.3h1.6c.5.1 1 .6 1 1.1a1.1 1.1 0 0 1-1 1Z"/></svg>') !important;
   width: 52px !important;
 }
 
@@ -338,7 +356,7 @@
   border-radius: 5px !important;
 }
 
-[dir=rtl] .i-amphtml-story-has-new-page-text-wrapper {
+[dir='rtl'] .i-amphtml-story-has-new-page-text-wrapper {
   padding-right: 0 !important;
   padding-left: 10px !important;
 }
@@ -370,7 +388,7 @@
 }
 
 .i-amphtml-animate-progress li {
-  transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-progress-bar {
@@ -386,7 +404,7 @@
   transform-origin: left !important;
 }
 
-[dir=rtl].i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
+[dir='rtl'].i-amphtml-progress-bar-overflow .i-amphtml-story-page-progress-bar {
   transform-origin: right !important;
 }
 
@@ -397,6 +415,10 @@
 .i-amphtml-story-desktop-one-panel.i-amphtml-story-system-layer {
   width: var(--i-amphtml-story-desktop-one-panel-width) !important;
   margin: auto !important;
-  margin-top: var(--i-amphtml-story-desktop-one-panel-responsive-margin) !important;
-  border-radius: var(--i-amphtml-story-desktop-one-panel-border-radius) !important;
+  margin-top: var(
+    --i-amphtml-story-desktop-one-panel-responsive-margin
+  ) !important;
+  border-radius: var(
+    --i-amphtml-story-desktop-one-panel-border-radius
+  ) !important;
 }

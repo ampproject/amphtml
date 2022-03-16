@@ -324,10 +324,8 @@
       "url": "examples/visual-tests/amp-story/share-menu.html",
       "name": "amp-story: share menu",
       "viewport": {"width": 320, "height": 480},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        "amp-story-share-menu"
-      ]
+      "interactive_tests": "examples/visual-tests/amp-story/share-menu.js",
+      "no_base_test": true
     },
     {
       // TODO(#36358, @ampproject/wg-stories): Re-enable test.
@@ -335,10 +333,8 @@
       "url": "examples/visual-tests/amp-story/info-dialog.html",
       "name": "amp-story: info dialog",
       "viewport": {"width": 320, "height": 480},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-info-dialog"
-      ]
+      "interactive_tests": "examples/visual-tests/amp-story/info-dialog.js",
+      "no_base_test": true
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-consent.html",
@@ -474,10 +470,8 @@
       "url": "examples/visual-tests/amp-story/share-menu.rtl.html",
       "name": "amp-story: share menu (rtl)",
       "viewport": {"width": 320, "height": 480},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        "amp-story-share-menu"
-      ]
+      "interactive_tests": "examples/visual-tests/amp-story/share-menu.js",
+      "no_base_test": true
     },
     {
       // TODO(#36358, @ampproject/wg-stories): Re-enable test.
@@ -485,10 +479,8 @@
       "url": "examples/visual-tests/amp-story/info-dialog.rtl.html",
       "name": "amp-story: info dialog (rtl)",
       "viewport": {"width": 320, "height": 480},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        ".i-amphtml-story-info-dialog"
-      ]
+      "interactive_tests": "examples/visual-tests/amp-story/info-dialog.js",
+      "no_base_test": true
     },
     {
       "url": "examples/visual-tests/amp-story/amp-story-consent.rtl.html",
@@ -813,9 +805,29 @@
     {
       "url": "examples/visual-tests/amp-story/amp-story-shopping.html",
       "name": "amp-story-shopping UI",
-      "viewport": {"width": 320, "height": 480},
+      "viewport": {"width": 320, "height": 900},
       "loading_complete_selectors": [".i-amphtml-story-loaded"],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
-    }    
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-shopping-rtl.html",
+      "name": "amp-story-shopping UI RTL",
+      "viewport": {"width": 320, "height": 900},
+      "loading_complete_selectors": [".i-amphtml-story-loaded"],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-shopping-lang-de.html",
+      "name": "amp-story-shopping UI number format based on language",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [".i-amphtml-story-loaded"]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-shopping-landscape.html",
+      "name": "amp-story-shopping UI in desktop supports landscape mode",
+      "viewport": {"width": 1500, "height": 1000},
+      "loading_complete_selectors": [".i-amphtml-story-loaded"],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
+    }
   ]
 }

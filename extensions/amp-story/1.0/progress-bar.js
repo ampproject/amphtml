@@ -1,24 +1,24 @@
+import {removeChildren} from '#core/dom';
+import {escapeCssSelectorNth} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
-import {
-  BranchToTimeValues,
-  StoryAdSegmentExp,
-} from '#experiments/story-ad-progress-segment';
-import {EventType} from './events';
-import {POLL_INTERVAL_MS} from './page-advancement';
+import {scopedQuerySelector} from '#core/dom/query';
+import {scale, setImportantStyles} from '#core/dom/style';
+import {debounce} from '#core/types/function';
+import {hasOwn, map} from '#core/types/object';
+
 import {Services} from '#service';
+
+import {dev, devAssert} from '#utils/log';
+
+import {isExperimentOn} from 'src/experiments';
+
 import {
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {debounce} from '#core/types/function';
-import {dev, devAssert} from '#utils/log';
-import {escapeCssSelectorNth} from '#core/dom/css-selectors';
-import {getExperimentBranch} from 'src/experiments';
-import {hasOwn, map} from '#core/types/object';
-import {removeChildren} from '#core/dom';
-import {scale, setImportantStyles} from '#core/dom/style';
-import {scopedQuerySelector} from '#core/dom/query';
+import {EventType} from './events';
+import {POLL_INTERVAL_MS} from './page-advancement';
 
 /**
  * Transition used to show the progress of a media. Has to be linear so the
@@ -419,33 +419,21 @@ export class ProgressBar {
    * TODO(#33969) clean up experiment is launched.
    */
   onAdStateUpdate_(adState) {
-    const segmentExpBranch = getExperimentBranch(
-      this.win_,
-      StoryAdSegmentExp.ID
-    );
-    if (
-      !segmentExpBranch ||
-      segmentExpBranch === StoryAdSegmentExp.CONTROL ||
-      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE_BOTH ||
-      segmentExpBranch === StoryAdSegmentExp.NO_ADVANCE_AD
-    ) {
+    if (!isExperimentOn(this.win_, 'story-ad-auto-advance')) {
       return;
     }
     // Set CSS signal that we are in the experiment.
+    // TODO(#33969) Unneeded when we actually launch.
     if (!this.root_.hasAttribute('i-amphtml-ad-progress-exp')) {
       this.root_.setAttribute('i-amphtml-ad-progress-exp', '');
     }
-    adState
-      ? this.createAdSegment_(BranchToTimeValues[segmentExpBranch])
-      : this.removeAdSegment_();
+    adState ? this.createAdSegment_() : this.removeAdSegment_();
   }
 
   /**
    * Create ad progress segment that will be shown when ad is visible.
-   * TODO(#33969) remove variable animation duration when best value is chosen.
-   * @param {string} animationDuration
    */
-  createAdSegment_(animationDuration) {
+  createAdSegment_() {
     const index = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
     // Fill in segment before ad segment.
     this.updateProgressByIndex_(index, 1, false);
@@ -455,12 +443,7 @@ export class ProgressBar {
         index + 2
       )})`
     );
-    const adSegment = (
-      <div
-        class="i-amphtml-story-ad-progress-value"
-        style={{animationDuration}}
-      ></div>
-    );
+    const adSegment = <div class="i-amphtml-story-ad-progress-value"></div>;
     this.currentAdSegment_ = adSegment;
     progressEl.appendChild(adSegment);
   }

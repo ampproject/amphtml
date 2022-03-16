@@ -1,15 +1,18 @@
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-poll';
-import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
-import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {measureMutateElementStub} from '#testing/helpers/service';
+
 import {
   MOCK_URL,
   addConfigToInteractive,
   getMockInteractiveData,
 } from './helpers';
-import {measureMutateElementStub} from '#testing/helpers/service';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-poll';
 
 describes.realWin(
   'amp-story-interactive-binary-poll',

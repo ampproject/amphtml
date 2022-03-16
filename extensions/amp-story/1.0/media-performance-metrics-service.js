@@ -1,10 +1,13 @@
-import {MEDIA_LOAD_FAILURE_SRC_PROPERTY, listen} from '#utils/event-helper';
-import {Services} from '#service';
 import {TickLabel_Enum} from '#core/constants/enums';
-import {dev} from '#utils/log';
 import {lastChildElement, matches} from '#core/dom/query';
-import {registerServiceBuilder} from '../../../src/service-helpers';
 import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY, listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {registerServiceBuilder} from '../../../src/service-helpers';
 
 /**
  * Media status.

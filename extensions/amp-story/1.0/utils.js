@@ -1,20 +1,24 @@
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {
+  closestAncestorElementBySelector,
+  scopedQuerySelectorAll,
+} from '#core/dom/query';
+import {setStyle, toggle} from '#core/dom/style';
+
 import {Services} from '#service';
+
+import {dev, user, userAssert} from '#utils/log';
+
 import {StateProperty} from './amp-story-store-service';
+
+import {getMode} from '../../../src/mode';
+import {createShadowRoot} from '../../../src/shadow-embed';
 import {
   assertHttpsUrl,
   getSourceOrigin,
   isProxyOrigin,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {
-  closestAncestorElementBySelector,
-  scopedQuerySelectorAll,
-} from '#core/dom/query';
-import {createShadowRoot} from '../../../src/shadow-embed';
-import {dev, user, userAssert} from '#utils/log';
-import {getMode} from '../../../src/mode';
-
-import {setStyle, toggle} from '#core/dom/style';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -341,4 +345,38 @@ export const maybeMakeProxyUrl = (url, ampDoc) => {
  */
 export function isTransformed(ampdoc) {
   return ampdoc.getRootNode().documentElement.hasAttribute('transformed');
+}
+
+/**
+ * Wrapper for classes that depend on story services being installed
+ * so they can fetch the services synchronously. This allows the extension
+ * to be installed on the doc as a script tag.
+ *
+ * @param {AMP.BaseElement.constructor} klass
+ * @return {AMP.BaseElement.constructor}
+ */
+export function dependsOnStoryServices(klass) {
+  return class extends AMP.BaseElement {
+    /**
+     * @override
+     * @return {AMP.BaseElement|Promise<AMP.BaseElement>}
+     */
+    upgradeCallback() {
+      const storyEl = closestAncestorElementBySelector(
+        this.element,
+        'amp-story'
+      );
+      if (!storyEl) {
+        // Unit tests may mock or install the services internally, so
+        // instantiating immediately allows us to test implementations without
+        // placing the element inside an <amp-story>.
+        // In reality, this would cause failures. This is okay since upgradable
+        // elements are required to descend from an <amp-story>.
+        return new klass(this.element);
+      }
+      return whenUpgradedToCustomElement(storyEl)
+        .then(() => storyEl.getImpl())
+        .then(() => new klass(this.element));
+    }
+  };
 }

@@ -1,8 +1,12 @@
 import '../amp-facebook';
 import {expect} from 'chai';
+
 import {facebook} from '#3p/facebook';
-import {resetServiceForTesting} from '../../../../src/service-helpers';
+
+import * as log from '#utils/log';
+
 import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
+import {resetServiceForTesting} from '../../../../src/service-helpers';
 
 describes.realWin(
   'amp-facebook',
@@ -18,6 +22,8 @@ describes.realWin(
     const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
     const fbVideoHref =
       'https://www.facebook.com/zuck/videos/10102509264909801/';
+    const fbCommentHref =
+      'https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185';
     let win, doc;
 
     beforeEach(() => {
@@ -74,32 +80,29 @@ describes.realWin(
       expect(context.attributes.embedAs).to.equal('video');
     });
 
-    it('renders iframe in amp-facebook with comment', async () => {
-      const ampFB = await getAmpFacebook(fbVideoHref, 'comment');
-      const iframe = ampFB.firstChild;
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
-
-      const context = JSON.parse(iframe.getAttribute('name'));
-      expect(context.attributes.embedAs).to.equal('comment');
+    it('warns unsupported data-embed-as value: comment', async () => {
+      const warn = env.sandbox.spy();
+      env.sandbox.stub(log, 'user').returns({warn});
+      expect(warn).not.to.be.called;
+      await getAmpFacebook(fbCommentHref, 'comment');
+      expect(warn).to.be.calledOnce;
     });
 
     it('rejects other supported and unsupported data-embed-as types', async () => {
       expectAsyncConsoleError(/.*/);
       await expect(getAmpFacebook(fbVideoHref, 'comments')).to.be.rejectedWith(
-        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: comments/
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post" or "video" but was: comments/
       );
       await expect(getAmpFacebook(fbVideoHref, 'like')).to.be.rejectedWith(
-        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: like/
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post" or "video" but was: like/
       );
       await expect(getAmpFacebook(fbVideoHref, 'page')).to.be.rejectedWith(
-        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: page/
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post" or "video" but was: page/
       );
       await expect(
         getAmpFacebook(fbVideoHref, 'unsupported')
       ).to.be.rejectedWith(
-        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post", "video" or "comment" but was: unsupported/
+        /Attribute data-embed-as for <amp-facebook> value is wrong, should be "post" or "video" but was: unsupported/
       );
     });
 

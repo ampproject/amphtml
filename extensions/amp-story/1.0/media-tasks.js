@@ -1,7 +1,8 @@
 import {Deferred} from '#core/data-structures/promise';
-import {tryPlay} from '#core/dom/video';
-import {Sources} from './sources';
 import {isConnectedNode} from '#core/dom';
+import {tryPlay} from '#core/dom/video';
+
+import {Sources} from './sources';
 
 /**
  * The name for a boolean property on an element indicating whether that element

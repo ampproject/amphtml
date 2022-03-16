@@ -1,10 +1,11 @@
-import {dict} from '#core/types/object';
+import {BaseElement} from '#bento/components/bento-jwplayer/1.0/base-element';
+import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
 
 import {isExperimentOn} from '#experiments';
 
-import {userAssert} from '#utils/log';
+import {setSuperClass} from '#preact/amp-base-element';
 
-import {BaseElement} from './base-element';
+import {userAssert} from '#utils/log';
 
 import {
   getConsentMetadata,
@@ -16,7 +17,7 @@ import {
 const TAG = 'amp-jwplayer';
 
 /** @implements {../../../src/video-interface.VideoInterface} */
-class AmpJwplayer extends BaseElement {
+class AmpJwplayer extends setSuperClass(BaseElement, AmpVideoBaseElement) {
   /** @override */
   init() {
     const consentPolicy = this.getConsentPolicy();
@@ -25,15 +26,13 @@ class AmpJwplayer extends BaseElement {
         const policyState = consentInfo[0];
         const policyInfo = consentInfo[1];
         const policyMetadata = consentInfo[2];
-        this.mutateProps(
-          dict({
-            'consentParams': {
-              'policyState': policyState,
-              'policyInfo': policyInfo,
-              'policyMetadata': policyMetadata,
-            },
-          })
-        );
+        this.mutateProps({
+          'consentParams': {
+            'policyState': policyState,
+            'policyInfo': policyInfo,
+            'policyMetadata': policyMetadata,
+          },
+        });
       });
     }
 

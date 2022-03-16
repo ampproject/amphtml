@@ -1,6 +1,7 @@
 import {Services} from '#service';
 
 import {getAdNetworkConfig} from '../ad-network-config';
+import {Attributes} from '../attributes';
 
 describes.realWin(
   'adsense-network-config',
@@ -47,6 +48,23 @@ describes.realWin(
       it('should report responsive-enabled', () => {
         const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
         expect(adNetwork.isResponsiveEnabled()).to.equal(true);
+      });
+
+      it('should force no-fill if adsbygoogle is set', () => {
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+        env.win.adsbygoogle = {};
+        expect(
+          adNetwork.filterConfig({
+            [Attributes.STICKY_AD_ATTRIBUTES]: {
+              'data-google-id': '123',
+            },
+          })
+        ).to.deep.equal({
+          [Attributes.STICKY_AD_ATTRIBUTES]: {
+            'data-google-id': '123',
+            'data-no-fill': 'true',
+          },
+        });
       });
 
       // TODO(bradfrizzell, #12476): Make this test work with sinon 4.0.

@@ -1,7 +1,6 @@
 import {LruCache} from '#core/data-structures/lru-cache';
 import {createElementWithAttributes} from '#core/dom';
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -96,9 +95,9 @@ export class AmpAdTemplateHelper {
         const scriptElem = createElementWithAttributes(
           element.ownerDocument,
           'script',
-          dict({
+          {
             'type': 'application/json',
-          })
+          }
         );
         scriptElem.textContent = JSON.stringify(config['inline']);
         analyticsEle.appendChild(scriptElem);

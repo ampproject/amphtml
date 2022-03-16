@@ -10,7 +10,7 @@ import {isEnabled} from '#core/dom';
 import {isFiniteNumber} from '#core/types';
 import {isArray, toArray} from '#core/types/array';
 import {debounce, throttle} from '#core/types/function';
-import {dict, getValueForExpr, hasOwn, map} from '#core/types/object';
+import {getValueForExpr, hasOwn, map} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -1133,7 +1133,7 @@ export function dereferenceArgsVariables(args, event, opt_args) {
   if (!args) {
     return args;
   }
-  const data = opt_args || dict({});
+  const data = opt_args || {};
   if (event) {
     const detail = getDetail(/** @type {!Event} */ (event));
     if (detail) {

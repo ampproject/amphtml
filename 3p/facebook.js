@@ -1,6 +1,5 @@
 import {setStyle} from '#core/dom/style';
 import {isEnumValue} from '#core/types/enum';
-import {dict} from '#core/types/object';
 import {dashToUnderline} from '#core/types/string';
 
 import {devAssert} from '#utils/log';
@@ -9,9 +8,6 @@ import {loadScript} from './3p';
 
 /** @const @enum {string} */
 export const FacebookEmbedType = {
-  // Embeds a single comment or reply to a comment on a post rendered by
-  // amp-facebook.
-  COMMENT: 'comment',
   // Allows users to comment on the embedded content using their Facebook
   // accounts. Correlates to amp-facebook-comments.
   COMMENTS: 'comments',
@@ -90,25 +86,6 @@ function getVideoContainer(global, data) {
     // from the default 'false')
     container.setAttribute('data-show-text', 'true');
   }
-  return container;
-}
-
-/**
- * Create DOM element for the Facebook embedded content plugin for comments or
- * comment replies.
- * @see https://developers.facebook.com/docs/plugins/embedded-comments
- * @param {!Window} global
- * @param {!Object} data The element data
- * @return {!Element} div
- */
-function getCommentContainer(global, data) {
-  const c = global.document.getElementById('c');
-  const container = createContainer(global, 'comment-embed', data.href);
-  container.setAttribute(
-    'data-include-parent',
-    data.includeCommentParent || 'false'
-  );
-  container.setAttribute('data-width', c./*OK*/ offsetWidth);
   return container;
 }
 
@@ -197,8 +174,6 @@ function getEmbedContainer(global, data, embedAs) {
       return getLikeContainer(global, data);
     case FacebookEmbedType.COMMENTS:
       return getCommentsContainer(global, data);
-    case FacebookEmbedType.COMMENT:
-      return getCommentContainer(global, data);
     case FacebookEmbedType.VIDEO:
       return getVideoContainer(global, data);
     default:
@@ -235,11 +210,9 @@ export function facebook(global, data) {
       FB.init({xfbml: true, version: 'v2.5'});
 
       // Report to parent that the SDK has loaded and is ready to paint
-      const message = JSON.stringify(
-        dict({
-          'action': 'ready',
-        })
-      );
+      const message = JSON.stringify({
+        'action': 'ready',
+      });
       global.parent./*OK*/ postMessage(message, '*');
     },
     data.locale ? data.locale : dashToUnderline(window.navigator.language)
