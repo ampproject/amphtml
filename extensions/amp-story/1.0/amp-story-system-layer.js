@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
 import {closest, matches, scopedQuerySelector} from '#core/dom/query';
@@ -640,7 +641,7 @@ export class SystemLayer {
    * @param {boolean} hasCaptions
    */
   onPageHasCaptionsState_(hasCaptions) {
-    this.systemLayerEl_.toggleAttribute(PAGE_HAS_CAPTIONS, hasCaptions);
+    toggleAttribute(this.systemLayerEl_, PAGE_HAS_CAPTIONS, hasCaptions);
   }
 
   /**
@@ -648,7 +649,7 @@ export class SystemLayer {
    * @param {boolean} captions
    */
   onCaptionsState_(captions) {
-    this.systemLayerEl_.toggleAttribute('captions-on', captions);
+    toggleAttribute(this.systemLayerEl_, 'captions-on', captions);
   }
 
   /**

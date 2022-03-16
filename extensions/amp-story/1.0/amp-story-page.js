@@ -1311,7 +1311,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     const hasAudioPromise = hasAudioElements
       ? Promise.resolve(true)
-      : this.hasVideoWithAudio_();
+      : this.hasLoadedVideoWith_(
+          (video) =>
+            !video.hasAttribute('noaudio') &&
+            parseFloat(video.getAttribute('volume')) !== 0
+        );
 
     hasAudioPromise.then((hasAudio) =>
       this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, hasAudio)
@@ -1320,32 +1324,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Checks if the page has any videos with audio.
+   * @param {function<!Element, boolean>} func
    * @return {!Promise<boolean>}
    * @private
    */
-  hasVideoWithAudio_() {
+  hasLoadedVideoWith_(func) {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
     return waitForElementsWithUnresolvedAudio(this.element).then(() =>
-      Array.prototype.some.call(
-        ampVideoEls,
-        (video) =>
-          !video.hasAttribute('noaudio') &&
-          parseFloat(video.getAttribute('volume')) !== 0
-      )
-    );
-  }
-
-  /**
-   * Checks if the page has any videos with captions.
-   * @return {!Promise<boolean>}
-   * @private
-   */
-  hasVideoWithCaptions_() {
-    const ampVideoEls = this.element.querySelectorAll('amp-video');
-    return waitForElementsWithUnresolvedAudio(this.element).then(() =>
-      Array.prototype.some.call(ampVideoEls, (video) =>
-        video.querySelector('track')
-      )
+      Array.prototype.some.call(ampVideoEls, func)
     );
   }
 
@@ -1370,18 +1356,20 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   checkPageHasCaptions_() {
-    this.hasVideoWithCaptions_().then((hasVideoWithCaptions) => {
-      this.storeService_.dispatch(
-        Action.TOGGLE_PAGE_HAS_CAPTIONS,
-        hasVideoWithCaptions
-      );
-
-      if (hasVideoWithCaptions) {
-        this.toggleCaptions_(
-          this.storeService_.get(StateProperty.CAPTIONS_STATE)
+    this.hasLoadedVideoWith_((video) => video.querySelector('track')).then(
+      (hasVideoWithCaptions) => {
+        this.storeService_.dispatch(
+          Action.TOGGLE_PAGE_HAS_CAPTIONS,
+          hasVideoWithCaptions
         );
+
+        if (hasVideoWithCaptions) {
+          this.toggleCaptions_(
+            this.storeService_.get(StateProperty.CAPTIONS_STATE)
+          );
+        }
       }
-    });
+    );
   }
 
   /**
