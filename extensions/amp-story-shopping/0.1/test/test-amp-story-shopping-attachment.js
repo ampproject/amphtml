@@ -294,7 +294,7 @@ describes.realWin(
       expect(trigger).to.have.been.calledWith(
         StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
         null,
-        {'calledFrom': 'story-shopping-cta'}
+        {'eventDetails': {'calledFrom': 'amp-story-shopping-cta'}}
       );
     });
 
@@ -305,7 +305,7 @@ describes.realWin(
         expect(trigger).to.have.been.calledWith(
           StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
           null,
-          {'calledFrom': 'story-shopping-tag'}
+          {'eventDetails': {'calledFrom': 'amp-story-shopping-tag'}}
         );
       });
 

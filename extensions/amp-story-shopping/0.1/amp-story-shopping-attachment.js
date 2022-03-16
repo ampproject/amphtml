@@ -138,7 +138,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.analyticsService_.triggerEvent(
         StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
         null,
-        {'eventDetails': {'calledFrom': 'story-shopping-cta'}}
+        {'eventDetails': {'calledFrom': 'amp-story-shopping-cta'}}
       );
     }
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
