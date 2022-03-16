@@ -19,7 +19,6 @@ import {
   ShoppingDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 /** @const {!Array<!Object>} fontFaces */
@@ -61,9 +60,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.pageEl_ = null;
-
-    /** @private @const {!./story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = Services.storyAnalyticsService(this.win);
   }
 
   /** @override */

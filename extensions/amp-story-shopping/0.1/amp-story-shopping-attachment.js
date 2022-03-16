@@ -271,11 +271,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * On plp card click dispatch shopping data.
-   * @param e
    * @param {!Array<!ShoppingConfigDataDef>} shoppingData
    * @private
    */
-  onPlpCardClick_(e, shoppingData) {
+  onPlpCardClick_(shoppingData) {
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.SHOPPING_PLP_CARD_CLICK
     );
@@ -461,7 +460,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             <button
               class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-plp-card"
               role="button"
-              onClick={(e) => this.onPlpCardClick_(e, data)}
+              onClick={() => this.onPlpCardClick_(data)}
             >
               <div
                 class="i-amphtml-amp-story-shopping-plp-card-image"

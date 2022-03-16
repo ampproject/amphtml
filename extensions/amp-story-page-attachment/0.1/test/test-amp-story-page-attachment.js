@@ -13,10 +13,7 @@ import {
 } from 'extensions/amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from 'src/service-helpers';
 
-import {
-  StoryAnalyticsEvent,
-  StoryAnalyticsService,
-} from '../../../amp-story/1.0/story-analytics';
+import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
 describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {

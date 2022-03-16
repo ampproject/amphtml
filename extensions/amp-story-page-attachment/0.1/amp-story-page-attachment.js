@@ -1,11 +1,7 @@
 import {devAssert} from '#core/assert';
 import {removeElement, toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
-import {
-  childElementByTag,
-  closest,
-  closestAncestorElementBySelector,
-} from '#core/dom/query';
+import {closest, closestAncestorElementBySelector} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
 import {getHistoryState} from '#core/window/history';
 

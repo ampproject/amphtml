@@ -11,10 +11,7 @@ import {
   StateProperty,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {
-  StoryAnalyticsEvent,
-  StoryAnalyticsService,
-} from '../../../amp-story/1.0/story-analytics';
+import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 
 describes.realWin(
   'amp-story-shopping-tag-v0.1',
