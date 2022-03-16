@@ -1012,6 +1012,7 @@ export class MediaPool {
 
     const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
     const isQueueRunning = queue.length !== 0;
+
     queue.push(task);
 
     if (!isQueueRunning) {

@@ -209,6 +209,7 @@ export class PlayTask extends MediaTask {
       // playing, as this can interrupt playback in some browsers.
       return Promise.resolve();
     }
+
     return tryPlay(mediaEl);
   }
 }
