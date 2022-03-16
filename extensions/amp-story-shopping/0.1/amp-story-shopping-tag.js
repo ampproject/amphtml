@@ -5,7 +5,6 @@ import {
   childElementByTag,
   closestAncestorElementBySelector,
 } from '#core/dom/query';
-import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
@@ -171,46 +170,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * This function counts the number of lines in the shopping tag
-   * and sets the styling properties dynamically based on the number of lines.
-   * @private
-   */
-  styleTagText_() {
-    const pillEl = this.element.shadowRoot?.querySelector(
-      '.amp-story-shopping-tag-pill'
-    );
-
-    const textEl = this.element.shadowRoot?.querySelector(
-      '.amp-story-shopping-tag-pill-text'
-    );
-
-    if (!pillEl || !textEl) {
-      return;
-    }
-
-    const fontSize = parseInt(
-      computedStyle(window, textEl).getPropertyValue('font-size'),
-      10
-    );
-    const ratioOfLineHeightToFontSize = 1.5;
-    const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
-
-    let numLines = 1;
-
-    this.measureElement(() => {
-      const height = textEl./*OK*/ clientHeight;
-      numLines = Math.ceil(height / lineHeight);
-    });
-
-    this.mutateElement(() => {
-      pillEl.classList.toggle(
-        'i-amphtml-amp-story-shopping-tag-pill-multi-line',
-        numLines > 1
-      );
-    });
-  }
-
-  /**
    * @return {!Element}
    * @private
    */
@@ -298,7 +257,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       shoppingSharedCSS + shoppingTagCSS
     );
     this.hasAppendedInnerShoppingTagEl_ = true;
-    this.styleTagText_();
     this.initializeTagStateListeners_();
   }
 }
