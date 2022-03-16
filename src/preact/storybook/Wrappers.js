@@ -65,6 +65,7 @@ containWrapper.argTypes = {
   },
   wrapperStyle: {
     name: 'wrapperStyle',
+    defaultValue: {padding: 4},
     control: {type: 'object'},
   },
   contentStyle: {
