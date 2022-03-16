@@ -46,6 +46,7 @@ describes.realWin('media-tasks', {}, (env) => {
       const storyPageEl = document.createElement('amp-story-page');
       storyPageEl.setAttribute('active', '');
       storyPageEl.appendChild(el);
+      expect(storyPageEl.hasAttribute('active')).to.be.true;
 
       expect(el.paused).to.be.true;
 
