@@ -1,6 +1,10 @@
+import {
+  GestureHandlers,
+  UserGestureConfig,
+  UserHandlers,
+  useGesture,
+} from '@use-gesture/react';
 import type {ComponentChildren, Ref} from 'preact';
-import type {FC} from 'preact/compat';
-import * as ReactHammer from 'react-hammerjs';
 
 import {scale as cssScale, px, translate} from '#core/dom/style';
 
@@ -14,14 +18,16 @@ import {logger} from '#preact/logger';
 import {useStyles} from './component.jss';
 import {usePanZoomState} from './hooks/usePanZoomState';
 
-/**
- * Fix a few issues with importing <Hammer>:
- */
-const Hammer: FC<Omit<ReactHammerProps, 'children'>> = (ReactHammer as any)
-  .default;
-type ReactHammerProps = ReactHammer.ReactHammerProps;
-
 const TAG = 'amp-pan-zoom';
+
+const DOUBLE_TAP_TIME = 500; // Maximum time between tap starts
+
+const gestureConfig: Omit<UserGestureConfig, 'target'> = {
+  drag: {
+    filterTaps: true,
+    tapsThreshold: 10,
+  },
+};
 
 const ELIGIBLE_TAGS = new Set([
   'svg',
@@ -131,70 +137,67 @@ export function BentoPanZoomWithRef(
     transform: translate(state.posX, state.posY) + cssScale(state.scale),
   };
 
-  const hammerStartInfo =
-    useRef<Pick<typeof state, 'posX' | 'posY' | 'scale'>>(null);
-  const hammerHandlers: Omit<ReactHammerProps, 'children'> = {
-    onDoubleTap: (ev) => {
-      const {center} = ev;
-      const element = containerRef.current!;
-      const {anchorX, anchorY} = getElementPosition(
-        center.x,
-        center.y,
-        element
-      );
-      actions.updateScale({anchorX, anchorY});
-    },
-
-    direction: 'DIRECTION_ALL',
-    onPanStart: () => {
-      if (!state.isPannable) {
-        return;
+  const lastTapTime = useRef(0);
+  const handlers: Partial<UserHandlers> = {
+    onDragStart() {
+      if (state.isPannable) {
+        actions.draggingStart();
       }
-      actions.draggingStart();
-      hammerStartInfo.current = state;
     },
-    onPanEnd: () => {
-      if (!state.isPannable) {
-        return;
-      }
+    onDragEnd() {
       actions.draggingRelease();
     },
-    onPan: (ev) => {
+    onDrag(ev) {
+      // Taps come through the `onDrag` handler:
+      if (ev.tap) {
+        const isDoubleTap =
+          ev.startTime - lastTapTime.current <= DOUBLE_TAP_TIME;
+        if (isDoubleTap) {
+          // Double tap:
+          const [clientX, clientY] = ev.xy;
+          const anchor = getElementPosition(
+            clientX,
+            clientY,
+            containerRef.current!
+          );
+          actions.updateScale(anchor);
+          lastTapTime.current = 0; // Prevent triple-taps
+        } else {
+          // Single tap
+          lastTapTime.current = ev.startTime;
+        }
+        return;
+      }
+
+      // Let's pan!
       if (!state.isPannable) {
         return;
       }
-      const {deltaX, deltaY} = ev;
+      const [deltaX, deltaY] = ev.movement;
+      const [initialX, initialY] = ev.memo || [state.posX, state.posY];
 
       actions.transform({
-        posX: hammerStartInfo.current!.posX + deltaX,
-        posY: hammerStartInfo.current!.posY + deltaY,
+        posX: initialX + deltaX,
+        posY: initialY + deltaY,
       });
+
+      if (ev.first) {
+        // This return value is accessed later via `ev.memo`
+        return [initialX, initialY];
+      }
     },
 
-    onPinchStart: (ev) => {
+    onPinchStart: () => {
       actions.draggingStart();
-      hammerStartInfo.current = state;
     },
-    onPinchEnd: (ev) => {
+    onPinchEnd: () => {
       actions.draggingRelease();
     },
     onPinch: (ev) => {
-      const {center, scale} = ev;
-      const {scale: startScale} = hammerStartInfo.current!;
-
-      actions.updateScale({
-        anchorX: center.x,
-        anchorY: center.y,
-        scale: startScale * scale,
-      });
-    },
-    options: {
-      touchAction: state.isPannable ? 'none' : 'pan-x pan-y',
-      recognizers: {
-        pinch: {enable: true},
-      },
+      console.log('onPinch', ev);
     },
   };
+  const bind = useGesture(handlers as GestureHandlers, gestureConfig);
 
   return (
     <ContainWrapper
@@ -203,32 +206,35 @@ export function BentoPanZoomWithRef(
       contentClassName={styles.ampPanZoomWrapper}
       contentRef={containerRef}
     >
-      <Hammer {...hammerHandlers}>
-        <div
-          class={classNames(
-            styles.ampPanZoomContainer,
-            state.isPannable && styles.ampPanZoomPannable
-          )}
-        >
-          <div ref={contentRef}>
-            <div
-              class={classNames(
-                styles.ampPanZoomContent,
-                state.isDragging && styles.ampPanZoomDragging
-              )}
-              style={panZoomStyles}
-              onPointerDown={(ev) => {
-                if (state.isPannable) {
-                  // Prevent images from being dragged, etc:
-                  ev.preventDefault();
-                }
-              }}
-            >
-              {children}
-            </div>
+      <div
+        class={classNames(
+          styles.ampPanZoomContainer,
+          state.isPannable && styles.ampPanZoomPannable
+        )}
+        style={{
+          touchAction: state.isPannable ? 'none' : 'pan-x pan-y',
+          userSelect: state.isPannable ? 'none' : null,
+        }}
+        {...bind()}
+      >
+        <div ref={contentRef}>
+          <div
+            class={classNames(
+              styles.ampPanZoomContent,
+              state.isDragging && styles.ampPanZoomDragging
+            )}
+            style={panZoomStyles}
+            onPointerDown={(ev) => {
+              if (state.isPannable) {
+                // Prevent images from being dragged, etc:
+                ev.preventDefault();
+              }
+            }}
+          >
+            {children}
           </div>
         </div>
-      </Hammer>
+      </div>
 
       {controls && (
         <button
