@@ -137,11 +137,13 @@ export function BentoPanZoomWithRef(
     transform: translate(state.posX, state.posY) + cssScale(state.scale),
   };
 
+  const initialStateRef = useRef(state);
   const lastTapTime = useRef(0);
   const handlers: Partial<UserHandlers> = {
     onDragStart() {
       if (state.isPannable) {
         actions.draggingStart();
+        initialStateRef.current = state;
       }
     },
     onDragEnd() {
@@ -174,27 +176,58 @@ export function BentoPanZoomWithRef(
         return;
       }
       const [deltaX, deltaY] = ev.movement;
-      const [initialX, initialY] = ev.memo || [state.posX, state.posY];
+
+      const {posX: initialX, posY: initialY} = initialStateRef.current;
 
       actions.transform({
         posX: initialX + deltaX,
         posY: initialY + deltaY,
       });
-
-      if (ev.first) {
-        // This return value is accessed later via `ev.memo`
-        return [initialX, initialY];
-      }
     },
 
     onPinchStart: () => {
       actions.draggingStart();
+      initialStateRef.current = state;
     },
     onPinchEnd: () => {
       actions.draggingRelease();
     },
     onPinch: (ev) => {
-      console.log('onPinch', ev);
+      const [clientX, clientY] = ev.origin;
+      const [scale] = ev.movement;
+      const [initialClientX, initialClientY] = ev.memo || [clientX, clientY];
+
+      const {anchorX, anchorY} = getElementPosition(
+        initialClientX,
+        initialClientY,
+        containerRef.current!
+      );
+
+      const {
+        posX: initialX,
+        posY: initialY,
+        scale: initialScale,
+      } = initialStateRef.current;
+
+      const newScale = scale * initialScale;
+
+      // Reset position before scaling:
+      actions.transform({
+        posX: initialX,
+        posY: initialY,
+        scale: initialScale,
+      });
+      // Zoom in on anchor:
+      actions.updateScale({
+        anchorX,
+        anchorY,
+        scale: newScale,
+      });
+
+      if (ev.first) {
+        // Store the initial origin as `ev.memo`:
+        return ev.origin;
+      }
     },
   };
   const bind = useGesture(handlers as GestureHandlers, gestureConfig);
