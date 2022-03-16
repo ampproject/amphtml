@@ -1343,9 +1343,8 @@ export class AmpStoryPage extends AMP.BaseElement {
   hasVideoWithCaptions_() {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
     return waitForElementsWithUnresolvedAudio(this.element).then(() =>
-      Array.prototype.some.call(
-        ampVideoEls,
-        (video) => !!video.querySelector('track')
+      Array.prototype.some.call(ampVideoEls, (video) =>
+        video.querySelector('track')
       )
     );
   }
