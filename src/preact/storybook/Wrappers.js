@@ -8,7 +8,7 @@ export default {
 
 export const wrapper = ({ariaLabel, asProp, className, ...args}) => {
   return (
-    <Wrapper as={asProp} class={className} aria-label={ariaLabel} {...args}>
+    <Wrapper {...args} as={asProp} class={className} aria-label={ariaLabel}>
       content
     </Wrapper>
   );
@@ -36,10 +36,10 @@ wrapper.argTypes = {
 export const containWrapper = ({ariaLabel, asProp, className, ...args}) => {
   return (
     <ContainWrapper
+      {...args}
       as={asProp}
       class={className}
       aria-label={ariaLabel}
-      {...args}
     >
       content
     </ContainWrapper>
