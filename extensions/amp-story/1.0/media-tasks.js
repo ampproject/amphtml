@@ -241,9 +241,13 @@ export class UnmuteTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    mediaEl.muted = false;
-    mediaEl.removeAttribute('muted');
-    return Promise.resolve();
+    if (mediaEl.closest('amp-story-page')?.hasAttribute('active')) {
+      mediaEl.muted = false;
+      mediaEl.removeAttribute('muted');
+      return Promise.resolve();
+    }
+    const reason = 'UnmuteTask canceled: Cannot unmute media on inactive page';
+    return Promise.reject(new Error(reason));
   }
 }
 
