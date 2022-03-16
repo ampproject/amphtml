@@ -35,7 +35,7 @@ export function selectDate(wrapper, date, formatDate) {
 }
 
 export function getSelectedDate(wrapper) {
-  return wrapper.find('[aria-label="Calendar"]').last().prop('data-date');
+  return wrapper.find('[aria-label="Calendar"]').prop('data-date');
 }
 
 export function isCalendarVisible(wrapper) {
