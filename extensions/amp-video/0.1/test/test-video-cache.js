@@ -496,7 +496,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
   });
 
   describe('captions_url field', async () => {
-    it('should append track element if the cache responds with captions_url', async () => {
+    it.only('should append track element if the cache responds with captions_url', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
           Promise.resolve({
@@ -526,8 +526,10 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       videoEl.appendChild(<track />);
       await fetchCachedSources(videoEl, env.ampdoc);
 
-      const trackEl = videoEl.querySelector('track');
-      expect(trackEl).to.exist;
+      const trackEl = videoEl.querySelector(
+        'track[src="captions_url_response.vtt"]'
+      );
+      expect(trackEl).to.not.exist;
     });
     it('should not append track element if captions_url does not exist', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
