@@ -1363,6 +1363,7 @@ export class AmpStory extends AMP.BaseElement {
         if (this.pageAfterGranted_) {
           this.showSubscriptionsDialog_();
         } else {
+          // If the target page is the paywall page, show dialog after delay.
           this.paywallTimeout_ = setTimeout(() => {
             this.pageAfterGranted_ = targetPageId;
             this.showSubscriptionsDialog_();
