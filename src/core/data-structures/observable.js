@@ -74,9 +74,6 @@ export class Observable {
       handler(opt_event);
     }
     this.iterating_ = false;
-    for (const handler of this.handlersToRemove_) {
-      removeItem(this.handlers_, handler);
-    }
     if (this.handlersToRemove_.size) {
       remove(this.handlers_, (handler) => this.handlersToRemove_.has(handler));
       this.handlersToRemove_.clear();
