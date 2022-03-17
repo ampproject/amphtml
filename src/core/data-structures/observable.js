@@ -1,4 +1,4 @@
-import {removeItem} from '#core/types/array';
+import {remove, removeItem} from '#core/types/array';
 
 /**
  * This class helps to manage observers. Observers can be added, removed or
@@ -13,8 +13,8 @@ export class Observable {
     /** @type {?Array<function(TYPE=):void>} */
     this.handlers_ = null;
 
-    /** @type {!Array<function(TYPE=):void>} */
-    this.handlersToRemove_ = [];
+    /** @type {!Set<function(TYPE=):void>} */
+    this.handlersToRemove_ = new Set();
 
     /** @type {boolean} */
     this.iterating_ = false;
@@ -45,7 +45,7 @@ export class Observable {
       return;
     }
     if (this.iterating_) {
-      this.handlersToRemove_.push(handler);
+      this.handlersToRemove_.add(handler);
     } else {
       removeItem(this.handlers_, handler);
     }
@@ -76,6 +76,10 @@ export class Observable {
     this.iterating_ = false;
     for (const handler of this.handlersToRemove_) {
       removeItem(this.handlers_, handler);
+    }
+    if (this.handlersToRemove_.size) {
+      remove(this.handlers_, (handler) => this.handlersToRemove_.has(handler));
+      this.handlersToRemove_.clear();
     }
   }
 
