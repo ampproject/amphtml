@@ -1330,7 +1330,7 @@ describes.realWin(
       });
     });
 
-    describe.only('amp-story-subscriptions navigation', () => {
+    describe('amp-story-subscriptions navigation', () => {
       let subscriptionsEl;
       let storeService;
 
