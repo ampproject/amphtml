@@ -9,16 +9,13 @@ import type {ComponentChildren, Ref} from 'preact';
 import {scale as cssScale, px, translate} from '#core/dom/style';
 
 import * as Preact from '#preact';
-import {useEffect, useImperativeHandle, useRef} from '#preact';
-import {Children, forwardRef} from '#preact/compat';
+import {useImperativeHandle, useRef} from '#preact';
+import {forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {useResizeObserver} from '#preact/hooks/useResizeObserver';
-import {logger} from '#preact/logger';
 
 import {useStyles} from './component.jss';
 import {usePanZoomState} from './hooks/usePanZoomState';
-
-const TAG = 'amp-pan-zoom';
 
 const DOUBLE_TAP_TIME = 500; // Maximum time between tap starts
 
@@ -28,15 +25,6 @@ const gestureConfig: Omit<UserGestureConfig, 'target'> = {
     tapsThreshold: 10,
   },
 };
-
-const ELIGIBLE_TAGS = new Set([
-  'svg',
-  'div',
-  'img',
-  // 'AMP-IMG',
-  // 'AMP-LAYOUT',
-  // 'AMP-SELECTOR',
-]);
 
 export type BentoPanZoomProps = {
   children?: ComponentChildren;
@@ -84,15 +72,6 @@ export function BentoPanZoomWithRef(
     ...rest
   } = props;
   const styles = useStyles();
-
-  // Warn if there are too many children:
-  useEffect(() => {
-    const childrenArray = Children.toArray(children);
-    if (childrenArray.length !== 1) {
-      // this should also potentially check child types?
-      logger.error(TAG, 'Component should only have one child');
-    }
-  }, [children]);
 
   const [state, actions] = usePanZoomState({
     initialX,

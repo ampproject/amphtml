@@ -73,7 +73,6 @@ export class Gestures {
    * @param {!Element} element
    * @param {boolean} shouldNotPreventDefault
    * @param {boolean} shouldStopPropagation
-   * @param {function} PassClass
    */
   constructor(
     element,
