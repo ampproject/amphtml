@@ -12,6 +12,7 @@
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
+
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
@@ -45,6 +46,7 @@ import {isEsm} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
 import {map} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
 import {parseQueryString} from '#core/types/string/url';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
@@ -312,13 +314,15 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {boolean} whether the styles were rewritten */
     this.didRewriteStyles_ = false;
 
-    /** @private {boolean} whether blocking on pending subscriptions state */
-    this.pendingSubscriptionsState_ = false;
+    /**
+     * @private {?string} the page id to navigate to after receiving a granted state
+     */
+    this.pageAfterGranted_ = null;
 
-    /** @private {?Deferred} A promise that is resolved once the subscription state is received */
-    this.subscriptionsStatePromise_ = null;
+    /** @private {!Deferred} a promise that is resolved once the subscription state is received */
+    this.subscriptionsStatePromise_ = new Deferred();
 
-    /** @private {?number} The timeout ID for the paywall timer */
+    /** @private {?number} the timeout ID for the paywall timer */
     this.paywallTimeout_ = null;
   }
 
@@ -366,6 +370,7 @@ export class AmpStory extends AMP.BaseElement {
         'en-xa',
         createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
       );
+    this.registerInlineLocalizationStrings_();
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
@@ -385,8 +390,6 @@ export class AmpStory extends AMP.BaseElement {
       );
       page.setAttribute('active', '');
     }
-
-    this.subscriptionsStatePromise_ = new Deferred();
 
     this.initializeListeners_();
     this.initializePageIds_();
@@ -735,9 +738,24 @@ export class AmpStory extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(StateProperty.SUBSCRIPTIONS_STATE, () => {
-      this.subscriptionsStatePromise_.resolve();
-    });
+    this.storeService_.subscribe(
+      StateProperty.SUBSCRIPTIONS_STATE,
+      (subscriptionsState) => {
+        this.subscriptionsStatePromise_.resolve();
+        if (subscriptionsState === SubscriptionsState.GRANTED) {
+          this.hideSubscriptionsDialog_();
+        }
+      }
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
+      (dialogState) => {
+        if (!dialogState) {
+          this.onHideSubscriptionsDialog_();
+        }
+      }
+    );
 
     this.win.document.addEventListener(
       'keydown',
@@ -1313,49 +1331,49 @@ export class AmpStory extends AMP.BaseElement {
     const subscriptionsState = this.storeService_.get(
       StateProperty.SUBSCRIPTIONS_STATE
     );
-    if (
-      isExperimentOn(this.win, 'amp-story-subscriptions') &&
-      this.isPaywallStory_()
-    ) {
+    if (this.isPaywallStory_()) {
       if (
         pageIndex >= PAYWALL_PAGE_INDEX &&
         subscriptionsState !== SubscriptionsState.GRANTED
       ) {
-        // Hit a blocked page.
         if (subscriptionsState === SubscriptionsState.UNKNOWN) {
-          if (this.pendingSubscriptionsState_) {
+          return this.blockOnPendingSubscriptionsState_(
+            targetPageId,
+            direction
+          );
+        }
+
+        // Attempt to navigate to the locked pages after the paywall page.
+        if (pageIndex > PAYWALL_PAGE_INDEX) {
+          this.pageAfterGranted_ = targetPageId;
+
+          // Show the paywall immediately if the active page is the paywall page.
+          if (this.isOnPaywallPage_()) {
+            this.showSubscriptionsDialog_();
             return Promise.resolve();
           }
-          // Block while waiting for entitlements.
-          this.pendingSubscriptionsState_ = true;
-          return this.subscriptionsStatePromise_.promise.then(() => {
-            this.pendingSubscriptionsState_ = false;
-            return this.switchTo_(targetPageId, direction);
-          });
+
+          // Redirect to the paywall page.
+          return this.switchTo_(
+            this.pages_[PAYWALL_PAGE_INDEX].element.id,
+            direction
+          );
+        }
+
+        if (this.pageAfterGranted_) {
+          this.showSubscriptionsDialog_();
         } else {
-          // Show the paywall if the access is not granted.
-          if (pageIndex === PAYWALL_PAGE_INDEX) {
-            this.paywallTimeout_ = setTimeout(() => {
-              this.storeService_.dispatch(
-                Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-                true
-              );
-            }, PAYWALL_DELAY_DURATION);
-          } else {
-            this.storeService_.dispatch(
-              Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-              true
-            );
-            return Promise.resolve();
-          }
+          // If the target page is the paywall page, show dialog after delay.
+          this.paywallTimeout_ = setTimeout(() => {
+            this.pageAfterGranted_ = targetPageId;
+            this.showSubscriptionsDialog_();
+            this.paywallTimeout_ = null;
+          }, PAYWALL_DELAY_DURATION);
         }
       } else {
-        // Reset paywall UI if visting a non-blocked page.
-        this.paywallTimeout_ && clearTimeout(this.paywallTimeout_);
-        this.storeService_.dispatch(
-          Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-          false
-        );
+        // Hide paywall UI if visting a non-blocked page, e.g. navigate back to the previous story
+        // or to the blocked pages with granted status.
+        this.hideSubscriptionsDialog_();
       }
     }
 
@@ -1530,6 +1548,72 @@ export class AmpStory extends AMP.BaseElement {
         toggle(this.element, true);
       }
     });
+  }
+
+  /** @private */
+  onHideSubscriptionsDialog_() {
+    this.paywallTimeout_ && clearTimeout(this.paywallTimeout_);
+    this.paywallTimeout_ = null;
+    if (
+      this.pageAfterGranted_ &&
+      this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
+        SubscriptionsState.GRANTED
+    ) {
+      this.switchTo_(this.pageAfterGranted_, NavigationDirection.NEXT);
+    }
+    this.pageAfterGranted_ = null;
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isPaywallStory_() {
+    return (
+      isExperimentOn(this.win, 'amp-story-subscriptions') &&
+      this.element.querySelector('amp-story-subscriptions') != null
+    );
+  }
+
+  /**
+   * Block while waiting to resolve subscriptions state.
+   * @param {string} targetPageId
+   * @param {!NavigationDirection} direction
+   * @return {!Promise}
+   * @private
+   */
+  blockOnPendingSubscriptionsState_(targetPageId, direction) {
+    return this.subscriptionsStatePromise_.promise.then(() => {
+      return this.switchTo_(targetPageId, direction);
+    });
+  }
+
+  /**
+   * @private
+   */
+  showSubscriptionsDialog_() {
+    this.storeService_.dispatch(
+      Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+      true
+    );
+  }
+
+  /**
+   * @private
+   */
+  hideSubscriptionsDialog_() {
+    this.storeService_.dispatch(
+      Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+      false
+    );
+  }
+
+  /**
+   *
+   * @return {boolean}
+   */
+  isOnPaywallPage_() {
+    return this.getPageIndex(this.activePage_) === PAYWALL_PAGE_INDEX;
   }
 
   /**
@@ -2534,11 +2618,27 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @private
-   * @return {boolean}
+   * If there are inline localization strings, register as current document language.
    */
-  isPaywallStory_() {
-    return this.element.querySelector('amp-story-subscriptions') != null;
+  registerInlineLocalizationStrings_() {
+    const inlineStringsEl = this.win.document.querySelector(
+      'script[amp-localization="amp-story"]'
+    );
+    if (
+      inlineStringsEl?.getAttribute('i-amphtml-version') !==
+      getMode(this.win).rtvVersion
+    ) {
+      return;
+    }
+    const stringsOrNull = tryParseJson(inlineStringsEl.textContent);
+    if (!stringsOrNull) {
+      return;
+    }
+    const localizationService = getLocalizationService(this.element);
+    localizationService.registerLocalizedStringBundle(
+      localizationService.getLanguageCodesForElement(this.element)[0],
+      stringsOrNull
+    );
   }
 }
 
