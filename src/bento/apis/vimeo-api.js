@@ -37,7 +37,7 @@ export const VIMEO_EVENTS = {
  */
 export function getVimeoIframeSrc(videoid, autoplay, doNotTrack) {
   const paramParts = videoid.split('?h=');
-  let identifier = encodeURIComponent(videoid)
+  let identifier = encodeURIComponent(videoid);
 
   if (paramParts.length > 1) {
     const encoded = paramParts.map((part) => {
