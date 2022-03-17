@@ -14,8 +14,6 @@ import {
   SubscriptionsState,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {SubscriptionService} from '../../../amp-subscriptions/0.1/amp-subscriptions';
-import {Dialog} from '../../../amp-subscriptions/0.1/dialog';
-import {Entitlement} from '../../../amp-subscriptions/0.1/entitlement';
 import {AmpStorySubscriptions} from '../amp-story-subscriptions';
 
 describes.realWin(
