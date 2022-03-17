@@ -77,11 +77,10 @@ export function BentoPanZoomWithRef(
   const {
     children,
     controls = true,
-    // These are here so they will be omitted from '...rest'
-    initialScale, // eslint-disable-line @typescript-eslint/no-unused-vars
-    initialX, // eslint-disable-line @typescript-eslint/no-unused-vars
-    initialY, // eslint-disable-line @typescript-eslint/no-unused-vars
-    maxScale, // eslint-disable-line @typescript-eslint/no-unused-vars
+    initialScale,
+    initialX,
+    initialY,
+    maxScale,
     ...rest
   } = props;
   const styles = useStyles();
@@ -95,7 +94,14 @@ export function BentoPanZoomWithRef(
     }
   }, [children]);
 
-  const [state, actions] = usePanZoomState(props);
+  const [state, actions] = usePanZoomState({
+    initialX,
+    initialY,
+    initialScale,
+    maxScale,
+  });
+  const isPannable = state.scale !== 1;
+  const canZoom = state.scale < state.maxScale;
 
   const contentRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -141,7 +147,7 @@ export function BentoPanZoomWithRef(
   const lastTapTime = useRef(0);
   const handlers: Partial<UserHandlers> = {
     onDragStart() {
-      if (state.isPannable) {
+      if (isPannable) {
         actions.draggingStart();
         initialStateRef.current = state;
       }
@@ -172,7 +178,7 @@ export function BentoPanZoomWithRef(
       }
 
       // Let's pan!
-      if (!state.isPannable) {
+      if (!isPannable) {
         return;
       }
       const [deltaX, deltaY] = ev.movement;
@@ -237,28 +243,23 @@ export function BentoPanZoomWithRef(
       {...rest}
       layout
       contentClassName={styles.ampPanZoomWrapper}
-      contentRef={containerRef}
     >
       <div
-        class={classNames(
-          styles.ampPanZoomContainer,
-          state.isPannable && styles.ampPanZoomPannable
-        )}
-        style={{
-          touchAction: state.isPannable ? 'none' : 'pan-x pan-y',
-          userSelect: state.isPannable ? 'none' : null,
-        }}
+        data-test-id="container"
+        ref={containerRef}
+        class={classNames(styles.ampPanZoomContainer, isPannable && 'pannable')}
         {...bind()}
       >
         <div ref={contentRef}>
           <div
+            data-test-id="content"
             class={classNames(
               styles.ampPanZoomContent,
               state.isDragging && styles.ampPanZoomDragging
             )}
             style={panZoomStyles}
             onPointerDown={(ev) => {
-              if (state.isPannable) {
+              if (isPannable) {
                 // Prevent images from being dragged, etc:
                 ev.preventDefault();
               }
@@ -271,9 +272,10 @@ export function BentoPanZoomWithRef(
 
       {controls && (
         <button
+          aria-label={canZoom ? 'Zoom in' : 'Zoom out'}
           class={classNames(
             styles.ampPanZoomButton,
-            state.canZoom ? styles.ampPanZoomInIcon : styles.ampPanZoomOutIcon
+            canZoom ? styles.ampPanZoomInIcon : styles.ampPanZoomOutIcon
           )}
           onClick={() => actions.updateScale({})}
         />

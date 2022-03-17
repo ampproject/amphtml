@@ -6,7 +6,6 @@ import {toggleExperiment} from '#experiments';
 import {cleanHtml} from '#testing/helpers/cleanHtml';
 import {waitFor} from '#testing/helpers/service';
 
-const CONTENTS = 'div > div';
 function snapshot(element) {
   if (!element) {
     return element;
@@ -43,14 +42,11 @@ describes.realWin(
     }
 
     function findParts(element) {
-      const contents = element.shadowRoot.querySelector(CONTENTS);
-      const contentWrapper = element.shadowRoot.querySelector(
-        'div > div > div > div > div'
-      );
+      // These selectors are pretty generic, but works for now:
       return {
-        hammerEl: contents.firstChild,
-        zoomButton: contents.querySelector('button'),
-        contentWrapper,
+        container: element.shadowRoot.querySelector('[data-test-id=container]'),
+        content: element.shadowRoot.querySelector('[data-test-id=content]'),
+        zoomButton: element.shadowRoot.querySelector('[aria-label="Zoom in"]'),
       };
     }
 
@@ -61,9 +57,9 @@ describes.realWin(
         </amp-pan-zoom>
       `);
 
-      expect(findParts(element).hammerEl).to.be.not.null;
+      expect(findParts(element).container).to.be.not.null;
+      expect(findParts(element).content).to.be.not.null;
       expect(findParts(element).zoomButton).to.be.not.null;
-      expect(findParts(element).contentWrapper).to.be.not.null;
     });
 
     it('initially renders the elements with appropriate zoom styles', async () => {
@@ -73,13 +69,10 @@ describes.realWin(
         </amp-pan-zoom>
       `);
 
-      expect(findParts(element).hammerEl.getAttribute('style')).to.equal(
-        'touch-action: pan-x pan-y; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);'
-      );
       expect(snapshot(findParts(element).zoomButton)).to.equal(
         `<button></button>`
       );
-      expect(findParts(element).contentWrapper.getAttribute('style')).to.equal(
+      expect(findParts(element).content.getAttribute('style')).to.equal(
         `transform-origin: 0px 0px; transform: translate(0px, 0px) scale(1);`
       );
     });
@@ -91,7 +84,7 @@ describes.realWin(
         </amp-pan-zoom>
       `);
 
-      expect(findParts(element).contentWrapper.getAttribute('style')).to.equal(
+      expect(findParts(element).content.getAttribute('style')).to.equal(
         `transform-origin: 0px 0px; transform: translate(555px, 444px) scale(3);`
       );
     });

@@ -11,6 +11,12 @@ const ampPanZoomContainer = {
   justifyContent: 'center',
   alignItems: 'center',
   overflow: 'hidden',
+  touchAction: 'pan-x pan-y',
+  '&.pannable': {
+    cursor: 'move',
+    touchAction: 'none',
+    userSelect: 'none',
+  },
 };
 
 const ampPanZoomContent = {
@@ -20,10 +26,6 @@ const ampPanZoomContent = {
 
 const ampPanZoomDragging = {
   transition: 'none',
-};
-
-const ampPanZoomPannable = {
-  cursor: 'move',
 };
 
 const ampPanZoomButton = {
@@ -56,7 +58,6 @@ const JSS = {
   ampPanZoomWrapper,
   ampPanZoomContent,
   ampPanZoomContainer,
-  ampPanZoomPannable,
   ampPanZoomDragging,
   ampPanZoomButton,
   ampPanZoomInIcon,

@@ -18,8 +18,6 @@ const initialState = {
   containerSize: {width: 0, height: 0},
   contentSize: {width: 0, height: 0},
 
-  isPannable: false,
-  canZoom: true,
   isDragging: false,
   allowExtent: false,
 };
@@ -116,8 +114,6 @@ const updateView = (
     posX: boundValueSpring(posX, minX, maxX, extent),
     posY: boundValueSpring(posY, minY, maxY, extent),
     scale: newScale,
-    isPannable: newScale !== 1,
-    canZoom: newScale !== state.maxScale,
   };
 };
 
@@ -128,17 +124,12 @@ function initReducer(config: PanZoomConfig): State {
     initialY = DEFAULT_ORIGIN,
     maxScale = DEFAULT_MAX_SCALE,
   } = config;
-  const state = {
+  return {
     ...initialState,
     posX: Number(initialX),
     posY: Number(initialY),
     scale: Number(initialScale),
     maxScale: Number(maxScale),
-  };
-  return {
-    ...state,
-    // Ensure the view is within bounds:
-    ...updateView(state, state),
   };
 }
 
@@ -198,7 +189,7 @@ export function usePanZoomState(config: PanZoomConfig) {
             anchorY = state.containerSize.height / 2,
             scale = state.scale === state.maxScale
               ? state.minScale
-              : state.scale + 1,
+              : Math.floor(state.scale) + 1,
           } = payload;
           return {
             ...state,
