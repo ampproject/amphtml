@@ -170,35 +170,5 @@ describes.realWin(
         SubscriptionsState.GRANTED
       );
     });
-
-    it('should hide the paywall once the new entitlement from subscription service resolves and has the status granted', async () => {
-      const dialog = new Dialog(env.ampdoc);
-      const dialogSpy = env.sandbox.spy(dialog, 'close');
-      env.sandbox.stub(subscriptionService, 'getDialog').returns(dialog);
-
-      storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
-      await nextTick();
-
-      // Paywall is shown
-      storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE, true);
-      storeService.dispatch(
-        Action.TOGGLE_SUBSCRIPTIONS_STATE,
-        SubscriptionsState.BLOCKED
-      );
-
-      subscriptionService.resolveEntitlementsToStore_(
-        'random_platform',
-        new Entitlement({
-          service: 'platform1',
-          granted: true,
-        })
-      );
-      await nextTick();
-
-      expect(storySubscriptions.element).to.not.have.class(
-        'i-amphtml-story-subscriptions-visible'
-      );
-      expect(dialogSpy).to.be.calledOnce;
-    });
   }
 );

@@ -82,11 +82,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
       (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
     );
-    this.storeService_.subscribe(
-      StateProperty.SUBSCRIPTIONS_STATE,
-      (subscriptionsState) =>
-        this.onSubscriptionsStateChange_(subscriptionsState)
-    );
   }
 
   /**
@@ -108,22 +103,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
     } else {
       this.subscriptionService_.getDialog().close();
-    }
-  }
-
-  /**
-   * @param {SubscriptionsState} subscriptionsState
-   * @private
-   */
-  onSubscriptionsStateChange_(subscriptionsState) {
-    if (
-      subscriptionsState === SubscriptionsState.GRANTED &&
-      this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
-    ) {
-      this.storeService_.dispatch(
-        Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-        false
-      );
     }
   }
 }
