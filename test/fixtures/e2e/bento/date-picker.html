@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Bento Date Picker</title>
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-date-picker-1.0.js"
+    ></script>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+
+      section + section {
+        margin-top: 3rem;
+      }
+
+      section {
+        padding: 0 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <section>
+      <h1>Single Date Picker</h1>
+      <bento-date-picker
+        id="bento-single-date-picker"
+        today="2022-01-01"
+        input-selector="#date"
+      >
+        <input type="text" id="date" placeholder="Choose a date" />
+        <button id="clear-single">Clear</button>
+        <button id="today">Today</button>
+        <button id="tomorrow">Tomorrow</button>
+      </bento-date-picker>
+    </section>
+    <section>
+      <h1>Date Range Picker</h1>
+      <bento-date-picker
+        id="bento-range-date-picker"
+        type="range"
+        today="2022-01-01"
+        start-input-selector="#start-date"
+        end-input-selector="#end-date"
+      >
+        <input type="text" id="start-date" placeholder="Start date" />
+        <input type="text" id="end-date" placeholder="End date" />
+        <button id="clear-range">Clear</button>
+        <button id="start-today">Set Start to Today</button>
+        <button id="end-today">Set End to Today</button>
+      </bento-date-picker>
+    </section>
+    <section>
+      <h1>Overlay Single Picker</h1>
+      <bento-date-picker
+        id="bento-single-date-picker-overlay"
+        today="2022-01-01"
+        input-selector="#date-overlay"
+        mode="overlay"
+      >
+        <input type="text" id="date-overlay" placeholder="Choose a date" />
+      </bento-date-picker>
+    </section>
+    <section>
+      <h1>Overlay Range Picker</h1>
+      <bento-date-picker
+        id="bento-range-date-picker-overlay"
+        type="range"
+        today="2022-01-01"
+        start-input-selector="#start-date-overlay"
+        end-input-selector="#end-date-overlay"
+        mode="overlay"
+      >
+        <input type="text" id="start-date-overlay" placeholder="Start date" />
+        <input type="text" id="end-date-overlay" placeholder="End date" />
+      </bento-date-picker>
+    </section>
+    <script>
+      async function runSingleDatePicker() {
+        const singleDatePicker = document.querySelector(
+          '#bento-single-date-picker'
+        );
+        await customElements.whenDefined('bento-date-picker');
+        const api = await singleDatePicker.getApi();
+
+        document.querySelector('#clear-single').onclick = () => api.clear();
+        document.querySelector('#today').onclick = () => api.today();
+        document.querySelector('#tomorrow').onclick = () => api.today(1);
+      }
+      async function runRangeDatepicker() {
+        const rangeDatePicker = document.querySelector(
+          '#bento-range-date-picker'
+        );
+        await customElements.whenDefined('bento-date-picker');
+        const api = await rangeDatePicker.getApi();
+
+        document.querySelector('#clear-range').onclick = () => api.clear();
+        document.querySelector('#start-today').onclick = () => api.startToday();
+        document.querySelector('#end-today').onclick = () => api.endToday();
+      }
+      runSingleDatePicker();
+      runRangeDatepicker();
+    </script>
+  </body>
+</html>

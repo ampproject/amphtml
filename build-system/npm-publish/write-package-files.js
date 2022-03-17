@@ -3,7 +3,8 @@
  * Creates npm package files for a given component and AMP version.
  */
 
-const [extension, ampVersion, extensionVersion] = process.argv.slice(2);
+const [extension, ampVersion, extensionVersion, corePkgVersion] =
+  process.argv.slice(2);
 const fastGlob = require('fast-glob');
 const marked = require('marked');
 const path = require('path');
@@ -14,10 +15,7 @@ const {getPackageDir, getSemver} = require('./utils');
 const {log} = require('../common/logging');
 const {stat, writeFile} = require('fs/promises');
 const {valid} = require('semver');
-const {
-  name: corePkgName,
-  version: corePkgVersion,
-} = require('../../src/bento/core/package.json');
+const {name: corePkgName} = require('../../src/bento/core/package.json');
 
 const packageName = getNameWithoutComponentPrefix(extension);
 
