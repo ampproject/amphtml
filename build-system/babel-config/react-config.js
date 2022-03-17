@@ -26,14 +26,14 @@ function mergeReactBabelConfig(config) {
  * @return {!Object}
  */
 function getReactUnminifiedConfig() {
-  return mergeReactBabelConfig(getUnminifiedConfig());
+  return mergeReactBabelConfig(getUnminifiedConfig('react'));
 }
 
 /**
  * @return {!Object}
  */
 function getReactMinifiedConfig() {
-  return mergeReactBabelConfig(getMinifiedConfig());
+  return mergeReactBabelConfig(getMinifiedConfig('react'));
 }
 
 module.exports = {

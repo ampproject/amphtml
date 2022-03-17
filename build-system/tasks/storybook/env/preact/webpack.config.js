@@ -21,9 +21,9 @@ module.exports = ({config}) => {
     modules,
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     alias: {
+      ...getRelativeAliasMap(rootDir),
       'react': 'preact/compat',
       'react-dom': 'preact/compat',
-      ...getRelativeAliasMap(rootDir),
     },
   };
   config.module = {

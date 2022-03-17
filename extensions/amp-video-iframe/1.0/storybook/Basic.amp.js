@@ -1,44 +1,40 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {boolean, number, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-video-iframe-1_0',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-video-iframe', version: '1.0'}],
     experiments: ['bento'],
   },
+  args: {
+    width: '640px',
+    height: '360px',
+
+    ariaLabel: 'Video Player',
+    autoplay: true,
+    controls: true,
+    mediasession: true,
+    noaudio: false,
+    loop: false,
+    poster: 'https://amp.dev/static/inline-examples/images/kitten-playing.png',
+    artist: '',
+    album: '',
+    artwork: '',
+    title: '',
+    src: 'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html',
+  },
 };
 
-const AmpVideoIframeWithKnobs = ({i, withPlaceholder, ...rest}) => {
+const AmpVideoIframeWithControls = ({
+  ariaLabel,
+  i,
+  withPlaceholder,
+  ...args
+}) => {
   const group = i ? `Player ${i + 1}` : undefined;
-
-  const width = text('width', '640px', group);
-  const height = text('height', '360px', group);
-
-  const ariaLabel = text('aria-label', 'Video Player');
-  const autoplay = boolean('autoplay', true);
-  const controls = boolean('controls', true);
-  const mediasession = boolean('mediasession', true);
-  const noaudio = boolean('noaudio', false);
-  const loop = boolean('loop', false);
-  const poster = text(
-    'poster',
-    'https://amp.dev/static/samples/img/amp-video-iframe-sample-placeholder.jpg'
-  );
-
-  const artist = text('artist', '');
-  const album = text('album', '');
-  const artwork = text('artwork', '');
-  const title = text('title', '');
-
-  const src = text(
-    'src',
-    'https://amp.dev/static/samples/files/amp-video-iframe-videojs.html'
-  );
-
   const placeholderAndFallback = withPlaceholder ? (
     <>
       <div placeholder style="background:red">
@@ -52,22 +48,10 @@ const AmpVideoIframeWithKnobs = ({i, withPlaceholder, ...rest}) => {
 
   return (
     <amp-video-iframe
-      {...rest}
+      id={group}
       aria-label={ariaLabel}
-      autoplay={autoplay}
-      controls={controls}
-      mediasession={mediasession}
-      noaudio={noaudio}
-      loop={loop}
-      poster={poster}
-      artist={artist}
-      album={album}
-      artwork={artwork}
-      title={title}
       layout="responsive"
-      width={width}
-      height={height}
-      src={src}
+      {...args}
     >
       {placeholderAndFallback}
     </amp-video-iframe>
@@ -86,15 +70,16 @@ const Spacer = ({height}) => {
   );
 };
 
-export const Default = () => {
-  const amount = number('Amount', 1, {}, 'Page');
-  const spacerHeight = text('Space', '80vh', 'Page');
-  const spaceAbove = boolean('Space above', false, 'Page');
-  const spaceBelow = boolean('Space below', false, 'Page');
-
+export const Default = ({
+  amount,
+  spaceAbove,
+  spaceBelow,
+  spacerHeight,
+  ...args
+}) => {
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<AmpVideoIframeWithKnobs key={i} i={i} />);
+    players.push(<AmpVideoIframeWithControls key={i} i={i} {...args} />);
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -109,16 +94,23 @@ export const Default = () => {
   );
 };
 
+Default.args = {
+  amount: 1,
+  spacerHeight: '80vh',
+  spaceAbove: false,
+  spaceBelow: false,
+};
+
 const ActionButton = ({children, ...props}) => (
   <button style={{flex: 1, margin: '0 4px'}} {...props}>
     {children}
   </button>
 );
 
-export const Actions = () => {
+export const Actions = ({...args}) => {
   return (
     <div style="max-width: 800px">
-      <AmpVideoIframeWithKnobs id="player" />
+      <AmpVideoIframeWithControls id="player" {...args} />
       <div
         style={{
           margin: '12px 0',
@@ -135,15 +127,18 @@ export const Actions = () => {
   );
 };
 
-export const WithPlaceholderAndFallback = () => {
-  const amount = number('Amount', 1, {}, 'Page');
-  const spacerHeight = text('Space', '80vh', 'Page');
-  const spaceAbove = boolean('Space above', false, 'Page');
-  const spaceBelow = boolean('Space below', false, 'Page');
-
+export const WithPlaceholderAndFallback = ({
+  amount,
+  spaceAbove,
+  spaceBelow,
+  spacerHeight,
+  ...args
+}) => {
   const players = [];
   for (let i = 0; i < amount; i++) {
-    players.push(<AmpVideoIframeWithKnobs key={i} i={i} placeholder={true} />);
+    players.push(
+      <AmpVideoIframeWithControls key={i} i={i} placeholder={true} {...args} />
+    );
     if (i < amount - 1) {
       players.push(<Spacer height={spacerHeight} />);
     }
@@ -156,4 +151,11 @@ export const WithPlaceholderAndFallback = () => {
       {spaceBelow && <Spacer height={spacerHeight} />}
     </>
   );
+};
+
+WithPlaceholderAndFallback.args = {
+  amount: 1,
+  spacerHeight: '80vh',
+  spaceAbove: false,
+  spaceBelow: false,
 };

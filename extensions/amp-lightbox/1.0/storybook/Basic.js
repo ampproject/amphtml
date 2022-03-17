@@ -1,15 +1,29 @@
-import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
+import {BentoLightbox} from '#bento/components/bento-lightbox/1.0/component';
 
 import * as Preact from '#preact';
 import {useRef} from '#preact';
 
-import {BentoLightbox} from '../component';
-import '../component.jss';
+import '#bento/components/bento-lightbox/1.0/component.jss';
 
 export default {
   title: 'Lightbox',
   component: BentoLightbox,
-  decorators: [withKnobs],
+  argTypes: {
+    animation: {
+      name: 'animation',
+      defaultValue: 'fade-in',
+      options: ['fade-in', 'fly-in-top', 'fly-in-bottom'],
+      control: {type: 'select'},
+    },
+    backgroundColor: {
+      name: 'backgroundColor',
+      control: {type: 'color'},
+    },
+    color: {
+      name: 'color',
+      control: {type: 'color'},
+    },
+  },
 };
 
 /**
@@ -153,20 +167,13 @@ function BentoLightboxWithActions({children, ...rest}) {
   );
 }
 
-export const _default = () => {
-  const animation = select('animation', [
-    'fade-in',
-    'fly-in-top',
-    'fly-in-bottom',
-  ]);
-  const backgroundColor = text('background color', '');
-  const color = text('font color', '');
+export const _default = ({backgroundColor, color, ...args}) => {
   return (
     <div>
       <BentoLightboxWithActions
         id="lightbox"
-        animation={animation}
         style={{backgroundColor, color}}
+        {...args}
       >
         <p>
           Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
@@ -177,23 +184,13 @@ export const _default = () => {
   );
 };
 
-export const scrollable = () => {
-  const animation = select('animation', [
-    'fade-in',
-    'fly-in-top',
-    'fly-in-bottom',
-  ]);
-  const backgroundColor = text('background color', 'rgba(0, 0, 0, 0.5)');
-  const color = text('font color', '');
-  const scrollable = boolean('scrollable', true);
-  const lotsOfText = boolean('lots of text?', true);
+export const scrollable = ({backgroundColor, color, lotsOfText, ...args}) => {
   return (
     <div>
       <BentoLightboxWithActions
         id="lightbox"
-        animation={animation}
         style={{backgroundColor, color}}
-        scrollable={scrollable}
+        {...args}
       >
         <p>
           Dessert tootsie roll marzipan pastry. Powder powder jelly beans
@@ -327,4 +324,27 @@ export const scrollable = () => {
       </BentoLightboxWithActions>
     </div>
   );
+};
+
+scrollable.args = {
+  scrollable: true,
+  lotsOfText: true,
+};
+
+scrollable.argtypes = {
+  animation: {
+    name: 'animation',
+    defaultValue: 'fade-in',
+    options: ['fade-in', 'fly-in-top', 'fly-in-bottom'],
+    control: {type: 'select'},
+  },
+  backgroundColor: {
+    name: 'backgroundColor',
+    control: {type: 'color'},
+    defaultValue: '',
+  },
+  color: {
+    name: 'color',
+    control: {type: 'color'},
+  },
 };

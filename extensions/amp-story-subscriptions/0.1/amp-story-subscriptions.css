@@ -35,3 +35,9 @@ amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
   opacity: 0.55 !important;
   transition: opacity 0.2s cubic-bezier(0, 0, 0.2, 1) !important;
 }
+
+/** Make the dialog wrapper from amp-subscriptions round corner. */
+amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
+  border-radius: 16px 16px 0px 0px !important;
+  font-family: Poppins, sans-serif !important;
+}
