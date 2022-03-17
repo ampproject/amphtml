@@ -12,6 +12,12 @@ export class Observable {
   constructor() {
     /** @type {?Array<function(TYPE=):void>} */
     this.handlers_ = null;
+
+    /** @type {!Array<function(TYPE=):void>} */
+    this.handlersToRemove_ = [];
+
+    /** @type {boolean} */
+    this.iterating_ = false;
   }
 
   /**
@@ -31,13 +37,18 @@ export class Observable {
 
   /**
    * Removes the observer from this instance.
+   * Can be called in a handler fired.
    * @param {function(TYPE=):void} handler Observer's instance.
    */
   remove(handler) {
     if (!this.handlers_) {
       return;
     }
-    removeItem(this.handlers_, handler);
+    if (this.iterating_) {
+      this.handlersToRemove_.push(handler);
+    } else {
+      removeItem(this.handlers_, handler);
+    }
   }
 
   /**
@@ -58,8 +69,13 @@ export class Observable {
     if (!this.handlers_) {
       return;
     }
+    this.iterating_ = true;
     for (const handler of this.handlers_) {
       handler(opt_event);
+    }
+    this.iterating_ = false;
+    for (const handler of this.handlersToRemove_) {
+      removeItem(this.handlers_, handler);
     }
   }
 
