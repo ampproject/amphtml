@@ -674,7 +674,9 @@ async function buildNpmBinaries(extDir, name, options) {
         ...(npm[mode].remap || {}),
         ...bentoRemaps,
       };
-      npm[mode].external = [...(npm[mode].external || []), ...bentoExternals];
+      npm[mode].external = [
+        ...new Set([...(npm[mode].external || []), ...bentoExternals]),
+      ];
     }
   }
   const binaries = Object.values(npm);
