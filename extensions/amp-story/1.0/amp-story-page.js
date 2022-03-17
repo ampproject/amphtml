@@ -1323,7 +1323,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the page has any videos with audio.
+   * Checks if the page has any videos that meet the requirement after receiving the video cache response.
    * @param {function<!Element, boolean>} func
    * @return {!Promise<boolean>}
    * @private
@@ -1689,17 +1689,21 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   initializeCaptionsListener_() {
-    if (!this.element.querySelector('track')) {
-      return;
-    }
-    this.storeService_.subscribe(
-      StateProperty.CAPTIONS_STATE,
-      (captionsOn) => {
-        if (this.isActive()) {
-          this.toggleCaptions_(captionsOn);
+    this.hasLoadedVideoWith_((video) => video.querySelector('track')).then(
+      (hasVideoWithCaptions) => {
+        if (!hasVideoWithCaptions) {
+          return;
         }
-      },
-      true
+        this.storeService_.subscribe(
+          StateProperty.CAPTIONS_STATE,
+          (captionsOn) => {
+            if (this.isActive()) {
+              this.toggleCaptions_(captionsOn);
+            }
+          },
+          true
+        );
+      }
     );
   }
 
