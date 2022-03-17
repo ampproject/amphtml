@@ -147,7 +147,6 @@ export const PageState = {
 export const NavigationDirection = {
   NEXT: 'next',
   PREVIOUS: 'previous',
-  FORCE: 'force',
 };
 
 /**

@@ -1342,12 +1342,11 @@ export class AmpStory extends AMP.BaseElement {
             direction
           );
         }
-        if (direction !== NavigationDirection.FORCE) {
-          this.pageAfterGranted_ = targetPageId;
-        }
 
         // Attempt to navigate to the locked pages after the paywall page.
         if (pageIndex > PAYWALL_PAGE_INDEX) {
+          this.pageAfterGranted_ = targetPageId;
+
           // Show the paywall immediately if the active page is the paywall page.
           if (this.isOnPaywallPage_()) {
             this.showSubscriptionsDialog_();
@@ -1357,14 +1356,15 @@ export class AmpStory extends AMP.BaseElement {
           // Redirect to the paywall page.
           return this.switchTo_(
             this.pages_[PAYWALL_PAGE_INDEX].element.id,
-            NavigationDirection.FORCE
+            direction
           );
         }
 
-        if (direction === NavigationDirection.FORCE) {
+        if (this.pageAfterGranted_) {
           this.showSubscriptionsDialog_();
         } else {
           this.paywallTimeout_ = setTimeout(() => {
+            this.pageAfterGranted_ = targetPageId;
             this.showSubscriptionsDialog_();
             this.paywallTimeout_ = null;
           }, PAYWALL_DELAY_DURATION);
