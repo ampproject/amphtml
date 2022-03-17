@@ -496,7 +496,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
   });
 
   describe('captions_url field', async () => {
-    it.only('should append track element if the cache responds with captions_url', async () => {
+    it('should append track element if the cache responds with captions_url', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
           Promise.resolve({
