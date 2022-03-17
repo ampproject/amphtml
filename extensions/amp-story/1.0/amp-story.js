@@ -319,11 +319,6 @@ export class AmpStory extends AMP.BaseElement {
      */
     this.pageAfterGranted_ = null;
 
-    /**
-     * @private {boolean} whether the story is redirecting to the paywall page from deeplinking to a locked page
-     */
-    this.isRedirectToPaywallPage_ = false;
-
     /** @private {!Deferred} a promise that is resolved once the subscription state is received */
     this.subscriptionsStatePromise_ = new Deferred();
 
@@ -1347,7 +1342,7 @@ export class AmpStory extends AMP.BaseElement {
             direction
           );
         }
-        if (!this.isRedirectToPaywallPage_) {
+        if (direction !== NavigationDirection.FORCE) {
           this.pageAfterGranted_ = targetPageId;
         }
 
@@ -1360,16 +1355,14 @@ export class AmpStory extends AMP.BaseElement {
           }
 
           // Redirect to the paywall page.
-          this.isRedirectToPaywallPage_ = true;
           return this.switchTo_(
             this.pages_[PAYWALL_PAGE_INDEX].element.id,
-            direction
+            NavigationDirection.FORCE
           );
         }
 
-        if (this.isRedirectToPaywallPage_) {
+        if (direction === NavigationDirection.FORCE) {
           this.showSubscriptionsDialog_();
-          this.isRedirectToPaywallPage_ = false;
         } else {
           this.paywallTimeout_ = setTimeout(() => {
             this.showSubscriptionsDialog_();
@@ -1560,11 +1553,14 @@ export class AmpStory extends AMP.BaseElement {
   onHideSubscriptionsDialog_() {
     this.paywallTimeout_ && clearTimeout(this.paywallTimeout_);
     this.paywallTimeout_ = null;
-    if (this.pageAfterGranted_ && this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) === SubscriptionsState.GRANTED
-      ) {
-        this.switchTo_(this.pageAfterGranted_, NavigationDirection.NEXT);
-      }
-     this.pageAfterGranted_ = null;
+    if (
+      this.pageAfterGranted_ &&
+      this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
+        SubscriptionsState.GRANTED
+    ) {
+      this.switchTo_(this.pageAfterGranted_, NavigationDirection.NEXT);
+    }
+    this.pageAfterGranted_ = null;
   }
 
   /**
