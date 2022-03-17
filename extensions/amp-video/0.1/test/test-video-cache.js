@@ -529,6 +529,21 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const trackEl = videoEl.querySelector('track');
       expect(trackEl).to.exist;
     });
+    it('should not append track element if captions_url does not exist', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const trackEl = videoEl.querySelector('track');
+      expect(trackEl).to.not.exist;
+    });
   });
 
   describe('web stories: inlined video', async () => {
