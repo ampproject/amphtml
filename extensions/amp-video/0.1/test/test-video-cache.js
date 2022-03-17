@@ -1,3 +1,4 @@
+import * as Preact from '#core/dom/jsx';
 import {createElementWithAttributes} from '#core/dom';
 
 import {Services} from '#service';
@@ -491,6 +492,42 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(videoEl).to.not.have.attribute('noaudio');
+    });
+  });
+
+  describe('captions_url field', async () => {
+    it('should append track element if the cache responds with captions_url', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'captions_url': 'captions_url_response.vtt',
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const trackEl = videoEl.querySelector('track');
+      expect(trackEl).to.exist;
+    });
+    it('should not append track element if video already has a track child', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'captions_url': 'captions_url_response.vtt',
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      videoEl.appendChild(<track />);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const trackEl = videoEl.querySelector('track');
+      expect(trackEl).to.exist;
     });
   });
 
