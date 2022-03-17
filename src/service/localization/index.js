@@ -119,12 +119,15 @@ export class LocalizationService {
    * @public
    */
   registerLocalizedStringBundles(localizedStringBundles) {
-    Object.entries(localizedStringBundles).forEach(([languageCode, bundle]) => {
+    Object.keys(localizedStringBundles).forEach(([languageCode]) => {
       const normalizedLangCode = languageCode.toLowerCase();
       if (!this.localizedStringBundles_[normalizedLangCode]) {
         this.localizedStringBundles_[normalizedLangCode] = {};
       }
-      Object.assign(this.localizedStringBundles_[normalizedLangCode], bundle);
+      Object.assign(
+        this.localizedStringBundles_[normalizedLangCode],
+        localizedStringBundles[languageCode]
+      );
     });
 
     this.bundleObserver_.fire();
