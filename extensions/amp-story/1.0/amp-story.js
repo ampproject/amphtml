@@ -1560,15 +1560,11 @@ export class AmpStory extends AMP.BaseElement {
   onHideSubscriptionsDialog_() {
     this.paywallTimeout_ && clearTimeout(this.paywallTimeout_);
     this.paywallTimeout_ = null;
-    if (this.pageAfterGranted_) {
-      if (
-        this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
-        SubscriptionsState.GRANTED
+    if (this.pageAfterGranted_ && this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) === SubscriptionsState.GRANTED
       ) {
         this.switchTo_(this.pageAfterGranted_, NavigationDirection.NEXT);
       }
-      this.pageAfterGranted_ = null;
-    }
+     this.pageAfterGranted_ = null;
   }
 
   /**
