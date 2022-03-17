@@ -16,8 +16,8 @@ export class Observable {
     /** @type {!Set<function(TYPE=):void>} */
     this.handlersToRemove_ = new Set();
 
-    /** @type {boolean} */
-    this.iterating_ = false;
+    /** @type {number} */
+    this.iteratingDepth_ = 0;
   }
 
   /**
@@ -44,7 +44,7 @@ export class Observable {
     if (!this.handlers_) {
       return;
     }
-    if (this.iterating_) {
+    if (this.iteratingDepth_ > 0) {
       this.handlersToRemove_.add(handler);
     } else {
       removeItem(this.handlers_, handler);
@@ -69,12 +69,12 @@ export class Observable {
     if (!this.handlers_) {
       return;
     }
-    this.iterating_ = true;
+    this.iteratingDepth_++;
     for (const handler of this.handlers_) {
       handler(opt_event);
     }
-    this.iterating_ = false;
-    if (this.handlersToRemove_.size) {
+    this.iteratingDepth_--;
+    if (this.handlersToRemove_.size && this.iteratingDepth_ == 0) {
       remove(this.handlers_, (handler) => this.handlersToRemove_.has(handler));
       this.handlersToRemove_.clear();
     }
