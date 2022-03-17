@@ -36,8 +36,19 @@ export const VIMEO_EVENTS = {
  * @return {string}
  */
 export function getVimeoIframeSrc(videoid, autoplay, doNotTrack) {
+  const paramParts = videoid.split('?h=');
+  let identifier = encodeURIComponent(videoid)
+
+  if (paramParts.length > 1) {
+    const encoded = paramParts.map((part) => {
+      return encodeURIComponent(part);
+    });
+
+    identifier = encoded.join('?h=');
+  }
+
   return addParamsToUrl(
-    `https://player.vimeo.com/video/${encodeURIComponent(videoid)}`,
+    `https://player.vimeo.com/video/${identifier}`,
     {
       'dnt': doNotTrack ? '1' : undefined,
       'muted': autoplay ? '1' : undefined,
