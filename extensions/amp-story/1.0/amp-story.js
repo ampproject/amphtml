@@ -12,6 +12,7 @@
 import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
+
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
@@ -44,6 +45,7 @@ import {isEsm} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
 import {map} from '#core/types/object';
+import {tryParseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
 import {parseQueryString} from '#core/types/string/url';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
@@ -85,7 +87,6 @@ import {AmpStoryHint} from './amp-story-hint';
 import {InfoDialog} from './amp-story-info-dialog';
 import {getLocalizationService} from './amp-story-localization-service';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
-import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryShare} from './amp-story-share';
 import {
   Action,
@@ -198,7 +199,7 @@ const DEFAULT_THEME_COLOR = '#202125';
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
@@ -344,6 +345,7 @@ export class AmpStory extends AMP.BaseElement {
         'en-xa',
         createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
       );
+    this.registerInlineLocalizationStrings_();
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
@@ -406,9 +408,6 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
     const performanceService = Services.performanceFor(this.win);
-    if (isExperimentOn(this.win, 'story-load-first-page-only')) {
-      performanceService.addEnabledExperiment('story-load-first-page-only');
-    }
     if (
       isExperimentOn(this.win, 'story-disable-animations-first-page') ||
       isPreviewMode(this.win) ||
@@ -973,6 +972,7 @@ export class AmpStory extends AMP.BaseElement {
     this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS).then(() => {
       this.markStoryAsLoaded_();
       this.initializeLiveStory_();
+      this.installLateExtensions_();
     });
 
     this.maybeLoadStoryEducation_();
@@ -1901,10 +1901,7 @@ export class AmpStory extends AMP.BaseElement {
     };
 
     this.mutateElement(() => {
-      if (
-        !isExperimentOn(this.win, 'story-load-first-page-only') ||
-        !prioritizeActivePage
-      ) {
+      if (!prioritizeActivePage) {
         return preloadAllPages();
       }
 
@@ -2454,6 +2451,49 @@ export class AmpStory extends AMP.BaseElement {
       this.element
     );
   }
+
+  /**
+   * Installs extensions that can be lazy-loaded.
+   * @private
+   */
+  installLateExtensions_() {
+    const extensionsFor = Services.extensionsFor(this.win);
+    const ampdoc = this.getAmpDoc();
+
+    if (this.element.querySelector('amp-story-auto-ads')) {
+      extensionsFor.installExtensionForDoc(ampdoc, 'amp-story-auto-ads');
+    }
+    if (this.element.querySelector('amp-story-auto-analytics')) {
+      extensionsFor.installExtensionForDoc(ampdoc, 'amp-story-auto-analytics');
+      extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
+    } else if (this.element.querySelector('amp-analytics')) {
+      extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
+    }
+  }
+
+  /**
+   * If there are inline localization strings, register as current document language.
+   */
+  registerInlineLocalizationStrings_() {
+    const inlineStringsEl = this.win.document.querySelector(
+      'script[amp-localization="amp-story"]'
+    );
+    if (
+      inlineStringsEl?.getAttribute('i-amphtml-version') !==
+      getMode(this.win).rtvVersion
+    ) {
+      return;
+    }
+    const stringsOrNull = tryParseJson(inlineStringsEl.textContent);
+    if (!stringsOrNull) {
+      return;
+    }
+    const localizationService = getLocalizationService(this.element);
+    localizationService.registerLocalizedStringBundle(
+      localizationService.getLanguageCodesForElement(this.element)[0],
+      stringsOrNull
+    );
+  }
 }
 
 AMP.extension('amp-story', '1.0', (AMP) => {
@@ -2462,5 +2502,4 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
-  AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

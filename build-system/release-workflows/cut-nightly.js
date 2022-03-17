@@ -33,12 +33,10 @@ async function getCommit(octokit) {
   );
 
   for (const {sha} of commits.data) {
-    const {'check_runs': checkRuns} = (
-      await octokit.rest.checks.listForRef({
-        ...params,
-        ref: sha,
-      })
-    ).data;
+    const checkRuns = await octokit.paginate(octokit.rest.checks.listForRef, {
+      ...params,
+      ref: sha,
+    });
     if (
       checkRuns
         .filter(({'external_id': id}) => id !== GITHUB_EXTERNAL_ID)

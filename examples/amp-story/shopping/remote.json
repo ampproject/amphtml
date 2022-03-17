@@ -1,12 +1,24 @@
 {
   "items": [
     {
+      "productUrl": "https://www.google.com",
       "productId": "art",
       "productTitle": "Abstract Art",
       "productBrand": "V. Artsy",
       "productPrice": 1200.0,
       "productPriceCurrency": "JPY",
-      "productImages": ["https://source.unsplash.com/BdVQU-NDtA8/500x500"]
+      "productImages": [
+        {
+          "url": "https://source.unsplash.com/BdVQU-NDtA8/500x500",
+          "alt": "art"
+        }
+      ],
+      "aggregateRating": {
+        "ratingValue": 4.4,
+        "reviewCount": 89,
+        "reviewUrl": "https://www.google.com"
+      },
+      "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
     }
   ]
 }

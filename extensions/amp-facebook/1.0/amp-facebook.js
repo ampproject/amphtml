@@ -1,3 +1,10 @@
+import {
+  BaseElement,
+  CommentsBaseElement,
+  LikeBaseElement,
+  PageBaseElement,
+} from '#bento/components/bento-facebook/1.0/base-element';
+
 import {dashToUnderline} from '#core/types/string';
 
 import {isExperimentOn} from '#experiments';
@@ -5,13 +12,6 @@ import {isExperimentOn} from '#experiments';
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {userAssert} from '#utils/log';
-
-import {
-  BaseElement,
-  CommentsBaseElement,
-  LikeBaseElement,
-  PageBaseElement,
-} from './base-element';
 
 import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 import {createLoaderLogo} from '../0.1/facebook-loader';
@@ -24,12 +24,12 @@ const PAGE_TAG = 'amp-facebook-page';
 const TYPE = 'facebook';
 
 class AmpFacebookBase extends setSuperClass(BaseElement, AmpPreactBaseElement) {
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     return createLoaderLogo(element);
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();
     const {win} = ampdoc;

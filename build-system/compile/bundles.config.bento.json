@@ -8,8 +8,136 @@
     }
   },
   {
+    "name": "bento-base-carousel",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-brightcove",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-dailymotion",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-facebook",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-inline-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-instagram",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "bento-jwplayer",
     "version": "1.0",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-lightbox",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-lightbox-gallery",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-reddit",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-social-share",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-soundcloud",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-twitter",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-video",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-video-iframe",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-vimeo",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
+    "name": "bento-youtube",
+    "version": "1.0",
+    "latestVersion": "0.1",
     "options": {
       "hasCss": true
     }

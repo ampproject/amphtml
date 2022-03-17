@@ -1,11 +1,10 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-lightbox-gallery-1_0',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [
@@ -13,6 +12,7 @@ export default {
       {name: 'amp-stream-gallery', version: '1.0'},
       {name: 'amp-lightbox-gallery', version: '1.0'},
     ],
+    argTypes: {},
     experiments: ['bento'],
   },
 };
