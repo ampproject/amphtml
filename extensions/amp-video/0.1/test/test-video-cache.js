@@ -1,5 +1,5 @@
-import * as Preact from '#core/dom/jsx';
 import {createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 import {installPerformanceService} from '#service/performance-impl';
