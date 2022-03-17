@@ -47,13 +47,10 @@ export function getVimeoIframeSrc(videoid, autoplay, doNotTrack) {
     identifier = encoded.join('?h=');
   }
 
-  return addParamsToUrl(
-    `https://player.vimeo.com/video/${identifier}`,
-    {
-      'dnt': doNotTrack ? '1' : undefined,
-      'muted': autoplay ? '1' : undefined,
-    }
-  );
+  return addParamsToUrl(`https://player.vimeo.com/video/${identifier}`, {
+    'dnt': doNotTrack ? '1' : undefined,
+    'muted': autoplay ? '1' : undefined,
+  });
 }
 
 /**
