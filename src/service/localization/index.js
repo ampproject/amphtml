@@ -91,7 +91,7 @@ export class LocalizationService {
      */
     this.localizedStringBundles_ = {};
 
-    /** Fires when new language bundles are created.
+    /** Fires when new language bundles are added.
      * @private @const {!Observable<string>}
      * */
     this.bundleObserver_ = new Observable();
@@ -119,7 +119,7 @@ export class LocalizationService {
    * @public
    */
   registerLocalizedStringBundles(localizedStringBundles) {
-    Object.keys(localizedStringBundles).forEach(([languageCode]) => {
+    Object.keys(localizedStringBundles).forEach((languageCode) => {
       const normalizedLangCode = languageCode.toLowerCase();
       if (!this.localizedStringBundles_[normalizedLangCode]) {
         this.localizedStringBundles_[normalizedLangCode] = {};
