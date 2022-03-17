@@ -947,7 +947,6 @@ export class AmpStory extends AMP.BaseElement {
     this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS).then(() => {
       this.markStoryAsLoaded_();
       this.initializeLiveStory_();
-      this.installLateExtensions_();
     });
 
     this.maybeLoadStoryEducation_();
@@ -2425,25 +2424,6 @@ export class AmpStory extends AMP.BaseElement {
       (e) => matches(e, 'a.i-amphtml-story-page-open-attachment[href]'),
       this.element
     );
-  }
-
-  /**
-   * Installs extensions that can be lazy-loaded.
-   * @private
-   */
-  installLateExtensions_() {
-    const extensionsFor = Services.extensionsFor(this.win);
-    const ampdoc = this.getAmpDoc();
-
-    if (this.element.querySelector('amp-story-auto-ads')) {
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-story-auto-ads');
-    }
-    if (this.element.querySelector('amp-story-auto-analytics')) {
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-story-auto-analytics');
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
-    } else if (this.element.querySelector('amp-analytics')) {
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
-    }
   }
 
   /**
