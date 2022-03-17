@@ -2530,6 +2530,7 @@ describes.repeated(
             let form;
             let ampForm;
             let redirectToValue;
+            let reloadSpy;
             const headersMock = {
               get: (header) => {
                 if (header == 'AMP-Redirect-To') {
@@ -2564,6 +2565,7 @@ describes.repeated(
               env.sandbox
                 .stub(ampForm.ssrTemplateHelper_, 'isEnabled')
                 .returns(false);
+              reloadSpy = env.sandbox.spy(ampForm, 'shouldReload_');
             });
 
             describe('AMP-Redirect-To', () => {
@@ -2581,6 +2583,81 @@ describes.repeated(
                   const {args} = navigateTo.firstCall;
                   expect(args[1]).to.equal('https://google.com/');
                   expect(args[2]).to.equal('AMP-Redirect-To');
+                });
+              });
+
+              it('should reload page when self redirecting', () => {
+                env.sandbox.stub(ampForm.xhr_, 'fetch').resolves(fetchResolve);
+                redirectToValue = window.location.href + '#dummy';
+
+                const submitActionPromise = ampForm.handleSubmitAction_(
+                  /* invocation */ {}
+                );
+                expect(navigateTo).not.to.be.called;
+
+                return submitActionPromise.then(() => {
+                  expect(navigateTo).to.be.calledOnce;
+                  const {args} = navigateTo.firstCall;
+                  expect(args[1]).to.equal(redirectToValue);
+                  expect(args[2]).to.equal('AMP-Redirect-To');
+                  expect(reloadSpy).to.be.calledOnce.and.returned(true);
+                });
+              });
+
+              it('should not reload page when self redirecting if anchor present in DOM', () => {
+                const element = createElement('div');
+                element.setAttribute('id', 'aaaa');
+                window.document.body.appendChild(element);
+                env.sandbox.stub(ampForm.xhr_, 'fetch').resolves(fetchResolve);
+                redirectToValue = window.location.href + '#aaaa';
+
+                const submitActionPromise = ampForm.handleSubmitAction_(
+                  /* invocation */ {}
+                );
+                expect(navigateTo).not.to.be.called;
+
+                return submitActionPromise.then(() => {
+                  expect(navigateTo).to.be.calledOnce;
+                  const {args} = navigateTo.firstCall;
+                  expect(args[1]).to.equal(redirectToValue);
+                  expect(args[2]).to.equal('AMP-Redirect-To');
+                  expect(reloadSpy).to.be.calledOnce.and.returned(false);
+                });
+              });
+
+              it('should not reload page when not self redirecting', () => {
+                env.sandbox.stub(ampForm.xhr_, 'fetch').resolves(fetchResolve);
+                redirectToValue = 'https://google.com/';
+
+                const submitActionPromise = ampForm.handleSubmitAction_(
+                  /* invocation */ {}
+                );
+                expect(navigateTo).not.to.be.called;
+
+                return submitActionPromise.then(() => {
+                  expect(navigateTo).to.be.calledOnce;
+                  const {args} = navigateTo.firstCall;
+                  expect(args[1]).to.equal(redirectToValue);
+                  expect(args[2]).to.equal('AMP-Redirect-To');
+                  expect(reloadSpy).to.be.calledOnce.and.returned(false);
+                });
+              });
+
+              it('should not reload page when hash is empty', () => {
+                env.sandbox.stub(ampForm.xhr_, 'fetch').resolves(fetchResolve);
+                redirectToValue = window.location.href + '#';
+
+                const submitActionPromise = ampForm.handleSubmitAction_(
+                  /* invocation */ {}
+                );
+                expect(navigateTo).not.to.be.called;
+
+                return submitActionPromise.then(() => {
+                  expect(navigateTo).to.be.calledOnce;
+                  const {args} = navigateTo.firstCall;
+                  expect(args[1]).to.equal(redirectToValue);
+                  expect(args[2]).to.equal('AMP-Redirect-To');
+                  expect(reloadSpy).to.be.calledOnce.and.returned(false);
                 });
               });
 

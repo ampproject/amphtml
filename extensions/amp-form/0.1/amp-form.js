@@ -1178,7 +1178,7 @@ export class AmpForm {
       navigator.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
 
       if (this.shouldReload_(redirectTo)) {
-        window.location.reload();
+        this.win_.location.reload();
       }
     }
   }
