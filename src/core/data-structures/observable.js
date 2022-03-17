@@ -58,7 +58,7 @@ export class Observable {
     if (!this.handlers_) {
       return;
     }
-    for (const handler of [...this.handlers_]) {
+    for (const handler of this.handlers_) {
       handler(opt_event);
     }
   }
