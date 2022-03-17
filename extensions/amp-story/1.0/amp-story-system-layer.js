@@ -508,7 +508,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.CAPTIONS_STATE,
-      (config) => this.onCaptionsState_(config),
+      (config) => this.onCaptionsStateUpdate_(config),
       true /* callToInitialize */
     );
 
@@ -654,7 +654,7 @@ export class SystemLayer {
    * Toggles whether the captions are active or not.
    * @param {boolean} captions
    */
-  onCaptionsState_(captions) {
+  onCaptionsStateUpdate_(captions) {
     toggleAttribute(this.systemLayerEl_, 'captions-on', captions);
   }
 

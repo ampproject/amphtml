@@ -512,7 +512,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
-      this.checkPageHasCaptions_();
+      this.togglePageCaptions_();
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
@@ -1355,7 +1355,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Checks if the page has any captions and toggles them.
    * @private
    */
-  checkPageHasCaptions_() {
+  togglePageCaptions_() {
     this.hasLoadedVideoWith_((video) => video.querySelector('track')).then(
       (hasVideoWithCaptions) => {
         this.storeService_.dispatch(
