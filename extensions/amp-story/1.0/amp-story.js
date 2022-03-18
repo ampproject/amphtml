@@ -1605,14 +1605,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   *
-   * @return {boolean}
-   */
-  isOnPaywallPage_() {
-    return this.getPageIndex(this.activePage_) === PAYWALL_PAGE_INDEX;
-  }
-
-  /**
    * Handles all key presses within the story.
    * @param {!Event} e The keydown event.
    * @private
