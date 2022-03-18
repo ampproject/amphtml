@@ -56,7 +56,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
 
     /** @private {!AmpElement} element */
     this.shoppingTagEl_ = null;
-
     /** @private {?Element} */
     this.pageEl_ = null;
   }

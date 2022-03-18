@@ -21,8 +21,6 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   let attachment;
   let outlinkEl;
   let outlink;
-  let analytics;
-  let pageEl;
   let storeService;
 
   beforeEach(() => {
@@ -30,7 +28,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
 
     // Set up the story.
     const storyEl = <amp-story></amp-story>;
-    pageEl = <amp-story-page></amp-story-page>;
+    const pageEl = <amp-story-page></amp-story-page>;
     win.document.body.appendChild(storyEl);
     storyEl.appendChild(pageEl);
 
@@ -44,7 +42,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
       return storeService;
     });
 
-    analytics = new StoryAnalyticsService(win, win.document.body);
+    const analytics = new StoryAnalyticsService(win, win.document.body);
     registerServiceBuilder(win, 'story-analytics', function () {
       return analytics;
     });
