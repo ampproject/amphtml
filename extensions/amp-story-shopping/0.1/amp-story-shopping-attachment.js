@@ -428,17 +428,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
                   backgroundImage: `url("${data['productImages'][0].url}")`,
                 }}
               ></div>
-<<<<<<< HEAD
-              <div class="i-amphtml-amp-story-shopping-plp-card-brand">
-                {data['productVendor']}
-              </div>
-=======
               {data['productVendor'] && (
                 <div class="i-amphtml-amp-story-shopping-plp-card-brand">
                   {data['productVendor']}
                 </div>
               )}
->>>>>>> main
               <div class="i-amphtml-amp-story-shopping-plp-card-title">
                 {data['productTitle']}
               </div>
