@@ -721,16 +721,6 @@ const forbiddenTermsGlobal = {
   },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
-  '@storybook/addon-knobs': {
-    message:
-      'The @storybook/addon-knobs package has been deprecated. Use Controls instead (`args` and `argTypes`). https://storybook.js.org/docs/react/essentials/controls',
-    allowlist: [
-      // TODO(#35923): Update existing files to use Controls instead.
-      'src/builtins/storybook/amp-layout.amp.js',
-      'src/preact/storybook/Context.js',
-      'src/preact/storybook/Wrappers.js',
-    ],
-  },
 };
 
 const bannedTermsHelpString =
