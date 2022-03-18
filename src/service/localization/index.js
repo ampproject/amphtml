@@ -155,9 +155,9 @@ export class LocalizationService {
    * Resolves with the localized string when the registered bundles contain them.
    * @param {!LocalizedStringId_Enum} localizedStringId
    * @return {!Promise{?string}}
-   * @private
+   * @public
    */
-  getLocalizedStringAsync_(localizedStringId) {
+  getLocalizedStringAsync(localizedStringId) {
     const languageCodes = this.getLanguageCodesForElement(this.element_);
 
     const localizedString = findLocalizedString(
@@ -180,23 +180,6 @@ export class LocalizationService {
           res(localizedString);
         }
       });
-    });
-  }
-
-  /**
-   * Localizes the text content of the element, or an attribute value if passed.
-   * @param {!Element} element
-   * @param {!LocalizedStringId_Enum} localizedStringId
-   * @param {?string=} attribute
-   * @return {!Promise}
-   */
-  localizeEl(element, localizedStringId, attribute = null) {
-    return this.getLocalizedStringAsync_(localizedStringId).then((val) => {
-      if (attribute === null) {
-        element.textContent = val;
-      } else {
-        element.setAttribute(attribute, val);
-      }
     });
   }
 }

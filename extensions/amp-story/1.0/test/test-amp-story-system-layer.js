@@ -49,6 +49,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
 
     env.sandbox.stub(Services, 'vsyncFor').returns({
       mutate: (fn) => fn(),
+      mutatePromise: (fn) => fn(),
     });
 
     systemLayer = new SystemLayer(win, win.document.body);
