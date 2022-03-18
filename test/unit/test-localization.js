@@ -1,7 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
 
-import * as Preact from '#preact';
-
 import {Services} from '#service';
 import {
   LocalizationService,
@@ -149,7 +147,7 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     });
   });
 
-  describe.only('localize element async', () => {
+  describe('localize element async', () => {
     beforeEach(() => {
       env.sandbox
         .stub(Services, 'vsyncFor')
