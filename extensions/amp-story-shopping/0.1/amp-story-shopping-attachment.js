@@ -138,6 +138,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         true
       );
 
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_SHOPPING_CTA_CLICKED,
+        false
+      );
+
       this.element['ANALYTICS_TAG_NAME'] = 'amp-story-shopping-tag';
 
       this.analyticsService_.triggerEvent(
@@ -154,6 +159,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.variableService_.onVariableUpdate(
         AnalyticsVariable.STORY_SHOPPING_CTA_CLICKED,
         true
+      );
+
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_SHOPPING_TAG_CLICKED,
+        false
       );
 
       this.analyticsService_.triggerEvent(
@@ -356,8 +366,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK,
-      null,
-      {'vars': {'storyShoppingConversionUrl': conversionURL}}
+      this.element
     );
   }
 
