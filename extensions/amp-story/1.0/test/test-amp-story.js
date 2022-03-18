@@ -1342,7 +1342,7 @@ describes.realWin(
         subscriptionsEl = win.document.createElement('amp-story-subscriptions');
         story.element.appendChild(subscriptionsEl);
 
-        // buildCallback() is implictly called by createStoryWithPages()
+        // buildCallback() is implicitly called by createStoryWithPages()
         await story.layoutCallback();
 
         const cover = story.getPageById(

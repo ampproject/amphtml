@@ -982,11 +982,24 @@ export class AmpStory extends AMP.BaseElement {
           new PaginationButtons(this);
         }
       })
-      .then(() =>
+      .then(() => {
+        // Enable paywall if required element found in DOM.
+        if (
+          isExperimentOn(this.win, 'amp-story-subscriptions') &&
+          this.element.querySelector('amp-story-subscriptions') != null &&
+          this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
+            SubscriptionsState.DISABLED
+        ) {
+          this.storeService_.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.PENDING
+          );
+        }
+
         // We need to call this.getInitialPageId_() again because the initial
         // page could've changed between the start of layoutStory_ and here.
-        this.switchTo_(this.getInitialPageId_(), NavigationDirection.NEXT)
-      )
+        this.switchTo_(this.getInitialPageId_(), NavigationDirection.NEXT);
+      })
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
           this.win,
@@ -1332,19 +1345,6 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    // Enable paywall if required element found in DOM.
-    if (
-      isExperimentOn(this.win, 'amp-story-subscriptions') &&
-      this.element.querySelector('amp-story-subscriptions') != null &&
-      this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
-        SubscriptionsState.DISABLED
-    ) {
-      this.storeService_.dispatch(
-        Action.TOGGLE_SUBSCRIPTIONS_STATE,
-        SubscriptionsState.PENDING
-      );
-    }
-
     const subscriptionsState = this.storeService_.get(
       StateProperty.SUBSCRIPTIONS_STATE
     );
@@ -1355,43 +1355,31 @@ export class AmpStory extends AMP.BaseElement {
       return this.blockOnPendingSubscriptionsState_(targetPageId, direction);
     }
 
-    // Attempt to navigate to the locked pages after the paywall page.
+    // Navigation to the locked pages after the paywall page should be redirected to the paywall page.
     if (
       pageIndex > PAYWALL_PAGE_INDEX &&
       subscriptionsState === SubscriptionsState.BLOCKED
     ) {
       this.pageAfterGranted_ = targetPageId;
-
-      // Show the paywall immediately if the active page is the paywall page.
-      if (this.isOnPaywallPage_()) {
-        this.showSubscriptionsDialog_();
-        return Promise.resolve();
-      }
-
-      // Redirect to the paywall page.
+      this.showSubscriptionsDialog_();
       return this.switchTo_(
         this.pages_[PAYWALL_PAGE_INDEX].element.id,
         direction
       );
     }
 
-    // Attempt to navigate to the paywall page.
     if (
       pageIndex === PAYWALL_PAGE_INDEX &&
       subscriptionsState === SubscriptionsState.BLOCKED
     ) {
-      if (this.pageAfterGranted_) {
+      // Navigation to the paywall page should show dialog after delay.
+      this.paywallTimeout_ = setTimeout(() => {
+        this.pageAfterGranted_ = targetPageId;
         this.showSubscriptionsDialog_();
-      } else {
-        // If the target page is the paywall page, show dialog after delay.
-        this.paywallTimeout_ = setTimeout(() => {
-          this.pageAfterGranted_ = targetPageId;
-          this.showSubscriptionsDialog_();
-          this.paywallTimeout_ = null;
-        }, PAYWALL_DELAY_DURATION);
-      }
+        this.paywallTimeout_ = null;
+      }, PAYWALL_DELAY_DURATION);
     } else {
-      // Hide paywall UI if visting a non-blocked page, e.g. navigate back to the previous page
+      // Hide paywall UI if visiting a non-blocked page, e.g. navigate back to the previous page
       // or to the blocked pages with granted status.
       this.hideSubscriptionsDialog_();
     }
