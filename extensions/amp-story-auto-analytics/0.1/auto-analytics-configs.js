@@ -79,10 +79,6 @@ export const buildGtagConfig = (gtagId) => ({
         'event_label': '${title}',
         'send_to': [gtagId],
       },
-      'storySpec': {
-        // Makes sure the event is only fired once.
-        'repeat': false,
-      },
     },
     'trackPageAttachmentOpen': {
       'on': 'story-open',
@@ -92,10 +88,6 @@ export const buildGtagConfig = (gtagId) => ({
         'event_category': '${title}',
         'event_label': '${title}',
         'send_to': [gtagId],
-      },
-      'storySpec': {
-        // Makes sure the event is only fired once.
-        'repeat': false,
       },
     },
     'storyShoppingPLPCardClick': {
@@ -107,10 +99,6 @@ export const buildGtagConfig = (gtagId) => ({
         'event_label': '${title}',
         'send_to': [gtagId],
       },
-      'storySpec': {
-        // Makes sure the event is only fired once.
-        'repeat': false,
-      },
     },
     'storyShoppingProductDetailsView': {
       'on': 'story-shopping-product-details-view',
@@ -120,10 +108,6 @@ export const buildGtagConfig = (gtagId) => ({
         'event_category': '${title}',
         'event_label': '${title}',
         'send_to': [gtagId],
-      },
-      'storySpec': {
-        // Makes sure the event is only fired once.
-        'repeat': false,
       },
     },
   },
