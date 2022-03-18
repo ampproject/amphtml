@@ -5,7 +5,6 @@ import {Keys_Enum} from '#core/constants/key-codes';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
-import * as Preact from '#core/dom/jsx';
 import {setImportantStyles} from '#core/dom/style';
 
 import {toggleExperiment} from '#experiments';
@@ -1980,79 +1979,13 @@ describes.realWin(
       });
     });
 
-    describe('lazy load non-critical extensions after first page is loaded', () => {
-      it('should install auto-ads if a config is provided', async () => {
-        await createStoryWithPages(2, ['cover', 'page-1']);
-        const extensionsFor = Services.extensionsFor(win);
-        const installSpy = env.sandbox.spy(
-          extensionsFor,
-          'installExtensionForDoc'
-        );
-        element.appendChild(<amp-story-auto-ads></amp-story-auto-ads>);
-        await story.layoutCallback();
-
-        // Signal that the first page finished loading.
-        await story.activePage_.element
-          .signals()
-          .whenSignal(CommonSignals_Enum.LOAD_END);
-
-        expect(installSpy).to.have.been.calledWith(
-          ampdoc,
-          'amp-story-auto-ads'
-        );
-      });
-
-      it('should install amp-analytics if a config is provided', async () => {
-        await createStoryWithPages(2, ['cover', 'page-1']);
-        const extensionsFor = Services.extensionsFor(win);
-        const installSpy = env.sandbox.spy(
-          extensionsFor,
-          'installExtensionForDoc'
-        );
-        element.appendChild(<amp-analytics></amp-analytics>);
-        await story.layoutCallback();
-
-        // Signal that the first page finished loading.
-        await story.activePage_.element
-          .signals()
-          .whenSignal(CommonSignals_Enum.LOAD_END);
-
-        expect(installSpy).to.have.been.calledWith(
-          env.sandbox.match.any,
-          'amp-analytics'
-        );
-      });
-
-      it('should install amp-analytics and auto-analytics if a config for auto-analytics is provided', async () => {
-        await createStoryWithPages(2, ['cover', 'page-1']);
-        const extensionsFor = Services.extensionsFor(win);
-        const installSpy = env.sandbox.spy(
-          extensionsFor,
-          'installExtensionForDoc'
-        );
-        element.appendChild(
-          <amp-story-auto-analytics></amp-story-auto-analytics>
-        );
-        await story.layoutCallback();
-
-        // Signal that the first page finished loading.
-        await story.activePage_.element
-          .signals()
-          .whenSignal(CommonSignals_Enum.LOAD_END);
-
-        expect(installSpy).to.have.been.calledWith(ampdoc, 'amp-analytics');
-        expect(installSpy).to.have.been.calledWith(
-          ampdoc,
-          'amp-story-auto-analytics'
-        );
-      });
-    });
-
     describe('localization', () => {
       beforeEach(() => {
         win.__AMP_MODE = {
           rtvVersion: '123',
         };
+        const performanceImpl = new Performance(env.win);
+        env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
       });
 
       it('should install the default english localizations', async () => {
@@ -2130,6 +2063,83 @@ describes.realWin(
         expect(localizationService.getLocalizedString('35')).to.be.equal(
           'Swipe up'
         );
+      });
+
+      describe('remote localization strings', () => {
+        beforeEach(() => {
+          toggleExperiment(env.win, 'story-remote-localization', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(env.win, 'story-remote-localization', false);
+        });
+
+        it('should fetch the localization strings for the default laguage from the cdn', async () => {
+          const fetchStub = env.sandbox
+            .stub(Services.xhrFor(env.win), 'fetchJson')
+            .resolves({
+              json: () => Promise.resolve({}),
+            });
+
+          await createStoryWithPages(1, ['cover']);
+
+          expect(fetchStub).to.be.calledOnceWithExactly(
+            'https://cdn.ampproject.org/v0/amp-story.en.json',
+            env.sandbox.match.any
+          );
+        });
+
+        it('should fetch the localization strings for the document laguage from the cdn', async () => {
+          env.win.document.body.parentElement.setAttribute('lang', 'es-419');
+
+          const fetchStub = env.sandbox
+            .stub(Services.xhrFor(env.win), 'fetchJson')
+            .resolves({
+              json: () => Promise.resolve({}),
+            });
+
+          await createStoryWithPages(1, ['cover']);
+
+          expect(fetchStub).to.have.been.calledOnceWithExactly(
+            'https://cdn.ampproject.org/v0/amp-story.es-419.json',
+            env.sandbox.match.any
+          );
+        });
+
+        it('should fetch the localization strings for the document laguage from the local dist if testing locally', async () => {
+          env.win.document.body.parentElement.setAttribute('lang', 'es-419');
+          env.win.__AMP_MODE.localDev = true;
+
+          const fetchStub = env.sandbox
+            .stub(Services.xhrFor(env.win), 'fetchJson')
+            .resolves({
+              json: () => Promise.resolve({}),
+            });
+
+          await createStoryWithPages(1, ['cover']);
+
+          expect(fetchStub).to.have.been.calledOnceWithExactly(
+            '/dist/v0/amp-story.es-419.json',
+            env.sandbox.match.any
+          );
+        });
+
+        it('should use the remote localization strings', async () => {
+          env.win.document.body.parentElement.setAttribute('lang', 'es-419');
+
+          env.sandbox.stub(Services.xhrFor(env.win), 'fetchJson').resolves({
+            json: () =>
+              Promise.resolve({
+                '35': 'REMOTE-STRING',
+              }),
+          });
+
+          await createStoryWithPages(1, ['cover']);
+
+          expect(localizationService.getLocalizedString('35')).to.be.equal(
+            'REMOTE-STRING'
+          );
+        });
       });
     });
   }
