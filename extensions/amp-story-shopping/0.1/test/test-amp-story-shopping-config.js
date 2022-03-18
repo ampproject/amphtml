@@ -4,7 +4,7 @@ import {Services} from '#service';
 
 import {user} from '#utils/log';
 
-import * as configData from '../../../../examples/amp-story/shopping/remote.json';
+import * as remoteConfigData from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import * as url from '../../../../src/url';
 import {
@@ -30,6 +30,7 @@ describes.realWin(
     let win;
     let storeService;
     let pageElement;
+    let shoppingAttachment;
 
     const defaultInlineConfig = {
       'items': [
@@ -76,67 +77,33 @@ describes.realWin(
             'reviewUrl': 'https://www.google.com',
           },
         },
-        {
-          'productUrl': 'https://www.google.com',
-          'productId': 'chair',
-          'productTitle': 'Yellow chair',
-          'productBrand': 'Chair Co.',
-          'productPrice': 1000.0,
-          'productPriceCurrency': 'BRL',
-          'productTagText': 'The perfectly imperfect yellow chair',
-          'productImages': [
-            {
-              'url': 'https://source.unsplash.com/DgQGKKLaVhY/500x500',
-              'alt': 'chair',
-            },
-          ],
-          'aggregateRating': {
-            'ratingValue': 4.4,
-            'reviewCount': 89,
-            'reviewUrl': 'https://www.google.com',
-          },
-        },
-        {
-          'productUrl': 'https://www.google.com',
-          'productId': 'flowers',
-          'productTitle': 'Flowers',
-          'productBrand': 'Very Long Flower Company Name',
-          'productPrice': 10.0,
-          'productPriceCurrency': 'USD',
-          'productIcon':
-            '/examples/visual-tests/amp-story/img/shopping/icon.png',
-          'productImages': [
-            {
-              'url': 'https://source.unsplash.com/SavQfLRm4Do/500x500',
-              'alt': 'flowers',
-            },
-          ],
-          'aggregateRating': {
-            'ratingValue': 4.4,
-            'reviewCount': 89,
-            'reviewUrl': 'https://www.google.com',
-          },
-        },
       ],
     };
 
     const keyedDefaultInlineConfig = {
       'lamp': defaultInlineConfig.items[0],
       'art': defaultInlineConfig.items[1],
-      'chair': defaultInlineConfig.items[2],
-      'flowers': defaultInlineConfig.items[3],
     };
 
     beforeEach(async () => {
-      pageElement = env.win.document.createElement('amp-story-page');
-      pageElement.id = 'page1';
       win = env.win;
+      pageElement = win.document.createElement('amp-story-page');
+      pageElement.id = 'page1';
       storeService = getStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
       pageElement = <amp-story-page id="page1"></amp-story-page>;
-      env.win.document.body.appendChild(pageElement);
+      win.document.body.appendChild(pageElement);
+
+      shoppingAttachment = win.document.createElement(
+        'amp-story-shopping-attachment'
+      );
+      shoppingAttachment.setAttribute('layout', 'nodisplay');
+      const story = win.document.createElement('amp-story');
+      win.document.body.appendChild(story);
+      story.appendChild(pageElement);
+      pageElement.appendChild(shoppingAttachment);
     });
 
     it('should build shopping config component', async () => {
@@ -148,19 +115,10 @@ describes.realWin(
       src = null,
       config = defaultInlineConfig
     ) {
-      const shoppingAttachment = env.win.document.createElement(
-        'amp-story-shopping-attachment'
-      );
-      shoppingAttachment.setAttribute('layout', 'nodisplay');
       shoppingAttachment.setAttribute('src', src);
       shoppingAttachment.appendChild(
         <script type="application/json">{JSON.stringify(config)}</script>
       );
-      const story = env.win.document.createElement('amp-story');
-      env.win.document.body.appendChild(story);
-      story.appendChild(pageElement);
-
-      pageElement.appendChild(shoppingAttachment);
       return getShoppingConfig(shoppingAttachment);
     }
 
@@ -210,7 +168,7 @@ describes.realWin(
           if (url === remoteUrl) {
             return Promise.resolve({
               ok: true,
-              json: () => configData,
+              json: () => remoteConfigData,
             });
           }
         },
@@ -220,7 +178,6 @@ describes.realWin(
     });
 
     it('does use inline config when remote src is invalid', async () => {
-      await createAmpStoryShoppingConfig();
       const exampleURL = 'invalidRemoteURL';
       pageElement.setAttribute('src', exampleURL);
       const result = await createAmpStoryShoppingConfig('invalidRemoteUrl');
@@ -264,15 +221,18 @@ describes.realWin(
     });
 
     it('test validate required fields for config', async () => {
-      const invalidConfig = {
-        'items': [{}],
-      };
-      await createAmpStoryShoppingConfig(null, invalidConfig);
+      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+
+      for (const [key, value] of Object.entries(productValidationConfig)) {
+        if (value.includes(validateRequired)) {
+          delete invalidConfig['items'][0][key];
+        }
+      }
       const spy = env.sandbox.spy(user(), 'warn');
+      await createAmpStoryShoppingConfig(null, invalidConfig);
       for (const [key, value] of Object.entries(productValidationConfig)) {
         if (value.includes(validateRequired)) {
           const errorString = `Error: Field ${key} is required.`;
-          await createAmpStoryShoppingConfig(null, invalidConfig);
           expect(spy).to.have.been.calledWith(
             'AMP-STORY-SHOPPING-CONFIG',
             errorString
@@ -281,34 +241,10 @@ describes.realWin(
       }
     });
 
-    it('test config is a string', async () => {
-      const invalidConfig = {
-        'items': [
-          {
-            'productUrl': 'https://www.google.com',
-            'productId': 'city-pop',
-            'productBrand': 'Vinyl',
-            /* productTitle is missing, so it is not a string, will fail string type test */
-            'productPrice': 19,
-            'productPriceCurrency': 'JPY',
-            'productImages': [
-              {
-                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
-                alt: 'nest-mini-icon',
-              },
-              {
-                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
-                alt: 'nest-mini-icon',
-              },
-            ],
-            'aggregateRating': {
-              'ratingValue': 4.4,
-              'reviewCount': 89,
-              'reviewUrl': 'https://www.google.com',
-            },
-          },
-        ],
-      };
+    it('should fail config validation because an expected string JSON value is of a non-string type', async () => {
+      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+      invalidConfig['items'][0]['productTitle'] = 50; // This value is not a string
+
       const errorString = `Error: productTitle ${invalidConfig['items'][0]['productTitle']} is not a string`;
       const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
@@ -318,35 +254,10 @@ describes.realWin(
       );
     });
 
-    it('test config is a valid HTML id', async () => {
-      const invalidConfig = {
-        'items': [
-          {
-            'productUrl': 'https://www.google.com',
-            'productId': '1234city-pop',
-            /* productId starts iwth a number, so it is an invalid HTML Id. */
-            'productBrand': 'Vinyl',
-            'productTitle': 'Adventure',
-            'productPrice': 19,
-            'productPriceCurrency': 'JPY',
-            'productImages': [
-              {
-                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
-                alt: 'nest-mini-icon',
-              },
-              {
-                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
-                alt: 'nest-mini-icon',
-              },
-            ],
-            'aggregateRating': {
-              'ratingValue': 4.4,
-              'reviewCount': 89,
-              'reviewUrl': 'https://www.google.com',
-            },
-          },
-        ],
-      };
+    it('should fail config validation because an expected string JSON value is not a valid HTML id', async () => {
+      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+      invalidConfig['items'][0]['productId'] = '1234city-pop'; // productId starts iwth a number, so it is an invalid HTML Id
+
       const errorString = `Error: productId ${invalidConfig['items'][0]['productId']} is not a valid HTML Id`;
       const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
@@ -356,35 +267,9 @@ describes.realWin(
       );
     });
 
-    it('test config not a number', async () => {
-      const invalidConfig = {
-        'items': [
-          {
-            'productUrl': 'https://www.google.com',
-            'productId': 'city-pop',
-            'productBrand': 'Vinyl',
-            'productTitle': 'Adventure',
-            'productPrice': 'two dozen watermelons',
-            /* Not an actual price */
-            'productPriceCurrency': 'JPY',
-            'productImages': [
-              {
-                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
-                alt: 'nest-mini-icon',
-              },
-              {
-                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
-                alt: 'nest-mini-icon',
-              },
-            ],
-            'aggregateRating': {
-              'ratingValue': 4.4,
-              'reviewCount': 89,
-              'reviewUrl': 'https://www.google.com',
-            },
-          },
-        ],
-      };
+    it('should fail config validation because an expected number JSON value is not a valid number', async () => {
+      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+      invalidConfig['items'][0]['productPrice'] = 'two dozen watermelons'; // two dozen watermelons is not an actual price.
 
       const errorString = `Error: Value ${invalidConfig['items'][0]['productPrice']} for field productPrice is not a number`;
       const spy = env.sandbox.spy(user(), 'warn');
@@ -395,35 +280,9 @@ describes.realWin(
       );
     });
 
-    it('test config invalid currency symbol', async () => {
-      const invalidConfig = {
-        'items': [
-          {
-            'productUrl': 'https://www.google.com',
-            'productId': 'city-pop',
-            'productBrand': 'Vinyl',
-            'productTitle': 'Adventure',
-            'productPrice': 123,
-            /* Not an actual price */
-            'productPriceCurrency': 'ZABAN',
-            'productImages': [
-              {
-                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
-                alt: 'nest-mini-icon',
-              },
-              {
-                url: '/examples/visual-tests/amp-story/img/shopping/nest-mini-icon.png',
-                alt: 'nest-mini-icon',
-              },
-            ],
-            'aggregateRating': {
-              'ratingValue': 4.4,
-              'reviewCount': 89,
-              'reviewUrl': 'https://www.google.com',
-            },
-          },
-        ],
-      };
+    it('should fail config validation because an expected string JSON value is not a valid currency code symbol', async () => {
+      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+      invalidConfig['items'][0]['productPriceCurrency'] = 'ZABAN'; // This is not a valid currency symbol code
 
       const errorString = `Error: productPriceCurrency ${invalidConfig['items'][0]['productPriceCurrency']} is not a valid currency code`;
       const spy = env.sandbox.spy(user(), 'warn');
@@ -434,27 +293,12 @@ describes.realWin(
       );
     });
 
-    it('test config invalid url array', async () => {
+    it('should fail config validation because an expected string JSON value is not a valid url', async () => {
       expectAsyncConsoleError(errorString, 1);
-      const invalidConfig = {
-        'items': [
-          {
-            'productUrl': 'http://zapp',
-            'productId': 'city-pop',
-            'productTitle': 'Adventure',
-            'productBrand': 'Vinyl',
-            'productPrice': 19,
-            'productPriceCurrency': 'JPY',
-            'productImages': [{url: 'https://zapp', alt: 'zapp'}],
-            'aggregateRating': {
-              'ratingValue': 4.4,
-              'reviewCount': 89,
-              'reviewUrl': 'https://www.google.com',
-            },
-          },
-        ],
-      };
-      const errorString = `Error: amp-story-shopping-config productImages source must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${invalidConfig['items'][0]['productImages'][0]}`;
+      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+      invalidConfig['items'][0]['productUrl'] = 'http://zapp'; // This is not a valid url
+
+      const errorString = `Error: productUrl ${invalidConfig['items'][0]['productUrl'][0]} is not a valid URL. (Error: amp-story-shopping-config productImages source must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${invalidConfig['items'][0]['productUrl'][0]})`;
       const spy = env.sandbox.spy(url, 'assertHttpsUrl');
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(spy).to.have.been.calledWith(
