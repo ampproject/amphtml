@@ -29,7 +29,6 @@ export const productValidationConfig = {
   'productUrl': [validateRequired, validateURL],
   'productId': [validateRequired, validateString, validateHTMLId],
   'productTitle': [validateRequired, validateString],
-  'productBrand': [validateRequired, validateString],
   'productPrice': [validateRequired, validateNumber],
   'productImages': [
     validateRequired,
@@ -37,6 +36,7 @@ export const productValidationConfig = {
   ],
   'productPriceCurrency': [validateRequired, validateString, validateCurrency],
   /* Optional Attrs */
+  'productVendor': [validateString],
   'aggregateRating': [
     getObjectValidationFnForConfig(aggregateRatingValidationConfig),
   ],

@@ -299,7 +299,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
           <span class="i-amphtml-amp-story-shopping-pdp-header-brand">
-            {activeProductData.productBrand}
+            {activeProductData.productVendor}
           </span>
           <div class="i-amphtml-amp-story-shopping-pdp-header-title-and-price">
             <span class="i-amphtml-amp-story-shopping-pdp-header-title">
@@ -410,7 +410,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
                 }}
               ></div>
               <div class="i-amphtml-amp-story-shopping-plp-card-brand">
-                {data['productBrand']}
+                {data['productVendor']}
               </div>
               <div class="i-amphtml-amp-story-shopping-plp-card-title">
                 {data['productTitle']}

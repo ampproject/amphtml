@@ -38,7 +38,7 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'lamp',
           'productTitle': 'Brass Lamp',
-          'productBrand': 'Lamp Co',
+          'productVendor': 'Lamp Co',
           'productPrice': 799.0,
           'productPriceCurrency': 'USD',
           'productImages': [
@@ -62,7 +62,7 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'art',
           'productTitle': 'Abstract Art',
-          'productBrand': 'V. Artsy',
+          'productVendor': 'V. Artsy',
           'productPrice': 1200.0,
           'productPriceCurrency': 'INR',
           'productImages': [
@@ -147,7 +147,7 @@ describes.realWin(
             'productUrl': 'https://www.google.com',
             'productId': 'art',
             'productTitle': 'Abstract Art',
-            'productBrand': 'V. Artsy',
+            'productVendor': 'V. Artsy',
             'productPrice': 1200.0,
             'productPriceCurrency': 'JPY',
             'productImages': [
