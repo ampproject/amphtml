@@ -291,9 +291,7 @@ describes.realWin(
         .dispatchEvent(new Event('click'));
 
       expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
-        null,
-        {'eventDetails': {'calledFrom': 'amp-story-shopping-cta'}}
+        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
       );
     });
 
@@ -302,9 +300,7 @@ describes.realWin(
 
       env.sandbox.stub(win.document.activeElement, 'tagName').callsFake(() => {
         expect(trigger).to.have.been.calledWith(
-          StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
-          null,
-          {'eventDetails': {'calledFrom': 'amp-story-shopping-tag'}}
+          StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
         );
       });
 
