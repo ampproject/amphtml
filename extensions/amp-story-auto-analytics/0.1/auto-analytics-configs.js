@@ -87,9 +87,7 @@ export const buildGtagConfig = (gtagId) => ({
         'event_name': 'custom',
         'event_action': 'story_open',
         'event_category': '${title}',
-        'event_label': '${title}',
-        'shopping_tag_clicked': '${storyShoppingTagClicked}',
-        'shopping_cta_clicked': '${storyShoppingCtaClicked}',
+        'event_label': '${title}'
         'send_to': [gtagId],
       },
     },

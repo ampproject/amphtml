@@ -126,15 +126,14 @@ export class StoryAnalyticsService {
   /**
    * @param {!StoryAnalyticsEvent} eventType
    * @param {Element=} element
-   * @param {?JsonObject} vars
    */
-  triggerEvent(eventType, element = null, vars = null) {
+  triggerEvent(eventType, element = null) {
     this.incrementPageEventCount_(eventType);
 
     triggerAnalyticsEvent(
       this.element_,
       eventType,
-      vars ?? this.updateDetails(eventType, element)
+      this.updateDetails(eventType, element)
     );
   }
 
