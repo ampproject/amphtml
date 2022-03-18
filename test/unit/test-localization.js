@@ -1,3 +1,7 @@
+import {createElementWithAttributes} from '#core/dom';
+
+import * as Preact from '#preact';
+
 import {Services} from '#service';
 import {
   LocalizationService,
@@ -9,6 +13,11 @@ import {
 } from '#service/localization/strings';
 
 import {waitFor} from '#testing/helpers/service';
+
+import {
+  getLocalizationService,
+  localizeTemplate,
+} from 'extensions/amp-story/1.0/amp-story-localization-service';
 
 describes.fakeWin('localization', {amp: true}, (env) => {
   let win;
@@ -140,9 +149,14 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     });
   });
 
-  describe('localize element async', () => {
+  describe.only('localize element async', () => {
+    beforeEach(() => {
+      env.sandbox
+        .stub(Services, 'vsyncFor')
+        .callsFake(() => ({mutatePromise: (task) => task()}));
+    });
     it('should set the text content if the bundle is installed for the default language', async () => {
-      const localizationService = new LocalizationService(win.document.body);
+      const localizationService = getLocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundles({
         'en': {
           'test_string_id': {
@@ -151,9 +165,16 @@ describes.fakeWin('localization', {amp: true}, (env) => {
         },
       });
 
-      const element = env.win.document.createElement('div');
+      const element = win.document.createElement('div');
+      element.appendChild(
+        createElementWithAttributes(win.document, 'div', {
+          'i-amphtml-i18n-text-content': 'test_string_id',
+        })
+      );
 
-      await localizationService.localizeEl(element, 'test_string_id');
+      win.document.body.appendChild(element);
+
+      await localizeTemplate(element, win.document.body);
 
       expect(element.textContent).to.equal('test string content');
     });
@@ -161,8 +182,13 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     it('should set the text content if the bundle is installed for the element language', async () => {
       const element = env.win.document.createElement('div');
       win.document.body.parentElement.setAttribute('lang', 'es');
+      element.appendChild(
+        createElementWithAttributes(win.document, 'div', {
+          'i-amphtml-i18n-text-content': 'test_string_id',
+        })
+      );
 
-      const localizationService = new LocalizationService(win.document.body);
+      const localizationService = getLocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundles({
         'es': {
           'test_string_id': {
@@ -171,7 +197,7 @@ describes.fakeWin('localization', {amp: true}, (env) => {
         },
       });
 
-      await localizationService.localizeEl(element, 'test_string_id');
+      await localizeTemplate(element, win.document.body);
 
       expect(element.textContent).to.equal('contenido de prueba');
     });
@@ -179,8 +205,13 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     it('should set the text content if bundles are installed for fallback language', async () => {
       const element = env.win.document.createElement('div');
       win.document.body.parentElement.setAttribute('lang', 'es-419');
+      element.appendChild(
+        createElementWithAttributes(win.document, 'div', {
+          'i-amphtml-i18n-text-content': 'test_string_id',
+        })
+      );
 
-      const localizationService = new LocalizationService(win.document.body);
+      const localizationService = getLocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundles({
         'es': {
           'test_string_id': {
@@ -189,15 +220,20 @@ describes.fakeWin('localization', {amp: true}, (env) => {
         },
       });
 
-      await localizationService.localizeEl(element, 'test_string_id');
+      await localizeTemplate(element, win.document.body);
 
       expect(element.textContent).to.equal('contenido de prueba');
     });
 
-    it('should set the attribute value if the attribute is provided', async () => {
-      const localizationService = new LocalizationService(win.document.body);
+    it('should set the aria-label if the attribute is provided', async () => {
+      const localizationService = getLocalizationService(win.document.body);
       const element = env.win.document.createElement('div');
       win.document.body.parentElement.setAttribute('lang', 'es');
+      const localizedEl = createElementWithAttributes(win.document, 'div', {
+        'i-amphtml-i18n-aria-label': 'test_string_id',
+      });
+      element.appendChild(localizedEl);
+
       localizationService.registerLocalizedStringBundles({
         'es': {
           'test_string_id': {
@@ -206,13 +242,9 @@ describes.fakeWin('localization', {amp: true}, (env) => {
         },
       });
 
-      await localizationService.localizeEl(
-        element,
-        'test_string_id',
-        'aria-label'
-      );
+      await localizeTemplate(element, win.document.body);
 
-      expect(element.getAttribute('aria-label')).to.equal(
+      expect(localizedEl.getAttribute('aria-label')).to.equal(
         'contenido de prueba'
       );
     });
@@ -220,10 +252,16 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     it('should set the text content if the bundle is installed after localizing', async () => {
       const element = env.win.document.createElement('div');
       win.document.body.parentElement.setAttribute('lang', 'es');
+      element.appendChild(
+        createElementWithAttributes(win.document, 'div', {
+          'i-amphtml-i18n-text-content': 'test_string_id',
+        })
+      );
 
-      const localizationService = new LocalizationService(win.document.body);
+      const localizationService = getLocalizationService(win.document.body);
 
-      localizationService.localizeEl(element, 'test_string_id');
+      localizeTemplate(element, win.document.body);
+
       localizationService.registerLocalizedStringBundles({
         'es': {
           'test_string_id': {
@@ -240,8 +278,13 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     it('should use the more specific language registered', async () => {
       const element = env.win.document.createElement('div');
       win.document.body.parentElement.setAttribute('lang', 'es');
+      const localizedEl = createElementWithAttributes(win.document, 'div', {
+        'i-amphtml-i18n-aria-label': 'test_string_id',
+      });
+      element.appendChild(localizedEl);
+      win.document.body.appendChild(element);
 
-      const localizationService = new LocalizationService(win.document.body);
+      const localizationService = getLocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundles({
         'default': {
           'test_string_id': {
@@ -255,13 +298,9 @@ describes.fakeWin('localization', {amp: true}, (env) => {
         },
       });
 
-      await localizationService.localizeEl(
-        element,
-        'test_string_id',
-        'aria-label'
-      );
+      await localizeTemplate(element, win.document.body);
 
-      expect(element.getAttribute('aria-label')).to.equal(
+      expect(localizedEl.getAttribute('aria-label')).to.equal(
         'contenido de prueba'
       );
     });
@@ -269,8 +308,12 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     it('should not update twice the element when a more specific language is registered later', async () => {
       const element = env.win.document.createElement('div');
       win.document.body.setAttribute('lang', 'es');
+      const localizedEl = createElementWithAttributes(win.document, 'div', {
+        'i-amphtml-i18n-aria-label': 'test_string_id',
+      });
+      element.appendChild(localizedEl);
 
-      const localizationService = new LocalizationService(win.document.body);
+      const localizationService = getLocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundles({
         'default': {
           'test_string_id': {
@@ -279,11 +322,7 @@ describes.fakeWin('localization', {amp: true}, (env) => {
         },
       });
 
-      await localizationService.localizeEl(
-        element,
-        'test_string_id',
-        'aria-label'
-      );
+      await localizeTemplate(element, win.document.body);
 
       localizationService.registerLocalizedStringBundles({
         'es': {
@@ -294,7 +333,7 @@ describes.fakeWin('localization', {amp: true}, (env) => {
       });
 
       // Should not localize it in spanish because it was already localized in english.
-      expect(element.getAttribute('aria-label')).to.equal(
+      expect(localizedEl.getAttribute('aria-label')).to.equal(
         'test string content'
       );
     });
