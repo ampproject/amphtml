@@ -4,10 +4,9 @@ import {
   BentoAccordionHeader,
   BentoAccordionSection,
 } from '#bento/components/bento-accordion/1.0/component';
+import {BentoInstagram} from '#bento/components/bento-instagram/1.0/component';
 
 import * as Preact from '#preact';
-
-import {BentoInstagram} from '../component';
 
 export default {
   title: 'Instagram',

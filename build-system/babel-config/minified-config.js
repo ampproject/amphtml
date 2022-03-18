@@ -8,9 +8,10 @@ const {getReplacePlugin} = require('./helpers');
 /**
  * Gets the config for minified babel transforms run, used by 3p vendors.
  *
+ * @param {'preact' | 'react'} buildFor
  * @return {!Object}
  */
-function getMinifiedConfig() {
+function getMinifiedConfig(buildFor = 'preact') {
   const isProd = argv._.includes('dist') && !argv.fortesting;
 
   const reactJsxPlugin = [
@@ -27,7 +28,7 @@ function getMinifiedConfig() {
     'optimize-objstr',
     './build-system/babel-plugins/babel-plugin-mangle-object-values',
     './build-system/babel-plugins/babel-plugin-jsx-style-object',
-    getImportResolverPlugin(),
+    getImportResolverPlugin(buildFor),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',

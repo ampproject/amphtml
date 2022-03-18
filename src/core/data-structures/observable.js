@@ -58,7 +58,8 @@ export class Observable {
     if (!this.handlers_) {
       return;
     }
-    for (const handler of this.handlers_) {
+    // Iterate over copy of handlers_ in case handlers are removed inside.
+    for (const handler of this.handlers_.slice()) {
       handler(opt_event);
     }
   }

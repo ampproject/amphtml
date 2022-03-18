@@ -64,7 +64,7 @@ describes.realWin(
           'productTitle': 'Abstract Art',
           'productVendor': 'V. Artsy',
           'productPrice': 1200.0,
-          'productPriceCurrency': 'INR',
+          'productPriceCurrency': 'JPY',
           'productImages': [
             {
               'url': 'https://source.unsplash.com/BdVQU-NDtA8/500x500',
@@ -76,6 +76,8 @@ describes.realWin(
             'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
+          'productDetails':
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
         },
       ],
     };
@@ -161,6 +163,8 @@ describes.realWin(
               'reviewCount': 89,
               'reviewUrl': 'https://www.google.com',
             },
+            'productDetails':
+              'Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
           },
         };
       env.sandbox.stub(Services, 'xhrFor').returns({
