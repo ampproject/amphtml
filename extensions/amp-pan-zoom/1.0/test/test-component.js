@@ -1,65 +1,118 @@
 import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
+import {createRef} from '#preact';
+
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
 
 import {BentoPanZoom} from '../component-ts';
 import {usePanZoomState} from '../hooks/usePanZoomState';
 
-describes.sandboxed('BentoPanZoom preact component v1.0', {}, (unusedEnv) => {
-  const Contents = () => <article style={{width: 200, height: 100}} />;
-  const getParentStyle = (wrapper) =>
-    wrapper.find(Contents).parent().prop('style');
+describes.sandboxed('BentoPanZoom preact component v1.0', {}, (env) => {
+  const {containerBox, contentBox, views} = getTestDimensions();
+
+  const DummyContents = () => (
+    <article style={{width: contentBox.width, height: contentBox.height}} />
+  );
+
+  const findContentContainer = (wrapper) =>
+    wrapper.find('[data-test-id="content-container"]');
+  const findContent = (wrapper) => wrapper.find('[data-test-id="content"]');
+  const getContentTransform = (wrapper) =>
+    findContent(wrapper).prop('style').transform;
+  const findContainer = (wrapper) => wrapper.find('[data-test-id="container"]');
+
+  let resizeObserverStub;
+  beforeEach(() => {
+    resizeObserverStub = installResizeObserverStub(env.sandbox, window);
+  });
+  const triggerResize = (wrapper) => {
+    const container = findContainer(wrapper).getDOMNode();
+    const contentContainer = findContentContainer(wrapper).getDOMNode();
+    env.sandbox.stub(container, 'getBoundingClientRect').returns(containerBox);
+    env.sandbox
+      .stub(contentContainer, 'getBoundingClientRect')
+      .returns(contentBox);
+
+    resizeObserverStub.notifySync({target: container});
+  };
 
   it('should render children and a zoom button', () => {
     const wrapper = mount(
       <BentoPanZoom>
-        <Contents />
+        <DummyContents />
       </BentoPanZoom>
     );
 
     const component = wrapper.find(BentoPanZoom);
     expect(component).to.have.lengthOf(1);
-    expect(component.find(Contents)).to.have.lengthOf(1);
+    expect(component.find(DummyContents)).to.have.lengthOf(1);
     expect(component.find('button')).to.have.lengthOf(1);
   });
 
   it('clicking the zoom button should zoom the contents in a loop', () => {
     const wrapper = mount(
       <BentoPanZoom>
-        <Contents />
+        <DummyContents />
       </BentoPanZoom>
     );
 
     // Without mocking out a lot of browser APIs, we can't assert very much:
     wrapper.find('button').simulate('click');
-    expect(getParentStyle(wrapper).transform).to.include('scale(2)');
+    expect(getContentTransform(wrapper)).to.include('scale(2)');
     wrapper.find('button').simulate('click');
-    expect(getParentStyle(wrapper).transform).to.include('scale(3)');
+    expect(getContentTransform(wrapper)).to.include('scale(3)');
     // It should "loop" around once the max is reached:
     wrapper.find('button').simulate('click');
-    expect(getParentStyle(wrapper).transform).to.include('scale(1)');
+    expect(getContentTransform(wrapper)).to.include('scale(1)');
+  });
+
+  describe('ref api', () => {
+    it('the "transform" method can be used to zoom/scale', () => {
+      const ref = createRef();
+      const wrapper = mount(
+        <BentoPanZoom ref={ref}>
+          <DummyContents />
+        </BentoPanZoom>
+      );
+
+      expect(Object.keys(ref.current)).to.deep.equal(['transform']);
+      expect(ref.current.transform).to.be.a('function');
+
+      const newZoom = {
+        x: 0,
+        y: 0,
+        scale: 3,
+      };
+      ref.current.transform(newZoom.scale, newZoom.x, newZoom.y);
+      wrapper.update();
+
+      expect(getContentTransform(wrapper)).to.equal(
+        `translate(0px, 0px)scale(3)`
+      );
+    });
   });
 
   describe('maxScale', () => {
     it('cannot be zoomed past maxScale', () => {
       const wrapper = mount(
         <BentoPanZoom maxScale={6}>
-          <Contents />
+          <DummyContents />
         </BentoPanZoom>
       );
       wrapper.find('button').simulate('click');
-      expect(getParentStyle(wrapper).transform).to.include('scale(2)');
+      expect(getContentTransform(wrapper)).to.include('scale(2)');
       wrapper.find('button').simulate('click');
-      expect(getParentStyle(wrapper).transform).to.include('scale(3)');
+      expect(getContentTransform(wrapper)).to.include('scale(3)');
       wrapper.find('button').simulate('click');
-      expect(getParentStyle(wrapper).transform).to.include('scale(4)');
+      expect(getContentTransform(wrapper)).to.include('scale(4)');
       wrapper.find('button').simulate('click');
-      expect(getParentStyle(wrapper).transform).to.include('scale(5)');
+      expect(getContentTransform(wrapper)).to.include('scale(5)');
       wrapper.find('button').simulate('click');
-      expect(getParentStyle(wrapper).transform).to.include('scale(6)');
+      expect(getContentTransform(wrapper)).to.include('scale(6)');
       // It should "loop" around once the max is reached:
       wrapper.find('button').simulate('click');
-      expect(getParentStyle(wrapper).transform).to.include('scale(1)');
+      expect(getContentTransform(wrapper)).to.include('scale(1)');
     });
   });
 
@@ -331,7 +384,176 @@ describes.sandboxed('BentoPanZoom preact component v1.0', {}, (unusedEnv) => {
       });
     });
   });
+
+  describe('gestures', () => {
+    let wrapper;
+    let gesture;
+    beforeEach(() => {
+      wrapper = mount(
+        <BentoPanZoom>
+          <DummyContents />
+        </BentoPanZoom>
+      );
+
+      triggerResize(wrapper);
+
+      const container = findContainer(wrapper);
+      gesture = new GestureSimulator(container, env.sandbox);
+    });
+
+    it('should start with scale(1)', () => {
+      expect(getContentTransform(wrapper)).to.include('scale(1)');
+    });
+    describe('doubleTap', () => {
+      it('single taps should do nothing', () => {
+        gesture.pointerDown();
+        gesture.pointerUp();
+        expect(getContentTransform(wrapper)).to.include('scale(1)');
+      });
+      it('double tap should zoom in', () => {
+        gesture.pointerDown();
+        gesture.pointerUp();
+
+        gesture.pointerDown();
+        gesture.pointerUp();
+
+        expect(getContentTransform(wrapper)).to.include('scale(2)');
+      });
+      it('double taps are registered within 10px', () => {
+        gesture.pointerDown();
+        gesture.pointerMove({deltaX: 9, deltaY: 9});
+        gesture.pointerUp();
+
+        gesture.pointerDown();
+        gesture.pointerMove({deltaX: -9, deltaY: -9});
+        gesture.pointerUp();
+        expect(getContentTransform(wrapper)).to.include('scale(2)');
+      });
+      it('double taps are not registered outside 10px', () => {
+        gesture.pointerDown();
+        gesture.pointerMove({deltaX: 99, deltaY: 99});
+        gesture.pointerUp();
+
+        gesture.pointerDown();
+        gesture.pointerMove({deltaX: -99, deltaY: -99});
+        gesture.pointerUp();
+        expect(getContentTransform(wrapper)).to.include('scale(1)');
+      });
+      it('each double-tap will zoom in again', () => {
+        gesture.doubleTap();
+        expect(getContentTransform(wrapper)).to.include('scale(2)');
+
+        gesture.doubleTap();
+        expect(getContentTransform(wrapper)).to.include('scale(3)');
+
+        gesture.doubleTap();
+        expect(getContentTransform(wrapper)).to.include('scale(1)');
+      });
+      it('zooms in on topLeft', () => {
+        gesture.doubleTap(views.topLeft);
+        gesture.doubleTap(views.topLeft);
+        expect(getContentTransform(wrapper)).to.equal(
+          'translate(-750px, -600px)scale(3)'
+        );
+      });
+      it('zooms in on middle', () => {
+        gesture.doubleTap(views.middle);
+        gesture.doubleTap(views.middle);
+        expect(getContentTransform(wrapper)).to.equal(
+          'translate(-1000px, -800px)scale(3)'
+        );
+      });
+      it('zooms in on bottomRight', () => {
+        gesture.doubleTap(views.bottomRight);
+        gesture.doubleTap(views.bottomRight);
+        expect(getContentTransform(wrapper)).to.equal(
+          'translate(-1250px, -1000px)scale(3)'
+        );
+      });
+    });
+
+    it('cannot be dragged when not scaled', () => {
+      gesture.pointerDown();
+      gesture.pointerMove({deltaX: 11, deltaY: 11});
+      gesture.pointerUp();
+
+      gesture.pointerDown();
+      gesture.pointerMove({deltaX: -11, deltaY: -11});
+      gesture.pointerUp();
+      expect(getContentTransform(wrapper)).to.equal(
+        'translate(0px, 0px)scale(1)'
+      );
+    });
+    describe('dragging', () => {
+      beforeEach(() => {
+        // Zoom in twice, so we can drag:
+        gesture.doubleTap(views.middle);
+        gesture.doubleTap(views.middle);
+      });
+
+      it('must be zoomed in first', () => {
+        expect(getContentTransform(wrapper)).to.include(
+          'translate(-1000px, -800px)'
+        );
+      });
+
+      it('should be able to drag', () => {
+        gesture.drag([
+          {deltaX: -50, deltaY: -50},
+          {deltaX: -50, deltaY: -50},
+        ]);
+
+        expect(getContentTransform(wrapper)).to.include(
+          'translate(-1090px, -890px)'
+        );
+      });
+    });
+  });
 });
+
+function getTestDimensions() {
+  // We will simulate the layout of the DOM.
+  // The container is a 1000x800 box.
+  // The contents is a 500x400 box, centered.
+
+  const offset = {x: 100, y: 100};
+  const containerBox = {
+    width: 1000,
+    height: 800,
+    ...offset,
+  };
+  const contentBox = {
+    width: 500,
+    height: 400,
+    x: offset.x + (containerBox.width - 500) / 2,
+    y: offset.y + (containerBox.height - 400) / 2,
+  };
+
+  const views = {
+    topLeft: {
+      clientX: containerBox.x,
+      clientY: containerBox.y,
+    },
+    topLeftContent: {
+      clientX: contentBox.x,
+      clientY: contentBox.y,
+    },
+    middle: {
+      clientX: contentBox.x + contentBox.width / 2,
+      clientY: contentBox.y + contentBox.height / 2,
+    },
+    bottomRightContent: {
+      clientX: contentBox.x + contentBox.width,
+      clientY: contentBox.y + contentBox.height,
+    },
+    bottomRight: {
+      clientX: containerBox.x + containerBox.width,
+      clientY: containerBox.y + containerBox.height,
+    },
+  };
+
+  return {containerBox, contentBox, views};
+}
 
 /**
  * Asserts that the object matches the expected properties
@@ -376,4 +598,72 @@ function renderHook(hook, {initialProps = {}} = {}) {
     rerender,
     act,
   };
+}
+
+class GestureSimulator {
+  constructor(wrapper, sandbox) {
+    this.wrapper = wrapper;
+    this.clientX = 0;
+    this.clientY = 0;
+    this.pointerId = 1;
+    this.createStubs_(sandbox);
+  }
+  createStubs_(sandbox) {
+    sandbox.stub(Element.prototype, 'setPointerCapture');
+    sandbox.stub(Element.prototype, 'releasePointerCapture');
+    sandbox.stub(Element.prototype, 'hasPointerCapture');
+  }
+  createEvent_() {
+    return {...this};
+  }
+  update(options) {
+    if (!options) {
+      return;
+    }
+    if (options.clientX) {
+      this.clientX = options.clientX;
+    }
+    if (options.clientY) {
+      this.clientY = options.clientY;
+    }
+    if (options.deltaX) {
+      this.clientX += options.deltaX;
+    }
+    if (options.deltaY) {
+      this.clientY += options.deltaY;
+    }
+  }
+  pointerDown(options) {
+    this.update(options);
+
+    this.wrapper.simulate('pointerdown', this.createEvent_());
+    this.wrapper.update();
+  }
+  pointerMove(options) {
+    this.update(options);
+
+    this.wrapper.simulate('pointermove', this.createEvent_());
+    this.wrapper.update();
+  }
+  pointerUp(options) {
+    this.update(options);
+
+    this.wrapper.simulate('pointerup', this.createEvent_());
+    this.wrapper.update();
+  }
+  doubleTap(options) {
+    this.update(options);
+
+    this.pointerDown();
+    this.pointerUp();
+    this.pointerDown();
+    this.pointerUp();
+  }
+  drag(points) {
+    this.pointerDown();
+    points.forEach((point) => {
+      this.pointerMove(point);
+    });
+    this.pointerUp();
+  }
 }

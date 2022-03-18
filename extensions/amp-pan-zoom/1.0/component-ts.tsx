@@ -123,7 +123,7 @@ export function BentoPanZoomWithRef(
   };
 
   const initialStateRef = useRef(state);
-  const lastTapTime = useRef(0);
+  const lastTapTime = useRef(-DOUBLE_TAP_TIME);
   const handlers: Partial<UserHandlers> = {
     onDragStart() {
       if (isPannable) {
@@ -148,7 +148,7 @@ export function BentoPanZoomWithRef(
             containerRef.current!
           );
           actions.updateScale(anchor);
-          lastTapTime.current = 0; // Prevent triple-taps
+          lastTapTime.current = -DOUBLE_TAP_TIME; // Prevent triple-taps
         } else {
           // Single tap
           lastTapTime.current = ev.startTime;
@@ -229,7 +229,7 @@ export function BentoPanZoomWithRef(
         class={classNames(styles.ampPanZoomContainer, isPannable && 'pannable')}
         {...bind()}
       >
-        <div ref={contentRef}>
+        <div data-test-id="content-container" ref={contentRef}>
           <div
             data-test-id="content"
             class={classNames(
