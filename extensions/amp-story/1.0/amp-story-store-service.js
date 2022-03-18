@@ -59,9 +59,10 @@ export const EmbeddedComponentState = {
  * @enum {number}
  */
 export const SubscriptionsState = {
-  UNKNOWN: 0,
-  GRANTED: 1,
-  BLOCKED: 2,
+  DISABLED: 0,
+  PENDING: 1,
+  GRANTED: 2,
+  BLOCKED: 3,
 };
 
 /**
@@ -609,7 +610,7 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_SIZE]: null,
       [StateProperty.PREVIEW_STATE]: false,
       [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: false,
-      [StateProperty.SUBSCRIPTIONS_STATE]: SubscriptionsState.UNKNOWN,
+      [StateProperty.SUBSCRIPTIONS_STATE]: SubscriptionsState.DISABLED,
     });
   }
 

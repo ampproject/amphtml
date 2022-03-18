@@ -1337,7 +1337,7 @@ describes.realWin(
       const clickRightEvent = new MouseEvent('click', {clientX: 200});
       const clickLeftEvent = new MouseEvent('click', {clientX: 10});
 
-      async function setUpSubscriptions() {
+      async function setUpStorySubscriptions() {
         await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
         subscriptionsEl = win.document.createElement('amp-story-subscriptions');
         story.element.appendChild(subscriptionsEl);
@@ -1345,9 +1345,6 @@ describes.realWin(
         // buildCallback() is implictly called by createStoryWithPages()
         await story.layoutCallback();
 
-        // This stub makes requestAnimationFrame a sync call so that each dispatch of click event
-        // can be a sync operation, which means it can be used as doing await switchTo call.
-        env.sandbox.stub(win, 'requestAnimationFrame').callsFake((cb) => cb());
         const cover = story.getPageById(
           storeService.get(StateProperty.CURRENT_PAGE_ID)
         );
@@ -1359,11 +1356,15 @@ describes.realWin(
 
         storeService = new AmpStoryStoreService(win);
         env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
+
+        // This stub makes requestAnimationFrame a sync call so that each dispatch of click event
+        // can be a sync operation, which means it can be used as doing await switchTo call.
+        env.sandbox.stub(win, 'requestAnimationFrame').callsFake((cb) => cb());
       });
 
       describe('UNKNOWN subscription state before paywall page', () => {
         beforeEach(async () => {
-          await setUpSubscriptions();
+          await setUpStorySubscriptions();
         });
 
         it('should not navigate to subscription content while subscription state is unknown', async () => {
@@ -1462,7 +1463,7 @@ describes.realWin(
 
       describe('GRANTED subscription state before paywall page', () => {
         beforeEach(async () => {
-          await setUpSubscriptions();
+          await setUpStorySubscriptions();
         });
 
         it('should be able to navigate like normal story', async () => {
@@ -1490,7 +1491,7 @@ describes.realWin(
 
       describe('BLOCKED subscription state', () => {
         it('should resume to paywall page once status becomes granted from blocked if the paywall is triggered on time delay', async () => {
-          await setUpSubscriptions();
+          await setUpStorySubscriptions();
           const clock = env.sandbox.useFakeTimers();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
@@ -1524,7 +1525,7 @@ describes.realWin(
         });
 
         it('should resume to the page right after paywall page once status becomes granted from blocked if the paywall is triggered on tap', async () => {
-          await setUpSubscriptions();
+          await setUpStorySubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1560,7 +1561,7 @@ describes.realWin(
         });
 
         it('tapping left before paywall shows should go to the previous page without showing the paywall', async () => {
-          await setUpSubscriptions();
+          await setUpStorySubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1585,7 +1586,7 @@ describes.realWin(
         });
 
         it('tapping left on paywall should hide the paywall and go to the previous page', async () => {
-          await setUpSubscriptions();
+          await setUpStorySubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1614,7 +1615,7 @@ describes.realWin(
         });
 
         it('should navigate to paywall page and navigate back to original page after granted with any switch events', async () => {
-          await setUpSubscriptions();
+          await setUpStorySubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1648,9 +1649,6 @@ describes.realWin(
         });
 
         it('should initialize with paywall page and navigate back to original page after granted if starting deep in story', async () => {
-          env.sandbox
-            .stub(win, 'requestAnimationFrame')
-            .callsFake((cb) => cb());
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
@@ -1693,9 +1691,6 @@ describes.realWin(
 
         it('should navigate back to paywall page after granted if starting deep in story but tap left on paywall page and tap right again back to paywall page', async () => {
           const clock = env.sandbox.useFakeTimers();
-          env.sandbox
-            .stub(win, 'requestAnimationFrame')
-            .callsFake((cb) => cb());
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
