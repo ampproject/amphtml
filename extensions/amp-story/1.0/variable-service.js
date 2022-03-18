@@ -21,6 +21,9 @@ export const AnalyticsVariable = {
   STORY_PROGRESS: 'storyProgress',
   STORY_PREVIOUS_PAGE_ID: 'storyPreviousPageId',
   STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
+  STORY_SHOPPING_CONVERSION_URL: 'storyShoppingConversionUrl',
+  STORY_SHOPPING_TAG_CLICKED: 'storyShoppingTagClicked',
+  STORY_SHOPPING_CTA_CLICKED: 'storyShoppingCtaClicked',
 };
 
 /**
@@ -65,6 +68,9 @@ export class AmpStoryVariableService {
       [AnalyticsVariable.STORY_IS_MUTED]: null,
       [AnalyticsVariable.STORY_PREVIOUS_PAGE_ID]: null,
       [AnalyticsVariable.STORY_ADVANCEMENT_MODE]: null,
+      [AnalyticsVariable.STORY_SHOPPING_CONVERSION_URL]: null,
+      [AnalyticsVariable.STORY_SHOPPING_TAG_CLICKED]: null,
+      [AnalyticsVariable.STORY_SHOPPING_CTA_CLICKED]: null,
     };
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */

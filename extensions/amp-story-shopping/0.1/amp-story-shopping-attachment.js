@@ -17,6 +17,10 @@ import {
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
+import {
+  AnalyticsVariable,
+  getVariableService,
+} from '../../amp-story/1.0/variable-service';
 
 /** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
@@ -60,6 +64,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = Services.storyAnalyticsService(this.win);
+
+    /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(this.win);
   }
 
   /** @override */
@@ -126,19 +133,28 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     }
 
     if (document.activeElement.tagName === 'AMP-STORY-SHOPPING-TAG') {
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_SHOPPING_TAG_CLICKED,
+        true
+      );
       this.analyticsService_.triggerEvent(
         StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
         null,
-        {'eventDetails': {'calledFrom': 'amp-story-shopping-tag'}}
+        {'vars': {'storyShoppingTagClicked': true}}
       );
       this.analyticsService_.triggerEvent(
         StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
       );
     } else {
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_SHOPPING_CTA_CLICKED,
+        true
+      );
+
       this.analyticsService_.triggerEvent(
         StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
         null,
-        {'eventDetails': {'calledFrom': 'amp-story-shopping-cta'}}
+        {'vars': {'storyShoppingCtaClicked': true}}
       );
     }
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
@@ -329,10 +345,15 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onClickBuyNow_(conversionURL) {
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_SHOPPING_CONVERSION_URL,
+      conversionURL
+    );
+
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK,
       null,
-      {'eventDetails': {'conversionURL': conversionURL}}
+      {'vars': {'storyShoppingConversionUrl': conversionURL}}
     );
   }
 
