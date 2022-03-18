@@ -75,9 +75,7 @@ export const buildGtagConfig = (gtagId) => ({
       'vars': {
         'event_name': 'custom',
         'event_action': 'story_shopping_buy_now_click',
-        'event_category': '${title}',
-        'event_label': '${title}',
-        'conversion_url': '${storyShoppingConversionUrl}',
+        'event_category': '${storyShoppingConversionUrl}',
         'send_to': [gtagId],
       },
     },
@@ -86,10 +84,7 @@ export const buildGtagConfig = (gtagId) => ({
       'vars': {
         'event_name': 'custom',
         'event_action': 'story_open',
-        'event_category': '${title}',
-        'event_label': '${title}',
-        'shopping_tag_clicked': '${storyShoppingTagClicked}',
-        'shopping_cta_clicked': '${storyShoppingCtaClicked}',
+        'event_category': '${storyShoppingItemClicked}',
         'send_to': [gtagId],
       },
     },
@@ -98,8 +93,6 @@ export const buildGtagConfig = (gtagId) => ({
       'vars': {
         'event_name': 'custom',
         'event_action': 'story_shopping_plp_card_click',
-        'event_category': '${title}',
-        'event_label': '${title}',
         'send_to': [gtagId],
       },
     },
@@ -108,8 +101,6 @@ export const buildGtagConfig = (gtagId) => ({
       'vars': {
         'event_name': 'custom',
         'event_action': 'story_shopping_product_details_view',
-        'event_category': '${title}',
-        'event_label': '${title}',
         'send_to': [gtagId],
       },
     },

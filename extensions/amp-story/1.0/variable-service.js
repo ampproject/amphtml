@@ -22,6 +22,7 @@ export const AnalyticsVariable = {
   STORY_PREVIOUS_PAGE_ID: 'storyPreviousPageId',
   STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
   STORY_SHOPPING_CONVERSION_URL: 'storyShoppingConversionUrl',
+  STORY_SHOPPING_ITEM_CLICKED: 'storyShoppingItemClicked',
   STORY_SHOPPING_TAG_CLICKED: 'storyShoppingTagClicked',
   STORY_SHOPPING_CTA_CLICKED: 'storyShoppingCtaClicked',
 };

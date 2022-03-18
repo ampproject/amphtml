@@ -134,16 +134,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     if (document.activeElement.tagName === 'AMP-STORY-SHOPPING-TAG') {
       this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_SHOPPING_TAG_CLICKED,
-        true
+        AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
+        AnalyticsVariable.STORY_SHOPPING_TAG_CLICKED
       );
-
-      this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_SHOPPING_CTA_CLICKED,
-        false
-      );
-
-      this.element['ANALYTICS_TAG_NAME'] = 'amp-story-shopping-tag';
 
       this.analyticsService_.triggerEvent(
         StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
@@ -154,16 +147,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
       );
     } else {
-      this.element['ANALYTICS_TAG_NAME'] = 'amp-story-shopping-cta';
-
       this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_SHOPPING_CTA_CLICKED,
-        true
-      );
-
-      this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_SHOPPING_TAG_CLICKED,
-        false
+        AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
+        AnalyticsVariable.STORY_SHOPPING_CTA_CLICKED
       );
 
       this.analyticsService_.triggerEvent(
