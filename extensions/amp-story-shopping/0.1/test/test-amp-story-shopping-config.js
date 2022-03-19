@@ -13,9 +13,7 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {
   getShoppingConfig,
-  productValidationConfig,
   storeShoppingConfig,
-  validateRequired,
 } from '../amp-story-shopping-config';
 
 describes.realWin(
@@ -89,8 +87,6 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      pageElement = win.document.createElement('amp-story-page');
-      pageElement.id = 'page1';
       storeService = getStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
         return storeService;
@@ -108,11 +104,6 @@ describes.realWin(
       pageElement.appendChild(shoppingAttachment);
     });
 
-    it('should build shopping config component', async () => {
-      await createAmpStoryShoppingConfig();
-      expect(() => getShoppingConfig(pageElement)).to.not.throw();
-    });
-
     async function createAmpStoryShoppingConfig(
       src = null,
       config = defaultInlineConfig
@@ -123,6 +114,10 @@ describes.realWin(
       );
       return getShoppingConfig(shoppingAttachment);
     }
+
+    it('should build shopping config component', async () => {
+      expect(() => getShoppingConfig(pageElement)).to.not.throw();
+    });
 
     it('throws on no config', async () => {
       await createAmpStoryShoppingConfig();
@@ -183,20 +178,17 @@ describes.realWin(
 
     it('does use inline config when remote src is invalid', async () => {
       const exampleURL = 'invalidRemoteURL';
-      pageElement.setAttribute('src', exampleURL);
-      const result = await createAmpStoryShoppingConfig('invalidRemoteUrl');
+      const result = await createAmpStoryShoppingConfig(exampleURL);
       expect(result).to.deep.eql(keyedDefaultInlineConfig);
     });
 
     it('test invalid remote config url', async () => {
       await createAmpStoryShoppingConfig();
-      const exampleURL = 'invalidRemoteURL';
-      pageElement.setAttribute('src', exampleURL);
       expectAsyncConsoleError(async () => {
         expect(async () => {
           await getShoppingConfig(pageElement);
         }).to.throw(
-          /'amp-story-auto-ads:config error determining if remote config is valid json: bad url or bad json'​​​/
+          /'amp-story-shopping-config:config error determining if remote config is valid json: bad url or bad json'​​​/
         );
       });
     });
@@ -226,30 +218,23 @@ describes.realWin(
 
     it('test validate required fields for config', async () => {
       const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-
-      for (const [key, value] of Object.entries(productValidationConfig)) {
-        if (value.includes(validateRequired)) {
-          delete invalidConfig['items'][0][key];
-        }
-      }
+      const requiredKey = 'productId';
+      delete invalidConfig['items'][0][requiredKey];
+      const errorString = `Error: Field productId is required.`;
       const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
-      for (const [key, value] of Object.entries(productValidationConfig)) {
-        if (value.includes(validateRequired)) {
-          const errorString = `Error: Field ${key} is required.`;
-          expect(spy).to.have.been.calledWith(
-            'AMP-STORY-SHOPPING-CONFIG',
-            errorString
-          );
-        }
-      }
+      expect(spy).to.have.been.calledWith(
+        'AMP-STORY-SHOPPING-CONFIG',
+        errorString
+      );
     });
 
     it('should fail config validation because an expected string JSON value is of a non-string type', async () => {
       const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      invalidConfig['items'][0]['productTitle'] = 50; // This value is not a string
+      const invalidValue = 50; // This value is not a string
+      invalidConfig['items'][0]['productTitle'] = invalidValue;
 
-      const errorString = `Error: productTitle ${invalidConfig['items'][0]['productTitle']} is not a string`;
+      const errorString = `Error: productTitle ${invalidValue} is not a string`;
       const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(spy).to.have.been.calledWith(
@@ -260,9 +245,10 @@ describes.realWin(
 
     it('should fail config validation because an expected string JSON value is not a valid HTML id', async () => {
       const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      invalidConfig['items'][0]['productId'] = '1234city-pop'; // productId starts iwth a number, so it is an invalid HTML Id
+      const invalidValue = '1234city-pop'; // productId starts with a number, so it is an invalid HTML Id
+      invalidConfig['items'][0]['productId'] = invalidValue;
 
-      const errorString = `Error: productId ${invalidConfig['items'][0]['productId']} is not a valid HTML Id`;
+      const errorString = `Error: productId ${invalidValue} is not a valid HTML Id`;
       const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(spy).to.have.been.calledWith(
@@ -273,9 +259,10 @@ describes.realWin(
 
     it('should fail config validation because an expected number JSON value is not a valid number', async () => {
       const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      invalidConfig['items'][0]['productPrice'] = 'two dozen watermelons'; // two dozen watermelons is not an actual price.
+      const invalidValue = 'two dozen watermelons'; // two dozen watermelons is not an actual price.
+      invalidConfig['items'][0]['productPrice'] = invalidValue;
 
-      const errorString = `Error: Value ${invalidConfig['items'][0]['productPrice']} for field productPrice is not a number`;
+      const errorString = `Error: Value ${invalidValue} for field productPrice is not a number`;
       const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(spy).to.have.been.calledWith(
@@ -286,9 +273,10 @@ describes.realWin(
 
     it('should fail config validation because an expected string JSON value is not a valid currency code symbol', async () => {
       const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      invalidConfig['items'][0]['productPriceCurrency'] = 'ZABAN'; // This is not a valid currency symbol code
+      const invalidValue = 'ZABAN'; // This is not a valid currency symbol code
+      invalidConfig['items'][0]['productPriceCurrency'] = invalidValue;
 
-      const errorString = `Error: productPriceCurrency ${invalidConfig['items'][0]['productPriceCurrency']} is not a valid currency code`;
+      const errorString = `Error: productPriceCurrency ${invalidValue} is not a valid currency code`;
       const spy = env.sandbox.spy(user(), 'warn');
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(spy).to.have.been.calledWith(
@@ -300,7 +288,8 @@ describes.realWin(
     it('should fail config validation because an expected string JSON value is not a valid url', async () => {
       expectAsyncConsoleError(errorString, 1);
       const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      invalidConfig['items'][0]['productUrl'] = 'http://zapp'; // This is not a valid url
+      const invalidValue = 'http://zapp'; // This is not a valid url
+      invalidConfig['items'][0]['productUrl'] = invalidValue;
 
       const errorString = `Error: productUrl ${invalidConfig['items'][0]['productUrl'][0]} is not a valid URL. (Error: amp-story-shopping-config productImages source must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${invalidConfig['items'][0]['productUrl'][0]})`;
       const spy = env.sandbox.spy(url, 'assertHttpsUrl');

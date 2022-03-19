@@ -24,7 +24,7 @@ const aggregateRatingValidationConfig = {
 };
 
 /** @const {!Object<string, !Array<function>>} */
-export const productValidationConfig = {
+const productValidationConfig = {
   /* Required Attrs */
   'productUrl': [validateRequired, validateURL],
   'productId': [validateRequired, validateString, validateHTMLId],
@@ -92,7 +92,7 @@ function getObjectArrayValidationFnForConfig(validationConfig) {
  * @param {string} field
  * @param {?string=} value
  */
-export function validateRequired(field, value) {
+function validateRequired(field, value) {
   if (value === undefined || value === null) {
     throw Error(`Field ${field} is required.`);
   }
@@ -103,7 +103,7 @@ export function validateRequired(field, value) {
  * @param {string} field
  * @param {?string=} str
  */
-export function validateString(field, str) {
+function validateString(field, str) {
   if (typeof str !== 'string') {
     throw Error(`${field} ${str} is not a string`);
   }
@@ -114,7 +114,7 @@ export function validateString(field, str) {
  * @param {string} field
  * @param {?string=} id
  */
-export function validateHTMLId(field, id) {
+function validateHTMLId(field, id) {
   const checkID = /^[A-Za-z]+[\w\-\:\.]*$/;
   if (!checkID.test(id)) {
     throw Error(`${field} ${id} is not a valid HTML Id`);
@@ -126,10 +126,10 @@ export function validateHTMLId(field, id) {
  * @param {string} field
  * @param {?number=} number
  */
-export function validateNumber(field, number) {
+function validateNumber(field, number) {
   if (
-    (typeof number === 'string' && !/^[0-9.,]+$/.test(number)) ||
-    (typeof number !== 'string' && typeof number !== 'number')
+    typeof number !== 'number' &&
+    (typeof number !== 'string' || !/^[0-9.,]+$/.test(number))
   ) {
     throw Error(`Value ${number} for field ${field} is not a number`);
   }
@@ -140,7 +140,7 @@ export function validateNumber(field, number) {
  * @param {string} field
  * @param {?string=} currencyCode
  */
-export function validateCurrency(field, currencyCode) {
+function validateCurrency(field, currencyCode) {
   const testPrice = 0;
   try {
     // This will throw an error on invalid currency codes.
@@ -155,7 +155,7 @@ export function validateCurrency(field, currencyCode) {
  * @param {string} field
  * @param {?Array<string>=} url
  */
-export function validateURL(field, url) {
+function validateURL(field, url) {
   try {
     assertHttpsUrl(url, `amp-story-shopping-config ${field}`);
   } catch (err) {
@@ -171,7 +171,7 @@ export function validateURL(field, url) {
  * @param {string=} parentFieldName Optional parent field name of the object for error messages.
  * @return {boolean} returns a boolean indicating whether the validation was successful.
  */
-export function validateConfig(
+function validateConfig(
   productConfig,
   validationConfig,
   parentFieldName = undefined
@@ -199,7 +199,7 @@ export function validateConfig(
 }
 
 /** @typedef {!Object<string, !ShoppingConfigDataDef> */
-export let KeyedShoppingConfigDef;
+let KeyedShoppingConfigDef;
 
 /**
  * Validates and returns the shopping config corresponding to the given
