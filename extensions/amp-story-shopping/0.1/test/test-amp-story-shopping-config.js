@@ -176,16 +176,16 @@ describes.realWin(
     });
 
     it('does use inline config when remote src is invalid', async () => {
-      const exampleURL = 'invalidRemoteURL';
-      const result = await createAmpStoryShoppingConfig(exampleURL);
+      const invalidURL = 'invalidRemoteURL';
+      const result = await createAmpStoryShoppingConfig(invalidURL);
       expect(result).to.deep.eql(keyedDefaultInlineConfig);
     });
 
     it('test invalid remote config url', async () => {
-      await createAmpStoryShoppingConfig();
       expectAsyncConsoleError(async () => {
         expect(async () => {
-          await getShoppingConfig(pageElement);
+          const invalidURL = 'invalidRemoteURL';
+          await createAmpStoryShoppingConfig(invalidURL);
         }).to.throw(
           /'amp-story-shopping-config:config error determining if remote config is valid json: bad url or bad json'​​​/
         );

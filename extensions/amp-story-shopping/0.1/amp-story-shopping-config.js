@@ -90,7 +90,7 @@ function getObjectArrayValidationFnForConfig(validationConfig) {
 /**
  * Throws an error if the given field is undefined or null.
  * @param {string} field
- * @param {?string=} value
+ * @param {*} value
  */
 function validateRequired(field, value) {
   if (value === undefined || value === null) {
@@ -101,7 +101,7 @@ function validateRequired(field, value) {
 /**
  * Throws an error if the given field is not a string.
  * @param {string} field
- * @param {?string=} str
+ * @param {*} str
  */
 function validateString(field, str) {
   if (typeof str !== 'string') {
@@ -112,7 +112,7 @@ function validateString(field, str) {
 /**
  * Throws an error if the given ID is not a valid HTML ID.
  * @param {string} field
- * @param {?string=} id
+ * @param {*} id
  */
 function validateHTMLId(field, id) {
   const checkID = /^[A-Za-z]+[\w\-\:\.]*$/;
@@ -124,7 +124,7 @@ function validateHTMLId(field, id) {
 /**
  * Throws an error if the given value is not a number.
  * @param {string} field
- * @param {?number=} number
+ * @param {*} number
  */
 function validateNumber(field, number) {
   if (
@@ -138,7 +138,7 @@ function validateNumber(field, number) {
 /**
  * Throws an error if the given currency code is invalid.
  * @param {string} field
- * @param {?string=} currencyCode
+ * @param {*} currencyCode
  */
 function validateCurrency(field, currencyCode) {
   const testPrice = 0;
@@ -153,7 +153,7 @@ function validateCurrency(field, currencyCode) {
 /**
  * Throws an error if a given URL is invalid.
  * @param {string} field
- * @param {?Array<string>=} url
+ * @param {*} url
  */
 function validateURL(field, url) {
   try {
