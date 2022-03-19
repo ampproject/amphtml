@@ -167,9 +167,12 @@ function validateURL(field, url) {
  * Uses the specified validation configuration to run validation against
  * the user's shopping configuration.
  * @param {!ShoppingConfigDataDef} productConfig The user's config object.
- * @param {!Object<string, !Array<function>>} validationConfig The object to validate against the user's config.
- * @param {string=} parentFieldName Optional parent field name of the object for error messages.
- * @return {boolean} returns a boolean indicating whether the validation was successful.
+ * @param {!Object<string, !Array<function>>} validationConfig The object to
+ *     validate against the user's config.
+ * @param {string=} parentFieldName Optional parent field name of the object
+ *     for error messages.
+ * @return {boolean} returns a boolean indicating whether the validation
+ *     was successful.
  */
 function validateConfig(
   productConfig,
@@ -204,8 +207,10 @@ let KeyedShoppingConfigDef;
 /**
  * Validates and returns the shopping config corresponding to the given
  * amp-story-shopping-attachment element.
- * @param {!Element} shoppingAttachmentEl <amp-story-shopping-attachment> The amp story shopping attachment element
- * @return {!Promise<!KeyedShoppingConfigDef>} An object with product ID keys that each have a `ShoppingConfigDataDef` value
+ * @param {!Element} shoppingAttachmentEl <amp-story-shopping-attachment>
+ *     The amp story shopping attachment element
+ * @return {!Promise<!KeyedShoppingConfigDef>} An object with product ID
+ *     keys that each have a `ShoppingConfigDataDef` value
  */
 export function getShoppingConfig(shoppingAttachmentEl) {
   return getElementConfig(shoppingAttachmentEl).then((config) => {

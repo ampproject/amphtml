@@ -120,12 +120,11 @@ describes.realWin(
     });
 
     it('throws on no config', async () => {
-      await createAmpStoryShoppingConfig();
       expectAsyncConsoleError(async () => {
         expect(() => {
           const shoppingAttachment = <amp-story-shopping-attachment />;
           pageElement.appendChild(shoppingAttachment);
-          return getShoppingConfig(shoppingAttachment);
+          return createAmpStoryShoppingConfig();
         }).to.throw(/<script> tag with type=\"application\/json\"​​​/);
       });
     });
