@@ -1,20 +1,23 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {Animation} from '#utils/animation';
-import {CarouselControls} from './carousel-controls';
-import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {dev} from '#utils/log';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {Keys_Enum} from '#core/constants/key-codes';
 import {isLayoutSizeFixed} from '#core/dom/layout';
-import {listen} from '#utils/event-helper';
-import {numeric} from '#core/dom/transition';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {realChildElements} from '#core/dom/query';
+import {numeric} from '#core/dom/transition';
+
+import {Services} from '#service';
+
+import {Animation} from '#utils/animation';
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
+import {buildDom} from './build-dom';
+import {CarouselControls} from './carousel-controls';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
 
 export class AmpScrollableCarousel extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
+  /** @param {AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -24,7 +27,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     /** @private {number} */
     this.oldPos_ = 0;
 
-    /** @private {?Array<!Element>} */
+    /** @private {?Array<Element>} */
     this.cells_ = null;
 
     /** @private {?Element} */
@@ -37,21 +40,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     this.unobserveIntersections_ = null;
 
     /** @private {CarouselControls} */
-    this.controls_ = new CarouselControls({
-      element,
-      go: this.go.bind(this),
-      hasPrev: () => this.hasPrev(),
-      hasNext: () => this.hasNext(),
-
-      /**
-       * In scrollable carousel, the next/previous buttons add no functionality
-       * for screen readers as scrollable carousel is just a horizontally
-       * scrollable div which ATs navigate just like any other content.
-       * To avoid confusion, we therefore set the role to presentation for the
-       * controls in this case.
-       */
-      ariaRole: 'presentation',
-    });
+    this.controls_ = null;
   }
 
   /** @override */
@@ -64,23 +53,11 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     return true;
   }
 
-  /** Build carousel elements */
-  buildCarousel() {
-    this.cells_ = realChildElements(this.element);
-
-    this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.classList.add('i-amphtml-scrollable-carousel-container');
-    // Focusable container makes it possible to fully consume Arrow key events.
-    this.container_.setAttribute('tabindex', '-1');
-    this.element.appendChild(this.container_);
-
-    this.cells_.forEach((cell) => {
-      Services.ownersForDoc(this.element).setOwner(cell, this.element);
-      cell.classList.add('amp-carousel-slide');
-      cell.classList.add('amp-scrollable-carousel-slide');
-      this.container_.appendChild(cell);
-    });
-
+  /**
+   * Attaches event handlers.
+   * @private
+   */
+  setupBehavior_() {
     this.cancelTouchEvents_();
 
     this.container_.addEventListener('scroll', this.scrollHandler_.bind(this));
@@ -89,16 +66,20 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
       this.keydownHandler_.bind(this)
     );
 
+    this.cells_.forEach((cell) => {
+      Services.ownersForDoc(this.element).setOwner(cell, this.element);
+    });
+
     this.registerAction(
       'goToSlide',
       (invocation) => {
         const {args} = invocation;
         if (args) {
           const index = parseInt(args['index'], 10);
-          this.goToSlide_(index);
+          this.goToSlide(index);
         }
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
     /** If the element is in an email document, allow its `goToSlide` action. */
     Services.actionServiceForDoc(this.element).addToAllowlist(
@@ -110,9 +91,17 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.buildCarousel();
-    this.controls_.buildDom();
-    this.controls_.initialize();
+    const {cells, container, nextButton, prevButton} = buildDom(this.element);
+    this.container_ = container;
+    this.cells_ = cells;
+
+    this.controls_ = new CarouselControls({
+      element: this.element,
+      prevButton,
+      nextButton,
+      go: this.go.bind(this),
+    });
+    this.setupBehavior_();
   }
 
   /** @override */
@@ -124,7 +113,10 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
 
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
-    this.controls_.setControlsState();
+    this.controls_.setControlsState({
+      prev: this.hasPrev_(),
+      next: this.hasNext_(),
+    });
     return Promise.resolve();
   }
 
@@ -151,9 +143,8 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
    * desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
-   * @param {boolean=} opt_autoplay
    */
-  go(dir, animate, opt_autoplay) {
+  go(dir, animate) {
     const newPos = this.nextPos_(this.pos_, dir);
     const oldPos = this.pos_;
 
@@ -165,7 +156,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
       this.commitSwitch_(newPos);
       this.container_./*OK*/ scrollLeft = newPos;
     } else {
-      /** @const {!TransitionDef<number>} */
+      /** @const {TransitionDef<number>} */
       const interpolate = numeric(oldPos, newPos);
       const duration = 200;
       const curve = 'ease-in-out';
@@ -185,10 +176,9 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
   /**
    * Scrolls to the slide at the given slide index.
    * @param {number} index
-   * @private
    * @return {*} TODO(#23582): Specify return type
    */
-  goToSlide_(index) {
+  goToSlide(index) {
     const noOfSlides = this.cells_.length;
 
     if (!isFinite(index) || index < 0 || index >= noOfSlides) {
@@ -207,7 +197,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
       if (newPos == oldPos) {
         return;
       }
-      /** @const {!TransitionDef<number>} */
+      /** @const {TransitionDef<number>} */
       const interpolate = numeric(oldPos, newPos);
       const duration = 200;
       const curve = 'ease-in-out';
@@ -255,12 +245,12 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
    * Escapes Left and Right arrow key events on the carousel container.
    * This is to prevent them from doubly interacting with surrounding viewer
    * contexts such as email clients when interacting with the amp-carousel.
-   * @param {!KeyboardEvent} event
+   * @param {KeyboardEvent} event
    * @private
    */
   keydownHandler_(event) {
     const {key} = event;
-    if (key == Keys.LEFT_ARROW || key == Keys.RIGHT_ARROW) {
+    if (key == Keys_Enum.LEFT_ARROW || key == Keys_Enum.RIGHT_ARROW) {
       event.stopPropagation();
     }
   }
@@ -307,7 +297,10 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
     this.oldPos_ = pos;
     this.pos_ = pos;
-    this.controls_.setControlsState();
+    this.controls_.setControlsState({
+      prev: this.hasPrev_(),
+      next: this.hasNext_(),
+    });
   }
 
   /**
@@ -317,7 +310,6 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
    * @private
    */
   nextPos_(pos, dir) {
-    // TODO(jridgewell): this could be using cached values from Layers.
     const containerWidth = this.element./*OK*/ offsetWidth;
     const fullWidth = this.container_./*OK*/ scrollWidth;
     const newPos = pos + dir * containerWidth;
@@ -332,7 +324,7 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
 
   /**
    * @param {number} pos
-   * @param {function(!Element):void} callback
+   * @param {function(Element):void} callback
    * @private
    */
   withinWindow_(pos, callback) {
@@ -392,17 +384,45 @@ export class AmpScrollableCarousel extends AMP.BaseElement {
     }
   }
 
-  /** @return  {boolean} */
-  hasPrev() {
+  /**
+   * @return {boolean}
+   * @private
+   */
+  hasPrev_() {
     return this.pos_ != 0;
   }
 
-  /** @return  {boolean} */
-  hasNext() {
+  /**
+   * @return {boolean}
+   * @private
+   */
+  hasNext_() {
     const containerWidth = this.element./*OK*/ offsetWidth;
     const scrollWidth = this.container_./*OK*/ scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;
+  }
+
+  /** Used by amp-lightbox-gallery */
+  interactionNext() {
+    this.controls_.handleNext();
+  }
+
+  /** Used by amp-lightbox-gallery */
+  interactionPrev() {
+    this.controls_.handlePrev();
+  }
+
+  /**
+   * Used by amp-lightbox-gallery
+   *
+   * Does all the work needed to proceed to next
+   * desired direction.
+   * @param {number} dir -1 or 1
+   * @param {boolean} animate
+   */
+  goCallback(dir, animate) {
+    this.go(dir, animate);
   }
 
   /**

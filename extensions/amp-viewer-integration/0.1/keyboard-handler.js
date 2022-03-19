@@ -1,5 +1,4 @@
-import {Keys} from '#core/constants/key-codes';
-import {dict} from '#core/types/object';
+import {Keys_Enum} from '#core/constants/key-codes';
 
 import {listen} from '#utils/event-helper';
 
@@ -103,7 +102,7 @@ function isHandledByEventTarget(e) {
     // Various AMP components consume keyboard events by preventing the default.
     return true;
   }
-  if (e.key == Keys.ESCAPE) {
+  if (e.key == Keys_Enum.ESCAPE) {
     // ESC is always a valid key for things like keyboard shortcuts, even if the
     // focus is on an input control, for example.
     return false;
@@ -111,7 +110,7 @@ function isHandledByEventTarget(e) {
   switch (e.target.nodeName) {
     case 'INPUT':
       // For checkboxes, only allow swallowing the space key event.
-      return e.target.type != 'checkbox' || e.key == Keys.SPACE;
+      return e.target.type != 'checkbox' || e.key == Keys_Enum.SPACE;
     case 'TEXTAREA':
     case 'BUTTON':
     case 'SELECT':
@@ -129,7 +128,7 @@ function isHandledByEventTarget(e) {
  * @return {!JsonObject}
  */
 function getKeyboardEventInit(e) {
-  const copiedEvent = dict();
+  const copiedEvent = {};
   eventProperties.forEach((eventProperty) => {
     if (e[eventProperty] !== undefined) {
       copiedEvent[eventProperty] = e[eventProperty];

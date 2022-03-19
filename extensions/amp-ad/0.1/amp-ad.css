@@ -64,7 +64,6 @@ amp-ad[data-a4a-upgrade-type='amp-ad-network-doubleclick-impl'][height='fluid'] 
 
 amp-ad .amp-ad-close-button {
   position: absolute;
-  visibility: visible;
   width: 28px;
   height: 28px;
   right: 0;
@@ -119,7 +118,7 @@ amp-ad[sticky='left'] .amp-ad-close-button {
 }
 
 amp-ad[sticky] {
-  z-index: 11;
+  z-index: 2147483647;
   position: fixed;
   overflow: visible !important;
   box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.2) !important;
@@ -132,6 +131,7 @@ amp-ad[sticky='top'] {
   max-height: 20% !important;
   background: #fff;
   padding-bottom: 5px;
+  top: 0;
 }
 
 amp-ad[sticky='bottom'] {

@@ -1,10 +1,10 @@
-import {ActionTrust} from '#core/constants/action-constants';
-import {AmpEvents} from '#core/constants/amp-events';
-import {TickLabel} from '#core/constants/enums';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {TickLabel_Enum} from '#core/constants/enums';
 import {Observable} from '#core/data-structures/observable';
 import {isJsonScriptTag} from '#core/dom';
 import {isArray} from '#core/types';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -122,9 +122,9 @@ export class AccessService {
       this.firstAuthorizationsCompleted_ = true;
       this.analyticsEvent_('access-authorization-received');
       if (this.performance_) {
-        this.performance_.tick(TickLabel.ACCESS_AUTHORIZATION);
+        this.performance_.tick(TickLabel_Enum.ACCESS_AUTHORIZATION);
         this.performance_.tickSinceVisible(
-          TickLabel.ACCESS_AUTHORIZATION_VISIBLE
+          TickLabel_Enum.ACCESS_AUTHORIZATION_VISIBLE
         );
         this.performance_.flush();
       }
@@ -133,7 +133,10 @@ export class AccessService {
     // Re-authorize newly added sections.
     ampdoc
       .getRootNode()
-      .addEventListener(AmpEvents.DOM_UPDATE, this.onDomUpdate_.bind(this));
+      .addEventListener(
+        AmpEvents_Enum.DOM_UPDATE,
+        this.onDomUpdate_.bind(this)
+      );
   }
 
   /** @override from AccessVars */
@@ -367,12 +370,10 @@ export class AccessService {
 
   /** @private */
   broadcastReauthorize_() {
-    this.viewer_.broadcast(
-      dict({
-        'type': 'amp-access-reauthorize',
-        'origin': this.pubOrigin_,
-      })
-    );
+    this.viewer_.broadcast({
+      'type': 'amp-access-reauthorize',
+      'origin': this.pubOrigin_,
+    });
   }
 
   /**
@@ -693,7 +694,7 @@ export class AccessService {
    * @private
    */
   handleAction_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
+    if (!invocation.satisfiesTrust(ActionTrust_Enum.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'login') {

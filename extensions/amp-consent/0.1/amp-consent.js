@@ -1,3 +1,23 @@
+import {Deferred} from '#core/data-structures/promise';
+import {realChildElements} from '#core/dom/query';
+import {toggle} from '#core/dom/style';
+import {isArray, isEnumValue, isObject} from '#core/types';
+import {hasOwn} from '#core/types/object';
+
+import {Services} from '#service';
+import {
+  NOTIFICATION_UI_MANAGER,
+  NotificationUiManager,
+} from '#service/notification-ui-manager';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {
+  ConsentConfig,
+  expandConsentEndpointUrl,
+  expandPolicyConfig,
+} from './consent-config';
 import {
   CONSENT_ITEM_STATE,
   ConsentMetadataDef,
@@ -7,35 +27,19 @@ import {
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
-import {CSS} from '../../../build/amp-consent-0.1.css';
-import {
-  ConsentConfig,
-  expandConsentEndpointUrl,
-  expandPolicyConfig,
-} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
 import {CookieWriter} from './cookie-writer';
-import {Deferred} from '#core/data-structures/promise';
-import {
-  NOTIFICATION_UI_MANAGER,
-  NotificationUiManager,
-} from '#service/notification-ui-manager';
-import {Services} from '#service';
 import {TcfApiCommandManager} from './tcf-api-command-manager';
+
+import {CSS} from '../../../build/amp-consent-0.1.css';
+import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   assertHttpsUrl,
   getSourceUrl,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {dev, devAssert, user, userAssert} from '#utils/log';
-import {dict, hasOwn} from '#core/types/object';
-import {getData} from '#utils/event-helper';
-import {getServicePromiseForDoc} from '../../../src/service-helpers';
-import {isArray, isEnumValue, isObject} from '#core/types';
-import {realChildElements} from '#core/dom/query';
-import {toggle} from '#core/dom/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
@@ -157,7 +161,7 @@ export class AmpConsent extends AMP.BaseElement {
     if (this.consentConfig_['postPromptUI']) {
       this.postPromptUI_ = new ConsentUI(
         this,
-        dict({}),
+        {},
         this.consentConfig_['postPromptUI']
       );
     }
@@ -179,7 +183,7 @@ export class AmpConsent extends AMP.BaseElement {
      *   'postPromptUI': ...
      * }
      */
-    const policyConfig = this.consentConfig_['policy'] || dict({});
+    const policyConfig = this.consentConfig_['policy'] || {};
 
     this.policyConfig_ = expandPolicyConfig(
       policyConfig,
@@ -453,6 +457,30 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {!ConsentMetadataDef=} opt_consentMetadata
    */
   handleAction_(action, consentString, opt_consentMetadata) {
+    const setDirtyBitPromise =
+      isEnumValue(ACTION_TYPE, action) &&
+      this.consentConfig_['clearDirtyBitOnResponse_dontUseThisItMightBeRemoved']
+        ? this.consentStateManager_.setDirtyBit(false)
+        : Promise.resolve();
+    setDirtyBitPromise.then(() => {
+      this.handleActionAfterClearingDirtyBit_(
+        action,
+        consentString,
+        opt_consentMetadata
+      );
+    });
+  }
+
+  /**
+   * @param {string} action
+   * @param {string=} consentString
+   * @param {!ConsentMetadataDef=} opt_consentMetadata
+   */
+  handleActionAfterClearingDirtyBit_(
+    action,
+    consentString,
+    opt_consentMetadata
+  ) {
     this.consentStateChangedViaPromptUI_ = true;
 
     if (action == ACTION_TYPE.ACCEPT) {
@@ -521,10 +549,13 @@ export class AmpConsent extends AMP.BaseElement {
    */
   handleReprompt_(invocation) {
     const {args} = invocation;
-    if (args && args['expireCache'] === true) {
-      this.consentStateManager_.setDirtyBit();
-    }
-    this.scheduleDisplay_(true);
+    const setDirtyBitPromise =
+      args?.['expireCache'] === true
+        ? this.consentStateManager_.setDirtyBit()
+        : Promise.resolve();
+    setDirtyBitPromise.then(() => {
+      this.scheduleDisplay_(true);
+    });
   }
 
   /**
@@ -699,7 +730,7 @@ export class AmpConsent extends AMP.BaseElement {
         this.consentStateManager_.getLastConsentInstanceInfo();
       this.remoteConfigPromise_ = storeConsentPromise.then((storedInfo) => {
         // Note: Expect the request to look different in following versions.
-        const body = dict({
+        const body = {
           'consentInstanceId': this.consentId_,
           'consentStateValue': getConsentStateValue(storedInfo['consentState']),
           'consentMetadata': storedInfo['consentMetadata'],
@@ -708,7 +739,7 @@ export class AmpConsent extends AMP.BaseElement {
           'matchedGeoGroup': this.matchedGeoGroup_,
           'purposeConsents': storedInfo['purposeConsents'],
           'clientConfig': this.consentConfig_['clientConfig'],
-        });
+        };
         const init = {
           credentials: 'include',
           method: 'POST',

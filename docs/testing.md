@@ -19,13 +19,11 @@ This document provides details for testing and building your AMP code.
     -   [A4A envelope (/a4a/, /a4a-3p/)](#a4a-envelope-a4a-a4a-3p)
     -   [In-a-box envelope (/inabox/)](#in-a-box-envelope-inabox)
     -   [Chrome extension](#chrome-extension)
--   [Visual Diff Tests](#visual-diff-tests)
+-   [Visual Diff Tests](#-visual-diff-tests)
     -   [Failing Tests](#failing-tests)
     -   [Flaky Tests](#flaky-tests)
     -   [How Are Tests Executed](#how-are-tests-executed)
     -   [Adding and Modifying Visual Diff Tests](#adding-and-modifying-visual-diff-tests)
-        -   [One-time Setup](#one-time-setup)
-        -   [Writing the Test](#writing-the-test)
 -   [Isolated Component Testing](#isolated-component-testing)
     -   [Launching Storybook](#launching-storybook)
     -   [Writing test scenarios](#writing-test-scenarios)
@@ -230,7 +228,7 @@ Additionally, the following query parameters can be provided:
 
 For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](../testing/local-amp-chrome-extension/README.md).
 
-## Visual Diff Tests
+## <a name="visual-diff-tests"></a> Visual Diff Tests
 
 In addition to building the AMP runtime and running `amp [unit|integration]`, the automatic test run on CircleCI includes a set of visual diff tests to make sure a new commit to `main` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
 
@@ -268,49 +266,7 @@ Percy DOES NOT by default run JavaScript, so the same DOM snapshot will be used 
 
 ### Adding and Modifying Visual Diff Tests
 
-#### One-time Setup
-
-First create a [free BrowserStack account](https://www.browserstack.com/), use it to log into [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`:
-
-```sh
-export PERCY_TOKEN="<unique-percy-token>"
-```
-
-Once the environment variable is set up, you can run the AMP visual diff tests. You can also pass this token directly to `amp visual-diff --percy_token="<unique-percy-token>"`
-
-#### Writing the Test
-
-To start, create the page and register it in the configuration file for visual diff tests:
-
--   Create an AMP document that will be tested under `examples/visual-tests`.
--   Add an entry in the [`test/visual-diff/visual-tests.jsonc`](../test/visual-diff/visual-tests.jsonc) JSON5 file. Documentation for the various settings are in that file.
-    -   Must set fields: `url`, `name`
-    -   You will also likely want to set `loading_complete_css` and maybe also `loading_incomplete_css`
-    -   Only set `viewport` if your page looks different on mobile vs. desktop, and you intend to create a separate config for each
-        -   The `viewport` setting wraps the entire DOM snapshot inside an `<iframe>` before uploading to Percy. Beware of weird iframe behaviors! 🐉
-    -   Do not set `enable_percy_javascript` without consulting `@ampproject/wg-infra`
-    -   Point `interactive_tests` to a JavaScript file if you would like to add interactions to the page. See examples of existing interactive tests to learn how to write those
--   (For past examples of pull requests that add visual diff tests, see [#17047](https://github.com/ampproject/amphtml/pull/17047), [#17110](https://github.com/ampproject/amphtml/pull/17110))
-
-Now, verify your test by executing it:
-
--   Build the AMP runtime in minified mode:
-    ```sh
-    amp dist --fortesting
-    ```
-    -   You can verify that your page looks as intented by running `amp serve --minified` and opening it in a browser
--   Execute the visual diff tests:
-    ```sh
-    amp visual-diff --nobuild
-    ```
-    -   Add `--grep="<regular expression>"` to the command to execute a subset of the tests. e.g., `amp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
-    -   Note that if you drop the `--nobuild` flag, `amp visual-diff` will run `amp dist --fortesting` on each execution. This is time consuming, so only drop it if you are changing the runtime/extension code and not just the test files
-    -   To see debugging info during Percy runs, you can add `--chrome_debug`, `--webserver_debug`, or `--debug` for both.
--   When the test finishes executing it will print a URL to Percy where you can inspect the results. It should take about a minute to finish processing.
--   Inspect the build on Percy. If you are not happy with the results, fix your page or code, and repeat. If all is well, approve it. This creates a new baseline on Percy, against which all following builds will be compared.
--   After approving your test, repeat the `amp visual-diff` command at least 5 more times. If any of the subsequent runs fails with a visual changes, this means that your test is flaky.
-    -   Flakiness is usually caused by bad `loading_complete_css` configurations
-    -   To find what CSS selector appear _exclusively_ after the page settles into the expected result, download the _baseline_ and _new_ source for the snapshots that Percy used in the build that flaked, and compare them using a text diff application
+See [Adding and Modifying Visual Diff Tests](./writing-visual-diff-tests.md).
 
 ## Isolated Component Testing
 
@@ -320,35 +276,49 @@ Stories can show configuration controls for manual testing of component paramete
 
 > 📖 Storybook documentation: [What's a Story?](https://storybook.js.org/docs/react/get-started/whats-a-story)
 
-This repository has two separate Storybooks for different evironments: **`amp`** and **`preact`**. They list either AMP elements or Preact components respectively.
-
 ### Launching Storybook
 
-You may launch Storybooks for both environments by running:
+You may launch the `preact` Storybook by running:
 
 ```sh
 amp storybook
 ```
 
-This command launches a separate browser tab for each Storybook, on `localhost:9001` and `:9002`.
+You may launch a specific environment by providing `--storybook_env`:
 
-You may launch a single environment by specifying `--storybook_env`:
+-   **`preact`**
 
-```sh
-amp storybook --storybook_env=preact
-```
+    ```sh
+    amp storybook --storybook_env=preact
+    ```
 
-> Launching the `amp` environment also initiates the build-and-serve task that's normally launched using the [`amp` command](#testing-commands). This provides an additional server on `localhost:8000`.
+-   **`react`**
+
+    ```sh
+    amp storybook --storybook_env=react
+    ```
+
+    > Launching the **`react`** environment requires component bundles. You should ensure that they're present in `extensions/**/dist` directories beforehand, by running `amp build --extensions=...` for all Bento components.
+
+-   **`amp`**
+
+    ```sh
+    amp storybook --storybook_env=amp
+    ```
+
+    > Launching the **`amp`** environment also initiates the build-and-serve task that's normally launched using the [`amp` command](#testing-commands). This provides an additional server on `localhost:8000`.
 
 ### Writing test scenarios
 
-Test scenarios (stories) are located inside a component's directory. Their filename suffix determines whether they run on an `amp` or `preact` environment:
+Test scenarios (stories) are located inside a component's directory. Their filename suffix determines whether they run on the `amp` environment, or on the `preact` and `react` environments:
 
--   **Preact** Stories end with `.js`:
+-   **`preact`** Stories end with `.js`:
 
     `extensions/amp-example/0.1/storybook/Basic.js`
 
--   **AMP** Stories end with `.amp.js`:
+-   **`react`** Stories use the same files as **`preact`**.
+
+-   **`amp`** Stories end with `.amp.js`:
 
     `extensions/amp-example/0.1/storybook/Basic.amp.js`
 

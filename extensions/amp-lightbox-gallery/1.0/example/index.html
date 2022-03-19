@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <!-- These styles prevent Cumulative Layout Shift on the unupgraded custom element -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.css"
+    />
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-lightbox-gallery-1.0.js"
+    ></script>
+    <style>
+      .body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol';
+        background: #ecf1f3;
+      }
+
+      .image-grid {
+        display: grid;
+        grid-template-columns: 50vw 50vw;
+        grid-gap: 10px;
+        margin: 2rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-lightbox-gallery></bento-lightbox-gallery>
+
+    <section class="image-grid">
+      <figure>
+        <img
+          width="160"
+          height="120"
+          src="https://picsum.photos/id/237/640/480"
+          lightbox
+        />
+        <figcaption>A random image</figcaption>
+      </figure>
+      <figure>
+        <img
+          width="160"
+          height="120"
+          src="https://picsum.photos/id/238/640/480"
+          lightbox
+        />
+        <figcaption>Another random image</figcaption>
+      </figure>
+      <figure>
+        <img
+          width="160"
+          height="120"
+          src="https://picsum.photos/id/239/640/480"
+          lightbox
+        />
+        <figcaption>And another random image</figcaption>
+      </figure>
+      <figure>
+        <img
+          width="160"
+          height="120"
+          src="https://picsum.photos/id/240/640/480"
+          lightbox
+        />
+        <figcaption>Aaaand another random image</figcaption>
+      </figure>
+    </section>
+  </body>
+</html>

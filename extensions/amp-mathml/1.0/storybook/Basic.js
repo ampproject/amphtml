@@ -2,6 +2,8 @@ import * as Preact from '#preact';
 
 import {BentoMathml} from '../component';
 
+import '../component.jss';
+
 const formulas = {
   quadratic: '\\[x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.\\]',
   cauchy: '\\[f(a) = \\frac{1}{2\\pi i} \\oint\\frac{f(z)}{z-a}dz\\]',
@@ -26,47 +28,30 @@ export const Default = (args) => {
   );
 };
 
-export const WithScroll = (args) => {
-  return (
-    <>
-      <p>Should lazily render formula when formulas are offscreen</p>
-      <TestDemo withScroll={true} {...args}></TestDemo>
-      <TestDemoInline {...args}></TestDemoInline>
-    </>
-  );
-};
-
-export const WithCustomDimensions = (args) => {
-  return (
-    <>
-      <p>
-        Should render everything, using manual sizes for onscreen elements and
-        dynamic resizing for offscreen elements
-      </p>
-      <TestDemo withScroll={true} style={{height: 40}} {...args}></TestDemo>
-      <TestDemoInline {...args}></TestDemoInline>
-    </>
-  );
-};
-
-function TestDemo({formulas, withScroll, ...args}) {
+function TestDemo({formulas, ...args}) {
   const {cauchy, doubleAngle, quadratic} = formulas;
   return (
     <>
       <h2>The Quadratic Formula</h2>
-      <BentoMathml formula={quadratic} {...args}></BentoMathml>
+      <BentoMathml
+        style={{height: 40}}
+        formula={quadratic}
+        {...args}
+      ></BentoMathml>
 
       <h2>Cauchy's Integral Formula</h2>
-      <BentoMathml formula={cauchy} {...args}></BentoMathml>
-
-      {withScroll ? (
-        <div style={{height: 1000, border: '1px solid black'}}>
-          long stuff to create scroll
-        </div>
-      ) : null}
+      <BentoMathml
+        style={{height: 40}}
+        formula={cauchy}
+        {...args}
+      ></BentoMathml>
 
       <h2>Double angle formula for Cosines</h2>
-      <BentoMathml formula={doubleAngle} {...args}></BentoMathml>
+      <BentoMathml
+        style={{height: 23}}
+        formula={doubleAngle}
+        {...args}
+      ></BentoMathml>
     </>
   );
 }
@@ -78,10 +63,22 @@ function TestDemoInline({formulas, ...args}) {
       <h2>Inline formula</h2>
       <p>
         This is an example of a formula of{' '}
-        <BentoMathml inline formula={'`x`'} {...args}></BentoMathml>,{' '}
-        <BentoMathml inline formula={quadratic} {...args}></BentoMathml> placed
-        inline in the middle of a block of text.{' '}
         <BentoMathml
+          style={{height: 13, width: 9}}
+          inline
+          formula={'`x`'}
+          {...args}
+        ></BentoMathml>
+        ,{' '}
+        <BentoMathml
+          style={{height: 47, width: 146}}
+          inline
+          formula={quadratic}
+          {...args}
+        ></BentoMathml>{' '}
+        placed inline in the middle of a block of text.{' '}
+        <BentoMathml
+          style={{height: 19, width: 71}}
           inline
           formula={'\\( \\cos(θ+φ) \\)'}
           {...args}

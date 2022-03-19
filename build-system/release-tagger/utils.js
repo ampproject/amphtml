@@ -4,7 +4,7 @@
  */
 
 const dedent = require('dedent');
-const {GraphQlQueryResponseData, graphql} = require('@octokit/graphql'); //eslint-disable-line no-unused-vars
+const {GraphQlQueryResponseData, graphql} = require('@octokit/graphql'); // eslint-disable-line @typescript-eslint/no-unused-vars
 const {Octokit} = require('@octokit/rest');
 
 // setup
@@ -60,14 +60,15 @@ async function _runQueryInBatches(queryType, queries) {
  * @param {string} title
  * @return {Promise<Object>}
  */
-function createIssue(body, label, title) {
-  return octokit.rest.issues.create({
+async function createIssue(body, label, title) {
+  const {data} = await octokit.rest.issues.create({
     owner,
     repo,
     title,
     body,
     labels: [label],
   });
+  return data;
 }
 
 /**
@@ -100,7 +101,7 @@ async function getIssue(title) {
   const search = dedent`\
     search(query:"repo:${owner}/${repo} in:title ${title}", \
     type: ISSUE, first: 1) { nodes { ... on Issue \
-    { number title body }}}`;
+    { number title body url }}}`;
   const query = `query {${search}}`;
   const response = await graphqlWithAuth({query});
   if (response.search?.nodes) {

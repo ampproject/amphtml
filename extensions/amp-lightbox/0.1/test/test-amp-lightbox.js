@@ -1,11 +1,12 @@
 import '../amp-lightbox';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import * as dom from '#core/dom';
-import {ActionService} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
-import {Keys} from '#core/constants/key-codes';
-import {Services} from '#service';
-import {whenCalled} from '#testing/helpers/service';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {whenCalled} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-lightbox component',
@@ -86,7 +87,7 @@ describes.realWin(
           'source',
           'caller',
           'event',
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
         expect(element.enqueAction.callCount).to.be.above(0);
         expect(element.enqueAction).to.be.calledWith(
@@ -98,29 +99,22 @@ describes.realWin(
             method,
             node: element,
             source: 'source',
-            trust: ActionTrust.HIGH,
+            trust: ActionTrust_Enum.HIGH,
           })
         );
       });
     });
 
-    it('should close on ESC', async () => {
+    it('should close on close-watcher signal', async () => {
       const lightbox = createLightbox();
       const impl = await lightbox.getImpl(true);
-      impl.getHistory_ = () => {
-        return {
-          pop: () => {},
-          push: () => Promise.resolve(11),
-        };
-      };
 
       const sourceElement = createOpeningButton('openBtn');
       const setupCloseSpy = env.sandbox.spy(impl, 'close');
 
-      impl.open_({caller: sourceElement});
-      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys.ENTER}));
-      impl.closeOnEscape_(new KeyboardEvent('keydown', {key: Keys.ESCAPE}));
-      expect(setupCloseSpy).to.be.calledOnce;
+      await impl.open_({caller: sourceElement});
+      impl.closeWatcher_.signalClosed();
+      expect(setupCloseSpy).to.be.called;
     });
 
     it('should not change focus or create a button if a focus has been made in the modal', async () => {

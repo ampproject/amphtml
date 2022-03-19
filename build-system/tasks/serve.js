@@ -13,6 +13,7 @@ const {
   lazyBuild3pVendor,
   lazyBuildExtensions,
   lazyBuildJs,
+  preBuildBentoComponents,
   preBuildExtensions,
   preBuildRuntimeFiles,
 } = require('../server/lazy-build');
@@ -198,6 +199,7 @@ async function restartServer() {
 async function performPreBuildSteps() {
   await preBuildRuntimeFiles();
   await preBuildExtensions();
+  await preBuildBentoComponents();
 }
 
 /**
@@ -234,7 +236,7 @@ module.exports = {
   PORT,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 serve.description = 'Start a webserver at the project root directory';
 serve.flags = {

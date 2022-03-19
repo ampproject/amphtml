@@ -62,6 +62,10 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://data.24smi.net',
   },
 
+  '4wmarketplace': {
+    renderStartImplemented: true,
+  },
+
   'a8': {
     prefetch: 'https://statics.a8.net/amp/ad.js',
     renderStartImplemented: true,
@@ -165,6 +169,10 @@ const adConfig = jsonConfiguration({
   },
 
   'adreactor': {},
+
+  'ads2bid': {
+    renderStartImplemented: true,
+  },
 
   'adsensor': {
     prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
@@ -406,6 +414,11 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  'colombiafeed': {
+    prefetch:
+      'https://static.clmbtech.com/c1e/static/themes/js/colombiafeed-amp.js',
+  },
+
   'conative': {
     renderStartImplemented: true,
   },
@@ -431,6 +444,10 @@ const adConfig = jsonConfiguration({
       'https://api.dable.io',
       'https://images.dable.io',
     ],
+    renderStartImplemented: true,
+  },
+
+  'dex': {
     renderStartImplemented: true,
   },
 
@@ -634,6 +651,19 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'insurads': {
+    prefetch: 'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
+    preconnect: [
+      'https://tpc.googlesyndication.com',
+      'https://adservice.google.com',
+      'https://cdn.insurads.com',
+      'https://services.insurads.com',
+      'https://messaging.insurads.com',
+    ],
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'invibes': {
     prefetch: 'https://k.r66net.com/GetAmpLink',
     renderStartImplemented: true,
@@ -661,7 +691,7 @@ const adConfig = jsonConfiguration({
   },
 
   'jixie': {
-    prefetch: ['https://scripts.jixie.io/jxamp.min.js'],
+    prefetch: ['https://scripts.jixie.media/jxamp.min.js'],
     clientIdScope: '__jxamp',
     clientIdCookieName: '_jx',
     renderStartImplemented: true,
@@ -1020,6 +1050,7 @@ const adConfig = jsonConfiguration({
   'rcmwidget': {
     prefetch: 'https://rcmjs.rambler.ru/static/rcmw/rcmw-amp.js',
     renderStartImplemented: true,
+    clientIdScope: '__rcmw_amp',
   },
 
   'readmo': {
@@ -1247,10 +1278,9 @@ const adConfig = jsonConfiguration({
   },
 
   'teads': {
-    prefetch: 'https://s8t.teads.tv/media/format/v3/teads-format.min.js',
+    prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
       'https://cdn2.teads.tv',
-      'https://a.teads.tv',
       'https://t.teads.tv',
       'https://r.teads.tv',
     ],
@@ -1370,6 +1400,7 @@ const adConfig = jsonConfiguration({
   'wunderkind': {
     preconnect: ['https://tag.wknd.ai', 'https://api.bounceexchange.com'],
     renderStartImplemented: true,
+    fullWidthHeightRatio: 4 / 3,
   },
 
   'xlift': {

@@ -1,15 +1,18 @@
-import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
-import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {Priority} from '#service/navigation';
-import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
-import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
+import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
 import {createElementWithAttributes} from '#core/dom';
-import {createLinker} from './linker';
-import {dict} from '#core/types/object';
-import {getHighestAvailableDomain} from '../../../src/cookies';
 import {isObject} from '#core/types';
+import {WindowInterface} from '#core/window/interface';
+
+import {Services} from '#service';
+import {Priority_Enum} from '#service/navigation';
+
 import {user} from '#utils/log';
+
+import {createLinker} from './linker';
+import {ExpansionOptions, variableServiceForDoc} from './variables';
+
+import {getHighestAvailableDomain} from '../../../src/cookies';
+import {addMissingParamsToUrl, addParamToUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-analytics/linker-manager';
@@ -38,7 +41,7 @@ export class LinkerManager {
     this.element_ = element;
 
     /** @const @private {!JsonObject} */
-    this.resolvedIds_ = dict();
+    this.resolvedIds_ = {};
 
     /** @const @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.element_);
@@ -111,10 +114,10 @@ export class LinkerManager {
           return;
         }
         element.href = this.applyLinkers_(element.href);
-      }, Priority.ANALYTICS_LINKER);
+      }, Priority_Enum.ANALYTICS_LINKER);
       navigation.registerNavigateToMutator(
         (url) => this.applyLinkers_(url),
-        Priority.ANALYTICS_LINKER
+        Priority_Enum.ANALYTICS_LINKER
       );
     }
 
@@ -138,7 +141,7 @@ export class LinkerManager {
    * @private
    */
   processConfig_(config) {
-    const processedConfig = dict();
+    const processedConfig = {};
     const defaultConfig = {
       enabled: this.isLegacyOptIn_() && this.isSafari12OrAbove_(),
     };
@@ -214,7 +217,7 @@ export class LinkerManager {
       return false;
     }
 
-    return this.ampdoc_.registerSingleton(AMPDOC_SINGLETON_NAME.LINKER);
+    return this.ampdoc_.registerSingleton(AMPDOC_SINGLETON_NAME_ENUM.LINKER);
   }
 
   /**
@@ -271,7 +274,7 @@ export class LinkerManager {
         this.resolvedIds_[name]
       );
       if (linkerValue) {
-        const params = dict();
+        const params = {};
         params[name] = linkerValue;
         return addMissingParamsToUrl(url, params);
       }
@@ -440,11 +443,11 @@ export class LinkerManager {
    * @param {string} linkerValue
    */
   addHiddenInputs_(form, linkerName, linkerValue) {
-    const attrs = dict({
+    const attrs = {
       'type': 'hidden',
       'name': linkerName,
       'value': linkerValue,
-    });
+    };
 
     const inputEl = createElementWithAttributes(
       /** @type {!Document} */ (form.ownerDocument),

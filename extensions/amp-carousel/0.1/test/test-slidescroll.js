@@ -1,11 +1,20 @@
 import '../amp-carousel';
-import {ActionService} from '#service/action-impl';
-import {ActionTrust} from '#core/constants/action-constants';
-import {Services} from '#service';
+import {createDocument as createWorkerDomDoc} from '@ampproject/worker-dom/dist/server-lib.mjs';
+
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
-import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {user} from '#utils/log';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+
+import {Services} from '#service';
+import {ActionService} from '#service/action-impl';
+
+import {user} from '#utils/log';
+
+import {getDeterministicOuterHTML} from '#testing/helpers';
+import {installResizeObserverStub} from '#testing/resize-observer-stub';
+
+import {buildDom} from '../build-dom';
+import {AmpSlideScroll} from '../slidescroll';
 
 describes.realWin(
   'SlideScroll',
@@ -27,12 +36,22 @@ describes.realWin(
       resizeObserverStub = installResizeObserverStub(env.sandbox, win);
     });
 
+    /**
+     * @param {boolean=} opt_hasLooping
+     * @param {number=} opt_slideCount
+     * @param {boolean=} opt_attachToDom
+     * @param {boolean=} opt_hasAutoplay
+     * @param {boolean=} opt_autoplayLoops
+     * @param {Document=} opt_doc
+     * @return {Element}
+     */
     function getAmpSlideScroll(
       opt_hasLooping,
       opt_slideCount = 5,
       opt_attachToDom = true,
       opt_hasAutoplay = false,
-      opt_autoplayLoops
+      opt_autoplayLoops,
+      doc = env.win.document
     ) {
       const imgUrl =
         'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
@@ -41,7 +60,7 @@ describes.realWin(
       ampSlideScroll.setAttribute('type', 'slides');
       ampSlideScroll.setAttribute('width', '400');
       ampSlideScroll.setAttribute('height', '300');
-      ampSlideScroll.style.position = 'relative';
+      ampSlideScroll.style.setProperty('position', 'relative');
       ampSlideScroll.setAttribute('controls', '');
       if (opt_hasLooping) {
         ampSlideScroll.setAttribute('loop', '');
@@ -60,7 +79,7 @@ describes.realWin(
         img.setAttribute('width', '400');
         img.setAttribute('height', '300');
         // See https://github.com/ampproject/amphtml/issues/3989
-        img.style.display = 'inline';
+        img.style.setProperty('display', 'inline');
         if (i == 0) {
           img.setAttribute('data-slide-id', 'slide-id');
         }
@@ -357,20 +376,14 @@ describes.realWin(
       const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
 
       impl.showSlide_(1);
-      expect(controls.hasNext_()).to.be.true;
-      expect(controls.hasPrev_()).to.be.true;
       expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
       expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
       impl.showSlide_(0);
-      expect(controls.hasNext_()).to.be.true;
-      expect(controls.hasPrev_()).to.be.false;
       expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
       expect(prevBtn.classList.contains('amp-disabled')).to.be.true;
 
       impl.showSlide_(4);
-      expect(controls.hasNext_()).to.be.false;
-      expect(controls.hasPrev_()).to.be.true;
       expect(nextBtn.classList.contains('amp-disabled')).to.be.true;
       expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
@@ -1053,20 +1066,14 @@ describes.realWin(
         const {nextButton_: nextBtn, prevButton_: prevBtn} = controls;
 
         impl.showSlide_(1);
-        expect(controls.hasNext_()).to.be.true;
-        expect(controls.hasPrev_()).to.be.true;
         expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
         impl.showSlide_(0);
-        expect(controls.hasNext_()).to.be.true;
-        expect(controls.hasPrev_()).to.be.true;
         expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
 
         impl.showSlide_(4);
-        expect(controls.hasNext_()).to.be.true;
-        expect(controls.hasPrev_()).to.be.true;
         expect(nextBtn.classList.contains('amp-disabled')).to.be.false;
         expect(prevBtn.classList.contains('amp-disabled')).to.be.false;
       });
@@ -1235,7 +1242,7 @@ describes.realWin(
           ampSlideScroll,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 4}),
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
 
         impl.go(1, /* animate */ false);
@@ -1243,7 +1250,7 @@ describes.realWin(
           ampSlideScroll,
           'slideChange',
           /* CustomEvent */ env.sandbox.match.has('detail', {index: 0}),
-          ActionTrust.HIGH
+          ActionTrust_Enum.HIGH
         );
       });
 
@@ -1257,12 +1264,12 @@ describes.realWin(
         impl.go(-1, /* animate */ false);
         expect(win.document.eventListeners.count('slideChange')).to.equal(1);
         expect(event.data.index).to.equal(4);
-        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+        expect(event.data.actionTrust).to.equal(ActionTrust_Enum.HIGH);
 
         impl.go(1, /* animate */ false);
         expect(win.document.eventListeners.count('slideChange')).to.equal(1);
         expect(event.data.index).to.equal(0);
-        expect(event.data.actionTrust).to.equal(ActionTrust.HIGH);
+        expect(event.data.actionTrust).to.equal(ActionTrust_Enum.HIGH);
       });
 
       it('should goToSlide on action', async () => {
@@ -1470,6 +1477,88 @@ describes.realWin(
         });
       });
     });
+
+    describe('buildDom', () => {
+      it('buildDom and buildCallback should result in the same outerHTML', async () => {
+        const el1 = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        const el2 = el1.cloneNode(/* deep */ true);
+        const impl = new AmpSlideScroll(el1);
+        impl.setupSlideBehavior_ = () => {};
+        await impl.buildCallback();
+        buildDom(el2);
+
+        expect(el2.outerHTML).equal(el1.outerHTML);
+      });
+
+      it('buildDom should behave same in browser and in WorkerDOM', async () => {
+        const browserCarousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        const workerCarousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false,
+          /* opt_hasAutoPlay */ undefined,
+          /* opt_autoplayLoops */ undefined,
+          createWorkerDomDoc()
+        );
+        buildDom(browserCarousel);
+        buildDom(workerCarousel);
+
+        const browserHtml = getDeterministicOuterHTML(browserCarousel);
+        const workerDomHtml = getDeterministicOuterHTML(workerCarousel);
+        expect(workerDomHtml).equal(browserHtml);
+      });
+
+      it('buildCallback should assign ivars even when server rendered', async () => {
+        const el1 = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        buildDom(el1);
+        el1.setAttribute('i-amphtml-ssr', '');
+        const impl = new AmpSlideScroll(el1);
+        impl.setupSlideBehavior_ = () => {};
+        await impl.buildCallback();
+
+        expect(impl.slides_).length(5);
+        expect(impl.slideWrappers_).length(5);
+        expect(impl.slidesContainer_).ok;
+      });
+
+      it('buildDom should throw if invalid server rendered dom', async () => {
+        const carousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        carousel.setAttribute('i-amphtml-ssr', '');
+        expect(() => buildDom(carousel)).throws(/Invalid server render/);
+      });
+
+      it('buildDom should not modify dom for server rendered element', async () => {
+        const carousel = await getAmpSlideScroll(
+          /* hasLooping */ true,
+          /* slideCount */ undefined,
+          /* attachToDom */ false
+        );
+        buildDom(carousel);
+        carousel.setAttribute('i-amphtml-ssr', '');
+
+        const before = carousel.outerHTML;
+        buildDom(carousel);
+        const after = carousel.outerHTML;
+
+        expect(before).equal(after);
+      });
+    });
   }
 );
 
@@ -1508,7 +1597,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       );
       expect(element.enqueAction).to.be.calledWith(
         env.sandbox.match({
@@ -1519,7 +1608,7 @@ describes.realWin(
           method: 'goToSlide',
           node: element,
           source: 'source',
-          trust: ActionTrust.HIGH,
+          trust: ActionTrust_Enum.HIGH,
         })
       );
 
@@ -1531,7 +1620,7 @@ describes.realWin(
         'source',
         'caller',
         'event',
-        ActionTrust.HIGH
+        ActionTrust_Enum.HIGH
       );
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.match(

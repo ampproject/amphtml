@@ -1,3 +1,11 @@
+import {
+  VIMEO_EVENTS,
+  getVimeoIframeSrc,
+  getVimeoOriginRegExp,
+  listenToVimeoEvents,
+  makeVimeoMessage,
+} from '#bento/apis/vimeo-api';
+
 import {dispatchCustomEvent, removeElement} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {isAutoplaySupported} from '#core/dom/video';
@@ -19,14 +27,10 @@ import {
   postMessageWhenAvailable,
   redispatch,
 } from '../../../src/iframe-video';
-import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {
-  VIMEO_EVENTS,
-  getVimeoIframeSrc,
-  getVimeoOriginRegExp,
-  listenToVimeoEvents,
-  makeVimeoMessage,
-} from '../vimeo-api';
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
+} from '../../../src/video-interface';
 
 const TAG = 'amp-vimeo';
 
@@ -139,7 +143,7 @@ class AmpVimeo extends AMP.BaseElement {
    * @private
    */
   isAutoplay_() {
-    if (!this.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+    if (!this.element.hasAttribute(VideoAttributes_Enum.AUTOPLAY)) {
       return Promise.resolve(false);
     }
     return isAutoplaySupported(this.win);
@@ -153,7 +157,7 @@ class AmpVimeo extends AMP.BaseElement {
 
     Services.videoManagerForDoc(element).register(this);
 
-    dispatchCustomEvent(element, VideoEvents.LOAD);
+    dispatchCustomEvent(element, VideoEvents_Enum.LOAD);
   }
 
   /**

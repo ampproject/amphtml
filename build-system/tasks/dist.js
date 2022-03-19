@@ -5,6 +5,7 @@ const path = require('path');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
+  compileBentoRuntimeAndCore,
   compileCoreRuntime,
   compileJs,
   endBuildStep,
@@ -12,10 +13,6 @@ const {
   printConfigHelp,
   printNobuildHelp,
 } = require('./helpers');
-const {
-  cleanupBuildDir,
-  printClosureConcurrency,
-} = require('../compile/compile');
 const {
   createCtrlcHandler,
   exitCtrlcHandler,
@@ -26,6 +23,7 @@ const {
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
+const {buildBentoComponents} = require('./build-bento');
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
@@ -34,6 +32,7 @@ const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
 const {VERSION} = require('../compile/internal-version');
+const {buildStoryLocalization} = require('./build-story-localization');
 
 const {cyan, green} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -89,13 +88,13 @@ function printDistHelp(options) {
  * @return {Promise<void>}
  */
 async function runPreDistSteps(options) {
-  cleanupBuildDir();
   await prebuild();
   await compileCss(options);
   await copyCss();
   await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
+  await buildStoryLocalization(options);
   displayLifecycleDebugging();
 }
 
@@ -111,7 +110,6 @@ async function dist() {
     minify: true,
     watch: argv.watch,
   };
-  printClosureConcurrency();
   printNobuildHelp();
   printDistHelp(options);
   await runPreDistSteps(options);
@@ -119,6 +117,8 @@ async function dist() {
   // These steps use closure compiler. Small ones before large (parallel) ones.
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
+  } else if (argv.bento_runtime_only) {
+    await compileBentoRuntimeAndCore(options);
   } else {
     await Promise.all([
       writeVersionFiles(),
@@ -131,11 +131,12 @@ async function dist() {
   }
 
   // This step internally parses the various extension* flags.
-  await buildExtensions(options);
+  await Promise.all([buildExtensions(options), buildBentoComponents(options)]);
 
   // This step is to be run only during a full `amp dist`.
   if (
     !argv.core_runtime_only &&
+    !argv.bento_runtime_only &&
     !argv.extensions &&
     !argv.extensions_from &&
     !argv.noextensions
@@ -206,10 +207,6 @@ function buildLoginDone(version) {
     minify: true,
     minifiedName,
     aliasName,
-    extraGlobs: [
-      `${buildDir}/amp-login-done-0.1.max.js`,
-      `${buildDir}/amp-login-done-dialog.js`,
-    ],
   });
 }
 
@@ -229,7 +226,6 @@ async function buildWebPushPublisherFiles() {
         includePolyfills: true,
         minify: true,
         minifiedName,
-        extraGlobs: [`${tempBuildDir}/*.js`],
       });
     }
   }
@@ -387,7 +383,7 @@ module.exports = {
   runPreDistSteps,
 };
 
-/* eslint "google-camelcase/google-camelcase": 0 */
+/* eslint "local/camelcase": 0 */
 
 dist.description =
   'Compile AMP production binaries and apply AMP_CONFIG to runtime files';
@@ -398,12 +394,15 @@ dist.flags = {
     'Output code with whitespace (useful while profiling / debugging production code)',
   fortesting: 'Compile production binaries for local testing',
   noconfig: 'Compile production binaries without applying AMP_CONFIG',
+  nomanglecache:
+    'Do not share the mangle cache between binaries, useful only in estimating size impacts of code changes.',
   config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   coverage: 'Instrument code for collecting coverage information',
   extensions: 'Build only the listed extensions',
   extensions_from: 'Build only the extensions from the listed AMP(s)',
   noextensions: 'Build with no extensions',
   core_runtime_only: 'Build only the core runtime',
+  bento_runtime_only: 'Build only the standalone Bento runtime',
   full_sourcemaps: 'Include source code content in sourcemaps',
   sourcemap_url: 'Set a custom sourcemap URL with placeholder {version}',
   type: 'Point sourcemap to fetch files from the correct GitHub tag',

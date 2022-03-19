@@ -1,7 +1,5 @@
 import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 /**
@@ -61,13 +59,18 @@ export class DenakopNetworkConfig {
   }
 
   /** @override */
+  filterConfig(config) {
+    return config;
+  }
+
+  /** @override */
   getAttributes() {
-    const attributes = dict({
+    const attributes = {
       'data-multi-size-validation': 'false',
       'type': 'doubleclick',
       'data-ad': 'denakop',
       'style': 'position:relative !important',
-    });
+    };
     return attributes;
   }
 

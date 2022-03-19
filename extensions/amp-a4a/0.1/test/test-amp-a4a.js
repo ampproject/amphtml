@@ -9,10 +9,8 @@ import '../../../amp-ad/0.1/amp-ad';
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Signals} from '#core/data-structures/signals';
 import {createElementWithAttributes} from '#core/dom';
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 import {layoutRectLtwh, layoutSizeFromRect} from '#core/dom/layout/rect';
-
-import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
 import {AmpDoc, installDocService} from '#service/ampdoc-impl';
@@ -163,7 +161,7 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
     expect(fie.contentDocument.body.textContent).to.contain.string(
       'Hello, world.'
     );
-    expect(prioritySpy).to.be.calledWith(LayoutPriority.CONTENT);
+    expect(prioritySpy).to.be.calledWith(LayoutPriority_Enum.CONTENT);
   });
 
   it('should not throw on polyfill scripts', async () => {
@@ -245,7 +243,6 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   });
 
   it('should fallback when shadow DOM is not supported', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', true, true);
     attachShadowStub.value(undefined);
     const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
     env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
@@ -256,7 +253,6 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
   });
 
   it('should fallback when shadow DOM is polyfilled', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', true, true);
     attachShadowStub.value(function () {
       // A non-native function.
       return null;
@@ -267,17 +263,6 @@ describes.realWin('amp-a4a: no signing', {amp: true}, (env) => {
     a4a.onLayoutMeasure();
     await a4a.adPromise_;
     expect(fallbackSpy).to.be.called;
-  });
-
-  it('should ignore shadow DOM requirement without an experiment', async () => {
-    toggleExperiment(env.win, 'disable-a4a-non-sd', false, true);
-    attachShadowStub.value(undefined);
-    const fallbackSpy = env.sandbox.spy(a4a, 'handleFallback_');
-    env.sandbox.stub(a4a, 'skipClientSideValidation').returns(false);
-    await a4a.buildCallback();
-    a4a.onLayoutMeasure();
-    await a4a.adPromise_;
-    expect(fallbackSpy).to.not.be.called;
   });
 });
 
@@ -1652,7 +1637,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         .calledOnce;
       expect(updateLayoutPriorityStub).to.be.calledOnce;
       expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-        LayoutPriority.CONTENT
+        LayoutPriority_Enum.CONTENT
       );
     });
 
@@ -1662,7 +1647,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
 
       // Remove attachShadow.
       attachShadowStub.value(undefined);
-      toggleExperiment(fixture.win, 'disable-a4a-non-sd', true, true);
 
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
@@ -1709,7 +1693,6 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
       attachShadowStub.value(function () {
         return null;
       });
-      toggleExperiment(fixture.win, 'disable-a4a-non-sd', true, true);
 
       fetchMock.getOnce(
         TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
@@ -1789,7 +1772,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
         'renderNonAmpCreative_ called exactly once'
       ).to.be.true;
       expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-        LayoutPriority.CONTENT
+        LayoutPriority_Enum.CONTENT
       );
       expect(is3pThrottled(a4a.win)).to.be.false;
     });
@@ -1994,7 +1977,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           .calledOnce;
         expect(updateLayoutPriorityStub).to.be.calledOnce;
         expect(updateLayoutPriorityStub.args[0][0]).to.equal(
-          LayoutPriority.CONTENT
+          LayoutPriority_Enum.CONTENT
         );
       } else {
         expect(iframe.getAttribute('srcdoc')).to.be.null;
@@ -2702,7 +2685,9 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
           const a4a = new MockA4AImpl(a4aElement);
-          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
+          expect(a4a.getLayoutPriority()).to.equal(
+            LayoutPriority_Enum.METADATA
+          );
         });
       }
     );
@@ -2719,7 +2704,7 @@ describes.realWin('amp-a4a', {amp: true}, (env) => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
           const a4a = new MockA4AImpl(a4aElement);
-          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority.ADS);
+          expect(a4a.getLayoutPriority()).to.equal(LayoutPriority_Enum.ADS);
         });
       }
     );

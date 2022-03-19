@@ -1,12 +1,14 @@
-import * as Preact from '#preact';
-import {VideoWrapper} from '../component';
-import {WithAmpContext} from '#preact/context';
-import {createRef} from '#preact';
-import {forwardRef} from '#preact/compat';
 import {mount} from 'enzyme';
+
+import {useStyles as useAutoplayStyles} from '#bento/components/bento-video/1.0/autoplay.jss';
+import {VideoWrapper} from '#bento/components/bento-video/1.0/component';
+
 import {omit} from '#core/types/object';
 
-import {useStyles as useAutoplayStyles} from '../autoplay.jss';
+import {createRef} from '#preact';
+import * as Preact from '#preact';
+import {forwardRef} from '#preact/compat';
+import {WithAmpContext} from '#preact/context';
 
 describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
   let intersectionObserverObserved;

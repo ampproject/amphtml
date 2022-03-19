@@ -39,5 +39,32 @@ describes.realWin(
       const iframe = element.shadowRoot.querySelector('iframe');
       expect(iframe).to.not.be.null;
     });
+
+    it('should pass the data-loading attribute to the underlying iframe', async () => {
+      const element = html`
+        <amp-vimeo
+          data-loading="lazy"
+          layout="responsive"
+          width="16"
+          height="9"
+        ></amp-vimeo>
+      `;
+      env.win.document.body.appendChild(element);
+      await waitForRender(element);
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('lazy');
+    });
+
+    it('should set data-loading="auto" if no value is specified', async () => {
+      const element = html`
+        <amp-vimeo layout="responsive" width="16" height="9"></amp-vimeo>
+      `;
+      env.win.document.body.appendChild(element);
+      await waitForRender(element);
+
+      const iframe = element.shadowRoot.querySelector('iframe');
+      expect(iframe.getAttribute('loading')).to.equal('auto');
+    });
   }
 );

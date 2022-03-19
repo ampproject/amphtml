@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
@@ -7,7 +7,6 @@ import {
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -42,7 +41,7 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.willBeLoaded_ = new Deferred();
 
     /** @private {!JsonObject} */
-    this.context_ = dict();
+    this.context_ = {};
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -112,7 +111,7 @@ export class Amp3dGltf extends AMP.BaseElement {
 
     const useAlpha = getOption('alpha', bool, false);
 
-    this.context_ = dict({
+    this.context_ = {
       'src': resolveRelativeUrl(src, this.getAmpDoc().getUrl()),
       'renderer': {
         'alpha': useAlpha,
@@ -131,7 +130,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         'enableZoom': getOption('enableZoom', bool, true),
         'autoRotate': getOption('autoRotate', bool, false),
       },
-    });
+    };
     this.registerAction(
       'setModelRotation',
       (invocation) => {
@@ -139,7 +138,7 @@ export class Amp3dGltf extends AMP.BaseElement {
           (e) => dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
@@ -199,10 +198,10 @@ export class Amp3dGltf extends AMP.BaseElement {
    */
   sendCommandWhenReady_(action, args) {
     return this.willBeReady_.promise.then(() => {
-      const message = dict({
+      const message = {
         'action': action,
         'args': args,
-      });
+      };
 
       this.postMessage_('action', message);
     });
@@ -243,10 +242,7 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @private
    */
   onResized_({height, width}) {
-    this.sendCommandWhenReady_(
-      'setSize',
-      dict({'width': width, 'height': height})
-    );
+    this.sendCommandWhenReady_('setSize', {'width': width, 'height': height});
   }
 
   /** @override */

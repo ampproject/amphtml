@@ -19,7 +19,6 @@ import {
 } from '#service/extensions-impl';
 
 import {
-  LogLevel, // eslint-disable-line no-unused-vars
   dev,
   initLogConstructor,
   overrideLogLevel,
@@ -50,7 +49,7 @@ const TAG = 'runtime';
  *  canonicalUrl: (string|undefined),
  *  head: (Element|undefined),
  *  ampdoc: (!./service/ampdoc-impl.AmpDoc | undefined),
- *  setVisibilityState: (function(!VisibilityState)|undefined),
+ *  setVisibilityState: (function(!VisibilityState_Enum)|undefined),
  *  postMessage: (function()|undefined),
  *  onMessage: (function()|undefined),
  *  close: (function()|undefined),
@@ -149,7 +148,7 @@ function adoptShared(global, callback) {
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   /**
-   * @param {!LogLevel} level
+   * @param {import('#utils/log').LogLevel_Enum} level
    */
   global.AMP.setLogLevel = overrideLogLevel.bind(null);
 

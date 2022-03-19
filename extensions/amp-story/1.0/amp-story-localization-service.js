@@ -1,5 +1,6 @@
-import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 
 /**
@@ -9,7 +10,7 @@ import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
  * @param {!Element} element
  * @return {!../../../src/service/localization.LocalizationService}
  */
-export const getLocalizationService = (element) => {
+export function getLocalizationService(element) {
   let localizationService = Services.localizationForDoc(element);
 
   if (!localizationService) {
@@ -20,4 +21,13 @@ export const getLocalizationService = (element) => {
   }
 
   return localizationService;
-};
+}
+
+/**
+ * @param {!Node} context
+ * @param {import('#service/localization/strings).LocalizedStringId_Enum} key
+ * @return {?string}
+ */
+export function localize(context, key) {
+  return getLocalizationService(context).getLocalizedString(key);
+}

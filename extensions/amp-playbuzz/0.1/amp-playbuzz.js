@@ -24,9 +24,8 @@
 import {CSS} from '#build/amp-playbuzz-0.1.css';
 
 import {removeElement} from '#core/dom';
-import {Layout, applyFillContent} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -119,7 +118,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.RESPONSIVE || layout === Layout.FIXED_HEIGHT;
+    return (
+      layout === Layout_Enum.RESPONSIVE || layout === Layout_Enum.FIXED_HEIGHT
+    );
   }
 
   /** @override */
@@ -292,12 +293,12 @@ class AmpPlaybuzz extends AMP.BaseElement {
       return;
     }
 
-    const scrollingData = dict({
+    const scrollingData = {
       'event': 'scroll',
       'windowHeight': changeEvent.height,
       'scroll': changeEvent.top,
       'offsetTop': this.getLayoutBox().top,
-    });
+    };
 
     this.notifyIframe_(scrollingData);
   }

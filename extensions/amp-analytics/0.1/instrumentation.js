@@ -1,3 +1,7 @@
+import {Services} from '#service';
+
+import {AnalyticsGroup} from './analytics-group';
+import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
 import {
   AmpStoryEventTracker,
   AnalyticsEvent,
@@ -5,10 +9,7 @@ import {
   CustomEventTracker,
   getTrackerKeyName,
 } from './events';
-import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from './analytics-root';
-import {AnalyticsGroup} from './analytics-group';
-import {Services} from '#service';
-import {dict} from '#core/types/object';
+
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {
   getParentWindowFrameElement,
@@ -80,12 +81,7 @@ export class InstrumentationService {
    * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
    * attribute value from target element should be included.
    */
-  triggerEventForTarget(
-    target,
-    eventType,
-    vars = dict(),
-    enableDataVars = true
-  ) {
+  triggerEventForTarget(target, eventType, vars = {}, enableDataVars = true) {
     const event = new AnalyticsEvent(target, eventType, vars, enableDataVars);
     const root = this.findRoot_(target);
     const trackerName = getTrackerKeyName(eventType);

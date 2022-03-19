@@ -1,61 +1,76 @@
-import {boolean, object, text, withKnobs} from '@storybook/addon-knobs';
-
+// @ts-nocheck
 import * as Preact from '#preact';
 import {ContainWrapper, Wrapper} from '#preact/component';
 
 export default {
   title: '0/Wrappers',
-  decorators: [withKnobs],
 };
 
-export const wrapper = () => {
-  const asProp = text('As', 'span');
-  const className = text('className', '');
-  const style = object('style', {border: '1px solid'});
-  const wrapperClassName = text('wrapperClassName', '');
-  const wrapperStyle = object('wrapperStyle', {});
-  const ariaLabel = text('ariaLabel', 'aria label');
+export const wrapper = ({ariaLabel, asProp, className, ...args}) => {
   return (
-    <Wrapper
-      as={asProp}
-      class={className}
-      style={style}
-      wrapperClassName={wrapperClassName}
-      wrapperStyle={wrapperStyle}
-      aria-label={ariaLabel}
-    >
+    <Wrapper {...args} as={asProp} class={className} aria-label={ariaLabel}>
       content
     </Wrapper>
   );
 };
 
-export const containWrapper = () => {
-  const asProp = text('As', 'div');
-  const className = text('className', '');
-  const style = object('style', {border: '1px solid', width: 200, height: 50});
-  const wrapperClassName = text('wrapperClassName', '');
-  const wrapperStyle = object('wrapperStyle', {padding: 4});
-  const contentClassName = text('contentClassName', 'content');
-  const contentStyle = object('contentStyle', {border: '1px dotted'});
-  const size = boolean('size', true);
-  const layout = boolean('layout', true);
-  const paint = boolean('paint', true);
-  const ariaLabel = text('ariaLabel', 'aria label');
+wrapper.args = {
+  asProp: 'span',
+  ariaLabel: 'aria Label',
+  className: '',
+  wrapperClassName: '',
+};
+
+wrapper.argTypes = {
+  style: {
+    name: 'style',
+    defaultValue: {border: '1px solid'},
+    control: {type: 'object'},
+  },
+  wrapperStyle: {
+    name: 'wrapperStyle',
+    control: {type: 'object'},
+  },
+};
+
+export const containWrapper = ({ariaLabel, asProp, className, ...args}) => {
   return (
     <ContainWrapper
+      {...args}
       as={asProp}
       class={className}
-      style={style}
-      wrapperClassName={wrapperClassName}
-      wrapperStyle={wrapperStyle}
-      contentClassName={contentClassName}
-      contentStyle={contentStyle}
-      size={size}
-      layout={layout}
-      paint={paint}
       aria-label={ariaLabel}
     >
       content
     </ContainWrapper>
   );
+};
+
+containWrapper.args = {
+  asProp: 'div',
+  ariaLabel: 'aria Label',
+  className: '',
+  contentClassName: 'content',
+  wrapperClassName: '',
+  size: true,
+  layout: true,
+  paint: true,
+};
+
+containWrapper.argTypes = {
+  style: {
+    name: 'style',
+    defaultValue: {border: '1px solid', width: 200, height: 50},
+    control: {type: 'object'},
+  },
+  wrapperStyle: {
+    name: 'wrapperStyle',
+    defaultValue: {padding: 4},
+    control: {type: 'object'},
+  },
+  contentStyle: {
+    name: 'contentStyle',
+    defaultValue: {border: '1px dotted'},
+    control: {type: 'object'},
+  },
 };

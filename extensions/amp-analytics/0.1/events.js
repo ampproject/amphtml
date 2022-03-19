@@ -1,19 +1,23 @@
-import {CommonSignals} from '#core/constants/common-signals';
-import {Deferred} from '#core/data-structures/promise';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Observable} from '#core/data-structures/observable';
-import {
-  PlayingStates,
-  VideoAnalyticsEvents,
-  videoAnalyticsCustomEventTypeKey,
-} from '../../../src/video-interface';
-import {deepMerge, dict, hasOwn} from '#core/types/object';
-import {dev, devAssert, user, userAssert} from '#utils/log';
-import {getData} from '#utils/event-helper';
+import {Deferred} from '#core/data-structures/promise';
 import {getDataParamsFromAttributes} from '#core/dom';
 import {isAmpElement} from '#core/dom/amp-element-helpers';
 import {isArray, isEnumValue, isFiniteNumber} from '#core/types';
+import {enumValues} from '#core/types/enum';
 import {debounce} from '#core/types/function';
+import {deepMerge, hasOwn} from '#core/types/object';
+
 import {isExperimentOn} from '#experiments';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
+import {
+  PlayingStates_Enum,
+  VideoAnalyticsEvents_Enum,
+  videoAnalyticsCustomEventTypeKey,
+} from '../../../src/video-interface';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -277,7 +281,7 @@ export class AnalyticsEvent {
    * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
    * attribute value from target element should be included.
    */
-  constructor(target, type, vars = dict(), enableDataVars = true) {
+  constructor(target, type, vars = {}, enableDataVars = true) {
     /** @const */
     this['target'] = target;
     /** @const */
@@ -332,7 +336,7 @@ export class BrowserEventTracker extends EventTracker {
     this.observables_ = new Observable();
 
     /** @private {!Object<BrowserEventType, boolean>} */
-    this.listenerMap_ = dict({});
+    this.listenerMap_ = {};
 
     /** @private {?function(!Event)} */
     this.boundOnSession_ = this.observables_.fire.bind(this.observables_);
@@ -780,7 +784,7 @@ export class ScrollEventTracker extends EventTracker {
    * @private
    */
   normalizeBoundaries_(bounds) {
-    const result = dict({});
+    const result = {};
     if (!bounds || !Array.isArray(bounds)) {
       return result;
     }
@@ -824,7 +828,7 @@ export class ScrollEventTracker extends EventTracker {
         continue;
       }
       bounds[bound] = true;
-      const vars = dict();
+      const vars = {};
       vars[varName] = b;
       listener(
         new AnalyticsEvent(
@@ -957,8 +961,8 @@ export class IniLoadTracker extends EventTracker {
     }
     const signals = element.signals();
     return Promise.race([
-      signals.whenSignal(CommonSignals.INI_LOAD),
-      signals.whenSignal(CommonSignals.LOAD_END),
+      signals.whenSignal(CommonSignals_Enum.INI_LOAD),
+      signals.whenSignal(CommonSignals_Enum.LOAD_END),
     ]);
   }
 }
@@ -1151,10 +1155,10 @@ class TimerEventHandler {
       timerDuration = this.calculateDuration_();
       this.lastRequestTime_ = Date.now();
     }
-    return dict({
+    return {
       'timerDuration': timerDuration,
       'timerStart': this.startTime_ || 0,
-    });
+    };
   }
 }
 
@@ -1364,18 +1368,16 @@ export class VideoEventTracker extends EventTracker {
       this.sessionObservable_
     );
 
-    Object.keys(VideoAnalyticsEvents).forEach((key) => {
-      this.root
-        .getRoot()
-        .addEventListener(VideoAnalyticsEvents[key], this.boundOnSession_);
+    enumValues(VideoAnalyticsEvents_Enum).forEach((value) => {
+      this.root.getRoot().addEventListener(value, this.boundOnSession_);
     });
   }
 
   /** @override */
   dispose() {
     const root = this.root.getRoot();
-    Object.keys(VideoAnalyticsEvents).forEach((key) => {
-      root.removeEventListener(VideoAnalyticsEvents[key], this.boundOnSession_);
+    enumValues(VideoAnalyticsEvents_Enum).forEach((value) => {
+      root.removeEventListener(value, this.boundOnSession_);
     });
     this.boundOnSession_ = null;
     this.sessionObservable_ = null;
@@ -1419,7 +1421,10 @@ export class VideoEventTracker extends EventTracker {
         return;
       }
 
-      if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED && !interval) {
+      if (
+        normalizedType === VideoAnalyticsEvents_Enum.SECONDS_PLAYED &&
+        !interval
+      ) {
         user().error(
           TAG,
           'video-seconds-played requires interval spec with non-zero value'
@@ -1427,14 +1432,14 @@ export class VideoEventTracker extends EventTracker {
         return;
       }
 
-      if (normalizedType === VideoAnalyticsEvents.SECONDS_PLAYED) {
+      if (normalizedType === VideoAnalyticsEvents_Enum.SECONDS_PLAYED) {
         intervalCounter++;
         if (intervalCounter % interval !== 0) {
           return;
         }
       }
 
-      if (normalizedType === VideoAnalyticsEvents.PERCENTAGE_PLAYED) {
+      if (normalizedType === VideoAnalyticsEvents_Enum.PERCENTAGE_PLAYED) {
         if (!percentages) {
           user().error(
             TAG,
@@ -1481,13 +1486,16 @@ export class VideoEventTracker extends EventTracker {
       }
 
       if (
-        type === VideoAnalyticsEvents.SESSION_VISIBLE &&
+        type === VideoAnalyticsEvents_Enum.SESSION_VISIBLE &&
         !endSessionWhenInvisible
       ) {
         return;
       }
 
-      if (excludeAutoplay && details['state'] === PlayingStates.PLAYING_AUTO) {
+      if (
+        excludeAutoplay &&
+        details['state'] === PlayingStates_Enum.PLAYING_AUTO
+      ) {
         return;
       }
 
@@ -1519,13 +1527,13 @@ export class VideoEventTracker extends EventTracker {
  * @return {string}
  */
 function normalizeVideoEventType(type, details) {
-  if (type == VideoAnalyticsEvents.SESSION_VISIBLE) {
-    return VideoAnalyticsEvents.SESSION;
+  if (type == VideoAnalyticsEvents_Enum.SESSION_VISIBLE) {
+    return VideoAnalyticsEvents_Enum.SESSION;
   }
 
   // Custom video analytics events are listened to from one signal type,
   // but they're configured by user with their custom name.
-  if (type == VideoAnalyticsEvents.CUSTOM) {
+  if (type == VideoAnalyticsEvents_Enum.CUSTOM) {
     return dev().assertString(details[videoAnalyticsCustomEventTypeKey]);
   }
 
@@ -1538,7 +1546,7 @@ function normalizeVideoEventType(type, details) {
  */
 function removeInternalVars(details) {
   if (!details) {
-    return dict();
+    return {};
   }
   const clean = {...details};
   delete clean[videoAnalyticsCustomEventTypeKey];

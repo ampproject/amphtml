@@ -8,12 +8,11 @@ import LocalizedStringca from './ca.json' assert {type: 'json'}; // lgtm[js/synt
 import LocalizedStringcs from './cs.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringda from './da.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringde from './de.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringdefault from './default.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringel from './el.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringen from './en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringenGB from './en-GB.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import LocalizedStringes from './es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringen from './en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringes419 from './es-419.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringes from './es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringet from './et.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringeu from './eu.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringfa from './fa.json' assert {type: 'json'}; // lgtm[js/syntax-error]
@@ -81,7 +80,6 @@ export default [
   {LocalizedStringcs},
   {LocalizedStringda},
   {LocalizedStringde},
-  {LocalizedStringdefault},
   {LocalizedStringel},
   {LocalizedStringen},
   {LocalizedStringenGB},

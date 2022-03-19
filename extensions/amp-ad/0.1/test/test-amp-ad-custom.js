@@ -1,7 +1,9 @@
-import {AmpAdCustom} from '../amp-ad-custom';
-import {LayoutPriority} from '#core/dom/layout';
-import {Services} from '#service';
 import {createElementWithAttributes, removeChildren} from '#core/dom';
+import {LayoutPriority_Enum} from '#core/dom/layout';
+
+import {Services} from '#service';
+
+import {AmpAdCustom} from '../amp-ad-custom';
 
 describes.realWin('Amp custom ad', {amp: true}, (env) => {
   let win;
@@ -193,7 +195,9 @@ describes.sandboxed.skip('#getLayoutPriority', {}, () => {
           /*body*/ env.ampdoc.getBody()
         );
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+        expect(customAd.getLayoutPriority()).to.equal(
+          LayoutPriority_Enum.CONTENT
+        );
       });
     }
   );
@@ -214,7 +218,9 @@ describes.sandboxed.skip('#getLayoutPriority', {}, () => {
           /*body*/ env.ampdoc.getBody()
         );
         const customAd = new AmpAdCustom(adElement);
-        expect(customAd.getLayoutPriority()).to.equal(LayoutPriority.CONTENT);
+        expect(customAd.getLayoutPriority()).to.equal(
+          LayoutPriority_Enum.CONTENT
+        );
       });
     }
   );

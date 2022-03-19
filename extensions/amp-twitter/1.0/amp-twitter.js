@@ -1,21 +1,25 @@
-import {BaseElement} from './base-element';
-import {dict} from '#core/types/object';
-import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
-import {htmlFor} from '#core/dom/static-template';
-import {isExperimentOn} from '#experiments';
+import {BaseElement} from '#bento/components/bento-twitter/1.0/base-element';
+
 import {userAssert} from '#core/assert';
+import {htmlFor} from '#core/dom/static-template';
+
+import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {getBootstrapBaseUrl, getBootstrapUrl} from '../../../src/3p-frame';
 
 /** @const {string} */
 const TAG = 'amp-twitter';
 const TYPE = 'twitter';
 
-class AmpTwitter extends BaseElement {
+class AmpTwitter extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     const html = htmlFor(element);
     return {
@@ -36,7 +40,7 @@ class AmpTwitter extends BaseElement {
     };
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static getPreconnects(element) {
     const ampdoc = element.getAmpDoc();
     const {win} = ampdoc;
@@ -57,9 +61,9 @@ class AmpTwitter extends BaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height) => this.attemptChangeHeight(height),
-    });
+    };
   }
 
   /** @override */

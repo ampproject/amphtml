@@ -5,17 +5,20 @@
  */
 
 import {
+  AsyncInputAttributes_Enum,
+  AsyncInputClasses_Enum,
+} from '#core/constants/async-input';
+import {Layout_Enum} from '#core/dom/layout';
+import {setStyles, toggle} from '#core/dom/style';
+
+import {userAssert} from '#utils/log';
+
+import {
   AmpRecaptchaService,
   recaptchaServiceForDoc,
 } from './amp-recaptcha-service';
-import {
-  AsyncInputAttributes,
-  AsyncInputClasses,
-} from '#core/constants/async-input';
+
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
-import {Layout} from '#core/dom/layout';
-import {setStyles, toggle} from '#core/dom/style';
-import {userAssert} from '#utils/log';
 
 /** @const */
 const TAG = 'amp-recaptcha-input';
@@ -57,9 +60,9 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
     );
 
     userAssert(
-      this.element.getAttribute(AsyncInputAttributes.NAME),
+      this.element.getAttribute(AsyncInputAttributes_Enum.NAME),
       'The %s attribute is required for <amp-recaptcha-input> %s',
-      AsyncInputAttributes.NAME,
+      AsyncInputAttributes_Enum.NAME,
       this.element
     );
 
@@ -71,7 +74,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       return this.mutateElement(() => {
         toggle(this.element);
         // Add the required AsyncInput class
-        this.element.classList.add(AsyncInputClasses.ASYNC_INPUT);
+        this.element.classList.add(AsyncInputClasses_Enum.ASYNC_INPUT);
         /**
          * These styles will create an in-place element, that is 1x1,
          * but invisible. Absolute positioning keeps it where it would have
@@ -91,7 +94,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout_Enum.NODISPLAY;
   }
 
   /** @override */

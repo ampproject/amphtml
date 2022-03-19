@@ -1209,7 +1209,7 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
     expect(attrSpec.name).not.toEqual('[style]');
   });
   if (attrSpec.valueUrl !== null) {
-    const protocolRegex = new RegExp('[a-z-]+');
+    const protocolRegex = new RegExp('^[a-z+-]+$');
     // UrlSpec protocol is matched against lowercased protocol names
     // so the rules *must* also be lower case.
     it('protocol must be lower case', () => {
@@ -1515,7 +1515,7 @@ describe('ValidatorRulesMakeSense', () => {
     });
     it('reference points must set descriptive_name', () => {
       if (tagSpec.tagName == '$REFERENCE_POINT') {
-        expect(tagSpec.descriptiveName !== null);
+        expect(tagSpec.descriptiveName).not.toBeNull();
       }
     });
     if ((tagSpec.enabledBy.length > 0) || (tagSpec.disabledBy.length > 0)) {
@@ -1749,7 +1749,7 @@ describe('ValidatorRulesMakeSense', () => {
            // it's sufficiently wrapped in private context inside the validator
            // that I don't see a way to call it.  For now just gold the current
            // index.
-           expect(tagSpec.attrLists[0]).toEqual(17);
+           expect(tagSpec.attrLists[0]).toEqual(18);
          });
     }
 
@@ -1760,6 +1760,9 @@ describe('ValidatorRulesMakeSense', () => {
       it('max_bytes are greater than or equal to -2', () => {
         expect(tagSpec.cdata.maxBytes).toBeGreaterThan(-3);
       });
+      if (tagSpec.cdata.maxBytes === -1) {
+        usefulCdataSpec = true;
+      }
       if (tagSpec.cdata.maxBytes >= 0) {
         usefulCdataSpec = true;
         it('max_bytes > 0 must have max_bytes_spec_url defined', () => {
@@ -1768,8 +1771,8 @@ describe('ValidatorRulesMakeSense', () => {
       }
       // disallowed_cdata_regex
       for (const disallowedCdataRegex of tagSpec.cdata.disallowedCdataRegex) {
+        usefulCdataSpec = true;
         it('disallowed_cdata_regex valid and error_message defined', () => {
-          usefulCdataSpec = true;
 
           expect(disallowedCdataRegex.regex).toBeDefined();
           expect(isValidRegex(disallowedCdataRegex.regex)).toBe(true);
@@ -1834,6 +1837,7 @@ describe('ValidatorRulesMakeSense', () => {
         let hasOctetStream = false;
         let hasCiphertext = false;
         let hasAmpOnerror = false;
+        let hasAmpStoryDvhPolyfill = false;
         for (const attrSpecId of tagSpec.attrs) {
           if (attrSpecId < 0) {
             continue;
@@ -1862,23 +1866,28 @@ describe('ValidatorRulesMakeSense', () => {
           if (attrSpec.name === 'amp-onerror') {
             hasAmpOnerror = true;
           }
+          if (attrSpec.name === 'amp-story-dvh-polyfill') {
+            hasAmpStoryDvhPolyfill = true;
+          }
         }
         it('script tags must have either a src attribute or type json, ' +
                'octet-stream (during SwG encryption), or text/plain',
            () => {
              expect(
                  hasSrc || hasJson || hasTextPlain ||
-                 (hasOctetStream && hasCiphertext) || hasAmpOnerror)
+                 (hasOctetStream && hasCiphertext) || hasAmpOnerror ||
+                  hasAmpStoryDvhPolyfill)
                  .toBe(true);
            });
       }
       // cdata_regex and mandatory_cdata
       if ((tagSpec.cdata.cdataRegex !== null) ||
-          (tagSpec.cdata.mandatoryCdata !== null)) {
+          (tagSpec.cdata.mandatoryCdata !== null) ||
+          (tagSpec.cdata.whitespaceOnly !== null)) {
         usefulCdataSpec = true;
       }
-      it('a cdata spec must be defined', () => {
-        expect(usefulCdataSpec).toBeDefined();
+      it(`Tag spec '${tagSpec.specName}' must define a useful cdata spec`, () => {
+        expect(usefulCdataSpec).toBe(true);
       });
       it('cdata_regex must have unicode named groups', () => {
         const regex = rules.internedStrings[-1 - tagSpec.cdata.cdataRegex];

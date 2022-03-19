@@ -1,5 +1,4 @@
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {userAssert} from '#utils/log';
 
@@ -139,7 +138,7 @@ export class SsrTemplateHelper {
    * @private
    */
   buildPayload_(request, mustacheTemplate, opt_templates, opt_attributes = {}) {
-    const ampComponent = dict({'type': this.sourceComponent_});
+    const ampComponent = {'type': this.sourceComponent_};
 
     const successTemplateKey = 'successTemplate';
     const successTemplate =
@@ -169,13 +168,13 @@ export class SsrTemplateHelper {
       Object.assign(ampComponent, opt_attributes);
     }
 
-    const data = dict({
+    const data = {
       'originalRequest': toStructuredCloneable(
         request.xhrUrl,
         request.fetchOpt
       ),
       'ampComponent': ampComponent,
-    });
+    };
 
     return data;
   }

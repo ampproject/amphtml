@@ -1,5 +1,4 @@
 import {removeChildren} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -57,7 +56,7 @@ const DEFAULT_MESSAGES = {
  *   sandbox: (boolean|undefined),
  * }}
  */
-let LaterpayConfig_0_2_Def; // eslint-disable-line google-camelcase/google-camelcase
+let LaterpayConfig_0_2_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -86,7 +85,7 @@ let ExpiryDef;
  *   expiry: ExpiryDef,
  * }}
  */
-let PurchaseOption_0_2_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PurchaseOption_0_2_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -94,7 +93,7 @@ let PurchaseOption_0_2_Def; // eslint-disable-line google-camelcase/google-camel
  *   purchase_options: Array<PurchaseOption_0_2_Def>,
  * }}
  */
-let PurchaseConfig_0_2_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PurchaseConfig_0_2_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -157,13 +156,10 @@ export class LaterpayVendor {
     this.currentLocale_ = this.laterpayConfig_['locale'] || 'en';
 
     /** @private {!JsonObject} */
-    this.i18n_ = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict(),
-        DEFAULT_MESSAGES,
-        this.laterpayConfig_['localeMessages'] || dict()
-      )
-    );
+    this.i18n_ = /** @type {!JsonObject} */ ({
+      ...DEFAULT_MESSAGES,
+      ...(this.laterpayConfig_['localeMessages'] || {}),
+    });
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;

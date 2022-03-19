@@ -4,8 +4,8 @@ import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {createElementWithAttributes} from '#core/dom';
 import {
-  Layout,
-  LayoutPriority,
+  LayoutPriority_Enum,
+  Layout_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
@@ -15,13 +15,10 @@ import {DetachedDomStream, streamResponseToWriter} from '#core/dom/stream';
 import {setStyle} from '#core/dom/style';
 import {duplicateErrorIfNecessary} from '#core/error';
 import {isArray, isEnumValue, isObject} from '#core/types';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {padStart} from '#core/types/string';
 import {utf8Decode} from '#core/types/string/bytes';
 import {tryDecodeUriComponent} from '#core/types/string/url';
-
-import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 import {installRealTimeConfigServiceForDoc} from '#service/real-time-config/real-time-config-impl';
@@ -49,6 +46,7 @@ import {
   getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -120,14 +118,14 @@ export const XORIGIN_MODE = {
 };
 
 /** @type {!Object} @private */
-const SHARED_IFRAME_PROPERTIES = dict({
+const SHARED_IFRAME_PROPERTIES = {
   'frameborder': '0',
   'allowfullscreen': '',
   'allowtransparency': '',
   'scrolling': 'no',
   'marginwidth': '0',
   'marginheight': '0',
-});
+};
 
 /** @typedef {{width: number, height: number}} */
 export let SizeInfoDef;
@@ -379,7 +377,7 @@ export class AmpA4A extends AMP.BaseElement {
     // therefore we want this to match the 3p priority.
     const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
-    return isPWA ? LayoutPriority.METADATA : LayoutPriority.ADS;
+    return isPWA ? LayoutPriority_Enum.METADATA : LayoutPriority_Enum.ADS;
   }
 
   /** @override */
@@ -408,6 +406,14 @@ export class AmpA4A extends AMP.BaseElement {
 
     this.uiHandler = new AMP.AmpAdUIHandler(this);
     this.uiHandler.validateStickyAd();
+
+    this.uiHandler
+      .getScrollPromiseForStickyAd()
+      .then(() => this.uiHandler.maybeInitStickyAd());
+
+    if (this.uiHandler.isStickyAd()) {
+      chunk(this.element, () => this.layoutCallback(), ChunkPriority_Enum.LOW);
+    }
 
     // Disable crypto key fetching if we are not going to use it in no-signing path.
     // TODO(ccordry): clean up with no-signing launch.
@@ -594,7 +600,7 @@ export class AmpA4A extends AMP.BaseElement {
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
     const fixedSizeZeroHeightOrWidth =
-      this.getLayout() != Layout.FLUID &&
+      this.getLayout() != Layout_Enum.FLUID &&
       (slotRect.height == 0 || slotRect.width == 0);
     if (
       fixedSizeZeroHeightOrWidth ||
@@ -993,7 +999,7 @@ export class AmpA4A extends AMP.BaseElement {
         if (!sanitizedHeadElement) {
           return this.handleFallback_(fallbackHttpResponse, checkStillCurrent);
         }
-        this.updateLayoutPriority(LayoutPriority.CONTENT);
+        this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
         this.isVerifiedAmpCreative_ = true;
         return sanitizedHeadElement;
       });
@@ -1011,7 +1017,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Experiment to give non-AMP creatives same benefits as AMP so
     // update priority.
     if (this.inNonAmpPreferenceExp()) {
-      this.updateLayoutPriority(LayoutPriority.CONTENT);
+      this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
     }
     return fallbackHttpResponse.arrayBuffer().then((domTextContent) => {
       checkStillCurrent();
@@ -1111,13 +1117,13 @@ export class AmpA4A extends AMP.BaseElement {
             if (this.inNonAmpPreferenceExp()) {
               // Experiment to give non-AMP creatives same benefits as AMP so
               // update priority.
-              this.updateLayoutPriority(LayoutPriority.CONTENT);
+              this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
             }
             return null;
           }
 
           // Update priority.
-          this.updateLayoutPriority(LayoutPriority.CONTENT);
+          this.updateLayoutPriority(LayoutPriority_Enum.CONTENT);
 
           // Load any extensions; do not wait on their promises as this
           // is just to prefetch.
@@ -1341,15 +1347,10 @@ export class AmpA4A extends AMP.BaseElement {
     const checkStillCurrent = this.verifyStillCurrent();
     // Promise chain will have determined if creative is valid AMP.
 
-    return Promise.all([
-      this.adPromise_,
-      this.uiHandler.getScrollPromiseForStickyAd(),
-    ])
-      .then((values) => {
+    return this.adPromise_
+      .then((creativeMetaData) => {
         checkStillCurrent();
 
-        this.uiHandler.maybeInitStickyAd();
-        const creativeMetaData = values[0];
         if (this.isCollapsed_) {
           return Promise.resolve();
         }
@@ -1878,7 +1879,7 @@ export class AmpA4A extends AMP.BaseElement {
       createElementWithAttributes(
         /** @type {!Document} */ (this.element.ownerDocument),
         'iframe',
-        dict({
+        {
           // NOTE: It is possible for either width or height to be 'auto',
           // a non-numeric value.
           'height': this.creativeSize_.height,
@@ -1891,7 +1892,7 @@ export class AmpA4A extends AMP.BaseElement {
           'role': 'region',
           'aria-label': 'Advertisement',
           'tabindex': '0',
-        })
+        }
       )
     );
     if (!this.uiHandler.isStickyAd()) {
@@ -2010,17 +2011,14 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   iframeRenderHelper_(attributes) {
-    const mergedAttributes = Object.assign(
-      attributes,
-      dict({
-        'height': this.creativeSize_.height,
-        'width': this.creativeSize_.width,
-        'title': this.getIframeTitle(),
-        'role': 'region',
-        'aria-label': 'Advertisement',
-        'tabindex': '0',
-      })
-    );
+    const mergedAttributes = Object.assign(attributes, {
+      'height': this.creativeSize_.height,
+      'width': this.creativeSize_.width,
+      'title': this.getIframeTitle(),
+      'role': 'region',
+      'aria-label': 'Advertisement',
+      'tabindex': '0',
+    });
 
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
@@ -2100,12 +2098,10 @@ export class AmpA4A extends AMP.BaseElement {
     const intersection = this.element.getIntersectionChangeEntry();
     contextMetadata['_context']['initialIntersection'] =
       intersectionEntryToJson(intersection);
-    return this.iframeRenderHelper_(
-      dict({
-        'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
-        'name': JSON.stringify(contextMetadata),
-      })
-    );
+    return this.iframeRenderHelper_({
+      'src': Services.xhrFor(this.win).getCorsUrl(this.win, adUrl),
+      'name': JSON.stringify(contextMetadata),
+    });
   }
 
   /**
@@ -2185,7 +2181,7 @@ export class AmpA4A extends AMP.BaseElement {
           `${contextMetadata}`;
       }
 
-      return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
+      return this.iframeRenderHelper_({'src': srcPath, 'name': name});
     });
   }
 
@@ -2342,12 +2338,10 @@ export class AmpA4A extends AMP.BaseElement {
     const analyticsEvent = devAssert(
       LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage]
     );
-    const analyticsVars = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict({'time': Math.round(this.getNow_())}),
-        this.getA4aAnalyticsVars(analyticsEvent)
-      )
-    );
+    const analyticsVars = /** @type {!JsonObject} */ ({
+      'time': Math.round(this.getNow_()),
+      ...this.getA4aAnalyticsVars(analyticsEvent),
+    });
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 
@@ -2360,7 +2354,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!JsonObject}
    */
   getA4aAnalyticsVars(unusedAnalyticsEvent) {
-    return dict({});
+    return {};
   }
 
   /**
@@ -2550,13 +2544,7 @@ export function signatureVerifierFor(win) {
  */
 export function isPlatformSupported(win) {
   // Require Shadow DOM support for a4a.
-  if (
-    !isNative(win.Element.prototype.attachShadow) &&
-    isExperimentOn(win, 'disable-a4a-non-sd')
-  ) {
-    return false;
-  }
-  return true;
+  return isNative(win.Element.prototype.attachShadow);
 }
 
 /**

@@ -1,35 +1,38 @@
-import {playIgnoringError} from '#core/dom/video';
-import {AMPDOC_SINGLETON_NAME} from '#core/constants/enums';
-import {ActionTrust} from '#core/constants/action-constants';
-import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
+import {removeElement} from '#core/dom';
 import {
-  LayoutPriority,
+  LayoutPriority_Enum,
   applyFillContent,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {MessageType} from '#core/3p-frame-messaging';
+import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {setStyle} from '#core/dom/style';
+import {playIgnoringError} from '#core/dom/video';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {Services} from '#service';
-import {base64EncodeFromBytes} from '#core/types/string/base64';
-import {createCustomEvent, getData, listen} from '#utils/event-helper';
-import {user, userAssert} from '#utils/log';
-import {dict} from '#core/types/object';
+import {parseJson} from '#core/types/object/json';
 import {endsWith} from '#core/types/string';
+import {base64EncodeFromBytes} from '#core/types/string/base64';
+import {utf8Encode} from '#core/types/string/bytes';
+
+import {isExperimentOn} from '#experiments';
+
+import {Services} from '#service';
+
+import {createCustomEvent, getData, listen} from '#utils/event-helper';
+import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
+import {user, userAssert} from '#utils/log';
+
+import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {urls} from '../../../src/config';
 import {getConsentDataToForward} from '../../../src/consent';
 import {
   isAdLike,
   listenFor,
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {isExperimentOn} from '#experiments';
-import {parseJson} from '#core/types/object/json';
-import {propagateAttributes} from '#core/dom/propagate-attributes';
-import {removeElement} from '#core/dom';
 import {removeFragment} from '../../../src/url';
-import {setStyle} from '#core/dom/style';
-import {urls} from '../../../src/config';
-import {utf8Encode} from '#core/types/string/bytes';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -337,7 +340,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.isTrackingFrame_) {
       if (
         !this.getAmpDoc().registerSingleton(
-          AMPDOC_SINGLETON_NAME.TRACKING_IFRAME
+          AMPDOC_SINGLETON_NAME_ENUM.TRACKING_IFRAME
         )
       ) {
         console /*OK*/
@@ -424,9 +427,13 @@ export class AmpIframe extends AMP.BaseElement {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 
-    listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
-      this.sendConsentData_(source, origin);
-    });
+    listenFor(
+      iframe,
+      MessageType_Enum.SEND_CONSENT_DATA,
+      (data, source, origin) => {
+        this.sendConsentData_(source, origin);
+      }
+    );
 
     this.container_.appendChild(iframe);
 
@@ -487,17 +494,11 @@ export class AmpIframe extends AMP.BaseElement {
   sendConsentData_(source, origin) {
     getConsentDataToForward(this.element, this.getConsentPolicy()).then(
       (consents) => {
-        this.sendConsentDataToIframe_(
-          source,
-          origin,
-          Object.assign(
-            dict({
-              'sentinel': 'amp',
-              'type': MessageType.CONSENT_DATA,
-            }),
-            consents
-          )
-        );
+        this.sendConsentDataToIframe_(source, origin, {
+          'sentinel': 'amp',
+          'type': MessageType_Enum.CONSENT_DATA,
+          ...consents,
+        });
       }
     );
   }
@@ -544,10 +545,10 @@ export class AmpIframe extends AMP.BaseElement {
   /** @override  */
   getLayoutPriority() {
     if (this.isAdLike_) {
-      return LayoutPriority.ADS; // See AmpAd3PImpl.
+      return LayoutPriority_Enum.ADS; // See AmpAd3PImpl.
     }
     if (this.isTrackingFrame_) {
-      return LayoutPriority.METADATA;
+      return LayoutPriority_Enum.METADATA;
     }
     return super.getLayoutPriority();
   }
@@ -770,13 +771,16 @@ export class AmpIframe extends AMP.BaseElement {
         user().error(TAG_, 'Data from "message" event must be JSON.');
         return;
       }
-      const event = createCustomEvent(
-        this.win,
-        'amp-iframe:message',
-        dict({'data': sanitized})
-      );
+      const event = createCustomEvent(this.win, 'amp-iframe:message', {
+        'data': sanitized,
+      });
       const actionService = Services.actionServiceForDoc(this.element);
-      actionService.trigger(this.element, 'message', event, ActionTrust.HIGH);
+      actionService.trigger(
+        this.element,
+        'message',
+        event,
+        ActionTrust_Enum.HIGH
+      );
     };
     // TODO(choumx): Consider using global listener in iframe-helper.
     this.win.addEventListener('message', listener);

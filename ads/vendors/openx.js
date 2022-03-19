@@ -1,5 +1,6 @@
-import {doubleclick} from '#ads/google/doubleclick';
 import {loadScript, validateData, writeScript} from '#3p/3p';
+
+import {doubleclick} from '#ads/google/doubleclick';
 
 const {hasOwnProperty} = Object.prototype;
 
@@ -72,7 +73,7 @@ export function openx(global, data) {
           const oxRequest = OX();
           const oxAnchor = global.document.createElement('div');
           global.document.body.appendChild(oxAnchor);
-          /*eslint "google-camelcase/google-camelcase": 0*/
+          /*eslint "local/camelcase": 0*/
           OX._requestArgs['bc'] = 'amp';
           oxRequest.addAdUnit(data.auid);
           oxRequest.setAdSizes([data.width + 'x' + data.height]);
@@ -99,7 +100,7 @@ export function openx(global, data) {
  */
 function standardImplementation(global, jssdk, dfpData) {
   writeScript(global, jssdk, () => {
-    /*eslint "google-camelcase/google-camelcase": 0*/
+    /*eslint "local/camelcase": 0*/
     doubleclick(global, dfpData);
   });
 }

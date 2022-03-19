@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {ScrollComponent} from './scroll-component';
 import {buildUrl, connectHostname} from './scroll-url';
 
@@ -38,28 +36,25 @@ export class ScrollBar extends ScrollComponent {
    * */
   makeIframe_() {
     this.frame_ = /** @type {!HTMLIFrameElement} */ (
-      this.el(
-        'iframe',
-        dict({
-          'scrolling': 'no',
-          'frameborder': '0',
-          'allowtransparency': 'true',
-          'title': 'Scroll',
-          'width': '100%',
-          'height': '100%',
-          'sandbox':
-            'allow-scripts allow-same-origin ' +
-            'allow-top-navigation allow-popups ' +
-            'allow-popups-to-escape-sandbox',
-        })
-      )
+      this.el('iframe', {
+        'scrolling': 'no',
+        'frameborder': '0',
+        'allowtransparency': 'true',
+        'title': 'Twitter Blue bar',
+        'width': '100%',
+        'height': '100%',
+        'sandbox':
+          'allow-scripts allow-same-origin ' +
+          'allow-top-navigation allow-popups ' +
+          'allow-popups-to-escape-sandbox',
+      })
     );
 
     this.root_ = this.el(
       'div',
-      dict({
+      {
         'class': 'amp-access-scroll-bar',
-      }),
+      },
       [this.frame_]
     );
 

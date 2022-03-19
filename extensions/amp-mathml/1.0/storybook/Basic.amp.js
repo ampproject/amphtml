@@ -30,29 +30,6 @@ export const Default = (args) => {
   );
 };
 
-export const WithScroll = (args) => {
-  return (
-    <>
-      <p>Should lazily render formula when formulas are offscreen</p>
-      <TestDemo withScroll={true} {...args}></TestDemo>
-      <TestDemoInline {...args}></TestDemoInline>
-    </>
-  );
-};
-
-export const WithCustomDimensions = (args) => {
-  return (
-    <>
-      <p>
-        Should render everything, using manual sizes for onscreen elements and
-        dynamic resizing for offscreen elements
-      </p>
-      <TestDemo withScroll={true} height="40" {...args}></TestDemo>
-      <TestDemoInline {...args}></TestDemoInline>
-    </>
-  );
-};
-
 function TestDemo({formulas, withScroll, ...args}) {
   const {cauchy, doubleAngle, quadratic} = formulas;
   return (
@@ -82,10 +59,25 @@ function TestDemoInline({formulas, ...args}) {
       <h2>Inline formula</h2>
       <p>
         This is an example of a formula of{' '}
-        <amp-mathml inline data-formula={'`x`'} {...args}></amp-mathml>,{' '}
-        <amp-mathml inline data-formula={quadratic} {...args}></amp-mathml>{' '}
+        <amp-mathml
+          height="13"
+          width="9"
+          inline
+          data-formula={'`x`'}
+          {...args}
+        ></amp-mathml>
+        ,{' '}
+        <amp-mathml
+          height="47"
+          width="146"
+          inline
+          data-formula={quadratic}
+          {...args}
+        ></amp-mathml>{' '}
         placed inline in the middle of a block of text.{' '}
         <amp-mathml
+          height="19"
+          width="71"
           inline
           data-formula={'\\( \\cos(θ+φ) \\)'}
           {...args}

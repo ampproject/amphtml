@@ -1,5 +1,5 @@
 const {dirname, join, relative, resolve} = require('path');
-const {readFileSync} = require('fs');
+const {readJson} = require('../../json-locales');
 
 /**
  * Transforms JSON imports into a `JSON.parse` call:
@@ -15,13 +15,10 @@ const {readFileSync} = require('fs');
  * ```
  *
  * @param {babel} babel
- * @param {any} options
  * @return {babel.PluginObj}
  */
-module.exports = function (babel, options) {
+module.exports = function (babel) {
   const {template, types: t} = babel;
-  const {freeze = true} = options;
-
   return {
     manipulateOptions(_opts, parserOpts) {
       parserOpts.plugins.push('importAssertions');
@@ -67,24 +64,11 @@ module.exports = function (babel, options) {
         );
         let json;
         try {
-          json = JSON.parse(readFileSync(jsonPath, 'utf8'));
+          json = readJson(jsonPath);
         } catch (e) {
           throw path.buildCodeFrameError(
             `could not load JSON file at '${jsonPath}'`
           );
-        }
-
-        if (freeze) {
-          path.replaceWith(
-            template.statement
-              .ast`const ${specifier} = JSON.parse('${JSON.stringify(
-              json
-            )}', function(key, val) {
-                if (typeof val === 'object') Object.freeze(val);
-                return val;
-              });`
-          );
-          return;
         }
 
         path.replaceWith(

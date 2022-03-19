@@ -1,8 +1,8 @@
-import {MessageType} from '#core/3p-frame-messaging';
-import {AmpEvents} from '#core/constants/amp-events';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {isObject} from '#core/types';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {dev, devAssert} from '#utils/log';
@@ -129,8 +129,8 @@ export class AbstractAmpContext {
   /** Registers an general handler for page visibility. */
   listenForPageVisibility_() {
     this.client_.makeRequest(
-      MessageType.SEND_EMBED_STATE,
-      MessageType.EMBED_STATE,
+      MessageType_Enum.SEND_EMBED_STATE,
+      MessageType_Enum.EMBED_STATE,
       (data) => {
         this.hidden = data['pageHidden'];
         this.dispatchVisibilityChangeEvent_();
@@ -145,7 +145,7 @@ export class AbstractAmpContext {
   dispatchVisibilityChangeEvent_() {
     const event = this.win_.document.createEvent('Event');
     event.data = {hidden: this.hidden};
-    event.initEvent(AmpEvents.VISIBILITY_CHANGE, true, true);
+    event.initEvent(AmpEvents_Enum.VISIBILITY_CHANGE, true, true);
     this.win_.dispatchEvent(event);
   }
 
@@ -157,9 +157,12 @@ export class AbstractAmpContext {
    *    every time we receive a page visibility message.
    */
   onPageVisibilityChange(callback) {
-    return this.client_.registerCallback(MessageType.EMBED_STATE, (data) => {
-      callback({hidden: data['pageHidden']});
-    });
+    return this.client_.registerCallback(
+      MessageType_Enum.EMBED_STATE,
+      (data) => {
+        callback({hidden: data['pageHidden']});
+      }
+    );
   }
 
   /**
@@ -171,8 +174,8 @@ export class AbstractAmpContext {
    */
   observeIntersection(callback) {
     return this.client_.makeRequest(
-      MessageType.SEND_INTERSECTIONS,
-      MessageType.INTERSECTION,
+      MessageType_Enum.SEND_INTERSECTIONS,
+      MessageType_Enum.INTERSECTION,
       (intersection) => {
         callback(intersection['changes']);
       }
@@ -188,11 +191,11 @@ export class AbstractAmpContext {
    */
   getHtml(selector, attributes, callback) {
     this.client_.getData(
-      MessageType.GET_HTML,
-      dict({
+      MessageType_Enum.GET_HTML,
+      {
         'selector': selector,
         'attributes': attributes,
-      }),
+      },
       callback
     );
   }
@@ -203,7 +206,7 @@ export class AbstractAmpContext {
    * @param {function(*)} callback
    */
   getConsentState(callback) {
-    this.client_.getData(MessageType.GET_CONSENT_STATE, null, callback);
+    this.client_.getData(MessageType_Enum.GET_CONSENT_STATE, null, callback);
   }
 
   /**
@@ -216,15 +219,12 @@ export class AbstractAmpContext {
    */
   requestResize(width, height, hasOverflow) {
     const requestId = this.nextResizeRequestId_++;
-    this.client_.sendMessage(
-      MessageType.EMBED_SIZE,
-      dict({
-        'id': requestId,
-        'width': width,
-        'height': height,
-        'hasOverflow': hasOverflow,
-      })
-    );
+    this.client_.sendMessage(MessageType_Enum.EMBED_SIZE, {
+      'id': requestId,
+      'width': width,
+      'height': height,
+      'hasOverflow': hasOverflow,
+    });
     const deferred = new Deferred();
     this.resizeIdToDeferred_[requestId] = deferred;
     return deferred.promise;
@@ -234,21 +234,27 @@ export class AbstractAmpContext {
    *  Set up listeners to handle responses from request size.
    */
   listenToResizeResponse_() {
-    this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, (data) => {
-      const id = data['id'];
-      if (id !== undefined) {
-        this.resizeIdToDeferred_[id].resolve();
-        delete this.resizeIdToDeferred_[id];
+    this.client_.registerCallback(
+      MessageType_Enum.EMBED_SIZE_CHANGED,
+      (data) => {
+        const id = data['id'];
+        if (id !== undefined) {
+          this.resizeIdToDeferred_[id].resolve();
+          delete this.resizeIdToDeferred_[id];
+        }
       }
-    });
+    );
 
-    this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, (data) => {
-      const id = data['id'];
-      if (id !== undefined) {
-        this.resizeIdToDeferred_[id].reject('Resizing is denied');
-        delete this.resizeIdToDeferred_[id];
+    this.client_.registerCallback(
+      MessageType_Enum.EMBED_SIZE_DENIED,
+      (data) => {
+        const id = data['id'];
+        if (id !== undefined) {
+          this.resizeIdToDeferred_[id].reject('Resizing is denied');
+          delete this.resizeIdToDeferred_[id];
+        }
       }
-    });
+    );
   }
 
   /**
@@ -256,13 +262,10 @@ export class AbstractAmpContext {
    * @private
    */
   sendDeprecationNotice_(endpoint) {
-    this.client_.sendMessage(
-      MessageType.USER_ERROR_IN_IFRAME,
-      dict({
-        'message': `${endpoint} is deprecated`,
-        'expected': true,
-      })
-    );
+    this.client_.sendMessage(MessageType_Enum.USER_ERROR_IN_IFRAME, {
+      'message': `${endpoint} is deprecated`,
+      'expected': true,
+    });
   }
 
   /**
@@ -273,9 +276,12 @@ export class AbstractAmpContext {
    *    request succeeds.
    */
   onResizeSuccess(callback) {
-    this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, (obj) => {
-      callback(obj['requestedHeight'], obj['requestedWidth']);
-    });
+    this.client_.registerCallback(
+      MessageType_Enum.EMBED_SIZE_CHANGED,
+      (obj) => {
+        callback(obj['requestedHeight'], obj['requestedWidth']);
+      }
+    );
     this.sendDeprecationNotice_('onResizeSuccess');
   }
 
@@ -287,7 +293,7 @@ export class AbstractAmpContext {
    *    request is denied.
    */
   onResizeDenied(callback) {
-    this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, (obj) => {
+    this.client_.registerCallback(MessageType_Enum.EMBED_SIZE_DENIED, (obj) => {
       callback(obj['requestedHeight'], obj['requestedWidth']);
     });
     this.sendDeprecationNotice_('onResizeDenied');
@@ -297,7 +303,7 @@ export class AbstractAmpContext {
    *  Make the ad interactive.
    */
   signalInteractive() {
-    this.client_.sendMessage(MessageType.SIGNAL_INTERACTIVE);
+    this.client_.sendMessage(MessageType_Enum.SIGNAL_INTERACTIVE);
   }
 
   /**
@@ -314,7 +320,7 @@ export class AbstractAmpContext {
    *  Notifies the parent document of no content available inside embed.
    */
   noContentAvailable() {
-    this.client_.sendMessage(MessageType.NO_CONTENT);
+    this.client_.sendMessage(MessageType_Enum.NO_CONTENT);
   }
 
   /**
@@ -413,12 +419,9 @@ export class AbstractAmpContext {
     if (!e.message) {
       return;
     }
-    this.client_.sendMessage(
-      MessageType.USER_ERROR_IN_IFRAME,
-      dict({
-        'message': e.message,
-      })
-    );
+    this.client_.sendMessage(MessageType_Enum.USER_ERROR_IN_IFRAME, {
+      'message': e.message,
+    });
   }
 }
 

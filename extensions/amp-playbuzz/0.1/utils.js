@@ -1,5 +1,4 @@
 import {rethrowAsync} from '#core/error';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {getData} from '#utils/event-helper';
@@ -108,11 +107,11 @@ function parsePlaybuzzEventData(data) {
     }
   } catch (e) {
     rethrowAsync('amp-playbuzz', err, e);
-    return dict({});
+    return {};
   }
 
   rethrowAsync('amp-playbuzz', err, data);
-  return dict({});
+  return {};
 }
 
 /**
@@ -123,23 +122,21 @@ export function composeEmbedUrl(options) {
   const embedUrl =
     options.itemUrl +
     '?' +
-    serializeQueryString(
-      dict({
-        'feed': true,
-        'implementation': 'amp',
-        'src': options.itemUrl,
-        'embedBy': '00000000-0000-0000-0000-000000000000',
-        'game': options.relativeUrl,
-        'comments': undefined,
-        'useComments': options.displayComments,
-        'gameInfo': options.displayItemInfo,
-        'useShares': options.displayShareBar,
-        'socialReferrer': false, //always false - will use parent url for sharing
-        'height': 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
-        'parentUrl': options.parentUrl, //used for sharing
-        'parentHost': options.parentHost,
-      })
-    );
+    serializeQueryString({
+      'feed': true,
+      'implementation': 'amp',
+      'src': options.itemUrl,
+      'embedBy': '00000000-0000-0000-0000-000000000000',
+      'game': options.relativeUrl,
+      'comments': undefined,
+      'useComments': options.displayComments,
+      'gameInfo': options.displayItemInfo,
+      'useShares': options.displayShareBar,
+      'socialReferrer': false, //always false - will use parent url for sharing
+      'height': 'auto', //must pass as is - if not, makes problems in trivia (iframe height scrolling)
+      'parentUrl': options.parentUrl, //used for sharing
+      'parentHost': options.parentHost,
+    });
   return embedUrl;
 }
 

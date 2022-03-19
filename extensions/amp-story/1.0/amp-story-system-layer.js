@@ -1,4 +1,15 @@
-import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/amp-story-player-impl';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+import * as Preact from '#core/dom/jsx';
+import {closest, matches, scopedQuerySelector} from '#core/dom/query';
+import {setImportantStyles} from '#core/dom/style';
+import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {dev} from '#utils/log';
+
+import {localize} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -6,31 +17,17 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
-import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
-import {
-  DevelopmentModeLog,
-  DevelopmentModeLogButtonSet,
-} from './development-ui';
-import {LocalizedStringId} from '#service/localization/strings';
 import {ProgressBar} from './progress-bar';
-import {Services} from '#service';
-import {closest, matches, scopedQuerySelector} from '#core/dom/query';
 import {
   createShadowRootWithStyle,
   getStoryAttributeSrc,
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
 } from './utils';
-import {dev} from '#utils/log';
-import {dict} from '#core/types/object';
-import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
-import {getMode} from '../../../src/mode';
+
+import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
+import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
 import {getSourceOrigin} from '../../../src/url';
-
-import {renderAsElement} from './simple-template';
-
-import {setImportantStyles} from '#core/dom/style';
-import {toArray} from '#core/types/array';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -66,9 +63,6 @@ const PAUSE_CLASS = 'i-amphtml-story-pause-control';
 const PLAY_CLASS = 'i-amphtml-story-play-control';
 
 /** @private @const {string} */
-const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
-
-/** @private @const {string} */
 const CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE = 'i-amphtml-current-page-has-audio';
 
 /** @private @const {string} */
@@ -86,199 +80,102 @@ const ATTRIBUTION_CLASS = 'i-amphtml-story-attribution';
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
-/** @private @const {!./simple-template.ElementDef} */
-const TEMPLATE = {
-  tag: 'aside',
-  attrs: dict({
-    'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset',
-  }),
-  children: [
-    {
-      tag: 'a',
-      attrs: dict({
-        'class': ATTRIBUTION_CLASS,
-        'target': '_blank',
-      }),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-attribution-logo-container',
-          }),
-          children: [
-            {
-              tag: 'img',
-              attrs: dict({
-                'alt': '',
-                'class': 'i-amphtml-story-attribution-logo',
-              }),
-            },
-          ],
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-attribution-text',
-          }),
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({
-        'class': 'i-amphtml-story-has-new-page-notification-container',
-      }),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-has-new-page-text-wrapper',
-          }),
-          children: [
-            {
-              tag: 'span',
-              attrs: dict({
-                'class': 'i-amphtml-story-has-new-page-circle-icon',
-              }),
-            },
-            {
-              tag: 'div',
-              attrs: dict({
-                'class': 'i-amphtml-story-has-new-page-text',
-              }),
-              localizedStringId: LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
-      children: [
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': INFO_CLASS + ' i-amphtml-story-button',
-          }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL,
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-story-sound-display',
-          }),
-          children: [
-            {
-              tag: 'div',
-              attrs: dict({
-                'role': 'alert',
-                'class': 'i-amphtml-message-container',
-              }),
-              children: [
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-mute-text',
-                  }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_TEXT,
-                },
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-unmute-sound-text',
-                  }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_SOUND_TEXT,
-                },
-                {
-                  tag: 'div',
-                  attrs: dict({
-                    'class': 'i-amphtml-story-unmute-no-sound-text',
-                  }),
-                  localizedStringId:
-                    LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_NO_SOUND_TEXT,
-                },
-              ],
-            },
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': UNMUTE_CLASS + ' i-amphtml-story-button',
-              }),
-              localizedLabelId:
-                LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
-            },
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': MUTE_CLASS + ' i-amphtml-story-button',
-              }),
-              localizedLabelId:
-                LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL,
-            },
-          ],
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'class': 'i-amphtml-paused-display',
-          }),
-          children: [
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': PAUSE_CLASS + ' i-amphtml-story-button',
-              }),
-              localizedLabelId: LocalizedStringId.AMP_STORY_PAUSE_BUTTON_LABEL,
-            },
-            {
-              tag: 'button',
-              attrs: dict({
-                'class': PLAY_CLASS + ' i-amphtml-story-button',
-              }),
-              localizedLabelId: LocalizedStringId.AMP_STORY_PLAY_BUTTON_LABEL,
-            },
-          ],
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class':
-              SKIP_TO_NEXT_CLASS +
-              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
-          }),
-          localizedLabelId:
-            LocalizedStringId.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL,
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class': SHARE_CLASS + ' i-amphtml-story-button',
-          }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
-        },
-        {
-          tag: 'button',
-          attrs: dict({
-            'class':
-              CLOSE_CLASS +
-              ' i-amphtml-story-ui-hide-button i-amphtml-story-button',
-          }),
-          localizedLabelId: LocalizedStringId.AMP_STORY_CLOSE_BUTTON_LABEL,
-        },
-      ],
-    },
-    {
-      tag: 'div',
-      attrs: dict({
-        'class': 'i-amphtml-story-system-layer-buttons-start-position',
-      }),
-    },
-  ],
-};
+/**
+ * @param {!Element} element
+ * @param {?Element=} children
+ * @return {!Element}
+ */
+const renderSystemLayerElement = (element, children) => (
+  <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
+    {children}
+    <a class={String(ATTRIBUTION_CLASS)} target="_blank">
+      <div class="i-amphtml-story-attribution-logo-container">
+        <img alt="" class="i-amphtml-story-attribution-logo" />
+      </div>
+      <div class="i-amphtml-story-attribution-text" />
+    </a>
+    <div class="i-amphtml-story-has-new-page-notification-container">
+      <div class="i-amphtml-story-has-new-page-text-wrapper">
+        <span class="i-amphtml-story-has-new-page-circle-icon" />
+        <div class="i-amphtml-story-has-new-page-text">
+          {localize(
+            element,
+            LocalizedStringId_Enum.AMP_STORY_HAS_NEW_PAGE_TEXT
+          )}
+        </div>
+      </div>
+    </div>
+    <div class="i-amphtml-story-system-layer-buttons">
+      <div
+        role="button"
+        class={INFO_CLASS + ' i-amphtml-story-button'}
+        aria-label={localize(
+          element,
+          LocalizedStringId_Enum.AMP_STORY_INFO_BUTTON_LABEL
+        )}
+      />
+      <div class="i-amphtml-story-sound-display">
+        <button
+          class={UNMUTE_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
+          )}
+        />
+        <button
+          class={MUTE_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId_Enum.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
+          )}
+        />
+      </div>
+      <div class="i-amphtml-paused-display">
+        <button
+          class={PAUSE_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId_Enum.AMP_STORY_PAUSE_BUTTON_LABEL
+          )}
+        />
+        <button
+          class={PLAY_CLASS + ' i-amphtml-story-button'}
+          aria-label={localize(
+            element,
+            LocalizedStringId_Enum.AMP_STORY_PLAY_BUTTON_LABEL
+          )}
+        />
+      </div>
+      <button
+        class={
+          SKIP_TO_NEXT_CLASS +
+          ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
+        }
+        aria-label={localize(
+          element,
+          LocalizedStringId_Enum.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
+        )}
+      />
+      <button
+        class={SHARE_CLASS + ' i-amphtml-story-button'}
+        aria-label={localize(
+          element,
+          LocalizedStringId_Enum.AMP_STORY_SHARE_BUTTON_LABEL
+        )}
+      />
+      <button
+        class={
+          CLOSE_CLASS + ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
+        }
+        aria-label={localize(
+          element,
+          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+        )}
+      />
+    </div>
+    <div class="i-amphtml-story-system-layer-buttons-start-position" />
+  </aside>
+);
 
 /**
  * Contains the event name belonging to the viewer control.
@@ -332,9 +229,6 @@ export class SystemLayer {
     /** @protected @const {!Element} */
     this.parentEl_ = parentEl;
 
-    /** @private {boolean} */
-    this.isBuilt_ = false;
-
     /**
      * Root element containing a shadow DOM root.
      * @private {?Element}
@@ -352,12 +246,6 @@ export class SystemLayer {
 
     /** @private @const {!ProgressBar} */
     this.progressBar_ = ProgressBar.create(win, this.parentEl_);
-
-    /** @private {!DevelopmentModeLog} */
-    this.developerLog_ = DevelopmentModeLog.create(win);
-
-    /** @private {!DevelopmentModeLogButtonSet} */
-    this.developerButtons_ = DevelopmentModeLogButtonSet.create(win);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
@@ -383,33 +271,29 @@ export class SystemLayer {
    * @param {string} initialPageId
    */
   build(initialPageId) {
-    if (this.isBuilt_) {
-      return this.getRoot();
+    if (this.root_) {
+      return this.root_;
     }
 
-    this.isBuilt_ = true;
-
-    this.root_ = this.win_.document.createElement('div');
-    this.root_.classList.add('i-amphtml-system-layer-host');
-    this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
+    this.systemLayerEl_ = renderSystemLayerElement(
+      this.parentEl_,
+      this.progressBar_.build(initialPageId)
+    );
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
     this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
       Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
-    createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
-
-    this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(initialPageId),
-      this.systemLayerEl_.firstChild
+    this.root_ = createShadowRootWithStyle(
+      <div class="i-amphtml-system-layer-host"></div>,
+      this.systemLayerEl_,
+      CSS
     );
 
     this.buttonsContainer_ = this.systemLayerEl_.querySelector(
       '.i-amphtml-story-system-layer-buttons'
     );
-
-    this.buildForDevelopmentMode_();
 
     this.initializeListeners_();
 
@@ -442,9 +326,8 @@ export class SystemLayer {
 
     this.maybeBuildAttribution_();
 
-    this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
-    return this.getRoot();
+    return this.root_;
   }
 
   /** @private */
@@ -472,22 +355,6 @@ export class SystemLayer {
       this.parentEl_.getAttribute('publisher');
 
     anchorEl.classList.add('i-amphtml-story-attribution-visible');
-  }
-
-  /**
-   * @private
-   */
-  buildForDevelopmentMode_() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.buttonsContainer_.appendChild(
-      this.developerButtons_.build(
-        this.developerLog_.toggle.bind(this.developerLog_)
-      )
-    );
-    this.getShadowRoot().appendChild(this.developerLog_.build());
   }
 
   /**
@@ -541,14 +408,6 @@ export class SystemLayer {
       StateProperty.CAN_SHOW_SHARING_UIS,
       (show) => {
         this.onCanShowSharingUisUpdate_(show);
-      },
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.STORY_HAS_AUDIO_STATE,
-      (hasAudio) => {
-        this.onStoryHasAudioStateUpdate_(hasAudio);
       },
       true /** callToInitialize */
     );
@@ -646,13 +505,6 @@ export class SystemLayer {
   /**
    * @return {!Element}
    */
-  getRoot() {
-    return dev().assertElement(this.root_);
-  }
-
-  /**
-   * @return {!Element}
-   */
   getShadowRoot() {
     return dev().assertElement(this.systemLayerEl_);
   }
@@ -697,21 +549,6 @@ export class SystemLayer {
       this.getShadowRoot().classList.toggle(
         'i-amphtml-story-no-sharing',
         !canShowSharingUis
-      );
-    });
-  }
-
-  /**
-   * Reacts to has audio state updates, determining if the story has a global
-   * audio track playing, or if any page has audio.
-   * @param {boolean} hasAudio
-   * @private
-   */
-  onStoryHasAudioStateUpdate_(hasAudio) {
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().classList.toggle(
-        'i-amphtml-story-has-audio',
-        hasAudio
       );
     });
   }
@@ -816,7 +653,7 @@ export class SystemLayer {
    * @private
    */
   hideMessageInternal_(message) {
-    if (!this.isBuilt_) {
+    if (!this.root_) {
       return;
     }
     this.vsync_.mutate(() => {
@@ -916,10 +753,6 @@ export class SystemLayer {
    */
   onAudioIconClick_(mute) {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
-    this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideMessageAfterTimeout_(MESSAGE_DISPLAY_CLASS);
-    });
   }
 
   /**
@@ -956,13 +789,10 @@ export class SystemLayer {
     const eventName = element[VIEWER_CONTROL_EVENT_NAME];
 
     this.viewerMessagingHandler_ &&
-      this.viewerMessagingHandler_.send(
-        'documentStateUpdate',
-        dict({
-          'state': AMP_STORY_PLAYER_EVENT,
-          'value': eventName,
-        })
-      );
+      this.viewerMessagingHandler_.send('documentStateUpdate', {
+        'state': AMP_STORY_PLAYER_EVENT,
+        'value': eventName,
+      });
   }
 
   /**
@@ -1010,9 +840,8 @@ export class SystemLayer {
           defaultConfig.selector
         );
       } else {
-        element = this.win_.document.createElement('button');
+        element = <button class="i-amphtml-story-button" />;
         this.vsync_.mutate(() => {
-          element.classList.add('i-amphtml-story-button');
           this.buttonsContainer_.appendChild(element);
         });
       }
@@ -1072,76 +901,5 @@ export class SystemLayer {
   updateProgress(pageId, progress) {
     // TODO(newmuis) avoid passing progress logic through system-layer
     this.progressBar_.updateProgress(pageId, progress);
-  }
-
-  /**
-   * @param {!./logging.AmpStoryLogEntryDef} logEntry
-   * @private
-   */
-  logInternal_(logEntry) {
-    this.developerButtons_.log(logEntry);
-    this.developerLog_.log(logEntry);
-  }
-
-  /**
-   * Logs an array of entries to the developer logs.
-   * @param {!Array<!./logging.AmpStoryLogEntryDef>} logEntries
-   */
-  logAll(logEntries) {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.vsync_.mutate(() => {
-      logEntries.forEach((logEntry) => this.logInternal_(logEntry));
-    });
-  }
-
-  /**
-   * Logs a single entry to the developer logs.
-   * @param {!./logging.AmpStoryLogEntryDef} logEntry
-   */
-  log(logEntry) {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.logInternal_(logEntry);
-  }
-
-  /**
-   * Clears any state held by the developer log or buttons.
-   */
-  resetDeveloperLogs() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerButtons_.clear();
-    this.developerLog_.clear();
-  }
-
-  /**
-   * Sets the string providing context for the developer logs window.  This is
-   * often the name or ID of the element that all logs are for (e.g. the page).
-   * @param {string} contextString
-   */
-  setDeveloperLogContextString(contextString) {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerLog_.setContextString(contextString);
-  }
-
-  /**
-   * Hides the developer log in the UI.
-   */
-  hideDeveloperLog() {
-    if (!getMode().development) {
-      return;
-    }
-
-    this.developerLog_.hide();
   }
 }

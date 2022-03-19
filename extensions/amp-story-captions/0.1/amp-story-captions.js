@@ -1,4 +1,4 @@
-import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {toArray} from '#core/types/array';
 
 import {listen} from '#utils/event-helper';
@@ -29,12 +29,11 @@ export class AmpStoryCaptions extends AMP.BaseElement {
   buildCallback() {
     this.container_ = this.element.ownerDocument.createElement('div');
     this.element.appendChild(this.container_);
-    applyFillContent(this.container_, /* replacedContent */ true);
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return isLayoutSizeDefined(layout) || layout === Layout_Enum.CONTAINER;
   }
 
   /**

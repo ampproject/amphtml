@@ -1,7 +1,3 @@
-
-
-/// <reference types="dompurify"/>
-
 export type AttributeRewriterDef = (
   tagName: string,
   attrName: string,

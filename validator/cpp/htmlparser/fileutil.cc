@@ -1,14 +1,15 @@
-#include "fileutil.h"
+#include "cpp/htmlparser/fileutil.h"
 
 #include <glob.h>
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
-#include "defer.h"
-#include "strings.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/strings.h"
 
 // TODO(caoboxiao)
 // The Macro `GLOB_TILDE` is not defined in the WebAssembly environment because
