@@ -49,10 +49,7 @@ function getTestConfig() {
   const replacePlugin = getReplacePlugin();
   const replaceGlobalsPlugin = getReplaceGlobalsPlugin();
   const testPlugins = [
-    getImportResolverPlugin({
-      'react': 'preact/compat',
-      'react-dom': 'preact/compat',
-    }),
+    getImportResolverPlugin(),
     argv.coverage ? instanbulPlugin : null,
     replacePlugin,
     replaceGlobalsPlugin,
