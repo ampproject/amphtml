@@ -1,4 +1,4 @@
-import {ComponentChildren} from 'preact';
+import {Component, ComponentChildren} from 'preact';
 
 const filterTypes = [
   'substring',
@@ -28,6 +28,7 @@ export interface BentoAutocompleteProps {
   maxItems?: number;
   highlightUserEntry?: boolean;
   inline?: string;
+  itemTemplate?: (item: Item) => Component;
 }
 
 export type InputElement = HTMLInputElement | HTMLTextAreaElement;

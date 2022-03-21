@@ -6,7 +6,15 @@ import {getValueForExpr} from '#core/types/object';
 import {includes} from '#core/types/string';
 
 import * as Preact from '#preact';
-import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
+import {
+  cloneElement,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from '#preact';
 import {ContainWrapper} from '#preact/component';
 
 import fuzzysearch from '#third_party/fuzzysearch';
@@ -36,6 +44,7 @@ export function BentoAutocomplete({
   maxItems,
   highlightUserEntry = false,
   inline,
+  itemTemplate,
 }: BentoAutocompleteProps) {
   const elementRef = useRef<HTMLElement>(null);
   const containerId = useRef<string>(
@@ -323,6 +332,48 @@ export function BentoAutocomplete({
     [highlightUserEntry, substring, filter]
   );
 
+  const getRenderedItem = useCallback(
+    (item: Item, index: number) => {
+      let component;
+      if (typeof item === 'object') {
+        if (!itemTemplate) {
+          onError(`${TAG} data must provide template for non-string items.`);
+          return null;
+        }
+        component = itemTemplate(item);
+      } else {
+        component = (
+          <div data-value={item}>{getItemChildren(item as string)}</div>
+        );
+      }
+      if (!isValidElement(component)) {
+        return component;
+      }
+      return cloneElement(component, {
+        key: item,
+        id: getItemId(index),
+        class: objStr({
+          [classes.autocompleteItem]: true,
+          [classes.autocompleteItemActive]: index === activeIndex,
+        }),
+        role: 'option',
+        dir: 'auto',
+        'aria-selected': activeIndex === index,
+        onClick: handleItemClick,
+        part: 'option',
+      });
+    },
+    [
+      itemTemplate,
+      getItemId,
+      activeIndex,
+      classes,
+      handleItemClick,
+      getItemChildren,
+      onError,
+    ]
+  );
+
   useEffect(() => {
     setupInputElement(elementRef.current!);
     validateProps();
@@ -353,29 +404,9 @@ export function BentoAutocomplete({
         // @ts-ignore
         part="results"
       >
-        {filteredData.map((item: Item, index: number) => {
-          if (typeof item === 'string') {
-            return (
-              <div
-                key={item}
-                data-value={item}
-                id={getItemId(index)}
-                class={objStr({
-                  [classes.autocompleteItem]: true,
-                  [classes.autocompleteItemActive]: index === activeIndex,
-                })}
-                role="option"
-                dir="auto"
-                aria-selected={activeIndex === index}
-                onClick={handleItemClick}
-                // @ts-ignore
-                part="option"
-              >
-                {getItemChildren(item)}
-              </div>
-            );
-          }
-        })}
+        {filteredData.map((item: Item, index: number) =>
+          getRenderedItem(item, index)
+        )}
       </div>
     </ContainWrapper>
   );

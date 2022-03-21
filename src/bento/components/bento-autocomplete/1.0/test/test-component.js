@@ -488,4 +488,59 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(wrapper.exists('[data-value="three"]')).to.be.true;
     });
   });
+
+  describe('item templates', () => {
+    it('calls onError if items are an object type and an itemTemplate prop is not present', () => {
+      mount(
+        <Autocomplete
+          id="id"
+          onError={onError}
+          items={[{name: 'one'}, {name: 'two'}]}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      expect(onError).to.have.been.calledWith(
+        'bento-autocomplete data must provide template for non-string items.'
+      );
+    });
+
+    it('renders an item template', () => {
+      const items = [
+        {
+          city: 'Seattle',
+          state: 'WA',
+        },
+        {
+          city: 'Portland',
+          state: 'OR',
+        },
+      ];
+      const itemTemplate = ({city, state}) => (
+        <div data-value={`${city}, ${state}`}>
+          {city}, {state}
+        </div>
+      );
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          items={items}
+          filterValue="name"
+          itemTemplate={itemTemplate}
+          minChars={0}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+
+      input.getDOMNode().value = '';
+      input.simulate('input');
+
+      expect(wrapper.exists('[data-value="Seattle, WA"]')).to.be.true;
+      expect(wrapper.exists('[data-value="Portland, OR"]')).to.be.true;
+    });
+  });
 });
