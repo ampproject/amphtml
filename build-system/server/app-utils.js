@@ -72,7 +72,7 @@ const isRtvMode = (serveMode) => {
  */
 const getCdnUrlRegExp = (pathPattern = '[^\'">]+') =>
   new RegExp(
-    `(https://cdn\\.ampproject\\.org)/${pathPattern}(\\.json|\\.m?js|\\.css)`,
+    `(https://cdn\\.ampproject\\.org|https://ampjs\\.org)/${pathPattern}(\\.json|\\.m?js|\\.css)`,
     'g'
   );
 
