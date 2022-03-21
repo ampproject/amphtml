@@ -1352,7 +1352,7 @@ export class AmpStory extends AMP.BaseElement {
         this.showSubscriptionsDialog_();
         this.paywallTimeout_ = null;
       }, PAYWALL_DELAY_DURATION);
-    } else {
+    } else if (subscriptionsState !== SubscriptionsState.DISABLED) {
       // Hide paywall UI if visiting a non-blocked page, e.g. navigate back to the previous page
       // or to the blocked pages with granted status.
       this.hideSubscriptionsDialog_();
