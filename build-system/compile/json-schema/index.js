@@ -8,6 +8,7 @@
  */
 const {_, default: Ajv} = require('ajv');
 const dedent = require('dedent');
+const json5 = require('json5');
 const {outputFile, pathExists} = require('fs-extra');
 const {basename, join, relative} = require('path');
 const {once} = require('../../common/once');
@@ -123,7 +124,7 @@ async function getCompiledJsonSchemaFilename(filename) {
   const cached = await transformCache.get(hash);
   let output = cached;
   if (!output) {
-    const schema = remapPortableSchema(JSON.parse(contents));
+    const schema = remapPortableSchema(json5.parse(contents));
     output = avjCompile(filename, schema);
     transformCache.set(hash, Promise.resolve(output));
   }

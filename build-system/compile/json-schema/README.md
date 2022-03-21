@@ -7,6 +7,7 @@ A file may import a [JSON Schema](https://json-schema.org/) validation function 
 ```json
 {
   "properties": {
+    // .schema.json files can have comments
     "title": {"type": "string"}
   },
   "required": ["title"]
