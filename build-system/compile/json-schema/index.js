@@ -6,7 +6,7 @@
  *   validate("my-data");
  *   ```
  */
-const {default: Ajv} = require('ajv');
+const {_, default: Ajv} = require('ajv');
 const dedent = require('dedent');
 const {outputFile, pathExists} = require('fs-extra');
 const {basename, join, relative} = require('path');
@@ -36,7 +36,67 @@ const ajvOptions = {
   validateSchema: false,
 };
 
-const ajv = once(() => new Ajv(ajvOptions));
+const ajv = once(() => decorateAjv(new Ajv(ajvOptions)));
+
+/**
+ * @param {Ajv} ajv
+ * @return {Ajv}
+ */
+function decorateAjv(ajv) {
+  ajv.addKeyword({
+    keyword: 'currencyCode',
+    code(ctx) {
+      ctx.pass(_`isValidCurrencyCode(${ctx.data})`);
+    },
+  });
+  return ajv;
+}
+
+/**
+ * Remaps a portable (standard) JSON Schema to our custom format in order to
+ * use our custom compilation steps
+ * @param {*} schema
+ * @return {*}
+ */
+function remapPortableSchema(schema) {
+  if (typeof schema === 'object') {
+    if (Array.isArray(schema)) {
+      schema = schema.map(remapPortableSchema);
+    } else {
+      schema = remapCurrencyCodeSchema(schema);
+      schema = remapPortableSchemaProps(schema);
+    }
+  }
+  return schema;
+}
+
+/**
+ * @param {Object} schema
+ * @return {Object}
+ */
+function remapCurrencyCodeSchema(schema) {
+  if (
+    'enum' in schema &&
+    Array.isArray(schema.enum) &&
+    'description' in schema &&
+    schema.description.includes('https://datahub.io/core/currency-codes')
+  ) {
+    delete schema.enum;
+    schema.currencyCode = true;
+  }
+  return schema;
+}
+
+/**
+ * @param {Object} schema
+ * @return {Object}
+ */
+function remapPortableSchemaProps(schema) {
+  for (const k in schema) {
+    schema[k] = remapPortableSchema(schema[k]);
+  }
+  return schema;
+}
 
 const escapeJsIdentifier = (id) => id.replace(/[^a-z_0-9]/gi, '_');
 
@@ -63,7 +123,8 @@ async function getCompiledJsonSchemaFilename(filename) {
   const cached = await transformCache.get(hash);
   let output = cached;
   if (!output) {
-    output = avjCompile(filename, contents);
+    const schema = remapPortableSchema(JSON.parse(contents));
+    output = avjCompile(filename, schema);
     transformCache.set(hash, Promise.resolve(output));
   }
   const outputFilename = `build/${filename}.js`;
@@ -86,6 +147,8 @@ function avjCompile(filename, contents) {
   );
   return (
     dedent(`
+      import {isValidCurrencyCode} from '#core/json-schema';
+
       const validateAjv = __validateAjv__;
       /**
        * @param {any} data
