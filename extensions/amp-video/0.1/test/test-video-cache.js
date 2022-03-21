@@ -99,6 +99,17 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       );
     });
 
+    it('should always add the ACAO header', async () => {
+      const videoEl = createVideo([{'src': 'https://website.com/video.html'}]);
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
+      );
+    });
+
     it('should send the request to the correct address if the video has a relative url', async () => {
       const videoEl = createVideo([{'src': 'video.html'}]);
       const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
