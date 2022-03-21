@@ -1,5 +1,3 @@
-import {expect} from 'chai';
-
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
@@ -292,6 +290,7 @@ describes.realWin(
       await createStoryWithPages(pageCount, [firstPageId, 'page-1']);
       const dispatchSpy = env.sandbox.spy(story.storeService_, 'dispatch');
 
+      env.sandbox.stub(win, 'requestAnimationFrame').callsFake((cb) => cb());
       await story.layoutCallback();
       expect(dispatchSpy).to.have.been.calledWith(Action.CHANGE_PAGE, {
         id: firstPageId,
@@ -376,6 +375,7 @@ describes.realWin(
       story.element.setAttribute('standalone', '');
       story.element.setAttribute('supports-landscape', '');
 
+      env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
       story.buildCallback();
 
       await story.layoutCallback();
@@ -390,6 +390,7 @@ describes.realWin(
       story.element.setAttribute('standalone', '');
       story.element.setAttribute('supports-landscape', '');
 
+      env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
       story.buildCallback();
 
       await story.layoutCallback();
@@ -403,6 +404,7 @@ describes.realWin(
       story.landscapeOrientationMedia_ = {matches: true};
       story.element.setAttribute('standalone', '');
 
+      env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
       story.buildCallback();
 
       await story.layoutCallback();
@@ -1302,6 +1304,7 @@ describes.realWin(
           styleEl.textContent = 'foo {transform: translate3d(100vw, 0, 0);}';
           win.document.head.appendChild(styleEl);
 
+          env.sandbox.stub(story.vsync_, 'mutate').callsFake((fn) => fn());
           story.buildCallback();
 
           await story.layoutCallback();
@@ -1318,6 +1321,7 @@ describes.realWin(
           styleEl.textContent = 'foo {transform: translate3d(-100vh, 0, 0);}';
           win.document.head.appendChild(styleEl);
 
+          env.sandbox.stub(story.vsync_, 'mutate').callsFake((fn) => fn());
           story.buildCallback();
 
           await story.layoutCallback();
@@ -1942,6 +1946,7 @@ describes.realWin(
         env.sandbox.stub(Services, 'performanceFor').returns(performanceImpl);
         pages = await createStoryWithPages(2, ['page-1', 'page-2'], false);
         env.sandbox.stub(story, 'mutateElement').callsFake((fn) => fn());
+        env.sandbox.stub(win, 'requestAnimationFrame').callsFake((cb) => cb());
       });
 
       it('should position the active page so it preloads', async () => {
