@@ -398,7 +398,7 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
       doc.body.appendChild(element);
 
       impl = new AmpAdNetworkSmartadserverImpl(element, doc, win);
-      const stub = env.sandbox.stub(impl, 'collapseIframe');
+      const stub = env.sandbox.stub(impl, 'collapse');
       const data = {
         sentinel: impl.sentinel,
         type: 'collapse',
