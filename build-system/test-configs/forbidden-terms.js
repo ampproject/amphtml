@@ -925,6 +925,7 @@ const forbiddenTermsSrcInclusive = {
       'code. Use urls from src/config/urls.js instead.',
     allowlist: [
       'ads/_a4a-config.js',
+      'build-system/release-workflows/build-release.js',
       'build-system/server/amp4test.js',
       'build-system/server/app-index/amphtml-helpers.js',
       'build-system/server/app-video-testbench.js',
