@@ -116,17 +116,13 @@ describes.realWin(
     }
 
     it('should build shopping config component', async () => {
-      expect(() => getShoppingConfig(pageElement)).to.not.throw();
+      expect(() => getShoppingConfig(shoppingAttachment)).to.not.throw();
     });
 
     it('throws on no config', async () => {
-      expectAsyncConsoleError(async () => {
-        expect(() => {
-          const shoppingAttachment = <amp-story-shopping-attachment />;
-          pageElement.appendChild(shoppingAttachment);
-          return createAmpStoryShoppingConfig();
-        }).to.throw(/<script> tag with type=\"application\/json\"​​​/);
-      });
+      expectAsyncConsoleError(
+        /<script> tag with type=\"application\/json\"​​​/
+      );
     });
 
     it('does use inline config', async () => {
@@ -182,14 +178,9 @@ describes.realWin(
     });
 
     it('test invalid remote config url', async () => {
-      expectAsyncConsoleError(async () => {
-        expect(async () => {
-          const invalidURL = 'invalidRemoteURL';
-          await createAmpStoryShoppingConfig(invalidURL);
-        }).to.throw(
-          /'amp-story-shopping-config:config error determining if remote config is valid json: bad url or bad json'​​​/
-        );
-      });
+      expectAsyncConsoleError(
+        /'amp-story-shopping-config:config error determining if remote config is valid json: bad url or bad json'​​​/
+      );
     });
 
     describe('storeShoppingConfig', () => {
@@ -290,11 +281,11 @@ describes.realWin(
       const invalidValue = 'http://zapp'; // This is not a valid url
       invalidConfig['items'][0]['productUrl'] = invalidValue;
 
-      const errorString = `Error: productUrl ${invalidConfig['items'][0]['productUrl'][0]} is not a valid URL. (Error: amp-story-shopping-config productImages source must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${invalidConfig['items'][0]['productUrl'][0]})`;
+      const errorString = `Error: productUrl ${invalidValue} is not a valid URL. (Error: amp-story-shopping-config productImages source must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${invalidConfig['items'][0]['productUrl'][0]})`;
       const spy = env.sandbox.spy(url, 'assertHttpsUrl');
       await createAmpStoryShoppingConfig(null, invalidConfig);
       expect(spy).to.have.been.calledWith(
-        `${invalidConfig['items'][0]['productUrl']}`,
+        `${invalidValue}`,
         'amp-story-shopping-config productUrl'
       );
     });
