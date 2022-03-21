@@ -1,4 +1,5 @@
 import {hasOwn, map, ownProperty} from '#core/types/object';
+
 /**
  * Takes a string, removes '.', and splits by special characters.
  * Returns the resulting array of tokens.

@@ -21,11 +21,13 @@ import fuzzysearch from '#third_party/fuzzysearch';
 
 import {useStyles} from './component.jss';
 import {DEFAULT_ON_ERROR, TAG} from './constants';
+import {getItemElement, getTextValue} from './helpers';
 import {tokenPrefixMatch} from './token-prefix-match';
 import {
   BentoAutocompleteProps,
   InputElement,
   Item,
+  ItemTemplateProps,
   isValidFilterType,
 } from './types';
 import {useAutocompleteBinding} from './use-autocomplete-binding';
@@ -209,7 +211,9 @@ export function BentoAutocomplete({
       }
       const index = activeIndex + delta;
       const newActiveIndex = mod(index, filteredData.length);
-      const newValue = filteredData[newActiveIndex];
+      const options = containerRef.current?.querySelectorAll('[role="option"]');
+      const activeOption = options?.item(newActiveIndex);
+      const newValue = getTextValue(activeOption as HTMLElement);
 
       setActiveIndex(newActiveIndex);
       inputRef.current?.setAttribute(
@@ -217,7 +221,7 @@ export function BentoAutocomplete({
         getItemId(newActiveIndex)
       );
 
-      setInputValue(newValue as string);
+      setInputValue(newValue);
     },
     [
       activeIndex,
@@ -263,28 +267,16 @@ export function BentoAutocomplete({
     ]
   );
 
-  const getItemElement: (element: HTMLElement | null) => HTMLElement | null =
-    useCallback((element) => {
-      if (!element) {
-        return null;
-      }
-      if (element.getAttribute('role') === 'option') {
-        return element as HTMLDivElement;
-      }
-      return getItemElement(element.parentElement);
-    }, []);
-
   const handleItemClick = useCallback(
     (event: MouseEvent) => {
       const element = getItemElement(event.target as HTMLElement);
-      const textValue =
-        element?.getAttribute('data-value') || element?.textContent || '';
+      const textValue = getTextValue(element);
 
       setInputValue(textValue);
       setActiveIndex(-1);
       setShowOptions(false);
     },
-    [setInputValue, setShowOptions, getItemElement]
+    [setInputValue, setShowOptions]
   );
 
   const getItemChildren = useCallback(
@@ -346,8 +338,13 @@ export function BentoAutocomplete({
           <div data-value={item}>{getItemChildren(item as string)}</div>
         );
       }
-      if (!isValidElement(component)) {
+      if (!isValidElement<ItemTemplateProps>(component)) {
         return component;
+      }
+      if (!component.props['data-value']) {
+        onError(
+          `${TAG} expected a "data-value" or "data-disabled" attribute on the rendered template item.`
+        );
       }
       return cloneElement(component, {
         key: item,

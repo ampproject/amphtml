@@ -641,7 +641,39 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(wrapper.exists('[data-value="Portland, OR"]')).to.be.false;
     });
 
-    it('sets the input value using the data-value attribute', () => {
+    it('calls onError if the data-value attribute is not present on the template', () => {
+      const itemTemplate = ({city, state}) => (
+        <div class="city-item">
+          <span>
+            {city}, {state}
+          </span>
+        </div>
+      );
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          items={items}
+          filterValue="city"
+          filter="token-prefix"
+          itemTemplate={itemTemplate}
+          minChars={0}
+          onError={onError}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+
+      input.getDOMNode().value = 'sea';
+      input.simulate('input');
+
+      expect(onError).to.have.been.calledWith(
+        'bento-autocomplete expected a "data-value" or "data-disabled" attribute on the rendered template item.'
+      );
+    });
+
+    it('sets the input value using the data-value attribute on click', () => {
       const wrapper = mount(
         <Autocomplete
           id="id"
@@ -661,6 +693,30 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('input');
 
       wrapper.find('[data-value="Seattle, WA"]').simulate('click');
+
+      expect(input.getDOMNode().value).to.equal('Seattle, WA');
+    });
+
+    it('sets the input value using the data-value attribute on arrow down', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          items={items}
+          filterValue="city"
+          filter="token-prefix"
+          itemTemplate={itemTemplate}
+          minChars={0}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+
+      input.getDOMNode().value = 'sea';
+      input.simulate('input');
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
 
       expect(input.getDOMNode().value).to.equal('Seattle, WA');
     });

@@ -28,7 +28,7 @@ export interface BentoAutocompleteProps {
   maxItems?: number;
   highlightUserEntry?: boolean;
   inline?: string;
-  itemTemplate?: (item: Item) => Component;
+  itemTemplate?: (item: Item) => Component<any, any>;
 }
 
 export type InputElement = HTMLInputElement | HTMLTextAreaElement;
@@ -37,3 +37,8 @@ export interface AutocompleteBinding {
   shouldAutocomplete(inputEl: InputElement): boolean;
   getUserInputForUpdate(inputEl: InputElement): string;
 }
+
+export type ItemTemplateProps = {
+  'data-value'?: string;
+  'data-disabled'?: boolean;
+};
