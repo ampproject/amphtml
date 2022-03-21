@@ -49,7 +49,7 @@ export function fetchCachedSources(
     .then((response) => {
       applySourcesToVideo(videoEl, response['sources'], maxBitrate);
       applyAudioInfoToVideo(videoEl, response['has_audio']);
-      applyCaptionsTrackToVideo(videoEl, response['captions_src']);
+      applyCaptionsTrackToVideo(videoEl, response);
     })
     .catch(() => {
       // If cache fails, video should still load properly.
@@ -161,14 +161,19 @@ function applyAudioInfoToVideo(videoEl, hasAudio) {
  * Appends captions track to video if captions url is defined and video
  * element doesn't have a track child specified in the document.
  * @param {!Element} videoEl
- * @param {string|undefined} captionsUrl
+ * @param {!Object} response
  */
-function applyCaptionsTrackToVideo(videoEl, captionsUrl) {
-  if (!captionsUrl || videoEl.querySelector('track')) {
+function applyCaptionsTrackToVideo(videoEl, response) {
+  if (
+    !response['captions_src'] ||
+    !response['captions_srclang'] ||
+    videoEl.querySelector('track')
+  ) {
     return;
   }
   const trackEl = createElementWithAttributes(videoEl.ownerDocument, 'track', {
-    'src': captionsUrl,
+    'src': response['captions_src'],
+    'srclang': response['captions_srclang'],
     'kind': 'captions',
   });
   videoEl.appendChild(trackEl);

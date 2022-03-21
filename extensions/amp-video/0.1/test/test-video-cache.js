@@ -501,6 +501,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
         json: () =>
           Promise.resolve({
             'captions_src': 'captions_src_response.vtt',
+            'captions_srclang': 'en-us',
             'sources': [
               {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
             ],
@@ -517,6 +518,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
         json: () =>
           Promise.resolve({
             'captions_src': 'captions_src_response.vtt',
+            'captions_srclang': 'en-us',
             'sources': [
               {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
             ],
