@@ -21,6 +21,7 @@ import fuzzysearch from '#third_party/fuzzysearch';
 
 import {useStyles} from './component.jss';
 import {DEFAULT_ON_ERROR, TAG} from './constants';
+import {tokenPrefixMatch} from './token-prefix-match';
 import {
   BentoAutocompleteProps,
   InputElement,
@@ -175,8 +176,7 @@ export function BentoAutocomplete({
         case 'prefix':
           return item.startsWith(normalizedValue);
         case 'token-prefix':
-          // TODO
-          return [];
+          return tokenPrefixMatch(item, normalizedValue);
         case 'fuzzy':
           return fuzzysearch(normalizedValue, item);
         case 'custom':

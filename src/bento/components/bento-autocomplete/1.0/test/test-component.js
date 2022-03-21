@@ -165,6 +165,31 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(wrapper.exists('[data-value="three"]')).to.be.true;
     });
 
+    it('displays autocomplete suggestions for a token prefix match', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          filter="token-prefix"
+          items={['Seattle, WA', 'Portland, OR']}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 'Seattle';
+      input.simulate('input');
+
+      expect(wrapper.exists('[data-value="Seattle, WA"]')).to.be.true;
+      expect(wrapper.exists('[data-value="Portland, OR"]')).to.be.false;
+
+      input.getDOMNode().value = 'OR';
+      input.simulate('input');
+
+      expect(wrapper.exists('[data-value="Seattle, WA"]')).to.be.false;
+      expect(wrapper.exists('[data-value="Portland, OR"]')).to.be.true;
+    });
+
     it('displays all items if filter type is none', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="none" items={['one', 'two', 'three']}>
