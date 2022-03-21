@@ -1,4 +1,5 @@
 export type {
+  Component,
   ComponentChildren,
   ComponentProps,
   ComponentType,

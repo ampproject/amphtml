@@ -1,4 +1,4 @@
-import {Component, ComponentChildren} from 'preact';
+import {Component, ComponentChildren} from '#preact/types';
 
 const filterTypes = [
   'substring',
