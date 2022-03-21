@@ -661,7 +661,7 @@ export class SystemLayer {
 
   /**
    * Reacts to UI state updates and triggers the expected UI.
-   * Call inside a mutate context if not initializing.
+   * Called inside a mutate context if not initializing.
    * @param {!UIType} uiState
    * @private
    */
