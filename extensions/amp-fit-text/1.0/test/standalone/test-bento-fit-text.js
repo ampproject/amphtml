@@ -1,29 +1,38 @@
-import '../amp-fit-text';
 import {expect} from 'chai';
+
+import {CSS} from '#build/bento-fit-text-1.0.css';
+
+import {adoptStyles} from '#bento/util/unit-helpers';
 
 import {createElementWithAttributes} from '#core/dom';
 import {computedStyle} from '#core/dom/style';
 
-import {toggleExperiment} from '#experiments';
+import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
 
-import {useStyles} from '../component.jss';
+import {BaseElement as BentoFitText} from '../../base-element';
+import {useStyles} from '../../component.jss';
 
 describes.realWin(
-  'amp-fit-text component',
+  'bento-fit-text component',
   {
-    amp: {
-      extensions: ['amp-fit-text:1.0'],
-    },
+    amp: false,
   },
   (env) => {
     let win, doc;
     const styles = useStyles();
 
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+      defineBentoElement('bento-fit-text', BentoFitText, win);
+      adoptStyles(win, CSS);
+    });
+
     async function waitForRender(element) {
       doc.body.appendChild(element);
-      await element.buildInternal();
+      await element.getApi();
       const getContent = () => {
         return (
           element.shadowRoot &&
@@ -37,29 +46,21 @@ describes.realWin(
       const content = element.shadowRoot.querySelector(
         `[class*=${styles['fitTextContent']}]`
       );
-      await waitFor(
-        () => computedStyle(win, content)[property] === value,
-        `${property} applied`
-      );
+      await new Promise((r) => setTimeout(200, r));
+
+      // await waitFor(
+      //   () => computedStyle(win, content)[property] === value,
+      //   `${property} applied`
+      // );
+
+      console.log(computedStyle(win, content)[property]);
       expect(computedStyle(win, content)[property]).to.equal(value);
     }
 
-    beforeEach(() => {
-      win = env.win;
-      doc = win.document;
-      toggleExperiment(win, 'bento-fit-text', true);
-    });
-
-    afterEach(() => {
-      toggleExperiment(win, 'bento-fit-text', false);
-    });
-
-    it('renders', async () => {
+    it.only('renders', async () => {
       const text = 'Lorem ipsum';
-      const element = createElementWithAttributes(doc, 'amp-fit-text', {
-        width: '100',
-        height: '200',
-        style: 'font-family: Arial;',
+      const element = createElementWithAttributes(doc, 'bento-fit-text', {
+        style: 'font-family: Arial; width: 100px; height: 200px',
       });
       element.textContent = text;
       await waitForRender(element);
@@ -70,15 +71,22 @@ describes.realWin(
       expect(assignedNodes).to.have.lengthOf(1);
       expect(assignedNodes[0].nodeType).to.equal(3);
       expect(assignedNodes[0].wholeText).to.equal(text);
+      await new Promise((r) => setTimeout(r, 200));
+      console.log(
+        computedStyle(
+          win,
+          element.shadowRoot.querySelector(
+            `[class*=${styles['fitTextContent']}]`
+          )
+        ).fontSize
+      );
       await expectAsyncStyle(element, 'fontSize', '35px');
     });
 
     it('respects min-font-size', async () => {
       const text = 'Lorem ipsum';
-      const element = createElementWithAttributes(doc, 'amp-fit-text', {
-        width: '100',
-        height: '200',
-        style: 'font-family: Arial;',
+      const element = createElementWithAttributes(doc, 'bento-fit-text', {
+        style: 'font-family: Arial; width: 100px; height: 200px',
         'min-font-size': 40,
       });
       element.textContent = text;
@@ -95,10 +103,8 @@ describes.realWin(
 
     it('respects max-font-size', async () => {
       const text = 'Lorem ipsum';
-      const element = createElementWithAttributes(doc, 'amp-fit-text', {
-        width: '100',
-        height: '200',
-        style: 'font-family: Arial;',
+      const element = createElementWithAttributes(doc, 'bento-fit-text', {
+        style: 'font-family: Arial; width: 100px; height: 200px',
         'max-font-size': 32,
       });
       element.textContent = text;
@@ -115,10 +121,8 @@ describes.realWin(
 
     it('respects equal min-font-size and max-font-size', async () => {
       const text = 'Lorem ipsum';
-      const element = createElementWithAttributes(doc, 'amp-fit-text', {
-        width: '100',
-        height: '200',
-        style: 'font-family: Arial;',
+      const element = createElementWithAttributes(doc, 'bento-fit-text', {
+        style: 'font-family: Arial; width: 100px; height: 200px',
         'min-font-size': 50,
         'max-font-size': 50,
       });
@@ -136,10 +140,8 @@ describes.realWin(
 
     it('respects min-font-size over max-font-size', async () => {
       const text = 'Lorem ipsum';
-      const element = createElementWithAttributes(doc, 'amp-fit-text', {
-        width: '100',
-        height: '200',
-        style: 'font-family: Arial;',
+      const element = createElementWithAttributes(doc, 'bento-fit-text', {
+        style: 'font-family: Arial; width: 100px; height: 200px',
         'max-font-size': 40,
         'min-font-size': 50,
       });
@@ -157,10 +159,8 @@ describes.realWin(
 
     it('supports update of textContent', async () => {
       const text = 'Lorem ipsum';
-      const element = createElementWithAttributes(doc, 'amp-fit-text', {
-        width: '100',
-        height: '200',
-        style: 'font-family: Arial;',
+      const element = createElementWithAttributes(doc, 'bento-fit-text', {
+        style: 'font-family: Arial; width: 100px; height: 200px',
       });
       element.textContent = text;
       await waitForRender(element);
@@ -187,10 +187,8 @@ describes.realWin(
 
     it('re-calculates font size if a resize is detected by the measurer', async () => {
       const text = 'Lorem ipsum';
-      const element = createElementWithAttributes(doc, 'amp-fit-text', {
-        width: '100',
-        height: '200',
-        style: 'font-family: Arial;',
+      const element = createElementWithAttributes(doc, 'bento-fit-text', {
+        style: 'font-family: Arial; width: 100px; height: 200px',
       });
       element.textContent = text;
       await waitForRender(element);
