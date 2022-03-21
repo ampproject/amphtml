@@ -36,7 +36,7 @@ const ajvOptions = {
   validateSchema: false,
 };
 
-const ajv = once(() => decorateAjv(new Ajv(ajvOptions)));
+const getAjv = once(() => decorateAjv(new Ajv(ajvOptions)));
 
 /**
  * @param {Ajv} ajv
@@ -136,12 +136,13 @@ async function getCompiledJsonSchemaFilename(filename) {
 
 /**
  * @param {string} filename
- * @param {string} contents
+ * @param {any} schema
  * @return {string}
  */
-function avjCompile(filename, contents) {
-  const schema = JSON.parse(contents);
-  const validateAjv = ajv().compile(schema);
+function avjCompile(filename, schema) {
+  const ajv = getAjv();
+  const validateAjv = ajv.compile(schema);
+  const scopeCode = ajv.scope.scopeCode(validateAjv?.source?.scopeValues, {});
   const validateFnName = escapeJsIdentifier(
     `validate_${basename(filename, '.json')}`
   );
@@ -149,7 +150,10 @@ function avjCompile(filename, contents) {
     dedent(`
       import {isValidCurrencyCode} from '#core/json-schema';
 
+      __scopeCode__
+
       const validateAjv = __validateAjv__;
+
       /**
        * @param {any} data
        * @return {{params?: object, message?: string, data?: any}[]}
@@ -159,11 +163,12 @@ function avjCompile(filename, contents) {
         return validateAjv(data) ? [] : [...validateAjv.errors]
       }
     `)
+      .replace('__scopeCode__', scopeCode)
       .replace('__validateFnName__', validateFnName)
       // validateAjv returns a boolean, and modifies a property of the function
       // for errors. The default instead returns an array of errors, which is
       // empty when the input is valid.
-      .replace('__validateAjv__', validateAjv.toString())
+      .replace('__validateAjv__', validateAjv?.source?.validateCode)
   );
 }
 
