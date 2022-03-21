@@ -1,5 +1,4 @@
 import * as Preact from '#preact';
-import {ContainWrapper} from '#preact/component';
 import {
   useCallback,
   useEffect,
@@ -8,7 +7,7 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {useStyles} from './component.jss';
+import {ContainWrapper} from '#preact/component';
 
 /**
  * @param {!BentoImgur.Props} props
@@ -16,10 +15,8 @@ import {useStyles} from './component.jss';
  */
 export function BentoImgur({exampleTagNameProp, ...rest}) {
   // Examples of state and hooks
-  // DO NOT SUBMIT: This is example code only.
   const [exampleValue, setExampleValue] = useState(0);
   const exampleRef = useRef(null);
-  const styles = useStyles();
 
   useCallback(() => {
     /* Do things */
@@ -37,7 +34,7 @@ export function BentoImgur({exampleTagNameProp, ...rest}) {
   return (
     <ContainWrapper layout size paint {...rest}>
       {exampleTagNameProp}
-      <div className={`${styles.exampleContentHidden}`}>This is hidden</div>
+      <div class={`${styles.exampleContentHidden}`}>This is hidden</div>
     </ContainWrapper>
   );
 }
