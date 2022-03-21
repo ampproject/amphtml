@@ -298,13 +298,16 @@ describes.realWin(
     it('should call analytics service on attachment state update when clicking the shopping tag', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
-      env.sandbox.stub(win.document.activeElement, 'tagName').callsFake(() => {
-        expect(trigger).to.have.been.calledWith(
-          StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
-        );
-      });
+      env.sandbox
+        .mock(win.document.activeElement)
+        .expects('tagName')
+        .returns('AMP-STORY-SHOPPING-TAG');
 
       await setupPDP();
+      //win.document.activeElement.tagName
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
+      );
     });
   }
 );
