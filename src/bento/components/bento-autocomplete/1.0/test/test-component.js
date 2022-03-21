@@ -10,7 +10,6 @@ import {areOptionsVisible} from './test-helpers';
 import {BentoAutocomplete} from '../component';
 
 // TODO
-// It accepts a list of objects as items and searches based on the filter value
 // it hides items on tab
 // something with backspace (1357)
 
@@ -515,13 +514,27 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
   });
 
   describe('item templates', () => {
+    const items = [
+      {
+        city: 'Seattle',
+        state: 'WA',
+      },
+      {
+        city: 'Portland',
+        state: 'OR',
+      },
+    ];
+    const itemTemplate = ({city, state}) => (
+      <div class="city-item" data-value={`${city}, ${state}`}>
+        <span>
+          {city}, {state}
+        </span>
+      </div>
+    );
+
     it('calls onError if items are an object type and an itemTemplate prop is not present', () => {
       mount(
-        <Autocomplete
-          id="id"
-          onError={onError}
-          items={[{name: 'one'}, {name: 'two'}]}
-        >
+        <Autocomplete id="id" onError={onError} items={items}>
           <input type="text"></input>
         </Autocomplete>
       );
@@ -532,26 +545,11 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
     });
 
     it('renders an item template with attributes', () => {
-      const items = [
-        {
-          city: 'Seattle',
-          state: 'WA',
-        },
-        {
-          city: 'Portland',
-          state: 'OR',
-        },
-      ];
-      const itemTemplate = ({city, state}) => (
-        <div class="city-item" data-value={`${city}, ${state}`}>
-          {city}, {state}
-        </div>
-      );
       const wrapper = mount(
         <Autocomplete
           id="id"
           items={items}
-          filterValue="name"
+          filter="none"
           itemTemplate={itemTemplate}
           minChars={0}
         >
@@ -569,6 +567,102 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       expect(wrapper.find('[role="option"]').length).to.equal(2);
       expect(wrapper.find('.city-item').length).to.equal(2);
+    });
+
+    it('tries to use a default filter-value when a filter type is specified and calls onError if it does not exist', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          onError={onError}
+          items={items}
+          itemTemplate={itemTemplate}
+          filter="prefix"
+          minChars={0}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+
+      input.getDOMNode().value = '';
+      input.simulate('input');
+
+      expect(onError).to.have.been.calledWith(
+        'bento-autocomplete data property "value" must map to string type.'
+      );
+    });
+
+    it('calls onError it items are an object type and filterValue is not present on object', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          onError={onError}
+          items={items}
+          itemTemplate={itemTemplate}
+          filter="prefix"
+          filterValue="something"
+          minChars={0}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+
+      input.getDOMNode().value = '';
+      input.simulate('input');
+
+      expect(onError).to.have.been.calledWith(
+        'bento-autocomplete data property "something" must map to string type.'
+      );
+    });
+
+    it('filters options using the filterValue', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          items={items}
+          filterValue="city"
+          filter="token-prefix"
+          itemTemplate={itemTemplate}
+          minChars={0}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+
+      input.getDOMNode().value = 'sea';
+      input.simulate('input');
+
+      expect(wrapper.exists('[data-value="Seattle, WA"]')).to.be.true;
+      expect(wrapper.exists('[data-value="Portland, OR"]')).to.be.false;
+    });
+
+    it('sets the input value using the data-value attribute', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          items={items}
+          filterValue="city"
+          filter="token-prefix"
+          itemTemplate={itemTemplate}
+          minChars={0}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+
+      input.getDOMNode().value = 'sea';
+      input.simulate('input');
+
+      wrapper.find('[data-value="Seattle, WA"]').simulate('click');
+
+      expect(input.getDOMNode().value).to.equal('Seattle, WA');
     });
   });
 });
