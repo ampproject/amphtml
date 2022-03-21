@@ -361,6 +361,7 @@ export function BentoAutocomplete({
         'aria-selected': activeIndex === index,
         onClick: handleItemClick,
         part: 'option',
+        ...component.props,
       });
     },
     [

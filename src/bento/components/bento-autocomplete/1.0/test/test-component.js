@@ -506,7 +506,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       );
     });
 
-    it('renders an item template', () => {
+    it('renders an item template with attributes', () => {
       const items = [
         {
           city: 'Seattle',
@@ -518,7 +518,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         },
       ];
       const itemTemplate = ({city, state}) => (
-        <div data-value={`${city}, ${state}`}>
+        <div class="city-item" data-value={`${city}, ${state}`}>
           {city}, {state}
         </div>
       );
@@ -541,6 +541,9 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       expect(wrapper.exists('[data-value="Seattle, WA"]')).to.be.true;
       expect(wrapper.exists('[data-value="Portland, OR"]')).to.be.true;
+
+      expect(wrapper.find('[role="option"]').length).to.equal(2);
+      expect(wrapper.find('.city-item').length).to.equal(2);
     });
   });
 });
