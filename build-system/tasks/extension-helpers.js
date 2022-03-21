@@ -630,18 +630,6 @@ async function buildBentoCss(name, versions, minifiedAmpCss) {
 async function buildNpmBinaries(extDir, name, options) {
   let {npm} = options;
   if (npm === true) {
-    // remap all shared modules to the @bentoproject/core package and declare as external
-    // todo(kvchari): currently only used for bento standalone, investigate using for preact & react
-    const bentoEntryPoint = await getBentoBuildFilename(
-      extDir,
-      getBentoName(name),
-      'web-component',
-      options
-    );
-    const fullEntryPoint = path.join(extDir, bentoEntryPoint);
-    const remap = getRemapBentoNpmDependencies(fullEntryPoint);
-    const external = [...new Set(Object.values(remap))];
-
     npm = {
       preact: {
         entryPoint: 'component.js',
@@ -664,14 +652,30 @@ async function buildNpmBinaries(extDir, name, options) {
         wrapper: '',
       },
       bento: {
-        entryPoint: bentoEntryPoint,
+        entryPoint: await getBentoBuildFilename(
+          extDir,
+          getBentoName(name),
+          'web-component',
+          options
+        ),
         outfile: 'web-component.js',
         wrapper: '',
-
-        remap,
-        external,
       },
     };
+
+    // for each bento mode, remap all shared modules and declare them as external
+    // remaps "core" modules to @bentoproject/core
+    // rempas any cross-extension (e.g imports to bento-foo) imports to @bentoproject/foo
+    for (const mode in npm) {
+      const fullEntryPoint = path.join(extDir, npm[mode].entryPoint);
+      const bentoRemaps = getRemapBentoNpmDependencies(fullEntryPoint);
+      const bentoExternals = Object.values(bentoRemaps);
+      npm[mode].remap = {
+        ...(npm[mode].remap || {}),
+        ...bentoRemaps,
+      };
+      npm[mode].external = [...(npm[mode].external || []), ...bentoExternals];
+    }
   }
   const binaries = Object.values(npm);
   return buildBinaries(extDir, binaries, options);
@@ -684,11 +688,14 @@ async function buildNpmBinaries(extDir, name, options) {
  * @return {!Promise}
  */
 function buildBinaries(extDir, binaries, options) {
+  // If outputPath is not defined, then use extDir
+  const {outputPath = extDir} = options;
+
   const promises = binaries.map((binary) => {
     const {babelCaller, entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
+    return esbuildCompile(extDir + '/', entryPoint, `${outputPath}/dist`, {
       ...options,
       toName: maybeToNpmEsmName(`${name}.max.js`),
       minifiedName: maybeToNpmEsmName(`${name}.js`),
@@ -730,7 +737,7 @@ async function buildBentoExtensionJs(dir, name, options) {
   );
   await buildExtensionJs(dir, name, {
     ...options,
-    externalDependencies: Object.values(remapDependencies),
+    externalDependencies: [...new Set(Object.values(remapDependencies))],
     remapDependencies,
     wrapper: 'none',
     outputFormat: argv.esm ? 'esm' : 'nomodule-loader',

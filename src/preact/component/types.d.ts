@@ -1,6 +1,7 @@
 import * as Preact from 'preact';
+import {ComponentChildren, FunctionComponent, Ref, VNode} from 'preact';
+
 import {ReadyState_Enum} from '#core/constants/ready-state';
-import {Ref, VNode, FunctionComponent, ComponentChildren} from 'preact';
 
 // TODO: figure out the proper type for all of the 'as' types.
 

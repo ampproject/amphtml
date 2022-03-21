@@ -311,9 +311,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
-          <span class="i-amphtml-amp-story-shopping-pdp-header-brand">
-            {activeProductData.productBrand}
-          </span>
+          {activeProductData.productVendor && (
+            <span class="i-amphtml-amp-story-shopping-pdp-header-vendor">
+              {activeProductData.productVendor}
+            </span>
+          )}
           <div class="i-amphtml-amp-story-shopping-pdp-header-title-and-price">
             <span class="i-amphtml-amp-story-shopping-pdp-header-title">
               {activeProductData.productTitle}
@@ -426,9 +428,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
                   backgroundImage: `url("${data['productImages'][0].url}")`,
                 }}
               ></div>
-              <div class="i-amphtml-amp-story-shopping-plp-card-brand">
-                {data['productBrand']}
-              </div>
+              {data['productVendor'] && (
+                <div class="i-amphtml-amp-story-shopping-plp-card-brand">
+                  {data['productVendor']}
+                </div>
+              )}
               <div class="i-amphtml-amp-story-shopping-plp-card-title">
                 {data['productTitle']}
               </div>
