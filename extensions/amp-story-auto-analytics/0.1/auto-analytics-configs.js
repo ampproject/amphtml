@@ -88,11 +88,11 @@ export const buildGtagConfig = (gtagId) => ({
         'send_to': [gtagId],
       },
     },
-    'storyShoppingPLPCardClick': {
-      'on': 'story-shopping-plp-card-click',
+    'storyShoppingListingPageClick': {
+      'on': 'story-shopping-listing-page-card-click',
       'vars': {
         'event_name': 'custom',
-        'event_action': 'story_shopping_plp_card_click',
+        'event_action': 'story_shopping_listing_page_card_click',
         'send_to': [gtagId],
       },
     },

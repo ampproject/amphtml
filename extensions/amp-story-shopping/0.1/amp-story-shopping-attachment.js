@@ -65,8 +65,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = Services.storyAnalyticsService(this.win);
 
-    /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
-    this.variableService_ = getVariableService(this.win);
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.variableService_ = Services.storyVariableService(this.win);
   }
 
   /** @override */
@@ -123,7 +123,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Triggers template update if opening without active product data.
-   * This happens when the "Shop Now" CTA is clicked.
+   * This happens either when the "Shop Now" CTA is clicked or when a
+   * shopping tag is clicked.
    * @param {boolean} isOpen
    * @private
    */
@@ -139,11 +140,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       );
 
       this.analyticsService_.triggerEvent(
-        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
-        this.element
-      );
-
-      this.analyticsService_.triggerEvent(
         StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
       );
     } else {
@@ -151,12 +147,13 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
         AnalyticsVariable.STORY_SHOPPING_CTA_CLICKED
       );
-
-      this.analyticsService_.triggerEvent(
-        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
-        this.element
-      );
     }
+
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
+      this.element
+    );
+
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
     if (!shoppingData.activeProductData) {
       this.updateTemplate_(shoppingData);
@@ -292,7 +289,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    */
   onPlpCardClick_(shoppingData) {
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.SHOPPING_PLP_CARD_CLICK
+      StoryAnalyticsEvent.SHOPPING_LISTING_PAGE_CARD_CLICK
     );
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW

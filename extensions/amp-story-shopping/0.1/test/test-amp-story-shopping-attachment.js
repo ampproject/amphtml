@@ -14,7 +14,7 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {
   StoryAnalyticsEvent,
-  StoryAnalyticsService,
+  getAnalyticsService,
 } from '../../../amp-story/1.0/story-analytics';
 describes.realWin(
   'amp-story-shopping-attachment-v0.1',
@@ -99,7 +99,7 @@ describes.realWin(
         return storeService;
       });
       env.sandbox.stub(win.history, 'replaceState');
-      analytics = new StoryAnalyticsService(win, win.document.body);
+      analytics = getAnalyticsService(win, win.document.body);
       registerServiceBuilder(win, 'story-analytics', function () {
         return analytics;
       });
@@ -237,7 +237,7 @@ describes.realWin(
       plpCard.dispatchEvent(new Event('click'));
 
       expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.SHOPPING_PLP_CARD_CLICK
+        StoryAnalyticsEvent.SHOPPING_LISTING_PAGE_CARD_CLICK
       );
     });
 
