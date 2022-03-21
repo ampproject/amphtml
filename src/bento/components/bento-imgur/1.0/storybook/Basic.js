@@ -1,21 +1,41 @@
-import * as Preact from '#preact';
-import {BentoImgur} from '../component';
+import {BentoImgur} from '#bento/components/bento-imgur/1.0/component';
 
-import '../component.jss';
+import * as Preact from '#preact';
 
 export default {
   title: 'Imgur',
   component: BentoImgur,
   args: {
-    'exampleProperty': 'example string property argument',
+    style: {
+      width: 300,
+      height: 200,
+    },
   },
 };
 
-// DO NOT SUBMIT: This is example code only.
-export const _default = (args) => {
-  return (
-    <BentoImgur style={{width: 300, height: 200}} {...args}>
-      This text is inside.
-    </BentoImgur>
-  );
+const shipTraffic = 'a/Jz6KlaV';
+const fancyCatGallery = 'a/4lyX4Uu';
+const fancyCat3 = 'HmZxgDE';
+const starWarsAtAt = 'a/JQlTKVh';
+
+const medium = {width: 600, height: 200};
+const small = {width: 300, height: 200};
+
+export const Medium = (args) => {
+  return <BentoImgur {...args} imgurId={shipTraffic} style={medium} />;
+};
+export const Small = (args) => {
+  return <BentoImgur {...args} imgurId={shipTraffic} style={small} />;
+};
+export const InvalidID = (args) => {
+  return <BentoImgur {...args} imgurId="a/INVALID" />;
+};
+export const Single = (args) => {
+  return <BentoImgur {...args} imgurId={fancyCat3} />;
+};
+export const ImageGallery = (args) => {
+  return <BentoImgur {...args} imgurId={fancyCatGallery} />;
+};
+export const VideoGallery = (args) => {
+  return <BentoImgur {...args} imgurId={starWarsAtAt} />;
 };

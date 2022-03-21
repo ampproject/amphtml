@@ -28,9 +28,9 @@ This extension creates an iframe and displays an [imgur](http://imgur.com) post.
 The id of the Imgur post.
 
 [tip type="important"]
-Album ids should prefixed with `a/` like `a/ZF7NS3V`.
+Album ids should be prefixed with `a/` like `a/ZF7NS3V`.
 
-You can confirm this in the post's url. It should include `a/` before the rest of the id, like on: `https://imgur.com/a/ZF7NS3V`
+You can confirm this in the post's url. It should include `a/` or `gallery/` before the rest of the id, like on: `https://imgur.com/a/ZF7NS3V` or `https://imgur.com/gallery/ZF7NS3V`.
 [/tip]
 
 ### width (required)

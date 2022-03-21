@@ -5,13 +5,10 @@ var BentoImgurDef = {};
 
 /**
  * @typedef {{
- *   exampleProperty: (string|undefined), (DO NOT SUBMIT)
+ *   imgurId: string,
  * }}
  */
 BentoImgurDef.Props;
 
 /** @interface */
-BentoImgurDef.BentoImgurApi = class {
-  /** Example: API method to toggle the component */
-  exampleToggle() {} // DO NOT SUBMIT
-};
+BentoImgurDef.BentoImgurApi = class {};
