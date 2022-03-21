@@ -42,7 +42,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -53,7 +53,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -67,7 +67,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -82,7 +82,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
   });
@@ -95,7 +95,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -106,7 +106,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -117,19 +117,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com'
-      );
-    });
-
-    it('should add the ACAO queryparam if the video is crossorigin', async () => {
-      const videoEl = createVideo([{'src': 'video.html'}]);
-      videoEl.setAttribute('crossorigin', '');
-      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
-
-      await fetchCachedSources(videoEl, env.ampdoc);
-
-      expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
   });
@@ -397,6 +385,14 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       expect(videoEl.querySelector('source[data-bitrate]')).to.not.be.null;
     });
 
+    it('should set the crossorigin attribute to the video', async () => {
+      const videoEl = createVideo([{'src': 'video.html'}]);
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(videoEl.hasAttribute('crossorigin')).to.be.true;
+    });
+
     it('should set an attribute on cached video sources', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
@@ -587,10 +583,10 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl3, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video3.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video3.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -606,7 +602,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -627,7 +623,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
   });
