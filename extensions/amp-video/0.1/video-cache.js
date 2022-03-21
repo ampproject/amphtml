@@ -36,6 +36,11 @@ export function fetchCachedSources(
     return Promise.resolve();
   }
 
+  // Always set crossorigin attribute so captions can be set.
+  if (!videoEl.hasAttribute('crossorigin')) {
+    videoEl.setAttribute('crossorigin', '');
+  }
+
   const videoSrc = videoEl.getAttribute('src');
   const sourceSrc = videoEl.querySelector('source[src]')?.getAttribute('src');
   if (!videoSrc && !sourceSrc) {
@@ -253,9 +258,7 @@ function requestCachedVideoSources(videoEl, ampdoc) {
       const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
         'amp_video_host_url':
           /* document url that contains the video */ canonicalUrl,
-        'amp_video_require_acao_header': videoEl.hasAttribute('crossorigin')
-          ? 1
-          : null,
+        'amp_video_require_acao_header': 1,
       });
       return Services.xhrFor(win)
         .fetch(requestUrl, {prerenderSafe: true})
