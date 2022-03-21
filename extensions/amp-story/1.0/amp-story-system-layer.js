@@ -285,14 +285,14 @@ export class SystemLayer {
     this.systemLayerEl_.querySelector('.i-amphtml-story-share-control').href =
       Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
-    this.buttonsContainer_ = this.systemLayerEl_.querySelector(
-      '.i-amphtml-story-system-layer-buttons'
-    );
-
     this.root_ = createShadowRootWithStyle(
       <div class="i-amphtml-system-layer-host"></div>,
       this.systemLayerEl_,
       CSS
+    );
+
+    this.buttonsContainer_ = this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-system-layer-buttons'
     );
 
     this.initializeListeners_();
