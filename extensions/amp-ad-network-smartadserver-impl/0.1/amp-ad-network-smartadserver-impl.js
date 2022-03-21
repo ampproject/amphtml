@@ -127,7 +127,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     return super.sendXhrRequest(adUrl).then((response) => {
       return response.text().then((responseText) => {
         if (includes(responseText, SAS_NO_AD_STR)) {
-          this.collapseIframe();
+          this./*OK*/ collapse();
         }
         return new Response(response);
       });
@@ -182,13 +182,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /**
-   * Collapses ad iframe
-   */
-  collapseIframe() {
-    this./*OK*/ collapse();
-  }
-
-  /**
    * Adds message event listener and triggers collapsing
    */
   addListener() {
@@ -197,7 +190,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
         event.data.sentinel === this.sentinel &&
         event.data.type === 'collapse'
       ) {
-        this.collapseIframe();
+        this./*OK*/ collapse();
         this.win.removeEventListener('message', messageListener);
       }
     };
