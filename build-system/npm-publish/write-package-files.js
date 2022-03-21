@@ -115,17 +115,18 @@ async function getDescription() {
  */
 async function writePackageJson() {
   const version = getSemver(extensionVersion, ampVersion);
-  if (!valid(version) || !valid(corePkgVersion) || ampVersion.length != 13) {
-    log(
-      'Invalid semver version',
-      version,
-      'or AMP version',
-      ampVersion,
-      'or extension version',
-      extensionVersion,
-      'or core package version',
-      corePkgVersion
-    );
+  if (!valid(version)) {
+    log('Invalid semver version', version);
+    process.exitCode = 1;
+    return;
+  }
+  if (!valid(corePkgVersion)) {
+    log('Invalid core package version', corePkgVersion);
+    process.exitCode = 1;
+    return;
+  }
+  if (ampVersion.length !== 13) {
+    log('Invalid AMP version', ampVersion);
     process.exitCode = 1;
     return;
   }
@@ -153,27 +154,34 @@ async function writePackageJson() {
     exports[`./${stylesheet}`] = `./dist/${stylesheet}`;
   }
 
+  const staticPackage = JSON.parse(
+    await readFile(`${dir}/package.static.json`, 'utf8')
+  );
+
   const json = {
     name: `@bentoproject/${packageName}`,
-    version,
-    description: await getDescription(),
     author: 'Bento Authors',
+    files: ['dist/*', 'react.js', 'styles.css'],
+    ...staticPackage,
     license: 'Apache-2.0',
     main: './dist/web-component.js',
     module: './dist/web-component.module.js',
-    exports,
-    files: ['dist/*', 'react.js', 'styles.css'],
     repository: {
       type: 'git',
       url: 'https://github.com/ampproject/amphtml.git',
       directory: dir,
     },
     homepage: `https://github.com/ampproject/amphtml/tree/main/${dir}`,
+    version,
+    exports,
+    description: await getDescription(),
     peerDependencies: {
+      ...(staticPackage.peerDependencies || {}),
       preact: '^10.2.1',
       react: '^17.0.0',
     },
     dependencies: {
+      ...(staticPackage.dependencies || {}),
       [corePkgName]: corePkgVersion,
     },
   };
