@@ -28,7 +28,7 @@ export default {
     filter: {
       control: {
         type: 'select',
-        options: ['none', 'prefix', 'fuzzy', 'substring'],
+        options: ['none', 'prefix', 'fuzzy', 'substring', 'token-prefix'],
       },
     },
   },
@@ -52,4 +52,32 @@ export const inline = (args) => {
 
 inline.args = {
   inline: ':',
+};
+
+// eslint-disable-next-line local/no-export-side-effect
+export const withCustomItems = _default.bind();
+
+withCustomItems.args = {
+  items: [
+    {
+      city: 'Seattle',
+      state: 'WA',
+    },
+    {
+      city: 'San Francisco',
+      state: 'CA',
+    },
+    {
+      city: 'New York',
+      state: 'NY',
+    },
+  ],
+  filterValue: 'city',
+  itemTemplate: ({city, state}) => {
+    return (
+      <div data-value={`${city}, ${state}`}>
+        {city}, {state}
+      </div>
+    );
+  },
 };
