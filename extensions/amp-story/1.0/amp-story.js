@@ -961,7 +961,7 @@ export class AmpStory extends AMP.BaseElement {
         // Enable paywall if required element found in DOM.
         if (
           isExperimentOn(this.win, 'amp-story-subscriptions') &&
-          this.element.querySelector('amp-story-subscriptions') != null &&
+          this.element.querySelector('amp-story-subscriptions') !== null &&
           this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
             SubscriptionsState.DISABLED
         ) {
