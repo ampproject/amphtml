@@ -1,30 +1,35 @@
 const glob = require('fast-glob');
-const {basename, join, relative} = require('path');
+const {basename, relative} = require('path');
 const test = require('ava');
+const esbuild = require('esbuild');
 const {esbuildCompile} = require('../../../tasks/helpers');
-const {dirname} = require('path/posix');
 const {pathExists, readFile} = require('fs-extra');
 const tempy = require('tempy');
 const {outputFile} = require('fs-extra');
+const {customValidatorsModule, esbuildJsonSchemaPlugin} = require('..');
 
 const inputFilenames = glob.sync(`${__dirname}/input/*.js`);
+
+const normalizeNlEof = (str) => `${str.trimEnd()}\n`;
 
 for (const inputFilename of inputFilenames) {
   const inputBasename = basename(inputFilename);
   test(inputBasename, async (t) => {
-    const outputTemporaryDir = tempy.directory();
-    const outputTemporaryFilename = join(outputTemporaryDir, inputBasename);
     const outputFilename = `${__dirname}/output/${basename(inputFilename)}`;
-    await esbuildCompile(
-      dirname(inputFilename),
-      inputBasename,
-      outputTemporaryDir,
-      {minify: false}
-    );
+    // Use esbuild directly to print out our plugin's output in isolation.
+    const result = await esbuild.build({
+      bundle: true,
+      entryPoints: [inputFilename],
+      external: [customValidatorsModule],
+      format: 'esm',
+      plugins: [esbuildJsonSchemaPlugin],
+      target: 'esnext',
+      write: false,
+    });
+    const actual = normalizeNlEof(result.outputFiles[0].text.trimEnd());
     const expected = (await pathExists(outputFilename))
-      ? await readFile(outputFilename, 'utf8')
+      ? normalizeNlEof(await readFile(outputFilename, 'utf8'))
       : null;
-    const actual = await readFile(outputTemporaryFilename, 'utf8');
     if (expected) {
       t.is(actual, expected);
     } else {
@@ -36,6 +41,7 @@ for (const inputFilename of inputFilenames) {
 
 function requireCompiled(filename) {
   return tempy.directory.task(async (tempDir) => {
+    // Use our actual bundler.
     await esbuildCompile(`${__dirname}/input/`, filename, tempDir, {
       minify: false,
     });

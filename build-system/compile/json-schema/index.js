@@ -9,7 +9,7 @@
 const {_: ajvCode, Name: AjvName, default: Ajv} = require('ajv');
 const dedent = require('dedent');
 const json5 = require('json5');
-const {outputFile, pathExists, readFile} = require('fs-extra');
+const {outputFile, pathExists} = require('fs-extra');
 const {basename, join, relative} = require('path');
 const {once} = require('../../common/once');
 const {
@@ -25,6 +25,9 @@ const {
  * @type {RegExp}
  */
 const importFilter = /\.schema\.json$/;
+
+// Must be aliased (#)
+const customValidatorsModule = '#core/json-schema';
 
 /**
  * Defines custom validators that we may inject into certain schemas.
@@ -119,23 +122,17 @@ const escapeJsIdentifier = (id) => id.replace(/[^a-z_0-9]/gi, '_');
 const getTransformCache = once(() => new TransformCache('.json-schema-cache'));
 
 /**
- * Like batchedRead(), but also includes the following in the invalidation hash:
- * - ajvOptions, including the definition of functions.
- * - the contents of our custom validator module on #core/json-schema
+ * Like batchedRead(), but also includes `ajvOptions` in the invalidation hash,
+ * including the definition of functions.
  * @param {string} filename
  * @return {Promise<{contents: string, hash: string}>}
  */
 async function ajvBatchedRead(filename) {
   const {contents, hash} = await batchedRead(filename);
-  const importContents = await getImportContents();
-  const hashable = {ajvOptions, importContents, hash};
+  const hashable = {ajvOptions, hash};
   const rehash = md5(jsonStringifyFunctions(hashable));
   return {contents, hash: rehash};
 }
-
-const getImportContents = once(() =>
-  readFile('src/core/json-schema.ts', 'utf8')
-);
 
 const jsonStringifyFunctions = (value) =>
   JSON.stringify(value, (_, value) =>
@@ -178,7 +175,7 @@ function avjCompile(filename, schema) {
   const customValidatorFns = customValidators.map(({fn}) => fn).join(', ');
   return (
     dedent(`
-      import {__customValidatorFns__} from '#core/json-schema';
+      import {__customValidatorFns__} from '__customValidatorsModule__';
 
       __scopeCode__
 
@@ -194,6 +191,7 @@ function avjCompile(filename, schema) {
       }
     `)
       .replace('__customValidatorFns__', customValidatorFns)
+      .replace('__customValidatorsModule__', customValidatorsModule)
       .replace('__scopeCode__', scopeCode)
       .replace('__validateFnName__', validateFnName)
       // validateAjv returns a boolean, and modifies a property of the function
@@ -208,7 +206,7 @@ const esbuildJsonSchemaPlugin = {
   setup(build) {
     build.onResolve({filter: importFilter}, async ({path, resolveDir}) => {
       // The import filename is printed as a comment in the esbuild output.
-      // Making it relative allows the tests for this output to be stable.
+      // Making it relative to be consistent with esbuild's own resolution.
       const filename = relative(process.cwd(), join(resolveDir, path));
       const compiledFilename = await getCompiledJsonSchemaFilename(filename);
       const resultPath = join(process.cwd(), compiledFilename);
@@ -218,5 +216,6 @@ const esbuildJsonSchemaPlugin = {
 };
 
 module.exports = {
+  customValidatorsModule,
   esbuildJsonSchemaPlugin,
 };
