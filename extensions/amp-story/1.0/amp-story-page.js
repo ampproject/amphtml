@@ -417,16 +417,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Return true if the current AmpStoryPage is protected by a paywall.
-   * 'limited-content' is for the paywall dialog page, where a paywall would trigger based on both time advance or click events.
-   * 'content' is for all the remaining locked pages.
-   * @return {boolean}
-   */
-  isPaywallProtected() {
-    return this.element.hasAttribute('subscriptions-section');
-  }
-
-  /**
    * Updates the state of the page.
    * @param {!PageState} state
    */
