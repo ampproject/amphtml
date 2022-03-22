@@ -204,6 +204,16 @@ export function BentoAutocomplete({
     [setShowOptions, binding]
   );
 
+  const handleFocus = useCallback(() => {
+    if (binding.shouldShowOnFocus) {
+      setShowOptions(true);
+    }
+  }, [setShowOptions, binding]);
+
+  const handleBlur = useCallback(() => {
+    setShowOptions(false);
+  }, [setShowOptions]);
+
   const updateActiveItem = useCallback(
     (delta: number) => {
       if (delta === 0 || !showAutocompleteOptions) {
@@ -378,12 +388,23 @@ export function BentoAutocomplete({
 
     inputRef.current?.addEventListener('input', handleInput);
     inputRef.current?.addEventListener('keydown', handleKeyDown);
+    inputRef.current?.addEventListener('focus', handleFocus);
+    inputRef.current?.addEventListener('blur', handleBlur);
 
     return () => {
       inputRef.current?.removeEventListener('input', handleInput);
       inputRef.current?.removeEventListener('keydown', handleKeyDown);
+      inputRef.current?.removeEventListener('focus', handleFocus);
+      inputRef.current?.removeEventListener('blur', handleBlur);
     };
-  }, [setupInputElement, validateProps, handleInput, handleKeyDown]);
+  }, [
+    setupInputElement,
+    validateProps,
+    handleInput,
+    handleKeyDown,
+    handleFocus,
+    handleBlur,
+  ]);
 
   return (
     <ContainWrapper

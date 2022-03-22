@@ -62,21 +62,24 @@ withCustomItems.args = {
     {
       city: 'Seattle',
       state: 'WA',
+      emoji: '🦦',
     },
     {
       city: 'San Francisco',
       state: 'CA',
+      emoji: '🌉',
     },
     {
       city: 'New York',
       state: 'NY',
+      emoji: '🌇',
     },
   ],
   filterValue: 'city',
-  itemTemplate: ({city, state}) => {
+  itemTemplate: ({city, emoji, state}) => {
     return (
       <div data-value={`${city}, ${state}`}>
-        {city}, {state}
+        {emoji} {city}, {state}
       </div>
     );
   },

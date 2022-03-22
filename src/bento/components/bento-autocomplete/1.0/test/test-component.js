@@ -255,8 +255,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(areOptionsVisible(wrapper)).to.be.false;
     });
 
-    // TODO: Simulate click or focus
-    it('shows options by default if minCharacters is 0', () => {
+    it('shows options on focus if minCharacters is 0', () => {
       const wrapper = mount(
         <Autocomplete
           id="id"
@@ -270,12 +269,31 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       const input = wrapper.find('input');
 
-      input.getDOMNode().value = '';
-      input.simulate('input');
+      input.simulate('focus');
 
-      expect(wrapper.exists('[data-value="one"]')).to.be.true;
-      expect(wrapper.exists('[data-value="two"]')).to.be.true;
-      expect(wrapper.exists('[data-value="three"]')).to.be.true;
+      expect(areOptionsVisible(wrapper)).to.be.true;
+    });
+
+    it('hides options on blur', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          filter="prefix"
+          minChars={0}
+          items={['one', 'two', 'three']}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.simulate('focus');
+
+      expect(areOptionsVisible(wrapper)).to.be.true;
+
+      input.simulate('blur');
+
+      expect(areOptionsVisible(wrapper)).to.be.false;
     });
 
     it('truncates items if max-items is set', () => {
@@ -477,7 +495,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
   });
 
   describe('inline autocomplete', () => {
-    it('displays options when the inline token is used', () => {
+    it('displays autocomplete suggestions when the inline token is used', () => {
       const wrapper = mount(
         <Autocomplete
           id="id"
@@ -510,6 +528,26 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(wrapper.exists('[data-value="one"]')).to.be.false;
       expect(wrapper.exists('[data-value="two"]')).to.be.false;
       expect(wrapper.exists('[data-value="three"]')).to.be.true;
+    });
+
+    it('does not show options on focus', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          inline=":"
+          filter="prefix"
+          items={['one', 'two', 'three']}
+          minChars={0}
+        >
+          <textarea></textarea>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('textarea');
+
+      input.simulate('focus');
+
+      expect(areOptionsVisible(wrapper)).to.be.false;
     });
   });
 

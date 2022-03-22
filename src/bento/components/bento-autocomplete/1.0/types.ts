@@ -36,6 +36,7 @@ export type InputElement = HTMLInputElement | HTMLTextAreaElement;
 export interface AutocompleteBinding {
   shouldAutocomplete(inputEl: InputElement): boolean;
   getUserInputForUpdate(inputEl: InputElement): string;
+  shouldShowOnFocus: boolean;
 }
 
 export type ItemTemplateProps = {

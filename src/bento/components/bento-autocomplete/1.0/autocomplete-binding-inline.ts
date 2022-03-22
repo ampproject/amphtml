@@ -3,9 +3,9 @@ import {ownProperty} from '#core/types/object';
 import {AutocompleteBinding, InputElement} from './types';
 
 export class AutocompleteBindingInline implements AutocompleteBinding {
-  trigger_: string;
-  regex_: RegExp;
-  match_: RegExpExecArray | null;
+  trigger_: string = '';
+  regex_: RegExp = new RegExp('');
+  match_: RegExpExecArray | null = null;
 
   constructor(trigger: string) {
     this.trigger_ = trigger;
@@ -13,6 +13,10 @@ export class AutocompleteBindingInline implements AutocompleteBinding {
     const delimiter = this.trigger_.replace(/([()[{*+.$^\\|?])/g, '\\$1');
     const pattern = `((${delimiter}|^${delimiter})(\\w+)?)`;
     this.regex_ = new RegExp(pattern, 'gm');
+  }
+
+  get shouldShowOnFocus() {
+    return false;
   }
 
   /**

@@ -1,6 +1,10 @@
 import {AutocompleteBinding, InputElement} from './types';
 
 export class AutocompleteBindingSingle implements AutocompleteBinding {
+  get shouldShowOnFocus() {
+    return true;
+  }
+
   shouldAutocomplete(): boolean {
     return true;
   }
