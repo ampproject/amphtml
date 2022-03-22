@@ -43,8 +43,7 @@
   }
 
   // build-system/compile/json-schema/test/input/currency-code.js
-  console.log(validate_currency_code_schema("MXN"));
-  console.log(validate_currency_code_schema("foobar"));
+  globalThis.validateCurrencyCode = validate_currency_code_schema;
 })();
 
 //# sourceMappingURL=currency-code.js.map

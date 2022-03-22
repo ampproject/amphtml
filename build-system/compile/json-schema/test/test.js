@@ -1,5 +1,5 @@
 const glob = require('fast-glob');
-const {basename, join} = require('path');
+const {basename, join, relative} = require('path');
 const test = require('ava');
 const {esbuildCompile} = require('../../../tasks/helpers');
 const {dirname} = require('path/posix');
@@ -33,3 +33,30 @@ for (const inputFilename of inputFilenames) {
     }
   });
 }
+
+function requireCompiled(filename) {
+  return tempy.directory.task(async (tempDir) => {
+    await esbuildCompile(`${__dirname}/input/`, filename, tempDir, {
+      minify: false,
+    });
+    require(relative(__dirname, `${tempDir}/${filename}`));
+    return globalThis;
+  });
+}
+
+test('run currency-code.js', async (t) => {
+  const {validateCurrencyCode} = await requireCompiled('currency-code.js');
+  t.deepEqual(validateCurrencyCode({currencyCode: 'INVALID'}), [
+    {
+      instancePath: '/currencyCode',
+      keyword: '_0',
+      message: 'must be a valid currency code',
+      params: {},
+      schemaPath: '#/properties/currencyCode/_0',
+    },
+  ]);
+  const schema = require('./input/currency-code.schema.json');
+  for (const currencyCode of schema.properties.currencyCode.enum) {
+    t.deepEqual(validateCurrencyCode({currencyCode}), []);
+  }
+});

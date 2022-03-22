@@ -9,7 +9,7 @@
 const {_: ajvCode, Name: AjvName, default: Ajv} = require('ajv');
 const dedent = require('dedent');
 const json5 = require('json5');
-const {outputFile, pathExists} = require('fs-extra');
+const {outputFile, pathExists, readFile} = require('fs-extra');
 const {basename, join, relative} = require('path');
 const {once} = require('../../common/once');
 const {
@@ -114,17 +114,21 @@ const getTransformCache = once(() => new TransformCache('.json-schema-cache'));
 /**
  * Like batchedRead(), but also includes the following in the invalidation hash:
  * - ajvOptions, including the definition of functions.
- * - the contents of our custom validator library on #core/json-schema
+ * - the contents of our custom validator module on #core/json-schema
  * @param {string} filename
  * @return {Promise<{contents: string, hash: string}>}
  */
 async function ajvBatchedRead(filename) {
-  const {contents, hash: schemaHash} = await batchedRead(filename);
-  const {hash: libraryHash} = await batchedRead('src/core/json-schema.ts');
-  const hashable = {ajvOptions, libraryHash, schemaHash};
-  const hash = md5(jsonStringifyFunctions(hashable));
-  return {contents, hash};
+  const {contents, hash} = await batchedRead(filename);
+  const importContents = await getImportContents();
+  const hashable = {ajvOptions, importContents, hash};
+  const rehash = md5(jsonStringifyFunctions(hashable));
+  return {contents, hash: rehash};
 }
+
+const getImportContents = once(() =>
+  readFile('src/core/json-schema.ts', 'utf8')
+);
 
 const jsonStringifyFunctions = (value) =>
   JSON.stringify(value, (_, value) =>
