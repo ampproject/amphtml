@@ -137,10 +137,7 @@ function getPackagesWithoutDepeneceiesInGraph(graph) {
     if (!node.dependencies) {
       return true;
     }
-    const dependenciesInGraph = Object.keys(node?.dependencies).filter(
-      (dep) => graph[dep]
-    );
-    return !Boolean(dependenciesInGraph.length);
+    return Object.keys(node?.dependencies).some((dep) => graph[dep]);
   });
 }
 
@@ -151,7 +148,7 @@ function getPackagesWithoutDepeneceiesInGraph(graph) {
  * @param {Record<string, PackageFileDef>} graph
  * @return {PackageFileDef[]}
  */
-function solveDependencyGraph(graph) {
+function getTopologicalSort(graph) {
   /** @type {PackageFileDef[]} */
   const publishOrder = [];
   let previousPackageCount = Object.keys(graph).length;
@@ -182,7 +179,7 @@ function solveDependencyGraph(graph) {
 async function getOptimalPublishOrder() {
   const packageFiles = await getPackageFiles();
   const graph = buildPublishGraph(packageFiles);
-  return solveDependencyGraph(graph).map((node) => node.name);
+  return getTopologicalSort(graph).map((node) => node.name);
 }
 
 module.exports = {
@@ -194,6 +191,6 @@ module.exports = {
   getSemver,
   coreConfig,
   exportedForTesting: {
-    solveDependencyGraph,
+    getTopologicalSort,
   },
 };

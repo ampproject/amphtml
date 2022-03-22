@@ -1,7 +1,7 @@
 const test = require('ava');
 const {exportedForTesting} = require('../utils');
 
-test('solveDependencyGraph', (t) => {
+test('getTopologicalSort', (t) => {
   const mockGraph = {
     a: {
       name: 'a',
@@ -29,7 +29,7 @@ test('solveDependencyGraph', (t) => {
   };
 
   const result = exportedForTesting
-    .solveDependencyGraph(mockGraph)
+    .getTopologicalSort(mockGraph)
     .map((node) => node.name);
   t.deepEqual(result, ['c', 'b', 'a', 'd']);
 
@@ -56,6 +56,6 @@ test('solveDependencyGraph', (t) => {
     },
   };
   t.throws(() => {
-    exportedForTesting.solveDependencyGraph(loopyGraph);
+    exportedForTesting.getTopologicalSort(loopyGraph);
   });
 });
