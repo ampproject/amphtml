@@ -194,7 +194,7 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg fill="#fff" xmlns="http://www.w3.org/2000/svg" width="20" height="8"><path d="m18 7.7-.7-.2-7.3-4-7.3 4c-.7.4-1.6.2-2-.6-.4-.7-.1-1.6.6-2l8-4.4a2 2 0 0 1 1.5 0l8 4.4c.7.4 1 1.3.6 2-.4.5-.9.8-1.4.8z"/></svg>') !important;
 }
 
-.i-amphtml-story-page-open-attachment:not([href]) .i-amphtml-story-page-attachment-label {
+.i-amphtml-story-page-open-attachment-inline .i-amphtml-story-page-attachment-label {
   margin-bottom: 20px !important;
   color: var(--i-amphtml-label-text-color) !important;
 }
@@ -213,12 +213,12 @@
   background: linear-gradient(0, rgba(255, 255, 255, .25), rgba(255, 255, 255, 0)) !important;
 }
 
-[href].i-amphtml-story-page-open-attachment {
+.i-amphtml-story-page-open-attachment-outlink {
   /* Outlink attachments do not need the linear gradient. */
   background: none !important;
 }
 
-[href].i-amphtml-story-page-open-attachment[active] {
+.i-amphtml-story-page-open-attachment-outlink[active] {
   animation: tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
@@ -294,13 +294,13 @@
   border-radius: 50% !important;
 }
 
-[href] .i-amphtml-story-page-attachment-label {
+.i-amphtml-story-page-open-attachment-outlink .i-amphtml-story-page-attachment-label {
   padding-inline-start: 6px !important;
   padding-inline-end: 8px !important;
   color: var(--i-amphtml-outlink-cta-text-color) !important;
 }
 
-[href] .i-amphtml-story-page-attachment-label:only-child {
+.i-amphtml-story-page-open-attachment-outlink .i-amphtml-story-page-attachment-label:only-child {
   padding-inline-start: 8px !important;
 }
 
