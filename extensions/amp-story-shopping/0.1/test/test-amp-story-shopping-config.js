@@ -26,7 +26,7 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'lamp',
           'productTitle': 'Brass Lamp',
-          'productBrand': 'Lamp Co',
+          'productVendor': 'Lamp Co',
           'productPrice': 799.0,
           'productPriceCurrency': 'USD',
           'productImages': [
@@ -50,7 +50,7 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'art',
           'productTitle': 'Abstract Art',
-          'productBrand': 'V. Artsy',
+          'productVendor': 'V. Artsy',
           'productPrice': 1200.0,
           'productPriceCurrency': 'JPY',
           'productImages': [
@@ -71,7 +71,7 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'chair',
           'productTitle': 'Yellow chair',
-          'productBrand': 'Chair Co.',
+          'productVendor': 'Chair Co.',
           'productPrice': 1000.0,
           'productPriceCurrency': 'BRL',
           'productTagText': 'The perfectly imperfect yellow chair',
@@ -91,7 +91,7 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'flowers',
           'productTitle': 'Flowers',
-          'productBrand': 'Very Long Flower Company Name',
+          'productVendor': 'Very Long Flower Company Name',
           'productPrice': 10.0,
           'productPriceCurrency': 'USD',
           'productIcon':
@@ -167,7 +167,7 @@ describes.realWin(
             'productUrl': 'https://www.google.com',
             'productId': 'art',
             'productTitle': 'Abstract Art',
-            'productBrand': 'V. Artsy',
+            'productVendor': 'V. Artsy',
             'productPrice': 1200.0,
             'productPriceCurrency': 'JPY',
             'productImages': [
