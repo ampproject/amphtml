@@ -502,13 +502,15 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     });
   });
 
-  describe('captions_src field', async () => {
-    it('should append track element if the cache responds with captions_src', async () => {
+  describe('captions field', async () => {
+    it('should append track element if the cache responds with captions', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
           Promise.resolve({
-            'captions_src': 'captions_src_response.vtt',
-            'captions_srclang': 'en-us',
+            'captions': {
+              'src': 'captions_src_response.vtt',
+              'srclang': 'en-us',
+            },
             'sources': [
               {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
             ],
@@ -524,8 +526,10 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
           Promise.resolve({
-            'captions_src': 'captions_src_response.vtt',
-            'captions_srclang': 'en-us',
+            'captions': {
+              'src': 'captions_src_response.vtt',
+              'srclang': 'en-us',
+            },
             'sources': [
               {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
             ],
@@ -540,7 +544,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       );
       expect(trackEl).to.not.exist;
     });
-    it('should not append track element if captions_src does not exist', async () => {
+    it('should not append track element if captions does not exist', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
           Promise.resolve({
