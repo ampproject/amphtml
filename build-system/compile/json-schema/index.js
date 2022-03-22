@@ -200,6 +200,8 @@ const esbuildJsonSchemaPlugin = {
   name: 'json-schema',
   setup(build) {
     build.onResolve({filter: importFilter}, async ({path, resolveDir}) => {
+      // The import filename is printed as a comment in the esbuild output.
+      // Making it relative allows the tests for this output to be stable.
       const filename = relative(process.cwd(), join(resolveDir, path));
       const compiledFilename = await getCompiledJsonSchemaFilename(filename);
       const resultPath = join(process.cwd(), compiledFilename);
