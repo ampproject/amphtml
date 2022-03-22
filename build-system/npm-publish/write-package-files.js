@@ -158,6 +158,16 @@ async function writePackageJson() {
     await readFile(`${dir}/package.static.json`, 'utf8')
   );
 
+  const peerDependencies = setDependencyVersions({
+    ...(staticPackage.peerDependencies || {}),
+    preact: '^10.2.1',
+    react: '^17.0.0',
+  });
+  const dependencies = setDependencyVersions({
+    ...(staticPackage.dependencies || {}),
+    [corePkgName]: corePkgVersion,
+  });
+
   const json = {
     name: `@bentoproject/${packageName}`,
     author: 'Bento Authors',
@@ -175,15 +185,8 @@ async function writePackageJson() {
     version,
     exports,
     description: await getDescription(),
-    peerDependencies: {
-      ...(staticPackage.peerDependencies || {}),
-      preact: '^10.2.1',
-      react: '^17.0.0',
-    },
-    dependencies: {
-      ...(staticPackage.dependencies || {}),
-      [corePkgName]: corePkgVersion,
-    },
+    peerDependencies,
+    dependencies,
   };
 
   try {
@@ -198,6 +201,23 @@ async function writePackageJson() {
     log(e);
     process.exitCode = 1;
     return;
+  }
+
+  /**
+   * Replaces the any instances of the `AMP_VERSION` constant found in package versions with the current semver.
+   * @param {Record<string, string>} dependencies
+   * @return {Record<string, string>}
+   */
+  function setDependencyVersions(dependencies) {
+    const modifiedEntries = Object.entries(dependencies).map(
+      ([dependency, dependencyVersion]) => {
+        const modifiedVersion =
+          dependencyVersion === 'AMP_VERSION' ? version : dependencyVersion;
+        return [dependency, modifiedVersion];
+      }
+    );
+
+    return Object.fromEntries(modifiedEntries);
   }
 }
 

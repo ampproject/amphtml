@@ -137,7 +137,7 @@ function getPackagesWithoutDepeneceiesInGraph(graph) {
     if (!node.dependencies) {
       return true;
     }
-    return Object.keys(node?.dependencies).some((dep) => graph[dep]);
+    return !Object.keys(node?.dependencies).some((dep) => graph[dep]);
   });
 }
 
