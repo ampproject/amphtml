@@ -51,7 +51,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'bento-timeago', false);
+      toggleExperiment(win, 'bento-fit-text', false);
     });
 
     it('renders', async () => {
