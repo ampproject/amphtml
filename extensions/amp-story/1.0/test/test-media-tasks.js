@@ -42,12 +42,6 @@ describes.realWin('media-tasks', {}, (env) => {
 
   describe('PlayTask', () => {
     it('should call play() if element was not yet playing', () => {
-      // The video must be on the active page in order for it to be playable.
-      const storyPageEl = document.createElement('amp-story-page');
-      storyPageEl.setAttribute('active', '');
-      storyPageEl.appendChild(el);
-      expect(storyPageEl.hasAttribute('active')).to.be.true;
-
       expect(el.paused).to.be.true;
 
       const play = env.sandbox.spy(el, 'play');
@@ -57,12 +51,6 @@ describes.realWin('media-tasks', {}, (env) => {
     });
 
     it('should not call play() if element was already playing', () => {
-      // The video must be on the active page in order for it to be playable.
-      const storyPageEl = document.createElement('amp-story-page');
-      storyPageEl.setAttribute('active', '');
-      storyPageEl.appendChild(el);
-      expect(storyPageEl.hasAttribute('active')).to.be.true;
-
       el.play();
       expect(el.paused).to.be.false;
 
@@ -71,19 +59,6 @@ describes.realWin('media-tasks', {}, (env) => {
       task.execute(el);
       expect(play).not.to.have.been.called;
     });
-  });
-
-  it('should not call play() if element is not on the active story page', () => {
-    const storyPageEl = document.createElement('amp-story-page');
-    storyPageEl.appendChild(el);
-    expect(storyPageEl.hasAttribute('active')).to.be.false;
-
-    expect(el.paused).to.be.true;
-
-    const play = env.sandbox.spy(el, 'play');
-    const task = new PlayTask();
-    task.execute(el);
-    expect(play).not.to.have.been.called;
   });
 
   describe('MuteTask', () => {
@@ -99,31 +74,12 @@ describes.realWin('media-tasks', {}, (env) => {
 
   describe('UnmuteTask', () => {
     it('should set muted to false', () => {
-      // The video must be on the active page in order for it to be unmutable.
-      const storyPageEl = document.createElement('amp-story-page');
-      storyPageEl.setAttribute('active', '');
-      storyPageEl.appendChild(el);
-      expect(storyPageEl.hasAttribute('active')).to.be.true;
-
       el.muted = true;
       expect(el.muted).to.be.true;
 
       const task = new UnmuteTask();
       task.execute(el);
       expect(el.muted).to.be.false;
-    });
-
-    it('should not call unmute() if element is not on the active story page', () => {
-      const storyPageEl = document.createElement('amp-story-page');
-      storyPageEl.appendChild(el);
-      expect(storyPageEl.hasAttribute('active')).to.be.false;
-
-      el.muted = true;
-      expect(el.muted).to.be.true;
-
-      const task = new UnmuteTask();
-      task.execute(el);
-      expect(el.muted).to.be.true;
     });
   });
 

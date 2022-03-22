@@ -200,11 +200,7 @@ export class PlayTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    if (!mediaEl.closest('amp-story-page')?.hasAttribute('active')) {
-      // We do not want to invoke play() if the media element is located on an
-      // inactive page.
-      return Promise.resolve();
-    } else if (!mediaEl.paused) {
+    if (!mediaEl.paused) {
       // We do not want to invoke play() if the media element is already
       // playing, as this can interrupt playback in some browsers.
       return Promise.resolve();
@@ -245,11 +241,8 @@ export class UnmuteTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    // We only unmute media elements on the currently displayed page.
-    if (mediaEl.closest('amp-story-page')?.hasAttribute('active')) {
-      mediaEl.muted = false;
-      mediaEl.removeAttribute('muted');
-    }
+    mediaEl.muted = false;
+    mediaEl.removeAttribute('muted');
     return Promise.resolve();
   }
 }
