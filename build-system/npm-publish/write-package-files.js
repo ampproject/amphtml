@@ -204,7 +204,7 @@ async function writePackageJson() {
   }
 
   /**
-   * Replaces the any instances of the `AMP_VERSION` constant found in package versions with the current semver.
+   * Replaces the any instances of the `BENTO_VERSION` constant found in package versions with the current semver.
    * @param {Record<string, string>} dependencies
    * @return {Record<string, string>}
    */
@@ -212,7 +212,7 @@ async function writePackageJson() {
     const modifiedEntries = Object.entries(dependencies).map(
       ([dependency, dependencyVersion]) => {
         const modifiedVersion =
-          dependencyVersion === 'AMP_VERSION' ? version : dependencyVersion;
+          dependencyVersion === 'BENTO_VERSION' ? version : dependencyVersion;
         return [dependency, modifiedVersion];
       }
     );
