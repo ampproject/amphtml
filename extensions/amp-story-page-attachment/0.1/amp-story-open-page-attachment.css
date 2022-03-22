@@ -298,13 +298,15 @@
   border-radius: 50% !important;
 }
 
-.i-amphtml-story-page-open-attachment-outlink .i-amphtml-story-page-attachment-label {
+.i-amphtml-story-page-open-attachment-outlink 
+  .i-amphtml-story-page-attachment-label {
   padding-inline-start: 6px !important;
   padding-inline-end: 8px !important;
   color: var(--i-amphtml-outlink-cta-text-color) !important;
 }
 
-.i-amphtml-story-page-open-attachment-outlink .i-amphtml-story-page-attachment-label:only-child {
+.i-amphtml-story-page-open-attachment-outlink 
+  .i-amphtml-story-page-attachment-label:only-child {
   padding-inline-start: 8px !important;
 }
 
