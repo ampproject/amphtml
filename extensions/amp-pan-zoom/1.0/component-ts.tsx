@@ -59,10 +59,7 @@ function classNames(...args: Array<string | false | null | 0>) {
  * @return {PreactDef.Renderable}
  */
 export function BentoPanZoomWithRef(
-  props: BentoPanZoomProps,
-  ref: Ref<BentoPanZoomApi>
-) {
-  const {
+  {
     children,
     controls = true,
     initialScale,
@@ -70,7 +67,9 @@ export function BentoPanZoomWithRef(
     initialY,
     maxScale,
     ...rest
-  } = props;
+  }: BentoPanZoomProps,
+  ref: Ref<BentoPanZoomApi>
+) {
   const styles = useStyles();
 
   const [state, actions] = usePanZoomState({
