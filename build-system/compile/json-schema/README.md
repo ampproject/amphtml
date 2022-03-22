@@ -4,7 +4,7 @@ A file may import a [JSON Schema](https://json-schema.org/) validation function 
 
 ### `product.schema.json`
 
-```json
+```json5
 {
   "properties": {
     // .schema.json files can have comments
