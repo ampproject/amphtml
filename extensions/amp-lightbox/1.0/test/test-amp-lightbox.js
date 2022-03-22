@@ -70,14 +70,6 @@ describes.realWin(
       win.document.body.removeChild(element);
     });
 
-    it('should render closed', async () => {
-      expect(element.hasAttribute('open')).to.be.false;
-      expect(element.hasAttribute('hidden')).to.be.true;
-      const content = getContent();
-      expect(content.tagName).to.equal('C');
-      expect(content.children).to.have.lengthOf(0);
-    });
-
     describe('imperative api', () => {
       function invocation(method, args = {}) {
         const source = null;
