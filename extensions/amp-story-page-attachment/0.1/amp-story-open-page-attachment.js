@@ -202,12 +202,11 @@ const renderInlineUi = (pageEl, attachmentEl) => {
   );
 
   return (
-    <a
-      class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset i-amphtml-story-page-open-attachment-inline"
+    <button
+      class="i-amphtml-story-page-open-attachment i-amphtml-story-page-open-attachment-inline"
       role="button"
       theme={AttachmentTheme.DARK === theme && theme}
       aria-label={openLabel}
-      href
     >
       <div class="i-amphtml-story-inline-page-attachment-chip">
         {makeImgElWithBG('cta-image')}
@@ -217,7 +216,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
       {openLabel !== 'none' && (
         <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
       )}
-    </a>
+    </button>
   );
 };
 

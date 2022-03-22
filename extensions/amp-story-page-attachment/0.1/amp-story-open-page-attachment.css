@@ -199,6 +199,10 @@
   color: var(--i-amphtml-label-text-color) !important;
 }
 
+.i-amphtml-story-page-open-attachment-inline {
+  border: none !important;
+}
+
 /** For amp-story-page-outlink button. */
 
 .i-amphtml-story-page-open-attachment {
