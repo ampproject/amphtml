@@ -27,19 +27,22 @@ const {
 const importFilter = /\.schema\.json$/;
 
 /**
- * Maps to use a custom validation function when a schema matches certain
- * criteria.
- * - The key is the name of a validator function exported from `#core/json-schema`
- * - The value is a boolean function that tests whether the validator function
- *   should be used.
- *   The boolean function may also modify the schema object in-place. This is
- *   desirable in cases where the validator function should override
- *   configurations validators.
+ * Defines custom validators that we may inject into certain schemas.
  * @const {{
  *   fn: string,
- *   error: import('ajv/dist/types').KeywordErrorDefinition,
- *   map: (import('ajv/dist/types').SchemaObject) => boolean,
+ *   error?: import('ajv/dist/types').KeywordErrorDefinition,
+ *   shouldUse: (import('ajv/dist/types').SchemaObject) => boolean,
  * }[]}
+ *  - `fn` is the name of a validator function exported from `#core/json-schema`
+ *    This function must return a boolean value determining whether the data is
+ *    valid
+ *  - `error` is optional and determines a `KeywordErrorDefinition` for ajv
+ *    that's used when validation fails.
+ *  - `shouldUse` is a boolean function that tests whether `fn` should be used
+ *    for a certain schema.
+ *    This function may also modify the schema object in-place. This is
+ *    desirable in cases where the validator function should override validators
+ *    with an equivalent implementation.
  */
 const customValidators = [
   // A schema may include an `enum` with a list of valid currency codes.
@@ -50,7 +53,7 @@ const customValidators = [
   {
     fn: 'isValidCurrencyCode',
     error: {message: 'must be a valid currency code'},
-    map(schema) {
+    shouldUse(schema) {
       if (
         Array.isArray(schema.enum) &&
         schema.description?.includes('https://datahub.io/core/currency-codes')
@@ -62,6 +65,33 @@ const customValidators = [
     },
   },
 ];
+
+/**
+ * Remaps a JSON schema recursively in order to use custom validators.
+ * These are mapped as keywords, using the format `_0` where `0` is a validator
+ * index:
+ *   { "_0": true }
+ * This format prevents them from clobbering the standard namespace
+ * @param {*} schema
+ * @return {*}
+ */
+function addCustomValidatorsToSchema(schema) {
+  if (typeof schema !== 'object') {
+    return schema;
+  }
+  if (Array.isArray(schema)) {
+    return schema.map(addCustomValidatorsToSchema);
+  }
+  for (const [i, entry] of customValidators.entries()) {
+    if (entry.shouldUse(schema)) {
+      schema[`_${i}`] = true;
+    }
+  }
+  for (const k in schema) {
+    schema[k] = addCustomValidatorsToSchema(schema[k]);
+  }
+  return schema;
+}
 
 // https://ajv.js.org/options.html
 const ajvOptions = {
@@ -83,29 +113,6 @@ const ajvOptions = {
 };
 
 const getAjv = once(() => new Ajv(ajvOptions));
-
-/**
- * Remaps a JSON schema in order to use custom validators.
- * @param {*} schema
- * @return {*}
- */
-function remapForCustomValidators(schema) {
-  if (typeof schema !== 'object') {
-    return schema;
-  }
-  if (Array.isArray(schema)) {
-    return schema.map(remapForCustomValidators);
-  }
-  for (const [i, entry] of customValidators.entries()) {
-    if (entry.map(schema)) {
-      schema[`_${i}`] = true;
-    }
-  }
-  for (const k in schema) {
-    schema[k] = remapForCustomValidators(schema[k]);
-  }
-  return schema;
-}
 
 const escapeJsIdentifier = (id) => id.replace(/[^a-z_0-9]/gi, '_');
 
@@ -145,7 +152,7 @@ async function getCompiledJsonSchemaFilename(filename) {
   const cached = await transformCache.get(hash);
   let output = cached;
   if (!output) {
-    const schema = remapForCustomValidators(json5.parse(contents));
+    const schema = json5.parse(contents);
     output = avjCompile(filename, schema);
     transformCache.set(hash, Promise.resolve(output));
   }
@@ -163,7 +170,7 @@ async function getCompiledJsonSchemaFilename(filename) {
  */
 function avjCompile(filename, schema) {
   const ajv = getAjv();
-  const validateAjv = ajv.compile(schema);
+  const validateAjv = ajv.compile(addCustomValidatorsToSchema(schema));
   const scopeCode = ajv.scope.scopeCode(validateAjv?.source?.scopeValues, {});
   const validateFnName = escapeJsIdentifier(
     `validate_${basename(filename, '.json')}`
