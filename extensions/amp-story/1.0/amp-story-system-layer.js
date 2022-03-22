@@ -9,7 +9,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
 
-import {localize} from './amp-story-localization-service';
+import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -97,53 +97,48 @@ const renderSystemLayerElement = (element, children) => (
     <div class="i-amphtml-story-has-new-page-notification-container">
       <div class="i-amphtml-story-has-new-page-text-wrapper">
         <span class="i-amphtml-story-has-new-page-circle-icon" />
-        <div class="i-amphtml-story-has-new-page-text">
-          {localize(
-            element,
+        <div
+          class="i-amphtml-story-has-new-page-text"
+          i-amphtml-i18n-text-content={
             LocalizedStringId_Enum.AMP_STORY_HAS_NEW_PAGE_TEXT
-          )}
-        </div>
+          }
+        ></div>
       </div>
     </div>
     <div class="i-amphtml-story-system-layer-buttons">
       <div
         role="button"
         class={INFO_CLASS + ' i-amphtml-story-button'}
-        aria-label={localize(
-          element,
+        i-amphtml-i18n-aria-label={
           LocalizedStringId_Enum.AMP_STORY_INFO_BUTTON_LABEL
-        )}
+        }
       />
       <div class="i-amphtml-story-sound-display">
         <button
           class={UNMUTE_CLASS + ' i-amphtml-story-button'}
-          aria-label={localize(
-            element,
+          i-amphtml-i18n-aria-label={
             LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
-          )}
+          }
         />
         <button
           class={MUTE_CLASS + ' i-amphtml-story-button'}
-          aria-label={localize(
-            element,
+          i-amphtml-i18n-aria-label={
             LocalizedStringId_Enum.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
-          )}
+          }
         />
       </div>
       <div class="i-amphtml-paused-display">
         <button
           class={PAUSE_CLASS + ' i-amphtml-story-button'}
-          aria-label={localize(
-            element,
+          i-amphtml-i18n-aria-label={
             LocalizedStringId_Enum.AMP_STORY_PAUSE_BUTTON_LABEL
-          )}
+          }
         />
         <button
           class={PLAY_CLASS + ' i-amphtml-story-button'}
-          aria-label={localize(
-            element,
+          i-amphtml-i18n-aria-label={
             LocalizedStringId_Enum.AMP_STORY_PLAY_BUTTON_LABEL
-          )}
+          }
         />
       </div>
       <button
@@ -151,26 +146,23 @@ const renderSystemLayerElement = (element, children) => (
           SKIP_TO_NEXT_CLASS +
           ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
         }
-        aria-label={localize(
-          element,
+        i-amphtml-i18n-aria-label={
           LocalizedStringId_Enum.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
-        )}
+        }
       />
       <button
         class={SHARE_CLASS + ' i-amphtml-story-button'}
-        aria-label={localize(
-          element,
+        i-amphtml-i18n-aria-label={
           LocalizedStringId_Enum.AMP_STORY_SHARE_BUTTON_LABEL
-        )}
+        }
       />
       <button
         class={
           CLOSE_CLASS + ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
         }
-        aria-label={localize(
-          element,
+        i-amphtml-i18n-aria-label={
           LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-        )}
+        }
       />
     </div>
     <div class="i-amphtml-story-system-layer-buttons-start-position" />
@@ -279,6 +271,8 @@ export class SystemLayer {
       this.parentEl_,
       this.progressBar_.build(initialPageId)
     );
+    localizeTemplate(this.systemLayerEl_, this.parentEl_);
+
     // Make the share button link to the current document to make sure
     // embedded STAMPs always have a back-link to themselves, and to make
     // gestures like right-clicks work.
