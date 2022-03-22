@@ -5,7 +5,8 @@
  * 1. action (promote|rollback)
  * 2. head (AMP version)
  * 3. base (AMP version)
- * 4. channel (beta-percent|stable|lts)
+ * 4. channel (beta-opt-in|beta-percent|stable|lts)
+ * 5. sha
  */
 
 const dedent = require('dedent');
