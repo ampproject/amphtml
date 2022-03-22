@@ -125,7 +125,7 @@ describes.realWin(
 
       storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE, true);
       await afterRenderPromise(win);
-
+  
       it('paywall element should have visible class', () => {
         expect(storySubscriptions.element).to.have.class(
           'i-amphtml-story-subscriptions-visible'
