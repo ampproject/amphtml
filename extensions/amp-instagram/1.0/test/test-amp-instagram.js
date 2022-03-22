@@ -33,39 +33,6 @@ describes.realWin(
       doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
-    it('renders', async () => {
-      element = createElementWithAttributes(win.document, 'amp-instagram', {
-        'data-shortcode': 'B8QaZW4AQY_',
-        'amp': true,
-        'height': 500,
-        'width': 500,
-        'layout': 'responsive',
-      });
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      expect(element.shadowRoot.querySelector('iframe').src).to.equal(
-        'https://www.instagram.com/p/B8QaZW4AQY_/embed/?cr=1&v=12'
-      );
-    });
-
-    it('renders with caption', async () => {
-      element = createElementWithAttributes(win.document, 'amp-instagram', {
-        'data-shortcode': 'B8QaZW4AQY_',
-        'data-captioned': true,
-        'amp': true,
-        'height': 500,
-        'width': 500,
-        'layout': 'responsive',
-      });
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      expect(element.shadowRoot.querySelector('iframe').src).to.equal(
-        'https://www.instagram.com/p/B8QaZW4AQY_/embed/captioned/?cr=1&v=12'
-      );
-    });
-
     it("container's height is changed", async () => {
       const initialHeight = 300;
       element = createElementWithAttributes(win.document, 'amp-instagram', {

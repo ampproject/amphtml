@@ -1,43 +1,44 @@
-import '../amp-video';
+import {CSS} from '#build/bento-video-1.0.css';
+
+import {BentoVideoBaseElement} from '#bento/components/bento-video/1.0/base-element';
+import {adoptStyles} from '#bento/util/unit-helpers';
+
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
-import {toggleExperiment} from '#experiments';
+import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
-  'amp-video-v1.0',
+  'bento-video-v1.0',
   {
-    amp: {
-      extensions: ['amp-video:1.0'],
-      canonicalUrl: 'https://canonicalexample.com/',
-    },
+    amp: false,
   },
   (env) => {
     let html;
     let element;
 
     const waitForRender = async () => {
-      await element.buildInternal();
-      const loadPromise = element.layoutCallback();
+      await element.getApi();
       const shadow = element.shadowRoot;
       await waitFor(() => shadow.querySelector('video'), 'video mounted');
       const video = shadow.querySelector('video');
       dispatchCustomEvent(video, 'canplay', null, {bubbles: false});
-      await loadPromise;
     };
 
     beforeEach(() => {
       html = htmlFor(env.win.document);
-      toggleExperiment(env.win, 'bento-video', true, true);
+
+      defineBentoElement('bento-video', BentoVideoBaseElement, env.win);
+      adoptStyles(env.win, CSS);
     });
 
     it('renders video element', async () => {
       element = html`
-        <amp-video layout="responsive" width="16" height="9">
+        <bento-video>
           <source src="foo" type="bar/baz" />
-        </amp-video>
+        </bento-video>
       `;
 
       env.win.document.body.appendChild(element);
@@ -50,14 +51,7 @@ describes.realWin(
 
     it('passes attributes through to <video>', async () => {
       element = html`
-        <amp-video
-          layout="responsive"
-          width="16"
-          height="9"
-          src="something.mp4"
-          poster="foo.png"
-          loop
-        ></amp-video>
+        <bento-video src="something.mp4" poster="foo.png" loop></bento-video>
       `;
 
       env.win.document.body.appendChild(element);
@@ -74,10 +68,10 @@ describes.realWin(
 
     it('clones <source> elements', async () => {
       element = html`
-        <amp-video layout="responsive" width="16" height="9">
+        <bento-video>
           <source src="foo" type="bar/baz" />
           <source src="something.mp4" type="application/mp4" />
-        </amp-video>
+        </bento-video>
       `;
 
       env.win.document.body.appendChild(element);

@@ -1,24 +1,24 @@
-import '../../../amp-base-carousel/1.0/amp-base-carousel';
-import '../amp-inline-gallery';
-import {CarouselContextProp} from '#bento/components/bento-base-carousel/1.0/carousel-props';
+import {CSS as BaseCarouselCss} from '#build/bento-base-carousel-1.0.css';
+import {CSS as InlineGalleryCss} from '#build/bento-inline-gallery-1.0.css';
+import {CSS as InlineGalleryPaginationCss} from '#build/bento-inline-gallery-pagination-1.0.css';
 
-import {ActionTrust_Enum} from '#core/constants/action-constants';
+import {BaseElement as BentoBaseCarousel} from '#bento/components/bento-base-carousel/1.0/base-element';
+import {CarouselContextProp} from '#bento/components/bento-base-carousel/1.0/carousel-props';
+import {defineElement} from '#bento/components/bento-inline-gallery/1.0/web-component';
+import {adoptStyles} from '#bento/util/unit-helpers';
+
 import {subscribe} from '#core/context';
 import {createElementWithAttributes} from '#core/dom';
 import {setStyles} from '#core/dom/style';
 
-import {toggleExperiment} from '#experiments';
-
-import {ActionInvocation} from '#service/action-impl';
+import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
-  'amp-inline-gallery',
+  'bento-inline-gallery',
   {
-    amp: {
-      extensions: ['amp-inline-gallery:1.0', 'amp-base-carousel:1.0'],
-    },
+    amp: false,
   },
   (env) => {
     let win;
@@ -27,31 +27,29 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      toggleExperiment(win, 'bento-inline-gallery', true, true);
-      toggleExperiment(win, 'bento-carousel', true, true);
+      defineElement(win);
+      defineBentoElement('bento-base-carousel', BentoBaseCarousel, win);
+      adoptStyles(win, BaseCarouselCss);
+      adoptStyles(win, InlineGalleryCss);
+      adoptStyles(win, InlineGalleryPaginationCss);
+
       carousel = createElementWithAttributes(
         win.document,
-        'amp-base-carousel',
+        'bento-base-carousel',
         {
-          'layout': 'fixed',
-          'width': '300px',
-          'height': '200px',
+          style: 'width: 300px; height: 200px;',
         }
       );
       pagination = createElementWithAttributes(
         win.document,
-        'amp-inline-gallery-pagination',
+        'bento-inline-gallery-pagination',
         {
-          'layout': 'fixed-height',
-          'height': 24,
+          style: 'height: 24px;',
         }
       );
       element = createElementWithAttributes(
         win.document,
-        'amp-inline-gallery',
-        {
-          'layout': 'container',
-        }
+        'bento-inline-gallery'
       );
       element.appendChild(carousel);
       element.appendChild(pagination);
@@ -63,9 +61,11 @@ describes.realWin(
 
       // Wait until ready.
       win.document.body.appendChild(element);
-      await element.buildInternal();
-      await carousel.buildInternal();
-      await pagination.buildInternal();
+      await Promise.all([
+        element.getApi(),
+        carousel.getApi(),
+        pagination.getApi(),
+      ]);
 
       lastContext = null;
       subscribe(element, [CarouselContextProp], (context) => {
@@ -78,11 +78,6 @@ describes.realWin(
       );
       await waitFor(() => getScroller(), 'carousel rendered');
       await waitFor(() => getDots().length > 0, 'pagination rendered');
-    });
-
-    afterEach(() => {
-      toggleExperiment(win, 'bento-inline-gallery', false, true);
-      toggleExperiment(win, 'bento-carousel', false, true);
     });
 
     function newSlide(id) {
@@ -111,42 +106,32 @@ describes.realWin(
       );
     }
 
-    function invocation(method, args = {}) {
-      const source = null;
-      const caller = null;
-      const event = null;
-      const trust = ActionTrust_Enum.DEFAULT;
-      return new ActionInvocation(
-        element,
-        method,
-        args,
-        source,
-        caller,
-        event,
-        trust
-      );
-    }
-
-    it('should navigate pagination using carousel', async () => {
-      const scroller = getScroller();
+    it('should render the right number of slides', () => {
+      expect(lastContext.slides.length).to.equal(3);
       const dots = getDots();
-      expect(lastContext.currentSlide).to.equal(0);
-      expect(scroller.scrollLeft).to.equal(0);
-      expect(dots[0].getAttribute('aria-selected')).to.equal('true');
-      expect(dots[1].getAttribute('aria-selected')).to.equal('false');
+      expect(dots).to.have.lengthOf(3);
+    });
 
-      // Scroll carousel.
-      carousel.enqueAction(invocation('goToSlide', {index: 1}));
-      await waitFor(() => scroller.scrollLeft > 0, 'to to slide 1');
+    it('should navigate carousel using pagination', async () => {
+      const dots = getDots();
+      dots[1].click();
 
       // Context updated.
       await waitFor(() => lastContext.currentSlide == 1, 'currentSlide == 1');
 
+      // Carousel updated.
+      const scroller = getScroller();
+      await waitFor(() => scroller.scrollLeft > 0, 'advanced to next slide');
+    });
+
+    it('should add a new slide', async () => {
+      carousel.appendChild(newSlide('new'));
+
+      // Context updated.
+      await waitFor(() => lastContext.slides.length == 4, 'slide.length == 4');
+
       // Pagination updated.
-      await waitFor(
-        () => dots[1].getAttribute('aria-selected') == 'true',
-        'pagination updated'
-      );
+      await waitFor(() => getDots().length == 4, 'pagination updated');
     });
   }
 );

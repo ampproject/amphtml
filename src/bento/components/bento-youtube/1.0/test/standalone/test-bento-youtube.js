@@ -1,45 +1,43 @@
-import '../amp-youtube';
+import {CSS} from '#build/bento-youtube-1.0.css';
+
+import {BaseElement as BentoYoutube} from '#bento/components/bento-youtube/1.0/base-element';
+import {adoptStyles} from '#bento/util/unit-helpers';
+
 import {createElementWithAttributes} from '#core/dom';
 
-import {toggleExperiment} from '#experiments';
+import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 
 describes.realWin(
-  'amp-youtube-v1.0',
+  'bento-youtube-v1.0',
   {
-    amp: {
-      extensions: ['amp-youtube:1.0'],
-    },
+    amp: false,
   },
   (env) => {
     let win, doc;
     let element;
 
     const waitForRender = async () => {
-      await element.buildInternal();
-      const loadPromise = element.layoutCallback();
+      await element.getApi();
       const shadow = element.shadowRoot;
       await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
-      await loadPromise;
     };
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      toggleExperiment(env.win, 'bento-youtube', true, true);
+      defineBentoElement('bento-youtube', BentoYoutube, win);
+      adoptStyles(win, CSS);
       // Override global window here because Preact uses global `createElement`.
       doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
     it('renders', async () => {
-      element = createElementWithAttributes(win.document, 'amp-youtube', {
+      element = createElementWithAttributes(win.document, 'bento-youtube', {
         'data-videoid': 'IAvf-rkzNck',
         'amp': true,
-        'height': 500,
-        'width': 500,
-        'layout': 'responsive',
       });
       doc.body.appendChild(element);
       await waitForRender();
@@ -50,13 +48,10 @@ describes.realWin(
     });
 
     it('should pass the data-loading attribute to the underlying iframe', async () => {
-      element = createElementWithAttributes(win.document, 'amp-youtube', {
+      element = createElementWithAttributes(win.document, 'bento-youtube', {
         'data-videoid': 'IAvf-rkzNck',
         'data-loading': 'lazy',
         'amp': true,
-        'height': 500,
-        'width': 500,
-        'layout': 'responsive',
       });
       doc.body.appendChild(element);
       await waitForRender();
@@ -66,12 +61,9 @@ describes.realWin(
     });
 
     it('should set loading="auto" if no value is specified', async () => {
-      element = createElementWithAttributes(win.document, 'amp-youtube', {
+      element = createElementWithAttributes(win.document, 'bento-youtube', {
         'data-videoid': 'IAvf-rkzNck',
         'amp': true,
-        'height': 500,
-        'width': 500,
-        'layout': 'responsive',
       });
       doc.body.appendChild(element);
       await waitForRender();

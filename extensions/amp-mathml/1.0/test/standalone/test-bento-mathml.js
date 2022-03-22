@@ -1,26 +1,26 @@
-import '../amp-mathml';
+import {CSS} from '#build/bento-mathml-1.0.css';
 
-import {expect} from 'chai';
+import {adoptStyles} from '#bento/util/unit-helpers';
 
 import {createElementWithAttributes} from '#core/dom';
 
-import {toggleExperiment} from '#experiments';
+import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
 import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
 
-import {QUADRATIC_FORMULA} from './utils';
+import {BaseElement as BentoMathml} from '../../base-element';
+import {QUADRATIC_FORMULA} from '../utils';
 
 describes.realWin(
-  'amp-mathml-v1.0',
+  'bento-mathml-v1.0',
   {
-    amp: {
-      extensions: ['amp-mathml:1.0'],
-    },
+    amp: false,
   },
   (env) => {
     beforeEach(async () => {
-      toggleExperiment(env.win, 'bento-mathml', true, true);
+      defineBentoElement('bento-mathml', BentoMathml, env.win);
+      adoptStyles(env.win, CSS);
       // Override global window here because Preact uses global `createElement`.
       doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
@@ -77,7 +77,7 @@ describes.realWin(
 );
 
 function createAmpMathmlElement(env, {formula, ...args}) {
-  return createElementWithAttributes(env.win.document, 'amp-mathml', {
+  return createElementWithAttributes(env.win.document, 'bento-mathml', {
     'data-formula': formula,
     ...args,
   });
@@ -88,11 +88,9 @@ function createAmpMathmlElement(env, {formula, ...args}) {
  * @param {HTMLElement} element
  */
 async function waitForRender(element) {
-  await element.buildInternal();
-  const loadPromise = element.layoutCallback();
+  await element.getApi();
   await waitFor(
     () => element.shadowRoot.querySelector('iframe'),
     'iframe mounted'
   );
-  await loadPromise;
 }

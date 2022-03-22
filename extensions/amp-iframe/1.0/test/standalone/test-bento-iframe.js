@@ -1,39 +1,39 @@
-import '../amp-iframe';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {CSS} from '#build/bento-iframe-1.0.css';
+
+import {adoptStyles} from '#bento/util/unit-helpers';
+
 import {htmlFor} from '#core/dom/static-template';
 
-import {toggleExperiment} from '#experiments';
+import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
-import {flush} from '#testing/preact';
+
+import {BaseElement as BentoIframe} from '../../base-element';
 
 describes.realWin(
-  'amp-iframe-v1.0',
+  'bento-iframe-v1.0',
   {
-    amp: {
-      extensions: ['amp-iframe:1.0'],
-    },
+    amp: false,
   },
   (env) => {
     let win, doc, html, element;
 
     async function waitRendered() {
-      await whenUpgradedToCustomElement(element);
-      await element.mount();
-      await flush();
+      await element.getApi();
       await waitFor(() => element.shadowRoot.querySelector('iframe'));
     }
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      defineBentoElement('bento-iframe', BentoIframe, win);
+      adoptStyles(win, CSS);
       html = htmlFor(doc);
-      toggleExperiment(win, 'bento-iframe', true, true);
     });
 
     it('should render', async () => {
       element = html`
-        <amp-iframe src="https://www.wikipedia.org"></amp-iframe>
+        <bento-iframe src="https://www.wikipedia.org"></bento-iframe>
       `;
       doc.body.appendChild(element);
 
