@@ -42,6 +42,7 @@ import {
   setImportantStyles,
   toggle,
 } from '#core/dom/style';
+import {devError} from '#core/error';
 import {isEsm} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
@@ -54,6 +55,7 @@ import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
+import {calculateScriptBaseUrl} from '#service/extension-script';
 import {createPseudoLocale} from '#service/localization/strings';
 
 import {getDetail} from '#utils/event-helper';
@@ -192,7 +194,7 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
  * The index of the page where the paywall would be triggered.
  * @const {number}
  */
-const PAYWALL_PAGE_INDEX = 2;
+export const PAYWALL_PAGE_INDEX = 2;
 
 /**
  * The number of milliseconds to wait before showing the paywall on paywall page.
@@ -315,15 +317,15 @@ export class AmpStory extends AMP.BaseElement {
     this.didRewriteStyles_ = false;
 
     /**
-     * @private {?string} the page id to navigate to after receiving a granted state
+     * @private {?string} the page id to navigate to after receiving a granted state from amp-subscriptions
      */
-    this.pageAfterGranted_ = null;
+    this.pageAfterSubscriptionsGranted_ = null;
 
     /** @private {!Deferred} a promise that is resolved once the subscription state is received */
     this.subscriptionsStatePromise_ = new Deferred();
 
-    /** @private {?number} the timeout ID for the paywall timer */
-    this.paywallTimeout_ = null;
+    /** @private {?number} the timeout to show subscriptions dialog after delay */
+    this.showSubscriptionsUITimeout_ = null;
   }
 
   /** @override */
@@ -343,34 +345,7 @@ export class AmpStory extends AMP.BaseElement {
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
 
-    getLocalizationService(this.element)
-      .registerLocalizedStringBundle('default', LocalizedStringsEn)
-      .registerLocalizedStringBundle('ar', LocalizedStringsAr)
-      .registerLocalizedStringBundle('de', LocalizedStringsDe)
-      .registerLocalizedStringBundle('en', LocalizedStringsEn)
-      .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)
-      .registerLocalizedStringBundle('es', LocalizedStringsEs)
-      .registerLocalizedStringBundle('es-419', LocalizedStringsEs419)
-      .registerLocalizedStringBundle('fr', LocalizedStringsFr)
-      .registerLocalizedStringBundle('hi', LocalizedStringsHi)
-      .registerLocalizedStringBundle('id', LocalizedStringsId)
-      .registerLocalizedStringBundle('it', LocalizedStringsIt)
-      .registerLocalizedStringBundle('ja', LocalizedStringsJa)
-      .registerLocalizedStringBundle('ko', LocalizedStringsKo)
-      .registerLocalizedStringBundle('nl', LocalizedStringsNl)
-      .registerLocalizedStringBundle('no', LocalizedStringsNo)
-      .registerLocalizedStringBundle('pt-PT', LocalizedStringsPtPt)
-      .registerLocalizedStringBundle('pt-BR', LocalizedStringsPtBr)
-      .registerLocalizedStringBundle('ru', LocalizedStringsRu)
-      .registerLocalizedStringBundle('tr', LocalizedStringsTr)
-      .registerLocalizedStringBundle('vi', LocalizedStringsVi)
-      .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
-      .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw)
-      .registerLocalizedStringBundle(
-        'en-xa',
-        createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
-      );
-    this.registerInlineLocalizationStrings_();
+    this.installLocalizationStrings_();
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
@@ -741,6 +716,10 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(
       StateProperty.SUBSCRIPTIONS_STATE,
       (subscriptionsState) => {
+        if (subscriptionsState === SubscriptionsState.PENDING) {
+          return;
+        }
+
         this.subscriptionsStatePromise_.resolve();
         if (subscriptionsState === SubscriptionsState.GRANTED) {
           this.hideSubscriptionsDialog_();
@@ -978,11 +957,27 @@ export class AmpStory extends AMP.BaseElement {
           new PaginationButtons(this);
         }
       })
-      .then(() =>
+      .then(() => {
+        // Enable paywall if required element found in DOM.
+        if (
+          isExperimentOn(this.win, 'amp-story-subscriptions') &&
+          this.element.querySelector('amp-story-subscriptions') !== null &&
+          this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
+            SubscriptionsState.DISABLED
+        ) {
+          this.storeService_.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.PENDING
+          );
+        }
+
         // We need to call this.getInitialPageId_() again because the initial
         // page could've changed between the start of layoutStory_ and here.
-        this.switchTo_(this.getInitialPageId_(), NavigationDirection.NEXT)
-      )
+        return this.switchTo_(
+          this.getInitialPageId_(),
+          NavigationDirection.NEXT
+        );
+      })
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
           this.win,
@@ -1016,7 +1011,6 @@ export class AmpStory extends AMP.BaseElement {
     this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS).then(() => {
       this.markStoryAsLoaded_();
       this.initializeLiveStory_();
-      this.installLateExtensions_();
     });
 
     this.maybeLoadStoryEducation_();
@@ -1328,54 +1322,31 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    // Block until the subscription state gets resolved.
     const subscriptionsState = this.storeService_.get(
       StateProperty.SUBSCRIPTIONS_STATE
     );
-    if (this.isPaywallStory_()) {
-      if (
-        pageIndex >= PAYWALL_PAGE_INDEX &&
-        subscriptionsState !== SubscriptionsState.GRANTED
-      ) {
-        if (subscriptionsState === SubscriptionsState.UNKNOWN) {
-          return this.blockOnPendingSubscriptionsState_(
-            targetPageId,
-            direction
-          );
-        }
-
-        // Attempt to navigate to the locked pages after the paywall page.
-        if (pageIndex > PAYWALL_PAGE_INDEX) {
-          this.pageAfterGranted_ = targetPageId;
-
-          // Show the paywall immediately if the active page is the paywall page.
-          if (this.isOnPaywallPage_()) {
-            this.showSubscriptionsDialog_();
-            return Promise.resolve();
-          }
-
-          // Redirect to the paywall page.
-          return this.switchTo_(
-            this.pages_[PAYWALL_PAGE_INDEX].element.id,
-            direction
-          );
-        }
-
-        if (this.pageAfterGranted_) {
-          this.showSubscriptionsDialog_();
-        } else {
-          // If the target page is the paywall page, show dialog after delay.
-          this.paywallTimeout_ = setTimeout(() => {
-            this.pageAfterGranted_ = targetPageId;
-            this.showSubscriptionsDialog_();
-            this.paywallTimeout_ = null;
-          }, PAYWALL_DELAY_DURATION);
-        }
-      } else {
-        // Hide paywall UI if visting a non-blocked page, e.g. navigate back to the previous story
-        // or to the blocked pages with granted status.
-        this.hideSubscriptionsDialog_();
-      }
+    if (
+      pageIndex >= PAYWALL_PAGE_INDEX &&
+      subscriptionsState === SubscriptionsState.PENDING
+    ) {
+      return this.blockOnPendingSubscriptionsState_(targetPageId, direction);
     }
+    // Navigation to the locked pages after the paywall page should be redirected to the paywall page.
+    // This is necessary for deeplinking case to make sure the paywall dialog shows on the paywall page.
+    if (
+      pageIndex > PAYWALL_PAGE_INDEX &&
+      subscriptionsState === SubscriptionsState.BLOCKED
+    ) {
+      this.pageAfterSubscriptionsGranted_ = targetPageId;
+      this.showSubscriptionsDialog_();
+      return this.switchTo_(
+        this.pages_[PAYWALL_PAGE_INDEX].element.id,
+        direction
+      );
+    }
+    // Maybe show paywall after timeout or hide paywall if switching back to previous pages.
+    this.maybeToggleSubscriptionsDialog_(targetPageId, pageIndex);
 
     const oldPage = this.activePage_;
     this.activePage_ = targetPage;
@@ -1552,27 +1523,20 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   onHideSubscriptionsDialog_() {
-    this.paywallTimeout_ && clearTimeout(this.paywallTimeout_);
-    this.paywallTimeout_ = null;
+    this.showSubscriptionsUITimeout_ &&
+      clearTimeout(this.showSubscriptionsUITimeout_);
+    this.showSubscriptionsUITimeout_ = null;
     if (
-      this.pageAfterGranted_ &&
+      this.pageAfterSubscriptionsGranted_ &&
       this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
         SubscriptionsState.GRANTED
     ) {
-      this.switchTo_(this.pageAfterGranted_, NavigationDirection.NEXT);
+      this.switchTo_(
+        this.pageAfterSubscriptionsGranted_,
+        NavigationDirection.NEXT
+      );
     }
-    this.pageAfterGranted_ = null;
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isPaywallStory_() {
-    return (
-      isExperimentOn(this.win, 'amp-story-subscriptions') &&
-      this.element.querySelector('amp-story-subscriptions') != null
-    );
+    this.pageAfterSubscriptionsGranted_ = null;
   }
 
   /**
@@ -1609,11 +1573,32 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   *
-   * @return {boolean}
+   * Show paywall dialog after delay or hide paywall dialog if tapping back to unlocked pages.
+   * @param {string} targetPageId
+   * @param {number} pageIndex
+   * @private
    */
-  isOnPaywallPage_() {
-    return this.getPageIndex(this.activePage_) === PAYWALL_PAGE_INDEX;
+  maybeToggleSubscriptionsDialog_(targetPageId, pageIndex) {
+    const subscriptionsDialogUIState = this.storeService_.get(
+      StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE
+    );
+    // Navigation to the paywall page should show dialog after delay if not already shown.
+    if (
+      pageIndex === PAYWALL_PAGE_INDEX &&
+      !subscriptionsDialogUIState &&
+      this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
+        SubscriptionsState.BLOCKED
+    ) {
+      this.showSubscriptionsUITimeout_ = setTimeout(() => {
+        this.pageAfterSubscriptionsGranted_ = targetPageId;
+        this.showSubscriptionsDialog_();
+        this.showSubscriptionsUITimeout_ = null;
+      }, PAYWALL_DELAY_DURATION);
+    }
+    // Hide paywall UI when navigating back to the previous page.
+    if (pageIndex < PAYWALL_PAGE_INDEX && subscriptionsDialogUIState) {
+      this.hideSubscriptionsDialog_();
+    }
   }
 
   /**
@@ -2599,28 +2584,60 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Installs extensions that can be lazy-loaded.
+   * Adds the localization string bundles to the localization service.
    * @private
    */
-  installLateExtensions_() {
-    const extensionsFor = Services.extensionsFor(this.win);
-    const ampdoc = this.getAmpDoc();
-
-    if (this.element.querySelector('amp-story-auto-ads')) {
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-story-auto-ads');
+  installLocalizationStrings_() {
+    const localizationService = getLocalizationService(this.element);
+    const storyLanguage = localizationService.getLanguageCodesForElement(
+      this.element
+    )[0];
+    if (this.maybeRegisterInlineLocalizationStrings_(storyLanguage)) {
+      return;
     }
-    if (this.element.querySelector('amp-story-auto-analytics')) {
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-story-auto-analytics');
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
-    } else if (this.element.querySelector('amp-analytics')) {
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
+    if (isExperimentOn(this.win, 'story-remote-localization')) {
+      this.fetchLocalizationStrings_(storyLanguage);
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-remote-localization'
+      );
+    } else {
+      getLocalizationService(this.element)
+        .registerLocalizedStringBundle('default', LocalizedStringsEn)
+        .registerLocalizedStringBundle('ar', LocalizedStringsAr)
+        .registerLocalizedStringBundle('de', LocalizedStringsDe)
+        .registerLocalizedStringBundle('en', LocalizedStringsEn)
+        .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)
+        .registerLocalizedStringBundle('es', LocalizedStringsEs)
+        .registerLocalizedStringBundle('es-419', LocalizedStringsEs419)
+        .registerLocalizedStringBundle('fr', LocalizedStringsFr)
+        .registerLocalizedStringBundle('hi', LocalizedStringsHi)
+        .registerLocalizedStringBundle('id', LocalizedStringsId)
+        .registerLocalizedStringBundle('it', LocalizedStringsIt)
+        .registerLocalizedStringBundle('ja', LocalizedStringsJa)
+        .registerLocalizedStringBundle('ko', LocalizedStringsKo)
+        .registerLocalizedStringBundle('nl', LocalizedStringsNl)
+        .registerLocalizedStringBundle('no', LocalizedStringsNo)
+        .registerLocalizedStringBundle('pt-PT', LocalizedStringsPtPt)
+        .registerLocalizedStringBundle('pt-BR', LocalizedStringsPtBr)
+        .registerLocalizedStringBundle('ru', LocalizedStringsRu)
+        .registerLocalizedStringBundle('tr', LocalizedStringsTr)
+        .registerLocalizedStringBundle('vi', LocalizedStringsVi)
+        .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
+        .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw)
+        .registerLocalizedStringBundle(
+          'en-xa',
+          createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
+        );
     }
   }
 
   /**
    * If there are inline localization strings, register as current document language.
+   * @param {string} languageCode
+   * @return {boolean}
+   * @private
    */
-  registerInlineLocalizationStrings_() {
+  maybeRegisterInlineLocalizationStrings_(languageCode) {
     const inlineStringsEl = this.win.document.querySelector(
       'script[amp-localization="amp-story"]'
     );
@@ -2628,17 +2645,44 @@ export class AmpStory extends AMP.BaseElement {
       inlineStringsEl?.getAttribute('i-amphtml-version') !==
       getMode(this.win).rtvVersion
     ) {
-      return;
+      return false;
     }
     const stringsOrNull = tryParseJson(inlineStringsEl.textContent);
+
     if (!stringsOrNull) {
-      return;
+      return false;
     }
     const localizationService = getLocalizationService(this.element);
     localizationService.registerLocalizedStringBundle(
-      localizationService.getLanguageCodesForElement(this.element)[0],
+      languageCode,
       stringsOrNull
     );
+    return true;
+  }
+
+  /**
+   * Fetches from the CDN or localhost the localization strings.
+   * @param {string} languageCode
+   * @private
+   */
+  fetchLocalizationStrings_(languageCode) {
+    const localizationService = getLocalizationService(this.element);
+
+    const localizationUrl = `${calculateScriptBaseUrl(
+      this.win.location,
+      getMode(this.win).localDev
+    )}/v0/amp-story.${languageCode}.json`;
+
+    // The cache fallbacks to english if language not found, locally it errors.
+    Services.xhrFor(this.win)
+      .fetchJson(localizationUrl, {prerenderSafe: true})
+      .then((res) => res.json())
+      .then((json) =>
+        localizationService.registerLocalizedStringBundle(languageCode, json)
+      )
+      .catch((err) => {
+        devError(TAG, err, 'Bundle not found for language ' + languageCode);
+      });
   }
 }
 

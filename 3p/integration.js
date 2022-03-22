@@ -33,6 +33,7 @@ import {_ping_} from '#ads/vendors/_ping_';
 // 3P Ad Networks - please keep in alphabetic order
 import {_1wo} from '#ads/vendors/1wo';
 import {_24smi} from '#ads/vendors/24smi';
+import {_4wmarketplace} from '#ads/vendors/4wmarketplace';
 import {a8} from '#ads/vendors/a8';
 import {a9} from '#ads/vendors/a9';
 import {accesstrade} from '#ads/vendors/accesstrade';
@@ -314,6 +315,7 @@ if (getMode().test || getMode().localDev) {
 register('1wo', _1wo);
 register('24smi', _24smi);
 register('3d-gltf', gltfViewer);
+register('4wmarketplace', _4wmarketplace);
 register('a8', a8);
 register('a9', a9);
 register('accesstrade', accesstrade);
