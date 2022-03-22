@@ -1,7 +1,5 @@
 import * as Preact from '#core/dom/jsx';
 
-import {toggleExperiment} from '#experiments';
-
 import {Services} from '#service';
 
 import {afterRenderPromise} from '#testing/helpers';
@@ -37,8 +35,6 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       doc = win.document;
-
-      toggleExperiment(win, 'amp-story-subscriptions', true);
 
       storeService = new AmpStoryStoreService(win);
       env.sandbox
@@ -125,7 +121,7 @@ describes.realWin(
 
       storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE, true);
       await afterRenderPromise(win);
-  
+
       it('paywall element should have visible class', () => {
         expect(storySubscriptions.element).to.have.class(
           'i-amphtml-story-subscriptions-visible'
