@@ -6,7 +6,6 @@ import {Services} from '#service';
 
 import {afterRenderPromise} from '#testing/helpers';
 
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
   AmpStoryStoreService,
@@ -14,6 +13,7 @@ import {
   SubscriptionsState,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {SubscriptionService} from '../../../amp-subscriptions/0.1/amp-subscriptions';
+import {Dialog} from '../../../amp-subscriptions/0.1/dialog';
 import {AmpStorySubscriptions} from '../amp-story-subscriptions';
 
 describes.realWin(
@@ -46,15 +46,7 @@ describes.realWin(
         .returns(Promise.resolve(storeService));
       env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
 
-      // Stub out functions not needed for the tests.
-      env.sandbox.stub(win.history, 'replaceState');
-      registerServiceBuilder(win, 'performance', function () {
-        return {
-          isPerformanceTrackingOn: () => false,
-        };
-      });
-
-      // Specify platfrom config
+      // Specify platform config.
       const subscriptionServiceConfigEl = (
         <script type="application/json" id="amp-subscriptions"></script>
       );
@@ -103,17 +95,21 @@ describes.realWin(
       subscriptionsEl = (
         <amp-story-subscriptions layout="container"> </amp-story-subscriptions>
       );
+      storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
       storyEl.appendChild(subscriptionsEl);
       win.document.body.appendChild(storyEl);
+      await subscriptionsEl.whenBuilt();
     });
 
-    it('should contain amp-subscriptions attributes', async () => {
-      await subscriptionsEl.whenBuilt();
+    it('should contain amp-subscriptions attributes: subscriptions-dialog', async () => {
       expect(
         subscriptionsEl
           .querySelector('div')
           .hasAttribute('subscriptions-dialog')
       ).to.equal(true);
+    });
+
+    it('should contain amp-subscriptions attributes: subscriptions-display', async () => {
       expect(
         subscriptionsEl
           .querySelector('div')
@@ -121,49 +117,66 @@ describes.realWin(
       ).to.equal('NOT granted');
     });
 
-    it('should activate subscription platform and display the blocking paywall on dialog UI state update', async () => {
+    it('should activate subscription platform and show paywall on dialog UI state update to true', async () => {
       const maybeRenderDialogForSelectedPlatformSpy = env.sandbox.spy(
         subscriptionService,
         'maybeRenderDialogForSelectedPlatform'
       );
 
-      storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
-      await nextTick(); // wait to make sure AmpStorySubscriptions is built.
-
       storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE, true);
-
       await afterRenderPromise(win);
-      expect(storySubscriptions.element).to.have.class(
-        'i-amphtml-story-subscriptions-visible'
-      );
-      expect(maybeRenderDialogForSelectedPlatformSpy).to.be.calledOnce;
+
+      it('paywall element should have visible class', () => {
+        expect(storySubscriptions.element).to.have.class(
+          'i-amphtml-story-subscriptions-visible'
+        );
+      });
+
+      it('should render paywall element', () => {
+        expect(maybeRenderDialogForSelectedPlatformSpy).to.be.calledOnce;
+      });
+    });
+
+    it('should hide the paywall on dialog UI state update to false', async () => {
+      const dialog = new Dialog(env.ampdoc);
+      const dialogCloseSpy = env.sandbox.spy(dialog, 'close');
+      env.sandbox.stub(subscriptionService, 'getDialog').returns(dialog);
+
+      storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE, false);
+      await afterRenderPromise(win);
+
+      it('paywall element should not have visible class', () => {
+        expect(storySubscriptions.element).to.not.have.class(
+          'i-amphtml-story-subscriptions-visible'
+        );
+      });
+
+      it('should hide paywall element', () => {
+        expect(dialogCloseSpy).to.be.calledOnce;
+      });
     });
 
     it('should update subscription state to blocked once grant status from subscription service resolves to false', async () => {
-      expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
-        SubscriptionsState.UNKNOWN
-      );
       env.sandbox
         .stub(subscriptionService, 'getGrantStatus')
         .returns(Promise.resolve(false));
 
       storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
       await nextTick();
+
       expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
         SubscriptionsState.BLOCKED
       );
     });
 
     it('should update subscription state to granted once grant status from subscription service resolves to true', async () => {
-      expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
-        SubscriptionsState.UNKNOWN
-      );
       env.sandbox
         .stub(subscriptionService, 'getGrantStatus')
         .returns(Promise.resolve(true));
 
       storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
       await nextTick();
+
       expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
         SubscriptionsState.GRANTED
       );

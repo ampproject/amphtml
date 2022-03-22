@@ -39,8 +39,8 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       Services.subscriptionsServiceForDoc(this.element),
     ]).then(([storeService, subscriptionService]) => {
       this.storeService_ = storeService;
-
       this.subscriptionService_ = subscriptionService;
+
       const getGrantStatusAndUpdateState = () => {
         this.subscriptionService_.getGrantStatus().then((granted) => {
           this.handleGrantStatusUpdate_(granted);
