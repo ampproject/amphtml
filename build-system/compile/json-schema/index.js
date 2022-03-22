@@ -112,15 +112,24 @@ const escapeJsIdentifier = (id) => id.replace(/[^a-z_0-9]/gi, '_');
 const getTransformCache = once(() => new TransformCache('.json-schema-cache'));
 
 /**
- * Like batchRead(), but considers ajvOptions part of the invalidation hash.
+ * Like batchedRead(), but also includes the following in the invalidation hash:
+ * - ajvOptions, including the definition of functions.
+ * - the contents of our custom validator library on #core/json-schema
  * @param {string} filename
  * @return {Promise<{contents: string, hash: string}>}
  */
 async function ajvBatchedRead(filename) {
-  const {contents, hash} = await batchedRead(filename);
-  const rehash = md5(JSON.stringify({ajvOptions, hash}));
-  return {contents, hash: rehash};
+  const {contents, hash: schemaHash} = await batchedRead(filename);
+  const {hash: libraryHash} = await batchedRead('src/core/json-schema.ts');
+  const hashable = {ajvOptions, libraryHash, schemaHash};
+  const hash = md5(jsonStringifyFunctions(hashable));
+  return {contents, hash};
 }
+
+const jsonStringifyFunctions = (value) =>
+  JSON.stringify(value, (_, value) =>
+    typeof value === 'function' ? value.toString() : value
+  );
 
 /**
  * @param {string} filename
