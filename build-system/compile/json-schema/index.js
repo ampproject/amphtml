@@ -6,7 +6,7 @@
  *   validate("my-data");
  *   ```
  */
-const {_, default: Ajv} = require('ajv');
+const {_: ajvCode, Name: AjvName, default: Ajv} = require('ajv');
 const dedent = require('dedent');
 const json5 = require('json5');
 const {outputFile, pathExists} = require('fs-extra');
@@ -26,6 +26,43 @@ const {
  */
 const importFilter = /\.schema\.json$/;
 
+/**
+ * Maps to use a custom validation function when a schema matches certain
+ * criteria.
+ * - The key is the name of a validator function exported from `#core/json-schema`
+ * - The value is a boolean function that tests whether the validator function
+ *   should be used.
+ *   The boolean function may also modify the schema object in-place. This is
+ *   desirable in cases where the validator function should override
+ *   configurations validators.
+ * @const {{
+ *   fn: string,
+ *   error: import('ajv/dist/types').KeywordErrorDefinition,
+ *   map: (import('ajv/dist/types').SchemaObject) => boolean,
+ * }[]}
+ */
+const customValidators = [
+  // A schema may include an `enum` with a list of valid currency codes.
+  // When its `description` includes the URL that links to currency codes below,
+  // we remove this enum and instead use `Intl.NumberFormat` to validate them
+  // natively. This prevents the binary from including a long list of currency
+  // codes.
+  {
+    fn: 'isValidCurrencyCode',
+    error: {message: 'must be a valid currency code'},
+    map(schema) {
+      if (
+        Array.isArray(schema.enum) &&
+        schema.description?.includes('https://datahub.io/core/currency-codes')
+      ) {
+        delete schema.enum;
+        return true;
+      }
+      return false;
+    },
+  },
+];
+
 // https://ajv.js.org/options.html
 const ajvOptions = {
   code: {
@@ -35,66 +72,37 @@ const ajvOptions = {
   },
   allErrors: true,
   validateSchema: false,
+  // Add a keyword to the vocabulary for each custom validator.
+  keywords: customValidators.map(({error, fn}, i) => ({
+    keyword: `_${i}`,
+    error,
+    code(ctx) {
+      ctx.pass(ajvCode`${new AjvName(fn)}(${ctx.data})`);
+    },
+  })),
 };
 
-const getAjv = once(() => decorateAjv(new Ajv(ajvOptions)));
+const getAjv = once(() => new Ajv(ajvOptions));
 
 /**
- * @param {Ajv} ajv
- * @return {Ajv}
- */
-function decorateAjv(ajv) {
-  ajv.addKeyword({
-    keyword: 'currencyCode',
-    code(ctx) {
-      ctx.pass(_`isValidCurrencyCode(${ctx.data})`);
-    },
-  });
-  return ajv;
-}
-
-/**
- * Remaps a portable (standard) JSON Schema to our custom format in order to
- * use our custom compilation steps
+ * Remaps a JSON schema in order to use custom validators.
  * @param {*} schema
  * @return {*}
  */
-function remapPortableSchema(schema) {
-  if (typeof schema === 'object') {
-    if (Array.isArray(schema)) {
-      schema = schema.map(remapPortableSchema);
-    } else {
-      schema = remapCurrencyCodeSchema(schema);
-      schema = remapPortableSchemaProps(schema);
+function remapForCustomValidators(schema) {
+  if (typeof schema !== 'object') {
+    return schema;
+  }
+  if (Array.isArray(schema)) {
+    return schema.map(remapForCustomValidators);
+  }
+  for (const [i, entry] of customValidators.entries()) {
+    if (entry.map(schema)) {
+      schema[`_${i}`] = true;
     }
   }
-  return schema;
-}
-
-/**
- * @param {Object} schema
- * @return {Object}
- */
-function remapCurrencyCodeSchema(schema) {
-  if (
-    'enum' in schema &&
-    Array.isArray(schema.enum) &&
-    'description' in schema &&
-    schema.description.includes('https://datahub.io/core/currency-codes')
-  ) {
-    delete schema.enum;
-    schema.currencyCode = true;
-  }
-  return schema;
-}
-
-/**
- * @param {Object} schema
- * @return {Object}
- */
-function remapPortableSchemaProps(schema) {
   for (const k in schema) {
-    schema[k] = remapPortableSchema(schema[k]);
+    schema[k] = remapForCustomValidators(schema[k]);
   }
   return schema;
 }
@@ -124,7 +132,7 @@ async function getCompiledJsonSchemaFilename(filename) {
   const cached = await transformCache.get(hash);
   let output = cached;
   if (!output) {
-    const schema = remapPortableSchema(json5.parse(contents));
+    const schema = remapForCustomValidators(json5.parse(contents));
     output = avjCompile(filename, schema);
     transformCache.set(hash, Promise.resolve(output));
   }
@@ -147,9 +155,10 @@ function avjCompile(filename, schema) {
   const validateFnName = escapeJsIdentifier(
     `validate_${basename(filename, '.json')}`
   );
+  const customValidatorFns = customValidators.map(({fn}) => fn).join(', ');
   return (
     dedent(`
-      import {isValidCurrencyCode} from '#core/json-schema';
+      import {__customValidatorFns__} from '#core/json-schema';
 
       __scopeCode__
 
@@ -164,6 +173,7 @@ function avjCompile(filename, schema) {
         return validateAjv(data) ? [] : [...validateAjv.errors]
       }
     `)
+      .replace('__customValidatorFns__', customValidatorFns)
       .replace('__scopeCode__', scopeCode)
       .replace('__validateFnName__', validateFnName)
       // validateAjv returns a boolean, and modifies a property of the function
