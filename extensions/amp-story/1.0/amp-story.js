@@ -41,6 +41,7 @@ import {
   setImportantStyles,
   toggle,
 } from '#core/dom/style';
+import {devError} from '#core/error';
 import {isEsm} from '#core/mode';
 import {findIndex, lastItem, toArray} from '#core/types/array';
 import {debounce} from '#core/types/function';
@@ -53,6 +54,7 @@ import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
+import {calculateScriptBaseUrl} from '#service/extension-script';
 import {createPseudoLocale} from '#service/localization/strings';
 
 import {getDetail} from '#utils/event-helper';
@@ -318,34 +320,7 @@ export class AmpStory extends AMP.BaseElement {
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
 
-    getLocalizationService(this.element)
-      .registerLocalizedStringBundle('default', LocalizedStringsEn)
-      .registerLocalizedStringBundle('ar', LocalizedStringsAr)
-      .registerLocalizedStringBundle('de', LocalizedStringsDe)
-      .registerLocalizedStringBundle('en', LocalizedStringsEn)
-      .registerLocalizedStringBundle('en-GB', LocalizedStringsEnGb)
-      .registerLocalizedStringBundle('es', LocalizedStringsEs)
-      .registerLocalizedStringBundle('es-419', LocalizedStringsEs419)
-      .registerLocalizedStringBundle('fr', LocalizedStringsFr)
-      .registerLocalizedStringBundle('hi', LocalizedStringsHi)
-      .registerLocalizedStringBundle('id', LocalizedStringsId)
-      .registerLocalizedStringBundle('it', LocalizedStringsIt)
-      .registerLocalizedStringBundle('ja', LocalizedStringsJa)
-      .registerLocalizedStringBundle('ko', LocalizedStringsKo)
-      .registerLocalizedStringBundle('nl', LocalizedStringsNl)
-      .registerLocalizedStringBundle('no', LocalizedStringsNo)
-      .registerLocalizedStringBundle('pt-PT', LocalizedStringsPtPt)
-      .registerLocalizedStringBundle('pt-BR', LocalizedStringsPtBr)
-      .registerLocalizedStringBundle('ru', LocalizedStringsRu)
-      .registerLocalizedStringBundle('tr', LocalizedStringsTr)
-      .registerLocalizedStringBundle('vi', LocalizedStringsVi)
-      .registerLocalizedStringBundle('zh-CN', LocalizedStringsZhCn)
-      .registerLocalizedStringBundle('zh-TW', LocalizedStringsZhTw)
-      .registerLocalizedStringBundle(
-        'en-xa',
-        createPseudoLocale(LocalizedStringsEn, (s) => `[${s} one two]`)
-      );
-    this.registerInlineLocalizationStrings_();
+    this.installLocalizationStrings_();
 
     if (this.isStandalone_()) {
       this.initializeStandaloneStory_();
@@ -972,7 +947,6 @@ export class AmpStory extends AMP.BaseElement {
     this.whenInitialContentLoaded_(INITIAL_CONTENT_LOAD_TIMEOUT_MS).then(() => {
       this.markStoryAsLoaded_();
       this.initializeLiveStory_();
-      this.installLateExtensions_();
     });
 
     this.maybeLoadStoryEducation_();
@@ -2453,28 +2427,61 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Installs extensions that can be lazy-loaded.
+   * Adds the localization string bundles to the localization service.
    * @private
    */
-  installLateExtensions_() {
-    const extensionsFor = Services.extensionsFor(this.win);
-    const ampdoc = this.getAmpDoc();
-
-    if (this.element.querySelector('amp-story-auto-ads')) {
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-story-auto-ads');
+  installLocalizationStrings_() {
+    const localizationService = getLocalizationService(this.element);
+    const storyLanguage = localizationService.getLanguageCodesForElement(
+      this.element
+    )[0];
+    if (this.maybeRegisterInlineLocalizationStrings_(storyLanguage)) {
+      return;
     }
-    if (this.element.querySelector('amp-story-auto-analytics')) {
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-story-auto-analytics');
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
-    } else if (this.element.querySelector('amp-analytics')) {
-      extensionsFor.installExtensionForDoc(ampdoc, 'amp-analytics');
+    if (isExperimentOn(this.win, 'story-remote-localization')) {
+      this.fetchLocalizationStrings_(storyLanguage);
+      Services.performanceFor(this.win).addEnabledExperiment(
+        'story-remote-localization'
+      );
+    } else {
+      getLocalizationService(this.element).registerLocalizedStringBundles({
+        'default': LocalizedStringsEn,
+        'ar': LocalizedStringsAr,
+        'de': LocalizedStringsDe,
+        'en': LocalizedStringsEn,
+        'en-GB': LocalizedStringsEnGb,
+        'es': LocalizedStringsEs,
+        'es-419': LocalizedStringsEs419,
+        'fr': LocalizedStringsFr,
+        'hi': LocalizedStringsHi,
+        'id': LocalizedStringsId,
+        'it': LocalizedStringsIt,
+        'ja': LocalizedStringsJa,
+        'ko': LocalizedStringsKo,
+        'nl': LocalizedStringsNl,
+        'no': LocalizedStringsNo,
+        'pt-PT': LocalizedStringsPtPt,
+        'pt-BR': LocalizedStringsPtBr,
+        'ru': LocalizedStringsRu,
+        'tr': LocalizedStringsTr,
+        'vi': LocalizedStringsVi,
+        'zh-CN': LocalizedStringsZhCn,
+        'zh-TW': LocalizedStringsZhTw,
+        'en-xa': createPseudoLocale(
+          LocalizedStringsEn,
+          (s) => `[${s} one two]`
+        ),
+      });
     }
   }
 
   /**
    * If there are inline localization strings, register as current document language.
+   * @param {string} languageCode
+   * @return {boolean}
+   * @private
    */
-  registerInlineLocalizationStrings_() {
+  maybeRegisterInlineLocalizationStrings_(languageCode) {
     const inlineStringsEl = this.win.document.querySelector(
       'script[amp-localization="amp-story"]'
     );
@@ -2482,17 +2489,45 @@ export class AmpStory extends AMP.BaseElement {
       inlineStringsEl?.getAttribute('i-amphtml-version') !==
       getMode(this.win).rtvVersion
     ) {
-      return;
+      return false;
     }
     const stringsOrNull = tryParseJson(inlineStringsEl.textContent);
+
     if (!stringsOrNull) {
-      return;
+      return false;
     }
     const localizationService = getLocalizationService(this.element);
-    localizationService.registerLocalizedStringBundle(
-      localizationService.getLanguageCodesForElement(this.element)[0],
-      stringsOrNull
-    );
+    localizationService.registerLocalizedStringBundles({
+      [languageCode]: stringsOrNull,
+    });
+    return true;
+  }
+
+  /**
+   * Fetches from the CDN or localhost the localization strings.
+   * @param {string} languageCode
+   * @private
+   */
+  fetchLocalizationStrings_(languageCode) {
+    const localizationService = getLocalizationService(this.element);
+
+    const localizationUrl = `${calculateScriptBaseUrl(
+      this.win.location,
+      getMode(this.win).localDev
+    )}/v0/amp-story.${languageCode}.json`;
+
+    // The cache fallbacks to english if language not found, locally it errors.
+    Services.xhrFor(this.win)
+      .fetchJson(localizationUrl, {prerenderSafe: true})
+      .then((res) => res.json())
+      .then((json) =>
+        localizationService.registerLocalizedStringBundles({
+          [languageCode]: json,
+        })
+      )
+      .catch((err) => {
+        devError(TAG, err, 'Bundle not found for language ' + languageCode);
+      });
   }
 }
 

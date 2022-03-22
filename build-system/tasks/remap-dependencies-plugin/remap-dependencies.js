@@ -52,6 +52,13 @@ function onResolveRemapDeps({externals, remapArr, resolve}, args) {
     }
 
     const isExternal = externals.includes(value);
+    // TODO: remove this garbage after PR #37857 is merged or we come up with a better solution
+    if (value === 'react' || value === 'react-dom') {
+      return {
+        path: isExternal ? value : require.resolve(value),
+        external: isExternal,
+      };
+    }
     return {
       path: isExternal ? value : resolve(value),
       external: isExternal,
