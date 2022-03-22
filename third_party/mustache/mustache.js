@@ -1,7 +1,7 @@
 /*!
-* mustache.js - Logic-less {{mustache}} templates with JavaScript
-* http://github.com/janl/mustache.js
-*/
+ * mustache.js - Logic-less {{mustache}} templates with JavaScript
+ * http://github.com/janl/mustache.js
+ */
 
 var objectToString = Object.prototype.toString;
 var isArray = Array.isArray || function isArrayPolyfill (object) {
@@ -656,8 +656,12 @@ Writer.prototype.renderPartial = function renderPartial (token, context, partial
 
 Writer.prototype.unescapedValue = function unescapedValue (token, context) {
   var value = context.lookup(token[1]);
-  if (value != null)
+  if (value != null) {
+    if (mustache.sanitizeUnescaped) {
+      return mustache.sanitizeUnescaped(value);
+    }
     return value;
+  }
 };
 
 Writer.prototype.escapedValue = function escapedValue (token, context, config) {
