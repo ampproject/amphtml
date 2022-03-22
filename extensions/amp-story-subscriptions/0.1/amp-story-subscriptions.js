@@ -46,7 +46,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
           this.handleGrantStatusUpdate_(granted);
         });
       };
-      // Get grant status to set up the story state.
+      // Get grant status immediately to set up the initial subscriptions state.
       getGrantStatusAndUpdateState();
       // When the user finishes any of the actions, e.g. log in or subscribe, new entitlements would be
       // re-fetched and this callback would be executed. Update states based on new entitlements.
@@ -99,7 +99,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     if (showDialog) {
       // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
       // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
-      // To note, it's a blocking call that would wait until entitlements from all platforms get resolved.
       this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
     } else {
       this.subscriptionService_.getDialog().close();
