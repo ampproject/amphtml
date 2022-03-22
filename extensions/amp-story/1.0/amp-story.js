@@ -973,7 +973,10 @@ export class AmpStory extends AMP.BaseElement {
 
         // We need to call this.getInitialPageId_() again because the initial
         // page could've changed between the start of layoutStory_ and here.
-        this.switchTo_(this.getInitialPageId_(), NavigationDirection.NEXT);
+        return this.switchTo_(
+          this.getInitialPageId_(),
+          NavigationDirection.NEXT
+        );
       })
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
@@ -1330,6 +1333,7 @@ export class AmpStory extends AMP.BaseElement {
       return this.blockOnPendingSubscriptionsState_(targetPageId, direction);
     }
     // Navigation to the locked pages after the paywall page should be redirected to the paywall page.
+    // This is necessary for deeplinking case to make sure the paywall dialog shows on the paywall page.
     if (
       pageIndex > PAYWALL_PAGE_INDEX &&
       subscriptionsState === SubscriptionsState.BLOCKED
