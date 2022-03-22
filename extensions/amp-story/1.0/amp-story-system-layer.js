@@ -428,13 +428,11 @@ export class SystemLayer {
       true /** callToInitialize */
     );
 
-    this.storeService_.subscribe(
-      StateProperty.UI_STATE,
-      (uiState) => {
-        this.onUIStateUpdate_(uiState);
-      },
-      true /** callToInitialize */
-    );
+    this.storeService_.subscribe(StateProperty.UI_STATE, (uiState) => {
+      this.vsync_.mutate(() => this.onUIStateUpdate_(uiState));
+    });
+    /** Initialize outside of mutate context to avoid CLS. */
+    this.onUIStateUpdate_(this.storeService_.get(StateProperty.UI_STATE));
 
     this.storeService_.subscribe(
       StateProperty.PAUSED_STATE,
@@ -663,27 +661,26 @@ export class SystemLayer {
 
   /**
    * Reacts to UI state updates and triggers the expected UI.
+   * Called inside a mutate context if not initializing.
    * @param {!UIType} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
-    this.vsync_.mutate(() => {
-      const shadowRoot = this.getShadowRoot();
+    const shadowRoot = this.getShadowRoot();
 
-      shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
-      shadowRoot.classList.remove('i-amphtml-story-desktop-one-panel');
-      shadowRoot.removeAttribute('desktop');
+    shadowRoot.classList.remove('i-amphtml-story-desktop-fullbleed');
+    shadowRoot.classList.remove('i-amphtml-story-desktop-one-panel');
+    shadowRoot.removeAttribute('desktop');
 
-      switch (uiState) {
-        case UIType.DESKTOP_FULLBLEED:
-          shadowRoot.setAttribute('desktop', '');
-          shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
-          break;
-        case UIType.DESKTOP_ONE_PANEL:
-          shadowRoot.classList.add('i-amphtml-story-desktop-one-panel');
-          break;
-      }
-    });
+    switch (uiState) {
+      case UIType.DESKTOP_FULLBLEED:
+        shadowRoot.setAttribute('desktop', '');
+        shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
+        break;
+      case UIType.DESKTOP_ONE_PANEL:
+        shadowRoot.classList.add('i-amphtml-story-desktop-one-panel');
+        break;
+    }
   }
 
   /**
