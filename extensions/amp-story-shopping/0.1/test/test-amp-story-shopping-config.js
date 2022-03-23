@@ -176,7 +176,6 @@ describes.realWin(
       const keyedShoppingConfig = await createAmpStoryShoppingConfig(
         invalidURL
       );
-
       // Length is two, as it defaults to inline config.
       expect(Object.keys(keyedShoppingConfig).length).to.eql(2);
     });
