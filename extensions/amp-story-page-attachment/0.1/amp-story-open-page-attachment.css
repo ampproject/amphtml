@@ -25,7 +25,6 @@
   visibility: visible !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
   flex-direction: column !important;
   position: absolute !important;
   bottom: 0 !important;
