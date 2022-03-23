@@ -10,6 +10,7 @@
  * }>
  */
 const initTestsPath = ['testing/init-tests.js'];
+const initBentoTestsPaths = ['testing/init-bento-tests.js'];
 
 const karmaHtmlFixturesPath = 'test/fixtures/*.html';
 
@@ -66,11 +67,18 @@ const karmaJsPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-  'src/bento/components/**/test/*.js',
+  'src/bento/components/**/test/**/*.js',
   'testing/**/*.js',
 ];
 
-const commonUnitTestPaths = initTestsPath.concat(fixturesExamplesPaths);
+/**
+ * @param {{bentoOnly?: boolean}} [options]
+ * @return {Array<*>}
+ */
+function getCommonUnitTestPaths({bentoOnly = false} = {}) {
+  const initTestPaths = bentoOnly ? initBentoTestsPaths : initTestsPath;
+  return initTestPaths.concat(fixturesExamplesPaths);
+}
 
 const commonIntegrationTestPaths = initTestsPath.concat(
   fixturesExamplesPaths,
@@ -92,6 +100,13 @@ const unitTestPaths = [
   'extensions/**/test/unit/*.js',
   'src/bento/components/**/test/*.js',
   'src/bento/components/**/test/unit/*.js',
+];
+
+const bentoUnitTestPaths = [
+  'extensions/**/test/standalone/*.js',
+  'extensions/**/test/standalone/unit/*.js',
+  'src/bento/components/**/test/standalone/*.js',
+  'src/bento/components/**/test/standalone/unit/*.js',
 ];
 
 // TODO(amphtml): Opt-in more unit tests to run on Safari / FF / Edge.
@@ -466,9 +481,10 @@ const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
 
 /** @const  */
 module.exports = {
+  bentoUnitTestPaths,
   changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
-  commonUnitTestPaths,
+  getCommonUnitTestPaths,
   devDashboardTestPaths,
   e2eTestPaths,
   htmlFixtureGlobs,
