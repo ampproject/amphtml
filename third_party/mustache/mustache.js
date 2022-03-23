@@ -231,10 +231,15 @@ function parseTemplate (template, tags) {
         throw new Error('Unclosed section "' + openSection[1] + '" at ' + start);
     } else if (type === 'name' || type === '{' || type === '&') {
       nonSpace = true;
-    } else if (type === '=') {
-      // Set the tags for the next time around.
-      compileTags(value);
     }
+    // ORIGINAL CODE:
+    // else if (type === '=') {
+    //   // Set the tags for the next time around.
+    //   compileTags(value);
+    // }
+    // Fail quitely but do not allow delimiter substitutions. This is
+    // important from the security point of view so that our validators
+    // do not have to parse and interprete all of the mustache's syntax.
   }
 
   stripSpace();
@@ -754,6 +759,20 @@ mustache.render = function render (template, view, partials, config) {
   }
 
   return defaultWriter.render(template, view, partials, config);
+};
+
+// This is here for backwards compatibility with 0.4.x.,
+/*eslint-disable */ // eslint wants camel cased function name
+mustache.to_html = function to_html (template, view, partials, send) {
+  /*eslint-enable*/
+
+  var result = mustache.render(template, view, partials);
+
+  if (isFunction(send)) {
+    send(result);
+  } else {
+    return result;
+  }
 };
 
 // Export the escaping function so that the user may override it.
