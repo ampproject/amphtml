@@ -112,8 +112,6 @@ function SelectorWithRef(
     }
   }, [onChange, multiple, selected]);
 
-  const clear = useCallback(() => setSelectedState([]), []);
-
   const toggle = useCallback(
     (option, select) => {
       const isSelected = selected.includes(option);
@@ -135,6 +133,13 @@ function SelectorWithRef(
     },
     [onChange, setSelectedState, selectOption, selected]
   );
+
+  const clear = useCallback(() => {
+    setSelectedState([]);
+    if (onChange) {
+      onChange({value: [], option: value});
+    }
+  }, [setSelectedState, onChange, value]);
 
   /**
    * This method uses the given callback on the target index found by
