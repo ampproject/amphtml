@@ -16,6 +16,7 @@ import {poll} from '#testing/iframe';
 
 import * as consent from '../../../../src/consent';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStory} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {PageState} from '../amp-story-page';
@@ -102,6 +103,9 @@ describes.realWin(
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);
+      localizationService.registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
 
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox
@@ -786,7 +790,7 @@ describes.realWin(
           ).to.not.be.null;
         });
 
-        it('should display the story after clicking "continue" button', async () => {
+        it.only('should display the story after clicking "continue" button', async () => {
           await createStoryWithPages(2, ['cover', 'page-1']);
 
           AmpStory.isBrowserSupported = () => false;
@@ -803,6 +807,7 @@ describes.realWin(
           const continueAnywayButton = element.querySelector(
             '.i-amphtml-story-unsupported-browser-overlay button'
           );
+          console.log(continueAnywayButton);
           continueAnywayButton.click();
 
           await poll(

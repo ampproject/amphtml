@@ -1738,6 +1738,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   displayUnsupportedBrowser_() {
+    console.log('display unsupported browser', this.getFallback());
     this.setPausedStateToRestore_();
     if (this.getFallback()) {
       this.toggleFallback(true);
@@ -1747,8 +1748,10 @@ export class AmpStory extends AMP.BaseElement {
     // Publisher provided fallbacks do not allow users to continue.
     const continueAnyway = () => {
       this.layoutStory_().then(() => {
+        console.log('laid out story');
         this.restorePausedState_();
         this.mutateElement(() => {
+          console.log('inside mutate');
           removeElement(layer);
         });
       });
