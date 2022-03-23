@@ -1346,18 +1346,10 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
-        let storePageIndex = pageIndex;
+        this.storeService_.dispatch(Action.TOGGLE_AD, targetPage.isAd());
         if (targetPage.isAd()) {
-          this.storeService_.dispatch(Action.TOGGLE_AD, true);
           setAttributeInMutate(this, Attributes.AD_SHOWING);
-
-          // Keep current page index when an ad is shown. Otherwise it messes
-          // up with the progress variable in the VariableService.
-          storePageIndex = this.storeService_.get(
-            StateProperty.CURRENT_PAGE_INDEX
-          );
         } else {
-          this.storeService_.dispatch(Action.TOGGLE_AD, false);
           removeAttributeInMutate(this, Attributes.AD_SHOWING);
 
           // Start progress bar update for pages that are not ads or auto-
@@ -1372,7 +1364,7 @@ export class AmpStory extends AMP.BaseElement {
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
           id: targetPageId,
-          index: storePageIndex,
+          index: pageIndex,
         });
 
         // If first navigation.
@@ -2003,7 +1995,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @return {number}
+   * @return {number} Number of story pages excluding ad pages.
    */
   getPageCount() {
     return this.pages_.length - this.adPages_.length;
@@ -2375,6 +2367,21 @@ export class AmpStory extends AMP.BaseElement {
       nextPageEl.setAttribute(Attributes.RETURN_TO, pageToBeInsertedId);
     }
 
+    // Adjust the ad page's position in this.adPages_ array to reflect the actual.
+    const adPageIndex = this.getPageIndexById(pageToBeInsertedId);
+    if (adPageIndex != -1) {
+      this.pages_.splice(adPageIndex, 1);
+    }
+    this.pages_.splice(
+      this.getPageIndexById(pageBeforeId) + 1,
+      0,
+      pageToBeInserted
+    );
+
+    this.storeService_.dispatch(Action.INSERT_AD_PAGE, {
+      pageBeforeId,
+      pageToBeInsertedId,
+    });
     return true;
   }
 
