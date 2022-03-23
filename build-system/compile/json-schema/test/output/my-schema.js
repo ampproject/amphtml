@@ -1,6 +1,6 @@
 // build/build-system/compile/json-schema/test/input/my-schema.schema.json.js
 import { isValidCurrencyCode } from "#core/json-schema";
-var validateAjv = function validate1(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
+var validateAjv = function validate0(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
   let errors = 0;
   const _errs0 = errors;
@@ -77,11 +77,11 @@ var validateAjv = function validate1(data, { instancePath = "", parentData, pare
       }
     }
   }
-  validate1.errors = vErrors;
+  validate0.errors = vErrors;
   return errors === 0;
 };
 function validate_my_schema_schema(data) {
-  return validateAjv(data) ? [] : [...validateAjv.errors];
+  return validateAjv(data) ? [] : validateAjv.errors;
 }
 
 // build-system/compile/json-schema/test/input/my-schema.js

@@ -187,7 +187,7 @@ function avjCompile(filename, schema) {
        * https://ajv.js.org/api.html#error-objects
        */
       export default function __validateFnName__(data) {
-        return validateAjv(data) ? [] : [...validateAjv.errors]
+        return validateAjv(data) ? [] : validateAjv.errors;
       }
     `)
       .replace('__customValidatorFns__', customValidatorFns)
