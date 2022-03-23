@@ -1,12 +1,10 @@
 import {useRef} from '#preact';
 
 /**
- * @param {T} current
- * @return {{current: T}}
- * @template T
+ * Returns a ref that always references the latest value
  */
-export function useValueRef<T>(current: T): {current: T} {
-  const valueRef = useRef<T>(current);
-  valueRef.current = current;
+export function useValueRef<T>(latest: T): {current: T} {
+  const valueRef = useRef<T>(latest);
+  valueRef.current = latest;
   return valueRef;
 }

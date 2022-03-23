@@ -22,11 +22,7 @@ describes.sandboxed('Gestures', {}, (env) => {
       .callsFake((name, listener, option) => {
         passiveSupported ? option.passive : false;
       });
-    env.sandbox
-      .stub(window, 'removeEventListener')
-      .callsFake((name, listener, option) => {
-        passiveSupported ? option.passive : false;
-      });
+    env.sandbox.stub(window, 'removeEventListener');
   }
 
   let element;
