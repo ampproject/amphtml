@@ -148,7 +148,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
       if (activeProuductData.length === 1) {
         productId = activeProuductData[0].productId;
-      } else {
+      } else if (productId === undefined) {
         productId = 'products card listing page opened';
       }
 
