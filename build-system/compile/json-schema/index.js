@@ -179,7 +179,7 @@ function avjCompile(filename, schema) {
 
       __scopeCode__
 
-      const validateAjv = __validateAjv__;
+      __validateAjv__
 
       /**
        * @param {any} data
@@ -187,7 +187,7 @@ function avjCompile(filename, schema) {
        * https://ajv.js.org/api.html#error-objects
        */
       export default function __validateFnName__(data) {
-        return validateAjv(data) ? [] : validateAjv.errors;
+        return __validateAjvName__(data) ? [] : __validateAjvName__.errors;
       }
     `)
       .replace('__customValidatorFns__', customValidatorFns)
@@ -198,6 +198,7 @@ function avjCompile(filename, schema) {
       // for errors. The default instead returns an array of errors, which is
       // empty when the input is valid.
       .replace('__validateAjv__', validateAjv?.source?.validateCode)
+      .replace(/__validateAjvName__/g, validateAjv?.source?.validateName.str)
   );
 }
 
