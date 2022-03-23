@@ -1,29 +1,4 @@
-/**
-   * Hiding the element and only showing it on the active page so the animation
-   * triggers every time the page becomes active.
-   */
 .i-amphtml-story-page-open-attachment {
-  /* Prevent tabbing to inactive page's buttons */
-  visibility: hidden !important;
-  display: none !important;
-  --i-amphtml-chip-background-color: rgba(255, 255, 255, 0.5) !important;
-  --i-amphtml-img-background-color: white !important;
-  --i-amphtml-label-text-color: white !important;
-  --i-amphtml-arrow-color: black !important;
-  --i-amphtml-page-attachment-ui-animation-delay: 1s !important;
-  --i-amphtml-page-attachment-ui-animation-duration: .6s !important;
-}
-
-[theme="dark"].i-amphtml-story-page-open-attachment {
-  --i-amphtml-chip-background-color: rgba(0, 0, 0, 0.5) !important;
-  --i-amphtml-img-background-color: black !important;
-  --i-amphtml-label-text-color: black !important;
-  --i-amphtml-arrow-color: white !important;
-}
-
-.i-amphtml-story-page-open-attachment[active] {
-  visibility: visible !important;
-  display: flex !important;
   align-items: center !important;
   flex-direction: column !important;
   position: absolute !important;
@@ -34,6 +9,26 @@
   z-index: 3 !important;
   -webkit-touch-callout: default !important; /* Allow long pressing the button to open context menu in iOS */
   text-decoration: none !important;
+  --i-amphtml-chip-background-color: rgba(255, 255, 255, 0.5) !important;
+  --i-amphtml-img-background-color: white !important;
+  --i-amphtml-label-text-color: white !important;
+  --i-amphtml-arrow-color: black !important;
+  --i-amphtml-page-attachment-ui-animation-delay: 1s !important;
+  --i-amphtml-page-attachment-ui-animation-duration: .6s !important;
+  /* Hidden by default to prevent tabbing to inactive page's CTAs. */
+  display: none !important;
+}
+
+[theme="dark"].i-amphtml-story-page-open-attachment {
+  --i-amphtml-chip-background-color: rgba(0, 0, 0, 0.5) !important;
+  --i-amphtml-img-background-color: black !important;
+  --i-amphtml-label-text-color: black !important;
+  --i-amphtml-arrow-color: white !important;
+}
+
+.i-amphtml-story-page-open-attachment[active] {
+  /* Displays only on active page. */
+  display: flex !important;
 }
 
 .i-amphtml-story-page-open-attachment > * {
@@ -84,6 +79,7 @@
   margin-bottom: 12px !important;
 }
 
+/* Animations only play when page is active. */
 .i-amphtml-story-page-open-attachment-inline[active] .i-amphtml-story-inline-page-attachment-chip {
   animation: i-amphtml-tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
