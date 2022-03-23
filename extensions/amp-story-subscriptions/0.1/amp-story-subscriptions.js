@@ -41,17 +41,12 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.storeService_ = storeService;
       this.subscriptionService_ = subscriptionService;
 
-      const getGrantStatusAndUpdateState = () => {
-        this.subscriptionService_.getGrantStatus().then((granted) => {
-          this.handleGrantStatusUpdate_(granted);
-        });
-      };
       // Get grant status immediately to set up the initial subscriptions state.
-      getGrantStatusAndUpdateState();
+      this.getGrantStatusAndUpdateState_();
       // When the user finishes any of the actions, e.g. log in or subscribe, new entitlements would be
       // re-fetched and this callback would be executed. Update states based on new entitlements.
-      this.subscriptionService_.addOnEntitlementResolvedCallback(
-        getGrantStatusAndUpdateState
+      this.subscriptionService_.addOnEntitlementResolvedCallback(() =>
+        this.getGrantStatusAndUpdateState_()
       );
 
       this.initializeListeners_();
@@ -61,6 +56,15 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout_Enum.CONTAINER;
+  }
+
+  /**
+   * @private
+   */
+  getGrantStatusAndUpdateState_() {
+    this.subscriptionService_.getGrantStatus().then((granted) => {
+      this.handleGrantStatusUpdate_(granted);
+    });
   }
 
   /**
@@ -86,6 +90,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
   /**
    * @param {boolean} showDialog
+   * @return {?Promise}
    * @private
    */
   onSubscriptionsDialogUiStateChange_(showDialog) {
@@ -99,10 +104,9 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     if (showDialog) {
       // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
       // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
-      this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
-    } else {
-      this.subscriptionService_.getDialog().close();
+      return this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
     }
+    this.subscriptionService_.getDialog().close();
   }
 }
 

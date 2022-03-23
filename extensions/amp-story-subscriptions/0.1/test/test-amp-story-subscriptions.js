@@ -42,10 +42,6 @@ describes.realWin(
         .returns(Promise.resolve(storeService));
       env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
 
-      // Specify platform config.
-      const subscriptionServiceConfigEl = (
-        <script type="application/json" id="amp-subscriptions"></script>
-      );
       const platformConfig = {
         'services': [
           {
@@ -63,11 +59,12 @@ describes.realWin(
           },
         ],
       };
-      subscriptionServiceConfigEl.innerHTML = JSON.stringify(platformConfig);
-      doc.head.appendChild(subscriptionServiceConfigEl);
+      doc.head.appendChild(
+        <script type="application/json" id="amp-subscriptions">
+          {JSON.stringify(platformConfig)}
+        </script>
+      );
 
-      // Specify page config
-      const pageConfigEl = <script type="application/ld+json"></script>;
       const pageConfig = {
         '@context': 'http://schema.org',
         '@type': 'NewsArticle',
@@ -78,8 +75,9 @@ describes.realWin(
           'productID': 'scenic-2017.appspot.com:news',
         },
       };
-      pageConfigEl.innerHTML = JSON.stringify(pageConfig);
-      doc.head.appendChild(pageConfigEl);
+      doc.head.appendChild(
+        <script type="application/ld+json">{JSON.stringify(pageConfig)}</script>
+      );
 
       subscriptionService = new SubscriptionService(env.ampdoc);
       subscriptionService.start();
