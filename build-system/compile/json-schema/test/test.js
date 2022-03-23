@@ -52,17 +52,17 @@ function requireCompiled(filename) {
 
 test('run currency-code.js', async (t) => {
   const {validateCurrencyCode} = await requireCompiled('currency-code.js');
-  t.deepEqual(validateCurrencyCode({currencyCode: 'INVALID'}), [
+  t.deepEqual(validateCurrencyCode('INVALID'), [
     {
-      instancePath: '/currencyCode',
+      instancePath: '',
       keyword: '_0',
       message: 'must be a valid currency code',
       params: {},
-      schemaPath: '#/properties/currencyCode/_0',
+      schemaPath: '#/_0',
     },
   ]);
   const schema = require('./input/currency-code.schema.json');
-  for (const currencyCode of schema.properties.currencyCode.enum) {
-    t.deepEqual(validateCurrencyCode({currencyCode}), []);
+  for (const currencyCode of schema.enum) {
+    t.deepEqual(validateCurrencyCode(currencyCode), []);
   }
 });
