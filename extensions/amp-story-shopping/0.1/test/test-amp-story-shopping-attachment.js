@@ -226,36 +226,6 @@ describes.realWin(
       expect(activeProductData).to.be.null;
     });
 
-    it('should call analytics service on PLP Card Click', async () => {
-      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
-
-      await layoutShoppingImplAndAttachmentChildImpl();
-      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
-      const plpCard = attachmentChildEl.querySelector(
-        '.i-amphtml-amp-story-shopping-plp-card'
-      );
-      plpCard.dispatchEvent(new Event('click'));
-
-      expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.SHOPPING_LISTING_PAGE_CARD_CLICK
-      );
-    });
-
-    it('should call analytics service with PDP view on PLP Card Click', async () => {
-      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
-
-      await layoutShoppingImplAndAttachmentChildImpl();
-      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
-      const plpCard = attachmentChildEl.querySelector(
-        '.i-amphtml-amp-story-shopping-plp-card'
-      );
-      plpCard.dispatchEvent(new Event('click'));
-
-      expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
-      );
-    });
-
     async function setupPDP() {
       await layoutShoppingImplAndAttachmentChildImpl();
       // Override to simulate data for one product on the page.
@@ -291,22 +261,7 @@ describes.realWin(
         .dispatchEvent(new Event('click'));
 
       expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
-      );
-    });
-
-    it('should call analytics service on attachment state update when clicking the shopping tag', async () => {
-      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
-
-      env.sandbox
-        .mock(win.document.activeElement)
-        .expects('tagName')
-        .returns('AMP-STORY-SHOPPING-TAG');
-
-      await setupPDP();
-      //win.document.activeElement.tagName
-      expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
+        StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
       );
     });
   }

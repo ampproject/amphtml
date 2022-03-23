@@ -17,10 +17,7 @@ import {
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
-import {
-  AnalyticsVariable,
-  getVariableService,
-} from '../../amp-story/1.0/variable-service';
+import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 
 /** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
@@ -133,28 +130,35 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
 
-    if (document.activeElement.tagName === 'AMP-STORY-SHOPPING-TAG') {
-      this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
-        AnalyticsVariable.STORY_SHOPPING_TAG_CLICKED
-      );
+    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
 
-      this.analyticsService_.triggerEvent(
-        StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
-      );
-    } else {
-      this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
-        AnalyticsVariable.STORY_SHOPPING_CTA_CLICKED
-      );
+    const productId =
+      Object.values(shoppingData[this.pageEl_.id])?.length === 1
+        ? Object.values(shoppingData[this.pageEl_.id])[0].productId
+        : shoppingData?.activeProductData?.productId;
+
+    if (productId === '') {
+      productId = 'products card listing page opened';
     }
 
-    this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER,
-      this.element
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+      productId
+    );
+    const shoppingItemClicked =
+      document.activeElement.tagName === 'AMP-STORY-SHOPPING-TAG'
+        ? document.activeElement.tagName
+        : 'AMP-STORY-SHOPPING-ATTACHMENT';
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
+      shoppingItemClicked.toLowerCase()
     );
 
-    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
+    );
+
     if (!shoppingData.activeProductData) {
       this.updateTemplate_(shoppingData);
     }
@@ -288,11 +292,18 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onPlpCardClick_(shoppingData) {
-    this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.SHOPPING_LISTING_PAGE_CARD_CLICK
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+      shoppingData?.productId
     );
+
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
+      'Product Card Clicked'
+    );
+
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.SHOPPING_PRODUCT_DETAILS_VIEW
+      StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
     );
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
@@ -336,17 +347,21 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
-   * onclick event that fires when buy now is clicked, has conversion tracking.
-   * @param {?string} conversionURL
+   * onclick event that fires when buy now is clicked,
+   * sends an analytics event containing product id and the conversion url.
+   * @param {!ShoppingConfigDataDef} activeProductData
    * @return {boolean}
    * @private
    */
-  onClickBuyNow_(conversionURL) {
+  onClickBuyNow_(activeProductData) {
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_SHOPPING_CONVERSION_URL,
-      conversionURL
+      AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+      activeProductData.productId
     );
-
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_SHOPPING_PRODUCT_URL,
+      activeProductData.productUrl
+    );
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK,
       this.element
@@ -406,7 +421,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             class="i-amphtml-amp-story-shopping-pdp-cta"
             href={activeProductData.productUrl}
             target="_top"
-            onClick={() => this.onClickBuyNow_(activeProductData.productUrl)}
+            onClick={() => this.onClickBuyNow_(activeProductData)}
           >
             {this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL,
