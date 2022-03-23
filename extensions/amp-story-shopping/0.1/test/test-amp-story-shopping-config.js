@@ -119,12 +119,6 @@ describes.realWin(
       expect(() => getShoppingConfig(shoppingAttachment)).to.not.throw();
     });
 
-    it('throws on no config', async () => {
-      expectAsyncConsoleError(
-        /<script> tag with type=\"application\/json\"​​​/
-      );
-    });
-
     it('does use inline config', async () => {
       const result = await createAmpStoryShoppingConfig();
       expect(result).to.deep.eql(keyedDefaultInlineConfig);
@@ -178,9 +172,13 @@ describes.realWin(
     });
 
     it('test invalid remote config url', async () => {
-      expectAsyncConsoleError(
-        /'amp-story-shopping-config:config error determining if remote config is valid json: bad url or bad json'​​​/
+      const invalidURL = 'invalidRemoteURL';
+      const keyedShoppingConfig = await createAmpStoryShoppingConfig(
+        invalidURL
       );
+
+      // Length is two, as it defaults to inline config.
+      expect(Object.keys(keyedShoppingConfig).length).to.eql(2);
     });
 
     describe('storeShoppingConfig', () => {
@@ -276,18 +274,20 @@ describes.realWin(
     });
 
     it('should fail config validation because an expected string JSON value is not a valid url', async () => {
-      expectAsyncConsoleError(errorString, 1);
       const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
       const invalidValue = 'http://zapp'; // This is not a valid url
       invalidConfig['items'][0]['productUrl'] = invalidValue;
-
-      const errorString = `Error: productUrl ${invalidValue} is not a valid URL. (Error: amp-story-shopping-config productImages source must start with "https://" or "//" or be relative and served from either https or from localhost. Invalid value: ${invalidConfig['items'][0]['productUrl'][0]})`;
       const spy = env.sandbox.spy(url, 'assertHttpsUrl');
-      await createAmpStoryShoppingConfig(null, invalidConfig);
+      const keyedShoppingConfig = await createAmpStoryShoppingConfig(
+        null,
+        invalidConfig
+      );
       expect(spy).to.have.been.calledWith(
         `${invalidValue}`,
         'amp-story-shopping-config productUrl'
       );
+      expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
+      expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
     });
   }
 );
