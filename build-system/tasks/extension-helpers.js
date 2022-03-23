@@ -804,8 +804,8 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
     import {BaseElement} from '../base-element';
     import {defineBentoElement} from '${bentoCePath}';
 
-    function defineElement() {
-      defineBentoElement(__name__, BaseElement);
+    function defineElement(win) {
+      defineBentoElement(__name__, BaseElement, win);
     }
 
     ${toExport ? 'export {defineElement};' : 'defineElement();'}
