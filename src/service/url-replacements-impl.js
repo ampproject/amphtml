@@ -466,7 +466,7 @@ export class GlobalVariableSource extends VariableSource {
       'UACH',
       // Synchronous alternative, will only work if the requested values were
       // previously requested using the async method.
-      (variable) => this.cachedUach_[variable],
+      (variable) => this.cachedUach_[variable] ?? '',
       (variable) => this.getUach_(variable, win)
     );
 
