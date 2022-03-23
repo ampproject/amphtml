@@ -19,7 +19,7 @@ function getExtensions() {
 
 /**
  * Get bento components to be published on npm
- * @return {Array<any>}
+ * @return {Array<{extension: string, version: string}>}
  */
 function getComponents() {
   const bundles = require('../compile/bundles.config.bento.json');
@@ -102,8 +102,10 @@ let PackageFileDef;
  */
 async function getPackageFiles() {
   const [extPackageFiles, componentPackageFiles] = await Promise.all([
-    fastGlob(path.join('extensions', '**', 'package.json')),
-    fastGlob(path.join('src', 'bento', 'components', '**', 'package.json')),
+    fastGlob(path.join('extensions', '**', 'package.static.json')),
+    fastGlob(
+      path.join('src', 'bento', 'components', '**', 'package.static.json')
+    ),
   ]);
 
   return await Promise.all(
@@ -174,12 +176,15 @@ function getTopologicalSort(graph) {
 
 /**
  * Get the order the npm packages should be published in.
- * @return {Promise<string[]>}
+ * @return {Promise<Array<{extension: string, version: string}>>}
  */
 async function getOptimalPublishOrder() {
   const packageFiles = await getPackageFiles();
   const graph = buildPublishGraph(packageFiles);
-  return getTopologicalSort(graph).map((node) => node.name);
+  return getTopologicalSort(graph).map((node) => ({
+    extension: node.name,
+    version: node.version,
+  }));
 }
 
 module.exports = {
