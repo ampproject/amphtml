@@ -3,6 +3,8 @@
    * triggers every time the page becomes active.
    */
 .i-amphtml-story-page-open-attachment {
+  /* Prevent tabbing to inactive page's buttons */
+  visibility: hidden !important;
   display: none !important;
   --i-amphtml-chip-background-color: rgba(255, 255, 255, 0.5) !important;
   --i-amphtml-img-background-color: white !important;
@@ -20,6 +22,7 @@
 }
 
 .i-amphtml-story-page-open-attachment[active] {
+  visibility: visible !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -32,11 +35,6 @@
   z-index: 3 !important;
   -webkit-touch-callout: default !important; /* Allow long pressing the button to open context menu in iOS */
   text-decoration: none !important;
-}
-
-.i-amphtml-story-page-open-attachment:not([active]) {
-  /* Prevent tabbing to inactive page's buttons */
-  visibility: hidden !important;
 }
 
 .i-amphtml-story-page-open-attachment > * {
@@ -87,7 +85,7 @@
   margin-bottom: 12px !important;
 }
 
-.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-inline-page-attachment-chip {
+.i-amphtml-story-page-open-attachment-inline[active] .i-amphtml-story-inline-page-attachment-chip {
   animation: i-amphtml-tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
@@ -135,7 +133,7 @@
   background-repeat: no-repeat !important;
 }
 
-.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-inline-page-attachment-arrow:before {
+.i-amphtml-story-page-open-attachment-inline[active] .i-amphtml-story-inline-page-attachment-arrow:before {
   animation: i-amphtml-move-up-arrow-in-circle var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
