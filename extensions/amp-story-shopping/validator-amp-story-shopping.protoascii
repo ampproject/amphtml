@@ -20,16 +20,6 @@ html_format: AMP
     supported_layouts: CONTAINER
   }
 }
-tags: {  # <amp-story-shopping-config>
-  html_format: AMP
-  tag_name: "AMP-STORY-SHOPPING-CONFIG"
-  requires_extension: "amp-story-shopping"
-  attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
-  amp_layout: {
-    supported_layouts: NODISPLAY
-  }
-}
 tags: {  # <amp-story-shopping-attachment>
   html_format: AMP
   tag_name: "AMP-STORY-SHOPPING-ATTACHMENT"
