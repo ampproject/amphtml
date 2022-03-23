@@ -492,6 +492,48 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(input.getDOMNode().value).to.equal('two');
       expect(areOptionsVisible(wrapper)).to.be.false;
     });
+
+    describe('suggesting the first option', () => {
+      it('calls onError if suggestFirst is true but filter is not prefix', () => {
+        mount(
+          <Autocomplete
+            id="id"
+            filter="none"
+            items={['one', 'two', 'three']}
+            onError={onError}
+            suggestFirst
+          >
+            <input type="text"></input>
+          </Autocomplete>
+        );
+
+        expect(onError).to.have.been.calledWith(
+          `bento-autocomplete "suggest-first" expected "filter" type "prefix".`
+        );
+      });
+
+      it('selects the first option if suggestFirst is true', () => {
+        const wrapper = mount(
+          <Autocomplete
+            id="id"
+            filter="prefix"
+            items={['one', 'two', 'three']}
+            onError={onError}
+            suggestFirst
+          >
+            <input type="text"></input>
+          </Autocomplete>
+        );
+
+        const input = wrapper.find('input');
+
+        input.getDOMNode().value = 't';
+        input.simulate('input');
+
+        expect(input.getDOMNode().value).to.equal('two');
+        expect(areOptionsVisible(wrapper)).to.be.false;
+      });
+    });
   });
 
   describe('inline autocomplete', () => {

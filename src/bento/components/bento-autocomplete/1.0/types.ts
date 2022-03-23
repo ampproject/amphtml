@@ -29,6 +29,7 @@ export interface BentoAutocompleteProps {
   highlightUserEntry?: boolean;
   inline?: string;
   itemTemplate?: (item: Item) => Component<any, any>;
+  suggestFirst?: boolean;
 }
 
 export type InputElement = HTMLInputElement | HTMLTextAreaElement;

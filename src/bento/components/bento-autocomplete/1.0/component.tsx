@@ -48,6 +48,7 @@ export function BentoAutocomplete({
   highlightUserEntry = false,
   inline,
   itemTemplate,
+  suggestFirst = false,
 }: BentoAutocompleteProps) {
   const elementRef = useRef<HTMLElement>(null);
   const containerId = useRef<string>(
@@ -59,6 +60,8 @@ export function BentoAutocomplete({
   const [substring, setSubstring] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const [showOptions, _setShowOptions] = useState<boolean>(false);
+  const [shouldSuggestFirst, setShouldSuggestFirst] =
+    useState<boolean>(suggestFirst);
   const classes = useStyles();
 
   const binding = useAutocompleteBinding(inline);
@@ -133,7 +136,11 @@ export function BentoAutocomplete({
     if (!isValidFilterType(filter)) {
       onError(`Unexpected filter: ${filter}.`);
     }
-  }, [filter, onError]);
+    if (!inline && suggestFirst && filter !== 'prefix') {
+      onError(`${TAG} "suggest-first" expected "filter" type "prefix".`);
+      setShouldSuggestFirst(false);
+    }
+  }, [filter, onError, inline, suggestFirst]);
 
   const showAutocompleteOptions = useMemo(() => {
     if (!showOptions || data?.length === 0) {
@@ -159,7 +166,7 @@ export function BentoAutocomplete({
 
     const normalizedValue = substring.toLocaleLowerCase();
 
-    const filteredData = data.filter((item: Item) => {
+    const _filteredData = data.filter((item: Item) => {
       if (typeof item === 'object') {
         item = getValueForExpr(item, filterValue);
       }
@@ -188,31 +195,8 @@ export function BentoAutocomplete({
       }
     });
 
-    return truncateToMaxItems(filteredData);
+    return truncateToMaxItems(_filteredData);
   }, [data, filter, substring, filterValue, onError, truncateToMaxItems]);
-
-  const handleInput = useCallback(
-    (event: Event) => {
-      if (binding.shouldAutocomplete(event.target as InputElement)) {
-        const substring = binding.getUserInputForUpdate(
-          event.target as InputElement
-        );
-        setSubstring(substring);
-        setShowOptions(true);
-      }
-    },
-    [setShowOptions, binding]
-  );
-
-  const handleFocus = useCallback(() => {
-    if (binding.shouldShowOnFocus) {
-      setShowOptions(true);
-    }
-  }, [setShowOptions, binding]);
-
-  const handleBlur = useCallback(() => {
-    setShowOptions(false);
-  }, [setShowOptions]);
 
   const updateActiveItem = useCallback(
     (delta: number) => {
@@ -241,6 +225,42 @@ export function BentoAutocomplete({
       setInputValue,
     ]
   );
+
+  const displaySuggestions = useCallback(() => {
+    setShowOptions(true);
+    // TODO: The options have not re-rendered yet and showAutocompleteOptions is false
+    // if (shouldSuggestFirst) {
+    //   updateActiveItem(1);
+    // }
+  }, [setShowOptions]);
+
+  const maybeFetchAndAutocomplete = useCallback(
+    (element: InputElement) => {
+      const substring = binding.getUserInputForUpdate(element);
+      setSubstring(substring);
+      displaySuggestions();
+    },
+    [binding, displaySuggestions]
+  );
+
+  const handleInput = useCallback(
+    (event: Event) => {
+      if (binding.shouldAutocomplete(event.target as InputElement)) {
+        maybeFetchAndAutocomplete(event.target as InputElement);
+      }
+    },
+    [binding, maybeFetchAndAutocomplete]
+  );
+
+  const handleFocus = useCallback(() => {
+    if (binding.shouldShowOnFocus) {
+      setShowOptions(true);
+    }
+  }, [setShowOptions, binding]);
+
+  const handleBlur = useCallback(() => {
+    setShowOptions(false);
+  }, [setShowOptions]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
