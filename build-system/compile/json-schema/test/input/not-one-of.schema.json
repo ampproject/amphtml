@@ -1,7 +1,9 @@
 {
   "not": {
     "oneOf": [
-      false,
+      {
+        "const": 0
+      },
       {
         "type": "string"
       }

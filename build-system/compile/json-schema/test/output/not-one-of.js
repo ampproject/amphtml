@@ -1,4 +1,4 @@
-// build/build-system/compile/json-schema/test/input/my-schema.schema.json.js
+// build/build-system/compile/json-schema/test/input/not-one-of.schema.json.js
 import { isValidCurrencyCode } from "#core/json-schema";
 function validate0(data, { instancePath = "", parentData, parentDataProperty, rootData = data } = {}) {
   let vErrors = null;
@@ -8,19 +8,22 @@ function validate0(data, { instancePath = "", parentData, parentDataProperty, ro
   const _errs2 = errors;
   let valid1 = false;
   let passing0 = null;
-  var _valid0 = false;
-  const err0 = {};
-  if (vErrors === null) {
-    vErrors = [err0];
-  } else {
-    vErrors.push(err0);
+  const _errs3 = errors;
+  if (data !== 0) {
+    const err0 = {};
+    if (vErrors === null) {
+      vErrors = [err0];
+    } else {
+      vErrors.push(err0);
+    }
+    errors++;
   }
-  errors++;
+  var _valid0 = _errs3 === errors;
   if (_valid0) {
     valid1 = true;
     passing0 = 0;
   }
-  const _errs3 = errors;
+  const _errs4 = errors;
   if (typeof data !== "string") {
     const err1 = {};
     if (vErrors === null) {
@@ -30,7 +33,7 @@ function validate0(data, { instancePath = "", parentData, parentDataProperty, ro
     }
     errors++;
   }
-  var _valid0 = _errs3 === errors;
+  var _valid0 = _errs4 === errors;
   if (_valid0 && valid1) {
     valid1 = false;
     passing0 = [passing0, 1];
@@ -80,12 +83,9 @@ function validate0(data, { instancePath = "", parentData, parentDataProperty, ro
   validate0.errors = vErrors;
   return errors === 0;
 }
-function validate_my_schema_schema(data) {
+function validate_not_one_of_schema(data) {
   return validate0(data) ? [] : validate0.errors;
 }
 
-// build-system/compile/json-schema/test/input/my-schema.js
-console.log(validate_my_schema_schema(100));
-console.log(validate_my_schema_schema(false));
-console.log(validate_my_schema_schema("bar"));
-console.log(validate_my_schema_schema());
+// build-system/compile/json-schema/test/input/not-one-of.js
+global.validateNotOneOf = validate_not_one_of_schema;

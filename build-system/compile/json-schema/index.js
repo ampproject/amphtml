@@ -115,8 +115,6 @@ const ajvOptions = {
   })),
 };
 
-const getAjv = once(() => new Ajv(ajvOptions));
-
 const escapeJsIdentifier = (id) => id.replace(/[^a-z_0-9]/gi, '_');
 
 const getTransformCache = once(() => new TransformCache('.json-schema-cache'));
@@ -166,7 +164,7 @@ async function getCompiledJsonSchemaFilename(filename) {
  * @return {string}
  */
 function avjCompile(filename, schema) {
-  const ajv = getAjv();
+  const ajv = new Ajv(ajvOptions);
   const validateAjv = ajv.compile(addCustomValidatorsToSchema(schema));
   const scopeCode = ajv.scope.scopeCode(validateAjv?.source?.scopeValues, {});
   const validateFnName = escapeJsIdentifier(

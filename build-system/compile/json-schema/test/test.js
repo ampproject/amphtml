@@ -15,7 +15,7 @@ const normalizeNlEof = (str) => `${str.trimEnd()}\n`;
 for (const inputFilename of inputFilenames) {
   const inputBasename = basename(inputFilename);
   test(inputBasename, async (t) => {
-    const outputFilename = `${__dirname}/output/${basename(inputFilename)}`;
+    const outputFilename = `${__dirname}/output/${inputBasename}`;
     // Use esbuild directly to print out our plugin's output in isolation.
     const result = await esbuild.build({
       bundle: true,
@@ -31,7 +31,11 @@ for (const inputFilename of inputFilenames) {
       ? normalizeNlEof(await readFile(outputFilename, 'utf8'))
       : null;
     if (expected) {
-      t.is(actual, expected);
+      t.is(
+        actual,
+        expected,
+        `If you intend to update this expectation, remove output/${inputBasename} and re-run this test.`
+      );
     } else {
       await outputFile(outputFilename, actual);
       t.is(actual, actual);
@@ -65,4 +69,58 @@ test('run currency-code.js', async (t) => {
   for (const currencyCode of schema.enum) {
     t.deepEqual(validateCurrencyCode(currencyCode), []);
   }
+});
+
+test('run one-of.js', async (t) => {
+  const {validateOneOf} = await requireCompiled('one-of.js');
+  const expectedErrors = [
+    {
+      instancePath: '',
+      keyword: 'const',
+      message: 'must be equal to constant',
+      params: {
+        allowedValue: 0,
+      },
+      schemaPath: '#/oneOf/0/const',
+    },
+    {
+      instancePath: '',
+      keyword: 'type',
+      message: 'must be string',
+      params: {
+        type: 'string',
+      },
+      schemaPath: '#/oneOf/1/type',
+    },
+    {
+      instancePath: '',
+      keyword: 'oneOf',
+      message: 'must match exactly one schema in oneOf',
+      params: {
+        passingSchemas: null,
+      },
+      schemaPath: '#/oneOf',
+    },
+  ];
+  t.deepEqual(validateOneOf(true), expectedErrors);
+  t.deepEqual(validateOneOf(123), expectedErrors);
+  t.deepEqual(validateOneOf(0), []);
+  t.deepEqual(validateOneOf('invalid'), []);
+});
+
+test('run not-one-of.js', async (t) => {
+  const {validateNotOneOf} = await requireCompiled('not-one-of.js');
+  const expectedErrors = [
+    {
+      instancePath: '',
+      keyword: 'not',
+      message: 'must NOT be valid',
+      params: {},
+      schemaPath: '#/not',
+    },
+  ];
+  t.deepEqual(validateNotOneOf(true), []);
+  t.deepEqual(validateNotOneOf(123), []);
+  t.deepEqual(validateNotOneOf(0), expectedErrors);
+  t.deepEqual(validateNotOneOf('invalid'), expectedErrors);
 });
