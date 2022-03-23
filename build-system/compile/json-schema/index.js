@@ -148,7 +148,7 @@ async function getCompiledJsonSchemaFilename(filename) {
   let output = cached;
   if (!output) {
     const schema = json5.parse(contents);
-    output = avjCompile(filename, schema);
+    output = ajvCompile(filename, schema);
     transformCache.set(hash, Promise.resolve(output));
   }
   const outputFilename = `build/${filename}.js`;
@@ -163,7 +163,7 @@ async function getCompiledJsonSchemaFilename(filename) {
  * @param {any} schema
  * @return {string}
  */
-function avjCompile(filename, schema) {
+function ajvCompile(filename, schema) {
   const ajv = new Ajv(ajvOptions);
   const validateAjv = ajv.compile(addCustomValidatorsToSchema(schema));
   const scopeCode = ajv.scope.scopeCode(validateAjv?.source?.scopeValues, {});
