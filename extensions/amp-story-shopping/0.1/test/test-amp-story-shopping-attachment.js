@@ -237,6 +237,21 @@ describes.realWin(
       storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
     }
 
+    it('should call analytics service on PLP Card Click', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+
+      await layoutShoppingImplAndAttachmentChildImpl();
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+      const plpCard = attachmentChildEl.querySelector(
+        '.i-amphtml-amp-story-shopping-plp-card'
+      );
+      plpCard.dispatchEvent(new Event('click'));
+
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
+      );
+    });
+
     it('should call analytics service on buy now button click', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
@@ -251,7 +266,7 @@ describes.realWin(
       );
     });
 
-    it('should call analytics service on attachment state update when clicking the cta', async () => {
+    it('should call analytics service on attachment state update', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
       await setupPDP();
