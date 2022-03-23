@@ -130,34 +130,42 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
 
-    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
-
-    const productId =
-      Object.values(shoppingData[this.pageEl_.id])?.length === 1
-        ? Object.values(shoppingData[this.pageEl_.id])[0].productId
-        : shoppingData?.activeProductData?.productId;
-
-    if (productId === '') {
-      productId = 'products card listing page opened';
-    }
-
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
-      productId
-    );
     const shoppingItemClicked =
       document.activeElement.tagName === 'AMP-STORY-SHOPPING-TAG'
         ? document.activeElement.tagName
         : 'AMP-STORY-SHOPPING-ATTACHMENT';
+    const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
+    const activeProuductData = Object.values(shoppingData[this.pageEl_.id]);
 
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
-      shoppingItemClicked.toLowerCase()
-    );
+    if (activeProuductData.length === 1) {
+      this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+        'activeProductData': activeProuductData[0],
+      });
+    }
 
-    this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
-    );
+    if (shoppingItemClicked === 'AMP-STORY-SHOPPING-ATTACHMENT') {
+      let productId = shoppingData?.activeProductData?.productId;
+
+      if (activeProuductData.length === 1) {
+        productId = activeProuductData[0].productId;
+      } else {
+        productId = 'products card listing page opened';
+      }
+
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+        productId
+      );
+
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
+        shoppingItemClicked.toLowerCase()
+      );
+
+      this.analyticsService_.triggerEvent(
+        StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
+      );
+    }
 
     if (!shoppingData.activeProductData) {
       this.updateTemplate_(shoppingData);
