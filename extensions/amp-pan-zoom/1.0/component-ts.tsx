@@ -4,6 +4,7 @@ import {
   UserHandlers,
   useGesture,
 } from '@use-gesture/react';
+import objStr from 'obj-str';
 import type {ComponentChildren, Ref} from 'preact';
 
 import {scale as cssScale, px, translate} from '#core/dom/style';
@@ -49,10 +50,6 @@ function getElementPosition(
     anchorX: clientX - elBounds.x,
     anchorY: clientY - elBounds.y,
   };
-}
-
-function classNames(...args: Array<string | false | null | 0>) {
-  return args.filter(Boolean).join(' ');
 }
 
 /**
@@ -225,16 +222,19 @@ export function BentoPanZoomWithRef(
       <div
         data-test-id="container"
         ref={containerRef}
-        class={classNames(styles.ampPanZoomContainer, isPannable && 'pannable')}
+        class={objStr({
+          [styles.ampPanZoomContainer]: true,
+          'pannable': isPannable,
+        })}
         {...bind()}
       >
         <div data-test-id="content-container" ref={contentRef}>
           <div
             data-test-id="content"
-            class={classNames(
-              styles.ampPanZoomContent,
-              state.isDragging && styles.ampPanZoomDragging
-            )}
+            class={objStr({
+              [styles.ampPanZoomContent]: true,
+              [styles.ampPanZoomDragging]: state.isDragging,
+            })}
             style={panZoomStyles}
             onPointerDown={(ev) => {
               if (isPannable) {
@@ -251,10 +251,10 @@ export function BentoPanZoomWithRef(
       {controls && (
         <button
           aria-label={canZoom ? 'Zoom in' : 'Zoom out'}
-          class={classNames(
-            styles.ampPanZoomButton,
-            canZoom ? styles.ampPanZoomInIcon : styles.ampPanZoomOutIcon
-          )}
+          class={objStr({
+            [styles.ampPanZoomButton]: true,
+            'canZoom': canZoom,
+          })}
           onClick={() => actions.updateScale({})}
         />
       )}

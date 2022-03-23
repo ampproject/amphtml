@@ -28,6 +28,13 @@ const ampPanZoomDragging = {
   transition: 'none',
 };
 
+const zoomInIcon = `url(
+    'data:image/svg+xml;charset=utf-8,<svg height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'
+  )`;
+const zoomOutIcon = `url(
+    'data:image/svg+xml;charset=utf-8,<svg height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 13H5v-2h14z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'
+  )`;
+
 const ampPanZoomButton = {
   position: 'absolute',
   right: '12px',
@@ -40,18 +47,10 @@ const ampPanZoomButton = {
   backgroundColor: 'white',
   borderRadius: '3px',
   border: 'none',
-};
-
-const ampPanZoomInIcon = {
-  backgroundImage: `url(
-    'data:image/svg+xml;charset=utf-8,<svg height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'
-  )`,
-};
-
-const ampPanZoomOutIcon = {
-  backgroundImage: `url(
-    'data:image/svg+xml;charset=utf-8,<svg height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M19 13H5v-2h14z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'
-  )`,
+  backgroundImage: zoomOutIcon,
+  '&.canZoom': {
+    backgroundImage: zoomInIcon,
+  },
 };
 
 const JSS = {
@@ -60,8 +59,6 @@ const JSS = {
   ampPanZoomContainer,
   ampPanZoomDragging,
   ampPanZoomButton,
-  ampPanZoomInIcon,
-  ampPanZoomOutIcon,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
