@@ -1,33 +1,9 @@
 /**
  * @fileoverview
- * esbuild plugin that maps JSON schema imports to validation functions.
- *   ```
- *   import validate from './my-schema.schema.json';
- *   validate("my-data");
- *   ```
+ * Compiles JSON Schema to a validate() function using ajv.
  */
 const {_: ajvCode, Name: AjvName, default: Ajv} = require('ajv');
 const dedent = require('dedent');
-const json5 = require('json5');
-const {outputFile, pathExists} = require('fs-extra');
-const {basename, join, relative} = require('path');
-const {once} = require('../../common/once');
-const {
-  TransformCache,
-  batchedRead,
-  md5,
-} = require('../../common/transform-cache');
-
-/**
- * File filter to match import.
- * It's useful that this always ends in .schema.json, since that suffix enables
- * JSON Schema features on IDEs like VSCode.
- * @type {RegExp}
- */
-const importFilter = /\.schema\.json$/;
-
-// Must be aliased (#)
-const customValidatorsModule = '#core/json-schema';
 
 /**
  * Defines custom validators that we may inject into certain schemas.
@@ -71,9 +47,8 @@ const customValidators = [
 
 /**
  * Remaps a JSON schema recursively in order to use custom validators.
- * These are mapped as keywords, using the format `_0` where `0` is a validator
- * index:
- *   { "_0": true }
+ * These are mapped as keywords, prefixed by an underscore `_`:
+ *   { "_isValidCurrencyCode": true }
  * This format prevents them from clobbering the standard namespace
  * @param {*} schema
  * @return {*}
@@ -85,9 +60,9 @@ function addCustomValidatorsToSchema(schema) {
   if (Array.isArray(schema)) {
     return schema.map(addCustomValidatorsToSchema);
   }
-  for (const [i, entry] of customValidators.entries()) {
-    if (entry.shouldUse(schema)) {
-      schema[`_${i}`] = true;
+  for (const {fn, shouldUse} of customValidators) {
+    if (shouldUse(schema)) {
+      schema[`_${fn}`] = true;
     }
   }
   for (const k in schema) {
@@ -96,125 +71,61 @@ function addCustomValidatorsToSchema(schema) {
   return schema;
 }
 
-// https://ajv.js.org/options.html
-const ajvOptions = {
-  code: {
-    esm: true,
-    source: true,
-    lines: true,
-  },
-  allErrors: true,
-  validateSchema: false,
-  // Add a keyword to the vocabulary for each custom validator.
-  keywords: customValidators.map(({error, fn}, i) => ({
-    keyword: `_${i}`,
-    error,
-    code(ctx) {
-      ctx.pass(ajvCode`${new AjvName(fn)}(${ctx.data})`);
-    },
-  })),
-};
-
-const escapeJsIdentifier = (id) => id.replace(/[^a-z_0-9]/gi, '_');
-
-const getTransformCache = once(() => new TransformCache('.json-schema-cache'));
-
 /**
- * Like batchedRead(), but also includes `ajvOptions` in the invalidation hash,
- * including the definition of functions.
- * @param {string} filename
- * @return {Promise<{contents: string, hash: string}>}
- */
-async function ajvBatchedRead(filename) {
-  const {contents, hash} = await batchedRead(filename);
-  const hashable = {ajvOptions, hash};
-  const rehash = md5(jsonStringifyFunctions(hashable));
-  return {contents, hash: rehash};
-}
-
-const jsonStringifyFunctions = (value) =>
-  JSON.stringify(value, (_, value) =>
-    typeof value === 'function' ? value.toString() : value
-  );
-
-/**
- * @param {string} filename
- * @return {Promise<string>}
- */
-async function getCompiledJsonSchemaFilename(filename) {
-  const {contents, hash} = await ajvBatchedRead(filename);
-  const transformCache = getTransformCache();
-  const cached = await transformCache.get(hash);
-  let output = cached;
-  if (!output) {
-    const schema = json5.parse(contents);
-    output = ajvCompile(filename, schema);
-    transformCache.set(hash, Promise.resolve(output));
-  }
-  const outputFilename = `build/${filename}.js`;
-  if (!cached || !(await pathExists(outputFilename))) {
-    await outputFile(outputFilename, output);
-  }
-  return outputFilename;
-}
-
-/**
- * @param {string} filename
  * @param {any} schema
- * @return {string}
+ * @param {string=} customValidatorsModuleId
+ * @return {{code: string, validateName: string}}
  */
-function ajvCompile(filename, schema) {
-  const ajv = new Ajv(ajvOptions);
+function ajvCompile(schema, customValidatorsModuleId = '__jsonSchema') {
+  const ajv = new Ajv({
+    code: {
+      esm: true,
+      source: true,
+      lines: true,
+    },
+    allErrors: true,
+    validateSchema: false,
+    // Add a keyword to the vocabulary for each custom validator.
+    keywords: customValidators.map(({error, fn}) => ({
+      keyword: `_${fn}`,
+      error,
+      code(ctx) {
+        ctx.pass(
+          ajvCode`${new AjvName(customValidatorsModuleId)}.${new AjvName(fn)}(${
+            ctx.data
+          })`
+        );
+      },
+    })),
+  });
   const validateAjv = ajv.compile(addCustomValidatorsToSchema(schema));
+  if (!validateAjv.source) {
+    throw new Error();
+  }
   const scopeCode = ajv.scope.scopeCode(validateAjv?.source?.scopeValues, {});
-  const validateFnName = escapeJsIdentifier(
-    `validate_${basename(filename, '.json')}`
-  );
-  const customValidatorFns = customValidators.map(({fn}) => fn).join(', ');
-  return (
-    dedent(`
-      import {__customValidatorFns__} from '__customValidatorsModule__';
-
-      __scopeCode__
-
-      __validateAjv__
-
-      /**
-       * @param {any} data
-       * @return {{params?: object, message?: string, data?: any}[]}
-       * https://ajv.js.org/api.html#error-objects
-       */
-      export default function __validateFnName__(data) {
-        return __validateAjvName__(data) ? [] : __validateAjvName__.errors;
-      }
-    `)
-      .replace('__customValidatorFns__', customValidatorFns)
-      .replace('__customValidatorsModule__', customValidatorsModule)
-      .replace('__scopeCode__', scopeCode)
-      .replace('__validateFnName__', validateFnName)
-      // validateAjv returns a boolean, and modifies a property of the function
-      // for errors. The default instead returns an array of errors, which is
-      // empty when the input is valid.
-      .replace('__validateAjv__', validateAjv?.source?.validateCode)
-      .replace(/__validateAjvName__/g, validateAjv?.source?.validateName.str)
-  );
+  const code = dedent(`
+    __scopeCode__
+    __validateAjv__
+    /**
+     * @type {(any) => {instancePath?: string, message?: string}[]}
+     * https://ajv.js.org/api.html#error-objects
+     */
+    function validate(data) {
+      return __validateAjvName__(data) ? [] : __validateAjvName__.errors;
+    }
+  `)
+    .replace('__scopeCode__', scopeCode)
+    // validateAjv returns a boolean, and modifies a property of the function
+    // for errors. The default instead returns an array of errors, which is
+    // empty when the input is valid.
+    .replace('__validateAjv__', validateAjv?.source?.validateCode)
+    .replace(/__validateAjvName__/g, validateAjv?.source?.validateName.str);
+  return {
+    code,
+    validateName: 'validate',
+  };
 }
-
-const esbuildJsonSchemaPlugin = {
-  name: 'json-schema',
-  setup(build) {
-    build.onResolve({filter: importFilter}, async ({path, resolveDir}) => {
-      // The import filename is printed as a comment in the esbuild output.
-      // Making it relative to be consistent with esbuild's own resolution.
-      const filename = relative(process.cwd(), join(resolveDir, path));
-      const compiledFilename = await getCompiledJsonSchemaFilename(filename);
-      const resultPath = join(process.cwd(), compiledFilename);
-      return {path: resultPath};
-    });
-  },
-};
 
 module.exports = {
-  customValidatorsModule,
-  esbuildJsonSchemaPlugin,
+  ajvCompile,
 };
