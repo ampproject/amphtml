@@ -115,10 +115,6 @@ describes.realWin(
       return getShoppingConfig(shoppingAttachment);
     }
 
-    it('should build shopping config component', async () => {
-      expect(() => getShoppingConfig(shoppingAttachment)).to.not.throw();
-    });
-
     it('does use inline config', async () => {
       const result = await createAmpStoryShoppingConfig();
       expect(result).to.deep.eql(keyedDefaultInlineConfig);
@@ -171,15 +167,6 @@ describes.realWin(
       expect(result).to.deep.eql(keyedDefaultInlineConfig);
     });
 
-    it('test invalid remote config url', async () => {
-      const invalidURL = 'invalidRemoteURL';
-      const keyedShoppingConfig = await createAmpStoryShoppingConfig(
-        invalidURL
-      );
-      // Length is two, as it defaults to inline config.
-      expect(Object.keys(keyedShoppingConfig).length).to.eql(2);
-    });
-
     describe('storeShoppingConfig', () => {
       let storeService;
 
@@ -203,90 +190,119 @@ describes.realWin(
       });
     });
 
-    it('test validate required fields for config', async () => {
-      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      const requiredKey = 'productId';
-      delete invalidConfig['items'][0][requiredKey];
-      const errorString = `Error: Field productId is required.`;
-      const spy = env.sandbox.spy(user(), 'warn');
-      await createAmpStoryShoppingConfig(null, invalidConfig);
-      expect(spy).to.have.been.calledWith(
-        'AMP-STORY-SHOPPING-CONFIG',
-        errorString
-      );
-    });
+    describe('amp-story-shopping-config validation', () => {
+      it('should fail config validation because a required config value is missing', async () => {
+        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const requiredKey = 'productId';
+        delete invalidConfig['items'][0][requiredKey];
 
-    it('should fail config validation because an expected string JSON value is of a non-string type', async () => {
-      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      const invalidValue = 50; // This value is not a string
-      invalidConfig['items'][0]['productTitle'] = invalidValue;
+        const errorString = `Error: Field productId is required.`;
+        const spy = env.sandbox.spy(user(), 'warn');
+        const keyedShoppingConfig = await createAmpStoryShoppingConfig(
+          null,
+          invalidConfig
+        );
+        expect(spy).to.have.been.calledWith(
+          'AMP-STORY-SHOPPING-CONFIG',
+          errorString
+        );
+        expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
+        expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
+      });
 
-      const errorString = `Error: productTitle ${invalidValue} is not a string`;
-      const spy = env.sandbox.spy(user(), 'warn');
-      await createAmpStoryShoppingConfig(null, invalidConfig);
-      expect(spy).to.have.been.calledWith(
-        'AMP-STORY-SHOPPING-CONFIG',
-        errorString
-      );
-    });
+      it('should fail config validation because an expected string JSON value is of a non-string type', async () => {
+        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const invalidValue = 50; // This value is not a string
+        invalidConfig['items'][0]['productTitle'] = invalidValue;
 
-    it('should fail config validation because an expected string JSON value is not a valid HTML id', async () => {
-      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      const invalidValue = '1234city-pop'; // productId starts with a number, so it is an invalid HTML Id
-      invalidConfig['items'][0]['productId'] = invalidValue;
+        const errorString = `Error: productTitle ${invalidValue} is not a string`;
+        const spy = env.sandbox.spy(user(), 'warn');
+        const keyedShoppingConfig = await createAmpStoryShoppingConfig(
+          null,
+          invalidConfig
+        );
+        expect(spy).to.have.been.calledWith(
+          'AMP-STORY-SHOPPING-CONFIG',
+          errorString
+        );
+        expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
+        expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
+      });
 
-      const errorString = `Error: productId ${invalidValue} is not a valid HTML Id`;
-      const spy = env.sandbox.spy(user(), 'warn');
-      await createAmpStoryShoppingConfig(null, invalidConfig);
-      expect(spy).to.have.been.calledWith(
-        'AMP-STORY-SHOPPING-CONFIG',
-        errorString
-      );
-    });
+      it('should fail config validation because an expected string JSON value is not a valid HTML id', async () => {
+        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const invalidValue = '1234city-pop'; // productId starts with a number, so it is an invalid HTML Id
+        invalidConfig['items'][0]['productId'] = invalidValue;
 
-    it('should fail config validation because an expected number JSON value is not a valid number', async () => {
-      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      const invalidValue = 'two dozen watermelons'; // two dozen watermelons is not an actual price.
-      invalidConfig['items'][0]['productPrice'] = invalidValue;
+        const errorString = `Error: productId ${invalidValue} is not a valid HTML Id`;
+        const spy = env.sandbox.spy(user(), 'warn');
+        const keyedShoppingConfig = await createAmpStoryShoppingConfig(
+          null,
+          invalidConfig
+        );
+        expect(spy).to.have.been.calledWith(
+          'AMP-STORY-SHOPPING-CONFIG',
+          errorString
+        );
+        expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
+        expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
+      });
 
-      const errorString = `Error: Value ${invalidValue} for field productPrice is not a number`;
-      const spy = env.sandbox.spy(user(), 'warn');
-      await createAmpStoryShoppingConfig(null, invalidConfig);
-      expect(spy).to.have.been.calledWith(
-        'AMP-STORY-SHOPPING-CONFIG',
-        errorString
-      );
-    });
+      it('should fail config validation because an expected number JSON value is not a valid number', async () => {
+        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const invalidValue = 'two dozen watermelons'; // two dozen watermelons is not an actual price.
+        invalidConfig['items'][0]['productPrice'] = invalidValue;
 
-    it('should fail config validation because an expected string JSON value is not a valid currency code symbol', async () => {
-      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      const invalidValue = 'ZABAN'; // This is not a valid currency symbol code
-      invalidConfig['items'][0]['productPriceCurrency'] = invalidValue;
+        const errorString = `Error: Value ${invalidValue} for field productPrice is not a number`;
+        const spy = env.sandbox.spy(user(), 'warn');
+        const keyedShoppingConfig = await createAmpStoryShoppingConfig(
+          null,
+          invalidConfig
+        );
+        expect(spy).to.have.been.calledWith(
+          'AMP-STORY-SHOPPING-CONFIG',
+          errorString
+        );
+        expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
+        expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
+      });
 
-      const errorString = `Error: productPriceCurrency ${invalidValue} is not a valid currency code`;
-      const spy = env.sandbox.spy(user(), 'warn');
-      await createAmpStoryShoppingConfig(null, invalidConfig);
-      expect(spy).to.have.been.calledWith(
-        'AMP-STORY-SHOPPING-CONFIG',
-        errorString
-      );
-    });
+      it('should fail config validation because an expected string JSON value is not a valid currency code symbol', async () => {
+        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const invalidValue = 'ZABAN'; // This is not a valid currency symbol code
+        invalidConfig['items'][0]['productPriceCurrency'] = invalidValue;
 
-    it('should fail config validation because an expected string JSON value is not a valid url', async () => {
-      const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-      const invalidValue = 'http://zapp'; // This is not a valid url
-      invalidConfig['items'][0]['productUrl'] = invalidValue;
-      const spy = env.sandbox.spy(url, 'assertHttpsUrl');
-      const keyedShoppingConfig = await createAmpStoryShoppingConfig(
-        null,
-        invalidConfig
-      );
-      expect(spy).to.have.been.calledWith(
-        `${invalidValue}`,
-        'amp-story-shopping-config productUrl'
-      );
-      expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
-      expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
+        const errorString = `Error: productPriceCurrency ${invalidValue} is not a valid currency code`;
+        const spy = env.sandbox.spy(user(), 'warn');
+        const keyedShoppingConfig = await createAmpStoryShoppingConfig(
+          null,
+          invalidConfig
+        );
+        expect(spy).to.have.been.calledWith(
+          'AMP-STORY-SHOPPING-CONFIG',
+          errorString
+        );
+        expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
+        expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
+      });
+
+      it('should fail config validation because an expected string JSON value is not a valid url', async () => {
+        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const invalidValue = 'http://zapp'; // This is not a valid url
+        invalidConfig['items'][0]['productUrl'] = invalidValue;
+
+        const spy = env.sandbox.spy(url, 'assertHttpsUrl');
+        const keyedShoppingConfig = await createAmpStoryShoppingConfig(
+          null,
+          invalidConfig
+        );
+        expect(spy).to.have.been.calledWith(
+          `${invalidValue}`,
+          'amp-story-shopping-config productUrl'
+        );
+        expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
+        expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
+      });
     });
   }
 );
