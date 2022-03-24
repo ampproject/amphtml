@@ -2,8 +2,10 @@
  * @fileoverview
  * Compiles JSON Schema to a validate() function using ajv.
  */
-const {_: ajvCode, Name: AjvName, default: Ajv} = require('ajv');
 const dedent = require('dedent');
+const {_: ajvCode, Name: AjvName, default: Ajv} = require('ajv');
+const {fastFormats: ajvFormats} = require('ajv-formats/dist/formats');
+const {once} = require('../../common/once');
 
 /**
  * Defines custom validators that we may inject into certain schemas.
@@ -46,10 +48,25 @@ const customValidators = [
 ];
 
 /**
- * Remaps a JSON schema recursively in order to use custom validators.
- * These are mapped as keywords, prefixed by an underscore `_`:
+ * Creates a vocabulary keyword for each custom validator.
+ * We name keywords by prefing the validator function name with an underscore:
  *   { "_isValidCurrencyCode": true }
  * This format prevents them from clobbering the standard namespace
+ * @param {string} moduleId
+ * @return {import('ajv').KeywordDefinition[]}
+ */
+function getCustomValidatorKeywords(moduleId) {
+  const moduleIdName = new AjvName(moduleId);
+  return customValidators.map(({error, fn}) => ({
+    keyword: `_${fn}`,
+    error,
+    code(ctx) {
+      ctx.pass(ajvCode`${moduleIdName}.${new AjvName(fn)}(${ctx.data})`);
+    },
+  }));
+}
+
+/**
  * @param {*} schema
  * @return {*}
  */
@@ -72,6 +89,30 @@ function addCustomValidatorsToSchema(schema) {
 }
 
 /**
+ * Remaps `ajv-formats` in order to only use simple formats (true, string, RegExp).
+ * Other types of formats would force bundles to contain *all* format definitions
+ * even when unused.
+ * @return {{[format: string]: import('ajv').Format}}
+ */
+const getFormats = once(() => {
+  const formats = {};
+  for (const k in ajvFormats) {
+    let format = ajvFormats[k];
+    if (typeof format === 'object' && 'validate' in format) {
+      format = format.validate;
+    }
+    if (
+      typeof format === 'string' ||
+      format instanceof RegExp ||
+      format === true
+    ) {
+      formats[k] = format;
+    }
+  }
+  return formats;
+});
+
+/**
  * @param {any} schema
  * @param {string=} customValidatorsModuleId
  * @return {{code: string, validateName: string}}
@@ -85,18 +126,8 @@ function ajvCompile(schema, customValidatorsModuleId = '__jsonSchema') {
     },
     allErrors: true,
     validateSchema: false,
-    // Add a keyword to the vocabulary for each custom validator.
-    keywords: customValidators.map(({error, fn}) => ({
-      keyword: `_${fn}`,
-      error,
-      code(ctx) {
-        ctx.pass(
-          ajvCode`${new AjvName(customValidatorsModuleId)}.${new AjvName(fn)}(${
-            ctx.data
-          })`
-        );
-      },
-    })),
+    formats: getFormats(),
+    keywords: getCustomValidatorKeywords(customValidatorsModuleId),
   });
   const validateAjv = ajv.compile(addCustomValidatorsToSchema(schema));
   if (!validateAjv.source) {

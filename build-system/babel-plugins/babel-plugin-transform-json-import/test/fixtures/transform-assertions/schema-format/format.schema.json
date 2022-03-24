@@ -1,4 +1,10 @@
 {
-  "type": "string",
-  "format": "uri"
+  "properties": {
+    "my-uri": {
+      "format": "uri"
+    },
+    "my-email": {
+      "format": "email"
+    }
+  }
 }
