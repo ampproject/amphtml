@@ -33,21 +33,6 @@ describes.realWin(
       doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
-    it('renders', async () => {
-      element = createElementWithAttributes(doc, 'amp-twitter', {
-        'data-tweetid': '585110598171631616',
-        'height': 500,
-        'width': 500,
-        'layout': 'responsive',
-      });
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      expect(element.shadowRoot.querySelector('iframe').src).to.equal(
-        'http://ads.localhost:9876/dist.3p/current/frame.max.html'
-      );
-    });
-
     it("container's height is changed", async () => {
       const initialHeight = 300;
       element = createElementWithAttributes(win.document, 'amp-twitter', {
@@ -77,38 +62,6 @@ describes.realWin(
         element.shadowRoot.querySelector('iframe').contentWindow;
       win.dispatchEvent(mockEvent);
       expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
-    });
-
-    it('should replace iframe after tweetid mutation', async () => {
-      const originalTweetId = '585110598171631616';
-      const newTweetId = '638793490521001985';
-      element = createElementWithAttributes(win.document, 'amp-twitter', {
-        'data-tweetid': originalTweetId,
-        'height': 500,
-        'width': 500,
-        'layout': 'responsive',
-      });
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      const iframe = element.shadowRoot.querySelector('iframe');
-      const originalName = iframe.getAttribute('name');
-      expect(originalName).to.contain(originalTweetId);
-      expect(originalName).not.to.contain(newTweetId);
-
-      element.setAttribute('data-tweetid', newTweetId);
-      await waitFor(
-        () =>
-          element.shadowRoot.querySelector('iframe').getAttribute('name') !=
-          originalName,
-        'iframe changed'
-      );
-
-      const newName = element.shadowRoot
-        .querySelector('iframe')
-        .getAttribute('name');
-      expect(newName).not.to.contain(originalTweetId);
-      expect(newName).to.contain(newTweetId);
     });
 
     it('should test toggling placeholder off', async () => {
@@ -151,29 +104,6 @@ describes.realWin(
       win.dispatchEvent(mockEvent);
 
       expect(togglePlaceholderStub).to.be.calledOnce.calledWith(true);
-    });
-
-    it('should pass the data-loading attribute to the underlying iframe', async () => {
-      element = createElementWithAttributes(doc, 'amp-twitter', {
-        'data-tweetid': '585110598171631616',
-        'data-loading': 'eager',
-      });
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      const iframe = element.shadowRoot.querySelector('iframe');
-      expect(iframe.getAttribute('loading')).to.equal('eager');
-    });
-
-    it('should set data-loading="auto" if no value is specified', async () => {
-      element = createElementWithAttributes(doc, 'amp-twitter', {
-        'data-tweetid': '585110598171631616',
-      });
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      const iframe = element.shadowRoot.querySelector('iframe');
-      expect(iframe.getAttribute('loading')).to.equal('auto');
     });
   }
 );
