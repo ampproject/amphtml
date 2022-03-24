@@ -808,7 +808,7 @@ export class GlobalVariableSource extends VariableSource {
           ?.getHighEntropyValues([variable])
           ?.then((values) => {
             const value =
-              values[variable] !== 'object'
+              typeof values[variable] !== 'object'
                 ? values[variable]
                 : JSON.stringify(values[variable]);
             this.cachedUach_[variable] = value;
