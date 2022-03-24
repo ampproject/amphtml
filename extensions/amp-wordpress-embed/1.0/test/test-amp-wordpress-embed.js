@@ -34,25 +34,6 @@ describes.realWin(
       doNotLoadExternalResourcesInTest(window, env.sandbox);
     });
 
-    it('renders', async () => {
-      element = createElementWithAttributes(
-        win.document,
-        'amp-wordpress-embed',
-        {
-          'data-url': 'https://wordpress.org/news/2021/06/gutenberg-highlights',
-          'height': 200,
-          'width': 500,
-          'layout': 'responsive',
-        }
-      );
-      doc.body.appendChild(element);
-      await waitForRender();
-
-      expect(element.shadowRoot.querySelector('iframe').src).to.equal(
-        'https://wordpress.org/news/2021/06/gutenberg-highlights?embed=true'
-      );
-    });
-
     it("container's height is changed", async () => {
       const initialHeight = 300;
       element = createElementWithAttributes(
@@ -86,28 +67,6 @@ describes.realWin(
       win.dispatchEvent(mockEvent);
 
       expect(attemptChangeHeightStub).to.be.calledOnce.calledWith(1000);
-    });
-
-    it('should show a warning message for invalid url', async () => {
-      const originalWarn = console.warn;
-      const consoleOutput = [];
-      const mockedWarn = (output) => consoleOutput.push(output);
-      console.warn = mockedWarn;
-
-      element = createElementWithAttributes(
-        win.document,
-        'amp-wordpress-embed',
-        {}
-      );
-      doc.body.appendChild(element);
-
-      await element.buildInternal();
-      await element.layoutCallback();
-
-      expect(consoleOutput.length).to.equal(1);
-      expect(consoleOutput[0]).to.equal('Please provide a valid url');
-
-      console.warn = originalWarn;
     });
   }
 );
