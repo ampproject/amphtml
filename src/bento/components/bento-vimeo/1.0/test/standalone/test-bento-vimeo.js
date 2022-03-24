@@ -1,37 +1,37 @@
-import '../amp-vimeo';
+import {CSS} from '#build/bento-vimeo-1.0.css';
+
+import {BaseElement as BentoVimeo} from '#bento/components/bento-vimeo/1.0/base-element';
+import {adoptStyles} from '#bento/util/unit-helpers';
+
 import {htmlFor} from '#core/dom/static-template';
 
-import {toggleExperiment} from '#experiments';
+import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
-  'amp-vimeo-v1.0',
+  'bento-vimeo-v1.0',
   {
-    amp: {
-      extensions: ['amp-vimeo:1.0'],
-    },
+    amp: false,
   },
   (env) => {
     let html;
 
     const waitForRender = async (element) => {
-      await element.buildInternal();
-      const loadPromise = element.layoutCallback();
+      await element.getApi();
       const {shadowRoot} = element;
       await waitFor(() => shadowRoot.querySelector('iframe'), 'iframe mounted');
-      await loadPromise;
     };
 
     beforeEach(async () => {
       html = htmlFor(env.win.document);
-      toggleExperiment(env.win, 'bento-vimeo', true, true);
+
+      defineBentoElement('bento-vimeo', BentoVimeo, env.win);
+      adoptStyles(env.win, CSS);
     });
 
     it('renders', async () => {
-      const element = html`
-        <amp-vimeo layout="responsive" width="16" height="9"></amp-vimeo>
-      `;
+      const element = html` <bento-vimeo></bento-vimeo> `;
       env.win.document.body.appendChild(element);
 
       await waitForRender(element);
@@ -41,14 +41,7 @@ describes.realWin(
     });
 
     it('should pass the data-loading attribute to the underlying iframe', async () => {
-      const element = html`
-        <amp-vimeo
-          data-loading="lazy"
-          layout="responsive"
-          width="16"
-          height="9"
-        ></amp-vimeo>
-      `;
+      const element = html` <bento-vimeo data-loading="lazy"></bento-vimeo> `;
       env.win.document.body.appendChild(element);
       await waitForRender(element);
 
@@ -57,9 +50,7 @@ describes.realWin(
     });
 
     it('should set data-loading="auto" if no value is specified', async () => {
-      const element = html`
-        <amp-vimeo layout="responsive" width="16" height="9"></amp-vimeo>
-      `;
+      const element = html` <bento-vimeo></bento-vimeo> `;
       env.win.document.body.appendChild(element);
       await waitForRender(element);
 
