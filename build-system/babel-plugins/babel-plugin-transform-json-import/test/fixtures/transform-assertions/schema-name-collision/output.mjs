@@ -1,10 +1,16 @@
 import * as _coreJsonSchema from "#core/json-schema";
-// validate is ajvCompile's output name, it should be renamed
+const validate0 = `
+  ajv creates a "validate0" identifier in module scope.
+  ajv's should be renamed, and this assignment should be preserved.
+`;
+"use strict";
+
+const _validate = _validate2;
 const schema0 = {
   "type": "string"
 };
 
-function validate0(data, {
+function _validate2(data, {
   instancePath = ""
 } = {}) {
   let vErrors = null;
@@ -25,12 +31,13 @@ function validate0(data, {
     errors++;
   }
 
-  validate0.errors = vErrors;
+  _validate2.errors = vErrors;
   return errors === 0;
 }
 
-function _validate(data) {
-  return validate0(data) ? [] : validate0.errors;
-}
+const validate = data => _validate(data) ? [] : _validate.errors;
 
-_validate(123);
+validate(`
+  "validate" is ajvCompile's default output name.
+  This should not fail transform.
+`);

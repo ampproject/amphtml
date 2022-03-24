@@ -24,81 +24,16 @@ const {readJson} = require('../../json-locales');
 module.exports = function (babel) {
   const {template, types: t} = babel;
 
-  // Unnecessary fields in ajv's error object
-  const ajvRemovableFromExpression = ['schemaPath', 'keyword', 'params'];
-
-  // Destructured fields that aren't required when removing ajv error properties.
-  const ajvRemovableFromPattern = [
-    'parentData',
-    'parentDataProperty',
-    'rootData',
-  ];
-
-  /**
-   * @param {babel.types.ObjectPattern|babel.types.ObjectExpression} patternOrExpression
-   * @param {string[]} removable
-   */
-  function removePropertiesWhenAllPresent(patternOrExpression, removable) {
-    const {properties} = patternOrExpression;
-    // @ts-ignore
-    const kept = properties.filter(
-      ({key}) => !removable.includes(key.name || key.value)
-    );
-    if (kept.length === properties.length - removable.length) {
-      patternOrExpression.properties = kept;
-    }
-  }
-
-  /**
-   * @param {import('@babel/traverse').Scope} outerScope
-   * @param {babel.types.Program} program
-   * @return {babel.types.Program}
-   */
-  function transformAjvResult(outerScope, program) {
-    const visitor = {
-      Program: {
-        exit(path) {
-          // Prevent collisions with outer scope
-          for (const binding in path.scope.bindings) {
-            if (binding in outerScope.bindings) {
-              path.scope.rename(binding, outerScope.generateUid(binding));
-            }
-          }
-        },
-      },
-      ObjectExpression(path) {
-        removePropertiesWhenAllPresent(path.node, ajvRemovableFromExpression);
-      },
-      ObjectPattern(path) {
-        removePropertiesWhenAllPresent(path.node, ajvRemovableFromPattern);
-      },
-    };
-    // Transforming from AST to AST instead of traverse(), since traversing does
-    // not create program scope.
-    const transformed = babel.transformFromAstSync(
-      program,
-      /* code */ undefined,
-      {
-        ast: true,
-        code: false,
-        plugins: [{visitor}],
-      }
-    );
-    // @ts-ignore
-    return transformed.ast.program;
-  }
-
   /**
    * @type {{
    *  [type: string]: (
    *    path: babel.NodePath,
-   *    id: babel.types.Identifier,
    *    jsonPath: string
-   *  ) => void,
+   *  ) => babel.types.Expression,
    * }}
    */
   const typeAssertions = {
-    'json': (path, id, jsonPath) => {
+    'json': (path, jsonPath) => {
       let json;
       try {
         json = readJson(jsonPath);
@@ -107,28 +42,27 @@ module.exports = function (babel) {
           `could not load JSON file at '${jsonPath}'`
         );
       }
-      path.replaceWith(
-        template.statement.ast`const ${id} = JSON.parse('${JSON.stringify(
-          json
-        )}');`
-      );
+      return template.expression.ast`
+        JSON.parse('${JSON.stringify(json)}')
+      `;
     },
 
-    'json-schema': (path, id, jsonPath) => {
+    'json-schema': (path, jsonPath) => {
       // json5 to allow comments
       const schema = json5.parse(readFileSync(jsonPath, 'utf8'));
       const validatorsModuleId = addNamespace(path, '#core/json-schema');
-      const {code, validateName} = ajvCompile(schema, validatorsModuleId.name);
+      const scope = Object.keys(path.scope.bindings);
+      const {code, name} = ajvCompile(schema, validatorsModuleId.name, scope);
 
-      // replaceWithMultiple fails when trying to insert the validate function
-      // with the specifier's name directly. Instead, rename validateName in
-      // preparation, and rename the function to the specifier's name later.
-      path.scope.rename(validateName, path.scope.generateUid(validateName));
-      const build = template.program(code, {placeholderPattern: false});
-      const program = build();
-      const {body} = transformAjvResult(path.scope, program);
-      path.replaceWithMultiple(body);
-      path.scope.rename(validateName, id.name);
+      const statements = template.statements(code, {placeholderPattern: false});
+      path.insertBefore(statements());
+
+      // The generated function returns a boolean, and modifies a property of
+      // itself for errors. We wrap it to instead return an array of errors,
+      // which is empty when the input is valid.
+      return template.expression.ast`
+        (data) => ${name}(data) ? [] : ${name}.errors
+      `;
     },
   };
 
@@ -154,7 +88,12 @@ module.exports = function (babel) {
             'babel plugin transform-json-import must be called with a filename'
           );
         }
-
+        const [specifier] = specifiers;
+        if (!t.isImportDefaultSpecifier(specifier)) {
+          throw path.buildCodeFrameError(
+            `must import default from JSON: \`import name from '...'\``
+          );
+        }
         if (assertions.length !== 1) {
           throw path.buildCodeFrameError(
             `too many import assertions, we only support \`${supportedAssertionsMessage()}\``
@@ -177,12 +116,15 @@ module.exports = function (babel) {
             `unknown type assertion, we only support \`${supportedAssertionsMessage()}\``
           );
         }
-        const id = specifiers[0].local;
         const jsonPath = relative(
           join(__dirname, '..', '..', '..'),
           resolve(dirname(filename), source.value)
         );
-        typeAssertions[type](path, id, jsonPath);
+        const init = typeAssertions[type](path, jsonPath);
+        const statement = template.statement.ast`
+          const ${specifier.local} = ${init};
+        `;
+        path.replaceWith(statement);
       },
     },
   };

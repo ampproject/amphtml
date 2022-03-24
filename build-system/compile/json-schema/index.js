@@ -6,6 +6,8 @@ const dedent = require('dedent');
 const {_: ajvCode, Name: AjvName, default: Ajv} = require('ajv');
 const {fastFormats: ajvFormats} = require('ajv-formats/dist/formats');
 const {once} = require('../../common/once');
+const {default: AjvStandalone} = require('ajv/dist/standalone');
+const babel = require('@babel/core');
 
 /**
  * Defines custom validators that we may inject into certain schemas.
@@ -113,11 +115,20 @@ const getFormats = once(() => {
 });
 
 /**
+ * @typedef {{
+ *   scope?: Set<string>,
+ *   name: string,
+ * }}
+ */
+let TransformContextDef;
+
+/**
  * @param {any} schema
  * @param {string=} customValidatorsModuleId
- * @return {{code: string, validateName: string}}
+ * @param {string[]=} scope
+ * @return {{code: string, name: string}}
  */
-function ajvCompile(schema, customValidatorsModuleId = '__jsonSchema') {
+function ajvCompile(schema, customValidatorsModuleId = '__jsonSchema', scope) {
   const ajv = new Ajv({
     code: {
       esm: true,
@@ -129,32 +140,93 @@ function ajvCompile(schema, customValidatorsModuleId = '__jsonSchema') {
     formats: getFormats(),
     keywords: getCustomValidatorKeywords(customValidatorsModuleId),
   });
-  const validateAjv = ajv.compile(addCustomValidatorsToSchema(schema));
-  if (!validateAjv.source) {
+  const ajvResult = ajv.compile(addCustomValidatorsToSchema(schema));
+  const untransformedCode = AjvStandalone(ajv, ajvResult);
+  const context = {
+    // name should be initially `validate` since that's ajv's output function.
+    name: 'validate',
+    scope: scope && scope.length ? new Set(scope) : undefined,
+  };
+  const code = transformAjvResult(untransformedCode, context);
+  return {code, name: context.name};
+}
+
+// Unwanted properties in ajv's error object
+const objectExpressionRemovable = ['schemaPath', 'keyword', 'params'];
+
+// Destructured properties that aren't required when removing ajv error properties.
+const objectPatternRemovable = ['parentData', 'parentDataProperty', 'rootData'];
+
+/**
+ * @param {babel.types.ObjectPattern|babel.types.ObjectExpression} patternOrExpression
+ * @param {string[]} removable
+ */
+function removePropertiesWhenAllPresent(patternOrExpression, removable) {
+  const {properties} = patternOrExpression;
+  // @ts-ignore
+  const kept = properties.filter(
+    ({key}) => !removable.includes(key.name || key.value)
+  );
+  if (kept.length === properties.length - removable.length) {
+    patternOrExpression.properties = kept;
+  }
+}
+
+/**
+ * @param {string} program
+ * @param {TransformContextDef} context
+ * @return {string}
+ */
+function transformAjvResult(program, context) {
+  const {scope} = context;
+
+  /** @type {babel.Visitor} */
+  const visitor = {
+    Program: {
+      exit(path) {
+        // Prevent collisions with outer scope
+        if (!scope) {
+          return;
+        }
+        for (const binding in path.scope.bindings) {
+          let renamed = binding;
+          while (scope.has(renamed)) {
+            renamed = path.scope.generateUid(binding);
+          }
+          if (renamed === binding) {
+            continue;
+          }
+          path.scope.rename(binding, renamed);
+          if (binding === context.name) {
+            context.name = renamed;
+          }
+        }
+      },
+    },
+    ExportDefaultDeclaration(path) {
+      // Remove `export default validate`
+      path.remove();
+    },
+    ExportNamedDeclaration(path) {
+      // Unexport named exports.
+      if (path.node.declaration) {
+        path.replaceWith(path.node.declaration);
+      } else {
+        path.remove();
+      }
+    },
+    ObjectExpression(path) {
+      removePropertiesWhenAllPresent(path.node, objectExpressionRemovable);
+    },
+    ObjectPattern(path) {
+      removePropertiesWhenAllPresent(path.node, objectPatternRemovable);
+    },
+  };
+  const result = babel.transformSync(program, {plugins: [{visitor}]});
+  if (!result?.code) {
     throw new Error();
   }
-  const scopeCode = ajv.scope.scopeCode(validateAjv?.source?.scopeValues, {});
-  const code = dedent(`
-    __scopeCode__
-    __validateAjv__
-    /**
-     * @type {(any) => {instancePath?: string, message?: string}[]}
-     * https://ajv.js.org/api.html#error-objects
-     */
-    function validate(data) {
-      return __validateAjvName__(data) ? [] : __validateAjvName__.errors;
-    }
-  `)
-    .replace('__scopeCode__', scopeCode)
-    // validateAjv returns a boolean, and modifies a property of the function
-    // for errors. The default instead returns an array of errors, which is
-    // empty when the input is valid.
-    .replace('__validateAjv__', validateAjv?.source?.validateCode)
-    .replace(/__validateAjvName__/g, validateAjv?.source?.validateName.str);
-  return {
-    code,
-    validateName: 'validate',
-  };
+  return result.code;
 }
 
 module.exports = {

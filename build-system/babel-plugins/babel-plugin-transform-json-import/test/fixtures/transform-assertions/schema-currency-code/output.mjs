@@ -1,4 +1,7 @@
 import * as _coreJsonSchema from "#core/json-schema";
+"use strict";
+
+const validate = validate0;
 const schema0 = {
   "description": "https://datahub.io/core/currency-codes",
   "_isValidCurrencyCode": true
@@ -29,9 +32,7 @@ function validate0(data, {
   return errors === 0;
 }
 
-function validateCurrencyCode(data) {
-  return validate0(data) ? [] : validate0.errors;
-}
+const validateCurrencyCode = data => validate(data) ? [] : validate.errors;
 
 console.
 /*OK*/

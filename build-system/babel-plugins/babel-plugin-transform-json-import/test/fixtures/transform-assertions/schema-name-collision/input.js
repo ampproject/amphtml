@@ -1,3 +1,11 @@
-// validate is ajvCompile's output name, it should be renamed
+const validate0 = `
+  ajv creates a "validate0" identifier in module scope.
+  ajv's should be renamed, and this assignment should be preserved.
+`;
+
 import validate from './name-collision.schema.json' assert {type: 'json-schema'};
-validate(123);
+
+validate(`
+  "validate" is ajvCompile's default output name.
+  This should not fail transform.
+`);
