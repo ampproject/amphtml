@@ -51,11 +51,14 @@ jobs:
         run: |
           EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-extensions.js)
           echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
-      - name: Get the order in which to publish the extensions
-        id: get-extensions
-        run: |
-          EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-extensions.js)
-          echo "::set-output name=extensions::{\"include\":${EXTENSIONS}}"
+          DEPTH_0_EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-publish-order.js 0)
+          echo "::set-output name=depth_0_extensions::{\"include\":${DEPTH_0_EXTENSIONS}}"
+          DEPTH_1_EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-publish-order.js 1)
+          echo "::set-output name=depth_1_extensions::{\"include\":${DEPTH_1_EXTENSIONS}}"
+          DEPTH_2_EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-publish-order.js 2)
+          echo "::set-output name=depth_2_extensions::{\"include\":${DEPTH_2_EXTENSIONS}}"
+          DEPTH_3_EXTENSIONS=$(node ${{ env.SCRIPTS_DIR }}/get-publish-order.js 3)
+          echo "::set-output name=depth_3_extensions::{\"include\":${DEPTH_3_EXTENSIONS}}"
   publish-core:
     if: github.repository == 'ampproject/amphtml'
     environment: bento_publishing
@@ -131,38 +134,23 @@ jobs:
           npm ci
           node ${{ env.SCRIPTS_DIR }}/build-npm-binaries.js ${{ matrix.extension }}
           node ${{ env.SCRIPTS_DIR }}/write-package-files.js ${{ matrix.extension }} ${{ github.event.inputs.amp-version }} ${{ matrix.version }} ${{ needs.publish-core.outputs.core-version }}
-      - name: Publish package for Nightly releases
-        if: github.event.inputs.tag != 'latest'
-        run: |
-          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js ${{ matrix.extension }} ${{ matrix.version }})
-          npm publish --access public --tag ${{ github.event.inputs.tag }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Tag package as latest for Stable releases
-        if: github.event.inputs.tag == 'latest'
-        run: |
-          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js ${{ matrix.extension }} ${{ matrix.version }})
-          NPM_PACKAGE=$(jq -r .name package.json)
-          NPM_VERSION=$(jq -r .version package.json)
-          echo "Processing ${NPM_PACKAGE}@${NPM_VERSION}"
-          if [[ $(npm view ${NPM_PACKAGE}@${NPM_VERSION}) ]]; then
-            npm dist-tag add ${NPM_PACKAGE}@${NPM_VERSION} latest
-          else
-            npm publish --access public --tag latest
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  publish:
+  publish-0:
     if: github.repository == 'ampproject/amphtml'
     environment: bento_publishing
     needs: [build]
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
-      max-parallel: 1
+      matrix: ${{ fromJson(needs.setup.outputs.depth_1_extensions) }}
       fail-fast: false
     steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.events.inputs.amp-version }}
+      - uses: actions/setup-node@v2
+        with:
+          registry-url: https://registry.npmjs.org
+          node-version: lts/*
       - name: Publish package for Nightly releases
         if: github.event.inputs.tag != 'latest'
         run: |
@@ -170,6 +158,88 @@ jobs:
           npm publish --access public --tag ${{ github.event.inputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-1:
+    if: github.repository == 'ampproject/amphtml'
+    environment: bento_publishing
+    needs: [publish-0]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.depth_1_extensions) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.events.inputs.amp-version }}
+      - uses: actions/setup-node@v2
+        with:
+          registry-url: https://registry.npmjs.org
+          node-version: lts/*
+      - name: Publish package for Nightly releases
+        if: github.event.inputs.tag != 'latest'
+        run: |
+          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js ${{ matrix.extension }} ${{ matrix.version }})
+          npm publish --access public --tag ${{ github.event.inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-2:
+    if: github.repository == 'ampproject/amphtml'
+    environment: bento_publishing
+    needs: [publish-1]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.depth_2_extensions) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.events.inputs.amp-version }}
+      - uses: actions/setup-node@v2
+        with:
+          registry-url: https://registry.npmjs.org
+          node-version: lts/*
+      - name: Publish package for Nightly releases
+        if: github.event.inputs.tag != 'latest'
+        run: |
+          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js ${{ matrix.extension }} ${{ matrix.version }})
+          npm publish --access public --tag ${{ github.event.inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-3:
+    if: github.repository == 'ampproject/amphtml'
+    environment: bento_publishing
+    needs: [publish-2]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.depth_3_extensions) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.events.inputs.amp-version }}
+      - uses: actions/setup-node@v2
+        with:
+          registry-url: https://registry.npmjs.org
+          node-version: lts/*
+      - name: Publish package for Nightly releases
+        if: github.event.inputs.tag != 'latest'
+        run: |
+          cd $(node ${{ env.SCRIPTS_DIR }}/get-package-dir.js ${{ matrix.extension }} ${{ matrix.version }})
+          npm publish --access public --tag ${{ github.event.inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  tag:
+    if: github.repository == 'ampproject/amphtml'
+    environment: bento_publishing
+    needs: [publish-3]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.extensions) }}
+      fail-fast: false
+    steps:
       - name: Tag package as latest for Stable releases
         if: github.event.inputs.tag == 'latest'
         run: |

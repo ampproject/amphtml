@@ -97,6 +97,15 @@ function getSemver(extensionVersion, ampVersion) {
 let PackageFileDef;
 
 /**
+ * typedef {{
+ *   name: string,
+ *   version: string,
+ *   depth: number,
+ * }}
+ */
+let PackageDef;
+
+/**
  * Get the parsed package files
  * @return {Promise<PackageFileDef[]>}
  */
@@ -133,7 +142,7 @@ function buildPublishGraph(packageFiles) {
  * @param {Record<string, PackageFileDef>} graph
  * @return {string[]}
  */
-function getPackagesWithoutDepeneceiesInGraph(graph) {
+function getPackagesWithoutDependenciesInGraph(graph) {
   return Object.keys(graph).filter((name) => {
     const node = graph[name];
     if (!node.dependencies) {
@@ -148,18 +157,23 @@ function getPackagesWithoutDepeneceiesInGraph(graph) {
  * be published before their dependents. This function solves the dependency graph
  * and returns the order the packages should be published in.
  * @param {Record<string, PackageFileDef>} graph
- * @return {PackageFileDef[]}
+ * @return {PackageDef[]}
  */
 function getTopologicalSort(graph) {
-  /** @type {PackageFileDef[]} */
+  /** @type {PackageDef[]} */
   const publishOrder = [];
   let previousPackageCount = Object.keys(graph).length;
   let packageCount = previousPackageCount;
+  let depth = 0;
   while (packageCount) {
     const packagesWithoutDependencies =
-      getPackagesWithoutDepeneceiesInGraph(graph);
+      getPackagesWithoutDependenciesInGraph(graph);
     for (const name of packagesWithoutDependencies) {
-      publishOrder.push(graph[name]);
+      publishOrder.push({
+        name,
+        version: graph[name].version,
+        depth,
+      });
       delete graph[name];
     }
     packageCount = Object.keys(graph).length;
@@ -170,21 +184,25 @@ function getTopologicalSort(graph) {
       );
     }
     previousPackageCount = packageCount;
+    depth++;
   }
   return publishOrder;
 }
 
 /**
  * Get the order the npm packages should be published in.
- * @return {Promise<Array<{extension: string, version: string}>>}
+ * @param {number?} depth
+ * @return {Promise<PackageDef[]>}
  */
-async function getOptimalPublishOrder() {
+async function getOptimalPublishOrder(depth) {
   const packageFiles = await getPackageFiles();
   const graph = buildPublishGraph(packageFiles);
-  return getTopologicalSort(graph).map((node) => ({
-    extension: node.name,
-    version: node.version,
-  }));
+  const nodes = getTopologicalSort(graph);
+  if (depth !== undefined) {
+    return nodes.filter((node) => node.depth === depth);
+  }
+
+  return nodes;
 }
 
 module.exports = {

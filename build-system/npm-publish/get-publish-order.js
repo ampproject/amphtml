@@ -5,4 +5,4 @@
 
 const {getOptimalPublishOrder} = require('./utils');
 
-getOptimalPublishOrder().then(console.log);
+getOptimalPublishOrder(parseInt(process.argv[2], 10)).then(console.log);

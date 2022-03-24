@@ -28,10 +28,15 @@ test('getTopologicalSort', (t) => {
     },
   };
 
-  const result = exportedForTesting
-    .getTopologicalSort(mockGraph)
-    .map((node) => node.name);
-  t.deepEqual(result, ['c', 'b', 'a', 'd']);
+  const nodes = exportedForTesting.getTopologicalSort(mockGraph);
+  t.deepEqual(
+    nodes.map((node) => node.name),
+    ['c', 'b', 'a', 'd']
+  );
+  t.deepEqual(
+    nodes.map((node) => node.depth),
+    [0, 1, 2, 2]
+  );
 
   const loopyGraph = {
     a: {
