@@ -111,41 +111,67 @@ describes.realWin(
       ).to.equal('NOT granted');
     });
 
-    it('should activate subscription platform and show paywall on dialog UI state update to true', async () => {
-      const maybeRenderDialogForSelectedPlatformSpy = env.sandbox.spy(
-        subscriptionService,
-        'maybeRenderDialogForSelectedPlatform'
-      );
+    describe('should activate subscription platform and show paywall on dialog UI state update to true', async () => {
+      let maybeRenderDialogForSelectedPlatformSpy;
 
-      storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE, true);
-      await afterRenderPromise(win);
+      beforeAll(() => {
+        maybeRenderDialogForSelectedPlatformSpy = env.sandbox.spy(
+          subscriptionService,
+          'maybeRenderDialogForSelectedPlatform'
+        );
+      });
 
-      it('paywall element should have visible class', () => {
+      it('paywall element should have visible class', async () => {
+        storeService.dispatch(
+          Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+          true
+        );
+        await afterRenderPromise(win);
+
         expect(storySubscriptions.element).to.have.class(
           'i-amphtml-story-subscriptions-visible'
         );
       });
 
-      it('should render paywall element', () => {
+      it('should render paywall element', async () => {
+        storeService.dispatch(
+          Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+          true
+        );
+        await afterRenderPromise(win);
+
         expect(maybeRenderDialogForSelectedPlatformSpy).to.be.calledOnce;
       });
     });
 
-    it('should hide the paywall on dialog UI state update to false', async () => {
-      const dialog = new Dialog(env.ampdoc);
-      const dialogCloseSpy = env.sandbox.spy(dialog, 'close');
-      env.sandbox.stub(subscriptionService, 'getDialog').returns(dialog);
+    describe('should hide the paywall on dialog UI state update to false', async () => {
+      let dialogCloseSpy;
 
-      storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE, false);
-      await afterRenderPromise(win);
+      beforeAll(() => {
+        const dialog = new Dialog(env.ampdoc);
+        dialogCloseSpy = env.sandbox.spy(dialog, 'close');
+        env.sandbox.stub(subscriptionService, 'getDialog').returns(dialog);
+      });
 
-      it('paywall element should not have visible class', () => {
+      it('paywall element should not have visible class', async () => {
+        storeService.dispatch(
+          Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+          false
+        );
+        await afterRenderPromise(win);
+
         expect(storySubscriptions.element).to.not.have.class(
           'i-amphtml-story-subscriptions-visible'
         );
       });
 
-      it('should hide paywall element', () => {
+      it('should hide paywall element', async () => {
+        storeService.dispatch(
+          Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+          false
+        );
+        await afterRenderPromise(win);
+
         expect(dialogCloseSpy).to.be.calledOnce;
       });
     });
