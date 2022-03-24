@@ -34,6 +34,7 @@ export function getLocalizationService(element) {
  * @return {!Promise}
  */
 export function localizeTemplate(template, context, mutateTextContent = true) {
+  console.log(template.isConnected);
   const localizationService = getLocalizationService(context);
   const vsync = Services.vsyncFor(getWin(context));
   const promises = [];
@@ -51,7 +52,9 @@ export function localizeTemplate(template, context, mutateTextContent = true) {
         .getLocalizedStringAsync(el.getAttribute('i-amphtml-i18n-text-content'))
         .then((str) =>
           mutateTextContent
-            ? vsync.mutatePromise(() => (el.textContent = str))
+            ? vsync.mutatePromise(() => {
+                el.textContent = str;
+              })
             : (el.textContent = str)
         )
     );
