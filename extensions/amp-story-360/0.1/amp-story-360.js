@@ -54,7 +54,6 @@ const MIN_WEBGL_DISTANCE = 2;
 const renderActivateButtonTemplate = () => (
   <button class="i-amphtml-story-360-activate-button" role="button">
     <span
-      class="i-amphtml-story-360-activate-text"
       i-amphtml-i18n-text-content={
         LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
       }
@@ -555,7 +554,6 @@ export class AmpStory360 extends AMP.BaseElement {
     ) {
       const page = this.getPage_();
       const discoveryTemplate = page && renderDiscoveryTemplate();
-
       // Support translation of discovery dialogue text.
       localizeTemplate(discoveryTemplate, page).then(() =>
         this.mutateElement(() => page.appendChild(discoveryTemplate))
