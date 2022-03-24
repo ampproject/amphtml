@@ -19,7 +19,10 @@ html_format: AMP
   amp_layout: {
     supported_layouts: CONTAINER
   }
-  attrs: { name: "data-product-id" }
+  attrs: { 
+    name: "data-product-id"
+    mandatory: true 
+  }
 }
 tags: {  # <amp-story-shopping-attachment>
   html_format: AMP
@@ -30,9 +33,17 @@ tags: {  # <amp-story-shopping-attachment>
   UrlSpec: {
     allow_empty = true
   }
-  ChildTagSpec: {
+  attrs: {
+    name: "src"
+    value_url: {
+      protocol: "https"
+      allow_relative: true
+      allow_empty: true
+    }
+  }
+  child_tags: {
     mandatory_num_child_tags = 1
-    first_child_tag_name_oneof = "script"
+    first_child_tag_name_oneof: "SCRIPT"
   }
   amp_layout: {
     supported_layouts: NODISPLAY
