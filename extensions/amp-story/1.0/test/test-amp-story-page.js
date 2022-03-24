@@ -617,8 +617,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       '.i-amphtml-story-page-play-button'
     );
 
-    console.log(playButtonEl.outerHTML);
-
     expect(playButtonEl.getAttribute('role')).to.eql('button');
   });
 

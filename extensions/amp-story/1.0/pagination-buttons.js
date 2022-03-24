@@ -6,10 +6,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {devAssert} from '#utils/log';
 
-import {
-  getLocalizationService,
-  localizeTemplate,
-} from './amp-story-localization-service';
+import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,

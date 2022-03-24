@@ -53,7 +53,12 @@ const MIN_WEBGL_DISTANCE = 2;
  */
 const renderActivateButtonTemplate = () => (
   <button class="i-amphtml-story-360-activate-button" role="button">
-    <span class="i-amphtml-story-360-activate-text"></span>
+    <span
+      class="i-amphtml-story-360-activate-text"
+      i-amphtml-i18n-text-content={
+        LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
+      }
+    ></span>
     <span class="i-amphtml-story-360-activate-button-icon">
       360°
       <svg
@@ -233,9 +238,6 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
 
     /** @private {!Array<!CameraOrientation>} */
     this.orientations_ = [];
@@ -590,11 +592,7 @@ export class AmpStory360 extends AMP.BaseElement {
     const ampStoryPage = this.getPage_();
     this.activateButton_ = ampStoryPage && renderActivateButtonTemplate();
 
-    this.activateButton_.querySelector(
-      '.i-amphtml-story-360-activate-text'
-    ).textContent = this.localizationService_.getLocalizedString(
-      LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
-    );
+    localizeTemplate(this.activateButton_, ampStoryPage);
 
     this.activateButton_.addEventListener('click', () =>
       this.requestGyroscopePermissions_()

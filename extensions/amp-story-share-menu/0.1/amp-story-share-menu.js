@@ -15,6 +15,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {user} from '#utils/log';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 import {Toast} from 'extensions/amp-story/1.0/toast';
 
@@ -31,7 +32,6 @@ import {
 } from '../../amp-story/1.0/utils';
 
 import '../../amp-social-share/0.1/amp-social-share';
-import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
