@@ -12,23 +12,26 @@ import {
 
 /**
  * Registers `<bento-inline-gallery> component to CustomElements registry
+ * @param {typeof globalThis=} win
  */
-export function defineElement() {
-  defineBentoElement(TAG, BaseElement);
-  defineThumbnailsElement();
-  definePaginationElement();
+export function defineElement(win) {
+  defineBentoElement(TAG, BaseElement, win);
+  defineThumbnailsElement(win);
+  definePaginationElement(win);
 }
 
 /**
  * Registers `<bento-inline-gallery-pagination> component to CustomElements registry
+ * @param {typeof globalThis=} win
  */
-export function definePaginationElement() {
-  defineBentoElement(PAGINATION_TAG, PaginationBaseElement);
+export function definePaginationElement(win) {
+  defineBentoElement(PAGINATION_TAG, PaginationBaseElement, win);
 }
 
 /**
  * Registers `<bento-inline-gallery-thumbnails> component to CustomElements registry
+ * @param {typeof globalThis=} win
  */
-export function defineThumbnailsElement() {
-  defineBentoElement(THUMBNAIL_TAG, ThumbnailsBaseElement);
+export function defineThumbnailsElement(win) {
+  defineBentoElement(THUMBNAIL_TAG, ThumbnailsBaseElement, win);
 }

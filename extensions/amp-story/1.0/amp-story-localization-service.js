@@ -57,7 +57,11 @@ export function localizeTemplate(template, context) {
     promises.push(
       localizationService
         .getLocalizedStringAsync(el.getAttribute('i-amphtml-i18n-text-content'))
-        .then((str) => vsync.mutatePromise(() => (el.textContent = str)))
+        .then((str) =>
+          vsync.mutatePromise(() => {
+            el.textContent = str;
+          })
+        )
     );
     el.removeAttribute('i-amphtml-i18n-text-content');
   });

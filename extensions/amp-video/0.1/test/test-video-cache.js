@@ -1,4 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 import {installPerformanceService} from '#service/performance-impl';
@@ -41,7 +42,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -52,7 +53,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -66,7 +67,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -81,7 +82,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
   });
@@ -94,7 +95,18 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
+      );
+    });
+
+    it('should always add the ACAO header', async () => {
+      const videoEl = createVideo([{'src': 'https://website.com/video.html'}]);
+      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(xhrSpy).to.have.been.calledWith(
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -105,7 +117,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -116,19 +128,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com'
-      );
-    });
-
-    it('should add the ACAO queryparam if the video is crossorigin', async () => {
-      const videoEl = createVideo([{'src': 'video.html'}]);
-      videoEl.setAttribute('crossorigin', '');
-      const xhrSpy = env.sandbox.spy(xhrService, 'fetch');
-
-      await fetchCachedSources(videoEl, env.ampdoc);
-
-      expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video.html?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
+        'https://website-com.cdn.ampproject.org/mbv/s/website.com/video.gif?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
   });
@@ -396,6 +396,14 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       expect(videoEl.querySelector('source[data-bitrate]')).to.not.be.null;
     });
 
+    it('should set the crossorigin attribute to the video', async () => {
+      const videoEl = createVideo([{'src': 'video.html'}]);
+
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(videoEl.hasAttribute('crossorigin')).to.be.true;
+    });
+
     it('should set an attribute on cached video sources', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
@@ -494,6 +502,65 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     });
   });
 
+  describe('captions field', async () => {
+    it('should append track element if the cache responds with captions', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'captions': {
+              'src': 'captions_src_response.vtt',
+              'srclang': 'en-us',
+            },
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const trackEl = videoEl.querySelector('track');
+      expect(trackEl).to.exist;
+    });
+    it('should not append track element if video already has a track child', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'captions': {
+              'src': 'captions_src_response.vtt',
+              'srclang': 'en-us',
+            },
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      videoEl.appendChild(<track />);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const trackEl = videoEl.querySelector(
+        'track[src="captions_src_response.vtt"]'
+      );
+      expect(trackEl).to.not.exist;
+    });
+    it('should not append track element if captions does not exist', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const trackEl = videoEl.querySelector('track');
+      expect(trackEl).to.not.exist;
+    });
+  });
+
   describe('web stories: inlined video', async () => {
     it('should use the inlined source for the first video in the story instead of sending an XHR request', async () => {
       // Set up an inlined source response for the first video in the story
@@ -531,10 +598,10 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl3, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video2.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video3.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video3.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -550,7 +617,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
 
@@ -571,7 +638,7 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       await fetchCachedSources(videoEl, env.ampdoc);
 
       expect(xhrSpy).to.have.been.calledWith(
-        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com'
+        'https://example-com.cdn.ampproject.org/mbv/s/example.com/video1.mp4?amp_video_host_url=https%3A%2F%2Fcanonical.com&amp_video_require_acao_header=1'
       );
     });
   });
