@@ -19,6 +19,7 @@ html_format: AMP
   amp_layout: {
     supported_layouts: CONTAINER
   }
+  attrs: { name: "data-product-id" }
 }
 tags: {  # <amp-story-shopping-attachment>
   html_format: AMP
@@ -26,6 +27,13 @@ tags: {  # <amp-story-shopping-attachment>
   requires_extension: "amp-story-shopping"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
+  UrlSpec: {
+    allow_empty = true
+  }
+  ChildTagSpec: {
+    mandatory_num_child_tags = 1
+    first_child_tag_name_oneof = "script"
+  }
   amp_layout: {
     supported_layouts: NODISPLAY
   }
