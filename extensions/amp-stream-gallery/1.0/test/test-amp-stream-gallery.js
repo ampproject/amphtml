@@ -1,11 +1,9 @@
 import '../../../amp-base-carousel/1.0/amp-base-carousel';
 import '../amp-stream-gallery';
-import {useStyles} from '#bento/components/bento-base-carousel/1.0/component.jss';
 
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {createElementWithAttributes, waitForChildPromise} from '#core/dom';
+import {createElementWithAttributes} from '#core/dom';
 import {setStyles} from '#core/dom/style';
-import {toArray} from '#core/types/array';
 
 import {toggleExperiment} from '#experiments';
 
@@ -25,8 +23,6 @@ describes.realWin(
     let win;
     let element;
     const userSuppliedChildren = [];
-
-    const styles = useStyles();
 
     beforeEach(async () => {
       win = env.win;
@@ -64,95 +60,6 @@ describes.realWin(
       slide.textContent = 'slide ' + id;
       return slide;
     }
-
-    async function getSlideWrappersFromShadow() {
-      await element.buildInternal();
-      const shadow = element.shadowRoot;
-      await waitForChildPromise(shadow, (shadow) => {
-        return shadow.querySelectorAll('[class*=hideScrollbar]');
-      });
-      await waitFor(
-        () =>
-          shadow.querySelectorAll(`[class*=${styles.hideScrollbar}] `).length >
-          0,
-        'slots rendered'
-      );
-      return shadow.querySelectorAll(
-        `[class*=${styles.hideScrollbar}] [class*=${styles.slideElement}]`
-      );
-    }
-
-    async function getSlidesFromShadow() {
-      const wrappers = await getSlideWrappersFromShadow();
-      const slots = Array.from(wrappers)
-        .map((wrapper) => wrapper.querySelector('slot'))
-        .filter(Boolean);
-      return toArray(slots).reduce(
-        (acc, slot) => acc.concat(slot.assignedElements()),
-        []
-      );
-    }
-
-    it('should render slides and arrows when built', async () => {
-      win.document.body.appendChild(element);
-      await element.buildInternal();
-
-      const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
-      const buttons = element.shadowRoot.querySelectorAll('button');
-      expect(buttons).to.have.length(2);
-    });
-
-    it('should render custom arrows when given', async () => {
-      const customPrev = createElementWithAttributes(win.document, 'button', {
-        'slot': 'prev-arrow',
-      });
-      const customNext = createElementWithAttributes(win.document, 'button', {
-        'slot': 'next-arrow',
-      });
-      element.appendChild(customPrev);
-      element.appendChild(customNext);
-      win.document.body.appendChild(element);
-      await element.buildInternal();
-
-      const renderedSlides = await getSlidesFromShadow();
-      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
-
-      const defaultButtons = element.shadowRoot.querySelectorAll('button');
-      expect(defaultButtons).to.have.length(0);
-
-      const slotButtons = element.shadowRoot.querySelectorAll(
-        'slot[name="prev-arrow"], slot[name="next-arrow"]'
-      );
-      expect(slotButtons).to.have.length(2);
-      expect(slotButtons[0].assignedElements()).to.have.ordered.members([
-        customPrev,
-      ]);
-      expect(slotButtons[1].assignedElements()).to.have.ordered.members([
-        customNext,
-      ]);
-    });
-
-    it('should render in preparation for looping with loop prop', async () => {
-      element.setAttribute('loop', '');
-      win.document.body.appendChild(element);
-      await element.buildInternal();
-
-      const renderedSlideWrappers = await getSlideWrappersFromShadow();
-      // Given slides [0][1][2] should be rendered as [2][0][1]. But [2] is
-      // a placeholder.
-      expect(renderedSlideWrappers).to.have.lengthOf(3);
-      expect(
-        renderedSlideWrappers[0].querySelector('slot').assignedElements()
-      ).to.deep.equal([userSuppliedChildren[2]]);
-      expect(
-        renderedSlideWrappers[1].querySelector('slot').assignedElements()
-      ).to.deep.equal([userSuppliedChildren[0]]);
-      expect(
-        renderedSlideWrappers[2].querySelector('slot').assignedElements()
-      ).to.deep.equal([userSuppliedChildren[1]]);
-    });
-
     describe('imperative api', () => {
       beforeEach(async () => {
         element.setAttribute('max-visible-count', '1');
