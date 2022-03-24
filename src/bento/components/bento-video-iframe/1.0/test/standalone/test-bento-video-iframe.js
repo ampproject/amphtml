@@ -1,46 +1,40 @@
-import '../amp-video-iframe';
+import {CSS} from '#build/bento-video-iframe-1.0.css';
+
+import {BaseElement as BentoVideoIframe} from '#bento/components/bento-video-iframe/1.0/base-element';
+import {adoptStyles} from '#bento/util/unit-helpers';
+
 import {dispatchCustomEvent} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
-import {toggleExperiment} from '#experiments';
+import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
-  'amp-video-iframe-v1.0',
+  'bento-video-iframe-v1.0',
   {
-    amp: {
-      extensions: ['amp-video-iframe:1.0'],
-      canonicalUrl: 'https://canonicalexample.com/',
-    },
+    amp: false,
   },
   (env) => {
     let html;
     let element;
 
     const waitForRender = async () => {
-      await element.buildInternal();
-      const loadPromise = element.layoutCallback();
+      await element.getApi();
       const shadow = element.shadowRoot;
       await waitFor(() => shadow.querySelector('iframe'), 'iframe mounted');
       const iframe = shadow.querySelector('iframe');
       dispatchCustomEvent(iframe, 'canplay', null, {bubbles: false});
-      await loadPromise;
     };
 
     beforeEach(() => {
       html = htmlFor(env.win.document);
-      toggleExperiment(env.win, 'bento-video-iframe', true, true);
+      defineBentoElement('bento-video-iframe', BentoVideoIframe, env.win);
+      adoptStyles(env.win, CSS);
     });
 
     it('renders iframe', async () => {
-      element = html`
-        <amp-video-iframe
-          layout="responsive"
-          width="16"
-          height="9"
-        ></amp-video-iframe>
-      `;
+      element = html` <bento-video-iframe></bento-video-iframe> `;
 
       element.setAttribute(
         'src',
@@ -57,12 +51,7 @@ describes.realWin(
 
     it('should pass the loading attribute to the underlying iframe', async () => {
       element = html`
-        <amp-video-iframe
-          layout="responsive"
-          width="16"
-          height="9"
-          data-loading="lazy"
-        ></amp-video-iframe>
+        <bento-video-iframe data-loading="lazy"></bento-video-iframe>
       `;
 
       env.win.document.body.appendChild(element);
@@ -74,13 +63,7 @@ describes.realWin(
     });
 
     it('should set data-loading="auto" if no value is specified', async () => {
-      element = html`
-        <amp-video-iframe
-          layout="responsive"
-          width="16"
-          height="9"
-        ></amp-video-iframe>
-      `;
+      element = html` <bento-video-iframe></bento-video-iframe> `;
 
       env.win.document.body.appendChild(element);
 
