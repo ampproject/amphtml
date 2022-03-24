@@ -30,9 +30,6 @@ tags: {  # <amp-story-shopping-attachment>
   requires_extension: "amp-story-shopping"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-story-shopping/"
-  UrlSpec: {
-    allow_empty = true
-  }
   attrs: {
     name: "src"
     value_url: {
