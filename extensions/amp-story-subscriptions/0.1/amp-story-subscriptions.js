@@ -71,17 +71,12 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.subscriptionService_ = subscriptionService;
       this.localizationService_ = localizationService;
 
-      const getGrantStatusAndUpdateState = () => {
-        this.subscriptionService_.getGrantStatus().then((granted) => {
-          this.handleGrantStatusUpdate_(granted);
-        });
-      };
-      // Get grant status to set up the story state.
-      getGrantStatusAndUpdateState();
+      // Get grant status immediately to set up the initial subscriptions state.
+      this.getGrantStatusAndUpdateState_();
       // When the user finishes any of the actions, e.g. log in or subscribe, new entitlements would be
       // re-fetched and this callback would be executed. Update states based on new entitlements.
-      this.subscriptionService_.addOnEntitlementResolvedCallback(
-        getGrantStatusAndUpdateState
+      this.subscriptionService_.addOnEntitlementResolvedCallback(() =>
+        this.getGrantStatusAndUpdateState_()
       );
 
       // Create a paywall dialog element that have required attributes to be able to be
@@ -197,15 +192,30 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   /**
    * @private
    */
+  getGrantStatusAndUpdateState_() {
+    this.subscriptionService_.getGrantStatus().then((granted) => {
+      this.handleGrantStatusUpdate_(granted);
+    });
+  }
+
+  /**
+   * @param {boolean} granted
+   * @private
+   */
+  handleGrantStatusUpdate_(granted) {
+    const state = granted
+      ? SubscriptionsState.GRANTED
+      : SubscriptionsState.BLOCKED;
+    this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_STATE, state);
+  }
+
+  /**
+   * @private
+   */
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
       (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
-    );
-    this.storeService_.subscribe(
-      StateProperty.SUBSCRIPTIONS_STATE,
-      (subscriptionsState) =>
-        this.onSubscriptionsStateChange_(subscriptionsState)
     );
   }
 
@@ -231,22 +241,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     }
   }
 
-  /**
-   * @param {SubscriptionsState} subscriptionsState
-   * @private
-   */
-  onSubscriptionsStateChange_(subscriptionsState) {
-    if (
-      subscriptionsState === SubscriptionsState.GRANTED &&
-      this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
-    ) {
-      this.storeService_.dispatch(
-        Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-        false
-      );
-    }
-  }
-
   /** @private */
   loadFonts_() {
     if (this.win.document.fonts && FontFace) {
@@ -257,8 +251,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       );
     }
   }
-
-  // TODO(#37285): handle grant state update, show/hide dialog after receiving dialog ui state update.
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {

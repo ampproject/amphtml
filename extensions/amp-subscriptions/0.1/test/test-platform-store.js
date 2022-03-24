@@ -1,7 +1,3 @@
-import {expect} from 'chai';
-
-import {Deferred} from '#core/data-structures/promise';
-
 import {user} from '#utils/log';
 
 import {Entitlement, GrantReason} from '../entitlement';

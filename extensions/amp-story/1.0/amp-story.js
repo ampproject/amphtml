@@ -366,8 +366,6 @@ export class AmpStory extends AMP.BaseElement {
       page.setAttribute('active', '');
     }
 
-    this.subscriptionsStatePromise_ = new Deferred();
-
     this.initializeListeners_();
     this.initializePageIds_();
     this.initializeStoryPlayer_();
@@ -2687,14 +2685,6 @@ export class AmpStory extends AMP.BaseElement {
       .catch((err) => {
         devError(TAG, err, 'Bundle not found for language ' + languageCode);
       });
-  }
-
-  /**
-   * @private
-   * @return {boolean}
-   */
-  isPaywallStory_() {
-    return this.element.querySelector('amp-story-subscriptions') != null;
   }
 }
 
