@@ -21,7 +21,7 @@ html_format: AMP
   }
   attrs: { 
     name: "data-product-id"
-    mandatory: true 
+    mandatory: true
   }
 }
 tags: {  # <amp-story-shopping-attachment>
