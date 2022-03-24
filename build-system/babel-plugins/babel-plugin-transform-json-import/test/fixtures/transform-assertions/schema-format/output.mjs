@@ -1,6 +1,3 @@
-import * as _coreJsonSchema from "#core/json-schema";
-"use strict";
-
 const validate = validate0;
 const schema0 = {
   "properties": {

@@ -1,6 +1,5 @@
 const json5 = require('json5');
-const {addNamespace} = require('@babel/helper-module-imports');
-const {ajvCompile} = require('../../compile/json-schema');
+const {ajvCompile, transformAjvCode} = require('../../compile/json-schema');
 const {dirname, join, relative, resolve} = require('path');
 const {readFileSync} = require('fs');
 const {readJson} = require('../../json-locales');
@@ -50,12 +49,15 @@ module.exports = function (babel) {
     'json-schema': (path, jsonPath) => {
       // json5 to allow comments
       const schema = json5.parse(readFileSync(jsonPath, 'utf8'));
-      const validatorsModuleId = addNamespace(path, '#core/json-schema');
-      const scope = Object.keys(path.scope.bindings);
-      const {code, name} = ajvCompile(schema, validatorsModuleId.name, scope);
+      const code = ajvCompile(schema);
 
-      const statements = template.statements(code, {placeholderPattern: false});
-      path.insertBefore(statements());
+      const scope = Object.keys(path.scope.bindings);
+      const {name, result} = transformAjvCode(code, scope, {
+        code: false,
+        ast: true,
+      });
+
+      path.insertBefore(result?.ast?.program.body || []);
 
       // The generated function returns a boolean, and modifies a property of
       // itself for errors. We wrap it to instead return an array of errors,

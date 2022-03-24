@@ -1,4 +1,4 @@
-import * as _coreJsonSchema from "#core/json-schema";
+import { isValidCurrencyCode } from '#core/json-schema';
 "use strict";
 
 const validate = validate0;
@@ -13,7 +13,7 @@ function validate0(data, {
   let vErrors = null;
   let errors = 0;
 
-  if (!_coreJsonSchema.isValidCurrencyCode(data)) {
+  if (!isValidCurrencyCode(data)) {
     const err0 = {
       instancePath,
       message: "must be a valid currency code"

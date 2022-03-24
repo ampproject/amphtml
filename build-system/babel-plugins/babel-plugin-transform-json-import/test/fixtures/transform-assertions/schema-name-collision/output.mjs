@@ -1,10 +1,7 @@
-import * as _coreJsonSchema from "#core/json-schema";
 const validate0 = `
   ajv creates a "validate0" identifier in module scope.
   ajv's should be renamed, and this assignment should be preserved.
 `;
-"use strict";
-
 const _validate = _validate2;
 const schema0 = {
   "type": "string"
