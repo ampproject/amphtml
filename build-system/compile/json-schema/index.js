@@ -170,6 +170,11 @@ function removePropertiesWhenAllPresent(patternOrExpression, removable) {
 }
 
 /**
+ * Transforms ajv's generated code to make it usable in a bundle:
+ *  - Trims unwanted properties from error messages so we only get
+ *    "instancePath" and "message".
+ *  - If provided a "scope" of used names, it will rescope the current code
+ *    to prevent collisions, and remove `export`.
  * @param {string} code
  * @param {string[]=} scope
  * @param {babel.TransformOptions=} config
@@ -207,10 +212,16 @@ function transformAjvCode(code, scope, config) {
       },
       ExportDefaultDeclaration(path) {
         // Remove `export default validate`
+        if (!scope) {
+          return;
+        }
         path.remove();
       },
       ExportNamedDeclaration(path) {
         // Unexport named exports.
+        if (!scope) {
+          return;
+        }
         if (path.node.declaration) {
           path.replaceWith(path.node.declaration);
         } else {
