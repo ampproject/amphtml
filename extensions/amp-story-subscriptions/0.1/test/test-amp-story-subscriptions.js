@@ -112,14 +112,10 @@ describes.realWin(
     });
 
     describe('should activate subscription platform and show paywall on dialog UI state update to true', async () => {
-      let maybeRenderDialogForSelectedPlatformSpy;
-
-      beforeAll(() => {
-        maybeRenderDialogForSelectedPlatformSpy = env.sandbox.spy(
-          subscriptionService,
-          'maybeRenderDialogForSelectedPlatform'
-        );
-      });
+      const maybeRenderDialogForSelectedPlatformSpy = env.sandbox.spy(
+        subscriptionService,
+        'maybeRenderDialogForSelectedPlatform'
+      );
 
       it('paywall element should have visible class', async () => {
         storeService.dispatch(
@@ -145,13 +141,9 @@ describes.realWin(
     });
 
     describe('should hide the paywall on dialog UI state update to false', async () => {
-      let dialogCloseSpy;
-
-      beforeAll(() => {
-        const dialog = new Dialog(env.ampdoc);
-        dialogCloseSpy = env.sandbox.spy(dialog, 'close');
-        env.sandbox.stub(subscriptionService, 'getDialog').returns(dialog);
-      });
+      const dialog = new Dialog(env.ampdoc);
+      const dialogCloseSpy = env.sandbox.spy(dialog, 'close');
+      env.sandbox.stub(subscriptionService, 'getDialog').returns(dialog);
 
       it('paywall element should not have visible class', async () => {
         storeService.dispatch(
