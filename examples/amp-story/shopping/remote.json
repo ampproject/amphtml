@@ -4,7 +4,7 @@
       "productUrl": "https://www.google.com",
       "productId": "art",
       "productTitle": "Abstract Art",
-      "productBrand": "V. Artsy",
+      "productVendor": "V. Artsy",
       "productPrice": 1200.0,
       "productPriceCurrency": "JPY",
       "productImages": [
@@ -17,7 +17,8 @@
         "ratingValue": 4.4,
         "reviewCount": 89,
         "reviewUrl": "https://www.google.com"
-      }
+      },
+      "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
     }
   ]
 }

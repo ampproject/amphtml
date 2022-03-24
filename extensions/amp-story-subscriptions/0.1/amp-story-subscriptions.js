@@ -257,6 +257,8 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       );
     }
   }
+
+  // TODO(#37285): handle grant state update, show/hide dialog after receiving dialog ui state update.
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {

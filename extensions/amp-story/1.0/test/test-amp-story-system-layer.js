@@ -1,7 +1,12 @@
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
+import {waitFor} from '#testing/helpers/service';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import LocalizedStringsEs from '../_locales/es.json' assert {type: 'json'}; // lgtm[js/syntax-error]
+import {getLocalizationService} from '../amp-story-localization-service';
 import {
   Action,
   AmpStoryStoreService,
@@ -44,6 +49,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
 
     env.sandbox.stub(Services, 'vsyncFor').returns({
       mutate: (fn) => fn(),
+      mutatePromise: (fn) => fn(),
     });
 
     systemLayer = new SystemLayer(win, win.document.body);
@@ -208,5 +214,80 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
       .click();
     expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
     expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
+  });
+
+  describe('localization', () => {
+    it('should load the localized aria-labels for buttons if strings are available', async () => {
+      getLocalizationService(win.document.body).registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
+      systemLayer.build();
+      await waitFor(
+        () =>
+          systemLayer.getShadowRoot().querySelectorAll('[aria-label]').length
+      );
+      expect(
+        systemLayer
+          .getShadowRoot()
+          .querySelector('.i-amphtml-story-info-control')
+          .getAttribute('aria-label')
+      ).to.equal('Story information');
+    });
+
+    it('should load the localized aria-labels for buttons if strings are available after building', async () => {
+      systemLayer.build();
+      getLocalizationService(win.document.body).registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
+      await waitFor(
+        () =>
+          systemLayer.getShadowRoot().querySelectorAll('[aria-label]').length
+      );
+      expect(
+        systemLayer
+          .getShadowRoot()
+          .querySelector('.i-amphtml-story-info-control')
+          .getAttribute('aria-label')
+      ).to.equal('Story information');
+    });
+
+    it('should load the localized aria-labels for the correct language', async () => {
+      win.document.body.setAttribute('lang', 'es');
+      getLocalizationService(win.document.body).registerLocalizedStringBundles({
+        'default': LocalizedStringsEn,
+        'es': LocalizedStringsEs,
+      });
+
+      systemLayer.build();
+
+      await waitFor(
+        () =>
+          systemLayer.getShadowRoot().querySelectorAll('[aria-label]').length
+      );
+      expect(
+        systemLayer
+          .getShadowRoot()
+          .querySelector('.i-amphtml-story-info-control')
+          .getAttribute('aria-label')
+      ).to.equal('Información de la historia');
+    });
+
+    it('should load the localized text content', async () => {
+      getLocalizationService(win.document.body).registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
+      systemLayer.build();
+
+      await waitFor(() =>
+        systemLayer
+          .getShadowRoot()
+          .querySelectorAll('.i-amphtml-story-has-new-page-text')
+      );
+      expect(
+        systemLayer
+          .getShadowRoot()
+          .querySelector('.i-amphtml-story-has-new-page-text').textContent
+      ).to.equal('Updated');
+    });
   });
 });
