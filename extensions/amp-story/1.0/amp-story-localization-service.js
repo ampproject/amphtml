@@ -33,9 +33,8 @@ export function getLocalizationService(element) {
  * @param {=boolean} mutateTextContent whether to use vsync for the text content
  * @return {!Promise}
  */
-export function localizeTemplate(template, context, mutateTextContent = true) {
-  console.log(template.isConnected);
-  const localizationService = getLocalizationService(context);
+export function localizeTemplate(template, context) {
+  const localizationService = Services.localizationForDoc(context);
   const vsync = Services.vsyncFor(getWin(context));
   const promises = [];
   template.querySelectorAll('[i-amphtml-i18n-aria-label]').forEach((el) => {
@@ -50,13 +49,14 @@ export function localizeTemplate(template, context, mutateTextContent = true) {
     promises.push(
       localizationService
         .getLocalizedStringAsync(el.getAttribute('i-amphtml-i18n-text-content'))
-        .then((str) =>
-          mutateTextContent
+        .then((str) => {
+          console.log(template.isConnected, str);
+          return template.isConnected
             ? vsync.mutatePromise(() => {
                 el.textContent = str;
               })
-            : (el.textContent = str)
-        )
+            : (el.textContent = str);
+        })
     );
     el.removeAttribute('i-amphtml-i18n-text-content');
   });

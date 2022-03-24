@@ -183,11 +183,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
       ];
       this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
 
-      return localizeTemplate(
-        this.storyConsentEl_,
-        this.element,
-        false /* mutateTextContent */
-      ).then(() => {
+      return localizeTemplate(this.storyConsentEl_, this.element).then(() => {
         createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
         this.setAcceptButtonFontColor_();
         this.initializeListeners_();

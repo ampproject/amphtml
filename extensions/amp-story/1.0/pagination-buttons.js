@@ -77,7 +77,7 @@ class PaginationButton {
     this.state_ = initialState;
 
     /** @const {!Element} */
-    this.element = renderPaginationButton(doc, initialState, (e) =>
+    this.element = renderPaginationButton(initialState, (e) =>
       this.onClick_(e)
     );
     localizeTemplate(this.element, doc);
@@ -105,7 +105,7 @@ class PaginationButton {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
       this.state_ = state;
-      getLocalizationService(this.win_)
+      Services.localizationForDoc(this.win_)
         .getLocalizedStringAsync(state.label)
         .then((str) => this.buttonElement_.setAttribute('aria-label', str));
     });

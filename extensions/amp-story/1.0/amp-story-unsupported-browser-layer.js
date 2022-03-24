@@ -39,7 +39,7 @@ const renderContent = (continueAnyway) => (
  * @return {!Element}
  */
 export function renderUnsupportedBrowserLayer(context, continueAnyway) {
-  const content = renderContent(context, continueAnyway);
+  const content = renderContent(continueAnyway);
   localizeTemplate(content, context);
   return createShadowRootWithStyle(<div />, content, CSS);
 }

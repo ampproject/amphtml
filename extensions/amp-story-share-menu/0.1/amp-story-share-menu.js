@@ -31,6 +31,7 @@ import {
 } from '../../amp-story/1.0/utils';
 
 import '../../amp-social-share/0.1/amp-social-share';
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
 
 /** @const {string} Class to toggle the share menu. */
 export const VISIBLE_CLASS = 'i-amphtml-story-share-menu-visible';
@@ -239,6 +240,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
           list.append(el);
         }
       }
+      localizeTemplate(list, this.storyEl_);
     });
 
     return list;
@@ -277,11 +279,10 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
         class="i-amphtml-story-share-icon"
         type={provider}
       >
-        <span class="i-amphtml-story-share-label">
-          {this.localizationService_.getLocalizedString(
-            shareProviderLocalizedStringId
-          )}
-        </span>
+        <span
+          class="i-amphtml-story-share-label"
+          i-amphtml-i18n-text-content={shareProviderLocalizedStringId}
+        ></span>
       </amp-social-share>
     );
 

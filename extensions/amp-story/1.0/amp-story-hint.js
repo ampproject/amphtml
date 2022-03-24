@@ -108,11 +108,7 @@ export class AmpStoryHint {
 
     this.hintContainer_ = renderHintElement();
 
-    localizeTemplate(
-      this.hintContainer_,
-      this.parentEl_,
-      false /* mutateTextContent */
-    ).then(() => {
+    localizeTemplate(this.hintContainer_, this.parentEl_).then(() => {
       const root = createShadowRootWithStyle(<div />, this.hintContainer_, CSS);
       this.vsync_.mutate(() => {
         this.parentEl_.appendChild(root);

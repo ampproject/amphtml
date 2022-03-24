@@ -1482,11 +1482,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         .then(() => this.playAllMedia_());
     });
 
-    localizeTemplate(
-      this.playMessageEl_,
-      this.element,
-      false /* mutateTextContent */
-    ).then(() =>
+    localizeTemplate(this.playMessageEl_, this.element).then(() =>
       this.mutateElement(() => this.element.appendChild(this.playMessageEl_))
     );
   }
@@ -1521,11 +1517,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   buildAndAppendErrorMessage_() {
     this.errorMessageEl_ = renderErrorMessageElement();
 
-    localizeTemplate(
-      this.errorMessageEl_,
-      this.element,
-      false /* mutateTextContent */
-    ).then(() =>
+    localizeTemplate(this.errorMessageEl_, this.element).then(() =>
       this.mutateElement(() => this.element.appendChild(this.errorMessageEl_))
     );
   }

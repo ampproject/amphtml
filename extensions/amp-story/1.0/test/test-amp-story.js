@@ -19,7 +19,6 @@ import {registerServiceBuilder} from '../../../../src/service-helpers';
 import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   AmpStory,
-  AmpStory,
   PAYWALL_DELAY_DURATION,
   PAYWALL_PAGE_INDEX,
 } from '../amp-story';
@@ -801,7 +800,7 @@ describes.realWin(
           ).to.not.be.null;
         });
 
-        it.only('should display the story after clicking "continue" button', async () => {
+        it('should display the story after clicking "continue" button', async () => {
           await createStoryWithPages(2, ['cover', 'page-1']);
 
           AmpStory.isBrowserSupported = () => false;
@@ -818,7 +817,6 @@ describes.realWin(
           const continueAnywayButton = element.querySelector(
             '.i-amphtml-story-unsupported-browser-overlay button'
           );
-          console.log(continueAnywayButton);
           continueAnywayButton.click();
 
           await poll(
@@ -1264,12 +1262,13 @@ describes.realWin(
           it('should trigger the navigation overlay', async () => {
             await createStoryWithPages(2);
             dispatchSwipeEvent(100, 0);
-            await story.mutateElement(() => {
-              const hintEl = story.element.querySelector(
-                '.i-amphtml-story-hint-container'
-              );
-              expect(hintEl).to.not.have.class('i-amphtml-hidden');
-            });
+            await waitFor(() =>
+              story.element.querySelector('.i-amphtml-story-hint-container')
+            );
+            const hintEl = story.element.querySelector(
+              '.i-amphtml-story-hint-container'
+            );
+            expect(hintEl).to.not.have.class('i-amphtml-hidden');
           });
         });
 

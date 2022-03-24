@@ -555,11 +555,7 @@ export class AmpStory360 extends AMP.BaseElement {
       const discoveryTemplate = page && renderDiscoveryTemplate();
 
       // Support translation of discovery dialogue text.
-      localizeTemplate(
-        discoveryTemplate,
-        page,
-        false /* mutateTextContent */
-      ).then(() =>
+      localizeTemplate(discoveryTemplate, page).then(() =>
         this.mutateElement(() => page.appendChild(discoveryTemplate))
       );
     }
