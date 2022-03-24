@@ -75,6 +75,7 @@ export const buildGtagConfig = (gtagId) => ({
       'vars': {
         'event_name': 'custom',
         'event_action': 'story_shopping_product_engagement',
+        'event_category': '${title}',
         'event_label':
           'product id: ${storyShoppingProductId}, button clicked: ${storyShoppingItemClicked}, page id: ${storyPageId}',
         'send_to': [gtagId],
@@ -85,6 +86,7 @@ export const buildGtagConfig = (gtagId) => ({
       'vars': {
         'event_name': 'custom',
         'event_action': 'story_shopping_buy_now_click',
+        'event_category': '${title}',
         'event_label':
           'product id: ${storyShoppingProductId}, product url: ${storyShoppingProductUrl}',
         'send_to': [gtagId],
