@@ -130,9 +130,9 @@ describes.realWin(
     });
 
     it('should activate subscription platform and display the blocking paywall on dialog UI state update', async () => {
-      const selectAndActivatePlatformSpy = env.sandbox.spy(
+      const maybeRenderDialogForSelectedPlatformSpy = env.sandbox.spy(
         subscriptionService,
-        'selectAndActivatePlatform'
+        'maybeRenderDialogForSelectedPlatform'
       );
 
       storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
@@ -144,12 +144,12 @@ describes.realWin(
       expect(storySubscriptions.element).to.have.class(
         'i-amphtml-story-subscriptions-visible'
       );
-      expect(selectAndActivatePlatformSpy).to.be.calledOnce;
+      expect(maybeRenderDialogForSelectedPlatformSpy).to.be.calledOnce;
     });
 
     it('should update subscription state to blocked once grant status from subscription service resolves to false', async () => {
       expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
-        SubscriptionsState.UNKNOWN
+        SubscriptionsState.DISABLED
       );
       env.sandbox
         .stub(subscriptionService, 'getGrantStatus')
@@ -164,7 +164,7 @@ describes.realWin(
 
     it('should update subscription state to granted once grant status from subscription service resolves to true', async () => {
       expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
-        SubscriptionsState.UNKNOWN
+        SubscriptionsState.DISABLED
       );
       env.sandbox
         .stub(subscriptionService, 'getGrantStatus')
