@@ -2,7 +2,6 @@
  * @fileoverview
  * Compiles JSON Schema to a validate() function using ajv.
  */
-const dedent = require('dedent');
 const {_: ajvCode, Name: AjvName, default: Ajv} = require('ajv');
 const {fastFormats: ajvFormats} = require('ajv-formats/dist/formats');
 const {once} = require('../../common/once');
@@ -54,16 +53,16 @@ const customValidators = [
  * We name keywords by prefing the validator function name with an underscore:
  *   { "_isValidCurrencyCode": true }
  * This format prevents them from clobbering the standard namespace
- * @param {string} moduleId
+ * @param {Set<string>} used
  * @return {import('ajv').KeywordDefinition[]}
  */
-function getCustomValidatorKeywords(moduleId) {
-  const moduleIdName = new AjvName(moduleId);
+function getCustomValidatorKeywords(used) {
   return customValidators.map(({error, fn}) => ({
     keyword: `_${fn}`,
     error,
     code(ctx) {
-      ctx.pass(ajvCode`${moduleIdName}.${new AjvName(fn)}(${ctx.data})`);
+      used.add(fn);
+      ctx.pass(ajvCode`${new AjvName(fn)}(${ctx.data})`);
     },
   }));
 }
@@ -115,20 +114,11 @@ const getFormats = once(() => {
 });
 
 /**
- * @typedef {{
- *   scope?: Set<string>,
- *   name: string,
- * }}
- */
-let TransformContextDef;
-
-/**
  * @param {any} schema
- * @param {string=} customValidatorsModuleId
- * @param {string[]=} scope
- * @return {{code: string, name: string}}
+ * @return {string}
  */
-function ajvCompile(schema, customValidatorsModuleId = '__jsonSchema', scope) {
+function ajvCompile(schema) {
+  const validatorFns = new Set();
   const ajv = new Ajv({
     code: {
       esm: true,
@@ -138,17 +128,24 @@ function ajvCompile(schema, customValidatorsModuleId = '__jsonSchema', scope) {
     allErrors: true,
     validateSchema: false,
     formats: getFormats(),
-    keywords: getCustomValidatorKeywords(customValidatorsModuleId),
+    keywords: getCustomValidatorKeywords(validatorFns),
   });
   const ajvResult = ajv.compile(addCustomValidatorsToSchema(schema));
-  const untransformedCode = AjvStandalone(ajv, ajvResult);
-  const context = {
-    // name should be initially `validate` since that's ajv's output function.
-    name: 'validate',
-    scope: scope && scope.length ? new Set(scope) : undefined,
-  };
-  const code = transformAjvResult(untransformedCode, context);
-  return {code, name: context.name};
+  const importCode = getImportCode(validatorFns);
+  const ajvCode = AjvStandalone(ajv, ajvResult);
+  return importCode + ajvCode;
+}
+
+/**
+ * @param {Set<string>} validatorFns
+ * @return {string}
+ */
+function getImportCode(validatorFns) {
+  if (!validatorFns.size) {
+    return '';
+  }
+  const specifiers = Array.from(validatorFns).join(', ');
+  return `import {${specifiers}} from '#core/json-schema';\n\n`;
 }
 
 // Unwanted properties in ajv's error object
@@ -173,62 +170,69 @@ function removePropertiesWhenAllPresent(patternOrExpression, removable) {
 }
 
 /**
- * @param {string} program
- * @param {TransformContextDef} context
- * @return {string}
+ * @param {string} code
+ * @param {string[]=} scope
+ * @param {babel.TransformOptions=} config
+ * @return {{result: babel.BabelFileResult | null, name: string}}
  */
-function transformAjvResult(program, context) {
-  const {scope} = context;
+function transformAjvCode(code, scope, config) {
+  const scopeSet = scope ? new Set(scope) : null;
 
-  /** @type {babel.Visitor} */
-  const visitor = {
-    Program: {
-      exit(path) {
-        // Prevent collisions with outer scope
-        if (!scope) {
-          return;
-        }
-        for (const binding in path.scope.bindings) {
-          let renamed = binding;
-          while (scope.has(renamed)) {
-            renamed = path.scope.generateUid(binding);
+  // ajvCompile's generated name
+  let name = 'validate';
+
+  /** @type {babel.PluginObj} */
+  const plugin = {
+    visitor: {
+      Program: {
+        exit(path) {
+          // Prevent collisions with outer scope
+          if (!scopeSet) {
+            return;
           }
-          if (renamed === binding) {
-            continue;
+          for (const binding in path.scope.bindings) {
+            let renamed = binding;
+            while (scopeSet.has(renamed)) {
+              renamed = path.scope.generateUid(binding);
+            }
+            if (renamed === binding) {
+              continue;
+            }
+            path.scope.rename(binding, renamed);
+            if (binding === name) {
+              name = renamed;
+            }
           }
-          path.scope.rename(binding, renamed);
-          if (binding === context.name) {
-            context.name = renamed;
-          }
+        },
+      },
+      ExportDefaultDeclaration(path) {
+        // Remove `export default validate`
+        path.remove();
+      },
+      ExportNamedDeclaration(path) {
+        // Unexport named exports.
+        if (path.node.declaration) {
+          path.replaceWith(path.node.declaration);
+        } else {
+          path.remove();
         }
       },
-    },
-    ExportDefaultDeclaration(path) {
-      // Remove `export default validate`
-      path.remove();
-    },
-    ExportNamedDeclaration(path) {
-      // Unexport named exports.
-      if (path.node.declaration) {
-        path.replaceWith(path.node.declaration);
-      } else {
-        path.remove();
-      }
-    },
-    ObjectExpression(path) {
-      removePropertiesWhenAllPresent(path.node, objectExpressionRemovable);
-    },
-    ObjectPattern(path) {
-      removePropertiesWhenAllPresent(path.node, objectPatternRemovable);
+      ObjectExpression(path) {
+        removePropertiesWhenAllPresent(path.node, objectExpressionRemovable);
+      },
+      ObjectPattern(path) {
+        removePropertiesWhenAllPresent(path.node, objectPatternRemovable);
+      },
     },
   };
-  const result = babel.transformSync(program, {plugins: [{visitor}]});
-  if (!result?.code) {
-    throw new Error();
-  }
-  return result.code;
+  const result = babel.transformSync(code, {
+    ...config,
+    plugins: [...(config?.plugins || []), plugin],
+  });
+  return {result, name};
 }
 
 module.exports = {
   ajvCompile,
+  transformAjvCode,
 };
