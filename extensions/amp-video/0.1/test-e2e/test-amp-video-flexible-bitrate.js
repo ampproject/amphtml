@@ -213,7 +213,7 @@ describes.endtoend(
         );
 
         await expect(
-          'https://amp-dev.cdn.ampproject.org/mbv/s/amp.dev/static/samples/video/tokyo.mp4?amp_video_host_url=https%3A%2F%2Famp.dev%2F&__amp_source_origin=http%3A%2F%2Flocalhost%3A8000'
+          'https://amp-dev.cdn.ampproject.org/mbv/s/amp.dev/static/samples/video/tokyo.mp4?amp_video_host_url=https%3A%2F%2Famp.dev%2F&amp_video_require_acao_header=1&__amp_source_origin=http%3A%2F%2Flocalhost%3A8000'
         ).to.have.been.sent;
       });
     });

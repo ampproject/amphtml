@@ -26,7 +26,7 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'lamp',
           'productTitle': 'Brass Lamp',
-          'productBrand': 'Lamp Co',
+          'productVendor': 'Lamp Co',
           'productPrice': 799.0,
           'productPriceCurrency': 'USD',
           'productImages': [
@@ -41,8 +41,8 @@ describes.realWin(
             {'url': 'https://source.unsplash.com/3LTht2nxd34', 'alt': 'lamp 6'},
           ],
           'aggregateRating': {
-            'ratingValue': '4.4',
-            'reviewCount': '89',
+            'ratingValue': 4.4,
+            'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
         },
@@ -50,9 +50,9 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'art',
           'productTitle': 'Abstract Art',
-          'productBrand': 'V. Artsy',
+          'productVendor': 'V. Artsy',
           'productPrice': 1200.0,
-          'productPriceCurrency': 'INR',
+          'productPriceCurrency': 'JPY',
           'productImages': [
             {
               'url': 'https://source.unsplash.com/BdVQU-NDtA8/500x500',
@@ -60,16 +60,18 @@ describes.realWin(
             },
           ],
           'aggregateRating': {
-            'ratingValue': '4.4',
-            'reviewCount': '89',
+            'ratingValue': 4.4,
+            'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
+          'productDetails':
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
         },
         {
           'productUrl': 'https://www.google.com',
           'productId': 'chair',
           'productTitle': 'Yellow chair',
-          'productBrand': 'Chair Co.',
+          'productVendor': 'Chair Co.',
           'productPrice': 1000.0,
           'productPriceCurrency': 'BRL',
           'productTagText': 'The perfectly imperfect yellow chair',
@@ -80,8 +82,8 @@ describes.realWin(
             },
           ],
           'aggregateRating': {
-            'ratingValue': '4.4',
-            'reviewCount': '89',
+            'ratingValue': 4.4,
+            'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
         },
@@ -89,7 +91,7 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'flowers',
           'productTitle': 'Flowers',
-          'productBrand': 'Very Long Flower Company Name',
+          'productVendor': 'Very Long Flower Company Name',
           'productPrice': 10.0,
           'productPriceCurrency': 'USD',
           'productIcon':
@@ -101,8 +103,8 @@ describes.realWin(
             },
           ],
           'aggregateRating': {
-            'ratingValue': '4.4',
-            'reviewCount': '89',
+            'ratingValue': 4.4,
+            'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
         },
@@ -165,7 +167,7 @@ describes.realWin(
             'productUrl': 'https://www.google.com',
             'productId': 'art',
             'productTitle': 'Abstract Art',
-            'productBrand': 'V. Artsy',
+            'productVendor': 'V. Artsy',
             'productPrice': 1200.0,
             'productPriceCurrency': 'JPY',
             'productImages': [
@@ -175,10 +177,12 @@ describes.realWin(
               },
             ],
             'aggregateRating': {
-              'ratingValue': '4.4',
-              'reviewCount': '89',
+              'ratingValue': 4.4,
+              'reviewCount': 89,
               'reviewUrl': 'https://www.google.com',
             },
+            'productDetails':
+              'Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
           },
         };
       env.sandbox.stub(Services, 'xhrFor').returns({
@@ -210,15 +214,13 @@ describes.realWin(
 
       beforeEach(async () => {
         storeService = {dispatch: env.sandbox.spy()};
-        env.sandbox
-          .stub(Services, 'storyStoreServiceForOrNull')
-          .resolves(storeService);
+        env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
       });
 
       it('dispatches ADD_SHOPPING_DATA', async () => {
         const dummyConfig = {foo: {bar: true}};
 
-        await storeShoppingConfig(pageElement, dummyConfig);
+        storeShoppingConfig(pageElement, dummyConfig);
 
         const pageIdToConfig = {[pageElement.id]: dummyConfig};
         expect(

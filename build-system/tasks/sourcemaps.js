@@ -2,11 +2,15 @@ const argv = require('minimist')(process.argv.slice(2));
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const path = require('path');
+const {posix: path} = require('path');
 const Remapping = require('@ampproject/remapping');
+const ResolveUri = require('@jridgewell/resolve-uri');
 
 /** @type {Remapping.default} */
 const remapping = /** @type {*} */ (Remapping);
+
+/** @type {ResolveUri.default} */
+const resolveUri = /** @type {*} */ (ResolveUri);
 
 /**
  * @return {boolean}
@@ -20,20 +24,19 @@ function includeSourcesContent() {
 
 /**
  * @param {Array<Object|string>} mapChain
+ * @param {string} destFile
  * @param {*} options
  * @return {Object}
  */
-function massageSourcemaps(mapChain, options) {
+function massageSourcemaps(mapChain, destFile, options) {
   const map = remapping(mapChain, () => null, !includeSourcesContent());
+  map.file = path.basename(destFile);
   map.sourceRoot = getSourceRoot(options);
-  if (map.file) {
-    map.file = path.basename(map.file);
-  }
   map.sources = map.sources.map((s) => {
-    if (s?.startsWith('../')) {
-      return s.slice('../'.length);
-    }
-    return s;
+    // By default, sources are relative to the map. But we just added an
+    // absolute sourceRoot, and we do not want the file to be relative to that
+    // root.
+    return resolveUri(s || '', destFile);
   });
 
   return map;

@@ -26,7 +26,6 @@ import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
 
 import {isExperimentOn} from '#experiments';
-import {StoryAdSegmentTimes} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -314,12 +313,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     const storyNextUpParam = Services.viewerForDoc(this.element).getParam(
       'storyNextUp'
     );
-    if (
-      autoAdvanceAttr !== null ||
-      storyNextUpParam === null ||
-      // This is a special value that indicates we are in the viewer indicated control group.
-      storyNextUpParam === StoryAdSegmentTimes.SENTINEL
-    ) {
+    if (autoAdvanceAttr !== null || storyNextUpParam === null) {
       return;
     }
     this.element.setAttribute('auto-advance-after', storyNextUpParam);
@@ -423,16 +417,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Return true if the current AmpStoryPage is protected by a paywall.
-   * 'limited-content' is for the paywall dialog page, where a paywall would trigger based on both time advance or click events.
-   * 'content' is for all the remaining locked pages.
-   * @return {boolean}
-   */
-  isPaywallProtected() {
-    return this.element.hasAttribute('subscriptions-section');
-  }
-
-  /**
    * Updates the state of the page.
    * @param {!PageState} state
    */
@@ -498,6 +482,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (this.isActive()) {
       registerAllPromise.then(() => {
+        if (this.state_ === PageState.NOT_ACTIVE) {
+          return;
+        }
         this.signals()
           .whenSignal(CommonSignals_Enum.LOAD_END)
           .then(() => {
@@ -506,11 +493,17 @@ export class AmpStoryPage extends AMP.BaseElement {
             }
           });
         this.preloadAllMedia_().then(() => {
+          if (this.state_ === PageState.NOT_ACTIVE) {
+            return;
+          }
           this.startMeasuringAllVideoPerformance_();
           this.startListeningToVideoEvents_();
           // iOS 14.2 and 14.3 requires play to be called before unmute
           this.playAllMedia_().then(() => {
-            if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+            if (
+              !this.storeService_.get(StateProperty.MUTED_STATE) &&
+              this.state_ !== PageState.NOT_ACTIVE
+            ) {
               this.unmuteAllMedia();
             }
           });
@@ -1331,7 +1324,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     return waitForElementsWithUnresolvedAudio(this.element).then(() =>
       Array.prototype.some.call(
         ampVideoEls,
-        (video) => !video.hasAttribute('noaudio')
+        (video) =>
+          !video.hasAttribute('noaudio') &&
+          parseFloat(video.getAttribute('volume')) !== 0
       )
     );
   }

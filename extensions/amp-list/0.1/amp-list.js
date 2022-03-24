@@ -796,7 +796,12 @@ export class AmpList extends AMP.BaseElement {
     let request;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
-    return requestForBatchFetch(this.element, this.getPolicy_(), refresh)
+    return requestForBatchFetch(
+      this.element,
+      elementSrc,
+      this.getPolicy_(),
+      refresh
+    )
       .then((r) => {
         request = r;
 

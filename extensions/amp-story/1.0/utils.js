@@ -359,13 +359,21 @@ export function dependsOnStoryServices(klass) {
   return class extends AMP.BaseElement {
     /**
      * @override
-     * @return {!Promise}
+     * @return {AMP.BaseElement|Promise<AMP.BaseElement>}
      */
     upgradeCallback() {
       const storyEl = closestAncestorElementBySelector(
         this.element,
         'amp-story'
       );
+      if (!storyEl) {
+        // Unit tests may mock or install the services internally, so
+        // instantiating immediately allows us to test implementations without
+        // placing the element inside an <amp-story>.
+        // In reality, this would cause failures. This is okay since upgradable
+        // elements are required to descend from an <amp-story>.
+        return new klass(this.element);
+      }
       return whenUpgradedToCustomElement(storyEl)
         .then(() => storyEl.getImpl())
         .then(() => new klass(this.element));
