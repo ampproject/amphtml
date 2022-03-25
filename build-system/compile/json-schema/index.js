@@ -228,10 +228,10 @@ function transformAjvCode(code, scope, config) {
         // to the `instancePath`, or `instancePath` and `message` combined.
         const {properties} = path.node;
         const instancePath = findProperty(properties, 'instancePath');
-        const message = findProperty(properties, 'message');
         if (!instancePath) {
           return;
         }
+        const message = findProperty(properties, 'message');
         if (!message) {
           path.replaceWith(instancePath.value);
           return;
