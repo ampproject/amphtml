@@ -43,6 +43,6 @@ tags: {  # <amp-story-shopping-attachment>
     first_child_tag_name_oneof: "SCRIPT"
   }
   amp_layout: {
-    supported_layouts: NODISPLAY
+    supported_layouts: CONTAINER
   }
 }
