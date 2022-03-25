@@ -38,9 +38,10 @@ tags: {  # <amp-story-shopping-attachment>
       allow_empty: true
     }
   }
+  attrs: { name: "theme" }
   child_tags: {
-    mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "SCRIPT"
+    child_tag_name_oneof: "SCRIPT"
+    mandatory_min_num_child_tags: 1
   }
   amp_layout: {
     supported_layouts: CONTAINER
