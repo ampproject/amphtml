@@ -36,8 +36,8 @@ const customValidators = [
   // natively. This prevents the binary from including a long list of currency
   // codes.
   {
-    fn: 'isValidCurrencyCode',
-    error: {message: 'must be a valid currency code'},
+    fn: 'isIso4217CurrencyCode',
+    error: {message: 'must be a valid ISO 4217 currency code'},
     shouldUse(schema) {
       if (!iso4217DescriptionRe.test(schema.description)) {
         return false;
@@ -59,7 +59,7 @@ const customValidators = [
 /**
  * Creates a vocabulary keyword for each custom validator.
  * We name keywords by prefing the validator function name with an underscore:
- *   { "_isValidCurrencyCode": true }
+ *   { "_isIso4217CurrencyCode": true }
  * This format prevents them from clobbering the standard namespace
  * @param {Set<string>} used
  * @return {import('ajv').KeywordDefinition[]}
