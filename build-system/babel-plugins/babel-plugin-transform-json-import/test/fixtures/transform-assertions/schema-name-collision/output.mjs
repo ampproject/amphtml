@@ -7,23 +7,12 @@ const schema0 = {
   "type": "string"
 };
 
-function _validate2(data, {
-  instancePath = ""
-} = {}) {
+function _validate2(data, instancePath = "") {
   let vErrors = null;
   let errors = 0;
 
   if (typeof data !== "string") {
-    const err0 =
-    /*
-      schemaPath:"#/type"
-      keyword:"type"
-      params:{type: "string"}
-    */
-    {
-      instancePath,
-      message: "must be string"
-    };
+    const err0 = (instancePath + ' ' + "must be string").trim();
 
     if (vErrors === null) {
       vErrors = [err0];
@@ -38,7 +27,7 @@ function _validate2(data, {
   return errors === 0;
 }
 
-const validate = data => _validate(data) ? [] : _validate.errors;
+const validate = (data, name) => _validate(data, name) ? [] : _validate.errors;
 
 validate(`
   "validate" is ajvCompile's default output name.

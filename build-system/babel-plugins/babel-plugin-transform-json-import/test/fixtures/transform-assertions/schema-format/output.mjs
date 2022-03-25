@@ -12,9 +12,7 @@ const schema0 = {
 const formats0 = /^(?:[a-z][a-z0-9+\-.]*:)(?:\/?\/)?[^\s]*$/i;
 const formats2 = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/i;
 
-function validate0(data, {
-  instancePath = ""
-} = {}) {
+function validate0(data, instancePath = "") {
   let vErrors = null;
   let errors = 0;
 
@@ -24,16 +22,7 @@ function validate0(data, {
 
       if (typeof data0 === "string") {
         if (!formats0.test(data0)) {
-          const err0 =
-          /*
-            schemaPath:"#/properties/my-uri/format"
-            keyword:"format"
-            params:{format: "uri"}
-          */
-          {
-            instancePath: instancePath + "/my-uri",
-            message: "must match format \"" + "uri" + "\""
-          };
+          const err0 = (instancePath + "/my-uri" + ' ' + ("must match format \"" + "uri" + "\"")).trim();
 
           if (vErrors === null) {
             vErrors = [err0];
@@ -51,16 +40,7 @@ function validate0(data, {
 
       if (typeof data1 === "string") {
         if (!formats2.test(data1)) {
-          const err1 =
-          /*
-            schemaPath:"#/properties/my-email/format"
-            keyword:"format"
-            params:{format: "email"}
-          */
-          {
-            instancePath: instancePath + "/my-email",
-            message: "must match format \"" + "email" + "\""
-          };
+          const err1 = (instancePath + "/my-email" + ' ' + ("must match format \"" + "email" + "\"")).trim();
 
           if (vErrors === null) {
             vErrors = [err1];
@@ -78,7 +58,7 @@ function validate0(data, {
   return errors === 0;
 }
 
-const validateFormat = data => validate(data) ? [] : validate.errors;
+const validateFormat = (data, name) => validate(data, name) ? [] : validate.errors;
 
 console.
 /*OK*/

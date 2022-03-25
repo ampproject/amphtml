@@ -7,9 +7,7 @@ const schema0 = {
   }]
 };
 
-function validate0(data, {
-  instancePath = ""
-} = {}) {
+function validate0(data, instancePath = "") {
   let vErrors = null;
   let errors = 0;
   const _errs0 = errors;
@@ -18,16 +16,7 @@ function validate0(data, {
   const _errs1 = errors;
 
   if (0 !== data) {
-    const err0 =
-    /*
-      schemaPath:"#/oneOf/0/const"
-      keyword:"const"
-      params:{allowedValue: 0}
-    */
-    {
-      instancePath,
-      message: "must be equal to constant"
-    };
+    const err0 = (instancePath + ' ' + "must be equal to constant").trim();
 
     if (vErrors === null) {
       vErrors = [err0];
@@ -48,16 +37,7 @@ function validate0(data, {
   const _errs2 = errors;
 
   if (typeof data !== "string") {
-    const err1 =
-    /*
-      schemaPath:"#/oneOf/1/type"
-      keyword:"type"
-      params:{type: "string"}
-    */
-    {
-      instancePath,
-      message: "must be string"
-    };
+    const err1 = (instancePath + ' ' + "must be string").trim();
 
     if (vErrors === null) {
       vErrors = [err1];
@@ -81,16 +61,7 @@ function validate0(data, {
   }
 
   if (!valid0) {
-    const err2 =
-    /*
-      schemaPath:"#/oneOf"
-      keyword:"oneOf"
-      params:{passingSchemas: passing0}
-    */
-    {
-      instancePath,
-      message: "must match exactly one schema in oneOf"
-    };
+    const err2 = (instancePath + ' ' + "must match exactly one schema in oneOf").trim();
 
     if (vErrors === null) {
       vErrors = [err2];
@@ -115,7 +86,7 @@ function validate0(data, {
   return errors === 0;
 }
 
-const validateOneOf = data => validate(data) ? [] : validate.errors;
+const validateOneOf = (data, name) => validate(data, name) ? [] : validate.errors;
 
 console.
 /*OK*/

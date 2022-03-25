@@ -63,7 +63,8 @@ module.exports = function (babel) {
       // itself for errors. We wrap it to instead return an array of errors,
       // which is empty when the input is valid.
       return template.expression.ast`
-        (data) => ${name}(data) ? [] : ${name}.errors
+        (data, name) =>
+          ${name}(data, name) ? [] : ${name}.errors
       `;
     },
   };

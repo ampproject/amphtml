@@ -156,51 +156,9 @@ function getImportCode(validatorFns) {
   return `import {${specifiers}} from '#core/json-schema';\n\n`;
 }
 
-// Unwanted properties in ajv's error object
-const objectExpressionRemovable = ['schemaPath', 'keyword', 'params'];
-
-// Destructured properties that aren't required when removing ajv error properties.
-const objectPatternRemovable = ['parentData', 'parentDataProperty', 'rootData'];
-
-/**
- * @param {babel.NodePath<babel.types.ObjectPattern|babel.types.ObjectExpression>} patternOrExpression
- * @param {string[]} removable
- * @param {boolean=} addComment
- */
-function removePropertiesWhenAllPresent(
-  patternOrExpression,
-  removable,
-  addComment
-) {
-  const removed = patternOrExpression
-    .get('properties')
-    .filter(
-      (path) =>
-        path.isObjectProperty() &&
-        ((babel.types.isIdentifier(path.node.key) &&
-          removable.includes(path.node.key.name)) ||
-          (babel.types.isStringLiteral(path.node.key) &&
-            removable.includes(path.node.key.value)))
-    );
-  if (removed.length === removable.length) {
-    const comment = removed.map((path) => {
-      const source = path.getSource();
-      path.remove();
-      return source;
-    });
-    if (addComment) {
-      patternOrExpression.addComment(
-        'leading',
-        `\n  ${comment.join('\n  ')}\n`
-      );
-    }
-  }
-}
-
 /**
  * Transforms ajv's generated code to make it usable in a bundle:
- *  - Trims unwanted properties from error messages so we only get
- *    "instancePath" and "message".
+ *  - Creates strings for error messages instead of an object.
  *  - If provided a "scope" of used names, it will rescope the current code
  *    to prevent collisions, and remove `export`.
  * @param {string} code
@@ -209,10 +167,19 @@ function removePropertiesWhenAllPresent(
  * @return {{result: babel.BabelFileResult | null, name: string}}
  */
 function transformAjvCode(code, scope, config) {
+  const {types: t} = babel;
+
   const scopeSet = scope ? new Set(scope) : null;
 
   // ajvCompile's generated name
   let name = 'validate';
+
+  const isObjectProperty = (node, name) =>
+    (t.isObjectProperty(node) && t.isIdentifier(node.key, {name})) ||
+    t.isStringLiteral(node.key, {value: name});
+
+  const findProperty = (properties, name) =>
+    properties.find((node) => isObjectProperty(node, name));
 
   /** @type {babel.PluginObj} */
   const plugin = {
@@ -257,14 +224,36 @@ function transformAjvCode(code, scope, config) {
         }
       },
       ObjectExpression(path) {
-        removePropertiesWhenAllPresent(
-          path,
-          objectExpressionRemovable,
-          /* addComment */ true
-        );
+        // Replace objects with {instancePath} with a string corresponding
+        // to the `instancePath`, or `instancePath` and `message` combined.
+        const {properties} = path.node;
+        const instancePath = findProperty(properties, 'instancePath');
+        const message = findProperty(properties, 'message');
+        if (!instancePath) {
+          return;
+        }
+        if (!message) {
+          path.replaceWith(instancePath.value);
+          return;
+        }
+        path.replaceWith(babel.template.expression.ast`
+          (${instancePath.value} + ' ' + ${message.value}).trim()
+        `);
       },
       ObjectPattern(path) {
-        removePropertiesWhenAllPresent(path, objectPatternRemovable);
+        // Replace destructuring of arguments with {instancePath} with just
+        // instancePath
+        const replacedPath = path.parentPath.isAssignmentPattern()
+          ? path.parentPath
+          : path;
+        if (!replacedPath.parentPath.isFunctionDeclaration()) {
+          return;
+        }
+        const {properties} = path.node;
+        const instancePath = findProperty(properties, 'instancePath');
+        if (instancePath) {
+          replacedPath.replaceWith(instancePath);
+        }
       },
     },
   };

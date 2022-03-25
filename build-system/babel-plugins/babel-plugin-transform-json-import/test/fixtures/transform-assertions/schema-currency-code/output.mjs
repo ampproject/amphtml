@@ -7,23 +7,12 @@ const schema0 = {
   "_isIso4217CurrencyCode": true
 };
 
-function validate0(data, {
-  instancePath = ""
-} = {}) {
+function validate0(data, instancePath = "") {
   let vErrors = null;
   let errors = 0;
 
   if (!isIso4217CurrencyCode(data)) {
-    const err0 =
-    /*
-      schemaPath:"#/_isIso4217CurrencyCode"
-      keyword:"_isIso4217CurrencyCode"
-      params:{}
-    */
-    {
-      instancePath,
-      message: "must be a valid ISO 4217 currency code"
-    };
+    const err0 = (instancePath + ' ' + "must be a valid ISO 4217 currency code").trim();
 
     if (vErrors === null) {
       vErrors = [err0];
@@ -38,7 +27,7 @@ function validate0(data, {
   return errors === 0;
 }
 
-const validateCurrencyCode = data => validate(data) ? [] : validate.errors;
+const validateCurrencyCode = (data, name) => validate(data, name) ? [] : validate.errors;
 
 console.
 /*OK*/

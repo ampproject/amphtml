@@ -16,9 +16,7 @@ const formats0 = /^\d\d\d\d-[0-1]\d-[0-3]\d$/;
 const formats2 = /^\d\d\d\d-[0-1]\d-[0-3]\d[t\s](?:[0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(?:\.\d+)?(?:z|[+-]\d\d(?::?\d\d)?)$/i;
 const formats4 = /^(?:[0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(?:\.\d+)?(?:z|[+-]\d\d(?::?\d\d)?)?$/i;
 
-function validate0(data, {
-  instancePath = ""
-} = {}) {
+function validate0(data, instancePath = "") {
   let vErrors = null;
   let errors = 0;
 
@@ -28,16 +26,7 @@ function validate0(data, {
 
       if (typeof data0 === "string") {
         if (!formats0.test(data0)) {
-          const err0 =
-          /*
-            schemaPath:"#/properties/my-date/format"
-            keyword:"format"
-            params:{format: "date"}
-          */
-          {
-            instancePath: instancePath + "/my-date",
-            message: "must match format \"" + "date" + "\""
-          };
+          const err0 = (instancePath + "/my-date" + ' ' + ("must match format \"" + "date" + "\"")).trim();
 
           if (vErrors === null) {
             vErrors = [err0];
@@ -55,16 +44,7 @@ function validate0(data, {
 
       if (typeof data1 === "string") {
         if (!formats2.test(data1)) {
-          const err1 =
-          /*
-            schemaPath:"#/properties/my-date-time/format"
-            keyword:"format"
-            params:{format: "date-time"}
-          */
-          {
-            instancePath: instancePath + "/my-date-time",
-            message: "must match format \"" + "date-time" + "\""
-          };
+          const err1 = (instancePath + "/my-date-time" + ' ' + ("must match format \"" + "date-time" + "\"")).trim();
 
           if (vErrors === null) {
             vErrors = [err1];
@@ -82,16 +62,7 @@ function validate0(data, {
 
       if (typeof data2 === "string") {
         if (!formats4.test(data2)) {
-          const err2 =
-          /*
-            schemaPath:"#/properties/my-time/format"
-            keyword:"format"
-            params:{format: "time"}
-          */
-          {
-            instancePath: instancePath + "/my-time",
-            message: "must match format \"" + "time" + "\""
-          };
+          const err2 = (instancePath + "/my-time" + ' ' + ("must match format \"" + "time" + "\"")).trim();
 
           if (vErrors === null) {
             vErrors = [err2];
@@ -109,7 +80,7 @@ function validate0(data, {
   return errors === 0;
 }
 
-const validateFormatDate = data => validate(data) ? [] : validate.errors;
+const validateFormatDate = (data, name) => validate(data, name) ? [] : validate.errors;
 
 console.
 /*OK*/

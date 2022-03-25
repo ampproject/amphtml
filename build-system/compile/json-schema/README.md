@@ -29,16 +29,23 @@ validateProduct({foo: "bar"}); // invalid, returns errrors
 This function has the following signature:
 
 ```typescript
-function validate(data: any): ErrorObject[] {}
+function validate(data: any, name? string): string[] {}
 ```
 
-It returns an array of [`ErrorObject`](https://ajv.js.org/api.html#error-objects), which is empty when valid:
+#### Arguments
+
+-   **`data`** is the value to validate.
+-   **`name`** is optional, and represents the name of the validated object. This is added to error messages, and it's recommended that you include it.
+
+#### Return value
+
+The function returns an array of strings representing validation errors. It is empty when valid:
 
 ```js
 const errors = validateProduct(myProduct);
 if (errors.length) {
-  for (const {message} of errors) {
-    console.warn(message);
+  for (const error of errors) {
+    console.warn(error);
   }
 }
 ```
