@@ -7,6 +7,9 @@ const {fastFormats: ajvFormats} = require('ajv-formats/dist/formats');
 const {once} = require('../../common/once');
 const {default: AjvStandalone} = require('ajv/dist/standalone');
 const babel = require('@babel/core');
+const iso4217 = require('./iso4217.json');
+
+const iso4217DescriptionRe = /iso[_\- ]*4217/i;
 
 /**
  * Defines custom validators that we may inject into certain schemas.
@@ -36,14 +39,19 @@ const customValidators = [
     fn: 'isValidCurrencyCode',
     error: {message: 'must be a valid currency code'},
     shouldUse(schema) {
-      if (
-        Array.isArray(schema.enum) &&
-        schema.description?.includes('https://datahub.io/core/currency-codes')
-      ) {
-        delete schema.enum;
-        return true;
+      if (!iso4217DescriptionRe.test(schema.description)) {
+        return false;
       }
-      return false;
+      if (
+        !Array.isArray(schema.enum) ||
+        JSON.stringify(schema.enum.sort()) !== JSON.stringify(iso4217.sort())
+      ) {
+        throw new Error(
+          'ISO 4217 schema must contain an `enum` keyword including all valid currency codes.'
+        );
+      }
+      delete schema.enum;
+      return true;
     },
   },
 ];

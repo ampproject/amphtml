@@ -42,3 +42,28 @@ if (errors.length) {
   }
 }
 ```
+
+## Extended Features
+
+We write all JSON schema exactly like the standard spec. However, some schemas can be annotated so that they can be compiled into a special function.
+
+### Currency Codes
+
+Validating a currency code in JSON Schema requires a long [`enum`](http://json-schema.org/understanding-json-schema/reference/generic.html#enumerated-values) of possible values.
+
+In JavaScript [we can instead use `Intl.NumberFormat`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#currency_formatting). This prevents us from including this long list, in order to reduce output size.
+
+By including the string `ISO 4217` (or any that matches `/iso[_- ]?4217/i`) in the `description` field, the `enum` is replaced with a `Intl.NumberFormat` call in the validation code.
+
+You should also include the full ISO 4217 list of currency codes as `enum` to ensure schema portability. If the list is not included, or incomplete, compilation will fail. You may copy this list from [`iso4217.json`](./iso4217.json)
+
+```json
+{
+  "description": "https://en.wikipedia.org/wiki/ISO_4217",
+  "enum": [
+    "AED",
+    "...",
+    "ZWL"
+  ]
+}
+```
