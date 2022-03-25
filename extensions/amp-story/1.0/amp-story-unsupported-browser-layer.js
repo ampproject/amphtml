@@ -17,7 +17,6 @@ const renderContent = (continueAnyway) => (
     <div class="i-amphtml-overlay-container">
       <div class="i-amphtml-gear-icon" />
       <div
-        class="i-amphtml-story-overlay-text"
         i-amphtml-i18n-text-content={
           LocalizedStringId_Enum.AMP_STORY_WARNING_UNSUPPORTED_BROWSER_TEXT
         }

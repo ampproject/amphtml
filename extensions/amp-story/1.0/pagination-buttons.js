@@ -101,10 +101,10 @@ class PaginationButton {
     this.mutator_.mutateElement(this.element, () => {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
-      this.state_ = state;
       Services.localizationForDoc(this.win_)
         .getLocalizedStringAsync(state.label)
         .then((str) => this.buttonElement_.setAttribute('aria-label', str));
+      this.state_ = state;
     });
   }
 
