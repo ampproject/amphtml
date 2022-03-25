@@ -1,11 +1,9 @@
-import {useEffect} from 'react';
-
 import {ReadyState_Enum} from '#core/constants/ready-state';
 import {isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 
 import * as Preact from '#preact';
-import {useRef, useState} from '#preact';
+import {useEffect, useRef, useState} from '#preact';
 import {forwardRef} from '#preact/compat';
 import {IframeEmbed} from '#preact/component/iframe';
 import {logger} from '#preact/logger';
