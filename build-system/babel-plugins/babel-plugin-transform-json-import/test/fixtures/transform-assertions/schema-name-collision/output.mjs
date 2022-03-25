@@ -14,7 +14,13 @@ function _validate2(data, {
   let errors = 0;
 
   if (typeof data !== "string") {
-    const err0 = {
+    const err0 =
+    /*
+      schemaPath:"#/type"
+      keyword:"type"
+      params:{type: "string"}
+    */
+    {
       instancePath,
       message: "must be string"
     };

@@ -24,7 +24,13 @@ function validate0(data, {
 
       if (typeof data0 === "string") {
         if (!formats0.test(data0)) {
-          const err0 = {
+          const err0 =
+          /*
+            schemaPath:"#/properties/my-uri/format"
+            keyword:"format"
+            params:{format: "uri"}
+          */
+          {
             instancePath: instancePath + "/my-uri",
             message: "must match format \"" + "uri" + "\""
           };
@@ -45,7 +51,13 @@ function validate0(data, {
 
       if (typeof data1 === "string") {
         if (!formats2.test(data1)) {
-          const err1 = {
+          const err1 =
+          /*
+            schemaPath:"#/properties/my-email/format"
+            keyword:"format"
+            params:{format: "email"}
+          */
+          {
             instancePath: instancePath + "/my-email",
             message: "must match format \"" + "email" + "\""
           };

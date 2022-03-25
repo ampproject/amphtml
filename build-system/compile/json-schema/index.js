@@ -163,17 +163,37 @@ const objectExpressionRemovable = ['schemaPath', 'keyword', 'params'];
 const objectPatternRemovable = ['parentData', 'parentDataProperty', 'rootData'];
 
 /**
- * @param {babel.types.ObjectPattern|babel.types.ObjectExpression} patternOrExpression
+ * @param {babel.NodePath<babel.types.ObjectPattern|babel.types.ObjectExpression>} patternOrExpression
  * @param {string[]} removable
+ * @param {boolean=} addComment
  */
-function removePropertiesWhenAllPresent(patternOrExpression, removable) {
-  const {properties} = patternOrExpression;
-  // @ts-ignore
-  const kept = properties.filter(
-    ({key}) => !removable.includes(key.name || key.value)
-  );
-  if (kept.length === properties.length - removable.length) {
-    patternOrExpression.properties = kept;
+function removePropertiesWhenAllPresent(
+  patternOrExpression,
+  removable,
+  addComment
+) {
+  const removed = patternOrExpression
+    .get('properties')
+    .filter(
+      (path) =>
+        path.isObjectProperty() &&
+        ((babel.types.isIdentifier(path.node.key) &&
+          removable.includes(path.node.key.name)) ||
+          (babel.types.isStringLiteral(path.node.key) &&
+            removable.includes(path.node.key.value)))
+    );
+  if (removed.length === removable.length) {
+    const comment = removed.map((path) => {
+      const source = path.getSource();
+      path.remove();
+      return source;
+    });
+    if (addComment) {
+      patternOrExpression.addComment(
+        'leading',
+        `\n  ${comment.join('\n  ')}\n`
+      );
+    }
   }
 }
 
@@ -237,10 +257,14 @@ function transformAjvCode(code, scope, config) {
         }
       },
       ObjectExpression(path) {
-        removePropertiesWhenAllPresent(path.node, objectExpressionRemovable);
+        removePropertiesWhenAllPresent(
+          path,
+          objectExpressionRemovable,
+          /* addComment */ true
+        );
       },
       ObjectPattern(path) {
-        removePropertiesWhenAllPresent(path.node, objectPatternRemovable);
+        removePropertiesWhenAllPresent(path, objectPatternRemovable);
       },
     },
   };

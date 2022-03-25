@@ -18,7 +18,13 @@ function validate0(data, {
   const _errs1 = errors;
 
   if (0 !== data) {
-    const err0 = {
+    const err0 =
+    /*
+      schemaPath:"#/oneOf/0/const"
+      keyword:"const"
+      params:{allowedValue: 0}
+    */
+    {
       instancePath,
       message: "must be equal to constant"
     };
@@ -42,7 +48,13 @@ function validate0(data, {
   const _errs2 = errors;
 
   if (typeof data !== "string") {
-    const err1 = {
+    const err1 =
+    /*
+      schemaPath:"#/oneOf/1/type"
+      keyword:"type"
+      params:{type: "string"}
+    */
+    {
       instancePath,
       message: "must be string"
     };
@@ -69,7 +81,13 @@ function validate0(data, {
   }
 
   if (!valid0) {
-    const err2 = {
+    const err2 =
+    /*
+      schemaPath:"#/oneOf"
+      keyword:"oneOf"
+      params:{passingSchemas: passing0}
+    */
+    {
       instancePath,
       message: "must match exactly one schema in oneOf"
     };
