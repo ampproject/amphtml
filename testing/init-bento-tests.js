@@ -6,5 +6,5 @@ import {initializeTests, setBentoMode} from './init-tests-helpers';
  * This file initializes AMP's Karma + Mocha based unit & integration tests.
  */
 
-setBentoMode(false);
+setBentoMode(true);
 initializeTests();
