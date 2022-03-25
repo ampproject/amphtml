@@ -1,0 +1,17 @@
+{
+  "$defs": {
+    "https": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    }
+  },
+  "properties": {
+    "foo": {
+      "$ref": "#/$defs/https"
+    },
+    "bar": {
+      "$ref": "#/$defs/https"
+    }
+  }
+}

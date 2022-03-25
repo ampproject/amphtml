@@ -133,6 +133,7 @@ function ajvCompile(schema) {
       source: true,
       lines: true,
     },
+    inlineRefs: false,
     allErrors: true,
     validateSchema: false,
     formats: getFormats(),
