@@ -9,6 +9,7 @@ import {
   px,
   resetStyles,
   setImportantStyles,
+  setInitialDisplay,
   setStyles,
   toggle,
 } from '#core/dom/style';
@@ -166,6 +167,27 @@ function complainAboutPortrait(element) {
     'Minimize-to-corner (`dock`) does not support portrait video.',
     element
   );
+}
+
+/**
+ * Prevents cumulative layout shifts (CLS) when switching
+ * position before and after dock animation:
+ *
+ * - `static` -> `fixed`
+ * - `fixed` -> `absolute` -> `static`
+ *
+ * @param {!VideoOrBaseElementDef} video
+ * @param {!Element} element
+ * @restricted
+ */
+function avoidCls(video, element) {
+  // avoid CLS by switching display style shortly
+  setInitialDisplay(element, 'flex');
+  video.mutateElement(() => {
+    // reset display on next mutation
+    // eslint-disable-next-line local/no-style-display
+    resetStyles(element, ['display']);
+  });
 }
 
 /**
@@ -1067,8 +1089,9 @@ export class VideoDocking {
 
         setTransitionTiming(element);
         maybeSetSizing(element);
-      });
 
+        avoidCls(video, element);
+      });
       setOpacity(shadowLayer);
 
       this.getControls_().positionOnVsync(scale, x, y, width, height);
@@ -1649,6 +1672,8 @@ export class VideoDocking {
           'top',
         ]);
       });
+
+      avoidCls(video, internalElement);
 
       this.placedAt_ = null;
       this.sizedAt_ = null;
