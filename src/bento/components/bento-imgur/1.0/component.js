@@ -22,7 +22,7 @@ export function BentoImgurWithRef(
   {imgurId, title = 'imgur post', ...rest},
   ref
 ) {
-  const [readyState, setReadyState] = useState({});
+  const [readyState, setReadyState] = useState(ReadyState_Enum.LOADING);
   const [heightStyle, setHeightStyle] = useState({});
 
   const messageReceived = useRef(false);

@@ -3,6 +3,7 @@ import {mount} from 'enzyme';
 import {BentoImgur} from '#bento/components/bento-imgur/1.0/component';
 
 import * as Preact from '#preact';
+import {logger} from '#preact/logger';
 
 describes.sandboxed('BentoImgur preact component v1.0', {}, (env) => {
   it('should render a single post', () => {
@@ -41,6 +42,25 @@ describes.sandboxed('BentoImgur preact component v1.0', {}, (env) => {
 
     expect(findContainer(wrapper).prop('style').height).to.equal(999);
   });
+
+  it('should error out if no message was received', () => {
+    const clock = env.sandbox.useFakeTimers();
+    const wrapper = mount(<BentoImgur imgurId="TEST" />);
+
+    const iframe = wrapper.find('iframe').getDOMNode();
+    dispatchIframeLoad({iframe});
+    wrapper.update();
+
+    allowConsoleError(() => {
+      clock.tick(500 + 99);
+      wrapper.update();
+    });
+
+    expect(logger.error).calledWith(
+      'bento-imgur',
+      'Failed to load.  Is "TEST" a correct id?'
+    );
+  });
 });
 
 function findContainer(wrapper) {
@@ -55,4 +75,9 @@ function dispatchIframeMessage({data, iframe}) {
   mockEvent.data = JSON.stringify(data);
 
   window.dispatchEvent(mockEvent);
+}
+
+function dispatchIframeLoad({iframe}) {
+  const mockEvent = new CustomEvent('load');
+  iframe.dispatchEvent(mockEvent);
 }
