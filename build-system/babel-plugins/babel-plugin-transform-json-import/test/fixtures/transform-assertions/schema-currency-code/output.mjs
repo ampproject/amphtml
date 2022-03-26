@@ -27,7 +27,7 @@ function validate0(data, instancePath = "") {
   return errors === 0;
 }
 
-const validateCurrencyCode = (data, name) => validate(data, name) ? [] : validate.errors;
+const validateCurrencyCode = (data, schemaName = "currency-code") => validate(data, schemaName) ? [] : validate.errors;
 
 console.
 /*OK*/

@@ -27,7 +27,7 @@ function _validate2(data, instancePath = "") {
   return errors === 0;
 }
 
-const validate = (data, name) => _validate(data, name) ? [] : _validate.errors;
+const validate = (data, schemaName = "name-collision") => _validate(data, schemaName) ? [] : _validate.errors;
 
 validate(`
   "validate" is ajvCompile's default output name.

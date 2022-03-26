@@ -86,7 +86,7 @@ function validate0(data, instancePath = "") {
   return errors === 0;
 }
 
-const validateOneOf = (data, name) => validate(data, name) ? [] : validate.errors;
+const validateOneOf = (data, schemaName = "one-of") => validate(data, schemaName) ? [] : validate.errors;
 
 console.
 /*OK*/

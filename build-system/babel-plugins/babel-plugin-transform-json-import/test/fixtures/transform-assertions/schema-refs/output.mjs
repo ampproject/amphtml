@@ -92,7 +92,7 @@ function validate0(data, instancePath = "") {
   return errors === 0;
 }
 
-const validateRefs = (data, name) => validate(data, name) ? [] : validate.errors;
+const validateRefs = (data, schemaName = "refs") => validate(data, schemaName) ? [] : validate.errors;
 
 console.
 /*OK*/

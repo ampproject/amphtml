@@ -1,6 +1,6 @@
 const json5 = require('json5');
 const {ajvCompile, transformAjvCode} = require('../../compile/json-schema');
-const {dirname, join, relative, resolve} = require('path');
+const {basename, dirname, join, relative, resolve} = require('path');
 const {readFileSync} = require('fs');
 const {readJson} = require('../../json-locales');
 
@@ -59,12 +59,16 @@ module.exports = function (babel) {
 
       path.insertBefore(result?.ast?.program.body || []);
 
+      const defaultSchemaName = basename(
+        basename(jsonPath, '.json'),
+        '.schema'
+      );
       // The generated function returns a boolean, and modifies a property of
       // itself for errors. We wrap it to instead return an array of errors,
       // which is empty when the input is valid.
       return template.expression.ast`
-        (data, name) =>
-          ${name}(data, name) ? [] : ${name}.errors
+        (data, schemaName = ${JSON.stringify(defaultSchemaName)}) =>
+          ${name}(data, schemaName) ? [] : ${name}.errors
       `;
     },
   };

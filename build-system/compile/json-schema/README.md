@@ -29,13 +29,13 @@ validateProduct({foo: "bar"}); // invalid, returns errrors
 This function has the following signature:
 
 ```typescript
-function validate(data: any, name? string): string[] {}
+function validate(data: any, schemaName? string): string[] {}
 ```
 
 #### Arguments
 
 -   **`data`** is the value to validate.
--   **`name`** is optional, and represents the name of the validated object. This is added to error messages, and it's recommended that you include it.
+-   **`schemaName`** is optional, and represents the name of the validated object. This is added to error messages. By default, it's the basename of the imported file.
 
 #### Return value
 

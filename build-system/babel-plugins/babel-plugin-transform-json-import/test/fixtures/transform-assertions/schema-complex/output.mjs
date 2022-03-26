@@ -1412,7 +1412,7 @@ function validate0(data, instancePath = "") {
   return errors === 0;
 }
 
-const validate = (data, name) => _validate(data, name) ? [] : _validate.errors;
+const validate = (data, schemaName = "complex") => _validate(data, schemaName) ? [] : _validate.errors;
 
 console.
 /*OK*/

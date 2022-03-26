@@ -80,7 +80,7 @@ function validate0(data, instancePath = "") {
   return errors === 0;
 }
 
-const validateFormatDate = (data, name) => validate(data, name) ? [] : validate.errors;
+const validateFormatDate = (data, schemaName = "format-date") => validate(data, schemaName) ? [] : validate.errors;
 
 console.
 /*OK*/

@@ -58,7 +58,7 @@ function validate0(data, instancePath = "") {
   return errors === 0;
 }
 
-const validateFormat = (data, name) => validate(data, name) ? [] : validate.errors;
+const validateFormat = (data, schemaName = "format") => validate(data, schemaName) ? [] : validate.errors;
 
 console.
 /*OK*/
