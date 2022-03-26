@@ -1,0 +1,52 @@
+{
+  "oneOf": [
+    {
+      "type": "string"
+    },
+    {
+      // By including `additionalProperties: false`, and these many
+      // known properties, we cause the compiler to include a reference to
+      // the schema.
+      // This tests the case where we reference arrays sparsely (only 
+      // item index `1` of the parent `oneOf`).
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "b": {
+          "type": "boolean"
+        },
+        "c": {
+          "type": "string"
+        },
+        "d": {
+          "type": "string"
+        },
+        "h": {
+          "type": "string"
+        },
+        "e": {
+          "type": "number",
+          "minimum": 0
+        },
+        "f": {
+          "type": "number"
+        },
+        "g": {
+          "type": "string"
+        },
+        "i": {
+          "type": "number"
+        }
+      }
+    }
+  ]
+}

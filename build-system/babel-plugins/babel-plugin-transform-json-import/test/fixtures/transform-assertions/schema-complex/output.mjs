@@ -3,85 +3,20 @@ import { isIso4217CurrencyCode } from '#core/json-schema';
 
 const _validate = validate0;
 const schema0 = {
-  "$id": "my-id",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["items"],
   "properties": {
-    "recursive": {
-      "$ref": "#/"
-    },
     "items": {
-      "type": "array",
       "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
         "properties": {
-          "recursive": {
-            "$ref": "#/properties/items"
-          },
-          "a": {
-            "oneOf": [{
-              "type": "string"
-            }, {
-              "type": "number"
-            }]
-          },
-          "b": {
-            "$ref": "#/properties/items/items/properties/a/oneOf/1"
-          },
-          "c": {
-            "type": "string"
-          },
-          "d": {
-            "type": "string"
-          },
-          "h": {
-            "type": "string"
-          },
-          "e": {
-            "type": "number",
-            "minimum": 0
-          },
-          "f": {
-            "description": "https://en.wikipedia.org/wiki/ISO_4217",
-            "_isIso4217CurrencyCode": true
-          },
-          "g": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["url", "altText"],
-              "properties": {
-                "url": {
-                  "type": "string"
-                },
-                "altText": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "i": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["ratingValue", "ratingCount", "ratingUrl"],
-            "properties": {
-              "ratingValue": {
-                "type": "number",
-                "minimum": 0
-              },
-              "ratingCount": {
-                "type": "number",
-                "minimum": 0
-              },
-              "ratingUrl": {
-                "type": "string"
-              }
-            }
-          }
+          "recursive": 1,
+          "a": 1,
+          "b": 1,
+          "c": 1,
+          "d": 1,
+          "h": 1,
+          "e": 1,
+          "f": 1,
+          "g": 1,
+          "i": 1
         }
       }
     }
@@ -89,84 +24,23 @@ const schema0 = {
 };
 const func0 = Object.prototype.hasOwnProperty;
 const schema1 = {
-  "type": "array",
   "items": {
-    "type": "object",
-    "additionalProperties": false,
-    "required": ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
     "properties": {
-      "recursive": {
-        "$ref": "#/properties/items"
-      },
-      "a": {
-        "oneOf": [{
-          "type": "string"
-        }, {
-          "type": "number"
-        }]
-      },
-      "b": {
-        "$ref": "#/properties/items/items/properties/a/oneOf/1"
-      },
-      "c": {
-        "type": "string"
-      },
-      "d": {
-        "type": "string"
-      },
-      "h": {
-        "type": "string"
-      },
-      "e": {
-        "type": "number",
-        "minimum": 0
-      },
-      "f": {
-        "description": "https://en.wikipedia.org/wiki/ISO_4217",
-        "_isIso4217CurrencyCode": true
-      },
-      "g": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["url", "altText"],
-          "properties": {
-            "url": {
-              "type": "string"
-            },
-            "altText": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "i": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["ratingValue", "ratingCount", "ratingUrl"],
-        "properties": {
-          "ratingValue": {
-            "type": "number",
-            "minimum": 0
-          },
-          "ratingCount": {
-            "type": "number",
-            "minimum": 0
-          },
-          "ratingUrl": {
-            "type": "string"
-          }
-        }
-      }
+      "recursive": 1,
+      "a": 1,
+      "b": 1,
+      "c": 1,
+      "d": 1,
+      "h": 1,
+      "e": 1,
+      "f": 1,
+      "g": 1,
+      "i": 1
     }
   }
 };
 const wrapper0 = {
   validate: validate1
-};
-const schema2 = {
-  "type": "number"
 };
 
 function validate2(data, instancePath = "") {

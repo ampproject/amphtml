@@ -9,6 +9,14 @@ const {default: AjvStandalone} = require('ajv/dist/standalone');
 const babel = require('@babel/core');
 const iso4217 = require('./iso4217.json');
 
+/**
+ * @typedef {{
+ *   singleError?: boolean,
+ *   treeShakeSchema?: boolean,
+ * }}
+ */
+let AjvCompileOptsDef;
+
 const iso4217DescriptionRe = /iso[_\- ]*4217/i;
 
 /**
@@ -123,9 +131,10 @@ const getFormats = once(() => {
 
 /**
  * @param {any} schema
+ * @param {AjvCompileOptsDef=} opts
  * @return {string}
  */
-function ajvCompile(schema) {
+function ajvCompile(schema, opts = {}) {
   const validatorFns = new Set();
   const ajv = new Ajv({
     code: {
@@ -134,7 +143,8 @@ function ajvCompile(schema) {
       lines: true,
     },
     inlineRefs: false,
-    allErrors: true,
+    allErrors: !opts.singleError,
+    messages: !opts.singleError,
     validateSchema: false,
     formats: getFormats(),
     keywords: getCustomValidatorKeywords(validatorFns),
@@ -163,14 +173,13 @@ function getImportCode(validatorFns) {
  *  - If provided a "scope" of used names, it will rescope the current code
  *    to prevent collisions, and remove `export`.
  * @param {string} code
+ * @param {AjvCompileOptsDef} opts
  * @param {string[]=} scope
  * @param {babel.TransformOptions=} config
  * @return {{result: babel.BabelFileResult | null, name: string}}
  */
-function transformAjvCode(code, scope, config) {
-  const {types: t} = babel;
-
-  const scopeSet = scope ? new Set(scope) : null;
+function transformAjvCode(code, opts = {}, scope, config) {
+  const {template, types: t} = babel;
 
   // ajvCompile's generated name
   let name = 'validate';
@@ -182,27 +191,146 @@ function transformAjvCode(code, scope, config) {
   const findProperty = (properties, name) =>
     properties.find((node) => isObjectProperty(node, name));
 
+  const schemaVariableDeclaratorRe = /^schema[0-9]+$/;
+  const missingSingleErrorVariableDeclaratorRe = /^missing[0-9]+$/;
+
+  /**
+   * @param {babel.NodePath} path
+   */
+  function treeShakeSchema(path) {
+    if (
+      !path.isVariableDeclarator() ||
+      !t.isIdentifier(path.node.id) ||
+      !schemaVariableDeclaratorRe.test(path.node.id.name)
+    ) {
+      return;
+    }
+    const init = path.get('init');
+    if (!init.isObjectExpression()) {
+      return;
+    }
+    const binding = path.scope.getBinding(path.node.id.name);
+    if (!binding?.referencePaths?.length) {
+      path.remove();
+      return;
+    }
+
+    const source = init.getSource();
+    let schema;
+    try {
+      schema = JSON.parse(source);
+    } catch {
+      // Could not parse as JSON, de-opt
+      return;
+    }
+
+    const {referencePaths} = binding;
+    const memberPaths = referencePaths.reduce((memberPaths, referencePath) => {
+      if (!memberPaths) {
+        return null;
+      }
+      const memberPath = /** @type {(string|number)[]} */ ([]);
+      let at = referencePath.parentPath;
+      while (at?.isMemberExpression()) {
+        const {property} = at.node;
+        if (t.isIdentifier(property)) {
+          memberPath.push(property.name);
+        } else if (
+          t.isStringLiteral(property) ||
+          t.isNumericLiteral(property)
+        ) {
+          memberPath.push(property.value);
+        } else {
+          // Dynamic expression, can't optimize
+          return null;
+        }
+        at = at.parentPath;
+      }
+      memberPaths.push(memberPath);
+      return memberPaths;
+    }, /** @type {(string|number)[][]} */ ([]));
+
+    if (!memberPaths) {
+      return;
+    }
+
+    const preserved = {};
+    for (const memberPath of memberPaths.sort((a, b) => b.length - a.length)) {
+      let preservedAt = preserved;
+      let schemaAt = schema;
+      for (const [i, k] of memberPath.entries()) {
+        const isExactReference = i === memberPath.length - 1;
+        if (isExactReference) {
+          if (
+            !(typeof schemaAt[k] === 'object') ||
+            Array.isArray(schemaAt[k])
+          ) {
+            // Arrays and plain values are added as-is.
+            preservedAt[k] = schemaAt[k];
+          } else {
+            if (typeof preservedAt[k] !== 'object') {
+              preservedAt[k] = {};
+            }
+            for (const j in schemaAt[k]) {
+              if (!(j in preservedAt[k])) {
+                // Objects are referenced directly only for their keys, so we
+                // set each as `1` rather than their real value, when unset.
+                preservedAt[k][j] = 1;
+              }
+            }
+          }
+        } else {
+          if (!(k in preservedAt)) {
+            // Even though the container value in the original schema may be an
+            // array, we instead create an object in the preserved schema since
+            // we may reference keys sparsely rather than sequentially.
+            preservedAt[k] = {};
+          }
+          preservedAt = preservedAt[k];
+          schemaAt = schemaAt[k];
+        }
+      }
+    }
+
+    init.replaceWith(
+      template.expression(JSON.stringify(preserved), {
+        placeholderPattern: false,
+      })()
+    );
+  }
+
+  /**
+   * Prevents collisions with outer scope
+   * @param {babel.NodePath<babel.types.Program>} path
+   * @param {Set<string>|null} taken
+   * @param {string} id
+   */
+  function rescope(path, taken, id) {
+    if (!taken) {
+      return;
+    }
+    let renamed = id;
+    while (taken.has(renamed)) {
+      renamed = path.scope.generateUid(id);
+    }
+    if (renamed === id) {
+      return;
+    }
+    path.scope.rename(id, renamed);
+    if (id === name) {
+      name = renamed;
+    }
+  }
+
   /** @type {babel.PluginObj} */
   const plugin = {
     visitor: {
       Program: {
         exit(path) {
-          // Prevent collisions with outer scope
-          if (!scopeSet) {
-            return;
-          }
-          for (const binding in path.scope.bindings) {
-            let renamed = binding;
-            while (scopeSet.has(renamed)) {
-              renamed = path.scope.generateUid(binding);
-            }
-            if (renamed === binding) {
-              continue;
-            }
-            path.scope.rename(binding, renamed);
-            if (binding === name) {
-              name = renamed;
-            }
+          const taken = scope ? new Set(scope) : null;
+          for (const id in path.scope.bindings) {
+            treeShakeSchema(path.scope.bindings[id].path);
+            rescope(path, taken, id);
           }
         },
       },
@@ -232,6 +360,19 @@ function transformAjvCode(code, scope, config) {
         if (!instancePath) {
           return;
         }
+        // On `singleError` we remove all references to error messages, so we
+        // don't need these objects downstream.
+        if (opts.singleError) {
+          if (
+            path.parentPath.isCallExpression() &&
+            path.parentPath.node.arguments.at(-1) === path.node
+          ) {
+            path.remove();
+          } else {
+            path.replaceWith(t.identifier('undefined'));
+          }
+          return;
+        }
         const message = findProperty(properties, 'message');
         if (!message) {
           path.replaceWith(instancePath.value);
@@ -250,10 +391,45 @@ function transformAjvCode(code, scope, config) {
         if (!replacedPath.parentPath.isFunctionDeclaration()) {
           return;
         }
+        // On `singleError` we remove all references to error messages, so we
+        // don't need this argument.
+        if (opts.singleError) {
+          if (
+            replacedPath.parentPath.node.params.at(-1) === replacedPath.node
+          ) {
+            replacedPath.remove();
+          }
+          return;
+        }
         const {properties} = path.node;
         const instancePath = findProperty(properties, 'instancePath');
         if (instancePath) {
           replacedPath.replaceWith(instancePath);
+        }
+      },
+      AssignmentExpression(path) {
+        if (!opts.singleError) {
+          return;
+        }
+        // On `singleError`, remove `fn.errors = [error]` assignment, and only
+        // return `true` or `false`
+        if (
+          t.isMemberExpression(path.node.left) &&
+          t.isIdentifier(path.node.left.property, {name: 'errors'})
+        ) {
+          path.remove();
+          return;
+        }
+        // On `singleError`, ajv creates inline assignments like
+        // `if (x && (missing1 = 'propertyName'))`.
+        // These are not required when we don't set errors, and the minifier
+        // will not tree-shake them. We remove them here instead.
+        if (
+          path.parentPath.isLogicalExpression() &&
+          t.isIdentifier(path.node.left) &&
+          missingSingleErrorVariableDeclaratorRe.test(path.node.left.name)
+        ) {
+          path.replaceWith(t.booleanLiteral(true));
         }
       },
     },

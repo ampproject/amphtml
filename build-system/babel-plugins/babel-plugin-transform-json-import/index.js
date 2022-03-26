@@ -27,12 +27,13 @@ module.exports = function (babel) {
    * @type {{
    *  [type: string]: (
    *    path: babel.NodePath,
+   *    state: babel.PluginPass,
    *    jsonPath: string
    *  ) => babel.types.Expression,
    * }}
    */
   const typeAssertions = {
-    'json': (path, jsonPath) => {
+    'json': (path, _, jsonPath) => {
       let json;
       try {
         json = readJson(jsonPath);
@@ -46,13 +47,15 @@ module.exports = function (babel) {
       `;
     },
 
-    'json-schema': (path, jsonPath) => {
+    'json-schema': (path, state, jsonPath) => {
+      const opts = state.opts?.['jsonSchema'] || {};
+
       // json5 to allow comments
       const schema = json5.parse(readFileSync(jsonPath, 'utf8'));
-      const code = ajvCompile(schema);
+      const code = ajvCompile(schema, opts);
 
       const scope = Object.keys(path.scope.bindings);
-      const {name, result} = transformAjvCode(code, scope, {
+      const {name, result} = transformAjvCode(code, opts, scope, {
         code: false,
         ast: true,
       });
@@ -66,9 +69,18 @@ module.exports = function (babel) {
       // The generated function returns a boolean, and modifies a property of
       // itself for errors. We wrap it to instead return an array of errors,
       // which is empty when the input is valid.
+      // On `singleError` it only returns a boolean. In this case, we return
+      // the schema name directly.
+      const resultExpression = opts.singleError
+        ? template.expression.ast`
+            ${name}(data) ? [] : [schemaName]
+          `
+        : template.expression.ast`
+            ${name}(data, schemaName) ? [] : ${name}.errors
+          `;
       return template.expression.ast`
         (data, schemaName = ${JSON.stringify(defaultSchemaName)}) =>
-          ${name}(data, schemaName) ? [] : ${name}.errors
+          ${resultExpression}
       `;
     },
   };
@@ -84,7 +96,7 @@ module.exports = function (babel) {
     },
 
     visitor: {
-      ImportDeclaration(path) {
+      ImportDeclaration(path, state) {
         const {filename} = this.file.opts;
         const {assertions, source, specifiers} = path.node;
         if (!assertions || assertions.length === 0) {
@@ -127,7 +139,7 @@ module.exports = function (babel) {
           join(__dirname, '..', '..', '..'),
           resolve(dirname(filename), source.value)
         );
-        const init = typeAssertions[type](path, jsonPath);
+        const init = typeAssertions[type](path, state, jsonPath);
         const statement = template.statement.ast`
           const ${specifier.local} = ${init};
         `;

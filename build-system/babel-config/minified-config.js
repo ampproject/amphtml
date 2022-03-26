@@ -44,7 +44,18 @@ function getMinifiedConfig(buildFor = 'preact') {
       './build-system/babel-plugins/babel-plugin-transform-log-methods',
       {replaceCallArguments: false},
     ],
-    './build-system/babel-plugins/babel-plugin-transform-json-import',
+    [
+      './build-system/babel-plugins/babel-plugin-transform-json-import',
+      {
+        jsonSchema: {
+          // On ESM builds, we only care whether a full schema passes or not.
+          // Since we don't show errors meant for the developer, exiting early
+          // with a single error is much faster, and creates slightly smaller
+          // bundles.
+          singleError: argv.esm,
+        },
+      },
+    ],
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',

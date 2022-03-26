@@ -2,10 +2,6 @@ import { isIso4217CurrencyCode } from '#core/json-schema';
 "use strict";
 
 const validate = validate0;
-const schema0 = {
-  "description": "https://en.wikipedia.org/wiki/ISO_4217",
-  "_isIso4217CurrencyCode": true
-};
 
 function validate0(data, instancePath = "") {
   let vErrors = null;

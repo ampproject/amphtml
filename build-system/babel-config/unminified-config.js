@@ -42,7 +42,18 @@ function getUnminifiedConfig(buildFor = 'preact') {
     getImportResolverPlugin(buildFor),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     replacePlugin,
-    './build-system/babel-plugins/babel-plugin-transform-json-import',
+    [
+      './build-system/babel-plugins/babel-plugin-transform-json-import',
+      {
+        jsonSchema: {
+          // On ESM builds, we only care whether a full schema passes or not.
+          // Since we don't show errors meant for the developer, exiting early
+          // with a single error is much faster, and creates slightly smaller
+          // bundles.
+          singleError: argv.esm,
+        },
+      },
+    ],
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',

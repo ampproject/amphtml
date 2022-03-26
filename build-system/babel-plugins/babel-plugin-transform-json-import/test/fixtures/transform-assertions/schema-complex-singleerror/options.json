@@ -1,0 +1,13 @@
+{
+  "plugins": [
+    [
+      "../../../..",
+      {
+        "jsonSchema": {
+          "singleError": true
+        }
+      }
+    ]
+  ],
+  "sourceType": "module"
+}

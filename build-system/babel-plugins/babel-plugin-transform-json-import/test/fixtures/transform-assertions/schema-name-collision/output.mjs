@@ -3,9 +3,6 @@ const validate0 = `
   ajv's should be renamed, and this assignment should be preserved.
 `;
 const _validate = _validate2;
-const schema0 = {
-  "type": "string"
-};
 
 function _validate2(data, instancePath = "") {
   let vErrors = null;

@@ -1,11 +1,4 @@
 const validate = validate0;
-const schema0 = {
-  "oneOf": [{
-    "const": 0
-  }, {
-    "type": "string"
-  }]
-};
 
 function validate0(data, instancePath = "") {
   let vErrors = null;
