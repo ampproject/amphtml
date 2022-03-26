@@ -228,8 +228,7 @@ describes.realWin(
       const factor = factorThatWillMakeTargetFitPage * 1.25;
       expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
 
-      const calculatedKeyframes = presets['pan-up'];
-      calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(
+      const calculatedKeyframes = presets['pan-up'].keyframes(
         dimensions,
         /* options */ {}
       );
@@ -248,7 +247,37 @@ describes.realWin(
         },
       ];
 
-      expect(calculatedKeyframes.keyframes).to.deep.equal(expectedKeyframes);
+      expect(calculatedKeyframes).to.deep.equal(expectedKeyframes);
+    });
+
+    it('Should not scale the target if static scale is set.', () => {
+      const staticFactor = 2;
+
+      const dimensions = setDimensions(380, 580, 360, 580);
+      expect(targetFitsWithinPage(dimensions)).to.be.true;
+
+      const calculatedKeyframes = presets['pan-up'].keyframes(
+        dimensions,
+        /* options */ {'pan-static-scale': staticFactor}
+      );
+
+      const offsetX = -dimensions.targetWidth / 2;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight;
+
+      const expectedKeyframes = [
+        {
+          'transform': `translate(${offsetX}px, ${offsetY}px) scale(${staticFactor})`,
+          'transform-origin': 'left top',
+        },
+        {
+          'transform': `translate(${offsetX}px, 0px) scale(${staticFactor})`,
+          'transform-origin': 'left top',
+        },
+      ];
+
+      expect(calculatedKeyframes[0].transform).to.equal(
+        expectedKeyframes[0].transform
+      );
     });
   }
 );
