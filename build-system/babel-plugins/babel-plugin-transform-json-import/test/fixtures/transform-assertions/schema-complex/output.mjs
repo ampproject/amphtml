@@ -34,9 +34,6 @@ const schema0 = {
           "c": {
             "type": "string"
           },
-          "productIcon": {
-            "type": "string"
-          },
           "d": {
             "type": "string"
           },
@@ -112,9 +109,6 @@ const schema1 = {
         "$ref": "#/properties/items/items/properties/a/oneOf/1"
       },
       "c": {
-        "type": "string"
-      },
-      "productIcon": {
         "type": "string"
       },
       "d": {
@@ -431,9 +425,9 @@ function validate1(data, instancePath = "") {
           }
         }
 
-        if (data0.productIcon !== undefined) {
-          if (typeof data0.productIcon !== "string") {
-            const err14 = (instancePath + "/" + i0 + "/productIcon" + ' ' + "must be string").trim();
+        if (data0.d !== undefined) {
+          if (typeof data0.d !== "string") {
+            const err14 = (instancePath + "/" + i0 + "/d" + ' ' + "must be string").trim();
 
             if (vErrors === null) {
               vErrors = [err14];
@@ -445,9 +439,9 @@ function validate1(data, instancePath = "") {
           }
         }
 
-        if (data0.d !== undefined) {
-          if (typeof data0.d !== "string") {
-            const err15 = (instancePath + "/" + i0 + "/d" + ' ' + "must be string").trim();
+        if (data0.h !== undefined) {
+          if (typeof data0.h !== "string") {
+            const err15 = (instancePath + "/" + i0 + "/h" + ' ' + "must be string").trim();
 
             if (vErrors === null) {
               vErrors = [err15];
@@ -459,37 +453,37 @@ function validate1(data, instancePath = "") {
           }
         }
 
-        if (data0.h !== undefined) {
-          if (typeof data0.h !== "string") {
-            const err16 = (instancePath + "/" + i0 + "/h" + ' ' + "must be string").trim();
+        if (data0.e !== undefined) {
+          let data7 = data0.e;
+
+          if (typeof data7 == "number" && isFinite(data7)) {
+            if (data7 < 0 || isNaN(data7)) {
+              const err16 = (instancePath + "/" + i0 + "/e" + ' ' + "must be >= 0").trim();
+
+              if (vErrors === null) {
+                vErrors = [err16];
+              } else {
+                vErrors.push(err16);
+              }
+
+              errors++;
+            }
+          } else {
+            const err17 = (instancePath + "/" + i0 + "/e" + ' ' + "must be number").trim();
 
             if (vErrors === null) {
-              vErrors = [err16];
+              vErrors = [err17];
             } else {
-              vErrors.push(err16);
+              vErrors.push(err17);
             }
 
             errors++;
           }
         }
 
-        if (data0.e !== undefined) {
-          let data8 = data0.e;
-
-          if (typeof data8 == "number" && isFinite(data8)) {
-            if (data8 < 0 || isNaN(data8)) {
-              const err17 = (instancePath + "/" + i0 + "/e" + ' ' + "must be >= 0").trim();
-
-              if (vErrors === null) {
-                vErrors = [err17];
-              } else {
-                vErrors.push(err17);
-              }
-
-              errors++;
-            }
-          } else {
-            const err18 = (instancePath + "/" + i0 + "/e" + ' ' + "must be number").trim();
+        if (data0.f !== undefined) {
+          if (!isIso4217CurrencyCode(data0.f)) {
+            const err18 = (instancePath + "/" + i0 + "/f" + ' ' + "must be a valid ISO 4217 currency code").trim();
 
             if (vErrors === null) {
               vErrors = [err18];
@@ -501,32 +495,30 @@ function validate1(data, instancePath = "") {
           }
         }
 
-        if (data0.f !== undefined) {
-          if (!isIso4217CurrencyCode(data0.f)) {
-            const err19 = (instancePath + "/" + i0 + "/f" + ' ' + "must be a valid ISO 4217 currency code").trim();
-
-            if (vErrors === null) {
-              vErrors = [err19];
-            } else {
-              vErrors.push(err19);
-            }
-
-            errors++;
-          }
-        }
-
         if (data0.g !== undefined) {
-          let data10 = data0.g;
+          let data9 = data0.g;
 
-          if (Array.isArray(data10)) {
-            const len1 = data10.length;
+          if (Array.isArray(data9)) {
+            const len1 = data9.length;
 
             for (let i1 = 0; i1 < len1; i1++) {
-              let data11 = data10[i1];
+              let data10 = data9[i1];
 
-              if (data11 && typeof data11 == "object" && !Array.isArray(data11)) {
-                if (data11.url === undefined) {
-                  const err20 = (instancePath + "/" + i0 + "/g/" + i1 + ' ' + ("must have required property '" + "url" + "'")).trim();
+              if (data10 && typeof data10 == "object" && !Array.isArray(data10)) {
+                if (data10.url === undefined) {
+                  const err19 = (instancePath + "/" + i0 + "/g/" + i1 + ' ' + ("must have required property '" + "url" + "'")).trim();
+
+                  if (vErrors === null) {
+                    vErrors = [err19];
+                  } else {
+                    vErrors.push(err19);
+                  }
+
+                  errors++;
+                }
+
+                if (data10.altText === undefined) {
+                  const err20 = (instancePath + "/" + i0 + "/g/" + i1 + ' ' + ("must have required property '" + "altText" + "'")).trim();
 
                   if (vErrors === null) {
                     vErrors = [err20];
@@ -537,21 +529,23 @@ function validate1(data, instancePath = "") {
                   errors++;
                 }
 
-                if (data11.altText === undefined) {
-                  const err21 = (instancePath + "/" + i0 + "/g/" + i1 + ' ' + ("must have required property '" + "altText" + "'")).trim();
+                for (const key1 in data10) {
+                  if (!(key1 === "url" || key1 === "altText")) {
+                    const err21 = (instancePath + "/" + i0 + "/g/" + i1 + ' ' + "must NOT have additional properties").trim();
 
-                  if (vErrors === null) {
-                    vErrors = [err21];
-                  } else {
-                    vErrors.push(err21);
+                    if (vErrors === null) {
+                      vErrors = [err21];
+                    } else {
+                      vErrors.push(err21);
+                    }
+
+                    errors++;
                   }
-
-                  errors++;
                 }
 
-                for (const key1 in data11) {
-                  if (!(key1 === "url" || key1 === "altText")) {
-                    const err22 = (instancePath + "/" + i0 + "/g/" + i1 + ' ' + "must NOT have additional properties").trim();
+                if (data10.url !== undefined) {
+                  if (typeof data10.url !== "string") {
+                    const err22 = (instancePath + "/" + i0 + "/g/" + i1 + "/url" + ' ' + "must be string").trim();
 
                     if (vErrors === null) {
                       vErrors = [err22];
@@ -563,9 +557,9 @@ function validate1(data, instancePath = "") {
                   }
                 }
 
-                if (data11.url !== undefined) {
-                  if (typeof data11.url !== "string") {
-                    const err23 = (instancePath + "/" + i0 + "/g/" + i1 + "/url" + ' ' + "must be string").trim();
+                if (data10.altText !== undefined) {
+                  if (typeof data10.altText !== "string") {
+                    const err23 = (instancePath + "/" + i0 + "/g/" + i1 + "/altText" + ' ' + "must be string").trim();
 
                     if (vErrors === null) {
                       vErrors = [err23];
@@ -576,39 +570,25 @@ function validate1(data, instancePath = "") {
                     errors++;
                   }
                 }
-
-                if (data11.altText !== undefined) {
-                  if (typeof data11.altText !== "string") {
-                    const err24 = (instancePath + "/" + i0 + "/g/" + i1 + "/altText" + ' ' + "must be string").trim();
-
-                    if (vErrors === null) {
-                      vErrors = [err24];
-                    } else {
-                      vErrors.push(err24);
-                    }
-
-                    errors++;
-                  }
-                }
               } else {
-                const err25 = (instancePath + "/" + i0 + "/g/" + i1 + ' ' + "must be object").trim();
+                const err24 = (instancePath + "/" + i0 + "/g/" + i1 + ' ' + "must be object").trim();
 
                 if (vErrors === null) {
-                  vErrors = [err25];
+                  vErrors = [err24];
                 } else {
-                  vErrors.push(err25);
+                  vErrors.push(err24);
                 }
 
                 errors++;
               }
             }
           } else {
-            const err26 = (instancePath + "/" + i0 + "/g" + ' ' + "must be array").trim();
+            const err25 = (instancePath + "/" + i0 + "/g" + ' ' + "must be array").trim();
 
             if (vErrors === null) {
-              vErrors = [err26];
+              vErrors = [err25];
             } else {
-              vErrors.push(err26);
+              vErrors.push(err25);
             }
 
             errors++;
@@ -616,11 +596,23 @@ function validate1(data, instancePath = "") {
         }
 
         if (data0.i !== undefined) {
-          let data14 = data0.i;
+          let data13 = data0.i;
 
-          if (data14 && typeof data14 == "object" && !Array.isArray(data14)) {
-            if (data14.ratingValue === undefined) {
-              const err27 = (instancePath + "/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingValue" + "'")).trim();
+          if (data13 && typeof data13 == "object" && !Array.isArray(data13)) {
+            if (data13.ratingValue === undefined) {
+              const err26 = (instancePath + "/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingValue" + "'")).trim();
+
+              if (vErrors === null) {
+                vErrors = [err26];
+              } else {
+                vErrors.push(err26);
+              }
+
+              errors++;
+            }
+
+            if (data13.ratingCount === undefined) {
+              const err27 = (instancePath + "/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingCount" + "'")).trim();
 
               if (vErrors === null) {
                 vErrors = [err27];
@@ -631,8 +623,8 @@ function validate1(data, instancePath = "") {
               errors++;
             }
 
-            if (data14.ratingCount === undefined) {
-              const err28 = (instancePath + "/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingCount" + "'")).trim();
+            if (data13.ratingUrl === undefined) {
+              const err28 = (instancePath + "/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingUrl" + "'")).trim();
 
               if (vErrors === null) {
                 vErrors = [err28];
@@ -643,77 +635,79 @@ function validate1(data, instancePath = "") {
               errors++;
             }
 
-            if (data14.ratingUrl === undefined) {
-              const err29 = (instancePath + "/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingUrl" + "'")).trim();
-
-              if (vErrors === null) {
-                vErrors = [err29];
-              } else {
-                vErrors.push(err29);
-              }
-
-              errors++;
-            }
-
-            for (const key2 in data14) {
+            for (const key2 in data13) {
               if (!(key2 === "ratingValue" || key2 === "ratingCount" || key2 === "ratingUrl")) {
-                const err30 = (instancePath + "/" + i0 + "/i" + ' ' + "must NOT have additional properties").trim();
+                const err29 = (instancePath + "/" + i0 + "/i" + ' ' + "must NOT have additional properties").trim();
 
                 if (vErrors === null) {
-                  vErrors = [err30];
+                  vErrors = [err29];
                 } else {
-                  vErrors.push(err30);
+                  vErrors.push(err29);
                 }
 
                 errors++;
               }
             }
 
-            if (data14.ratingValue !== undefined) {
-              let data15 = data14.ratingValue;
+            if (data13.ratingValue !== undefined) {
+              let data14 = data13.ratingValue;
+
+              if (typeof data14 == "number" && isFinite(data14)) {
+                if (data14 < 0 || isNaN(data14)) {
+                  const err30 = (instancePath + "/" + i0 + "/i/ratingValue" + ' ' + "must be >= 0").trim();
+
+                  if (vErrors === null) {
+                    vErrors = [err30];
+                  } else {
+                    vErrors.push(err30);
+                  }
+
+                  errors++;
+                }
+              } else {
+                const err31 = (instancePath + "/" + i0 + "/i/ratingValue" + ' ' + "must be number").trim();
+
+                if (vErrors === null) {
+                  vErrors = [err31];
+                } else {
+                  vErrors.push(err31);
+                }
+
+                errors++;
+              }
+            }
+
+            if (data13.ratingCount !== undefined) {
+              let data15 = data13.ratingCount;
 
               if (typeof data15 == "number" && isFinite(data15)) {
                 if (data15 < 0 || isNaN(data15)) {
-                  const err31 = (instancePath + "/" + i0 + "/i/ratingValue" + ' ' + "must be >= 0").trim();
+                  const err32 = (instancePath + "/" + i0 + "/i/ratingCount" + ' ' + "must be >= 0").trim();
 
                   if (vErrors === null) {
-                    vErrors = [err31];
+                    vErrors = [err32];
                   } else {
-                    vErrors.push(err31);
+                    vErrors.push(err32);
                   }
 
                   errors++;
                 }
               } else {
-                const err32 = (instancePath + "/" + i0 + "/i/ratingValue" + ' ' + "must be number").trim();
+                const err33 = (instancePath + "/" + i0 + "/i/ratingCount" + ' ' + "must be number").trim();
 
                 if (vErrors === null) {
-                  vErrors = [err32];
+                  vErrors = [err33];
                 } else {
-                  vErrors.push(err32);
+                  vErrors.push(err33);
                 }
 
                 errors++;
               }
             }
 
-            if (data14.ratingCount !== undefined) {
-              let data16 = data14.ratingCount;
-
-              if (typeof data16 == "number" && isFinite(data16)) {
-                if (data16 < 0 || isNaN(data16)) {
-                  const err33 = (instancePath + "/" + i0 + "/i/ratingCount" + ' ' + "must be >= 0").trim();
-
-                  if (vErrors === null) {
-                    vErrors = [err33];
-                  } else {
-                    vErrors.push(err33);
-                  }
-
-                  errors++;
-                }
-              } else {
-                const err34 = (instancePath + "/" + i0 + "/i/ratingCount" + ' ' + "must be number").trim();
+            if (data13.ratingUrl !== undefined) {
+              if (typeof data13.ratingUrl !== "string") {
+                const err34 = (instancePath + "/" + i0 + "/i/ratingUrl" + ' ' + "must be string").trim();
 
                 if (vErrors === null) {
                   vErrors = [err34];
@@ -724,51 +718,37 @@ function validate1(data, instancePath = "") {
                 errors++;
               }
             }
-
-            if (data14.ratingUrl !== undefined) {
-              if (typeof data14.ratingUrl !== "string") {
-                const err35 = (instancePath + "/" + i0 + "/i/ratingUrl" + ' ' + "must be string").trim();
-
-                if (vErrors === null) {
-                  vErrors = [err35];
-                } else {
-                  vErrors.push(err35);
-                }
-
-                errors++;
-              }
-            }
           } else {
-            const err36 = (instancePath + "/" + i0 + "/i" + ' ' + "must be object").trim();
+            const err35 = (instancePath + "/" + i0 + "/i" + ' ' + "must be object").trim();
 
             if (vErrors === null) {
-              vErrors = [err36];
+              vErrors = [err35];
             } else {
-              vErrors.push(err36);
+              vErrors.push(err35);
             }
 
             errors++;
           }
         }
       } else {
-        const err37 = (instancePath + "/" + i0 + ' ' + "must be object").trim();
+        const err36 = (instancePath + "/" + i0 + ' ' + "must be object").trim();
 
         if (vErrors === null) {
-          vErrors = [err37];
+          vErrors = [err36];
         } else {
-          vErrors.push(err37);
+          vErrors.push(err36);
         }
 
         errors++;
       }
     }
   } else {
-    const err38 = (instancePath + ' ' + "must be array").trim();
+    const err37 = (instancePath + ' ' + "must be array").trim();
 
     if (vErrors === null) {
-      vErrors = [err38];
+      vErrors = [err37];
     } else {
-      vErrors.push(err38);
+      vErrors.push(err37);
     }
 
     errors++;
@@ -1053,9 +1033,9 @@ function validate0(data, instancePath = "") {
               }
             }
 
-            if (data2.productIcon !== undefined) {
-              if (typeof data2.productIcon !== "string") {
-                const err16 = (instancePath + "/items/" + i0 + "/productIcon" + ' ' + "must be string").trim();
+            if (data2.d !== undefined) {
+              if (typeof data2.d !== "string") {
+                const err16 = (instancePath + "/items/" + i0 + "/d" + ' ' + "must be string").trim();
 
                 if (vErrors === null) {
                   vErrors = [err16];
@@ -1067,9 +1047,9 @@ function validate0(data, instancePath = "") {
               }
             }
 
-            if (data2.d !== undefined) {
-              if (typeof data2.d !== "string") {
-                const err17 = (instancePath + "/items/" + i0 + "/d" + ' ' + "must be string").trim();
+            if (data2.h !== undefined) {
+              if (typeof data2.h !== "string") {
+                const err17 = (instancePath + "/items/" + i0 + "/h" + ' ' + "must be string").trim();
 
                 if (vErrors === null) {
                   vErrors = [err17];
@@ -1081,37 +1061,37 @@ function validate0(data, instancePath = "") {
               }
             }
 
-            if (data2.h !== undefined) {
-              if (typeof data2.h !== "string") {
-                const err18 = (instancePath + "/items/" + i0 + "/h" + ' ' + "must be string").trim();
+            if (data2.e !== undefined) {
+              let data9 = data2.e;
+
+              if (typeof data9 == "number" && isFinite(data9)) {
+                if (data9 < 0 || isNaN(data9)) {
+                  const err18 = (instancePath + "/items/" + i0 + "/e" + ' ' + "must be >= 0").trim();
+
+                  if (vErrors === null) {
+                    vErrors = [err18];
+                  } else {
+                    vErrors.push(err18);
+                  }
+
+                  errors++;
+                }
+              } else {
+                const err19 = (instancePath + "/items/" + i0 + "/e" + ' ' + "must be number").trim();
 
                 if (vErrors === null) {
-                  vErrors = [err18];
+                  vErrors = [err19];
                 } else {
-                  vErrors.push(err18);
+                  vErrors.push(err19);
                 }
 
                 errors++;
               }
             }
 
-            if (data2.e !== undefined) {
-              let data10 = data2.e;
-
-              if (typeof data10 == "number" && isFinite(data10)) {
-                if (data10 < 0 || isNaN(data10)) {
-                  const err19 = (instancePath + "/items/" + i0 + "/e" + ' ' + "must be >= 0").trim();
-
-                  if (vErrors === null) {
-                    vErrors = [err19];
-                  } else {
-                    vErrors.push(err19);
-                  }
-
-                  errors++;
-                }
-              } else {
-                const err20 = (instancePath + "/items/" + i0 + "/e" + ' ' + "must be number").trim();
+            if (data2.f !== undefined) {
+              if (!isIso4217CurrencyCode(data2.f)) {
+                const err20 = (instancePath + "/items/" + i0 + "/f" + ' ' + "must be a valid ISO 4217 currency code").trim();
 
                 if (vErrors === null) {
                   vErrors = [err20];
@@ -1123,32 +1103,30 @@ function validate0(data, instancePath = "") {
               }
             }
 
-            if (data2.f !== undefined) {
-              if (!isIso4217CurrencyCode(data2.f)) {
-                const err21 = (instancePath + "/items/" + i0 + "/f" + ' ' + "must be a valid ISO 4217 currency code").trim();
-
-                if (vErrors === null) {
-                  vErrors = [err21];
-                } else {
-                  vErrors.push(err21);
-                }
-
-                errors++;
-              }
-            }
-
             if (data2.g !== undefined) {
-              let data12 = data2.g;
+              let data11 = data2.g;
 
-              if (Array.isArray(data12)) {
-                const len1 = data12.length;
+              if (Array.isArray(data11)) {
+                const len1 = data11.length;
 
                 for (let i1 = 0; i1 < len1; i1++) {
-                  let data13 = data12[i1];
+                  let data12 = data11[i1];
 
-                  if (data13 && typeof data13 == "object" && !Array.isArray(data13)) {
-                    if (data13.url === undefined) {
-                      const err22 = (instancePath + "/items/" + i0 + "/g/" + i1 + ' ' + ("must have required property '" + "url" + "'")).trim();
+                  if (data12 && typeof data12 == "object" && !Array.isArray(data12)) {
+                    if (data12.url === undefined) {
+                      const err21 = (instancePath + "/items/" + i0 + "/g/" + i1 + ' ' + ("must have required property '" + "url" + "'")).trim();
+
+                      if (vErrors === null) {
+                        vErrors = [err21];
+                      } else {
+                        vErrors.push(err21);
+                      }
+
+                      errors++;
+                    }
+
+                    if (data12.altText === undefined) {
+                      const err22 = (instancePath + "/items/" + i0 + "/g/" + i1 + ' ' + ("must have required property '" + "altText" + "'")).trim();
 
                       if (vErrors === null) {
                         vErrors = [err22];
@@ -1159,21 +1137,23 @@ function validate0(data, instancePath = "") {
                       errors++;
                     }
 
-                    if (data13.altText === undefined) {
-                      const err23 = (instancePath + "/items/" + i0 + "/g/" + i1 + ' ' + ("must have required property '" + "altText" + "'")).trim();
+                    for (const key2 in data12) {
+                      if (!(key2 === "url" || key2 === "altText")) {
+                        const err23 = (instancePath + "/items/" + i0 + "/g/" + i1 + ' ' + "must NOT have additional properties").trim();
 
-                      if (vErrors === null) {
-                        vErrors = [err23];
-                      } else {
-                        vErrors.push(err23);
+                        if (vErrors === null) {
+                          vErrors = [err23];
+                        } else {
+                          vErrors.push(err23);
+                        }
+
+                        errors++;
                       }
-
-                      errors++;
                     }
 
-                    for (const key2 in data13) {
-                      if (!(key2 === "url" || key2 === "altText")) {
-                        const err24 = (instancePath + "/items/" + i0 + "/g/" + i1 + ' ' + "must NOT have additional properties").trim();
+                    if (data12.url !== undefined) {
+                      if (typeof data12.url !== "string") {
+                        const err24 = (instancePath + "/items/" + i0 + "/g/" + i1 + "/url" + ' ' + "must be string").trim();
 
                         if (vErrors === null) {
                           vErrors = [err24];
@@ -1185,9 +1165,9 @@ function validate0(data, instancePath = "") {
                       }
                     }
 
-                    if (data13.url !== undefined) {
-                      if (typeof data13.url !== "string") {
-                        const err25 = (instancePath + "/items/" + i0 + "/g/" + i1 + "/url" + ' ' + "must be string").trim();
+                    if (data12.altText !== undefined) {
+                      if (typeof data12.altText !== "string") {
+                        const err25 = (instancePath + "/items/" + i0 + "/g/" + i1 + "/altText" + ' ' + "must be string").trim();
 
                         if (vErrors === null) {
                           vErrors = [err25];
@@ -1198,39 +1178,25 @@ function validate0(data, instancePath = "") {
                         errors++;
                       }
                     }
-
-                    if (data13.altText !== undefined) {
-                      if (typeof data13.altText !== "string") {
-                        const err26 = (instancePath + "/items/" + i0 + "/g/" + i1 + "/altText" + ' ' + "must be string").trim();
-
-                        if (vErrors === null) {
-                          vErrors = [err26];
-                        } else {
-                          vErrors.push(err26);
-                        }
-
-                        errors++;
-                      }
-                    }
                   } else {
-                    const err27 = (instancePath + "/items/" + i0 + "/g/" + i1 + ' ' + "must be object").trim();
+                    const err26 = (instancePath + "/items/" + i0 + "/g/" + i1 + ' ' + "must be object").trim();
 
                     if (vErrors === null) {
-                      vErrors = [err27];
+                      vErrors = [err26];
                     } else {
-                      vErrors.push(err27);
+                      vErrors.push(err26);
                     }
 
                     errors++;
                   }
                 }
               } else {
-                const err28 = (instancePath + "/items/" + i0 + "/g" + ' ' + "must be array").trim();
+                const err27 = (instancePath + "/items/" + i0 + "/g" + ' ' + "must be array").trim();
 
                 if (vErrors === null) {
-                  vErrors = [err28];
+                  vErrors = [err27];
                 } else {
-                  vErrors.push(err28);
+                  vErrors.push(err27);
                 }
 
                 errors++;
@@ -1238,11 +1204,23 @@ function validate0(data, instancePath = "") {
             }
 
             if (data2.i !== undefined) {
-              let data16 = data2.i;
+              let data15 = data2.i;
 
-              if (data16 && typeof data16 == "object" && !Array.isArray(data16)) {
-                if (data16.ratingValue === undefined) {
-                  const err29 = (instancePath + "/items/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingValue" + "'")).trim();
+              if (data15 && typeof data15 == "object" && !Array.isArray(data15)) {
+                if (data15.ratingValue === undefined) {
+                  const err28 = (instancePath + "/items/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingValue" + "'")).trim();
+
+                  if (vErrors === null) {
+                    vErrors = [err28];
+                  } else {
+                    vErrors.push(err28);
+                  }
+
+                  errors++;
+                }
+
+                if (data15.ratingCount === undefined) {
+                  const err29 = (instancePath + "/items/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingCount" + "'")).trim();
 
                   if (vErrors === null) {
                     vErrors = [err29];
@@ -1253,8 +1231,8 @@ function validate0(data, instancePath = "") {
                   errors++;
                 }
 
-                if (data16.ratingCount === undefined) {
-                  const err30 = (instancePath + "/items/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingCount" + "'")).trim();
+                if (data15.ratingUrl === undefined) {
+                  const err30 = (instancePath + "/items/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingUrl" + "'")).trim();
 
                   if (vErrors === null) {
                     vErrors = [err30];
@@ -1265,77 +1243,79 @@ function validate0(data, instancePath = "") {
                   errors++;
                 }
 
-                if (data16.ratingUrl === undefined) {
-                  const err31 = (instancePath + "/items/" + i0 + "/i" + ' ' + ("must have required property '" + "ratingUrl" + "'")).trim();
-
-                  if (vErrors === null) {
-                    vErrors = [err31];
-                  } else {
-                    vErrors.push(err31);
-                  }
-
-                  errors++;
-                }
-
-                for (const key3 in data16) {
+                for (const key3 in data15) {
                   if (!(key3 === "ratingValue" || key3 === "ratingCount" || key3 === "ratingUrl")) {
-                    const err32 = (instancePath + "/items/" + i0 + "/i" + ' ' + "must NOT have additional properties").trim();
+                    const err31 = (instancePath + "/items/" + i0 + "/i" + ' ' + "must NOT have additional properties").trim();
 
                     if (vErrors === null) {
-                      vErrors = [err32];
+                      vErrors = [err31];
                     } else {
-                      vErrors.push(err32);
+                      vErrors.push(err31);
                     }
 
                     errors++;
                   }
                 }
 
-                if (data16.ratingValue !== undefined) {
-                  let data17 = data16.ratingValue;
+                if (data15.ratingValue !== undefined) {
+                  let data16 = data15.ratingValue;
+
+                  if (typeof data16 == "number" && isFinite(data16)) {
+                    if (data16 < 0 || isNaN(data16)) {
+                      const err32 = (instancePath + "/items/" + i0 + "/i/ratingValue" + ' ' + "must be >= 0").trim();
+
+                      if (vErrors === null) {
+                        vErrors = [err32];
+                      } else {
+                        vErrors.push(err32);
+                      }
+
+                      errors++;
+                    }
+                  } else {
+                    const err33 = (instancePath + "/items/" + i0 + "/i/ratingValue" + ' ' + "must be number").trim();
+
+                    if (vErrors === null) {
+                      vErrors = [err33];
+                    } else {
+                      vErrors.push(err33);
+                    }
+
+                    errors++;
+                  }
+                }
+
+                if (data15.ratingCount !== undefined) {
+                  let data17 = data15.ratingCount;
 
                   if (typeof data17 == "number" && isFinite(data17)) {
                     if (data17 < 0 || isNaN(data17)) {
-                      const err33 = (instancePath + "/items/" + i0 + "/i/ratingValue" + ' ' + "must be >= 0").trim();
+                      const err34 = (instancePath + "/items/" + i0 + "/i/ratingCount" + ' ' + "must be >= 0").trim();
 
                       if (vErrors === null) {
-                        vErrors = [err33];
+                        vErrors = [err34];
                       } else {
-                        vErrors.push(err33);
+                        vErrors.push(err34);
                       }
 
                       errors++;
                     }
                   } else {
-                    const err34 = (instancePath + "/items/" + i0 + "/i/ratingValue" + ' ' + "must be number").trim();
+                    const err35 = (instancePath + "/items/" + i0 + "/i/ratingCount" + ' ' + "must be number").trim();
 
                     if (vErrors === null) {
-                      vErrors = [err34];
+                      vErrors = [err35];
                     } else {
-                      vErrors.push(err34);
+                      vErrors.push(err35);
                     }
 
                     errors++;
                   }
                 }
 
-                if (data16.ratingCount !== undefined) {
-                  let data18 = data16.ratingCount;
-
-                  if (typeof data18 == "number" && isFinite(data18)) {
-                    if (data18 < 0 || isNaN(data18)) {
-                      const err35 = (instancePath + "/items/" + i0 + "/i/ratingCount" + ' ' + "must be >= 0").trim();
-
-                      if (vErrors === null) {
-                        vErrors = [err35];
-                      } else {
-                        vErrors.push(err35);
-                      }
-
-                      errors++;
-                    }
-                  } else {
-                    const err36 = (instancePath + "/items/" + i0 + "/i/ratingCount" + ' ' + "must be number").trim();
+                if (data15.ratingUrl !== undefined) {
+                  if (typeof data15.ratingUrl !== "string") {
+                    const err36 = (instancePath + "/items/" + i0 + "/i/ratingUrl" + ' ' + "must be string").trim();
 
                     if (vErrors === null) {
                       vErrors = [err36];
@@ -1346,63 +1326,49 @@ function validate0(data, instancePath = "") {
                     errors++;
                   }
                 }
-
-                if (data16.ratingUrl !== undefined) {
-                  if (typeof data16.ratingUrl !== "string") {
-                    const err37 = (instancePath + "/items/" + i0 + "/i/ratingUrl" + ' ' + "must be string").trim();
-
-                    if (vErrors === null) {
-                      vErrors = [err37];
-                    } else {
-                      vErrors.push(err37);
-                    }
-
-                    errors++;
-                  }
-                }
               } else {
-                const err38 = (instancePath + "/items/" + i0 + "/i" + ' ' + "must be object").trim();
+                const err37 = (instancePath + "/items/" + i0 + "/i" + ' ' + "must be object").trim();
 
                 if (vErrors === null) {
-                  vErrors = [err38];
+                  vErrors = [err37];
                 } else {
-                  vErrors.push(err38);
+                  vErrors.push(err37);
                 }
 
                 errors++;
               }
             }
           } else {
-            const err39 = (instancePath + "/items/" + i0 + ' ' + "must be object").trim();
+            const err38 = (instancePath + "/items/" + i0 + ' ' + "must be object").trim();
 
             if (vErrors === null) {
-              vErrors = [err39];
+              vErrors = [err38];
             } else {
-              vErrors.push(err39);
+              vErrors.push(err38);
             }
 
             errors++;
           }
         }
       } else {
-        const err40 = (instancePath + "/items" + ' ' + "must be array").trim();
+        const err39 = (instancePath + "/items" + ' ' + "must be array").trim();
 
         if (vErrors === null) {
-          vErrors = [err40];
+          vErrors = [err39];
         } else {
-          vErrors.push(err40);
+          vErrors.push(err39);
         }
 
         errors++;
       }
     }
   } else {
-    const err41 = (instancePath + ' ' + "must be object").trim();
+    const err40 = (instancePath + ' ' + "must be object").trim();
 
     if (vErrors === null) {
-      vErrors = [err41];
+      vErrors = [err40];
     } else {
-      vErrors.push(err41);
+      vErrors.push(err40);
     }
 
     errors++;

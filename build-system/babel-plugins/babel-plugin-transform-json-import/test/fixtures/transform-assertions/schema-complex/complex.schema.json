@@ -45,9 +45,6 @@
           "c": {
             "type": "string"
           },
-          "productIcon": {
-            "type": "string"
-          },
           "d": {
             "type": "string"
           },
