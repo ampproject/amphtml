@@ -162,15 +162,15 @@ function getImportCode(validatorFns) {
  *  - Creates strings for error messages instead of an object.
  *  - If provided a "scope" of used names, it will rescope the current code
  *    to prevent collisions, and remove `export`.
+ *  - Strips down included schemas so that they only contain the referenced
+ *    portions.
  * @param {string} code
  * @param {string[]=} scope
  * @param {babel.TransformOptions=} config
  * @return {{result: babel.BabelFileResult | null, name: string}}
  */
 function transformAjvCode(code, scope, config) {
-  const {types: t} = babel;
-
-  const scopeSet = scope ? new Set(scope) : null;
+  const {template, types: t} = babel;
 
   // ajvCompile's generated name
   let name = 'validate';
@@ -182,27 +182,254 @@ function transformAjvCode(code, scope, config) {
   const findProperty = (properties, name) =>
     properties.find((node) => isObjectProperty(node, name));
 
+  const evaluatePropertyKey = (property) =>
+    property.isIdentifier() ? property.node.name : property.evaluate().value;
+
+  const schemaVariableDeclaratorRe = /^schema[0-9]*$/;
+
+  /**
+   * @param {babel.NodePath} path
+   * @return {boolean}
+   */
+  function parentIsHasOwnPropertyCall(path) {
+    const {parentPath} = path;
+    if (
+      !parentPath?.isCallExpression() ||
+      parentPath.node.arguments[0] !== path.node
+    ) {
+      return false;
+    }
+    const callee = parentPath.get('callee');
+    if (
+      !callee.isMemberExpression() ||
+      !callee.get('property').isIdentifier({name: 'call'})
+    ) {
+      return false;
+    }
+    /** @type {babel.NodePath<any>} */
+    let resolved = callee.get('object');
+    while (resolved.isIdentifier()) {
+      const binding = path.scope.getBinding(resolved.node.name);
+      if (!binding) {
+        break;
+      }
+      resolved = binding.path;
+      if (resolved.isVariableDeclarator()) {
+        resolved = resolved.get('init');
+      }
+    }
+    return resolved.getSource().trim() === 'Object.prototype.hasOwnProperty';
+  }
+
+  /**
+   * Strips down an included schema binding so that it only contains the
+   * referenced portions.
+   * @param {import('@babel/traverse').Binding} binding
+   */
+  function treeShakeSchema(binding) {
+    const {path, referencePaths} = binding;
+    if (
+      !binding.constant ||
+      !path.isVariableDeclarator() ||
+      !t.isIdentifier(path.node.id) ||
+      !schemaVariableDeclaratorRe.test(path.node.id.name)
+    ) {
+      return;
+    }
+    const init = path.get('init');
+    if (!init.isObjectExpression()) {
+      return;
+    }
+    if (!referencePaths.length) {
+      path.remove();
+      return;
+    }
+    // Re-construct schema from references
+    const original = init.evaluate().value;
+    const replacement = {};
+    if (original == null) {
+      // original is dynamic, deopt
+      return;
+    }
+    /**
+     * Maps container objects to their member expressions.
+     * A container object is one that we create during traversal, and is never
+     * referenced directly. At the point a container is referenced, its mapping
+     * is set as `false`.
+     * @type {Map<Object, Set<babel.NodePath<babel.types.MemberExpression>> | false>}
+     */
+    const containers = new Map();
+    const queue = [...referencePaths];
+    for (const referencePath of queue) {
+      // Navigate MemberExpression to find deepest key to insert.
+      // We create necessary depth in replacement object as we go along.
+      let key;
+      let originalAt = original;
+      let replacementAt = replacement;
+      let containersAt;
+      let memberExpression;
+      let {parentPath} = referencePath;
+      while (replacementAt !== originalAt && parentPath?.isMemberExpression()) {
+        memberExpression = parentPath;
+        parentPath = memberExpression.parentPath;
+        const nextKey = evaluatePropertyKey(memberExpression.get('property'));
+        if (nextKey == null) {
+          break;
+        }
+        if (key != null) {
+          if (!replacementAt[key]) {
+            // Even though the original container may be an array, we first
+            // create it as an object in order to insert sparse keys.
+            // Container objects are all converted to arrays later.
+            replacementAt[key] = {};
+          }
+          replacementAt = replacementAt[key];
+          originalAt = originalAt[key];
+        }
+        key = nextKey;
+        containersAt = containers.get(replacementAt);
+        if (containersAt == null) {
+          containersAt = new Set();
+          containers.set(replacementAt, containersAt);
+        }
+        if (containersAt !== false) {
+          containersAt.add(memberExpression);
+        }
+      }
+      // deopt full schema if we can't resolve at least one key deep
+      if (key == null) {
+        return;
+      }
+      // already inserted as-is
+      if (replacementAt[key] === originalAt[key]) {
+        continue;
+      }
+      // Fill indirect references with fully qualified paths, and add those
+      // to the queue.
+      if (
+        memberExpression &&
+        parentPath?.isVariableDeclarator() &&
+        parentPath.node.init &&
+        t.isIdentifier(parentPath.node.id)
+      ) {
+        const {name} = parentPath.node.id;
+        const localBinding = parentPath.scope.getBinding(name);
+        if (localBinding?.constant) {
+          const {referencePaths} = localBinding;
+          for (const referencePath of referencePaths) {
+            const [replacedWithMemberExpression] = referencePath.replaceWith(
+              t.cloneNode(memberExpression.node)
+            );
+            let object = replacedWithMemberExpression.get('object');
+            while (object.isMemberExpression()) {
+              object = object.get('object');
+            }
+            queue.push(object);
+          }
+          parentPath.remove();
+          if (containersAt) {
+            containersAt.delete(memberExpression);
+          }
+          continue;
+        }
+      }
+      // Objects may in some cases be referenced only for their key list, in
+      // which we define each unset value as a zero rather than the original.
+      // If the original value is needed, it will be included during a
+      // different loop pass.
+      if (memberExpression && parentIsHasOwnPropertyCall(memberExpression)) {
+        if (typeof replacementAt[key] !== 'object') {
+          replacementAt[key] = {};
+        }
+        // Can no longer consider this level a container, since we require
+        // its keys
+        containers.set(replacementAt[key], false);
+        for (const j in originalAt[key]) {
+          if (!(j in replacementAt[key])) {
+            replacementAt[key][j] = 0;
+          }
+        }
+      } else {
+        replacementAt[key] = originalAt[key];
+      }
+    }
+    /**
+     * Simplify containers so that the full schema is as shallow as possible.
+     * We update container's references to match these changes.
+     * 1. If the container is an object, convert it to an array.
+     * 2. If the container only has one item, replace the container with the
+     *    item.
+     * @param {any} value
+     * @return {any}
+     */
+    function simplifyContainers(value) {
+      const memberExpressions = containers.get(value);
+      if (!memberExpressions) {
+        return value;
+      }
+      const indices = {};
+      const array = [];
+      for (const memberExpression of memberExpressions) {
+        const property = memberExpression.get('property');
+        const key = evaluatePropertyKey(property);
+        const subValue = value[key];
+        if (indices[key] == null) {
+          indices[key] = array.length;
+          array.push(subValue);
+        }
+        memberExpression.node.computed = true;
+        memberExpression.node.property = t.numericLiteral(indices[key]);
+      }
+      if (array.length === 1) {
+        for (const memberExpression of memberExpressions) {
+          const object = memberExpression.get('object');
+          memberExpression.replaceWith(object);
+        }
+        return simplifyContainers(array[0]);
+      }
+      return array.map(simplifyContainers);
+    }
+    const simplified = JSON.parse(
+      JSON.stringify(replacement, (_, value) => {
+        return simplifyContainers(value);
+      })
+    );
+    init.replaceWith(t.valueToNode(simplified));
+  }
+
+  /**
+   * Prevents collisions with outer scope
+   * @param {babel.NodePath<babel.types.Program>} path
+   * @param {Set<string>|null} taken
+   * @param {string} id
+   */
+  function rescope(path, taken, id) {
+    if (!taken) {
+      return;
+    }
+    let renamed = id;
+    while (taken.has(renamed)) {
+      renamed = path.scope.generateUid(id);
+    }
+    if (renamed === id) {
+      return;
+    }
+    path.scope.rename(id, renamed);
+    if (id === name) {
+      name = renamed;
+    }
+  }
+
   /** @type {babel.PluginObj} */
   const plugin = {
     visitor: {
       Program: {
         exit(path) {
-          // Prevent collisions with outer scope
-          if (!scopeSet) {
-            return;
-          }
-          for (const binding in path.scope.bindings) {
-            let renamed = binding;
-            while (scopeSet.has(renamed)) {
-              renamed = path.scope.generateUid(binding);
-            }
-            if (renamed === binding) {
-              continue;
-            }
-            path.scope.rename(binding, renamed);
-            if (binding === name) {
-              name = renamed;
-            }
+          path.scope.crawl();
+          const taken = scope ? new Set(scope) : null;
+          for (const id in path.scope.bindings) {
+            treeShakeSchema(path.scope.bindings[id]);
+            rescope(path, taken, id);
           }
         },
       },
@@ -237,7 +464,7 @@ function transformAjvCode(code, scope, config) {
           path.replaceWith(instancePath.value);
           return;
         }
-        path.replaceWith(babel.template.expression.ast`
+        path.replaceWith(template.expression.ast`
           (${instancePath.value} + ' ' + ${message.value}).trim()
         `);
       },
