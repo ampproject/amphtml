@@ -12,7 +12,6 @@ const iso4217 = require('./iso4217.json');
 /**
  * @typedef {{
  *   singleError?: boolean,
- *   treeShakeSchema?: boolean,
  * }}
  */
 let AjvCompileOptsDef;
