@@ -132,15 +132,15 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
   return openLabelOrFallback(
     pageEl,
     anchorChild?.textContent || ctaLabelFromAttr(attachmentEl)
-  ).then((label) => {
+  ).then((openLabel) => {
     const openAttachmentEl = (
       <a
-        class="i-amphtml-story-page-open-attachment"
+        class="i-amphtml-story-page-open-attachment i-amphtml-story-page-open-attachment-outlink"
         role="button"
         target="_top"
         title={attachmentTitle}
         theme={theme}
-        aria-label={label}
+        aria-label={openLabel}
       >
         {renderOutlinkAttachmentArrow()}
         <div class="i-amphtml-story-outlink-page-attachment-outlink-chip">
@@ -152,7 +152,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
           ) : (
             renderOutlinkLinkIconElement()
           )}
-          <span class="i-amphtml-story-page-attachment-label">{label}</span>
+          <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
         </div>
       </a>
     );
@@ -197,7 +197,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
   return openLabelOrFallback(pageEl, ctaLabelFromAttr(attachmentEl)).then(
     (openLabel) => (
       <a
-        class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+        class="i-amphtml-story-page-open-attachment i-amphtml-story-page-open-attachment-inline"
         role="button"
         theme={AttachmentTheme.DARK === theme && theme}
         aria-label={openLabel}
