@@ -424,83 +424,279 @@ describes.realWin('bento-accordion:1.0', {amp: false}, (env) => {
   });
 
   describe('imperative api', () => {
-    beforeEach(async () => {
-      element = html`
-        <bento-accordion id="testAccordion">
-          <section>
-            <h2>Section 1</h2>
-            <div>Content 1</div>
-          </section>
-          <section id="section2">
-            <h2>Section 2</h2>
-            <div>Bunch of awesome content</div>
-          </section>
-          <section id="section3">
-            <h2>Section 3</h2>
-            <div>Content 3</div>
-          </section>
-        </bento-accordion>
-      `;
-      win.document.body.appendChild(element);
-      await element.getApi();
+    let section1;
+    let section2;
+    let section3;
+
+    beforeEach(() => {
+      section1 = element.children[0];
+      section2 = element.children[1];
+      section3 = element.children[2];
     });
 
-    it('should capture events in bento mode (w/o "on" attribute)', async () => {
-      const section1 = element.children[0];
-      const section3 = element.children[2];
+    describe('multi-expand accordion', () => {
+      it('toggle all', async () => {
+        const api = await element.getApi();
+        api.toggle();
+        await waitForExpanded(section1, false);
 
-      // Set up section 1 to trigger expand of section 3 on expand
-      // and collapse of section 3 on collapse
-      const api = await element.getApi();
-      section1.addEventListener('expand', () => api.expand('section3'));
-      section1.addEventListener('collapse', () => api.collapse('section3'));
+        // All sections are toggled
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
+      });
 
-      // initally both section 1 and 3 are collapsed
-      expect(section1).to.not.have.attribute('expanded');
-      expect(section3).to.not.have.attribute('expanded');
+      it('toggle one section', async () => {
+        const api = await element.getApi();
+        api.toggle('section1');
+        await waitForExpanded(section1, false);
 
-      // expand section 1
-      section1.firstElementChild.click();
-      await waitForExpanded(section1, true);
+        // Only section 1 is toggled
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
 
-      // both section 1 and 3 are expanded
-      expect(section1).to.have.attribute('expanded');
-      expect(section3).to.have.attribute('expanded');
+      it('expand all', async () => {
+        const api = await element.getApi();
+        api.expand();
+        await waitForExpanded(section2, true);
 
-      // collapse section 1
-      section1.firstElementChild.click();
-      await waitForExpanded(section1, false);
+        // All sections are expanded
+        expect(section1).to.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
+      });
 
-      // both section 1 and 3 are collapsed
-      expect(section1).to.not.have.attribute('expanded');
-      expect(section3).to.not.have.attribute('expanded');
+      it('expand one section', async () => {
+        const api = await element.getApi();
+        // Collapse first section to setup the test
+        api.collapse();
+        await waitForExpanded(section1, false);
+
+        // Expand the first section
+        api.expand('section1');
+        await waitForExpanded(section1, true);
+
+        // Only the first section is expanded
+        expect(section1).to.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('collapse all', async () => {
+        const api = await element.getApi();
+        api.collapse();
+        await waitForExpanded(section1, false);
+
+        // All sections are collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('collapse one section', async () => {
+        const api = await element.getApi();
+        api.collapse('section1');
+        await waitForExpanded(section1, false);
+
+        // Only the first section is collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
     });
 
-    it('should fire and listen for "expand" and "collapse" events', async () => {
-      const section1 = element.children[0];
+    describe('single-expand accordion', () => {
+      beforeEach(async () => {
+        element = html`
+          <bento-accordion expand-single-section>
+            <section expanded id="section1">
+              <h1>header1</h1>
+              <div>content1</div>
+            </section>
+            <section id="section2">
+              <h1>header2</h1>
+              <div>content2</div>
+            </section>
+            <section>
+              <h1>header3</h1>
+              <div>content3</div>
+            </section>
+          </bento-accordion>
+        `;
+        win.document.body.appendChild(element);
+        await element.getApi();
 
-      // Add spy functions for expand and collapse
-      const spyE = env.sandbox.spy();
-      const spyC = env.sandbox.spy();
-      section1.addEventListener('expand', spyE);
-      section1.addEventListener('collapse', spyC);
+        section1 = element.children[0];
+        section2 = element.children[1];
+        section3 = element.children[2];
+      });
 
-      expect(spyE).to.not.be.called;
-      expect(spyC).to.not.be.called;
+      it('toggle all', async () => {
+        const api = await element.getApi();
+        // First action should do nothing
+        api.toggle();
 
-      // expand section 1
-      section1.firstElementChild.click();
-      await waitForExpanded(section1, true);
+        // Use a second action as we need something to waitFor
+        api.toggle('section1');
+        await waitForExpanded(section1, false);
 
-      expect(spyE).to.be.calledOnce;
-      expect(spyC).to.not.be.called;
+        // Verify state after both actions (should reflect only 2nd action)
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
 
-      // collapse section 1
-      section1.firstElementChild.click();
-      await waitForExpanded(section1, false);
+      it('toggle one section', async () => {
+        const api = await element.getApi();
+        api.toggle('section2');
+        await waitForExpanded(section1, false);
 
-      expect(spyE).to.be.calledOnce;
-      expect(spyC).to.be.calledOnce;
+        // Verify that the second section is expanded and the first
+        // section is un-expanded
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+
+        api.toggle('section2');
+        await waitForExpanded(section2, false);
+
+        // Verify that the second section is collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('expand all', async () => {
+        const api = await element.getApi();
+        // First action should do nothing
+        api.expand();
+
+        // Use a second action as we need something to waitFor
+        api.toggle('section1');
+        await waitForExpanded(section1, false);
+
+        // Verify state after both actions (should reflect only 2nd action)
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('expand one section', async () => {
+        const api = await element.getApi();
+        api.expand('section2');
+        await waitForExpanded(section1, false);
+
+        // Verify that the second section is expanded and the first
+        // section is un-expanded
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('collapse all', async () => {
+        const api = await element.getApi();
+        api.collapse();
+        await waitForExpanded(section1, false);
+
+        // All sections are collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('collapse one section', async () => {
+        const api = await element.getApi();
+        api.collapse('section1');
+        await waitForExpanded(section1, false);
+
+        // Section 1 is collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section2).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+    });
+
+    describe('misc', () => {
+      beforeEach(async () => {
+        element = html`
+          <bento-accordion id="testAccordion">
+            <section>
+              <h2>Section 1</h2>
+              <div>Content 1</div>
+            </section>
+            <section id="section2">
+              <h2>Section 2</h2>
+              <div>Bunch of awesome content</div>
+            </section>
+            <section id="section3">
+              <h2>Section 3</h2>
+              <div>Content 3</div>
+            </section>
+          </bento-accordion>
+        `;
+        win.document.body.appendChild(element);
+        await element.getApi();
+      });
+
+      it('should capture events in bento mode (w/o "on" attribute)', async () => {
+        const section1 = element.children[0];
+        const section3 = element.children[2];
+
+        // Set up section 1 to trigger expand of section 3 on expand
+        // and collapse of section 3 on collapse
+        const api = await element.getApi();
+        section1.addEventListener('expand', () => api.expand('section3'));
+        section1.addEventListener('collapse', () => api.collapse('section3'));
+
+        // initally both section 1 and 3 are collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+
+        // expand section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, true);
+
+        // both section 1 and 3 are expanded
+        expect(section1).to.have.attribute('expanded');
+        expect(section3).to.have.attribute('expanded');
+
+        // collapse section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, false);
+
+        // both section 1 and 3 are collapsed
+        expect(section1).to.not.have.attribute('expanded');
+        expect(section3).to.not.have.attribute('expanded');
+      });
+
+      it('should fire and listen for "expand" and "collapse" events', async () => {
+        const section1 = element.children[0];
+
+        // Add spy functions for expand and collapse
+        const spyE = env.sandbox.spy();
+        const spyC = env.sandbox.spy();
+        section1.addEventListener('expand', spyE);
+        section1.addEventListener('collapse', spyC);
+
+        expect(spyE).to.not.be.called;
+        expect(spyC).to.not.be.called;
+
+        // expand section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, true);
+
+        expect(spyE).to.be.calledOnce;
+        expect(spyC).to.not.be.called;
+
+        // collapse section 1
+        section1.firstElementChild.click();
+        await waitForExpanded(section1, false);
+
+        expect(spyE).to.be.calledOnce;
+        expect(spyC).to.be.calledOnce;
+      });
     });
   });
 });
