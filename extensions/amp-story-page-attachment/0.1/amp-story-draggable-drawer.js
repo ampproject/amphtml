@@ -12,6 +12,8 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {listen} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+
 import {CSS} from '../../../build/amp-story-draggable-drawer-header-0.1.css';
 import {
   Action,
@@ -145,9 +147,9 @@ export class DraggableDrawer extends AMP.BaseElement {
       <button
         role="button"
         class="i-amphtml-story-draggable-drawer-spacer i-amphtml-story-system-reset"
-        aria-label={this.localizationService.getLocalizedString(
+        i-amphtml-i18n-aria-label={
           LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-        )}
+        }
       ></button>
     );
 
@@ -155,6 +157,8 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.contentEl.appendChild(
       createShadowRootWithStyle(<div />, this.headerEl, CSS)
     );
+
+    localizeTemplate(this.containerEl, this.element);
 
     this.element.appendChild(templateEl);
     this.element.setAttribute('aria-hidden', true);

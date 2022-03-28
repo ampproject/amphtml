@@ -59,7 +59,7 @@ describes.fakeWin('localization', {amp: true}, (env) => {
     });
   });
 
-  describe('localization service', () => {
+  describe('localization service synchronous', () => {
     it('should get string text', () => {
       const localizationService = new LocalizationService(win.document.body);
       localizationService.registerLocalizedStringBundles({
