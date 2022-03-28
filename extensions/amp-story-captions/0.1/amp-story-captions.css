@@ -2,12 +2,12 @@ amp-story-captions {
   white-space: pre-wrap;
 }
 
-.amp-story-captions-wrapper {
+.amp-story-captions-cue-wrapper {
   display: flex;
   justify-content: center;
 }
 
-.amp-story-captions-track {
+.amp-story-captions-cue {
   font-family: 'Roboto', sans-serif !important;
   max-width: calc(100% - 28px);
   position: absolute;
