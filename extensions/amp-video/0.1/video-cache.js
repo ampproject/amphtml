@@ -36,6 +36,11 @@ export function fetchCachedSources(
     return Promise.resolve();
   }
 
+  // Always set crossorigin attribute so captions can be set.
+  if (!videoEl.hasAttribute('crossorigin')) {
+    videoEl.setAttribute('crossorigin', '');
+  }
+
   const videoSrc = videoEl.getAttribute('src');
   const sourceSrc = videoEl.querySelector('source[src]')?.getAttribute('src');
   if (!videoSrc && !sourceSrc) {
@@ -49,6 +54,7 @@ export function fetchCachedSources(
     .then((response) => {
       applySourcesToVideo(videoEl, response['sources'], maxBitrate);
       applyAudioInfoToVideo(videoEl, response['has_audio']);
+      applyCaptionsTrackToVideo(videoEl, response['captions']);
     })
     .catch(() => {
       // If cache fails, video should still load properly.
@@ -157,6 +163,29 @@ function applyAudioInfoToVideo(videoEl, hasAudio) {
 }
 
 /**
+ * Appends captions track to video if captions url is defined and video
+ * element doesn't have a track child specified in the document.
+ * @param {!Element} videoEl
+ * @param {!Object} captionsResponse
+ */
+function applyCaptionsTrackToVideo(videoEl, captionsResponse) {
+  if (
+    !captionsResponse ||
+    !captionsResponse['src'] ||
+    !captionsResponse['srclang'] ||
+    videoEl.querySelector('track')
+  ) {
+    return;
+  }
+  const trackEl = createElementWithAttributes(videoEl.ownerDocument, 'track', {
+    'src': captionsResponse['src'],
+    'srclang': captionsResponse['srclang'],
+    'kind': 'captions',
+  });
+  videoEl.appendChild(trackEl);
+}
+
+/**
  * If present, moves the src attribute to a source element to enable playing
  * from multiple sources: the cached ones and the fallback initial src.
  * @param {!Element} videoEl
@@ -230,9 +259,7 @@ function requestCachedVideoSources(videoEl, ampdoc) {
       const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
         'amp_video_host_url':
           /* document url that contains the video */ canonicalUrl,
-        'amp_video_require_acao_header': videoEl.hasAttribute('crossorigin')
-          ? 1
-          : null,
+        'amp_video_require_acao_header': 1,
       });
       return Services.xhrFor(win)
         .fetch(requestUrl, {prerenderSafe: true})

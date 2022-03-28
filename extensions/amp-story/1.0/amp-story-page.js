@@ -34,7 +34,7 @@ import {listen, listenOnce} from '#utils/event-helper';
 import {dev} from '#utils/log';
 
 import {embeddedElementsSelectors} from './amp-story-embedded-component';
-import {localize} from './amp-story-localization-service';
+import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -106,19 +106,21 @@ const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
 const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
 
 /**
- * @param {!Element} context
  * @param {function(Event)} onClick
  * @return {!Element}
  */
-const renderPlayMessageElement = (context, onClick) => (
+const renderPlayMessageElement = (onClick) => (
   <button
     role="button"
     class="i-amphtml-story-page-play-button i-amphtml-story-system-reset"
     onClick={onClick}
   >
-    <span class="i-amphtml-story-page-play-label">
-      {localize(context, LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO)}
-    </span>
+    <span
+      class="i-amphtml-story-page-play-label"
+      i-amphtml-i18n-text-content={
+        LocalizedStringId_Enum.AMP_STORY_PAGE_PLAY_VIDEO
+      }
+    ></span>
     <span class="i-amphtml-story-page-play-icon"></span>
   </button>
 );
@@ -128,7 +130,12 @@ const renderPlayMessageElement = (context, onClick) => (
  */
 const renderErrorMessageElement = () => (
   <div class="i-amphtml-story-page-error i-amphtml-story-system-reset">
-    <span class="i-amphtml-story-page-error-label"></span>
+    <span
+      class="i-amphtml-story-page-error-label"
+      i-amphtml-i18n-text-content={
+        LocalizedStringId_Enum.AMP_STORY_PAGE_ERROR_VIDEO
+      }
+    ></span>
     <span class="i-amphtml-story-page-error-icon"></span>
   </div>
 );
@@ -417,16 +424,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Return true if the current AmpStoryPage is protected by a paywall.
-   * 'limited-content' is for the paywall dialog page, where a paywall would trigger based on both time advance or click events.
-   * 'content' is for all the remaining locked pages.
-   * @return {boolean}
-   */
-  isPaywallProtected() {
-    return this.element.hasAttribute('subscriptions-section');
-  }
-
-  /**
    * Updates the state of the page.
    * @param {!PageState} state
    */
@@ -492,6 +489,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (this.isActive()) {
       registerAllPromise.then(() => {
+        if (this.state_ === PageState.NOT_ACTIVE) {
+          return;
+        }
         this.signals()
           .whenSignal(CommonSignals_Enum.LOAD_END)
           .then(() => {
@@ -500,11 +500,17 @@ export class AmpStoryPage extends AMP.BaseElement {
             }
           });
         this.preloadAllMedia_().then(() => {
+          if (this.state_ === PageState.NOT_ACTIVE) {
+            return;
+          }
           this.startMeasuringAllVideoPerformance_();
           this.startListeningToVideoEvents_();
           // iOS 14.2 and 14.3 requires play to be called before unmute
           this.playAllMedia_().then(() => {
-            if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+            if (
+              !this.storeService_.get(StateProperty.MUTED_STATE) &&
+              this.state_ !== PageState.NOT_ACTIVE
+            ) {
               this.unmuteAllMedia();
             }
           });
@@ -1468,7 +1474,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendPlayMessage_() {
-    this.playMessageEl_ = renderPlayMessageElement(this.element, () => {
+    this.playMessageEl_ = renderPlayMessageElement(() => {
       this.togglePlayMessage_(false);
       this.startMeasuringAllVideoPerformance_();
       this.mediaPoolPromise_
@@ -1476,7 +1482,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         .then(() => this.playAllMedia_());
     });
 
-    this.mutateElement(() => this.element.appendChild(this.playMessageEl_));
+    localizeTemplate(this.playMessageEl_, this.element).then(() =>
+      this.mutateElement(() => this.element.appendChild(this.playMessageEl_))
+    );
   }
 
   /**
@@ -1508,15 +1516,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   buildAndAppendErrorMessage_() {
     this.errorMessageEl_ = renderErrorMessageElement();
-    const labelEl = this.errorMessageEl_.querySelector(
-      '.i-amphtml-story-page-error-label'
-    );
-    labelEl.textContent = localize(
-      this.element,
-      LocalizedStringId_Enum.AMP_STORY_PAGE_ERROR_VIDEO
-    );
 
-    this.mutateElement(() => this.element.appendChild(this.errorMessageEl_));
+    localizeTemplate(this.errorMessageEl_, this.element).then(() =>
+      this.mutateElement(() => this.element.appendChild(this.errorMessageEl_))
+    );
   }
 
   /**

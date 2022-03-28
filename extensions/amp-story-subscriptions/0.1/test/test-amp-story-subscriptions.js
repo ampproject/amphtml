@@ -65,7 +65,7 @@ describes.realWin(
       await storySubscriptions.buildCallback();
       await nextTick();
 
-      storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG, true);
+      storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE, true);
 
       await afterRenderPromise(win);
       expect(storySubscriptions.element).to.have.class(

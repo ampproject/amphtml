@@ -23,6 +23,7 @@ const {watch} = require('chokidar');
 const {debug} = require('../compile/debug-compilation-lifecycle');
 const babel = require('@babel/core');
 const {
+  ampResolve,
   remapDependenciesPlugin,
 } = require('./remap-dependencies-plugin/remap-dependencies');
 
@@ -333,7 +334,9 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   if (options.remapDependencies) {
     const {externalDependencies: externals, remapDependencies: remaps} =
       options;
-    plugins.unshift(remapDependenciesPlugin({externals, remaps}));
+    plugins.unshift(
+      remapDependenciesPlugin({externals, remaps, resolve: ampResolve})
+    );
   }
 
   let result = null;
