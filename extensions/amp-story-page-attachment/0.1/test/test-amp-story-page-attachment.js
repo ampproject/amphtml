@@ -13,6 +13,7 @@ import {
 } from 'extensions/amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from 'src/service-helpers';
 
+import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
@@ -35,6 +36,9 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
     const localizationService = new LocalizationService(win.document.body);
     registerServiceBuilder(win, 'localization', function () {
       return localizationService;
+    });
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
     });
 
     storeService = new AmpStoryStoreService(win);

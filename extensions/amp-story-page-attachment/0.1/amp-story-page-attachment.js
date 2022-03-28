@@ -345,7 +345,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @param {boolean} isActive
    */
   setOpenAttachmentActive(isActive) {
-    toggleAttribute(this.openAttachmentEl_, 'active', isActive);
+    this.openAttachmentEl_ &&
+      toggleAttribute(this.openAttachmentEl_, 'active', isActive);
   }
 
   /**
