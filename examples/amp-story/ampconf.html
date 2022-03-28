@@ -244,6 +244,7 @@
         <amp-story-grid-layer template="fill">
           <amp-video autoplay
             id="gmail-vid"
+            captions-id="gmail-captions"
             width="400"
             height="750"
             poster="./img/poster4.jpg"
@@ -251,6 +252,9 @@
             <source src="./video/gmail.mp4" type="video/mp4">
             <track default src="./video/gmail.vtt" srclang="en">
           </amp-video>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="fill">
+          <amp-story-captions id="gmail-captions" layout="fixed-height" height="300"></amp-story-captions>
         </amp-story-grid-layer>
       </amp-story-page>
 
