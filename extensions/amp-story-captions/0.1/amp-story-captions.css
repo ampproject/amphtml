@@ -2,6 +2,25 @@ amp-story-captions {
   white-space: pre-wrap;
 }
 
+.amp-story-captions-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.amp-story-captions-track {
+  font-family: 'Roboto', sans-serif !important;
+  max-width: calc(100% - 28px);
+  position: absolute;
+  bottom: 94px;
+  text-align: center;
+  font-size: 16px;
+  color: #fff;
+  border-radius: 15px; 
+  padding: 4px 14px;
+  backdrop-filter: blur(20px);
+  background: rgba(0,0,0,.45);
+}
+
 .amp-story-captions-future {
   color: gray;
 }

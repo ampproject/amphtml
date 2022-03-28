@@ -74,6 +74,7 @@ export class TrackRenderer {
     this.cueTimestamps_.length = 0;
     toArray(this.track_.activeCues).forEach((cue) => {
       const cueElement = this.element_.ownerDocument.createElement('div');
+      cueElement.classList.add('amp-story-captions-wrapper');
       const html = cue.getCueAsHTML();
       let section = this.element_.ownerDocument.createElement('span');
       cueElement.appendChild(section);
@@ -91,6 +92,7 @@ export class TrackRenderer {
         } else {
           section.appendChild(node);
         }
+        section.classList.add('amp-story-captions-track');
       });
 
       this.cueTimestamps_.push(timestamps);
