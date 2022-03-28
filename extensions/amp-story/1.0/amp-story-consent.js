@@ -19,7 +19,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev, user, userAssert} from '#utils/log';
 
-import {localize} from './amp-story-localization-service';
+import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -49,14 +49,13 @@ const DEFAULT_OPTIONAL_PARAMETERS = {
 
 /**
  * Story consent template.
- * @param {!Element} element
  * @param {!Object} config
  * @param {string} consentId
  * @param {?string} logoSrc
  * @return {!Element}
  * @private @const
  */
-const renderElement = (element, config, consentId, logoSrc) => (
+const renderElement = (config, consentId, logoSrc) => (
   <div class="i-amphtml-story-consent i-amphtml-story-system-reset">
     <div class="i-amphtml-story-consent-overflow">
       <div class="i-amphtml-story-consent-container">
@@ -97,24 +96,20 @@ const renderElement = (element, config, consentId, logoSrc) => (
             'i-amphtml-hidden': config.onlyAccept === true,
           })}
           on={`tap:${consentId}.reject`}
-        >
-          {localize(
-            element,
+          i-amphtml-i18n-text-content={
             LocalizedStringId_Enum.AMP_STORY_CONSENT_DECLINE_BUTTON_LABEL
-          )}
-        </button>
+          }
+        ></button>
         <button
           class={objstr({
             'i-amphtml-story-consent-action': true,
             'i-amphtml-story-consent-action-accept': true,
           })}
           on={`tap:${consentId}.accept`}
-        >
-          {localize(
-            element,
+          i-amphtml-i18n-text-content={
             LocalizedStringId_Enum.AMP_STORY_CONSENT_ACCEPT_BUTTON_LABEL
-          )}
-        </button>
+          }
+        ></button>
       </div>
     </div>
   </div>
@@ -175,12 +170,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
     // Story consent config is set by the `assertAndParseConfig_` method.
     if (this.storyConsentConfig_) {
       this.storyConsentEl_ = renderElement(
-        this.element,
         this.storyConsentConfig_,
         consentId,
         logoSrc
       );
-      createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 
       // Allow <amp-consent> actions in STAMP (defaults to no actions allowed).
       const actions = [
@@ -190,9 +183,11 @@ export class AmpStoryConsent extends AMP.BaseElement {
       ];
       this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
 
-      this.setAcceptButtonFontColor_();
-
-      this.initializeListeners_();
+      return localizeTemplate(this.storyConsentEl_, this.element).then(() => {
+        createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
+        this.setAcceptButtonFontColor_();
+        this.initializeListeners_();
+      });
     }
   }
 

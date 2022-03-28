@@ -2,6 +2,7 @@ import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   DIALOG_VISIBLE_CLASS,
   InfoDialog,
@@ -29,6 +30,9 @@ describes.realWin('amp-story-info-dialog', {amp: true}, (env) => {
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
 
     storeService = new AmpStoryStoreService(win);
     embedded = true;

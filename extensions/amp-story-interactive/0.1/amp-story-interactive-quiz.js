@@ -5,6 +5,8 @@ import {setStyle} from '#core/dom/style';
 
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+
 import {
   AmpStoryInteractive,
   InteractiveType,
@@ -87,13 +89,14 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
       LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_B,
       LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_C,
       LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_QUIZ_ANSWER_CHOICE_D,
-    ].map((choice) => this.localizationService.getLocalizedString(choice));
+    ];
     const optionContainer = this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-quiz-option-container'
     );
     this.options_.forEach((option, index) =>
       optionContainer.appendChild(this.configureOption_(option, index))
     );
+    localizeTemplate(optionContainer, this.element);
   }
 
   /**
@@ -113,7 +116,10 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     const answerChoiceEl = convertedOption.querySelector(
       '.i-amphtml-story-interactive-quiz-answer-choice'
     );
-    answerChoiceEl.textContent = this.localizedAnswerChoices_[index];
+    answerChoiceEl.setAttribute(
+      'i-amphtml-i18n-text-content',
+      this.localizedAnswerChoices_[index]
+    );
     convertedOption.optionIndex_ = option['optionIndex'];
 
     // Extract and structure the option information
