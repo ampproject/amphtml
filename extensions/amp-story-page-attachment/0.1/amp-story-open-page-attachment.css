@@ -143,7 +143,9 @@
 
 .i-amphtml-story-page-open-attachment-inline {
   background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent) !important;
+  /* Button element overrides. */
   border: none !important;
+  padding: 0 !important;
 }
 
 [theme="dark"].i-amphtml-story-page-open-attachment-inline {
