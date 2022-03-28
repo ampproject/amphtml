@@ -41,6 +41,7 @@ export class TrackRenderer {
     /** @private {!Element} */
     this.element_ = container.ownerDocument.createElement('div');
     container.appendChild(this.element_);
+    this.element_.classList.add('amp-story-captions-cue-wrapper');
 
     /** @private {!Array<number>} */
     this.cueTimestamps_ = [];
@@ -74,8 +75,10 @@ export class TrackRenderer {
     this.cueTimestamps_.length = 0;
     toArray(this.track_.activeCues).forEach((cue) => {
       const cueElement = this.element_.ownerDocument.createElement('div');
-      cueElement.classList.add('amp-story-captions-cue-wrapper');
+      cueElement.classList.add('amp-story-captions-cue');
       const html = cue.getCueAsHTML();
+      let section = this.element_.ownerDocument.createElement('span');
+      cueElement.appendChild(section);
       const timestamps = [];
       toArray(html.childNodes).forEach((node) => {
         if (node.target === 'timestamp') {
@@ -84,12 +87,11 @@ export class TrackRenderer {
             timestamps.push(timestamp);
             // Create a new section after each timestamp, so the style can
             // easily be updated based on time.
-            let section = this.element_.ownerDocument.createElement('span');
+            section = this.element_.ownerDocument.createElement('span');
             cueElement.appendChild(section);
           }
-        } else if (node.tagName === 'SPAN') {
-          cueElement.appendChild(node);
-          node.classList.add('amp-story-captions-cue');
+        } else {
+          section.appendChild(node);
         }
       });
 
@@ -109,8 +111,6 @@ export class TrackRenderer {
       toArray(cue.childNodes).forEach((section, j) => {
         // The first section always has implicit timestamp 0, so it's never in
         // the future.
-        // console.log(this.cueTimestamps_[i][j - 1], videoTime);
-        // console.log(this.cueTimestamps_[i][j - 1], videoTime);
         if (j > 0) {
           section.classList.toggle(
             FUTURE_CUE_SECTION_CLASS,
