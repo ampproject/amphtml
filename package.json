@@ -69,7 +69,7 @@
     "@typescript-eslint/eslint-plugin": "5.9.1",
     "@typescript-eslint/parser": "5.9.1",
     "acorn-globals": "6.0.0",
-    "ajv": "8.6.3",
+    "ajv": "8.10.0",
     "ajv-formats": "2.1.1",
     "amphtml-validator": "1.0.35",
     "ast-replace": "1.1.3",
