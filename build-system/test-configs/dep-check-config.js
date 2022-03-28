@@ -261,6 +261,12 @@ exports.rules = [
       // AMP Story Subscriptions.
       'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
+      // Story localization.
+      'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-quiz.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
       'extensions/amp-subscriptions/0.1/local-subscription-platform-iframe.js->extensions/amp-access/0.1/iframe-api/messenger.js',

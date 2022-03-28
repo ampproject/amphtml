@@ -1,6 +1,7 @@
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
-import {LocalizationService} from '#service/localization';
+
+import {getLocalizationService} from 'extensions/amp-story/1.0/amp-story-localization-service';
 
 import {
   getMockIncompleteData,
@@ -11,6 +12,7 @@ import {
 } from './helpers';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStoryInteractiveImgQuiz} from '../amp-story-interactive-img-quiz';
 
@@ -52,10 +54,10 @@ describes.realWin(
         return storeService;
       });
 
-      const localizationService = new LocalizationService(win.document.body);
-      env.sandbox
-        .stub(Services, 'localizationServiceForOrNull')
-        .returns(Promise.resolve(localizationService));
+      const localizationService = getLocalizationService(win.document.body);
+      localizationService.registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');

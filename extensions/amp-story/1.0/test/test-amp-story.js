@@ -16,6 +16,7 @@ import {poll} from '#testing/iframe';
 
 import * as consent from '../../../../src/consent';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   AmpStory,
   PAYWALL_DELAY_DURATION,
@@ -108,6 +109,9 @@ describes.realWin(
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);
+      localizationService.registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
 
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox
@@ -1258,12 +1262,13 @@ describes.realWin(
           it('should trigger the navigation overlay', async () => {
             await createStoryWithPages(2);
             dispatchSwipeEvent(100, 0);
-            await story.mutateElement(() => {
-              const hintEl = story.element.querySelector(
-                '.i-amphtml-story-hint-container'
-              );
-              expect(hintEl).to.not.have.class('i-amphtml-hidden');
-            });
+            await waitFor(() =>
+              story.element.querySelector('.i-amphtml-story-hint-container')
+            );
+            const hintEl = story.element.querySelector(
+              '.i-amphtml-story-hint-container'
+            );
+            expect(hintEl).to.not.have.class('i-amphtml-hidden');
           });
         });
 
