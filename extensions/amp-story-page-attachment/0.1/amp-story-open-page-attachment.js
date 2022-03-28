@@ -93,7 +93,6 @@ const ctaLabelFromAttr = (element) =>
 
 /**
  * @param {!Element} element
- * @param {!Element} attachmentEl
  * @param {?string} label
  * @return {!Promise<string>}
  */
