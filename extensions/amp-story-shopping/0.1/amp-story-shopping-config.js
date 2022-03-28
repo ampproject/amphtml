@@ -29,10 +29,8 @@ let ShoppingConfigResponseDef;
 function validateConfig(productConfig, parentFieldName = undefined) {
   let isValidConfig = true;
 
-  consol.log('productConfig', productConfig);
-
   try {
-    validateProduct(productConfig);
+    //validateProduct(productConfig);
   } catch (err) {
     isValidConfig = false;
     const warning = parentFieldName?.concat(` ${err}`) ?? `${err}`;
@@ -54,7 +52,6 @@ let KeyedShoppingConfigDef;
  *     keys that each have a `ShoppingConfigDataDef` value
  */
 export function getShoppingConfig(shoppingAttachmentEl) {
-  console.log('sourcemap error');
   return getElementConfig(shoppingAttachmentEl).then((config) => {
     const allItems = config['items'];
     const validItems = allItems.filter((item) => validateConfig(item));
