@@ -431,12 +431,6 @@ export class CustomEventTracker extends EventTracker {
      * @private {!Object<string, !Array<!AnalyticsEvent>|undefined>|undefined}
      */
     this.sandboxBuffer_ = {};
-
-    // Stop buffering of custom events after 10 seconds. Assumption is that all
-    // `amp-analytics` elements will have been instrumented by this time.
-    setTimeout(() => {
-      this.buffer_ = undefined;
-    }, 10000);
   }
 
   /** @override */
