@@ -111,6 +111,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
 
     const providersList = this.buildProvidersList_();
     this.rootEl_ = this.buildDialog_(providersList);
+    localizeTemplate(this.rootEl_, this.element);
     createShadowRootWithStyle(this.element, this.rootEl_, CSS);
     this.initializeListeners_();
   }
@@ -197,9 +198,9 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
         <div class="i-amphtml-story-share-menu-container">
           <button
             class="i-amphtml-story-share-menu-close-button"
-            aria-label={this.localizationService_.getLocalizedString(
+            i-amphtml-i18n-aria-label={
               LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-            )}
+            }
             role="button"
             onClick={this.close_.bind(this)}
           >
@@ -303,19 +304,23 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
     if (!isCopyingToClipboardSupported(this.win.document)) {
       return;
     }
-    const label = this.localizationService_.getLocalizedString(
-      LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
-    );
     return renderShareItemElement(
       <button
         class="i-amphtml-story-share-icon i-amphtml-story-share-icon-link"
-        aria-label={label}
+        i-amphtml-i18n-aria-label={
+          LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+        }
         onClick={(e) => {
           e.preventDefault();
           this.copyUrlToClipboard_();
         }}
       >
-        <span class="i-amphtml-story-share-label">{label}</span>
+        <span
+          class="i-amphtml-story-share-label"
+          i-amphtml-i18n-text-content={
+            LocalizedStringId_Enum.AMP_STORY_SHARING_PROVIDER_NAME_LINK
+          }
+        ></span>
       </button>
     );
   }
@@ -332,27 +337,36 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
       this.win,
       url,
       () => {
-        Toast.show(this.storyEl_, this.buildCopySuccessfulToast_(url));
+        this.localizationService_
+          .getLocalizedStringAsync(
+            LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
+          )
+          .then((successString) =>
+            Toast.show(
+              this.storyEl_,
+              this.buildCopySuccessfulToast_(url, successString)
+            )
+          );
       },
       () => {
-        const failureString = this.localizationService_.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
-        );
-        Toast.show(this.storyEl_, failureString);
+        this.localizationService_
+          .getLocalizedStringAsync(
+            LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
+          )
+          .then((failureString) => Toast.show(this.storyEl_, failureString));
       }
     );
   }
 
   /**
    * @param {string} url
+   * @param {string} localizedString
    * @return {!Element}
    */
-  buildCopySuccessfulToast_(url) {
+  buildCopySuccessfulToast_(url, localizedString) {
     return (
       <div class="i-amphtml-story-copy-successful">
-        {this.localizationService_.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT
-        )}
+        {localizedString}
         <div class="i-amphtml-story-copy-url">{url}</div>
       </div>
     );
