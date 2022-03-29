@@ -26,8 +26,8 @@ let ShoppingConfigResponseDef;
  */
 function validateConfig(productConfig) {
   let isValidConfig = true;
-
   const errors = validateProduct(productConfig);
+
   if (errors.length > 0) {
     isValidConfig = false;
     user().warn('AMP-STORY-SHOPPING-CONFIG', `${errors}`);
