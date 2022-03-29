@@ -99,6 +99,16 @@ Type attribute value: `bg.canary`
 Type attribute value: `bg`
 -->
 
+### Bisko
+
+Type attribute value: `bisko`
+
+Adds support for Bisko event collection. You are required to fill out the `propertyId`.
+
+-   `propertyId`: ID of the Bisko property to which you want to send data.
+
+Use extraUrlParams to add additional event properties. The events supported along with the corresponding event values that can be specified are detailed in the [GjirafaTech Bisko](https://docs.bisko.gjirafa.tech/#/ampsdk).
+
 ### Black Crow AI
 
 Type attribute value: `blackcrowai`

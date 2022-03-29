@@ -1,0 +1,30 @@
+{
+    "transport": {
+        "beacon": true,
+        "xhrpost": false
+    },
+    "vars": {
+        "onViewType": "pageview",
+        "onClickType": "linkclick",
+        "propertyId": "PROPERTY_ID"
+    },
+    "requests": {
+        "pageview": "https://bisko.gjirafa.tech/api/v1/amp?Type=${onViewType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}",
+        "linkclick": "https://bisko.gjirafa.tech/api/v1/amp?Type=${onClickType}&PropertyId=${propertyId}&ScreenHeight=${screenHeight}&ScreenWidth=${screenWidth}&Language=${browserLanguage}&PageDomain=${canonicalHostname}&Url=${canonicalUrl}&PageCleanUrl=${canonicalHost}&Title=${title}&Referrer=${documentReferrer}&PageViewGuid=${pageViewId64}&ClientDateTime=${timestamp}&DateTimeUtcOffset=${timezone}"
+    },
+    "triggers": {
+        "trackPageview": {
+            "on": "visible",
+            "request": "pageview"
+        },
+        "trackClick": {
+            "on": "click",
+            "selector": "a",
+            "request": "linkclick"
+        }
+    },
+    "extraUrlParams": {
+        "Content.id": "1234",
+        "Content.name": "Samsung releases new Galaxy Note version"
+    }
+}

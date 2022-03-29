@@ -54,6 +54,7 @@
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
+      <option>bisko</option>
       <option>blackcrowai</option>
       <option>blueconic</option>
       <option>bluetriangle</option>
@@ -402,6 +403,30 @@ For complete documentation and additional examples please see: https://marketing
     </script>
 </amp-analytics>
 <!-- Baidu stats example -->
+
+<!-- Bisko example -->
+<amp-analytics type="bisko" id="bisko">
+  <script type="application/json">
+    {
+      "vars": {
+        "propertyId": BISKO_PROPERTY_ID
+      },
+      "extraUrlParams": {
+        "Content.id": THE_IDENTIFIER_OF_THE_CONTENT_LIKE_1234,
+        "Content.name": "THE_NAME_OF_THE_CONTENT",
+        "Content.type": "TYPE_OF_THE_CONTENT_LIKE_video",
+        "Content.description": "DESCRIPTION_OF_THE_CONTENT",
+        "Content.author": "AUTHOR_OF_THE_CONTENT",
+        "Content.category": "STRING_ARRAY_OF_THE_CONTENT_CATEGORIES",
+        "Content.value": "VALUE_OF_CONTENT_LIKE_100$",
+        "Content.quantity": QUANTITY_OF_THE_CONTENT_LIKE_2,
+        "Content.imageUrl": "THE_URL_OF_THE_MAIN_IMAGE_OF_THE_CONTENT",
+        "Content.test": "EXTRA_DATA_OF_THE_CONTENT"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- END Bisko example -->
 
 <!-- Black Crow AI example -->
 <amp-analytics type="blackcrowai">
