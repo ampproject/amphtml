@@ -7,6 +7,8 @@ import {htmlFor} from '#core/dom/static-template';
 import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
+import {doNotLoadExternalResourcesInTest} from '#testing/iframe';
+import {flush} from '#testing/preact';
 
 import {BaseElement as BentoIframe} from '../../base-element';
 
@@ -20,10 +22,14 @@ describes.realWin(
 
     async function waitRendered() {
       await element.getApi();
+      await flush();
       await waitFor(() => element.shadowRoot.querySelector('iframe'));
     }
 
     beforeEach(() => {
+      // Override global window here because Preact uses global `createElement`.
+      doNotLoadExternalResourcesInTest(window, env.sandbox);
+
       win = env.win;
       doc = win.document;
       defineBentoElement('bento-iframe', BentoIframe, win);
@@ -39,10 +45,9 @@ describes.realWin(
 
       await waitRendered();
       const iframe = element.shadowRoot.querySelector('iframe');
-
       expect(element.parentNode).to.equal(doc.body);
       expect(element.getAttribute('src')).to.equal('https://www.wikipedia.org');
-      expect(iframe.getAttribute('src')).to.equal('https://www.wikipedia.org');
+      expect(iframe.src).to.equal('https://www.wikipedia.org');
     });
   }
 );
