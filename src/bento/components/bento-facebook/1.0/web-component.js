@@ -13,32 +13,36 @@ import {
 
 /**
  *Register BentoFacebook component to CustomElements registry
+ * @param {typeof globalThis=} win
  */
-export function defineElement() {
-  defineBentoElement(TAG, BaseElement);
+export function defineElement(win) {
+  defineBentoElement(TAG, BaseElement, win);
 
-  defineCommentsElement();
-  defineLikeElement();
-  definePageElement();
+  defineCommentsElement(win);
+  defineLikeElement(win);
+  definePageElement(win);
 }
 
 /**
  * Register BentoFacebookComments component to CustomElements registry
+ * @param {typeof globalThis=} win
  */
-export function defineCommentsElement() {
-  defineBentoElement(COMMENTS_TAG, CommentsBaseElement);
+export function defineCommentsElement(win) {
+  defineBentoElement(COMMENTS_TAG, CommentsBaseElement, win);
 }
 
 /**
  * Register BentoFacebook component to CustomElements registry
+ * @param {typeof globalThis=} win
  */
-export function defineLikeElement() {
-  defineBentoElement(LIKE_TAG, LikeBaseElement);
+export function defineLikeElement(win) {
+  defineBentoElement(LIKE_TAG, LikeBaseElement, win);
 }
 
 /**
  * Register BentoFacebook component to CustomElements registry
+ * @param {typeof globalThis=} win
  */
-export function definePageElement() {
-  defineBentoElement(PAGE_TAG, PageBaseElement);
+export function definePageElement(win) {
+  defineBentoElement(PAGE_TAG, PageBaseElement, win);
 }

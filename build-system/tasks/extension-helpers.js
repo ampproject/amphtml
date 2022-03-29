@@ -674,7 +674,9 @@ async function buildNpmBinaries(extDir, name, options) {
         ...(npm[mode].remap || {}),
         ...bentoRemaps,
       };
-      npm[mode].external = [...(npm[mode].external || []), ...bentoExternals];
+      npm[mode].external = [
+        ...new Set([...(npm[mode].external || []), ...bentoExternals]),
+      ];
     }
   }
   const binaries = Object.values(npm);
@@ -804,8 +806,8 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
     import {BaseElement} from '../base-element';
     import {defineBentoElement} from '${bentoCePath}';
 
-    function defineElement() {
-      defineBentoElement(__name__, BaseElement);
+    function defineElement(win) {
+      defineBentoElement(__name__, BaseElement, win);
     }
 
     ${toExport ? 'export {defineElement};' : 'defineElement();'}
