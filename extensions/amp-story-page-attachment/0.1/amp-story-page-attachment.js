@@ -10,6 +10,8 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {
   allowlistFormActions,
@@ -132,7 +134,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     super.layoutCallback();
     // Outlink renders an image and must be built in layoutCallback.
     if (this.type_ === AttachmentType.OUTLINK) {
-      this.buildOutlink_();
+      return this.buildOutlink_();
     }
   }
 
@@ -148,37 +150,36 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     }
 
     if (!this.openAttachmentEl_) {
-      this.openAttachmentEl_ = renderPageAttachmentUI(
-        this.pageEl_,
-        this.element
-      );
+      renderPageAttachmentUI(this.pageEl_, this.element).then((el) => {
+        this.openAttachmentEl_ = el;
 
-      // This ensures `active` is set on first render.
-      // Otherwise setState may be called before this.openAttachmentEl_ exists.
-      if (this.storyEl_.hasAttribute('active')) {
-        this.openAttachmentEl_.setAttribute('active', '');
-      }
+        // This ensures `active` is set on first render.
+        // Otherwise setState may be called before this.openAttachmentEl_ exists.
+        if (this.storyEl_.hasAttribute('active')) {
+          this.openAttachmentEl_.setAttribute('active', '');
+        }
 
-      const container = (
-        <div
-          class="i-amphtml-story-page-open-attachment-host"
-          role="button"
-          onClick={(e) => {
-            // Prevent default so link can be opened programmatically after URL preview is shown.
-            e.preventDefault();
-            this.open();
-          }}
-        ></div>
-      );
-
-      this.mutateElement(() => {
-        this.pageEl_.appendChild(
-          createShadowRootWithStyle(
-            container,
-            this.openAttachmentEl_,
-            pageAttachmentCss
-          )
+        const container = (
+          <div
+            class="i-amphtml-story-page-open-attachment-host"
+            role="button"
+            onClick={(e) => {
+              // Prevent default so link can be opened programmatically after URL preview is shown.
+              e.preventDefault();
+              this.open();
+            }}
+          ></div>
         );
+
+        this.mutateElement(() => {
+          this.pageEl_.appendChild(
+            createShadowRootWithStyle(
+              container,
+              this.openAttachmentEl_,
+              pageAttachmentCss
+            )
+          );
+        });
       });
     }
   }
@@ -196,9 +197,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       <div class="i-amphtml-story-draggable-drawer-header-title-and-close">
         <button
           class="i-amphtml-story-page-attachment-close-button"
-          aria-label={this.localizationService.getLocalizedString(
+          i-amphtml-i18n-aria-label={
             LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-          )}
+          }
           role="button"
           onClick={() => this.close_()}
           tabindex="-1"
@@ -208,6 +209,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
         )}
       </div>
     );
+    localizeTemplate(this.headerEl, this.element);
 
     const forms = this.element.querySelectorAll('form');
     if (forms.length > 0) {
@@ -215,22 +217,20 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
       forms.forEach((form) => {
         // Scroll each response attribute element into view, when displayed.
-        setupResponseAttributeElements(form, this.localizationService).forEach(
-          (el) => {
-            // TODO(wg-stories): Share ResizeObserver for runtime performance.
-            new this.win.ResizeObserver((e) => {
-              if (
-                this.state === DrawerState.OPEN &&
-                e[0].contentRect.height > 0
-              ) {
-                el./*OK*/ scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'nearest',
-                });
-              }
-            }).observe(el);
-          }
-        );
+        setupResponseAttributeElements(form, this.storyEl_).forEach((el) => {
+          // TODO(wg-stories): Share ResizeObserver for runtime performance.
+          new this.win.ResizeObserver((e) => {
+            if (
+              this.state === DrawerState.OPEN &&
+              e[0].contentRect.height > 0
+            ) {
+              el./*OK*/ scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+              });
+            }
+          }).observe(el);
+        });
       });
 
       // Page attachments that contain forms must display the page's publisher
@@ -251,6 +251,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
   /**
    * Builds outlink CTA drawer UI.
+   * @return {!Promise}
    * @private
    */
   buildOutlink_() {
@@ -294,11 +295,11 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       >
         {image}
         <span class="i-amphtml-story-page-attachment-remote-title">
-          <span>
-            {this.localizationService.getLocalizedString(
+          <span
+            i-amphtml-i18n-text-content={
               LocalizedStringId_Enum.AMP_STORY_OPEN_OUTLINK_TEXT
-            )}
-          </span>
+            }
+          ></span>
           <span>{hrefAttr}</span>
         </span>
         <svg
@@ -330,7 +331,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     // can inline the attribute, and avoid the warning.
     link.setAttribute('href', hrefAttr);
 
-    this.contentEl.appendChild(link);
+    return localizeTemplate(link, this.element).then(() =>
+      this.mutateElement(() => this.contentEl.appendChild(link))
+    );
   }
 
   /**
@@ -338,7 +341,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @param {boolean} isActive
    */
   setOpenAttachmentActive(isActive) {
-    toggleAttribute(this.openAttachmentEl_, 'active', isActive);
+    this.openAttachmentEl_ &&
+      toggleAttribute(this.openAttachmentEl_, 'active', isActive);
   }
 
   /**
