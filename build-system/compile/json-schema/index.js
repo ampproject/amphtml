@@ -243,7 +243,7 @@ function transformAjvCode(code, scope, config) {
       },
       ObjectPattern(path) {
         // Replace destructuring of arguments with {instancePath} with just
-        // instancePath
+        // the assignment or id for instancePath
         const replacedPath = path.parentPath.isAssignmentPattern()
           ? path.parentPath
           : path;
@@ -251,9 +251,9 @@ function transformAjvCode(code, scope, config) {
           return;
         }
         const {properties} = path.node;
-        const instancePath = findProperty(properties, 'instancePath');
-        if (instancePath) {
-          replacedPath.replaceWith(instancePath);
+        const value = findProperty(properties, 'instancePath')?.value;
+        if (t.isIdentifier(value) || t.isAssignmentPattern(value)) {
+          replacedPath.replaceWith(value);
         }
       },
     },

@@ -73,6 +73,9 @@ class PaginationButton {
     /** @private {!PaginationButtonStateDef} */
     this.state_ = initialState;
 
+    /** @const {!Document} */
+    this.doc_ = doc;
+
     /** @const {!Element} */
     this.element = renderPaginationButton(initialState, (e) =>
       this.onClick_(e)
@@ -101,11 +104,11 @@ class PaginationButton {
     this.mutator_.mutateElement(this.element, () => {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
-      Services.localizationForDoc(this.win_)
-        .getLocalizedStringAsync(state.label)
-        .then((str) => this.buttonElement_.setAttribute('aria-label', str));
       this.state_ = state;
     });
+    Services.localizationForDoc(this.doc_)
+      .getLocalizedStringAsync(state.label)
+      .then((str) => this.buttonElement_.setAttribute('aria-label', str));
   }
 
   /**
