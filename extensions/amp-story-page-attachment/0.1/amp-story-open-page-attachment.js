@@ -137,7 +137,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
 
   const openAttachmentEl = (
     <a
-      class="i-amphtml-story-page-open-attachment"
+      class="i-amphtml-story-page-open-attachment i-amphtml-story-page-open-attachment-outlink"
       role="button"
       target="_top"
       title={attachmentTitle}
@@ -202,8 +202,8 @@ const renderInlineUi = (pageEl, attachmentEl) => {
   );
 
   return (
-    <a
-      class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
+    <button
+      class="i-amphtml-story-page-open-attachment i-amphtml-story-page-open-attachment-inline"
       role="button"
       theme={AttachmentTheme.DARK === theme && theme}
       aria-label={openLabel}
@@ -216,7 +216,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
       {openLabel !== 'none' && (
         <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
       )}
-    </a>
+    </button>
   );
 };
 
