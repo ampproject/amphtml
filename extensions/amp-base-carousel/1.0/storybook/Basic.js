@@ -65,9 +65,15 @@ function CarouselWithActions(props) {
     <section>
       <BentoBaseCarousel ref={ref} {...props} />
       <div style={{marginTop: 8}}>
-        <button onClick={() => ref.current.goToSlide(3)}>goToSlide(3)</button>
-        <button onClick={() => ref.current.next()}>next</button>
-        <button onClick={() => ref.current.prev()}>prev</button>
+        <button data-testid="goto" onClick={() => ref.current.goToSlide(3)}>
+          goToSlide(3)
+        </button>
+        <button data-testid="next" onClick={() => ref.current.next()}>
+          next
+        </button>
+        <button data-testid="prev" onClick={() => ref.current.prev()}>
+          prev
+        </button>
       </div>
     </section>
   );
