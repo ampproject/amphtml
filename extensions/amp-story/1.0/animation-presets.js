@@ -23,7 +23,7 @@ const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
 /** @const {string} */
 const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
 /** @const {string} */
-const PAN_STATIC_SCALE_ATTRIBUTION_NAME = 'pan-static-scale';
+const PAN_STATIC_SCALE_ATTRIBUTE_NAME = 'pan-static-scale';
 /** @const {string} */
 const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** @const {string} */
@@ -35,7 +35,7 @@ const DEFAULT_CURVE = '0.4, 0.4, 0.0, 1';
 export const PRESET_OPTION_ATTRIBUTES = [
   SCALE_START_ATTRIBUTE_NAME,
   SCALE_END_ATTRIBUTE_NAME,
-  PAN_STATIC_SCALE_ATTRIBUTION_NAME,
+  PAN_STATIC_SCALE_ATTRIBUTE_NAME,
   TRANSLATE_X_ATTRIBUTE_NAME,
   TRANSLATE_Y_ATTRIBUTE_NAME,
 ];
@@ -288,8 +288,8 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
-      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTION_NAME]
-        ? options[PAN_STATIC_SCALE_ATTRIBUTION_NAME]
+      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
+        ? options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
         : calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -311,8 +311,8 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
-      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTION_NAME]
-        ? options[PAN_STATIC_SCALE_ATTRIBUTION_NAME]
+      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
+        ? options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
         : calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -334,8 +334,8 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTION_NAME]
-        ? options[PAN_STATIC_SCALE_ATTRIBUTION_NAME]
+      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
+        ? options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
         : calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
@@ -357,8 +357,8 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTION_NAME]
-        ? options[PAN_STATIC_SCALE_ATTRIBUTION_NAME]
+      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
+        ? options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
         : calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
