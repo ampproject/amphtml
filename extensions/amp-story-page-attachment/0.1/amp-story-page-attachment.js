@@ -247,10 +247,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     while (this.element.firstChild && this.element.firstChild !== templateEl) {
       this.contentEl.appendChild(this.element.firstChild);
     }
-
-    // Ensures the content of the attachment won't be rendered/loaded until we
-    // actually need it.
-    toggle(dev().assertElement(this.containerEl), true);
   }
 
   /**
