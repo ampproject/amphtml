@@ -4,6 +4,6 @@
  */
 export function adoptStyles(win, css) {
   const style = win.document.createElement('style');
-  style.textContent = `<style>${css}</style>`;
+  style.textContent = css;
   win.document.head.appendChild(style);
 }

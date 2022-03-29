@@ -16,6 +16,7 @@ import {afterRenderPromise} from '#testing/helpers';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {MediaType} from '../media-pool';
@@ -51,6 +52,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
 
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {

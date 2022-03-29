@@ -7,7 +7,10 @@
 
     // Enable JSON auto-formatting for these files.
     ".prettierrc": "json",
-    ".renovaterc.json": "json"
+    ".renovaterc.json": "json",
+
+    // Allow comments in JSON schema files.
+    "*.schema.json": "jsonc"
   },
 
   // Auto-fix JS files with ESLint using amphtml's custom settings. Needs

@@ -1,0 +1,13 @@
+{
+  "properties": {
+    "my-date": {
+      "format": "date"
+    },
+    "my-date-time": {
+      "format": "date-time"
+    },
+    "my-time": {
+      "format": "time"
+    }
+  }
+}

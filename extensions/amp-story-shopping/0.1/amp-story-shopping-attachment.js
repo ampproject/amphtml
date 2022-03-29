@@ -5,6 +5,8 @@ import {Layout_Enum} from '#core/dom/layout';
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 import {
   getShoppingConfig,
@@ -73,18 +75,22 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
 
-    this.attachmentEl_ = (
-      <amp-story-page-attachment
-        layout="nodisplay"
-        theme={this.element.getAttribute('theme')}
-        cta-text={this.localizationService_.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
-        )}
-      >
-        {this.templateContainer_}
-      </amp-story-page-attachment>
-    );
-    this.element.appendChild(this.attachmentEl_);
+    return this.localizationService_
+      .getLocalizedStringAsync(
+        LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+      )
+      .then((ctaText) => {
+        this.attachmentEl_ = (
+          <amp-story-page-attachment
+            layout="nodisplay"
+            theme={this.element.getAttribute('theme')}
+            cta-text={ctaText}
+          >
+            {this.templateContainer_}
+          </amp-story-page-attachment>
+        );
+        this.element.appendChild(this.attachmentEl_);
+      });
   }
 
   /** @override */
@@ -220,7 +226,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   getTemplate_(templateId, productForPdp, shoppingDataForPage) {
-    const buildTemplate = () => (
+    if (this.builtTemplates_[templateId]) {
+      return this.builtTemplates_[templateId];
+    }
+    const template = (
       <div class="i-amphtml-amp-story-shopping">
         {/* If there is a product for the PDP, render PDP. */}
         {productForPdp && this.renderPdpTemplate_(productForPdp)}
@@ -231,8 +240,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           )}
       </div>
     );
-
-    return this.builtTemplates_[templateId] || buildTemplate();
+    localizeTemplate(template, this.element);
+    return template;
   }
 
   /**
@@ -338,10 +347,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
                 target="_top"
               >
                 {activeProductData.aggregateRating.reviewCount + ' '}
-                {this.localizationService_.getLocalizedString(
-                  LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL,
-                  this.element
-                )}
+                <span
+                  i-amphtml-i18n-text-content={
+                    LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL
+                  }
+                ></span>
               </a>
               )
             </span>
@@ -350,12 +360,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             class="i-amphtml-amp-story-shopping-pdp-cta"
             href={activeProductData.productUrl}
             target="_top"
-          >
-            {this.localizationService_.getLocalizedString(
-              LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL,
-              this.element
-            )}
-          </a>
+            i-amphtml-i18n-text-content={
+              LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL
+            }
+          ></a>
         </div>
         <div class="i-amphtml-amp-story-shopping-pdp-carousel">
           {activeProductData.productImages.map((image) => (
@@ -374,12 +382,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-pdp-details-header"
               onClick={(e) => onDetailsHeaderClick(e.target)}
             >
-              <span class="i-amphtml-amp-story-shopping-sub-section-header">
-                {this.localizationService_.getLocalizedString(
-                  LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_DETAILS,
-                  this.element
-                )}
-              </span>
+              <span
+                class="i-amphtml-amp-story-shopping-sub-section-header"
+                i-amphtml-i18n-text-content={
+                  LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_DETAILS
+                }
+              ></span>
               <svg
                 viewBox="0 0 10 6"
                 class="i-amphtml-amp-story-shopping-pdp-details-header-arrow"
@@ -409,12 +417,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   renderPlpTemplate_(shoppingDataForPage) {
     return (
       <div class="i-amphtml-amp-story-shopping-plp">
-        <div class="i-amphtml-amp-story-shopping-sub-section-header">
-          {this.localizationService_.getLocalizedString(
-            LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER,
-            this.element
-          )}
-        </div>
+        <div
+          class="i-amphtml-amp-story-shopping-sub-section-header"
+          i-amphtml-i18n-text-content={
+            LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER
+          }
+        ></div>
         <div class="i-amphtml-amp-story-shopping-plp-cards">
           {shoppingDataForPage.map((data) => (
             <button
