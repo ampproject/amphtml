@@ -137,7 +137,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.containerEl = dev().assertElement(
       templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
     );
-
     this.contentEl = dev().assertElement(
       this.containerEl.querySelector(
         '.i-amphtml-story-draggable-drawer-content'
