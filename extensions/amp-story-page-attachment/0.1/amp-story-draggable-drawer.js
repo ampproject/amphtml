@@ -183,7 +183,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     }
 
     // `containerEl` is hidden by default, to ensure that its content is not
-    // rendered/loaded by the AMP Resources manager before we can set a 
+    // rendered/loaded by the AMP Resources manager before we can set a
     // different owner. Now that the owner has been set, we can unhide it.
     toggle(dev().assertElement(this.containerEl), true);
   }
