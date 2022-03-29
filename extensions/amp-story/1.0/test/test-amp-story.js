@@ -16,6 +16,7 @@ import {poll} from '#testing/iframe';
 
 import * as consent from '../../../../src/consent';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   AmpStory,
   PAYWALL_DELAY_DURATION,
@@ -108,6 +109,9 @@ describes.realWin(
       env.sandbox
         .stub(Services, 'localizationForDoc')
         .returns(localizationService);
+      localizationService.registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
 
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox
@@ -1258,12 +1262,13 @@ describes.realWin(
           it('should trigger the navigation overlay', async () => {
             await createStoryWithPages(2);
             dispatchSwipeEvent(100, 0);
-            await story.mutateElement(() => {
-              const hintEl = story.element.querySelector(
-                '.i-amphtml-story-hint-container'
-              );
-              expect(hintEl).to.not.have.class('i-amphtml-hidden');
-            });
+            await waitFor(() =>
+              story.element.querySelector('.i-amphtml-story-hint-container')
+            );
+            const hintEl = story.element.querySelector(
+              '.i-amphtml-story-hint-container'
+            );
+            expect(hintEl).to.not.have.class('i-amphtml-hidden');
           });
         });
 
@@ -1999,18 +2004,18 @@ describes.realWin(
       it('should install the default english localizations', async () => {
         await createStoryWithPages(1, ['cover']);
 
-        expect(localizationService.getLocalizedString('35')).to.be.equal(
-          'Swipe up'
-        );
+        expect(
+          await localizationService.getLocalizedStringAsync('35')
+        ).to.be.equal('Swipe up');
       });
 
       it('should install the correct language localizations if specified', async () => {
         env.win.document.body.parentElement.setAttribute('lang', 'es');
         await createStoryWithPages(1, ['cover']);
 
-        expect(localizationService.getLocalizedString('35')).to.be.equal(
-          'Deslizar el dedo hacia arriba'
-        );
+        expect(
+          await localizationService.getLocalizedStringAsync('35')
+        ).to.be.equal('Deslizar el dedo hacia arriba');
       });
 
       it('should use the inlined amp-story strings when available', async () => {
@@ -2022,9 +2027,9 @@ describes.realWin(
 
         await createStoryWithPages(1, ['cover']);
 
-        expect(localizationService.getLocalizedString('35')).to.be.equal(
-          'INLINED-STRING'
-        );
+        expect(
+          await localizationService.getLocalizedStringAsync('35')
+        ).to.be.equal('INLINED-STRING');
       });
 
       it('should not use the inlined amp-story strings if incorrect RTV', async () => {
@@ -2036,9 +2041,9 @@ describes.realWin(
 
         await createStoryWithPages(1, ['cover']);
 
-        expect(localizationService.getLocalizedString('35')).to.be.equal(
-          'Swipe up'
-        );
+        expect(
+          await localizationService.getLocalizedStringAsync('35')
+        ).to.be.equal('Swipe up');
       });
 
       it('should use the inlined amp-story strings when available if the language is specified', async () => {
@@ -2052,9 +2057,9 @@ describes.realWin(
 
         await createStoryWithPages(1, ['cover']);
 
-        expect(localizationService.getLocalizedString('35')).to.be.equal(
-          'TEXTO-EN-LINEA'
-        );
+        expect(
+          await localizationService.getLocalizedStringAsync('35')
+        ).to.be.equal('TEXTO-EN-LINEA');
       });
 
       it('should use the default strings if inlined JSON is corrupted', async () => {
@@ -2068,9 +2073,9 @@ describes.realWin(
 
         await createStoryWithPages(1, ['cover']);
 
-        expect(localizationService.getLocalizedString('35')).to.be.equal(
-          'Swipe up'
-        );
+        expect(
+          await localizationService.getLocalizedStringAsync('35')
+        ).to.be.equal('Swipe up');
       });
 
       describe('remote localization strings', () => {
@@ -2144,9 +2149,9 @@ describes.realWin(
 
           await createStoryWithPages(1, ['cover']);
 
-          expect(localizationService.getLocalizedString('35')).to.be.equal(
-            'REMOTE-STRING'
-          );
+          expect(
+            await localizationService.getLocalizedStringAsync('35')
+          ).to.be.equal('REMOTE-STRING');
         });
       });
     });
