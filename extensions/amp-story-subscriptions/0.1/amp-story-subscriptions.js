@@ -1,4 +1,3 @@
-import {iterateCursor} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 
@@ -8,18 +7,6 @@ import {CSS} from '../../../build/amp-story-subscriptions-0.1.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 
 const TAG = 'amp-story-subscriptions';
-
-/**
- * The attribute name used in amp-subscriptions to indicate the content is locked or not.
- * @const {string}
- */
-const SUBSCRIPTIONS_SECTION = 'subscriptions-section';
-
-/**
- * The index of the limited-content page, which is the page where the paywall would be triggered.
- * @const {number}
- */
-const FIRST_PAYWALL_STORY_PAGE_INDEX = 2;
 
 export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -32,20 +19,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // Mark pages with required attributes to be treated as paywall protected pages.
-    // 'limited-content' is for the paywall dialog page, where a paywall would trigger based on both time advance or click events.
-    // 'content' is for all the remaining locked pages.
-    iterateCursor(
-      document.querySelectorAll('amp-story-page'),
-      (pageEl, index) => {
-        if (index == FIRST_PAYWALL_STORY_PAGE_INDEX) {
-          pageEl.setAttribute(SUBSCRIPTIONS_SECTION, 'limited-content');
-        } else if (index > FIRST_PAYWALL_STORY_PAGE_INDEX) {
-          pageEl.setAttribute(SUBSCRIPTIONS_SECTION, 'content');
-        }
-      }
-    );
-
     // Create a paywall dialog element that have required attributes to be able to be
     // rendered by amp-subscriptions.
     // TODO(#37285): complete the rest of paywall dialog UI based on the publisher-provided attributes.
@@ -72,7 +45,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
    */
   initializeListeners_() {
     this.storeService_.subscribe(
-      StateProperty.SUBSCRIPTIONS_DIALOG_STATE,
+      StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
       (isDialogVisible) => this.onSubscriptionStateChange_(isDialogVisible)
     );
   }
@@ -89,6 +62,8 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       )
     );
   }
+
+  // TODO(#37285): handle grant state update, show/hide dialog after receiving dialog ui state update.
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {

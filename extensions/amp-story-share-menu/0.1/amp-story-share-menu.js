@@ -15,6 +15,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {user} from '#utils/log';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 import {Toast} from 'extensions/amp-story/1.0/toast';
 
@@ -239,6 +240,7 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
           list.append(el);
         }
       }
+      localizeTemplate(list, this.storyEl_);
     });
 
     return list;
@@ -277,11 +279,10 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
         class="i-amphtml-story-share-icon"
         type={provider}
       >
-        <span class="i-amphtml-story-share-label">
-          {this.localizationService_.getLocalizedString(
-            shareProviderLocalizedStringId
-          )}
-        </span>
+        <span
+          class="i-amphtml-story-share-label"
+          i-amphtml-i18n-text-content={shareProviderLocalizedStringId}
+        ></span>
       </amp-social-share>
     );
 
