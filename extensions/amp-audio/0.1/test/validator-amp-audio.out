@@ -39,5 +39,13 @@ PASS
 |
 |    <!-- Valid: empty sizes attribute is layout fixed -->
 |    <amp-audio src=lemur.png sizes=""></amp-audio>
+|
+|    <!-- Valid: empty audio tag with container layout -->
+|    <amp-audio autoplay src="https://yourhost.com/audios/myaudio.mp3" layout="container" preload="auto">
+|      <div fallback>
+|        <p>Your browser doesn’t support HTML5 audio</p>
+|      </div>
+|      <audio controls>
+|    </amp-audio>
 |  </body>
 |  </html>
