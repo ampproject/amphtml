@@ -250,7 +250,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     // Ensures the content of the attachment won't be rendered/loaded until we
     // actually need it.
-    toggle(dev().assertElement(this.containerEl), false);
+    toggle(dev().assertElement(this.containerEl), true);
   }
 
   /**

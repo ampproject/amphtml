@@ -517,12 +517,8 @@ export class DraggableDrawer extends AMP.BaseElement {
           return;
         }
         this.state = DrawerState.DRAGGING_TO_OPEN;
-        if (this.containerEl.hasAttribute('hidden')) {
-          this.mutateElement(() => {
-            toggle(dev().assertElement(this.containerEl), true);
-          });
-        }
         const drag = Math.max(deltaY, -this.dragCap_) - this.spacerElHeight_;
+
         translate = `translate3d(0, calc(100% + ${drag}px), 0)`;
         break;
       case DrawerState.OPEN:
