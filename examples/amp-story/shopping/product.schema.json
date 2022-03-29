@@ -1,76 +1,289 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/product.schema.json",
-  "title": "Product",
-  "description": "A product from an amp story shopping configuration.",
-  "type": "object",  
-  "properties": {
-    "productId": {
-      "description": "Keys to amp-story-shopping-tag nodes",
-      "type": "string"
-    },
-    "productUrl": {
-      "description": "Links to the product's website",
-      "type": "string"
-    },
-    "productTitle": {
-      "description": "The name of the product",
-      "type": "string"
-    },
-    "productPrice": {
-      "description": "The price of the product",
-      "type": "number"
-    },
-    /*"productPriceCurrency": {
-      "enum": [
-        "AED",
-        "...",
-        "ZWL"
-      ],
-      "description": "The ISO 4217 currency code of the product price",
-      "type": "string"
-    },*/
-    "productImages": {
-      "description": "A list of images for the product",
-      "type": "array"
-    },
-    "productDetails": {
-      "description": "Details about the product",
-      "type": "string"
-    },
-    "productBrand": {
-      "description": "Brand name of the product",
-      "type": "string"
-    },
-    "productIcon": {
-      "description": "Links the icon image for the product. Defaults to a shopping bag icon",
-      "type": "string"
-    },
-    "productTagText": {
-      "description": "Text for the Prodcut tag. Supersedes productPrice",
-      "type": "string"
-    }
-  },
-  "$defs": {
-    "aggregateRating": {
-      "description": "Ratings and review data for the product",
-      "type": "object",
-      "required": [ "veggieName", "veggieLike" ],
-      "properties": {
-        "ratingValue": {
-          "description": "The aggregate rating value of the product",
-          "type": "number"
+    "title": "Product",
+    "description": "A product from an amp story shopping configuration.",
+    "type": "object",
+    "$defs": {
+        "https": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://"
         },
-        "reviewCount": {
-          "description": "The number of reviews for the product",
-          "type": "number"
-        },
-        "reviewUrl": {
-          "description": "The Url for the product reviews",
-          "type": "string"
+        "httpsUrlOrUrls": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/https"
+                },
+                {
+                "type": "array",
+                "items": {
+                    "$ref": "#/$defs/https"
+                }
+                }
+            ]
         }
-      }
+    },
+    "items": {
+            "type": "object",
+                "properties": {
+                            "productId": {
+                                "description": "Keys to amp-story-shopping-tag nodes",
+                                "type": "string"
+                            },
+                            "productUrl": {
+                                "description": "Links to the product's website",
+                                "type": "string"
+                            },
+                            "productTitle": {
+                                "description": "The name of the product",
+                                "type": "string"
+                            },
+                            "productPrice": {
+                                "description": "The price of the product",
+                                "type": "number"
+                            },
+                            "productPriceCurrency": {
+                                "description": "The ISO 4217 currency code of the product price",
+                                "type": "string",
+                                "enum": [
+                                    "AED",
+                                    "AFN",
+                                    "ALL",
+                                    "AMD",
+                                    "ANG",
+                                    "AOA",
+                                    "ARS",
+                                    "AUD",
+                                    "AWG",
+                                    "AZN",
+                                    "BAM",
+                                    "BBD",
+                                    "BDT",
+                                    "BGN",
+                                    "BHD",
+                                    "BIF",
+                                    "BMD",
+                                    "BND",
+                                    "BOB",
+                                    "BOV",
+                                    "BRL",
+                                    "BSD",
+                                    "BTN",
+                                    "BWP",
+                                    "BYN",
+                                    "BZD",
+                                    "CAD",
+                                    "CDF",
+                                    "CHE",
+                                    "CHF",
+                                    "CHW",
+                                    "CLF",
+                                    "CLP",
+                                    "CNY",
+                                    "COP",
+                                    "COU",
+                                    "CRC",
+                                    "CUC",
+                                    "CUP",
+                                    "CVE",
+                                    "CZK",
+                                    "DJF",
+                                    "DKK",
+                                    "DOP",
+                                    "DZD",
+                                    "EGP",
+                                    "ERN",
+                                    "ETB",
+                                    "EUR",
+                                    "FJD",
+                                    "FKP",
+                                    "GBP",
+                                    "GEL",
+                                    "GHS",
+                                    "GIP",
+                                    "GMD",
+                                    "GNF",
+                                    "GTQ",
+                                    "GYD",
+                                    "HKD",
+                                    "HNL",
+                                    "HRK",
+                                    "HTG",
+                                    "HUF",
+                                    "IDR",
+                                    "ILS",
+                                    "INR",
+                                    "IQD",
+                                    "IRR",
+                                    "ISK",
+                                    "JMD",
+                                    "JOD",
+                                    "JPY",
+                                    "KES",
+                                    "KGS",
+                                    "KHR",
+                                    "KMF",
+                                    "KPW",
+                                    "KRW",
+                                    "KWD",
+                                    "KYD",
+                                    "KZT",
+                                    "LAK",
+                                    "LBP",
+                                    "LKR",
+                                    "LRD",
+                                    "LSL",
+                                    "LYD",
+                                    "MAD",
+                                    "MDL",
+                                    "MGA",
+                                    "MKD",
+                                    "MMK",
+                                    "MNT",
+                                    "MOP",
+                                    "MRU",
+                                    "MUR",
+                                    "MVR",
+                                    "MWK",
+                                    "MXN",
+                                    "MXV",
+                                    "MYR",
+                                    "MZN",
+                                    "NAD",
+                                    "NGN",
+                                    "NIO",
+                                    "NOK",
+                                    "NPR",
+                                    "NZD",
+                                    "OMR",
+                                    "PAB",
+                                    "PEN",
+                                    "PGK",
+                                    "PHP",
+                                    "PKR",
+                                    "PLN",
+                                    "PYG",
+                                    "QAR",
+                                    "RON",
+                                    "RSD",
+                                    "RUB",
+                                    "RWF",
+                                    "SAR",
+                                    "SBD",
+                                    "SCR",
+                                    "SDG",
+                                    "SEK",
+                                    "SGD",
+                                    "SHP",
+                                    "SLL",
+                                    "SOS",
+                                    "SRD",
+                                    "SSP",
+                                    "STN",
+                                    "SVC",
+                                    "SYP",
+                                    "SZL",
+                                    "THB",
+                                    "TJS",
+                                    "TMT",
+                                    "TND",
+                                    "TOP",
+                                    "TRY",
+                                    "TTD",
+                                    "TWD",
+                                    "TZS",
+                                    "UAH",
+                                    "UGX",
+                                    "USD",
+                                    "USN",
+                                    "UYI",
+                                    "UYU",
+                                    "UYW",
+                                    "UZS",
+                                    "VED",
+                                    "VES",
+                                    "VND",
+                                    "VUV",
+                                    "WST",
+                                    "XAF",
+                                    "XAG",
+                                    "XAU",
+                                    "XBA",
+                                    "XBB",
+                                    "XBC",
+                                    "XBD",
+                                    "XCD",
+                                    "XDR",
+                                    "XOF",
+                                    "XPD",
+                                    "XPF",
+                                    "XPT",
+                                    "XSU",
+                                    "XTS",
+                                    "XUA",
+                                    "XXX",
+                                    "YER",
+                                    "ZAR",
+                                    "ZMW",
+                                    "ZWL"
+                                ]
+                            },
+                            "productImages": {
+                                "description": "A list of images for the product",
+                                "type": "array",
+                                "items": {
+                                    "required": ["url", "altText"],
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                        "url": {"$ref": "#/$defs/https"},
+                                        "altText": {"type": "string"}
+                                    }
+                                }
+                            },
+                            "productDetails": {
+                                "description": "Details about the product",
+                                "type": "string"
+                            },
+                            "productBrand": {
+                                "description": "Brand name of the product",
+                                "type": "string"
+                            },
+                            "productIcon": {
+                                "description": "Links the icon image for the product. Defaults to a shopping bag icon",
+                                "type": "string"
+                            },
+                            "productTagText": {
+                                "description": "Text for the Prodcut tag. Supersedes productPrice",
+                                "type": "string"
+                            },
+                            "aggregateRating": {
+                                "description": "Ratings and review data for the product",
+                                "type": "object",
+                                "required": ["ratingValue", "reviewCount", "reviewUrl"],
+                                "properties": {
+                                    "ratingValue": {
+                                    "description": "The aggregate rating value of the product",
+                                    "type": "number"
+                                    },
+                                    "reviewCount": {
+                                    "description": "The number of reviews for the product",
+                                    "type": "number"
+                                    },
+                                    "reviewUrl": {
+                                    "description": "The Url for the product reviews",
+                                    "type": "string"
+                                    }
+                                }
+                            }
+        },
+        "required": [
+            "productId",
+            "productUrl",
+            "productTitle",
+            "productPrice",
+            "productPriceCurrency",
+            "productImages",
+            "productDetails"
+        ]
     }
-  },
-  "required": [ "productId", "productUrl" , "productTitle" , "productPrice" , "productPriceCurrency", "productImages", "productDetails" ]
 }
