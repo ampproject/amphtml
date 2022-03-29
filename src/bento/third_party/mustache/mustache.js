@@ -1,8 +1,5 @@
 /* eslint-disable */
 
-// Bento components must import `bento-mustache.js` instead of `mustache` directly.
-// This is so that the bundler links it to the external `bento-mustache.js` binary.
-
 /*!
  * mustache.js - Logic-less {{mustache}} templates with JavaScript
  * http://github.com/janl/mustache.js
