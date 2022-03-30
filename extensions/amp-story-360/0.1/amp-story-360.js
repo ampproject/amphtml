@@ -42,7 +42,7 @@ const HAVE_CURRENT_DATA = 2;
 const CENTER_OFFSET = 90;
 
 /**
- * Minimum distance from active page to activate WebGL context.
+ * Minimum distance from active page.
  * @const {number}
  */
 const MIN_WEBGL_DISTANCE = 2;
@@ -295,9 +295,6 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {number} */
     this.headingOffset_ = 0;
 
-    /** @private WebGL extension for lost context. */
-    this.lostGlContext_ = null;
-
     /** @private {!Array<number>} */
     this.rot_ = null;
   }
@@ -356,7 +353,6 @@ export class AmpStory360 extends AMP.BaseElement {
         mutationsList[0].target.getAttribute('distance'),
         10
       );
-      this.restoreOrLoseGlContext_();
     };
     const observer = new MutationObserver(callback);
     this.getPage_() && observer.observe(this.getPage_(), config);
@@ -428,20 +424,6 @@ export class AmpStory360 extends AMP.BaseElement {
     } else {
       this.pause_();
       this.rewind_();
-    }
-  }
-
-  /** @private */
-  restoreOrLoseGlContext_() {
-    if (!this.renderer_) {
-      return;
-    }
-    if (this.distance_ < MIN_WEBGL_DISTANCE) {
-      if (this.renderer_.gl.isContextLost()) {
-        this.lostGlContext_.restoreContext();
-      }
-    } else if (!this.renderer_.gl.isContextLost()) {
-      this.lostGlContext_.loseContext();
     }
   }
 
@@ -711,7 +693,6 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.setupGlContextListeners_();
           this.image_ = this.checkImageReSize_(
             dev().assertElement(this.element.querySelector('img'))
           );
@@ -742,24 +723,10 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.setupGlContextListeners_();
           this.initRenderer_();
         },
         () => user().error(TAG, 'Failed to load the amp-video.')
       );
-  }
-
-  /** @private */
-  setupGlContextListeners_() {
-    this.lostGlContext_ = this.renderer_.gl.getExtension('WEBGL_lose_context');
-    this.renderer_.canvas.addEventListener('webglcontextlost', (e) => {
-      // Calling preventDefault is necessary for restoring context.
-      e.preventDefault();
-      this.isReady_ = false;
-    });
-    this.renderer_.canvas.addEventListener('webglcontextrestored', () =>
-      this.initRenderer_()
-    );
   }
 
   /** @private */
