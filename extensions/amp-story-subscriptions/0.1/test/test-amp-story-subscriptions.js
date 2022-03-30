@@ -119,6 +119,10 @@ describes.realWin(
           subscriptionService,
           'maybeRenderDialogForSelectedPlatform'
         );
+        storeService.dispatch(
+          Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+          false
+        );
       });
 
       it('paywall element should have visible class', async () => {
@@ -151,6 +155,10 @@ describes.realWin(
         const dialog = new Dialog(env.ampdoc);
         dialogCloseSpy = env.sandbox.spy(dialog, 'close');
         env.sandbox.stub(subscriptionService, 'getDialog').returns(dialog);
+        storeService.dispatch(
+          Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+          true
+        );
       });
 
       it('paywall element should not have visible class', async () => {
