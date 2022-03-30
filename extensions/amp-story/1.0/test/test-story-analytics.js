@@ -49,6 +49,26 @@ describes.realWin('amp-story-analytics', {amp: true}, (env) => {
     expect(triggerAnalyticsStub).not.to.be.called;
   });
 
+  it('does not send story-page-visible before document becomes visible', async () => {
+    const triggerAnalyticsStub = env.sandbox.stub(
+      analytics,
+      'triggerAnalyticsEvent'
+    );
+    storeService.dispatch(Action.CHANGE_PAGE, {
+      id: 'page-1',
+      index: 1,
+    });
+    expect(triggerAnalyticsStub).not.to.be.called;
+
+    await getAmpdoc(env.win.document).whenFirstVisible();
+
+    expect(triggerAnalyticsStub).to.have.been.calledOnceWithExactly(
+      el,
+      'story-page-visible',
+      env.sandbox.match({storyPageIndex: 0, storyPageId: 'page-1'})
+    );
+  });
+
   it('sends story-page-visible on content page after ad page', async () => {
     const triggerAnalyticsStub = env.sandbox.stub(
       analytics,
