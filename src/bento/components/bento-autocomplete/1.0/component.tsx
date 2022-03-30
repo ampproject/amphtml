@@ -59,6 +59,7 @@ export function BentoAutocomplete({
 
   const [substring, setSubstring] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [results, setResults] = useState<NodeList>();
   const [showOptions, _setShowOptions] = useState<boolean>(false);
   const [shouldSuggestFirst, setShouldSuggestFirst] =
     useState<boolean>(suggestFirst);
@@ -205,9 +206,8 @@ export function BentoAutocomplete({
       }
       const index = activeIndex + delta;
       const newActiveIndex = mod(index, filteredData.length);
-      const options = containerRef.current?.querySelectorAll('[role="option"]');
-      const activeOption = options?.item(newActiveIndex);
-      const newValue = getTextValue(activeOption as HTMLElement);
+      const activeResult = results?.item(newActiveIndex);
+      const newValue = getTextValue(activeResult as HTMLElement);
 
       setActiveIndex(newActiveIndex);
       inputRef.current?.setAttribute(
@@ -223,15 +223,12 @@ export function BentoAutocomplete({
       getItemId,
       showAutocompleteOptions,
       setInputValue,
+      results,
     ]
   );
 
   const displaySuggestions = useCallback(() => {
     setShowOptions(true);
-    // TODO: The options have not re-rendered yet and showAutocompleteOptions is false
-    // if (shouldSuggestFirst) {
-    //   updateActiveItem(1);
-    // }
   }, [setShowOptions]);
 
   const maybeFetchAndAutocomplete = useCallback(
@@ -403,9 +400,15 @@ export function BentoAutocomplete({
   );
 
   useEffect(() => {
-    setupInputElement(elementRef.current!);
-    validateProps();
+    setResults(containerRef.current?.childNodes);
 
+    // Suggests the first item in the list if suggestFirst prop is true
+    if (shouldSuggestFirst && activeIndex === -1) {
+      updateActiveItem(1);
+    }
+  }, [results, activeIndex, updateActiveItem, shouldSuggestFirst]);
+
+  useEffect(() => {
     inputRef.current?.addEventListener('input', handleInput);
     inputRef.current?.addEventListener('keydown', handleKeyDown);
     inputRef.current?.addEventListener('focus', handleFocus);
@@ -425,6 +428,13 @@ export function BentoAutocomplete({
     handleFocus,
     handleBlur,
   ]);
+
+  useEffect(() => {
+    setupInputElement(elementRef.current!);
+    validateProps();
+    // This should only be called on first render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <ContainWrapper

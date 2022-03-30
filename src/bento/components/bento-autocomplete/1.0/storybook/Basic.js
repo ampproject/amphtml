@@ -23,6 +23,7 @@ export default {
     filter: 'prefix',
     minChars: 1,
     highlightUserEntry: true,
+    suggestFirst: false,
   },
   argTypes: {
     filter: {

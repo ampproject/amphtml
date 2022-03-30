@@ -531,7 +531,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         input.simulate('input');
 
         expect(input.getDOMNode().value).to.equal('two');
-        expect(areOptionsVisible(wrapper)).to.be.false;
+        expect(areOptionsVisible(wrapper)).to.be.true;
       });
     });
   });
