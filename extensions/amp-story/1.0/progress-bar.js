@@ -155,14 +155,15 @@ export class ProgressBar {
         }
 
         this.segmentsAddedPromise_ = this.mutator_.mutateElement(root, () => {
-          /** @type {!Array} */ (pageIds)
-            // Do not show progress bar for the ad page.
-            .filter((id) => !id.startsWith('i-amphtml-ad-'))
-            .forEach((id) => {
-              if (!(id in this.segmentIdMap_)) {
-                this.addSegment_(id);
-              }
-            });
+          /** @type {!Array} */ (pageIds).forEach((id) => {
+            if (
+              // Do not show progress bar for the ad page.
+              !id.startsWith('i-amphtml-ad-') &&
+              !(id in this.segmentIdMap_)
+            ) {
+              this.addSegment_(id);
+            }
+          });
         });
 
         if (attached) {

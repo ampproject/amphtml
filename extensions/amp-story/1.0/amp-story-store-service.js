@@ -205,7 +205,6 @@ const Action = mangleObjectValues({
   ADD_SHOPPING_DATA: 'addShoppingData',
   ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
-  INSERT_AD_PAGE: 'insertAdPage',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   SET_CONSENT_ID: 'setConsentId',
   SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
@@ -310,17 +309,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.ACTIONS_ALLOWLIST]: newActionsAllowlist,
-      });
-    case Action.INSERT_AD_PAGE:
-      const oldPageIds = [...state[StateProperty.PAGE_IDS]];
-      const insertPos = oldPageIds.indexOf(data.pageBeforeId);
-      if (insertPos === -1 || oldPageIds.includes(data.pageToBeInsertedId)) {
-        return state;
-      }
-      oldPageIds.splice(insertPos + 1, 0, data.pageToBeInsertedId);
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.PAGE_IDS]: oldPageIds,
       });
     case Action.TOGGLE_PAGE_ATTACHMENT_STATE:
       return /** @type {!State} */ ({

@@ -1995,13 +1995,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @return {number} Number of story pages excluding ad pages.
-   */
-  getPageCount() {
-    return this.pages_.length - this.adPages_.length;
-  }
-
-  /**
    * @param {!./amp-story-page.AmpStoryPage} desiredPage
    * @return {number} The index of the page.
    */
@@ -2378,10 +2371,10 @@ export class AmpStory extends AMP.BaseElement {
       pageToBeInserted
     );
 
-    this.storeService_.dispatch(Action.INSERT_AD_PAGE, {
-      pageBeforeId,
-      pageToBeInsertedId,
-    });
+    this.storeService_.dispatch(
+      Action.SET_PAGE_IDS,
+      this.pages_.map((el) => el.element.id)
+    );
     return true;
   }
 

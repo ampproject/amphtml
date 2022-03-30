@@ -142,28 +142,6 @@ describes.realWin(
       element.remove();
     });
 
-    it('should build with the expected number of pages', async () => {
-      const pagesCount = 2;
-      await createStoryWithPages(pagesCount, ['cover', 'page-1']);
-      await story.layoutCallback();
-      expect(story.getPageCount()).to.equal(pagesCount);
-    });
-
-    it('should return the correct number of pages with ads', async () => {
-      const pagesCount = 4;
-      const adId = 'i-amphtml-ad-page-1';
-      await createStoryWithPages(pagesCount, [
-        'cover',
-        'page-1',
-        'page-2',
-        'page-3',
-      ]);
-      await story.layoutCallback();
-      story.addPage(await createStoryAdPage(adId));
-      story.insertPage('page-2', adId);
-      expect(story.getPageCount()).to.equal(pagesCount);
-    });
-
     it('should activate the first page when built', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
       await story.layoutCallback();
@@ -192,7 +170,6 @@ describes.realWin(
     });
 
     it('should return a valid page index', async () => {
-      const adId = 'i-amphtml-ad-page-1';
       await createStoryWithPages(4, ['cover', 'page-1', 'page-2', 'page-3']);
       await story.layoutCallback();
       // Getting all the AmpStoryPage objets.
@@ -200,13 +177,6 @@ describes.realWin(
       let pages = Array.from(pageElements).map((el) => el.getImpl());
 
       pages = await Promise.all(pages);
-
-      // Insert ads
-      const adPage = await createStoryAdPage(adId);
-      story.addPage(adPage);
-      story.insertPage('page-2', adId);
-
-      pages.splice(3, 0, adPage);
 
       // Only the first page should be active.
       for (let i = 0; i < pages.length; i++) {
@@ -1077,6 +1047,37 @@ describes.realWin(
           iframe.contentDocument.body.appendChild(elToFind);
           const distance = story.getElementDistance(elToFind);
           expect(distance).to.equal(4);
+        });
+      });
+
+      describe('amp-story ads', () => {
+        it('should return a valid page index', async () => {
+          const adId = 'i-amphtml-ad-page-1';
+          await createStoryWithPages(4, [
+            'cover',
+            'page-1',
+            'page-2',
+            'page-3',
+          ]);
+          await story.layoutCallback();
+          // Getting all the AmpStoryPage objets.
+          const pageElements =
+            story.element.getElementsByTagName('amp-story-page');
+          let pages = Array.from(pageElements).map((el) => el.getImpl());
+
+          pages = await Promise.all(pages);
+
+          // Insert ads
+          const adPage = await createStoryAdPage(adId);
+          story.addPage(adPage);
+          story.insertPage('page-2', adId);
+
+          pages.splice(3, 0, adPage);
+
+          // Only the first page should be active.
+          for (let i = 0; i < pages.length; i++) {
+            expect(story.getPageIndex(pages[i])).to.equal(i);
+          }
         });
       });
 
