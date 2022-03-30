@@ -1,3 +1,5 @@
+import {closestAncestorElementBySelector} from '#core/dom/query';
+
 import {Services} from '#service';
 
 import {user} from '#utils/log';
@@ -21,19 +23,17 @@ let ShoppingConfigResponseDef;
  * Uses the specified validation configuration to run validation against
  * the user's shopping configuration.
  * @param {!ShoppingConfigDataDef} productConfig The user's config object.
+ * @param {string} name the name of the item in the config object.
  * @return {boolean} returns a boolean indicating whether the validation
  *     was successful.
  */
-function validateConfig(productConfig) {
-  let isValidConfig = true;
-  const errors = validateProduct(productConfig);
-
+function validateConfig(productConfig, name) {
+  const errors = validateProduct(productConfig, name);
   if (errors.length > 0) {
-    isValidConfig = false;
     user().warn('AMP-STORY-SHOPPING-CONFIG', `${errors}`);
+    return false;
   }
-
-  return isValidConfig;
+  return true;
 }
 
 /** @typedef {!Object<string, !ShoppingConfigDataDef> */
@@ -49,16 +49,20 @@ let KeyedShoppingConfigDef;
  */
 export function getShoppingConfig(shoppingAttachmentEl) {
   return getElementConfig(shoppingAttachmentEl).then((config) => {
+    const pageId = closestAncestorElementBySelector(
+      shoppingAttachmentEl,
+      'amp-story-page'
+    ).id;
+
     const allItems = config['items'];
-    const validItems = allItems.filter((item) => validateConfig(item));
-    if (allItems.length != validItems.length) {
-      user().warn(
-        'AMP-STORY-SHOPPING-CONFIG',
-        `Please fix: ${
-          allItems.length - validItems.length
-        } product(s) have invalid shopping configuration values. See the error messages above for more details.`
+    const validItems = allItems.filter((item, i) => {
+      const productTitle = item?.productTitle ?? '';
+      return validateConfig(
+        item,
+        `pageId ${pageId} items[${i}] ${productTitle}`.trim()
       );
-    }
+    });
+
     return keyByProductId(validItems);
   });
 }

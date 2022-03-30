@@ -19,10 +19,6 @@
             ]
         }
     },
-    "properties": {
-        "items": {
-                "type": "array",
-                    "items": {
                         "title": "Product",
                         "description": "A product from an amp story shopping configuration.",
                         "type": "object",
@@ -233,12 +229,12 @@
                                     "description": "A list of images for the product",
                                     "type": "array",
                                     "items": {
-                                        "required": ["url", "altText"],
+                                        "required": ["url", "alt"],
                                         "additionalProperties": false,
                                         "type": "object",
                                         "properties": {
                                             "url": {"$ref": "#/$defs/https"},
-                                            "altText": {"type": "string"}
+                                            "alt": {"type": "string"}
                                         }
                                     }
                                 },
@@ -262,7 +258,6 @@
                                     "description": "Ratings and review data for the product",
                                     "type": "object",
                                     "required": ["ratingValue", "reviewCount", "reviewUrl"],
-                                    "additionalProperties": false,
                                     "properties": {
                                         "ratingValue": {
                                             "description": "The aggregate rating value of the product",
@@ -279,7 +274,6 @@
                                     }
                                 }
                 },
-                "additionalProperties": false,
                 "required": [
                     "productId",
                     "productUrl",
@@ -289,7 +283,4 @@
                     "productImages",
                     "productDetails"
                 ]
-            }
-        }
-    }
 }
