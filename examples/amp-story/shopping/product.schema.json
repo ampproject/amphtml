@@ -4,24 +4,6 @@
           "type":"string",
           "format":"uri",
           "pattern":"^https://"
-       },
-       "htmlId":{
-          "type":"string",
-          "format":"uri",
-          "pattern":"/^[A-Za-z]+[\\w\\-\\:\\.]*$/"
-       },
-       "httpsUrlOrUrls":{
-          "anyOf":[
-             {
-                "$ref":"#/$defs/https"
-             },
-             {
-                "type":"array",
-                "items":{
-                   "$ref":"#/$defs/https"
-                }
-             }
-          ]
        }
     },
     "title":"Product",
@@ -30,8 +12,7 @@
     "properties":{
        "productId":{
           "description":"Keys to amp-story-shopping-tag nodes",
-          "type":"string",
-          "$ref":"#/$defs/htmlId"
+          "type":"string"
        },
        "productUrl":{
           "description":"Links to the product's website",

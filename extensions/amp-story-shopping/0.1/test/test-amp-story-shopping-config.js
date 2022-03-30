@@ -229,25 +229,6 @@ describes.realWin(
         expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
       });
 
-      it('should fail config validation because an expected string JSON value is not a valid HTML id', async () => {
-        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
-        const invalidValue = '1234city-pop'; // productId starts with a number, so it is an invalid HTML Id
-        invalidConfig['items'][0]['productId'] = invalidValue;
-
-        const errorString = `Error: productId ${invalidValue} is not a valid HTML Id`;
-        const spy = env.sandbox.spy(user(), 'warn');
-        const keyedShoppingConfig = await createAmpStoryShoppingConfig(
-          null,
-          invalidConfig
-        );
-        expect(spy).to.have.been.calledWith(
-          'AMP-STORY-SHOPPING-CONFIG',
-          errorString
-        );
-        expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
-        expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
-      });
-
       it('should fail config validation because an expected number JSON value is not a valid number', async () => {
         const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
         const invalidValue = 'two dozen watermelons'; // two dozen watermelons is not an actual price.
