@@ -1,4 +1,3 @@
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {addAttributesToElement} from '#core/dom';
 
 import {Services} from '#service';
