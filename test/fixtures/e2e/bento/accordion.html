@@ -1,39 +1,42 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script async src="https://cdn.ampproject.org/bento.js"></script>
-    <script
-      async
-      src="https://cdn.ampproject.org/v0/bento-accordion-1.0.js"
-    ></script>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css"
-    />
+
+<head>
+  <script type="module" async src="https://cdn.ampproject.org/bento.mjs"></script>
+  <script type="module" async src="https://cdn.ampproject.org/v0/bento-accordion-1.0.mjs"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.ampproject.org/v0/bento-accordion-1.0.css" />
   </head>
-  <body>
-    <button id="expand">expand</button>
-    <button id="collapse">collapse</button>
-    <bento-accordion id="my-accordion" disable-session-states>
-      <section>
-        <h2>Section 1</h2>
-        <div>Content in section 1.</div>
-      </section>
-      <section>
-        <h2>Section 2</h2>
-        <div>Content in section 2.</div>
-      </section>
-      <section expanded>
-        <h2>Section 3</h2>
-        <div>Content in section 3.</div>
-      </section>
+
+<body>
+  <button id="expand">expand</button>
+  <button id="collapse">collapse</button>
+  <button id="toggle">toggle</button>
+
+  <button id="expand2">expand2</button>
+  <button id="collapse2">collapse2</button>
+  <button id="toggle2">toggle2</button>
+
+  <bento-accordion id="my-accordion">
+    <section id="section1">
+      <h2 id="header1">Section 1</h2>
+      <div id="content1">Content in section 1.</div>
+    </section>
+    <section id="section2">
+      <h2 id="header2">Section 2</h2>
+      <div id="content2">Content in section 2.</div>
+    </section>
+    <section id="section3" expanded>
+      <h2 id="header3">Section 3</h2>
+      <div id="content3">Content in section 3.</div>
+    </section>
     </bento-accordion>
+
     <script>
       (async () => {
         const accordion = document.querySelector('#my-accordion');
         const expandBtn = document.querySelector('#expand');
         const collapseBtn = document.querySelector('#collapse');
+        const toggleBtn = document.querySelector('#toggle');
         await customElements.whenDefined('bento-accordion');
         const api = await accordion.getApi();
 
@@ -41,7 +44,15 @@
         expandBtn.addEventListener('click', () => api.expand());
         // programatically collapse all sections
         collapseBtn.addEventListener('click', () => api.collapse());
+        // programatically toggle all sections
+        toggleBtn.addEventListener('click', () => api.toggle());
+
+
+        document.querySelector('#expand2').addEventListener('click', () => api.expand('section2'));
+        document.querySelector('#collapse2').addEventListener('click', () => api.collapse('section2'));
+        document.querySelector('#toggle2').addEventListener('click', () => api.toggle('section2'));
       })();
     </script>
   </body>
+
 </html>
