@@ -8,7 +8,7 @@ export function rcmwidget(global, data) {
   validateData(
     data,
     ['rcmId', 'blockId', 'templateName', 'projectId'],
-    ['contextItemId', 'customStyles', 'itemExcludedIds', 'params']
+    ['contextItemId', 'customStyles', 'itemExcludedIds', 'itemExcludedUrls', 'params']
   );
 
   global.rcmWidgetInit = data;

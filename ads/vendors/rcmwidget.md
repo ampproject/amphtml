@@ -24,7 +24,8 @@
 
 ### Optional parameters
 
--   `data-context-item-id`
--   `data-custom-styles`
--   `data-item-excluded-ids`
--   `data-params`
+- `data-context-item-id`
+- `data-custom-styles`
+- `data-item-excluded-ids`
+- `data-item-excluded-urls`
+- `data-params`
