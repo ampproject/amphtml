@@ -61,13 +61,12 @@ export async function isElementInViewport(element, controller) {
 }
 
 export async function isElementOutOfViewport(element, controller) {
-  const rect = await controller.getElementRect(element);
-  const [width, height] = await controller.getWindowRect();
+  const winRect = await controller.getWindowRect();
+  const width = Number(winRect[0]);
+  const height = Number(winRect[1]);
 
-  await expect(
-    rect.top < 0 ||
-      rect.bottom > Number(height) ||
-      rect.left < 0 ||
-      rect.right > Number(width)
-  ).to.be.true;
+  await expect(controller.getElementRect(element)).to.satisfy(
+    ({bottom, left, right, top}) =>
+      top < 0 || bottom > height || left < 0 || right > width
+  );
 }
