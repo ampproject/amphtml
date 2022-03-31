@@ -56,7 +56,7 @@ describes.realWin('amp-story-analytics', {amp: true}, (env) => {
     );
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'page-1',
-      index: 1,
+      index: 0,
     });
     expect(triggerAnalyticsStub).not.to.be.called;
 
