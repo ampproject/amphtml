@@ -205,24 +205,8 @@ describes.realWin(
       });
     }
 
-    it('Should fit target same size as the screen.', () => {
-      const dimensions = setDimensions(380, 580, 360, 580);
-      expect(targetFitsWithinPage(dimensions)).to.be.true;
-    });
-
-    it('Should fit target with bigger width but same height as screen.', () => {
-      const dimensions = setDimensions(380, 580, 400, 580);
-      expect(targetFitsWithinPage(dimensions)).to.be.true;
-    });
-
-    it('Should not fit target with larger width and height than screen.', () => {
-      const dimensions = setDimensions(380, 580, 400, 600);
-      expect(targetFitsWithinPage(dimensions)).to.be.false;
-    });
-
     it('Should scale the target accordingly.', () => {
       const dimensions = setDimensions(380, 580, 360, 580);
-      expect(targetFitsWithinPage(dimensions)).to.be.true;
 
       const factorThatWillMakeTargetFitPage = 380 / 360;
       const factor = factorThatWillMakeTargetFitPage * 1.25;

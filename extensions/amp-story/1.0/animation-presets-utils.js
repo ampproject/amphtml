@@ -60,20 +60,6 @@ export function whooshIn(startX, startY, endX, endY) {
 }
 
 /**
- * Checks if either of the target's dimensions are smaller than or equal to
- * those of the page.
- * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
- * @return {boolean}
- * @visibleForTesting
- */
-export function targetFitsWithinPage(dimensions) {
-  return (
-    dimensions.targetWidth <= dimensions.pageWidth ||
-    dimensions.targetHeight <= dimensions.pageHeight
-  );
-}
-
-/**
  * Calculate target scaling factor so that it is at least 25% larger than the
  * page in the direction required, and matches the size of the other direction.
  * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
