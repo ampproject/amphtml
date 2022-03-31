@@ -145,6 +145,7 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
    * @override
    */
   displayOptionsData(optionsData) {
+    console.log(optionsData);
     if (!optionsData) {
       return;
     }
@@ -167,6 +168,7 @@ export class AmpStoryInteractiveImgQuiz extends AmpStoryInteractive {
         '.i-amphtml-story-interactive-img-option-percentage-text'
       ).textContent = `${percentages[index]}%`;
       setImportantStyles(el, {'--option-percentage': percentages[index] / 100});
+      console.log(el.textContent.trim());
     });
   }
 
