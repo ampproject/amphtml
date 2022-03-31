@@ -1,7 +1,5 @@
 import * as Preact from '#core/dom/jsx';
 
-import {toggleExperiment} from '#experiments';
-
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
@@ -38,8 +36,6 @@ describes.realWin(
     beforeEach(async () => {
       win = env.win;
       doc = win.document;
-
-      toggleExperiment(win, 'amp-story-subscriptions', true);
 
       storeService = new AmpStoryStoreService(win);
       env.sandbox
