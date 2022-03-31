@@ -3,7 +3,7 @@
        "https":{
           "type":"string",
           "format":"uri-reference",
-          "pattern":"(^\/\/|^https:|^localhost|^127.0.0.1|.localhost$)"
+          "pattern":"^(/|https://|https?://(127.0.0.1|([^/]+\\.)?localhost)(:[0-9]+)?/)"
        }
     },
     "title":"Product",
