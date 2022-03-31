@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.207 */
+/** Version: 0.1.22.211 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -104,36 +104,36 @@ const I18N_STRINGS = {
     'te': '<strong></strong>ఈ కంటెంట్‌కు మీరు సాధారణంగా పేమెంట్ చేయాల్సి ఉంటుంది, కానీ మీరు Google ఖాతాను ఉపయోగించి <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>తో రిజిస్టర్ చేసుకున్నప్పుడు, ఈ వార్తా కథనానికి ఇంకా మరెన్నో వాటికి Google, ఉచిత యాక్సెస్‌ను ఇస్తుంది.',
   },
   'SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON': {
-    'bg': 'Вече имате профил?',
-    'bn': 'আপনার কি আগে থেকেই অ্যাকাউন্ট আছে?',
-    'cs': 'Už máte účet?',
-    'da': 'Har du allerede en konto?',
-    'de': 'Du hast bereits ein Konto?',
-    'el': 'Διαθέτετε ήδη λογαριασμό;',
-    'en': 'Already have an account?',
-    'es': '¿Ya tienes una cuenta?',
-    'es-419': '¿Ya tienes una cuenta?',
+    'bg': 'Вече сте се регистрирали? Вход',
+    'bn': 'আগে থেকেই রেজিস্টার করেছেন? সাইন-ইন করুন',
+    'cs': 'Jste už zaregistrováni? Přihlásit se',
+    'da': 'Er du allerede tilmeldt? Log ind',
+    'de': 'Bereits registriert? Anmelden',
+    'el': 'Έχετε εγγραφεί ήδη; Σύνδεση',
+    'en': 'Already registered? Sign in',
+    'es': '¿Ya te has registrado? Iniciar sesión',
+    'es-419': '¿Ya te registraste? Accede',
     'es-ar': '¿Ya tienes una cuenta?',
-    'fr': 'Vous avez déjà un compte&nbsp;?',
-    'fr-ca': 'Vous avez déjà un compte?',
-    'hi': 'क्या आपके पास पहले से कोई प्रकाशक खाता है?',
-    'it': 'Hai già un account?',
-    'ja': 'すでにアカウントをお持ちですか？',
-    'kn': 'ಈಗಾಗಲೇ ಖಾತೆಯೊಂದನ್ನು ಹೊಂದಿದ್ದೀರಾ?',
-    'lt': 'Jau turite paskyrą?',
-    'lv': 'Vai jums jau ir konts?',
-    'ml': 'മുമ്പേ അക്കൗണ്ടുണ്ടോ?',
-    'mr': 'आधीपासून खाते आहे?',
-    'nl': 'Heb je al een account?',
-    'pl': 'Masz już konto?',
-    'pt-br': 'Já tem uma conta?',
-    'pt-pt': 'Já tem uma conta?',
-    'ro': 'Aveți deja un cont?',
-    'sk': 'Už máte účet?',
-    'sl': 'Že imate račun?',
-    'sv': 'Har du redan ett konto?',
-    'ta': 'ஏற்கெனவே கணக்கு உள்ளதா?',
-    'te': 'ఇప్పటికే ఖాతా ఉందా?',
+    'fr': 'Déjà inscrit&nbsp;? Connectez-vous',
+    'fr-ca': 'Déjà inscrit? Se connecter',
+    'hi': 'पहले से रजिस्टर किया हुआ है? साइन इन करें',
+    'it': 'Hai già effettuato la registrazione? Accedi',
+    'ja': '登録済みの方: ログイン',
+    'kn': 'ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಲಾಗಿದೆಯೇ? ಸೈನ್ ಇನ್',
+    'lt': 'Jau užsiregistravote? Prisijungti',
+    'lv': 'Vai esat jau reģistrējies? Pierakstīties',
+    'ml': 'മുമ്പേ രജിസ്റ്റർ ചെയ്തിട്ടുണ്ടോ? സൈൻ ഇൻ ചെയ്യുക',
+    'mr': 'आधीपासून नोंदणी केली आहे का? साइन इन करा',
+    'nl': 'Al geregistreerd? Inloggen',
+    'pl': 'Jesteś już zarejestrowanym użytkownikiem? Zaloguj się',
+    'pt-br': 'Já se inscreveu? Fazer login',
+    'pt-pt': 'Já fez o seu registo? Inicie sessão',
+    'ro': 'V-ați înregistrat deja? Conectați-vă',
+    'sk': 'Už máte zaregistrovaný účet? Prihlásiť sa',
+    'sl': 'Ste že registrirani? Prijavite se.',
+    'sv': 'Har du redan registrerat dig? Logga in',
+    'ta': 'ஏற்கெனவே பதிவுசெய்துள்ளீர்களா? உள்நுழைக',
+    'te': 'ఇప్పటికే రిజిస్టర్ చేయబడి ఉందా? సైన్ ఇన్ చేయండి',
   },
   'SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON': {
     'bg': 'Вход с Google',
@@ -152,8 +152,8 @@ const I18N_STRINGS = {
     'it': 'Accedi con Google',
     'ja': 'Google でログイン',
     'kn': 'Google ಖಾತೆ ಬಳಸಿಕೊಂಡು ಸೈನ್ ಇನ್ ಮಾಡಿ',
-    'lt': 'Prisijungimas naudojant „Google“',
-    'lv': 'Pierakstīšanās ar Google kontu',
+    'lt': 'Prisijunkite su „Google“',
+    'lv': 'Pierakstīties, izmantojot Google',
     'ml': 'Google ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക',
     'mr': 'Google वापरून साइन इन करा',
     'nl': 'Inloggen met Google',
@@ -186,7 +186,7 @@ const I18N_STRINGS = {
     'ja': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> の <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL 規約<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>を見る',
     'kn': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> ನ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL ನಿಯಮಗಳು<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> ಅನ್ನು ಪರಿಶೀಲಿಸಿ',
     'lt': 'Peržiūrėkite „<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>“ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL sąlygas<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'lv': 'Pārskatīt izdevuma <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL noteikumus<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'lv': 'Pārskatīt <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL noteikumus<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
     'ml': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> എന്നതിന്റെ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL നിബന്ധനകൾ<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> അവലോകനം ചെയ്യുക',
     'mr': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> च्या <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL अटी<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> यांचे पुनरावलोकन करा',
     'nl': 'Bekijk de <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL-voorwaarden<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> van <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
@@ -1915,6 +1915,7 @@ class GaaGoogle3pSignInButton {
   }
   /**
    * Notify Google Intervention of a complete sign-in event.
+   * @nocollapse
    * @param {{ gaaUser: GaaUserDef}} params
    */
   static gaaNotifySignIn({gaaUser}) {

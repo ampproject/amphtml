@@ -614,6 +614,10 @@ export class AmpStoryPlayer {
             this.onSelectDocument_(/** @type {!Object} */ (data));
           });
 
+          messaging.registerHandler('storyContentLoaded', () => {
+            story.storyContentLoaded = true;
+          });
+
           messaging.sendRequest(
             'onDocumentState',
             {
@@ -841,25 +845,6 @@ export class AmpStoryPlayer {
         console /*OK*/
           .error(`[${TAG}]`, reason);
       });
-  }
-
-  /**
-   * Resolves currentStoryLoadDeferred_ when given story's content is finished
-   * loading.
-   * @param {!StoryDef} story
-   * @private
-   */
-  initStoryContentLoadedPromise_(story) {
-    this.currentStoryLoadDeferred_ = new Deferred();
-
-    story.messagingPromise.then((messaging) =>
-      messaging.registerHandler('storyContentLoaded', () => {
-        // Stories that already loaded won't dispatch a `storyContentLoaded`
-        // event anymore, which is why we need this sync property.
-        story.storyContentLoaded = true;
-        this.currentStoryLoadDeferred_.resolve();
-      })
-    );
   }
 
   /**
@@ -1159,8 +1144,10 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Returns a promise that makes sure current story gets loaded first before
-   * others.
+   * Returns a promise that makes sure that the current story gets loaded first
+   * before any others. When the given story is not the current story, it will
+   * block until the current story has finished loading. When the given story
+   * is the current story, then this method will not block.
    * @param {!StoryDef} story
    * @return {!Promise}
    * @private
@@ -1174,14 +1161,21 @@ export class AmpStoryPlayer {
       return this.currentStoryLoadDeferred_.promise;
     }
 
-    if (this.currentStoryLoadDeferred_) {
-      // Cancel previous story load promise.
-      this.currentStoryLoadDeferred_.reject(
-        `[${LOG_TYPE_ENUM.DEV}] Cancelling previous story load promise.`
-      );
-    }
+    // Cancel previous story load promise.
+    this.currentStoryLoadDeferred_?.reject(
+      `[${LOG_TYPE_ENUM.DEV}] Cancelling previous story load promise.`
+    );
 
-    this.initStoryContentLoadedPromise_(story);
+    this.currentStoryLoadDeferred_ = new Deferred();
+    story.messagingPromise.then((messaging) =>
+      messaging.registerHandler('storyContentLoaded', () => {
+        // Stories that already loaded won't dispatch a `storyContentLoaded`
+        // event anymore, which is why we need this sync property.
+        story.storyContentLoaded = true;
+        this.currentStoryLoadDeferred_.resolve();
+      })
+    );
+
     return Promise.resolve();
   }
 

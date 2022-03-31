@@ -916,6 +916,57 @@ describes.realWin(
       });
     });
 
+    it('should allow hash to override pre-rendered geo sudivision in test', () => {
+      setGeoOverrideHash('us us-ny');
+      doc.documentElement.classList.add(
+        'amp-geo-group-canadaSubdivisions',
+        'amp-iso-country-ca',
+        'amp-iso-subdivision-ca-mb'
+      );
+      doc.body.classList.add(
+        'amp-geo-group-canadaSubdivisions',
+        'amp-iso-country-ca',
+        'amp-iso-subdivision-ca-mb'
+      );
+      addConfigElement('script');
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('us');
+        expect(geo.ISOSubdivision).to.equal('us-ny');
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-us', 'amp-iso-subdivision-us-ny'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-us', 'amp-iso-subdivision-us-ny'],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-iso-country-unknown',
+            'amp-geo-group-canadaSubdivisions',
+            'amp-iso-country-ca',
+            'amp-iso-subdivision-ca-mb',
+          ],
+          false
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-iso-country-unknown',
+            'amp-geo-group-canadaSubdivisions',
+            'amp-iso-country-ca',
+            'amp-iso-subdivision-ca-mb',
+          ],
+          false
+        );
+      });
+    });
+
     it('geo service should resolve correctly.', () => {
       addConfigElement('script');
       geo.buildCallback();

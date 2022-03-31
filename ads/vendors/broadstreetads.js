@@ -14,7 +14,8 @@ export function broadstreetads(global, data) {
   data.place = data.place || 0;
 
   const placeholderID = 'placement_' + data.zone + '_' + data.place;
-  const initUrl = data.initurl || 'https://cdn.broadstreetads.com/init.js';
+  const initUrl =
+    data.initurl || 'https://cdn.broadstreetads.com/init-2.min.js';
 
   // placeholder div
   const d = global.document.createElement('div');

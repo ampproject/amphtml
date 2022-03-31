@@ -67,7 +67,10 @@ const SERVICE_TAG = 'geo';
 const API_TIMEOUT = 60; // Seconds
 const GEO_HOTPATCH_STR_REGEX = /^(?:(\w{2})(?:\s(\w{2}-\w{1,3}))?)?\s*/;
 
-const STRIP_RE = new RegExp('^' + COUNTRY_PREFIX + '|^' + GROUP_PREFIX, 'i');
+const STRIP_RE = new RegExp(
+  '^' + COUNTRY_PREFIX + '|^' + GROUP_PREFIX + '|^' + SUBDIVISION_PREFIX,
+  'i'
+);
 
 /**
  * Operating Mode

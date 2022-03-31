@@ -47,6 +47,7 @@ amp-story-shopping-attachment a {
   justify-content: space-between !important;
   display: flex !important;
   flex-wrap: wrap !important;
+  align-items: flex-start;
 }
 
 .i-amphtml-amp-story-shopping-plp-card {
@@ -232,19 +233,20 @@ amp-story-shopping-attachment a {
   border-radius: 0 1.1em 1.1em 0 !important;
 }
 
-.i-amphtml-amp-story-shopping-pdp-carousel-card:only-child {
-  width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
-  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2)!important;
-  border-radius: 1.1em !important;
-  cursor: auto !important;
-}
-
 [dir=rtl] .i-amphtml-amp-story-shopping-pdp-carousel-card:first-child {
   border-radius: 0 1.1em 1.1em 0 !important;
 }
 
 [dir=rtl] .i-amphtml-amp-story-shopping-pdp-carousel-card:last-child {
   border-radius: 1.1em 0 0 1.1em !important;
+}
+
+/* Override when it's the only child. First and last selectors are used for specificity. */
+.i-amphtml-amp-story-shopping-pdp-carousel-card:first-child:last-child {
+  width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
+  max-width: calc(100% - var(--i-amphtml-shopping-attachment-horizontal-spacing) * 2) !important;
+  border-radius: 1.1em !important;
+  cursor: auto !important;
 }
 
 /* PDP deatils */
@@ -288,6 +290,8 @@ amp-story-shopping-attachment a {
 .i-amphtml-amp-story-shopping-pdp-details[active] .i-amphtml-amp-story-shopping-pdp-details-text {
   height: auto !important;
   opacity: 1 !important;
+  /* Renders \n as newlines in product data text. */
+  white-space: pre-line !important;
 }
 
 .i-amphtml-amp-story-shopping-pdp-details-text:after {

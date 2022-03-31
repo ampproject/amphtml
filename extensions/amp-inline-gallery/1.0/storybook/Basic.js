@@ -1,11 +1,11 @@
-import * as Preact from '#preact';
-
-import {BentoBaseCarousel} from '../../../amp-base-carousel/1.0/component';
+import {BentoBaseCarousel} from '#bento/components/bento-base-carousel/1.0/component';
 import {
   BentoInlineGallery,
   BentoInlineGalleryPagination,
   BentoInlineGalleryThumbnails,
-} from '../component';
+} from '#bento/components/bento-inline-gallery/1.0/component';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'InlineGallery',

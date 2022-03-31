@@ -1,3 +1,5 @@
+import {BaseElement} from '#bento/components/bento-inline-gallery/1.0/base-element';
+
 import {Layout_Enum} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
@@ -14,7 +16,6 @@ import {
   AmpInlineGalleryThumbnails,
   TAG as THUMBNAILS_TAG,
 } from './amp-inline-gallery-thumbnails';
-import {BaseElement} from './base-element';
 
 import {CSS as PAGINATION_CSS} from '../../../build/amp-inline-gallery-pagination-1.0.css';
 

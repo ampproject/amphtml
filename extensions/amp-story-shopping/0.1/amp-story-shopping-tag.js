@@ -5,7 +5,6 @@ import {
   childElementByTag,
   closestAncestorElementBySelector,
 } from '#core/dom/query';
-import {computedStyle} from '#core/dom/style';
 
 import {Services} from '#service';
 
@@ -86,29 +85,11 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     if (!this.shoppingAttachment_) {
       return;
     }
-
     loadFonts(this.win, FONTS_TO_LOAD);
     this.storeService_.subscribe(
       StateProperty.SHOPPING_DATA,
-      (shoppingData) => this.createAndAppendInnerShoppingTagEl_(shoppingData),
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
-      (rtlState) => this.onRtlStateUpdate_(rtlState),
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.PAGE_SIZE,
-      (pageSizeState) => this.flipTagIfOffscreen_(pageSizeState),
-      true /** callToInitialize */
-    );
-
-    this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
-      (id) => this.toggleShoppingTagActive_(id),
+      (shoppingData) =>
+        this.maybeCreateAndAppendInnerShoppingTagEl_(shoppingData),
       true /** callToInitialize */
     );
   }
@@ -188,46 +169,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
-   * This function counts the number of lines in the shopping tag
-   * and sets the styling properties dynamically based on the number of lines.
-   * @private
-   */
-  styleTagText_() {
-    const pillEl = this.element.shadowRoot?.querySelector(
-      '.amp-story-shopping-tag-pill'
-    );
-
-    const textEl = this.element.shadowRoot?.querySelector(
-      '.amp-story-shopping-tag-pill-text'
-    );
-
-    if (!pillEl || !textEl) {
-      return;
-    }
-
-    const fontSize = parseInt(
-      computedStyle(window, textEl).getPropertyValue('font-size'),
-      10
-    );
-    const ratioOfLineHeightToFontSize = 1.5;
-    const lineHeight = Math.floor(fontSize * ratioOfLineHeightToFontSize);
-
-    let numLines = 1;
-
-    this.measureElement(() => {
-      const height = textEl./*OK*/ clientHeight;
-      numLines = Math.ceil(height / lineHeight);
-    });
-
-    this.mutateElement(() => {
-      pillEl.classList.toggle(
-        'i-amphtml-amp-story-shopping-tag-pill-multi-line',
-        numLines > 1
-      );
-    });
-  }
-
-  /**
    * @return {!Element}
    * @private
    */
@@ -269,32 +210,52 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
   }
 
   /**
+   * Initialize listeners (data, orientation, visibility) for the shopping tag on creation.
+   * @private
+   */
+  initializeTagStateListeners_() {
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      (rtlState) => this.onRtlStateUpdate_(rtlState),
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.PAGE_SIZE,
+      (pageSizeState) => this.flipTagIfOffscreen_(pageSizeState),
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_ID,
+      (id) => this.toggleShoppingTagActive_(id),
+      true /** callToInitialize */
+    );
+  }
+
+  /**
    * @param {!ShoppingDataDef} shoppingData
    * @private
    */
-  createAndAppendInnerShoppingTagEl_(shoppingData) {
+  maybeCreateAndAppendInnerShoppingTagEl_(shoppingData) {
     const pageElement = closestAncestorElementBySelector(
       this.element,
       'amp-story-page'
     );
-
     this.tagData_ =
-      shoppingData[pageElement.id][
+      shoppingData[pageElement.id]?.[
         this.element.getAttribute('data-product-id')
       ];
     if (this.hasAppendedInnerShoppingTagEl_ || !this.tagData_) {
       return;
     }
-
-    this.onRtlStateUpdate_(this.storeService_.get(StateProperty.RTL_STATE));
     this.shoppingTagEl_ = this.renderShoppingTagTemplate_();
-
     createShadowRootWithStyle(
       this.element,
       this.shoppingTagEl_,
       shoppingSharedCSS + shoppingTagCSS
     );
     this.hasAppendedInnerShoppingTagEl_ = true;
-    this.styleTagText_();
+    this.initializeTagStateListeners_();
   }
 }

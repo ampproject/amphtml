@@ -96,6 +96,9 @@ const forbiddenTermsGlobal = {
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
     checkInTestFolder: true,
+    allowlist: [
+      'build-system/tasks/remap-dependencies-plugin/test-remap-dependencies.js',
+    ],
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
@@ -218,7 +221,7 @@ const forbiddenTermsGlobal = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'testing/describes.js',
       'testing/iframe.js',
     ],
@@ -427,6 +430,7 @@ const forbiddenTermsGlobal = {
       'build-system/externs/amp.extern.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
       'extensions/amp-video/0.1/video-cache.js',
+      'extensions/amp-story/1.0/amp-story.js',
       'src/utils/xhr-utils.js',
     ],
   },
@@ -466,7 +470,7 @@ const forbiddenTermsGlobal = {
       'src/service/cid-impl.js',
       'src/service/standard-actions-impl.js',
       'src/service/storage-impl.js',
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'testing/fake-dom.js',
     ],
   },
@@ -635,7 +639,7 @@ const forbiddenTermsGlobal = {
       'src/core/mode/test.js',
       'src/core/mode/local-dev.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'tools/experiments/experiments.js',
     ],
   },
@@ -670,7 +674,7 @@ const forbiddenTermsGlobal = {
       'Use of `this.skip()` is forbidden in test files. Use ' +
       '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
-    allowlist: ['testing/init-tests.js'],
+    allowlist: ['testing/init-tests-helpers.js'],
   },
   '[^\\.]makeBodyVisible\\(': {
     message:
@@ -717,38 +721,6 @@ const forbiddenTermsGlobal = {
   },
   'withA11y':
     'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
-  '@storybook/addon-knobs': {
-    message:
-      'The @storybook/addon-knobs package has been deprecated. Use Controls instead (`args` and `argTypes`). https://storybook.js.org/docs/react/essentials/controls',
-    allowlist: [
-      // TODO(#35923): Update existing files to use Controls instead.
-      'extensions/amp-date-display/1.0/storybook/Basic.amp.js',
-      'extensions/amp-date-display/1.0/storybook/Basic.js',
-      'extensions/amp-iframe/0.1/storybook/Basic.amp.js',
-      'extensions/amp-iframe/1.0/storybook/Basic.amp.js',
-      'extensions/amp-image-slider/0.1/storybook/Basic.amp.js',
-      'extensions/amp-lightbox/1.0/storybook/Basic.js',
-      'extensions/amp-selector/1.0/storybook/Basic.amp.js',
-      'extensions/amp-selector/1.0/storybook/Basic.js',
-      'extensions/amp-sidebar/0.1/storybook/Basic.amp.js',
-      'extensions/amp-sidebar/1.0/storybook/Basic.amp.js',
-      'extensions/amp-sidebar/1.0/storybook/Basic.js',
-      'extensions/amp-soundcloud/1.0/storybook/Basic.amp.js',
-      'extensions/amp-soundcloud/1.0/storybook/Basic.js',
-      'extensions/amp-timeago/1.0/storybook/Basic.js',
-      'extensions/amp-video/1.0/storybook/Basic.amp.js',
-      'extensions/amp-video/1.0/storybook/Basic.js',
-      'extensions/amp-video-iframe/1.0/storybook/Basic.amp.js',
-      'extensions/amp-vimeo/1.0/storybook/Basic.amp.js',
-      'extensions/amp-vimeo/1.0/storybook/Basic.js',
-      'extensions/amp-youtube/0.1/storybook/Basic.amp.js',
-      'extensions/amp-youtube/1.0/storybook/Basic.amp.js',
-      'extensions/amp-youtube/1.0/storybook/Basic.js',
-      'src/builtins/storybook/amp-layout.amp.js',
-      'src/preact/storybook/Context.js',
-      'src/preact/storybook/Wrappers.js',
-    ],
-  },
 };
 
 const bannedTermsHelpString =

@@ -88,17 +88,12 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.subscriptionService_ = subscriptionService;
       this.localizationService_ = localizationService;
 
-      const getGrantStatusAndUpdateState = () => {
-        this.subscriptionService_.getGrantStatus().then((granted) => {
-          this.handleGrantStatusUpdate_(granted);
-        });
-      };
-      // Get grant status to set up the story state.
-      getGrantStatusAndUpdateState();
+      // Get grant status immediately to set up the initial subscriptions state.
+      this.getGrantStatusAndUpdateState_();
       // When the user finishes any of the actions, e.g. log in or subscribe, new entitlements would be
       // re-fetched and this callback would be executed. Update states based on new entitlements.
-      this.subscriptionService_.addOnEntitlementResolvedCallback(
-        getGrantStatusAndUpdateState
+      this.subscriptionService_.addOnEntitlementResolvedCallback(() =>
+        this.getGrantStatusAndUpdateState_()
       );
 
       // Create a paywall dialog element that have required attributes to be able to be
@@ -131,6 +126,15 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   }
 
   /**
+   * @private
+   */
+  getGrantStatusAndUpdateState_() {
+    this.subscriptionService_.getGrantStatus().then((granted) => {
+      this.handleGrantStatusUpdate_(granted);
+    });
+  }
+
+  /**
    * @param {boolean} granted
    * @private
    */
@@ -139,6 +143,65 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       ? SubscriptionsState.GRANTED
       : SubscriptionsState.BLOCKED;
     this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_STATE, state);
+  }
+
+  /**
+   * @private
+   */
+  initializeListeners_() {
+    this.storeService_.subscribe(
+      StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
+      (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
+    );
+
+    const ampSubscriptionsEl =
+      this.element.parentElement.parentElement.querySelector(
+        'amp-subscriptions-dialog'
+      );
+    ampSubscriptionsEl.addEventListener('click', (event) =>
+      this.onSkipButtonClick_(event)
+    );
+  }
+
+  /**
+   * @param {boolean} showDialog
+   * @return {?Promise}
+   * @private
+   */
+  onSubscriptionsDialogUiStateChange_(showDialog) {
+    this.mutateElement(() =>
+      this.element.classList.toggle(
+        'i-amphtml-story-subscriptions-visible',
+        showDialog
+      )
+    );
+
+    if (showDialog) {
+      // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
+      // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
+      return this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
+    }
+    this.subscriptionService_.getDialog().close();
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  onSkipButtonClick_(event) {
+    if (
+      event.target.classList.contains(
+        'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+      )
+    ) {
+      const advancementMode = this.storeService_.get(
+        StateProperty.ADVANCEMENT_MODE
+      );
+      this.viewerMessagingHandler_.send('selectDocument', {
+        'next': true,
+        'advancementMode': advancementMode,
+      });
+    }
   }
 
   /**
@@ -219,101 +282,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         </div>
       </div>
     );
-  }
-
-  /**
-   * @private
-   */
-  initializeListeners_() {
-    this.storeService_.subscribe(
-      StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
-      (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
-    );
-    this.storeService_.subscribe(
-      StateProperty.SUBSCRIPTIONS_STATE,
-      (subscriptionsState) =>
-        this.onSubscriptionsStateChange_(subscriptionsState)
-    );
-
-    const ampSubscriptionsEl =
-      this.element.parentElement.parentElement.querySelector(
-        'amp-subscriptions-dialog'
-      );
-    ampSubscriptionsEl.addEventListener('click', (event) =>
-      this.onSkipButtonClick_(event)
-    );
-  }
-
-  /**
-   * @param {!Event} event
-   * @private
-   */
-  onSkipButtonClick_(event) {
-    if (
-      event.target.classList.contains(
-        'i-amphtml-story-subscriptions-dialog-banner-button-visible'
-      )
-    ) {
-      const advancementMode = this.storeService_.get(
-        StateProperty.ADVANCEMENT_MODE
-      );
-      this.viewerMessagingHandler_.send('selectDocument', {
-        'next': true,
-        'advancementMode': advancementMode,
-      });
-    }
-  }
-
-  /**
-   * @param {boolean} showDialog
-   * @private
-   */
-  onSubscriptionsDialogUiStateChange_(showDialog) {
-    this.mutateElement(() =>
-      this.element.classList.toggle(
-        'i-amphtml-story-subscriptions-visible',
-        showDialog
-      )
-    );
-
-    if (showDialog) {
-      // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
-      // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
-      // To note, it's a blocking call that would wait until entitlements from all platforms get resolved.
-      this.subscriptionService_.selectAndActivatePlatform().then(() => {
-        if (this.viewer_.isEmbedded()) {
-          setTimeout(() => {
-            const buttonEl = this.win.document.querySelector(
-              'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
-            );
-            buttonEl &&
-              this.mutateElement(() =>
-                buttonEl.classList.add(
-                  'i-amphtml-story-subscriptions-dialog-banner-button-visible'
-                )
-              );
-          }, SKIP_BUTTON_DELAY_DURATION);
-        }
-      });
-    } else {
-      this.subscriptionService_.getDialog().close();
-    }
-  }
-
-  /**
-   * @param {SubscriptionsState} subscriptionsState
-   * @private
-   */
-  onSubscriptionsStateChange_(subscriptionsState) {
-    if (
-      subscriptionsState === SubscriptionsState.GRANTED &&
-      this.storeService_.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
-    ) {
-      this.storeService_.dispatch(
-        Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
-        false
-      );
-    }
   }
 
   /** @private */

@@ -156,7 +156,7 @@ amp-story-shopping-tag {
 .i-amphtml-amp-story-shopping-tag-pill {
   --i-amphtml-pill-icon-size: 24px !important;
   --i-amphtml-pill-padding-inline-start: 6px !important;
-  --i-amphtml-pill-transfrom-origin: calc(var(--i-amphtml-pill-padding-inline-start) + var(--i-amphtml-pill-icon-size) * .5) !important;
+  --i-amphtml-pill-transform-origin: calc(var(--i-amphtml-pill-padding-inline-start) + var(--i-amphtml-pill-icon-size) * .5) !important;
   display: flex !important;
   align-items: center !important;
   border-radius: 18px !important;
@@ -165,7 +165,7 @@ amp-story-shopping-tag {
   background-color: var(--i-amphtml-shopping-tag-bg-color) !important;
   padding-inline-start: var(--i-amphtml-pill-padding-inline-start) !important;
   padding-inline-end: 12px !important;
-  transform-origin: var(--i-amphtml-pill-transfrom-origin) !important;
+  transform-origin: var(--i-amphtml-pill-transform-origin) !important;
 }
 
 .i-amphtml-amp-story-shopping-tag-inner[active] .i-amphtml-amp-story-shopping-tag-pill {
@@ -184,7 +184,7 @@ amp-story-shopping-tag {
   --clip-path-inset-offset-supports-rtl: inset(0 0 0 calc(100% - 36px) round 30px) !important;
 
   /* Transform origin from center of icon (right side) in RTL. */
-  transform-origin: calc(100% - var(--i-amphtml-pill-transfrom-origin)) !important;
+  transform-origin: calc(100% - var(--i-amphtml-pill-transform-origin)) !important;
 }
 
 @keyframes i-amphtml-animate-in-sequence-pill {
@@ -226,12 +226,6 @@ amp-story-shopping-tag {
     transform: scale(0);
     clip-path: var(--clip-path-inset-offset-supports-rtl);
   }
-}
-
-.i-amphtml-story-shopping-tag-pill-multi-line {
-  border-radius: 10px !important;
-  margin-inline-start: 9px !important;
-  margin-inline-end: 4px !important;
 }
 
 .i-amphtml-amp-story-shopping-tag-pill-image {

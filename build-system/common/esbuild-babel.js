@@ -127,7 +127,7 @@ function getEsbuildBabelPlugin(
         const map = outputFiles.find(({path}) => path.endsWith('.map'));
 
         if (!map) {
-          debug('post-esbuild', code.path, code.text);
+          debug('post-esbuild', code?.path, code?.text);
           return;
         }
 

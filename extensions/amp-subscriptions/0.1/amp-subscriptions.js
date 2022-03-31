@@ -168,8 +168,7 @@ export class SubscriptionService {
       isStoryDocument(this.ampdoc_).then((isStory) => {
         if (isStory) {
           // Make the dialog with round corners for AMP Story.
-          const doc = this.ampdoc_.getRootNode();
-          const dialogWrapperEl = doc.querySelector('amp-subscriptions-dialog');
+          const dialogWrapperEl = this.dialog_.getRoot();
           dialogWrapperEl.classList.add(
             'i-amphtml-story-subscriptions-dialog-wrapper'
           );
@@ -210,10 +209,10 @@ export class SubscriptionService {
   }
 
   /**
-   * Select and activate all platforms. Do nothing if the viewer can authorize the user.
+   * Maybe renders and opens the dialog using the cached entitlements. Do nothing if the viewer can authorize the user.
    * @return {!Promise}
    */
-  selectAndActivatePlatform() {
+  maybeRenderDialogForSelectedPlatform() {
     return this.initialize_().then(() => {
       if (this.doesViewerProvideAuth_ || this.platformConfig_['alwaysGrant']) {
         return;
