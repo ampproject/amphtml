@@ -145,30 +145,19 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     }
 
     if (shoppingItemClicked === 'AMP-STORY-SHOPPING-ATTACHMENT') {
-      let productId = shoppingData?.activeProductData?.productId;
-
       if (activeProuductData.length === 1) {
-        productId = activeProuductData[0].productId;
-
         this.variableService_.onVariableUpdate(
           AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
-          productId
+          activeProuductData[0].productId
         );
-
-        this.variableService_.onVariableUpdate(
-          AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
-          shoppingItemClicked.toLowerCase()
-        );
-
         this.analyticsService_.triggerEvent(
           StoryAnalyticsEvent.SHOPPING_PDP_VIEW
         );
-      } else if (productId === undefined) {
+      } else if (shoppingData?.activeProductData?.productId === undefined) {
         this.variableService_.onVariableUpdate(
           AnalyticsVariable.STORY_PAGE_ID,
           pageId
         );
-
         this.analyticsService_.triggerEvent(
           StoryAnalyticsEvent.SHOPPING_PLP_VIEW
         );
@@ -312,12 +301,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
       shoppingData?.productId
     );
-
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
-      'Product Card Clicked'
-    );
-
     this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_PDP_VIEW);
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
