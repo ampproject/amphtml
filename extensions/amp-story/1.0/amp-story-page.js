@@ -10,7 +10,7 @@
  */
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
-import {iterateCursor} from '#core/dom';
+import {iterateCursor, removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
@@ -256,6 +256,33 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
   }
 
+  /**
+   * @private
+   * @return {Element}
+   */
+  maybeConvertCtaLayerToPageOutlink_() {
+    const ctaLayerEl = this.element.querySelector('amp-story-cta-layer');
+    if (!ctaLayerEl) {
+      return;
+    }
+
+    const anchorSet = ctaLayerEl.querySelectorAll('a');
+    if (anchorSet.length !== 1 || !anchorSet[0].getAttribute('href')) {
+      return;
+    }
+
+    this.mutateElement(() => {
+      removeElement(ctaLayerEl);
+      this.element.appendChild(
+        <amp-story-page-outlink layout="nodisplay">
+          <a href={anchorSet[0].getAttribute('href')}>
+            {anchorSet[0].textContent}
+          </a>
+        </amp-story-page-outlink>
+      );
+    });
+  }
+
   /** @override */
   buildCallback() {
     this.delegateVideoAutoplay();
@@ -283,6 +310,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.initializeImgAltTags_();
     this.initializeTabbableElements_();
     this.maybeApplyFirstAnimationFrameOrFinish();
+    this.maybeConvertCtaLayerToPageOutlink_();
   }
 
   /** @private */
@@ -1547,7 +1575,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   installPageAttachmentExtension_() {
     const elementsThatRequireExtension = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
+      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment, amp-story-cta-layer'
     );
 
     if (!elementsThatRequireExtension) {
