@@ -179,7 +179,23 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     if (showDialog) {
       // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
       // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
-      return this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
+      return this.subscriptionService_
+        .maybeRenderDialogForSelectedPlatform()
+        .then(() => {
+          if (this.viewer_.isEmbedded()) {
+            setTimeout(() => {
+              const buttonEl = this.win.document.querySelector(
+                'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
+              );
+              buttonEl &&
+                this.mutateElement(() =>
+                  buttonEl.classList.add(
+                    'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+                  )
+                );
+            }, SKIP_BUTTON_DELAY_DURATION);
+          }
+        });
     }
     this.subscriptionService_.getDialog().close();
   }
