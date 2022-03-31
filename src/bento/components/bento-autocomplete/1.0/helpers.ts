@@ -13,3 +13,9 @@ export function getItemElement(
 export function getTextValue(element: HTMLElement | null): string {
   return element?.getAttribute('data-value') || element?.textContent || '';
 }
+
+export function getResults(
+  element: HTMLElement | null
+): NodeListOf<Element> | undefined {
+  return element?.querySelectorAll('[role="option"]:not([data-disabled=true])');
+}

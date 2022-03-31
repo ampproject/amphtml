@@ -21,7 +21,7 @@ import fuzzysearch from '#third_party/fuzzysearch';
 
 import {useStyles} from './component.jss';
 import {DEFAULT_ON_ERROR, TAG} from './constants';
-import {getItemElement, getTextValue} from './helpers';
+import {getItemElement, getResults, getTextValue} from './helpers';
 import {tokenPrefixMatch} from './token-prefix-match';
 import {
   BentoAutocompleteProps,
@@ -31,6 +31,8 @@ import {
   isValidFilterType,
 } from './types';
 import {useAutocompleteBinding} from './use-autocomplete-binding';
+
+const INITIAL_ACTIVE_INDEX = -1;
 
 /**
  * @param {!BentoAutocomplete.Props} props
@@ -58,7 +60,7 @@ export function BentoAutocomplete({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [substring, setSubstring] = useState<string>('');
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [activeIndex, setActiveIndex] = useState<number>(INITIAL_ACTIVE_INDEX);
   const [areResultsDisplayed, setAreResultsDisplayed] =
     useState<boolean>(false);
   const [shouldSuggestFirst, setShouldSuggestFirst] =
@@ -67,15 +69,7 @@ export function BentoAutocomplete({
 
   const binding = useAutocompleteBinding(inline);
 
-  const getResults = useCallback((el: HTMLElement) => {
-    return el.querySelectorAll('[role="option"]:not([data-disabled=true])');
-  }, []);
-
   const toggleResults = useCallback((shouldDisplay: boolean) => {
-    if (!shouldDisplay) {
-      // Reset the selection state if the items are hidden
-      setActiveIndex(-1);
-    }
     inputRef.current?.setAttribute('aria-expanded', shouldDisplay.toString());
     setAreResultsDisplayed(shouldDisplay);
   }, []);
@@ -205,7 +199,7 @@ export function BentoAutocomplete({
 
   const updateActiveItem = useCallback(
     (delta: number) => {
-      const results = getResults(elementRef.current!);
+      const results = getResults(elementRef.current);
       if (delta === 0 || !showAutocompleteResults) {
         return;
       }
@@ -222,20 +216,26 @@ export function BentoAutocomplete({
 
       setInputValue(newValue);
     },
-    [activeIndex, getItemId, showAutocompleteResults, setInputValue, getResults]
+    [activeIndex, getItemId, showAutocompleteResults, setInputValue]
   );
 
-  const displaySuggestions = useCallback(() => {
+  const displayResults = useCallback(() => {
     toggleResults(true);
+  }, [toggleResults]);
+
+  const hideResults = useCallback(() => {
+    // Reset the selection state if the items are hidden
+    setActiveIndex(INITIAL_ACTIVE_INDEX);
+    toggleResults(false);
   }, [toggleResults]);
 
   const maybeFetchAndAutocomplete = useCallback(
     (element: InputElement) => {
       const substring = binding.getUserInputForUpdate(element);
       setSubstring(substring);
-      displaySuggestions();
+      displayResults();
     },
-    [binding, displaySuggestions]
+    [binding, displayResults]
   );
 
   const handleInput = useCallback(
@@ -249,13 +249,13 @@ export function BentoAutocomplete({
 
   const handleFocus = useCallback(() => {
     if (binding.shouldShowOnFocus) {
-      toggleResults(true);
+      displayResults();
     }
-  }, [toggleResults, binding]);
+  }, [displayResults, binding]);
 
   const handleBlur = useCallback(() => {
-    toggleResults(false);
-  }, [toggleResults]);
+    hideResults();
+  }, [hideResults]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -271,12 +271,12 @@ export function BentoAutocomplete({
           break;
         }
         case Keys_Enum.ENTER: {
-          toggleResults(false);
+          hideResults();
           break;
         }
         case Keys_Enum.ESCAPE: {
           setInputValue(substring);
-          toggleResults(false);
+          hideResults();
           break;
         }
       }
@@ -286,7 +286,7 @@ export function BentoAutocomplete({
       activeIndex,
       filteredData,
       updateActiveItem,
-      toggleResults,
+      hideResults,
       setInputValue,
       substring,
     ]
@@ -403,7 +403,7 @@ export function BentoAutocomplete({
   );
 
   useEffect(() => {
-    if (shouldSuggestFirst && activeIndex === -1) {
+    if (shouldSuggestFirst && activeIndex === INITIAL_ACTIVE_INDEX) {
       updateActiveItem(1);
     }
   }, [activeIndex, updateActiveItem, shouldSuggestFirst]);
