@@ -150,7 +150,7 @@ amp-story[standalone] {
   min-height: initial !important;
   min-width: initial !important;
 
-  /* Unblocks rendering when this CSS file is installed. */
+  /* Unblocks rendering when this CSS file is installed. Info on #37990. */
   visibility: visible !important;
 }
 

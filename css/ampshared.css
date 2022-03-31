@@ -493,7 +493,7 @@ amp-analytics, amp-story-auto-ads, amp-auto-ads {
   visibility: hidden;
 }
 
-/* Blocked rendering until amp-story.css is installed. */
+/* Blocked rendering until amp-story.css is installed. Info on #37990. */
 amp-story {
   visibility: hidden !important;
 }
