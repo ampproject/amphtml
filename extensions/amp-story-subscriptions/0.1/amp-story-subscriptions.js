@@ -109,6 +109,15 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   }
 
   /**
+   * @private
+   */
+  getGrantStatusAndUpdateState_() {
+    this.subscriptionService_.getGrantStatus().then((granted) => {
+      this.handleGrantStatusUpdate_(granted);
+    });
+  }
+
+  /**
    * @param {boolean} granted
    * @private
    */
@@ -117,6 +126,37 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       ? SubscriptionsState.GRANTED
       : SubscriptionsState.BLOCKED;
     this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_STATE, state);
+  }
+
+  /**
+   * @private
+   */
+  initializeListeners_() {
+    this.storeService_.subscribe(
+      StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
+      (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
+    );
+  }
+
+  /**
+   * @param {boolean} showDialog
+   * @return {?Promise}
+   * @private
+   */
+  onSubscriptionsDialogUiStateChange_(showDialog) {
+    this.mutateElement(() =>
+      this.element.classList.toggle(
+        'i-amphtml-story-subscriptions-visible',
+        showDialog
+      )
+    );
+
+    if (showDialog) {
+      // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
+      // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
+      return this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
+    }
+    this.subscriptionService_.getDialog().close();
   }
 
   /**
@@ -187,57 +227,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         </div>
       </div>
     );
-  }
-
-  /**
-   * @private
-   */
-  getGrantStatusAndUpdateState_() {
-    this.subscriptionService_.getGrantStatus().then((granted) => {
-      this.handleGrantStatusUpdate_(granted);
-    });
-  }
-
-  /**
-   * @param {boolean} granted
-   * @private
-   */
-  handleGrantStatusUpdate_(granted) {
-    const state = granted
-      ? SubscriptionsState.GRANTED
-      : SubscriptionsState.BLOCKED;
-    this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_STATE, state);
-  }
-
-  /**
-   * @private
-   */
-  initializeListeners_() {
-    this.storeService_.subscribe(
-      StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
-      (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
-    );
-  }
-
-  /**
-   * @param {boolean} showDialog
-   * @return {?Promise}
-   * @private
-   */
-  onSubscriptionsDialogUiStateChange_(showDialog) {
-    this.mutateElement(() =>
-      this.element.classList.toggle(
-        'i-amphtml-story-subscriptions-visible',
-        showDialog
-      )
-    );
-
-    if (showDialog) {
-      // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
-      // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
-      return this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
-    }
-    this.subscriptionService_.getDialog().close();
   }
 
   /** @private */
