@@ -1,6 +1,10 @@
 import {useStyles} from '#bento/components/bento-base-carousel/1.0/component.jss';
 
-import {getScrollingElement} from './helpers';
+import {
+  getScrollingElement,
+  isElementInViewport,
+  isElementOutOfViewport,
+} from './helpers';
 
 describes.endtoend(
   'bento-base-carousel react e2e',
@@ -33,40 +37,18 @@ function TestSuite(env) {
     controller = env.controller;
   });
 
-  async function isElementInViewport(element) {
-    const rect = await controller.getElementRect(element);
-    const [width, height] = await controller.getWindowRect();
-
-    await expect(rect.top).to.be.above(0);
-    await expect(rect.bottom).to.be.below(Number(height));
-    await expect(rect.left).to.be.above(0);
-    await expect(rect.right).to.be.below(Number(width));
-  }
-
-  async function isElementOutOfViewport(element) {
-    const rect = await controller.getElementRect(element);
-    const [width, height] = await controller.getWindowRect();
-
-    await expect(
-      rect.top < 0 ||
-        rect.bottom > Number(height) ||
-        rect.left < 0 ||
-        rect.right > Number(width)
-    ).to.be.true;
-  }
-
   it('should display 2 slides and loop back to the start when pressing next', async () => {
     const initSlides = await controller.findElements('[data-slide]');
 
-    await isElementOutOfViewport(initSlides[0]);
+    await isElementOutOfViewport(initSlides[0], controller);
     await expect(controller.getElementText(initSlides[0])).to.equal('3');
-    await isElementOutOfViewport(initSlides[1]);
+    await isElementOutOfViewport(initSlides[1], controller);
     await expect(controller.getElementText(initSlides[1])).to.equal('4');
-    await isElementInViewport(initSlides[2]);
+    await isElementInViewport(initSlides[2], controller);
     await expect(controller.getElementText(initSlides[2])).to.equal('0');
-    await isElementInViewport(initSlides[3]);
+    await isElementInViewport(initSlides[3], controller);
     await expect(controller.getElementText(initSlides[3])).to.equal('1');
-    await isElementOutOfViewport(initSlides[4]);
+    await isElementOutOfViewport(initSlides[4], controller);
     await expect(controller.getElementText(initSlides[4])).to.equal('2');
 
     const nextButton = await controller.findElement(
@@ -75,15 +57,15 @@ function TestSuite(env) {
     await controller.click(nextButton);
     const slides2 = await controller.findElements('[data-slide]');
 
-    await isElementOutOfViewport(slides2[0]);
+    await isElementOutOfViewport(slides2[0], controller);
     await expect(controller.getElementText(slides2[0])).to.equal('4');
-    await isElementOutOfViewport(slides2[1]);
+    await isElementOutOfViewport(slides2[1], controller);
     await expect(controller.getElementText(slides2[1])).to.equal('0');
-    await isElementInViewport(slides2[2]);
+    await isElementInViewport(slides2[2], controller);
     await expect(controller.getElementText(slides2[2])).to.equal('1');
-    await isElementInViewport(slides2[3]);
+    await isElementInViewport(slides2[3], controller);
     await expect(controller.getElementText(slides2[3])).to.equal('2');
-    await isElementOutOfViewport(slides2[4]);
+    await isElementOutOfViewport(slides2[4], controller);
     await expect(controller.getElementText(slides2[4])).to.equal('3');
 
     const exernalNextButton = await controller.findElement(
@@ -91,15 +73,15 @@ function TestSuite(env) {
     );
     await controller.click(exernalNextButton);
     const slides3 = await controller.findElements('[data-slide]');
-    await isElementOutOfViewport(slides3[0]);
+    await isElementOutOfViewport(slides3[0], controller);
     await expect(controller.getElementText(slides3[0])).to.equal('0');
-    await isElementOutOfViewport(slides3[1]);
+    await isElementOutOfViewport(slides3[1], controller);
     await expect(controller.getElementText(slides3[1])).to.equal('1');
-    await isElementInViewport(slides3[2]);
+    await isElementInViewport(slides3[2], controller);
     await expect(controller.getElementText(slides3[2])).to.equal('2');
-    await isElementInViewport(slides3[3]);
+    await isElementInViewport(slides3[3], controller);
     await expect(controller.getElementText(slides3[3])).to.equal('3');
-    await isElementOutOfViewport(slides3[4]);
+    await isElementOutOfViewport(slides3[4], controller);
     await expect(controller.getElementText(slides3[4])).to.equal('4');
 
     const el = await getScrollingElement(styles, controller);
@@ -117,30 +99,30 @@ function TestSuite(env) {
     await controller.click(nextButton);
     const slides4 = await controller.findElements('[data-slide]');
 
-    await isElementOutOfViewport(slides4[0]);
+    await isElementOutOfViewport(slides4[0], controller);
     await expect(controller.getElementText(slides4[0])).to.equal('3');
-    await isElementOutOfViewport(slides4[1]);
+    await isElementOutOfViewport(slides4[1], controller);
     await expect(controller.getElementText(slides4[1])).to.equal('4');
-    await isElementInViewport(slides4[2]);
+    await isElementInViewport(slides4[2], controller);
     await expect(controller.getElementText(slides4[2])).to.equal('0');
-    await isElementInViewport(slides4[3]);
+    await isElementInViewport(slides4[3], controller);
     await expect(controller.getElementText(slides4[3])).to.equal('1');
-    await isElementOutOfViewport(slides4[4]);
+    await isElementOutOfViewport(slides4[4], controller);
     await expect(controller.getElementText(slides4[4])).to.equal('2');
   });
 
   it('should be able to jump around the slider', async () => {
     const initSlides = await controller.findElements('[data-slide]');
 
-    await isElementOutOfViewport(initSlides[0]);
+    await isElementOutOfViewport(initSlides[0], controller);
     await expect(controller.getElementText(initSlides[0])).to.equal('3');
-    await isElementOutOfViewport(initSlides[1]);
+    await isElementOutOfViewport(initSlides[1], controller);
     await expect(controller.getElementText(initSlides[1])).to.equal('4');
-    await isElementInViewport(initSlides[2]);
+    await isElementInViewport(initSlides[2], controller);
     await expect(controller.getElementText(initSlides[2])).to.equal('0');
-    await isElementInViewport(initSlides[3]);
+    await isElementInViewport(initSlides[3], controller);
     await expect(controller.getElementText(initSlides[3])).to.equal('1');
-    await isElementOutOfViewport(initSlides[4]);
+    await isElementOutOfViewport(initSlides[4], controller);
     await expect(controller.getElementText(initSlides[4])).to.equal('2');
 
     const exernalGoToButton = await controller.findElement(
