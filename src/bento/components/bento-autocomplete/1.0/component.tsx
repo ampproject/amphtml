@@ -59,13 +59,16 @@ export function BentoAutocomplete({
 
   const [substring, setSubstring] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState<number>(-1);
-  const [results, setResults] = useState<NodeList>();
   const [showOptions, _setShowOptions] = useState<boolean>(false);
   const [shouldSuggestFirst, setShouldSuggestFirst] =
     useState<boolean>(suggestFirst);
   const classes = useStyles();
 
   const binding = useAutocompleteBinding(inline);
+
+  const getResults = useCallback((el: HTMLElement) => {
+    return el.querySelectorAll('[role="option"]:not([data-disabled=true])');
+  }, []);
 
   const setShowOptions = useCallback((shouldDisplay: boolean) => {
     if (!shouldDisplay) {
@@ -201,11 +204,12 @@ export function BentoAutocomplete({
 
   const updateActiveItem = useCallback(
     (delta: number) => {
+      const results = getResults(elementRef.current!);
       if (delta === 0 || !showAutocompleteOptions) {
         return;
       }
       const index = activeIndex + delta;
-      const newActiveIndex = mod(index, filteredData.length);
+      const newActiveIndex = mod(index, results?.length || 0);
       const activeResult = results?.item(newActiveIndex);
       const newValue = getTextValue(activeResult as HTMLElement);
 
@@ -217,14 +221,7 @@ export function BentoAutocomplete({
 
       setInputValue(newValue);
     },
-    [
-      activeIndex,
-      filteredData,
-      getItemId,
-      showAutocompleteOptions,
-      setInputValue,
-      results,
-    ]
+    [activeIndex, getItemId, showAutocompleteOptions, setInputValue, getResults]
   );
 
   const displaySuggestions = useCallback(() => {
@@ -297,9 +294,9 @@ export function BentoAutocomplete({
   const handleItemClick = useCallback(
     (event: MouseEvent) => {
       const element = getItemElement(event.target as HTMLElement);
-      const textValue = getTextValue(element);
-
-      setInputValue(textValue);
+      if (!element?.hasAttribute('data-disabled')) {
+        setInputValue(getTextValue(element));
+      }
       setActiveIndex(-1);
       setShowOptions(false);
     },
@@ -368,23 +365,26 @@ export function BentoAutocomplete({
       if (!isValidElement<ItemTemplateProps>(component)) {
         return component;
       }
-      if (!component.props['data-value']) {
+      const isDisabled = component.props['data-disabled'];
+      if (!component.props['data-value'] && !isDisabled) {
         onError(
           `${TAG} expected a "data-value" or "data-disabled" attribute on the rendered template item.`
         );
       }
       return cloneElement(component, {
-        key: item,
-        id: getItemId(index),
+        'aria-selected': activeIndex === index,
         class: objStr({
+          'autocomplete-item': true,
           [classes.autocompleteItem]: true,
           [classes.autocompleteItemActive]: index === activeIndex,
         }),
-        role: 'option',
         dir: 'auto',
-        'aria-selected': activeIndex === index,
+        id: getItemId(index),
+        key: item,
         onClick: handleItemClick,
         part: 'option',
+        role: 'option',
+        'aria-disabled': isDisabled,
         ...component.props,
       });
     },
@@ -400,15 +400,15 @@ export function BentoAutocomplete({
   );
 
   useEffect(() => {
-    setResults(containerRef.current?.childNodes);
-
-    // Suggests the first item in the list if suggestFirst prop is true
     if (shouldSuggestFirst && activeIndex === -1) {
       updateActiveItem(1);
     }
-  }, [results, activeIndex, updateActiveItem, shouldSuggestFirst]);
+  }, [activeIndex, updateActiveItem, shouldSuggestFirst]);
 
   useEffect(() => {
+    setupInputElement(elementRef.current!);
+    validateProps();
+
     inputRef.current?.addEventListener('input', handleInput);
     inputRef.current?.addEventListener('keydown', handleKeyDown);
     inputRef.current?.addEventListener('focus', handleFocus);
@@ -427,14 +427,8 @@ export function BentoAutocomplete({
     handleKeyDown,
     handleFocus,
     handleBlur,
+    inputRef,
   ]);
-
-  useEffect(() => {
-    setupInputElement(elementRef.current!);
-    validateProps();
-    // This should only be called on first render
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <ContainWrapper

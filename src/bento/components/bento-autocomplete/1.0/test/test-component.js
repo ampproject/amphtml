@@ -800,5 +800,98 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       expect(input.getDOMNode().value).to.equal('Seattle, WA');
     });
+
+    describe('disabled items', () => {
+      const items = [
+        {
+          city: 'City',
+          state: 'State',
+          disabled: true,
+        },
+        {
+          city: 'Seattle',
+          state: 'WA',
+        },
+        {
+          city: 'Portland',
+          state: 'OR',
+        },
+      ];
+      const itemTemplate = ({city, disabled, state}) => (
+        <div
+          class="city-item"
+          data-value={!disabled && `${city}, ${state}`}
+          data-disabled={disabled}
+        >
+          <span>
+            {city}, {state}
+          </span>
+        </div>
+      );
+      it('sets aria-disabled on the option if data-disabled is true', () => {
+        const wrapper = mount(
+          <Autocomplete
+            id="id"
+            items={items}
+            filterValue="city"
+            filter="none"
+            itemTemplate={itemTemplate}
+            minChars={0}
+          >
+            <input type="text"></input>
+          </Autocomplete>
+        );
+
+        expect(
+          wrapper.find('[data-disabled=true]').prop('aria-disabled')
+        ).to.equal(true);
+      });
+
+      it('selects the first non-disabled option', () => {
+        const wrapper = mount(
+          <Autocomplete
+            id="id"
+            items={items}
+            filterValue="city"
+            filter="none"
+            itemTemplate={itemTemplate}
+            minChars={0}
+          >
+            <input type="text"></input>
+          </Autocomplete>
+        );
+        const input = wrapper.find('input');
+
+        input.simulate('focus');
+
+        input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+
+        expect(input.getDOMNode().value).to.equal('Seattle, WA');
+      });
+
+      it('does not select a disabled option on click', () => {
+        const wrapper = mount(
+          <Autocomplete
+            id="id"
+            items={items}
+            filterValue="city"
+            filter="none"
+            itemTemplate={itemTemplate}
+            minChars={0}
+          >
+            <input type="text"></input>
+          </Autocomplete>
+        );
+        const input = wrapper.find('input');
+
+        input.simulate('focus');
+
+        wrapper.find('[data-disabled=true]').simulate('click');
+
+        expect(input.getDOMNode().value).to.equal('');
+
+        expect(areOptionsVisible(wrapper)).to.be.false;
+      });
+    });
   });
 });
