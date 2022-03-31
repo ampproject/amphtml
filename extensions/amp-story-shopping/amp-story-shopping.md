@@ -7,6 +7,8 @@ teaser:
 tags:
   - shopping
 author: philipbell
+toc: true
+draft: true
 $title: amp-story-shopping
 version: '0.1'
 versions:
@@ -26,7 +28,7 @@ scripts:
 
 The `amp-story-shopping` component creates configurable, templated shopping experiences within [amp-story](https://amp.dev/documentation/components/amp-story/?format=stories).
 
-Specify an shopping experience by defining one `amp-story-shopping-attachment` and `amp-story-shopping-tag` elements for each product on the [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page/?format=stories).
+Specify a shopping experience by defining one `amp-story-shopping-attachment` and one or more `amp-story-shopping-tag` elements for each product on the [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page/?format=stories).
 
 ## amp-story-shopping-tag
 
@@ -36,8 +38,8 @@ Use `amp-story-shopping-tag` elements to indicate shop-able elements within [`am
 Tapping them opens a product description page (PDP) within the `amp-story-shopping-attachment`.
 
 -   They must be a child of [`amp-story-grid-layer`](https://amp.dev/documentation/components/amp-story-grid-layer/).
--   They are (positioned `absolute`)[https://developer.mozilla.org/en-US/docs/Web/CSS/position#values]. Use custom CSS to place them on the page.
--   Use `top` and `left` CSS rules with percentage based units for responsive placement.
+-   They are positioned [`absolute`](https://developer.mozilla.org/en-US/docs/Web/CSS/position#values). Use custom CSS to place them on the page.
+-   Use `top` and `left` CSS rules with percentage based units for responsive layout.
 
 ```html
 ...
@@ -60,7 +62,7 @@ Example of positioning a amp-story-shopping-tag and testing responsiveness:
 
 #### `data-product-id` {string} required
 
-Used to associate the tag with product data.
+Used to associate the `amp-story-shopping-tag` with product data.
 It should be equal to the `productId` value of the associated product's JSON data.
 
 ### Customization
@@ -77,18 +79,17 @@ Recommended image size is 48 x 48px;
 
 <amp-img alt="An example of custom text in amp story shopping tag" src="https://user-images.githubusercontent.com/3860311/155756003-4f4b9967-d40d-452e-99f2-ca445ac65a3b.png" layout="intrinsic" width="182" height="54">
 
-By default the item's price renders.
+The item's price renders by default.
 Render custom text by defining `productTagText` in the associated product's JSON data.
 A maximum of two lines will display.
 Ellipses will display if the text is too long.
 
-Diagram demonstrating how product JSON renders within `amp-story-shopping-tag`.
-
+Diagram demonstrating how product JSON renders within `amp-story-shopping-tag`:
 <amp-img alt="A diagram of product data rendering in amp story shopping tag" src="https://user-images.githubusercontent.com/3860311/155763007-92858806-44df-41fa-8804-f0767741e28a.jpg" layout="intrinsic" width="806" height="411">
 
 ## amp-story-shopping-attachment
 
-<amp-img alt="A short video showing opening and navigating through an amp story shopping attachment" src="https://user-images.githubusercontent.com/3860311/155758474-3fa4e666-c1a9-44d3-bbf6-61dc3fe16498.gif" layout="intrinsic" width="338" height="548">
+<amp-img alt="An example of opening the attachment and navigating through an amp story shopping attachment" src="https://user-images.githubusercontent.com/3860311/155758474-3fa4e666-c1a9-44d3-bbf6-61dc3fe16498.gif" layout="intrinsic" width="338" height="548">
 
 The `amp-story-shopping-attachment` renders a tap-able CTA that opens an inline shopping experience.
 Product JSON data must be configured and at least one `amp-story-shopping-tag` must be on the same page.
@@ -133,7 +134,7 @@ Inline data may be served from cache which may take time to propogate. `src` JSO
 
 ### Attributes
 
-#### `src` {string} optional
+#### src {string} optional
 
 A url for remote product JSON data. When defined it will override inline JSON.
 
@@ -155,9 +156,8 @@ Two types of templates render within the shopping attachment.
 The PLP template renders a list of products on the active [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page/?format=stories).
 Open it by tapping the "Shop Now" CTA.
 At least two associated `amp-story-shopping-tag` elements must be on the page for the PLP render.
-If only one product is on the page the Product Description Page will render when tapping the "Shop Now" CTA.
 
-Diagram demonstrating how product JSON renders within the PLP template.
+Diagram demonstrating how product JSON renders within the PLP template:
 <amp-img alt="A diagram of product data rendering in the PLP template" src="https://user-images.githubusercontent.com/3860311/160697611-f0e8cfd3-5470-4d0b-b24c-003b9ddec860.jpg" layout="intrinsic" width="806" height="633">
 
 #### Product Details Page (PDP)
@@ -167,8 +167,9 @@ Diagram demonstrating how product JSON renders within the PLP template.
 The PDP template displays detailed information about the active product.
 Tapping an `amp-story-shopping-tag` will open the product's PDP.
 It can also be accessed by tapping the product's card within the PLP.
+If only one product is on the page the PDP will render when tapping the "Shop Now" CTA.
 
-Diagram demonstrating how product JSON renders within the PDP template.
+Diagram demonstrating how product JSON renders within the PDP template:
 <amp-img alt="A diagram of product data rendering in the PDP template" src="https://user-images.githubusercontent.com/3860311/160697640-44bb55c5-3e26-48fd-b2ae-d16a05f71038.jpg" layout="intrinsic" width="806" height="425">
 
 ## Validation
