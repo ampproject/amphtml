@@ -59,7 +59,8 @@ export function BentoAutocomplete({
 
   const [substring, setSubstring] = useState<string>('');
   const [activeIndex, setActiveIndex] = useState<number>(-1);
-  const [showOptions, _setShowOptions] = useState<boolean>(false);
+  const [areResultsDisplayed, setAreResultsDisplayed] =
+    useState<boolean>(false);
   const [shouldSuggestFirst, setShouldSuggestFirst] =
     useState<boolean>(suggestFirst);
   const classes = useStyles();
@@ -70,13 +71,13 @@ export function BentoAutocomplete({
     return el.querySelectorAll('[role="option"]:not([data-disabled=true])');
   }, []);
 
-  const setShowOptions = useCallback((shouldDisplay: boolean) => {
+  const toggleResults = useCallback((shouldDisplay: boolean) => {
     if (!shouldDisplay) {
-      // Reset the selection state
+      // Reset the selection state if the items are hidden
       setActiveIndex(-1);
     }
     inputRef.current?.setAttribute('aria-expanded', shouldDisplay.toString());
-    _setShowOptions(shouldDisplay);
+    setAreResultsDisplayed(shouldDisplay);
   }, []);
 
   const setInputValue = useCallback((value: string) => {
@@ -146,12 +147,12 @@ export function BentoAutocomplete({
     }
   }, [filter, onError, inline, suggestFirst]);
 
-  const showAutocompleteOptions = useMemo(() => {
-    if (!showOptions || data?.length === 0) {
+  const showAutocompleteResults = useMemo(() => {
+    if (!areResultsDisplayed || data?.length === 0) {
       return false;
     }
     return substring.length >= minChars;
-  }, [data, substring, minChars, showOptions]);
+  }, [data, substring, minChars, areResultsDisplayed]);
 
   const truncateToMaxItems = useCallback(
     (data: Item[]) => {
@@ -205,7 +206,7 @@ export function BentoAutocomplete({
   const updateActiveItem = useCallback(
     (delta: number) => {
       const results = getResults(elementRef.current!);
-      if (delta === 0 || !showAutocompleteOptions) {
+      if (delta === 0 || !showAutocompleteResults) {
         return;
       }
       const index = activeIndex + delta;
@@ -221,12 +222,12 @@ export function BentoAutocomplete({
 
       setInputValue(newValue);
     },
-    [activeIndex, getItemId, showAutocompleteOptions, setInputValue, getResults]
+    [activeIndex, getItemId, showAutocompleteResults, setInputValue, getResults]
   );
 
   const displaySuggestions = useCallback(() => {
-    setShowOptions(true);
-  }, [setShowOptions]);
+    toggleResults(true);
+  }, [toggleResults]);
 
   const maybeFetchAndAutocomplete = useCallback(
     (element: InputElement) => {
@@ -248,20 +249,20 @@ export function BentoAutocomplete({
 
   const handleFocus = useCallback(() => {
     if (binding.shouldShowOnFocus) {
-      setShowOptions(true);
+      toggleResults(true);
     }
-  }, [setShowOptions, binding]);
+  }, [toggleResults, binding]);
 
   const handleBlur = useCallback(() => {
-    setShowOptions(false);
-  }, [setShowOptions]);
+    toggleResults(false);
+  }, [toggleResults]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       switch (event.key) {
         case Keys_Enum.DOWN_ARROW: {
           event.preventDefault();
-          if (showAutocompleteOptions) {
+          if (showAutocompleteResults) {
             if (activeIndex === filteredData.length - 1) {
               return;
             }
@@ -270,22 +271,22 @@ export function BentoAutocomplete({
           break;
         }
         case Keys_Enum.ENTER: {
-          setShowOptions(false);
+          toggleResults(false);
           break;
         }
         case Keys_Enum.ESCAPE: {
           setInputValue(substring);
-          setShowOptions(false);
+          toggleResults(false);
           break;
         }
       }
     },
     [
-      showAutocompleteOptions,
+      showAutocompleteResults,
       activeIndex,
       filteredData,
       updateActiveItem,
-      setShowOptions,
+      toggleResults,
       setInputValue,
       substring,
     ]
@@ -297,10 +298,12 @@ export function BentoAutocomplete({
       if (!element?.hasAttribute('data-disabled')) {
         setInputValue(getTextValue(element));
       }
-      setActiveIndex(-1);
-      setShowOptions(false);
+      // It isn't documented whether the input should stay open or closed
+      // if the user clicks a disabled item. The demo closes the results after
+      // clicking on any item.
+      setAreResultsDisplayed(false);
     },
-    [setInputValue, setShowOptions]
+    [setInputValue, setAreResultsDisplayed]
   );
 
   const getItemChildren = useCallback(
@@ -443,7 +446,7 @@ export function BentoAutocomplete({
         id={containerId.current}
         class={classes.autocompleteResults}
         role="listbox"
-        hidden={!showAutocompleteOptions}
+        hidden={!showAutocompleteResults}
         // @ts-ignore
         part="results"
       >
