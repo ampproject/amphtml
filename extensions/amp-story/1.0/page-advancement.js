@@ -487,6 +487,11 @@ export class ManualAdvancement extends AdvancementConfig {
           return true;
         }
 
+        if (tagName === 'amp-story-subscriptions') {
+          shouldHandleEvent = true;
+          return true;
+        }
+
         return false;
       },
       /* opt_stopAt */ this.element_

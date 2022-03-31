@@ -265,6 +265,16 @@ exports.rules = [
       // AMP Story Subscriptions.
       'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
+      // Story localization.
+      'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-quiz.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-draggable-drawer.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
       'extensions/amp-subscriptions/0.1/local-subscription-platform-iframe.js->extensions/amp-access/0.1/iframe-api/messenger.js',
@@ -404,6 +414,7 @@ exports.rules = [
       'extensions/amp-story/1.0/amp-story-localization-service.js->src/service/localization/index.js',
       'extensions/amp-story*/**/*.js->src/service/localization/strings.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization/index.js',
+      'extensions/amp-story/1.0/amp-story.js->src/service/extension-script.js',
 
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +
