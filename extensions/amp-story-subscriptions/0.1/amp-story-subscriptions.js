@@ -212,6 +212,26 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   /**
    * @private
    */
+  getGrantStatusAndUpdateState_() {
+    this.subscriptionService_.getGrantStatus().then((granted) => {
+      this.handleGrantStatusUpdate_(granted);
+    });
+  }
+
+  /**
+   * @param {boolean} granted
+   * @private
+   */
+  handleGrantStatusUpdate_(granted) {
+    const state = granted
+      ? SubscriptionsState.GRANTED
+      : SubscriptionsState.BLOCKED;
+    this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_STATE, state);
+  }
+
+  /**
+   * @private
+   */
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
@@ -221,6 +241,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
   /**
    * @param {boolean} showDialog
+   * @return {?Promise}
    * @private
    */
   onSubscriptionsDialogUiStateChange_(showDialog) {
@@ -234,11 +255,9 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     if (showDialog) {
       // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
       // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
-      // To note, it's a blocking call that would wait until entitlements from all platforms get resolved.
-      this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
-    } else {
-      this.subscriptionService_.getDialog().close();
+      return this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
     }
+    this.subscriptionService_.getDialog().close();
   }
 
   /** @private */

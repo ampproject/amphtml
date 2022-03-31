@@ -1,0 +1,10 @@
+{
+  "properties": {
+    "my-uri": {
+      "format": "uri"
+    },
+    "my-email": {
+      "format": "email"
+    }
+  }
+}

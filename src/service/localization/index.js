@@ -134,6 +134,8 @@ export class LocalizationService {
   }
 
   /**
+   * Retrieves the localized string synchronously, useful for strings bundled with a given extension.
+   *
    * @param {!LocalizedStringId_Enum} localizedStringId
    * @param {!Element=} elementToUse The element where the string will be
    *     used.  The language is based on the language at that part of the

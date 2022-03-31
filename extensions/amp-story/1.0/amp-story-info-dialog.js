@@ -6,7 +6,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {dev} from '#utils/log';
 
-import {localize} from './amp-story-localization-service';
+import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -74,12 +74,13 @@ export class InfoDialog {
     const {canonicalUrl} = Services.documentInfoForDoc(this.parentEl_);
 
     const linkElement = (
-      <a class="i-amphtml-story-info-moreinfo" target="_blank">
-        {localize(
-          this.parentEl_,
+      <a
+        class="i-amphtml-story-info-moreinfo"
+        target="_blank"
+        i-amphtml-i18n-text-content={
           LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
-        )}
-      </a>
+        }
+      ></a>
     );
 
     this.element_ = (
@@ -98,12 +99,12 @@ export class InfoDialog {
             this.onClick_(event);
           }}
         >
-          <h1 class="i-amphtml-story-info-heading">
-            {localize(
-              this.parentEl_,
+          <h1
+            class="i-amphtml-story-info-heading"
+            i-amphtml-i18n-text-content={
               LocalizedStringId_Enum.AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL
-            )}
-          </h1>
+            }
+          ></h1>
           <a class="i-amphtml-story-info-link" href={canonicalUrl}>
             {
               // Add zero-width space character (\u200B) after "." and "/"
@@ -119,6 +120,7 @@ export class InfoDialog {
     this.initializeListeners_();
 
     return Promise.all([
+      localizeTemplate(this.element_, this.parentEl_),
       this.mutator_.mutateElement(this.parentEl_, () => {
         const root = createShadowRootWithStyle(<div />, this.element_, CSS);
         this.parentEl_.appendChild(root);
