@@ -2,8 +2,8 @@
     "$defs":{
        "https":{
           "type":"string",
-          "format":"uri",
-          "pattern":"^https://"
+          "format":"uri-reference",
+          "pattern":"(^\/\/|^https:|^localhost|^127.0.0.1|.localhost$)"
        }
     },
     "title":"Product",

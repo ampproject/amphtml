@@ -29,6 +29,7 @@ describes.realWin(
     let storeService;
     let pageElement;
     let shoppingAttachment;
+    const errorStringTagName = 'AMP-STORY-SHOPPING-CONFIG';
 
     const defaultInlineConfig = {
       'items': [
@@ -55,6 +56,8 @@ describes.realWin(
             'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
+          'productDetails':
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
         },
         {
           'productUrl': 'https://www.google.com',
@@ -62,20 +65,15 @@ describes.realWin(
           'productTitle': 'Abstract Art',
           'productVendor': 'V. Artsy',
           'productPrice': 1200.0,
-          'productPriceCurrency': 'JPY',
+          'productPriceCurrency': 'INR',
           'productImages': [
             {
               'url': 'https://source.unsplash.com/BdVQU-NDtA8/500x500',
               'alt': 'art',
             },
           ],
-          'aggregateRating': {
-            'ratingValue': 4.4,
-            'reviewCount': 89,
-            'reviewUrl': 'https://www.google.com',
-          },
           'productDetails':
-            'Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
         },
       ],
     };
@@ -196,16 +194,15 @@ describes.realWin(
         const requiredKey = 'productId';
         delete invalidConfig['items'][0][requiredKey];
 
-        const errorString = `Error: Field productId is required.`;
+        const errorString =
+          "pageId page1 items[0] Brass Lamp must have required property 'productId'";
+
         const spy = env.sandbox.spy(user(), 'warn');
         const keyedShoppingConfig = await createAmpStoryShoppingConfig(
           null,
           invalidConfig
         );
-        expect(spy).to.have.been.calledWith(
-          'AMP-STORY-SHOPPING-CONFIG',
-          errorString
-        );
+        expect(spy).to.have.been.calledWith(errorStringTagName, errorString);
         expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
         expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
       });
@@ -215,16 +212,15 @@ describes.realWin(
         const invalidValue = 50; // This value is not a string
         invalidConfig['items'][0]['productTitle'] = invalidValue;
 
-        const errorString = `Error: productTitle ${invalidValue} is not a string`;
+        const errorString =
+          'pageId page1 items[0] 50/productTitle must be string';
+
         const spy = env.sandbox.spy(user(), 'warn');
         const keyedShoppingConfig = await createAmpStoryShoppingConfig(
           null,
           invalidConfig
         );
-        expect(spy).to.have.been.calledWith(
-          'AMP-STORY-SHOPPING-CONFIG',
-          errorString
-        );
+        expect(spy).to.have.been.calledWith(errorStringTagName, errorString);
         expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
         expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
       });
@@ -234,16 +230,15 @@ describes.realWin(
         const invalidValue = 'two dozen watermelons'; // two dozen watermelons is not an actual price.
         invalidConfig['items'][0]['productPrice'] = invalidValue;
 
-        const errorString = `Error: Value ${invalidValue} for field productPrice is not a number`;
+        const errorString =
+          'pageId page1 items[0] Brass Lamp/productPrice must be number';
+
         const spy = env.sandbox.spy(user(), 'warn');
         const keyedShoppingConfig = await createAmpStoryShoppingConfig(
           null,
           invalidConfig
         );
-        expect(spy).to.have.been.calledWith(
-          'AMP-STORY-SHOPPING-CONFIG',
-          errorString
-        );
+        expect(spy).to.have.been.calledWith(errorStringTagName, errorString);
         expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
         expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
       });
@@ -253,16 +248,15 @@ describes.realWin(
         const invalidValue = 'ZABAN'; // This is not a valid currency symbol code
         invalidConfig['items'][0]['productPriceCurrency'] = invalidValue;
 
-        const errorString = `Error: productPriceCurrency ${invalidValue} is not a valid currency code`;
+        const errorString =
+          'pageId page1 items[0] Brass Lamp/productPriceCurrency must be a valid ISO 4217 currency code';
+
         const spy = env.sandbox.spy(user(), 'warn');
         const keyedShoppingConfig = await createAmpStoryShoppingConfig(
           null,
           invalidConfig
         );
-        expect(spy).to.have.been.calledWith(
-          'AMP-STORY-SHOPPING-CONFIG',
-          errorString
-        );
+        expect(spy).to.have.been.calledWith(errorStringTagName, errorString);
         expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
         expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
       });
@@ -272,15 +266,14 @@ describes.realWin(
         const invalidValue = 'http://zapp'; // This is not a valid url
         invalidConfig['items'][0]['productUrl'] = invalidValue;
 
-        const spy = env.sandbox.spy(url, 'assertHttpsUrl');
+        const spy = env.sandbox.spy(user(), 'warn');
         const keyedShoppingConfig = await createAmpStoryShoppingConfig(
           null,
           invalidConfig
         );
-        expect(spy).to.have.been.calledWith(
-          `${invalidValue}`,
-          'amp-story-shopping-config productUrl'
-        );
+        const errorString =
+          'pageId page1 items[0] Brass Lamp/productUrl must match pattern "(^//|^https:|^localhost|^127.0.0.1|.localhost$)"';
+        expect(spy).to.have.been.calledWith(errorStringTagName, errorString);
         expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
         expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
       });
