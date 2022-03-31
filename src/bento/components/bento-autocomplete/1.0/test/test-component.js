@@ -434,7 +434,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(areOptionsVisible(wrapper)).to.be.false;
     });
 
-    it('hides the options on escape and resets the text field to the original text', () => {
+    it('hides the options on escape and resets the selection state', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
           <input type="text"></input>
@@ -450,6 +450,14 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       expect(input.getDOMNode().value).to.equal('t');
       expect(areOptionsVisible(wrapper)).to.be.false;
+
+      // It should reset the active index
+      input.simulate('focus');
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+      input.simulate('keydown', {key: Keys_Enum.ENTER});
+
+      expect(input.getDOMNode().value).to.equal('two');
     });
 
     it('selects an option on click', () => {
@@ -801,7 +809,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(input.getDOMNode().value).to.equal('Seattle, WA');
     });
 
-    describe('disabled items', () => {
+    describe('templates with disabled items', () => {
       const items = [
         {
           city: 'City',

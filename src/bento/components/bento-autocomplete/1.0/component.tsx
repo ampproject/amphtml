@@ -253,10 +253,6 @@ export function BentoAutocomplete({
     }
   }, [displayResults, binding]);
 
-  const handleBlur = useCallback(() => {
-    hideResults();
-  }, [hideResults]);
-
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       switch (event.key) {
@@ -375,6 +371,7 @@ export function BentoAutocomplete({
         );
       }
       return cloneElement(component, {
+        'aria-disabled': isDisabled,
         'aria-selected': activeIndex === index,
         class: objStr({
           'autocomplete-item': true,
@@ -387,7 +384,6 @@ export function BentoAutocomplete({
         onClick: handleItemClick,
         part: 'option',
         role: 'option',
-        'aria-disabled': isDisabled,
         ...component.props,
       });
     },
@@ -415,13 +411,13 @@ export function BentoAutocomplete({
     inputRef.current?.addEventListener('input', handleInput);
     inputRef.current?.addEventListener('keydown', handleKeyDown);
     inputRef.current?.addEventListener('focus', handleFocus);
-    inputRef.current?.addEventListener('blur', handleBlur);
+    inputRef.current?.addEventListener('blur', hideResults);
 
     return () => {
       inputRef.current?.removeEventListener('input', handleInput);
       inputRef.current?.removeEventListener('keydown', handleKeyDown);
       inputRef.current?.removeEventListener('focus', handleFocus);
-      inputRef.current?.removeEventListener('blur', handleBlur);
+      inputRef.current?.removeEventListener('blur', hideResults);
     };
   }, [
     setupInputElement,
@@ -429,7 +425,7 @@ export function BentoAutocomplete({
     handleInput,
     handleKeyDown,
     handleFocus,
-    handleBlur,
+    hideResults,
     inputRef,
   ]);
 
