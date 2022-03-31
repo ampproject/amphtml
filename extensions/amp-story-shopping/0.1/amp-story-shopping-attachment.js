@@ -135,7 +135,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
         ? document.activeElement.tagName
         : 'AMP-STORY-SHOPPING-ATTACHMENT';
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
-    const activeProuductData = Object.values(shoppingData[this.pageEl_.id]);
+    const pageId = this.pageEl_.id;
+    const activeProuductData = Object.values(shoppingData[pageId]);
 
     if (activeProuductData.length === 1) {
       this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
@@ -148,23 +149,30 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
       if (activeProuductData.length === 1) {
         productId = activeProuductData[0].productId;
+
+        this.variableService_.onVariableUpdate(
+          AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+          productId
+        );
+
+        this.variableService_.onVariableUpdate(
+          AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
+          shoppingItemClicked.toLowerCase()
+        );
+
+        this.analyticsService_.triggerEvent(
+          StoryAnalyticsEvent.SHOPPING_PDP_VIEW
+        );
       } else if (productId === undefined) {
-        productId = 'products card listing page opened';
+        this.variableService_.onVariableUpdate(
+          AnalyticsVariable.STORY_PAGE_ID,
+          pageId
+        );
+
+        this.analyticsService_.triggerEvent(
+          StoryAnalyticsEvent.SHOPPING_PLP_VIEW
+        );
       }
-
-      this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
-        productId
-      );
-
-      this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_SHOPPING_ITEM_CLICKED,
-        shoppingItemClicked.toLowerCase()
-      );
-
-      this.analyticsService_.triggerEvent(
-        StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
-      );
     }
 
     if (!shoppingData.activeProductData) {
@@ -310,9 +318,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       'Product Card Clicked'
     );
 
-    this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
-    );
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_PDP_VIEW);
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
@@ -365,10 +371,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
       activeProductData.productId
-    );
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_SHOPPING_PRODUCT_URL,
-      activeProductData.productUrl
     );
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK,

@@ -70,14 +70,23 @@ export const buildGtagConfig = (gtagId) => ({
         'repeat': false,
       },
     },
-    'storyShoppingProductEngagement': {
-      'on': 'story-shopping-product-engagement',
+    'storyShoppingPLPView': {
+      'on': 'story-shopping-plp-view',
       'vars': {
         'event_name': 'custom',
-        'event_action': 'story_shopping_product_engagement',
+        'event_action': 'story_shopping_plp_view',
         'event_category': '${title}',
-        'event_label':
-          'product id: ${storyShoppingProductId}, button clicked: ${storyShoppingItemClicked}, page id: ${storyPageId}',
+        'event_label': 'page id: ${storyPageId}',
+        'send_to': [gtagId],
+      },
+    },
+    'storyShoppingPDPView': {
+      'on': 'story-shopping-pdp-view',
+      'vars': {
+        'event_name': 'custom',
+        'event_action': 'story_shopping_pdp_view',
+        'event_category': '${title}',
+        'event_label': 'product id: ${storyShoppingProductId}',
         'send_to': [gtagId],
       },
     },
@@ -87,8 +96,7 @@ export const buildGtagConfig = (gtagId) => ({
         'event_name': 'custom',
         'event_action': 'story_shopping_buy_now_click',
         'event_category': '${title}',
-        'event_label':
-          'product id: ${storyShoppingProductId}, product url: ${storyShoppingProductUrl}',
+        'event_label': 'product id: ${storyShoppingProductId}',
         'send_to': [gtagId],
       },
     },

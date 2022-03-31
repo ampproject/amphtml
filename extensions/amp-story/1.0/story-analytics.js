@@ -28,7 +28,8 @@ export const StoryAnalyticsEvent = {
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
   SHOPPING_BUY_NOW_CLICK: 'story-shopping-buy-now-click',
-  SHOPPING_PRODUCT_ENGAGEMENT: 'story-shopping-product-engagement',
+  SHOPPING_PLP_VIEW: 'story-shopping-plp-view',
+  SHOPPING_PDP_VIEW: 'story-shopping-pdp-view',
 };
 
 /**
