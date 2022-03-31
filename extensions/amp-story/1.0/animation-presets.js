@@ -27,6 +27,8 @@ const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** @const {string} */
 const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
 /** @const {string} */
+const SCALING_RATIO_ATTRIBUTE_NAME = 'scaling-ratio';
+/** @const {string} */
 const DEFAULT_CURVE = '0.4, 0.4, 0.0, 1';
 
 /** @const {!Array<string>} */
@@ -35,6 +37,7 @@ export const PRESET_OPTION_ATTRIBUTES = [
   SCALE_END_ATTRIBUTE_NAME,
   TRANSLATE_X_ATTRIBUTE_NAME,
   TRANSLATE_Y_ATTRIBUTE_NAME,
+  SCALING_RATIO_ATTRIBUTE_NAME,
 ];
 
 /**
@@ -285,7 +288,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions, true);
+      const scalingFactor =
+        calculateTargetScalingFactor(dimensions, true) *
+        (options[SCALING_RATIO_ATTRIBUTE_NAME] ?? 1);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -307,7 +312,9 @@ export const presets = {
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
 
-      const scalingFactor = calculateTargetScalingFactor(dimensions, true);
+      const scalingFactor =
+        calculateTargetScalingFactor(dimensions, true) *
+        (options[SCALING_RATIO_ATTRIBUTE_NAME] ?? 1);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -328,7 +335,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions, false);
+      const scalingFactor =
+        calculateTargetScalingFactor(dimensions, false) *
+        (options[SCALING_RATIO_ATTRIBUTE_NAME] ?? 1);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -349,7 +358,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions, false);
+      const scalingFactor =
+        calculateTargetScalingFactor(dimensions, false) *
+        (options[SCALING_RATIO_ATTRIBUTE_NAME] ?? 1);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
