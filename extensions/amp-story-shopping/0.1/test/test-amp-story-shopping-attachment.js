@@ -40,7 +40,7 @@ describes.realWin(
           productUrl: 'https://www.google.com',
           productId: 'lamp',
           productTitle: 'Brass Lamp',
-          productVendor: 'Lamp Co',
+          productBrand: 'Lamp Co',
           productPrice: 799.0,
           productPriceCurrency: 'USD',
           productImages: [
@@ -63,7 +63,7 @@ describes.realWin(
           productUrl: 'https://www.google.com',
           productId: 'art',
           productTitle: 'Abstract Art',
-          productVendor: 'V. Artsy',
+          productBrand: 'V. Artsy',
           productPrice: 1200.0,
           productPriceCurrency: 'INR',
           productImages: [
