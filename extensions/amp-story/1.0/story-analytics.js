@@ -30,6 +30,7 @@ export const StoryAnalyticsEvent = {
   SHOPPING_BUY_NOW_CLICK: 'story-shopping-buy-now-click',
   SHOPPING_PLP_VIEW: 'story-shopping-plp-view',
   SHOPPING_PDP_VIEW: 'story-shopping-pdp-view',
+  SHOPPING_TAG_CLICK: 'story-shopping-tag-click',
 };
 
 /**
