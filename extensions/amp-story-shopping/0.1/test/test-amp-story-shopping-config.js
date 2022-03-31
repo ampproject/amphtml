@@ -45,6 +45,8 @@ describes.realWin(
             'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
+          'productDetails':
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
         },
         {
           'productUrl': 'https://www.google.com',
@@ -86,6 +88,8 @@ describes.realWin(
             'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
+          'productDetails':
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
         },
         {
           'productUrl': 'https://www.google.com',
@@ -107,6 +111,8 @@ describes.realWin(
             'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
+          'productDetails':
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
         },
       ],
     };
