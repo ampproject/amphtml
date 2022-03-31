@@ -285,7 +285,7 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor = calculateTargetScalingFactor(dimensions, true);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -307,7 +307,7 @@ export const presets = {
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
 
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor = calculateTargetScalingFactor(dimensions, true);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -328,7 +328,7 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor = calculateTargetScalingFactor(dimensions, false);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -349,7 +349,7 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      const scalingFactor = calculateTargetScalingFactor(dimensions, false);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 

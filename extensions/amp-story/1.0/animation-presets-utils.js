@@ -75,24 +75,20 @@ export function targetFitsWithinPage(dimensions) {
 
 /**
  * Calculate target scaling factor so that it is at least 25% larger than the
- * page.
+ * page in the direction required, and matches the size of the other direction.
  * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
+ * @param {=boolean} horizontal whether the direction of the 25% padding is horizontal or not (vertical).
  * @return {number}
  */
-export function calculateTargetScalingFactor(dimensions) {
-  if (targetFitsWithinPage(dimensions)) {
-    const scalingFactor = 1.25;
-    const widthFactor =
-      dimensions.pageWidth > dimensions.targetWidth
-        ? dimensions.pageWidth / dimensions.targetWidth
-        : 1;
-    const heightFactor =
-      dimensions.pageHeight > dimensions.targetHeight
-        ? dimensions.pageHeight / dimensions.targetHeight
-        : 1;
-    return Math.max(widthFactor, heightFactor) * scalingFactor;
-  }
-  return 1;
+export function calculateTargetScalingFactor(dimensions, horizontal = true) {
+  const scalingFactors = [horizontal ? 1.25 : 1, horizontal ? 1 : 1.25];
+
+  const widthFactor = dimensions.pageWidth / dimensions.targetWidth;
+  const heightFactor = dimensions.pageHeight / dimensions.targetHeight;
+  return Math.max(
+    widthFactor * scalingFactors[0],
+    heightFactor * scalingFactors[1]
+  );
 }
 
 /**
