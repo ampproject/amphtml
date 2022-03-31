@@ -1,4 +1,5 @@
 import * as Preact from '#preact';
+import {xhrUtils} from '#preact/utils/xhr';
 
 import {BentoAutocomplete} from '../component';
 
@@ -83,5 +84,17 @@ withCustomItems.args = {
         {emoji} {city}, {state}
       </div>
     );
+  },
+};
+
+// eslint-disable-next-line local/no-export-side-effect
+export const withDataFromApi = _default.bind({});
+
+withDataFromApi.args = {
+  items: null,
+  src: 'https://datausa.io/api/data?drilldowns=State&measures=Population&year=latest',
+  fetchJson: (src) => xhrUtils.fetchJson(src),
+  parseJson: (json) => {
+    return json.data.map((v) => v.State);
   },
 };

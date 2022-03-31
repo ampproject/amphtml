@@ -16,12 +16,13 @@ import {
   useState,
 } from '#preact';
 import {ContainWrapper} from '#preact/component';
+import {xhrUtils} from '#preact/utils/xhr';
 
 import fuzzysearch from '#third_party/fuzzysearch';
 
 import {useStyles} from './component.jss';
-import {DEFAULT_ON_ERROR, TAG} from './constants';
-import {getItemElement, getResults, getTextValue} from './helpers';
+import {DEFAULT_ON_ERROR, DEFAULT_PARSE_JSON, TAG} from './constants';
+import {getEnabledResults, getItemElement, getTextValue} from './helpers';
 import {tokenPrefixMatch} from './token-prefix-match';
 import {
   BentoAutocompleteProps,
@@ -34,6 +35,79 @@ import {useAutocompleteBinding} from './use-autocomplete-binding';
 
 const INITIAL_ACTIVE_INDEX = -1;
 
+const noop = () => {};
+
+type SuccessState<TData> = {
+  loading: false;
+  data: TData;
+  error: undefined;
+};
+
+type ErrorState = {
+  loading: false;
+  data: undefined;
+  error: Error;
+};
+
+type LoadingState<TData> = {
+  loading: true;
+  data: TData | undefined;
+  error: undefined;
+};
+
+type InitialState<TData> = {
+  loading: false;
+  data: TData;
+  error: undefined;
+};
+
+type QueryState<TData = unknown> =
+  | SuccessState<TData>
+  | ErrorState
+  | LoadingState<TData>
+  | InitialState<TData>;
+
+const DEFAULT_STATE_VALUES = {
+  loading: false,
+  error: undefined,
+};
+
+type QueryConfig<TData = unknown> = {
+  initialData: TData;
+  enabled?: boolean;
+  onSettled?: (data: TData | undefined, error: Error | undefined) => void;
+};
+
+function useQuery<TData>(
+  queryFn: () => Promise<TData>,
+  {enabled, initialData, onSettled = noop}: QueryConfig<TData>
+) {
+  const [state, setState] = useState<QueryState<TData>>({
+    ...DEFAULT_STATE_VALUES,
+    data: initialData,
+  });
+
+  const fetchQueryData = useCallback(async () => {
+    setState((s) => ({...s, error: undefined, loading: true}));
+    try {
+      const data = await queryFn();
+      setState((s) => ({...s, error: undefined, loading: false, data}));
+    } catch (error) {
+      setState((s) => ({...s, data: undefined, loading: false, error}));
+    } finally {
+      onSettled(state.data, state.error);
+    }
+  }, [onSettled, queryFn, state]);
+
+  useEffect(() => {
+    if (enabled) {
+      fetchQueryData();
+    }
+  }, [enabled, fetchQueryData]);
+
+  return state;
+}
+
 /**
  * @param {!BentoAutocomplete.Props} props
  * @return {PreactDef.Renderable}
@@ -44,13 +118,16 @@ export function BentoAutocomplete({
   onError = DEFAULT_ON_ERROR,
   filter = 'none',
   minChars = 1,
-  items: data = [],
+  items = [],
+  fetchJson = xhrUtils.fetchJson,
   filterValue = 'value',
   maxItems,
   highlightUserEntry = false,
   inline,
   itemTemplate,
+  parseJson = DEFAULT_PARSE_JSON,
   suggestFirst = false,
+  src,
 }: BentoAutocompleteProps) {
   const elementRef = useRef<HTMLElement>(null);
   const containerId = useRef<string>(
@@ -66,8 +143,26 @@ export function BentoAutocomplete({
   const [shouldSuggestFirst, setShouldSuggestFirst] =
     useState<boolean>(suggestFirst);
   const classes = useStyles();
+  const [shouldFetchItems, setShouldFetchItems] = useState(false);
 
   const binding = useAutocompleteBinding(inline);
+
+  const {data} = useQuery<Item[]>(
+    async () => {
+      const response = await fetchJson(src!);
+      return parseJson(response);
+    },
+    {
+      enabled: !!src && shouldFetchItems,
+      initialData: items,
+      onSettled: (_data, error) => {
+        if (error) {
+          onError(error.message);
+        }
+        setShouldFetchItems(false);
+      },
+    }
+  );
 
   const toggleResults = useCallback((shouldDisplay: boolean) => {
     inputRef.current?.setAttribute('aria-expanded', shouldDisplay.toString());
@@ -149,7 +244,7 @@ export function BentoAutocomplete({
   }, [data, substring, minChars, areResultsDisplayed]);
 
   const truncateToMaxItems = useCallback(
-    (data: Item[]) => {
+    (data: Item[] = []) => {
       if (maxItems && maxItems < data.length) {
         return data.slice(0, maxItems);
       }
@@ -160,12 +255,12 @@ export function BentoAutocomplete({
 
   const filteredData = useMemo(() => {
     if (filter === 'none') {
-      return truncateToMaxItems(data);
+      return truncateToMaxItems(data || []);
     }
 
     const normalizedValue = substring.toLocaleLowerCase();
 
-    const _filteredData = data.filter((item: Item) => {
+    const _filteredData = data?.filter((item: Item) => {
       if (typeof item === 'object') {
         item = getValueForExpr(item, filterValue);
       }
@@ -199,7 +294,7 @@ export function BentoAutocomplete({
 
   const updateActiveItem = useCallback(
     (delta: number) => {
-      const results = getResults(elementRef.current);
+      const results = getEnabledResults(elementRef.current);
       if (delta === 0 || !showAutocompleteResults) {
         return;
       }
@@ -230,18 +325,22 @@ export function BentoAutocomplete({
   }, [toggleResults]);
 
   const maybeFetchAndAutocomplete = useCallback(
-    (element: InputElement) => {
-      const substring = binding.getUserInputForUpdate(element);
-      setSubstring(substring);
+    async (element: InputElement) => {
+      const isFirstInteraction =
+        substring.length === 0 && element.value.length === 1;
+      setShouldFetchItems(isFirstInteraction);
+
+      const _substring = binding.getUserInputForUpdate(element);
+      setSubstring(_substring);
       displayResults();
     },
-    [binding, displayResults]
+    [binding, displayResults, substring]
   );
 
   const handleInput = useCallback(
-    (event: Event) => {
+    async (event: Event) => {
       if (binding.shouldAutocomplete(event.target as InputElement)) {
-        maybeFetchAndAutocomplete(event.target as InputElement);
+        return await maybeFetchAndAutocomplete(event.target as InputElement);
       }
     },
     [binding, maybeFetchAndAutocomplete]

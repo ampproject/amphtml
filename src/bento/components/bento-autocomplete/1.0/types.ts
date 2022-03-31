@@ -30,6 +30,9 @@ export interface BentoAutocompleteProps {
   inline?: string;
   itemTemplate?: (item: Item) => Component<any, any>;
   suggestFirst?: boolean;
+  src?: string;
+  fetchJson?: (src: string) => Promise<Item[]>;
+  parseJson?: (response: any) => Item[];
 }
 
 export type InputElement = HTMLInputElement | HTMLTextAreaElement;

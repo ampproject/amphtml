@@ -4,6 +4,9 @@ import {mount} from 'enzyme';
 import {Keys_Enum} from '#core/constants/key-codes';
 
 import * as Preact from '#preact';
+import {xhrUtils} from '#preact/utils/xhr';
+
+import {waitFor} from '#testing/helpers/service';
 
 import {areOptionsVisible} from './test-helpers';
 
@@ -27,9 +30,25 @@ function Autocomplete(initialProps) {
 
 describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
   let onError;
+  let fetchJson;
   beforeEach(() => {
     onError = env.sandbox.spy();
+
+    fetchJson = env.sandbox
+      .stub(xhrUtils, 'fetchJson')
+      .resolves({items: ['one', 'two', 'three']});
   });
+
+  async function waitForData(component, callCount = 1) {
+    await waitFor(
+      () => fetchJson.callCount === callCount,
+      'expected fetchJson to have been called' +
+        (callCount > 1 ? ` ${callCount} times` : '')
+    );
+    // Ensure everything has settled:
+    await new Promise((r) => setTimeout(r, 0));
+    component.update();
+  }
 
   it('requires a single input or textarea descendant', () => {
     mount(<Autocomplete onError={onError}></Autocomplete>);
@@ -901,5 +920,35 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         expect(areOptionsVisible(wrapper)).to.be.false;
       });
     });
+  });
+
+  describe('fetching items', async () => {
+    it('does not fetch items on initial render', async () => {
+      const wrapper = mount(
+        <Autocomplete id="id" src="/items.json">
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      await waitForData(wrapper, 0);
+
+      expect(fetchJson).to.have.callCount(0);
+    });
+
+    // it('fetches on first interaction if a src is provided', async () => {
+    //   const wrapper = mount(
+    //     <Autocomplete id="id" src="/items.json">
+    //       <input type="text"></input>
+    //     </Autocomplete>
+    //   );
+
+    //   const input = wrapper.find('input');
+    //   input.getDOMNode().value = 'o';
+    //   input.simulate('input');
+
+    //   await waitForData(wrapper);
+
+    //   expect(fetchJson).calledWith('/items.json');
+    // });
   });
 });
