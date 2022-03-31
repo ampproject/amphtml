@@ -42,7 +42,7 @@ export const DrawerState = {
 const renderDrawerElement = () => {
   return (
     <div class="i-amphtml-story-draggable-drawer">
-      <div class="i-amphtml-story-draggable-drawer-container" hidden>
+      <div class="i-amphtml-story-draggable-drawer-container">
         <div class="i-amphtml-story-draggable-drawer-content"></div>
       </div>
     </div>
@@ -137,7 +137,6 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.containerEl = dev().assertElement(
       templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
     );
-
     this.contentEl = dev().assertElement(
       this.containerEl.querySelector(
         '.i-amphtml-story-draggable-drawer-content'
@@ -182,11 +181,7 @@ export class DraggableDrawer extends AMP.BaseElement {
         Services.ownersForDoc(this.element).setOwner(el, this.element);
       }
     }
-
-    // `containerEl` is hidden by default, to ensure that its content is not
-    // rendered/loaded by the AMP Resources manager before we can set a 
-    // different owner. Now that the owner has been set, we can unhide it.
-    toggle(dev().assertElement(this.containerEl), true);
+    return Promise.resolve();
   }
 
   /**
