@@ -134,5 +134,14 @@ describes.realWin(
         StoryAnalyticsEvent.SHOPPING_PDP_VIEW
       );
     });
+
+    it('should call analytics service on tag click', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+      await setupShoppingTagAndData();
+      await shoppingTag.shoppingTagEl_.click();
+      expect(trigger).to.have.been.calledWith(
+        StoryAnalyticsEvent.SHOPPING_TAG_CLICK
+      );
+    });
   }
 );
