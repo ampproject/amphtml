@@ -212,26 +212,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   /**
    * @private
    */
-  getGrantStatusAndUpdateState_() {
-    this.subscriptionService_.getGrantStatus().then((granted) => {
-      this.handleGrantStatusUpdate_(granted);
-    });
-  }
-
-  /**
-   * @param {boolean} granted
-   * @private
-   */
-  handleGrantStatusUpdate_(granted) {
-    const state = granted
-      ? SubscriptionsState.GRANTED
-      : SubscriptionsState.BLOCKED;
-    this.storeService_.dispatch(Action.TOGGLE_SUBSCRIPTIONS_STATE, state);
-  }
-
-  /**
-   * @private
-   */
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
