@@ -248,7 +248,7 @@ describes.realWin(
       plpCard.dispatchEvent(new Event('click'));
 
       expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
+        StoryAnalyticsEvent.SHOPPING_PDP_VIEW
       );
     });
 
@@ -276,7 +276,7 @@ describes.realWin(
         .dispatchEvent(new Event('click'));
 
       expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
+        StoryAnalyticsEvent.SHOPPING_PDP_VIEW
       );
     });
   }

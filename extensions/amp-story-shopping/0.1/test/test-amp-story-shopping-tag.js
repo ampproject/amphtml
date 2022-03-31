@@ -131,7 +131,7 @@ describes.realWin(
       await setupShoppingTagAndData();
       await shoppingTag.shoppingTagEl_.click();
       expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.SHOPPING_PRODUCT_ENGAGEMENT
+        StoryAnalyticsEvent.SHOPPING_PDP_VIEW
       );
     });
   }
