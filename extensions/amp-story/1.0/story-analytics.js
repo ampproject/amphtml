@@ -8,7 +8,7 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {getVariableService} from './variable-service';
 
-import {registerServiceBuilder} from '../../../src/service-helpers';
+import {getAmpdoc, registerServiceBuilder} from '../../../src/service-helpers';
 
 /** @const {string} */
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
@@ -127,11 +127,15 @@ export class StoryAnalyticsService {
   triggerEvent(eventType, element = null) {
     this.incrementPageEventCount_(eventType);
 
-    triggerAnalyticsEvent(
-      this.element_,
-      eventType,
-      this.updateDetails(eventType, element)
-    );
+    getAmpdoc(this.element_)
+      .whenFirstVisible()
+      .then(() =>
+        triggerAnalyticsEvent(
+          this.element_,
+          eventType,
+          this.updateDetails(eventType, element)
+        )
+      );
   }
 
   /**
