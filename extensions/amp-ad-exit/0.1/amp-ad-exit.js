@@ -206,6 +206,7 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_X': true,
       'CLICK_Y': true,
       'RANDOM': true,
+      'UACH': true,
     };
     if (target['vars']) {
       for (const customVarName in target['vars']) {

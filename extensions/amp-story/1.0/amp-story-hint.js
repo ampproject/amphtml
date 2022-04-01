@@ -3,7 +3,7 @@ import * as Preact from '#core/dom/jsx';
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
-import {localize} from './amp-story-localization-service';
+import {localizeTemplate} from './amp-story-localization-service';
 import {
   EmbeddedComponentState,
   StateProperty,
@@ -15,10 +15,9 @@ import {createShadowRootWithStyle} from './utils';
 import {CSS} from '../../../build/amp-story-hint-1.0.css';
 
 /**
- * @param {!Element} element
  * @return {!Element}
  */
-const renderHintElement = (element) => (
+const renderHintElement = () => (
   <aside
     class={
       'i-amphtml-story-hint-container ' +
@@ -31,12 +30,12 @@ const renderHintElement = (element) => (
           <div class="i-amphtml-story-hint-tap-button">
             <div class="i-amphtml-story-hint-tap-button-icon" />
           </div>
-          <div class="i-amphtml-story-hint-tap-button-text">
-            {localize(
-              element,
+          <div
+            class="i-amphtml-story-hint-tap-button-text"
+            i-amphtml-i18n-text-content={
               LocalizedStringId_Enum.AMP_STORY_HINT_UI_PREVIOUS_LABEL
-            )}
-          </div>
+            }
+          ></div>
         </div>
       </div>
       <div class="i-amphtml-story-navigation-help-section next-page">
@@ -44,12 +43,12 @@ const renderHintElement = (element) => (
           <div class="i-amphtml-story-hint-tap-button">
             <div class="i-amphtml-story-hint-tap-button-icon" />
           </div>
-          <div class="i-amphtml-story-hint-tap-button-text">
-            {localize(
-              element,
+          <div
+            class="i-amphtml-story-hint-tap-button-text"
+            i-amphtml-i18n-text-content={
               LocalizedStringId_Enum.AMP_STORY_HINT_UI_NEXT_LABEL
-            )}
-          </div>
+            }
+          ></div>
         </div>
       </div>
     </div>
@@ -107,9 +106,14 @@ export class AmpStoryHint {
       return;
     }
 
-    this.hintContainer_ = renderHintElement(this.parentEl_);
+    this.hintContainer_ = renderHintElement();
 
-    const root = createShadowRootWithStyle(<div />, this.hintContainer_, CSS);
+    localizeTemplate(this.hintContainer_, this.parentEl_).then(() => {
+      const root = createShadowRootWithStyle(<div />, this.hintContainer_, CSS);
+      this.vsync_.mutate(() => {
+        this.parentEl_.appendChild(root);
+      });
+    });
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
@@ -136,10 +140,6 @@ export class AmpStoryHint {
         );
       }
     );
-
-    this.vsync_.mutate(() => {
-      this.parentEl_.appendChild(root);
-    });
   }
 
   /**
