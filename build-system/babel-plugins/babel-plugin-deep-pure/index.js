@@ -2,11 +2,6 @@ const pureFnName = 'pure';
 
 /** @return {import('@babel/core').PluginObj} */
 module.exports = function () {
-  /** @param {import('@babel/core').NodePath} path */
-  function setIsPure(path) {
-    path.addComment('leading', ' #__PURE__ ');
-  }
-
   /**
    * @param {import('@babel/core').NodePath<import('@babel/types').CallExpression>} path
    * @return {boolean}
@@ -18,18 +13,30 @@ module.exports = function () {
     );
   }
 
+  /** @param {import('@babel/core').NodePath} path */
+  function addPureComment(path) {
+    path.addComment('leading', ' #__PURE__ ');
+  }
+
+  /** @param {import('@babel/core').NodePath<import('@babel/types').CallExpression>} path */
+  function replaceWithFirstArgument(path) {
+    path.replaceWith(path.node.arguments[0]);
+  }
+
   return {
     name: 'deep-pure',
     visitor: {
       CallExpression(path) {
         if (isPureFnCallExpression(path)) {
           path.traverse({
-            NewExpression: setIsPure,
+            NewExpression(path) {
+              addPureComment(path);
+            },
             CallExpression(path) {
               if (isPureFnCallExpression(path)) {
-                path.replaceWith(path.node.arguments[0]);
+                replaceWithFirstArgument(path);
               } else {
-                setIsPure(path);
+                addPureComment(path);
               }
             },
             MemberExpression(path) {
@@ -38,7 +45,7 @@ module.exports = function () {
               );
             },
           });
-          path.replaceWith(path.node.arguments[0]);
+          replaceWithFirstArgument(path);
         }
       },
     },
