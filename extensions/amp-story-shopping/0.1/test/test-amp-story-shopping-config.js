@@ -272,7 +272,7 @@ describes.realWin(
           invalidConfig
         );
         const errorString =
-          'pageId page1 items[0] Brass Lamp/productUrl must match pattern "(^//|^https:|^localhost|^127.0.0.1|.localhost$)"';
+          'pageId page1 items[0] Brass Lamp/productUrl must match pattern "^(/|https://|https?://(127.0.0.1|([^/]+\\.)?localhost)(:[0-9]+)?/)"';
         expect(spy).to.have.been.calledWith(errorStringTagName, errorString);
         expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
         expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
