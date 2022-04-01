@@ -88,7 +88,7 @@ export let InteractiveReactData;
  * @typedef {{
  *   productId: string,
  *   productTitle: string,
- *   productVendor: string,
+ *   productBrand: string,
  *   productPrice: number,
  *   productPriceCurrency: string,
  *   productIcon: string,
