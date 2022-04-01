@@ -282,8 +282,7 @@ export function BentoAutocomplete({
 
   const resetUserInput = useCallback(() => {
     setInputValue(substring);
-    hideResults();
-  }, [substring, hideResults, setInputValue]);
+  }, [substring, setInputValue]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -311,6 +310,7 @@ export function BentoAutocomplete({
         }
         case Keys_Enum.ESCAPE: {
           resetUserInput();
+          hideResults();
           break;
         }
         case Keys_Enum.TAB: {
@@ -322,7 +322,7 @@ export function BentoAutocomplete({
     [activeIndex, filteredData, updateActiveItem, resetUserInput, hideResults]
   );
 
-  const handleItemClick = useCallback(
+  const selectItem = useCallback(
     (event: MouseEvent) => {
       const element = getItemElement(event.target as HTMLElement);
       if (!element?.hasAttribute('data-disabled')) {
@@ -351,7 +351,6 @@ export function BentoAutocomplete({
         return (
           <>
             {item.slice(0, substringStart)}
-            {/* TODO: Add JSS style */}
             <span class="autocomplete-partial">
               {item.slice(substringStart, substringEnd)}
             </span>
@@ -364,6 +363,9 @@ export function BentoAutocomplete({
         substring.length <= item.length &&
         filter === 'fuzzy'
       ) {
+        // This will create a separate span for each character in the substring.
+        // This isn't ideal for every match, but it enables highlighting for fuzzy
+        // matches.
         const lowerCaseSubstring = substring.toLocaleLowerCase();
         return (
           <>
@@ -415,7 +417,8 @@ export function BentoAutocomplete({
         dir: 'auto',
         id: getItemId(index),
         key: item,
-        onClick: handleItemClick,
+        // unlike onClick, onMouseDown overrides the blur event handler
+        onMouseDown: selectItem,
         part: 'option',
         role: 'option',
         ...component.props,
@@ -426,7 +429,7 @@ export function BentoAutocomplete({
       getItemId,
       activeIndex,
       classes,
-      handleItemClick,
+      selectItem,
       getItemChildren,
       onError,
     ]

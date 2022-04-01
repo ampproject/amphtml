@@ -13,7 +13,6 @@ import {areOptionsVisible} from './test-helpers';
 import {BentoAutocomplete} from '../component';
 
 // TODO
-// it selects an item on click (this is not working)
 // something with backspace (1357)
 
 // Maybe TODO
@@ -458,6 +457,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('keydown', {key: Keys_Enum.UP_ARROW});
 
       expect(input.getDOMNode().value).to.equal('t');
+      expect(areOptionsVisible(wrapper)).to.be.true;
     });
 
     it('hides the options on enter and sets the input to the selected item', () => {
@@ -522,7 +522,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(input.getDOMNode().value).to.equal('two');
     });
 
-    it('selects an option on click', () => {
+    it('selects an option on mouse down', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
           <input type="text"></input>
@@ -534,7 +534,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('input');
 
       const option = wrapper.find('[data-value="two"]');
-      option.simulate('click');
+      option.simulate('mousedown');
 
       expect(input.getDOMNode().value).to.equal('two');
       expect(areOptionsVisible(wrapper)).to.be.false;
@@ -557,7 +557,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('input');
 
       const span = wrapper.find('.autocomplete-partial');
-      span.simulate('click', {bubbles: true});
+      span.simulate('mousedown', {bubbles: true});
 
       expect(input.getDOMNode().value).to.equal('two');
       expect(areOptionsVisible(wrapper)).to.be.false;
@@ -823,7 +823,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       );
     });
 
-    it('sets the input value using the data-value attribute on click', () => {
+    it('sets the input value using the data-value attribute on mouse down', () => {
       const wrapper = mount(
         <Autocomplete
           id="id"
@@ -842,7 +842,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.getDOMNode().value = 'sea';
       input.simulate('input');
 
-      wrapper.find('[data-value="Seattle, WA"]').simulate('click');
+      wrapper.find('[data-value="Seattle, WA"]').simulate('mousedown');
 
       expect(input.getDOMNode().value).to.equal('Seattle, WA');
     });
@@ -939,7 +939,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         expect(input.getDOMNode().value).to.equal('Seattle, WA');
       });
 
-      it('does not select a disabled option on click', () => {
+      it('does not select a disabled option on mouse down', () => {
         const wrapper = mount(
           <Autocomplete
             id="id"
@@ -956,7 +956,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
         input.simulate('focus');
 
-        wrapper.find('[data-disabled=true]').simulate('click');
+        wrapper.find('[data-disabled=true]').simulate('mousedown');
 
         expect(input.getDOMNode().value).to.equal('');
 
