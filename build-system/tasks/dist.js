@@ -409,13 +409,10 @@ dist.flags = {
   esm: 'Do not transpile down to ES5',
   version_override: 'Override the version written to AMP_CONFIG',
   watch: 'Watch for changes in files, re-compiles when detected',
-  closure_concurrency: 'Set the number of concurrent invocations of closure',
   debug: 'Output the file contents during compilation lifecycles',
   define_experiment_constant:
     'Build runtime with the EXPERIMENT constant set to true',
   sanitize_vars_for_diff:
     'Sanitize the output to diff build results (requires --pseudo_names)',
   sxg: 'Output the minified code for the SxG build',
-  warning_level:
-    "Optionally set closure's warning level to one of [quiet, default, verbose]",
 };
