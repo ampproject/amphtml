@@ -93,9 +93,10 @@ export class AmpStoryVariableService {
       this.storeService_.get(StateProperty.PAGE_IDS)
     );
 
-    this.variables_[AnalyticsVariable.STORY_PAGE_COUNT] = pageIds.filter(
+    const numberOfPages = pageIds.filter(
       (id) => !id.startsWith('i-amphtml-ad-')
     ).length;
+    this.variables_[AnalyticsVariable.STORY_PAGE_COUNT] = numberOfPages;
 
     const pageId = /** @type {string} */ (
       this.storeService_.get(StateProperty.CURRENT_PAGE_ID)
@@ -118,14 +119,11 @@ export class AmpStoryVariableService {
     this.variables_[AnalyticsVariable.STORY_PAGE_INDEX] =
       pageIndex - adsBeforePage;
 
-    const numberOfPages = pageIds.length;
-    if (numberOfPages > 0) {
-      if (numberOfPages === 1) {
-        this.variables_[AnalyticsVariable.STORY_PROGRESS] = 0;
-      } else {
-        this.variables_[AnalyticsVariable.STORY_PROGRESS] =
-          pageIndex / (numberOfPages - 1);
-      }
+    if (numberOfPages === 1) {
+      this.variables_[AnalyticsVariable.STORY_PROGRESS] = 0;
+    } else if (numberOfPages > 1) {
+      this.variables_[AnalyticsVariable.STORY_PROGRESS] =
+        (pageIndex - adsBeforePage) / (numberOfPages - 1);
     }
   }
 

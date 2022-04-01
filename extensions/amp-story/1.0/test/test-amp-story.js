@@ -1053,7 +1053,7 @@ describes.realWin(
       describe('amp-story ads', () => {
         it('should return a valid page index', async () => {
           const adId = 'i-amphtml-ad-page-1';
-          await createStoryWithPages(4, [
+          const pageElements = await createStoryWithPages(4, [
             'cover',
             'page-1',
             'page-2',
@@ -1061,8 +1061,6 @@ describes.realWin(
           ]);
           await story.layoutCallback();
           // Getting all the AmpStoryPage objets.
-          const pageElements =
-            story.element.getElementsByTagName('amp-story-page');
           let pages = Array.from(pageElements).map((el) => el.getImpl());
 
           pages = await Promise.all(pages);
