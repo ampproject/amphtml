@@ -728,7 +728,6 @@ async function buildBentoExtensionJs(dir, name, options) {
     entryPoint,
     options.minify
   );
-  console.log({remapDependencies});
   await buildExtensionJs(dir, name, {
     ...options,
     externalDependencies: [...new Set(Object.values(remapDependencies))],
