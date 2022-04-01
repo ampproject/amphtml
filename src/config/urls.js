@@ -15,6 +15,16 @@ const env = (key) => (self.AMP_CONFIG ? self.AMP_CONFIG[key] : null);
  */
 const pure = (value) => value;
 
+/* Note that cdnProxyRegex is only ever checked against origins
+ * (proto://host[:port]) so does not need to consider path
+ */
+const cdnProxyRegex = pure(
+  (typeof env('cdnProxyRegex') == 'string'
+    ? new RegExp(env('cdnProxyRegex'))
+    : env('cdnProxyRegex')) ||
+    /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/
+);
+
 /**
  * Check for a custom URL definition in special <meta> tags. Note that this does
  * not allow for distinct custom URLs in AmpDocShadow instances. The shell is
@@ -56,16 +66,6 @@ const thirdPartyFrameRegex = pure(
 
 const cdn = pure(
   env('cdnUrl') || getMetaUrl('runtime-host') || 'https://cdn.ampproject.org'
-);
-
-/* Note that cdnProxyRegex is only ever checked against origins
- * (proto://host[:port]) so does not need to consider path
- */
-const cdnProxyRegex = pure(
-  (typeof env('cdnProxyRegex') == 'string'
-    ? new RegExp(env('cdnProxyRegex'))
-    : env('cdnProxyRegex')) ||
-    /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/
 );
 
 const localhostRegex = pure(/^https?:\/\/localhost(:\d+)?$/);
