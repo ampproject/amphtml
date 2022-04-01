@@ -178,9 +178,4 @@ export const EXPERIMENTS = [
     name: 'Disable animations on the first page that can artificially delay LCP reports',
     spec: 'https://github.com/ampproject/amphtml/pull/35356',
   },
-  {
-    id: 'story-load-inactive-outside-viewport',
-    name: 'Load inactive pages outside the viewport to prevent them from counting towards LCP when invisible',
-    spec: 'https://github.com/ampproject/amphtml/pull/35323',
-  },
 ];

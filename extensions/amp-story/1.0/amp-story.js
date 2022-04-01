@@ -436,7 +436,10 @@ export class AmpStory extends AMP.BaseElement {
       performanceService.addEnabledExperiment('story-link-css');
     }
 
-    if (isExperimentOn(this.win, 'story-load-inactive-outside-viewport')) {
+    if (
+      /* isExperimentOn(this.win, 'story-load-inactive-outside-viewport') // launched: true */
+      true
+    ) {
       performanceService.addEnabledExperiment(
         'story-load-inactive-outside-viewport'
       );
