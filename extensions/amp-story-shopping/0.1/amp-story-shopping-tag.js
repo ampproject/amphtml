@@ -175,7 +175,6 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       this.tagData_.productId
     );
 
-    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_PDP_VIEW);
     this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_TAG_CLICK);
   }
 

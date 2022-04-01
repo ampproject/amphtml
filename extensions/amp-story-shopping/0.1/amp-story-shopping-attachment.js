@@ -196,19 +196,11 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       productForPdp = shoppingDataPerPage[0];
     }
 
-    //pdp view
+    // pdp view that calls the analytics service sending the product id
     if (productForPdp) {
       this.variableService_.onVariableUpdate(
         AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
         productForPdp.productId
-      );
-    }
-    //plp view with more than one product on the page
-    else {
-      const pageId = this.pageEl_.id;
-      this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_PAGE_ID,
-        pageId
       );
     }
 
@@ -300,7 +292,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
       shoppingData?.productId
     );
-    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_PDP_VIEW);
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
@@ -344,14 +335,13 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * onclick event that fires when buy now is clicked,
-   * sends an analytics event containing product id and the conversion url.
+   * sends an analytics event containing product id.
    * @return {boolean}
    * @private
    */
   onClickBuyNow_() {
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK,
-      this.element
+      StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK
     );
   }
 
