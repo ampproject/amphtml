@@ -3,7 +3,7 @@ import {getHashParams} from '#core/types/string/url';
 
 import {loadPromise} from '#utils/event-helper';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 import {isModeDevelopment} from './mode';
 
 /**

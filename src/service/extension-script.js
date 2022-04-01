@@ -1,7 +1,7 @@
 import {propagateNonce} from '#core/dom';
 import * as mode from '#core/mode';
 
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {getMode} from '../mode';
 
 const CUSTOM_TEMPLATES = ['amp-mustache'];
