@@ -155,7 +155,7 @@ The `story-page-attachment-exit` trigger is fired when a page attachment is dism
 
 ### Story shopping product listing page view trigger (`"on": "story-shopping-plp-view"`)
 
-The `story-shopping-plp-view` trigger is fired when whenever amp-story-shopping-attachment displays the Product Listing Page without an active product.
+The `story-shopping-plp-view` trigger is fired when whenever `amp-story-shopping-attachment` displays the Product Listing Page without an active product.
 it will not fire when the Product Listing Page is viewed within the context of a Product Details Page.
 The event label will be the active page since there is no product associated with the Product Listing Page.
 
@@ -164,12 +164,12 @@ event label: active page id
 
 ### Story shopping product details page view trigger (`"on": "story-shopping-pdp-view"`)
 
-The `story-shopping-pdp-view` trigger is fired when whenever the amp-story-shopping-attachment displays the Product Details Page.
+The `story-shopping-pdp-view` trigger is fired when whenever the `amp-story-shopping-attachment` displays the Product Details Page.
 
 event action: story_shopping_pdp_view
 event label: active product id
 
-### Story shopping buy now click trigger (`"on": "story-shopping-buy-now-click"`)
+### Story shopping “Buy now” CTA button click trigger (`"on": "story-shopping-buy-now-click"`)
 
 The `story-shopping-buy-now-click` trigger is fired when whenever the “Buy now” cta button in the Product Description Page is clicked.
 

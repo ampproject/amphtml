@@ -237,7 +237,7 @@ describes.realWin(
       storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
     }
 
-    it('should call analytics service on PLP card click', async () => {
+    it('should call PDP view analytics event on PLP card click', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
       await layoutShoppingImplAndAttachmentChildImpl();
