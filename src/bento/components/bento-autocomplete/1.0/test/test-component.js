@@ -13,7 +13,7 @@ import {areOptionsVisible} from './test-helpers';
 import {BentoAutocomplete} from '../component';
 
 // TODO
-// it hides items on tab
+// it selects an item on click (this is not working)
 // something with backspace (1357)
 
 // Maybe TODO
@@ -419,6 +419,47 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         .true;
     });
 
+    it('updates the input value on arrow up', () => {
+      const wrapper = mount(
+        <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 't';
+      input.simulate('input');
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+
+      expect(input.getDOMNode().value).to.equal('three');
+
+      input.simulate('keydown', {key: Keys_Enum.UP_ARROW});
+
+      expect(input.getDOMNode().value).to.equal('two');
+    });
+
+    it('resets the input value if the user arrows up to the top', () => {
+      const wrapper = mount(
+        <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 't';
+      input.simulate('input');
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+
+      expect(input.getDOMNode().value).to.equal('two');
+
+      input.simulate('keydown', {key: Keys_Enum.UP_ARROW});
+
+      expect(input.getDOMNode().value).to.equal('t');
+    });
+
     it('hides the options on enter and sets the input to the selected item', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
@@ -432,6 +473,24 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
       input.simulate('keydown', {key: Keys_Enum.ENTER});
+
+      expect(input.getDOMNode().value).to.equal('two');
+      expect(areOptionsVisible(wrapper)).to.be.false;
+    });
+
+    it('hides the options on tab and sets the input to the selected item', () => {
+      const wrapper = mount(
+        <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 't';
+      input.simulate('input');
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+      input.simulate('keydown', {key: Keys_Enum.TAB});
 
       expect(input.getDOMNode().value).to.equal('two');
       expect(areOptionsVisible(wrapper)).to.be.false;
@@ -951,6 +1010,10 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       await waitForData(wrapper);
 
       expect(fetchJson).calledWith('/items.json').callCount(1);
+
+      expect(wrapper.exists('[data-value="one"]')).to.be.true;
+      expect(wrapper.exists('[data-value="two"]')).to.be.true;
+      expect(wrapper.exists('[data-value="three"]')).to.be.true;
     });
 
     it('can parse response data', async () => {

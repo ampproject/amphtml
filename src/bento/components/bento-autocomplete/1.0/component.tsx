@@ -280,17 +280,29 @@ export function BentoAutocomplete({
     }
   }, [displayResults, binding]);
 
+  const resetUserInput = useCallback(() => {
+    setInputValue(substring);
+    hideResults();
+  }, [substring, hideResults, setInputValue]);
+
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       switch (event.key) {
         case Keys_Enum.DOWN_ARROW: {
           event.preventDefault();
-          if (showAutocompleteResults) {
-            if (activeIndex === filteredData.length - 1) {
-              return;
-            }
-            updateActiveItem(1);
+          if (activeIndex === filteredData.length - 1) {
+            return;
           }
+          updateActiveItem(1);
+          break;
+        }
+        case Keys_Enum.UP_ARROW: {
+          event.preventDefault();
+          if (activeIndex === 0) {
+            resetUserInput();
+            return;
+          }
+          updateActiveItem(-1);
           break;
         }
         case Keys_Enum.ENTER: {
@@ -298,21 +310,16 @@ export function BentoAutocomplete({
           break;
         }
         case Keys_Enum.ESCAPE: {
-          setInputValue(substring);
+          resetUserInput();
+          break;
+        }
+        case Keys_Enum.TAB: {
           hideResults();
           break;
         }
       }
     },
-    [
-      showAutocompleteResults,
-      activeIndex,
-      filteredData,
-      updateActiveItem,
-      hideResults,
-      setInputValue,
-      substring,
-    ]
+    [activeIndex, filteredData, updateActiveItem, resetUserInput, hideResults]
   );
 
   const handleItemClick = useCallback(

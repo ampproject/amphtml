@@ -50,13 +50,17 @@ const DEFAULT_STATE_VALUES = {
 
 /**
  * Loads data asynchronously.
- * If `enabled` is true (default), then the `fetch` method is called when the component is mounted.
+ * If `enabled` is true (default), then the `fetch` method is called
+ * when the component is mounted.
+ * Note: This API mimics react-query, but does not include any caching.
  *
  * @example
  * const {data, error, loading} = useQuery(
  *  async () => await fetchJson('https://example.com/items'),
  *  {
  *   enabled: shouldFetchItems,
+ *   initialData: [],
+ *   onSettled: () => setShouldFetchItems(false)
  *  }
  * )
  */
