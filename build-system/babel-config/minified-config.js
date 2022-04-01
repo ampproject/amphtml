@@ -26,6 +26,7 @@ function getMinifiedConfig(buildFor = 'preact') {
 
   const plugins = [
     'optimize-objstr',
+    './build-system/babel-plugins/babel-plugin-deep-pure',
     './build-system/babel-plugins/babel-plugin-mangle-object-values',
     './build-system/babel-plugins/babel-plugin-jsx-style-object',
     getImportResolverPlugin(buildFor),
