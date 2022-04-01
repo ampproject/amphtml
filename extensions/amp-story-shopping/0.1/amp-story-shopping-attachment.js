@@ -136,39 +136,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
 
-    const shoppingItemClicked =
-      document.activeElement.tagName === 'AMP-STORY-SHOPPING-TAG'
-        ? document.activeElement.tagName
-        : 'AMP-STORY-SHOPPING-ATTACHMENT';
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
-    const pageId = this.pageEl_.id;
-    const activeProuductData = Object.values(shoppingData[pageId]);
-
-    if (activeProuductData.length === 1) {
-      this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-        'activeProductData': activeProuductData[0],
-      });
-    }
-
-    if (shoppingItemClicked === 'AMP-STORY-SHOPPING-ATTACHMENT') {
-      if (activeProuductData.length === 1) {
-        this.variableService_.onVariableUpdate(
-          AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
-          activeProuductData[0].productId
-        );
-        this.analyticsService_.triggerEvent(
-          StoryAnalyticsEvent.SHOPPING_PDP_VIEW
-        );
-      } else if (shoppingData?.activeProductData?.productId === undefined) {
-        this.variableService_.onVariableUpdate(
-          AnalyticsVariable.STORY_PAGE_ID,
-          pageId
-        );
-        this.analyticsService_.triggerEvent(
-          StoryAnalyticsEvent.SHOPPING_PLP_VIEW
-        );
-      }
-    }
 
     if (!shoppingData.activeProductData) {
       this.updateTemplate_(shoppingData);
@@ -227,6 +195,28 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (!productForPdp && shoppingDataPerPage.length === 1) {
       productForPdp = shoppingDataPerPage[0];
     }
+
+    //pdp view
+    if (productForPdp) {
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+        productForPdp.productId
+      );
+    }
+    //plp view with more than one product on the page
+    else {
+      const pageId = this.pageEl_.id;
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_PAGE_ID,
+        pageId
+      );
+    }
+
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent[
+        productForPdp ? 'SHOPPING_PDP_VIEW' : 'SHOPPING_PLP_VIEW'
+      ]
+    );
 
     // templateId string used to key already built templates.
     const templateId = productForPdp ? `pdp-${productForPdp.productId}` : 'plp';
@@ -355,15 +345,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /**
    * onclick event that fires when buy now is clicked,
    * sends an analytics event containing product id and the conversion url.
-   * @param {!ShoppingConfigDataDef} activeProductData
    * @return {boolean}
    * @private
    */
-  onClickBuyNow_(activeProductData) {
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
-      activeProductData.productId
-    );
+  onClickBuyNow_() {
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK,
       this.element
@@ -426,7 +411,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             class="i-amphtml-amp-story-shopping-pdp-cta"
             href={activeProductData.productUrl}
             target="_top"
-            onClick={() => this.onClickBuyNow_(activeProductData)}
+            onClick={() => this.onClickBuyNow_()}
             i-amphtml-i18n-text-content={
               LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL
             }
