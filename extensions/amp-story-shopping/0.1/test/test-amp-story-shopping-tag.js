@@ -126,15 +126,6 @@ describes.realWin(
       });
     });
 
-    it('should call analytics service on attachment state update', async () => {
-      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
-      await setupShoppingTagAndData();
-      await shoppingTag.shoppingTagEl_.click();
-      expect(trigger).to.have.been.calledWith(
-        StoryAnalyticsEvent.SHOPPING_PDP_VIEW
-      );
-    });
-
     it('should call analytics service on tag click', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
       await setupShoppingTagAndData();
