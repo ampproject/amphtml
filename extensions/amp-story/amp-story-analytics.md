@@ -2,31 +2,6 @@
 
 This document details triggers associated with AMP Stories. If you're looking for a guide to setting up analytics for your AMP pages, see [this blog post](https://blog.amp.dev/2019/08/28/analytics-for-your-amp-stories/)
 
-## Shopping triggers
-
-### story_shopping_plp_view
-
-Triggers whenever the template displays the Product Listing Page without an active product.
-Will not fire when the Product Listing Page is viewed within the context of a Product Details Page.
-The event label will be the active page since there is no product associated with the Product Listing Page.
-
-event action: story_shopping_plp_view
-event label: active page id
-
-### story_shopping_pdp_view
-
-Triggers whenever the template displays the Product Details Page.
-
-event action: story_shopping_pdp_view
-event label: active product id
-
-### story_shopping_buy_now_click
-
-Triggers when the “Buy now” cta button is clicked”.
-
-event action: story_shopping_buy_now_click
-event label: active product id
-
 ## Story triggers
 
 `amp-story` issues events for changes of state. These events can be reported through the analytics configuration by using triggers.
@@ -177,6 +152,29 @@ The `story-page-attachment-enter` trigger is fired when a page attachment is ope
 ### Page attachment exit trigger (`"on": "story-page-attachment-exit"`)
 
 The `story-page-attachment-exit` trigger is fired when a page attachment is dismissed by the user.
+
+### Story shopping product listing page view trigger (`"on": "story-shopping-plp-view"`)
+
+Triggers whenever amp-story-shopping-attachment displays the Product Listing Page without an active product.
+Will not fire when the Product Listing Page is viewed within the context of a Product Details Page.
+The event label will be the active page since there is no product associated with the Product Listing Page.
+
+event action: story_shopping_plp_view
+event label: active page id
+
+### Story shopping product details page view trigger (`"on": "story-shopping-pdp-view"`)
+
+Triggers whenever amp-story-shopping-attachment displays the Product Details Page.
+
+event action: story_shopping_pdp_view
+event label: active product id
+
+### Story shopping buy now click trigger (`"on": "story-shopping-buy-now-click"`)
+
+Triggers when the “Buy now” cta button in the Product Description Page is clicked.
+
+event action: story_shopping_buy_now_click
+event label: active product id
 
 ## Variables as data attribute
 
