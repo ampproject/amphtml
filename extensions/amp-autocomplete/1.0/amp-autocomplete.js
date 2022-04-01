@@ -1,8 +1,12 @@
-import {BaseElement} from './base-element';
-import {CSS} from '../../../build/amp-autocomplete-1.0.css';
+import {BaseElement} from '#bento/components/bento-autocomplete/1.0/base-element';
+
 import {isExperimentOn} from '#experiments';
+
 import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {userAssert} from '#utils/log';
+
+import {CSS} from '../../../build/amp-autocomplete-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-autocomplete';
@@ -10,14 +14,8 @@ const TAG = 'amp-autocomplete';
 class AmpAutocomplete extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
-    // DO NOT SUBMIT: This is example code only.
-    this.registerApiAction('exampleToggle', (api) =>
-      api./*OK*/ exampleToggle()
-    );
-
     return {
       // Extra props passed by wrapper AMP component
-      exampleTagNameProp: this.element.tagName,
     };
   }
 

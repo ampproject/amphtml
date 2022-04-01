@@ -1,6 +1,7 @@
-import {CSS as COMPONENT_CSS} from './component.jss';
-import {BentoAutocomplete} from './component';
 import {PreactBaseElement} from '#preact/base-element';
+
+import {BentoAutocomplete} from './component';
+import {CSS as COMPONENT_CSS} from './component.jss';
 
 export class BaseElement extends PreactBaseElement {}
 
@@ -10,8 +11,14 @@ BaseElement['Component'] = BentoAutocomplete;
 /** @override */
 BaseElement['props'] = {
   'children': {passthrough: true},
-  // 'children': {passthroughNonEmpty: true},
-  // 'children': {selector: '...'},
+  'filter': {attr: 'filter'},
+  'highlightUserEntry': {attr: 'highlight-user-entry', type: 'boolean'},
+  'id': {attr: 'id'},
+  'inline': {attr: 'inline'},
+  'maxItems': {attr: 'max-items', type: 'number'},
+  'minChars': {attr: 'min-chars', type: 'number'},
+  'src': {attr: 'src'},
+  'suggestFirst': {attr: 'suggest-first', type: 'boolean'},
 };
 
 /** @override */
@@ -20,9 +27,5 @@ BaseElement['layoutSizeDefined'] = true;
 /** @override */
 BaseElement['usesShadowDom'] = true;
 
-// DO NOT SUBMIT: If BaseElement['shadowCss']  is set to `null`, remove the
-// following declaration.
-// Otherwise, keep it when defined to an actual value like `COMPONENT_CSS`.
-// Once addressed, remove this set of comments.
 /** @override */
 BaseElement['shadowCss'] = COMPONENT_CSS;
