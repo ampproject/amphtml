@@ -1,8 +1,4 @@
-import {
-  Layout_Enum,
-  applyFillContent,
-  isLayoutSizeFixed,
-} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeFixed} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {realChildNodes} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';

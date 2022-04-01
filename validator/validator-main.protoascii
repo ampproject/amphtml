@@ -2052,20 +2052,8 @@ tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
   tag_name: "AUDIO"
   mandatory_ancestor: "AMP-AUDIO"
-  attrs: { name: "autoplay" }
+  spec_name: "amp-audio > audio"
   attrs: { name: "controls" }
-  attrs: { name: "loop" }
-  attrs: { name: "muted" }
-  attrs: { name: "preload" }
-  attrs: {
-    name: "src"
-    value_url: {
-      protocol: "data"
-      protocol: "https"
-      allow_relative: false
-    }
-    disallowed_value_regex: "__amp_source_origin"
-  }
   spec_url: "https://amp.dev/documentation/components/amp-audio/"
 }
 # 4.7.7 The picture element
