@@ -118,7 +118,7 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   lotame: {
-    url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK/ma=MAX_AUDIENCES',
+    url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK/ma=MAX_AUDIENCE/gdpr_consent=CONSENT_STRING/gdpr=CONSENT_METADATA(gdprApplies)',
     macros: ['CLIENT_ID', 'AD_NETWORK', 'MAX_AUDIENCES'],
     disableKeyAppend: true,
   },
