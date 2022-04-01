@@ -271,10 +271,6 @@ describes.realWin(
 
       await setupPDP();
 
-      attachmentChildEl
-        .querySelector('.i-amphtml-amp-story-shopping-pdp-cta')
-        .dispatchEvent(new Event('click'));
-
       expect(trigger).to.have.been.calledWith(
         StoryAnalyticsEvent.SHOPPING_PDP_VIEW
       );
