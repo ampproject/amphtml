@@ -1,8 +1,7 @@
 /**
- * Allows for runtime configuration. Internally, the runtime should
- * use the src/config.js module for various constants. We can use the
- * AMP_CONFIG global to translate user-defined configurations to this
- * module.
+ * Allows for runtime configuration. Internally, the runtime should import this
+ * module for various constants. We can use the AMP_CONFIG global to translate
+ * user-defined configurations to this module.
  * @param {string} key
  * @return {any}
  */
