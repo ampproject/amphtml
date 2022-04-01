@@ -830,10 +830,11 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-subscriptions.html",
+      "url": "examples/visual-tests/amp-story/amp-story-subscriptions.html#page=page-2",
       "name": "amp-story-subscriptions UI",
-      "viewport": {"width": 320, "height": 900},
-      "loading_complete_selectors": [".i-amphtml-story-loaded"],
+      "viewport": {"width": 400, "height": 800},
+      "loading_complete_selectors": ["amp-subscriptions-dialog:not([hidden])"],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-subscriptions.js"
     }
   ]
 }
