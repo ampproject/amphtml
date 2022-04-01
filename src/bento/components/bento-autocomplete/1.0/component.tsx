@@ -15,7 +15,7 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {ContainWrapper} from '#preact/component';
+import {ContainWrapper, useValueRef} from '#preact/component';
 import {useQuery} from '#preact/hooks/useQuery';
 import {xhrUtils} from '#preact/utils/xhr';
 
@@ -58,7 +58,7 @@ export function BentoAutocomplete({
   src,
 }: BentoAutocompleteProps) {
   const elementRef = useRef<HTMLElement>(null);
-  const containerId = useRef<string>(
+  const containerId = useValueRef<string>(
     id || `${Math.floor(Math.random() * 100)}_AMP_content_`
   );
   const inputRef = useRef<HTMLInputElement>(null);
@@ -103,9 +103,9 @@ export function BentoAutocomplete({
 
   const getItemId = useCallback(
     (index: number) => {
-      return `${id}-${index}`;
+      return `${containerId.current}-${index}`;
     },
-    [id]
+    [containerId]
   );
 
   const getSingleInputOrTextarea = useCallback(
@@ -137,9 +137,9 @@ export function BentoAutocomplete({
         inputElement.classList.add(classes.input);
         inputElement.setAttribute('dir', 'auto');
         inputElement.setAttribute('aria-autocomplete', 'both');
-        inputElement.setAttribute('aria-controls', containerId.current);
+        inputElement.setAttribute('aria-controls', containerId.current!);
         inputElement.setAttribute('aria-haspopup', 'listbox');
-        inputElement.setAttribute('aria-owns', containerId.current);
+        inputElement.setAttribute('aria-owns', containerId.current!);
         inputElement.setAttribute('aria-expanded', 'false');
         if (inputElement.tagName === 'INPUT') {
           inputElement.setAttribute('role', 'combobox');
@@ -151,7 +151,7 @@ export function BentoAutocomplete({
         inputRef.current = inputElement as HTMLInputElement;
       }
     },
-    [getSingleInputOrTextarea, onError, classes.input]
+    [getSingleInputOrTextarea, onError, classes.input, containerId]
   );
 
   const validateProps = useCallback(() => {
@@ -476,7 +476,7 @@ export function BentoAutocomplete({
       {children}
       <div
         ref={containerRef}
-        id={containerId.current}
+        id={containerId.current!}
         class={classes.autocompleteResults}
         role="listbox"
         hidden={!showAutocompleteResults}
