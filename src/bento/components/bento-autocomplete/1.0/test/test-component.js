@@ -30,25 +30,9 @@ function Autocomplete(initialProps) {
 
 describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
   let onError;
-  let fetchJson;
   beforeEach(() => {
     onError = env.sandbox.spy();
-
-    fetchJson = env.sandbox
-      .stub(xhrUtils, 'fetchJson')
-      .resolves({items: ['one', 'two', 'three']});
   });
-
-  async function waitForData(component, callCount = 1) {
-    await waitFor(
-      () => fetchJson.callCount === callCount,
-      'expected fetchJson to have been called' +
-        (callCount > 1 ? ` ${callCount} times` : '')
-    );
-    // Ensure everything has settled:
-    await new Promise((r) => setTimeout(r, 0));
-    component.update();
-  }
 
   it('requires a single input or textarea descendant', () => {
     mount(<Autocomplete onError={onError}></Autocomplete>);
@@ -923,6 +907,24 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
   });
 
   describe('fetching items', async () => {
+    let fetchJson;
+    beforeEach(() => {
+      fetchJson = env.sandbox
+        .stub(xhrUtils, 'fetchJson')
+        .resolves({items: ['one', 'two', 'three']});
+    });
+
+    async function waitForData(component, callCount = 1) {
+      await waitFor(
+        () => fetchJson.callCount === callCount,
+        'expected fetchJson to have been called' +
+          (callCount > 1 ? ` ${callCount} times` : '')
+      );
+      // Ensure everything has settled:
+      await new Promise((r) => setTimeout(r, 0));
+      component.update();
+    }
+
     it('does not fetch items on initial render', async () => {
       const wrapper = mount(
         <Autocomplete id="id" src="/items.json">
@@ -948,7 +950,38 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       await waitForData(wrapper);
 
-      expect(fetchJson).calledWith('/items.json');
+      expect(fetchJson).calledWith('/items.json').callCount(1);
+    });
+
+    it('can parse response data', async () => {
+      fetchJson.resolves({
+        data: [
+          {name: 'one', value: 1},
+          {name: 'two', value: 2},
+          {name: 'three', value: 3},
+        ],
+      });
+
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          filter="none"
+          src="/items.json"
+          parseJson={(response) => response.data.map(({name}) => name)}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 'o';
+      input.simulate('input');
+
+      await waitForData(wrapper);
+
+      expect(wrapper.exists('[data-value="one"]')).to.be.true;
+      expect(wrapper.exists('[data-value="two"]')).to.be.true;
+      expect(wrapper.exists('[data-value="three"]')).to.be.true;
     });
   });
 });
