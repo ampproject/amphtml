@@ -34,7 +34,7 @@ import {
  *   geoApi: ?string,
  * }}
  */
-export const urls = {
+const urls = {
   thirdParty,
   thirdPartyFrameHost,
   thirdPartyFrameRegex,
