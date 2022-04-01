@@ -12,6 +12,7 @@ const {
 const {bentoBundles, verifyBentoBundles} = require('../compile/bundles.config');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {log} = require('../common/logging');
+const {mkdir} = require('fs').promises;
 const {red} = require('kleur/colors');
 const {watch} = require('chokidar');
 
