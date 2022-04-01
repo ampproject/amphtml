@@ -196,20 +196,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       productForPdp = shoppingDataPerPage[0];
     }
 
-    // pdp view that calls the analytics service sending the product id
-    if (productForPdp) {
-      this.variableService_.onVariableUpdate(
-        AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
-        productForPdp.productId
-      );
-    }
-
-    this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent[
-        productForPdp ? 'SHOPPING_PDP_VIEW' : 'SHOPPING_PLP_VIEW'
-      ]
-    );
-
     // templateId string used to key already built templates.
     const templateId = productForPdp ? `pdp-${productForPdp.productId}` : 'plp';
 
@@ -240,6 +226,21 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.builtTemplates_[templateId] = template;
       this.mutateElement(() => this.templateContainer_.appendChild(template));
     }
+
+    // PDP view that calls the analytics service sending the product id.
+    if (productForPdp) {
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+        productForPdp.productId
+      );
+    }
+
+    // Triggers an analytics event for the PDP or PLP depending on if there is an active product.
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent[
+        productForPdp ? 'SHOPPING_PDP_VIEW' : 'SHOPPING_PLP_VIEW'
+      ]
+    );
   }
 
   /**
@@ -288,10 +289,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onPlpCardClick_(shoppingData) {
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
-      shoppingData?.productId
-    );
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
