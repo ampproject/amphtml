@@ -935,20 +935,20 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(fetchJson).to.have.callCount(0);
     });
 
-    // it('fetches on first interaction if a src is provided', async () => {
-    //   const wrapper = mount(
-    //     <Autocomplete id="id" src="/items.json">
-    //       <input type="text"></input>
-    //     </Autocomplete>
-    //   );
+    it('fetches on first interaction if a src is provided', async () => {
+      const wrapper = mount(
+        <Autocomplete id="id" src="/items.json">
+          <input type="text"></input>
+        </Autocomplete>
+      );
 
-    //   const input = wrapper.find('input');
-    //   input.getDOMNode().value = 'o';
-    //   input.simulate('input');
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 'o';
+      input.simulate('input');
 
-    //   await waitForData(wrapper);
+      await waitForData(wrapper);
 
-    //   expect(fetchJson).calledWith('/items.json');
-    // });
+      expect(fetchJson).calledWith('/items.json');
+    });
   });
 });

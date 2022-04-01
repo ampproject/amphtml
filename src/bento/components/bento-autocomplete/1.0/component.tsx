@@ -16,6 +16,7 @@ import {
   useState,
 } from '#preact';
 import {ContainWrapper} from '#preact/component';
+import {useQuery} from '#preact/hooks/useQuery';
 import {xhrUtils} from '#preact/utils/xhr';
 
 import fuzzysearch from '#third_party/fuzzysearch';
@@ -34,79 +35,6 @@ import {
 import {useAutocompleteBinding} from './use-autocomplete-binding';
 
 const INITIAL_ACTIVE_INDEX = -1;
-
-const noop = () => {};
-
-type SuccessState<TData> = {
-  loading: false;
-  data: TData;
-  error: undefined;
-};
-
-type ErrorState = {
-  loading: false;
-  data: undefined;
-  error: Error;
-};
-
-type LoadingState<TData> = {
-  loading: true;
-  data: TData | undefined;
-  error: undefined;
-};
-
-type InitialState<TData> = {
-  loading: false;
-  data: TData;
-  error: undefined;
-};
-
-type QueryState<TData = unknown> =
-  | SuccessState<TData>
-  | ErrorState
-  | LoadingState<TData>
-  | InitialState<TData>;
-
-const DEFAULT_STATE_VALUES = {
-  loading: false,
-  error: undefined,
-};
-
-type QueryConfig<TData = unknown> = {
-  initialData: TData;
-  enabled?: boolean;
-  onSettled?: (data: TData | undefined, error: Error | undefined) => void;
-};
-
-function useQuery<TData>(
-  queryFn: () => Promise<TData>,
-  {enabled, initialData, onSettled = noop}: QueryConfig<TData>
-) {
-  const [state, setState] = useState<QueryState<TData>>({
-    ...DEFAULT_STATE_VALUES,
-    data: initialData,
-  });
-
-  const fetchQueryData = useCallback(async () => {
-    setState((s) => ({...s, error: undefined, loading: true}));
-    try {
-      const data = await queryFn();
-      setState((s) => ({...s, error: undefined, loading: false, data}));
-    } catch (error) {
-      setState((s) => ({...s, data: undefined, loading: false, error}));
-    } finally {
-      onSettled(state.data, state.error);
-    }
-  }, [onSettled, queryFn, state]);
-
-  useEffect(() => {
-    if (enabled) {
-      fetchQueryData();
-    }
-  }, [enabled, fetchQueryData]);
-
-  return state;
-}
 
 /**
  * @param {!BentoAutocomplete.Props} props
@@ -155,11 +83,11 @@ export function BentoAutocomplete({
     {
       enabled: !!src && shouldFetchItems,
       initialData: items,
-      onSettled: (_data, error) => {
-        if (error) {
-          onError(error.message);
-        }
+      onSettled: () => {
         setShouldFetchItems(false);
+      },
+      onError: (error) => {
+        onError(error.message);
       },
     }
   );
