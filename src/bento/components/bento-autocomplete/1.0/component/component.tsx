@@ -21,18 +21,19 @@ import {xhrUtils} from '#preact/utils/xhr';
 
 import fuzzysearch from '#third_party/fuzzysearch';
 
-import {useStyles} from './component.jss';
-import {DEFAULT_ON_ERROR, DEFAULT_PARSE_JSON, TAG} from './constants';
-import {getEnabledResults, getItemElement, getTextValue} from './helpers';
-import {tokenPrefixMatch} from './token-prefix-match';
+import {useAutocompleteBinding} from './use-autocomplete-binding';
+
+import {useStyles} from '../component.jss';
+import {DEFAULT_ON_ERROR, DEFAULT_PARSE_JSON, TAG} from '../constants';
+import {getEnabledResults, getItemElement, getTextValue} from '../helpers';
+import {tokenPrefixMatch} from '../token-prefix-match';
 import {
   BentoAutocompleteProps,
   InputElement,
   Item,
   ItemTemplateProps,
   isValidFilterType,
-} from './types';
-import {useAutocompleteBinding} from './use-autocomplete-binding';
+} from '../types';
 
 const INITIAL_ACTIVE_INDEX = -1;
 
