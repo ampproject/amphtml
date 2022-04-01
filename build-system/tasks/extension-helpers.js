@@ -721,9 +721,6 @@ function buildBinaries(extDir, binaries, options) {
  */
 async function buildBentoExtensionJs(dir, name, options) {
   const entryPoint = await findJsSourceFilename(path.join(dir, name));
-  if (!entryPoint) {
-    throw new Error(`No source file matching ${dir}/${name} was found`);
-  }
   const remapDependencies = getRemapBentoDependencies(
     entryPoint,
     options.minify
