@@ -2087,7 +2087,7 @@ describes.realWin(
           toggleExperiment(env.win, 'story-remote-localization', false);
         });
 
-        it('should fetch the localization strings for the default laguage from the cdn', async () => {
+        it('should fetch the localization strings for the default language from the cdn', async () => {
           const fetchStub = env.sandbox
             .stub(Services.xhrFor(env.win), 'fetchJson')
             .resolves({
@@ -2097,12 +2097,12 @@ describes.realWin(
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.be.calledOnceWithExactly(
-            'https://cdn.ampproject.org/v0/amp-story.en.json',
+            'https://cdn.ampproject.org/rtv/123/v0/amp-story.en.json',
             env.sandbox.match.any
           );
         });
 
-        it('should fetch the localization strings for the document laguage from the cdn', async () => {
+        it('should fetch the localization strings for the document language from the cdn', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
 
           const fetchStub = env.sandbox
@@ -2114,12 +2114,12 @@ describes.realWin(
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.have.been.calledOnceWithExactly(
-            'https://cdn.ampproject.org/v0/amp-story.es-419.json',
+            'https://cdn.ampproject.org/rtv/123/v0/amp-story.es-419.json',
             env.sandbox.match.any
           );
         });
 
-        it('should fetch the localization strings for the document laguage from the local dist if testing locally', async () => {
+        it('should fetch the localization strings for the document language from the local dist if testing locally', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
           env.win.__AMP_MODE.localDev = true;
 
