@@ -828,6 +828,12 @@
       "viewport": {"width": 1500, "height": 1000},
       "loading_complete_selectors": [".i-amphtml-story-loaded"],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-subscriptions.html",
+      "name": "amp-story-subscriptions UI",
+      "viewport": {"width": 320, "height": 900},
+      "loading_complete_selectors": [".i-amphtml-story-loaded"],
     }
   ]
 }
