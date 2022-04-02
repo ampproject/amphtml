@@ -13,6 +13,7 @@ import {
   storeShoppingConfig,
 } from './amp-story-shopping-config';
 
+import {isSecureUrlDeprecated, resolveRelativeUrl} from '../../../src/url';
 import {
   Action,
   ShoppingConfigDataDef,
@@ -123,8 +124,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @return {string}
    */
   resolveRelativeUrl_(url) {
-    if (/^\//.test(url)) {
-      return Services.documentInfoForDoc(this.element).canonicalUrl + url;
+    if (/^\//.test(url) && isSecureUrlDeprecated(url)) {
+      return resolveRelativeUrl(url, this.getAmpDoc().getUrl());
     }
     return url;
   }
