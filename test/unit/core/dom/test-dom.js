@@ -160,27 +160,6 @@ describes.sandboxed('DOM helpers', {}, (env) => {
     });
   });
 
-  it('iterateCursor should loop through every element in a NodeList', () => {
-    const fragment = document.createDocumentFragment();
-    [0, 1, 2].forEach(() => fragment.appendChild(document.createElement('i')));
-
-    const iSpy = env.sandbox.spy();
-    dom.iterateCursor(fragment.querySelectorAll('i'), iSpy);
-    expect(iSpy).to.be.calledThrice;
-
-    const bSpy = env.sandbox.spy();
-    dom.iterateCursor(fragment.querySelectorAll('b'), bSpy);
-    expect(bSpy).to.have.not.been.called;
-  });
-
-  it('iterateCursor should allow null elements in a list', () => {
-    const list = ['wow', null, 'cool'];
-
-    const spy = env.sandbox.spy();
-    dom.iterateCursor(list, spy);
-    expect(spy).to.be.calledThrice;
-  });
-
   describe('waitFor', () => {
     let parent;
     let child;

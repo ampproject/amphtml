@@ -1,4 +1,3 @@
-import {iterateCursor} from '#core/dom';
 import {ancestorElementsByTag} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 
@@ -59,11 +58,12 @@ export function getFormAsObject(form) {
     }
 
     if (multiple) {
-      iterateCursor(options, (option) => {
+      for (let i = 0; i < options.length; i++) {
+        const option = options[i];
         if (option.selected) {
           data[name].push(option.value);
         }
-      });
+      }
       continue;
     }
     data[name].push(value);

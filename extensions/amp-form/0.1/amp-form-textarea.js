@@ -1,5 +1,5 @@
 import {AmpEvents_Enum} from '#core/constants/amp-events';
-import {iterateCursor, removeElement} from '#core/dom';
+import {removeElement} from '#core/dom';
 import {computedStyle, px, setStyle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 import {throttle} from '#core/types/function';
@@ -173,7 +173,7 @@ export function getHasOverflow(element) {
  * @param {!IArrayLike<!Element>} elements
  */
 function resizeTextareaElements(elements) {
-  iterateCursor(elements, (element) => {
+  elements.forEach((element) => {
     if (
       element.tagName != 'TEXTAREA' ||
       !element.hasAttribute(AMP_FORM_TEXTAREA_EXPAND_ATTR)

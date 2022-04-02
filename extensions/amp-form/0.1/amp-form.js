@@ -7,12 +7,7 @@ import {
 import {Keys_Enum} from '#core/constants/key-codes';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {isAmp4Email} from '#core/document/format';
-import {
-  createElementWithAttributes,
-  iterateCursor,
-  removeElement,
-  tryFocus,
-} from '#core/dom';
+import {createElementWithAttributes, removeElement, tryFocus} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   formOrNullForElement,
@@ -523,7 +518,7 @@ export class AmpForm {
     const validityElements = this.form_.querySelectorAll(
       '.user-valid, .user-invalid'
     );
-    iterateCursor(validityElements, (element) => {
+    validityElements.forEach((element) => {
       element.classList.remove('user-valid');
       element.classList.remove('user-invalid');
     });
@@ -531,7 +526,7 @@ export class AmpForm {
     const messageElements = this.form_.querySelectorAll(
       '.visible[validation-for]'
     );
-    iterateCursor(messageElements, (element) => {
+    messageElements.forEach((element) => {
       element.classList.remove('visible');
     });
 
@@ -636,7 +631,7 @@ export class AmpForm {
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
-    iterateCursor(asyncInputs, (asyncInput) => {
+    asyncInputs.forEach((asyncInput) => {
       const asyncCall = this.getValueForAsyncInput_(asyncInput);
       if (
         asyncInput.classList.contains(
@@ -1401,7 +1396,7 @@ export class AmpForm {
         maybeFillField(field, key);
       } else if (formControls.length) {
         const fields = /** @type {!NodeList} */ (formControls);
-        iterateCursor(fields, (field) => maybeFillField(field, key));
+        fields.forEach((field) => maybeFillField(field, key));
       }
     });
   }
@@ -1434,7 +1429,7 @@ export class AmpForm {
  */
 function checkUserValidityOnSubmission(form) {
   const elements = form.querySelectorAll('input,select,textarea,fieldset');
-  iterateCursor(elements, (element) => checkUserValidity(element));
+  elements.forEach((element) => checkUserValidity(element));
   return checkUserValidity(form);
 }
 
@@ -1477,7 +1472,7 @@ function removeValidityStateClasses(form) {
     const elements = form.querySelectorAll(
       `.${escapeCssSelectorIdent(validityState)}`
     );
-    iterateCursor(elements, (element) => {
+    elements.forEach((element) => {
       dev().assertElement(element).classList.remove(validityState);
     });
   }
@@ -1629,7 +1624,7 @@ export class AmpFormService {
       return;
     }
 
-    iterateCursor(forms, (form, index) => {
+    forms.forEach((form, index) => {
       const existingAmpForm = formOrNullForElement(form);
       if (!existingAmpForm) {
         new AmpForm(form, `amp-form-${index}`);

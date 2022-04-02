@@ -1,4 +1,3 @@
-import {iterateCursor} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {htmlFor, htmlRefs} from '#core/dom/static-template';
@@ -254,9 +253,9 @@ export class Controls {
   useControlSet_(setName) {
     const activeClassname = `amp-video-docked-control-set-${setName}`;
 
-    iterateCursor(this.controlSets_, (controlSet) => {
+    for (const controlSet of this.controlSets_) {
       toggle(controlSet, controlSet.classList.contains(activeClassname));
-    });
+    }
   }
 
   /**

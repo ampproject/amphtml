@@ -1,4 +1,4 @@
-import {iterateCursor, removeElement} from '#core/dom';
+import {removeElement} from '#core/dom';
 
 import {Services} from '#service';
 
@@ -89,7 +89,7 @@ export class TextMask {
 
     if (!this.hiddenInput_) {
       const hiddenName = `${name}-unmasked`;
-      iterateCursor(this.element_.form.elements, (element) => {
+      this.element_.form.elements.forEach((element) => {
         const {name} = element;
         if (name == hiddenName && TextMask.isMaskOutputElement(element)) {
           return;

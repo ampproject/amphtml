@@ -1,11 +1,6 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Keys_Enum} from '#core/constants/key-codes';
-import {
-  dispatchCustomEvent,
-  isRTL,
-  iterateCursor,
-  toggleAttribute,
-} from '#core/dom';
+import {dispatchCustomEvent, isRTL, toggleAttribute} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
@@ -531,11 +526,11 @@ export class AmpCarousel extends AMP.BaseElement {
     const isAtStart = this.carousel_.isAtStart();
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
-    iterateCursor(this.prevArrowSlot_.children, (child) => {
+    this.prevArrowSlot_.children.forEach((child) => {
       const disabled = (!loop && index === 0) || isAtStart;
       toggleAttribute(child, 'disabled', disabled);
     });
-    iterateCursor(this.nextArrowSlot_.children, (child) => {
+    this.nextArrowSlot_.children.forEach((child) => {
       const disabled =
         (!loop && index >= this.slides_.length - visibleCount) || isAtEnd;
       toggleAttribute(child, 'disabled', disabled);

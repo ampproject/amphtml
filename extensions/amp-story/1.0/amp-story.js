@@ -2439,7 +2439,7 @@ export class AmpStory extends AMP.BaseElement {
         'amp-story-cta-layer a'
       );
 
-      Array.prototype.forEach.call(ctaAnchorEls, (ctaAnchorEl) => {
+      ctaAnchorEls.forEach((ctaAnchorEl) => {
         ctaAnchorEl.setAttribute('data-vars-story-page-id', pageId);
         ctaAnchorEl.setAttribute('data-vars-story-page-index', pageIndex);
       });

@@ -20,7 +20,7 @@
  */
 
 import {Deferred} from '#core/data-structures/promise';
-import {isJsonScriptTag, iterateCursor} from '#core/dom';
+import {isJsonScriptTag} from '#core/dom';
 import {isArray, isObject} from '#core/types';
 import {tryParseJson} from '#core/types/object/json';
 import {getHashParams} from '#core/types/string/url';
@@ -477,7 +477,7 @@ export class AmpGeo extends AMP.BaseElement {
 
     if (docElem) {
       const {classList: docElemClassList} = docElem;
-      iterateCursor(docElemClassList, (el) => {
+      docElemClassList.forEach((el) => {
         if (STRIP_RE.test(el)) {
           classesToRemove.add(el);
         }
@@ -485,7 +485,7 @@ export class AmpGeo extends AMP.BaseElement {
     }
 
     const {classList: bodyClassList} = body;
-    iterateCursor(bodyClassList, (el) => {
+    bodyClassList.forEach((el) => {
       if (STRIP_RE.test(el)) {
         classesToRemove.add(el);
       }
