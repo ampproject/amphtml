@@ -3,7 +3,7 @@ import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {FiniteStateMachine} from '#core/data-structures/finite-state-machine';
 import {Deferred} from '#core/data-structures/promise';
-import {isRTL tryFocus} from '#core/dom';
+import {isRTL, tryFocus} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {
