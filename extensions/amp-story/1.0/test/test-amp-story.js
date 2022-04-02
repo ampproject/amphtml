@@ -29,7 +29,7 @@ import {
   AmpStoryStoreService,
   StateProperty,
   SubscriptionsState,
-  UIType,
+  UIType_Enum,
 } from '../amp-story-store-service';
 import {EventType, dispatch} from '../events';
 import {MediaType_Enum} from '../media-pool';
@@ -349,7 +349,7 @@ describes.realWin(
 
       await story.layoutCallback();
       expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
-        UIType.DESKTOP_ONE_PANEL
+        UIType_Enum.DESKTOP_ONE_PANEL
       );
     });
 
@@ -364,7 +364,7 @@ describes.realWin(
 
       await story.layoutCallback();
       expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
-        UIType.DESKTOP_FULLBLEED
+        UIType_Enum.DESKTOP_FULLBLEED
       );
     });
 
@@ -1226,7 +1226,7 @@ describes.realWin(
 
         const dispatchSwipeEvent = (deltaX, deltaY) => {
           // Triggers mobile UI so hint overlay can attach.
-          story.storeService_.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
+          story.storeService_.dispatch(Action.TOGGLE_UI, UIType_Enum.MOBILE);
 
           story.element.dispatchEvent(
             new TouchEvent('touchstart', getTouchOptions(-10, -10))

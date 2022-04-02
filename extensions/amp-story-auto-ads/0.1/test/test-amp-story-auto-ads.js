@@ -19,7 +19,7 @@ import {NavigationDirection} from '../../../amp-story/1.0/amp-story-page';
 import {
   Action,
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import * as storyEvents from '../../../amp-story/1.0/events';
@@ -348,11 +348,11 @@ describes.realWin(
         const adBadgeContainer = doc.querySelector(
           '.i-amphtml-ad-overlay-container'
         );
-        storeService.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
+        storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.MOBILE);
         expect(adBadgeContainer).not.to.have.attribute(
           Attributes.DESKTOP_ONE_PANEL
         );
-        storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_ONE_PANEL);
+        storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.DESKTOP_ONE_PANEL);
         expect(adBadgeContainer).to.have.attribute(
           Attributes.DESKTOP_ONE_PANEL
         );
