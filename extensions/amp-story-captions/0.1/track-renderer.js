@@ -1,4 +1,5 @@
 import {removeChildren, removeElement} from '#core/dom';
+import {toArray} from '#core/types/array';
 
 import {listen} from '#utils/event-helper';
 
@@ -71,13 +72,13 @@ export class TrackRenderer {
   render_() {
     removeChildren(this.element_);
     this.cueTimestamps_.length = 0;
-    this.track_.activeCues.forEach((cue) => {
+    toArray(this.track_.activeCues).forEach((cue) => {
       const cueElement = this.element_.ownerDocument.createElement('div');
       const html = cue.getCueAsHTML();
       let section = this.element_.ownerDocument.createElement('span');
       cueElement.appendChild(section);
       const timestamps = [];
-      html.childNodes.forEach((node) => {
+      toArray(html.childNodes).forEach((node) => {
         if (node.target === 'timestamp') {
           const timestamp = parseTimestamp(node.data);
           if (timestamp !== null) {
@@ -104,8 +105,8 @@ export class TrackRenderer {
    */
   updateTime_() {
     const videoTime = this.video_.currentTime;
-    this.element_.childNodes.forEach((cue, i) => {
-      cue.childNodes.forEach((section, j) => {
+    toArray(this.element_.childNodes).forEach((cue, i) => {
+      toArray(cue.childNodes).forEach((section, j) => {
         // The first section always has implicit timestamp 0, so it's never in
         // the future.
         if (j > 0) {
