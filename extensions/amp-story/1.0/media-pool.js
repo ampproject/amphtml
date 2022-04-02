@@ -609,19 +609,6 @@ export class MediaPool {
   }
 
   /**
-   * Invokes a function for all media managed by the media pool.
-   * @param {function(!PoolBoundElementDef)} callbackFn The function to be
-   *     invoked.
-   * @private
-   */
-  forEachMediaElement_(callbackFn) {
-    callbackFn(this.allocated[MediaType_Enum.AUDIO]);
-    callbackFn(this.allocated[MediaType_Enum.VIDEO]);
-    callbackFn(this.unallocated[MediaType_Enum.AUDIO]);
-    callbackFn(this.unallocated[MediaType_Enum.VIDEO]);
-  }
-
-  /**
    * Preloads the content of the specified media element in the DOM and returns
    * a media element that can be used in its stead for playback.
    * @param {!DomElementDef} domMediaEl The media element, found in the
@@ -940,16 +927,17 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    const blessPromises = [];
-
     (this.ampElementsToBless_ || []).forEach(userInteractedWith);
 
     this.ampElementsToBless_ = null; // GC
 
-    this.forEachMediaElement_((mediaEl) => {
-      blessPromises.push(this.bless_(mediaEl));
+    const elements = [];
+    this.forEachMediaType_((type) => {
+      elements.push(...this.allocated[type]);
+      elements.push(...this.unallocated[type]);
     });
 
+    const blessPromises = elements.map((element) => this.bless_(element));
     return Promise.all(blessPromises).then(
       () => {
         this.blessed_ = true;
