@@ -170,7 +170,7 @@ export function getHasOverflow(element) {
 
 /**
  * Attempt to resize all textarea elements
- * @param {!IArrayLike<!Element>} elements
+ * @param {!NodeList} elements
  */
 function resizeTextareaElements(elements) {
   elements.forEach((element) => {

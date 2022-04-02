@@ -1,3 +1,4 @@
+import {iterateCursor} from '#core/dom';
 import {getFormAsObject, getSubmitButtonUsed} from '#core/dom/form';
 import {map} from '#core/types/object';
 
@@ -181,12 +182,14 @@ class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
   constructor(opt_form) {
     super(opt_form);
 
-    opt_form?.elements.forEach((input) => {
-      if (input.type == 'file' && input.files.length == 0) {
-        this.formData_.delete(input.name);
-        this.formData_.append(input.name, new Blob([]), '');
-      }
-    });
+    if (opt_form) {
+      iterateCursor(opt_form.elements, (input) => {
+        if (input.type == 'file' && input.files.length == 0) {
+          this.formData_.delete(input.name);
+          this.formData_.append(input.name, new Blob([]), '');
+        }
+      });
+    }
   }
 
   /**

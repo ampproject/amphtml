@@ -1615,8 +1615,7 @@ export class AmpFormService {
 
   /**
    * Install submission handler on all forms in the document.
-   * @param {?IArrayLike<T>} forms
-   * @template T
+   * @param {NodeList} forms
    * @private
    */
   installSubmissionHandlers_(forms) {
