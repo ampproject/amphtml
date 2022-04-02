@@ -311,6 +311,20 @@ export function templateContentClone(template) {
 }
 
 /**
+ * Iterate over an array-like.
+ * Test cases: https://jsbench.github.io/#f638cacc866a1b2d6e517e6cfa900d6b
+ * @param {ArrayLike<T>} iterable
+ * @param {function(T, number):void} cb
+ * @template T
+ */
+export function iterateCursor(iterable, cb) {
+  const {length} = iterable;
+  for (let i = 0; i < length; i++) {
+    cb(iterable[i], i);
+  }
+}
+
+/**
  * Whether the element is a script tag with application/json type.
  * @param {Element} element
  * @return {boolean}

@@ -1,3 +1,4 @@
+import {iterateCursor} from '#core/dom';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -158,7 +159,7 @@ export class FormValidator {
    * @private
    */
   checkTextAreaValidityInForm_(form) {
-    form.elements.forEach((element) => {
+    iterateCursor(form.elements, (element) => {
       if (element.tagName == 'TEXTAREA') {
         this.checkInputValidity(element);
       }

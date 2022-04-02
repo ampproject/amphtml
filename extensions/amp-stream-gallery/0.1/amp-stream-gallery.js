@@ -1,5 +1,10 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {dispatchCustomEvent, isRTL, toggleAttribute} from '#core/dom';
+import {
+  dispatchCustomEvent,
+  isRTL,
+  iterateCursor,
+  toggleAttribute,
+} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
@@ -664,10 +669,10 @@ class AmpStreamGallery extends AMP.BaseElement {
   updateUi_() {
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
-    this.prevArrowSlot_.children.forEach((child) => {
+    iterateCursor(this.prevArrowSlot_.children, (child) => {
       toggleAttribute(child, 'disabled', this.carousel_.isAtStart());
     });
-    this.nextArrowSlot_.children.forEach((child) => {
+    iterateCursor(this.nextArrowSlot_.children, (child) => {
       toggleAttribute(child, 'disabled', this.carousel_.isAtEnd());
     });
     toggleAttribute(
