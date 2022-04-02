@@ -32,7 +32,7 @@ import {
   UIType,
 } from '../amp-story-store-service';
 import {EventType, dispatch} from '../events';
-import {MediaType} from '../media-pool';
+import {MediaType_Enum} from '../media-pool';
 import {AdvancementMode} from '../story-analytics';
 import * as utils from '../utils';
 
@@ -978,8 +978,8 @@ describes.realWin(
 
           await story.layoutCallback();
           const expected = {
-            [MediaType.AUDIO]: 2,
-            [MediaType.VIDEO]: 2,
+            [MediaType_Enum.AUDIO]: 2,
+            [MediaType_Enum.VIDEO]: 2,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
         });
@@ -998,8 +998,8 @@ describes.realWin(
           story.element.appendChild(ampAudoEl);
 
           const expected = {
-            [MediaType.AUDIO]: 3,
-            [MediaType.VIDEO]: 3,
+            [MediaType_Enum.AUDIO]: 3,
+            [MediaType_Enum.VIDEO]: 3,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
         });
@@ -1021,8 +1021,8 @@ describes.realWin(
           }
 
           const expected = {
-            [MediaType.AUDIO]: 4,
-            [MediaType.VIDEO]: 8,
+            [MediaType_Enum.AUDIO]: 4,
+            [MediaType_Enum.VIDEO]: 8,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
         });
