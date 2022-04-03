@@ -949,10 +949,9 @@ export class MediaPool {
     const [fn, requiresSynchronousExecution] = task;
     const executionFn = () => {
       Promise.resolve(fn(mediaEl))
-        .catch((reason) => dev().error('AMP-STORY', reason))
+        .then(resolve, (reason) => dev().error('AMP-STORY', reason))
         .then(() => {
           // Run regardless of success or failure of task execution.
-          resolve();
           queue.shift();
           this.executeNextMediaElementTask_(mediaEl, queue);
         });
@@ -968,8 +967,7 @@ export class MediaPool {
    * @param {!PoolBoundElementDef} mediaEl The element for which the specified
    *     task should be executed.
    * @param {!./media-tasks.MediaTask} task The task to be executed.
-   * @return {!Promise} A promise that is resolved when the specified task is
-   *     completed.
+   * @return {!Promise<void>} Resolved when the specified task is completed.
    * @private
    */
   enqueueMediaElementTask_(mediaEl, task) {
@@ -982,7 +980,7 @@ export class MediaPool {
       if (length === 1) {
         this.executeNextMediaElementTask_(mediaEl, queue);
       }
-    });
+    }).then();
   }
 
   /**
