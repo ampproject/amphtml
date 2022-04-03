@@ -7,7 +7,12 @@ import {
 import {Keys_Enum} from '#core/constants/key-codes';
 import {Deferred, tryResolve} from '#core/data-structures/promise';
 import {isAmp4Email} from '#core/document/format';
-import {createElementWithAttributes, removeElement, tryFocus} from '#core/dom';
+import {
+  createElementWithAttributes,
+  iterateCursor,
+  removeElement,
+  tryFocus,
+} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {
   formOrNullForElement,
@@ -631,7 +636,7 @@ export class AmpForm {
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
-    asyncInputs.forEach((asyncInput) => {
+    iterateCursor(asyncInputs, (asyncInput) => {
       const asyncCall = this.getValueForAsyncInput_(asyncInput);
       if (
         asyncInput.classList.contains(
