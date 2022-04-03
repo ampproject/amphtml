@@ -198,21 +198,13 @@ export const MuteTask = [mute];
 
 /**
  * Seeks the specified media element to the provided time, in seconds.
- * @param {HTMLMediaElement} mediaEl
- * @param {number} currentTime
- */
-const setCurrentTime = (mediaEl, currentTime) => {
-  mediaEl.currentTime = currentTime;
-};
-
-/**
  * @param {number} currentTime
  * @return {MediaTask}
  */
 export function createSetCurrentTimeTask(currentTime) {
   return [
     (mediaEl) => {
-      setCurrentTime(mediaEl, currentTime);
+      mediaEl.currentTime = currentTime;
     },
   ];
 }
