@@ -1,4 +1,3 @@
-import {Deferred} from '#core/data-structures/promise';
 import {isConnectedNode} from '#core/dom';
 import {tryPlay} from '#core/dom/video';
 
@@ -109,200 +108,132 @@ function copyAttributes(fromEl, toEl) {
 }
 
 /**
- * Base class for tasks executed in order on HTMLMediaElements.
+ * A task executed in order on HTMLMediaElements.
+ * @interface
  */
 export class MediaTask {
   /**
-   * @param {string} name
-   * @param {!Object=} options
-   */
-  constructor(name, options = {}) {
-    /** @private @const {string} */
-    this.name_ = name;
-
-    const deferred = new Deferred();
-
-    /** @private @const {!Promise} */
-    this.completionPromise_ = deferred.promise;
-
-    /** @protected @const {!Object} */
-    this.options = options;
-
-    /** @private {?function()} */
-    this.resolve_ = deferred.resolve;
-
-    /** @private {?function(*)} */
-    this.reject_ = deferred.reject;
-  }
-
-  /**
-   * @return {string} The name of this task.
-   */
-  getName() {
-    return this.name_;
-  }
-
-  /**
-   * @return {!Promise<*>} A promise that is resolved when the task has
-   *     completed execution.
-   */
-  whenComplete() {
-    return this.completionPromise_;
-  }
-
-  /**
-   * @param {!HTMLMediaElement} mediaEl The element on which this task should be
-   *     executed.
-   * @return {!Promise} A promise that is resolved when the task has completed
-   *     execution.
-   */
-  execute(mediaEl) {
-    return this.executeInternal(mediaEl).then(this.resolve_, this.reject_);
-  }
-
-  /**
    * @param {!HTMLMediaElement} unusedMediaEl The element on which this task
    *     should be executed.
-   * @return {*} TODO(#23582): Specify return type
+   * @return {Promise|void}
    * @protected
    */
-  executeInternal(unusedMediaEl) {
-    return Promise.resolve();
-  }
+  execute(unusedMediaEl) {}
 
   /**
    * @return {boolean} true, if this task must be executed synchronously, e.g.
    *    if it requires a user gesture.
    */
-  requiresSynchronousExecution() {
-    return false;
-  }
-
-  /**
-   * @param {*} reason The reason for failing the task.
-   * @protected
-   */
-  failTask(reason) {
-    this.reject_(reason);
-  }
+  sync() {}
 }
 
 /**
  * Plays the specified media element.
+ * @implements {MediaTask}
  */
-export class PlayTask extends MediaTask {
-  /**
-   * @public
-   */
-  constructor() {
-    super('play');
-  }
-
+export class PlayTask {
   /** @override */
-  executeInternal(mediaEl) {
+  execute(mediaEl) {
     if (!mediaEl.paused) {
       // We do not want to invoke play() if the media element is already
       // playing, as this can interrupt playback in some browsers.
-      return Promise.resolve();
+      return;
     }
-
     return tryPlay(mediaEl);
+  }
+
+  /** @override */
+  sync() {
+    return false;
   }
 }
 
 /**
  * Pauses the specified media element.
+ * @implements {MediaTask}
  */
-export class PauseTask extends MediaTask {
-  /**
-   * @public
-   */
-  constructor() {
-    super('pause');
+export class PauseTask {
+  /** @override */
+  execute(mediaEl) {
+    mediaEl.pause();
   }
 
   /** @override */
-  executeInternal(mediaEl) {
-    mediaEl.pause();
-    return Promise.resolve();
+  sync() {
+    return false;
   }
 }
 
 /**
  * Unmutes the specified media element.
+ * @implements {MediaTask}
  */
-export class UnmuteTask extends MediaTask {
-  /**
-   * @public
-   */
-  constructor() {
-    super('unmute');
+export class UnmuteTask {
+  /** @override */
+  execute(mediaEl) {
+    mediaEl.muted = false;
+    mediaEl.removeAttribute('muted');
   }
 
   /** @override */
-  executeInternal(mediaEl) {
-    mediaEl.muted = false;
-    mediaEl.removeAttribute('muted');
-    return Promise.resolve();
+  sync() {
+    return false;
   }
 }
 
 /**
  * Mutes the specified media element.
+ * @implements {MediaTask}
  */
-export class MuteTask extends MediaTask {
-  /**
-   * @public
-   */
-  constructor() {
-    super('mute');
+export class MuteTask {
+  /** @override */
+  execute(mediaEl) {
+    mediaEl.muted = true;
+    mediaEl.setAttribute('muted', '');
   }
 
   /** @override */
-  executeInternal(mediaEl) {
-    mediaEl.muted = true;
-    mediaEl.setAttribute('muted', '');
-    return Promise.resolve();
+  sync() {
+    return false;
   }
 }
 
 /**
  * Seeks the specified media element to the provided time, in seconds.
+ * @implements {MediaTask}
  */
-export class SetCurrentTimeTask extends MediaTask {
+export class SetCurrentTimeTask {
   /**
-   * @param {!Object=} options
+   * @param {number} currentTime
    */
-  constructor(options = {currentTime: 0}) {
-    super('setCurrentTime', options);
+  constructor(currentTime) {
+    /** @private @const {number} */
+    this.currentTime_ = currentTime;
   }
 
   /** @override */
-  executeInternal(mediaEl) {
-    mediaEl.currentTime = this.options.currentTime;
-    return Promise.resolve();
+  execute(mediaEl) {
+    mediaEl.currentTime = this.currentTime_;
+  }
+
+  /** @override */
+  sync() {
+    return false;
   }
 }
 
 /**
  * Loads the specified media element.
+ * @implements {MediaTask}
  */
-export class LoadTask extends MediaTask {
-  /**
-   * @public
-   */
-  constructor() {
-    super('load');
-  }
-
+export class LoadTask {
   /** @override */
-  executeInternal(mediaEl) {
+  execute(mediaEl) {
     mediaEl.load();
-    return Promise.resolve();
   }
 
   /** @override */
-  requiresSynchronousExecution() {
+  sync() {
     // When recycling a media pool element, its sources are removed and the
     // LoadTask runs to reset it (buffered data, readyState, etc). It needs to
     // run synchronously so the media element can't be used in a new context
@@ -315,43 +246,35 @@ export class LoadTask extends MediaTask {
  * "Blesses" the specified media element for future playback without a user
  * gesture.  In order for this to bless the media element, this function must
  * be invoked in response to a user gesture.
+ * @implements {MediaTask}
  */
-export class BlessTask extends MediaTask {
-  /**
-   * @public
-   */
-  constructor() {
-    super('bless');
-  }
-
+export class BlessTask {
   /** @override */
-  requiresSynchronousExecution() {
-    return true;
-  }
-
-  /** @override */
-  executeInternal(mediaEl) {
+  execute(mediaEl) {
     const isMuted = mediaEl.muted;
     mediaEl.muted = false;
     if (isMuted) {
       mediaEl.muted = true;
     }
-    return Promise.resolve();
+  }
+
+  /** @override */
+  sync() {
+    return true;
   }
 }
 
 /**
  * Updates the sources of the specified media element.
+ * @implements {MediaTask}
  */
-export class UpdateSourcesTask extends MediaTask {
+export class UpdateSourcesTask {
   /**
    * @param {!Window} win
    * @param {!Sources} newSources The sources to which the media element should
    *     be updated.
    */
   constructor(win, newSources) {
-    super('update-src');
-
     /** @private {!Window} */
     this.win_ = win;
 
@@ -360,38 +283,37 @@ export class UpdateSourcesTask extends MediaTask {
   }
 
   /** @override */
-  executeInternal(mediaEl) {
+  execute(mediaEl) {
     Sources.removeFrom(this.win_, mediaEl);
     this.newSources_.applyToElement(this.win_, mediaEl);
-    return Promise.resolve();
   }
 
   /** @override */
-  requiresSynchronousExecution() {
+  sync() {
     return true;
   }
 }
 
 /**
  * Swaps a media element into the DOM, in the place of a placeholder element.
+ * @implements {MediaTask}
  */
-export class SwapIntoDomTask extends MediaTask {
+export class SwapIntoDomTask {
   /**
    * @param {!Element} placeholderEl The element to be replaced by the media
    *     element on which this task is executed.
    */
   constructor(placeholderEl) {
-    super('swap-into-dom');
-
     /** @private @const {!Element} */
     this.placeholderEl_ = placeholderEl;
   }
 
   /** @override */
-  executeInternal(mediaEl) {
+  execute(mediaEl) {
     if (!isConnectedNode(this.placeholderEl_)) {
-      this.failTask('Cannot swap media for element that is not in DOM.');
-      return Promise.resolve();
+      return Promise.reject(
+        'Cannot swap media for element that is not in DOM.'
+      );
     }
 
     copyCssClasses(this.placeholderEl_, mediaEl);
@@ -400,40 +322,37 @@ export class SwapIntoDomTask extends MediaTask {
       mediaEl,
       this.placeholderEl_
     );
-    return Promise.resolve();
   }
 
   /** @override */
-  requiresSynchronousExecution() {
+  sync() {
     return true;
   }
 }
 
 /**
  * Swaps a media element out the DOM, replacing it with a placeholder element.
+ * @implements {MediaTask}
  */
-export class SwapOutOfDomTask extends MediaTask {
+export class SwapOutOfDomTask {
   /**
    * @param {!Element} placeholderEl The element to replace the media element on
    *     which this task is executed.
    */
   constructor(placeholderEl) {
-    super('swap-out-of-dom');
-
     /** @private @const {!Element} */
     this.placeholderEl_ = placeholderEl;
   }
 
   /** @override */
-  executeInternal(mediaEl) {
+  execute(mediaEl) {
     copyCssClasses(mediaEl, this.placeholderEl_);
     copyAttributes(mediaEl, this.placeholderEl_);
     mediaEl.parentElement.replaceChild(this.placeholderEl_, mediaEl);
-    return Promise.resolve();
   }
 
   /** @override */
-  requiresSynchronousExecution() {
+  sync() {
     return true;
   }
 }

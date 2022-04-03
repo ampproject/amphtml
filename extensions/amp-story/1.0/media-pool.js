@@ -776,7 +776,7 @@ export class MediaPool {
         if (rewindToBeginning) {
           this.enqueueMediaElementTask_(
             /** @type {!PoolBoundElementDef} */ (poolMediaEl),
-            new SetCurrentTimeTask({currentTime: 0})
+            new SetCurrentTimeTask(0)
           );
         }
       }
@@ -813,7 +813,7 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(
       poolMediaEl,
-      new SetCurrentTimeTask({currentTime})
+      new SetCurrentTimeTask(currentTime)
     );
   }
 
@@ -939,28 +939,26 @@ export class MediaPool {
   /**
    * @param {!PoolBoundElementDef} mediaEl The element whose task queue should
    *     be executed.
+   * @param {[MediaTask, () => void][]} queue
    * @private
    */
-  executeNextMediaElementTask_(mediaEl) {
-    const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
-    if (queue.length === 0) {
+  executeNextMediaElementTask_(mediaEl, queue) {
+    if (!queue.length) {
       return;
     }
-
-    const task = queue[0];
-
+    const [item] = queue;
+    const [task, resolve] = item;
     const executionFn = () => {
-      task
-        .execute(mediaEl)
+      Promise.resolve(task.execute(mediaEl))
         .catch((reason) => dev().error('AMP-STORY', reason))
         .then(() => {
           // Run regardless of success or failure of task execution.
+          resolve();
           queue.shift();
-          this.executeNextMediaElementTask_(mediaEl);
+          this.executeNextMediaElementTask_(mediaEl, queue);
         });
     };
-
-    if (task.requiresSynchronousExecution()) {
+    if (task.sync()) {
       executionFn();
     } else {
       this.timer_.delay(executionFn, 0);
@@ -976,20 +974,16 @@ export class MediaPool {
    * @private
    */
   enqueueMediaElementTask_(mediaEl, task) {
-    if (!mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME]) {
-      mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME] = [];
-    }
-
-    const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
-    const isQueueRunning = queue.length !== 0;
-
-    queue.push(task);
-
-    if (!isQueueRunning) {
-      this.executeNextMediaElementTask_(mediaEl);
-    }
-
-    return task.whenComplete();
+    return new Promise((resolve) => {
+      if (!mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME]) {
+        mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME] = [];
+      }
+      const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
+      const length = queue.push([task, resolve]);
+      if (length === 1) {
+        this.executeNextMediaElementTask_(mediaEl, queue);
+      }
+    });
   }
 
   /**
