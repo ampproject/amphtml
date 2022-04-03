@@ -41,6 +41,7 @@ const {
   getRemapBentoDependencies,
   getRemapBentoNpmDependencies,
 } = require('../compile/bento-remap');
+const {findJsSourceFilename} = require('../common/fs');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -435,7 +436,6 @@ async function buildExtension(name, version, hasCss, options) {
   }
 
   if (hasCss) {
-    await fs.mkdir('build/css', {recursive: true});
     await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
@@ -515,6 +515,7 @@ async function buildNpmBentoWebComponentCss(extDir, options) {
     await buildExtensionCss(extDir, options.name, options.version, options);
   }
   const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
+  await fs.ensureDir(path.dirname(destFilepath));
   await fs.copyFile(srcFilepath, destFilepath);
 }
 
@@ -713,19 +714,6 @@ function buildBinaries(extDir, binaries, options) {
 }
 
 /**
- * @param {string} nameWithoutExtension
- * @param {?string|void} cwd
- * @return {Promise<string|undefined>}
- */
-async function findJsSourceFilename(nameWithoutExtension, cwd) {
-  const [filename] = await fastGlob(
-    `${nameWithoutExtension}.{js,ts,tsx}`,
-    cwd ? {cwd} : undefined
-  );
-  return filename;
-}
-
-/**
  * @param {string} dir
  * @param {string} name
  * @param {!Object} options
@@ -825,7 +813,11 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
  */
 async function buildExtensionJs(dir, name, options) {
   const isLatest = legacyLatestVersions[options.name] === options.version;
-  const {version, filename = `${name}.js`, wrapper = 'extension'} = options;
+  const {
+    filename = await findJsSourceFilename(name, dir),
+    version,
+    wrapper = 'extension',
+  } = options;
 
   const wrapperOrFn = wrappers[wrapper];
   if (!wrapperOrFn) {

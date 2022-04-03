@@ -8,12 +8,16 @@ const glob = require('globby');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 const {posix} = require('path');
 
+const formatPathLikeSource = (path) => `./${path.replace(/^\.\//, '')}`;
+
 /**
  * @param {string} path
  * @return {?string}
  */
 function resolveExactModuleFile(path) {
-  let unaliased = resolvePath(path);
+  let unaliased = path.startsWith('#')
+    ? resolvePath(path)
+    : formatPathLikeSource(path);
   try {
     if (lstatSync(unaliased).isDirectory()) {
       unaliased += '/index';
@@ -93,7 +97,11 @@ const getAllRemappings = once(() => {
       .map(({cdn, npm, source}) => {
         const resolved = resolveExactModuleFile(source);
         if (resolved) {
-          return {source: resolved, cdn, npm};
+          return {
+            source: resolved,
+            cdn: formatPathLikeSource(cdn),
+            npm: formatPathLikeSource(npm),
+          };
         }
       })
       .filter(Boolean)
@@ -108,7 +116,7 @@ const getAllRemappings = once(() => {
  */
 function getRemappings(type, entryPoint) {
   const entryPointFormattedLikeSource = entryPoint
-    ? `./${entryPoint.replace(/^\.\//, '')}`
+    ? formatPathLikeSource(entryPoint)
     : null;
   return /** @type {{[string: string]: string}} */ (
     Object.fromEntries(
