@@ -116,7 +116,32 @@ let AsyncMediaTaskDef;
 /** @typedef {[MediaTaskFnDef, true]} */
 let SyncMediaTaskDef;
 
-/** @typedef {AsyncMediaTaskDef|SyncMediaTaskDef} */
+/**
+ * A task on an HTMLMediaElement that runs sequentially on a queue.
+ * It must be specified as an array whose first item is a function:
+ *
+ *   const fn = (mediaEl) => {};
+ *   const task = [fn];
+ *
+ * This function is executed asynchronously as a result of `setTimeout(fn, 0)`.
+ *
+ * If the function requires synchronous execution (for example, if it should
+ * run as the result of a user gesture), the task must have a second item to
+ * annotate this fact as `true`:
+ *
+ *   const task = [fn, /* requiresSynchronousExecution *\/ true];
+ *
+ * If the function requires arguments, the task must be implemented as a
+ * factory (see `create*` for more examples):
+ *
+ *   function createTask(a, b) {
+ *     const fn = (mediaEl) => {
+ *       x(mediaEl, a, b);
+ *     };
+ *     return [fn];
+ *   }
+ * @typedef {AsyncMediaTaskDef|SyncMediaTaskDef}
+ */
 export let MediaTask;
 
 /**
@@ -185,7 +210,7 @@ export const LoadTask = [
   // LoadTask runs to reset it (buffered data, readyState, etc). It needs to
   // run synchronously so the media element can't be used in a new context
   // but with old data.
-  /* sync */ true,
+  /* requiresSynchronousExecution */ true,
 ];
 
 /**
@@ -206,7 +231,7 @@ const bless = (mediaEl) => {
 export const BlessTask = [
   bless,
   // Must be sync since it's from a user gesture
-  /* sync */ true,
+  /* requiresSynchronousExecution */ true,
 ];
 
 /**
@@ -222,7 +247,7 @@ export function createUpdateSourcesTask(win, newSources) {
       Sources.removeFrom(win, mediaEl);
       newSources.applyToElement(win, mediaEl);
     },
-    /* sync */ true,
+    /* requiresSynchronousExecution */ true,
   ];
 }
 
@@ -244,7 +269,7 @@ export function createSwapIntoDomTask(placeholderEl) {
       copyAttributes(placeholderEl, mediaEl);
       placeholderEl.parentElement.replaceChild(mediaEl, placeholderEl);
     },
-    /* sync */ true,
+    /* requiresSynchronousExecution */ true,
   ];
 }
 
@@ -261,6 +286,6 @@ export function createSwapOutOfDomTask(placeholderEl) {
       copyAttributes(mediaEl, placeholderEl);
       mediaEl.parentElement.replaceChild(placeholderEl, mediaEl);
     },
-    /* sync */ true,
+    /* requiresSynchronousExecution */ true,
   ];
 }
