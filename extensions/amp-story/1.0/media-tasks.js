@@ -145,6 +145,7 @@ let SyncMediaTaskDef;
 export let MediaTask;
 
 /**
+ * Plays the specified media element.
  * @param {HTMLMediaElement} mediaEl
  * @return {Promise|void}
  */
@@ -160,7 +161,10 @@ const play = (mediaEl) => {
 /** @const {MediaTask} */
 export const PlayTask = [play];
 
-/** @param {HTMLMediaElement} mediaEl */
+/**
+ * Pauses the specified media element.
+ * @param {HTMLMediaElement} mediaEl
+ */
 const pause = (mediaEl) => {
   mediaEl.pause();
 };
@@ -168,7 +172,10 @@ const pause = (mediaEl) => {
 /** @const {MediaTask} */
 export const PauseTask = [pause];
 
-/** @param {HTMLMediaElement} mediaEl */
+/**
+ * Unmutes the specified media element.
+ * @param {HTMLMediaElement} mediaEl
+ */
 const unmute = (mediaEl) => {
   mediaEl.muted = false;
   mediaEl.removeAttribute('muted');
@@ -177,7 +184,10 @@ const unmute = (mediaEl) => {
 /** @const {MediaTask} */
 export const UnmuteTask = [unmute];
 
-/** @param {HTMLMediaElement} mediaEl */
+/**
+ * Mutes the specified media element.
+ * @param {HTMLMediaElement} mediaEl
+ */
 const mute = (mediaEl) => {
   mediaEl.muted = true;
   mediaEl.setAttribute('muted', '');
@@ -187,18 +197,30 @@ const mute = (mediaEl) => {
 export const MuteTask = [mute];
 
 /**
+ * Seeks the specified media element to the provided time, in seconds.
+ * @param {HTMLMediaElement} mediaEl
+ * @param {number} currentTime
+ */
+const setCurrentTime = (mediaEl, currentTime) => {
+  mediaEl.currentTime = currentTime;
+};
+
+/**
  * @param {number} currentTime
  * @return {MediaTask}
  */
 export function createSetCurrentTimeTask(currentTime) {
   return [
     (mediaEl) => {
-      mediaEl.currentTime = currentTime;
+      setCurrentTime(mediaEl, currentTime);
     },
   ];
 }
 
-/** @param {HTMLMediaElement} mediaEl */
+/**
+ * Loads the specified media element.
+ * @param {HTMLMediaElement} mediaEl
+ */
 const load = (mediaEl) => {
   mediaEl.load();
 };
