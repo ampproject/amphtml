@@ -288,9 +288,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
-      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
-        ? options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
-        : calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_STATIC_SCALE_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -311,9 +311,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
-      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
-        ? options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
-        : calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_STATIC_SCALE_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -334,9 +334,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
-        ? options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
-        : calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_STATIC_SCALE_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
@@ -357,9 +357,9 @@ export const presets = {
     easing: 'linear',
     keyframes(dimensions, options) {
       const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
-      const scalingFactor = options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
-        ? options[PAN_STATIC_SCALE_ATTRIBUTE_NAME]
-        : calculateTargetScalingFactor(dimensions);
+      const scalingFactor =
+        options[PAN_STATIC_SCALE_ATTRIBUTE_NAME] ??
+        calculateTargetScalingFactor(dimensions);
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 

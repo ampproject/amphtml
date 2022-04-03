@@ -269,7 +269,9 @@ tags: {
   }
   attrs: {
     name: "pan-static-scale"
-    value_regex_casei: "[0-9]+([.][0-9]+)?"
+    # Allow float number such as "12.3", ".1", or "5."
+    # Note that string with only decimal point such as "." is not allowed.
+    value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
   }
   attrs: {
     name: "justify-content"
