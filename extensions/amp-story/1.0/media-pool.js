@@ -946,7 +946,7 @@ export class MediaPool {
     }
     const [item] = queue;
     const [task, resolve] = item;
-    const [fn, sync] = task;
+    const [fn, requiresSynchronousExecution] = task;
     const executionFn = () => {
       Promise.resolve(fn(mediaEl))
         .catch((reason) => dev().error('AMP-STORY', reason))
@@ -957,7 +957,7 @@ export class MediaPool {
           this.executeNextMediaElementTask_(mediaEl, queue);
         });
     };
-    if (sync) {
+    if (requiresSynchronousExecution) {
       executionFn();
     } else {
       this.timer_.delay(executionFn, 0);
