@@ -121,25 +121,27 @@ let SyncMediaTaskDef;
  * It must be specified as an array whose first item is a function:
  *
  *   const fn = (mediaEl) => {};
- *   const task = [fn];
+ *   const MyTask = [fn];
  *
  * This function is executed asynchronously as a result of `setTimeout(fn, 0)`.
  *
- * If the function requires synchronous execution (for example, if it should
- * run as the result of a user gesture), the task must have a second item to
- * annotate this fact as `true`:
+ * If this is not desired because the function requires synchronous execution
+ * (for example, if it should run as a result of a user gesture), the task
+ * must include a second item that annotates this property as `true`:
  *
- *   const task = [fn, /* requiresSynchronousExecution *\/ true];
+ *   const MyTask = [fn, /* requiresSynchronousExecution *\/ true];
  *
- * If the function requires arguments, the task must be implemented as a
- * factory (see `create*` for more examples):
+ * If the function requires arguments in addition to HTMLMediaElement, you must
+ * implement a factory that returns the task (see exported functions named
+ * `create*` for more examples):
  *
- *   function createTask(a, b) {
+ *   function createMyTask(a, b) {
  *     const fn = (mediaEl) => {
  *       x(mediaEl, a, b);
  *     };
  *     return [fn];
  *   }
+ *
  * @typedef {AsyncMediaTaskDef|SyncMediaTaskDef}
  */
 export let MediaTask;
