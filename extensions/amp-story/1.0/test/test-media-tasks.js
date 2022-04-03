@@ -93,20 +93,11 @@ describes.realWin('media-tasks', {}, (env) => {
   });
 
   describe('SetCurrentTimeTask', () => {
-    it('should set currentTime to 0 by default', () => {
-      el.currentTime = 1;
-      expect(el.currentTime).to.equal(1);
-
-      const task = new SetCurrentTimeTask();
-      task.execute(el);
-      expect(el.currentTime).to.equal(0);
-    });
-
     it('should set currentTime to the passed value', () => {
       el.currentTime = 1;
       expect(el.currentTime).to.equal(1);
 
-      const task = new SetCurrentTimeTask({currentTime: 2});
+      const task = new SetCurrentTimeTask(2);
       task.execute(el);
       expect(el.currentTime).to.equal(2);
     });
