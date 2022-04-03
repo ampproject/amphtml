@@ -15,11 +15,11 @@ import {
   MuteTask,
   PauseTask,
   PlayTask,
-  SetCurrentTimeTask,
-  SwapIntoDomTask,
-  SwapOutOfDomTask,
   UnmuteTask,
-  UpdateSourcesTask,
+  createSetCurrentTimeTask,
+  createSwapIntoDomTask,
+  createSwapOutOfDomTask,
+  createUpdateSourcesTask,
 } from './media-tasks';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
@@ -509,7 +509,7 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(
       poolMediaEl,
-      new SwapIntoDomTask(placeholderEl)
+      createSwapIntoDomTask(placeholderEl)
     )
       .then(() =>
         Promise.all([
@@ -520,10 +520,10 @@ export class MediaPool {
       .then(() =>
         this.enqueueMediaElementTask_(
           poolMediaEl,
-          new UpdateSourcesTask(this.win_, sources)
+          createUpdateSourcesTask(this.win_, sources)
         )
       )
-      .then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()))
+      .then(() => this.enqueueMediaElementTask_(poolMediaEl, LoadTask))
       .catch(() => {
         this.forceDeallocateMediaElement_(poolMediaEl);
       });
@@ -562,8 +562,8 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(
       poolMediaEl,
-      new UpdateSourcesTask(this.win_, defaultSources)
-    ).then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()));
+      createUpdateSourcesTask(this.win_, defaultSources)
+    ).then(() => this.enqueueMediaElementTask_(poolMediaEl, LoadTask));
   }
 
   /**
@@ -588,7 +588,7 @@ export class MediaPool {
 
     const swapOutOfDom = this.enqueueMediaElementTask_(
       poolMediaEl,
-      new SwapOutOfDomTask(placeholderEl)
+      createSwapOutOfDomTask(placeholderEl)
     );
 
     this.resetPoolMediaElementSource_(poolMediaEl);
@@ -660,7 +660,7 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    return this.enqueueMediaElementTask_(poolMediaEl, new BlessTask());
+    return this.enqueueMediaElementTask_(poolMediaEl, BlessTask);
   }
 
   /**
@@ -748,7 +748,7 @@ export class MediaPool {
         return Promise.resolve();
       }
 
-      return this.enqueueMediaElementTask_(poolMediaEl, new PlayTask());
+      return this.enqueueMediaElementTask_(poolMediaEl, PlayTask);
     });
   }
 
@@ -771,16 +771,14 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask()).then(
-      () => {
-        if (rewindToBeginning) {
-          this.enqueueMediaElementTask_(
-            /** @type {!PoolBoundElementDef} */ (poolMediaEl),
-            new SetCurrentTimeTask(0)
-          );
-        }
+    return this.enqueueMediaElementTask_(poolMediaEl, PauseTask).then(() => {
+      if (rewindToBeginning) {
+        this.enqueueMediaElementTask_(
+          /** @type {!PoolBoundElementDef} */ (poolMediaEl),
+          createSetCurrentTimeTask(0)
+        );
       }
-    );
+    });
   }
 
   /**
@@ -813,7 +811,7 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(
       poolMediaEl,
-      new SetCurrentTimeTask(currentTime)
+      createSetCurrentTimeTask(currentTime)
     );
   }
 
@@ -839,7 +837,7 @@ export class MediaPool {
       audioSource.disconnect();
     }
 
-    return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
+    return this.enqueueMediaElementTask_(poolMediaEl, MuteTask);
   }
 
   /**
@@ -873,7 +871,7 @@ export class MediaPool {
       }
     }
 
-    return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
+    return this.enqueueMediaElementTask_(poolMediaEl, UnmuteTask);
   }
 
   /**
@@ -948,8 +946,9 @@ export class MediaPool {
     }
     const [item] = queue;
     const [task, resolve] = item;
+    const [fn, sync] = task;
     const executionFn = () => {
-      Promise.resolve(task.execute(mediaEl))
+      Promise.resolve(fn(mediaEl))
         .catch((reason) => dev().error('AMP-STORY', reason))
         .then(() => {
           // Run regardless of success or failure of task execution.
@@ -958,7 +957,7 @@ export class MediaPool {
           this.executeNextMediaElementTask_(mediaEl, queue);
         });
     };
-    if (task.sync()) {
+    if (sync) {
       executionFn();
     } else {
       this.timer_.delay(executionFn, 0);
