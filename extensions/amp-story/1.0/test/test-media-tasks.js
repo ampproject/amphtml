@@ -5,11 +5,11 @@ import {
   MuteTask,
   PauseTask,
   PlayTask,
-  SetCurrentTimeTask,
-  SwapIntoDomTask,
-  SwapOutOfDomTask,
   UnmuteTask,
-  UpdateSourcesTask,
+  createSetCurrentTimeTask,
+  createSwapIntoDomTask,
+  createSwapOutOfDomTask,
+  createUpdateSourcesTask,
 } from '../media-tasks';
 import {Sources} from '../sources';
 
@@ -34,8 +34,8 @@ describes.realWin('media-tasks', {}, (env) => {
   describe('PauseTask', () => {
     it('should call pause()', () => {
       const pause = env.sandbox.spy(el, 'pause');
-      const task = new PauseTask();
-      task.execute(el);
+      const [execute] = PauseTask;
+      execute(el);
       expect(pause).to.have.been.called;
     });
   });
@@ -45,8 +45,8 @@ describes.realWin('media-tasks', {}, (env) => {
       expect(el.paused).to.be.true;
 
       const play = env.sandbox.spy(el, 'play');
-      const task = new PlayTask();
-      task.execute(el);
+      const [execute] = PlayTask;
+      execute(el);
       expect(play).to.have.been.called;
     });
 
@@ -55,8 +55,8 @@ describes.realWin('media-tasks', {}, (env) => {
       expect(el.paused).to.be.false;
 
       const play = env.sandbox.spy(el, 'play');
-      const task = new PlayTask();
-      task.execute(el);
+      const [execute] = PlayTask;
+      execute(el);
       expect(play).not.to.have.been.called;
     });
   });
@@ -66,8 +66,8 @@ describes.realWin('media-tasks', {}, (env) => {
       el.muted = false;
       expect(el.muted).to.be.false;
 
-      const task = new MuteTask();
-      task.execute(el);
+      const [execute] = MuteTask;
+      execute(el);
       expect(el.muted).to.be.true;
     });
   });
@@ -77,8 +77,8 @@ describes.realWin('media-tasks', {}, (env) => {
       el.muted = true;
       expect(el.muted).to.be.true;
 
-      const task = new UnmuteTask();
-      task.execute(el);
+      const [execute] = UnmuteTask;
+      execute(el);
       expect(el.muted).to.be.false;
     });
   });
@@ -86,8 +86,8 @@ describes.realWin('media-tasks', {}, (env) => {
   describe('LoadTask', () => {
     it('should call load()', () => {
       const load = env.sandbox.spy(el, 'load');
-      const task = new LoadTask();
-      task.execute(el);
+      const [execute] = LoadTask;
+      execute(el);
       expect(load).to.have.been.called;
     });
   });
@@ -97,8 +97,8 @@ describes.realWin('media-tasks', {}, (env) => {
       el.currentTime = 1;
       expect(el.currentTime).to.equal(1);
 
-      const task = new SetCurrentTimeTask(2);
-      task.execute(el);
+      const [execute] = createSetCurrentTimeTask(2);
+      execute(el);
       expect(el.currentTime).to.equal(2);
     });
   });
@@ -136,8 +136,8 @@ describes.realWin('media-tasks', {}, (env) => {
 
       expect(el.src).to.not.be.empty;
       const newSources = new Sources(null, []);
-      const task = new UpdateSourcesTask(win, newSources);
-      task.execute(el);
+      const [execute] = createUpdateSourcesTask(win, newSources);
+      execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.be.empty;
     });
@@ -150,8 +150,8 @@ describes.realWin('media-tasks', {}, (env) => {
 
       expect(toArray(el.children)).to.deep.equal(OLD_SRC_ELS);
       const newSources = new Sources(null, []);
-      const task = new UpdateSourcesTask(win, newSources);
-      task.execute(el);
+      const [execute] = createUpdateSourcesTask(win, newSources);
+      execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.be.empty;
     });
@@ -163,8 +163,8 @@ describes.realWin('media-tasks', {}, (env) => {
 
       expect(el.src).to.not.be.empty;
       const newSources = new Sources(NEW_SRC_URL, []);
-      const task = new UpdateSourcesTask(win, newSources);
-      task.execute(el);
+      const [execute] = createUpdateSourcesTask(win, newSources);
+      execute(el);
       expect(el.src).to.equal(NEW_SRC_URL);
       expect(toArray(el.children)).to.be.empty;
     });
@@ -179,8 +179,8 @@ describes.realWin('media-tasks', {}, (env) => {
 
       expect(toArray(el.children)).to.deep.equal(OLD_SRC_ELS);
       const newSources = new Sources(null, NEW_SRC_ELS);
-      const task = new UpdateSourcesTask(win, newSources);
-      task.execute(el);
+      const [execute] = createUpdateSourcesTask(win, newSources);
+      execute(el);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.deep.equal(NEW_SRC_ELS);
     });
@@ -188,8 +188,8 @@ describes.realWin('media-tasks', {}, (env) => {
     it('should propagate the src attribute as a source', () => {
       el.setAttribute('src', './foo.mp4');
       const newSources = Sources.removeFrom(win, el);
-      const task = new UpdateSourcesTask(win, newSources);
-      task.execute(el);
+      const [execute] = createUpdateSourcesTask(win, newSources);
+      execute(el);
       expect(el).to.not.have.attribute('src');
       expect(toArray(el.children)).to.have.length(1);
       expect(el.firstElementChild).to.have.attribute('src');
@@ -200,8 +200,8 @@ describes.realWin('media-tasks', {}, (env) => {
       el.setAttribute('src', './foo.mp4');
       el.setAttribute('amp-orig-src', './bar.mp4');
       const newSources = Sources.removeFrom(win, el);
-      const task = new UpdateSourcesTask(win, newSources);
-      task.execute(el);
+      const [execute] = createUpdateSourcesTask(win, newSources);
+      execute(el);
       expect(el.firstElementChild).to.have.attribute('amp-orig-src');
       expect(el.firstElementChild.getAttribute('amp-orig-src')).to.equal(
         './bar.mp4'
@@ -214,8 +214,8 @@ describes.realWin('media-tasks', {}, (env) => {
         el.appendChild(source);
       });
       const newSources = Sources.removeFrom(win, el);
-      const task = new UpdateSourcesTask(win, newSources);
-      task.execute(el);
+      const [execute] = createUpdateSourcesTask(win, newSources);
+      execute(el);
       expect(el).to.not.have.attribute('src');
       expect(toArray(el.children)).to.have.length(1);
       expect(el.firstElementChild).to.have.attribute('src');
@@ -241,8 +241,8 @@ describes.realWin('media-tasks', {}, (env) => {
       expect(replacedMedia.parentElement).to.equal(parent);
       expect(el.parentElement).to.equal(null);
 
-      const task = new SwapIntoDomTask(replacedMedia);
-      await task.execute(el);
+      const [execute] = createSwapIntoDomTask(replacedMedia);
+      await execute(el);
       expect(replacedMedia.parentElement).to.equal(null);
       expect(el.parentElement).to.equal(parent);
     });
@@ -259,8 +259,8 @@ describes.realWin('media-tasks', {}, (env) => {
       expect(el.parentElement).to.equal(parent);
       expect(placeholderEl.parentElement).to.equal(null);
 
-      const task = new SwapOutOfDomTask(placeholderEl);
-      await task.execute(el);
+      const [execute] = createSwapOutOfDomTask(placeholderEl);
+      await execute(el);
       expect(el.parentElement).to.equal(null);
       expect(placeholderEl.parentElement).to.equal(parent);
     });
