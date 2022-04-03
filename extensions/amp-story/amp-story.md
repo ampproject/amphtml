@@ -731,9 +731,9 @@ _Example_: An image panning 50px down over 15 seconds.
 
 #### pan-static-scale [optional, only works with `pan-left`, `pan-right`, `pan-up`, & `pan-down` animations]
 
-The target scales to at least 25% larger than the page in a pan-left/pan-right/pan-up/pan-down animation to ensure it does not go out of the target boundary when panning.
+The target scales automatically in a pan-left/pan-right/pan-up/pan-down animation to ensure it does not go out of the target boundary when panning.
 
-Use this attribute to override the default sclaing factor calculation, and specify the static scaling factor. The value must be greater than 0, and decimals are allowed.
+Use this attribute to override the default scaling factor calculation, and specify the static scaling factor. The value must be greater than 0, and decimals are allowed.
 
 _Example_: An image scales 1.3x when panning.
 
