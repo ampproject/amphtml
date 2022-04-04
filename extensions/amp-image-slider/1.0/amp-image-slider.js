@@ -2,6 +2,8 @@ import {isFiniteNumber} from '#core/types';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {userAssert} from '#utils/log';
 
 import {BaseElement} from './base-element';
@@ -11,7 +13,7 @@ import {CSS} from '../../../build/amp-image-slider-1.0.css';
 /** @const {string} */
 const TAG = 'amp-image-slider';
 
-class AmpImageSlider extends BaseElement {
+class AmpImageSlider extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     this.registerApiAction('seekTo', (api, invocation) => {
