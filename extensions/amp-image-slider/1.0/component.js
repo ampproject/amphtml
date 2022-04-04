@@ -18,6 +18,7 @@ import {ContainWrapper} from '#preact/component';
 import {installTimerService} from '#service/timer-impl';
 
 import {listen} from '#utils/event-helper';
+// eslint-disable-next-line
 import {initLogConstructor} from '#utils/log';
 
 import {useStyles} from './component.jss';
@@ -29,6 +30,7 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
  * Using Gestures class throws console error for failed to call initLogConstructor
  * so we need to explicity call it.
  */
+// eslint-disable-next-line
 initLogConstructor();
 installTimerService(global);
 
@@ -189,7 +191,8 @@ export function BentoImageSliderWithRef(
       // pointer down after scrolling away and back 3+ slides
       // layoutBox is not updated correctly when first landed on page
 
-      const {left, right, width} = containerRef.current./*OK*/ getBoundingClientRect();;
+      const {left, right, width} =
+        containerRef.current./*OK*/ getBoundingClientRect();
 
       const newPos = clamp(pointerX, left, right);
       const newPercentage = (newPos - left) / width;
@@ -371,10 +374,10 @@ export function BentoImageSliderWithRef(
       e.preventDefault();
       pointerMoveX(e.pageX);
 
-      if ( unlistenMouseMove.current === null ) {
+      if (unlistenMouseMove.current === null) {
         unlistenMouseMove.current = listen(window, 'mousemove', onMouseMove);
       }
-      if ( unlistenMouseUp.current === null ) {
+      if (unlistenMouseUp.current === null) {
         unlistenMouseUp.current = listen(window, 'mouseup', onMouseUp);
       }
 
@@ -387,7 +390,6 @@ export function BentoImageSliderWithRef(
       unlistenMouseUp,
       onMouseMove,
       onMouseUp,
-      unlisten,
     ]
   );
 
@@ -470,7 +472,7 @@ export function BentoImageSliderWithRef(
       layout
       size
       paint
-      tabIndex="0"
+      tabindex="0"
       autoFocus="true"
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}

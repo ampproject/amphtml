@@ -53,25 +53,25 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       toggleExperiment(win, 'bento-image-slider', true, true);
-      element = createElementWithAttributes(win.document, 'amp-image-slider', {
+      element = createElementWithAttributes(doc, 'amp-image-slider', {
         'layout': 'fixed',
         'width': '300px',
         'height': '200px',
         'initial-slider-position': '0.3',
       });
-      leftImage = createElementWithAttributes(win.document, 'amp-img', {
+      leftImage = createElementWithAttributes(doc, 'amp-img', {
         'slot': 'first-image',
         'layout': 'fill',
         'src': '/examples/img/hero@1x.jpg',
       });
-      rightImage = createElementWithAttributes(win.document, 'amp-img', {
+      rightImage = createElementWithAttributes(doc, 'amp-img', {
         'slot': 'second-image',
         'layout': 'fill',
         'src': '/examples/img/hero@2x.jpg',
       });
       element.appendChild(leftImage);
       element.appendChild(rightImage);
-      win.document.body.appendChild(element);
+      doc.body.appendChild(element);
     });
 
     afterEach(async () => {
@@ -122,11 +122,11 @@ describes.realWin(
     });
 
     it('should render custom labels when given', async () => {
-      const leftLabel = createElementWithAttributes(win.document, 'div', {
+      const leftLabel = createElementWithAttributes(doc, 'div', {
         'slot': 'first-label',
       });
       leftLabel.append('Left Label');
-      const rightLabel = createElementWithAttributes(win.document, 'div', {
+      const rightLabel = createElementWithAttributes(doc, 'div', {
         'slot': 'second-label',
       });
       rightLabel.append('Right Label');
@@ -134,7 +134,7 @@ describes.realWin(
       element.appendChild(leftLabel);
       element.appendChild(rightLabel);
 
-      win.document.body.appendChild(element);
+      doc.body.appendChild(element);
       await waitForRender();
 
       const labelSlots = element.shadowRoot.querySelectorAll(
@@ -161,10 +161,10 @@ describes.realWin(
     });
 
     it('should render custom hints', async () => {
-      const leftHint = createElementWithAttributes(win.document, 'div', {
+      const leftHint = createElementWithAttributes(doc, 'div', {
         'slot': 'left-hint',
       });
-      const rightHint = createElementWithAttributes(win.document, 'div', {
+      const rightHint = createElementWithAttributes(doc, 'div', {
         'slot': 'right-hint',
       });
       element.appendChild(leftHint);
