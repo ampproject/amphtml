@@ -1,12 +1,11 @@
 import '../amp-audio';
 
 import {htmlFor} from '#core/dom/static-template';
+import {naturalDimensions_} from '#core/static-layout';
 
 import {toggleExperiment} from '#experiments';
 
-import {waitFor} from '#testing/test-helper';
-
-import {naturalDimensions_} from '../../../../src/static-layout';
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-audio-v1.0',

@@ -1,12 +1,11 @@
-import {Layout} from '#core/dom/layout';
-import {dict} from '#core/types/object';
+import {Layout_Enum} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
 
-import {BaseElement} from './base-element';
+import {triggerAnalyticsEvent} from '#utils/analytics';
+import {userAssert} from '#utils/log';
 
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {userAssert} from '../../../src/log';
+import {BaseElement} from './base-element';
 
 /** @const {string} */
 const TAG = 'amp-audio';
@@ -27,7 +26,7 @@ class AmpAudio extends BaseElement {
      * Add "validateMediaMetadata(element, metadata)" to dictionary
      * once validation step for video components on Bento are included
      */
-    return dict({
+    return {
       'onLoad': () => {
         this.toggleFallback(false);
       },
@@ -40,7 +39,7 @@ class AmpAudio extends BaseElement {
       'onPause': () => {
         triggerAnalyticsEvent(this.element, 'audio-pause');
       },
-    });
+    };
   }
 
   /** @override */
@@ -50,7 +49,7 @@ class AmpAudio extends BaseElement {
         isExperimentOn(this.win, 'bento-audio'),
       'expected global "bento" or specific "bento-audio" experiment to be enabled'
     );
-    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+    return layout == Layout_Enum.FIXED || layout == Layout_Enum.FIXED_HEIGHT;
   }
 }
 
