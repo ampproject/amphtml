@@ -6,7 +6,7 @@ import {user} from '#utils/log';
 
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 
-import validateProduct from '../../../examples/amp-story/shopping/product.schema.json' assert {type: 'json-schema'};
+import validateProduct from '../../../examples/amp-story/shopping/product.schema.json' assert {type: 'json-schema'}; // lgtm[js/syntax-error]
 import {
   Action,
   ShoppingConfigDataDef,
@@ -59,7 +59,7 @@ export function getShoppingConfig(shoppingAttachmentEl) {
       const productTitle = item?.productTitle ?? '';
       return validateConfig(
         item,
-        `pageId ${pageId} items[${i}] ${productTitle}`.trim()
+        `#${pageId} items[${i}] ${productTitle}`.trim()
       );
     });
 

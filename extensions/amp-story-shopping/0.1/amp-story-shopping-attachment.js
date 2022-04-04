@@ -13,7 +13,7 @@ import {
   storeShoppingConfig,
 } from './amp-story-shopping-config';
 
-import {resolveRelativeUrl} from '../../../src/url';
+import {relativeToSourceUrl} from '../../../src/url';
 import {
   Action,
   ShoppingConfigDataDef,
@@ -59,9 +59,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     /** @private {!Map<string, Element>} */
     this.builtTemplates_ = {};
-
-    /** @private @const {!string} */
-    this.sourceUrl_ = Services.documentInfoForDoc(this.element).sourceUrl;
   }
 
   /** @override */
@@ -347,9 +344,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               {activeProductData.aggregateRating.ratingValue} (
               <a
                 class="i-amphtml-amp-story-shopping-pdp-reviews-link"
-                href={resolveRelativeUrl(
+                href={relativeToSourceUrl(
                   activeProductData.aggregateRating.reviewUrl,
-                  this.sourceUrl_
+                  this.element
                 )}
                 target="_top"
               >
@@ -365,9 +362,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           )}
           <a
             class="i-amphtml-amp-story-shopping-pdp-cta"
-            href={resolveRelativeUrl(
+            href={relativeToSourceUrl(
               activeProductData.productUrl,
-              this.sourceUrl_
+              this.element
             )}
             target="_top"
             i-amphtml-i18n-text-content={
@@ -381,9 +378,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               class="i-amphtml-amp-story-shopping-pdp-carousel-card"
               role="img"
               aria-label={image.alt}
-              style={`background-image: url("${resolveRelativeUrl(
+              style={`background-image: url("${relativeToSourceUrl(
                 image.url,
-                this.sourceUrl_
+                this.element
               )}")`}
               onClick={(e) => this.onPdpCarouselCardClick_(e.target)}
             ></div>
@@ -446,9 +443,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               <div
                 class="i-amphtml-amp-story-shopping-plp-card-image"
                 style={{
-                  backgroundImage: `url("${resolveRelativeUrl(
+                  backgroundImage: `url("${relativeToSourceUrl(
                     data['productImages'][0].url,
-                    this.sourceUrl_
+                    this.element
                   )}")`,
                 }}
               ></div>
