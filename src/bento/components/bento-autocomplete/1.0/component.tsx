@@ -92,14 +92,35 @@ export function BentoAutocomplete({
     }
   );
 
+  const setInputValue = useCallback(
+    (value: string) => {
+      inputRef.current!.value = value;
+    },
+    [inputRef]
+  );
+
   const toggleResults = useCallback((shouldDisplay: boolean) => {
     inputRef.current?.setAttribute('aria-expanded', shouldDisplay.toString());
     setAreResultsDisplayed(shouldDisplay);
   }, []);
 
-  const setInputValue = useCallback((value: string) => {
-    inputRef.current!.value = value;
-  }, []);
+  const resetActiveItem = useCallback(() => {
+    setActiveIndex(INITIAL_ACTIVE_INDEX);
+    inputRef.current?.removeAttribute('aria-activedescendant');
+  }, [inputRef]);
+
+  const displayResults = useCallback(() => {
+    toggleResults(true);
+  }, [toggleResults]);
+
+  const hideResults = useCallback(() => {
+    resetActiveItem();
+    toggleResults(false);
+  }, [toggleResults, resetActiveItem]);
+
+  const resetUserInput = useCallback(() => {
+    setInputValue(substring);
+  }, [substring, setInputValue]);
 
   const getItemId = useCallback(
     (index: number) => {
@@ -242,24 +263,13 @@ export function BentoAutocomplete({
     [activeIndex, getItemId, showAutocompleteResults, setInputValue]
   );
 
-  const displayResults = useCallback(() => {
-    toggleResults(true);
-  }, [toggleResults]);
-
-  const hideResults = useCallback(() => {
-    // Reset the selection state if the items are hidden
-    setActiveIndex(INITIAL_ACTIVE_INDEX);
-    toggleResults(false);
-  }, [toggleResults]);
-
   const maybeFetchAndAutocomplete = useCallback(
     async (element: InputElement) => {
       const isFirstInteraction =
         substring.length === 0 && element.value.length === 1;
       setShouldFetchItems(isFirstInteraction);
 
-      const _substring = binding.getUserInputForUpdate(element);
-      setSubstring(_substring);
+      setSubstring(binding.getUserInputForUpdate(element));
       displayResults();
     },
     [binding, displayResults, substring]
@@ -280,13 +290,6 @@ export function BentoAutocomplete({
     }
   }, [displayResults, binding]);
 
-  const resetUserInput = useCallback(() => {
-    // Reset the selection state and the input value
-    setActiveIndex(INITIAL_ACTIVE_INDEX);
-    inputRef.current?.removeAttribute('aria-activedescendant');
-    setInputValue(substring);
-  }, [substring, setInputValue]);
-
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       switch (event.key) {
@@ -302,6 +305,7 @@ export function BentoAutocomplete({
           event.preventDefault();
           if (activeIndex === 0) {
             resetUserInput();
+            resetActiveItem();
             return;
           }
           updateActiveItem(-1);
@@ -322,7 +326,14 @@ export function BentoAutocomplete({
         }
       }
     },
-    [activeIndex, filteredData, updateActiveItem, resetUserInput, hideResults]
+    [
+      activeIndex,
+      filteredData,
+      updateActiveItem,
+      resetUserInput,
+      hideResults,
+      resetActiveItem,
+    ]
   );
 
   const selectItem = useCallback(
