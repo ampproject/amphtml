@@ -946,7 +946,7 @@ export class MediaPool {
     }
     // Using object destructure `const {0: item}` syntax rather than array
     // destructure `const [item]` syntax since the latter forces a runtime
-    // utility to be included.
+    // utility to be included in non-ESM builds.
     const {0: item} = queue;
     const {0: task, 1: resolve} = item;
     const {0: fn, 1: requiresSynchronousExecution} = task;
