@@ -13,7 +13,7 @@ import {
   storeShoppingConfig,
 } from './amp-story-shopping-config';
 
-import {isSecureUrlDeprecated, resolveRelativeUrl} from '../../../src/url';
+import {resolveRelativeUrl} from '../../../src/url';
 import {
   Action,
   ShoppingConfigDataDef,
@@ -59,6 +59,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     /** @private {!Map<string, Element>} */
     this.builtTemplates_ = {};
+
+    /** @private @const {!string} */
+    this.sourceUrl_ = Services.documentInfoForDoc(this.element).sourceUrl;
   }
 
   /** @override */
@@ -115,19 +118,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.attachmentEl_.addEventListener('transitionend', () =>
       this.clearActiveProductDataIfClosed_()
     );
-  }
-
-  /**
-   * Resolves relative URLs to their full path.
-   * @param {string} url
-   * @private
-   * @return {string}
-   */
-  resolveRelativeUrl_(url) {
-    if (/^\//.test(url) && isSecureUrlDeprecated(url)) {
-      return resolveRelativeUrl(url, this.getAmpDoc().getUrl());
-    }
-    return url;
   }
 
   /**
@@ -357,8 +347,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               {activeProductData.aggregateRating.ratingValue} (
               <a
                 class="i-amphtml-amp-story-shopping-pdp-reviews-link"
-                href={this.resolveRelativeUrl_(
-                  activeProductData.aggregateRating.reviewUrl
+                href={resolveRelativeUrl(
+                  activeProductData.aggregateRating.reviewUrl,
+                  this.sourceUrl_
                 )}
                 target="_top"
               >
@@ -374,7 +365,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           )}
           <a
             class="i-amphtml-amp-story-shopping-pdp-cta"
-            href={this.resolveRelativeUrl_(activeProductData.productUrl)}
+            href={resolveRelativeUrl(
+              activeProductData.productUrl,
+              this.sourceUrl_
+            )}
             target="_top"
             i-amphtml-i18n-text-content={
               LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL
@@ -387,8 +381,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               class="i-amphtml-amp-story-shopping-pdp-carousel-card"
               role="img"
               aria-label={image.alt}
-              style={`background-image: url("${this.resolveRelativeUrl_(
-                image.url
+              style={`background-image: url("${resolveRelativeUrl(
+                image.url,
+                this.sourceUrl_
               )}")`}
               onClick={(e) => this.onPdpCarouselCardClick_(e.target)}
             ></div>
@@ -451,8 +446,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               <div
                 class="i-amphtml-amp-story-shopping-plp-card-image"
                 style={{
-                  backgroundImage: `url("${this.resolveRelativeUrl_(
-                    data['productImages'][0].url
+                  backgroundImage: `url("${resolveRelativeUrl(
+                    data['productImages'][0].url,
+                    this.sourceUrl_
                   )}")`,
                 }}
               ></div>
