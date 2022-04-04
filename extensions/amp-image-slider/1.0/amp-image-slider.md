@@ -188,5 +188,5 @@ Few updates and alteration are done in `1.0` which are a bit different from `0.1
 
 ## Validation
 
-See [`amp-image-slider` rules](validator-amp-image-slider.protoascii)
+See [`amp-image-slider` rules](../validator-amp-image-slider.protoascii)
 in the AMP validator specification.
