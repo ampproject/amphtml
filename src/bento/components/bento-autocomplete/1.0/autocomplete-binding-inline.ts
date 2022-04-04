@@ -1,6 +1,6 @@
 import {ownProperty} from '#core/types/object';
 
-import {AutocompleteBinding, InputElement} from '../types';
+import {AutocompleteBinding, InputElement} from './types';
 
 export class AutocompleteBindingInline implements AutocompleteBinding {
   trigger_: string = '';

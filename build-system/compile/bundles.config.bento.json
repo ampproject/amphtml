@@ -8,6 +8,14 @@
     }
   },
   {
+    "name": "bento-autocomplete",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
     "name": "bento-base-carousel",
     "version": "1.0",
     "latestVersion": "0.1",
