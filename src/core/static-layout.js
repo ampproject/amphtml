@@ -30,8 +30,7 @@ import {setStyle, setStyles, toggle} from '#core/dom/style';
 export const naturalDimensions_ = {
   'AMP-PIXEL': {width: '0px', height: '0px'},
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
-  // TODO(dvoytenko): audio should have width:auto.
-  'AMP-AUDIO': {width: '100%', height: '3.5rem'},
+  'AMP-AUDIO': {width: 'auto', height: '3.5rem'},
   'AMP-SOCIAL-SHARE': {width: '60px', height: '44px'},
 };
 
@@ -57,6 +56,25 @@ export function hasNaturalDimensions(tagName) {
 export function getNaturalDimensions(element) {
   const tagName = element.tagName.toUpperCase();
   devAssert(naturalDimensions_[tagName] !== undefined);
+  if (!naturalDimensions_[tagName]) {
+    const doc = element.ownerDocument;
+    const naturalTagName = tagName.replace(/^AMP\-/, '');
+    const temp = /** @type {HTMLElement} */ (doc.createElement(naturalTagName));
+
+    // For audio, should no-op elsewhere.
+    /** @type {HTMLAudioElement} */ (temp).controls = true;
+
+    setStyles(temp, {
+      position: 'absolute',
+      visibility: 'hidden',
+    });
+    doc.body.appendChild(temp);
+    naturalDimensions_[tagName] = {
+      width: (temp./*OK*/ offsetWidth || 1) + 'px',
+      height: (temp./*OK*/ offsetHeight || 1) + 'px',
+    };
+    doc.body.removeChild(temp);
+  }
 
   return /** @type {import('./dom/layout').DimensionsDef} */ (
     naturalDimensions_[tagName]
