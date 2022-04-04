@@ -418,6 +418,35 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         .true;
     });
 
+    it('does not update the input value or active index if the bottom result is selected', () => {
+      const wrapper = mount(
+        <Autocomplete id="id" filter="prefix" items={['one']} minChars={0}>
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.simulate('focus');
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+
+      expect(input.getDOMNode().value).to.equal('one');
+      expect(input.getDOMNode().getAttribute('aria-activedescendant')).to.equal(
+        'id-0'
+      );
+      expect(wrapper.find('[data-value="one"]').prop('aria-selected')).to.be
+        .true;
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+
+      expect(input.getDOMNode().value).to.equal('one');
+      expect(input.getDOMNode().getAttribute('aria-activedescendant')).to.equal(
+        'id-0'
+      );
+      expect(wrapper.find('[data-value="one"]').prop('aria-selected')).to.be
+        .true;
+    });
+
     it('updates the input value on arrow up', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>

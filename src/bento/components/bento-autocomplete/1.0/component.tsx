@@ -247,18 +247,13 @@ export function BentoAutocomplete({
       if (delta === 0 || !showAutocompleteResults) {
         return;
       }
-      const index = activeIndex + delta;
-      const newActiveIndex = mod(index, results?.length || 0);
-      const activeResult = results?.item(newActiveIndex);
-      const newValue = getTextValue(activeResult as HTMLElement);
+      const index = mod(activeIndex + delta, results.length);
+      const activeResult = results?.item(index);
 
-      setActiveIndex(newActiveIndex);
-      inputRef.current?.setAttribute(
-        'aria-activedescendant',
-        getItemId(newActiveIndex)
-      );
+      setActiveIndex(index);
+      inputRef.current?.setAttribute('aria-activedescendant', getItemId(index));
 
-      setInputValue(newValue);
+      setInputValue(getTextValue(activeResult as HTMLElement));
     },
     [activeIndex, getItemId, showAutocompleteResults, setInputValue]
   );
@@ -295,9 +290,6 @@ export function BentoAutocomplete({
       switch (event.key) {
         case Keys_Enum.DOWN_ARROW: {
           event.preventDefault();
-          if (activeIndex === filteredData.length - 1) {
-            return;
-          }
           updateActiveItem(1);
           break;
         }
@@ -328,7 +320,6 @@ export function BentoAutocomplete({
     },
     [
       activeIndex,
-      filteredData,
       updateActiveItem,
       resetUserInput,
       hideResults,
