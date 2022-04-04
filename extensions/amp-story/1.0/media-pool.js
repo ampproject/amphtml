@@ -944,8 +944,9 @@ export class MediaPool {
     if (!queue.length) {
       return;
     }
-    // Using object destructure {0: item} syntax rather than array destructure
-    // since the latter forces a runtime utility to be included.
+    // Using object destructure `const {0: item}` syntax rather than array
+    // destructure `const [item]` syntax since the latter forces a runtime
+    // utility to be included.
     const {0: item} = queue;
     const {0: task, 1: resolve} = item;
     const {0: fn, 1: requiresSynchronousExecution} = task;
