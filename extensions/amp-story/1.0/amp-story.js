@@ -2491,7 +2491,7 @@ export class AmpStory extends AMP.BaseElement {
       nextPageEl.setAttribute(Attributes.RETURN_TO, pageToBeInsertedId);
     }
 
-    // Adjust the ad page's position in this.adPages_ array to reflect the actual.
+    // Adjust the page's position in this.pages_ array to reflect the actual.
     const insertedPageIndex = this.getPageIndexById(pageToBeInsertedId);
     if (insertedPageIndex != -1) {
       this.pages_.splice(insertedPageIndex, 1);
