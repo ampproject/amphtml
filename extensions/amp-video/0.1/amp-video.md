@@ -105,7 +105,7 @@ when the video has autoplay.
 
 ### volume
 
-Sets the current volume of the video, where the value must be in the range [0.1, 1]. The default value is 1.
+Sets the current volume of the video, where the value must be in the range [0, 1]. The default value is 1.
 [/filter]<!-- formats="stories" -->
 
 ### rotate-to-fullscreen

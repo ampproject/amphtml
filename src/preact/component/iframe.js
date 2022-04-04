@@ -23,12 +23,13 @@ const ABOUT_BLANK = 'about:blank';
  * @param {string} src
  * @return {boolean}
  * */
-const canResetSrc = (src) => src && src != ABOUT_BLANK && !src.includes('#');
+const canResetSrc = (src) =>
+  !!(src && src != ABOUT_BLANK && !src.includes('#'));
 
 /**
- * @param {IframeEmbedDef.Props} props
- * @param {{current: ?IframeEmbedDef.Api}} ref
- * @return {PreactDef.Renderable}
+ * @param {import('./types').IframeEmbedProps} props
+ * @param {import('preact').RefObject<import('./types').IframeEmbedApi>} ref
+ * @return {import('preact').VNode}
  */
 export function IframeEmbedWithRef(
   {
@@ -57,6 +58,7 @@ export function IframeEmbedWithRef(
   // of `onReadyState` re-triggering the side effects.
   const onReadyStateRef = useValueRef(onReadyState);
   const setLoaded = useCallback(
+    /** @param {boolean} value */
     (value) => {
       if (value !== loadedRef.current) {
         loadedRef.current = value;
@@ -121,6 +123,7 @@ export function IframeEmbedWithRef(
       return;
     }
 
+    /** @param {MessageEvent} event */
     const handler = (event) => {
       const iframe = iframeRef.current;
       if (
@@ -144,10 +147,14 @@ export function IframeEmbedWithRef(
         <iframe
           allow={allow}
           allowFullScreen={allowFullScreen}
-          frameborder="0"
-          loading={loading}
+          // TODO: is it frameborder or frameBorder?
+          frameBorder="0"
+          // TODO: ensure loading is not "auto" or "unload".
+          loading={/** @type {*} */ (loading)}
           name={name}
           onLoad={() => setLoaded(true)}
+          // TODO: what should be here?
+          // @ts-ignore
           part="iframe"
           ref={iframeRef}
           sandbox={sandbox}

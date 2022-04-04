@@ -1,12 +1,10 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-twitter-0_1',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [
       {
@@ -21,30 +19,47 @@ export default {
   },
 };
 
-export const Default = () => {
-  const tweetId = select(
-    'tweet id',
-    ['1356304203044499462', '495719809695621121', '463440424141459456'],
-    '1356304203044499462'
-  );
-  const cards = boolean('show cards', true) ? undefined : 'hidden';
-  const conversation = boolean('show conversation', false) ? undefined : 'none';
+export const Default = ({showCards, showConversation, ...args}) => {
+  const cards = showCards ? undefined : 'hidden';
+  const conversation = showConversation ? undefined : 'none';
   return (
     <amp-twitter
       width="300"
       height="200"
-      data-tweetid={tweetId}
+      {...args}
       data-cards={cards}
       data-conversation={conversation}
     />
   );
 };
 
-export const Moments = () => {
-  const limit = number('limit to', 2);
+Default.argTypes = {
+  'data-tweetid': {
+    name: 'tweetId',
+    defaultValue: '1356304203044499462',
+    options: [
+      '1356304203044499462',
+      '495719809695621121',
+      '463440424141459456',
+    ],
+    control: {type: 'select'},
+  },
+  showCards: {
+    name: 'show cards?',
+    defaultValue: true,
+    control: {type: 'boolean'},
+  },
+  showConversation: {
+    name: 'show conversation?',
+    defaultValue: false,
+    control: {type: 'boolean'},
+  },
+};
+
+export const Moments = (args) => {
   return (
     <amp-twitter
-      data-limit={limit}
+      {...args}
       data-momentid="1009149991452135424"
       width="300"
       height="200"
@@ -52,29 +67,38 @@ export const Moments = () => {
   );
 };
 
-export const Timelines = () => {
-  const tweetLimit = number('limit to', 5);
-  const timelineSourceType = select(
-    'source type',
-    ['profile', 'likes', 'list', 'source', 'collection', 'url', 'widget'],
-    'profile'
-  );
-  const timelineScreenName = 'amphtml';
-  const timelineUserId = '3450662892';
-  return (
-    <amp-twitter
-      data-tweet-limit={tweetLimit}
-      data-timeline-source-type={timelineSourceType}
-      data-timeline-scree-name={timelineScreenName}
-      data-timeline-user-id={timelineUserId}
-      width="300"
-      height="200"
-    />
-  );
+Moments.args = {
+  'data-limit': 2,
 };
 
-export const DeletedTweet = () => {
-  const withFallback = boolean('include fallback?', true);
+export const Timelines = (args) => {
+  return <amp-twitter {...args} width="300" height="200" />;
+};
+
+Timelines.args = {
+  'data-tweet-limit': 5,
+  'data-timeline-screen-name': 'amphtml',
+  'data-timeline-user-id': '3450662892',
+};
+
+Timelines.argTypes = {
+  'data-timeline-source-type': {
+    name: 'data-timeline-source-type',
+    defaultValue: 'profile',
+    options: [
+      'profile',
+      'likes',
+      'list',
+      'source',
+      'collection',
+      'url',
+      'widget',
+    ],
+    control: {type: 'select'},
+  },
+};
+
+export const DeletedTweet = ({withFallback}) => {
   return (
     <amp-twitter
       width="390"
@@ -102,6 +126,10 @@ export const DeletedTweet = () => {
       )}
     </amp-twitter>
   );
+};
+
+DeletedTweet.args = {
+  withFallback: true,
 };
 
 export const InvalidTweet = () => {

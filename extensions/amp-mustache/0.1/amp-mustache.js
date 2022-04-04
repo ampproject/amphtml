@@ -1,5 +1,4 @@
 import {iterateCursor, templateContentClone} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {user} from '#utils/log';
 
@@ -48,7 +47,7 @@ export class AmpMustache extends BaseTemplate {
       return;
     }
     /** @private @const {!JsonObject} */
-    this.nestedTemplates_ = dict();
+    this.nestedTemplates_ = {};
 
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();

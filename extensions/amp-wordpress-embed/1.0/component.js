@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import * as Preact from '#preact';
 import {forwardRef} from '#preact/compat';
 import {useValueRef} from '#preact/component';
@@ -11,7 +9,7 @@ import {addParamToUrl} from '../../../src/url';
 
 const {useCallback, useEffect, useMemo, useRef, useState} = Preact;
 
-const NO_HEIGHT_STYLE = dict();
+const NO_HEIGHT_STYLE = {};
 
 /**
  * @param {!BentoWordPressEmbedDef.Props} props
@@ -52,7 +50,7 @@ function BentoWordPressEmbedWithRef(
             if (requestResize) {
               requestResize(height);
             }
-            setHeightStyle(dict({'height': height}));
+            setHeightStyle({'height': height});
             setOpacity(1);
           }
 

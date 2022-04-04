@@ -1,22 +1,22 @@
 import {BaseElement} from './base-element';
 __css_import__;
-import {dict} from '#core/types/object';
 import {isExperimentOn} from '#experiments';
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-__component_name_hyphenated__';
 
-class Amp__component_name_pascalcase__ extends BaseElement {
+class Amp__component_name_pascalcase__ extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     // __do_not_submit__: This is example code only.
     this.registerApiAction('exampleToggle', (api) => api./*OK*/exampleToggle());
 
-    return dict({
+    return {
       // Extra props passed by wrapper AMP component
-      'exampleTagNameProp': this.element.tagName,
-    });
+      exampleTagNameProp: this.element.tagName,
+    };
   }
 
   /** @override */

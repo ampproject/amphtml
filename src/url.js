@@ -1,9 +1,9 @@
 import {LruCache} from '#core/data-structures/lru-cache';
 import * as mode from '#core/mode';
 import {arrayOrSingleItemToArray} from '#core/types/array';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 import {endsWith} from '#core/types/string';
-import {parseQueryString} from '#core/types/string/url';
+import {INVALID_PROTOCOLS, parseQueryString} from '#core/types/string/url';
 
 import {userAssert} from '#utils/log';
 
@@ -33,9 +33,6 @@ let cachedAnchorEl;
  * @type {LruCache}
  */
 let urlCache;
-
-// eslint-disable-next-line no-script-url
-const INVALID_PROTOCOLS = ['javascript:', 'data:', 'vbscript:'];
 
 /** @const {string} */
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
@@ -251,7 +248,7 @@ export function addParamsToUrl(url, params) {
 export function addMissingParamsToUrl(url, params) {
   const location = parseUrlDeprecated(url);
   const existingParams = parseQueryString(location.search);
-  const paramsToAdd = dict({});
+  const paramsToAdd = {};
   const keys = Object.keys(params);
   for (let i = 0; i < keys.length; i++) {
     if (!hasOwn(existingParams, keys[i])) {

@@ -1,17 +1,17 @@
-import {dict} from '#core/types/object';
+import {BaseElement} from '#bento/components/bento-instagram/1.0/base-element';
 
 import {isExperimentOn} from '#experiments';
 
-import {userAssert} from '#utils/log';
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
-import {BaseElement} from './base-element';
+import {userAssert} from '#utils/log';
 
 import {CSS} from '../../../build/amp-instagram-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-instagram';
 
-class AmpInstagram extends BaseElement {
+class AmpInstagram extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -24,9 +24,9 @@ class AmpInstagram extends BaseElement {
 
   /** @override */
   init() {
-    return dict({
+    return {
       'requestResize': (height) => this.attemptChangeHeight(height),
-    });
+    };
   }
 }
 

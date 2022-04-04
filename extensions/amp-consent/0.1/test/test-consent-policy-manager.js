@@ -4,7 +4,6 @@ import {
   CONSENT_POLICY_STATE,
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
-import {dict} from '#core/types/object';
 
 import {macroTask} from '#testing/helpers';
 
@@ -56,11 +55,9 @@ describes.realWin(
             return Promise.resolve();
           },
           getConsentInstanceSharedData: () => {
-            return Promise.resolve(
-              dict({
-                'shared': 'test',
-              })
-            );
+            return Promise.resolve({
+              'shared': 'test',
+            });
           },
         });
       });
@@ -213,7 +210,7 @@ describes.realWin(
           manager = new ConsentPolicyManager(ampdoc);
           consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
           manager.setLegacyConsentInstanceId('ABC');
-          policy = expandPolicyConfig(dict({}), 'ABC');
+          policy = expandPolicyConfig({}, 'ABC');
           const keys = Object.keys(policy);
           for (let i = 0; i < keys.length; i++) {
             manager.registerConsentPolicyInstance(keys[i], policy[keys[i]]);
@@ -408,7 +405,7 @@ describes.realWin(
           manager = new ConsentPolicyManager(ampdoc);
           consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
           manager.setLegacyConsentInstanceId('ABC');
-          policy = expandPolicyConfig(dict({}), 'ABC');
+          policy = expandPolicyConfig({}, 'ABC');
           const keys = Object.keys(policy);
           for (let i = 0; i < keys.length; i++) {
             manager.registerConsentPolicyInstance(keys[i], policy[keys[i]]);

@@ -47,7 +47,8 @@
   "blueconic": {
     "event": "https://!tenantId/s/!pixelId.gif?",
     "trackingIdentifier": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues",
-    "defaultTrackingValues": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&geoLocation=_amp_geo(ISOCountry)_&userAgent=_user_agent_"
+    "defaultTrackingValues": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&geoLocation=_amp_geo(ISOCountry)_&userAgent=_user_agent_&canonicalHostname=_canonical_hostname_&deviceType=!deviceType&originType=!originType",
+    "trackingValuesWithoutGeo": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&userAgent=_user_agent_&canonicalHostname=_canonical_hostname_&deviceType=!deviceType&originType=!originType"
   },
   "bluetriangle": {
     "host": "https://d.btttag.com",
@@ -195,7 +196,7 @@
   },
   "ibeatanalytics": {
     "host": "https://api.ibeat-analytics.com",
-    "track": "https://api.ibeat-analytics.com/ping-amp?url=_source_url_&sid=_client_id(_iibeat_session)_&ua=_user_agent_&ref=_document_referrer_&at=_incremental_engaged_time_&tt=!totalTime&pid=_page_view_id_&d=!d&dn=_source_hostname_&ct=!ct&pt=!pt&hid=!hid&au=!au&ag=!ag&aid=!aid&cn=_canonical_url_&pot=!timerStart&rct=1&id=!id&sec=!sec&tgs=!tgs&pc=!pc"
+    "track": "https://api.ibeat-analytics.com/ping-amp?url=_source_url_&sid=_client_id(_iibeat_session)_&ua=_user_agent_&ref=_document_referrer_&at=_incremental_engaged_time_&tt=!totalTime&pid=_page_view_id_&d=!d&dn=_source_hostname_&ct=!ct&pt=!pt&hid=!hid&au=!au&ag=!ag&aid=!aid&cn=_canonical_url_&pot=!timerStart&rct=1&id=!id&sec=!sec&tgs=!tgs&pc=!pc&vct=!vct"
   },
   "infonline": {
     "pageview": "!url?st=!st&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&act=_consent_string_&acs=_if(_equals(_consent_state_%2Csufficient)_%2C1)__if(_equals(_consent_state_%2Cinsufficient)_%2C0)__if(_equals(_consent_state_%2C)_%2C-1)_&host=_canonical_host_&path=_canonical_path_&type=pageview",
@@ -239,7 +240,7 @@
     "ping": "https://pp.lp4.io/u?i=!id&u=_client_id(_lp4_u)_&p=_canonical_url_&uActive=true&isPing=yes&c=amp&t=!type&s=!section&_t=amp&_r=_random_"
   },
   "lotame": {
-    "pageview": "https://bcp.crwdcntrl.net/amp?c=!account&pv=y"
+    "pageview": "https://bcp.crwdcntrl.net/amp?c=!account&pv=y&gdpr_consent=_consent_string_&gdpr=_if(_equals(_consent_metadata(gdprApplies)_%2Ctrue)_%2C1)__if(_equals(_consent_metadata(gdprApplies)_%2Cfalse)_%2C0)_"
   },
   "mapp_intelligence": {
     "trackURL": "https://!trackDomain/!trackId/wt",

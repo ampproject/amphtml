@@ -1,25 +1,39 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {boolean, select, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-lightbox-1_0',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [{name: 'amp-lightbox', version: '1.0'}],
   },
+  argTypes: {
+    animation: {
+      name: 'animation',
+      control: {type: 'select'},
+      options: ['fade-in', 'fly-in-top', 'fly-in-bottom'],
+    },
+    backgroundColor: {
+      name: 'background color',
+      control: {type: 'text'},
+      defaultValue: '',
+    },
+    color: {
+      name: 'font color',
+      control: {type: 'text'},
+      defaultValue: '',
+    },
+    lotsOfText: {
+      name: 'lotsOfText',
+      control: {type: 'boolean'},
+      defaultValue: true,
+    },
+  },
 };
 
-export const Default = () => {
-  const animation = select('animation', [
-    'fade-in',
-    'fly-in-top',
-    'fly-in-bottom',
-  ]);
-  const backgroundColor = text('background color', '');
-  const color = text('font color', '');
+export const Default = ({animation, backgroundColor, color, ...args}) => {
   return (
     <>
       <style>{`
@@ -29,7 +43,12 @@ export const Default = () => {
         }
       `}</style>
       <div style="height: 300px;">
-        <amp-lightbox id="lightbox" layout="nodisplay" animation={animation}>
+        <amp-lightbox
+          id="lightbox"
+          layout="nodisplay"
+          animation={animation}
+          {...args}
+        >
           <p>Test</p>
           <button slot="close-button">Close</button>
         </amp-lightbox>
@@ -41,15 +60,13 @@ export const Default = () => {
   );
 };
 
-export const overflowAuto = () => {
-  const animation = select('animation', [
-    'fade-in',
-    'fly-in-top',
-    'fly-in-bottom',
-  ]);
-  const backgroundColor = text('background color', 'rgba(0,0,0,0.5)');
-  const color = text('font color', '');
-  const lotsOfText = boolean('lots of text?', true);
+export const OverflowAuto = ({
+  animation,
+  backgroundColor,
+  color,
+  lotsOfText,
+  ...args
+}) => {
   return (
     <>
       <style>{`
@@ -59,7 +76,12 @@ export const overflowAuto = () => {
         }
       `}</style>
       <div style="height: 300px;">
-        <amp-lightbox id="lightbox" layout="nodisplay" animation={animation}>
+        <amp-lightbox
+          id="lightbox"
+          layout="nodisplay"
+          animation={animation}
+          {...args}
+        >
           <p>
             Dessert tootsie roll marzipan pastry. Powder powder jelly beans
             chocolate bar candy sugar plum. Jelly-o gummi bears jelly icing

@@ -3,7 +3,6 @@
 import {loadScript} from '#3p/3p';
 import {listenParent, nonSensitiveDataPostMessage} from '#3p/messaging';
 
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {user} from '#utils/log';
@@ -54,22 +53,16 @@ export function gltfViewer(global) {
         if (!e.lengthComputable) {
           return;
         }
-        nonSensitiveDataPostMessage(
-          'progress',
-          dict({
-            'total': e.total,
-            'loaded': e.loaded,
-          })
-        );
+        nonSensitiveDataPostMessage('progress', {
+          'total': e.total,
+          'loaded': e.loaded,
+        });
       },
       onerror: (err) => {
         user().error('3DGLTF', err);
-        nonSensitiveDataPostMessage(
-          'error',
-          dict({
-            'error': (err || '').toString(),
-          })
-        );
+        nonSensitiveDataPostMessage('error', {
+          'error': (err || '').toString(),
+        });
       },
     });
     listenParent(global, 'action', (msg) => {

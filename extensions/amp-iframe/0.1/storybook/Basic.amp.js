@@ -1,11 +1,10 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-iframe',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [{name: 'amp-iframe', version: '0.1'}],

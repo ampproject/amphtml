@@ -8,7 +8,6 @@ import {
 } from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 import {computedStyle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -31,7 +30,7 @@ const CarouselType = {
 };
 
 class AmpCarousel extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
@@ -578,11 +577,11 @@ class AmpCarousel extends AMP.BaseElement {
       return;
     }
 
-    const data = dict({'index': index});
+    const data = {'index': index};
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
     const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;
-    const dataWithActionTrust = dict({'index': index, 'actionTrust': trust});
+    const dataWithActionTrust = {'index': index, 'actionTrust': trust};
 
     const action = createCustomEvent(this.win, `slidescroll.${name}`, data);
     this.action_.trigger(this.element, name, action, trust);
@@ -624,10 +623,10 @@ class AmpCarousel extends AMP.BaseElement {
       ? 'amp-carousel-next'
       : 'amp-carousel-prev';
 
-    const vars = dict({
+    const vars = {
       'fromSlide': this.getSlideId_(prevIndex),
       'toSlide': this.getSlideId_(newIndex),
-    });
+    };
     triggerAnalyticsEvent(this.element, 'amp-carousel-change', vars);
     triggerAnalyticsEvent(this.element, directionEventName, vars);
   }

@@ -17,6 +17,7 @@ function pushBuildWorkflow() {
   timedExecOrDie('amp validator-webui');
   timedExecOrDie('amp validator');
   timedExecOrDie('amp validator-cpp');
+  timedExecOrDie('amp validate-html-fixtures');
 }
 
 /**
@@ -25,6 +26,7 @@ function pushBuildWorkflow() {
 function prBuildWorkflow() {
   if (
     !buildTargetsInclude(
+      Targets.HTML_FIXTURES,
       Targets.RUNTIME,
       Targets.VALIDATOR,
       Targets.VALIDATOR_WEBUI
@@ -32,7 +34,7 @@ function prBuildWorkflow() {
   ) {
     skipDependentJobs(
       jobName,
-      'this PR does not affect the runtime, validator, or validator web UI'
+      'this PR does not affect the runtime, HTML fixtures, validator, or validator web UI'
     );
     return;
   }
@@ -41,12 +43,22 @@ function prBuildWorkflow() {
     timedExecOrDie('amp validator-webui');
   }
 
-  if (buildTargetsInclude(Targets.RUNTIME, Targets.VALIDATOR)) {
+  if (
+    buildTargetsInclude(
+      Targets.HTML_FIXTURES,
+      Targets.RUNTIME,
+      Targets.VALIDATOR
+    )
+  ) {
     timedExecOrDie('amp validator');
   }
 
   if (buildTargetsInclude(Targets.VALIDATOR)) {
     timedExecOrDie('amp validator-cpp');
+  }
+
+  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
+    timedExecOrDie('amp validate-html-fixtures');
   }
 }
 

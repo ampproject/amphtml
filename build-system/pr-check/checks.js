@@ -16,7 +16,6 @@ const jobName = 'checks.js';
 function pushBuildWorkflow() {
   timedExecOrDie('amp presubmit');
   timedExecOrDie('amp check-invalid-whitespaces');
-  timedExecOrDie('amp validate-html-fixtures');
   timedExecOrDie('amp lint');
   timedExecOrDie('amp prettify');
   timedExecOrDie('amp check-json-schemas');
@@ -53,10 +52,6 @@ function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.IGNORE_LIST)) {
     timedExecOrDie(`amp check-ignore-lists`);
-  }
-
-  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
-    timedExecOrDie('amp validate-html-fixtures');
   }
 
   if (buildTargetsInclude(Targets.LINT_RULES)) {

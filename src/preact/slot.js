@@ -17,15 +17,18 @@ import {CanPlay, CanRender, LoadingProp} from './contextprops';
 
 const EMPTY = {};
 
-/** @const {WeakMap<Element, {oldDefauls: (Object|undefined), component: Component}>} */
+/** @const {WeakMap<Element, {oldDefaults: (Object|undefined), component: Component}>} */
 const cache = new WeakMap();
+
+/** @typedef {import('preact').VNode} VNode */
+/** @typedef {import('preact').FunctionComponent} FunctionComponent */
 
 /**
  * @param {Element} element
  * @param {string} name
- * @param {Object|undefined} defaultProps
- * @param {boolean|undefined} as
- * @return {PreactDef.VNode|PreactDef.FunctionalComponent}
+ * @param {Object=} defaultProps
+ * @param {boolean=} as
+ * @return {VNode|FunctionComponent}
  */
 export function createSlot(element, name, defaultProps, as = false) {
   element.setAttribute('slot', name);
@@ -39,8 +42,8 @@ export function createSlot(element, name, defaultProps, as = false) {
   }
 
   /**
-   * @param {Object|undefined} props
-   * @return {PreactDef.VNode}
+   * @param {Object=} props
+   * @return {VNode}
    */
   function SlotWithProps(props) {
     return <Slot {...(defaultProps || EMPTY)} name={name} {...props} />;
@@ -54,10 +57,10 @@ export function createSlot(element, name, defaultProps, as = false) {
  * Slot component.
  *
  * @param {JsonObject} props
- * @return {PreactDef.VNode}
+ * @return {VNode}
  */
 export function Slot(props) {
-  const ref = useRef(/** @type {?Element} */ (null));
+  const ref = useRef(/** @type {HTMLSlotElement|null} */ (null));
 
   useSlotContext(ref, props);
 
@@ -72,11 +75,11 @@ export function Slot(props) {
 }
 
 /**
- * @param {{current:?}} ref
+ * @param {{current: HTMLSlotElement?}} ref
  * @param {JsonObject=} opt_props
  */
 export function useSlotContext(ref, opt_props) {
-  const {'loading': loading} = opt_props || EMPTY;
+  const loading = opt_props?.loading;
   const context = useAmpContext();
 
   // Context changes.
@@ -90,7 +93,7 @@ export function useSlotContext(ref, opt_props) {
       slot,
       LoadingProp,
       Slot,
-      /** @type {./core/constants/loading-instructions.Loading_Enum} */ (
+      /** @type {import('#core/constants/loading-instructions').Loading_Enum} */ (
         context.loading
       )
     );
@@ -129,8 +132,8 @@ export function useSlotContext(ref, opt_props) {
 }
 
 /**
- * @param {Element} slot
- * @param {function(AmpElement):void|function(Array<AmpElement>):void} action
+ * @param {HTMLSlotElement} slot
+ * @param {function(Element|Element[]):void} action
  * @param {boolean} schedule
  */
 function execute(slot, action, schedule) {

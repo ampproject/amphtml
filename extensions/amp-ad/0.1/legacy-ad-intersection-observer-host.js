@@ -1,6 +1,5 @@
 import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {intersectionEntryToJson} from '#core/dom/layout/intersection';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -200,12 +199,9 @@ export class LegacyAdIntersectionObserverHost {
       return;
     }
     // Note that SubscribeApi multicasts the update to all interested windows.
-    this.postMessageApi_.send(
-      MessageType_Enum.INTERSECTION,
-      dict({
-        'changes': this.pendingChanges_,
-      })
-    );
+    this.postMessageApi_.send(MessageType_Enum.INTERSECTION, {
+      'changes': this.pendingChanges_,
+    });
     this.pendingChanges_.length = 0;
   }
 

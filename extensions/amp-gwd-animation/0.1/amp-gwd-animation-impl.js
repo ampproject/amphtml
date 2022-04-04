@@ -2,7 +2,7 @@ import {waitForChild} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {scopedQuerySelector} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {dev, user} from '#utils/log';
@@ -486,10 +486,10 @@ export class AmpGwdRuntimeService {
       return;
     }
 
-    const detail = dict({
+    const detail = {
       'eventName': userEventName,
       'sourceEvent': event,
-    });
+    };
     const timelineEvent = createCustomEvent(
       this.win_,
       GWD_TIMELINE_EVENT,

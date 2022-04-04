@@ -200,7 +200,6 @@ export function ssp(global, data) {
         // todo on SSP side (option to register error callback)
         // requestErrorCallback: () => {},
         AMPcallback: (ads) => {
-          /** @suppress {checkTypes} */
           const adById = keyBy(ads, (item) => item.id);
           const ad = adById[position['id']];
 

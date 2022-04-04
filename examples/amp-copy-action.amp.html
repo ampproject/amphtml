@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html ⚡ lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <!-- ## Setup -->
+    <link
+      rel="canonical"
+      href="https://amp.dev/documentation/examples/components/amp-copy-action/"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <script
+      async
+      custom-element="amp-bind"
+      src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"
+    ></script>
+    <style amp-custom>
+      .row {
+        background-color: #eee;
+        border-radius: 5px;
+        border: 1px black solid;
+        margin: 10px auto;
+        padding: 5px;
+        width: 50%;
+      }
+
+      .code {
+        border-radius: 5px;
+        border: 1px lightgray solid;
+        margin: 5px;
+        padding: 10px;
+      }
+
+      .sample {
+        background-color: #fff;
+        margin: 5px;
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: medium;
+      }
+
+      .copy-success {
+        background-color: greenyellow;
+        border-radius: 5px;
+        border: 1px green solid;
+        color: green;
+        padding: 0 5px;
+      }
+
+      .copy-error {
+        background-color: red;
+        border-radius: 5px;
+        border: 1px darkred solid;
+        color: darkred;
+        padding: 0 5px;
+      }
+
+      .sticky-paste-here {
+        background-color: gray;
+        border-radius: 0 0 5px 5px;
+        border: 10px gray solid;
+        left: 0;
+        margin: auto;
+        padding: 5px;
+        position: sticky;
+        top: 0;
+        width: 50%;
+      }
+    </style>
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+        animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      }
+      @-webkit-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-moz-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-ms-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @-o-keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+      @keyframes -amp-start {
+        from {
+          visibility: hidden;
+        }
+        to {
+          visibility: visible;
+        }
+      }
+    </style>
+    <noscript
+      ><style amp-boilerplate>
+        body {
+          -webkit-animation: none;
+          -moz-animation: none;
+          -ms-animation: none;
+          animation: none;
+        }
+      </style></noscript
+    >
+  </head>
+
+  <body>
+    <div class="sticky-paste-here">
+      <textarea placeholder="Paste here!" cols="50"></textarea>
+    </div>
+    <div class="row">
+      <h1>Copy DIV Content</h1>
+      <pre class="code">
+        <code>
+          &#60;!-- 'divTarget' to Copy --&#62;
+          &#60;div id="divTarget"&#62;
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          &#60;/div&#62;
+
+          &#60;!-- Copy Action Button --&#62;
+          &#60;button on="tap:divTarget.copy();
+                      copy-success:divCopySuccess.show();
+                      copy-error:divCopyError.show()"&#62;
+            Copy DIV Content
+          &#60;/button&#62;
+
+          &#60;!-- Target to show on 'copy-success' --&#62;
+          &#60;span id="divCopySuccess" hidden class="copy-success"&#62;Content copied!&#60;/span&#62;
+          &#60;!-- Target to show on 'copy-error' --&#62;
+          &#60;span id="divCopyError" hidden class="copy-error"&#62; Error while copying! &#60;/span&#62;
+        </code>
+      </pre>
+      <div class="sample">
+        <!-- 'divTarget' to Copy -->
+        <div id="divTarget">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        </div>
+
+        <!-- Copy Action Button -->
+        <button
+          on="tap:divTarget.copy();copy-success:divCopySuccess.show();copy-error:divCopyError.show()"
+        >
+          Copy DIV Content
+        </button>
+
+        <!-- Target to show on 'copy-success' -->
+        <span id="divCopySuccess" hidden class="copy-success">
+          Content copied!
+        </span>
+
+        <!-- Target to show on 'copy-error' -->
+        <span id="divCopyError" hidden class="copy-error">
+          Error while copying!
+        </span>
+      </div>
+    </div>
+    <div class="row">
+      <h1>Copy INPUT Value</h1>
+      <pre class="code">
+        <code>
+          &#60;!-- 'inputTarget' to Copy --&#62;
+          &#60;input id="inputTarget" value="Sample Input Value" /&#62;
+
+          &#60;!-- Copy Action Button --&#62;
+          &#60;button on="tap:inputTarget.copy();
+                      copy-success:inputCopySuccess.show();
+                      copy-error:inputCopyError.show()"&#62;
+            Copy Input Value
+          &#60;/button&#62;
+
+          &#60;!-- Target to show on 'copy-success' --&#62;
+          &#60;span id="inputCopySuccess" hidden class="copy-success"&#62;Value copied successfully!&#60;/span&#62;
+          &#60;!-- Target to show on 'copy-error' --&#62;
+          &#60;span id="inputCopyError" hidden class="copy-error"&#62;Error while copying!&#60;/span&#62;
+        </code>
+      </pre>
+      <div class="sample">
+        <!-- 'inputTarget' to Copy -->
+        <input id="inputTarget" value="Sample Input Value" />
+
+        <!-- Copy Action Button -->
+        <button
+          on="tap:inputTarget.copy();copy-success:inputCopySuccess.show();copy-error:inputCopyError.show()"
+        >
+          Copy Input Value
+        </button>
+
+        <!-- Target to show on 'copy-success' -->
+        <span id="inputCopySuccess" hidden class="copy-success">
+          Value copied successfully!
+        </span>
+
+        <!-- Target to show on 'copy-error' -->
+        <span id="inputCopyError" hidden class="copy-error">
+          Error while copying!
+        </span>
+      </div>
+    </div>
+    <div class="row">
+      <h1>Copy Static Text</h1>
+      <pre class="code">
+        <code>
+          &#60;!-- Copy Action Button --&#62;
+          &#60;button on="tap:AMP.copy(text='Hello AMP!');
+                          copy-success:staticTextCopySuccess.show()"&#62;
+            Copy Static Text
+          &#60;/button&#62;
+
+          &#60;!-- Target to show on 'copy-success' --&#62;
+          &#60;span id="staticTextCopySuccess" hidden class="copy-success"&#62;
+            StaticText copied successfully!
+          &#60;/span&#62;
+        </code>
+      </pre>
+      <div class="sample">
+        <!-- Copy Action Button -->
+        <button
+          on="tap:AMP.copy(text='Hello AMP!');copy-success:staticTextCopySuccess.show()"
+        >
+          Copy Static Text
+        </button>
+
+        <!-- Target to show on 'copy-success' -->
+        <span id="staticTextCopySuccess" hidden class="copy-success">
+          StaticText copied successfully!
+        </span>
+      </div>
+    </div>
+    <div class="row">
+      <h1>Dynamically modifying class & text based on 'eventResult'</h1>
+      <pre>
+        <code>
+          &#60;!-- Copy Action Button --&#62;
+          &#60;button on="tap:AMP.copy(text='Copy static text');
+                          copy-error:AMP.setState({eventResult: event.data.type});
+                          copy-success:AMP.setState({eventResult: event.data.type})"&#62;
+            Copy Action
+          &#60;/button&#62;
+
+          &#60;!-- Dynamically checking copy 'eventResult' --&#62;
+          &#60;p hidden [hidden]="false"
+                 [class]="(eventResult != 'error')?'copy-success':'copy-error'"
+                 [text]="(eventResult != 'error')?'Copied!':'Error while copying!'"
+          /&#62;
+        </code>
+      </pre>
+      <div class="sample">
+        <!-- Copy Action Button -->
+        <button
+          on="tap:AMP.copy(text='Copy static text');copy-error:AMP.setState({eventResult: event.data.type});copy-success:AMP.setState({eventResult: event.data.type})"
+        >
+          Copy Action
+        </button>
+
+        <!-- Dynamically checking copy 'eventResult' -->
+        <p
+          hidden
+          [hidden]="false"
+          [class]="(eventResult != 'error')?'copy-success':'copy-error'"
+          [text]="(eventResult != 'error')?'Copied!':'Error while copying!'"
+        />
+      </div>
+    </div>
+  </body>
+</html>

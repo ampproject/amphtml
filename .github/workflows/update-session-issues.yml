@@ -8,7 +8,6 @@ on:
   schedule:
     - cron: '30 16,17 * * 3' # Africa/Europe/western Asia
     - cron: '0 21,22 * * 3' # Americas
-    - cron: '0 1,2 * * 4' # Asia/Oceania
 
 jobs:
   update-session-issues:

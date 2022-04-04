@@ -252,6 +252,11 @@ describes.realWin('amp-img R1', {amp: true}, (env) => {
     expect(AmpImg.prerenderAllowed(el)).to.equal(true);
   });
 
+  it('should allow preview by default', () => {
+    const el = createImg({src: '/examples/img/sample.jpg'});
+    expect(AmpImg.previewAllowed(el)).to.equal(true);
+  });
+
   it('should load an img with srcset', async () => {
     const ampImg = await getImg({
       srcset: SRCSET_STRING,

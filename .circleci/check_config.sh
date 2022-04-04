@@ -11,8 +11,8 @@ RED() { echo -e "\033[0;31m$1\033[0m"; }
 YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 
-# Push builds are only run against the main branch and amp-release branches.
-if [[ "$CIRCLE_BRANCH" == "main" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
+# Push builds are only run against the main, nightly, and amp-release branches.
+if [[ "$CIRCLE_BRANCH" == "main" || "$CIRCLE_BRANCH" == "nightly" || "$CIRCLE_BRANCH" =~ ^amp-release-* ]]; then
   echo $(GREEN "Nothing to do because $CIRCLE_BRANCH is not a PR branch.")
   exit 0
 fi

@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
@@ -5,7 +6,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {devAssert} from '#utils/log';
 
-import {localize} from './amp-story-localization-service';
+import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -42,19 +43,18 @@ const ButtonStates = {
 };
 
 /**
- * @param {!Node} context
  * @param {PaginationButtonStateDef} initialState
  * @param {function(Event)} onClick
  * @return {!Element}
  */
-const renderPaginationButton = (context, initialState, onClick) => (
+const renderPaginationButton = (initialState, onClick) => (
   <div
     onClick={onClick}
     class={`i-amphtml-story-button-container ${initialState.className}`}
   >
     <button
       class="i-amphtml-story-button-move"
-      aria-label={initialState.label && localize(context, initialState.label)}
+      i-amphtml-i18n-aria-label={initialState.label}
     ></button>
   </div>
 );
@@ -73,10 +73,14 @@ class PaginationButton {
     /** @private {!PaginationButtonStateDef} */
     this.state_ = initialState;
 
+    /** @const {!Document} */
+    this.doc_ = doc;
+
     /** @const {!Element} */
-    this.element = renderPaginationButton(doc, initialState, (e) =>
+    this.element = renderPaginationButton(initialState, (e) =>
       this.onClick_(e)
     );
+    localizeTemplate(this.element, doc);
 
     /** @private @const {!Element} */
     this.buttonElement_ = devAssert(this.element.firstElementChild);
@@ -100,12 +104,11 @@ class PaginationButton {
     this.mutator_.mutateElement(this.element, () => {
       this.element.classList.remove(this.state_.className);
       this.element.classList.add(state.className);
-      this.buttonElement_.setAttribute(
-        'aria-label',
-        localize(this.win_.document, state.label)
-      );
       this.state_ = state;
     });
+    Services.localizationForDoc(this.doc_)
+      .getLocalizedStringAsync(state.label)
+      .then((str) => this.buttonElement_.setAttribute('aria-label', str));
   }
 
   /**
@@ -122,9 +125,8 @@ class PaginationButton {
         'i-amphtml-story-button-hidden',
         !isEnabled
       );
-      this.element
-        .querySelector('button')
-        ?.toggleAttribute('disabled', !isEnabled);
+      const button = this.element.querySelector('button');
+      toggleAttribute(button, 'disabled', !isEnabled);
     });
   }
 

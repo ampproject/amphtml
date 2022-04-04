@@ -26,7 +26,7 @@ import {dev} from '#utils/log';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getConsentPolicyInfo} from '../../../src/consent';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-smartadserver-impl';
@@ -80,6 +80,11 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
           urlParams['hb_height'] = this.element.getAttribute('height');
         }
 
+        const schain = this.element.getAttribute('data-schain');
+        if (schain) {
+          urlParams['schain'] = schain;
+        }
+
         const formatId = this.element.getAttribute('data-format');
         const tagId = 'sas_' + formatId;
         return buildUrl(
@@ -94,7 +99,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             'out': 'amp-hb',
             ...urlParams,
             'gdpr_consent': consentString,
-            'pgDomain': this.win.top.location.hostname,
+            'pgDomain': Services.documentInfoForDoc(this.element).canonicalUrl,
             'tmstp': Date.now(),
           },
           MAX_URL_LENGTH,
@@ -102,6 +107,13 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
         );
       });
     });
+  }
+
+  /** @override */
+  getNonAmpCreativeRenderingMethod(headerValue) {
+    return Services.platformFor(this.win).isIos()
+      ? XORIGIN_MODE.IFRAME_GET
+      : super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
   /** @override */

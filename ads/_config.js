@@ -62,6 +62,10 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://data.24smi.net',
   },
 
+  '4wmarketplace': {
+    renderStartImplemented: true,
+  },
+
   'a8': {
     prefetch: 'https://statics.a8.net/amp/ad.js',
     renderStartImplemented: true,
@@ -165,6 +169,10 @@ const adConfig = jsonConfiguration({
   },
 
   'adreactor': {},
+
+  'ads2bid': {
+    renderStartImplemented: true,
+  },
 
   'adsensor': {
     prefetch: 'https://wfpscripts.webspectator.com/amp/adsensor-amp.js',
@@ -1042,6 +1050,7 @@ const adConfig = jsonConfiguration({
   'rcmwidget': {
     prefetch: 'https://rcmjs.rambler.ru/static/rcmw/rcmw-amp.js',
     renderStartImplemented: true,
+    clientIdScope: '__rcmw_amp',
   },
 
   'readmo': {
@@ -1269,10 +1278,9 @@ const adConfig = jsonConfiguration({
   },
 
   'teads': {
-    prefetch: 'https://s8t.teads.tv/media/format/v3/teads-format.min.js',
+    prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
       'https://cdn2.teads.tv',
-      'https://a.teads.tv',
       'https://t.teads.tv',
       'https://r.teads.tv',
     ],

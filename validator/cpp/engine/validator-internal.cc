@@ -127,6 +127,22 @@ static const LazyRE2 kRuntimeScriptPathRe = {
 static const LazyRE2 kExtensionPathRe = {
     R"re((?:lts/)?v0/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.(?:m)?js(?:\?f=sxg)?)re"};
 
+// Generates a htmlparser::css::CssParsingConfig.
+CssParsingConfig GenCssParsingConfig() {
+  CssParsingConfig config;
+  // If other @ rule types are added to the rules, their block parsing types
+  // will need to be added here as well.
+  config.at_rule_spec["font-face"] = BlockType::PARSE_AS_DECLARATIONS;
+  config.at_rule_spec["keyframes"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
+  config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
+  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
+  // Note that ignoring still generates an error.
+  config.default_spec = BlockType::PARSE_AS_IGNORE;
+  return config;
+}
+
 namespace {
 
 #define CHECK_NOTNULL(x) (x)
@@ -134,7 +150,7 @@ namespace {
 // Sorts and eliminates duplicates in |v|.
 template <typename T>
 void SortAndUniquify(vector<T>* v) {
-  std::sort(v->begin(), v->end());
+  std::stable_sort(v->begin(), v->end());
   v->erase(std::unique(v->begin(), v->end()), v->end());
 }
 
@@ -844,22 +860,6 @@ class ParsedAttrSpecs {
   vector<unique_ptr<ParsedAttrSpec>> parsed_attr_specs_;
   unordered_map<std::string, vector<const ParsedAttrSpec*>> attr_lists_by_name_;
 };
-
-// Generates a htmlparser::css::CssParsingConfig.
-CssParsingConfig GenCssParsingConfig() {
-  CssParsingConfig config;
-  // If other @ rule types are added to the rules, their block parsing types
-  // will need to be added here as well.
-  config.at_rule_spec["font-face"] = BlockType::PARSE_AS_DECLARATIONS;
-  config.at_rule_spec["keyframes"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["media"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["page"] = BlockType::PARSE_AS_DECLARATIONS;
-  config.at_rule_spec["supports"] = BlockType::PARSE_AS_RULES;
-  config.at_rule_spec["-moz-document"] = BlockType::PARSE_AS_RULES;
-  // Note that ignoring still generates an error.
-  config.default_spec = BlockType::PARSE_AS_IGNORE;
-  return config;
-}
 
 // Instances of this class precompute the regular expressions for a particular
 // Cdata specification.
@@ -3294,7 +3294,7 @@ void ValidateAttrValueProperties(const ParsedAttrSpec& parsed_attr_spec,
            mandatory_value_properties_seen);
 
   // To reduce churn emit errors sorted by names instead of memory addresses.
-  std::sort(not_seen.begin(), not_seen.end(),
+  std::stable_sort(not_seen.begin(), not_seen.end(),
             [](const PropertySpec* lhs, const PropertySpec* rhs) {
               return lhs->name() < rhs->name();
             });
@@ -4631,7 +4631,7 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
     missing_attrs.push_back(attr_name);
   }
   // Sort this list for stability across implementations.
-  std::sort(missing_attrs.begin(), missing_attrs.end());
+  std::stable_sort(missing_attrs.begin(), missing_attrs.end());
   for (const std::string& missing_attr : missing_attrs) {
     context.AddError(ValidationError::MANDATORY_ATTR_MISSING,
                      context.line_col(),
@@ -4736,7 +4736,7 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
     }
     if (parsed_tag_spec.spec().mandatory()) mandatory_tagspecs_.push_back(ii);
   }
-  std::sort(mandatory_tagspecs_.begin(), mandatory_tagspecs_.end());
+  std::stable_sort(mandatory_tagspecs_.begin(), mandatory_tagspecs_.end());
 
   error_codes_.resize(ValidationError::Code_MAX + 1);
   for (const ErrorSpecificity& error_specificity : rules_.error_specificity()) {

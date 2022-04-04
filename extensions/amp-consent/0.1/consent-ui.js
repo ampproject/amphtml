@@ -8,7 +8,6 @@ import {elementByTag} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
 import {isEsm} from '#core/mode';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -456,7 +455,7 @@ export class ConsentUI {
    * @param {string} event
    */
   sendViewerEvent_(event) {
-    this.viewer_.sendMessage(event, dict(), /* cancelUnsent */ true);
+    this.viewer_.sendMessage(event, {}, /* cancelUnsent */ true);
   }
 
   /**
@@ -526,7 +525,7 @@ export class ConsentUI {
       return consentStateManager
         .getLastConsentInstanceInfo()
         .then((consentInfo) => {
-          return dict({
+          return {
             'clientConfig': this.clientConfig_,
             // consentState to be deprecated
             'consentState': getConsentStateValue(consentInfo['consentState']),
@@ -538,7 +537,7 @@ export class ConsentUI {
             'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
             'isDirty': !!consentInfo['isDirty'],
             'purposeConsents': consentInfo['purposeConsents'],
-          });
+          };
         });
     });
   }

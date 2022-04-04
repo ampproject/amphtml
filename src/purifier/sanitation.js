@@ -1,5 +1,5 @@
 import {isAmp4Email} from '#core/document/format';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 
 import {isUrlAttribute} from '../url-rewrite';
 
@@ -294,25 +294,21 @@ const ATTR_WHITESPACE =
   /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
-const DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
-  dict({
-    'input': {
-      'type': /(?:image|button)/i,
-    },
-  })
-);
+const DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze({
+  'input': {
+    'type': /(?:image|button)/i,
+  },
+});
 
 /**
  * Rules in addition to DENYLISTED_TAG_SPECIFIC_ATTR_VALUES for AMP4EMAIL.
  * @const {!Object<string, !Object<string, !RegExp>>}
  */
-const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
-  dict({
-    'input': {
-      'type': /(?:button|file|image|password)/i,
-    },
-  })
-);
+const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze({
+  'input': {
+    'type': /(?:button|file|image|password)/i,
+  },
+});
 
 /** @const {!Array<string>} */
 const DENYLISTED_FIELDS_ATTR = Object.freeze([
@@ -325,24 +321,20 @@ const DENYLISTED_FIELDS_ATTR = Object.freeze([
 ]);
 
 /** @const {!Object<string, !Array<string>>} */
-const DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
-  dict({
-    'input': DENYLISTED_FIELDS_ATTR,
-    'textarea': DENYLISTED_FIELDS_ATTR,
-    'select': DENYLISTED_FIELDS_ATTR,
-  })
-);
+const DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze({
+  'input': DENYLISTED_FIELDS_ATTR,
+  'textarea': DENYLISTED_FIELDS_ATTR,
+  'select': DENYLISTED_FIELDS_ATTR,
+});
 
 /**
  * Rules in addition to denylistED_TAG_SPECIFIC_ATTRS for AMP4EMAIL.
  * @const {!Object<string, !Array<string>>}
  */
-const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
-  dict({
-    'amp-anim': ['controls'],
-    'form': ['name'],
-  })
-);
+const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze({
+  'amp-anim': ['controls'],
+  'form': ['name'],
+});
 
 /**
  * Test for invalid `style` attribute values.

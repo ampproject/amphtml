@@ -294,6 +294,7 @@ cc_library(
     copts = ["-std=c++17"],
     deps = [
         ":validator-internal",
+        "//cpp/htmlparser/css:parse-css",
         "//:validator_cc_proto",
     ],
     alwayslink = 1,
@@ -321,6 +322,16 @@ cc_library(
     ],
 )
 
+cc_binary(
+    name = "update-tests",
+    srcs = ["update-tests.cc"],
+    copts = ["-std=c++17"],
+    deps = [
+        ":testing-utils",
+        ":validator",
+    ],
+)
+
 cc_test(
     name = "validator_test",
     srcs = ["validator_test.cc"],
@@ -329,6 +340,8 @@ cc_test(
         ":testing-utils",
         ":validator",
         ":validator_pb",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "//cpp/htmlparser/css:parse_css_cc_proto",

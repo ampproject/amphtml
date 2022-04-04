@@ -1,7 +1,6 @@
 import {removeElement} from '#core/dom';
 import {closestAncestorElementBySelector} from '#core/dom/query';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -392,12 +391,10 @@ function sendAmpScriptToSwOnFirstVisit(win, registration) {
     // using convention from https://github.com/redux-utilities/flux-standard-action.
     if (activeSW.postMessage) {
       activeSW.postMessage(
-        JSON.stringify(
-          dict({
-            'type': 'AMP__FIRST-VISIT-CACHING',
-            'payload': ampScriptsUsed,
-          })
-        )
+        JSON.stringify({
+          'type': 'AMP__FIRST-VISIT-CACHING',
+          'payload': ampScriptsUsed,
+        })
       );
     }
   }
@@ -426,12 +423,10 @@ function prefetchOutgoingLinks(registration, win) {
     const activeSW = registration.active;
     if (activeSW.postMessage) {
       activeSW.postMessage(
-        JSON.stringify(
-          dict({
-            'type': 'AMP__LINK-PREFETCH',
-            'payload': links,
-          })
-        )
+        JSON.stringify({
+          'type': 'AMP__LINK-PREFETCH',
+          'payload': links,
+        })
       );
     }
   }

@@ -2,6 +2,8 @@ import * as Preact from '#preact';
 
 import {BentoMathml} from '../component';
 
+import '../component.jss';
+
 const formulas = {
   quadratic: '\\[x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.\\]',
   cauchy: '\\[f(a) = \\frac{1}{2\\pi i} \\oint\\frac{f(z)}{z-a}dz\\]',

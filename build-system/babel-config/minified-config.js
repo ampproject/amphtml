@@ -8,9 +8,10 @@ const {getReplacePlugin} = require('./helpers');
 /**
  * Gets the config for minified babel transforms run, used by 3p vendors.
  *
+ * @param {'preact' | 'react'} buildFor
  * @return {!Object}
  */
-function getMinifiedConfig() {
+function getMinifiedConfig(buildFor = 'preact') {
   const isProd = argv._.includes('dist') && !argv.fortesting;
 
   const reactJsxPlugin = [
@@ -25,8 +26,9 @@ function getMinifiedConfig() {
 
   const plugins = [
     'optimize-objstr',
+    './build-system/babel-plugins/babel-plugin-mangle-object-values',
     './build-system/babel-plugins/babel-plugin-jsx-style-object',
-    getImportResolverPlugin(),
+    getImportResolverPlugin(buildFor),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
@@ -68,17 +70,22 @@ function getMinifiedConfig() {
       shippedProposals: true,
     },
   ];
+  const presetTypescript = [
+    '@babel/preset-typescript',
+    {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
+  ];
 
   return {
     compact: false,
     plugins,
     sourceMaps: true,
-    presets: [presetEnv],
+    presets: [presetTypescript, presetEnv],
     retainLines: true,
     assumptions: {
       constantSuper: true,
       noClassCalls: true,
       setClassMethods: true,
+      setPublicClassFields: true,
     },
   };
 }

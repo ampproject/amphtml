@@ -11,11 +11,7 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
-import {
-  ANALYTICS_TAG_NAME,
-  StoryAnalyticsEvent,
-  getAnalyticsService,
-} from './story-analytics';
+import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 
 const TAG = 'amp-story-share';
 
@@ -64,7 +60,6 @@ export class AmpStoryShare {
         }
       }
 
-      this.shareMenuEl_[ANALYTICS_TAG_NAME] = TAG;
       this.analyticsService_.triggerEvent(
         isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
         this.shareMenuEl_

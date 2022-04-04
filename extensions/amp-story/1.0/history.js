@@ -1,4 +1,3 @@
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 
@@ -103,7 +102,7 @@ function setLocalStorageState(win, state) {
 function getLocalStorageStateContainer(win) {
   const container = readLocalStorage(win);
   if (!container) {
-    return dict();
+    return {};
   }
   const now = Date.now();
   let expired = false;

@@ -1,6 +1,7 @@
 import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
-import {LocalizationService} from '#service/localization';
+
+import {getLocalizationService} from 'extensions/amp-story/1.0/amp-story-localization-service';
 
 import {
   MOCK_URL,
@@ -12,6 +13,7 @@ import {
 } from './helpers';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStoryInteractiveQuiz} from '../amp-story-interactive-quiz';
 
@@ -54,10 +56,10 @@ describes.realWin(
         return storeService;
       });
 
-      const localizationService = new LocalizationService(win.document.body);
-      env.sandbox
-        .stub(Services, 'localizationServiceForOrNull')
-        .returns(Promise.resolve(localizationService));
+      const localizationService = getLocalizationService(win.document.body);
+      localizationService.registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
@@ -145,8 +147,8 @@ describes.realWin(
       await ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
 
-      expect(ampStoryQuiz.getOptionElements()[0].innerText).to.contain('30%');
-      expect(ampStoryQuiz.getOptionElements()[3].innerText).to.contain('10%');
+      expect(ampStoryQuiz.getOptionElements()[0].textContent).to.contain('30%');
+      expect(ampStoryQuiz.getOptionElements()[3].textContent).to.contain('10%');
     });
 
     it('should handle the percentage pipeline with scrambled data', async () => {
@@ -162,7 +164,7 @@ describes.realWin(
       const expectedPercentages = [10, 20, 30, 40];
       for (let i = 0; i < NUM_OPTIONS; i++) {
         const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+        expect(ampStoryQuiz.getOptionElements()[i].textContent).to.contain(
           expectedText
         );
       }
@@ -181,7 +183,7 @@ describes.realWin(
       const expectedPercentages = [0, 50, 50, 0];
       for (let i = 0; i < NUM_OPTIONS; i++) {
         const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+        expect(ampStoryQuiz.getOptionElements()[i].textContent).to.contain(
           expectedText
         );
       }
@@ -200,7 +202,7 @@ describes.realWin(
       const expectedPercentages = [20, 0, 0, 80];
       for (let i = 0; i < NUM_OPTIONS; i++) {
         const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+        expect(ampStoryQuiz.getOptionElements()[i].textContent).to.contain(
           expectedText
         );
       }

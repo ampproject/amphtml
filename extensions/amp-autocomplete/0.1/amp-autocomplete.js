@@ -6,13 +6,7 @@ import {toggle} from '#core/dom/style';
 import {mod} from '#core/math';
 import {isArray, isEnumValue} from '#core/types';
 import {once} from '#core/types/function';
-import {
-  dict,
-  getValueForExpr,
-  hasOwn,
-  map,
-  ownProperty,
-} from '#core/types/object';
+import {getValueForExpr, hasOwn, map, ownProperty} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 import {includes} from '#core/types/string';
 
@@ -432,6 +426,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (this.isSsr_) {
       return requestForBatchFetch(
         this.element,
+        this.element.getAttribute('src'),
         policy,
         /* refresh */ false
       ).then((request) => {
@@ -443,12 +438,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
         );
         setupJsonFetchInit(request.fetchOpt);
 
-        const attributes = dict({
+        const attributes = {
           'ampAutocompleteAttributes': {
             'items': itemsExpr,
             'maxItems': this.maxItems_,
           },
-        });
+        };
         return this.getSsrTemplateHelper().ssr(
           this.element,
           request,

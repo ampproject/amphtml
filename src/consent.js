@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 /**
@@ -91,12 +89,12 @@ export function getConsentMetadata(element, policyId = 'default') {
  */
 export function getConsentDataToForward(element, opt_policyId) {
   return Services.consentPolicyServiceForDocOrNull(element).then((policy) => {
-    const gettersOrNull = dict({
+    const gettersOrNull = {
       'consentMetadata': policy && policy.getConsentMetadataInfo,
       'consentString': policy && policy.getConsentStringInfo,
       'consentPolicyState': policy && policy.whenPolicyResolved,
       'consentPolicySharedData': policy && policy.getMergedSharedData,
-    });
+    };
     if (!policy) {
       return gettersOrNull;
     }

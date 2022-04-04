@@ -35,37 +35,27 @@ export function fetchCachedSources(
   if (Services.platformFor(win).isBot()) {
     return Promise.resolve();
   }
-  if (
-    !(
-      videoEl.getAttribute('src') ||
-      videoEl.querySelector('source[src]')?.getAttribute('src')
-    )
-  ) {
+
+  // Always set crossorigin attribute so captions can be set.
+  if (!videoEl.hasAttribute('crossorigin')) {
+    videoEl.setAttribute('crossorigin', '');
+  }
+
+  const videoSrc = videoEl.getAttribute('src');
+  const sourceSrc = videoEl.querySelector('source[src]')?.getAttribute('src');
+  if (!videoSrc && !sourceSrc) {
     user().error('AMP-VIDEO', 'Video cache not properly configured');
     return Promise.resolve();
   }
 
   Services.performanceFor(ampdoc.win).addEnabledExperiment('video-cache');
 
-  const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
-  maybeReplaceSrcWithSourceElement(videoEl, win);
-  const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
-  return getCacheUrlService(videoEl, ampdoc)
-    .then((service) => service.createCacheUrl(videoUrl))
-    .then((cacheUrl) => {
-      const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
-        'amp_video_host_url':
-          /* document url that contains the video */ canonicalUrl,
-        'amp_video_require_acao_header': videoEl.hasAttribute('crossorigin')
-          ? 1
-          : null,
-      });
-      return Services.xhrFor(win).fetch(requestUrl, {prerenderSafe: true});
+  return requestCachedVideoSources(videoEl, ampdoc)
+    .then((response) => {
+      applySourcesToVideo(videoEl, response['sources'], maxBitrate);
+      applyAudioInfoToVideo(videoEl, response['has_audio']);
+      applyCaptionsTrackToVideo(videoEl, response['captions']);
     })
-    .then((response) => response.json())
-    .then((jsonResponse) =>
-      applySourcesToVideo(videoEl, jsonResponse['sources'], maxBitrate)
-    )
     .catch(() => {
       // If cache fails, video should still load properly.
     });
@@ -163,6 +153,39 @@ function applySourcesToVideo(videoEl, sources, maxBitrate) {
 }
 
 /**
+ * @param {!Element} videoEl
+ * @param {boolean|undefined} hasAudio
+ */
+function applyAudioInfoToVideo(videoEl, hasAudio) {
+  if (hasAudio === false) {
+    videoEl.setAttribute('noaudio', '');
+  }
+}
+
+/**
+ * Appends captions track to video if captions url is defined and video
+ * element doesn't have a track child specified in the document.
+ * @param {!Element} videoEl
+ * @param {!Object} captionsResponse
+ */
+function applyCaptionsTrackToVideo(videoEl, captionsResponse) {
+  if (
+    !captionsResponse ||
+    !captionsResponse['src'] ||
+    !captionsResponse['srclang'] ||
+    videoEl.querySelector('track')
+  ) {
+    return;
+  }
+  const trackEl = createElementWithAttributes(videoEl.ownerDocument, 'track', {
+    'src': captionsResponse['src'],
+    'srclang': captionsResponse['srclang'],
+    'kind': 'captions',
+  });
+  videoEl.appendChild(trackEl);
+}
+
+/**
  * If present, moves the src attribute to a source element to enable playing
  * from multiple sources: the cached ones and the fallback initial src.
  * @param {!Element} videoEl
@@ -203,4 +226,58 @@ function getCacheUrlService(videoEl, ampdoc) {
   return Services.extensionsFor(ampdoc.win)
     .installExtensionForDoc(ampdoc, 'amp-cache-url')
     .then(() => Services.cacheUrlServicePromiseForDoc(videoEl));
+}
+
+/**
+ * Fetch the sources for the given video element.
+ * @param {!Element} videoEl
+ * @param {!AmpDoc} ampdoc
+ * @return {!Promise<!Object>} JSON representing AMP's cached video sources.
+ */
+function requestCachedVideoSources(videoEl, ampdoc) {
+  const {win} = ampdoc;
+  if (shouldUseInlineVideoResponse(videoEl, win)) {
+    const inlineResponseEl = win.document.getElementById(
+      'amp-google-video-cache-response'
+    );
+    try {
+      const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
+      if (inlineResponseJson['sources']) {
+        return Promise.resolve(inlineResponseJson);
+      }
+    } catch (err) {
+      // If parsing the response fails, an XHR request will be made below.
+    }
+  }
+
+  const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
+  maybeReplaceSrcWithSourceElement(videoEl, win);
+  const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
+  return getCacheUrlService(videoEl, ampdoc)
+    .then((service) => service.createCacheUrl(videoUrl))
+    .then((cacheUrl) => {
+      const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
+        'amp_video_host_url':
+          /* document url that contains the video */ canonicalUrl,
+        'amp_video_require_acao_header': 1,
+      });
+      return Services.xhrFor(win)
+        .fetch(requestUrl, {prerenderSafe: true})
+        .then((xhrResponse) => xhrResponse.json());
+    });
+}
+
+/**
+ * Returns `true` if the video's inline response should be used instead of
+ * issuing an XHR request.
+ * @param {!Element} videoEl
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function shouldUseInlineVideoResponse(videoEl, win) {
+  // Google video cache inlines the first video of the first web story page.
+  const firstVid = win.document.querySelector(
+    'amp-story-page:first-of-type amp-video'
+  );
+  return videoEl === firstVid;
 }

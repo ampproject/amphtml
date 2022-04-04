@@ -1,7 +1,6 @@
 import {AMPDOC_SINGLETON_NAME_ENUM} from '#core/constants/enums';
 import {createElementWithAttributes} from '#core/dom';
 import {isObject} from '#core/types';
-import {dict} from '#core/types/object';
 import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
@@ -42,7 +41,7 @@ export class LinkerManager {
     this.element_ = element;
 
     /** @const @private {!JsonObject} */
-    this.resolvedIds_ = dict();
+    this.resolvedIds_ = {};
 
     /** @const @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.element_);
@@ -142,7 +141,7 @@ export class LinkerManager {
    * @private
    */
   processConfig_(config) {
-    const processedConfig = dict();
+    const processedConfig = {};
     const defaultConfig = {
       enabled: this.isLegacyOptIn_() && this.isSafari12OrAbove_(),
     };
@@ -275,7 +274,7 @@ export class LinkerManager {
         this.resolvedIds_[name]
       );
       if (linkerValue) {
-        const params = dict();
+        const params = {};
         params[name] = linkerValue;
         return addMissingParamsToUrl(url, params);
       }
@@ -444,11 +443,11 @@ export class LinkerManager {
    * @param {string} linkerValue
    */
   addHiddenInputs_(form, linkerName, linkerValue) {
-    const attrs = dict({
+    const attrs = {
       'type': 'hidden',
       'name': linkerName,
       'value': linkerValue,
-    });
+    };
 
     const inputEl = createElementWithAttributes(
       /** @type {!Document} */ (form.ownerDocument),

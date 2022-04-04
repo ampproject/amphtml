@@ -38,6 +38,10 @@ Connatix management dashboard.
 Connatix media id. This represents the unique ID of any media in your Library.
 This can be found at the Library section in the Connatix management dashboard.
 
+### data-param-\*
+
+All `data-param-*` prefixed attributes are turned into URL parameters and passed to iframe src.
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)

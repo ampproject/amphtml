@@ -16,7 +16,7 @@ function getSourceRoot(options) {
       .replace(/\{version\}/g, internalRuntimeVersion)
       .replace(/([^/])$/, '$1/');
   }
-  if (options.fortesting) {
+  if (options.fortesting || !argv._.includes('dist')) {
     return 'http://localhost:8000/';
   }
   return `https://raw.githubusercontent.com/ampproject/amphtml/${internalRuntimeVersion}/`;

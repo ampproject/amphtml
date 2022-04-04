@@ -1,8 +1,8 @@
+import {useStyles} from '#bento/components/bento-base-carousel/1.0/component.jss';
+
 import {sleep} from '#testing/helpers';
 
 import {getCarousel, getNextArrow, getPrevArrow, getSlides} from './helpers';
-
-import {useStyles} from '../component.jss';
 
 const pageWidth = 500;
 const pageHeight = 800;

@@ -3,6 +3,8 @@ import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {Services} from '#service';
 
 import {createCustomEvent} from '#utils/event-helper';
@@ -15,7 +17,10 @@ import {CSS} from '../../../build/amp-stream-gallery-1.0.css';
 /** @const {string} */
 const TAG = 'amp-stream-gallery';
 
-class AmpStreamGallery extends BaseElement {
+class AmpStreamGallery extends setSuperClass(
+  BaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   init() {
     this.registerApiAction('prev', (api) => api.prev(), ActionTrust_Enum.LOW);

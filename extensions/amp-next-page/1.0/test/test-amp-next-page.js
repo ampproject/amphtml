@@ -4,37 +4,45 @@ import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 
 import {Services} from '#service';
+import {installCidService} from '#service/cid-impl';
+
+import {getAmpdoc} from 'src/service-helpers';
+import * as url from 'src/url';
 
 import {HostPage, PageState} from '../page';
 import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 
-const MOCK_NEXT_PAGE = `<header>Header</header>
-    <div style="height:1000px"></div>
-    <footer>Footer</footer>`;
-const MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS = `<header>Header</header>
-    <div style="height:1000px"></div>
-    <amp-next-page>
-        <script type="application/json">
-        [
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 3",
-            "url": "./document3"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 4",
-            "url": "./document4"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Title 2",
-            "url": "./document2"
-          }
-        ]
-      </script>
-    </amp-next-page>
-    <footer>Footer</footer>`;
+const MOCK_NEXT_PAGE = /* HTML */ `
+  <header>Header</header>
+  <div style="height:1000px"></div>
+  <footer>Footer</footer>
+`;
+const MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS = /* HTML */ `
+  <header>Header</header>
+  <div style="height:1000px"></div>
+  <amp-next-page>
+    <script type="application/json">
+      [
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 3",
+          "url": "./document3"
+        },
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 4",
+          "url": "./document4"
+        },
+        {
+          "image": "/examples/img/hero@1x.jpg",
+          "title": "Title 2",
+          "url": "./document2"
+        }
+      ]
+    </script>
+  </amp-next-page>
+  <footer>Footer</footer>
+`;
 const VALID_CONFIG = [
   {
     'image': '/examples/img/hero@1x.jpg',
@@ -665,6 +673,48 @@ describes.realWin(
             expect(initialMessageDeliverer.withArgs(...args)).to.not.have.been
               .called;
           }
+        }
+      });
+
+      it('replaces CLIENT_ID from propagated message', async () => {
+        const expectedCid = 'myCid123';
+
+        installCidService(ampdoc);
+
+        // Only Proxy Origin URLs enable the Viewer CID API
+        env.sandbox.stub(url, 'isProxyOrigin').returns(true);
+
+        const messageDeliverer = (type) => {
+          if (type === 'cid') {
+            return expectedCid;
+          }
+        };
+        Services.viewerForDoc(ampdoc).setMessageDeliverer(messageDeliverer, '');
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+
+        for (const page of service.pages_) {
+          const ampdoc = getAmpdoc(page.document);
+
+          // CID API is bound to doc visibility
+          env.sandbox.stub(ampdoc, 'whenFirstVisible').resolves();
+
+          const viewer = Services.viewerForDoc(page.document);
+
+          // Mock hasCapability and isTrustedViewer to enable Viewer CID API
+          env.sandbox
+            .stub(viewer, 'hasCapability')
+            .callsFake((capability) => capability === 'cid');
+
+          env.sandbox.stub(viewer, 'isTrustedViewer').resolves(true);
+        }
+
+        for (const page of service.pages_) {
+          const cidStruct = {scope: 'foo', cookie: 'bar'};
+          const cidConsent = Promise.resolve();
+          const cidService = await Services.cidForDoc(page.document);
+          const cid = await cidService.get(cidStruct, cidConsent);
+          expect(cid).to.equal(expectedCid);
         }
       });
     });

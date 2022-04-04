@@ -10,7 +10,6 @@ import {isLayoutSizeDefined} from '#core/dom/layout';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -46,7 +45,7 @@ function isSizer(el) {
 }
 
 export class AmpCarousel extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
@@ -624,7 +623,7 @@ export class AmpCarousel extends AMP.BaseElement {
     const detail = getDetail(event);
     const index = detail['index'];
     const actionSource = detail['actionSource'];
-    const data = dict({'index': index});
+    const data = {'index': index};
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
     const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;

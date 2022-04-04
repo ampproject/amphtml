@@ -4,7 +4,6 @@ import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {clamp} from '#core/math';
 import {isFiniteNumber, isObject} from '#core/types';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -202,13 +201,11 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   sendCommand_(action, opt_valueType, opt_value) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(
-          dict({
-            'action': action,
-            'valueType': opt_valueType || '',
-            'value': opt_value || '',
-          })
-        );
+        const message = JSON.stringify({
+          'action': action,
+          'valueType': opt_valueType || '',
+          'value': opt_value || '',
+        });
         this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
       }
     });

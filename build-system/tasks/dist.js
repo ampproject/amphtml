@@ -5,7 +5,7 @@ const path = require('path');
 const {
   bootstrapThirdPartyFrames,
   compileAllJs,
-  compileBentoRuntime,
+  compileBentoRuntimeAndCore,
   compileCoreRuntime,
   compileJs,
   endBuildStep,
@@ -23,6 +23,7 @@ const {
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
+const {buildBentoComponents} = require('./build-bento');
 const {buildCompiler} = require('../compile/build-compiler');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {buildVendorConfigs} = require('./3p-vendor-helpers');
@@ -31,6 +32,7 @@ const {compileJison} = require('./compile-jison');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {log} = require('../common/logging');
 const {VERSION} = require('../compile/internal-version');
+const {buildStoryLocalization} = require('./build-story-localization');
 
 const {cyan, green} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -92,6 +94,7 @@ async function runPreDistSteps(options) {
   await compileJison();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
+  await buildStoryLocalization(options);
   displayLifecycleDebugging();
 }
 
@@ -115,7 +118,7 @@ async function dist() {
   if (argv.core_runtime_only) {
     await compileCoreRuntime(options);
   } else if (argv.bento_runtime_only) {
-    await compileBentoRuntime(options);
+    await compileBentoRuntimeAndCore(options);
   } else {
     await Promise.all([
       writeVersionFiles(),
@@ -128,7 +131,7 @@ async function dist() {
   }
 
   // This step internally parses the various extension* flags.
-  await buildExtensions(options);
+  await Promise.all([buildExtensions(options), buildBentoComponents(options)]);
 
   // This step is to be run only during a full `amp dist`.
   if (
@@ -204,10 +207,6 @@ function buildLoginDone(version) {
     minify: true,
     minifiedName,
     aliasName,
-    extraGlobs: [
-      `${buildDir}/amp-login-done-0.1.max.js`,
-      `${buildDir}/amp-login-done-dialog.js`,
-    ],
   });
 }
 
@@ -227,7 +226,6 @@ async function buildWebPushPublisherFiles() {
         includePolyfills: true,
         minify: true,
         minifiedName,
-        extraGlobs: [`${tempBuildDir}/*.js`],
       });
     }
   }

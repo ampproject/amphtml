@@ -160,5 +160,8 @@
   },
   "99": {
     "string": "Form successfully submitted"
+  },
+  "101": {
+    "string": "Shop Now"
   }
 }

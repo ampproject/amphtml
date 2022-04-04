@@ -248,6 +248,9 @@ async function compileDistFlavors_(flavorType, command, tempDir) {
   if (argv.esm) {
     command += ' --esm';
   }
+  if (argv.full_sourcemaps) {
+    command += ' --full_sourcemaps';
+  }
   log('Compiling flavor', green(flavorType), 'using', cyan(command));
 
   execOrDie('amp clean --exclude release');
@@ -483,7 +486,8 @@ async function prependConfig_(outputDir) {
           ...target.config,
         });
 
-        const contents = await fs.readFile(targetPath, 'utf-8');
+        const contents = await fs.readFile(targetPath, 'utf8');
+
         return fs.writeFile(
           targetPath,
           `self.AMP_CONFIG=${channelConfig};/*AMP_CONFIG*/${contents}`
@@ -590,6 +594,7 @@ release.flags = {
   'flavor':
     'Limit this release build to a single flavor (can be used to split the release work across multiple build machines)',
   'esm': 'Compile with --esm if true, without --esm if false or unspecified',
+  'full_sourcemaps': 'Include source code content in sourcemaps',
   'dedup_v0':
     'Removes duplicate copies of the v0/ subdirectory when they are the same files as those in the Stable (01-prefixed) channel',
 };

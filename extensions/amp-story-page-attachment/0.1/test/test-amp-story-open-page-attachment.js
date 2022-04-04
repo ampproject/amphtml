@@ -4,6 +4,7 @@ import {LocalizationService} from '#service/localization';
 import {AmpStoryStoreService} from 'extensions/amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from 'src/service-helpers';
 
+import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryPageAttachment} from '../amp-story-page-attachment';
 
 describes.realWin(
@@ -32,6 +33,9 @@ describes.realWin(
       registerServiceBuilder(win, 'localization', function () {
         return localizationService;
       });
+      localizationService.registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
@@ -42,6 +46,8 @@ describes.realWin(
       attachmentEl = win.document.createElement('amp-story-page-attachment');
       attachmentEl.getAmpDoc = () => new AmpDocSingle(win);
       page.appendChild(attachmentEl);
+      page.getAmpDoc = () => new AmpDocSingle(win);
+
       attachment = new AmpStoryPageAttachment(attachmentEl);
       env.sandbox.stub(attachment, 'mutateElement').callsFake((fn) => fn());
 
@@ -63,8 +69,8 @@ describes.realWin(
       attachmentEl.setAttribute('layout', 'nodisplay');
       attachmentEl.setAttribute('href', 'google.com');
       page.appendChild(attachmentEl);
-      attachment.buildCallback();
-      attachment.layoutCallback();
+      await attachment.buildCallback();
+      await attachment.layoutCallback();
 
       const openAttachmentEl = storyEl.querySelector(
         '.i-amphtml-story-page-open-attachment'
@@ -78,8 +84,8 @@ describes.realWin(
       const anchorEl = win.document.createElement('a');
       outlinkEl.appendChild(anchorEl);
 
-      outlink.buildCallback();
-      outlink.layoutCallback();
+      await outlink.buildCallback();
+      await outlink.layoutCallback();
 
       const openAttachmentEl = storyEl.querySelector(
         '.i-amphtml-story-page-open-attachment'
@@ -88,10 +94,10 @@ describes.realWin(
       expect(openAttachmentEl.getAttribute('target')).to.eql('_top');
     });
 
-    it('should build the open outlink UI with same codepath as page attachment', () => {
+    it('should build the open outlink UI with same codepath as page attachment', async () => {
       outlinkEl.setAttribute('layout', 'nodisplay');
-      outlink.buildCallback();
-      outlink.layoutCallback();
+      await outlink.buildCallback();
+      await outlink.layoutCallback();
 
       const openoutlinkEl = page.querySelector(
         '.i-amphtml-story-page-open-attachment'
@@ -99,13 +105,13 @@ describes.realWin(
       expect(openoutlinkEl).to.exist;
     });
 
-    it('should build the amp-story-page-attachment UI with one image', () => {
+    it('should build the amp-story-page-attachment UI with one image', async () => {
       attachmentEl.setAttribute('layout', 'nodisplay');
       attachmentEl.setAttribute('cta-image', 'nodisplay');
       page.appendChild(attachmentEl);
 
-      attachment.buildCallback();
-      attachment.layoutCallback();
+      await attachment.buildCallback();
+      await attachment.layoutCallback();
 
       const openAttachmentEl = page.querySelector(
         '.i-amphtml-story-page-open-attachment'
@@ -118,13 +124,13 @@ describes.realWin(
       ).to.exist;
     });
 
-    it('should build the amp-story-page-attachment UI with two images', () => {
+    it('should build the amp-story-page-attachment UI with two images', async () => {
       attachmentEl.setAttribute('layout', 'nodisplay');
       attachmentEl.setAttribute('cta-image', 'nodisplay');
       attachmentEl.setAttribute('cta-image-2', 'nodisplay');
 
-      attachment.buildCallback();
-      attachment.layoutCallback();
+      await attachment.buildCallback();
+      await attachment.layoutCallback();
 
       const openAttachmentEl = page.querySelector(
         '.i-amphtml-story-page-open-attachment'
@@ -137,13 +143,13 @@ describes.realWin(
       ).to.equal(2);
     });
 
-    it('should NOT rewrite the amp-story-page-attachment UI images to a proxy URL', () => {
+    it('should NOT rewrite the amp-story-page-attachment UI images to a proxy URL', async () => {
       const src = 'https://examples.com/foo.bar.png';
       attachmentEl.setAttribute('layout', 'nodisplay');
       attachmentEl.setAttribute('cta-image', src);
 
-      attachment.buildCallback();
-      attachment.layoutCallback();
+      await attachment.buildCallback();
+      await attachment.layoutCallback();
 
       const openAttachmentEl = page.querySelector(
         '.i-amphtml-story-page-open-attachment'
@@ -155,12 +161,12 @@ describes.realWin(
       expect(imgEl.getAttribute('style')).to.contain(src);
     });
 
-    it('should build the amp-story-page-attachment with href (legacy) UI', () => {
+    it('should build the amp-story-page-attachment with href (legacy) UI', async () => {
       attachmentEl.setAttribute('layout', 'nodisplay');
       attachmentEl.setAttribute('href', 'www.google.com');
 
-      attachment.buildCallback();
-      attachment.layoutCallback();
+      await attachment.buildCallback();
+      await attachment.layoutCallback();
 
       const openAttachmentEl = page.querySelector(
         '.i-amphtml-story-page-open-attachment'
@@ -173,13 +179,13 @@ describes.realWin(
       ).to.exist;
     });
 
-    it('should build the amp-story-page-outlink UI', () => {
+    it('should build the amp-story-page-outlink UI', async () => {
       outlinkEl.setAttribute('layout', 'nodisplay');
       const anchorChild = win.document.createElement('a');
       outlinkEl.appendChild(anchorChild);
 
-      outlink.buildCallback();
-      outlink.layoutCallback();
+      await outlink.buildCallback();
+      await outlink.layoutCallback();
 
       const openAttachmentEl = page.querySelector(
         '.i-amphtml-story-page-open-attachment'
@@ -192,12 +198,12 @@ describes.realWin(
       ).to.exist;
     });
 
-    it('should build the open attachment UI with custom text', () => {
+    it('should build the open attachment UI with custom text', async () => {
       attachmentEl.setAttribute('layout', 'nodisplay');
       attachmentEl.setAttribute('cta-text', 'Custom text');
 
-      attachment.buildCallback();
-      attachment.layoutCallback();
+      await attachment.buildCallback();
+      await attachment.layoutCallback();
 
       const openAttachmentLabelEl = page.querySelector(
         '.i-amphtml-story-page-attachment-label'
@@ -205,13 +211,32 @@ describes.realWin(
       expect(openAttachmentLabelEl.textContent).to.equal('Custom text');
     });
 
-    it('should use cta-text attribute when data-cta-text also exist', () => {
+    it('should use the correct outlink text', async () => {
+      const firstPage = win.document.createElement('amp-story-page');
+      storyEl.insertBefore(firstPage, page);
+      const otherOutlink = document.createElement('amp-story-page-outlink');
+      otherOutlink.appendChild(win.document.createElement('a'));
+      firstPage.appendChild(otherOutlink);
+
+      outlinkEl.querySelector('a').textContent = 'Custom text';
+      otherOutlink.querySelector('a').textContent = 'Wrong text';
+
+      await outlink.buildCallback();
+      await outlink.layoutCallback();
+
+      const openOutlinkLabelEl = page.querySelector(
+        '.i-amphtml-story-page-attachment-label'
+      );
+      expect(openOutlinkLabelEl.textContent).to.equal('Custom text');
+    });
+
+    it('should use cta-text attribute when data-cta-text also exist', async () => {
       attachmentEl.setAttribute('layout', 'nodisplay');
       attachmentEl.setAttribute('cta-text', 'CTA text');
       attachmentEl.setAttribute('data-cta-text', 'data CTA text');
 
-      attachment.buildCallback();
-      attachment.layoutCallback();
+      await attachment.buildCallback();
+      await attachment.layoutCallback();
 
       const openAttachmentLabelEl = page.querySelector(
         '.i-amphtml-story-page-attachment-label'

@@ -77,3 +77,10 @@ jobs:
             ```
             git checkout -t upstream/${{ steps.sweep.outputs.branch }}
             ```
+
+            If you're a repository collaborator, you may push to the branch associated with this pull request.
+
+      - name: Cleanup Branches
+        if: ${{ steps.pull-request.outputs.pull-request-number }}
+        run: |
+          node build-system/tasks/sweep-experiments/cleanup-branches.js --except="${{ steps.sweep.outputs.branch }}"

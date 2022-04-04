@@ -11,7 +11,7 @@
 const {addNamed} = require('@babel/helper-module-imports');
 
 const baseModule = 'core/dom/jsx';
-const helperModule = '#core/dom/jsx-style-property-string';
+const helperModule = '#core/dom/jsx/style-property-string';
 const helperFnName = 'jsxStylePropertyString';
 
 // All values from here, converted to dash-case:

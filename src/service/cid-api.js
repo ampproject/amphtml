@@ -1,4 +1,3 @@
-import {dict} from '#core/types/object';
 import {WindowInterface} from '#core/window/interface';
 
 import {Services} from '#service';
@@ -128,10 +127,10 @@ export class GoogleCidApi {
    * @return {!Promise<!JsonObject>}
    */
   fetchCid_(url, scope, token) {
-    const payload = dict({
+    const payload = {
       'originScope': scope,
       'canonicalOrigin': this.canonicalOrigin_,
-    });
+    };
     if (token) {
       payload['securityToken'] = token;
     }

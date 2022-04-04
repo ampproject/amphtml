@@ -21,7 +21,7 @@ import {
 } from '#core/dom/form';
 import {ancestorElementsByTag, childElementByAttr} from '#core/dom/query';
 import {isArray, toArray} from '#core/types/array';
-import {deepMerge, dict} from '#core/types/object';
+import {deepMerge} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 import {parseQueryString} from '#core/types/string/url';
 import {toWin} from '#core/window';
@@ -292,7 +292,7 @@ export class AmpForm {
    */
   requestForFormFetch(url, method, opt_extraFields, opt_fieldDenylist) {
     let xhrUrl, body;
-    let headers = dict({'Accept': 'application/json'});
+    let headers = {'Accept': 'application/json'};
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
     if (isHeadOrGet) {
       this.assertNoSensitiveFields_();
@@ -309,10 +309,10 @@ export class AmpForm {
       xhrUrl = url;
       if (this.encType_ === 'application/x-www-form-urlencoded') {
         body = serializeQueryString(this.getFormAsObject_());
-        headers = dict({
+        headers = {
           'Accept': 'application/json',
           'Content-Type': 'application/x-www-form-urlencoded',
-        });
+        };
       } else {
         // default case: encType_ is 'multipart/form-data'
         devAssert(this.encType_ === 'multipart/form-data');
@@ -330,12 +330,12 @@ export class AmpForm {
     /** @type {!FetchRequestDef}*/
     const request = {
       xhrUrl,
-      fetchOpt: dict({
+      fetchOpt: {
         'body': body,
         'method': method,
         'credentials': 'include',
         'headers': headers,
-      }),
+      },
     };
     return request;
   }
@@ -437,7 +437,7 @@ export class AmpForm {
           if (this.state_ === FormState.VERIFYING) {
             if (errors.length) {
               this.setState_(FormState.VERIFY_ERROR);
-              this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
+              this.renderTemplate_({'verifyErrors': errors}).then(() => {
                 this.triggerAction_(
                   FormEvents.VERIFY_ERROR,
                   errors,
@@ -478,7 +478,7 @@ export class AmpForm {
    */
   triggerFormSubmitInAnalytics_(eventType) {
     this.assertSsrTemplate_(false, 'Form analytics not supported');
-    const formDataForAnalytics = dict({});
+    const formDataForAnalytics = {};
     const formObject = this.getFormAsObject_();
 
     for (const k in formObject) {
@@ -671,7 +671,7 @@ export class AmpForm {
    * @private
    */
   handlePresubmitError_(error, trust) {
-    const detail = dict();
+    const detail = {};
     if (error && error.message) {
       detail['error'] = error.message;
     }
@@ -790,7 +790,7 @@ export class AmpForm {
       .then(
         (response) => this.handleSsrTemplateResponse_(response, trust),
         (error) => {
-          const detail = dict();
+          const detail = {};
           if (error && error.message) {
             detail['error'] = error.message;
           }
@@ -897,14 +897,10 @@ export class AmpForm {
           `input[name=${escapeCssSelectorIdent(name)}]`
         );
         if (!input) {
-          input = createElementWithAttributes(
-            this.win_.document,
-            'input',
-            dict({
-              'name': asyncInput.getAttribute(AsyncInputAttributes_Enum.NAME),
-              'hidden': 'true',
-            })
-          );
+          input = createElementWithAttributes(this.win_.document, 'input', {
+            'name': asyncInput.getAttribute(AsyncInputAttributes_Enum.NAME),
+            'hidden': 'true',
+          });
         }
         input.setAttribute('value', value);
         this.form_.appendChild(input);
@@ -1191,11 +1187,9 @@ export class AmpForm {
    * @private
    */
   triggerAction_(name, detail, trust) {
-    const event = createCustomEvent(
-      this.win_,
-      `${TAG}.${name}`,
-      dict({'response': detail})
-    );
+    const event = createCustomEvent(this.win_, `${TAG}.${name}`, {
+      'response': detail,
+    });
     this.actions_.trigger(this.form_, name, event, trust);
   }
 
@@ -1249,7 +1243,7 @@ export class AmpForm {
    */
   renderTemplate_(data) {
     if (isArray(data)) {
-      data = dict();
+      data = {};
       user().warn(
         TAG,
         `Unexpected data type: ${data}. Expected non JSON array.`

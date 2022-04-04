@@ -1,6 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
 import {childElementByTag} from '#core/dom/query';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -67,10 +66,10 @@ export class Renderer {
         const element = createElementWithAttributes(
           this.ampdoc_.win.document,
           'div',
-          dict({
+          {
             'class': 'i-amphtml-subs-progress',
             'subscriptions-section': 'loading',
-          })
+          }
         );
         // The loading indicator will be either inserted right before the
         // `<footer>` node or appended as the last child.
