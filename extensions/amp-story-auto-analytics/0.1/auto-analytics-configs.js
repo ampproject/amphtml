@@ -70,5 +70,45 @@ export const buildGtagConfig = (gtagId) => ({
         'repeat': false,
       },
     },
+    'storyShoppingTagClick': {
+      'on': 'story-shopping-tag-click',
+      'vars': {
+        'event_name': 'custom',
+        'event_action': 'story_shopping_tag_click',
+        'event_category': '${title}',
+        'event_label': '${storyShoppingProductId}',
+        'send_to': [gtagId],
+      },
+    },
+    'storyShoppingPLPView': {
+      'on': 'story-shopping-plp-view',
+      'vars': {
+        'event_name': 'custom',
+        'event_action': 'story_shopping_plp_view',
+        'event_category': '${title}',
+        'event_label': '${storyPageId}',
+        'send_to': [gtagId],
+      },
+    },
+    'storyShoppingPDPView': {
+      'on': 'story-shopping-pdp-view',
+      'vars': {
+        'event_name': 'custom',
+        'event_action': 'story_shopping_pdp_view',
+        'event_category': '${title}',
+        'event_label': '${storyShoppingProductId}',
+        'send_to': [gtagId],
+      },
+    },
+    'storyShoppingBuyNowClick': {
+      'on': 'story-shopping-buy-now-click',
+      'vars': {
+        'event_name': 'custom',
+        'event_action': 'story_shopping_buy_now_click',
+        'event_category': '${title}',
+        'event_label': '${storyShoppingProductId}',
+        'send_to': [gtagId],
+      },
+    },
   },
 });
