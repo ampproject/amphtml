@@ -91,7 +91,7 @@ export class AmpInlineGallerySlide extends AMP.BaseElement {
         captionSlot.appendChild(node);
       } else if (slot === 'attribution') {
         attributionSlot.appendChild(node);
-      } else {
+      } else if (slot == null) {
         contentSlot.appendChild(node);
       }
     });
