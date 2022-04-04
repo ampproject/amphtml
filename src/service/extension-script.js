@@ -50,6 +50,25 @@ export function calculateExtensionScriptUrl(
 }
 
 /**
+ * Calculate url for a file in the v0/ extension directory.
+ * @param {!Window} win The window
+ * @param {!Location} location The window's location
+ * @param {string} filename
+ * @param {boolean=} opt_isLocalDev
+ * @return {string}
+ */
+export function calculateExtensionFileUrl(
+  win,
+  location,
+  filename,
+  opt_isLocalDev
+) {
+  const base = calculateScriptBaseUrl(location, opt_isLocalDev);
+  const rtv = getMode(win).rtvVersion;
+  return `${base}/rtv/${rtv}/v0/${filename}`;
+}
+
+/**
  * Calculate script url for an entry point.
  * If `opt_rtv` is true, returns the URL matching the current RTV.
  * @param {!Location} location The window's location

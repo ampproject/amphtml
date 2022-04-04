@@ -72,7 +72,7 @@ const isRtvMode = (serveMode) => {
  */
 const getCdnUrlRegExp = (pathPattern = '[^\'">]+') =>
   new RegExp(
-    `(https://cdn\\.ampproject\\.org)/${pathPattern}(\\.m?js|\\.css)`,
+    `(https://cdn\\.ampproject\\.org)/${pathPattern}(\\.json|\\.m?js|\\.css)`,
     'g'
   );
 
@@ -116,8 +116,9 @@ function replaceCdnJsUrls(mode, html, hostName, useMaxNames) {
     if (isRtv) {
       return CDNURLToRTVURL(url, mode, pathnames, extension).href;
     }
-    // CSS files are never output as .max.css
-    const useMaxNamesForFile = useMaxNames && extension !== '.css';
+    // Only JS files have "max" files. Even mjs files don't have an equivalent
+    // max file during "amp build".
+    const useMaxNamesForFile = useMaxNames && extension === '.js';
     const href = getHrefWithoutHost(
       replaceCDNURLPath(url, pathnames, extension, useMaxNamesForFile)
     );
