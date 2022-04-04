@@ -237,11 +237,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     // Triggers an analytics event for the PDP or PLP depending on if there is an active product.
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent[
-        productForPdp
-          ? StoryAnalyticsEvent.SHOPPING_PDP_VIEW
-          : StoryAnalyticsEvent.SHOPPING_PLP_VIEW
-      ]
+      productForPdp
+        ? StoryAnalyticsEvent.SHOPPING_PDP_VIEW
+        : StoryAnalyticsEvent.SHOPPING_PLP_VIEW
     );
   }
 
