@@ -247,7 +247,7 @@ export class MediaPool {
 
       // Cloning nodes is faster than building them.
       // Construct a seed media element as a small optimization.
-      const mediaElSeed = ctor.call(this);
+      const mediaElSeed = ctor();
 
       this.allocated[type] = [];
       this.unallocated[type] = [];
@@ -605,7 +605,7 @@ export class MediaPool {
    * @private
    */
   forEachMediaType_(callbackFn) {
-    Object.keys(MediaType).forEach(callbackFn.bind(this));
+    Object.keys(MediaType).forEach(callbackFn);
   }
 
   /**
@@ -622,7 +622,7 @@ export class MediaPool {
         if (!els) {
           return;
         }
-        els.forEach(callbackFn.bind(this));
+        els.forEach(callbackFn);
       });
     });
   }
@@ -991,9 +991,9 @@ export class MediaPool {
     };
 
     if (task.requiresSynchronousExecution()) {
-      executionFn.call(this);
+      executionFn();
     } else {
-      this.timer_.delay(executionFn.bind(this), 0);
+      this.timer_.delay(executionFn, 0);
     }
   }
 
