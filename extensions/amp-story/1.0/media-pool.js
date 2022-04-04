@@ -232,12 +232,8 @@ export class MediaPool {
   initializeMediaPool_(maxCounts) {
     let poolIdCounter = 0;
 
-    this.forEachMediaType_((type) => {
-      const count = maxCounts[type] || 0;
-
-      if (count <= 0) {
-        return;
-      }
+    for (const type in maxCounts) {
+      const count = maxCounts[type];
 
       const ctor = devAssert(
         this.mediaFactory_[type],
@@ -267,7 +263,7 @@ export class MediaPool {
         mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
         this.unallocated[type].push(mediaEl);
       }
-    });
+    }
   }
 
   /**
@@ -600,15 +596,6 @@ export class MediaPool {
   }
 
   /**
-   * @param {function(string)} callbackFn
-   * @private
-   */
-  forEachMediaType_(callbackFn) {
-    callbackFn(MediaType_Enum.AUDIO);
-    callbackFn(MediaType_Enum.VIDEO);
-  }
-
-  /**
    * Preloads the content of the specified media element in the DOM and returns
    * a media element that can be used in its stead for playback.
    * @param {!DomElementDef} domMediaEl The media element, found in the
@@ -931,11 +918,12 @@ export class MediaPool {
 
     this.ampElementsToBless_ = null; // GC
 
-    const elements = [];
-    this.forEachMediaType_((type) => {
-      elements.push(...this.allocated[type]);
-      elements.push(...this.unallocated[type]);
-    });
+    const elements = [
+      ...this.allocated[MediaType_Enum.AUDIO],
+      ...this.unallocated[MediaType_Enum.VIDEO],
+      ...this.allocated[MediaType_Enum.AUDIO],
+      ...this.unallocated[MediaType_Enum.VIDEO],
+    ];
 
     const blessPromises = elements.map((element) => this.bless_(element));
     return Promise.all(blessPromises).then(
