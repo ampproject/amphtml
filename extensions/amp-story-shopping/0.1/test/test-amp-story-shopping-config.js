@@ -6,7 +6,6 @@ import {user} from '#utils/log';
 
 import * as remoteConfigData from '../../../../examples/amp-story/shopping/remote.json';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
-import * as url from '../../../../src/url';
 import {
   Action,
   getStoreService,
