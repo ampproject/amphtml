@@ -2,6 +2,8 @@ import {Layout_Enum} from '#core/dom/layout';
 
 import {isExperimentOn} from '#experiments';
 
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
 import {triggerAnalyticsEvent} from '#utils/analytics';
 import {userAssert} from '#utils/log';
 
@@ -10,7 +12,7 @@ import {BaseElement} from './base-element';
 /** @const {string} */
 const TAG = 'amp-audio';
 
-class AmpAudio extends BaseElement {
+class AmpAudio extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     this.registerApiAction('play', (api) => {
