@@ -1,4 +1,4 @@
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -166,6 +166,13 @@ export class SubscriptionService {
         });
 
       isStoryDocument(this.ampdoc_).then((isStory) => {
+        if (isStory) {
+          // Make the dialog with round corners for AMP Story.
+          const dialogWrapperEl = this.dialog_.getRoot();
+          dialogWrapperEl.classList.add(
+            'i-amphtml-story-subscriptions-dialog-wrapper'
+          );
+        }
         // Delegates the platform selection and activation call if is story.
         this.startAuthorizationFlow_(!isStory /** shouldActivatePlatform */);
       });
@@ -199,6 +206,36 @@ export class SubscriptionService {
    */
   getDialog() {
     return this.dialog_;
+  }
+
+  /**
+   * Maybe renders and opens the dialog using the cached entitlements. Do nothing if the viewer can authorize the user.
+   * @return {!Promise}
+   */
+  maybeRenderDialogForSelectedPlatform() {
+    return this.initialize_().then(() => {
+      if (this.doesViewerProvideAuth_ || this.platformConfig_['alwaysGrant']) {
+        return;
+      }
+
+      return this.selectAndActivatePlatform_();
+    });
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   */
+  getGrantStatus() {
+    return this.platformStore_.getGrantStatus();
+  }
+
+  /**
+   * This registers a callback which is called whenever a platform key is resolved
+   * with an entitlement.
+   * @param {function(!EntitlementChangeEventDef):void} callback
+   */
+  addOnEntitlementResolvedCallback(callback) {
+    this.platformStore_.addOnEntitlementResolvedCallback(callback);
   }
 
   /**
@@ -793,14 +830,14 @@ export class SubscriptionService {
         devAssert(platform, 'Platform is not registered');
         this.subscriptionAnalytics_.event(
           SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-          dict({
+          {
             'action': action,
             'serviceId': platformKey,
-          }),
-          dict({
+          },
+          {
             'action': action,
             'status': ActionStatus.STARTED,
-          })
+          }
         );
         resolve(platform.executeAction(action, sourceId));
       });

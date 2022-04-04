@@ -13,7 +13,6 @@ import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
@@ -307,7 +306,7 @@ class AmpJWPlayer extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     return this.getConsentData_().then(() => {
-      const queryParams = dict({
+      const queryParams = {
         'search': this.getContextualVal_() || undefined,
         'recency': this.contentRecency_ || undefined,
         'backfill': this.contentBackfill_ || undefined,
@@ -315,7 +314,7 @@ class AmpJWPlayer extends AMP.BaseElement {
         'consentState': this.consentState_ || undefined,
         'consentValue': this.consentString_ || undefined,
         'consentGdpr': this.consentMetadata_?.gdprApplies || undefined,
-      });
+      };
 
       const url = this.getSingleLineEmbed_();
       let src = addParamsToUrl(url, queryParams);
@@ -565,12 +564,10 @@ class AmpJWPlayer extends AMP.BaseElement {
     dev().info('JWPLAYER', 'COMMAND:', method, optParams);
 
     this.iframe_.contentWindow./*OK*/ postMessage(
-      JSON.stringify(
-        dict({
-          'method': method,
-          'optParams': optParams,
-        })
-      ),
+      JSON.stringify({
+        'method': method,
+        'optParams': optParams,
+      }),
       '*'
     );
   }

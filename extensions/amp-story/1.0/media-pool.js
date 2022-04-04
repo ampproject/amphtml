@@ -162,6 +162,18 @@ export class MediaPool {
     this.sources_ = {};
 
     /**
+     * The audio context.
+     * @private {?AudioContext}
+     */
+    this.audioContext_ = null;
+
+    /**
+     * Maps a media element's ID to its audio source.
+     * @private @const {!Object<string, !MediaElementAudioSourceNode>}
+     */
+    this.audioSources_ = {};
+
+    /**
      * Maps a media element's ID to the element.  This is necessary, as elements
      * are kept in memory when they are swapped out of the DOM.
      * @private @const {!Object<string, !PlaceholderElementDef>}
@@ -854,9 +866,9 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    // When a video is muted, reset its volume to the default value of 1.
-    if (mediaType == MediaType.VIDEO) {
-      domMediaEl.volume = 1;
+    const audioSource = this.audioSources_[domMediaEl.id];
+    if (audioSource) {
+      audioSource.disconnect();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
@@ -882,14 +894,44 @@ export class MediaPool {
     if (mediaType == MediaType.VIDEO) {
       const ampVideoEl = domMediaEl.parentElement;
       if (ampVideoEl) {
-        const volume = ampVideoEl.getAttribute('volume');
-        if (volume) {
-          domMediaEl.volume = parseFloat(volume);
+        if (ampVideoEl.hasAttribute('noaudio')) {
+          this.setVolume_(domMediaEl, 0);
+        } else {
+          const volume = ampVideoEl.getAttribute('volume');
+          if (volume) {
+            this.setVolume_(domMediaEl, parseFloat(volume));
+          }
         }
       }
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
+  }
+
+  /**
+   * Updates the volume of the provided media element.
+   * @param {!DomElementDef} domMediaEl The media element whose volume will be set.
+   * @param {number} volume The volume to be applied to the media element.
+   * @private
+   */
+  setVolume_(domMediaEl, volume) {
+    // Handle cross-browser differences (see https://googlechrome.github.io/samples/webaudio-method-chaining/).
+    if (typeof AudioContext === 'function') {
+      this.audioContext_ = this.audioContext_ || new AudioContext();
+    } else if (typeof webkitAudioContext === 'function') {
+      this.audioContext_ =
+        this.audioContext_ || new global.webkitAudioContext();
+    }
+
+    if (this.audioContext_) {
+      const audioSource =
+        this.audioSources_[domMediaEl.id] ||
+        this.audioContext_.createMediaElementSource(domMediaEl);
+      this.audioSources_[domMediaEl.id] = audioSource;
+      const gainNode = this.audioContext_.createGain();
+      gainNode.gain.value = volume;
+      audioSource.connect(gainNode).connect(this.audioContext_.destination);
+    }
   }
 
   /**

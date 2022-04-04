@@ -21,7 +21,6 @@ import {
 } from '#core/dom/layout';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {px, setStyles} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -44,7 +43,7 @@ import {addParamsToUrl} from '../../../src/url';
 const TAG = 'amp-apester-media';
 const AD_TAG = 'amp-ad';
 /** @const {!JsonObject} */
-const BOTTOM_AD_MESSAGE = dict({'type': 'has_bottom_ad', 'adHeight': 50});
+const BOTTOM_AD_MESSAGE = {'type': 'has_bottom_ad', 'adHeight': 50};
 /**
  * @enum {string}
  */
@@ -185,7 +184,7 @@ class AmpApesterMedia extends AMP.BaseElement {
       dev().assertString(this.mediaAttribute_)
     );
     let suffix = '';
-    const queryParams = dict();
+    const queryParams = {};
     queryParams['renderer'] = false;
     queryParams['platform'] = getPlatform();
     if (inative) {
@@ -227,7 +226,7 @@ class AmpApesterMedia extends AMP.BaseElement {
    *  @return {string}
    * */
   constructUrlFromMedia_(id, usePlayer) {
-    const queryParams = dict();
+    const queryParams = {};
     queryParams['channelId'] = this.embedOptions_.distributionChannelId;
     queryParams['type'] = this.embedOptions_.playlist
       ? 'playlist'

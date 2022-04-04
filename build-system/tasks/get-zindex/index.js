@@ -156,6 +156,7 @@ async function getZindex() {
         '!**/dist/**/*.js',
         '!extensions/**/test/**/*.js',
         '!extensions/**/storybook/**/*.js',
+        '!src/bento/components/**/test/*.js',
       ]),
     ]))
   );

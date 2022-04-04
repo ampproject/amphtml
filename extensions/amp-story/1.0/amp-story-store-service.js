@@ -1,4 +1,5 @@
 import {Observable} from '#core/data-structures/observable';
+import {mangleObjectValues} from '#core/types/enum';
 import {hasOwn} from '#core/types/object';
 import {deepEquals} from '#core/types/object/json';
 
@@ -54,6 +55,17 @@ export const EmbeddedComponentState = {
 };
 
 /**
+ * Subscription states for the paywall-enabled stories.
+ * @enum {number}
+ */
+export const SubscriptionsState = {
+  DISABLED: 0,
+  PENDING: 1,
+  GRANTED: 2,
+  BLOCKED: 3,
+};
+
+/**
  * @typedef {{
  *    element: !Element,
  *    state: !EmbeddedComponentState,
@@ -74,12 +86,14 @@ export let InteractiveReactData;
 
 /**
  * @typedef {{
- *   product-tag-id: string,
- *   product-title: string,
- *   product-price: number,
- *   product-price-currency: string,
- *   product-icon: string,
- *   product-tag-text: ?string,
+ *   productId: string,
+ *   productTitle: string,
+ *   productBrand: string,
+ *   productPrice: number,
+ *   productPriceCurrency: string,
+ *   productIcon: string,
+ *   productTagText: ?string,
+ *   productImages: !Array<string>,
  * }}
  */
 export let ShoppingConfigDataDef;
@@ -132,12 +146,13 @@ export let ShoppingDataDef;
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
  *    pageSize: {width: number, height: number},
+ *    subscriptionsDialogState: boolean,
  * }}
  */
 export let State;
 
-/** @const @enum {string} */
-export const StateProperty = {
+/** @const @enum {string|number} */
+const StateProperty = mangleObjectValues({
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_AUDIO_UI: 'canShowAudioUi',
@@ -186,17 +201,29 @@ export const StateProperty = {
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
   PAGE_IDS: 'pageIds',
   PAGE_SIZE: 'pageSize',
-};
 
-/** @const @enum {string} */
-export const Action = {
+  // AMP Story paywall states.
+  SUBSCRIPTIONS_DIALOG_UI_STATE: 'subscriptionsDialogUiState',
+  SUBSCRIPTIONS_STATE: 'subscriptionsState',
+});
+
+export {StateProperty};
+
+/** @const @enum {string|number} */
+const Action = mangleObjectValues({
   ADD_INTERACTIVE_REACT: 'addInteractiveReact',
+  ADD_NEW_PAGE_ID: 'addNewPageId',
+  ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
+  ADD_SHOPPING_DATA: 'addShoppingData',
   ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
-  SET_CONSENT_ID: 'setConsentId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
+  SET_CONSENT_ID: 'setConsentId',
+  SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
   SET_NAVIGATION_PATH: 'setNavigationPath',
   SET_PAGE_IDS: 'setPageIds',
+  SET_PAGE_SIZE: 'updatePageSize',
+  SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
@@ -209,17 +236,15 @@ export const Action = {
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
-  ADD_SHOPPING_DATA: 'addShoppingData',
-  TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
+  TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
+  TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE: 'toggleSubscriptionsDialogUiState',
+  TOGGLE_SUBSCRIPTIONS_STATE: 'toggleSubscriptionsState',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
-  SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
-  ADD_NEW_PAGE_ID: 'addNewPageId',
-  SET_PAGE_SIZE: 'updatePageSize',
-  ADD_PANNING_MEDIA_STATE: 'addPanningMediaState',
-  SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
-};
+});
+
+export {Action};
 
 /**
  * Functions to compare a data structure from the previous to the new state and
@@ -436,6 +461,17 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.VIEWER_CUSTOM_CONTROLS]: data,
       });
+    case Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: !!data,
+        [StateProperty.PAUSED_STATE]: !!data,
+      });
+    case Action.TOGGLE_SUBSCRIPTIONS_STATE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SUBSCRIPTIONS_STATE]: data,
+      });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -573,6 +609,8 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
       [StateProperty.PREVIEW_STATE]: false,
+      [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: false,
+      [StateProperty.SUBSCRIPTIONS_STATE]: SubscriptionsState.DISABLED,
     });
   }
 

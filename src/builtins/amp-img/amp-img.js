@@ -41,22 +41,22 @@ export const ATTRIBUTES_TO_PROPAGATE = [
 ];
 
 export class AmpImg extends BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static R1() {
     return R1_IMG_DEFERRED_BUILD;
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static usesLoading() {
     return true;
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static getPreconnects(element) {
     const src = element.getAttribute('src');
     if (src) {

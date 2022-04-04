@@ -1,5 +1,4 @@
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -134,9 +133,9 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
-        headers: dict({
+        headers: {
           'Content-Type': 'text/plain',
-        }),
+        },
         body: this.stringifyPingbackData_(selectedEntitlement),
       });
     });

@@ -1,6 +1,5 @@
 import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -121,13 +120,9 @@ export class LightboxControls {
     }
 
     this.element_.dispatchEvent(
-      createCustomEvent(
-        this.win_,
-        'action',
-        dict({
-          'action': action,
-        })
-      )
+      createCustomEvent(this.win_, 'action', {
+        'action': action,
+      })
     );
     event.stopPropagation();
     event.preventDefault();

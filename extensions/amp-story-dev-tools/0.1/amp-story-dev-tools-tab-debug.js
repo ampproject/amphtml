@@ -68,7 +68,7 @@ const buildLogMessageTemplate = (element) => {
 };
 
 export class AmpStoryDevToolsTabDebug extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return false;
   }

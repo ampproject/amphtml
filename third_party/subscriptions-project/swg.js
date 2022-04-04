@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.200 */
+/** Version: 0.1.22.211 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -172,6 +172,7 @@ const EntitlementSource = {
   UNKNOWN_ENTITLEMENT_SOURCE: 0,
   GOOGLE_SUBSCRIBER_ENTITLEMENT: 1001,
   GOOGLE_SHOWCASE_METERING_SERVICE: 2001,
+  SUBSCRIBE_WITH_GOOGLE_METERING_SERVICE: 2002,
   PUBLISHER_ENTITLEMENT: 3001,
 };
 /** @enum {number} */
@@ -839,7 +840,7 @@ class AudienceActivityClientLogsRequest {
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.event_,  // field 1 - event
+        this.event_, // field 1 - event
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -853,6 +854,95 @@ class AudienceActivityClientLogsRequest {
    */
   label() {
     return 'AudienceActivityClientLogsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class CompleteAudienceActionResponse {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?string} */
+    this.swgUserToken_ = data[base] == null ? null : data[base];
+
+    /** @private {?boolean} */
+    this.actionCompleted_ = data[1 + base] == null ? null : data[1 + base];
+
+    /** @private {?string} */
+    this.userEmail_ = data[2 + base] == null ? null : data[2 + base];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSwgUserToken() {
+    return this.swgUserToken_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSwgUserToken(value) {
+    this.swgUserToken_ = value;
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getActionCompleted() {
+    return this.actionCompleted_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setActionCompleted(value) {
+    this.actionCompleted_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUserEmail() {
+    return this.userEmail_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUserEmail(value) {
+    this.userEmail_ = value;
+  }
+
+  /**
+   * @param {boolean=} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.swgUserToken_, // field 1 - swg_user_token
+        this.actionCompleted_, // field 2 - action_completed
+        this.userEmail_, // field 3 - user_email
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'CompleteAudienceActionResponse';
   }
 }
 
@@ -2008,6 +2098,7 @@ const PROTO_MAP = {
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
   'AudienceActivityClientLogsRequest': AudienceActivityClientLogsRequest,
+  'CompleteAudienceActionResponse': CompleteAudienceActionResponse,
   'EntitlementJwt': EntitlementJwt,
   'EntitlementsRequest': EntitlementsRequest,
   'EntitlementsResponse': EntitlementsResponse,
@@ -3651,9 +3742,11 @@ class Entitlements {
 
   /**
    * Returns true if the current article is unlocked by a
-   * Google metering entitlement. These entitlements come
+   * Google metering entitlement. These entitlements may come
    * from Google News Intiative's licensing program to support news.
    * https://www.blog.google/outreach-initiatives/google-news-initiative/licensing-program-support-news-industry-/
+   * They may also come from Google's Subscribe With Google Metering
+   * functionality.
    * @return {boolean}
    */
   enablesThisWithGoogleMetering() {
@@ -3819,14 +3912,17 @@ class Entitlement {
    * @param {string} source
    * @param {!Array<string>} products
    * @param {string} subscriptionToken
+   * @param {JsonObject|null|undefined} subscriptionTokenContents
    */
-  constructor(source, products, subscriptionToken) {
+  constructor(source, products, subscriptionToken, subscriptionTokenContents) {
     /** @const {string} */
     this.source = source;
     /** @const {!Array<string>} */
     this.products = products;
     /** @const {string} */
     this.subscriptionToken = subscriptionToken;
+    /** @const {JsonObject|null|undefined} */
+    this.subscriptionTokenContents = subscriptionTokenContents;
   }
 
   /**
@@ -3836,7 +3932,8 @@ class Entitlement {
     return new Entitlement(
       this.source,
       this.products.slice(0),
-      this.subscriptionToken
+      this.subscriptionToken,
+      this.subscriptionTokenContents
     );
   }
 
@@ -3884,16 +3981,30 @@ class Entitlement {
 
   /**
    * @param {?Object} json
+   * @param {!../utils/jwt.JwtHelper} jwtHelper
    * @return {!Entitlement}
    */
-  static parseFromJson(json) {
+  static parseFromJson(json, jwtHelper) {
     if (!json) {
       json = {};
     }
     const source = json['source'] || '';
     const products = json['products'] || [];
     const subscriptionToken = json['subscriptionToken'];
-    return new Entitlement(source, products, subscriptionToken);
+    let subscriptionTokenContents;
+    try {
+      subscriptionTokenContents = subscriptionToken
+        ? jwtHelper.decode(subscriptionToken)
+        : null;
+    } catch (e) {
+      subscriptionTokenContents = null;
+    }
+    return new Entitlement(
+      source,
+      products,
+      subscriptionToken,
+      subscriptionTokenContents
+    );
   }
 
   /**
@@ -3901,13 +4012,14 @@ class Entitlement {
    * - Single entitlement: `{products: [], ...}`.
    * - A list of entitlements: `[{products: [], ...}, {...}]`.
    * @param {!Object|!Array<!Object>} json
+   * @param {!../utils/jwt.JwtHelper} jwtHelper
    * @return {!Array<!Entitlement>}
    */
-  static parseListFromJson(json) {
+  static parseListFromJson(json, jwtHelper) {
     const jsonList = Array.isArray(json)
       ? /** @type {!Array<Object>} */ (json)
       : [json];
-    return jsonList.map((json) => Entitlement.parseFromJson(json));
+    return jsonList.map((json) => Entitlement.parseFromJson(json, jwtHelper));
   }
 
   /**
@@ -4908,7 +5020,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.200',
+    '_client': 'SwG 0.1.22.211',
   });
 }
 
@@ -5252,10 +5364,13 @@ class PayCompleteFlow {
         publicationId: args.publicationId,
         offerId: this.sku_,
         origin: parseUrl(this.win_.location.href).origin,
+        isPaid: true,
+        checkOrderStatus: true,
       });
       if (response.requestMetadata) {
         urlParams.canonicalUrl = response.requestMetadata.contentId;
         urlParams.isAnonymous = response.requestMetadata.anonymous;
+        args['contentTitle'] = response.requestMetadata.contentTitle;
       }
 
       // Add feArgs to be passed via activities.
@@ -5450,6 +5565,11 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
         productType =
           (data['paymentRequest']['i'] || {})['productType'] ||
           ProductType.SUBSCRIPTION;
+      }
+      // Set productType if paymentRequest is not present, which happens
+      // if the pay flow was opened in redirect mode.
+      else if ('productType' in data) {
+        productType = data['productType'];
       }
     }
   }
@@ -5653,7 +5773,7 @@ class OffersFlow {
           ? new ActivityIframeView(
               this.win_,
               this.activityPorts_,
-              this.getUrl_(clientConfig),
+              this.getUrl_(clientConfig, deps.pageConfig()),
               feArgsObj,
               /* shouldFadeBody */ true
             )
@@ -5793,9 +5913,10 @@ class OffersFlow {
   /**
    * Returns the full URL that should be used for the activity iFrame view.
    * @param {!../model/client-config.ClientConfig} clientConfig
+   * @param {!../model/page-config.PageConfig} pageConfig
    * @return {string}
    */
-  getUrl_(clientConfig) {
+  getUrl_(clientConfig, pageConfig) {
     if (!clientConfig.useUpdatedOfferFlows) {
       return feUrl('/offersiframe');
     }
@@ -5803,10 +5924,13 @@ class OffersFlow {
     if (this.clientConfigManager_.shouldForceLangInIframes()) {
       return feUrl('/subscriptionoffersiframe', {
         'hl': this.clientConfigManager_.getLanguage(),
+        'publicationId': pageConfig.getPublicationId(),
       });
     }
 
-    return feUrl('/subscriptionoffersiframe');
+    return feUrl('/subscriptionoffersiframe', {
+      'publicationId': pageConfig.getPublicationId(),
+    });
   }
 
   /**
@@ -6226,7 +6350,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.200',
+        '_client': 'SwG 0.1.22.211',
         'supportsEventManager': true,
       },
       args || {}
@@ -6643,6 +6767,11 @@ const ExperimentFlags = {
    * Experiment flag for logging audience activity.
    */
   LOGGING_AUDIENCE_ACTIVITY: 'logging-audience-activity',
+
+  /**
+   * Experiment flag for swapping the location of the counter and the main CTA in Amplio blogs.
+   */
+  TWG_SWAP_COUNTER_AND_CTA: 'counter_cta_swap_enable_experiment',
 };
 
 /**
@@ -7013,6 +7142,24 @@ class AnalyticsService {
     this.getTimestamp_ = () => {
       return toTimestamp(Date.now());
     };
+
+    // While false, we will buffer logs instead of sending them to the analytics service.
+    /** @private {boolean} */
+    this.readyForLogging_ = false;
+
+    // Stores log events while we wait to be ready for logging.
+    /** @private {Array<!../api/client-event-manager-api.ClientEvent>}*/
+    this.logs_ = [];
+  }
+
+  /**
+   * Sets ready for logging to true and logs all the client events that were previously buffered.
+   */
+  setReadyForLogging() {
+    this.readyForLogging_ = true;
+    this.logs_.forEach((event) => {
+      this.handleClientEvent_(event);
+    });
   }
 
   /**
@@ -7116,7 +7263,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.200');
+    context.setClientVersion('SwG 0.1.22.211');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7135,23 +7282,29 @@ class AnalyticsService {
   }
 
   /**
-   * @param {?string=} swgUserToken
    * @return {!Promise<!../components/activities.ActivityIframePort>}
    */
-  start(swgUserToken = '') {
+  start() {
     if (!this.serviceReady_) {
       // Please note that currently openIframe reads the current analytics
       // context and that it may not contain experiments activated late during
       // the publishers code lifecycle.
       this.addLabels(getOnExperiments(this.doc_.getWin()));
-      const urlParams = swgUserToken ? {sut: swgUserToken} : {};
-      this.serviceReady_ = this.activityPorts_
-        .openIframe(
-          this.iframe_,
-          feUrl('/serviceiframe', urlParams),
-          null,
-          true
-        )
+      this.serviceReady_ = this.deps_
+        .storage()
+        .get(Constants$1.USER_TOKEN)
+        .then((swgUserToken) => {
+          const pubId = this.deps_.pageConfig().getPublicationId();
+          const urlParams = swgUserToken
+            ? {sut: swgUserToken, publicationId: pubId}
+            : {publicationId: pubId};
+          return this.activityPorts_.openIframe(
+            this.iframe_,
+            feUrl('/serviceiframe', urlParams),
+            null,
+            true
+          );
+        })
         .then(
           (port) => {
             // Register a listener for the logging to code indicate it is
@@ -7267,15 +7420,23 @@ class AnalyticsService {
     ) {
       return;
     }
-    // Register we sent a log, the port will call this.afterLogging_ when done.
-    this.unfinishedLogs_++;
-    this.lastAction_ = this.start().then((port) => {
-      const analyticsRequest = this.createLogRequest_(event);
-      port.execute(analyticsRequest);
-      if (isExperimentOn(this.doc_.getWin(), ExperimentFlags.LOGGING_BEACON)) {
-        this.sendBeacon_(analyticsRequest);
-      }
-    });
+
+    if (this.readyForLogging_) {
+      // Register we sent a log, the port will call this.afterLogging_ when done.
+      this.unfinishedLogs_++;
+      this.lastAction_ = this.start().then((port) => {
+        const analyticsRequest = this.createLogRequest_(event);
+        port.execute(analyticsRequest);
+        if (
+          isExperimentOn(this.doc_.getWin(), ExperimentFlags.LOGGING_BEACON)
+        ) {
+          this.sendBeacon_(analyticsRequest);
+        }
+      });
+    } else {
+      // If we're not ready to log events yet, store the event so we can log it later.
+      this.logs_.push(event);
+    }
   }
 
   /**
@@ -7438,8 +7599,8 @@ const SWG_I18N_STRINGS = {
     'nl': 'Bijdragen met Google',
     'no': 'Bidra med Google',
     'pl': 'Wesprzyj publikację przez Google',
-    'pt': 'Contribuir com o Google',
-    'pt-br': 'Contribua com o Google',
+    'pt': 'Contribuir utilizando o Google',
+    'pt-br': 'Contribua usando o Google',
     'ru': 'Внести средства через Google',
     'se': 'Bidra med Google',
     'th': 'มีส่วนร่วมผ่าน Google',
@@ -7448,6 +7609,76 @@ const SWG_I18N_STRINGS = {
     'zh-cn': '通过 Google 捐赠',
     'zh-hk': '透過 Google 提供內容',
     'zh-tw': '透過 Google 捐款',
+  },
+  'REGWALL_ALREADY_REGISTERED_LANG_MAP': {
+    'en': 'You have registered before.',
+    'ar': 'لقد سبق أن تسجّلت.',
+    'de': 'Du bist bereits registriert.',
+    'en-au': 'You have registered before.',
+    'en-ca': 'You have registered before.',
+    'en-gb': 'You have registered before.',
+    'en-us': 'You have registered before.',
+    'es': 'Ya te habías registrado anteriormente.',
+    'es-419': 'Ya te registraste antes.',
+    'fr': 'Vous vous êtes déjà inscrit.',
+    'fr-ca': 'Vous vous êtes inscrit auparavant.',
+    'hi': 'आपने पहले ही इसके लिए रजिस्टर कर लिया है.',
+    'id': 'Anda telah mendaftar sebelumnya.',
+    'it': 'Registrazione già effettuata in precedenza.',
+    'jp': 'すでに登録済みです。',
+    'ko': '이전에 등록한 사용자입니다.',
+    'ms': 'Anda telah mendaftar sebelum ini.',
+    'nl': 'Je hebt je al eerder geregistreerd.',
+    'no': 'Du er allerede registrert.',
+    'pl': 'Masz już wcześniejszą rejestrację.',
+    'pt': 'Já se registou anteriormente.',
+    'pt-br': 'Você já tem um cadastro.',
+    'ru': 'Вы уже зарегистрированы.',
+    'se': 'Du har redan registrerat dig.',
+    'th': 'คุณเคยลงทะเบียนแล้ว',
+    'tr': 'Daha önce kaydolmuştunuz.',
+    'uk': 'Ви вже зареєструвалися раніше.',
+    'zh-cn': '您之前已注册。',
+    'zh-hk': '您之前已註冊。',
+    'zh-tw': '你已註冊這個出版品。',
+  },
+  'NEWSLETTER_ALREADY_SIGNED_UP_LANG_MAP': {
+    'en': 'You have signed up before.',
+    'ar': 'سبق أن اشتركت في النشرة الإخبارية.',
+    'de': 'Du hast dich bereits angemeldet.',
+    'en-au': 'You have signed up before.',
+    'en-ca': 'You have signed up before.',
+    'en-gb': 'You have signed up before.',
+    'en-us': 'You have signed up before.',
+    'es': 'Ya te has registrado anteriormente.',
+    'es-419': 'Ya te registraste antes.',
+    'fr': 'Vous vous êtes déjà inscrit.',
+    'fr-ca': 'Vous vous êtes inscrit auparavant.',
+    'hi': 'न्यूज़लेटर के लिए पहले ही साइन अप किया जा चुका है.',
+    'id': 'Anda telah mendaftar sebelumnya.',
+    'it': "Hai già effettuato l'iscrizione.",
+    'jp': 'すでに登録されています。',
+    'ko': '이전에 가입한 사용자입니다.',
+    'ms': 'Anda sudah mendaftar sebelum ini.',
+    'nl': 'Je hebt je al eerder aangemeld.',
+    'no': 'Du er allerede registrert.',
+    'pl': 'Już wcześniej się zarejestrowałeś(-aś).',
+    'pt': 'Já se inscreveu anteriormente.',
+    'pt-br': 'Você se inscreveu anteriormente.',
+    'ru': 'Вы уже зарегистрированы.',
+    'se': 'Du har redan registrerat dig.',
+    'th': 'คุณสมัครรับข้อมูลมาก่อนแล้ว',
+    'tr': 'Daha önce kaydolmuştunuz.',
+    'uk': 'Ви вже зареєструвалися.',
+    'zh-cn': '您之前已注册。',
+    'zh-hk': '您之前已訂閱。',
+    'zh-tw': '你已經訂閱了。',
+  },
+  'REGWALL_ACCOUNT_CREATED_LANG_MAP': {
+    'en': 'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+  },
+  'NEWSLETTER_SIGNED_UP_LANG_MAP': {
+    'en': 'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
   },
 };
 
@@ -7541,12 +7772,7 @@ class SmartSubscriptionButtonApi {
    */
   handleSmartBoxClick_(smartBoxMessage) {
     if (smartBoxMessage && smartBoxMessage.getIsClicked()) {
-      if (!this.callback_) {
-        throw new Error('No callback!');
-      }
       this.callback_();
-
-      return;
     }
   }
 
@@ -8524,6 +8750,11 @@ class ClientConfigManager {
 
     /** @private {?Promise<!ClientConfig>} */
     this.responsePromise_ = null;
+
+    /** @private @const {ClientConfig} */
+    this.defaultConfig_ = new ClientConfig({
+      skipAccountCreationScreen: this.clientOptions_.skipAccountCreationScreen,
+    });
   }
 
   /**
@@ -8549,7 +8780,7 @@ class ClientConfigManager {
    * @return {!Promise<!ClientConfig>}
    */
   getClientConfig() {
-    return this.responsePromise_ || Promise.resolve(new ClientConfig());
+    return this.responsePromise_ || Promise.resolve(this.defaultConfig_);
   }
 
   /**
@@ -8758,7 +8989,7 @@ class ContributionsFlow {
           ? new ActivityIframeView(
               this.win_,
               this.activityPorts_,
-              this.getUrl_(clientConfig),
+              this.getUrl_(clientConfig, deps.pageConfig()),
               feArgs({
                 'productId': deps.pageConfig().getProductId(),
                 'publicationId': deps.pageConfig().getPublicationId(),
@@ -8850,9 +9081,10 @@ class ContributionsFlow {
   /**
    * Gets the complete URL that should be used for the activity iFrame view.
    * @param {!../model/client-config.ClientConfig} clientConfig
+   * @param {!../model/page-config.PageConfig} pageConfig
    * @return {string}
    */
-  getUrl_(clientConfig) {
+  getUrl_(clientConfig, pageConfig) {
     if (!clientConfig.useUpdatedOfferFlows) {
       return feUrl('/contributionsiframe');
     }
@@ -8860,10 +9092,13 @@ class ContributionsFlow {
     if (this.clientConfigManager_.shouldForceLangInIframes()) {
       return feUrl('/contributionoffersiframe', {
         'hl': this.clientConfigManager_.getLanguage(),
+        'publicationId': pageConfig.getPublicationId(),
       });
     }
 
-    return feUrl('/contributionoffersiframe');
+    return feUrl('/contributionoffersiframe', {
+      'publicationId': pageConfig.getPublicationId(),
+    });
   }
 
   /**
@@ -10365,6 +10600,11 @@ class DialogManager {
 const MeterClientTypes = {
   /** Meter client type for content licensed by Google. */
   LICENSED_BY_GOOGLE: 1,
+  /**
+   * Meter client type for content that a publication is allowing to be
+   * metered by Google.
+   */
+  METERED_BY_GOOGLE: 2,
 };
 
 /**
@@ -10386,7 +10626,20 @@ const MeterClientTypes = {
 const IFRAME_BOX_SHADOW =
   'rgba(60, 64, 67, 0.3) 0px -2px 5px, rgba(60, 64, 67, 0.15) 0px -5px 5px';
 const MINIMIZED_IFRAME_SIZE = '420px';
-const DEFAULT_IFRAME_URL = '/metertoastiframe';
+const ANONYMOUS_USER_ATTRIBUTE = 'anonymous_user';
+/**
+ * The iframe URLs to be used per MeterClientType
+ * @type {Object.<MeterClientTypes, string>}
+ */
+const IframeUrlByMeterClientType = {
+  [MeterClientTypes.LICENSED_BY_GOOGLE]: '/metertoastiframe',
+  [MeterClientTypes.METERED_BY_GOOGLE]: '/meteriframe',
+};
+/** @enum {string} */
+const MeterType = {
+  UNKNOWN: 'UNKNOWN',
+  KNOWN: 'KNOWN',
+};
 
 class MeterToastApi {
   /**
@@ -10395,7 +10648,10 @@ class MeterToastApi {
    */
   constructor(
     deps,
-    {iframeUrl = DEFAULT_IFRAME_URL, iframeUrlParams = {}} = {}
+    {
+      meterClientType = MeterClientTypes.LICENSED_BY_GOOGLE,
+      meterClientUserAttribute = ANONYMOUS_USER_ATTRIBUTE,
+    } = {}
   ) {
     /** @private @const {!./deps.DepsDef} */
     this.deps_ = deps;
@@ -10409,21 +10665,15 @@ class MeterToastApi {
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = deps.dialogManager();
 
-    const iframeArgs = this.activityPorts_.addDefaultArguments({
-      isClosable: true,
-      hasSubscriptionCallback: deps.callbacks().hasSubscribeRequestCallback(),
-    });
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl(iframeUrl, iframeUrlParams),
-      iframeArgs,
-      /* shouldFadeBody */ false
-    );
+    /** @private @const {!MeterClientTypes} */
+    this.meterClientType_ = meterClientType;
+
+    /** @private @const {string} */
+    this.meterClientUserAttribute_ = meterClientUserAttribute;
 
     /**
-     * Function this class calls when a user dismisses the toast to consume a free read.
+     * Function this class calls when a user dismisses the toast to consume a
+     * free read.
      * @private {?function()}
      */
     this.onConsumeCallback_ = null;
@@ -10436,26 +10686,6 @@ class MeterToastApi {
      */
     this.onConsumeCallbackHandled_ = false;
 
-    /** @private @const {!function()} */
-    this.sendCloseRequestFunction_ = () => {
-      const closeRequest = new ToastCloseRequest();
-      closeRequest.setClose(true);
-      this.activityIframeView_.execute(closeRequest);
-      this.removeCloseEventListener();
-
-      this.deps_
-        .eventManager()
-        .logSwgEvent(
-          AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
-          true
-        );
-
-      if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
-        this.onConsumeCallbackHandled_ = true;
-        this.onConsumeCallback_();
-      }
-    };
-
     /** @private {?function()} */
     this.scrollEventListener_ = null;
   }
@@ -10465,81 +10695,150 @@ class MeterToastApi {
    * @return {!Promise}
    */
   start() {
-    this.deps_
-      .callbacks()
-      .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
-    this.activityIframeView_.on(
-      ViewSubscriptionsResponse,
-      this.startNativeFlow_.bind(this)
-    );
-    if (!this.deps_.callbacks().hasSubscribeRequestCallback()) {
-      const errorMessage =
-        '[swg.js]: `setOnNativeSubscribeRequest` has not been ' +
-        'set before starting the metering flow, so users will not be able to ' +
-        'subscribe from the metering dialog directly. Please call ' +
-        '`setOnNativeSubscribeRequest` with a subscription flow callback before ' +
-        'starting metering.';
-      warn(errorMessage);
+    const additionalArguments = {
+      isClosable: true,
+      hasSubscriptionCallback: this.deps_
+        .callbacks()
+        .hasSubscribeRequestCallback(),
+    };
+    if (this.meterClientType_ === MeterClientTypes.METERED_BY_GOOGLE) {
+      additionalArguments['meterType'] =
+        this.meterClientUserAttribute_ === ANONYMOUS_USER_ATTRIBUTE
+          ? MeterType.UNKNOWN
+          : MeterType.KNOWN;
     }
+    return this.deps_
+      .storage()
+      .get(Constants$1.USER_TOKEN, true)
+      .then((swgUserToken) => {
+        const iframeArgs =
+          this.activityPorts_.addDefaultArguments(additionalArguments);
 
-    this.dialogManager_
-      .handleCancellations(this.activityIframeView_)
-      .catch((reason) => {
-        // Possibly call onConsumeCallback on all dialog cancellations to ensure unexpected
-        // dialog closures don't give access without a meter consumed.
-        if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
-          this.onConsumeCallbackHandled_ = true;
-          this.onConsumeCallback_();
+        const iframeUrl =
+          IframeUrlByMeterClientType[
+            this.meterClientType_ ?? MeterClientTypes.LICENSED_BY_GOOGLE
+          ];
+        const iframeUrlParams = {
+          'publicationId': this.deps_.pageConfig().getPublicationId(),
+          'origin': parseUrl(this.win_.location.href).origin,
+        };
+        if (swgUserToken) {
+          iframeUrlParams['sut'] = swgUserToken;
         }
-        // Don't throw on cancel errors since they happen when a user closes the toast,
-        // which is expected.
-        if (!isCancelError(reason)) {
-          // eslint-disable-next-line no-console
-          console /*OK*/
-            .error(
-              '[swg.js]: Error occurred during meter toast handling: ' + reason
-            );
-          throw reason;
-        }
-      });
-    return this.dialogManager_.openDialog().then((dialog) => {
-      this.setDialogBoxShadow_();
-      this.setLoadingViewWidth_();
-      return dialog.openView(this.activityIframeView_).then(() => {
-        // Allow closing of the iframe with any scroll or click event.
-        this.win_.addEventListener('click', this.sendCloseRequestFunction_);
-        this.win_.addEventListener(
-          'touchstart',
-          this.sendCloseRequestFunction_
+
+        /** @private @const {!ActivityIframeView} */
+        this.activityIframeView_ = new ActivityIframeView(
+          this.win_,
+          this.activityPorts_,
+          feUrl(iframeUrl, iframeUrlParams),
+          iframeArgs,
+          /* shouldFadeBody */ false
         );
-        this.win_.addEventListener('mousedown', this.sendCloseRequestFunction_);
-        // Making body's overflow property 'hidden' to prevent scrolling
-        // while swiping on the iframe only on mobile.
-        if (this.isMobile_()) {
-          const $body = this.win_.document.body;
-          setStyle($body, 'overflow', 'hidden');
-        } else {
-          let start, scrollTimeout;
-          this.scrollEventListener_ = () => {
-            start = start || this.win_./*REVIEW*/ pageYOffset;
-            this.win_.clearTimeout(scrollTimeout);
-            scrollTimeout = this.win_.setTimeout(() => {
-              // If the scroll is longer than 100, close the toast.
-              if (Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100) {
-                this.sendCloseRequestFunction_();
-              }
-            }, 100);
-          };
-          this.win_.addEventListener('scroll', this.scrollEventListener_);
+
+        /** @private @const {!function()} */
+        this.sendCloseRequestFunction_ = () => {
+          const closeRequest = new ToastCloseRequest();
+          closeRequest.setClose(true);
+          this.activityIframeView_.execute(closeRequest);
+          this.removeCloseEventListener();
+
+          this.deps_
+            .eventManager()
+            .logSwgEvent(
+              AnalyticsEvent.ACTION_METER_TOAST_CLOSED_BY_ARTICLE_INTERACTION,
+              true
+            );
+
+          if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+            this.onConsumeCallbackHandled_ = true;
+            this.onConsumeCallback_();
+          }
+        };
+
+        this.deps_
+          .callbacks()
+          .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
+        this.activityIframeView_.on(
+          ViewSubscriptionsResponse,
+          this.startNativeFlow_.bind(this)
+        );
+        if (!this.deps_.callbacks().hasSubscribeRequestCallback()) {
+          const errorMessage =
+            '[swg.js]: `setOnNativeSubscribeRequest` has not been set ' +
+            'before starting the metering flow, so users will not be able to ' +
+            'subscribe from the metering dialog directly. Please call ' +
+            '`setOnNativeSubscribeRequest` with a subscription flow callback ' +
+            'before starting metering.';
+          warn(errorMessage);
         }
-        this.deps_
-          .eventManager()
-          .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
-        this.deps_
-          .eventManager()
-          .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+
+        this.dialogManager_
+          .handleCancellations(this.activityIframeView_)
+          .catch((reason) => {
+            // Possibly call onConsumeCallback on all dialog cancellations to
+            // ensure unexpected dialog closures don't give access without a
+            // meter consumed.
+            if (this.onConsumeCallback_ && !this.onConsumeCallbackHandled_) {
+              this.onConsumeCallbackHandled_ = true;
+              this.onConsumeCallback_();
+            }
+            // Don't throw on cancel errors since they happen when a user closes
+            // the toast, which is expected.
+            if (!isCancelError(reason)) {
+              // eslint-disable-next-line no-console
+              console /*OK*/
+                .error(
+                  '[swg.js]: Error occurred during meter toast handling: ' +
+                    reason
+                );
+              throw reason;
+            }
+          });
+
+        return this.dialogManager_.openDialog().then((dialog) => {
+          this.setDialogBoxShadow_();
+          this.setLoadingViewWidth_();
+          return dialog.openView(this.activityIframeView_).then(() => {
+            // Allow closing of the iframe with any scroll or click event.
+            this.win_.addEventListener('click', this.sendCloseRequestFunction_);
+            this.win_.addEventListener(
+              'touchstart',
+              this.sendCloseRequestFunction_
+            );
+            this.win_.addEventListener(
+              'mousedown',
+              this.sendCloseRequestFunction_
+            );
+            // Making body's overflow property 'hidden' to prevent scrolling
+            // while swiping on the iframe only on mobile.
+            if (this.isMobile_()) {
+              const $body = this.win_.document.body;
+              setStyle($body, 'overflow', 'hidden');
+            } else {
+              let start, scrollTimeout;
+              this.scrollEventListener_ = () => {
+                start = start || this.win_./*REVIEW*/ pageYOffset;
+                this.win_.clearTimeout(scrollTimeout);
+                scrollTimeout = this.win_.setTimeout(() => {
+                  // If the scroll is longer than 100, close the toast.
+                  if (
+                    Math.abs(this.win_./*REVIEW*/ pageYOffset - start) > 100
+                  ) {
+                    this.sendCloseRequestFunction_();
+                  }
+                }, 100);
+              };
+              this.win_.addEventListener('scroll', this.scrollEventListener_);
+            }
+            this.deps_
+              .eventManager()
+              .logSwgEvent(AnalyticsEvent.IMPRESSION_METER_TOAST);
+            this.deps_
+              .eventManager()
+              .logSwgEvent(AnalyticsEvent.EVENT_OFFERED_METER);
+          });
+        });
       });
-    });
   }
 
   /**
@@ -11185,6 +11484,9 @@ class EntitlementsManager {
     /** @private {?Article} */
     this.article_ = null;
 
+    /** @private {boolean} */
+    this.enableMeteredByGoogle_ = false;
+
     this.deps_
       .eventManager()
       .registerEventListener(this.possiblyPingbackOnClientEvent_.bind(this));
@@ -11277,33 +11579,51 @@ class EntitlementsManager {
 
   /**
    * Sends a pingback that marks a metering entitlement as used.
-   * @param {!Entitlements} entitlements
+   * @param {!Entitlement|null} entitlement
    */
-  consumeMeter_(entitlements) {
-    const entitlement = entitlements.getEntitlementForThis();
+  consumeMeter_(entitlement) {
     if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
       return;
     }
-    // Verify GAA params are present, otherwise bail since the pingback
-    // shouldn't happen on non-metering requests.
-    if (!queryStringHasFreshGaaParams(this.win_.location.search)) {
-      return;
+
+    // If GAA params are present, include them in the pingback.
+    let gaaToken;
+    let entitlementSource;
+    if (
+      entitlement.subscriptionTokenContents &&
+      entitlement.subscriptionTokenContents['metering']['clientType'] ===
+        MeterClientTypes.METERED_BY_GOOGLE
+    ) {
+      // If clientType is METERED_BY_GOOGLE, this is the appropriate
+      // EntitlementSource, and no GAA params are required.
+      entitlementSource =
+        EntitlementSource.SUBSCRIBE_WITH_GOOGLE_METERING_SERVICE;
+    } else {
+      // Expected: clientType is LICENSED_BY_GOOGLE
+      if (queryStringHasFreshGaaParams(this.win_.location.search)) {
+        // GAA params are valid. Post back as Showcase.
+        entitlementSource = EntitlementSource.GOOGLE_SHOWCASE_METERING_SERVICE;
+        gaaToken = this.getGaaToken_();
+      } else {
+        // Sanity check:
+        // If we're not METERED_BY_GOOGLE, and GAA params are not valid, do not
+        // post back.
+        return;
+      }
     }
 
     this.deps_
       .eventManager()
       .logSwgEvent(AnalyticsEvent.EVENT_UNLOCKED_BY_METER, false);
 
-    const token = this.getGaaToken_();
-
     const jwt = new EntitlementJwt();
     jwt.setSource(entitlement.source);
     jwt.setJwt(entitlement.subscriptionToken);
     return this.postEntitlementsRequest_(
-      jwt,
-      EntitlementResult.UNLOCKED_METER,
-      EntitlementSource.GOOGLE_SHOWCASE_METERING_SERVICE,
-      token
+      /* usedEntitlement */ jwt,
+      /* entitlementResult */ EntitlementResult.UNLOCKED_METER,
+      /* entitlementSource */ entitlementSource,
+      /* optionalToken */ gaaToken
     );
   }
 
@@ -11401,7 +11721,16 @@ class EntitlementsManager {
           );
         });
 
-    this.entitlementsPostPromise = encodedParamsPromise.then(() => {
+    // Get swgUserToken from local storage
+    const swgUserTokenPromise = this.storage_.get(Constants$1.USER_TOKEN, true);
+    this.entitlementsPostPromise = Promise.all([
+      swgUserTokenPromise,
+      encodedParamsPromise,
+    ]).then((values) => {
+      const swgUserToken = values[0];
+      if (swgUserToken) {
+        url = addQueryParam(url, 'sut', swgUserToken);
+      }
       url = addQueryParam(
         url,
         this.encodedParamName_,
@@ -11476,6 +11805,23 @@ class EntitlementsManager {
   }
 
   /**
+   * The experiment flags that are returned by the article endpoint should be accessible from here.
+   * @returns {Promise<Array<string>>}
+   */
+  getExperimentConfigFlags() {
+    return this.getArticle().then((article) => {
+      const expConfig = article['experimentConfig'];
+      if (expConfig != null) {
+        const expFlags = expConfig['experimentFlags'];
+        if (expFlags != null) {
+          return expFlags;
+        }
+      }
+      return [];
+    });
+  }
+
+  /**
    * @param {!GetEntitlementsParamsExternalDef=} params
    * @return {!Promise<!Entitlements>}
    * @private
@@ -11526,6 +11872,13 @@ class EntitlementsManager {
   }
 
   /**
+   * Allow Google to handle metering for the given page.
+   */
+  enableMeteredByGoogle() {
+    this.enableMeteredByGoogle_ = true;
+  }
+
+  /**
    * The JSON must either contain a "signedEntitlements" with JWT, or
    * "entitlements" field with plain JSON object.
    * @param {!Object} json
@@ -11541,6 +11894,9 @@ class EntitlementsManager {
     const signedData = json['signedEntitlements'];
     const decryptedDocumentKey = json['decryptedDocumentKey'];
     const swgUserToken = json['swgUserToken'];
+    if (swgUserToken) {
+      this.saveSwgUserToken_(swgUserToken);
+    }
     if (signedData) {
       const entitlements = this.getValidJwtEntitlements_(
         signedData,
@@ -11549,13 +11905,11 @@ class EntitlementsManager {
         decryptedDocumentKey
       );
       if (entitlements) {
-        this.saveSwgUserToken_(swgUserToken);
         return entitlements;
       }
     } else {
       const plainEntitlements = json['entitlements'];
       if (plainEntitlements) {
-        this.saveSwgUserToken_(swgUserToken);
         return this.createEntitlements_(
           '',
           plainEntitlements,
@@ -11634,7 +11988,7 @@ class EntitlementsManager {
     return new Entitlements(
       SERVICE_ID,
       raw,
-      Entitlement.parseListFromJson(json),
+      Entitlement.parseListFromJson(json, this.jwtHelper_),
       this.pageConfig_.getProductId(),
       this.ack_.bind(this),
       this.consume_.bind(this),
@@ -11739,41 +12093,42 @@ class EntitlementsManager {
    */
   consume_(entitlements, onCloseDialog) {
     if (entitlements.enablesThisWithGoogleMetering()) {
+      const entitlement = entitlements.getEntitlementForThis();
+
       const onConsumeCallback = () => {
         if (onCloseDialog) {
           onCloseDialog();
         }
-        this.consumeMeter_(entitlements);
+        this.consumeMeter_(entitlement);
       };
-      const showToast = this.getShowToastFromEntitlements_(entitlements);
-      if (showToast === false) {
-        // If showToast is explicitly false, call onConsumeCallback directly.
+
+      if (!entitlement.subscriptionTokenContents) {
+        // Ignore decoding errors. Don't show a toast, and return
+        // onConsumeCallback directly.
         return onConsumeCallback();
       }
-      const meterToastApi = new MeterToastApi(this.deps_);
-      meterToastApi.setOnConsumeCallback(onConsumeCallback);
-      return meterToastApi.start();
-    }
-  }
 
-  /**
-   * Gets the `showToast` value (or null/undefined if unavailable) from
-   * the Google metering entitlement details in the input entitlements.
-   * @param {!Entitlements} entitlements
-   * @return {boolean|undefined}
-   * @private
-   */
-  getShowToastFromEntitlements_(entitlements) {
-    const entitlement = entitlements.getEntitlementForThis();
-    if (!entitlement || entitlement.source !== GOOGLE_METERING_SOURCE) {
-      return;
-    }
-    try {
-      const meteringJwt = this.jwtHelper_.decode(entitlement.subscriptionToken);
-      return meteringJwt['metering'] && meteringJwt['metering']['showToast'];
-    } catch (e) {
-      // Ignore decoding errors.
-      return;
+      if (
+        entitlement.subscriptionTokenContents['metering'] &&
+        entitlement.subscriptionTokenContents['metering']['showToast'] === true
+      ) {
+        // Return a delegation to the meterToastApi, which will return the
+        // onConsumeCallback when the toast is dismissed.
+        const meterToastApi = new MeterToastApi(this.deps_, {
+          meterClientType:
+            entitlement.subscriptionTokenContents['metering']['clientType'],
+          meterClientUserAttribute:
+            entitlement.subscriptionTokenContents['metering'][
+              'clientUserAttribute'
+            ],
+        });
+        meterToastApi.setOnConsumeCallback(onConsumeCallback);
+        return meterToastApi.start();
+      } else {
+        // If showToast isn't true, don't show a toast, and return
+        // onConsumeCallback directly.
+        return onConsumeCallback();
+      }
     }
   }
 
@@ -11783,12 +12138,8 @@ class EntitlementsManager {
    * @private
    */
   fetch_(params) {
-    // Get swgUserToken from getEntitlements params
-    const swgUserTokenParam = params?.encryption?.swgUserToken;
-    // Get swgUserToken from local storage if it is not in getEntitlements params
-    const swgUserTokenPromise = swgUserTokenParam
-      ? Promise.resolve(swgUserTokenParam)
-      : this.storage_.get(Constants$1.USER_TOKEN, true);
+    // Get swgUserToken from local storage
+    const swgUserTokenPromise = this.storage_.get(Constants$1.USER_TOKEN, true);
 
     let url =
       '/publication/' + encodeURIComponent(this.publicationId_) + this.action_;
@@ -11817,6 +12168,19 @@ class EntitlementsManager {
           url = addQueryParam(url, 'sut', swgUserToken);
         }
 
+        /** @type {!GetEntitlementsParamsInternalDef|undefined} */
+        let encodableParams = this.enableMeteredByGoogle_
+          ? {
+              metering: {
+                clientTypes: [MeterClientTypes.METERED_BY_GOOGLE],
+                owner: this.publicationId_,
+                resource: {
+                  hashedCanonicalUrl,
+                },
+              },
+            }
+          : undefined;
+
         // Add metering params.
         if (
           this.publicationId_ &&
@@ -11828,15 +12192,14 @@ class EntitlementsManager {
             typeof meteringStateId === 'string' &&
             meteringStateId.length > 0
           ) {
-            /** @type {!GetEntitlementsParamsInternalDef} */
-            const encodableParams = {
+            encodableParams = {
               metering: {
                 clientTypes: [MeterClientTypes.LICENSED_BY_GOOGLE],
                 owner: this.publicationId_,
                 resource: {
                   hashedCanonicalUrl,
                 },
-                // Publisher provided state.
+                // Add publisher provided state and additional fields.
                 state: {
                   id: meteringStateId,
                   attributes: [],
@@ -11880,21 +12243,19 @@ class EntitlementsManager {
               attributes: params.metering.state.customAttributes,
               category: 'custom',
             });
-
-            // Encode params.
-            this.encodedParams_ = base64UrlEncodeFromBytes(
-              utf8EncodeSync(JSON.stringify(encodableParams))
-            );
-            url = addQueryParam(
-              url,
-              this.encodedParamName_,
-              this.encodedParams_
-            );
           } else {
             warn(
               `SwG Entitlements: Please specify a metering state ID string, ideally a hash to avoid PII.`
             );
           }
+        }
+
+        if (encodableParams) {
+          // Encode params.
+          this.encodedParams_ = base64UrlEncodeFromBytes(
+            utf8EncodeSync(JSON.stringify(encodableParams))
+          );
+          url = addQueryParam(url, this.encodedParamName_, this.encodedParams_);
         }
 
         // Build URL.
@@ -12322,6 +12683,8 @@ class FetchResponseHeaders {
  * limitations under the License.
  */
 
+const jsonSaftyPrefix = /^(\)\]\}'\n)/;
+
 /**
  * @interface
  */
@@ -12377,7 +12740,7 @@ class XhrFetcher {
     return this.fetch(url, init).then((response) => {
       return response.text().then((text) => {
         // Remove "")]}'\n" XSSI prevention prefix in safe responses.
-        const cleanedText = text.replace(/^(\)\]\}'\n)/, '');
+        const cleanedText = text.replace(jsonSaftyPrefix, '');
         return parseJson(cleanedText);
       });
     });
@@ -12393,9 +12756,21 @@ class XhrFetcher {
       credentials: 'include',
       body: 'f.req=' + serializeProtoMessageForUrl(message),
     });
-    return this.fetch(url, init).then(
-      (response) => (response && response.json()) || {}
-    );
+    return this.fetch(url, init).then((response) => {
+      if (!response) {
+        return {};
+      }
+      return response.text().then((text) => {
+        try {
+          // Remove "")]}'\n" XSSI prevention prefix in safe responses.
+          const cleanedText = text.replace(jsonSaftyPrefix, '');
+          return parseJson(cleanedText);
+        } catch (e) {
+          ErrorUtils.throwAsync(e);
+          return {};
+        }
+      });
+    });
   }
 
   /** @override */
@@ -17430,14 +17805,14 @@ class WaitForSubscriptionLookupApi {
 
 /**
  * @implements {DepsDef}
- * @implements {Subscriptions}
+ * @implements {SubscriptionsInterface}
  */
 class ConfiguredRuntime {
   /**
-   * @param {!Window|!Document|!Doc} winOrDoc
+   * @param {!Window|!Document|!DocInterface} winOrDoc
    * @param {!../model/page-config.PageConfig} pageConfig
    * @param {{
-   *     fetcher: (!Fetcher|undefined),
+   *     fetcher: (!FetcherInterface|undefined),
    *     configPromise: (!Promise|undefined),
    *     enableGoogleAnalytics: (boolean|undefined),
    *     useArticleEndpoint: (boolean|undefined)
@@ -17455,7 +17830,7 @@ class ConfiguredRuntime {
     /** @private @const {!ClientEventManager} */
     this.eventManager_ = new ClientEventManager(integr.configPromise);
 
-    /** @private @const {!Doc} */
+    /** @private @const {!DocInterface} */
     this.doc_ = resolveDoc(winOrDoc);
 
     /** @private @const {!Window} */
@@ -17482,7 +17857,7 @@ class ConfiguredRuntime {
     /** @private @const {!JsError} */
     this.jserror_ = new JsError(this.doc_);
 
-    /** @private @const {!Fetcher} */
+    /** @private @const {!FetcherInterface} */
     this.fetcher_ = integr.fetcher || new XhrFetcher(this.win_);
 
     /** @private @const {!Storage} */
@@ -17516,7 +17891,6 @@ class ConfiguredRuntime {
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this, this.fetcher_);
-    this.analyticsService_.start();
 
     /** @private @const {!PayClient} */
     this.payClient_ = new PayClient(this);
@@ -17747,6 +18121,9 @@ class ConfiguredRuntime {
     return this.entitlementsManager_
       .getEntitlements(params)
       .then((entitlements) => {
+        // The swg user token is stored in the entitlements flow, so the analytics service is ready for logging.
+        this.analyticsService_.setReadyForLogging();
+        this.analyticsService_.start();
         // Auto update internal things tracking the user's current SKU.
         if (entitlements) {
           try {

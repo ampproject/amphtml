@@ -1,7 +1,7 @@
 import {bindParser as parser} from '#build/parsers/bind-expr-impl';
 
 import {isArray, isObject} from '#core/types';
-import {dict, hasOwn, map} from '#core/types/object';
+import {hasOwn, map} from '#core/types/object';
 
 import {devAssert, user} from '#utils/log';
 
@@ -104,7 +104,7 @@ function generateFunctionAllowlist() {
   }
 
   // Prototype functions.
-  const allowlist = dict({
+  const allowlist = {
     '[object Array]': {
       // TODO(choumx): Polyfill Array#find and Array#findIndex for IE.
       'concat': Array.prototype.concat,
@@ -140,7 +140,7 @@ function generateFunctionAllowlist() {
       'toLowerCase': String.prototype.toLowerCase,
       'toUpperCase': String.prototype.toUpperCase,
     },
-  });
+  };
 
   // Un-namespaced static functions.
   allowlist[CUSTOM_FUNCTIONS] = {

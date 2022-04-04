@@ -1,3 +1,9 @@
+import {
+  DailymotionEvents,
+  getDailymotionIframeSrc,
+  makeDailymotionMessage,
+} from '#bento/apis/dailymotion-api';
+
 import {Deferred} from '#core/data-structures/promise';
 import {dispatchCustomEvent, getDataParamsFromAttributes} from '#core/dom';
 import {
@@ -22,11 +28,6 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {VideoEvents_Enum} from '../../../src/video-interface';
-import {
-  DailymotionEvents,
-  getDailymotionIframeSrc,
-  makeDailymotionMessage,
-} from '../dailymotion-api';
 
 const TAG = 'amp-dailymotion';
 

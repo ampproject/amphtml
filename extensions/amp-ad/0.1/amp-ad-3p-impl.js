@@ -17,7 +17,6 @@ import {moveLayoutRect} from '#core/dom/layout/rect';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {computedStyle, setStyle} from '#core/dom/style';
 import {clamp} from '#core/math';
-import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {Services} from '#service';
@@ -35,6 +34,7 @@ import {
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {getAdCid} from '../../../src/ad-cid';
 import {getAdContainer, isAdPositionAllowed} from '../../../src/ad-helper';
+import {ChunkPriority_Enum, chunk} from '../../../src/chunk';
 import {
   getConsentMetadata,
   getConsentPolicyInfo,
@@ -194,6 +194,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     this.uiHandler = new AmpAdUIHandler(this);
     this.uiHandler.validateStickyAd();
+
+    // For sticky ad only: must wait for scrolling event before loading the ad
+    this.uiHandler
+      .getScrollPromiseForStickyAd()
+      .then(() => this.uiHandler.maybeInitStickyAd());
+
+    if (this.uiHandler.isStickyAd()) {
+      chunk(this.element, () => this.layoutCallback(), ChunkPriority_Enum.LOW);
+    }
 
     this.isFullWidthRequested_ = this.shouldRequestFullWidth_();
 
@@ -361,21 +370,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.element
     ).pageViewId64;
 
-    // For sticky ad only: must wait for scrolling event before loading the ad
-    const scrollPromise = this.uiHandler.getScrollPromiseForStickyAd();
-
     this.layoutPromise_ = Promise.all([
       getAdCid(this),
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
       consentMetadataPromise,
-      scrollPromise,
       pageViewId64Promise,
     ])
       .then((consents) => {
-        this.uiHandler.maybeInitStickyAd();
-
         // Use JsonObject to preserve field names so that ampContext can access
         // values with name
         // ampcontext.js and this file are compiled in different compilation unit
@@ -384,15 +387,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         // perserved name to extern. We are doing both right now.
         // Please also add new introduced variable
         // name to the extern list.
-        const opt_context = dict({
+        const opt_context = {
           'clientId': consents[0] || null,
           'container': this.container_,
           'initialConsentState': consents[1],
           'consentSharedData': consents[2],
           'initialConsentValue': consents[3],
           'initialConsentMetadata': consents[4],
-          'pageViewId64': consents[6],
-        });
+          'pageViewId64': consents[5],
+        };
 
         // In this path, the request and render start events are entangled,
         // because both happen inside a cross-domain iframe.  Separating them

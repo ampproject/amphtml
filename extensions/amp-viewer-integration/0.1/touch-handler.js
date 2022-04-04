@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {listen} from '#utils/event-helper';
 
 /**
@@ -177,7 +175,7 @@ export class TouchHandler {
    * @private
    */
   copyProperties_(o, properties) {
-    const copy = dict();
+    const copy = {};
     for (let i = 0; i < properties.length; i++) {
       const p = properties[i];
       if (o[p] !== undefined) {

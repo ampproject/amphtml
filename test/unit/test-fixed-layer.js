@@ -17,6 +17,7 @@ import {
   FakePerformance,
   FakeWindow,
 } from '#testing/fake-dom';
+import {hypenCaseToCamelCase} from '#testing/helpers';
 
 describes.sandboxed('FixedLayer', {}, (env) => {
   let parentApi;
@@ -223,70 +224,32 @@ describes.sandboxed('FixedLayer', {}, (env) => {
         return id;
       },
       style: {
-        _top: '15px',
-        _bottom: '',
-        _position: '',
-        _opacity: '0.9',
-        _visibility: 'visible',
-        _transition: '',
+        top: '15px',
+        bottom: '',
+        position: '',
+        opacity: '0.9',
+        visibility: 'visible',
+        transition: '',
 
-        get top() {
-          return this._top;
-        },
-        set top(v) {
-          elem.style.setProperty('top', v);
-        },
-        get bottom() {
-          return this._bottom;
-        },
-        set bottom(v) {
-          elem.style.setProperty('bottom', v);
-        },
-        get position() {
-          return this._position;
-        },
-        set position(v) {
-          elem.style.setProperty('position', v);
-        },
-        get opacity() {
-          return this._opacity;
-        },
-        set opacity(v) {
-          elem.style.setProperty('opacity', v);
-        },
-        get visibility() {
-          return this._visibility;
-        },
-        set visibility(v) {
-          elem.style.setProperty('visibility', v);
-        },
-        get transition() {
-          return this._transition;
-        },
-        set transition(v) {
-          elem.style.setProperty('transition', v);
-        },
         setProperty(prop, value, priority) {
-          const privProp = '_' + prop;
-
           // Override if important
           if (priority === 'important') {
-            elem.style[privProp] = `${value} !${priority}`;
+            elem.style[prop] = `${value} !${priority}`;
           } else if (
-            elem.style[privProp] ||
-            !endsWith(elem.computedStyle[prop], '!important')
+            elem.style[prop] ||
+            !elem.computedStyle[prop]?.endsWith('!important')
           ) {
             if (
               prop === 'transition' &&
               !value &&
-              endsWith(elem.style[privProp] || '', '!important')
+              endsWith(elem.style[prop] || '', '!important')
             ) {
               // Emulate a stupid Safari bug.
               // noop.
             } else {
               // If element style is already set, we can override
               // Or, if computed style is not important priority
-              elem.style[privProp] = value;
+              elem.style[hypenCaseToCamelCase(prop)] = value;
             }
           }
         },
@@ -1466,11 +1429,11 @@ describes.sandboxed('FixedLayer', {}, (env) => {
 
       expect(fixedLayer.transferLayer_).to.exist;
       const layer = fixedLayer.transferLayer_.layer_;
-      expect(layer.style['pointerEvents']).to.equal('none');
+      expect(layer.style.pointerEvents).to.equal('none');
 
       expect(fe.element.parentElement).to.equal(layer);
-      expect(fe.element.style['pointer-events']).to.equal('initial');
-      expect(fe.element.style['zIndex']).to.equal('calc(10001 + 11)');
+      expect(fe.element.style.pointerEvents).to.equal('initial');
+      expect(fe.element.style.zIndex).to.equal('calc(10001 + 11)');
     });
 
     it('should ignore transfer when non-transferrable', () => {

@@ -1,13 +1,15 @@
+import {BaseElement} from '#bento/components/bento-soundcloud/1.0/base-element';
+
 import {isExperimentOn} from '#experiments';
 
-import {userAssert} from '#utils/log';
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
-import {BaseElement} from './base-element';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-soundcloud';
 
-class AmpSoundcloud extends BaseElement {
+class AmpSoundcloud extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(

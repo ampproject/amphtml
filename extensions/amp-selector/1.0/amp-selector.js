@@ -1,8 +1,9 @@
 import {ActionTrust_Enum} from '#core/constants/action-constants';
-import {dict} from '#core/types/object';
 import {getWin} from '#core/window';
 
 import {isExperimentOn} from '#experiments';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
 
 import {Services} from '#service';
 
@@ -16,13 +17,13 @@ import {CSS} from '../../../build/amp-selector-1.0.css';
 /** @const {string} */
 const TAG = 'amp-selector';
 
-class AmpSelector extends BaseElement {
+class AmpSelector extends setSuperClass(BaseElement, AmpPreactBaseElement) {
   /** @override */
   init() {
     // Set up API
     this.registerApiAction('clear', (api) => {
       api./*OK*/ clear();
-      this.mutateProps(dict({'value': []}));
+      this.mutateProps({'value': []});
     });
 
     this.registerApiAction('selectUp', (api, invocation) => {

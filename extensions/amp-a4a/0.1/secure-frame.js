@@ -1,5 +1,4 @@
 import {createElementWithAttributes, escapeHtml} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {getFieSafeScriptSrcs} from '../../../src/friendly-iframe-embed';
 
@@ -71,25 +70,21 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
 export function createSecureFrame(win, title, height, width) {
   const {document} = win;
   const iframe = /** @type {!HTMLIFrameElement} */ (
-    createElementWithAttributes(
-      document,
-      'iframe',
-      dict({
-        // NOTE: It is possible for either width or height to be 'auto',
-        // a non-numeric value.
-        'height': height,
-        'width': width,
-        'title': title,
-        'frameborder': '0',
-        'allowfullscreen': '',
-        'allowtransparency': '',
-        'scrolling': 'no',
-        'sandbox': sandboxVals,
-        'role': 'region',
-        'aria-label': 'Advertisement',
-        'tabindex': '0',
-      })
-    )
+    createElementWithAttributes(document, 'iframe', {
+      // NOTE: It is possible for either width or height to be 'auto',
+      // a non-numeric value.
+      'height': height,
+      'width': width,
+      'title': title,
+      'frameborder': '0',
+      'allowfullscreen': '',
+      'allowtransparency': '',
+      'scrolling': 'no',
+      'sandbox': sandboxVals,
+      'role': 'region',
+      'aria-label': 'Advertisement',
+      'tabindex': '0',
+    })
   );
 
   if (isAttributionReportingSupported(document)) {

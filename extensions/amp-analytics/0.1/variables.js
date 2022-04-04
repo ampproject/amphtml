@@ -1,6 +1,5 @@
 import {TickLabel_Enum} from '#core/constants/enums';
 import {isArray, isFiniteNumber} from '#core/types';
-import {dict} from '#core/types/object';
 import {asyncStringReplace} from '#core/types/string';
 import {base64UrlEncodeFromString} from '#core/types/string/base64';
 
@@ -234,7 +233,7 @@ export class VariableService {
     this.ampdoc_ = ampdoc;
 
     /** @private {!JsonObject} */
-    this.macros_ = dict({});
+    this.macros_ = {};
 
     /** @const @private {!./linker-reader.LinkerReader} */
     this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);

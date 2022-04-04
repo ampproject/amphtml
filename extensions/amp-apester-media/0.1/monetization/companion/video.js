@@ -1,5 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
 
 import {Services} from '#service';
 
@@ -106,14 +106,14 @@ function addCompanionAvElement(
   const ampAvAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    dict({
+    {
       'width': size.width,
       'height': size.height,
       'type': 'aniview',
       'data-publisherid': '5fabb425e5d4cb4bbc0ca7e4',
       'data-channelid': playerOptions.aniviewChannelId,
       'data-enable-refresh': `${refreshInterval}`,
-    })
+    }
   );
 
   if (consentObj['gdpr']) {
@@ -145,7 +145,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
   const ampBladeAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    dict({
+    {
       'width': size.width,
       'height': size.height,
       'type': 'blade',
@@ -156,7 +156,7 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
       'data-blade_player_id': videoTag,
       'data-blade_api_key': '5857d2ee263dc90002000001',
       'data-enable-refresh': `${refreshInterval}`,
-    })
+    }
   );
 
   ampBladeAd.classList.add('i-amphtml-amp-apester-companion');
@@ -196,12 +196,12 @@ function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
 
   const pageUrl = Services.documentInfoForDoc(apesterElement).canonicalUrl;
 
-  const macros = dict({
+  const macros = {
     'param1': interactionId,
     'param2': publisherId,
     'param6': campaignId,
     'page_url': pageUrl,
-  });
+  };
 
   if (consentObj['gdpr']) {
     macros['gdpr'] = consentObj['gdpr'];

@@ -1,6 +1,6 @@
 import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {isDisabled, isFieldDefault, isFieldEmpty} from '#core/dom/form';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 
 import {createCustomEvent} from '#utils/event-helper';
 import {dev} from '#utils/log';
@@ -103,7 +103,7 @@ export class FormDirtiness {
       const formDirtinessChangeEvent = createCustomEvent(
         this.win_,
         AmpEvents_Enum.FORM_DIRTINESS_CHANGE,
-        dict({'isDirty': isDirty}),
+        {'isDirty': isDirty},
         {bubbles: true}
       );
       this.form_.dispatchEvent(formDirtinessChangeEvent);

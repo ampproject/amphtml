@@ -2,7 +2,6 @@ import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {removeElement} from '#core/dom';
 import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {setStyle, toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
@@ -589,10 +588,10 @@ export class NextPageService {
   triggerAnalyticsEvent_(eventType, toURL, fromURL) {
     fromURL = fromURL || '';
 
-    const vars = dict({
+    const vars = {
       'toURL': toURL,
       'fromURL': fromURL,
-    });
+    };
     triggerAnalyticsEvent(dev().assertElement(this.element_), eventType, vars);
   }
 }

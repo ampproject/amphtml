@@ -1,4 +1,3 @@
-import {dict} from '#core/types/object';
 import {deepEquals} from '#core/types/object/json';
 
 import {getData} from '#utils/event-helper';
@@ -83,10 +82,10 @@ export class Linkmate {
     const linksPayload = this.buildLinksPayload_(anchorList);
     const editPayload = this.getEditInfo_();
 
-    const payload = dict({
+    const payload = {
       'article': editPayload,
       'links': linksPayload,
-    });
+    };
 
     const fetchUrl = ENDPOINTS.LINKMATE_ENDPOINT.replace(
       '.pub_id.',
@@ -95,7 +94,7 @@ export class Linkmate {
     const postOptions = {
       method: 'POST',
       ampCors: false,
-      headers: dict({'Content-Type': 'application/json'}),
+      headers: {'Content-Type': 'application/json'},
       body: payload,
     };
 
@@ -148,10 +147,10 @@ export class Linkmate {
    * @private
    */
   getEditInfo_() {
-    return dict({
+    return {
       'name': this.getEditName_(),
       'url': this.getLocationHref_(),
-    });
+    };
   }
 
   /**

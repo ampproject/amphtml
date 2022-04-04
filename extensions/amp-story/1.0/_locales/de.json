@@ -160,5 +160,8 @@
   },
   "99": {
     "string": "Formular erfolgreich abgeschickt"
+  },
+  "101": {
+    "string": "Jetzt kaufen"
   }
 }

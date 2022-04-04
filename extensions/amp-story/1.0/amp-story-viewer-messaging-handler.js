@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {dev, user} from '#utils/log';
 
 import {
@@ -157,10 +155,10 @@ export class AmpStoryViewerMessagingHandler {
     }
 
     this.storeService_.subscribe(config.property, (value) => {
-      this.viewer_.sendMessage(
-        'documentStateUpdate',
-        dict({'state': state, 'value': value})
-      );
+      this.viewer_.sendMessage('documentStateUpdate', {
+        'state': state,
+        'value': value,
+      });
     });
   }
 

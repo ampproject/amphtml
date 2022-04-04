@@ -32,23 +32,8 @@
       }
     </style>
       <script>
+        // TODO(#17108): Remove this when getMode().test is set.
         __AMP_TEST = true;
-        /**
-         * On load, open the share menu.
-         */
-        document.addEventListener('ampstory:load', () => {
-
-          // Automatically open the share menu.
-          const storyEl = document.querySelector('amp-story');
-          const shareMenuAction = new CustomEvent('ampstory:dispatchaction', {
-            detail: {
-              action: 'toggleShareMenu',
-              data: true,
-            }
-          });
-
-          storyEl.dispatchEvent(shareMenuAction);
-        });
       </script>
   </head>
 

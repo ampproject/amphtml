@@ -16,6 +16,7 @@ import {afterRenderPromise} from '#testing/helpers';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {MediaType} from '../media-pool';
@@ -51,6 +52,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
 
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
@@ -143,13 +147,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     await page.layoutCallback();
     expect(spy).to.have.been.calledOnce;
-  });
-
-  it('should call renderOpenAttachmentUI_ in beforeVisible', async () => {
-    const spy = env.sandbox.spy(page, 'renderOpenAttachmentUI_');
-    page.buildCallback();
-    await page.layoutCallback();
-    expect(spy).to.have.been.calledTwice;
   });
 
   it('should mark page as loaded after media is loaded', async () => {
@@ -430,15 +427,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
 
     expect(element.getAttribute('auto-advance-after')).to.be.equal('20000ms');
-  });
-
-  it('should not use storyNextUp when in viewer control group', () => {
-    env.sandbox
-      .stub(Services.viewerForDoc(element), 'getParam')
-      .withArgs('storyNextUp')
-      .returns('999999ms');
-    page.buildCallback();
-    expect(element).not.to.have.attribute('auto-advance-after');
   });
 
   it('should stop the advancement when state becomes not active', async () => {

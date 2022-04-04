@@ -4,7 +4,6 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {DomFingerprint} from '#core/dom/fingerprint';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {getBinaryType, isExperimentOn, toggleExperiment} from '#experiments';
@@ -369,6 +368,8 @@ export function googlePageParameters(a4a, startTime) {
       'uam': uaDataValues?.model,
       'uafv': uaDataValues?.uaFullVersion,
       'uab': uaDataValues?.bitness,
+      'uafvl': JSON.stringify(uaDataValues?.fullVersionList),
+      'uaw': uaDataValues?.wow64,
     };
   });
 }
@@ -591,7 +592,7 @@ export function additionalDimensions(win, viewportSize) {
  * @return {!JsonObject}
  */
 function csiTrigger(on, params) {
-  return dict({
+  return {
     'on': on,
     'request': 'csi',
     'sampleSpec': {
@@ -604,7 +605,7 @@ function csiTrigger(on, params) {
     'selector': 'amp-ad',
     'selectionMethod': 'closest',
     'extraUrlParams': params,
-  });
+  };
 }
 
 /**
@@ -612,7 +613,7 @@ function csiTrigger(on, params) {
  * @return {!JsonObject}
  */
 export function getCsiAmpAnalyticsConfig() {
-  return dict({
+  return {
     'requests': {
       'csi': 'https://csi.gstatic.com/csi?',
     },
@@ -648,7 +649,7 @@ export function getCsiAmpAnalyticsConfig() {
       // evaluated when the URL is built by amp-analytics.
       'puid': '${requestCount}~${timestamp}',
     },
-  });
+  };
 }
 
 /**
@@ -713,11 +714,11 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     if (!hasActiveViewRequests && !hasBeginToRenderRequests) {
       return null;
     }
-    const config = dict({
+    const config = {
       'transport': {'beacon': false, 'xhrpost': false},
       'requests': {},
       'triggers': {},
-    });
+    };
     if (hasActiveViewRequests) {
       generateActiveViewRequest(config, acUrls);
     }
@@ -741,7 +742,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
  * @param {!Array<string>} urls
  */
 function generateActiveViewRequest(config, urls) {
-  config['triggers']['continuousVisible'] = dict({
+  config['triggers']['continuousVisible'] = {
     'request': [],
     'on': 'visible',
     'visibilitySpec': {
@@ -750,7 +751,7 @@ function generateActiveViewRequest(config, urls) {
       'visiblePercentageMin': 50,
       'continuousTimeMin': 1000,
     },
-  });
+  };
   for (let idx = 0; idx < urls.length; idx++) {
     // TODO: Ensure url is valid and not freeform JS?
     config['requests'][`visibility${idx + 1}`] = `${urls[idx]}`;
@@ -765,12 +766,12 @@ function generateActiveViewRequest(config, urls) {
  * @param {!Array<string>} urls
  */
 function generateBeginToRenderRequest(config, urls) {
-  config['triggers']['beginToRender'] = dict({
+  config['triggers']['beginToRender'] = {
     'request': [],
     'on': 'ini-load',
     'selector': 'amp-ad',
     'selectionMethod': 'closest',
-  });
+  };
 
   for (let idx = 0; idx < urls.length; idx++) {
     // TODO: Ensure url is valid and not freeform JS?

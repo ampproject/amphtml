@@ -53,7 +53,7 @@ The Bento Date Display Preact/React component allows consumers to render their o
 
 #### `datetime`
 
-Required prop. Denotes the date and time as a Date, String, or Nuumber. If String, must be a standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
+Required prop. Denotes the date and time as a Date, String, or Number. If String, must be a standard ISO 8601 date string (e.g. 2017-08-02T15:05:05.000Z) or the string `now`. If set to `now`, it will use the time the page loaded to render its template. If Number, must be a POSIX epoch value in milliseconds.
 
 #### `displayIn`
 

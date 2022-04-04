@@ -11,7 +11,7 @@ import {listenFor} from '../../../src/iframe-helper';
 const TYPE = 'twitter';
 
 class AmpTwitter extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     const html = htmlFor(element);
     return {

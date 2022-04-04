@@ -9,7 +9,6 @@ import {isLayoutSizeDefined} from '#core/dom/layout';
 import {htmlFor} from '#core/dom/static-template';
 import {setStyle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -36,11 +35,11 @@ const InsetArrowVisibility = {
 };
 
 /** Maps attribute values to enum values. */
-const insetArrowVisibilityMapping = dict({
+const insetArrowVisibilityMapping = {
   'never': InsetArrowVisibility.NEVER,
   'auto': InsetArrowVisibility.AUTO,
   'always': InsetArrowVisibility.ALWAYS,
-});
+};
 
 /**
  * @param {!Element} el The Element to check.
@@ -66,7 +65,7 @@ const TAG = 'amp-stream-gallery';
  * - Does not support autoplay
  */
 class AmpStreamGallery extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
@@ -753,7 +752,7 @@ class AmpStreamGallery extends AMP.BaseElement {
       return;
     }
 
-    const data = dict({'index': index});
+    const data = {'index': index};
     const name = 'slideChange';
     const isHighTrust = this.isHighTrustActionSource_(actionSource);
     const trust = isHighTrust ? ActionTrust_Enum.HIGH : ActionTrust_Enum.LOW;

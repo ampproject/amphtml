@@ -1,6 +1,6 @@
-import {getCarousel, getScrollingElement, getSlide} from './helpers';
+import {useStyles} from '#bento/components/bento-base-carousel/1.0/component.jss';
 
-import {useStyles} from '../component.jss';
+import {getCarousel, getScrollingElement, getSlide} from './helpers';
 
 const pageWidth = 600;
 const pageHeight = 600;

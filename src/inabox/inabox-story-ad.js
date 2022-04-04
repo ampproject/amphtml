@@ -4,6 +4,7 @@ import {ButtonTextFitter} from '../../extensions/amp-story-auto-ads/0.1/story-ad
 import {
   START_CTA_ANIMATION_ATTR,
   createCta,
+  getStoryAdMetaTags,
   getStoryAdMetadataFromDoc,
   maybeCreateAttribution,
   validateCtaMetadata,
@@ -17,7 +18,7 @@ import {installStylesForDoc} from '../style-installer';
 export function maybeRenderInaboxAsStoryAd(ampdoc) {
   const {win} = ampdoc;
   const doc = win.document;
-  const storyAdMetadata = getStoryAdMetadataFromDoc(doc);
+  const storyAdMetadata = getStoryAdMetadataFromDoc(getStoryAdMetaTags(doc));
   if (!validateCtaMetadata(storyAdMetadata, true /* opt_inabox */)) {
     return;
   }

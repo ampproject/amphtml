@@ -144,12 +144,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/27068',
   },
   {
-    id: 'amp-cid-backup',
-    name: 'Backup AMP-generated CIDs to Storage.',
-    spec: 'https://github.com/ampproject/amphtml/issues/29484',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/29484',
-  },
-  {
     id: 'dfp-render-on-idle-cwv-exp',
     name: 'To measure the CWV impact of ads idle rendering',
     spec: 'https://github.com/ampproject/amphtml/issues/31436',
@@ -183,11 +177,6 @@ export const EXPERIMENTS = [
     id: 'story-disable-animations-first-page',
     name: 'Disable animations on the first page that can artificially delay LCP reports',
     spec: 'https://github.com/ampproject/amphtml/pull/35356',
-  },
-  {
-    id: 'story-load-first-page-only',
-    name: 'Load first page before loading inactive pages',
-    spec: 'https://github.com/ampproject/amphtml/issues/35219',
   },
   {
     id: 'story-load-inactive-outside-viewport',

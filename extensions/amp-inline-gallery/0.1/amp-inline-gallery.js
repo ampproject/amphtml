@@ -37,7 +37,7 @@ const CAROUSEL_SELECTOR =
   '> amp-base-carousel, :not(amp-inline-gallery-thumbnails) > amp-base-carousel';
 
 class AmpInlineGallery extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }

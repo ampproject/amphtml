@@ -5,6 +5,8 @@ import {createParseAttrsWithPrefix} from '#preact/parse-props';
 
 import {BentoDateDisplay} from './component';
 
+export const TAG = 'bento-date-display';
+
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */

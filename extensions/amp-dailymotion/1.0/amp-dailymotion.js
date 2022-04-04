@@ -1,17 +1,18 @@
-import {dict} from '#core/types/object';
+import {BaseElement} from '#bento/components/bento-dailymotion/1.0/base-element';
+import {AmpVideoBaseElement} from '#bento/components/bento-video/1.0/video-base-element';
 
 import {isExperimentOn} from '#experiments';
 
-import {userAssert} from '#utils/log';
+import {setSuperClass} from '#preact/amp-base-element';
 
-import {BaseElement} from './base-element';
+import {userAssert} from '#utils/log';
 
 import {CSS} from '../../../build/amp-dailymotion-1.0.css';
 
 /** @const {string} */
 const TAG = 'amp-dailymotion';
 
-class AmpDailymotion extends BaseElement {
+class AmpDailymotion extends setSuperClass(BaseElement, AmpVideoBaseElement) {
   /** @override */
   init() {
     super.init();
@@ -23,13 +24,13 @@ class AmpDailymotion extends BaseElement {
       'uiLogo': uiLogo,
     } = this.element.dataset;
 
-    return dict({
+    return {
       'endscreenEnable': endscreenEnable !== 'false',
       'info': info !== 'false',
       'mute': mute === 'true',
       'sharingEnable': sharingEnable !== 'false',
       'uiLogo': uiLogo !== 'false',
-    });
+    };
   }
 
   /** @override */

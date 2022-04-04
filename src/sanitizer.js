@@ -1,5 +1,4 @@
 import {isAmp4Email} from '#core/document/format';
-import {dict} from '#core/types/object';
 
 import {
   ALLOWLISTED_ATTRS,
@@ -28,7 +27,7 @@ const TAG = 'sanitizer';
  * the browser's HTML parser.
  * @const {!Object<string, boolean>}
  */
-const SELF_CLOSING_TAGS = dict({
+const SELF_CLOSING_TAGS = {
   'br': true,
   'col': true,
   'hr': true,
@@ -45,7 +44,7 @@ const SELF_CLOSING_TAGS = dict({
   'link': true,
   'meta': true,
   'param': true,
-});
+};
 
 /**
  * Regex to allow data-*, aria-* and role attributes.

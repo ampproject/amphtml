@@ -10,7 +10,7 @@ const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15; // WARNING: when updating this ensure you also update the css values for line-height.
 const RESIZE_THROTTLE_MS = 100;
 export class AmpFitText extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }

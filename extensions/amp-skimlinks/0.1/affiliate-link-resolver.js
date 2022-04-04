@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {TwoStepsResponse} from './link-rewriter/two-steps-response';
 import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils';
 
@@ -54,7 +52,7 @@ export class AffiliateLinkResolver {
     this.waypoint_ = waypoint;
 
     /** @private {!JsonObject} */
-    this.domains_ = dict({});
+    this.domains_ = {};
 
     /**
      * @public {?Promise}
@@ -75,11 +73,11 @@ export class AffiliateLinkResolver {
    * @public
    */
   fetchDomainResolverApi(domains) {
-    const data = dict({
+    const data = {
       'pubcode': this.skimOptions_.pubcode,
       'page': '',
       'domains': domains,
-    });
+    };
     let {beaconUrl} = this.skimOptions_.config;
     beaconUrl = `${beaconUrl}?data=${JSON.stringify(data)}`;
     const fetchOptions = {

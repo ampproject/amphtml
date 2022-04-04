@@ -2,6 +2,8 @@ import * as Preact from '#preact';
 
 import {BentoFitText} from '../component';
 
+import '../component.jss';
+
 export default {
   title: 'FitText',
   component: BentoFitText,

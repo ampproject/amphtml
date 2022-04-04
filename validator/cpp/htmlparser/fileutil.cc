@@ -2,6 +2,7 @@
 
 #include <glob.h>
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <iostream>

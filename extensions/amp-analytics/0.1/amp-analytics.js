@@ -3,7 +3,7 @@ import {isIframed} from '#core/dom';
 import {LayoutPriority_Enum} from '#core/dom/layout';
 import {rethrowAsync} from '#core/error';
 import {isArray, isEnumValue} from '#core/types';
-import {dict, hasOwn} from '#core/types/object';
+import {hasOwn} from '#core/types/object';
 import {expandTemplate} from '#core/types/string';
 
 import {Services} from '#service';
@@ -69,7 +69,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     /**
      * @private {!JsonObject}
      */
-    this.config_ = dict();
+    this.config_ = {};
 
     /** @private {?./instrumentation.InstrumentationService} */
     this.instrumentation_ = null;
@@ -333,7 +333,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (hasOwn(this.config_['triggers'], k)) {
         const trigger = this.config_['triggers'][k];
         const expansionOptions = this.expansionOptions_(
-          dict({}),
+          {},
           trigger,
           undefined /* opt_iterations */,
           true /* opt_noEncode */
@@ -736,7 +736,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (threshold >= 0 && threshold <= 100) {
       const sampleDeferred = new Deferred();
       const sampleInTask = () => {
-        const expansionOptions = this.expansionOptions_(dict({}), trigger);
+        const expansionOptions = this.expansionOptions_({}, trigger);
         const samplePromise = this.expandTemplateWithUrlParams_(
           sampleOn,
           expansionOptions
@@ -847,7 +847,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!ExpansionOptions}
    */
   expansionOptions_(source1, source2, opt_iterations, opt_noEncode) {
-    const vars = dict();
+    const vars = {};
     mergeObjects(this.config_['vars'], vars);
     mergeObjects(source2['vars'], vars);
     mergeObjects(source1['vars'], vars);

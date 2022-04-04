@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {triggerAnalyticsEvent} from '#utils/analytics';
 
 import {getUniqueId} from './utils';
@@ -93,10 +91,10 @@ export class StoryAdAnalytics {
    */
   ensurePageTrackingInitialized_(adIndex) {
     if (!this.data_[adIndex]) {
-      this.data_[adIndex] = dict({
+      this.data_[adIndex] = {
         [AnalyticsVars.AD_INDEX]: adIndex,
         [AnalyticsVars.AD_UNIQUE_ID]: getUniqueId(this.win_),
-      });
+      };
     }
   }
 }

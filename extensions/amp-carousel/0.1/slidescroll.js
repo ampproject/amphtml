@@ -12,7 +12,6 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {getStyle, setStyle} from '#core/dom/style';
 import {numeric} from '#core/dom/transition';
 import {isFiniteNumber} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
@@ -32,7 +31,6 @@ import {
 import {CarouselControls} from './carousel-controls';
 
 /** @const {string} */
-const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
 
 /** @const {number} */
 const NATIVE_SNAP_TIMEOUT = 200;
@@ -843,7 +841,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
       if (this.shouldLoop_) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
       }
-      this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
+      this.slideWrappers_[showIndex].classList.add(ClassNames.SLIDES_ITEM_SHOW);
       const owners = Services.ownersForDoc(this.element);
       if (showIndex == newIndex) {
         owners.scheduleLayout(this.element, this.slides_[showIndex]);
@@ -891,11 +889,9 @@ export class AmpSlideScroll extends AMP.BaseElement {
 
     if (slideChanged) {
       const name = 'slideChange';
-      const event = createCustomEvent(
-        this.win,
-        `slidescroll.${name}`,
-        dict({'index': newIndex})
-      );
+      const event = createCustomEvent(this.win, `slidescroll.${name}`, {
+        'index': newIndex,
+      });
       this.action_.trigger(this.element, name, event, opt_trust);
 
       dispatchCustomEvent(this.element, name, {
@@ -932,7 +928,9 @@ export class AmpSlideScroll extends AMP.BaseElement {
   hideRestOfTheSlides_(indexArr) {
     const {noOfSlides_} = this;
     for (let i = 0; i < noOfSlides_; i++) {
-      if (!this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
+      if (
+        !this.slideWrappers_[i].classList.contains(ClassNames.SLIDES_ITEM_SHOW)
+      ) {
         continue;
       }
       // Hide if not shown anymore
@@ -940,9 +938,7 @@ export class AmpSlideScroll extends AMP.BaseElement {
         if (this.shouldLoop_) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
-        dev()
-          .assertElement(this.slideWrappers_[i])
-          .classList.remove(SHOWN_CSS_CLASS);
+        this.slideWrappers_[i].classList.remove(ClassNames.SLIDES_ITEM_SHOW);
         this.slides_[i].removeAttribute('aria-hidden');
       }
       // Pause if not the current slide
@@ -1016,10 +1012,10 @@ export class AmpSlideScroll extends AMP.BaseElement {
         ? 'null'
         : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
 
-    const vars = dict({
+    const vars = {
       'fromSlide': fromSlide,
       'toSlide': this.dataSlideIdArr_[newSlideIndex],
-    });
+    };
     this.analyticsEvent_('amp-carousel-change', vars);
     // At this point direction can be only +1 or -1.
     if (direction == 1) {

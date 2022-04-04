@@ -1,6 +1,5 @@
 import {devAssert} from '#core/assert';
 import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {getWin} from '#core/window';
 
@@ -257,7 +256,7 @@ export function getDataParamsFromAttributes(
 ) {
   const computeParamNameFunc = opt_computeParamNameFunc || ((key) => key);
   const {dataset} = element;
-  const params = dict();
+  const params = /** @type {!JsonObject} */ ({});
   const paramPattern = opt_paramPattern || /^param(.+)/;
   for (const key in dataset) {
     const matches = key.match(paramPattern);

@@ -1,5 +1,4 @@
 import {htmlFor} from '#core/dom/static-template';
-import {dict} from '#core/types/object';
 
 import {toggleExperiment} from '#experiments/';
 
@@ -65,13 +64,11 @@ class InteractiveTest extends AmpStoryInteractive {
  * @param {Array<number>} responseCounts
  */
 export const generateResponseDataFor = (responseCounts) => {
-  return responseCounts.map((count, index) =>
-    dict({
-      'index': index,
-      'count': count,
-      'selected': false,
-    })
-  );
+  return responseCounts.map((count, index) => ({
+    'index': index,
+    'count': count,
+    'selected': false,
+  }));
 };
 
 describes.realWin(
@@ -316,7 +313,7 @@ describes.realWin(
 
     it('should throw error if percentages are not correctly passed', () => {
       addConfigToInteractive(ampStoryInteractive);
-      const responseData = dict({'wrongKey': []});
+      const responseData = {'wrongKey': []};
       allowConsoleError(() => {
         expect(() =>
           ampStoryInteractive.onDataRetrieved_(responseData)

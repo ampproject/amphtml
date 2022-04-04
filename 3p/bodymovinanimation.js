@@ -1,20 +1,19 @@
 import {setStyles} from '#core/dom/style';
 import {tryPlay} from '#core/dom/video';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {getData} from '#utils/event-helper';
 
 import {loadScript} from './3p';
 
-const libSourceUrl = dict({
+const libSourceUrl = {
   'canvas':
     'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_canvas.min.js',
   'html':
     'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_html.min.js',
   'svg':
     'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.6/lottie_svg.min.js',
-});
+};
 
 /**
  * Produces the AirBnB Bodymovin Player SDK object for the passed in callback.
@@ -84,11 +83,9 @@ export function bodymovinanimation(global) {
       autoplay: dataReceived['autoplay'],
       animationData: dataReceived['animationData'],
     });
-    const message = JSON.stringify(
-      dict({
-        'action': 'ready',
-      })
-    );
+    const message = JSON.stringify({
+      'action': 'ready',
+    });
     global.addEventListener('message', parseMessage, false);
     global.parent./*OK*/ postMessage(message, '*');
   });

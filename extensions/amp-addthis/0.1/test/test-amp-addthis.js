@@ -1,6 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {getKeywordsString} from '../addthis-utils/classify';
 import {createCUID, isDateInFuture} from '../addthis-utils/cuid';
@@ -43,10 +42,10 @@ describes.realWin(
 
     function getAT(configuration, opt_responsive, opt_beforeLayoutCallback) {
       const {shareConfig = {}} = configuration;
-      const elementAttributes = dict({
+      const elementAttributes = {
         'width': '320px',
         'height': '90px',
-      });
+      };
       if (configuration.pubId) {
         elementAttributes['data-pub-id'] = configuration.pubId;
       }

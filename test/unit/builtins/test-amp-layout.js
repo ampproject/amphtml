@@ -1,8 +1,12 @@
+import {createDocument as createWorkerDomDoc} from '@ampproject/worker-dom/dist/server-lib.mjs';
+
 import {AmpLayout} from '#builtins/amp-layout/amp-layout';
 import {buildDom} from '#builtins/amp-layout/build-dom';
 
 import {createElementWithAttributes} from '#core/dom';
 import {Layout_Enum} from '#core/dom/layout';
+
+import {getDeterministicOuterHTML} from '#testing/helpers';
 
 describes.realWin('amp-layout', {amp: true}, (env) => {
   async function getAmpLayout(attrs, innerHTML) {
@@ -58,6 +62,32 @@ describes.realWin('amp-layout', {amp: true}, (env) => {
     buildDom(layout2);
 
     expect(layout1.outerHTML).to.equal(layout2.outerHTML);
+  });
+
+  it('buildDom should result in the same outerHTML in WorkerDOM and Browser', () => {
+    const browserAmpLayout = createElementWithAttributes(
+      env.win.document,
+      'amp-layout',
+      {
+        width: 100,
+        height: 100,
+      }
+    );
+    const workerDomAmpLayout = createElementWithAttributes(
+      createWorkerDomDoc(),
+      'amp-layout',
+      {
+        width: 100,
+        height: 100,
+      }
+    );
+
+    buildDom(browserAmpLayout);
+    buildDom(workerDomAmpLayout);
+
+    const browserHtml = getDeterministicOuterHTML(browserAmpLayout);
+    const workerDomHtml = getDeterministicOuterHTML(workerDomAmpLayout);
+    expect(browserHtml).to.equal(workerDomHtml);
   });
 
   it('buildDom does not modify server rendered elements', () => {

@@ -1,6 +1,6 @@
-import * as Preact from '#preact';
+import {BentoBrightcove} from '#bento/components/bento-brightcove/1.0/component';
 
-import {BentoBrightcove} from '../component';
+import * as Preact from '#preact';
 
 export default {
   title: 'Brightcove',

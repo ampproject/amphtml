@@ -1,15 +1,13 @@
-import {number, select, text} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
-const FILL_OPTIONS = {
+export const FILL_OPTIONS = {
   none: 'none',
   forwards: 'forwards',
   backwards: 'backwards',
   both: 'both',
 };
 
-const DIRECTION_OPTIONS = {
+export const DIRECTION_OPTIONS = {
   normal: 'normal',
   reverse: 'reverse',
   alternate: 'alternate',
@@ -38,29 +36,32 @@ const INFO_STYLE = {
   overflow: 'auto',
 };
 
+export const animationFillArgType = {
+  name: 'fill',
+  options: FILL_OPTIONS,
+  control: {type: 'select'},
+  defaultValue: 'both',
+};
+
+export const animationDirectionArgType = {
+  name: 'duration',
+  options: DIRECTION_OPTIONS,
+  control: {type: 'select'},
+  defaultValue: 'alternate',
+};
+
 /**
  * @param {!Object} props
  * @return {!Object}
  */
 export function AnimationTemplate(props) {
   const {children, spec} = props;
-  const duration = text('Duration', '1s');
-  const iterations = number('Iterations', 2);
-  const fill = select('Fill', FILL_OPTIONS, 'both');
-  const direction = select('Direction', DIRECTION_OPTIONS, 'alternate');
-  const fullSpec = {
-    duration,
-    iterations,
-    fill,
-    direction,
-    ...spec,
-  };
   return (
     <main>
       <amp-animation id="anim1" layout="nodisplay">
         <script
           type="application/json"
-          dangerouslySetInnerHTML={{__html: JSON.stringify(fullSpec)}}
+          dangerouslySetInnerHTML={{__html: JSON.stringify(spec)}}
         />
       </amp-animation>
 
@@ -74,7 +75,7 @@ export function AnimationTemplate(props) {
         <button on="tap:anim1.cancel">Cancel</button>
       </div>
       <div style={CONTAINER_STYLE}>
-        <pre style={INFO_STYLE}>{JSON.stringify(fullSpec, null, 2)}</pre>
+        <pre style={INFO_STYLE}>{JSON.stringify(spec, null, 2)}</pre>
 
         {children}
       </div>
