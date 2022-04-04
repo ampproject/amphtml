@@ -36,8 +36,8 @@ tags: {  # <amp-story-shopping-attachment>
       allow_relative: true
     }
   }
-  attrs: { 
-    name: "theme" 
+  attrs: {
+    name: "theme"
     value: "dark"
     value: "light"
   }
