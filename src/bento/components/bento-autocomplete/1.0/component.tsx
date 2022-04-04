@@ -281,6 +281,9 @@ export function BentoAutocomplete({
   }, [displayResults, binding]);
 
   const resetUserInput = useCallback(() => {
+    // Reset the selection state and the input value
+    setActiveIndex(INITIAL_ACTIVE_INDEX);
+    inputRef.current?.removeAttribute('aria-activedescendant');
     setInputValue(substring);
   }, [substring, setInputValue]);
 

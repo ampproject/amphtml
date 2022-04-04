@@ -439,7 +439,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(input.getDOMNode().value).to.equal('two');
     });
 
-    it('resets the input value if the user arrows up to the top', () => {
+    it('resets the input value and attributes if the user arrows up to the top', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
           <input type="text"></input>
@@ -457,6 +457,10 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('keydown', {key: Keys_Enum.UP_ARROW});
 
       expect(input.getDOMNode().value).to.equal('t');
+      expect(input.getDOMNode().getAttribute('aria-activedescendant')).to.be
+        .null;
+      expect(wrapper.find('[data-value="two"]').prop('aria-selected')).to.be
+        .false;
       expect(areOptionsVisible(wrapper)).to.be.true;
     });
 
