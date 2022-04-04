@@ -181,8 +181,8 @@ describes.realWin(
       await ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
 
-      expect(ampStoryQuiz.getOptionElements()[0].innerText).to.contain('30%');
-      expect(ampStoryQuiz.getOptionElements()[3].innerText).to.contain('10%');
+      expect(ampStoryQuiz.getOptionElements()[0].textContent).to.contain('30%');
+      expect(ampStoryQuiz.getOptionElements()[3].textContent).to.contain('10%');
     });
 
     it('should handle the percentage pipeline with scrambled data', async () => {
@@ -198,7 +198,7 @@ describes.realWin(
       const expectedPercentages = [10, 20, 30, 40];
       for (let i = 0; i < NUM_OPTIONS; i++) {
         const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+        expect(ampStoryQuiz.getOptionElements()[i].textContent).to.contain(
           expectedText
         );
       }
@@ -217,7 +217,7 @@ describes.realWin(
       const expectedPercentages = [0, 50, 50, 0];
       for (let i = 0; i < NUM_OPTIONS; i++) {
         const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+        expect(ampStoryQuiz.getOptionElements()[i].textContent).to.contain(
           expectedText
         );
       }
@@ -236,7 +236,7 @@ describes.realWin(
       const expectedPercentages = [20, 0, 0, 80];
       for (let i = 0; i < NUM_OPTIONS; i++) {
         const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryQuiz.getOptionElements()[i].innerText).to.contain(
+        expect(ampStoryQuiz.getOptionElements()[i].textContent).to.contain(
           expectedText
         );
       }

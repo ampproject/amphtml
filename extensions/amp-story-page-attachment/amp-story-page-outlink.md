@@ -4,6 +4,17 @@ formats:
   - stories
 teaser:
   text: A CTA button for opening external links with one tap in AMP story pages.
+$title: amp-story-page-outlink
+version: '0.1'
+versions:
+  - '0.1'
+latest_version: '0.1'
+is_current: true
+$path: /documentation/components/amp-story-page-outlink.html
+$localization:
+  path: '/{locale}/documentation/components/amp-story-page-outlink.html'
+layouts:
+  - nodisplay
 ---
 
 # amp-story-page-outlink

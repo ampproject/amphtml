@@ -10,7 +10,6 @@
  */
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
-import {iterateCursor} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
@@ -389,7 +388,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * play videos from an inactive page.
    */
   delegateVideoAutoplay() {
-    iterateCursor(this.element.querySelectorAll('amp-video'), delegateAutoplay);
+    this.element.querySelectorAll('amp-video').forEach(delegateAutoplay);
   }
 
   /** @private */
@@ -413,7 +412,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   markMediaElementsWithPreload_() {
     const mediaSet = this.element.querySelectorAll('amp-audio, amp-video');
-    Array.prototype.forEach.call(mediaSet, (mediaItem) => {
+    mediaSet.forEach((mediaItem) => {
       mediaItem.setAttribute('preload', 'auto');
     });
   }
@@ -738,18 +737,15 @@ export class AmpStoryPage extends AMP.BaseElement {
       );
     const mediaSet = [];
 
-    iterateCursor(scopedQuerySelectorAll(this.element, selector), (el) =>
+    scopedQuerySelectorAll(this.element, selector).forEach((el) =>
       mediaSet.push(el)
     );
 
     if (fie) {
-      iterateCursor(
-        scopedQuerySelectorAll(
-          fie.win.document.body,
-          selector.replace(/amp-story-grid-layer/g, '')
-        ),
-        (el) => mediaSet.push(el)
-      );
+      scopedQuerySelectorAll(
+        fie.win.document.body,
+        selector.replace(/amp-story-grid-layer/g, '')
+      ).forEach((el) => mediaSet.push(el));
     }
 
     return mediaSet;
@@ -1420,7 +1416,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       }
     }
 
-    Array.prototype.forEach.call(videoEls, (videoEl) => {
+    videoEls.forEach((videoEl) => {
       this.unlisteners_.push(
         listen(videoEl, 'playing', () =>
           this.debounceToggleLoadingSpinner_(false)
