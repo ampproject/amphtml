@@ -21,6 +21,7 @@ export const AnalyticsVariable = {
   STORY_PROGRESS: 'storyProgress',
   STORY_PREVIOUS_PAGE_ID: 'storyPreviousPageId',
   STORY_ADVANCEMENT_MODE: 'storyAdvancementMode',
+  STORY_SHOPPING_PRODUCT_ID: 'storyShoppingProductId',
 };
 
 /**
@@ -65,6 +66,7 @@ export class AmpStoryVariableService {
       [AnalyticsVariable.STORY_IS_MUTED]: null,
       [AnalyticsVariable.STORY_PREVIOUS_PAGE_ID]: null,
       [AnalyticsVariable.STORY_ADVANCEMENT_MODE]: null,
+      [AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID]: null,
     };
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
