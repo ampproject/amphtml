@@ -268,7 +268,7 @@ tags: {
     value_regex_casei: "[0-9]+px"
   }
   attrs: {
-    name: "pan-static-scale"
+    name: "pan-scaling-factor"
     # Allow float number such as "12.3", ".1", or "5."
     # Note that string with only decimal point such as "." is not allowed.
     value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
@@ -369,7 +369,7 @@ tags: {
     value_regex_casei: "[0-9]+px"
   }
   attrs: {
-    name: "pan-static-scale"
+    name: "pan-scaling-factor"
     # Allow float number such as "12.3", ".1", or "5."
     # Note that string with only decimal point such as "." is not allowed.
     value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"
@@ -579,7 +579,7 @@ tags: {
     value_regex_casei: "[0-9]+px"
   }
   attrs: {
-    name: "pan-static-scale"
+    name: "pan-scaling-factor"
     # Allow float number such as "12.3", ".1", or "5."
     # Note that string with only decimal point such as "." is not allowed.
     value_regex_casei: "^([0-9]*[.]?[0-9]+)|([0-9]+[.]?[0-9]*)$"

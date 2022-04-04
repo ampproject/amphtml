@@ -224,7 +224,8 @@ describes.realWin(
       const dimensions = setDimensions(380, 580, 360, 580);
       expect(targetFitsWithinPage(dimensions)).to.be.true;
 
-      const factorThatWillMakeTargetFitPage = 380 / 360;
+      const factorThatWillMakeTargetFitPage =
+        dimensions.pageWidth / dimensions.targetWidth;
       const factor = factorThatWillMakeTargetFitPage * 1.25;
       expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
 
@@ -255,7 +256,8 @@ describes.realWin(
         const dimensions = setDimensions(380, 580, 360, 580);
         expect(targetFitsWithinPage(dimensions)).to.be.true;
 
-        const factorThatWillMakeTargetFitPage = 380 / 360;
+        const factorThatWillMakeTargetFitPage =
+          dimensions.pageWidth / dimensions.targetWidth;
         const factor = factorThatWillMakeTargetFitPage * 1.25;
         expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
 
@@ -270,18 +272,18 @@ describes.realWin(
         });
       });
 
-      it(`Should not scale the target if static scale is set for ${panAnimation}.`, () => {
-        const staticFactor = 2;
+      it(`Should not scale the target if scaling factor is set for ${panAnimation}.`, () => {
+        const scalingFactor = 2;
 
         const dimensions = setDimensions(380, 580, 360, 580);
         expect(targetFitsWithinPage(dimensions)).to.be.true;
 
         const calculatedKeyframes = presets[panAnimation].keyframes(
           dimensions,
-          /* options */ {'pan-static-scale': staticFactor}
+          /* options */ {'pan-scaling-factor': scalingFactor}
         );
 
-        const expectedScaleFactorStr = `scale(${staticFactor})`;
+        const expectedScaleFactorStr = `scale(${scalingFactor})`;
         calculatedKeyframes.forEach((keyframe) => {
           expect(keyframe.transform).to.contain(expectedScaleFactorStr);
         });
