@@ -29,6 +29,7 @@ describes.realWin(
     let pageElement;
     let shoppingAttachment;
     const errorStringTagName = 'AMP-STORY-SHOPPING-CONFIG';
+    const copyObject = (object) => JSON.parse(JSON.stringify(object));
 
     const defaultInlineConfig = {
       'items': [
@@ -189,7 +190,7 @@ describes.realWin(
 
     describe('amp-story-shopping-config validation', () => {
       it('should fail config validation because a required config value is missing', async () => {
-        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const invalidConfig = copyObject(defaultInlineConfig);
         const requiredKey = 'productId';
         delete invalidConfig['items'][0][requiredKey];
 
@@ -207,7 +208,7 @@ describes.realWin(
       });
 
       it('should fail config validation because an expected string JSON value is of a non-string type', async () => {
-        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const invalidConfig = copyObject(defaultInlineConfig);
         const invalidValue = 50; // This value is not a string
         invalidConfig['items'][0]['productTitle'] = invalidValue;
 
@@ -224,7 +225,7 @@ describes.realWin(
       });
 
       it('should fail config validation because an expected number JSON value is not a valid number', async () => {
-        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const invalidConfig = copyObject(defaultInlineConfig);
         const invalidValue = 'two dozen watermelons'; // two dozen watermelons is not an actual price.
         invalidConfig['items'][0]['productPrice'] = invalidValue;
 
@@ -242,7 +243,7 @@ describes.realWin(
       });
 
       it('should fail config validation because an expected string JSON value is not a valid currency code symbol', async () => {
-        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const invalidConfig = copyObject(defaultInlineConfig);
         const invalidValue = 'ZABAN'; // This is not a valid currency symbol code
         invalidConfig['items'][0]['productPriceCurrency'] = invalidValue;
 
@@ -260,7 +261,7 @@ describes.realWin(
       });
 
       it('should fail config validation because an expected string JSON value is not a valid url', async () => {
-        const invalidConfig = JSON.parse(JSON.stringify(defaultInlineConfig));
+        const invalidConfig = copyObject(defaultInlineConfig);
         const invalidValue = 'http://zapp'; // This is not a valid url
         invalidConfig['items'][0]['productUrl'] = invalidValue;
 

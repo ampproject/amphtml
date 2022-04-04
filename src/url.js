@@ -552,7 +552,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
 /**
  * Returns absolute URL resolved based on the relative URL and the element.
  * @param {string} relativeUrlString
- * @param {!AmpElement} element
+ * @param {!element} element
  * @return {string}
  */
 export function relativeToSourceUrl(relativeUrlString, element) {

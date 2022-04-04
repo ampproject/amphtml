@@ -7,28 +7,29 @@
     }
   },
   "title": "Product",
-  "description": "A product from an amp story shopping configuration.",
+  "description": "A product from an amp-story-shopping configuration.",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "productId": {
-      "description": "Keys to amp-story-shopping-tag nodes",
+      "description": "Keys for amp-story-shopping-tag nodes, sent out in analytics events.",
       "type": "string"
     },
     "productUrl": {
-      "description": "Links to the product's website",
+      "description": "Links to the product's website, whne the buy now button is clicked.",
       "type": "string",
       "$ref": "#/$defs/https"
     },
     "productTitle": {
-      "description": "The name of the product",
+      "description": "The name of the product, displayed on the tag.",
       "type": "string"
     },
     "productPrice": {
-      "description": "The price of the product",
+      "description": "The price of the product, displayed on the tag.",
       "type": "number"
     },
     "productPriceCurrency": {
-      "description": "The ISO 4217 currency code of the product price",
+      "description": "The ISO 4217 currency code of the product price.",
       "type": "string",
       "enum": [
         "AED",
@@ -214,7 +215,7 @@
       ]
     },
     "productImages": {
-      "description": "A list of images for the product",
+      "description": "A list of images for the product used in the carousel of the product page",
       "type": "array",
       "items": {
         "required": ["url", "alt"],
@@ -231,15 +232,15 @@
       }
     },
     "productDetails": {
-      "description": "Details about the product",
+      "description": "Details about the product used in the product details page",
       "type": "string"
     },
     "productBrand": {
-      "description": "Brand name of the product",
+      "description": "Brand name of the product used in the tag.",
       "type": "string"
     },
     "productIcon": {
-      "description": "Links the icon image for the product. Defaults to a shopping bag icon",
+      "description": "Links the icon image for the product in the tag. Defaults to a shopping bag icon.",
       "type": "string"
     },
     "productTagText": {
@@ -247,21 +248,21 @@
       "type": "string"
     },
     "aggregateRating": {
-      "description": "Ratings and review data for the product",
+      "description": "Ratings and review data for the product displayed on the product page.",
       "type": "object",
       "required": ["ratingValue", "reviewCount", "reviewUrl"],
       "additionalProperties": false,
       "properties": {
         "ratingValue": {
-          "description": "The aggregate rating value of the product",
+          "description": "The aggregate rating value of the product.",
           "type": "number"
         },
         "reviewCount": {
-          "description": "The number of reviews for the product",
+          "description": "The number of reviews for the product.",
           "type": "number"
         },
         "reviewUrl": {
-          "description": "The Url for the product reviews",
+          "description": "The Url for the product reviews.",
           "type": "string",
           "$ref": "#/$defs/https"
         }

@@ -70,7 +70,7 @@ export function getShoppingConfig(shoppingAttachmentEl) {
 /**
  * Takes an array of product configs and returns a map of product IDs to
  * product configs.
- * @param {!ShoppingConfigResponseDef} configItems
+ * @param {ShoppingConfigDataDef[]} configItems
  * @return {!KeyedShoppingConfigDef}
  */
 function keyByProductId(configItems) {
