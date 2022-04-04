@@ -7,18 +7,23 @@
       name="viewport"
       content="width=device-width,minimum-scale=1,initial-scale=1"
     />
-    <script src="https://cdn.ampproject.org/bento.js"></script>
+    <script async src="https://cdn.ampproject.org/bento.js"></script>
     <script
       async
       src="https://cdn.ampproject.org/v0/bento-autocomplete-1.0.js"
     ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-autocomplete-1.0.css"
+    />
     <style></style>
   </head>
   <body>
     <section>
       <h1>Default Autocomplete</h1>
-      <bento-autocopmlete id="default">
-        <input type="text">
+      <bento-autocomplete id="default">
+        <input type="text" />
         <script type="application/json">
           {
             "items": ["apple", "orange", "banana"]
