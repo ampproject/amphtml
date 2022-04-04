@@ -717,7 +717,12 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
     it('calls onError if items are an object type and an itemTemplate prop is not present', () => {
       mount(
-        <Autocomplete id="id" onError={onError} items={items}>
+        <Autocomplete
+          id="id"
+          onError={onError}
+          items={items}
+          filterValue="city"
+        >
           <input type="text"></input>
         </Autocomplete>
       );
@@ -734,6 +739,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
           items={items}
           filter="none"
           itemTemplate={itemTemplate}
+          filterValue="city"
           minChars={0}
         >
           <input type="text"></input>

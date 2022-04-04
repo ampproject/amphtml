@@ -203,13 +203,9 @@ export function BentoAutocomplete({
   );
 
   const filteredData = useMemo(() => {
-    if (filter === 'none') {
-      return truncateToMaxItems(data || []);
-    }
-
     const normalizedValue = substring.toLocaleLowerCase();
 
-    const _filteredData = data?.filter((item: Item) => {
+    const allFilteredData = data?.filter((item: Item) => {
       if (typeof item === 'object') {
         item = getValueForExpr(item, filterValue);
       }
@@ -217,12 +213,13 @@ export function BentoAutocomplete({
         onError(
           `${TAG} data property "${filterValue}" must map to string type.`
         );
-        // Return default value
         return;
       }
       item = item.toLocaleLowerCase();
 
       switch (filter) {
+        case 'none':
+          return true;
         case 'substring':
           return includes(item, normalizedValue);
         case 'prefix':
@@ -238,7 +235,7 @@ export function BentoAutocomplete({
       }
     });
 
-    return truncateToMaxItems(_filteredData);
+    return truncateToMaxItems(allFilteredData);
   }, [data, filter, substring, filterValue, onError, truncateToMaxItems]);
 
   const updateActiveItem = useCallback(
@@ -247,7 +244,7 @@ export function BentoAutocomplete({
       if (delta === 0 || !showAutocompleteResults) {
         return;
       }
-      const index = mod(activeIndex + delta, results.length);
+      const index = mod(activeIndex + delta, results?.length || 0);
       const activeResult = results?.item(index);
 
       setActiveIndex(index);
