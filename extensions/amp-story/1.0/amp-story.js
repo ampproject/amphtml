@@ -2439,7 +2439,7 @@ export class AmpStory extends AMP.BaseElement {
         'amp-story-cta-layer a'
       );
 
-      Array.prototype.forEach.call(ctaAnchorEls, (ctaAnchorEl) => {
+      ctaAnchorEls.forEach((ctaAnchorEl) => {
         ctaAnchorEl.setAttribute('data-vars-story-page-id', pageId);
         ctaAnchorEl.setAttribute('data-vars-story-page-index', pageIndex);
       });
@@ -2668,10 +2668,14 @@ export class AmpStory extends AMP.BaseElement {
   fetchLocalizationStrings_(languageCode) {
     const localizationService = getLocalizationService(this.element);
 
-    const localizationUrl = `${calculateScriptBaseUrl(
+    const base = calculateScriptBaseUrl(
       this.win.location,
       getMode(this.win).localDev
-    )}/v0/amp-story.${languageCode}.json`;
+    );
+    const rtvPath = getMode(this.win).localDev
+      ? ''
+      : `rtv/${getMode(this.win).rtvVersion}/`;
+    const localizationUrl = `${base}/${rtvPath}v0/amp-story.${languageCode}.json`;
 
     // The cache fallbacks to english if language not found, locally it errors.
     Services.xhrFor(this.win)
