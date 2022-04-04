@@ -28,7 +28,7 @@ export interface BentoAutocompleteProps {
   maxItems?: number;
   highlightUserEntry?: boolean;
   inline?: string;
-  itemTemplate?: (item: Item) => Component<any, any>;
+  itemTemplate?: (item: Item) => Component<any>;
   suggestFirst?: boolean;
   src?: string;
   fetchJson?: (src: string) => Promise<Item[]>;

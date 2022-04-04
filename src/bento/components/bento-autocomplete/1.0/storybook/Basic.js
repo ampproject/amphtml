@@ -95,6 +95,14 @@ withDataFromApi.args = {
   src: 'https://datausa.io/api/data?drilldowns=State&measures=Population&year=latest',
   fetchJson: (src) => xhrUtils.fetchJson(src),
   parseJson: (json) => {
-    return json.data.map((v) => v.State);
+    return json.data.map((v) => ({state: v.State, population: v.Population}));
+  },
+  filterValue: 'state',
+  itemTemplate: ({population, state}) => {
+    return (
+      <div data-value={state}>
+        {state} - <span style={{color: 'gray'}}>{population}</span>
+      </div>
+    );
   },
 };
