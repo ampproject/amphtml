@@ -1,38 +1,35 @@
-import * as Preact from '#preact';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
+
+import * as Preact from '#preact';
 
 export default {
   title: 'amp-iframe-1_0',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-iframe', version: '1.0'}],
     experiments: ['bento'],
   },
+  argTypes: {
+    src: {
+      name: 'iframe src',
+      defaultValue: 'https://www.wikipedia.org/',
+      control: {type: 'text'},
+    },
+  },
 };
 
-export const WithSrc = () => {
-  return (
-    <amp-iframe
-      width="800"
-      height="600"
-      src="https://www.wikipedia.org/"
-    ></amp-iframe>
-  );
+export const WithSrc = ({src}) => {
+  return <amp-iframe width="800" height="600" src={src}></amp-iframe>;
 };
 
-WithSrc.storyName = 'amp-iframe with src attribute';
-
-export const WithPlaceholder = () => {
+export const WithPlaceholder = ({src}) => {
   return (
-    <amp-iframe width="800" height="600" src="https://www.wikipedia.org/">
-      <h1>Placeholder</h1>
+    <amp-iframe width="800" height="600" src={src}>
+      <h1 placeholder>Placeholder</h1>
+      <h1 fallback>Fallback</h1>
     </amp-iframe>
   );
 };
-
-WithPlaceholder.storyName = 'amp-iframe with placeholder';
 
 export const WithResizableIframe = () => {
   return (
@@ -51,8 +48,6 @@ export const WithResizableIframe = () => {
     </div>
   );
 };
-
-WithResizableIframe.storyName = 'resizable amp-iframe';
 
 export const WithContentBelow = () => {
   return (
@@ -76,8 +71,6 @@ export const WithContentBelow = () => {
   );
 };
 
-WithContentBelow.storyName = 'resizeable amp-iframe with content below';
-
 export const WithOverflowButton = () => {
   return (
     <div>
@@ -96,5 +89,3 @@ export const WithOverflowButton = () => {
     </div>
   );
 };
-
-WithOverflowButton.storyName = 'resizeable amp-iframe with overflow';

@@ -1,3 +1,12 @@
+import {forceExperimentBranch} from '#experiments';
+
+import {Services} from '#service';
+
+import {
+  installLinkerReaderService,
+  linkerReaderServiceFor,
+} from '../linker-reader';
+import {installSessionServiceForTesting} from '../session-manager';
 import {
   ExpansionOptions,
   VariableService,
@@ -6,13 +15,6 @@ import {
   installVariableServiceForTesting,
   variableServiceForDoc,
 } from '../variables';
-import {Services} from '#service';
-import {forceExperimentBranch} from '#experiments';
-import {
-  installLinkerReaderService,
-  linkerReaderServiceFor,
-} from '../linker-reader';
-import {installSessionServiceForTesting} from '../session-manager';
 
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   let fakeElement;

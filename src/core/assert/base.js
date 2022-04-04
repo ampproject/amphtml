@@ -8,11 +8,13 @@ import {remove} from '#core/types/array';
  * `dev` or `user`. It is also used by the Log class for its assertions.
  */
 
+/** @typedef {function(*, string, ...*):*} AssertionFunctionStringDef */
+/** @typedef {function(*, Array<*>):*} AssertionFunctionArrayDef */
+
 /**
  * A base assertion function, provided to various assertion helpers.
- * @typedef {function(?, string=, ...*):?|function(?, !Array<*>)}
+ * @typedef {AssertionFunctionStringDef|AssertionFunctionArrayDef} AssertionFunctionDef
  */
-export let AssertionFunctionDef;
 
 /**
  * Throws an error if the second argument isn't trueish.
@@ -24,11 +26,10 @@ export let AssertionFunctionDef;
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
  * @param {?string} sentinel
- * @param {T} shouldBeTruthy
+ * @param {*} shouldBeTruthy
  * @param {string} opt_message
  * @param {...*} var_args Arguments substituted into %s in the message
- * @return {T}
- * @template T
+ * @return {asserts shouldBeTruthy}
  * @throws {Error} when shouldBeTruthy is not truthy.
  */
 export function assert(
@@ -38,7 +39,7 @@ export function assert(
   var_args
 ) {
   if (shouldBeTruthy) {
-    return shouldBeTruthy;
+    return /** @type {void} */ (shouldBeTruthy);
   }
 
   // Include the sentinel string if provided and not already present
@@ -58,7 +59,7 @@ export function assert(
 
   while (splitMessage.length) {
     const subValue = arguments[i++];
-    const nextConstant = splitMessage.shift();
+    const nextConstant = /** @type {NonNullable<*>} */ (splitMessage.shift());
 
     message += elementStringOrPassThru(subValue) + nextConstant;
     messageArray.push(subValue, nextConstant.trim());
@@ -81,13 +82,12 @@ export function assert(
  * Otherwise creates a sprintf syntax string containing the optional message or the
  * default. The `subject` of the assertion is added at the end.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
- * @param {T} subject
+ * @param {AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {*} subject
  * @param {*} shouldBeTruthy
  * @param {string} defaultMessage
- * @param {!Array<*>|string=} opt_message
- * @return {T}
- * @template T
+ * @param {Array<*>|string=} opt_message
+ * @return {asserts shouldBeTruthy}
  * @private
  */
 function assertType_(
@@ -98,15 +98,19 @@ function assertType_(
   opt_message
 ) {
   if (isArray(opt_message)) {
-    assertFn(
+    /** @type {AssertionFunctionArrayDef} */ (assertFn)(
       shouldBeTruthy,
-      /** @type {!Array} */ (opt_message).concat([subject])
+      /** @type {Array<*>} */ (opt_message).concat([subject])
     );
   } else {
-    assertFn(shouldBeTruthy, `${opt_message || defaultMessage}: %s`, subject);
+    /** @type {AssertionFunctionStringDef} */ (assertFn)(
+      shouldBeTruthy,
+      `${opt_message || defaultMessage}: %s`,
+      subject
+    );
   }
 
-  return subject;
+  return /** @type {void} */ (subject);
 }
 
 /**
@@ -114,22 +118,19 @@ function assertType_(
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeElement
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {!Element} The value of shouldBeTrueish.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeElement is Element}
  * @throws {Error} when shouldBeElement is not an Element
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertElement(assertFn, shouldBeElement, opt_message) {
-  return /** @type {!Element} */ (
-    assertType_(
-      assertFn,
-      shouldBeElement,
-      isElement(shouldBeElement),
-      'Element expected',
-      opt_message
-    )
+  return assertType_(
+    assertFn,
+    shouldBeElement,
+    isElement(shouldBeElement),
+    'Element expected',
+    opt_message
   );
 }
 
@@ -139,22 +140,19 @@ export function assertElement(assertFn, shouldBeElement, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeString
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {string} The string value. Can be an empty string.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeString is string}
  * @throws {Error} when shouldBeString is not an String
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertString(assertFn, shouldBeString, opt_message) {
-  return /** @type {string} */ (
-    assertType_(
-      assertFn,
-      shouldBeString,
-      isString(shouldBeString),
-      'String expected',
-      opt_message
-    )
+  return assertType_(
+    assertFn,
+    shouldBeString,
+    isString(shouldBeString),
+    'String expected',
+    opt_message
   );
 }
 
@@ -164,23 +162,19 @@ export function assertString(assertFn, shouldBeString, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeNumber
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {number} The number value. The allowed values include `0`
- *   and `NaN`.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeNumber is number}
  * @throws {Error} when shouldBeNumber is not an Number
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertNumber(assertFn, shouldBeNumber, opt_message) {
-  return /** @type {number} */ (
-    assertType_(
-      assertFn,
-      shouldBeNumber,
-      typeof shouldBeNumber == 'number',
-      'Number expected',
-      opt_message
-    )
+  return assertType_(
+    assertFn,
+    shouldBeNumber,
+    typeof shouldBeNumber == 'number',
+    'Number expected',
+    opt_message
   );
 }
 
@@ -190,22 +184,19 @@ export function assertNumber(assertFn, shouldBeNumber, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeArray
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {!Array} The array value
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeArray is Array} The array value
  * @throws {Error} when shouldBeArray is not an Array
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertArray(assertFn, shouldBeArray, opt_message) {
-  return /** @type {!Array} */ (
-    assertType_(
-      assertFn,
-      shouldBeArray,
-      isArray(shouldBeArray),
-      'Array expected',
-      opt_message
-    )
+  return assertType_(
+    assertFn,
+    shouldBeArray,
+    isArray(shouldBeArray),
+    'Array expected',
+    opt_message
   );
 }
 
@@ -214,21 +205,18 @@ export function assertArray(assertFn, shouldBeArray, opt_message) {
  *
  * For more details see `assert`.
  *
- * @param {!AssertionFunctionDef} assertFn underlying assertion function to call
+ * @param {AssertionFunctionDef} assertFn underlying assertion function to call
  * @param {*} shouldBeBoolean
- * @param {!Array<*>|string=} opt_message The assertion message
- * @return {boolean} The boolean value.
+ * @param {Array<*>|string=} opt_message The assertion message
+ * @return {asserts shouldBeBoolean is boolean} The boolean value.
  * @throws {Error} when shouldBeBoolean is not an Boolean
- * @closurePrimitive {asserts.matchesReturn}
  */
 export function assertBoolean(assertFn, shouldBeBoolean, opt_message) {
-  return /** @type {boolean} */ (
-    assertType_(
-      assertFn,
-      shouldBeBoolean,
-      !!shouldBeBoolean === shouldBeBoolean,
-      'Boolean expected',
-      opt_message
-    )
+  return assertType_(
+    assertFn,
+    shouldBeBoolean,
+    !!shouldBeBoolean === shouldBeBoolean,
+    'Boolean expected',
+    opt_message
   );
 }

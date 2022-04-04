@@ -1,4 +1,4 @@
-import {listenOncePromise} from '../../../../../src/event-helper';
+import {listenOncePromise} from '#utils/event-helper';
 
 export function simulateKeyboardInteraction(win, input, key) {
   const promise = listenOncePromise(input, 'keypress');

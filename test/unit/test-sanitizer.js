@@ -2,11 +2,12 @@ import {sanitizeHtml, sanitizeTagsForTripleMustache} from '../../src/sanitizer';
 
 let sanitize;
 let html;
+let documentEl;
 
 describes.sandboxed('Caja-based', {}, () => {
   beforeEach(() => {
     html = document.createElement('html');
-    const documentEl = {documentElement: html};
+    documentEl = {documentElement: html};
     sanitize = (html) => sanitizeHtml(html, documentEl);
   });
 
@@ -422,43 +423,54 @@ function runSanitizerTests() {
 
   describe('sanitizeTagsForTripleMustache', () => {
     it('should output basic text', () => {
-      expect(sanitizeTagsForTripleMustache('abc')).to.be.equal('abc');
+      expect(sanitizeTagsForTripleMustache('abc', documentEl)).to.be.equal(
+        'abc'
+      );
     });
 
     it('should output valid markup', () => {
-      expect(sanitizeTagsForTripleMustache('<b>abc</b>')).to.be.equal(
-        '<b>abc</b>'
-      );
-      expect(sanitizeTagsForTripleMustache('<b>ab<br>c</b>')).to.be.equal(
-        '<b>ab<br>c</b>'
-      );
-      expect(sanitizeTagsForTripleMustache('<b>a<i>b</i>c</b>')).to.be.equal(
-        '<b>a<i>b</i>c</b>'
-      );
+      expect(
+        sanitizeTagsForTripleMustache('<b>abc</b>', documentEl)
+      ).to.be.equal('<b>abc</b>');
+      expect(
+        sanitizeTagsForTripleMustache('<b>ab<br>c</b>', documentEl)
+      ).to.be.equal('<b>ab<br>c</b>');
+      expect(
+        sanitizeTagsForTripleMustache('<b>a<i>b</i>c</b>', documentEl)
+      ).to.be.equal('<b>a<i>b</i>c</b>');
       const markupWithClassAttribute = '<p class="some-class">heading</p>';
       expect(
-        sanitizeTagsForTripleMustache(markupWithClassAttribute)
+        sanitizeTagsForTripleMustache(markupWithClassAttribute, documentEl)
       ).to.be.equal(markupWithClassAttribute);
       const markupWithClassesAttribute =
         '<div class="some-class another"><span>heading</span></div>';
       expect(
-        sanitizeTagsForTripleMustache(markupWithClassesAttribute)
+        sanitizeTagsForTripleMustache(markupWithClassesAttribute, documentEl)
       ).to.be.equal(markupWithClassesAttribute);
       const markupParagraph = '<p class="valid-class">paragraph</p>';
-      expect(sanitizeTagsForTripleMustache(markupParagraph)).to.be.equal(
-        markupParagraph
-      );
+      expect(
+        sanitizeTagsForTripleMustache(markupParagraph, documentEl)
+      ).to.be.equal(markupParagraph);
     });
 
     it('should NOT output non-allowlisted markup', () => {
-      expect(sanitizeTagsForTripleMustache('a<style>b</style>c')).to.be.equal(
+      expect(
+        sanitizeTagsForTripleMustache('a<style>b</style>c', documentEl)
+      ).to.be.equal('ac');
+      expect(sanitizeTagsForTripleMustache('a<img>c', documentEl)).to.be.equal(
         'ac'
       );
-      expect(sanitizeTagsForTripleMustache('a<img>c')).to.be.equal('ac');
+    });
+
+    it('should not allowlist amp-img element for AMP4Email', () => {
+      html.setAttribute('amp4email', '');
+      expect(
+        sanitizeTagsForTripleMustache('a<amp-img></amp-img>c', documentEl)
+      ).to.be.equal('ac');
     });
 
     it('should compensate for broken markup', () => {
-      expect(sanitizeTagsForTripleMustache('<b>a<i>b')).to.be.equal(
+      expect(sanitizeTagsForTripleMustache('<b>a<i>b', documentEl)).to.be.equal(
         '<b>a<i>b</i></b>'
       );
     });

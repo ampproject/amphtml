@@ -2,7 +2,6 @@ import {
   Action,
   AmpStoryStoreService,
   StateProperty,
-  UIType,
 } from '../amp-story-store-service';
 import {EmbedMode, EmbedModeParam} from '../embed-mode';
 
@@ -77,14 +76,6 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     expect(listenerSpy).to.have.been.calledWith(false);
   });
 
-  it('should toggle the desktop state when setting a UI State', () => {
-    const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.DESKTOP_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-    expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(true);
-  });
-
   it('should update the current page id', () => {
     const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.CURRENT_PAGE_ID, listenerSpy);
@@ -105,30 +96,6 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     });
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(1);
-  });
-
-  it('should toggle the has audio state', () => {
-    const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.STORY_HAS_AUDIO_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_STORY_HAS_AUDIO, true);
-    expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(true);
-  });
-
-  it('should toggle the viewport warning state', () => {
-    const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.VIEWPORT_WARNING_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_VIEWPORT_WARNING, true);
-    expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(true);
-  });
-
-  it('should toggle the supported browser state', () => {
-    const listenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.SUPPORTED_BROWSER_STATE, listenerSpy);
-    storeService.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
-    expect(listenerSpy).to.have.been.calledOnce;
-    expect(listenerSpy).to.have.been.calledWith(false);
   });
 
   it('should pause the story when displaying the share menu', () => {
@@ -165,18 +132,6 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     storeService.dispatch(Action.TOGGLE_INFO_DIALOG, false);
     expect(pausedListenerSpy).to.have.been.calledOnce;
     expect(pausedListenerSpy).to.have.been.calledWith(false);
-  });
-
-  it('should not update PAUSED_STATE if ACCESS_STATE is unchanged', () => {
-    // Story is paused.
-    storeService.dispatch(Action.TOGGLE_PAUSED, true);
-
-    // ACCESS_STATE was already false but is set to false again.
-    expect(storeService.get(StateProperty.ACCESS_STATE)).to.be.false;
-    storeService.dispatch(Action.TOGGLE_ACCESS, false);
-
-    // PAUSED_STATE did not get affected.
-    expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
   });
 
   it('should add an action to the allowlist', () => {

@@ -75,9 +75,11 @@ amp-live-list/0.1/test/validator-amp-live-list.html:55:2 The reference point 'AM
 |         OK but the tags that attach to them are not: Reference point validation
 |         and regular tag validation are orthogonal. -->
 |    <amp-live-list id="my-live-list-4" data-poll-interval="15000" data-max-items-per-page="20">
-|      <img update src="button.gif" onclick="javascript:alert('u have updates!')">
+>>   ^~~~~~~~~
+amp-live-list/0.1/test/validator-amp-live-list.html:66:2 The mandatory reference point 'AMP-LIVE-LIST [items]' for 'amp-live-list' is missing. (see https://amp.dev/documentation/components/amp-live-list)
+|      <foo update src="button.gif" onclick="javascript:alert('u have updates!')">
 >>     ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:67:4 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
+amp-live-list/0.1/test/validator-amp-live-list.html:67:4 The tag 'foo' is disallowed.
 |      <script items>
 >>     ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:68:4 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
@@ -92,22 +94,22 @@ amp-live-list/0.1/test/validator-amp-live-list.html:68:4 Custom JavaScript is no
 |      <ul items>
 |        <li id="1" data-update-time="42">1</li>  <!-- data-sort-time missing -->
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:78:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+amp-live-list/0.1/test/validator-amp-live-list.html:78:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 >>       ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:78:6 The tag 'li', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 |        <li id="2" data-sort-time="43" data-update-time="44">2</li>
 |        <li data-update-time="44">3</li> <!-- id and data-sort-time missing -->
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The mandatory attribute 'id' is missing in tag 'amp-live-list [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The mandatory attribute 'id' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 >>       ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:80:6 The tag 'li', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 |        <p>junk</p> <!-- id, data-sort-time missing -->
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The mandatory attribute 'data-sort-time' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 >>       ^~~~~~~~~
-amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The mandatory attribute 'id' is missing in tag 'amp-live-list [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
+amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The mandatory attribute 'id' is missing in tag 'amp-live-list [data-sort-time] child'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 >>       ^~~~~~~~~
 amp-live-list/0.1/test/validator-amp-live-list.html:81:6 The tag 'p', a child tag of 'AMP-LIVE-LIST [items]', does not satisfy the reference point 'AMP-LIVE-LIST [items] item'. (see https://amp.dev/documentation/components/amp-live-list/#items)
 |      </ul>

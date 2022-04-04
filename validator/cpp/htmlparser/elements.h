@@ -1,9 +1,9 @@
-#ifndef HTMLPARSER__ELEMENTS_H_
-#define HTMLPARSER__ELEMENTS_H_
+#ifndef CPP_HTMLPARSER_ELEMENTS_H_
+#define CPP_HTMLPARSER_ELEMENTS_H_
 
 #include <array>
 
-#include "atom.h"
+#include "cpp/htmlparser/atom.h"
 
 namespace htmlparser {
 
@@ -116,4 +116,4 @@ inline constexpr std::array<Atom, 82> kSpecialElements{
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__ELEMENTS_H_
+#endif  // CPP_HTMLPARSER_ELEMENTS_H_

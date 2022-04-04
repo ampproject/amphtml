@@ -1,9 +1,9 @@
-import * as Preact from '#preact';
-import {ContainWrapper, useValueRef} from '#preact/component';
-import {Keys} from '#core/constants/key-codes';
-import {Side} from './sidebar-config';
-import {forwardRef} from '#preact/compat';
+import objstr from 'obj-str';
+
+import {Keys_Enum} from '#core/constants/key-codes';
 import {isRTL} from '#core/dom';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useEffect,
@@ -12,17 +12,19 @@ import {
   useRef,
   useState,
 } from '#preact';
-import {useSidebarAnimation} from './sidebar-animations-hook';
+import {forwardRef} from '#preact/compat';
+import {ContainWrapper, useValueRef} from '#preact/component';
+
 import {useStyles} from './component.jss';
-import {useToolbarHook} from './sidebar-toolbar-hook';
-import objstr from 'obj-str';
+import {useSidebarAnimation} from './sidebar-animations-hook';
+import {Side} from './sidebar-config';
 
 /**
- * @param {!SidebarDef.SidebarProps} props
- * @param {{current: (!SidebarDef.SidebarApi|null)}} ref
+ * @param {!BentoSidebarDef.Props} props
+ * @param {{current: (!BentoSidebarDef.Api|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function SidebarWithRef(
+function BentoSidebarWithRef(
   {
     as: Comp = 'div',
     backdropClassName,
@@ -67,7 +69,7 @@ function SidebarWithRef(
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!SidebarDef.SidebarApi} */ ({
+      /** @type {!BentoSidebarDef.Api} */ ({
         open,
         close,
         toggle,
@@ -108,7 +110,7 @@ function SidebarWithRef(
       return;
     }
     const keydownCallback = (event) => {
-      if (event.key === Keys.ESCAPE) {
+      if (event.key === Keys_Enum.ESCAPE) {
         event.stopImmediatePropagation();
         event.preventDefault();
         close();
@@ -121,7 +123,13 @@ function SidebarWithRef(
   }, [opened, close]);
 
   return (
-    <div class={objstr({[classes.unmounted]: !mounted})} part="wrapper">
+    <div
+      class={objstr({
+        [classes.mounted]: mounted,
+        [classes.unmounted]: !mounted,
+      })}
+      part="wrapper"
+    >
       <ContainWrapper
         as={Comp}
         ref={sidebarRef}
@@ -136,7 +144,7 @@ function SidebarWithRef(
           [classes.right]: side !== Side.LEFT,
         })}
         role="menu"
-        tabIndex="-1"
+        tabindex="-1"
         hidden={!side}
         {...rest}
       >
@@ -160,31 +168,6 @@ function SidebarWithRef(
   );
 }
 
-const Sidebar = forwardRef(SidebarWithRef);
-Sidebar.displayName = 'Sidebar'; // Make findable for tests.
-export {Sidebar};
-
-/**
- * @param {!SidebarDef.SidebarToolbarProps} props
- * @return {PreactDef.Renderable}
- */
-export function SidebarToolbar({
-  children,
-  toolbar: mediaQueryProp,
-  toolbarTarget: toolbarTargetProp,
-  ...rest
-}) {
-  const ref = useRef(null);
-  useToolbarHook(ref, mediaQueryProp, toolbarTargetProp);
-
-  return (
-    <nav
-      ref={ref}
-      toolbar={mediaQueryProp}
-      toolbar-target={toolbarTargetProp}
-      {...rest}
-    >
-      {children}
-    </nav>
-  );
-}
+const BentoSidebar = forwardRef(BentoSidebarWithRef);
+BentoSidebar.displayName = 'BentoSidebar'; // Make findable for tests.
+export {BentoSidebar};

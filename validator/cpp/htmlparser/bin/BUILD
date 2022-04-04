@@ -10,17 +10,17 @@ cc_binary(
         "atomgen.cc",
     ],
     data = [
-        "@htmlparser//data:amptags.txt",
-        "@htmlparser//data:htmlattributes.txt",
-        "@htmlparser//data:htmltags.txt",
-        "@htmlparser//data:javascriptevents.txt",
+        "//cpp/htmlparser/data:amptags.txt",
+        "//cpp/htmlparser/data:htmlattributes.txt",
+        "//cpp/htmlparser/data:htmltags.txt",
+        "//cpp/htmlparser/data:javascriptevents.txt",
     ],
     deps = [
-        "@htmlparser//:defer",
-        "@htmlparser//:fileutil",
-        "@htmlparser//:hash",
-        "@htmlparser//:strings",
-        "@htmlparser//:token",
+        "//cpp/htmlparser:defer",
+        "//cpp/htmlparser:fileutil",
+        "//cpp/htmlparser:hash",
+        "//cpp/htmlparser:strings",
+        "//cpp/htmlparser:token",
     ],
 )
 
@@ -30,11 +30,11 @@ cc_binary(
         "casetablegen.cc",
     ],
     data = [
-        "@htmlparser//data:CaseFolding.txt",
+        "//cpp/htmlparser/data:CaseFolding.txt",
     ],
     deps = [
-        "@htmlparser//:defer",
-        "@htmlparser//:fileutil",
+        "//cpp/htmlparser:defer",
+        "//cpp/htmlparser:fileutil",
     ],
 )
 
@@ -44,25 +44,27 @@ cc_binary(
         "entitytablegen.cc",
     ],
     data = [
-        "@htmlparser//data:entities.json",
+        "//cpp/htmlparser/data:entities.json",
     ],
     deps = [
-        "@htmlparser//:defer",
-        "@htmlparser//:fileutil",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:defer",
+        "//cpp/htmlparser:fileutil",
+        "//cpp/htmlparser:strings",
     ],
 )
 
 cc_binary(
-    name = "jsongrammargen",
+    name = "statetablegen",
     srcs = [
-        "jsongrammargen.cc",
+        "statetablegen.cc",
     ],
     data = [
-        "@htmlparser//data:jsongrammar.txt",
-        "@htmlparser//json:states.h",
+        "//cpp/htmlparser/data:jsongrammar.txt",
+        "//cpp/htmlparser/json:states.h",
     ],
     deps = [
-        "@htmlparser//grammar:tablebuilder",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "//cpp/htmlparser/grammar:tablebuilder",
     ],
 )

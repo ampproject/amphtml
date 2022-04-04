@@ -1,7 +1,8 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
+
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import * as IniLoad from '../../../../src/ini-load';
+import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 import {
   AMP_EXPERIMENT_ATTRIBUTE,
   EXPERIMENT_ATTRIBUTE,
@@ -24,18 +25,24 @@ import {
   maybeInsertOriginTrialToken,
   mergeExperimentIds,
 } from '#ads/google/a4a/utils';
+
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
-import {GEO_IN_GROUP} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
-import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
-import {Services} from '#service';
-import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 import {createElementWithAttributes} from '#core/dom';
-import {createIframePromise} from '#testing/iframe';
+
+import {toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 import {installExtensionsService} from '#service/extensions-impl';
 import {installXhrService} from '#service/xhr-impl';
-import {toggleExperiment} from '#experiments';
-import {user} from '../../../../src/log';
+
+import {user} from '#utils/log';
+
+import {createIframePromise} from '#testing/iframe';
+
+import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
+import {GEO_IN_GROUP} from '../../../../extensions/amp-geo/0.1/amp-geo-in-group';
+import * as IniLoad from '../../../../src/ini-load';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);
@@ -645,13 +652,15 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
                 model: 'Pixel',
                 uaFullVersion: 3.14159,
                 bitness: 42,
+                fullVersionList: [{brand: 'Chrome', version: '3.14159'}],
+                wow64: true,
               }),
           },
         });
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', Date.now(), [], []).then((url) => {
             expect(url).to.match(
-              /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159&uab=42[&$]/
+              /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159&uab=42&uafvl=%5B%7B%22brand%22%3A%22Chrome%22%2C%22version%22%3A%223.14159%22%7D%5D&uaw=true[&$]/
             );
           });
         });
@@ -681,7 +690,7 @@ describes.sandboxed('Google A4A utils', {}, (env) => {
           const promise = googleAdUrl(impl, '', Date.now(), [], []).then(
             (url) => {
               expect(url).to.not.match(
-                /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159&uab=42[&$]/
+                /[&?]uap=Windows&uapv=10&uaa=x86&uam=Pixel&uafv=3.14159&uab=42&uafvl=%5B%7B%22brand%22%3A%22Chrome%22%2C%22version%22%3A%223.14159%22%7D%5D&uaw=true[&$]/
               );
             }
           );

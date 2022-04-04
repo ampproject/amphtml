@@ -1,5 +1,5 @@
 import {Deferred} from '#core/data-structures/promise';
-import * as DocumentReady from '#core/document-ready';
+import * as DocumentReady from '#core/document/ready';
 
 import helpersFactory from './helpers';
 

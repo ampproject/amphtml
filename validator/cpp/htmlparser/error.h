@@ -1,5 +1,5 @@
-#ifndef HTMLPARSER__ERROR_H_
-#define HTMLPARSER__ERROR_H_
+#ifndef CPP_HTMLPARSER_ERROR_H_
+#define CPP_HTMLPARSER_ERROR_H_
 
 #include <optional>
 #include <string>
@@ -15,4 +15,4 @@ std::optional<Error> error(const std::string& error_msg);
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__ERROR_H_
+#endif  // CPP_HTMLPARSER_ERROR_H_

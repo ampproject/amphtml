@@ -1,15 +1,15 @@
-#ifndef HTMLPARSER__PARSER_H_
-#define HTMLPARSER__PARSER_H_
+#ifndef CPP_HTMLPARSER_PARSER_H_
+#define CPP_HTMLPARSER_PARSER_H_
 
 #include <array>
 #include <deque>
 #include <functional>
 #include <vector>
 
-#include "atom.h"
-#include "document.h"
-#include "node.h"
-#include "tokenizer.h"
+#include "cpp/htmlparser/atom.h"
+#include "cpp/htmlparser/document.h"
+#include "cpp/htmlparser/node.h"
+#include "cpp/htmlparser/tokenizer.h"
 
 namespace htmlparser {
 
@@ -357,4 +357,4 @@ class Parser {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__PARSER_H_
+#endif  // CPP_HTMLPARSER_PARSER_H_

@@ -1,6 +1,6 @@
 import {setInitialDisplay, toggle} from '#core/dom/style';
 
-import {BrowserController} from '#testing/test-helper';
+import {BrowserController} from '#testing/helpers/service';
 
 describes.integration(
   'toggle display helper',

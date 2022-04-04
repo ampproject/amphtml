@@ -11,7 +11,8 @@ describes.endtoend(
     });
 
     describe('with <amp-iframe>', () => {
-      it('should support binding to src', async () => {
+      // TODO(#37532): Unskip this test.
+      it.skip('should support binding to src', async () => {
         const button = await controller.findElement('#iframeButton');
         const ampIframe = await controller.findElement('#ampIframe');
         const iframe = await controller.findElement('#ampIframe iframe');

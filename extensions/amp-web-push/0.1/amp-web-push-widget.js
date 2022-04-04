@@ -14,7 +14,7 @@
  * the License.
  */
 
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 
 /**
  * @fileoverview
@@ -31,7 +31,7 @@ export class WebPushWidget extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED;
+    return layout == Layout_Enum.FIXED;
   }
 
   /** @override */

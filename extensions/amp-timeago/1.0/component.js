@@ -1,10 +1,12 @@
+import {devAssertElement} from '#core/assert';
 import {getDate} from '#core/types/date';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import * as Preact from '#preact';
-import {useEffect, useRef, useState} from '#preact';
+import {useCallback, useRef, useState} from '#preact';
 import {Wrapper} from '#preact/component';
-import {useResourcesNotify} from '#preact/utils';
+import {useIntersectionObserver} from '#preact/component/intersection-observer';
+import {useMergeRefs, useResourcesNotify} from '#preact/utils';
 
 import {format, getLocale} from './locales';
 
@@ -24,10 +26,10 @@ const DEFAULT_DATETIME_OPTIONS = {
 const DEFAULT_TIME_OPTIONS = {'hour': 'numeric', 'minute': 'numeric'};
 
 /**
- * @param {!TimeagoProps} props
+ * @param {!BentoTimeagoProps} props
  * @return {PreactDef.Renderable}
  */
-export function Timeago({
+export function BentoTimeago({
   cutoff,
   datetime,
   locale: localeProp,
@@ -39,28 +41,26 @@ export function Timeago({
 
   const date = getDate(datetime);
 
-  useEffect(() => {
-    const node = ref.current;
-    const win = node && toWin(node.ownerDocument.defaultView);
-    if (!win) {
-      return undefined;
-    }
-    const observer = new win.IntersectionObserver((entries) => {
+  const ioCallback = useCallback(
+    ({isIntersecting}) => {
+      if (!isIntersecting) {
+        return;
+      }
+      const node = devAssertElement(ref.current);
       let {lang} = node.ownerDocument.documentElement;
+      const win = getWin(node);
       if (lang === 'unknown') {
         lang = win.navigator?.language || DEFAULT_LOCALE;
       }
       const locale = getLocale(localeProp || lang);
-      const last = entries[entries.length - 1];
-      if (last.isIntersecting) {
-        setTimestamp(
-          getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
-        );
-      }
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [date, localeProp, cutoff, placeholder]);
+      setTimestamp(
+        getFuzzyTimestampValue(new Date(date), locale, cutoff, placeholder)
+      );
+    },
+    [cutoff, date, localeProp, placeholder]
+  );
+
+  const inObRef = useIntersectionObserver(ioCallback);
 
   useResourcesNotify();
 
@@ -68,7 +68,7 @@ export function Timeago({
     <Wrapper
       {...rest}
       as="time"
-      ref={ref}
+      ref={useMergeRefs([ref, inObRef])}
       datetime={new Date(date).toISOString()}
     >
       {timestamp}

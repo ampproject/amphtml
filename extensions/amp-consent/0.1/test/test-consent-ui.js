@@ -1,22 +1,26 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
+
+import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
+import {elementByTag} from '#core/dom/query';
+
+import {Services} from '#service';
+
+import {user} from '#utils/log';
+
+import {macroTask} from '#testing/helpers';
+import {whenCalled} from '#testing/helpers/service';
+
+import {
+  registerServiceBuilder,
+  resetServiceForTesting,
+} from '../../../../src/service-helpers';
 import {
   CONSENT_ITEM_STATE,
   PURPOSE_CONSENT_STATE,
   constructConsentInfo,
   constructMetadata,
 } from '../consent-info';
-import {CONSENT_STRING_TYPE} from '#core/constants/consent-state';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
-import {Services} from '#service';
-import {dict} from '#core/types/object';
-import {elementByTag} from '#core/dom/query';
-import {macroTask} from '#testing/helpers';
-import {
-  registerServiceBuilder,
-  resetServiceForTesting,
-} from '../../../../src/service-helpers';
-import {user} from '../../../../src/log';
-import {whenCalled} from '#testing/test-helper';
 
 describes.realWin(
   'consent-ui',
@@ -31,6 +35,7 @@ describes.realWin(
     let ampdoc;
     let consentUI;
     let mockInstance;
+    let mockViewport;
     let parent;
     let ownersStubs;
 
@@ -46,18 +51,17 @@ describes.realWin(
       postPrompt.setAttribute('id', 'testPost');
       parent.appendChild(postPrompt);
       doc.body.appendChild(parent);
+      mockViewport = {
+        addToFixedLayer: env.sandbox.spy(),
+        removeFromFixedLayer: () => {},
+      };
       mockInstance = {
         getAmpDoc: () => {
           return ampdoc;
         },
         element: parent,
         win,
-        getViewport: () => {
-          return {
-            addToFixedLayer: () => {},
-            removeFromFixedLayer: () => {},
-          };
-        },
+        getViewport: () => mockViewport,
         getVsync: () => {
           return {
             mutate: (callback) => {
@@ -100,12 +104,18 @@ describes.realWin(
     });
 
     const getReadyIframeCmpConsentUi = () => {
-      const config = dict({
+      const config = {
         'promptUISrc': 'https://promptUISrc',
-      });
+      };
       const consentUI = new ConsentUI(mockInstance, config);
       const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
       consentUI.show(false);
+      expect(
+        mockViewport.addToFixedLayer.withArgs(
+          mockInstance.element,
+          /* forceTransfer */ true
+        )
+      ).to.have.been.calledOnce;
       consentUI.iframeReady_.resolve();
       return whenCalled(showIframeSpy).then(() => Promise.resolve(consentUI));
     };
@@ -114,25 +124,25 @@ describes.realWin(
       it('should repsect postPromptUI if there is one', function* () {
         consentUI = new ConsentUI(
           mockInstance,
-          dict({'promptUI': 'test1'}),
+          {'promptUI': 'test1'},
           'testPost'
         );
         expect(consentUI.ui_.id).to.equal('testPost');
       });
 
       it('should ignore promptUISrc w/ promptUI', function* () {
-        const config = dict({
+        const config = {
           'promptUI': 'test1',
           'promptUISrc': 'https://promptUISrc',
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         expect(consentUI.ui_.id).to.equal('test1');
       });
 
       it('should create iframe from promptUISrc', function* () {
-        const config = dict({
+        const config = {
           'promptUISrc': 'https://promptUISrc',
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         expect(consentUI.ui_.tagName).to.equal('IFRAME');
         expect(consentUI.ui_.getAttribute('sandbox')).to.equal(
@@ -143,9 +153,9 @@ describes.realWin(
 
     describe('show/hide', () => {
       it('toggle display', () => {
-        const config = dict({
+        const config = {
           'promptUI': 'test1',
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         expect(parent.classList.contains('amp-active')).to.be.false;
         expect(parent.classList.contains('amp-hidden')).to.be.false;
@@ -161,9 +171,9 @@ describes.realWin(
       });
 
       it('should support pause/resume lifecycle', () => {
-        const config = dict({
+        const config = {
           'promptUI': 'test1',
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         consentUI.show(false);
         expect(ownersStubs.scheduleLayout).to.be.calledOnce;
@@ -181,9 +191,9 @@ describes.realWin(
       });
 
       it('append/remove iframe', async () => {
-        const config = dict({
+        const config = {
           'promptUISrc': 'https://promptUISrc',
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         const clock = fakeTimers.withGlobal(win).install();
 
@@ -213,9 +223,9 @@ describes.realWin(
       });
 
       it('should not lock scrolling', () => {
-        const config = dict({
+        const config = {
           'promptUISrc': 'https://promptUISrc',
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
 
         expect(consentUI.scrollEnabled_).to.be.true;
@@ -236,9 +246,9 @@ describes.realWin(
       });
 
       it('should set the iframe transform class on parent', async () => {
-        const config = dict({
+        const config = {
           'promptUISrc': 'https://promptUISrc',
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
 
         consentUI.show(false);
@@ -262,9 +272,9 @@ describes.realWin(
 
     describe('placeholder', () => {
       it('should be created / shown while loading CMP Iframe', async () => {
-        const config = dict({
+        const config = {
           'promptUISrc': 'https://promptUISrc',
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
 
         const placeholder = consentUI.placeholder_;
@@ -284,9 +294,9 @@ describes.realWin(
 
     describe('CMP Iframe', () => {
       it('should load the iframe, then show it with correct state CSS classes', async () => {
-        const config = dict({
+        const config = {
           'promptUISrc': 'https://promptUISrc',
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         expect(parent).to.not.have.class('amp-active');
         expect(parent).to.not.have.class('amp-hidden');
@@ -310,7 +320,7 @@ describes.realWin(
       });
 
       it('should expand the promptUISrc', async () => {
-        const config = dict({
+        const config = {
           'promptUISrc':
             'https://example.test/?' +
             'cid=CLIENT_ID&' +
@@ -320,7 +330,7 @@ describes.realWin(
           'clientConfig': {
             'test': 'ABC',
           },
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         consentUI.show(false);
         await macroTask();
@@ -338,12 +348,12 @@ describes.realWin(
       });
 
       it("should pass info into iframe's name", async () => {
-        const config = dict({
+        const config = {
           'promptUISrc': 'https://promptUISrc',
           'clientConfig': {
             'test': 'ABC',
           },
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         consentUI.show(false);
         await macroTask();
@@ -368,12 +378,12 @@ describes.realWin(
       });
 
       it('should pass the promptTrigger reason to the iframe', function* () {
-        const config = dict({
+        const config = {
           'promptUISrc': 'https://promptUISrc',
           'clientConfig': {
             'test': 'ABC',
           },
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         consentUI.show(true);
         yield macroTask();
@@ -638,10 +648,10 @@ describes.realWin(
 
     describe('overlay', () => {
       it('should not enable the overlay if not configured', function* () {
-        const config = dict({
+        const config = {
           'promptUISrc': 'https://promptUISrc',
           'uiConfig': {},
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         // Mock out load Iframe_
         consentUI.loadIframe_ = () => {
@@ -656,12 +666,12 @@ describes.realWin(
       });
 
       it('append/hide/show overlay', function* () {
-        const config = dict({
+        const config = {
           'promptUISrc': 'https://promptUISrc',
           'uiConfig': {
             'overlay': true,
           },
-        });
+        };
         consentUI = new ConsentUI(mockInstance, config);
         // Mock out load Iframe_
         consentUI.loadIframe_ = () => {

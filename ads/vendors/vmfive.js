@@ -5,7 +5,7 @@ import {validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function vmfive(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   const mandatory_fields = ['appKey', 'placementId', 'adType'];
   const optional_fields = [];
 

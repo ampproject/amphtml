@@ -9,6 +9,7 @@
   type="smartclip"
   data-plc="68005"
   data-sz="400x320"
+  data-block-on-consent="_till_responded"
 >
 </amp-ad>
 ```

@@ -9,10 +9,11 @@ import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
-import {getData, listen} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {addParamsToUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-gfycat';
 
@@ -151,7 +152,7 @@ class AmpGfycat extends AMP.BaseElement {
 
     this.element.appendChild(iframe);
     return this.loadPromise(this.iframe_).then(() => {
-      dispatchCustomEvent(this.element, VideoEvents.LOAD);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
     });
   }
 
@@ -196,9 +197,9 @@ class AmpGfycat extends AMP.BaseElement {
     }
 
     if (eventData == 'paused') {
-      dispatchCustomEvent(this.element, VideoEvents.PAUSE);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.PAUSE);
     } else if (eventData == 'playing') {
-      dispatchCustomEvent(this.element, VideoEvents.PLAYING);
+      dispatchCustomEvent(this.element, VideoEvents_Enum.PLAYING);
     }
   }
 

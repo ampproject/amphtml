@@ -21,9 +21,9 @@ import {isFiniteNumber} from '#core/types';
 
 import {Services} from '#service';
 
-import {FontLoader} from './fontloader';
+import {user, userAssert} from '#utils/log';
 
-import {user, userAssert} from '../../../src/log';
+import {FontLoader} from './fontloader';
 
 const TAG = 'amp-font';
 
@@ -56,7 +56,7 @@ const DEFAULT_SIZE_ = 'medium';
 const CACHED_FONT_LOAD_TIME_ = 100;
 
 export class AmpFont extends AMP.BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }

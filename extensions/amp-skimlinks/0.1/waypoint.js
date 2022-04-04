@@ -1,5 +1,3 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
 import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
@@ -50,7 +48,7 @@ export class Waypoint {
 
     const xcust = anchor.getAttribute(XCUST_ATTRIBUTE_NAME) || customTrackingId;
 
-    const queryParams = dict({
+    const queryParams = {
       'id': pubcode,
       'url': anchor.href,
       'sref': this.canonicalUrl_,
@@ -60,7 +58,7 @@ export class Waypoint {
       'xtz': this.timezone_,
       'xs': '1', // Always use source_app=1 (skimlinks)
       'jv': PLATFORM_NAME,
-    });
+    };
     if (xcust) {
       queryParams['xcust'] = xcust;
     }

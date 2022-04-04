@@ -1,10 +1,9 @@
 const esbuild = require('esbuild');
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const path = require('path');
 const {accessSync} = require('fs-extra');
-const {cyan, green} = require('../common/colors');
+const {cyan, green} = require('kleur/colors');
 const {endBuildStep} = require('../tasks/helpers');
-const {exec} = require('../common/exec');
 const {log} = require('../common/logging');
 
 const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
@@ -30,7 +29,7 @@ async function buildNewServer() {
     green('at'),
     cyan(outdir) + green('...')
   );
-  const entryPoints = await globby(`${SERVER_TRANSFORM_PATH}/**/*.ts`);
+  const entryPoints = await fastGlob(`${SERVER_TRANSFORM_PATH}/**/*.ts`);
   const startTime = Date.now();
   await esbuild.build({
     ...esbuildOptions,
@@ -38,18 +37,6 @@ async function buildNewServer() {
     outdir,
   });
   endBuildStep('Built', 'AMP Server', startTime);
-}
-
-/**
- * Checks all types in the generated output after running server transforms.
- */
-function typecheckNewServer() {
-  const cmd = `npx -p typescript tsc --noEmit -p ${CONFIG_PATH}`;
-  const result = exec(cmd, {'stdio': ['inherit', 'inherit', 'pipe']});
-
-  if (result.status != 0) {
-    throw new Error(`Typechecking AMP Server failed.`);
-  }
 }
 
 /**
@@ -79,7 +66,6 @@ function requireNewServerModule(modulePath) {
 
 module.exports = {
   buildNewServer,
-  typecheckNewServer,
   requireNewServerModule,
   SERVER_TRANSFORM_PATH,
 };

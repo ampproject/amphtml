@@ -1,20 +1,24 @@
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {assertHttpsUrl} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {dict} from '#core/types/object';
-import {elementByTag} from '#core/dom/query';
-import {expandConsentEndpointUrl} from './consent-config';
-import {getConsentStateValue} from './consent-info';
-import {getData} from '../../../src/event-helper';
-import {getConsentStateManager} from './consent-state-manager';
-import {htmlFor} from '#core/dom/static-template';
 import {insertAtStart, removeElement, tryFocus} from '#core/dom';
 import {
   isAmpElement,
   whenUpgradedToCustomElement,
 } from '#core/dom/amp-element-helpers';
+import {elementByTag} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {setImportantStyles, setStyles, toggle} from '#core/dom/style';
+import {isEsm} from '#core/mode';
+
+import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {dev, user} from '#utils/log';
+
+import {expandConsentEndpointUrl} from './consent-config';
+import {getConsentStateValue} from './consent-info';
+import {getConsentStateManager} from './consent-state-manager';
+
+import {assertHttpsUrl} from '../../../src/url';
 
 const TAG = 'amp-consent-ui';
 const MINIMUM_INITIAL_HEIGHT = 10;
@@ -196,6 +200,13 @@ export class ConsentUI {
           promptUI
         );
       }
+      // Warn of use of <amp-iframe> within a promptUI element.
+      if (!isEsm() && promptElement.querySelector('amp-iframe')) {
+        user().error(
+          TAG,
+          '`promptUI` element contains an <amp-iframe>. This may cause content flashing when consent is not required. Consider using `promptUISrc` instead. See https://go.amp.dev/c/amp-analytics'
+        );
+      }
       this.ui_ = dev().assertElement(promptElement);
     } else if (promptUISrc) {
       // Create an iframe element with the provided src
@@ -226,8 +237,11 @@ export class ConsentUI {
     const {classList} = this.parent_;
     classList.add('amp-active');
     classList.remove('amp-hidden');
-    // Add to fixed layer
-    this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
+
+    this.baseInstance_
+      .getViewport()
+      .addToFixedLayer(this.parent_, /* forceTransfer */ true);
+
     if (this.isCreatedIframe_) {
       // show() can be called multiple times, but notificationsUiManager
       // ensures that only 1 is shown at a time, so no race condition here
@@ -441,7 +455,7 @@ export class ConsentUI {
    * @param {string} event
    */
   sendViewerEvent_(event) {
-    this.viewer_.sendMessage(event, dict(), /* cancelUnsent */ true);
+    this.viewer_.sendMessage(event, {}, /* cancelUnsent */ true);
   }
 
   /**
@@ -511,7 +525,7 @@ export class ConsentUI {
       return consentStateManager
         .getLastConsentInstanceInfo()
         .then((consentInfo) => {
-          return dict({
+          return {
             'clientConfig': this.clientConfig_,
             // consentState to be deprecated
             'consentState': getConsentStateValue(consentInfo['consentState']),
@@ -523,7 +537,7 @@ export class ConsentUI {
             'promptTrigger': this.isActionPromptTrigger_ ? 'action' : 'load',
             'isDirty': !!consentInfo['isDirty'],
             'purposeConsents': consentInfo['purposeConsents'],
-          });
+          };
         });
     });
   }

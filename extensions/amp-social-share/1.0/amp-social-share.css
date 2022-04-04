@@ -1,5 +1,3 @@
-
-
 /*
  * Pre-upgrade:
  * - display:inline-block element
@@ -16,7 +14,8 @@ amp-social-share {
 }
 
 /* Pre-upgrade: size-defining element - hide children until build. */
-amp-social-share:not(.i-amphtml-built) > :not([placeholder]):not(.i-amphtml-svc) {
+amp-social-share:not(.i-amphtml-built)
+  > :not([placeholder]):not([slot='i-amphtml-svc']) {
   display: none;
   content-visibility: hidden;
 }

@@ -1,6 +1,7 @@
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
+
+import {Services} from '#service';
 const ALLOWED_AD_PROVIDER = 'gdt';
 
 /**
@@ -30,9 +31,16 @@ export function handleCompanionDisplay(media, apesterElement) {
     settings['bannerAdProvider'] === ALLOWED_AD_PROVIDER
   ) {
     const slot = settings['slot'];
+    const refreshInterval =
+      settings['options']['autoRefreshTime'] === 60000 ? 60 : 30;
     const defaultBannerSizes = [[300, 250]];
     const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
-    constructCompanionDisplayAd(slot, bannerSizes, apesterElement);
+    constructCompanionDisplayAd(
+      slot,
+      bannerSizes,
+      apesterElement,
+      refreshInterval
+    );
   }
 }
 
@@ -40,9 +48,15 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @param {string} slot
  * @param {Array} bannerSizes
  * @param {!AmpElement} apesterElement
+ * @param {number} refreshInterval
  * @return {!Element}
  */
-function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
+function constructCompanionDisplayAd(
+  slot,
+  bannerSizes,
+  apesterElement,
+  refreshInterval
+) {
   const maxWidth = Math.max.apply(
     null,
     bannerSizes.map((s) => s[0])
@@ -56,7 +70,7 @@ function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    dict({
+    {
       'width': `${maxWidth}`,
       'height': '0',
       'type': 'doubleclick',
@@ -64,7 +78,8 @@ function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
       'data-slot': `${slot}`,
       'data-multi-size-validation': 'false',
       'data-multi-size': multiSizeData,
-    })
+      'data-enable-refresh': `${refreshInterval}`,
+    }
   );
   ampAd.classList.add('i-amphtml-amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);

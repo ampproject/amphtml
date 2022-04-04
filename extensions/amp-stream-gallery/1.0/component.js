@@ -1,8 +1,11 @@
-import * as Preact from '#preact';
-import {BaseCarousel} from '../../amp-base-carousel/1.0/component';
-import {forwardRef} from '#preact/compat';
+import objstr from 'obj-str';
+
+import {BentoBaseCarousel} from '#bento/components/bento-base-carousel/1.0/component';
+
 import {setStyle} from '#core/dom/style';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
+
+import * as Preact from '#preact';
 import {
   useCallback,
   useImperativeHandle,
@@ -10,23 +13,25 @@ import {
   useRef,
   useState,
 } from '#preact';
+import {Children, forwardRef} from '#preact/compat';
+import {propName} from '#preact/utils';
+
 import {useStyles} from './component.jss';
-import objstr from 'obj-str';
 
 const DEFAULT_VISIBLE_COUNT = 1;
 const OUTSET_ARROWS_WIDTH = 100;
 
 /**
- * @param {!StreamGalleryDef.Props} props
- * @param {{current: (!BaseCarouselDef.CarouselApi|null)}} ref
+ * @param {!BentoStreamGalleryDef.Props} props
+ * @param {{current: (!BentoBaseCarouselDef.CarouselApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-function StreamGalleryWithRef(props, ref) {
+function BentoStreamGalleryWithRef(props, ref) {
   const {
     arrowPrevAs = DefaultArrow,
     arrowNextAs = DefaultArrow,
     children,
-    'class': className,
+    [propName('class')]: className,
     extraSpace,
     maxItemWidth = Number.MAX_VALUE,
     minItemWidth = 1,
@@ -40,7 +45,7 @@ function StreamGalleryWithRef(props, ref) {
   const classes = useStyles();
   const carouselRef = useRef(null);
   const [visibleCount, setVisibleCount] = useState(DEFAULT_VISIBLE_COUNT);
-
+  const length = Children.count(children);
   const measure = useCallback(
     (containerWidth) =>
       getVisibleCount(
@@ -48,7 +53,7 @@ function StreamGalleryWithRef(props, ref) {
         minItemWidth,
         maxVisibleCount,
         minVisibleCount,
-        children.length,
+        length,
         outsetArrows,
         peek,
         containerWidth,
@@ -59,7 +64,7 @@ function StreamGalleryWithRef(props, ref) {
       minItemWidth,
       maxVisibleCount,
       minVisibleCount,
-      children.length,
+      length,
       outsetArrows,
       peek,
     ]
@@ -68,7 +73,7 @@ function StreamGalleryWithRef(props, ref) {
   useImperativeHandle(
     ref,
     () =>
-      /** @type {!BaseCarouselDef.CarouselApi} */ ({
+      /** @type {!BentoBaseCarouselDef.CarouselApi} */ ({
         goToSlide: (index) => carouselRef.current.goToSlide(index),
         next: () => carouselRef.current.next(),
         prev: () => carouselRef.current.prev(),
@@ -86,7 +91,7 @@ function StreamGalleryWithRef(props, ref) {
       return;
     }
     // Use local window.
-    const win = toWin(node.ownerDocument.defaultView);
+    const win = getWin(node);
     if (!win) {
       return undefined;
     }
@@ -99,7 +104,7 @@ function StreamGalleryWithRef(props, ref) {
   }, [measure]);
 
   return (
-    <BaseCarousel
+    <BentoBaseCarousel
       advanceCount={Math.floor(visibleCount)}
       arrowPrevAs={arrowPrevAs}
       arrowNextAs={arrowNextAs}
@@ -115,25 +120,25 @@ function StreamGalleryWithRef(props, ref) {
       {...rest}
     >
       {children}
-    </BaseCarousel>
+    </BentoBaseCarousel>
   );
 }
 
-const StreamGallery = forwardRef(StreamGalleryWithRef);
-StreamGallery.displayName = 'StreamGallery'; // Make findable for tests.
-export {StreamGallery};
+const BentoStreamGallery = forwardRef(BentoStreamGalleryWithRef);
+BentoStreamGallery.displayName = 'StreamGallery'; // Make findable for tests.
+export {BentoStreamGallery};
 
 /**
- * @param {!StreamGalleryDef.ArrowProps} props
+ * @param {!BentoStreamGalleryDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow({
   'aria-disabled': ariaDisabled,
   by,
-  'class': className,
   disabled,
   onClick,
   outsetArrows,
+  [propName('class')]: className,
 }) {
   const classes = useStyles();
   return (

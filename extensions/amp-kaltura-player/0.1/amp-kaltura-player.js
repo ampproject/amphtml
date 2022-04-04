@@ -2,11 +2,11 @@ import {getDataParamsFromAttributes} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
+
 import {addParamsToUrl} from '../../../src/url';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
@@ -146,12 +146,10 @@ class AmpKaltura extends AMP.BaseElement {
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/ postMessage(
-        JSON.stringify(
-          dict({
-            'method': 'pause',
-            'value': '',
-          })
-        ),
+        JSON.stringify({
+          'method': 'pause',
+          'value': '',
+        }),
         '*'
       );
     }

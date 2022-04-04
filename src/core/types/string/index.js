@@ -149,7 +149,7 @@ export function trimStart(str) {
  * @param {string} str
  * @param {RegExp} regex
  * @param {Function|string} replacer
- * @return {!Promise<string>}
+ * @return {Promise<string>}
  */
 export function asyncStringReplace(str, regex, replacer) {
   if (isString(replacer)) {
@@ -170,6 +170,7 @@ export function asyncStringReplace(str, regex, replacer) {
     // Store the promise in it's eventual string position.
     const replacementPromise = replacer.apply(null, arguments);
     stringBuilder.push(replacementPromise);
+    return ''; // returned for tsc
   });
   stringBuilder.push(str.slice(lastIndex));
 
@@ -198,7 +199,7 @@ export function padStart(s, targetLength, padString) {
 /**
  * Tests if a value is a string.
  * @param {?} s
- * @return {boolean}
+ * @return {s is string}
  */
 export function isString(s) {
   return typeof s == 'string';

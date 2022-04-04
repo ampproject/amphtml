@@ -4,7 +4,7 @@ import {hasOwn} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 /** @abstract */
 export class ScrollComponent {

@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
-import {Services} from '#service';
-import {addParamsToUrl} from '../../../src/url';
+import {removeElement} from '#core/dom';
 import {
   applyFillContent,
   getLengthNumeral,
   isLayoutSizeDefined,
 } from '#core/dom/layout';
-import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
+import {px, setStyles} from '#core/dom/style';
+
+import {Services} from '#service';
+
+import {IntersectionObserver3pHost} from '#utils/intersection-observer-3p-host';
+import {dev, user, userAssert} from '#utils/log';
+
+import {handleCompanionAds} from './monetization';
 import {
   extractTags,
   getPlatform,
@@ -31,19 +35,15 @@ import {
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
-import {handleCompanionAds} from './monetization';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
-import {px, setStyles} from '#core/dom/style';
-import {removeElement} from '#core/dom';
+
+import {CSS} from '../../../build/amp-apester-media-0.1.css';
+import {addParamsToUrl} from '../../../src/url';
 
 /** @const */
 const TAG = 'amp-apester-media';
 const AD_TAG = 'amp-ad';
 /** @const {!JsonObject} */
-const BOTTOM_AD_MESSAGE = dict({'type': 'has_bottom_ad', 'adHeight': 50});
+const BOTTOM_AD_MESSAGE = {'type': 'has_bottom_ad', 'adHeight': 50};
 /**
  * @enum {string}
  */
@@ -106,6 +106,9 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.unlisteners_ = [];
     /** @private {?IntersectionObserver3pHost} */
     this.intersectionObserverHostApi_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -181,7 +184,7 @@ class AmpApesterMedia extends AMP.BaseElement {
       dev().assertString(this.mediaAttribute_)
     );
     let suffix = '';
-    const queryParams = dict();
+    const queryParams = {};
     queryParams['renderer'] = false;
     queryParams['platform'] = getPlatform();
     if (inative) {
@@ -223,7 +226,7 @@ class AmpApesterMedia extends AMP.BaseElement {
    *  @return {string}
    * */
   constructUrlFromMedia_(id, usePlayer) {
-    const queryParams = dict();
+    const queryParams = {};
     queryParams['channelId'] = this.embedOptions_.distributionChannelId;
     queryParams['type'] = this.embedOptions_.playlist
       ? 'playlist'
@@ -363,8 +366,9 @@ class AmpApesterMedia extends AMP.BaseElement {
             })
           )
           .then(() => {
-            observeWithSharedInOb(this.element, (inViewport) =>
-              this.viewportCallback_(inViewport)
+            this.unobserveIntersections_ = observeIntersections(
+              this.element,
+              ({isIntersecting}) => this.viewportCallback_(isIntersecting)
             );
           });
       })
@@ -405,7 +409,8 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     if (this.iframe_) {
       this.intersectionObserverHostApi_.destroy();
       this.intersectionObserverHostApi_ = null;

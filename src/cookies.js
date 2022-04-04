@@ -1,14 +1,15 @@
 import {endsWith} from '#core/types/string';
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
+import {userAssert} from '#utils/log';
+
 import {urls} from './config';
-import {userAssert} from './log';
 import {getSourceOrigin, isProxyOrigin, parseUrlDeprecated} from './url';
 
 const TEST_COOKIE_NAME = '-test-amp-cookie-tmp';
 
 /** @enum {string} */
-export const SameSite = {
+export const SameSite_Enum = {
   LAX: 'Lax',
   STRICT: 'Strict',
   NONE: 'None',
@@ -73,7 +74,7 @@ function tryGetDocumentCookie_(win) {
  * @param {{
  *   highestAvailableDomain:(boolean|undefined),
  *   domain:(string|undefined),
- *   sameSite: (!SameSite|undefined),
+ *   sameSite: (!SameSite_Enum|undefined),
  *   secure: (boolean|undefined),
  * }=} options
  *     - highestAvailableDomain: If true, set the cookie at the widest domain
@@ -81,7 +82,7 @@ function tryGetDocumentCookie_(win) {
  *       on www.example.com.
  *     - domain: Explicit domain to set. domain overrides HigestAvailableDomain
  *     - allowOnProxyOrigin: Allow setting a cookie on the AMP Cache.
- *     - sameSite: The SameSite value to use when setting the cookie.
+ *     - sameSite: The SameSite_Enum value to use when setting the cookie.
  *     - secure: Whether the cookie should contain Secure (only sent over https).
  */
 export function setCookie(win, name, value, expirationTime, options = {}) {
@@ -170,7 +171,7 @@ export function getHighestAvailableDomain(win) {
  * @param {string} value
  * @param {time} expirationTime
  * @param {string|undefined} domain
- * @param {!SameSite=} sameSite
+ * @param {!SameSite_Enum=} sameSite
  * @param {boolean|undefined=} secure
  */
 function trySetCookie(
@@ -212,13 +213,13 @@ function trySetCookie(
 /**
  * Gets the cookie string to use for SameSite. This only sets the SameSite
  * value if specified, falling back to the browser default. The default value
- * is equivalent to SameSite.NONE, but is planned to be set to SameSite.LAX in
+ * is equivalent to SameSite_Enum.NONE, but is planned to be set to SameSite_Enum.LAX in
  * Chrome 80.
  *
- * Note: In Safari 12, if the value is set to SameSite.NONE, it is treated by
- * the browser as SameSite.STRICT.
+ * Note: In Safari 12, if the value is set to SameSite_Enum.NONE, it is treated by
+ * the browser as SameSite_Enum.STRICT.
  * @param {Window} win
- * @param {!SameSite|undefined} sameSite
+ * @param {!SameSite_Enum|undefined} sameSite
  * @return {string} The string to use when setting the cookie.
  */
 function getSameSiteString(win, sameSite) {

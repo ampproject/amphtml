@@ -42,20 +42,19 @@ import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '#experiments';
-import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
-import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {Navigation} from '#service/navigation';
+
+import {getData} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
 
 import {AdsenseSharedState} from './adsense-shared-state';
 import {ResponsiveState} from './responsive-state';
 
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {getData} from '../../../src/event-helper';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {dev, devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
@@ -244,22 +243,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (storyAdPlacementsExpId) {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
     }
-
-    const autoAdvanceExpBranch = getExperimentBranch(
-      this.win,
-      StoryAdAutoAdvance.ID
-    );
-    if (autoAdvanceExpBranch) {
-      addExperimentIdToElement(autoAdvanceExpBranch, this.element);
-    }
-
-    const storyAdSegmentBranch = getExperimentBranch(
-      this.win,
-      StoryAdSegmentExp.ID
-    );
-    if (storyAdSegmentBranch) {
-      addExperimentIdToElement(storyAdSegmentBranch, this.element);
-    }
   }
 
   /**
@@ -353,6 +336,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'h': sizeToSend.height,
       'ptt': 12,
       'iu': slotname,
+      'fa': {bottom: 1, top: 2}[this.element.getAttribute('sticky')],
       'npa':
         consentState == CONSENT_POLICY_STATE.INSUFFICIENT ||
         consentState == CONSENT_POLICY_STATE.UNKNOWN ||

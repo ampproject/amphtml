@@ -1,13 +1,12 @@
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 export class AmpAdMetadataTransformer {
   /** constructor */
   constructor() {
     /** @public {JsonObject} */
-    this.metadata = dict({});
+    this.metadata = {};
     /** @private {!Array<Object>} */
     this.styles_ = [];
     /** @private {!Array<Object>} */

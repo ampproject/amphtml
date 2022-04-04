@@ -1,8 +1,6 @@
-import {dict} from '#core/types/object';
-
 import {Services} from '#service';
 
-import {devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '#utils/log';
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen
@@ -158,10 +156,10 @@ export function getRefreshManager(a4a, opt_predicate) {
   }
   return new RefreshManager(
     a4a,
-    dict({
+    {
       'visiblePercentageMin': 50,
       'continuousTimeMin': 1,
-    }),
+    },
     refreshInterval
   );
 }

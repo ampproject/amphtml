@@ -1,0 +1,21 @@
+FAIL
+|  <!--
+|    Test Description:
+|    This document is missing `v0.js`, but is otherwise valid.
+|    `v0.js` is required because of the inclusion of `amp-video.js`.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+|  </head>
+|  <body>
+|  Hello, world.
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+feature_tests/missing_v0_js.html:18:6 The tag 'amphtml javascript runtime (v0.js)' is missing or incorrect, but required by 'amp-video v0.1 extension script'. (see https://amp.dev/documentation/components/amp-video)

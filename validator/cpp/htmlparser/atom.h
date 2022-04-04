@@ -1,8 +1,8 @@
 // AUTO GENERATED; DO NOT EDIT.
 // To regenerate this file see comments in bin/atomgen.cc
 
-#ifndef HTMLPARSER__ATOM_H_
-#define HTMLPARSER__ATOM_H_
+#ifndef CPP_HTMLPARSER_ATOM_H_
+#define CPP_HTMLPARSER_ATOM_H_
 
 #include <array>
 #include <string>
@@ -1919,4 +1919,4 @@ inline constexpr std::string_view kAtomText(
 
 }  // namespace htmlparser.
 
-#endif  // HTMLPARSER__ATOM_H_
+#endif  // CPP_HTMLPARSER_ATOM_H_

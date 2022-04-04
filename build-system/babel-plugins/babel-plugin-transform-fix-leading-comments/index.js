@@ -8,6 +8,10 @@
  */
 module.exports = function () {
   return {
+    manipulateOptions(_opts, parserOpts) {
+      parserOpts.createParenthesizedExpressions = true;
+    },
+
     visitor: {
       Statement(path) {
         const {node} = path;

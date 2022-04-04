@@ -1,8 +1,9 @@
 import {tryResolve} from '#core/data-structures/promise';
 
+import {userAssert} from '#utils/log';
+
 import {Util} from './util';
 
-import {userAssert} from '../../../src/log';
 import {openWindowDialog} from '../../../src/open-window-dialog';
 import {assertHttpsUrl} from '../../../src/url';
 

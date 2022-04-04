@@ -1,9 +1,7 @@
-import {dict} from '#core/types/object';
+import {dev, user, userAssert} from '#utils/log';
 
 import {computeInMasterFrame} from './3p';
 import {AbstractAmpContext} from './ampcontext';
-
-import {dev, user, userAssert} from '../src/log';
 
 /**
  * Returns the "master frame" for all widgets of a given type.
@@ -114,12 +112,9 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    * @param {string} entityId See comment above for content.
    */
   reportRenderedEntityIdentifier(entityId) {
-    this.client_.sendMessage(
-      'entity-id',
-      dict({
-        'id': user().assertString(entityId),
-      })
-    );
+    this.client_.sendMessage('entity-id', {
+      'id': user().assertString(entityId),
+    });
   }
 
   /**

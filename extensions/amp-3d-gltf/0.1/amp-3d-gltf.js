@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
@@ -6,17 +6,14 @@ import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
-import {
-  observeWithSharedInOb,
-  unobserveWithSharedInOb,
-} from '#core/dom/layout/viewport-observer';
-import {dict} from '#core/types/object';
+import {observeIntersections} from '#core/dom/layout/viewport-observer';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listenFor, postMessage} from '../../../src/iframe-helper';
-import {dev, devAssert} from '../../../src/log';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 
 const TAG = 'amp-3d-gltf';
@@ -44,12 +41,15 @@ export class Amp3dGltf extends AMP.BaseElement {
     this.willBeLoaded_ = new Deferred();
 
     /** @private {!JsonObject} */
-    this.context_ = dict();
+    this.context_ = {};
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
     this.onResized_ = this.onResized_.bind(this);
+
+    /** @private {?UnlistenDef} */
+    this.unobserveIntersections_ = null;
   }
 
   /**
@@ -78,7 +78,8 @@ export class Amp3dGltf extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-    unobserveWithSharedInOb(this.element);
+    this.unobserveIntersections_?.();
+    this.unobserveIntersections_ = null;
     this.viewportCallback_(false);
     if (this.iframe_) {
       removeElement(this.iframe_);
@@ -110,7 +111,7 @@ export class Amp3dGltf extends AMP.BaseElement {
 
     const useAlpha = getOption('alpha', bool, false);
 
-    this.context_ = dict({
+    this.context_ = {
       'src': resolveRelativeUrl(src, this.getAmpDoc().getUrl()),
       'renderer': {
         'alpha': useAlpha,
@@ -129,7 +130,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         'enableZoom': getOption('enableZoom', bool, true),
         'autoRotate': getOption('autoRotate', bool, false),
       },
-    });
+    };
     this.registerAction(
       'setModelRotation',
       (invocation) => {
@@ -137,14 +138,15 @@ export class Amp3dGltf extends AMP.BaseElement {
           (e) => dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
-      ActionTrust.LOW
+      ActionTrust_Enum.LOW
     );
   }
 
   /** @override */
   layoutCallback() {
-    observeWithSharedInOb(this.element, (inViewport) =>
-      this.viewportCallback_(inViewport)
+    this.unobserveIntersections_ = observeIntersections(
+      this.element,
+      ({isIntersecting}) => this.viewportCallback_(isIntersecting)
     );
     if (!isWebGLSupported()) {
       this.toggleFallback(true);
@@ -196,10 +198,10 @@ export class Amp3dGltf extends AMP.BaseElement {
    */
   sendCommandWhenReady_(action, args) {
     return this.willBeReady_.promise.then(() => {
-      const message = dict({
+      const message = {
         'action': action,
         'args': args,
-      });
+      };
 
       this.postMessage_('action', message);
     });
@@ -240,10 +242,7 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @private
    */
   onResized_({height, width}) {
-    this.sendCommandWhenReady_(
-      'setSize',
-      dict({'width': width, 'height': height})
-    );
+    this.sendCommandWhenReady_('setSize', {'width': width, 'height': height});
   }
 
   /** @override */

@@ -1,86 +1,72 @@
-import {devAssert} from '#core/assert';
+import {devAssert, devAssertNumber} from '#core/assert';
 import {rethrowAsync} from '#core/error';
 import {pushIfNotExist, removeItem} from '#core/types/array';
 
-import {ContextPropDef} from './prop.type';
 import {deepScan, findParent} from './scan';
 import {throttleTail} from './scheduler';
 
+/** @type {Array<*>} */
 const EMPTY_ARRAY = [];
+
+/** @type {function():void} */
 const EMPTY_FUNC = () => {};
 
-/** @enum {number} */
-const Pending = {
+/** @typedef {import('./node').ContextNode<?>} ContextNode */
+/**
+ * @template T, DEP
+ * @typedef {import('./types.d').IContextProp<T, DEP>} IContextProp
+ */
+/**
+ * @template T
+ * @typedef {import('./types.d').IContextPropInput<T>} IContextPropInput
+ */
+/**
+ * @template T, DEP
+ * @typedef {import('./types.d').IContextPropUsed<T, DEP>} IContextPropUsed
+ */
+
+/** @enum {import('./types.d').PendingEnumValue} */
+const Pending_Enum = {
   NOT_PENDING: 0,
   PENDING: 1,
   PENDING_REFRESH_PARENT: 2,
 };
 
 /**
- * The structure for a property's inputs. It's important that `values` are
- * easily available as an array to pass them to the `recursive` and
- * `compute` callbacks without reallocation.
- *
- * @interface
- * @template T
- */
-function InputDef() {}
-/** @type {!Array<T>} */
-InputDef.prototype.values;
-/** @type {!Array<function(T)>} */
-InputDef.prototype.setters;
-
-/**
- * The structure for a property's computed values and subscribers.
- * @interface
- * @template T
- * @template DEP
- */
-function UsedDef() {}
-/** @type {!ContextPropDef<T, DEP>} */
-UsedDef.prototype.prop;
-/** @type {!Array<function(!T)>} */
-UsedDef.prototype.subscribers;
-/** @type {T} */
-UsedDef.prototype.value;
-/** @type {!Pending} */
-UsedDef.prototype.pending;
-/** @type {number} */
-UsedDef.prototype.counter;
-/** @type {!Array<DEP>} */
-UsedDef.prototype.depValues;
-/** @type {!T} */
-UsedDef.prototype.parentValue;
-/** @type {?./node.ContextNode} */
-UsedDef.prototype.parentContextNode;
-/** @type {function(boolean)} */
-UsedDef.prototype.ping;
-/** @type {!Array<function(DEP)>} */
-UsedDef.prototype.pingDep;
-/** @type {?function(T)} */
-UsedDef.prototype.pingParent;
-
-/**
  * Propagates context property values in the context tree. The key APIs are
- * `set()` and `subscribe()`. See `ContextPropDef` type for details on how
+ * `set()` and `subscribe()`. See `IContextProp` type for details on how
  * values are declared and propagated.
  */
 export class Values {
   /**
-   * @param {!./node.ContextNode} contextNode
+   * @param {ContextNode} contextNode
    */
   constructor(contextNode) {
-    /** @private @const {!./node.ContextNode} */
+    /**
+     * @private
+     * @const
+     * @type {ContextNode}
+     */
     this.contextNode_ = contextNode;
 
-    /** @private {?Map<string, !InputDef>} */
+    /**
+     * @private
+     * @type {?Map<string, IContextPropInput<?>>}}
+     */
     this.inputsByKey_ = null;
 
-    /** @private {?Map<string, !UsedDef>} */
+    /**
+     * @private
+     * @type {?Map<string, IContextPropUsed<?, ?>>}}
+     */
     this.usedByKey_ = null;
 
     // Schedulers.
-    /** @private @const {function()} */
+    /**
+     * @private
+     * @const
+     * @type {function():void}
+     */
     this.checkUpdates_ = throttleTail(
       this.checkUpdates_.bind(this),
       setTimeout
@@ -101,8 +87,8 @@ export class Values {
    * Once the input is set, the recalculation is rescheduled asynchronously.
    * All dependent properties are also recalculated.
    *
-   * @param {!ContextPropDef<T>} prop
-   * @param {function(T)} setter
+   * @param {IContextProp<T, ?>} prop
+   * @param {function(T):void} setter
    * @param {T} value
    * @template T
    */
@@ -152,8 +138,8 @@ export class Values {
   /**
    * Unsets the input value for the specified property and setter.
    * See `set()` for more info.
-   * @param {!ContextPropDef<T>} prop
-   * @param {function(T)} setter
+   * @param {IContextProp<T, ?>} prop
+   * @param {function(T):void} setter
    * @template T
    */
   remove(prop, setter) {
@@ -163,6 +149,8 @@ export class Values {
     const inputsByKey = this.inputsByKey_;
     const inputs = inputsByKey?.get(key);
     if (inputs) {
+      devAssert(inputsByKey);
+
       const index = inputs.setters.indexOf(setter);
       if (index != -1) {
         inputs.setters.splice(index, 1);
@@ -178,7 +166,7 @@ export class Values {
   /**
    * Whether this node has inputs for the specified property.
    *
-   * @param {!ContextPropDef} prop
+   * @param {IContextProp<?, ?>} prop
    * @return {boolean}
    */
   has(prop) {
@@ -192,8 +180,8 @@ export class Values {
    * only called if a valid used value is available and only if this value
    * has changed since the last handler call.
    *
-   * @param {!ContextPropDef<T>} prop
-   * @param {function(T)} handler
+   * @param {IContextProp<T, ?>} prop
+   * @param {function(T):void} handler
    * @template T
    */
   subscribe(prop, handler) {
@@ -215,8 +203,8 @@ export class Values {
    * Unsubscribes a previously added handler. If there are no other subscribers
    * the property tracking is stopped and the used value is removed.
    *
-   * @param {!ContextPropDef<T>} prop
-   * @param {function(T)} handler
+   * @param {IContextProp<T, ?>} prop
+   * @param {function(T):void} handler
    * @template T
    */
   unsubscribe(prop, handler) {
@@ -234,7 +222,7 @@ export class Values {
    * Schedules a recalculation of the specified property, but only if this
    * property is tracked by this node.
    *
-   * @param {!ContextPropDef} prop
+   * @param {IContextProp<?, ?>} prop
    * @param {boolean} refreshParent Whether the parent node needs to be looked
    * up again.
    * @protected
@@ -302,7 +290,7 @@ export class Values {
    * Scans are relatively common and this method exists (as opposed to be
    * inlined) only to avoid frequent function allocation.
    *
-   * @param {!ContextPropDef} prop
+   * @param {IContextProp<?, ?>} prop
    * @return {boolean}
    * @protected Necessary for cross-binary access.
    */
@@ -326,11 +314,12 @@ export class Values {
    * Scans are relatively common and this method exists (as opposed to be
    * inlined) only to avoid frequent function allocation.
    *
-   * @param {!Array<string>} scheduled The already scheduled props.
-   * @return {!Array<string>} The new scheduled props.
+   * @param {string[]} scheduled The already scheduled props.
+   * @return {string[]} The new scheduled props.
    * @protected
    */
   scanAll(scheduled) {
+    /** @type {string[]?} */
     let newScheduled = null;
     const usedByKey = this.usedByKey_;
     if (usedByKey) {
@@ -366,11 +355,10 @@ export class Values {
   /**
    * Start the used value tracker if it hasn't started yet.
    *
-   * @param {!ContextPropDef<T, DEF>} prop
-   * @return {!UsedDef<T, DEF>}
+   * @param {IContextProp<T, DEP>} prop
+   * @return {IContextPropUsed<T, DEP>}
    * @private
-   * @template T
-   * @template DEF
+   * @template T, DEP
    */
   startUsed_(prop) {
     const {deps, key} = prop;
@@ -381,18 +369,19 @@ export class Values {
         prop,
         subscribers: [],
         value: undefined,
-        pending: Pending.NOT_PENDING,
+        pending: Pending_Enum.NOT_PENDING,
         counter: 0,
         depValues: deps.length > 0 ? deps.map(EMPTY_FUNC) : EMPTY_ARRAY,
         parentValue: undefined,
         parentContextNode: null,
         // Schedule the value recalculation, optionally with the parent
         // refresh.
+        /** @type {function(boolean):void} */
         ping: (refreshParent) => {
           if (this.isConnected_()) {
             const pending = refreshParent
-              ? Pending.PENDING_REFRESH_PARENT
-              : Pending.PENDING;
+              ? Pending_Enum.PENDING_REFRESH_PARENT
+              : Pending_Enum.PENDING;
             used.pending = Math.max(used.pending, pending);
             this.checkUpdates_();
           }
@@ -400,14 +389,18 @@ export class Values {
         // Schedule the value recalculation due to the dependency change.
         pingDep:
           deps.length > 0
-            ? deps.map((dep, index) => (value) => {
-                used.depValues[index] = value;
-                used.ping();
+            ? deps.map((dep, index) => {
+                /** @param {DEP} value*/
+                return (value) => {
+                  used.depValues[index] = value;
+                  used.ping();
+                };
               })
             : EMPTY_ARRAY,
         // Schedule the value recalculation due to the parent value change.
         pingParent: isRecursive(prop)
-          ? (parentValue) => {
+          ? /** @param {T} parentValue */
+            (parentValue) => {
               used.parentValue = parentValue;
               used.ping();
             }
@@ -427,8 +420,9 @@ export class Values {
   /**
    * Stop calculating the used value if there are no more subscribers left.
    *
-   * @param {!UsedDef} used
+   * @param {IContextPropUsed<?, DEP>} used
    * @private
+   * @template DEP
    */
   stopUsed_(used) {
     if (used.subscribers.length > 0) {
@@ -438,7 +432,7 @@ export class Values {
     const {pingDep, prop} = used;
     const {deps, key} = prop;
 
-    this.usedByKey_.delete(key);
+    this.usedByKey_?.delete(key);
 
     // Unsubscribe itself.
     this.updateParentContextNode_(used, null);
@@ -472,19 +466,21 @@ export class Values {
 
     // Recompute all "pinged" values for this node. It checks if dependencies
     // are satisfied and recomputes values accordingly.
+    /** @type {number?} */
     let updated;
     do {
       updated = 0;
       usedByKey.forEach((used) => {
-        if (used.pending != Pending.NOT_PENDING) {
+        if (used.pending != Pending_Enum.NOT_PENDING) {
           const {key} = used.prop;
           used.counter++;
           if (used.counter > 5) {
             // A simple protection from infinte loops.
             rethrowAsync(`cyclical prop: ${key}`);
-            used.pending = Pending.NOT_PENDING;
+            used.pending = Pending_Enum.NOT_PENDING;
             return;
           }
+          devAssertNumber(updated);
           updated++;
           this.tryUpdate_(used);
         }
@@ -493,13 +489,14 @@ export class Values {
   }
 
   /**
-   * @param {!UsedDef} used
+   * @param {IContextPropUsed<T, DEP>} used
    * @private
+   * @template T, DEP
    */
   tryUpdate_(used) {
     // The value is not pending anymore. If any of the dependencies will remain
     // unresolved, we will simply need to recomputed it.
-    const refreshParent = used.pending == Pending.PENDING_REFRESH_PARENT;
+    const refreshParent = used.pending == Pending_Enum.PENDING_REFRESH_PARENT;
 
     let newValue;
     try {
@@ -507,20 +504,20 @@ export class Values {
     } catch (e) {
       // This is the narrowest catch to avoid unrelated values breaking each
       // other. The only exposure to the user-code are `recursive` and
-      // `compute` methods in the `ContextPropDef`.
+      // `compute` methods in the `IContextProp`.
       rethrowAsync(e);
     }
 
     // Reset pending flag. It's good to reset it after the calculation to
     // ensure that deps are automatically covered.
-    used.pending = Pending.NOT_PENDING;
+    used.pending = Pending_Enum.NOT_PENDING;
 
     // Check if the value has been updated.
     this.maybeUpdated_(used, newValue);
   }
 
   /**
-   * @param {!UsedDef<T>} used
+   * @param {IContextPropUsed<T, ?>} used
    * @param {T} value
    * @private
    * @template T
@@ -550,7 +547,7 @@ export class Values {
   /**
    * The used value calculation algorithm.
    *
-   * @param {!UsedDef<T>} used
+   * @param {IContextPropUsed<T, ?>} used
    * @param {boolean} refreshParent
    * @return {T|undefined} The used value.
    * @private
@@ -622,8 +619,8 @@ export class Values {
   /**
    * Update the node from which the parent value is used.
    *
-   * @param {!UsedDef} used
-   * @param {?./node.ContextNode} newParentContextNode
+   * @param {IContextPropUsed<?, ?>} used
+   * @param {?ContextNode} newParentContextNode
    * @private
    */
   updateParentContextNode_(used, newParentContextNode) {
@@ -632,12 +629,14 @@ export class Values {
       used.parentContextNode = newParentContextNode;
       used.parentValue = undefined;
 
+      devAssert(pingParent);
       if (oldParentContextNode) {
-        oldParentContextNode.values.unsubscribe(prop, devAssert(pingParent));
+        oldParentContextNode.values.unsubscribe(prop, pingParent);
       }
 
       if (newParentContextNode) {
-        newParentContextNode.values.subscribe(prop, devAssert(pingParent));
+        devAssert(pingParent);
+        newParentContextNode.values.subscribe(prop, pingParent);
       }
     }
   }
@@ -646,31 +645,33 @@ export class Values {
 /**
  * See `Values.scan()` method.
  *
- * @param {!./node.ContextNode} contextNode
- * @param {!ContextPropDef} prop
+ * @param {ContextNode} contextNode
+ * @param {IContextProp<?, ?>} prop
  * @return {boolean}
  */
 function scan(contextNode, prop) {
+  // @ts-ignore private access
   return contextNode.values.scan(prop);
 }
 
 /**
  * See `Values.scanAll()` method.
  *
- * @param {!./node.ContextNode} contextNode
+ * @param {ContextNode} contextNode
  * @param {?} unusedArg
- * @param {!Array<string>} state
- * @return {!Array<string>}
+ * @param {string[]} state
+ * @return {string[]}
  */
 function scanAll(contextNode, unusedArg, state) {
+  // @ts-ignore private access
   return contextNode.values.scanAll(state);
 }
 
 /**
  * See `Values.has()` method.
  *
- * @param {!./node.ContextNode} contextNode
- * @param {!ContextPropDef} prop
+ * @param {ContextNode} contextNode
+ * @param {IContextProp<?, ?>} prop
  * @return {boolean}
  */
 function hasInput(contextNode, prop) {
@@ -680,7 +681,7 @@ function hasInput(contextNode, prop) {
 /**
  * Whether the property is recursive.
  *
- * @param {!ContextPropDef} prop
+ * @param {IContextProp<?, ?>} prop
  * @return {boolean}
  */
 function isRecursive(prop) {
@@ -692,8 +693,8 @@ function isRecursive(prop) {
 /**
  * Whether the parent value is required to calculate the used value.
  *
- * @param {!ContextPropDef<T>} prop
- * @param {?Array<T>} inputs
+ * @param {IContextProp<T, ?>} prop
+ * @param {T[]|undefined} inputs
  * @return {boolean}
  * @template T
  */
@@ -714,13 +715,12 @@ function calcRecursive(prop, inputs) {
 /**
  * A substitute for `compute(...deps)`, but faster.
  *
- * @param {function(!Node, !Array<T>, ...DEP):T} compute See `ContextPropDef.compute()`.
- * @param {!Node} node
- * @param {!Array<T>} inputValues
- * @param {!Array<DEP>} deps
+ * @param {function(Node, T[], ...DEP):T} compute See `IContextProp.compute()`.
+ * @param {Node} node
+ * @param {T[]} inputValues
+ * @param {DEP[]} deps
  * @return {T}
- * @template T
- * @template DEP
+ * @template T, DEP
  */
 function callCompute(compute, node, inputValues, deps) {
   switch (deps.length) {
@@ -733,21 +733,23 @@ function callCompute(compute, node, inputValues, deps) {
     case 3:
       return compute(node, inputValues, deps[0], deps[1], deps[2]);
     default:
-      return compute.apply(null, [node, inputValues].concat(deps));
+      return compute.apply(
+        null,
+        /** @type {*[]} */ ([node, inputValues]).concat(deps)
+      );
   }
 }
 
 /**
  * A substitute for `compute(parentValue, ...deps)`, but faster.
  *
- * @param {function(!Node, !Array<T>, ...DEP):T} compute See `ContextPropDef.compute()`.
- * @param {!Node} node
- * @param {!Array<T>} inputValues
- * @param {T} parentValue
- * @param {!Array<DEP>} deps
+ * @param {function(Node, T[], ...DEP):T} compute See `IContextProp.compute()`.
+ * @param {Node} node
+ * @param {T[]} inputValues
+ * @param {DEP} parentValue
+ * @param {DEP[]} deps
  * @return {T}
- * @template T
- * @template DEP
+ * @template T, DEP
  */
 function callRecursiveCompute(compute, node, inputValues, parentValue, deps) {
   switch (deps.length) {

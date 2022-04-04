@@ -12,7 +12,7 @@ const {
 } = require('./utils');
 
 const labelConfig = {
-  beta: 'PR Use: In Beta / Experimental',
+  'beta-percent': 'PR Use: In Beta / Experimental',
   lts: 'PR Use: In LTS',
   stable: 'PR Use: In Stable',
 };

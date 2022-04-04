@@ -76,11 +76,11 @@ While overflowing content is _visually_ truncated to fit the container, note tha
 
 ### `min-font-size`
 
-Specifies the minimum font size as an integer that the `amp-fit-text` can use.
+Specifies the minimum font size in pixels as an integer that the `amp-fit-text` can use.
 
 ### `max-font-size`
 
-Specifies the maximum font size as an integer that the `amp-fit-text` can use.
+Specifies the maximum font size in pixels as an integer that the `amp-fit-text` can use.
 
 ### Common attributes
 

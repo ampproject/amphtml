@@ -1,9 +1,9 @@
 import {tryPlay} from '#core/dom/video';
 import {tryDecodeUriComponent} from '#core/types/string/url';
 
-import {loadScript} from './3p';
+import {getData} from '#utils/event-helper';
 
-import {getData} from '../src/event-helper';
+import {loadScript} from './3p';
 
 /**
  * @param {Window} global

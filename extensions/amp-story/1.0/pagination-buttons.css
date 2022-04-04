@@ -12,7 +12,7 @@
   width: 30px !important;
   top: 0 !important;
   bottom: 0 !important;
-  height: calc(100vh - 150px) !important;
+  height: calc(var(--story-100dvh) - 150px) !important;
   margin: auto 0 !important;
   background: none !important;
   transition: 150ms opacity linear, 150ms visibility linear !important;
@@ -51,8 +51,9 @@ amp-story:not([desktop]) .i-amphtml-story-button-move,
   pointer-events: none !important;
   background-repeat: no-repeat !important;
   background-color: transparent !important;
+  background-position: center !important;
   /* Contrast protection. Make icons white. */
-  filter: invert(100%) drop-shadow(0 0 3px rgba(0, 0, 0, 0.5)) !important;
+  filter: invert(100%) drop-shadow(0 0 3px #000b) !important;
 }
 
 body:not(.amp-mode-keyboard-active) amp-story:not([desktop]):not(.i-amphtml-story-desktop-one-panel) .i-amphtml-story-button-move {
@@ -65,25 +66,21 @@ body:not(.amp-mode-keyboard-active) amp-story:not([desktop]):not(.i-amphtml-stor
   position: fixed!important;
   top: 0!important;
   bottom: 0!important;
-  margin: auto 40px!important;
-  width: 60px!important;
-  height: 60px!important;
-  border-radius: 50%!important;
+  margin: auto 12px!important;
+  width: 54px!important;
+  height: 54px!important;
   border: 0!important;
-  background-color: #fff!important;
   background-repeat: no-repeat!important;
-  background-size: 12px 17px!important;
   justify-content: center!important;
   align-items: center!important;
-  opacity: .5!important;
-  transition: 150ms opacity linear, 350ms transform linear!important;
+  transition: 150ms opacity linear!important;
   cursor: pointer!important;
   pointer-events: all!important;
 }
 
 amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-container {
-  height: 40px !important;
-  width: 40px !important;
+  height: 48px !important;
+  width: 48px !important;
   transform: translateY(-50%) !important;
   top: 50% !important;
   bottom: auto !important;
@@ -105,15 +102,6 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-move,
   filter: none !important;
   background-color: white !important;
   border-radius: 50% !important;
-  width: 40px !important;
-  height: 40px !important;
-  background-position-y: 52% !important;
-  background-size: 20% !important;
-}
-
-amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
-  background-size: 52% !important;
-  background-position-y: 56% !important;
 }
 
 amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
@@ -123,40 +111,34 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 }
 
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-button-move {
-  height: 48px !important;
-  width: 48px !important;
-  margin: auto 12px !important;
-  background-color: transparent !important;
-  background-size: auto !important;
-  filter: drop-shadow(0 0 16px rgba(0, 0, 0, 0.5)) !important;
-  opacity: 1 !important;
+  background-size: 100% !important;
+  background-color: #fff2 !important;
+  border-radius: 50% !important;
+  filter: invert(1)!important;
+}
+
+.prev-container > .i-amphtml-story-button-move,
+[dir=rtl] .i-amphtml-story-fwd-next > .i-amphtml-story-button-move,
+.i-amphtml-story-fwd-next > .i-amphtml-story-button-move,
+[dir=rtl] .prev-container > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="m21.52 16.22 7.75 7.75M21.52 31.75 29.27 24"/></svg>')!important;
 }
 
 .prev-container > .i-amphtml-story-button-move,
 [dir=rtl] .i-amphtml-story-fwd-next > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M15.7 22l-9.5-9.5L15.7 3l-3-3L.4 12.6 12.8 25"/></svg>')!important;
-  background-position: 45% 50%!important;
   left: 0!important;
   right: auto !important;
+  transform: rotate(180deg) !important;
 }
 
-.i-amphtml-story-desktop-fullbleed .prev-container > .i-amphtml-story-button-move,
-.i-amphtml-story-desktop-fullbleed[dir=rtl] .i-amphtml-story-fwd-next > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M11.67 3.87L9.9 2.1 0 12l9.9 9.9 1.77-1.77L3.54 12z"/><path fill="none" d="M0 0h24v24H0z"/></svg>') !important;
-  background-position: 10px 0 !important;
+[dir="rtl"] .prev-container > .i-amphtml-story-button-move {
+  transform: none !important;
 }
 
 .i-amphtml-story-fwd-next > .i-amphtml-story-button-move,
 [dir=rtl] .prev-container > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>')!important;
-  background-position: 55% 50%!important;
   left: auto !important;
   right: 0 !important;
-}
-
-.i-amphtml-story-desktop-fullbleed .i-amphtml-story-fwd-next > .i-amphtml-story-button-move,
-.i-amphtml-story-desktop-fullbleed[dir=rtl] .prev-container > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M11.76 8.24L27.51 24 11.76 39.76 16 44l20-20L16 4z"/><path fill="none" d="M0 0h48v48H0z"/></svg>') !important;
 }
 
 .i-amphtml-story-fwd-replay {
@@ -164,25 +146,7 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
 }
 
 .i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
-  background-position: center center;
-  background-size: 32px 32px !important;
-}
-
-.i-amphtml-story-desktop-fullbleed .i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 10V2L14 12l10 10v-8c6.63 0 12 5.37 12 12s-5.37 12-12 12-12-5.37-12-12H8c0 8.84 7.16 16 16 16s16-7.16 16-16-7.16-16-16-16z"/></svg>') !important;
-  background-size: auto !important;
-}
-
-.i-amphtml-story-fwd-more > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>') !important;
-  background-position: center center;
-  background-size: 32px 32px !important;
-}
-
-.i-amphtml-story-desktop-fullbleed .i-amphtml-story-fwd-more > .i-amphtml-story-button-move {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0 0 48 48" fill="#FFFFFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M12 20c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm24 0c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm-12 0c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg>') !important;
-  background-size: auto !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none"><path stroke="#000" stroke-linecap="round" stroke-width="2.4" d="M16.15 19.4a9.1 9.1 0 1 1-1.29 3.95"/><path stroke="#000" stroke-linecap="round" stroke-width="2.4" d="M15.6 15.1v4.61M20 19.71h-4.4"/></svg>') !important;
 }
 
 /* Do not display when hidden. */
@@ -190,22 +154,4 @@ amp-story.i-amphtml-story-desktop-one-panel .i-amphtml-story-button-hidden {
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
-}
-
-/* Mouseover states */
-.i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .i-amphtml-story-fwd-next >
-    .i-amphtml-story-button-move {
-  transform: translateX(8px)!important;
-  opacity: 1!important;
-}
-
-.i-amphtml-story-desktop-panels.i-amphtml-story-next-hover > .i-amphtml-story-fwd-replay >
-    .i-amphtml-story-button-move {
-  opacity: 1 !important;
-}
-
-.i-amphtml-story-desktop-panels.i-amphtml-story-prev-hover > .i-amphtml-story-back-prev >
-    .i-amphtml-story-button-move {
-  transform: translateX(-8px)!important;
-  opacity: 1!important;
 }

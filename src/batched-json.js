@@ -2,13 +2,15 @@ import {getValueForExpr} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {user} from './log';
+import {user} from '#utils/log';
+
 import {assertHttpsUrl} from './url';
 
 /**
  * Detail of each `options` property:
  * expr - Dot-syntax reference to subdata of JSON result to return. If not specified,
  *     entire JSON result is returned.
+ * url - Url to fetch; defaults to element's `src` attribute
  * urlReplacement - If ALL, replaces all URL vars. If OPT_IN, replaces allowlisted
  *     URL vars. Otherwise, don't expand.
  * refresh - Forces refresh of browser cache.
@@ -16,9 +18,10 @@ import {assertHttpsUrl} from './url';
  *
  * @typedef {{
  *  expr:(string|undefined),
- *  urlReplacement: (UrlReplacementPolicy|undefined),
+ *  urlReplacement: (UrlReplacementPolicy_Enum|undefined),
  *  refresh: (boolean|undefined),
  *  xssiPrefix: (string|undefined),
+ *  url: (string|undefined),
  * }}
  */
 export let BatchFetchOptionsDef;
@@ -26,7 +29,7 @@ export let BatchFetchOptionsDef;
 /**
  * @enum {number}
  */
-export const UrlReplacementPolicy = {
+export const UrlReplacementPolicy_Enum = {
   NONE: 0,
   OPT_IN: 1,
   ALL: 2,
@@ -46,13 +49,14 @@ export const UrlReplacementPolicy = {
 export function batchFetchJsonFor(ampdoc, element, options = {}) {
   const {
     expr = '.',
-    urlReplacement = UrlReplacementPolicy.NONE,
+    urlReplacement = UrlReplacementPolicy_Enum.NONE,
     refresh = false,
     xssiPrefix = undefined,
+    url = element.getAttribute('src'),
   } = options;
-  assertHttpsUrl(element.getAttribute('src'), element);
+  assertHttpsUrl(url, element);
   const xhr = Services.batchedXhrFor(ampdoc.win);
-  return requestForBatchFetch(element, urlReplacement, refresh)
+  return requestForBatchFetch(element, url, urlReplacement, refresh)
     .then((data) => {
       return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
     })
@@ -72,25 +76,24 @@ export function batchFetchJsonFor(ampdoc, element, options = {}) {
  * Handles url replacement and constructs the FetchInitJsonDef required for a
  * fetch.
  * @param {!Element} element
- * @param {!UrlReplacementPolicy} replacement If ALL, replaces all URL
+ * @param {string} url
+ * @param {!UrlReplacementPolicy_Enum} replacement If ALL, replaces all URL
  *     vars. If OPT_IN, replaces allowlisted URL vars. Otherwise, don't expand.
  * @param {boolean} refresh Forces refresh of browser cache.
  * @return {!Promise<!FetchRequestDef>}
  */
-export function requestForBatchFetch(element, replacement, refresh) {
-  const url = element.getAttribute('src');
-
+export function requestForBatchFetch(element, url, replacement, refresh) {
   // Replace vars in URL if desired.
   const urlReplacements = Services.urlReplacementsForDoc(element);
   const promise =
-    replacement >= UrlReplacementPolicy.OPT_IN
+    replacement >= UrlReplacementPolicy_Enum.OPT_IN
       ? urlReplacements.expandUrlAsync(url)
       : Promise.resolve(url);
 
   return promise.then((xhrUrl) => {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
-    if (replacement == UrlReplacementPolicy.OPT_IN) {
+    if (replacement === UrlReplacementPolicy_Enum.OPT_IN) {
       const invalid = urlReplacements.collectDisallowedVarsSync(element);
       if (invalid.length > 0) {
         throw user().createError(

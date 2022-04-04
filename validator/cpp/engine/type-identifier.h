@@ -1,5 +1,5 @@
-#ifndef AMPVALIDATOR__TYPE_IDENTIFIER_H_
-#define AMPVALIDATOR__TYPE_IDENTIFIER_H_
+#ifndef CPP_ENGINE_TYPE_IDENTIFIER_H_
+#define CPP_ENGINE_TYPE_IDENTIFIER_H_
 
 #include <vector>
 
@@ -46,4 +46,4 @@ bool HasSignedExchangeTypeIdentifiers(
     std::vector<TypeIdentifier> type_identifiers);
 }  // namespace amp::validator
 
-#endif  // AMPVALIDATOR__TYPE_IDENTIFIER_H_
+#endif  // CPP_ENGINE_TYPE_IDENTIFIER_H_

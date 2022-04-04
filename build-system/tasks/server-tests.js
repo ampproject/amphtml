@@ -1,6 +1,6 @@
 const assert = require('assert');
+const fastGlob = require('fast-glob');
 const fs = require('fs');
-const globby = require('globby');
 const path = require('path');
 const posthtml = require('posthtml');
 const {
@@ -9,7 +9,7 @@ const {
   logWithoutTimestampLocalDev,
 } = require('../common/logging');
 const {buildNewServer} = require('../server/typescript-compile');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 
 const transformsDir = path.resolve('build-system/server/new-server/transforms');
 const inputPaths = [`${transformsDir}/**/input.html`];
@@ -91,7 +91,9 @@ async function getTransform(inputFile, extraOptions) {
   const transformDir = getTransformerDir(inputFile);
   const parsed = path.parse(transformDir);
   const transformPath = path.join(parsed.dir, 'dist', parsed.base);
-  const transformFile = (await globby(path.resolve(transformPath, '*.js')))[0];
+  const transformFile = (
+    await fastGlob(path.resolve(transformPath, '*.js'))
+  )[0];
   return (await import(transformFile)).default.default(extraOptions);
 }
 
@@ -183,7 +185,7 @@ async function runTest(inputFile) {
  */
 async function serverTests() {
   await buildNewServer();
-  const inputFiles = await globby(inputPaths);
+  const inputFiles = await fastGlob(inputPaths);
   for (const inputFile of inputFiles) {
     await runTest(inputFile);
   }

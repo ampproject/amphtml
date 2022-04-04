@@ -67,7 +67,7 @@ export class DomFingerprint {
  * Gets a string showing the index of an element within
  * the children of its parent, counting only nodes with the same tag.
  * Stop at 25, just to have a limit.
- * @param {!Element} element DOM node to get index of.
+ * @param {Element} element DOM node to get index of.
  * @return {string} '.<index>' or ''.
  */
 function indexWithinParent(element) {

@@ -1,4 +1,4 @@
-#include "strings.h"
+#include "cpp/htmlparser/strings.h"
 
 #include <string>
 
@@ -303,14 +303,26 @@ TEST(StringsTest, EscapeUnescapeTest) {
   std::string str2 = "&gt;cdef";
   std::string str3 = "abc&nGt;cdef";
   std::string str4 = "&abc;def";
+  std::string str5 = "&amp;num;";
+  std::string str6 = "&amp;num";
+  std::string str7 = "&num";
+  std::string str8 = "&num;";
   htmlparser::Strings::UnescapeString(&str1);
   htmlparser::Strings::UnescapeString(&str2);
   htmlparser::Strings::UnescapeString(&str3);
   htmlparser::Strings::UnescapeString(&str4);
+  htmlparser::Strings::UnescapeString(&str5);
+  htmlparser::Strings::UnescapeString(&str6);
+  htmlparser::Strings::UnescapeString(&str7);
+  htmlparser::Strings::UnescapeString(&str8);
   EXPECT_EQ(str1, "≫⃒cdef");
   EXPECT_EQ(str2, ">cdef");
   EXPECT_EQ(str3, "abc≫⃒cdef");
   EXPECT_EQ(str4, "&abc;def");
+  EXPECT_EQ(str5, "&num;");
+  EXPECT_EQ(str6, "&num");
+  EXPECT_EQ(str7, "&num");
+  EXPECT_EQ(str8, "#");
 }
 
 TEST(StringsTest, EncodingTest) {

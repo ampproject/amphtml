@@ -3,15 +3,16 @@ import {
   addDocumentVisibilityChangeListener,
   isDocumentHidden,
   removeDocumentVisibilityChangeListener,
-} from '#core/document-visibility';
+} from '#core/document/visibility';
 import {rethrowAsync} from '#core/error';
 
 import {Services} from '#service';
 
+import {dev, devAssert} from '#utils/log';
+
 import {installTimerService} from './timer-impl';
 
 import {cancellation} from '../error-reporting';
-import {dev, devAssert} from '../log';
 import {Pass} from '../pass';
 import {getService, registerServiceBuilder} from '../service-helpers';
 

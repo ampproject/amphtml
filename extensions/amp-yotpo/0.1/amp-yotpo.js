@@ -3,9 +3,10 @@ import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 
 import {Services} from '#service';
 
+import {userAssert} from '#utils/log';
+
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
 
 export class AmpYotpo extends AMP.BaseElement {
   /** @param {!AmpElement} element */

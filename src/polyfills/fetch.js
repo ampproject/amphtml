@@ -4,13 +4,7 @@ import {hasOwn, map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 import {utf8Encode} from '#core/types/string/bytes';
 
-import {dev, user} from '../log';
-
-/** @enum {number} Allowed fetch responses. */
-const allowedFetchTypes = {
-  document: 1,
-  text: 2,
-};
+import {dev, user} from '#utils/log';
 
 /** @const {!Array<string>} */
 const allowedMethods = ['GET', 'POST'];
@@ -49,7 +43,7 @@ export function fetchPolyfill(input, init = {}) {
       xhr.withCredentials = true;
     }
 
-    if (init.responseType in allowedFetchTypes) {
+    if (init.responseType === 'document' || init.responseType === 'text') {
       xhr.responseType = init.responseType;
     }
 

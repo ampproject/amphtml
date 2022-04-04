@@ -74,6 +74,44 @@ describes.realWin(
         return Promise.all([strategyPromise, expectPromise]);
       });
 
+      it('should insert amp-ad sticky ad for top sticky ads', () => {
+        configObj['optInStatus'].push(2);
+        attributes['sticky'] = 'top';
+
+        const anchorAdStrategy = new AnchorAdStrategy(
+          env.ampdoc,
+          attributes,
+          configObj
+        );
+
+        const strategyPromise = anchorAdStrategy.run().then((placed) => {
+          expect(placed).to.equal(true);
+        });
+
+        const expectPromise = new Promise((resolve) => {
+          waitForChild(
+            env.win.document.body,
+            (parent) => {
+              return parent.firstChild.tagName == 'AMP-AD';
+            },
+            () => {
+              const ampAd = env.win.document.body.firstChild;
+              expect(ampAd.getAttribute('sticky')).to.equal('top');
+              expect(ampAd.getAttribute('type')).to.equal('adsense');
+              expect(ampAd.getAttribute('width')).to.equal('360');
+              expect(ampAd.getAttribute('height')).to.equal('100');
+              expect(ampAd.getAttribute('data-ad-client')).to.equal(
+                'ca-pub-test'
+              );
+              expect(ampAd.getAttribute('data-no-fill')).to.equal('true');
+              resolve();
+            }
+          );
+        });
+
+        return Promise.all([strategyPromise, expectPromise]);
+      });
+
       it('should not insert sticky ad if not opted in anchor ad', () => {
         const anchorAdStrategy = new AnchorAdStrategy(
           env.ampdoc,

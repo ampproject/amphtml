@@ -1,11 +1,11 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {WordPressEmbed} from './component';
+import {BentoWordPressEmbed} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = WordPressEmbed;
+BaseElement['Component'] = BentoWordPressEmbed;
 
 /** @override */
 BaseElement['props'] = {

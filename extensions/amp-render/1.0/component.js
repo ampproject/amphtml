@@ -1,7 +1,8 @@
 import * as Preact from '#preact';
-import {Wrapper, useRenderer} from '#preact/component';
-import {forwardRef} from '#preact/compat';
 import {useCallback, useEffect, useImperativeHandle, useState} from '#preact';
+import {forwardRef} from '#preact/compat';
+import {Wrapper, useValueRef} from '#preact/component';
+import {useRenderer} from '#preact/component/renderer';
 import {useResourcesNotify} from '#preact/utils';
 
 /**
@@ -30,7 +31,7 @@ export function RenderWithRef(
     render = DEFAULT_RENDER,
     ariaLiveValue = 'polite',
     onLoading,
-    onReady,
+    onLoad,
     onRefresh,
     onError,
     ...rest
@@ -40,6 +41,8 @@ export function RenderWithRef(
   useResourcesNotify();
 
   const [data, setData] = useState({});
+  const onLoadRef = useValueRef(onLoad);
+  const onErrorRef = useValueRef(onError);
 
   useEffect(() => {
     // TODO(dmanek): Add additional validation for src
@@ -56,24 +59,24 @@ export function RenderWithRef(
         }
       })
       .catch((e) => {
-        onError?.(e);
+        onErrorRef.current?.(e);
       });
     return () => {
       cancelled = true;
     };
-  }, [getJson, src, onError, onLoading]);
+  }, [getJson, src, onErrorRef, onLoading]);
 
   const refresh = useCallback(() => {
     onRefresh?.();
     getJson(src, /* shouldRefresh */ true)
       .then((data) => {
         setData(data);
-        onReady?.();
+        onLoadRef.current?.();
       })
       .catch((e) => {
-        onError?.(e);
+        onErrorRef.current?.(e);
       });
-  }, [getJson, src, onReady, onRefresh, onError]);
+  }, [getJson, src, onLoadRef, onRefresh, onErrorRef]);
 
   useImperativeHandle(
     ref,
@@ -93,9 +96,9 @@ export function RenderWithRef(
       if (!node?.firstElementChild || !rendered) {
         return;
       }
-      onReady?.();
+      onLoadRef.current?.();
     },
-    [rendered, onReady]
+    [rendered, onLoadRef]
   );
 
   return (

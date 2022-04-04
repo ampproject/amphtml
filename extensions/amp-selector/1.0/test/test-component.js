@@ -1,18 +1,18 @@
 import {mount} from 'enzyme';
 
-import {Keys} from '#core/constants/key-codes';
+import {Keys_Enum} from '#core/constants/key-codes';
 
 import * as Preact from '#preact';
 
-import {Option, Selector} from '../component';
+import {BentoSelector, BentoSelectorOption} from '../component';
 
 describes.sandboxed('Selector preact component', {}, () => {
   describe('standalone option', () => {
     it('should render a default option', () => {
       const wrapper = mount(
-        <Option as="li" option="a">
+        <BentoSelectorOption as="li" option="a">
           option a
-        </Option>
+        </BentoSelectorOption>
       );
 
       const dom = wrapper.getDOMNode();
@@ -27,17 +27,17 @@ describes.sandboxed('Selector preact component', {}, () => {
 
     beforeEach(() => {
       wrapper = mount(
-        <Selector multiple defaultValue={[1]}>
-          <Option key={1} option={1}>
+        <BentoSelector multiple defaultValue={[1]}>
+          <BentoSelectorOption key={1} option={1}>
             option 1
-          </Option>
-          <Option key={2} option={2}>
+          </BentoSelectorOption>
+          <BentoSelectorOption key={2} option={2}>
             option 2
-          </Option>
-          <Option key={3} option={3} disabled>
+          </BentoSelectorOption>
+          <BentoSelectorOption key={3} option={3} disabled>
             option 3
-          </Option>
-        </Selector>
+          </BentoSelectorOption>
+        </BentoSelector>
       );
     });
 
@@ -50,7 +50,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       expect(dom.localName).to.equal('div');
       expect(dom).to.have.attribute('multiple');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
 
       const option0 = options.at(0).getDOMNode();
@@ -74,7 +74,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       expect(dom).to.have.attribute('multiple');
       expect(dom).to.have.attribute('aria-multiselectable');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
 
       const option0 = options.at(0).getDOMNode();
@@ -104,7 +104,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
 
       // Click to expand.
@@ -119,7 +119,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
 
       // Click to deselect.
@@ -133,7 +133,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
 
       function countSelected() {
         const nodes = [
@@ -165,17 +165,17 @@ describes.sandboxed('Selector preact component', {}, () => {
 
     beforeEach(() => {
       wrapper = mount(
-        <Selector defaultValue={[1]}>
-          <Option key={1} option={1}>
+        <BentoSelector defaultValue={[1]}>
+          <BentoSelectorOption key={1} option={1}>
             option 1
-          </Option>
-          <Option key={2} option={2}>
+          </BentoSelectorOption>
+          <BentoSelectorOption key={2} option={2}>
             option 2
-          </Option>
-          <Option key={3} option={3} disabled>
+          </BentoSelectorOption>
+          <BentoSelectorOption key={3} option={3} disabled>
             option 3
-          </Option>
-        </Selector>
+          </BentoSelectorOption>
+        </BentoSelector>
       );
     });
 
@@ -187,7 +187,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
       expect(options.at(0).getDOMNode()).to.have.attribute('selected');
 
@@ -203,7 +203,7 @@ describes.sandboxed('Selector preact component', {}, () => {
       const dom = wrapper.getDOMNode();
       expect(dom.localName).to.equal('div');
 
-      const options = wrapper.find(Option);
+      const options = wrapper.find(BentoSelectorOption);
       expect(options).to.have.lengthOf(3);
 
       // Click to expand.
@@ -226,20 +226,20 @@ describes.sandboxed('Selector preact component', {}, () => {
       beforeEach(() => {
         ref = Preact.createRef();
         wrapper = mount(
-          <Selector ref={ref} multiple defaultValue={['a']}>
-            <Option key={1} option="a" index={1}>
+          <BentoSelector ref={ref} multiple defaultValue={['a']}>
+            <BentoSelectorOption key={1} option="a" index={1}>
               option a
-            </Option>
-            <Option key={2} option="b" index={2}>
+            </BentoSelectorOption>
+            <BentoSelectorOption key={2} option="b" index={2}>
               option b
-            </Option>
-            <Option key={3} option="c" disabled index={3}>
+            </BentoSelectorOption>
+            <BentoSelectorOption key={3} option="c" disabled index={3}>
               option c
-            </Option>
-          </Selector>
+            </BentoSelectorOption>
+          </BentoSelector>
         );
 
-        const options = wrapper.find(Option);
+        const options = wrapper.find(BentoSelectorOption);
         option0 = options.at(0).getDOMNode();
         option1 = options.at(1).getDOMNode();
         disabledOption = options.at(2).getDOMNode();
@@ -362,20 +362,20 @@ describes.sandboxed('Selector preact component', {}, () => {
       beforeEach(() => {
         ref = Preact.createRef();
         wrapper = mount(
-          <Selector ref={ref} defaultValue={['a']}>
-            <Option key={1} option="a" index={1}>
+          <BentoSelector ref={ref} defaultValue={['a']}>
+            <BentoSelectorOption key={1} option="a" index={1}>
               option a
-            </Option>
-            <Option key={2} option="b" index={2}>
+            </BentoSelectorOption>
+            <BentoSelectorOption key={2} option="b" index={2}>
               option b
-            </Option>
-            <Option key={3} option="c" disabled index={3}>
+            </BentoSelectorOption>
+            <BentoSelectorOption key={3} option="c" disabled index={3}>
               option c
-            </Option>
-          </Selector>
+            </BentoSelectorOption>
+          </BentoSelector>
         );
 
-        const options = wrapper.find(Option);
+        const options = wrapper.find(BentoSelectorOption);
         option0 = options.at(0).getDOMNode();
         option1 = options.at(1).getDOMNode();
         disabledOption = options.at(2).getDOMNode();
@@ -509,21 +509,21 @@ describes.sandboxed('Selector preact component', {}, () => {
       beforeEach(() => {
         ref = Preact.createRef();
         wrapper = mount(
-          <Selector ref={ref} multiple>
-            <Option key={1} option="a">
+          <BentoSelector ref={ref} multiple>
+            <BentoSelectorOption key={1} option="a">
               option a
-            </Option>
-            <Option key={2} option="b">
+            </BentoSelectorOption>
+            <BentoSelectorOption key={2} option="b">
               option b
-            </Option>
-            <Option key={3} option="c">
+            </BentoSelectorOption>
+            <BentoSelectorOption key={3} option="c">
               option c
-            </Option>
-          </Selector>
+            </BentoSelectorOption>
+          </BentoSelector>
         );
 
         selector = wrapper.find('div').first();
-        options = wrapper.find(Option);
+        options = wrapper.find(BentoSelectorOption);
         option0 = options.at(0).getDOMNode();
         option1 = options.at(1).getDOMNode();
         option2 = options.at(2).getDOMNode();
@@ -538,70 +538,70 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.LEFT_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.LEFT_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.RIGHT_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.RIGHT_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.DOWN_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.UP_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.UP_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
       });
 
       it('Enter to select', () => {
-        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Subsequent Enter will deselect.
-        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Select multiple options.
-        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        options.at(1).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
       });
 
       it('Space to select', () => {
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Subsequent Space will deselect.
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Select multiple options.
-        options.at(0).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
@@ -612,21 +612,21 @@ describes.sandboxed('Selector preact component', {}, () => {
       beforeEach(() => {
         ref = Preact.createRef();
         wrapper = mount(
-          <Selector ref={ref}>
-            <Option key={1} option="a">
+          <BentoSelector ref={ref}>
+            <BentoSelectorOption key={1} option="a">
               option a
-            </Option>
-            <Option key={2} option="b">
+            </BentoSelectorOption>
+            <BentoSelectorOption key={2} option="b">
               option b
-            </Option>
-            <Option key={3} option="c">
+            </BentoSelectorOption>
+            <BentoSelectorOption key={3} option="c">
               option c
-            </Option>
-          </Selector>
+            </BentoSelectorOption>
+          </BentoSelector>
         );
 
         selector = wrapper.find('div').first();
-        options = wrapper.find(Option);
+        options = wrapper.find(BentoSelectorOption);
         option0 = options.at(0).getDOMNode();
         option1 = options.at(1).getDOMNode();
         option2 = options.at(2).getDOMNode();
@@ -641,60 +641,60 @@ describes.sandboxed('Selector preact component', {}, () => {
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.LEFT_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.LEFT_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.RIGHT_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.RIGHT_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.DOWN_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
-        selector.simulate('keydown', {key: Keys.UP_ARROW});
+        selector.simulate('keydown', {key: Keys_Enum.UP_ARROW});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
       });
 
       it('Enter to select', () => {
-        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Subsequent Enter does nothing.
-        options.at(0).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(0).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.have.attribute('selected');
         expect(option1).to.not.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Select new option deselects the first.
-        options.at(1).find('div').simulate('keydown', {key: Keys.ENTER});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.ENTER});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
       });
 
       it('Space to select', () => {
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Subsequent Space does nothing.
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');
 
         // Select new option deselects the first.
-        options.at(1).find('div').simulate('keydown', {key: Keys.SPACE});
+        options.at(1).find('div').simulate('keydown', {key: Keys_Enum.SPACE});
         expect(option0).to.not.have.attribute('selected');
         expect(option1).to.have.attribute('selected');
         expect(option2).to.not.have.attribute('selected');

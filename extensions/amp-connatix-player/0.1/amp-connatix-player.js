@@ -3,17 +3,19 @@ import {
   CONSENT_STRING_TYPE,
 } from '#core/constants/consent-state';
 import {Deferred} from '#core/data-structures/promise';
-import {removeElement} from '#core/dom';
+import {getDataParamsFromAttributes, removeElement} from '#core/dom';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {
   observeContentSize,
   unobserveContentSize,
 } from '#core/dom/layout/size-observer';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
+
+import {getData} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
 
 import {
   getConsentMetadata,
@@ -21,8 +23,6 @@ import {
   getConsentPolicySharedData,
   getConsentPolicyState,
 } from '../../../src/consent';
-import {getData} from '../../../src/event-helper';
-import {userAssert} from '../../../src/log';
 import {addParamsToUrl} from '../../../src/url';
 import {setIsMediaComponent} from '../../../src/video-interface';
 
@@ -106,13 +106,11 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
 
       if (iframe.contentWindow) {
         iframe.contentWindow./*OK*/ postMessage(
-          JSON.stringify(
-            dict({
-              'event': 'command',
-              'func': command,
-              'args': opt_args || '',
-            })
-          ),
+          JSON.stringify({
+            'event': 'command',
+            'func': command,
+            'args': opt_args || '',
+          }),
           this.iframeDomain_
         );
       }
@@ -270,11 +268,12 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   layoutCallback() {
     const {element} = this;
     // Url Params for iframe source
-    const urlParams = dict({
+    const urlParams = {
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
       'url': Services.documentInfoForDoc(element).sourceUrl,
-    });
+      ...getDataParamsFromAttributes(element),
+    };
     const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
 

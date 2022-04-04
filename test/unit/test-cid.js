@@ -15,8 +15,9 @@ import {installPlatformService} from '#service/platform-impl';
 import {installTimerService} from '#service/timer-impl';
 import {installViewerServiceForDoc} from '#service/viewer-impl';
 
+import {FakePerformance} from '#testing/fake-dom';
 import {macroTask} from '#testing/helpers';
-import {stubServiceForDoc} from '#testing/test-helper';
+import {stubServiceForDoc} from '#testing/helpers/service';
 
 import {installCryptoPolyfill} from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
 import {getCookie, setCookie} from '../../src/cookies';
@@ -97,6 +98,7 @@ describes.sandboxed('cid', {}, (env) => {
       clearTimeout: window.clearTimeout,
       Math: window.Math,
       Promise: window.Promise,
+      performance: new FakePerformance(window),
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);

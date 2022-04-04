@@ -1,6 +1,7 @@
 import {Services} from '#service';
 
-import {devAssert} from './log';
+import {devAssert} from '#utils/log';
+
 import {getServicePromise} from './service-helpers';
 
 /**
@@ -24,7 +25,6 @@ import {getServicePromise} from './service-helpers';
 const SERVICES = {
   'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
   'variant': 'amp-experiment',
-  'amp-story-render': 'amp-story[standalone]',
 };
 
 /**

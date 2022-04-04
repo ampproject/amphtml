@@ -2,6 +2,8 @@
 
 import sinon from 'sinon'; // eslint-disable-line local/no-import
 
+import {logger} from '#preact/logger';
+
 /**
  * @fileoverview Provides functions that track unexpected console errors during
  * tests and prints warnings when they are detected.
@@ -159,4 +161,19 @@ export function maybeStubConsoleInfoLogWarn() {
     consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
     consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
   }
+}
+
+let loggerSandbox;
+/**
+ * Used to silence "production" logs from logger
+ */
+export function stubLogger() {
+  loggerSandbox = sinon.createSandbox();
+  // Ensure we do not log anything (even if --verbose is enabled)
+  loggerSandbox.stub(logger);
+  // Ensure error logs still get reported properly:
+  logger.error.callsFake(console.error.bind(console));
+}
+export function restoreLogger() {
+  loggerSandbox?.restore();
 }

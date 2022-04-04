@@ -3,8 +3,9 @@
 const argv = require('minimist')(process.argv.slice(2));
 const karmaConfig = require('../../test-configs/karma.conf');
 const {
+  bentoUnitTestPaths,
   commonIntegrationTestPaths,
-  commonUnitTestPaths,
+  getCommonUnitTestPaths,
   integrationTestPaths,
   karmaHtmlFixturesPath,
   karmaJsPaths,
@@ -18,7 +19,7 @@ const {
 const {app} = require('../../server/test-server');
 const {createKarmaServer, getAdTypes} = require('./helpers');
 const {customLaunchers} = require('./custom-launchers');
-const {cyan, green, red, yellow} = require('../../common/colors');
+const {cyan, green, red, yellow} = require('kleur/colors');
 const {dotWrappingWidth} = require('../../common/logging');
 const {getEsbuildBabelPlugin} = require('../../common/esbuild-babel');
 const {getFilesFromArgv, getFilesFromFileList} = require('../../common/utils');
@@ -56,8 +57,9 @@ class RuntimeTestConfig {
 
   /**
    * @param {string} testType
+   * @param {{bentoOnly?: boolean}} [options]
    */
-  constructor(testType) {
+  constructor(testType, {bentoOnly = false} = {}) {
     this.testType = testType;
     /**
      * TypeScript is used for typechecking here and is unable to infer the type
@@ -67,7 +69,7 @@ class RuntimeTestConfig {
     Object.assign(this, karmaConfig);
     this.updateBrowsers();
     this.updateReporters();
-    this.updateFiles();
+    this.updateFiles({bentoOnly});
     this.updatePreprocessors();
     this.updateEsbuildConfig();
     this.updateClient();
@@ -151,10 +153,12 @@ class RuntimeTestConfig {
   /**
    * Computes the set of files for Karma to load based on factors like test type,
    * target browser, and flags.
+   * @param {{bentoOnly: boolean}} options
    */
-  updateFiles() {
+  updateFiles({bentoOnly}) {
     switch (this.testType) {
       case 'unit':
+        const commonUnitTestPaths = getCommonUnitTestPaths({bentoOnly});
         if (argv.files || argv.filelist) {
           this.files = commonUnitTestPaths
             .concat(getFilesFromArgv())
@@ -166,10 +170,12 @@ class RuntimeTestConfig {
           return;
         }
         if (argv.local_changes) {
-          this.files = commonUnitTestPaths.concat(unitTestsToRun());
+          this.files = commonUnitTestPaths.concat(unitTestsToRun({bentoOnly}));
           return;
         }
-        this.files = commonUnitTestPaths.concat(unitTestPaths);
+        this.files = commonUnitTestPaths.concat(
+          bentoOnly ? bentoUnitTestPaths : unitTestPaths
+        );
         return;
 
       case 'integration':
@@ -226,16 +232,19 @@ class RuntimeTestConfig {
     const babelPlugin = getEsbuildBabelPlugin(
       /* callerName */ 'test',
       /* enableCache */ true,
-      /* preSetup */ this.logBabelStart,
-      /* postLoad */ this.printBabelDot
+      {
+        preSetup: this.logBabelStart,
+        postLoad: this.printBabelDot,
+      }
     );
     this.esbuild = {
-      target: 'es5',
+      target: 'esnext', // We use babel for transpilation.
       define: {
         'process.env.NODE_DEBUG': 'false',
         'process.env.NODE_ENV': '"test"',
       },
       plugins: [importPathPlugin, babelPlugin],
+      mainFields: ['module', 'browser', 'main'],
       sourcemap: 'inline',
     };
   }

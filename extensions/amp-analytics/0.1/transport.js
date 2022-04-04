@@ -1,3 +1,14 @@
+import {removeElement} from '#core/dom';
+import {toggle} from '#core/dom/style';
+import {getWin} from '#core/window';
+import {WindowInterface} from '#core/window/interface';
+
+import {Services} from '#service';
+
+import {loadPromise} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
+import {IframeTransport} from './iframe-transport';
 import {
   BatchSegmentDef,
   RequestDef,
@@ -5,25 +16,17 @@ import {
   TransportSerializers,
   defaultSerializer,
 } from './transport-serializer';
-import {IframeTransport} from './iframe-transport';
-import {Services} from '#service';
-import {WindowInterface} from '#core/window/interface';
+
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getMode} from '../../../src/mode';
+import {createPixel} from '../../../src/pixel';
+import {getTopWindow} from '../../../src/service-helpers';
 import {
   assertHttpsUrl,
   checkCorsUrl,
   isAmpScriptUri,
   parseUrlDeprecated,
 } from '../../../src/url';
-import {createPixel} from '../../../src/pixel';
-import {dev, user, userAssert} from '../../../src/log';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getMode} from '../../../src/mode';
-import {getTopWindow} from '../../../src/service-helpers';
-
-import {loadPromise} from '../../../src/event-helper';
-import {removeElement} from '#core/dom';
-import {toWin} from '#core/window';
-import {toggle} from '#core/dom/style';
 
 /** @const {string} */
 const TAG_ = 'amp-analytics/transport';
@@ -154,7 +157,7 @@ export class Transport {
     }
 
     // In the case of FIE rendering, we should be using the parent doc win.
-    const topWin = getTopWindow(toWin(element.ownerDocument.defaultView));
+    const topWin = getTopWindow(getWin(element));
     const type = element.getAttribute('type');
     // In inabox there is no amp-ad element.
     const ampAdResourceId = this.isInabox_

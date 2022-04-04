@@ -1,21 +1,25 @@
 import {CONSENT_POLICY_STATE} from '#core/constants/consent-state';
+import {createElementWithAttributes} from '#core/dom';
+import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {DomFingerprint} from '#core/dom/fingerprint';
-import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
-import {Services} from '#service';
-import {buildUrl} from './shared/url-builder';
-import {dev, devAssert, user} from '../../../src/log';
-import {dict} from '#core/types/object';
+import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
+import * as mode from '#core/mode';
+import {parseJson} from '#core/types/object/json';
+
 import {getBinaryType, isExperimentOn, toggleExperiment} from '#experiments';
+
+import {Services} from '#service';
+import {getTimingDataSync} from '#service/variable-source';
+
+import {dev, devAssert, user} from '#utils/log';
+
+import {buildUrl} from './shared/url-builder';
+
+import {GEO_IN_GROUP} from '../../../extensions/amp-geo/0.1/amp-geo-in-group';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
-import {getTimingDataSync} from '#service/variable-source';
-import * as mode from '#core/mode';
-import {parseJson} from '#core/types/object/json';
-import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
-import {createElementWithAttributes} from '#core/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -39,7 +43,7 @@ export const ValidAdContainerTypes = {
 };
 
 /**
- * See `VisibilityState` enum.
+ * See `VisibilityState_Enum` enum.
  * @const {!Object<string, string>}
  */
 const visibilityStateCodes = {
@@ -99,8 +103,8 @@ const CDN_PROXY_REGEXP =
   /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
 
 /** @const {string} */
-const TOKEN_VALUE =
-  'A8Ujr8y+9sg/ZBmCs90ZfQGOUFJsAS/YaHYtjLAsNn05OaQXSmZeRZ2U1wAj3PD74WY9re2x/TwinJoOaYuqFQoAAACBeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3QubmV0OjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2MzE2NjM5OTksImlzU3ViZG9tYWluIjp0cnVlLCJ1c2FnZSI6InN1YnNldCJ9';
+const TOKEN_VALUE_3P =
+  'AxOH8+XUqIxXfDG7Bxf7YR6oBTF4f73xWZNTyqhrkvIEgEmpxrpX8rzEqe9/yOsCGW9ChT05U9t++yH/aCYKCAgAAACVeyJvcmlnaW4iOiJodHRwczovL2FtcHByb2plY3Qub3JnOjQ0MyIsImZlYXR1cmUiOiJDb252ZXJzaW9uTWVhc3VyZW1lbnQiLCJleHBpcnkiOjE2NDMxNTUxOTksImlzU3ViZG9tYWluIjp0cnVlLCJpc1RoaXJkUGFydHkiOnRydWUsInVzYWdlIjoic3Vic2V0In0=';
 
 /**
  * Inserts origin-trial token for `attribution-reporting` if not already
@@ -108,12 +112,12 @@ const TOKEN_VALUE =
  * @param {!Window} win
  */
 export function maybeInsertOriginTrialToken(win) {
-  if (win.document.head.querySelector(`meta[content='${TOKEN_VALUE}']`)) {
+  if (win.document.head.querySelector(`meta[content='${TOKEN_VALUE_3P}']`)) {
     return;
   }
   const metaEl = createElementWithAttributes(win.document, 'meta', {
     'http-equiv': 'origin-trial',
-    content: TOKEN_VALUE,
+    content: TOKEN_VALUE_3P,
   });
   win.document.head.appendChild(metaEl);
 }
@@ -364,6 +368,8 @@ export function googlePageParameters(a4a, startTime) {
       'uam': uaDataValues?.model,
       'uafv': uaDataValues?.uaFullVersion,
       'uab': uaDataValues?.bitness,
+      'uafvl': JSON.stringify(uaDataValues?.fullVersionList),
+      'uaw': uaDataValues?.wow64,
     };
   });
 }
@@ -586,7 +592,7 @@ export function additionalDimensions(win, viewportSize) {
  * @return {!JsonObject}
  */
 function csiTrigger(on, params) {
-  return dict({
+  return {
     'on': on,
     'request': 'csi',
     'sampleSpec': {
@@ -599,7 +605,7 @@ function csiTrigger(on, params) {
     'selector': 'amp-ad',
     'selectionMethod': 'closest',
     'extraUrlParams': params,
-  });
+  };
 }
 
 /**
@@ -607,7 +613,7 @@ function csiTrigger(on, params) {
  * @return {!JsonObject}
  */
 export function getCsiAmpAnalyticsConfig() {
-  return dict({
+  return {
     'requests': {
       'csi': 'https://csi.gstatic.com/csi?',
     },
@@ -643,7 +649,7 @@ export function getCsiAmpAnalyticsConfig() {
       // evaluated when the URL is built by amp-analytics.
       'puid': '${requestCount}~${timestamp}',
     },
-  });
+  };
 }
 
 /**
@@ -708,11 +714,11 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     if (!hasActiveViewRequests && !hasBeginToRenderRequests) {
       return null;
     }
-    const config = dict({
+    const config = {
       'transport': {'beacon': false, 'xhrpost': false},
       'requests': {},
       'triggers': {},
-    });
+    };
     if (hasActiveViewRequests) {
       generateActiveViewRequest(config, acUrls);
     }
@@ -736,7 +742,7 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
  * @param {!Array<string>} urls
  */
 function generateActiveViewRequest(config, urls) {
-  config['triggers']['continuousVisible'] = dict({
+  config['triggers']['continuousVisible'] = {
     'request': [],
     'on': 'visible',
     'visibilitySpec': {
@@ -745,7 +751,7 @@ function generateActiveViewRequest(config, urls) {
       'visiblePercentageMin': 50,
       'continuousTimeMin': 1000,
     },
-  });
+  };
   for (let idx = 0; idx < urls.length; idx++) {
     // TODO: Ensure url is valid and not freeform JS?
     config['requests'][`visibility${idx + 1}`] = `${urls[idx]}`;
@@ -760,12 +766,12 @@ function generateActiveViewRequest(config, urls) {
  * @param {!Array<string>} urls
  */
 function generateBeginToRenderRequest(config, urls) {
-  config['triggers']['beginToRender'] = dict({
+  config['triggers']['beginToRender'] = {
     'request': [],
     'on': 'ini-load',
     'selector': 'amp-ad',
     'selectionMethod': 'closest',
-  });
+  };
 
   for (let idx = 0; idx < urls.length; idx++) {
     // TODO: Ensure url is valid and not freeform JS?
@@ -1090,7 +1096,7 @@ export function setNameframeExperimentConfigs(headers, nameframeConfig) {
  * than 32 capabilities to this enum.
  * @enum {number}
  */
-const Capability = {
+const Capability_Enum = {
   SVG_SUPPORTED: 1 << 0,
   SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED: 1 << 1,
   SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED: 1 << 2,
@@ -1105,17 +1111,17 @@ function getBrowserCapabilitiesBitmap(win) {
   let browserCapabilities = 0;
   const doc = win.document;
   if (win.SVGElement && doc.createElementNS) {
-    browserCapabilities |= Capability.SVG_SUPPORTED;
+    browserCapabilities |= Capability_Enum.SVG_SUPPORTED;
   }
   const iframeEl = doc.createElement('iframe');
   if (iframeEl.sandbox && iframeEl.sandbox.supports) {
     if (iframeEl.sandbox.supports('allow-top-navigation-by-user-activation')) {
       browserCapabilities |=
-        Capability.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
+        Capability_Enum.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
     }
     if (iframeEl.sandbox.supports('allow-popups-to-escape-sandbox')) {
       browserCapabilities |=
-        Capability.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
+        Capability_Enum.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
     }
   }
   return browserCapabilities;

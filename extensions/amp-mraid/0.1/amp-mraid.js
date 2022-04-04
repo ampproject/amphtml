@@ -22,10 +22,11 @@
 
 import {HostServices} from '#inabox/host-services';
 
+import {dev} from '#utils/log';
+
 import {MraidService} from './mraid-service';
 
 import {urls} from '../../../src/config';
-import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-mraid';

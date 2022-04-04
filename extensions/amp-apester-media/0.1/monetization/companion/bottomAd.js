@@ -1,6 +1,7 @@
-import {Services} from '#service';
 import {createElementWithAttributes} from '#core/dom';
-import {dict, getValueForExpr} from '#core/types/object';
+import {getValueForExpr} from '#core/types/object';
+
+import {Services} from '#service';
 const ALLOWED_AD_PROVIDER = 'gpt';
 
 /**
@@ -38,21 +39,21 @@ export function handleCompanionBottomAd(media, apesterElement) {
 function constructCompanionBottomAd(slot, bannerSizes, apesterElement) {
   const width = bannerSizes[0][0];
   const height = bannerSizes[0][1];
+  const refreshInterval = 30;
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
     'amp-ad',
-    dict({
+    {
       'width': `${width}`,
       'height': `${height}`,
       'type': 'doubleclick',
-      'style':
-        'position: absolute !important; bottom: 0;left: 50%;margin-left: -150px;margin-bottom: 0;',
       'layout': 'fixed',
       'data-slot': `${slot}`,
       'data-multi-size-validation': 'false',
-    })
+      'data-enable-refresh': `${refreshInterval}`,
+    }
   );
-  ampAd.classList.add('i-amphtml-amp-apester-companion');
+  ampAd.classList.add('i-amphtml-amp-apester-bottom-ad');
   apesterElement.appendChild(ampAd);
   Services.mutatorForDoc(apesterElement).requestChangeSize(ampAd, height);
   return ampAd;

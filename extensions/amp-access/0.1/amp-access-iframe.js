@@ -1,14 +1,14 @@
 import {Deferred} from '#core/data-structures/promise';
 import {toggle} from '#core/dom/style';
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {dev, userAssert} from '#utils/log';
+
 import {Messenger} from './iframe-api/messenger';
 
-import {dev, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 
@@ -244,12 +244,10 @@ export class AccessIframeAdapter {
       if (data) {
         storage.setItem(
           TAG,
-          JSON.stringify(
-            dict({
-              't': this.ampdoc.win.Date.now(),
-              'd': data,
-            })
-          )
+          JSON.stringify({
+            't': this.ampdoc.win.Date.now(),
+            'd': data,
+          })
         );
       } else {
         storage.removeItem(TAG);

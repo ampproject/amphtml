@@ -1,10 +1,14 @@
-import {Services} from '#service';
-import {StateProperty, getStoreService} from './amp-story-store-service';
 import {getDataParamsFromAttributes} from '#core/dom';
-import {getVariableService} from './variable-service';
 import {map} from '#core/types/object';
-import {registerServiceBuilder} from '../../../src/service-helpers';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+
+import {Services} from '#service';
+
+import {triggerAnalyticsEvent} from '#utils/analytics';
+
+import {StateProperty, getStoreService} from './amp-story-store-service';
+import {getVariableService} from './variable-service';
+
+import {getAmpdoc, registerServiceBuilder} from '../../../src/service-helpers';
 
 /** @const {string} */
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
@@ -123,11 +127,15 @@ export class StoryAnalyticsService {
   triggerEvent(eventType, element = null) {
     this.incrementPageEventCount_(eventType);
 
-    triggerAnalyticsEvent(
-      this.element_,
-      eventType,
-      this.updateDetails(eventType, element)
-    );
+    getAmpdoc(this.element_)
+      .whenFirstVisible()
+      .then(() =>
+        triggerAnalyticsEvent(
+          this.element_,
+          eventType,
+          this.updateDetails(eventType, element)
+        )
+      );
   }
 
   /**

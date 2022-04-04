@@ -3,7 +3,7 @@ import * as fakeTimers from '@sinonjs/fake-timers';
 import {CacheCidApi} from '#service/cache-cid-api';
 import {installTimerService} from '#service/timer-impl';
 
-import {mockServiceForDoc, stubService} from '#testing/test-helper';
+import {mockServiceForDoc, stubService} from '#testing/helpers/service';
 
 describes.realWin('cacheCidApi', {amp: true}, (env) => {
   let ampdoc;

@@ -6,7 +6,8 @@ import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {isObject} from '#core/types';
 import {utf8Encode} from '#core/types/string/bytes';
 
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert} from '#utils/log';
+
 import {RENDERING_TYPE_HEADER, XORIGIN_MODE} from '../../amp-a4a/0.1/amp-a4a';
 
 /** @type {string} */
@@ -82,7 +83,9 @@ export function combineInventoryUnits(impls) {
   const prevIusEncoded = [];
   impls.forEach((instance) => {
     const iu = devAssert(instance.element.getAttribute('data-slot'));
-    const componentNames = iu.split('/');
+    const componentNames = iu
+      .split('/')
+      .map((componentName) => componentName.replace(/,/g, ':'));
     const encodedNames = [];
     for (let i = 0; i < componentNames.length; i++) {
       if (componentNames[i] == '') {

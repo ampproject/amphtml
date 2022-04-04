@@ -1,6 +1,5 @@
 import {createElementWithAttributes} from '#core/dom';
 import {intersectionEntryToJson} from '#core/dom/layout/intersection';
-import {dict} from '#core/types/object';
 import {utf8Decode} from '#core/types/string/bytes';
 
 import {Renderer} from './amp-ad-type-defs';
@@ -43,7 +42,7 @@ export class NameFrameRenderer extends Renderer {
     const intersection = element.getIntersectionChangeEntry();
     contextMetadata['_context']['initialIntersection'] =
       intersectionEntryToJson(intersection);
-    const attributes = dict({
+    const attributes = {
       'src': srcPath,
       'name': JSON.stringify(contextMetadata),
       'height': context.size.height,
@@ -54,7 +53,7 @@ export class NameFrameRenderer extends Renderer {
       'scrolling': 'no',
       'marginwidth': '0',
       'marginheight': '0',
-    });
+    };
     if (crossDomainData.sentinel) {
       attributes['data-amp-3p-sentinel'] = crossDomainData.sentinel;
     }

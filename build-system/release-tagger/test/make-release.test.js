@@ -1,6 +1,6 @@
 const nock = require('nock');
 const test = require('ava');
-const {getExtensions} = require('../../npm-publish/utils');
+const {getExtensionsAndComponents} = require('../../npm-publish/utils');
 const {makeRelease} = require('../make-release');
 
 test.before(() => nock.disableNetConnect());
@@ -20,20 +20,24 @@ test('create', async (t) => {
     '<a href="https://github.com/ampproject/amphtml/commit/3abcdef">' +
     '<code>3abc</code></a> - Update packages';
 
-  const packages = getExtensions().map((e) => e.extension);
+  const packages = getExtensionsAndComponents().map((e) => e.extension);
+  const packageChanged = new Set(['bento-accordion']);
+  const packagesNotChanged = packages.filter(
+    (package) => !packageChanged.has(package)
+  );
 
   const rest = nock('https://api.github.com')
-    // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    .get('/repos/ampproject/amphtml/releases/tags/2107280123000')
+    // https://docs.github.com/en/rest/reference/git#get-a-reference
+    .get('/repos/ampproject/amphtml/git/ref/tags%2F2107280123000')
     .reply(200, {
       id: 2,
-      'target_commitish': '3abcdef',
+      object: {sha: '3abcdef'},
     })
-    // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    .get('/repos/ampproject/amphtml/releases/tags/2107210123000')
+    // https://docs.github.com/en/rest/reference/git#get-a-reference
+    .get('/repos/ampproject/amphtml/git/ref/tags%2F2107210123000')
     .reply(200, {
       id: 1,
-      'target_commitish': '1abcdef',
+      object: {sha: '1abcdef'},
     })
     // https://docs.github.com/en/rest/reference/repos#compare-two-commits
     .get('/repos/ampproject/amphtml/compare/1abcdef...3abcdef')
@@ -51,14 +55,19 @@ test('create', async (t) => {
         '<a href="https://github.com/ampproject/amphtml/compare/' +
         '2107210123000...2107280123000">\n' +
         '<code>2107210123000...2107280123000</code>\n</a>\n</p>\n\n' +
-        '<h2>npm packages @ 1.2107280123.0</h2>\n\n\n' +
-        `<b>Packages not changed:</b> <i>${packages.join(', ')}</i>\n\n` +
+        '<h2>npm packages @ 1.2107280123.0</h2>\n' +
+        `<b>${Array.from(packageChanged).join(', ')}</b>\n` +
+        `<ul><li>${pr2}</li></ul>\n\n` +
+        `<b>Packages not changed:</b> <i>${packagesNotChanged.join(
+          ', '
+        )}</i>\n\n` +
         '<h2>Changes by component</h2>\n' +
         `<details><summary>ads (1)</summary>${pr1}</details>` +
         `<details><summary>amp-test1 (1)</summary>${pr1}</details>` +
+        `<details><summary>bento-accordion (1)</summary>${pr2}</details>` +
         `<details><summary>build-system (1)</summary>${pr2}</details>` +
         `<details><summary>package updates (1)</summary>${pr3}</details>` +
-        `<details><summary>src (1)</summary>${pr1}</details>` +
+        `<details><summary>src (2)</summary>${pr1}<br />${pr2}</details>` +
         `<details><summary>third_party (2)</summary>${pr1}<br />${pr2}</details>` +
         `<details><summary>validator (1)</summary>${pr1}</details>`,
     })
@@ -135,6 +144,10 @@ test('create', async (t) => {
                   {
                     'path': 'third_party/tasks/e2e/readme.md',
                   },
+                  {
+                    'path':
+                      'src/bento/components/bento-accordion/1.0/README.md',
+                  },
                 ],
               },
               mergeCommit: {
@@ -176,7 +189,7 @@ test('create', async (t) => {
       },
     });
 
-  await makeRelease('2107280123000', '2107210123000', 'beta');
+  await makeRelease('2107280123000', '2107210123000', 'beta-percent');
   t.true(rest.isDone());
   t.true(graphql.isDone());
 });
@@ -186,20 +199,20 @@ test('cherry-pick', async (t) => {
     '<a href="https://github.com/ampproject/amphtml/commit/2abcdef">' +
     '<code>2abc</code></a> - Cherry pick fix';
 
-  const packages = getExtensions().map((e) => e.extension);
+  const packages = getExtensionsAndComponents().map((e) => e.extension);
 
   const rest = nock('https://api.github.com')
-    // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    .get('/repos/ampproject/amphtml/releases/tags/2107280123001')
+    // https://docs.github.com/en/rest/reference/git#get-a-reference
+    .get('/repos/ampproject/amphtml/git/ref/tags%2F2107280123001')
     .reply(200, {
       id: 2,
-      'target_commitish': '2abcdef',
+      object: {sha: '2abcdef'},
     })
-    // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    .get('/repos/ampproject/amphtml/releases/tags/2107280123000')
+    // https://docs.github.com/en/rest/reference/git#get-a-reference
+    .get('/repos/ampproject/amphtml/git/ref/tags%2F2107210123000')
     .reply(200, {
       id: 1,
-      'target_commitish': '1abcdef',
+      object: {sha: '1abcdef'},
     })
     // https://docs.github.com/en/rest/reference/repos#compare-two-commits
     .get('/repos/ampproject/amphtml/compare/1abcdef...2abcdef')
@@ -220,8 +233,8 @@ test('cherry-pick', async (t) => {
         'release calendar</a> for additional channel information.\n\n' +
         '<h2>Changelog</h2>\n<p>\n' +
         '<a href="https://github.com/ampproject/amphtml/compare/' +
-        '2107280123000...2107280123001">\n' +
-        '<code>2107280123000...2107280123001</code>\n</a>\n</p>\n\n' +
+        '2107210123000...2107280123001">\n' +
+        '<code>2107210123000...2107280123001</code>\n</a>\n</p>\n\n' +
         '<h2>npm packages @ 1.2107280123.1</h2>\n\n\n' +
         `<b>Packages not changed:</b> <i>${packages.join(', ')}</i>\n\n` +
         '<h2>Changes by component</h2>\n' +
@@ -272,7 +285,7 @@ test('cherry-pick', async (t) => {
       },
     });
 
-  await makeRelease('2107280123001', '2107280123000', 'stable');
+  await makeRelease('2107280123001', '2107210123000', 'stable');
   t.true(rest.isDone());
   t.true(graphql.isDone());
 });

@@ -3,7 +3,7 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
-import {devAssert, userAssert} from './log';
+import {devAssert, userAssert} from '#utils/log';
 
 /**
  * @typedef {{

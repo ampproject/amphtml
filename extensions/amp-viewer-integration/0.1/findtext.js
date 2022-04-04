@@ -1,6 +1,6 @@
 import {computedStyle} from '#core/dom/style';
 
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 /**
  * Simple implementation of CircularBuffer.

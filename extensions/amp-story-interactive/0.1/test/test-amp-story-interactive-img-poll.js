@@ -1,9 +1,9 @@
-import {AmpDocSingle} from '#service/ampdoc-impl';
-import {AmpStoryInteractiveImgPoll} from '../amp-story-interactive-img-poll';
-import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
-import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
-import {LocalizationService} from '#service/localization';
 import {Services} from '#service';
+import {AmpDocSingle} from '#service/ampdoc-impl';
+import {LocalizationService} from '#service/localization';
+
+import {measureMutateElementStub} from '#testing/helpers/service';
+
 import {
   addConfigToInteractive,
   getMockIncompleteData,
@@ -11,8 +11,10 @@ import {
   getMockOutOfBoundsData,
   getMockScrambledData,
 } from './helpers';
-import {measureMutateElementStub} from '#testing/test-helper';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpStoryInteractiveImgPoll} from '../amp-story-interactive-img-poll';
 
 describes.realWin(
   'amp-story-interactive-img-poll',
@@ -23,7 +25,8 @@ describes.realWin(
     let win;
     let ampStoryPoll;
     let storyEl;
-    let requestService;
+    let xhrMock;
+    let xhrJson;
 
     beforeEach(() => {
       win = env.win;
@@ -37,9 +40,13 @@ describes.realWin(
       );
       ampStoryPollEl.getAmpDoc = () => new AmpDocSingle(win);
       ampStoryPollEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-      requestService = new AmpStoryRequestService(win);
-      registerServiceBuilder(win, 'story-request', function () {
-        return requestService;
+      const xhr = Services.xhrFor(win);
+      xhrMock = env.sandbox.mock(xhr);
+      xhrMock.expects('fetchJson').resolves({
+        ok: true,
+        json() {
+          return Promise.resolve(xhrJson);
+        },
       });
 
       const storeService = new AmpStoryStoreService(win);
@@ -135,9 +142,7 @@ describes.realWin(
     });
 
     it('should handle the percentage pipeline', async () => {
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractiveData());
+      xhrJson = getMockInteractiveData();
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -145,15 +150,13 @@ describes.realWin(
       await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
 
-      expect(ampStoryPoll.getOptionElements()[0].innerText).to.contain('50%');
-      expect(ampStoryPoll.getOptionElements()[1].innerText).to.contain('50%');
+      expect(ampStoryPoll.getOptionElements()[0].textContent).to.contain('50%');
+      expect(ampStoryPoll.getOptionElements()[1].textContent).to.contain('50%');
     });
 
     it('should handle the percentage pipeline with scrambled data', async () => {
       const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockScrambledData());
+      xhrJson = getMockScrambledData();
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -164,7 +167,7 @@ describes.realWin(
       const expectedPercentages = [10, 20, 30, 40];
       for (let i = 0; i < NUM_OPTIONS; i++) {
         const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryPoll.getOptionElements()[i].innerText).to.contain(
+        expect(ampStoryPoll.getOptionElements()[i].textContent).to.contain(
           expectedText
         );
       }
@@ -172,9 +175,7 @@ describes.realWin(
 
     it('should handle the percentage pipeline with incomplete data', async () => {
       const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockIncompleteData());
+      xhrJson = getMockIncompleteData();
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -185,7 +186,7 @@ describes.realWin(
       const expectedPercentages = [0, 50, 50, 0];
       for (let i = 0; i < NUM_OPTIONS; i++) {
         const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryPoll.getOptionElements()[i].innerText).to.contain(
+        expect(ampStoryPoll.getOptionElements()[i].textContent).to.contain(
           expectedText
         );
       }
@@ -193,9 +194,7 @@ describes.realWin(
 
     it('should handle the percentage pipeline with out of bounds data', async () => {
       const NUM_OPTIONS = 4;
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockOutOfBoundsData());
+      xhrJson = getMockOutOfBoundsData();
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
@@ -206,7 +205,7 @@ describes.realWin(
       const expectedPercentages = [20, 0, 0, 80];
       for (let i = 0; i < NUM_OPTIONS; i++) {
         const expectedText = `${expectedPercentages[i]}%`;
-        expect(ampStoryPoll.getOptionElements()[i].innerText).to.contain(
+        expect(ampStoryPoll.getOptionElements()[i].textContent).to.contain(
           expectedText
         );
       }

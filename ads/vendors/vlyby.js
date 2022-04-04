@@ -6,7 +6,7 @@ import {validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function vlyby(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global._vlyby_amp = {
     allowed_data: ['publisherid', 'placementid', 'pubref'],
     mandatory_data: ['publisherid', 'placementid'],

@@ -121,6 +121,11 @@ class InaboxViewer {
   setMessageDeliverer() {}
 
   /** @override */
+  maybeGetMessageDeliverer() {
+    return null;
+  }
+
+  /** @override */
   sendMessage() {}
 
   /** @override */

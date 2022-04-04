@@ -1,5 +1,3 @@
-import {Services} from '#service';
-import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 import {
   createElementWithAttributes,
   iterateCursor,
@@ -7,7 +5,15 @@ import {
 } from '#core/dom';
 import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
-import {user} from '../../../src/log';
+
+import {Services} from '#service';
+
+import {user} from '#utils/log';
+
+import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
+
+/** @const {!Array<string>} */
+const CODECS_IN_ASCENDING_PRIORITY = ['h264', 'vp09'];
 
 /**
  * Add the caching sources to the video if opted in.
@@ -29,34 +35,27 @@ export function fetchCachedSources(
   if (Services.platformFor(win).isBot()) {
     return Promise.resolve();
   }
-  if (
-    !(
-      videoEl.getAttribute('src') ||
-      videoEl.querySelector('source[src]')?.getAttribute('src')
-    )
-  ) {
+
+  // Always set crossorigin attribute so captions can be set.
+  if (!videoEl.hasAttribute('crossorigin')) {
+    videoEl.setAttribute('crossorigin', '');
+  }
+
+  const videoSrc = videoEl.getAttribute('src');
+  const sourceSrc = videoEl.querySelector('source[src]')?.getAttribute('src');
+  if (!videoSrc && !sourceSrc) {
     user().error('AMP-VIDEO', 'Video cache not properly configured');
     return Promise.resolve();
   }
 
   Services.performanceFor(ampdoc.win).addEnabledExperiment('video-cache');
 
-  const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
-  maybeReplaceSrcWithSourceElement(videoEl, win);
-  const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
-  return getCacheUrlService(videoEl, ampdoc)
-    .then((service) => service.createCacheUrl(videoUrl))
-    .then((cacheUrl) => {
-      const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
-        'amp_video_host_url':
-          /* document url that contains the video */ canonicalUrl,
-      });
-      return Services.xhrFor(win).fetch(requestUrl, {prerenderSafe: true});
+  return requestCachedVideoSources(videoEl, ampdoc)
+    .then((response) => {
+      applySourcesToVideo(videoEl, response['sources'], maxBitrate);
+      applyAudioInfoToVideo(videoEl, response['has_audio']);
+      applyCaptionsTrackToVideo(videoEl, response['captions']);
     })
-    .then((response) => response.json())
-    .then((jsonResponse) =>
-      applySourcesToVideo(videoEl, jsonResponse['sources'], maxBitrate)
-    )
     .catch(() => {
       // If cache fails, video should still load properly.
     });
@@ -85,23 +84,105 @@ function selectVideoSource(videoEl) {
  */
 function applySourcesToVideo(videoEl, sources, maxBitrate) {
   sources
-    .sort((a, b) => a['bitrate_kbps'] - b['bitrate_kbps'])
+    .sort((a, b) => {
+      // This comparator sorts the video sources from least to most preferred.
+
+      const A_GOES_FIRST = -1;
+      const B_GOES_FIRST = 1;
+
+      // 'codec' values can contain metadata after the '.' that we must strip
+      // for sorting purposes. For example, "vp09.00.30.08" contains level,
+      // profile, and color depth values that are ignored in this sort.
+      const aCodec = a['codec']?.split('.')[0];
+      const bCodec = b['codec']?.split('.')[0];
+
+      // Codec priority is the primary sorting factor of this comparator.
+      // The greater the codec priority, the more the source is preferred.
+      const aCodecPriority = CODECS_IN_ASCENDING_PRIORITY.indexOf(aCodec);
+      const bCodecPriority = CODECS_IN_ASCENDING_PRIORITY.indexOf(bCodec);
+      if (aCodecPriority > bCodecPriority) {
+        return B_GOES_FIRST;
+      }
+      if (aCodecPriority < bCodecPriority) {
+        return A_GOES_FIRST;
+      }
+
+      // Bitrate is the tiebreaking sorting factor of this comparator.
+      // The greater the bitrate, the more the source is preferred.
+      const aBitrate = a['bitrate_kbps'];
+      const bBitrate = b['bitrate_kbps'];
+      if (aBitrate > bBitrate) {
+        return B_GOES_FIRST;
+      }
+      if (aBitrate < bBitrate) {
+        return A_GOES_FIRST;
+      }
+
+      return 0;
+    })
     .forEach((source) => {
+      // This callback inserts each source as the first child within the video.
+      // So, although the sources were just sorted in ascending preference,
+      // they are ultimately arranged within the video element in descending
+      // preference.
+
       if (source['bitrate_kbps'] > maxBitrate) {
         return;
+      }
+
+      let type = source['type'];
+      // If the codec information is available, add it to the type attribute.
+      // We do not append H.264 codec strings because, unlike their synonymous
+      // AVC codec strings (e.g., "avc1.4d002a"), "h264" is not recognized as a
+      // playable type by the browser.
+      if (source['codec'] && source['codec'] !== 'h264') {
+        type += '; codecs=' + source['codec'];
       }
       const sourceEl = createElementWithAttributes(
         videoEl.ownerDocument,
         'source',
         {
           'src': source['url'],
-          'type': source['type'],
+          type,
           'data-bitrate': source['bitrate_kbps'],
           'i-amphtml-video-cached-source': '',
         }
       );
       videoEl.insertBefore(sourceEl, videoEl.firstChild);
     });
+}
+
+/**
+ * @param {!Element} videoEl
+ * @param {boolean|undefined} hasAudio
+ */
+function applyAudioInfoToVideo(videoEl, hasAudio) {
+  if (hasAudio === false) {
+    videoEl.setAttribute('noaudio', '');
+  }
+}
+
+/**
+ * Appends captions track to video if captions url is defined and video
+ * element doesn't have a track child specified in the document.
+ * @param {!Element} videoEl
+ * @param {!Object} captionsResponse
+ */
+function applyCaptionsTrackToVideo(videoEl, captionsResponse) {
+  if (
+    !captionsResponse ||
+    !captionsResponse['src'] ||
+    !captionsResponse['srclang'] ||
+    videoEl.querySelector('track')
+  ) {
+    return;
+  }
+  const trackEl = createElementWithAttributes(videoEl.ownerDocument, 'track', {
+    'src': captionsResponse['src'],
+    'srclang': captionsResponse['srclang'],
+    'kind': 'captions',
+  });
+  videoEl.appendChild(trackEl);
 }
 
 /**
@@ -145,4 +226,58 @@ function getCacheUrlService(videoEl, ampdoc) {
   return Services.extensionsFor(ampdoc.win)
     .installExtensionForDoc(ampdoc, 'amp-cache-url')
     .then(() => Services.cacheUrlServicePromiseForDoc(videoEl));
+}
+
+/**
+ * Fetch the sources for the given video element.
+ * @param {!Element} videoEl
+ * @param {!AmpDoc} ampdoc
+ * @return {!Promise<!Object>} JSON representing AMP's cached video sources.
+ */
+function requestCachedVideoSources(videoEl, ampdoc) {
+  const {win} = ampdoc;
+  if (shouldUseInlineVideoResponse(videoEl, win)) {
+    const inlineResponseEl = win.document.getElementById(
+      'amp-google-video-cache-response'
+    );
+    try {
+      const inlineResponseJson = JSON.parse(inlineResponseEl.textContent);
+      if (inlineResponseJson['sources']) {
+        return Promise.resolve(inlineResponseJson);
+      }
+    } catch (err) {
+      // If parsing the response fails, an XHR request will be made below.
+    }
+  }
+
+  const {canonicalUrl, sourceUrl} = Services.documentInfoForDoc(win.document);
+  maybeReplaceSrcWithSourceElement(videoEl, win);
+  const videoUrl = resolveRelativeUrl(selectVideoSource(videoEl), sourceUrl);
+  return getCacheUrlService(videoEl, ampdoc)
+    .then((service) => service.createCacheUrl(videoUrl))
+    .then((cacheUrl) => {
+      const requestUrl = addParamsToUrl(cacheUrl.replace(/\/[ic]\//, '/mbv/'), {
+        'amp_video_host_url':
+          /* document url that contains the video */ canonicalUrl,
+        'amp_video_require_acao_header': 1,
+      });
+      return Services.xhrFor(win)
+        .fetch(requestUrl, {prerenderSafe: true})
+        .then((xhrResponse) => xhrResponse.json());
+    });
+}
+
+/**
+ * Returns `true` if the video's inline response should be used instead of
+ * issuing an XHR request.
+ * @param {!Element} videoEl
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function shouldUseInlineVideoResponse(videoEl, win) {
+  // Google video cache inlines the first video of the first web story page.
+  const firstVid = win.document.querySelector(
+    'amp-story-page:first-of-type amp-video'
+  );
+  return videoEl === firstVid;
 }

@@ -1,4 +1,4 @@
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import localesObjs from '../_locales';
 
@@ -15,8 +15,8 @@ describes.fakeWin('amp-story-ad-localization-strings', {amp: true}, () => {
         expect(uniqueKeys.size).to.eql(languageKeys.length);
       });
 
-      it(languageName + ' keys should exist in LocalizedStringId', () => {
-        const localizedStringIdKeys = Object.values(LocalizedStringId);
+      it(languageName + ' keys should exist in LocalizedStringId_Enum', () => {
+        const localizedStringIdKeys = Object.values(LocalizedStringId_Enum);
 
         languageKeys.forEach((key) => {
           expect(localizedStringIdKeys.indexOf(key)).to.not.eql(-1);

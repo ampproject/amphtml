@@ -3,7 +3,7 @@ import {removeElement} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
 import * as Preact from '#preact';
-import {PreactBaseElement, whenUpgraded} from '#preact/base-element';
+import {PreactBaseElement} from '#preact/base-element';
 import {forwardRef} from '#preact/compat';
 import {useAmpContext, useLoading} from '#preact/context';
 import {CanRender} from '#preact/contextprops';
@@ -12,8 +12,24 @@ import {Slot} from '#preact/slot';
 import {upgradeOrRegisterElement} from '#service/custom-element-registry';
 import {getSchedulerForDoc} from '#service/scheduler';
 
+import {waitFor} from '#testing/helpers/service';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
-import {waitFor} from '#testing/test-helper';
+
+/**
+ * Returns the upgraded imperative API object, once Preact has actually mounted.
+ *
+ * This technically works with both Bento and Legacy components, returning the
+ * BaseElement instance in the later case.
+ *
+ * @param {!Element} el
+ * @return {!Promise<!Object>}
+ */
+function whenUpgraded(el) {
+  return el.ownerDocument.defaultView.customElements
+    .whenDefined(el.localName)
+    .then(() => el.getImpl())
+    .then((impl) => impl.getApi());
+}
 
 describes.realWin('PreactBaseElement', {amp: true}, (env) => {
   let win, doc, html;

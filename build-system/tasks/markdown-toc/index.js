@@ -1,9 +1,9 @@
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const path = require('path');
 const prettier = require('prettier');
 const toc = require('markdown-toc');
 const {getStdout} = require('../../common/process');
-const {green} = require('../../common/colors');
+const {green} = require('kleur/colors');
 const {logOnSameLineLocalDev} = require('../../common/logging');
 const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../../common/diff');
@@ -125,7 +125,9 @@ async function overrideTocGlob(cwd) {
     '**/*.md',
     '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
   ];
-  const files = (await globby(glob, {cwd})).map((file) => path.join(cwd, file));
+  const files = (await fastGlob(glob, {cwd})).map((file) =>
+    path.join(cwd, file)
+  );
   const filesIncludingString = getStdout(
     [`grep -irl "${task}"`, ...files].join(' ')
   )

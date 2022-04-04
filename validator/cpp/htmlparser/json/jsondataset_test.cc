@@ -4,9 +4,9 @@
 #include <string_view>
 
 #include "gtest/gtest.h"
-#include "defer.h"
-#include "fileutil.h"
-#include "json/parser.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/json/parser.h"
 
 void ParseAndValidateFile(std::string file_path) {
   std::ifstream fd(file_path);
@@ -27,41 +27,41 @@ void ParseAndValidateFile(std::string file_path) {
 }
 
 TEST(JSONParserTest, File1) {
-  ParseAndValidateFile("json/testdata/1.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/1.json");
 }
 
 TEST(JSONParserTest, File2) {
-  ParseAndValidateFile("json/testdata/2.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/2.json");
 }
 
 TEST(JSONParserTest, File3) {
-  ParseAndValidateFile("json/testdata/3.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/3.json");
 }
 
 TEST(JSONParserTest, File4) {
-  ParseAndValidateFile("json/testdata/4.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/4.json");
 }
 
 TEST(JSONParserTest, File5) {
-  ParseAndValidateFile("json/testdata/5.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/5.json");
 }
 
 TEST(JSONParserTest, File6) {
-  ParseAndValidateFile("json/testdata/6.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/6.json");
 }
 
 TEST(JSONParserTest, File7) {
-  ParseAndValidateFile("json/testdata/7.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/7.json");
 }
 
 TEST(JSONParserTest, File8) {
-  ParseAndValidateFile("json/testdata/8.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/8.json");
 }
 
 TEST(JSONParserTest, File9) {
-  ParseAndValidateFile("json/testdata/9.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/9.json");
 }
 
 TEST(JSONParserTest, File10) {
-  ParseAndValidateFile("json/testdata/10.json");
+  ParseAndValidateFile("cpp/htmlparser/json/testdata/10.json");
 }

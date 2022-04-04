@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {iterateCursor, removeElement} from '#core/dom';
 import {computedStyle, px, setStyle} from '#core/dom/style';
 import {toArray} from '#core/types/array';
@@ -6,8 +6,8 @@ import {throttle} from '#core/types/function';
 
 import {Services} from '#service';
 
-import {listen, listenOncePromise} from '../../../src/event-helper';
-import {dev, devAssert, user} from '../../../src/log';
+import {listen, listenOncePromise} from '#utils/event-helper';
+import {dev, devAssert, user} from '#utils/log';
 
 const AMP_FORM_TEXTAREA_EXPAND_ATTR = 'autoexpand';
 
@@ -50,7 +50,7 @@ export class AmpFormTextarea {
       }
     };
 
-    listen(root, AmpEvents.DOM_UPDATE, maybeInstall);
+    listen(root, AmpEvents_Enum.DOM_UPDATE, maybeInstall);
     maybeInstall();
   }
 
@@ -105,7 +105,7 @@ export class AmpFormTextarea {
 
     let cachedTextareaElements = root.querySelectorAll('textarea');
     this.unlisteners_.push(
-      listen(root, AmpEvents.DOM_UPDATE, () => {
+      listen(root, AmpEvents_Enum.DOM_UPDATE, () => {
         cachedTextareaElements = root.querySelectorAll('textarea');
       })
     );

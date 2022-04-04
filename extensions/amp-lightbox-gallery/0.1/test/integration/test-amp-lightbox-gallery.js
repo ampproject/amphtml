@@ -1,6 +1,6 @@
-import {poll} from '#testing/iframe';
+import * as analytics from '#utils/analytics';
 
-import * as analytics from '../../../../../src/analytics';
+import {poll} from '#testing/iframe';
 
 // TODO(cathyxz, #16822): This suite is flaky.
 describes.sandboxed.configure().skip('amp-lightbox-gallery', function () {

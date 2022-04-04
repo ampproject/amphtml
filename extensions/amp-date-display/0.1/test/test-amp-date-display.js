@@ -4,7 +4,7 @@ import {expect} from 'chai';
 
 import {Services} from '#service';
 
-import {user} from '../../../../src/log';
+import {user} from '#utils/log';
 
 describes.realWin(
   'amp-date-display',

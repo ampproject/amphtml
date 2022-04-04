@@ -2,9 +2,9 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
-import {buildGtagConfig} from './auto-analytics-configs';
+import {devAssert} from '#utils/log';
 
-import {devAssert} from '../../../src/log';
+import {buildGtagConfig} from './auto-analytics-configs';
 
 const buildAutoAnalyticsTemplate = (element) => {
   const html = htmlFor(element);

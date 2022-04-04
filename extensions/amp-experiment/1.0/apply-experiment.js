@@ -1,3 +1,5 @@
+import {user, userAssert} from '#utils/log';
+
 import {
   assertMutationRecordFormat,
   getElementsFromMutationRecordSelector,
@@ -6,8 +8,6 @@ import {AttributeMutationDefaultClass} from './mutation/attribute-mutation-defau
 import {AttributeMutationDefaultStyle} from './mutation/attribute-mutation-default-style';
 import {AttributeMutationDefaultUrl} from './mutation/attribute-mutation-default-url';
 import {CharacterDataMutation} from './mutation/character-data-mutation';
-
-import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-experiment apply-experiment';
 

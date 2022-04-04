@@ -1,11 +1,12 @@
+import {htmlFor} from '#core/dom/static-template';
+
+import {StateProperty} from '../amp-story-store-service';
 import {
   AdvancementConfig,
   ManualAdvancement,
   MediaBasedAdvancement,
   TimeBasedAdvancement,
 } from '../page-advancement';
-import {StateProperty} from '../amp-story-store-service';
-import {htmlFor} from '#core/dom/static-template';
 
 describes.realWin('page-advancement', {amp: true}, (env) => {
   let html;
@@ -74,6 +75,20 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
           )
         ).to.be.true;
         expect(!!advancement.timeoutId_).to.be.false;
+      });
+
+      it('should handle click event on amp-story-subscriptions', async () => {
+        const storyEl = win.document.createElement('amp-story');
+        const pageEl = win.document.createElement('amp-story-page');
+        const subscriptionsEl = win.document.createElement(
+          'amp-story-subscriptions'
+        );
+        storyEl.appendChild(pageEl);
+        storyEl.appendChild(subscriptionsEl);
+        const advancement = new ManualAdvancement(win, storyEl);
+
+        expect(advancement.shouldHandleEvent_({target: subscriptionsEl})).to.be
+          .true;
       });
     });
 

@@ -2,18 +2,18 @@ import {devAssert} from '#core/assert';
 
 export class DetachedDomStream {
   /**
-   * @param {!Window} win
-   * @param {function(!Document):void} onChunk
-   * @param {function(!Document):void} onEnd
+   * @param {Window} win
+   * @param {function(Document):void} onChunk
+   * @param {function(Document):void} onEnd
    */
   constructor(win, onChunk, onEnd) {
-    /** @const @private {function(!Document):void} */
+    /** @const @private {function(Document):void} */
     this.onChunk_ = onChunk;
 
-    /** @const @private {function(!Document):void} */
+    /** @const @private {function(Document):void} */
     this.onEnd_ = onEnd;
 
-    /** @const @private {!Document} */
+    /** @const @private {Document} */
     this.detachedDoc_ = win.document.implementation.createHTMLDocument('');
     this.detachedDoc_.open();
 

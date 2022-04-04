@@ -16,6 +16,10 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
+      - name: Set Up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
       - name: Install Dependencies
         run: bash ./.github/workflows/install_dependencies.sh
       - name: ${{ matrix.flavor }}

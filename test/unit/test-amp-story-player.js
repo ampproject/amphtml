@@ -1,12 +1,13 @@
 import {Messaging} from '@ampproject/viewer-messaging';
 import {expect} from 'chai';
 
+import {createCustomEvent, listenOncePromise} from '#utils/event-helper';
+
 import {macroTask} from '#testing/helpers';
 
 import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
 import {AmpStoryPlayer} from '../../src/amp-story-player/amp-story-player-impl';
 import {PageScroller} from '../../src/amp-story-player/page-scroller';
-import {createCustomEvent, listenOncePromise} from '../../src/event-helper';
 
 describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
@@ -291,6 +292,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(registerHandlerSpy).to.have.been.calledWith('touchmove');
     expect(registerHandlerSpy).to.have.been.calledWith('touchend');
     expect(registerHandlerSpy).to.have.been.calledWith('selectDocument');
+    expect(registerHandlerSpy).to.have.been.calledWith('storyContentLoaded');
     expect(registerHandlerSpy).to.have.been.calledWith('documentStateUpdate');
   });
 
@@ -1506,12 +1508,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(
-        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-prev')
-      ).to.exist;
-      expect(
-        playerEl.querySelector('.i-amphtml-story-player-desktop-panel-next')
-      ).to.exist;
+      expect(playerEl.querySelector('.i-amphtml-story-player-panel-prev')).to
+        .exist;
+      expect(playerEl.querySelector('.i-amphtml-story-player-panel-next')).to
+        .exist;
     });
 
     it('Should get UI state on resize', async () => {

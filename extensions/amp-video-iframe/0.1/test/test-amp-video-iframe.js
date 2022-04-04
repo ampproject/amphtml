@@ -4,11 +4,12 @@ import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 
 import {Services} from '#service';
 
+import {listenOncePromise} from '#utils/event-helper';
+
 import {macroTask} from '#testing/helpers';
 import {installResizeObserverStub} from '#testing/resize-observer-stub';
 
-import {listenOncePromise} from '../../../../src/event-helper';
-import {VideoEvents} from '../../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 describes.realWin(
   'amp-video-iframe',
@@ -82,7 +83,7 @@ describes.realWin(
         height: Number(element.getAttribute('height')) || 100,
       });
       impl.layoutCallback();
-      return listenOncePromise(element, VideoEvents.LOAD);
+      return listenOncePromise(element, VideoEvents_Enum.LOAD);
     }
 
     async function stubPostMessage(videoIframe) {
@@ -137,6 +138,42 @@ describes.realWin(
           sourceUrl,
           title,
           lang,
+          jsonLd: null,
+        });
+      });
+
+      it('sets metadata in iframe name — with jsonLd', async () => {
+        const canonicalUrl = 'foo.html';
+        const sourceUrl = 'bar.html';
+        const title = 'My test title';
+        const lang = 'es';
+
+        env.sandbox.stub(win.document, 'title').value(title);
+        env.sandbox.stub(win.document.documentElement, 'lang').value(lang);
+
+        env.sandbox.stub(Services, 'documentInfoForDoc').returns({
+          canonicalUrl,
+          sourceUrl,
+        });
+
+        const jsonLd = {jsonLd: 'blah'};
+        const jsonLdScript = win.document.createElement('script');
+        jsonLdScript.type = 'application/ld+json';
+        jsonLdScript.text = JSON.stringify(jsonLd);
+
+        win.document.head.appendChild(jsonLdScript);
+
+        const videoIframe = createVideoIframe();
+
+        await layoutAndLoad(videoIframe);
+
+        const iframe = videoIframe.querySelector('iframe');
+        expect(JSON.parse(iframe.name)).to.deep.equal({
+          canonicalUrl,
+          sourceUrl,
+          title,
+          lang,
+          jsonLd,
         });
       });
 
@@ -202,7 +239,7 @@ describes.realWin(
       });
 
       it('should auto-pause when playing and no size', async () => {
-        impl.onMessage_({data: {event: VideoEvents.PLAYING}});
+        impl.onMessage_({data: {event: VideoEvents_Enum.PLAYING}});
         // First send "size" event and then "no size".
         resizeObserverStub.notifySync({
           target: player,
@@ -224,8 +261,8 @@ describes.realWin(
       });
 
       it('should NOT auto-pause when not playing', async () => {
-        impl.onMessage_({data: {event: VideoEvents.PLAYING}});
-        impl.onMessage_({data: {event: VideoEvents.PAUSE}});
+        impl.onMessage_({data: {event: VideoEvents_Enum.PLAYING}});
+        impl.onMessage_({data: {event: VideoEvents_Enum.PAUSE}});
         // First send "size" event and then "no size".
         resizeObserverStub.notifySync({
           target: player,
@@ -314,13 +351,13 @@ describes.realWin(
         const impl = await videoIframe.getImpl(false);
 
         const validEvents = [
-          VideoEvents.PLAYING,
-          VideoEvents.PAUSE,
-          VideoEvents.ENDED,
-          VideoEvents.MUTED,
-          VideoEvents.UNMUTED,
-          VideoEvents.AD_START,
-          VideoEvents.AD_END,
+          VideoEvents_Enum.PLAYING,
+          VideoEvents_Enum.PAUSE,
+          VideoEvents_Enum.ENDED,
+          VideoEvents_Enum.MUTED,
+          VideoEvents_Enum.UNMUTED,
+          VideoEvents_Enum.AD_START,
+          VideoEvents_Enum.AD_END,
         ];
 
         for (let i = 0; i < validEvents.length; i++) {
@@ -460,7 +497,7 @@ describes.realWin(
         it(`should ${verb} custom analytics event ${sufix}`, async () => {
           const videoIframe = createVideoIframe();
           const eventSpy = env.sandbox.spy();
-          videoIframe.addEventListener(VideoEvents.CUSTOM_TICK, eventSpy);
+          videoIframe.addEventListener(VideoEvents_Enum.CUSTOM_TICK, eventSpy);
 
           await layoutAndLoad(videoIframe);
 

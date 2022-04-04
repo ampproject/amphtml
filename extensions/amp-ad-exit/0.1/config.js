@@ -1,6 +1,7 @@
+import {user, userAssert} from '#utils/log';
+
 import {FilterType} from './filters/filter';
 
-import {user, userAssert} from '../../../src/log';
 import {IFRAME_TRANSPORTS} from '../../amp-analytics/0.1/iframe-transport-vendors';
 
 /**

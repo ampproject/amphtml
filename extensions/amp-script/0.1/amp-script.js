@@ -1,10 +1,14 @@
-import * as WorkerDOM from '@ampproject/worker-dom/dist/amp-production/main.mjs';
+import {upgrade} from '@ampproject/worker-dom/dist/amp-production/main.mjs';
 
 import {Deferred} from '#core/data-structures/promise';
-import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
+import {
+  Layout_Enum,
+  applyFillContent,
+  isLayoutSizeDefined,
+} from '#core/dom/layout';
 import {realChildElements} from '#core/dom/query';
 import * as mode from '#core/mode';
-import {dict, map} from '#core/types/object';
+import {map} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 import {utf8Encode} from '#core/types/string/bytes';
 
@@ -13,13 +17,14 @@ import {Purifier} from '#purifier';
 import {Services} from '#service';
 import {calculateExtensionScriptUrl} from '#service/extension-script';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {UserActivationTracker} from './user-activation-tracker';
 
 import {CSS} from '../../../build/amp-script-0.1.css';
 import {urls} from '../../../src/config';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {cancellation} from '../../../src/error-reporting';
-import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service-helpers';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
@@ -62,6 +67,18 @@ export const StorageLocation = {
   SESSION: 1,
   AMP_STATE: 2,
 };
+
+/** @private {*}  */
+let upgradeForTest = null;
+
+/**
+ * Set the WorkerDOM.upgrade function for tests.
+ * @param {*} fn the function to use instead of WorkerDOM.upgrade.
+ * @visibleForTesting
+ */
+export function setUpgradeForTest(fn) {
+  upgradeForTest = fn;
+}
 
 export class AmpScript extends AMP.BaseElement {
   /**
@@ -125,7 +142,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
+    return layout == Layout_Enum.CONTAINER || isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -173,11 +190,11 @@ export class AmpScript extends AMP.BaseElement {
     }
 
     const {height, width} = this.getLayoutSize();
-    if (width === 0 && height === 0) {
+    if (width * height === 0 && !this.nodom_) {
       this.reportedZeroSize_ = true;
       user().warn(
         TAG,
-        'Skipped initializing amp-script due to zero width and height.',
+        'Skipped initializing amp-script due to zero width or height.',
         this.element
       );
     }
@@ -306,7 +323,7 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
-    return WorkerDOM.upgrade(
+    return (upgradeForTest || upgrade)(
       container || this.element,
       workerAndAuthorScripts,
       config
@@ -424,8 +441,8 @@ export class AmpScript extends AMP.BaseElement {
           return response.text();
         } else {
           // For cross-origin, verify hash of script itself (skip in
-          // development mode).
-          if (this.development_) {
+          // development and sandboxed mode).
+          if (this.development_ || this.sandboxed_) {
             return response.text();
           } else {
             return response.text().then((text) => {
@@ -679,7 +696,7 @@ export class SanitizerImpl {
     registerServiceBuilder(this.win_, 'purifier-inplace', function () {
       return new Purifier(
         ampScript.win.document,
-        dict({'IN_PLACE': true}),
+        {'IN_PLACE': true},
         rewriteAttributeValue
       );
     });

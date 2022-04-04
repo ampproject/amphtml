@@ -5,7 +5,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {Services} from '#service';
 
-import {PlayingStates} from '../../../../src/video-interface';
+import {PlayingStates_Enum} from '../../../../src/video-interface';
 import {
   Actions,
   BASE_CLASS_NAME,
@@ -53,7 +53,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
     // VideoDocking.querySlot_() expects this guy:
     querySelectorStub.withArgs('[dock]').returns(video.element);
 
-    // VideoDocking.querySlot_() expects the VideoEvents.REGISTERED signal.
+    // VideoDocking.querySlot_() expects the VideoEvents_Enum.REGISTERED signal.
     // This is normally set by virtue of the Video service, which is not
     // tested here.
     video.signals = () => ({
@@ -154,7 +154,7 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
     manager = {
       getPlayingState() {
-        return PlayingStates.PLAYING_MANUAL;
+        return PlayingStates_Enum.PLAYING_MANUAL;
       },
       isMuted() {
         return false;
@@ -1278,6 +1278,34 @@ describes.realWin('video docking', {amp: true}, (env) => {
 
       expect(viewport.animateScrollIntoView.withArgs(video.element, 'center'))
         .to.have.been.calledOnce;
+    });
+  });
+
+  describe('onViewportResize_', () => {
+    beforeEach(() => {
+      env.sandbox.stub(docking, 'trigger_');
+      env.sandbox.stub(docking, 'updateOnResize_');
+
+      const video = createVideo();
+      mockAreaWidth(400);
+
+      docking.observed_.push(video);
+      docking.setCurrentlyDocked_(
+        video,
+        /* target, irrelevant */ {},
+        /* step, irrelevant */ 1
+      );
+    });
+    it('updates dock on resize when docked and viewport width changed', () => {
+      mockAreaWidth(399);
+      docking.onViewportResize_();
+      expect(docking.updateOnResize_.withArgs()).to.have.been.calledOnce;
+    });
+
+    it('does not update dock on resize when docked and viewport width did not change', () => {
+      mockAreaWidth(400); // unchanged
+      docking.onViewportResize_();
+      expect(docking.updateOnResize_).not.to.have.been.called;
     });
   });
 

@@ -1,4 +1,4 @@
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const {getStdout} = require('../common/process');
 const {readFile} = require('fs-extra');
 const {writeDiffOrFail} = require('../common/diff');
@@ -29,7 +29,7 @@ const entry = (name) =>
  */
 const generateList = () =>
   getStdout(
-    ['grep -lr', `"${grepJsContent}"`, ...globby.sync(grepJsFiles)].join(' ')
+    ['grep -lr', `"${grepJsContent}"`, ...fastGlob.sync(grepJsFiles)].join(' ')
   )
     .trim()
     .split('\n')

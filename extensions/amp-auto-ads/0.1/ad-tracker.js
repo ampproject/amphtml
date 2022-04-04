@@ -2,9 +2,9 @@ import {endsWith} from '#core/types/string';
 
 import {Services} from '#service';
 
-import {measurePageLayoutBox} from './measure-page-layout-box';
+import {user} from '#utils/log';
 
-import {user} from '../../../src/log';
+import {measurePageLayoutBox} from './measure-page-layout-box';
 
 /** @const */
 const TAG = 'amp-auto-ads';

@@ -239,7 +239,7 @@ test('unlabel', async (t) => {
     )
     .reply(200, {data: {}});
 
-  await removeLabels('2107280123000', '2107210123000', 'beta');
+  await removeLabels('2107280123000', '2107210123000', 'beta-percent');
   t.true(rest.isDone());
   t.true(graphql.isDone());
 });

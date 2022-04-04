@@ -16,13 +16,13 @@ const jobName = 'checks.js';
 function pushBuildWorkflow() {
   timedExecOrDie('amp presubmit');
   timedExecOrDie('amp check-invalid-whitespaces');
-  timedExecOrDie('amp validate-html-fixtures');
   timedExecOrDie('amp lint');
   timedExecOrDie('amp prettify');
+  timedExecOrDie('amp check-json-schemas');
   timedExecOrDie('amp ava');
   timedExecOrDie('amp check-build-system');
+  timedExecOrDie('amp check-ignore-lists');
   timedExecOrDie('amp babel-plugin-tests');
-  timedExecOrDie('amp caches-json');
   timedExecOrDie('amp check-exact-versions');
   timedExecOrDie('amp check-renovate-config');
   timedExecOrDie('amp server-tests');
@@ -50,8 +50,8 @@ function prBuildWorkflow() {
     timedExecOrDie('amp check-invalid-whitespaces');
   }
 
-  if (buildTargetsInclude(Targets.HTML_FIXTURES)) {
-    timedExecOrDie('amp validate-html-fixtures');
+  if (buildTargetsInclude(Targets.IGNORE_LIST)) {
+    timedExecOrDie(`amp check-ignore-lists`);
   }
 
   if (buildTargetsInclude(Targets.LINT_RULES)) {
@@ -64,6 +64,10 @@ function prBuildWorkflow() {
     timedExecOrDie('amp prettify');
   }
 
+  if (buildTargetsInclude(Targets.JSON_FILES)) {
+    timedExecOrDie('amp check-json-schemas');
+  }
+
   if (buildTargetsInclude(Targets.AVA)) {
     timedExecOrDie('amp ava');
   }
@@ -74,10 +78,6 @@ function prBuildWorkflow() {
 
   if (buildTargetsInclude(Targets.BABEL_PLUGIN)) {
     timedExecOrDie('amp babel-plugin-tests');
-  }
-
-  if (buildTargetsInclude(Targets.CACHES_JSON)) {
-    timedExecOrDie('amp caches-json');
   }
 
   if (buildTargetsInclude(Targets.DOCS)) {

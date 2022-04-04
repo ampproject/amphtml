@@ -7,21 +7,21 @@ import {
 } from '#core/dom/fullscreen';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {PauseHelper} from '#core/dom/video/pause-helper';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
+import {getData, listen} from '#utils/event-helper';
+import {dev, userAssert} from '#utils/log';
+
 import {getConsentPolicyInfo} from '../../../src/consent';
-import {getData, listen} from '../../../src/event-helper';
 import {
   createFrameFor,
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, userAssert} from '../../../src/log';
 import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-nexxtv-player';
 
@@ -122,17 +122,14 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       [clientId, streamtype, mediaid].map(encodeURIComponent).join('/');
 
     return assertAbsoluteHttpOrHttpsUrl(
-      addParamsToUrl(
-        url,
-        dict({
-          'dataMode': mode,
-          'platform': 'amp',
-          'disableAds': disableAds,
-          'streamingFilter': streamingFilter,
-          'exitMode': exitMode,
-          'consentString': consentString,
-        })
-      )
+      addParamsToUrl(url, {
+        'dataMode': mode,
+        'platform': 'amp',
+        'disableAds': disableAds,
+        'streamingFilter': streamingFilter,
+        'exitMode': exitMode,
+        'consentString': consentString,
+      })
     );
   }
 
@@ -194,9 +191,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/ postMessage(
-          dict({
+          {
             'cmd': command,
-          }),
+          },
           '*'
         );
       }
@@ -228,11 +225,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     redispatch(this.element, eventType, {
-      'ready': VideoEvents.LOAD,
-      'play': VideoEvents.PLAYING,
-      'pause': VideoEvents.PAUSE,
-      'mute': VideoEvents.MUTED,
-      'unmute': VideoEvents.UNMUTED,
+      'ready': VideoEvents_Enum.LOAD,
+      'play': VideoEvents_Enum.PLAYING,
+      'pause': VideoEvents_Enum.PAUSE,
+      'mute': VideoEvents_Enum.MUTED,
+      'unmute': VideoEvents_Enum.UNMUTED,
     });
   }
 

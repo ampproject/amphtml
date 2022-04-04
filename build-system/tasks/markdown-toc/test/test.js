@@ -1,4 +1,4 @@
-const globby = require('globby');
+const fastGlob = require('fast-glob');
 const path = require('path');
 const test = require('ava');
 const {headerRegExpForTesting, overrideToc, overrideTocGlob} = require('../');
@@ -23,7 +23,9 @@ test('README.md includes correct header', async (t) => {
 });
 
 test('overrideToc ./all-are-complete', async (t) => {
-  for (const filename of await globby(`${dirname}/all-are-complete/**/*.md`)) {
+  for (const filename of await fastGlob(
+    `${dirname}/all-are-complete/**/*.md`
+  )) {
     const content = await readFile(filename, 'utf-8');
     t.deepEqual(await overrideToc(content), content);
   }

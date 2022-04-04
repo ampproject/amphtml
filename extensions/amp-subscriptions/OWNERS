@@ -5,12 +5,9 @@
   rules: [
     {
       owners: [
-        {name: 'chenshay'},
         {name: 'chrisantaki'},
-        {name: 'dvoytenko'},
-        {name: 'elijahsoria'},
         {name: 'jpettitt'},
-        {name: 'qidonna'},
+        {name: 'mmmicedcoffee'},
       ],
     },
   ],

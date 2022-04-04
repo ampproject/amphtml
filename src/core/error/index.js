@@ -1,7 +1,7 @@
 /**
  * Some exceptions (DOMException, namely) have read-only message.
- * @param {!Error} error
- * @return {!Error}
+ * @param {Error} error
+ * @return {Error}
  */
 export function duplicateErrorIfNecessary(error) {
   const messageProperty = Object.getOwnPropertyDescriptor(error, 'message');
@@ -13,7 +13,7 @@ export function duplicateErrorIfNecessary(error) {
   const e = new Error(message);
   // Copy all the extraneous things we attach.
   for (const prop in error) {
-    e[prop] = error[prop];
+    /** @type {*} */ (e)[prop] = /** @type {*} */ (error)[prop];
   }
   // Ensure these are copied.
   e.stack = stack;
@@ -23,7 +23,7 @@ export function duplicateErrorIfNecessary(error) {
 /**
  * Creates an error object.
  * @param {...*} var_args
- * @return {!Error}
+ * @return {Error}
  */
 export function createError(var_args) {
   let error = null;
@@ -49,7 +49,7 @@ export function createError(var_args) {
 
 /**
  * Reports an error, if the global error reporting function is defined.
- * @param {!Error} error
+ * @param {Error} error
  */
 function maybeReportError(error) {
   self.__AMP_REPORT_ERROR?.(error);
@@ -76,8 +76,8 @@ export function rethrowAsync(var_args) {
  * asynchronously.
  *
  * @param {function(S):T} callback
- * @param {S} args
- * @return {T}
+ * @param {...S} args
+ * @return {T|undefined}
  * @template T
  * @template S
  */
@@ -92,7 +92,7 @@ export function tryCallback(callback, ...args) {
 /**
  * Creates an error object with its expected property set to true.
  * @param {...*} var_args
- * @return {!Error}
+ * @return {Error}
  */
 export function createExpectedError(var_args) {
   const error = createError.apply(null, arguments);

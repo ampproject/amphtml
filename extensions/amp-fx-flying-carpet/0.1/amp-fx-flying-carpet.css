@@ -32,17 +32,20 @@ amp-fx-flying-carpet > .i-amphtml-fx-flying-carpet-clip > .i-amphtml-fx-flying-c
   top: 0 !important;
   width: 100%;
   height: 100%;
-  /*
-   * Included to force slow webkit browsers (Android) into rendering the
-   * container using the GPU.
-   */
-  -webkit-transform: translateZ(0) !important;
 
   /* Center contents in the container */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/*
+ * Included to force slow webkit browsers (Android) into rendering the
+ * container using the GPU.
+ */
+amp-fx-flying-carpet > .i-amphtml-fx-flying-carpet-clip > .i-amphtml-fx-flying-carpet-container.i-amphtml-fx-flying-carpet-container-fix {
+  -webkit-transform: translateZ(0) !important;
 }
 
 .i-amphtml-fx-flying-carpet-container > .i-amphtml-layout-responsive,

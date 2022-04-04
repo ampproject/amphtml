@@ -6,7 +6,9 @@ import {
 
 import {Services} from '#service';
 import {installPositionObserverServiceForDoc} from '#service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '#service/position-observer/position-observer-worker';
+import {PositionObserverFidelity_Enum} from '#service/position-observer/position-observer-worker';
+
+import {devAssert} from '#utils/log';
 
 import {Presets} from './amp-fx-presets';
 import {
@@ -19,15 +21,14 @@ import {
   resolvePercentageToNumber,
 } from './amp-fx-presets-utils';
 
-import {devAssert} from '../../../../src/log';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../../src/service-helpers';
-import {FxType} from '../fx-type'; // eslint-disable-line no-unused-vars
+import {FxType} from '../fx-type'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import {
   ScrollToggleDispatch,
-  ScrollTogglePosition, // eslint-disable-line no-unused-vars
+  ScrollTogglePosition, // eslint-disable-line @typescript-eslint/no-unused-vars
   assertValidScrollToggleElement,
   getScrollToggleFloatInOffset,
   getScrollTogglePosition,
@@ -218,7 +219,7 @@ export class FxElement {
   observePositionChanges_() {
     this.positionObserver_.observe(
       this.element,
-      PositionObserverFidelity.HIGH,
+      PositionObserverFidelity_Enum.HIGH,
       Presets[this.fxType_].update.bind(this)
     );
 

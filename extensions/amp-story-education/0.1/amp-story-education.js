@@ -1,16 +1,19 @@
 import {removeChildren} from '#core/dom';
-import {Layout} from '#core/dom/layout';
+import {Layout_Enum} from '#core/dom/layout';
 import {setModalAsClosed, setModalAsOpen} from '#core/dom/modal';
 import {htmlFor} from '#core/dom/static-template';
 import {toggle} from '#core/dom/style';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
-import {LocalizedStringId} from '#service/localization/strings';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {dev} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-education-0.1.css';
-import {dev} from '../../../src/log';
-import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
+import {
+  getLocalizationService,
+  localizeTemplate,
+} from '../../amp-story/1.0/amp-story-localization-service';
 import {
   Action,
   StateProperty,
@@ -62,9 +65,6 @@ export class AmpStoryEducation extends AMP.BaseElement {
     /** @private {!Element} */
     this.containerEl_ = this.win.document.createElement('div');
 
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
-
     /** @private {?boolean} */
     this.storyPausedStateToRestore_ = null;
 
@@ -107,7 +107,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.CONTAINER;
+    return layout === Layout_Enum.CONTAINER;
   }
 
   /**
@@ -203,21 +203,23 @@ export class AmpStoryEducation extends AMP.BaseElement {
         el = buildNavigationEl(this.element);
         el.setAttribute('step', 'tap');
         const progressStringId = this.viewer_.hasCapability('swipe')
-          ? LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS
-          : LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE;
+          ? LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS
+          : LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE;
+
         el.querySelector(
           '.i-amphtml-story-education-navigation-progress'
-        ).textContent =
-          this.localizationService_.getLocalizedString(progressStringId);
+        ).setAttribute('i-amphtml-i18n-text-content', progressStringId);
         el.querySelector(
           '.i-amphtml-story-education-navigation-instructions'
-        ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS
+        ).setAttribute(
+          'i-amphtml-i18n-text-content',
+          LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS
         );
         el.querySelector(
           '.i-amphtml-story-education-navigation-button'
-        ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_DISMISS
+        ).setAttribute(
+          'i-amphtml-i18n-text-content',
+          LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_TAP_DISMISS
         );
         this.showTemplate_(el);
         break;
@@ -226,18 +228,21 @@ export class AmpStoryEducation extends AMP.BaseElement {
         el.setAttribute('step', 'swipe');
         el.querySelector(
           '.i-amphtml-story-education-navigation-progress'
-        ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS
+        ).setAttribute(
+          'i-amphtml-i18n-text-content',
+          LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS
         );
         el.querySelector(
           '.i-amphtml-story-education-navigation-instructions'
-        ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_INSTRUCTIONS
+        ).setAttribute(
+          'i-amphtml-i18n-text-content',
+          LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_INSTRUCTIONS
         );
         el.querySelector(
           '.i-amphtml-story-education-navigation-button'
-        ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_DISMISS
+        ).setAttribute(
+          'i-amphtml-i18n-text-content',
+          LocalizedStringId_Enum.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_DISMISS
         );
         this.showTemplate_(el);
         break;
@@ -260,6 +265,8 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.storeService_.dispatch(Action.TOGGLE_EDUCATION, true);
+
+    localizeTemplate(template, this.containerEl_);
 
     this.mutateElement(() => {
       removeChildren(this.containerEl_);
@@ -288,10 +295,9 @@ export class AmpStoryEducation extends AMP.BaseElement {
         // TODO(gmajoulet): update this method to support showing multiple
         // screens, if/when needed.
         this.viewer_
-          .sendMessageAwaitResponse(
-            'canShowScreens',
-            dict({'screens': [{'screen': screen}]})
-          )
+          .sendMessageAwaitResponse('canShowScreens', {
+            'screens': [{'screen': screen}],
+          })
           .then((response) => {
             const shouldShow = !!(
               response &&

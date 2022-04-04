@@ -65,7 +65,11 @@ Type attribute value: `amplitude`
 
 Type attribute value: `appsflyer`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for AppsFlyer. More details for adding AppsFlyer support can be found at [appsflyer.com](https://support.appsflyer.com/hc/en-us/articles/360001610038#amp-support)
+
+<!-- markdown-link-check-enable -->
 
 ### AT Internet
 
@@ -109,7 +113,11 @@ Type attribute value: `blueconic`
 
 Type attribute value: `bluetriangle`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for blue Triangle. More details can be found at [help.bluetriangle.com](https://help.bluetriangle.com/hc/en-us/articles/1500006133061).
+
+<!-- markdown-link-check-enable -->
 
 ### Browsi
 
@@ -155,7 +163,11 @@ Adds support for comScore Unified Digital Measurement™ pageview analytics. Req
 
 Type attribute value: `cxense`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Cxense Insight analytics. Requires defining _var_ `siteId` with Cxense-provided _siteId_. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
+
+<!-- markdown-link-check-enable -->
 
 ### Deep.BI
 
@@ -184,7 +196,7 @@ Adds support for Eulerian Technologies Analytics. Requires defining _var_ `analy
 
 Type attribute value: `facebookpixel`
 
-Adds support for the [Facebook Pixel](https://www.facebook.com/business/a/facebook-pixel). In your [`amp-analytics`](./amp-analytics.md) configuration, you must define your Pixel ID as `pixelId: YOUR-PIXEL-ID`. The events supported along with the corresponding event values that can be specified are detailed in the [Facebook Pixel developer documentation](https://developers.facebook.com/docs/ads-for-websites/pixel-events).
+Adds support for the [Facebook Pixel](https://www.facebook.com/business/a/facebook-pixel). In your [`amp-analytics`](./amp-analytics.md) configuration, you must define your Pixel ID as `pixelId: YOUR-PIXEL-ID`. The events supported along with the corresponding event values that can be specified are detailed in the [Facebook Pixel developer documentation](https://developers.facebook.com/docs/facebook-pixel).
 
 ### Gemius
 
@@ -262,6 +274,20 @@ Additionally, the following variables must be defined:
 
 More details for adding INFOnline anonymous support can be found at [www.infonline.de](https://www.infonline.de/).
 
+### INFOnline base
+
+Type attribute value: `infonline_base`
+
+Additionally, the following variables must be defined:
+
+-   `st`: offer ID
+-   `co`: comment
+-   `cp`: code
+-   `url`: HTTPS location of `amp.html` on the service platform or sub domain
+-   `dn`: The relay domain name
+
+More details for adding INFOnline anonymous support can be found at [www.infonline.de](https://www.infonline.de/).
+
 ### ip-label
 
 Type attribute value: `iplabel`
@@ -281,7 +307,11 @@ Use `extraUrlParams` to add more data. Configuration details can be found at [ke
 
 Type attribute value: `kenshoo`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for Kenshoo. More information and configuration details can be found at [helpcenter.kenshoo.com](https://helpcenter.kenshoo.com/hc/en-us/articles/360025260592).
+
+<!-- markdown-link-check-enable -->
 
 ### Krux
 
@@ -399,7 +429,11 @@ Adds support for Nielsen Marketing Cloud. More details can be found at [Nielsen 
 
 Type attribute value: `oewa`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for [OEWA](http://www.oewa.at). Requires a copy of [amp-analytics-oewa.html](http://www.oewa.at/fileadmin/downloads/amp-analytics-oewa.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/main/docs/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `amp-analytics-oewa.html` needs to be on another subdomain such as `oewa-amp.example.com`. More details for adding OEWA support can be found [here](http://www.oewa.at/Implementierung).
+
+<!-- markdown-link-check-enable -->
 
 Additionally, the following variables must be defined:
 
@@ -440,8 +474,21 @@ Adds support for Permutive event collection. Additionally, the following `vars` 
 
 -   `namespace`: your Permutive AMP namespace
 -   `key`: your Permutive public API key
+    <!-- markdown-link-check-disable -->
+    Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](https://support.permutive.com/hc/en-us).
+    <!-- markdown-link-check-enable -->
 
-Use `extraUrlParams` to add additional event properties. Full configuration details can be found at [support.permutive.com](http://support.permutive.com).
+### Permutive-ampscript
+
+Type attribute value: `permutive-ampscript`
+
+Adds support for Permutive event collection via the Permutive SDK running inside `amp-script`. This is a newer version of the `Permutive` configuration mentioned above. It will soon replace the old configuration.
+
+<!-- markdown-link-check-disable -->
+
+To add additional properties to Permutive events use the `extraUrlParams` property and use the `customProperties` key to define any custom properties. The value should be a valid json object. Full configuration details can be found at [support.permutive.com](https://support.permutive.com/hc/en-us).
+
+<!-- markdown-link-check-enable -->
 
 ### Piano
 
@@ -501,8 +548,12 @@ Type attribute value: `retargetly`
 
 Type attribute value: `rudderstack`
 
+<!-- markdown-link-check-disable -->
+
 Adds support for RudderStack page views and events.
 Find out more on the implementation check our documentation at [docs.rudderstack.com](https://docs.rudderstack.com/rudderstack-sdk-integration-guides/amp-analytics).
+
+<!-- markdown-link-check-enable -->
 
 ### Segment
 
@@ -571,7 +622,7 @@ Adds support for Rambler/TOP-100. Configuration details can be found at [top100.
 
 Type attribute value: `topmailru`
 
-Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru Help](https://help.mail.ru/top/amp-analytics).
+Adds support for Top.Mail.Ru. Configuration details can be found at [Top.Mail.Ru Help](https://top.mail.ru/help/en/code/amp).
 
 ### Treasure Data
 
@@ -597,7 +648,7 @@ Adds support for Vpon Analytics. Configuration details can be found at [Vpon Ana
 
 ### Webengage
 
-Type attribute value: `webengage`
+Type attribute value: `webengage`.
 
 <!--
 ### webtrekk (deprecated, see below)
@@ -614,5 +665,3 @@ Type attribute value: `webtrekk_v2`
 <span style="text-decoration: line-through;">`webtrekk`</span> is deprecated. **Use `webtrekk_v2` instead.**
 
 [/tip]
-
-Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).

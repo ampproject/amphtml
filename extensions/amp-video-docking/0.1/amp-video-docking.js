@@ -1,4 +1,4 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 import {isRTL, removeElement} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {applyFillContent} from '#core/dom/layout';
@@ -14,9 +14,11 @@ import {
 } from '#core/dom/style';
 import {getInternalVideoElementFor} from '#core/dom/video';
 import {once} from '#core/types/function';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
+
+import {createCustomEvent, listen, listenOnce} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
 
 import {applyBreakpointClassname} from './breakpoints';
 import {Controls} from './controls';
@@ -35,13 +37,11 @@ import {
 import {createViewportRect} from './viewport-rect';
 
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
-import {createCustomEvent, listen, listenOnce} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
-  PlayingStates,
-  VideoAttributes,
-  VideoEvents,
+  PlayingStates_Enum,
+  VideoAttributes_Enum,
+  VideoEvents_Enum,
   VideoInterface,
   VideoOrBaseElementDef,
   isDockable,
@@ -113,6 +113,7 @@ export const DockTargetType = {
  *   video: !VideoOrBaseElementDef,
  *   target: !DockTargetDef,
  *   step: number,
+ *   viewportRect: !RectDef,
  * }}
  */
 let DockedDef;
@@ -346,7 +347,7 @@ export class VideoDocking {
     const ampdoc = this.ampdoc_;
 
     const dockableSelector = `[${escapeCssSelectorIdent(
-      VideoAttributes.DOCK
+      VideoAttributes_Enum.DOCK
     )}]`;
 
     const dockableElements = ampdoc
@@ -355,12 +356,15 @@ export class VideoDocking {
 
     for (let i = 0; i < dockableElements.length; i++) {
       const element = dockableElements[i];
-      if (element.signals && element.signals().get(VideoEvents.REGISTERED)) {
+      if (
+        element.signals &&
+        element.signals().get(VideoEvents_Enum.REGISTERED)
+      ) {
         this.registerElement(element);
       }
     }
 
-    listen(ampdoc.getBody(), VideoEvents.REGISTERED, (e) => {
+    listen(ampdoc.getBody(), VideoEvents_Enum.REGISTERED, (e) => {
       const target = dev().assertElement(e.target);
       if (isDockable(target)) {
         this.registerElement(target);
@@ -396,7 +400,7 @@ export class VideoDocking {
     dev().assertElement(video);
 
     userAssert(
-      video.signals().get(VideoEvents.REGISTERED),
+      video.signals().get(VideoEvents_Enum.REGISTERED),
       '`dock` attribute can only be set on video components.'
     );
 
@@ -420,6 +424,15 @@ export class VideoDocking {
 
   /** @private */
   onViewportResize_() {
+    if (
+      this.viewportRect_.width === this.currentlyDocked_?.viewportRect.width
+    ) {
+      // Ignore resize events that occur when only the height changes.
+      // This works around issues where the browser may hide the location bar,
+      // or a virtual keyboard; causing a height-only resize that would
+      // otherwise undock the video.
+      return;
+    }
     this.observed_.forEach((video) => this.updateOnResize_(video));
   }
 
@@ -698,7 +711,8 @@ export class VideoDocking {
       optVideo || this.getDockedVideo_()
     );
     return (
-      this.manager_().getPlayingState(video) == PlayingStates.PLAYING_MANUAL
+      this.manager_().getPlayingState(video) ==
+      PlayingStates_Enum.PLAYING_MANUAL
     );
   }
 
@@ -811,11 +825,11 @@ export class VideoDocking {
         this.getDockedVideo_().element
     );
 
-    const trust = ActionTrust.LOW;
+    const trust = ActionTrust_Enum.LOW;
     const event = createCustomEvent(
       this.ampdoc_.win,
       /** @type {string} */ (action),
-      /* detail */ dict({})
+      {}
     );
     const actions = Services.actionServiceForDoc(element);
     actions.trigger(element, action, event, trust);
@@ -1139,7 +1153,8 @@ export class VideoDocking {
    */
   setCurrentlyDocked_(video, target, step) {
     const previouslyDocked = this.currentlyDocked_;
-    this.currentlyDocked_ = {video, target, step};
+    const viewportRect = {...this.viewportRect_};
+    this.currentlyDocked_ = {video, target, step, viewportRect};
     if (
       previouslyDocked &&
       previouslyDocked.video == video &&

@@ -1,7 +1,7 @@
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 
-import {userAssert} from './log';
+import {userAssert} from '#utils/log';
+
 import {toStructuredCloneable} from './utils/xhr-utils';
 
 /**
@@ -106,7 +106,7 @@ export class SsrTemplateHelper {
     if (this.isEnabled()) {
       userAssert(
         typeof data['html'] === 'string',
-        'Server side html response must be defined'
+        'Skipping template rendering due to failed fetch'
       );
       renderTemplatePromise = this.assertTrustedViewer(element).then(() => {
         return this.templates_.findAndSetHtmlForTemplate(
@@ -138,7 +138,7 @@ export class SsrTemplateHelper {
    * @private
    */
   buildPayload_(request, mustacheTemplate, opt_templates, opt_attributes = {}) {
-    const ampComponent = dict({'type': this.sourceComponent_});
+    const ampComponent = {'type': this.sourceComponent_};
 
     const successTemplateKey = 'successTemplate';
     const successTemplate =
@@ -168,13 +168,13 @@ export class SsrTemplateHelper {
       Object.assign(ampComponent, opt_attributes);
     }
 
-    const data = dict({
+    const data = {
       'originalRequest': toStructuredCloneable(
         request.xhrUrl,
         request.fetchOpt
       ),
       'ampComponent': ampComponent,
-    });
+    };
 
     return data;
   }

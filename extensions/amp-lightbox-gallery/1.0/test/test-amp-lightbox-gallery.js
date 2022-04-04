@@ -1,5 +1,8 @@
 import '../amp-lightbox-gallery';
-import {ActionTrust, DEFAULT_ACTION} from '#core/constants/action-constants';
+import {
+  ActionTrust_Enum,
+  DEFAULT_ACTION,
+} from '#core/constants/action-constants';
 import {createElementWithAttributes} from '#core/dom';
 import {htmlFor} from '#core/dom/static-template';
 
@@ -8,10 +11,11 @@ import {toggleExperiment} from '#experiments';
 import {Services} from '#service/';
 import {ActionInvocation} from '#service/action-impl';
 
-import {poll} from '#testing/iframe';
-import {waitFor, whenCalled} from '#testing/test-helper';
+import * as analytics from '#utils/analytics';
 
-import * as analytics from '../../../../src/analytics';
+import {waitFor, whenCalled} from '#testing/helpers/service';
+import {poll} from '#testing/iframe';
+
 import {installLightboxGallery} from '../amp-lightbox-gallery';
 
 const TAG = 'amp-lightbox-gallery';
@@ -41,7 +45,7 @@ describes.realWin(
       const source = null;
       const caller = null;
       const event = null;
-      const trust = ActionTrust.HIGH;
+      const trust = ActionTrust_Enum.HIGH;
       return new ActionInvocation(
         element,
         method,

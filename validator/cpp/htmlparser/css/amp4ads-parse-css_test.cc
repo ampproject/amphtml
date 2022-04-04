@@ -1,12 +1,12 @@
-#include "css/amp4ads-parse-css.h"
+#include "cpp/htmlparser/css/amp4ads-parse-css.h"
 
 #include <gmock/gmock.h>
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
-#include "css/parse-css.h"
-#include "strings.h"
+#include "cpp/htmlparser/css/parse-css.h"
+#include "cpp/htmlparser/strings.h"
 
 using std::unique_ptr;
 using testing::ElementsAre;

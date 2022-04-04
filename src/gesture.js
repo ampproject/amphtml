@@ -1,9 +1,10 @@
 import {Observable} from '#core/data-structures/observable';
 import {supportsPassiveEventListener} from '#core/dom/event-helper-listen';
 import {findIndex} from '#core/types/array';
-import {toWin} from '#core/window';
+import {getWin, toWin} from '#core/window';
 
-import {devAssert} from './log';
+import {devAssert} from '#utils/log';
+
 import {Pass} from './pass';
 
 const PROP_ = '__AMP_Gestures';
@@ -107,10 +108,7 @@ export class Gestures {
     this.wasEventing_ = false;
 
     /** @private {!Pass} */
-    this.pass_ = new Pass(
-      toWin(element.ownerDocument.defaultView),
-      this.doPass_.bind(this)
-    );
+    this.pass_ = new Pass(getWin(element), this.doPass_.bind(this));
 
     /** @private {!Observable} */
     this.pointerDownObservable_ = new Observable();

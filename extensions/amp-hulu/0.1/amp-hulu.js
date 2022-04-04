@@ -3,7 +3,8 @@ import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 
 import {Services} from '#service';
 
-import {devAssert, userAssert} from '../../../src/log';
+import {devAssert, userAssert} from '#utils/log';
+
 import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpHulu extends AMP.BaseElement {

@@ -1,4 +1,4 @@
-import {dev} from '../../../src/log';
+import {dev} from '#utils/log';
 
 /** @enum {string} */
 export const VideoDockingEvents = {

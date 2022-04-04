@@ -15,6 +15,7 @@
  */
 
 import {loadScript, validateData} from '#3p/3p';
+
 import {setStyle} from '#core/dom/style';
 
 /**

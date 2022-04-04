@@ -1,0 +1,119 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Hydration Test</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <!-- TODO: make lazy server work with .css files. -->
+  <link rel="stylesheet" href="/extensions/amp-carousel/0.1/amp-carousel.css" />
+  <link rel="stylesheet" href="/dist/v0.css" />
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
+      h1 {
+          text-align: center;
+      }
+      amp-fit-text {
+          left: 50%;
+          transform: translateX(-50%);
+      }
+
+      amp-carousel {
+          left: 50%;
+          transform: translateX(-50%);
+      }
+  </style>
+</head>
+<body>
+    <!--
+        Manual test file for hydration of server-rendered components.
+        Unlike most AMPHTML pages, this file's components should all be rendered.
+    -->
+
+    <h1><code>client render: amp-layout</code> with a 4:1 responsive ratio </h1>
+    <amp-layout layout="responsive" width="4" height="1">
+        <svg viewBox="0 0 100 25">
+            <circle cx="50%" cy="50%" r="15%" stroke="black" stroke-width="3"></circle>
+            Sorry, your browser does not support inline SVG.
+        </svg>
+    </amp-layout>
+
+    <h1><code>server render: amp-layout</code> with a 4:1 responsive ratio </h1>
+    <amp-layout class="i-amphtml-layout-responsive i-amphtml-layout-size-defined i-amphtml-element" height=1 i-amphtml-layout=responsive i-amphtml-ssr layout=responsive width=4>
+        <i-amphtml-sizer slot="i-amphtml-svc" style="padding-top: 25%;"></i-amphtml-sizer>
+        <div class="i-amphtml-fill-content">
+            <svg viewBox="0 0 100 25">
+                <circle cx="50%" cy="50%" r="15%" stroke=black stroke-width=3></circle>
+                Sorry, your browser does not support inline SVG.
+            </svg>
+        </div>
+    </amp-layout>
+
+    <h1><code>amp-fit-text</code> with large text</h1>
+    <amp-fit-text width="111px" height="222px" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout="fixed" i-amphtml-ssr="" style="width: 111px; height: 222px;">
+        <div class="i-amphtml-fill-content i-amphtml-fit-text-content">
+            <div class="i-amphtml-fit-text-content-wrapper">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed ultrices massa. Fusce lacus magna, blandit sed suscipit at, congue mollis sem. Vestibulum molestie tortor eu dui dictum, eget pharetra orci ultricies. Donec venenatis pellentesque massa sit amet mollis. Praesent nisl metus, egestas eu turpis a, tincidunt imperdiet purus. Nulla tincidunt vulputate porta. Sed vitae lacinia ligula, in ultricies ante. Nunc ornare lacus in bibendum mattis. Cras ultricies vel eros pulvinar laoreet. Curabitur sed magna a est interdum mattis eu eget magna. Nam sit amet massa volutpat, pellentesque urna id, pretium magna. Praesent et enim ante. Vestibulum ultricies, urna ac ullamcorper scelerisque, augue est scelerisque massa, nec rhoncus orci sapien at ipsum. Fusce egestas sem non finibus euismod</div>
+        </div>
+        <div class="i-amphtml-fit-text-measurer">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer sed ultrices massa. Fusce lacus magna, blandit sed suscipit at, congue mollis sem. Vestibulum molestie tortor eu dui dictum, eget pharetra orci ultricies. Donec venenatis pellentesque massa sit amet mollis. Praesent nisl metus, egestas eu turpis a, tincidunt imperdiet purus. Nulla tincidunt vulputate porta. Sed vitae lacinia ligula, in ultricies ante. Nunc ornare lacus in bibendum mattis. Cras ultricies vel eros pulvinar laoreet. Curabitur sed magna a est interdum mattis eu eget magna. Nam sit amet massa volutpat, pellentesque urna id, pretium magna. Praesent et enim ante. Vestibulum ultricies, urna ac ullamcorper scelerisque, augue est scelerisque massa, nec rhoncus orci sapien at ipsum. Fusce egestas sem non finibus euismod</div>
+    </amp-fit-text>
+
+    <h1><code>amp-fit-text</code> with short text</h1>
+    <amp-fit-text width="111px" height="222px" class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout="fixed" i-amphtml-ssr="" style="width: 111px; height: 222px;">
+        <div class="i-amphtml-fill-content i-amphtml-fit-text-content">
+            <div class="i-amphtml-fit-text-content-wrapper">Hello, world</div>
+        </div>
+        <div class="i-amphtml-fit-text-measurer">Hello, world</div>
+    </amp-fit-text>
+
+    <h1><code>client render: carousel-0.1 type=slides</code></h1>
+    <amp-carousel type="slides" width="400" height="300" controls loop>
+        <img src="https://picsum.photos/400/300?img=1" width="400" height="300"></img>
+        <img src="https://picsum.photos/400/200?img=2" width="400" height="300"></img>
+        <img src="https://picsum.photos/400/200?img=3" width="400" height="300"></img>
+        <img src="https://picsum.photos/400/200?img=4" width="400" height="300"></img>
+        <img src="https://picsum.photos/400/200?img=5" width="400" height="300"></img>
+    </amp-carousel>
+
+    <h1><code>server render: carousel-0.1 type=slides</code></h1>
+    <amp-carousel class="i-amphtml-layout-fixed i-amphtml-layout-size-defined i-amphtml-slidescroll i-amphtml-carousel-has-controls i-amphtml-element" controls height="300" i-amphtml-layout="fixed" i-amphtml-ssr loop style="width: 400px; height: 300px" type="slides" width="400">
+        <div aria-live="polite" class="i-amphtml-slides-container i-amphtml-slidescroll-no-snap" tabindex="-1">
+            <div class="i-amphtml-slide-item i-amphtml-slide-item-show">
+                <img class="amp-carousel-slide" height="300" src="https://picsum.photos/400/300?img=1" width="400" />
+            </div>
+            <div class="i-amphtml-slide-item"><img class="amp-carousel-slide" height="300" src="https://picsum.photos/400/200?img=2" width="400"></div>
+            <div class="i-amphtml-slide-item"><img class="amp-carousel-slide" height="300" src="https://picsum.photos/400/200?img=3" width="400"></div>
+            <div class="i-amphtml-slide-item"><img class="amp-carousel-slide" height="300" src="https://picsum.photos/400/200?img=4" width="400"></div>
+            <div class="i-amphtml-slide-item"><img class="amp-carousel-slide" height="300" src="https://picsum.photos/400/200?img=5" width="400"></div>
+        </div>
+        <div aria-disabled="false" class="amp-carousel-button amp-carousel-button-prev" role="button" tabindex="0" title="Previous item in carousel (5 of 5)"></div>
+        <div aria-disabled="false" class="amp-carousel-button amp-carousel-button-next" role="button" tabindex="0" title="Next item in carousel (2 of 5)"></div>
+    </amp-carousel>
+
+    <h1><code>client render: carousel-0.1 type=scrollable</code></h1>
+    <amp-carousel width="300" height="100">
+        <img src="https://picsum.photos/300/400?img=1" width="120" height="100">
+        <img src="https://picsum.photos/300/400?img=2" width="120" height="100">
+        <img src="https://picsum.photos/300/400?img=3" width="120" height="100">
+        <img src="https://picsum.photos/300/400?img=4" width="120" height="100">
+        <img src="https://picsum.photos/300/400?img=5" width="120" height="100">
+        <img src="https://picsum.photos/300/400?img=6" width="120" height="100">
+        <img src="https://picsum.photos/300/400?img=7" width="120" height="100">
+    </amp-carousel>
+
+    <h1><code>server render: carousel-0.1 type=scrollable</code></h1>
+    <amp-carousel class="i-amphtml-layout-fixed i-amphtml-layout-size-defined i-amphtml-element" height="100" i-amphtml-layout="fixed" i-amphtml-ssr style="width: 300px; height: 100px" width="300">
+        <div class="i-amphtml-scrollable-carousel-container" tabindex="-1">
+          <img class="amp-carousel-slide amp-scrollable-carousel-slide" height="100" src="https://picsum.photos/300/400?img=1" width="120" />
+          <img class="amp-carousel-slide amp-scrollable-carousel-slide" height="100" src="https://picsum.photos/300/400?img=2" width="120" />
+          <img class="amp-carousel-slide amp-scrollable-carousel-slide" height="100" src="https://picsum.photos/300/400?img=3" width="120" />
+          <img class="amp-carousel-slide amp-scrollable-carousel-slide" height="100" src="https://picsum.photos/300/400?img=4" width="120" />
+          <img class="amp-carousel-slide amp-scrollable-carousel-slide" height="100" src="https://picsum.photos/300/400?img=5" width="120" />
+          <img class="amp-carousel-slide amp-scrollable-carousel-slide" height="100" src="https://picsum.photos/300/400?img=6" width="120" />
+          <img class="amp-carousel-slide amp-scrollable-carousel-slide" height="100" src="https://picsum.photos/300/400?img=7" width="120" />
+        </div>
+        <div aria-disabled="true" class="amp-carousel-button amp-carousel-button-prev amp-disabled" role="presentation" tabindex="-1" title="Previous item in carousel"></div>
+        <div aria-disabled="false" class="amp-carousel-button amp-carousel-button-next" role="presentation" tabindex="0" title="Next item in carousel"></div>
+    </amp-carousel>
+</html>

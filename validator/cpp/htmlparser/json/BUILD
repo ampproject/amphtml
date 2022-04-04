@@ -72,7 +72,7 @@ cc_test(
     deps = [
         ":parser",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//:defer",
-        "@htmlparser//:fileutil",
+        "//cpp/htmlparser:defer",
+        "//cpp/htmlparser:fileutil",
     ],
 )

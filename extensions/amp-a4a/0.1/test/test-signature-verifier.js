@@ -3,7 +3,8 @@
 import {base64EncodeFromBytes} from '#core/types/string/base64';
 import {utf8Encode} from '#core/types/string/bytes';
 
-import {dev, user} from '../../../../src/log';
+import {dev, user} from '#utils/log';
+
 import {SignatureVerifier, VerificationStatus} from '../signature-verifier';
 
 const networkFailure = {throws: new TypeError('Failed to fetch')};

@@ -1,8 +1,9 @@
 import {Services} from '#service';
 import {vsyncForTesting} from '#service/vsync-impl';
 
+import {user} from '#utils/log';
+
 import {urls} from '../../../../src/config';
-import {user} from '../../../../src/log';
 import {AmpGeo} from '../amp-geo';
 import {GEO_IN_GROUP} from '../amp-geo-in-group';
 
@@ -15,7 +16,7 @@ describes.realWin(
   },
   (env) => {
     const expectedState =
-      '<amp-state id="ampGeo"><script type="application/json">{"ISOCountry":"unknown","nafta":true,"unknown":true,"ISOCountryGroups":["nafta","unknown"]}</script></amp-state>';
+      '<amp-state id="ampGeo"><script type="application/json">{"ISOCountry":"unknown","ISOSubdivision":"unknown","nafta":true,"unknown":true,"ISOCountryGroups":["nafta","unknown"]}</script></amp-state>';
 
     const config = {
       ISOCountryGroups: {
@@ -23,6 +24,8 @@ describes.realWin(
         unknown: ['unknown'],
         eea: ['preset-eea'],
         myGroup: ['preset-eea', 'us'],
+        usSubdivisions: ['us-al', 'us-ny'],
+        canadaSubdivisions: ['ca-mb', 'ca-nb'],
         anz: ['au', 'nz'],
         uscaGroup: ['preset-us-ca'],
       },
@@ -42,6 +45,7 @@ describes.realWin(
         nafta: ['CA', 'mx', 'us', 'unknown'],
         unknown: ['unknown'],
         anz: ['au', 'NZ'],
+        canadaSubdivision: ['CA-MB'],
       },
     };
 
@@ -51,7 +55,10 @@ describes.realWin(
         unknown: ['unknown'],
         anz: ['au', 'NZ'],
         uscaGroup: ['preset-us-ca'],
-        invalid: ['us-ca'],
+        california: ['us-ca'],
+        tatarstan: ['ru-ta'],
+        myGroup: ['ru'],
+        invalid: ['ru-svee'],
       },
     };
 
@@ -94,9 +101,15 @@ describes.realWin(
       geo.element.appendChild(child);
     }
 
-    function expectBodyHasClass(klasses, expected) {
+    function expectElementHasClass(target, klasses, expected) {
       for (const k in klasses) {
-        expect(doc.body.classList.contains(klasses[k])).to.equal(expected);
+        const klass = klasses[k];
+        expect(target.classList.contains(klass)).to.equal(
+          expected,
+          expected
+            ? `missing ${klass} class for ${target.tagName}`
+            : `should not have ${klass} class for ${target.tagName}`
+        );
       }
     }
 
@@ -115,30 +128,68 @@ describes.realWin(
       expect(userErrorStub).to.not.be.called;
     });
 
-    it('should add classes to body element for the geo', () => {
+    it('should be able to handle `documentElement` being null (shadow mode instances)', () => {
+      env.sandbox.stub(ampdoc, 'getRootNode').returns({});
       addConfigElement('script');
 
       geo.buildCallback();
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('unknown');
-        expectBodyHasClass(
+        expectElementHasClass(
+          doc.body,
           ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
           true
         );
-        expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], false);
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          false
+        );
       });
     });
 
-    it('should remove amp-geo-pending class from body element', () => {
+    it('should add classes to html and body element for the geo', () => {
       addConfigElement('script');
-      doc.body.classList.add('amp-geo-pending');
-
-      expectBodyHasClass(['amp-geo-pending'], true);
 
       geo.buildCallback();
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('unknown');
-        expectBodyHasClass(['amp-geo-pending'], false);
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          false
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          false
+        );
+      });
+    });
+
+    it('should remove amp-geo-pending class from html and body element', () => {
+      addConfigElement('script');
+      doc.documentElement.classList.add('amp-geo-pending');
+      doc.body.classList.add('amp-geo-pending');
+
+      expectElementHasClass(doc.body, ['amp-geo-pending'], true);
+      expectElementHasClass(doc.documentElement, ['amp-geo-pending'], true);
+
+      geo.buildCallback();
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('unknown');
+        expectElementHasClass(doc.body, ['amp-geo-pending'], false);
+        expectElementHasClass(doc.documentElement, ['amp-geo-pending'], false);
       });
     });
 
@@ -179,8 +230,29 @@ describes.realWin(
 
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
-        expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], true);
-        expectBodyHasClass(
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-iso-country-unknown',
+            'amp-geo-group-nafta',
+            'amp-geo-no-group',
+            'amp-geo-group-eea',
+            'amp-geo-group-myGroup',
+          ],
+          false
+        );
+        expectElementHasClass(
+          doc.documentElement,
           [
             'amp-iso-country-unknown',
             'amp-geo-group-nafta',
@@ -200,16 +272,36 @@ describes.realWin(
 
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('us');
-        expectBodyHasClass(
+
+        expectElementHasClass(
+          doc.body,
           [
             'amp-iso-country-us',
             'amp-geo-group-nafta',
             'amp-geo-group-myGroup',
             'amp-geo-group-uscaGroup',
+            'amp-iso-subdivision-us-ca',
           ],
           true
         );
-        expectBodyHasClass(
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-iso-country-us',
+            'amp-geo-group-nafta',
+            'amp-geo-group-myGroup',
+            'amp-geo-group-uscaGroup',
+            'amp-iso-subdivision-us-ca',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-unknown', 'amp-geo-no-group', 'amp-geo-group-eea'],
+          false
+        );
+        expectElementHasClass(
+          doc.documentElement,
           ['amp-iso-country-unknown', 'amp-geo-no-group', 'amp-geo-group-eea'],
           false
         );
@@ -223,15 +315,26 @@ describes.realWin(
 
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('fr');
-        expectBodyHasClass(
+        expectElementHasClass(
+          doc.body,
           ['amp-iso-country-fr', 'amp-geo-group-eea', 'amp-geo-group-myGroup'],
           true
         );
-        expectBodyHasClass([, 'amp-geo-no-group'], false);
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-fr', 'amp-geo-group-eea', 'amp-geo-group-myGroup'],
+          true
+        );
+        expectElementHasClass(doc.body, [, 'amp-geo-no-group'], false);
+        expectElementHasClass(
+          doc.documentElement,
+          [, 'amp-geo-no-group'],
+          false
+        );
       });
     });
 
-    it('should allow preset-us-ca, but not us-ca', () => {
+    it('should allow preset-us-ca and us-ca subdivision', () => {
       setGeoOverrideHash('us us-ca');
       addConfigElement(
         'script',
@@ -240,9 +343,165 @@ describes.realWin(
       );
       geo.buildCallback();
 
-      return Services.geoForDocOrNull(el).then(() => {
-        expectBodyHasClass(['amp-geo-group-uscaGroup'], true);
-        expectBodyHasClass(['amp-geo-group-invalid'], false);
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOSubdivision).to.equal('us-ca');
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-geo-group-uscaGroup',
+            'amp-geo-group-california',
+            'amp-iso-subdivision-us-ca',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-geo-group-uscaGroup',
+            'amp-geo-group-california',
+            'amp-iso-subdivision-us-ca',
+          ],
+          true
+        );
+      });
+    });
+
+    it('should allow ru-ta subdivision', () => {
+      setGeoOverrideHash('ru ru-ta');
+      addConfigElement(
+        'script',
+        'application/json',
+        JSON.stringify(configWithInvalidCountry)
+      );
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOSubdivision).to.equal('ru-ta');
+        expectElementHasClass(
+          doc.body,
+          ['amp-geo-group-myGroup', 'amp-geo-group-tatarstan'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-geo-group-myGroup', 'amp-geo-group-tatarstan'],
+          true
+        );
+      });
+    });
+
+    it('should allow subdivisions that have max 3 symbol length', () => {
+      setGeoOverrideHash('ru ru-svee');
+      addConfigElement(
+        'script',
+        'application/json',
+        JSON.stringify(configWithInvalidCountry)
+      );
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOSubdivision).to.equal('ru-sve');
+        expectElementHasClass(
+          doc.body,
+          ['amp-geo-group-myGroup', 'amp-iso-subdivision-ru-sve'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-geo-group-myGroup', 'amp-iso-subdivision-ru-sve'],
+          true
+        );
+        expectElementHasClass(doc.body, ['amp-geo-group-invalid'], false);
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-geo-group-invalid'],
+          false
+        );
+      });
+    });
+
+    it('Should support Canada subdivisions', () => {
+      setGeoOverrideHash('ca ca-mb');
+      addConfigElement('script');
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOSubdivision).to.equal('ca-mb');
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-geo-group-nafta',
+            'amp-geo-group-canadaSubdivisions',
+            'amp-iso-subdivision-ca-mb',
+            'amp-iso-country-ca',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-geo-group-nafta',
+            'amp-geo-group-canadaSubdivisions',
+            'amp-iso-subdivision-ca-mb',
+            'amp-iso-country-ca',
+          ],
+          true
+        );
+
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-geo-group-usSubdivisions',
+            'amp-geo-group-myGroup',
+            'amp-geo-group-uscaGroup',
+            'amp-geo-group-anz',
+            'amp-geo-group-eea',
+            'amp-geo-group-unknown',
+          ],
+          false
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-geo-group-usSubdivisions',
+            'amp-geo-group-myGroup',
+            'amp-geo-group-uscaGroup',
+            'amp-geo-group-anz',
+            'amp-geo-group-eea',
+            'amp-geo-group-unknown',
+          ],
+          false
+        );
+      });
+    });
+
+    it('Should support US subdivisions', () => {
+      setGeoOverrideHash('us us-ny');
+      addConfigElement('script');
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOSubdivision).to.equal('us-ny');
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-geo-group-nafta',
+            'amp-geo-group-usSubdivisions',
+            'amp-iso-subdivision-us-ny',
+            'amp-iso-country-us',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-geo-group-nafta',
+            'amp-geo-group-usSubdivisions',
+            'amp-iso-subdivision-us-ny',
+            'amp-iso-country-us',
+          ],
+          true
+        );
       });
     });
 
@@ -253,8 +512,27 @@ describes.realWin(
 
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('za');
-        expectBodyHasClass(['amp-iso-country-za', 'amp-geo-no-group'], true);
-        expectBodyHasClass(
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-za', 'amp-geo-no-group'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-za', 'amp-geo-no-group'],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-iso-country-unknown',
+            'amp-geo-group-nafta',
+            'amp-geo-group-anz',
+          ],
+          false
+        );
+        expectElementHasClass(
+          doc.documentElement,
           [
             'amp-iso-country-unknown',
             'amp-geo-group-nafta',
@@ -322,9 +600,61 @@ describes.realWin(
 
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
-        expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], true);
-        expectBodyHasClass(
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
           ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
+          false
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
+          false
+        );
+      });
+    });
+
+    it('should allow uppercase hash for subdivisions', () => {
+      setGeoOverrideHash('US US-AL');
+      addConfigElement('script');
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('us');
+        expect(geo.ISOSubdivision).to.equal('us-al');
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-geo-group-nafta',
+            'amp-iso-country-us',
+            'amp-geo-group-usSubdivisions',
+            'amp-iso-subdivision-us-al',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-geo-group-nafta',
+            'amp-iso-country-us',
+            'amp-geo-group-usSubdivisions',
+            'amp-iso-subdivision-us-al',
+          ],
+          true
+        );
+        expectElementHasClass(doc.body, ['amp-iso-country-unknown'], false);
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-unknown'],
           false
         );
       });
@@ -341,10 +671,133 @@ describes.realWin(
 
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
-        expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], true);
-        expectBodyHasClass(
+        expect(geo.ISOSubdivision).to.equal('unknown');
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
           ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
           false
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
+          false
+        );
+      });
+    });
+
+    it('should accept uppercase country subdivision codes in config', () => {
+      setGeoOverrideHash('ca ca-mb');
+      addConfigElement(
+        'script',
+        'application/json',
+        JSON.stringify(configWithUppercase)
+      );
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('ca');
+        expect(geo.ISOSubdivision).to.equal('ca-mb');
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-iso-country-ca',
+            'amp-iso-subdivision-ca-mb',
+            'amp-geo-group-nafta',
+            'amp-geo-group-canadaSubdivision',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-iso-country-ca',
+            'amp-iso-subdivision-ca-mb',
+            'amp-geo-group-nafta',
+            'amp-geo-group-canadaSubdivision',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-unknown', 'amp-geo-group-anz'],
+          false
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-unknown', 'amp-geo-group-anz'],
+          false
+        );
+      });
+    });
+
+    it('should subdivisions work in GEO_HOT_PATCH mode', () => {
+      env.sandbox.stub(geo, 'getHotPatchCountry_').returns('ca ca-nb');
+      addConfigElement('script');
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('ca');
+        expect(geo.ISOSubdivision).to.equal('ca-nb');
+
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-iso-country-ca',
+            'amp-iso-subdivision-ca-nb',
+            'amp-geo-group-nafta',
+            'amp-geo-group-canadaSubdivisions',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-iso-country-ca',
+            'amp-iso-subdivision-ca-nb',
+            'amp-geo-group-nafta',
+            'amp-geo-group-canadaSubdivisions',
+          ],
+          true
+        );
+      });
+    });
+
+    it('should allow uppercase for subdivisions in GEO_HOT_PATCH mode', () => {
+      env.sandbox.stub(geo, 'getHotPatchCountry_').returns('US US-AL');
+      addConfigElement('script');
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('us');
+        expect(geo.ISOSubdivision).to.equal('us-al');
+
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-iso-country-us',
+            'amp-iso-subdivision-us-al',
+            'amp-geo-group-usSubdivisions',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-iso-country-us',
+            'amp-iso-subdivision-us-al',
+            'amp-geo-group-usSubdivisions',
+          ],
+          true
         );
       });
     });
@@ -353,15 +806,75 @@ describes.realWin(
      * pre-rendered geo is the the case where a publisher uses their own
      * infrastructure to add a country tag to the body.
      */
-    it('should respect pre-rendered geo tags', () => {
+    it('should respect pre-rendered geo tags in the body', () => {
       addConfigElement('script');
       doc.body.classList.add('amp-iso-country-nz', 'amp-geo-group-anz');
       geo.buildCallback();
 
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
-        expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], true);
-        expectBodyHasClass(
+        expect(geo.ISOSubdivision).to.equal('unknown');
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          true
+        );
+        expectElementHasClass(
+          doc.body[('amp-iso-country-unknown', 'amp-geo-group-nafta')],
+          false
+        );
+      });
+    });
+
+    it('should respect pre-rendered geo subscription tags in the body', () => {
+      addConfigElement('script');
+      doc.body.classList.add(
+        'amp-iso-country-ca',
+        'amp-iso-subdivision-ca-mb',
+        'amp-geo-group-nafta'
+      );
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('ca');
+        expect(geo.ISOSubdivision).to.equal('ca-mb');
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-iso-country-ca',
+            'amp-iso-subdivision-ca-mb',
+            'amp-geo-group-nafta',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.body[
+            ('amp-iso-country-unknown',
+            'amp-geo-group-anz',
+            'amp-geo-group-canadaSubdivisions')
+          ],
+          false
+        );
+      });
+    });
+
+    it('should respect pre-rendered geo tags in the html element', () => {
+      addConfigElement('script');
+      doc.documentElement.classList.add(
+        'amp-iso-country-nz',
+        'amp-geo-group-anz'
+      );
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('nz');
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
           ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
           false
         );
@@ -370,15 +883,85 @@ describes.realWin(
 
     it('should allow hash to override pre-rendered geo in test', () => {
       setGeoOverrideHash('nz');
-      doc.body.classList.add('amp-iso-country-mx', 'amp-geo-group-nafta');
+      // NOTE: notide that we cause the the body and html element classes
+      // to go out of sync but we still clear `amp-iso-country-mx` AND
+      // `amp-geo-group-nafta`.
+      doc.documentElement.classList.add('amp-iso-country-mx');
+      doc.body.classList.add('amp-geo-group-nafta');
       addConfigElement('script');
       geo.buildCallback();
 
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('nz');
-        expectBodyHasClass(['amp-iso-country-nz', 'amp-geo-group-anz'], true);
-        expectBodyHasClass(
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-nz', 'amp-geo-group-anz'],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
           ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
+          false
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-unknown', 'amp-geo-group-nafta'],
+          false
+        );
+      });
+    });
+
+    it('should allow hash to override pre-rendered geo sudivision in test', () => {
+      setGeoOverrideHash('us us-ny');
+      doc.documentElement.classList.add(
+        'amp-geo-group-canadaSubdivisions',
+        'amp-iso-country-ca',
+        'amp-iso-subdivision-ca-mb'
+      );
+      doc.body.classList.add(
+        'amp-geo-group-canadaSubdivisions',
+        'amp-iso-country-ca',
+        'amp-iso-subdivision-ca-mb'
+      );
+      addConfigElement('script');
+      geo.buildCallback();
+
+      return Services.geoForDocOrNull(el).then((geo) => {
+        expect(geo.ISOCountry).to.equal('us');
+        expect(geo.ISOSubdivision).to.equal('us-ny');
+        expectElementHasClass(
+          doc.body,
+          ['amp-iso-country-us', 'amp-iso-subdivision-us-ny'],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          ['amp-iso-country-us', 'amp-iso-subdivision-us-ny'],
+          true
+        );
+        expectElementHasClass(
+          doc.body,
+          [
+            'amp-iso-country-unknown',
+            'amp-geo-group-canadaSubdivisions',
+            'amp-iso-country-ca',
+            'amp-iso-subdivision-ca-mb',
+          ],
+          false
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-iso-country-unknown',
+            'amp-geo-group-canadaSubdivisions',
+            'amp-iso-country-ca',
+            'amp-iso-subdivision-ca-mb',
+          ],
           false
         );
       });
@@ -396,6 +979,8 @@ describes.realWin(
           'unknown',
           'eea',
           'myGroup',
+          'usSubdivisions',
+          'canadaSubdivisions',
           'anz',
           'uscaGroup',
         ]);
@@ -423,7 +1008,8 @@ describes.realWin(
       geo.buildCallback();
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(geo.ISOCountry).to.equal('unknown');
-        expectBodyHasClass(['amp-geo-error'], true);
+        expectElementHasClass(doc.body, ['amp-geo-error'], true);
+        expectElementHasClass(doc.documentElement, ['amp-geo-error'], true);
       });
     });
 
@@ -455,9 +1041,23 @@ describes.realWin(
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(userErrorStub).to.not.be.called;
         expect(geo.ISOCountry).to.equal('us');
-        expectBodyHasClass(
+        expect(geo.ISOSubdivision).to.equal('us-ca');
+        expectElementHasClass(
+          doc.body,
           [
             'amp-iso-country-us',
+            'amp-iso-subdivision-us-ca',
+            'amp-geo-group-nafta',
+            'amp-geo-group-myGroup',
+            'amp-geo-group-uscaGroup',
+          ],
+          true
+        );
+        expectElementHasClass(
+          doc.documentElement,
+          [
+            'amp-iso-country-us',
+            'amp-iso-subdivision-us-ca',
             'amp-geo-group-nafta',
             'amp-geo-group-myGroup',
             'amp-geo-group-uscaGroup',
@@ -481,6 +1081,7 @@ describes.realWin(
       return Services.geoForDocOrNull(el).then((geo) => {
         expect(userErrorStub).to.be.called;
         expect(geo.ISOCountry).to.equal('unknown');
+        expect(geo.ISOSubdivision).to.equal('unknown');
       });
     });
 

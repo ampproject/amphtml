@@ -1,16 +1,22 @@
-import * as analyticsApi from '../../../../src/analytics';
+import {addAttributesToElement} from '#core/dom';
+
+import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
+
+import * as analyticsApi from '#utils/analytics';
+
+import {
+  getAmpdoc,
+  registerServiceBuilder,
+} from '../../../../src/service-helpers';
+import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {
   Action,
   EmbeddedComponentState,
   getStoreService,
 } from '../amp-story-store-service';
-import {AmpStoryEmbeddedComponent} from '../amp-story-embedded-component';
 import {EventType} from '../events';
-import {LocalizationService} from '#service/localization';
-import {Services} from '#service';
 import {StoryAnalyticsEvent} from '../story-analytics';
-import {addAttributesToElement} from '#core/dom';
-import {registerServiceBuilder} from '../../../../src/service-helpers';
 
 describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
   let component;
@@ -221,12 +227,14 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     expect(tooltipTextEl.textContent).to.equal('google.com');
   });
 
-  it('should fire analytics event when entering a tooltip', () => {
+  it('should fire analytics event when entering a tooltip', async () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       element: clickableEl,
       state: EmbeddedComponentState.FOCUSED,
     });
+
+    await getAmpdoc(win.document).whenFirstVisible();
 
     expect(analyticsTriggerStub).to.be.calledWith(
       parentEl,
@@ -234,7 +242,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
   });
 
-  it('should send data-var specified by publisher in analytics event', () => {
+  it('should send data-var specified by publisher in analytics event', async () => {
     addAttributesToElement(clickableEl, {
       'data-vars-tooltip-id': '1234',
     });
@@ -245,6 +253,8 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
       state: EmbeddedComponentState.FOCUSED,
     });
 
+    await getAmpdoc(win.document).whenFirstVisible();
+
     expect(analyticsTriggerStub).to.be.calledWithMatch(
       parentEl,
       StoryAnalyticsEvent.FOCUS,
@@ -254,7 +264,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     );
   });
 
-  it('should fire analytics event when clicking on the tooltip of a link', () => {
+  it('should fire analytics event when clicking on the tooltip of a link', async () => {
     fakePage.appendChild(clickableEl);
     storeService.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       element: clickableEl,
@@ -270,13 +280,15 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
 
     tooltip.click();
 
+    await getAmpdoc(win.document).whenFirstVisible();
+
     expect(analyticsTriggerStub).to.be.calledWith(
       parentEl,
       StoryAnalyticsEvent.CLICK_THROUGH
     );
   });
 
-  it('should fire analytics event when clicking on the tooltip of a tweet', () => {
+  it('should fire analytics event when clicking on the tooltip of a tweet', async () => {
     clickableEl = win.document.createElement('amp-twitter');
     addAttributesToElement(clickableEl, {
       'data-tweetid': '1166723359696130049',
@@ -296,6 +308,8 @@ describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
     };
 
     tooltip.click();
+
+    await getAmpdoc(win.document).whenFirstVisible();
 
     expect(analyticsTriggerStub).to.be.calledWith(
       parentEl,

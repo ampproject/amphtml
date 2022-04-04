@@ -115,9 +115,8 @@ describes.realWin('TemplateRenderer', realWinConfig, (env) => {
               '"https://buy.com/buy-1">Click for ad!</a>' +
               '\n    <amp-analytics class="i-amphtml-element i-amphtml' +
               '-notbuilt amp-notbuilt i-amphtml-layout-fixed i-amphtml' +
-              '-layout-size-defined amp-unresolved i-amphtml-' +
-              'unresolved" i-amphtml-layout="fixed" style="width: 1px;' +
-              ' height: 1px;"></amp-analytics></div>'
+              '-layout-size-defined" i-amphtml-layout="fixed" style="width: ' +
+              '1px; height: 1px;"></amp-analytics></div>'
           );
         });
     });

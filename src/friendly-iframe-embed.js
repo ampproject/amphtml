@@ -1,8 +1,8 @@
-import {CommonSignals} from '#core/constants/common-signals';
-import {VisibilityState} from '#core/constants/visibility-state';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
-import {isDocumentReady} from '#core/document-ready';
+import {isDocumentReady} from '#core/document/ready';
 import {escapeHtml} from '#core/dom';
 import {layoutRectLtwh, moveLayoutRect} from '#core/dom/layout/rect';
 import {
@@ -14,7 +14,7 @@ import {
 } from '#core/dom/style';
 import {rethrowAsync} from '#core/error';
 import * as mode from '#core/mode';
-import {toWin} from '#core/window';
+import {getWin} from '#core/window';
 
 import {install as installAbortController} from '#polyfills/abort-controller';
 import {install as installCustomElements} from '#polyfills/custom-elements';
@@ -26,11 +26,12 @@ import {Services} from '#service';
 import {installAmpdocServicesForEmbed} from '#service/core-services';
 import {installTimerInEmbedWindow} from '#service/timer-impl';
 
+import {loadPromise} from '#utils/event-helper';
+import {dev, devAssert, userAssert} from '#utils/log';
+
 import {urls} from './config';
-import {loadPromise} from './event-helper';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {whenContentIniLoad} from './ini-load';
-import {dev, devAssert, userAssert} from './log';
 import {getMode} from './mode';
 import {
   disposeServicesForEmbed,
@@ -139,7 +140,7 @@ export function installFriendlyIframeEmbed(
   opt_preinstallCallback // TODO(#22733): remove "window" argument.
 ) {
   /** @const {!Window} */
-  const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
+  const win = getTopWindow(getWin(iframe));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensionsService = Services.extensionsFor(win);
   /** @const {!./service/ampdoc-impl.AmpDocService} */
@@ -435,7 +436,7 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   whenRenderStarted() {
-    return this.signals_.whenSignal(CommonSignals.RENDER_START);
+    return this.signals_.whenSignal(CommonSignals_Enum.RENDER_START);
   }
 
   /**
@@ -454,7 +455,7 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   whenIniLoaded() {
-    return this.signals_.whenSignal(CommonSignals.INI_LOAD);
+    return this.signals_.whenSignal(CommonSignals_Enum.INI_LOAD);
   }
 
   /**
@@ -479,7 +480,7 @@ export class FriendlyIframeEmbed {
    */
   pause() {
     if (this.ampdoc) {
-      this.ampdoc.overrideVisibilityState(VisibilityState.PAUSED);
+      this.ampdoc.overrideVisibilityState(VisibilityState_Enum.PAUSED);
     }
   }
 
@@ -488,7 +489,7 @@ export class FriendlyIframeEmbed {
    */
   resume() {
     if (this.ampdoc) {
-      this.ampdoc.overrideVisibilityState(VisibilityState.VISIBLE);
+      this.ampdoc.overrideVisibilityState(VisibilityState_Enum.VISIBLE);
     }
   }
 
@@ -500,7 +501,7 @@ export class FriendlyIframeEmbed {
     if (this.host) {
       this.host.renderStarted();
     } else {
-      this.signals_.signal(CommonSignals.RENDER_START);
+      this.signals_.signal(CommonSignals_Enum.RENDER_START);
     }
 
     // TODO(ccordry): remove when no-signing launched.
@@ -536,7 +537,7 @@ export class FriendlyIframeEmbed {
       this.whenRenderComplete(),
       whenContentIniLoad(this.ampdoc, this.win, rect),
     ]).then(() => {
-      this.signals_.signal(CommonSignals.INI_LOAD);
+      this.signals_.signal(CommonSignals_Enum.INI_LOAD);
     });
   }
 
@@ -685,11 +686,11 @@ export class FriendlyIframeEmbed {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   if (!mode.isEsm()) {
     installDocContains(childWin);
+    installCustomElements(childWin, class {});
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   if (!IS_SXG) {
-    installCustomElements(childWin, class {});
     installIntersectionObserver(parentWin, childWin);
     installResizeObserver(parentWin, childWin);
     installAbortController(childWin);
@@ -722,7 +723,7 @@ export class Installers {
     opt_installComplete
   ) {
     const childWin = ampdoc.win;
-    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
+    const parentWin = getWin(childWin.frameElement);
     setParentWindow(childWin, parentWin);
     const getDelayPromise = getDelayPromiseProducer();
 

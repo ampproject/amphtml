@@ -1,4 +1,5 @@
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
+
 import {useEffect, useState} from '#preact';
 
 /**

@@ -4,7 +4,7 @@ import {toggleExperiment} from '#experiments';
 
 import {InaboxResources} from '#inabox/inabox-resources';
 
-import {ResourceState} from '#service/resource';
+import {ResourceState_Enum} from '#service/resource';
 
 import {macroTask} from '#testing/helpers';
 
@@ -159,10 +159,10 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     env.sandbox.stub(resource2, 'build').resolves();
     env.sandbox
       .stub(resource1, 'getState')
-      .returns(ResourceState.READY_FOR_LAYOUT);
+      .returns(ResourceState_Enum.READY_FOR_LAYOUT);
     env.sandbox
       .stub(resource2, 'getState')
-      .returns(ResourceState.READY_FOR_LAYOUT);
+      .returns(ResourceState_Enum.READY_FOR_LAYOUT);
     env.sandbox.stub(resource1, 'isDisplayed').returns(true);
     env.sandbox.stub(resource2, 'isDisplayed').returns(true);
     resources.upgraded(element1);

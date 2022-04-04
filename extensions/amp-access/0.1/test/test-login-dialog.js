@@ -1,6 +1,8 @@
 import {Services} from '#service';
 import {installDocService} from '#service/ampdoc-impl';
 
+import {FakePerformance} from '#testing/fake-dom';
+
 import {WebLoginDialog, openLoginDialog} from '../login-dialog';
 
 const RETURN_URL_ESC = encodeURIComponent(
@@ -40,6 +42,7 @@ describes.sandboxed('ViewerLoginDialog', {}, (env) => {
       setInterval: () => {
         throw new Error('Not allowed');
       },
+      performance: new FakePerformance(window),
     };
     windowApi.document.defaultView = windowApi;
     installDocService(windowApi, /* isSingleDoc */ true);
@@ -178,6 +181,7 @@ describes.sandboxed('WebLoginDialog', {}, (env) => {
       setTimeout: (callback, t) => window.setTimeout(callback, t),
       setInterval: (callback, t) => window.setInterval(callback, t),
       clearInterval: (intervalId) => window.clearInterval(intervalId),
+      performance: new FakePerformance(window),
     };
     windowApi = windowObj;
     windowApi.document.defaultView = windowApi;

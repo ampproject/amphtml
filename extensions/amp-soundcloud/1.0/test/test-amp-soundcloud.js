@@ -3,7 +3,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {toggleExperiment} from '#experiments';
 
-import {waitFor} from '#testing/test-helper';
+import {waitFor} from '#testing/helpers/service';
 
 describes.realWin(
   'amp-soundcloud-v1.0',

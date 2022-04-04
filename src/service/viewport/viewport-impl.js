@@ -1,4 +1,4 @@
-import {VisibilityState} from '#core/constants/visibility-state';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Observable} from '#core/data-structures/observable';
 import {tryResolve} from '#core/data-structures/promise';
 import {getVerticalScrollbarWidth, isIframed} from '#core/dom';
@@ -11,20 +11,20 @@ import {closestAncestorElementBySelector} from '#core/dom/query';
 import {computedStyle, setStyle} from '#core/dom/style';
 import {numeric} from '#core/dom/transition';
 import {clamp} from '#core/math';
-import {dict} from '#core/types/object';
 
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
+
+import {Animation} from '#utils/animation';
+import {dev, devAssert} from '#utils/log';
 
 import {ViewportBindingDef} from './viewport-binding-def';
 import {ViewportBindingIosEmbedWrapper_} from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {ViewportInterface} from './viewport-interface';
 
-import {Animation} from '../../animation';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
-import {dev, devAssert} from '../../log';
 import {getMode} from '../../mode';
 import {
   getParentWindowFrameElement,
@@ -326,9 +326,10 @@ export class ViewportImpl {
     if (this.size_.width == 0 || this.size_.height == 0) {
       // Only report when the visibility is "visible" or "prerender".
       const visibilityState = this.ampdoc.getVisibilityState();
+      // We do NOT want to report for PREVIEW mode.
       if (
-        visibilityState == VisibilityState.PRERENDER ||
-        visibilityState == VisibilityState.VISIBLE
+        visibilityState == VisibilityState_Enum.PRERENDER ||
+        visibilityState == VisibilityState_Enum.VISIBLE
       ) {
         if (Math.random() < 0.01) {
           dev().error(TAG_, 'viewport has zero dimensions');
@@ -649,11 +650,7 @@ export class ViewportImpl {
 
   /** @override */
   enterLightboxMode(opt_requestingElement, opt_onComplete) {
-    this.viewer_.sendMessage(
-      'requestFullOverlay',
-      dict(),
-      /* cancelUnsent */ true
-    );
+    this.viewer_.sendMessage('requestFullOverlay', {}, /* cancelUnsent */ true);
 
     this.enterOverlayMode();
     if (this.fixedLayer_) {
@@ -671,11 +668,7 @@ export class ViewportImpl {
 
   /** @override */
   leaveLightboxMode(opt_requestingElement) {
-    this.viewer_.sendMessage(
-      'cancelFullOverlay',
-      dict(),
-      /* cancelUnsent */ true
-    );
+    this.viewer_.sendMessage('cancelFullOverlay', {}, /* cancelUnsent */ true);
 
     if (this.fixedLayer_) {
       this.fixedLayer_.leaveLightbox();
@@ -1072,7 +1065,7 @@ export class ViewportImpl {
         this.scrollAnimationFrameThrottled_ = false;
         this.viewer_.sendMessage(
           'scroll',
-          dict({'scrollTop': this.getScrollTop()}),
+          {'scrollTop': this.getScrollTop()},
           /* cancelUnsent */ true
         );
       });
@@ -1207,7 +1200,7 @@ function createViewport(ampdoc) {
   let binding;
   if (
     ampdoc.isSingleDoc() &&
-    getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED &&
+    getViewportType(win, viewer) == ViewportType_Enum.NATURAL_IOS_EMBED &&
     !IS_SXG
   ) {
     binding = new ViewportBindingIosEmbedWrapper_(win);
@@ -1221,7 +1214,7 @@ function createViewport(ampdoc) {
  * The type of the viewport.
  * @enum {string}
  */
-const ViewportType = {
+const ViewportType_Enum = {
   /**
    * Viewer leaves sizing and scrolling up to the AMP document's window.
    */
@@ -1247,7 +1240,7 @@ function getViewportType(win, viewer) {
 
   // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
   if (getMode(win).test && isIframedIos) {
-    return ViewportType.NATURAL_IOS_EMBED;
+    return ViewportType_Enum.NATURAL_IOS_EMBED;
   }
 
   // Override to ios-embed for iframe-viewer mode.
@@ -1256,9 +1249,9 @@ function getViewportType(win, viewer) {
     viewer.isEmbedded() &&
     !viewer.hasCapability('iframeScroll')
   ) {
-    return ViewportType.NATURAL_IOS_EMBED;
+    return ViewportType_Enum.NATURAL_IOS_EMBED;
   }
-  return ViewportType.NATURAL;
+  return ViewportType_Enum.NATURAL;
 }
 
 /**

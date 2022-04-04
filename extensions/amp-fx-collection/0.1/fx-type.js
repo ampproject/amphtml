@@ -1,4 +1,4 @@
-import {devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '#utils/log';
 
 const TAG = 'amp-fx-collection';
 

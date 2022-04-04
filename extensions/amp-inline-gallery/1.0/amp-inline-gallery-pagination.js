@@ -1,15 +1,18 @@
-import {CSS} from './pagination.jss';
-import {CarouselContextProp} from '../../amp-base-carousel/1.0/carousel-props';
-import {Pagination} from './pagination';
-import {PreactBaseElement} from '#preact/base-element';
+import {PaginationBaseElement} from '#bento/components/bento-inline-gallery/1.0/pagination-base-element';
+
 import {isExperimentOn} from '#experiments';
-import {userAssert} from '../../../src/log';
+
+import {AmpPreactBaseElement, setSuperClass} from '#preact/amp-base-element';
+
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 export const TAG = 'amp-inline-gallery-pagination';
 
-/** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
-export class AmpInlineGalleryPagination extends PreactBaseElement {
+export class AmpInlineGalleryPagination extends setSuperClass(
+  PaginationBaseElement,
+  AmpPreactBaseElement
+) {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -22,23 +25,3 @@ export class AmpInlineGalleryPagination extends PreactBaseElement {
     return super.isLayoutSupported(layout);
   }
 }
-
-/** @override */
-AmpInlineGalleryPagination['Component'] = Pagination;
-
-/** @override */
-AmpInlineGalleryPagination['props'] = {
-  'inset': {attr: 'inset', type: 'boolean', media: true},
-};
-
-/** @override */
-AmpInlineGalleryPagination['layoutSizeDefined'] = true;
-
-/** @override */
-AmpInlineGalleryPagination['shadowCss'] = CSS;
-
-/** @override */
-AmpInlineGalleryPagination['usesShadowDom'] = true;
-
-/** @override */
-AmpInlineGalleryPagination['useContexts'] = [CarouselContextProp];

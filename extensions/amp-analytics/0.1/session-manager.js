@@ -1,13 +1,16 @@
+import {isDocumentHidden} from '#core/document/visibility';
+import {isObject} from '#core/types';
+import {hasOwn, map} from '#core/types/object';
+
 import {Services} from '#service';
-import {dev, user} from '../../../src/log';
+
+import {listen} from '#utils/event-helper';
+import {dev, user} from '#utils/log';
+
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
-import {hasOwn, map} from '#core/types/object';
-import {isDocumentHidden} from '#core/document-visibility';
-import {isObject} from '#core/types';
-import {listen} from 'src/event-helper';
 
 /** @const {string} */
 const TAG = 'amp-analytics/session-manager';

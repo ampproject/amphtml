@@ -367,7 +367,7 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
    rendered by the server and are not (yet) controlled by JS to speed up
    display of the real image. This conveniently also fixes the display of
    the image when JS fails to load. */
-amp-img.i-amphtml-ssr:not(.i-amphtml-element) > [placeholder] {
+amp-img[i-amphtml-ssr]:not(.i-amphtml-element) > [placeholder] {
   z-index: auto;
 }
 
@@ -491,6 +491,11 @@ amp-analytics, amp-story-auto-ads, amp-auto-ads {
   height: 1px !important;
   overflow: hidden !important;
   visibility: hidden;
+}
+
+/* Blocked rendering until amp-story.css is installed. Info on #37990. */
+amp-story {
+  visibility: hidden !important;
 }
 
 html.i-amphtml-fie > amp-analytics {

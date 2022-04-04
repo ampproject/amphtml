@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-stream-gallery-1.0.css"
+    />
+  </head>
+  <body>
+    <bento-stream-gallery
+      id="my-stream-gallery"
+      style="height: 150px"
+      min-item-width="75"
+      max-item-width="100"
+    >
+      <div style="height: 100px; background: red">A</div>
+      <div style="height: 100px; background: green">B</div>
+      <div style="height: 100px; background: blue">C</div>
+      <div style="height: 100px; background: yellow">D</div>
+      <div style="height: 100px; background: purple">E</div>
+      <div style="height: 100px; background: orange">F</div>
+      <div style="height: 100px; background: fuchsia">G</div>
+    </bento-stream-gallery>
+    <script>
+      (async () => {
+        const streamGallery = document.querySelector('#my-stream-gallery');
+        await customElements.whenDefined('bento-stream-gallery');
+        const api = await streamGallery.getApi();
+
+        // programatically go to next slide
+        api.next();
+        // programatically go to prev slide
+        api.prev();
+        // programatically go to slide
+        api.goToSlide(4);
+      })();
+    </script>
+  </body>
+</html>

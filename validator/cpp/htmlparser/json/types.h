@@ -71,8 +71,8 @@
 //
 // See types_test.cc for detailed usage of generating nested json objects.
 //
-#ifndef HTMLPARSER__JSON_JSON_H_
-#define HTMLPARSER__JSON_JSON_H_
+#ifndef CPP_HTMLPARSER_JSON_JSON_H_
+#define CPP_HTMLPARSER_JSON_JSON_H_
 
 #include <functional>
 #include <memory>
@@ -289,4 +289,4 @@ T* JsonDict::Get(const std::string& key) {
 
 }  // namespace htmlparser::json
 
-#endif  // HTMLPARSER__JSON_JSON_H_
+#endif  // CPP_HTMLPARSER_JSON_JSON_H_

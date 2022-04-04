@@ -19,14 +19,14 @@ This document provides details for testing and building your AMP code.
     -   [A4A envelope (/a4a/, /a4a-3p/)](#a4a-envelope-a4a-a4a-3p)
     -   [In-a-box envelope (/inabox/)](#in-a-box-envelope-inabox)
     -   [Chrome extension](#chrome-extension)
--   [Visual Diff Tests](#visual-diff-tests)
+-   [Visual Diff Tests](#-visual-diff-tests)
     -   [Failing Tests](#failing-tests)
     -   [Flaky Tests](#flaky-tests)
     -   [How Are Tests Executed](#how-are-tests-executed)
     -   [Adding and Modifying Visual Diff Tests](#adding-and-modifying-visual-diff-tests)
-        -   [One-time Setup](#one-time-setup)
-        -   [Writing the Test](#writing-the-test)
 -   [Isolated Component Testing](#isolated-component-testing)
+    -   [Launching Storybook](#launching-storybook)
+    -   [Writing test scenarios](#writing-test-scenarios)
 -   [Testing on devices](#testing-on-devices)
     -   [Testing with ngrok](#testing-with-ngrok)
     -   [Testing with Firebase](#testing-with-firebase)
@@ -40,95 +40,98 @@ Before running these commands, make sure you have Node.js installed. For instruc
 
 **Pro tip:** To see a full listing of `amp` commands and their flags, run `amp --help`.
 
-| Command                                                  | Description                                                                                                                                                                                                                                            |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`amp`**                                                | Starts the dev server, lazily builds JS files and extensions when requested, and watches them for changes. **Use this for development.**                                                                                                               |
-| `amp --extensions=amp-foo,amp-bar`                       | Same as `amp`. Pre-builds the listed extensions, and lazily builds other files when requested.                                                                                                                                                         |
-| `amp --extensions_from=examples/foo.amp.html`            | Same as `amp`. Pre-builds the extensions in the given example file, and lazily builds other files when requested.                                                                                                                                      |
-| `amp --minified`                                         | Same as `amp`. Compiles and serves minified binaries. Can be used with `--extensions` and `--extensions_from`.                                                                                                                                         |
-| `amp --version_override=<version_override>`              | Runs "watch" and "serve". Overrides the version written to the AMP_CONFIG.                                                                                                                                                                             |
-| `amp dist`                                               | Builds minified AMP binaries and applies AMP_CONFIG to runtime files.                                                                                                                                                                                  |
-| `amp dist --watch`                                       | Builds minified AMP binaries and watches them for changes.                                                                                                                                                                                             |
-| `amp dist --noconfig`                                    | Builds minified AMP binaries without applying AMP_CONFIG to runtime files.                                                                                                                                                                             |
-| `amp dist --extensions=amp-foo,amp-bar`                  | Builds minified AMP binaries, with only the listed extensions.                                                                                                                                                                                         |
-| `amp dist --extensions_from=examples/foo.amp.html`       | Builds minified AMP binaries, with only extensions from the listed examples.                                                                                                                                                                           |
-| `amp dist --noextensions`                                | Builds minified AMP binaries without building any extensions.                                                                                                                                                                                          |
-| `amp dist --core_runtime_only`                           | Builds minified AMP binaries for just the core runtime. Can be combined with `--extensions` and `--extensions_from`.                                                                                                                                   |
-| `amp dist --fortesting`                                  | Builds minified AMP binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.)                                           |
-| `amp dist --fortesting --config=<config>`                | Builds minified AMP binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                             |
-| `amp dist --version_override=<version_override>`         | Builds minified AMP binaries and overrides the version written to the AMP_CONFIG.                                                                                                                                                                      |
-| `amp lint`                                               | Validates JS files against the ESLint linter.                                                                                                                                                                                                          |
-| `amp lint --watch`                                       | Watches for changes in files, and validates against the ESLint linter.                                                                                                                                                                                 |
-| `amp lint --fix`                                         | Fixes simple lint warnings/errors automatically.                                                                                                                                                                                                       |
-| `amp lint --files=<files-path-glob>`                     | Lints just the files provided. Can be used with `--fix`.                                                                                                                                                                                               |
-| `amp lint --local_changes`                               | Lints just the files changed in the local branch. Can be used with `--fix`.                                                                                                                                                                            |
-| `amp prettify`                                           | Validates non-JS files using Prettier.                                                                                                                                                                                                                 |
-| `amp prettify --fix`                                     | Fixes simple formatting errors automatically.                                                                                                                                                                                                          |
-| `amp prettify --files=<files-path-glob>`                 | Checks just the files provided. Can be used with `--fix`.                                                                                                                                                                                              |
-| `amp prettify --local_changes`                           | Checks just the files changed in the local branch. Can be used with `--fix`.                                                                                                                                                                           |
-| `amp build`                                              | Builds unminified AMP binaries.                                                                                                                                                                                                                        |
-| `amp build --watch`                                      | Builds unminified AMP binaries and watches them for changes.                                                                                                                                                                                           |
-| `amp build --extensions=amp-foo,amp-bar`                 | Builds unminified AMP binaries, with only the listed extensions.                                                                                                                                                                                       |
-| `amp build --extensions_from=examples/foo.amp.html`      | Builds unminified AMP binaries, with only the extensions needed to load the listed examples.                                                                                                                                                           |
-| `amp build --noextensions`                               | Builds unminified AMP binaries with no extensions.                                                                                                                                                                                                     |
-| `amp build --core_runtime_only`                          | Builds unminified AMP binaries for just the core runtime.                                                                                                                                                                                              |
-| `amp build --fortesting`                                 | Builds unminified AMP binaries and sets the `test` field in `AMP_CONFIG` to `true`.                                                                                                                                                                    |
-| `amp build --version_override=<version_override>`        | Builds unminified AMP binaries with the specified version.                                                                                                                                                                                             |
-| `amp check-links --files=<files-path-glob>`              | Reports dead links in `.md` files.                                                                                                                                                                                                                     |
-| `amp check-links --local_changes`                        | Reports dead links in `.md` files changed in the local branch.                                                                                                                                                                                         |
-| `amp clean`                                              | Removes build output.                                                                                                                                                                                                                                  |
-| `amp css`                                                | Recompiles css to the build directory and builds the embedded css into js files for the AMP library.                                                                                                                                                   |
-| `amp compile-jison`                                      | Compiles jison parsers for extensions to build directory.                                                                                                                                                                                              |
-| `amp pr-check`                                           | Runs all the CircleCI checks locally.                                                                                                                                                                                                                  |
-| `amp pr-check --nobuild`                                 | Runs all the CircleCI checks locally, but skips the `amp build` step.                                                                                                                                                                                  |
-| `amp pr-check --files=<test-files-path-glob>`            | Runs all the CircleCI checks locally, and restricts tests to the files provided.                                                                                                                                                                       |
-| `amp unit`                                               | Runs the unit tests in Chrome (doesn't require the AMP library to be built).                                                                                                                                                                           |
-| `amp unit --local_changes`                               | Runs the unit tests directly affected by the files changed in the local branch in Chrome.                                                                                                                                                              |
-| `amp integration`                                        | Runs the integration tests in Chrome after building the unminified runtime with the `prod` version of `AMP_CONFIG`.                                                                                                                                    |
-| `amp integration --minified`                             | Same as above, but builds the minified runtime.                                                                                                                                                                                                        |
-| `amp integration --config=<config>`                      | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                                                                                           |
-| `amp integration --nobuild`                              | Same as above, but skips building the runtime.                                                                                                                                                                                                         |
-| `amp [unit\|integration] --verbose`                      | Runs tests in Chrome with logging enabled.                                                                                                                                                                                                             |
-| `amp [unit\|integration] --coverage`                     | Runs code coverage tests. After running, the report will be available at test/coverage/index.html                                                                                                                                                      |
-| `amp [unit\|integration] --watch`                        | Watches for changes in files, runs corresponding test(s) in Chrome.                                                                                                                                                                                    |
-| `amp [unit\|integration] --watch --verbose`              | Same as `watch`, with logging enabled.                                                                                                                                                                                                                 |
-| `amp [unit\|integration] --safari`                       | Runs tests in Safari.                                                                                                                                                                                                                                  |
-| `amp [unit\|integration] --firefox`                      | Runs tests in Firefox.                                                                                                                                                                                                                                 |
-| `amp [unit\|integration] --edge`                         | Runs tests in Edge.                                                                                                                                                                                                                                    |
-| `amp [unit\|integration] --files=<test-files-path-glob>` | Runs specific test files.                                                                                                                                                                                                                              |
-| `amp [unit\|integration] --testnames`                    | Lists the name of each test being run, and prints a summary at the end.                                                                                                                                                                                |
-| `amp serve`                                              | Serves content from the repository root at http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serves unminified binaries by default.                                                                                            |
-| `amp serve --minified`                                   | Same as `serve`, but serves minified binaries.                                                                                                                                                                                                         |
-| `amp serve --cdn`                                        | Same as `serve`, but serves CDN binaries.                                                                                                                                                                                                              |
-| `amp serve --rtv <rtv_number>`                           | Same as `serve`, but serves binaries with the given 15 digit RTV.                                                                                                                                                                                      |
-| `amp serve --esm`                                        | Same as `serve`, but serves esm (module) binaries. Uses the new Typescript based transforms. _Still under active development._                                                                                                                         |
-| `amp serve --quiet`                                      | Same as `serve`, with logging silenced.                                                                                                                                                                                                                |
-| `amp serve --port <port>`                                | Same as `serve`, but uses a port number other than the default of 8000.                                                                                                                                                                                |
-| `amp check-types`                                        | Verifies that there are no errors associated with Closure typing. Run automatically upon push.                                                                                                                                                         |
-| `amp dep-check`                                          | Runs a dependency check on each module. Run automatically upon push.                                                                                                                                                                                   |
-| `amp presubmit`                                          | Run validation against files to check for forbidden and required terms. Run automatically upon push.                                                                                                                                                   |
-| `amp validator`                                          | Builds and tests the AMP validator. Run automatically upon push.                                                                                                                                                                                       |
-| `amp ava`                                                | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava).                                                                                                                                                              |
-| `amp todos:find-closed`                                  | Find `TODO`s in code for issues that have been closed.                                                                                                                                                                                                 |
-| `amp visual-diff`                                        | Runs all visual diff tests on a headless instance of local Chrome after building the minified runtime with the `prod` version of `AMP_CONFIG`. Requires `PERCY_TOKEN` to be set as an environment variable or passed to the task with `--percy_token`. |
-| `amp visual-diff --config=<config>`                      | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                                                                                           |
-| `amp visual-diff --nobuild`                              | Same as above, but skips building the runtime.                                                                                                                                                                                                         |
-| `amp visual-diff --chrome_debug --webserver_debug`       | Same as above, with additional logging. Debug flags can be used independently.                                                                                                                                                                         |
-| `amp visual-diff --grep=<regular-expression-pattern>`    | Same as above, but executes only those tests whose name matches the regular expression pattern.                                                                                                                                                        |
-| `amp firebase`                                           | Generates a folder `firebase` and copies over all files from `examples` and `test/manual` for firebase deployment.                                                                                                                                     |
-| `amp firebase --file path/to/file`                       | Same as above, but copies over the file specified as `firebase/index.html`.                                                                                                                                                                            |
-| `amp firebase --minified`                                | Same as `amp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.                                                                             |
-| `amp firebase --nobuild`                                 | Same as `amp firebase`, but skips building the runtime.                                                                                                                                                                                                |
-| `amp e2e`                                                | Runs all end-to-end tests on Chrome after building the unminified runtime with the `prod` version of `AMP_CONFIG`..                                                                                                                                    |
-| `amp e2e --minified`                                     | Same as above, but builds the minified runtime. .                                                                                                                                                                                                      |
-| `amp e2e --config=<config>`                              | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                                                                                           |
-| `amp e2e --nobuild`                                      | Same as above, but skips building the runtime.                                                                                                                                                                                                         |
-| `amp e2e --files=<test-files-path-glob>`                 | Runs end-to-end tests from the specified files on the latest Chrome browser.                                                                                                                                                                           |
-| `amp e2e --testnames`                                    | Lists the name of each test being run, and prints a summary at the end.                                                                                                                                                                                |
-| `amp e2e --engine=ENGINE`                                | Runs end-to-end tests with the given Web Driver engine. Allowed values are `puppeteer` and `selenium`.                                                                                                                                                 |
-| `amp e2e --headless`                                     | Runs end-to-end tests in a headless browser instance.                                                                                                                                                                                                  |
-| `amp e2e --watch`                                        | Watches for changes in test files, runs tests.                                                                                                                                                                                                         |
-| `amp check-sourcemaps`                                   | Checks sourcemaps generated during minified compilation for correctness.                                                                                                                                                                               |
+| Command                                                   | Description                                                                                                                                                                                                                                            |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`amp`**                                                 | Starts the dev server, lazily builds JS files and extensions when requested, and watches them for changes. **Use this for development.**                                                                                                               |
+| `amp --extensions=amp-foo,amp-bar`                        | Same as `amp`. Pre-builds the listed extensions, and lazily builds other files when requested.                                                                                                                                                         |
+| `amp --extensions_from=examples/foo.amp.html`             | Same as `amp`. Pre-builds the extensions in the given example file, and lazily builds other files when requested.                                                                                                                                      |
+| `amp --minified`                                          | Same as `amp`. Compiles and serves minified binaries. Can be used with `--extensions` and `--extensions_from`.                                                                                                                                         |
+| `amp --version_override=<version_override>`               | Runs "watch" and "serve". Overrides the version written to the AMP_CONFIG.                                                                                                                                                                             |
+| `amp dist`                                                | Builds minified AMP binaries and applies AMP_CONFIG to runtime files.                                                                                                                                                                                  |
+| `amp dist --watch`                                        | Builds minified AMP binaries and watches them for changes.                                                                                                                                                                                             |
+| `amp dist --noconfig`                                     | Builds minified AMP binaries without applying AMP_CONFIG to runtime files.                                                                                                                                                                             |
+| `amp dist --extensions=amp-foo,amp-bar`                   | Builds minified AMP binaries, with only the listed extensions.                                                                                                                                                                                         |
+| `amp dist --extensions_from=examples/foo.amp.html`        | Builds minified AMP binaries, with only extensions from the listed examples.                                                                                                                                                                           |
+| `amp dist --noextensions`                                 | Builds minified AMP binaries without building any extensions.                                                                                                                                                                                          |
+| `amp dist --core_runtime_only`                            | Builds minified AMP binaries for just the core runtime. Can be combined with `--extensions` and `--extensions_from`.                                                                                                                                   |
+| `amp dist --fortesting`                                   | Builds minified AMP binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.)                                           |
+| `amp dist --fortesting --config=<config>`                 | Builds minified AMP binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                             |
+| `amp dist --version_override=<version_override>`          | Builds minified AMP binaries and overrides the version written to the AMP_CONFIG.                                                                                                                                                                      |
+| `amp lint`                                                | Validates JS files against the ESLint linter.                                                                                                                                                                                                          |
+| `amp lint --watch`                                        | Watches for changes in files, and validates against the ESLint linter.                                                                                                                                                                                 |
+| `amp lint --fix`                                          | Fixes simple lint warnings/errors automatically.                                                                                                                                                                                                       |
+| `amp lint --files=<files-path-glob>`                      | Lints just the files provided. Can be used with `--fix`.                                                                                                                                                                                               |
+| `amp lint --local_changes`                                | Lints just the files changed in the local branch. Can be used with `--fix`.                                                                                                                                                                            |
+| `amp prettify`                                            | Validates non-JS files using Prettier.                                                                                                                                                                                                                 |
+| `amp prettify --fix`                                      | Fixes simple formatting errors automatically.                                                                                                                                                                                                          |
+| `amp prettify --files=<files-path-glob>`                  | Checks just the files provided. Can be used with `--fix`.                                                                                                                                                                                              |
+| `amp prettify --local_changes`                            | Checks just the files changed in the local branch. Can be used with `--fix`.                                                                                                                                                                           |
+| `amp build`                                               | Builds unminified AMP binaries.                                                                                                                                                                                                                        |
+| `amp build --watch`                                       | Builds unminified AMP binaries and watches them for changes.                                                                                                                                                                                           |
+| `amp build --extensions=amp-foo,amp-bar`                  | Builds unminified AMP binaries, with only the listed extensions.                                                                                                                                                                                       |
+| `amp build --extensions_from=examples/foo.amp.html`       | Builds unminified AMP binaries, with only the extensions needed to load the listed examples.                                                                                                                                                           |
+| `amp build --noextensions`                                | Builds unminified AMP binaries with no extensions.                                                                                                                                                                                                     |
+| `amp build --core_runtime_only`                           | Builds unminified AMP binaries for just the core runtime.                                                                                                                                                                                              |
+| `amp build --fortesting`                                  | Builds unminified AMP binaries and sets the `test` field in `AMP_CONFIG` to `true`.                                                                                                                                                                    |
+| `amp build --version_override=<version_override>`         | Builds unminified AMP binaries with the specified version.                                                                                                                                                                                             |
+| `amp check-links --files=<files-path-glob>`               | Reports dead links in `.md` files.                                                                                                                                                                                                                     |
+| `amp check-links --local_changes`                         | Reports dead links in `.md` files changed in the local branch.                                                                                                                                                                                         |
+| `amp clean`                                               | Removes build output.                                                                                                                                                                                                                                  |
+| `amp css`                                                 | Recompiles css to the build directory and builds the embedded css into js files for the AMP library.                                                                                                                                                   |
+| `amp compile-jison`                                       | Compiles jison parsers for extensions to build directory.                                                                                                                                                                                              |
+| `amp pr-check`                                            | Runs all the CircleCI checks locally.                                                                                                                                                                                                                  |
+| `amp pr-check --nobuild`                                  | Runs all the CircleCI checks locally, but skips the `amp build` step.                                                                                                                                                                                  |
+| `amp pr-check --files=<test-files-path-glob>`             | Runs all the CircleCI checks locally, and restricts tests to the files provided.                                                                                                                                                                       |
+| `amp unit`                                                | Runs the unit tests in Chrome (doesn't require the AMP library to be built).                                                                                                                                                                           |
+| `amp unit --local_changes`                                | Runs the unit tests directly affected by the files changed in the local branch in Chrome.                                                                                                                                                              |
+| `amp integration`                                         | Runs the integration tests in Chrome after building the unminified runtime with the `prod` version of `AMP_CONFIG`.                                                                                                                                    |
+| `amp integration --minified`                              | Same as above, but builds the minified runtime.                                                                                                                                                                                                        |
+| `amp integration --config=<config>`                       | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                                                                                           |
+| `amp integration --nobuild`                               | Same as above, but skips building the runtime.                                                                                                                                                                                                         |
+| `amp [unit\|integration] --verbose`                       | Runs tests in Chrome with logging enabled.                                                                                                                                                                                                             |
+| `amp [unit\|integration] --coverage`                      | Runs code coverage tests. After running, the report will be available at test/coverage/index.html                                                                                                                                                      |
+| `amp [unit\|integration] --watch`                         | Watches for changes in files, runs corresponding test(s) in Chrome.                                                                                                                                                                                    |
+| `amp [unit\|integration] --watch --verbose`               | Same as `watch`, with logging enabled.                                                                                                                                                                                                                 |
+| `amp [unit\|integration] --safari`                        | Runs tests in Safari.                                                                                                                                                                                                                                  |
+| `amp [unit\|integration] --firefox`                       | Runs tests in Firefox.                                                                                                                                                                                                                                 |
+| `amp [unit\|integration] --edge`                          | Runs tests in Edge.                                                                                                                                                                                                                                    |
+| `amp [unit\|integration] --files=<test-files-path-glob>`  | Runs specific test files.                                                                                                                                                                                                                              |
+| `amp [unit\|integration] --testnames`                     | Lists the name of each test being run, and prints a summary at the end.                                                                                                                                                                                |
+| `amp serve`                                               | Serves content from the repository root at http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serves unminified binaries by default.                                                                                            |
+| `amp serve --minified`                                    | Same as `serve`, but serves minified binaries.                                                                                                                                                                                                         |
+| `amp serve --cdn`                                         | Same as `serve`, but serves CDN binaries.                                                                                                                                                                                                              |
+| `amp serve --rtv <rtv_number>`                            | Same as `serve`, but serves binaries with the given 15 digit RTV.                                                                                                                                                                                      |
+| `amp serve --esm`                                         | Same as `serve`, but serves esm (module) binaries. Uses the new Typescript based transforms. _Still under active development._                                                                                                                         |
+| `amp serve --quiet`                                       | Same as `serve`, with logging silenced.                                                                                                                                                                                                                |
+| `amp serve --port <port>`                                 | Same as `serve`, but uses a port number other than the default of 8000.                                                                                                                                                                                |
+| `amp storybook`                                           | Serves Storybooks for [isolated component testing.](#isolated-component-testing)                                                                                                                                                                       |
+| `amp storybook --storybook_env <storybook_env>`           | Serves Storybook of a specific environment (`amp`, `preact`).                                                                                                                                                                                          |
+| `amp storybook --build [--storybook_env <storybook_env>]` | Builds one or more Storybooks into a static directory.                                                                                                                                                                                                 |
+| `amp check-types`                                         | Verifies that there are no errors associated with Closure typing. Run automatically upon push.                                                                                                                                                         |
+| `amp dep-check`                                           | Runs a dependency check on each module. Run automatically upon push.                                                                                                                                                                                   |
+| `amp presubmit`                                           | Run validation against files to check for forbidden and required terms. Run automatically upon push.                                                                                                                                                   |
+| `amp validator`                                           | Builds and tests the AMP validator. Run automatically upon push.                                                                                                                                                                                       |
+| `amp ava`                                                 | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava).                                                                                                                                                              |
+| `amp todos:find-closed`                                   | Find `TODO`s in code for issues that have been closed.                                                                                                                                                                                                 |
+| `amp visual-diff`                                         | Runs all visual diff tests on a headless instance of local Chrome after building the minified runtime with the `prod` version of `AMP_CONFIG`. Requires `PERCY_TOKEN` to be set as an environment variable or passed to the task with `--percy_token`. |
+| `amp visual-diff --config=<config>`                       | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                                                                                           |
+| `amp visual-diff --nobuild`                               | Same as above, but skips building the runtime.                                                                                                                                                                                                         |
+| `amp visual-diff --chrome_debug --webserver_debug`        | Same as above, with additional logging. Debug flags can be used independently.                                                                                                                                                                         |
+| `amp visual-diff --grep=<regular-expression-pattern>`     | Same as above, but executes only those tests whose name matches the regular expression pattern.                                                                                                                                                        |
+| `amp firebase`                                            | Generates a folder `firebase` and copies over all files from `examples` and `test/manual` for firebase deployment.                                                                                                                                     |
+| `amp firebase --file path/to/file`                        | Same as above, but copies over the file specified as `firebase/index.html`.                                                                                                                                                                            |
+| `amp firebase --minified`                                 | Same as `amp firebase`, but uses minified files of the form `/dist/v0/amp-component-name.js` instead of unminified files of the form `/dist/v0/amp-component-name.max.js`.                                                                             |
+| `amp firebase --nobuild`                                  | Same as `amp firebase`, but skips building the runtime.                                                                                                                                                                                                |
+| `amp e2e`                                                 | Runs all end-to-end tests on Chrome after building the unminified runtime with the `prod` version of `AMP_CONFIG`..                                                                                                                                    |
+| `amp e2e --minified`                                      | Same as above, but builds the minified runtime. .                                                                                                                                                                                                      |
+| `amp e2e --config=<config>`                               | Same as above, but `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                                                                                           |
+| `amp e2e --nobuild`                                       | Same as above, but skips building the runtime.                                                                                                                                                                                                         |
+| `amp e2e --files=<test-files-path-glob>`                  | Runs end-to-end tests from the specified files on the latest Chrome browser.                                                                                                                                                                           |
+| `amp e2e --testnames`                                     | Lists the name of each test being run, and prints a summary at the end.                                                                                                                                                                                |
+| `amp e2e --engine=ENGINE`                                 | Runs end-to-end tests with the given Web Driver engine. Allowed values are `puppeteer` and `selenium`.                                                                                                                                                 |
+| `amp e2e --headless`                                      | Runs end-to-end tests in a headless browser instance.                                                                                                                                                                                                  |
+| `amp e2e --watch`                                         | Watches for changes in test files, runs tests.                                                                                                                                                                                                         |
+| `amp check-sourcemaps`                                    | Checks sourcemaps generated during minified compilation for correctness.                                                                                                                                                                               |
 
 **Pro tip:** All the above commands can be run in debug mode using `node --inspect`. This will make the Chrome debugger stop at `debugger;` statements, after which local state can be inspected using dev tools.
 
@@ -225,7 +228,7 @@ Additionally, the following query parameters can be provided:
 
 For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](../testing/local-amp-chrome-extension/README.md).
 
-## Visual Diff Tests
+## <a name="visual-diff-tests"></a> Visual Diff Tests
 
 In addition to building the AMP runtime and running `amp [unit|integration]`, the automatic test run on CircleCI includes a set of visual diff tests to make sure a new commit to `main` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
 
@@ -248,7 +251,7 @@ If a Percy test flakes and you would like to trigger a rerun, you can't do that 
 
 ### How Are Tests Executed
 
-Visual diff tests are defined in the [`visual-tests`](../test/visual-diff/visual-tests), see file for the configurations of each test. When running, the visual diff test runner does the following for each test case:
+Visual diff tests are defined in the [`visual-tests.jsonc`](../test/visual-diff/visual-tests.jsonc), see file for the configurations of each test. When running, the visual diff test runner does the following for each test case:
 
 -   Navgates to the defined page using a headless Chrome browser
 -   Waits for the page to finish loading, both by verifying idle network connections and lack of loader animations
@@ -263,74 +266,63 @@ Percy DOES NOT by default run JavaScript, so the same DOM snapshot will be used 
 
 ### Adding and Modifying Visual Diff Tests
 
-#### One-time Setup
-
-First create a [free BrowserStack account](https://www.browserstack.com/), use it to log into [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`:
-
-```sh
-export PERCY_TOKEN="<unique-percy-token>"
-```
-
-Once the environment variable is set up, you can run the AMP visual diff tests. You can also pass this token directly to `amp visual-diff --percy_token="<unique-percy-token>"`
-
-#### Writing the Test
-
-To start, create the page and register it in the configuration file for visual diff tests:
-
--   Create an AMP document that will be tested under `examples/visual-tests`.
--   Add an entry in the [`test/visual-diff/visual-tests`](../test/visual-diff/visual-tests) JSON5 file. Documentation for the various settings are in that file.
-    -   Must set fields: `url`, `name`
-    -   You will also likely want to set `loading_complete_css` and maybe also `loading_incomplete_css`
-    -   Only set `viewport` if your page looks different on mobile vs. desktop, and you intend to create a separate config for each
-        -   The `viewport` setting wraps the entire DOM snapshot inside an `<iframe>` before uploading to Percy. Beware of weird iframe behaviors! 🐉
-    -   Do not set `enable_percy_javascript` without consulting `@ampproject/wg-infra`
-    -   Point `interactive_tests` to a JavaScript file if you would like to add interactions to the page. See examples of existing interactive tests to learn how to write those
--   (For past examples of pull requests that add visual diff tests, see [#17047](https://github.com/ampproject/amphtml/pull/17047), [#17110](https://github.com/ampproject/amphtml/pull/17110))
-
-Now, verify your test by executing it:
-
--   Build the AMP runtime in minified mode:
-    ```sh
-    amp dist --fortesting
-    ```
-    -   You can verify that your page looks as intented by running `amp serve --minified` and opening it in a browser
--   Execute the visual diff tests:
-    ```sh
-    amp visual-diff --nobuild
-    ```
-    -   Add `--grep="<regular expression>"` to the command to execute a subset of the tests. e.g., `amp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
-    -   Note that if you drop the `--nobuild` flag, `amp visual-diff` will run `amp dist --fortesting` on each execution. This is time consuming, so only drop it if you are changing the runtime/extension code and not just the test files
-    -   To see debugging info during Percy runs, you can add `--chrome_debug`, `--webserver_debug`, or `--debug` for both.
--   When the test finishes executing it will print a URL to Percy where you can inspect the results. It should take about a minute to finish processing.
--   Inspect the build on Percy. If you are not happy with the results, fix your page or code, and repeat. If all is well, approve it. This creates a new baseline on Percy, against which all following builds will be compared.
--   After approving your test, repeat the `amp visual-diff` command at least 5 more times. If any of the subsequent runs fails with a visual changes, this means that your test is flaky.
-    -   Flakiness is usually caused by bad `loading_complete_css` configurations
-    -   To find what CSS selector appear _exclusively_ after the page settles into the expected result, download the _baseline_ and _new_ source for the snapshots that Percy used in the build that flaked, and compare them using a text diff application
+See [Adding and Modifying Visual Diff Tests](./writing-visual-diff-tests.md).
 
 ## Isolated Component Testing
 
-To speed up development and testing of components, it is advised to use the Storybook dashboard and develop "stories" (testing scenarios) for components. Storybook has many features that assist with the isolated development and manual testing of components including easy manual interaction with component parameters, integrated accessibility auditing, responsiveness testing, etc.
+To speed up development and testing of components, it is advised to use [Storybook](https://storybook.js.org/). This allows you to write "stories", which are renderable test scenarios.
 
-AMP includes two Storybook environments: `storybook-amp` (for components living inside AMP pages) and `storybook-preact` (simulating Bento components living in a Preact/React app).
+Stories can show configuration controls for manual testing of component parameters. They also provide tools to audit accessibility, test layouts that change according to viewport size, among other features.
 
-To run these environments and explore existing AMP components, run
+> 📖 Storybook documentation: [What's a Story?](https://storybook.js.org/docs/react/get-started/whats-a-story)
 
-```sh
-amp storybook-amp
-# ------ or ------
-amp storybook-preact
-```
+### Launching Storybook
 
-Test scenarios (stories) live inside each of the components' directories, stories ran in the AMP environment have the `.amp.js` extension:
+You may launch the `preact` Storybook by running:
 
 ```sh
-# Preact environment test scenario
-./extensions/amp-example/0.1/storybook/Basic.js
-# AMP environment test scenario
-./extensions/amp-example/0.1/storybook/Basic.amp.js
+amp storybook
 ```
 
-Read more about [Writing Storybook Test Scenarios](https://storybook.js.org/docs/guides/guide-preact/#step-4-write-your-stories) in the official [Storybook documentation](https://storybook.js.org/docs/).
+You may launch a specific environment by providing `--storybook_env`:
+
+-   **`preact`**
+
+    ```sh
+    amp storybook --storybook_env=preact
+    ```
+
+-   **`react`**
+
+    ```sh
+    amp storybook --storybook_env=react
+    ```
+
+    > Launching the **`react`** environment requires component bundles. You should ensure that they're present in `extensions/**/dist` directories beforehand, by running `amp build --extensions=...` for all Bento components.
+
+-   **`amp`**
+
+    ```sh
+    amp storybook --storybook_env=amp
+    ```
+
+    > Launching the **`amp`** environment also initiates the build-and-serve task that's normally launched using the [`amp` command](#testing-commands). This provides an additional server on `localhost:8000`.
+
+### Writing test scenarios
+
+Test scenarios (stories) are located inside a component's directory. Their filename suffix determines whether they run on the `amp` environment, or on the `preact` and `react` environments:
+
+-   **`preact`** Stories end with `.js`:
+
+    `extensions/amp-example/0.1/storybook/Basic.js`
+
+-   **`react`** Stories use the same files as **`preact`**.
+
+-   **`amp`** Stories end with `.amp.js`:
+
+    `extensions/amp-example/0.1/storybook/Basic.amp.js`
+
+Read more about [Writing Stories](https://storybook.js.org/docs/guides/guide-preact/#step-4-write-your-stories) in the official [Storybook documentation](https://storybook.js.org/docs/). Make sure to also follow our own [Style Recommendations](../build-system/tasks/storybook/README.md#style-recommendations)
 
 ## Testing on devices
 

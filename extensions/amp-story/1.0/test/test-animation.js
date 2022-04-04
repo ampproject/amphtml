@@ -1,17 +1,19 @@
+import {Deferred} from '#core/data-structures/promise';
+import {layoutRectLtwh} from '#core/dom/layout/rect';
+import {scopedQuerySelectorAll} from '#core/dom/query';
+import {htmlFor, htmlRefs} from '#core/dom/static-template';
+import {toArray} from '#core/types/array';
+
+import {Services} from '#service';
 import {AmpDocSingle} from '#service/ampdoc-impl';
+
+import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
 import {
   AnimationManager,
   AnimationRunner,
   AnimationSequence,
 } from '../animation';
-import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {WebAnimationPlayState} from '../../../amp-animation/0.1/web-animation-types';
-import {htmlFor, htmlRefs} from '#core/dom/static-template';
-import {layoutRectLtwh} from '#core/dom/layout/rect';
 import {presets} from '../animation-presets';
-import {scopedQuerySelectorAll} from '#core/dom/query';
-import {toArray} from '#core/types/array';
 
 const querySelectorAllAnimateIn = (element) =>
   toArray(scopedQuerySelectorAll(element, '[animate-in]'));

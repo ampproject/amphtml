@@ -1,32 +1,19 @@
 'use strict';
 
+const fastGlob = require('fast-glob');
 const fs = require('fs');
-const globby = require('globby');
 const path = require('path');
 const Postcss = require('postcss');
 const prettier = require('prettier');
-const textTable = require('text-table');
-const {
-  getJscodeshiftReport,
-  jscodeshiftAsync,
-} = require('../../test-configs/jscodeshift');
-const {getStdout} = require('../../common/process');
-const {gray, magenta} = require('../../common/colors');
+const {getZindexJs} = require('./js');
+const {gray, magenta} = require('kleur/colors');
 const {logLocalDev, logOnSameLineLocalDev} = require('../../common/logging');
 const {writeDiffOrFail} = require('../../common/diff');
 
 /** @type {Postcss.default} */
 const postcss = /** @type {*} */ (Postcss);
 
-const tableHeaders = [
-  ['context', 'z-index', 'file'],
-  ['---', '---', '---'],
-];
-
-const tableOptions = {
-  align: ['l', 'l', 'l'],
-  hsep: '   |   ',
-};
+const tableHeaders = ['context', 'z-index', 'file'];
 
 const preamble = `
 **Run \`amp get-zindex --fix\` to generate this file.**
@@ -110,7 +97,7 @@ function createTable(filesData) {
  */
 async function getZindexSelectors(glob, cwd = '.') {
   const filesData = Object.create(null);
-  const files = await globby(glob, {cwd});
+  const files = await fastGlob(glob, {cwd});
   for (const file of files) {
     const contents = await fs.promises.readFile(path.join(cwd, file), 'utf-8');
     const selectors = Object.create(null);
@@ -129,63 +116,25 @@ async function getZindexSelectors(glob, cwd = '.') {
  * @param {string=} cwd
  * @return {!Promise<Object>}
  */
-function getZindexChainsInJs(glob, cwd = '.') {
-  return new Promise((resolve) => {
-    const files = globby.sync(glob, {cwd}).map((file) => path.join(cwd, file));
+async function getZindexChainsInJs(glob, cwd = '.') {
+  const files = (await fastGlob(glob, {cwd})).map((file) =>
+    path.join(cwd, file)
+  );
 
-    const filesIncludingString = getStdout(
-      ['grep -irl "z-*index"', ...files].join(' ')
-    )
-      .trim()
-      .split('\n');
-
-    const result = {};
-
-    let resultCountInverse = filesIncludingString.length;
-
-    if (resultCountInverse === 0) {
-      // We don't expect this fileset to be empty since it's unlikely that we
-      // never change the z-index from JS, but we add this just in case to
-      // prevent hanging infinitely.
-      resolve(result);
-      return;
-    }
-
-    const process = jscodeshiftAsync([
-      '--dry',
-      '--no-babel',
-      `--transform=${__dirname}/jscodeshift/collect-zindex.js`,
-      ...filesIncludingString,
-    ]);
-    const {stderr, stdout} = process;
-
-    stderr.on('data', (data) => {
-      throw new Error(data.toString());
-    });
-
-    stdout.on('data', (data) => {
-      const reportLine = getJscodeshiftReport(data.toString());
-
-      if (!reportLine) {
-        return;
-      }
-
-      const [filename, report] = reportLine;
-      const relative = path.relative(cwd, filename);
-
+  const resultEntries = await Promise.all(
+    files.map(async (filename) => {
       logChecking(filename);
+      const relative = path.relative(cwd, filename);
+      const found = await getZindexJs(filename);
+      return [relative, found];
+    })
+  );
 
-      try {
-        const reportParsed = JSON.parse(report);
-        if (reportParsed.length) {
-          result[relative] = reportParsed.sort(sortedByEntryKey);
-        }
-        if (--resultCountInverse === 0) {
-          resolve(result);
-        }
-      } catch (_) {}
-    });
-  });
+  return Object.fromEntries(
+    resultEntries
+      // eslint-disable-next-line local/no-deep-destructuring
+      .filter(([, {length}]) => length)
+  );
 }
 
 /**
@@ -198,12 +147,16 @@ async function getZindex() {
   const filesData = Object.assign(
     {},
     ...(await Promise.all([
-      getZindexSelectors('{css,src,extensions}/**/*.css'),
+      getZindexSelectors([
+        '{css,src,extensions}/**/*.css',
+        '!**/dist/**/*.css',
+      ]),
       getZindexChainsInJs([
         '{3p,src,extensions}/**/*.js',
         '!**/dist/**/*.js',
         '!extensions/**/test/**/*.js',
         '!extensions/**/storybook/**/*.js',
+        '!src/bento/components/**/test/*.js',
       ]),
     ]))
   );
@@ -214,8 +167,12 @@ async function getZindex() {
   );
 
   const filename = 'css/Z_INDEX.md';
-  const rows = [...tableHeaders, ...createTable(filesData)];
-  const table = textTable(rows, tableOptions);
+  const rows = [
+    tableHeaders,
+    tableHeaders.map(() => '-'),
+    ...createTable(filesData),
+  ];
+  const table = rows.map((row) => row.join(' | ')).join('\n');
   const output = await prettierFormat(filename, `${preamble}\n\n${table}`);
 
   await writeDiffOrFail(

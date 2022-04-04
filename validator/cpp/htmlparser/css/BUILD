@@ -29,14 +29,13 @@ cc_library(
     hdrs = ["parse-css.h"],
     deps = [
         ":parse_css_cc_proto",
-        "@com_github_glog//:glog",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:variant",
-        "@htmlparser//:strings",
-        "@htmlparser//json:types",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:strings",
+        "//cpp/htmlparser/json:types",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -49,7 +48,7 @@ cc_test(
         ":parse_css_cc_proto",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:strings",
     ],
 )
 
@@ -69,13 +68,12 @@ cc_library(
     hdrs = ["parse-css-urls.h"],
     deps = [
         ":parse_css_urls_cc_proto",
-        "@com_github_glog//:glog",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:variant",
-        "@htmlparser//:strings",
-        "@validator//:validator_cc_proto",
+        "//cpp/htmlparser:strings",
+        "//:validator_cc_proto",
     ],
 )
 
@@ -96,9 +94,9 @@ cc_library(
     hdrs = ["amp4ads-parse-css.h"],
     deps = [
         ":parse-css",
-        "@com_github_re2//:re2",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
+        "@com_googlesource_code_re2//:re2",
     ],
 )
 
@@ -110,6 +108,6 @@ cc_test(
         ":parse-css",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//:strings",
+        "//cpp/htmlparser:strings",
     ],
 )

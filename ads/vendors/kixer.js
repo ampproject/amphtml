@@ -1,4 +1,5 @@
 import {loadScript, validateData} from '#3p/3p';
+
 import {parseUrlDeprecated} from '../../src/url';
 
 /* global
@@ -13,7 +14,7 @@ __kx_viewability: false,
  * @param {!Object} data
  */
 export function kixer(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
 
   validateData(data, ['adslot'], []);
 

@@ -1,3 +1,13 @@
+import {isConnectedNode} from '#core/dom';
+import {matches} from '#core/dom/query';
+import {findIndex} from '#core/types/array';
+import {getWin} from '#core/window';
+
+import {Services} from '#service';
+
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '#utils/event-helper';
+import {dev, devAssert} from '#utils/log';
+
 import {
   BlessTask,
   ELEMENT_BLESSED_PROPERTY_NAME,
@@ -11,15 +21,9 @@ import {
   UnmuteTask,
   UpdateSourcesTask,
 } from './media-tasks';
-import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper';
-import {Services} from '#service';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
-import {dev, devAssert} from '../../../src/log';
-import {findIndex} from '#core/types/array';
-import {isConnectedNode} from '#core/dom';
-import {matches} from '#core/dom/query';
-import {toWin} from '#core/window';
+
 import {userInteractedWith} from '../../../src/video-interface';
 
 /** @const @enum {string} */
@@ -65,7 +69,7 @@ export let ElementDistanceFnDef;
  * Represents a task to be executed on a media element.
  * @typedef {function(!PoolBoundElementDef, *): !Promise}
  */
-let ElementTask_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
+let ElementTask_1_0_Def; // eslint-disable-line local/camelcase
 
 /**
  * @const {string}
@@ -156,6 +160,18 @@ export class MediaPool {
      * @private @const {!Object<string, !Sources>}
      */
     this.sources_ = {};
+
+    /**
+     * The audio context.
+     * @private {?AudioContext}
+     */
+    this.audioContext_ = null;
+
+    /**
+     * Maps a media element's ID to its audio source.
+     * @private @const {!Object<string, !MediaElementAudioSourceNode>}
+     */
+    this.audioSources_ = {};
 
     /**
      * Maps a media element's ID to the element.  This is necessary, as elements
@@ -850,6 +866,11 @@ export class MediaPool {
       return Promise.resolve();
     }
 
+    const audioSource = this.audioSources_[domMediaEl.id];
+    if (audioSource) {
+      audioSource.disconnect();
+    }
+
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
   }
 
@@ -870,7 +891,47 @@ export class MediaPool {
       return Promise.resolve();
     }
 
+    if (mediaType == MediaType.VIDEO) {
+      const ampVideoEl = domMediaEl.parentElement;
+      if (ampVideoEl) {
+        if (ampVideoEl.hasAttribute('noaudio')) {
+          this.setVolume_(domMediaEl, 0);
+        } else {
+          const volume = ampVideoEl.getAttribute('volume');
+          if (volume) {
+            this.setVolume_(domMediaEl, parseFloat(volume));
+          }
+        }
+      }
+    }
+
     return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
+  }
+
+  /**
+   * Updates the volume of the provided media element.
+   * @param {!DomElementDef} domMediaEl The media element whose volume will be set.
+   * @param {number} volume The volume to be applied to the media element.
+   * @private
+   */
+  setVolume_(domMediaEl, volume) {
+    // Handle cross-browser differences (see https://googlechrome.github.io/samples/webaudio-method-chaining/).
+    if (typeof AudioContext === 'function') {
+      this.audioContext_ = this.audioContext_ || new AudioContext();
+    } else if (typeof webkitAudioContext === 'function') {
+      this.audioContext_ =
+        this.audioContext_ || new global.webkitAudioContext();
+    }
+
+    if (this.audioContext_) {
+      const audioSource =
+        this.audioSources_[domMediaEl.id] ||
+        this.audioContext_.createMediaElementSource(domMediaEl);
+      this.audioSources_[domMediaEl.id] = audioSource;
+      const gainNode = this.audioContext_.createGain();
+      gainNode.gain.value = volume;
+      audioSource.connect(gainNode).connect(this.audioContext_.destination);
+    }
   }
 
   /**
@@ -977,7 +1038,7 @@ export class MediaPool {
     const newId = String(nextInstanceId++);
     element[POOL_MEDIA_ELEMENT_PROPERTY_NAME] = newId;
     instances[newId] = new MediaPool(
-      toWin(root.getElement().ownerDocument.defaultView),
+      getWin(root.getElement()),
       root.getMaxMediaElementCounts(),
       (element) => root.getElementDistance(element)
     );

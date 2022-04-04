@@ -1,11 +1,11 @@
 import {removeChildren} from '#core/dom';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {listen} from '#utils/event-helper';
+import {dev, user, userAssert} from '#utils/log';
+
 import {CSS} from '../../../build/amp-access-laterpay-0.1.css';
-import {listen} from '../../../src/event-helper';
-import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 
@@ -52,7 +52,7 @@ const DEFAULT_MESSAGES = {
  *   sandbox: (boolean|undefined),
  * }}
  */
-let LaterpayConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
+let LaterpayConfig_0_1_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -65,7 +65,7 @@ let LaterpayConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camel
  *   validity_value: number
  * }}
  */
-let PurchaseOption_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PurchaseOption_0_1_Def; // eslint-disable-line local/camelcase
 
 /**
  * @typedef {{
@@ -76,7 +76,7 @@ let PurchaseOption_0_1_Def; // eslint-disable-line google-camelcase/google-camel
  *   subscriptions: (!Array<PurchaseOption_0_1_Def>|undefined)
  * }}
  */
-let PurchaseConfig_0_1_Def; // eslint-disable-line google-camelcase/google-camelcase
+let PurchaseConfig_0_1_Def; // eslint-disable-line local/camelcase
 
 /**
  * @implements {../../amp-access/0.1/access-vendor.AccessVendor}
@@ -127,13 +127,10 @@ export class LaterpayVendor {
     this.currentLocale_ = this.laterpayConfig_['locale'] || 'en';
 
     /** @private {!JsonObject} */
-    this.i18n_ = /** @type {!JsonObject} */ (
-      Object.assign(
-        dict(),
-        DEFAULT_MESSAGES,
-        this.laterpayConfig_['localeMessages'] || dict()
-      )
-    );
+    this.i18n_ = /** @type {!JsonObject} */ ({
+      ...DEFAULT_MESSAGES,
+      ...(this.laterpayConfig_['localeMessages'] || {}),
+    });
 
     /** @private {string} */
     this.purchaseConfigBaseUrl_ = this.getConfigUrl_() + CONFIG_BASE_PATH;

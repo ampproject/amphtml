@@ -1,11 +1,10 @@
 import {htmlFor} from '#core/dom/static-template';
 import {toArray} from '#core/types/array';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../../../src/event-helper';
-import {devAssert} from '../../../src/log';
+import {createCustomEvent} from '#utils/event-helper';
+import {devAssert} from '#utils/log';
 
 /**
  * @enum {string}
@@ -121,13 +120,9 @@ export class LightboxControls {
     }
 
     this.element_.dispatchEvent(
-      createCustomEvent(
-        this.win_,
-        'action',
-        dict({
-          'action': action,
-        })
-      )
+      createCustomEvent(this.win_, 'action', {
+        'action': action,
+      })
     );
     event.stopPropagation();
     event.preventDefault();

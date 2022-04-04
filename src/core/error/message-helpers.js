@@ -6,14 +6,10 @@ import {isElement} from '#core/types';
  * This is added to user error messages, so that we can later identify
  * them, when the only thing that we have is the message. This is the
  * case in many browsers when the global exception handler is invoked.
- *
- * @const {string}
  */
 export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 /**
  * Four zero width space.
- *
- * @const {string}
  */
 export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
 

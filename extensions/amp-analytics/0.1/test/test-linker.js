@@ -1,5 +1,6 @@
+import {mockWindowInterface} from '#testing/helpers/service';
+
 import {createLinker, parseLinker} from '../linker';
-import {mockWindowInterface} from '#testing/test-helper';
 
 const TAG = '[amp-analytics/linker]';
 

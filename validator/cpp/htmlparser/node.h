@@ -1,5 +1,5 @@
-#ifndef HTMLPARSER__NODE_H_
-#define HTMLPARSER__NODE_H_
+#ifndef CPP_HTMLPARSER_NODE_H_
+#define CPP_HTMLPARSER_NODE_H_
 
 #include <deque>
 #include <memory>
@@ -10,9 +10,9 @@
 #include <utility>
 #include <vector>
 
-#include "atom.h"
-#include "error.h"
-#include "token.h"
+#include "cpp/htmlparser/atom.h"
+#include "cpp/htmlparser/error.h"
+#include "cpp/htmlparser/token.h"
 
 namespace htmlparser {
 
@@ -232,4 +232,4 @@ std::optional<Error> CheckNodeConsistency(Node* node);
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__NODE_H_
+#endif  // CPP_HTMLPARSER_NODE_H_

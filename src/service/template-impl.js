@@ -2,7 +2,8 @@ import {Deferred} from '#core/data-structures/promise';
 import {rootNodeFor} from '#core/dom';
 import {scopedQuerySelector} from '#core/dom/query';
 
-import {userAssert} from '../log';
+import {userAssert} from '#utils/log';
+
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
@@ -87,6 +88,23 @@ export class Templates {
   renderTemplateAsString(templateElement, data) {
     return this.getImplementation_(templateElement).then((impl) => {
       return impl.renderAsString(data);
+    });
+  }
+
+  /**
+   * Resolves to a reusable template renderer.
+   *
+   * @param {!Element} templateElement
+   * @return {Promise<{
+   *   renderAsString: function(*=): string
+   * }>}
+   */
+  getTemplateRenderer(templateElement) {
+    return this.getImplementation_(templateElement).then((impl) => {
+      const renderer = {
+        renderAsString: (data) => impl.renderAsString(data),
+      };
+      return renderer;
     });
   }
 

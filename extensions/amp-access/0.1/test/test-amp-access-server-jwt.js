@@ -1,7 +1,8 @@
 import * as fakeTimers from '@sinonjs/fake-timers';
 
+import {isUserErrorMessage} from '#utils/log';
+
 import * as DocumentFetcher from '../../../../src/document-fetcher';
-import {isUserErrorMessage} from '../../../../src/log';
 import {removeFragment, serializeQueryString} from '../../../../src/url';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 

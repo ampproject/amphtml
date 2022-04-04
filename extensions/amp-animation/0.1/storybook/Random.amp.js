@@ -1,9 +1,8 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
-import {AnimationTemplate} from './template';
+import {AnimationTemplate, animationFillArgType} from './template';
 
 const CONTAINER_STYLE = {
   position: 'absolute',
@@ -28,15 +27,24 @@ const DROP_STYLE = {
 
 export default {
   title: 'Animation',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-animation', version: 0.1}],
   },
+  argTypes: {
+    fill: animationFillArgType,
+  },
+  args: {
+    duration: '1s',
+    iterations: 2,
+  },
 };
 
-export const Random = () => {
+export const Random = ({duration, fill, iterations}) => {
   const spec = {
+    duration,
+    fill,
+    iterations,
     selector: '.drop',
     '--delay': 'rand(0.1s, 5s)',
     delay: 'var(--delay)',
@@ -70,5 +78,3 @@ export const Random = () => {
     </AnimationTemplate>
   );
 };
-
-Random.storyName = 'random';

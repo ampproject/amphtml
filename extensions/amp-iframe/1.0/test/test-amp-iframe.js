@@ -1,8 +1,11 @@
 import '../amp-iframe';
-import {htmlFor} from '#core/dom/static-template';
-import {toggleExperiment} from '#experiments';
-import {waitFor} from '#testing/test-helper';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
+import {htmlFor} from '#core/dom/static-template';
+
+import {toggleExperiment} from '#experiments';
+
+import {waitFor} from '#testing/helpers/service';
+import {flush} from '#testing/preact';
 
 describes.realWin(
   'amp-iframe-v1.0',
@@ -16,8 +19,9 @@ describes.realWin(
 
     async function waitRendered() {
       await whenUpgradedToCustomElement(element);
-      await element.buildInternal();
-      await waitFor(() => element.isConnected, 'element connected');
+      await element.mount();
+      await flush();
+      await waitFor(() => element.shadowRoot.querySelector('iframe'));
     }
 
     beforeEach(() => {
@@ -34,9 +38,11 @@ describes.realWin(
       doc.body.appendChild(element);
 
       await waitRendered();
+      const iframe = element.shadowRoot.querySelector('iframe');
 
       expect(element.parentNode).to.equal(doc.body);
       expect(element.getAttribute('src')).to.equal('https://www.wikipedia.org');
+      expect(iframe.getAttribute('src')).to.equal('https://www.wikipedia.org');
     });
   }
 );

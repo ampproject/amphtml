@@ -2,8 +2,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const moduleResolver = require('babel-plugin-module-resolver');
 
-const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.json');
+const TSCONFIG_PATH = path.join(__dirname, '..', '..', 'tsconfig.base.json');
 let tsConfigPaths = null;
 
 /**
@@ -41,40 +42,81 @@ function readJsconfigPaths() {
 }
 
 /**
- * Import map configuration.
- * @return {!Object}
+ * Remap external modules that rely on React if building for Preact.
+ * @param {'preact' | 'react'} buildFor
+ * @return {Object}
  */
-function getImportResolver() {
+function moduleAliases(buildFor) {
+  if (buildFor === 'react') {
+    return {};
+  }
   return {
-    'root': ['.'],
-    'alias': readJsconfigPaths(),
+    'react': './src/react',
+    'react-dom': './src/react/dom',
+  };
+}
+
+/**
+ * Import map configuration.
+ * @param {'preact' | 'react'} buildFor
+ * @return {Object}
+ */
+function getImportResolver(buildFor = 'preact') {
+  return {
+    root: ['.'],
+    alias: {
+      ...readJsconfigPaths(),
+      ...moduleAliases(buildFor),
+    },
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    stripExtensions: [],
+    babelOptions: {
+      caller: {
+        name: 'import-resolver',
+      },
+    },
   };
 }
 
 /**
  * Produces an alias map with paths relative to the provided root.
  * @param {string} rootDir
+ * @param {'preact' | 'react'} buildFor
  * @return {!Object<string, string>}
  */
-function getRelativeAliasMap(rootDir) {
+function getRelativeAliasMap(rootDir, buildFor = 'preact') {
   return Object.fromEntries(
-    Object.entries(getImportResolver().alias).map(([alias, destPath]) => [
-      alias,
-      path.join(rootDir, destPath),
-    ])
+    Object.entries(getImportResolver(buildFor).alias).map(
+      ([alias, destPath]) => [alias, path.join(rootDir, destPath)]
+    )
   );
 }
 
 /**
  * Import resolver Babel plugin configuration.
+ * @param {'preact' | 'react'} buildFor
  * @return {!Array}
  */
-function getImportResolverPlugin() {
-  return ['module-resolver', getImportResolver()];
+function getImportResolverPlugin(buildFor = 'preact') {
+  return ['module-resolver', getImportResolver(buildFor)];
+}
+
+/**
+ * Resolves a filepath using the same logic as the rest of our build pipeline (babel module-resolver).
+ * The return value is a relative path from the amphtml folder.
+ *
+ * @param {string} filepath
+ * @return {string}
+ */
+function resolvePath(filepath) {
+  // 2nd arg is a file from which to make a relative path.
+  // The actual file doesn't need to exist. In this case it is process.cwd()/anything
+  return moduleResolver.resolvePath(filepath, 'anything', getImportResolver());
 }
 
 module.exports = {
   getImportResolver,
   getImportResolverPlugin,
   getRelativeAliasMap,
+  resolvePath,
 };

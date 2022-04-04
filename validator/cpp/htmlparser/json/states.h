@@ -1,10 +1,10 @@
 // -*- C++ -*-
 
 // AUTO GENERATED; DO NOT EDIT.
-// To regenerate this file, see comments in bin/jsongrammargen
+// To regenerate this file, see comments in bin/statestablegen
 
-#ifndef HTMLPARSER__JSON_STATES_H_
-#define HTMLPARSER__JSON_STATES_H_
+#ifndef CPP_HTMLPARSER_JSON_STATES_H_
+#define CPP_HTMLPARSER_JSON_STATES_H_
 
 #include <array>
 
@@ -409,4 +409,4 @@ inline static uint32_t CodeForToken(unsigned char c, uint8_t state) {
 
 }  // namespace htmlparser::json
 
-#endif  // HTMLPARSER__JSON_STATES_H_
+#endif  // CPP_HTMLPARSER_JSON_STATES_H_

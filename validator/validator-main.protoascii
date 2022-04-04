@@ -13,6 +13,8 @@ script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/valid
 # in the extensions/*/validator-*.protoascii files. This makes it
 # easy to organize the rules for extensions next to their Javascript
 # implementation.
+# Please read how the rules in this file works:
+# https://github.com/ampproject/amphtml/blob/fc447110e86db57e4391bf5c50de8dd2bf75e18f/docs/component-validator-rules.md
 
 # Rules for AMP HTML
 # https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml
@@ -312,6 +314,40 @@ tags: {
   attrs: { name: "imagesizes" }
   attr_lists: "common-link-attrs"
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
+}
+# Allowlisted CSS provider
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "LINK"
+  spec_name: "link rel=stylesheet for amp-story-1.0 css"
+  descriptive_name: "link rel=stylesheet for amp-story-1.0 css"
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: { name: "crossorigin" }  # SRI attribute (https://www.w3.org/TR/SRI/)
+  attrs: {
+    name: "href"
+    mandatory: true
+    value: "https://cdn.ampproject.org/v0/amp-story-1.0.css"
+    value: "https://cdn.ampproject.org/lts/v0/amp-story-1.0.css"
+  }
+  attrs: { name: "integrity" }  # SRI attribute (https://www.w3.org/TR/SRI/)
+  attrs: { name: "media" }
+  attrs: {
+    name: "rel"
+    mandatory: true
+    value_casei: "stylesheet"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    value_casei: "text/css"
+  }
+  attrs: {
+    name: "amp-extension"
+    mandatory: true
+    value_casei: "amp-story"
+  }
 }
 # Allowlisted font providers
 tags: {
@@ -731,6 +767,7 @@ tags: {
         "viewport"
         ")(\\s|$)"
   }
+  attrs: { name: "media" } # For varying theme-color.
   attrs: { name: "property" }  # property is non-standard, but commonly seen.
   # scheme is used by Dublin Core, see issue #13993
   attrs: { name: "scheme" }
@@ -1340,6 +1377,8 @@ tags: {
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
       protocol: "line"
+      # (https://docs.microsoft.com/en-us/windows/uwp/launch-resume/launch-default-app#microsoft-edge-uri-scheme)
+      protocol: "microsoft-edge"
       protocol: "skype"
       protocol: "sms"
       protocol: "snapchat"
@@ -1736,6 +1775,159 @@ tags: {
 # the exception of tags inside of a <noscript> or <amp-story-player> ancestor
 # and transformed amp-img.
 # 4.7.1 The img element
+attr_lists: {
+  name: "img-attrs"
+  attrs: {
+    name: "align"
+    value_casei: "top"
+    value_casei: "middle"
+    value_casei: "bottom"
+    value_casei: "left"
+    value_casei: "right"
+  }
+  attrs: { name: "alt" }
+  attrs: { name: "border" }
+  attrs: {
+    name: "crossorigin"
+    value_casei: "anonymous"
+    value_casei: "use-credentials"
+  }
+  attrs: { name: "height" }
+  attrs: { name: "hspace" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
+  attrs: { name: "ismap" }
+  attrs: {
+    name: "loading"
+    value_casei: "lazy"
+  }  # Not yet part of the html spec
+  attrs: { name: "name" }
+  attrs: {
+    name: "referrerpolicy"
+    value_casei: "no-referrer"
+    value_casei: "no-referrer-when-downgrade"
+    value_casei: "origin"
+    value_casei: "origin-when-cross-origin"
+    value_casei: "same-origin"
+    value_casei: "strict-origin"
+    value_casei: "strict-origin-when-cross-origin"
+    value_casei: "unsafe-url"
+  }
+  attrs: { name: "usemap" }
+  attrs: { name: "vspace" }
+  attrs: { name: "width" }
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMG"
+  spec_name: "Standard Img"
+  descriptive_name: "img"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMG"
+  spec_name: "Hero Img"
+  descriptive_name: "img"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "data-hero"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attrs: {
+    name: "sizes"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMG"
+  spec_name: "Img using srcset"
+  descriptive_name: "img"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attrs: {
+    name: "sizes"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMAGE"
+  spec_name: "Standard Image"
+  descriptive_name: "img"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMAGE"
+  spec_name: "Hero Image"
+  descriptive_name: "img"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  attrs: {
+    name: "data-hero"
+    mandatory: true
+    dispatch_key: NAME_DISPATCH
+  }
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attrs: {
+    name: "sizes"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+}
+tags: {
+  html_format: AMP
+  tag_name: "IMAGE"
+  spec_name: "Image using srcset"
+  disallowed_ancestor: "AMP-IMG"
+  disallowed_ancestor: "AMP-STORY"
+  descriptive_name: "img"
+  attrs: {
+    name: "decoding"
+    value_casei: "async"
+  }
+  attr_lists: "img-attrs"
+  attr_lists: "mandatory-src-or-srcset"
+  attrs: {
+    name: "sizes"
+  }
+}
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
   tag_name: "IMG"
@@ -1743,30 +1935,16 @@ tags: {
   descriptive_name: "img"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
-  attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
   attrs: {
     name: "decoding"
-    value: "async"
-    value: "auto"
-    value: "sync"
+    value_casei: "async"
+    value_casei: "auto"
+    value_casei: "sync"
   }
-  attrs: { name: "height" }  # Not valid html5 but commonly used and supported.
-  attrs: { name: "importance" }  # Not yet part of the html spec
-  attrs: { name: "ismap" }
   attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
-  attrs: { name: "loading" }  # Not yet part of the html spec
-  attrs: {
-    name: "longdesc"
-    value_url: {
-      protocol: "http"
-      protocol: "https"
-    }
-    disallowed_value_regex: "__amp_source_origin"
-  }
   attrs: { name: "sizes" }
-  attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
+  attr_lists: "img-attrs"
   attr_lists: "mandatory-src-or-srcset"
   spec_url: "https://amp.dev/documentation/components/amp-img/"
 }
@@ -2350,6 +2528,7 @@ tags {  # <form method=GET ...>
     }
     disallowed_value_regex: "__amp_source_origin"
   }
+  attrs: { name: "xssi-prefix" }
   attr_lists: "form-name-attr"
 }
 tags {  # <form method=POST ...>
@@ -2763,6 +2942,35 @@ tags: {
   mandatory_ancestor: "FORM [method=POST]"
   spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
+tags: {
+  html_format: AMP
+  tag_name: "INPUT"
+  spec_name: "INPUT [type=image]"
+  attrs: {
+    name: "type"
+    value_casei: "image"
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "[type]"
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "data"
+      protocol: "http"
+      protocol: "https"
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attr_lists: "input-common-attr"
+  attr_lists: "name-attr"
+  mandatory_ancestor: "FORM [method=POST]"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
+}
 # 4.10.6 The button element
 tags: {
   html_format: AMP
@@ -3106,10 +3314,40 @@ attr_lists: {
 }
 tags: {
   html_format: AMP
+  disabled_by: "transformed"
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script"
   descriptive_name: "amphtml engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
+  requires: "style[amp-boilerplate]"
+  requires: "noscript > style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/v0.js"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
+  # The transformed variant is the same except does not require the boilerplate,
+  # given that it may have been removed during transformation.
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml engine script (transformed)"
+  descriptive_name: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3130,10 +3368,40 @@ tags: {
 }
 tags: {
   html_format: AMP
+  disabled_by: "transformed"
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script (LTS)"
   descriptive_name: "amphtml engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
+  requires: "style[amp-boilerplate]"
+  requires: "noscript > style[amp-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attr_lists: "amphtml-engine-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/lts/v0.js"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    disallowed_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
+}
+tags: {
+  # The transformed variant is the same except does not require the boilerplate,
+  # given that it may have been removed during transformation.
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "amphtml engine script (LTS) (transformed)"
+  descriptive_name: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -3158,7 +3426,7 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml module engine script"
   descriptive_name: "amphtml module engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   satisfies: "amphtml module engine script"
@@ -3183,7 +3451,7 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml nomodule engine script"
   descriptive_name: "amphtml nomodule engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   satisfies: "amphtml nomodule engine script"
@@ -3208,7 +3476,7 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml module LTS engine script"
   descriptive_name: "amphtml module LTS engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   satisfies: "amphtml module LTS engine script"
@@ -3233,7 +3501,7 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml nomodule LTS engine script"
   descriptive_name: "amphtml nomdule LTS engine script"
-  mandatory_alternatives: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
   unique: true
   mandatory_parent: "HEAD"
   satisfies: "amphtml nomodule LTS engine script"
@@ -3257,6 +3525,8 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amphtml engine script [AMP4EMAIL]"
   descriptive_name: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
+  requires: "style[amp-boilerplate]"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -3281,6 +3551,8 @@ tags: {
   tag_name: "SCRIPT"
   spec_name: "amp4ads engine script"
   descriptive_name: "amphtml engine script"
+  satisfies: "amphtml javascript runtime (v0.js)"
+  requires: "style[amp-boilerplate]"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -3392,6 +3664,28 @@ tags: {
   }
 }
 
+# Dynamic Viewport (dvh) Polyfill when amp-story-1.0.css is Server Side Rendered.
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "SCRIPT"
+  spec_name: "script amp-story-dvh-polyfill"
+  descriptive_name: "script amp-story-dvh-polyfill"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-story-dvh-polyfill"
+    value: ""
+    mandatory: true
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  cdata: {
+    # Only valid if contents is exactly:
+    # "use strict";if(!self.CSS||!CSS.supports||!CSS.supports("height:1dvh")){function e(){document.documentElement.style.setProperty("--story-dvh",innerHeight/100+"px","important")}addEventListener("resize",e,{passive:!0}),e()}
+    cdata_regex: "\"use strict\";if\\(!self\\.CSS\\|\\|!CSS\\.supports\\|\\|!CSS\\.supports\\(\"height:1dvh\"\\)\\)\\{function e\\(\\)\\{document\\.documentElement\\.style\\.setProperty\\(\"--story-dvh\",innerHeight/100\\+\"px\",\"important\"\\)\\}addEventListener\\(\"resize\",e,\\{passive:!0\\}\\),e\\(\\)\\}"
+  }
+}
+
 # Enables early styling on fast failure to load v0.js. See GitHub #22543.
 tags: {
   html_format: AMP
@@ -3415,23 +3709,13 @@ tags: {
 # 4.11.2 The noscript element
 tags: {
   html_format: AMP
-  disabled_by: "transformed"
   tag_name: "NOSCRIPT"
-  spec_name: "noscript enclosure for boilerplate"
-  descriptive_name: "noscript enclosure for boilerplate"
-  mandatory: true
-  unique: true
+  spec_name: "noscript enclosure for amp style tags"
   mandatory_parent: "HEAD"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
-}
-tags: {
-  html_format: AMP
-  enabled_by: "transformed"
-  tag_name: "NOSCRIPT"
-  spec_name: "noscript enclosure for boilerplate (transformed)"
-  descriptive_name: "noscript enclosure for boilerplate"
-  unique: true
-  mandatory_parent: "HEAD"
+  child_tags {
+    child_tag_name_oneof: "STYLE"
+    mandatory_min_num_child_tags: 1
+  }
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
 }
 # We allow noscript in the body to contain tags otherwise disallowed by AMP.
@@ -3616,9 +3900,19 @@ tags: {  # <amp-img>
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "AMP-IMG"
+  # amp-img does not require a matching extension script, it's built in to v0.
+  # js directly, so we explicitly list that dependency here.
+  requires: "amphtml javascript runtime (v0.js)"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "crossorigin" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
@@ -3648,6 +3942,9 @@ tags: {  # <amp-img i-amphtml-ssr>
   enabled_by: "transformed"
   tag_name: "AMP-IMG"
   spec_name: "amp-img (transformed)"
+  # amp-img does not require a matching extension script, it's built in to v0.
+  # js directly, so we explicitly list that dependency here.
+  requires: "amphtml javascript runtime (v0.js)"
   attrs: {
     dispatch_key: NAME_DISPATCH
     name: "i-amphtml-ssr"
@@ -3655,6 +3952,13 @@ tags: {  # <amp-img i-amphtml-ssr>
   }
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
@@ -3684,6 +3988,11 @@ tags: {  # <amp-img>
   html_format: AMP4EMAIL
   tag_name: "AMP-IMG"
   spec_name: "AMP-IMG (AMP4EMAIL)"
+  # amp-img does not require a matching extension script, it's built in to v0.
+  # js directly, so we explicitly list that dependency here. This is redundant
+  # for email since v0.js is still required, but we include to for consistency
+  # and to future proof.
+  requires: "amphtml javascript runtime (v0.js)"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
@@ -3708,6 +4017,9 @@ tags: {  # <amp-layout>
   html_format: AMP4ADS
   html_format: AMP4EMAIL
   tag_name: "AMP-LAYOUT"
+  # amp-pixel does not require a matching extension script, it's built in to v0.
+  # js directly, so we explicitly list that dependency here.
+  requires: "amphtml javascript runtime (v0.js)"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-layout/"
   amp_layout: {
@@ -3725,6 +4037,9 @@ tags: {  # <amp-pixel>
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "AMP-PIXEL"
+  # amp-pixel does not require a matching extension script, it's built in to v0.
+  # js directly, so we explicitly list that dependency here.
+  requires: "amphtml javascript runtime (v0.js)"
   attrs: { name: "allow-ssr-img" }
   attrs: {
     name: "referrerpolicy"
@@ -3844,6 +4159,13 @@ tags: {
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "height" }
+  # https://developers.google.com/web/updates/2019/02/priority-hints
+  attrs: {
+    name: "importance"
+    value_casei: "high"
+    value_casei: "low"
+    value_casei: "auto"
+  }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "referrerpolicy" }
@@ -4896,6 +5218,7 @@ attr_lists: {
   attrs: { name: "aria-labelledby" }
   attrs: { name: "aria-level" }
   attrs: { name: "aria-live" }
+  attrs: { name: "aria-modal" }
   attrs: { name: "aria-multiline" }
   attrs: { name: "aria-multiselectable" }
   attrs: { name: "aria-orientation" }

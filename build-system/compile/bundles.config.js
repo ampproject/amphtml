@@ -1,7 +1,8 @@
 'use strict';
+const bentoBundles = require('./bundles.config.bento.json');
 const extensionBundles = require('./bundles.config.extensions.json');
 const wrappers = require('./compile-wrappers');
-const {cyan, red} = require('../common/colors');
+const {cyan, red} = require('kleur/colors');
 const {log} = require('../common/logging');
 
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
@@ -16,15 +17,17 @@ exports.jsBundles = {
     destDir: './build/',
     minifiedDestDir: './build/',
   },
-  'custom-elements-polyfill.js': {
-    srcDir: 'src/polyfills/',
-    srcFilename: 'custom-elements-entrypoint.js',
+  'bento.js': {
+    srcDir: './src/bento',
+    srcFilename: 'bento.js',
     destDir: './dist',
     minifiedDestDir: './dist',
     options: {
-      toName: 'custom-elements-polyfill.max.js',
       includePolyfills: false,
-      minifiedName: 'custom-elements-polyfill.js',
+      toName: 'bento.max.js',
+      minifiedName: 'bento.js',
+      // For backwards-compat:
+      aliasName: 'custom-elements-polyfill.js',
     },
   },
   'alp.max.js': {
@@ -108,16 +111,6 @@ exports.jsBundles = {
       includePolyfills: true,
     },
   },
-  'compiler.js': {
-    srcDir: './src/compiler/',
-    srcFilename: 'index.js',
-    destDir: './dist',
-    minifiedDestDir: './dist',
-    options: {
-      minifiedName: 'compiler.js',
-      extraGlobs: ['src/builtins/**/*.js', 'extensions/amp-fit-text/**/*.js'],
-    },
-  },
   'amp-viewer-host.max.js': {
     srcDir: './extensions/amp-viewer-integration/0.1/examples/',
     srcFilename: 'amp-viewer-host.js',
@@ -127,7 +120,6 @@ exports.jsBundles = {
       toName: 'amp-viewer-host.max.js',
       minifiedName: 'amp-viewer-host.js',
       incudePolyfills: true,
-      extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
       skipUnknownDepsCheck: true,
     },
   },
@@ -202,7 +194,6 @@ exports.jsBundles = {
       toName: 'amp-inabox.js',
       minifiedName: 'amp4ads-v0.js',
       includePolyfills: true,
-      extraGlobs: ['src/inabox/*.js', '3p/iframe-messaging-client.js'],
     },
   },
 };
@@ -211,6 +202,11 @@ exports.jsBundles = {
  * Used to generate extension build targets
  */
 exports.extensionBundles = extensionBundles;
+
+/**
+ * Used to generate component build targets
+ */
+exports.bentoBundles = bentoBundles;
 
 /**
  * Used to alias a version of an extension to an older deprecated version.
@@ -264,24 +260,32 @@ exports.verifyExtensionBundles = function () {
       bundle.name,
       bundleString
     );
+  });
+};
+
+exports.verifyBentoBundles = function () {
+  bentoBundles.forEach((bundle, i) => {
+    const bundleString = JSON.stringify(bundle, null, 2);
     verifyBundle_(
-      'latestVersion' in bundle,
-      'latestVersion',
+      'name' in bundle,
+      'name',
       'is missing from',
+      '',
+      bundleString
+    );
+    verifyBundle_(
+      i === 0 || bundle.name.localeCompare(bentoBundles[i - 1].name) >= 0,
+      'name',
+      'is out of order. bentoBundles should be alphabetically sorted by name.',
       bundle.name,
       bundleString
     );
-    const duplicates = exports.extensionBundles.filter(
-      (duplicate) => duplicate.name === bundle.name
-    );
     verifyBundle_(
-      duplicates.every(
-        (duplicate) => duplicate.latestVersion === bundle.latestVersion
-      ),
-      'latestVersion',
-      'is not the same for all versions of',
+      'version' in bundle,
+      'version',
+      'is missing from',
       bundle.name,
-      JSON.stringify(duplicates, null, 2)
+      bundleString
     );
   });
 };

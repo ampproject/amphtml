@@ -13,7 +13,7 @@ const {
 } = require('../common/logging');
 const {determineBuildTargets} = require('./build-targets');
 const {isPullRequestBuild} = require('../common/ci');
-const {red} = require('../common/colors');
+const {red} = require('kleur/colors');
 const {updatePackages} = require('../common/update-packages');
 
 /**

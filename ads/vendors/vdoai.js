@@ -4,7 +4,7 @@ import {loadScript} from '#3p/3p';
  * @param {!Object} data
  */
 export function vdoai(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
+  /*eslint "local/camelcase": 0*/
   global.vdo_ai_ = {
     unitData: data['unitid'],
     unitTagname: data['tagname'],

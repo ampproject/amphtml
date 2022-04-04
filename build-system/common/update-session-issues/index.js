@@ -15,8 +15,8 @@
  * ⚠️ Only use standard node modules.
  * This file cannot depend on `npm install`.
  */
-const https = require('https');
 const {readdir} = require('fs').promises;
+const https = require('https');
 const {relative} = require('path');
 const {RotationItemDef, TemplateDef} = require('./types');
 
@@ -399,7 +399,7 @@ function getSessionDateFromTitle(title) {
   }
   const [
     // @ts-ignore
-    unusedFullMatch, // eslint-disable-line no-unused-vars
+    unusedFullMatch, // eslint-disable-line @typescript-eslint/no-unused-vars
     day,
     time,
   ] = match;

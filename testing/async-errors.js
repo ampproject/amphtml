@@ -4,13 +4,14 @@ import sinon from 'sinon'; // eslint-disable-line local/no-import
 
 import * as coreError from '#core/error';
 
+import {setReportError} from '#utils/log';
+
 import {
   expectedAsyncErrors,
   indexOfExpectedMessage,
 } from './console-logging-setup';
 
 import {reportError} from '../src/error-reporting';
-import {setReportError} from '../src/log';
 
 let rethrowAsyncSandbox;
 

@@ -1,5 +1,5 @@
 import {
-  Layout,
+  Layout_Enum,
   assertLength,
   assertLengthOrPercent,
   getLengthNumeral,
@@ -8,36 +8,14 @@ import {
   parseLayout,
   parseLength,
 } from '#core/dom/layout';
-
-import {isExperimentOn, toggleExperiment} from '#experiments';
-
-import {
-  applyStaticLayout,
-  resetShouldUseAspectRatioCssForTesting,
-} from '../../../../../src/static-layout';
+import {applyStaticLayout} from '#core/static-layout';
 
 describes.sandboxed('DOM - layout', {}, () => {
   let div;
-  let aspectRatioEnabled;
 
   beforeEach(() => {
     div = document.createElement('div');
-    aspectRatioEnabled =
-      isExperimentOn(window, 'layout-aspect-ratio-css') &&
-      CSS.supports('aspect-ratio: 1/1');
-    resetShouldUseAspectRatioCssForTesting();
   });
-
-  afterEach(() => {
-    resetShouldUseAspectRatioCssForTesting();
-  });
-
-  function removeWhitespace(value) {
-    if (!value) {
-      return value;
-    }
-    return value.replace(/\s/g, '');
-  }
 
   it('parseLayout', () => {
     expect(parseLayout('nodisplay')).to.equal('nodisplay');
@@ -243,7 +221,7 @@ describes.sandboxed('DOM - layout', {}, () => {
 
   it('layout=nodisplay', () => {
     div.setAttribute('layout', 'nodisplay');
-    expect(applyStaticLayout(div)).to.equal(Layout.NODISPLAY);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.NODISPLAY);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     document.body.appendChild(div);
@@ -254,22 +232,11 @@ describes.sandboxed('DOM - layout', {}, () => {
     expect(div.children.length).to.equal(0);
   });
 
-  it('layout=nodisplay with SSR', () => {
-    div.setAttribute('layout', 'nodisplay');
-    div.style.display = 'none';
-    applyStaticLayout(div);
-    expect(div.style.display).to.equal('');
-
-    document.body.appendChild(div);
-    expect(div).to.have.display('none');
-    document.body.removeChild(div);
-  });
-
   it('layout=fixed', () => {
     div.setAttribute('layout', 'fixed');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED);
     expect(div.style.width).to.equal('100px');
     expect(div.style.height).to.equal('200px');
     expect(div).to.have.class('i-amphtml-layout-fixed');
@@ -280,7 +247,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('layout=fixed - default with width/height', () => {
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED);
     expect(div.style.width).to.equal('100px');
     expect(div.style.height).to.equal('200px');
   });
@@ -297,7 +264,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('layout=fixed-height', () => {
     div.setAttribute('layout', 'fixed-height');
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED_HEIGHT);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('200px');
     expect(div).to.have.class('i-amphtml-layout-fixed-height');
@@ -309,7 +276,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('layout', 'fixed-height');
     div.setAttribute('height', 200);
     div.setAttribute('width', 'auto');
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED_HEIGHT);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('200px');
     expect(div).to.have.class('i-amphtml-layout-fixed-height');
@@ -330,7 +297,7 @@ describes.sandboxed('DOM - layout', {}, () => {
 
   it('layout=fixed-height - default with height', () => {
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED_HEIGHT);
     expect(div.style.height).to.equal('200px');
     expect(div.style.width).to.equal('');
   });
@@ -338,7 +305,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('layout=fixed-height - default with height and width=auto', () => {
     div.setAttribute('height', 200);
     div.setAttribute('width', 'auto');
-    expect(applyStaticLayout(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FIXED_HEIGHT);
     expect(div.style.height).to.equal('200px');
     expect(div.style.width).to.equal('');
   });
@@ -356,47 +323,37 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('layout', 'responsive');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-responsive');
     expect(div).to.have.class('i-amphtml-layout-size-defined');
-    if (aspectRatioEnabled) {
-      expect(div.children.length).to.equal(0);
-      expect(removeWhitespace(div.style.aspectRatio)).to.equal('100/200');
-    } else {
-      expect(div.children.length).to.equal(1);
-      expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
-      expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
-      expect(div.children[0].style.paddingTop).to.equal('200%');
-    }
+    expect(div.children.length).to.equal(1);
+    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
+    expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
   it('layout=responsive - default with sizes', () => {
     div.setAttribute('sizes', '50vw');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-responsive');
     expect(div).to.have.class('i-amphtml-layout-size-defined');
-    if (aspectRatioEnabled) {
-      expect(div.children.length).to.equal(0);
-      expect(removeWhitespace(div.style.aspectRatio)).to.equal('100/200');
-    } else {
-      expect(div.children.length).to.equal(1);
-      expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
-      expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
-      expect(div.children[0].style.paddingTop).to.equal('200%');
-    }
+    expect(div.children.length).to.equal(1);
+    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
+    expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
   it('layout=intrinsic', () => {
     div.setAttribute('layout', 'intrinsic');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.INTRINSIC);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-intrinsic');
@@ -416,7 +373,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('sizes', '50vw');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.INTRINSIC);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.INTRINSIC);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-intrinsic');
@@ -433,7 +390,7 @@ describes.sandboxed('DOM - layout', {}, () => {
 
   it('layout=fill', () => {
     div.setAttribute('layout', 'fill');
-    expect(applyStaticLayout(div)).to.equal(Layout.FILL);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FILL);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-fill');
@@ -443,7 +400,7 @@ describes.sandboxed('DOM - layout', {}, () => {
 
   it('layout=container', () => {
     div.setAttribute('layout', 'container');
-    expect(applyStaticLayout(div)).to.equal(Layout.CONTAINER);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.CONTAINER);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div).to.have.class('i-amphtml-layout-container');
@@ -455,7 +412,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('layout', 'flex-item');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.FLEX_ITEM);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FLEX_ITEM);
     expect(div.style.width).to.equal('100px');
     expect(div.style.height).to.equal('200px');
     expect(div).to.have.class('i-amphtml-layout-flex-item');
@@ -467,7 +424,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('height', 'fluid');
     const parentDiv = document.createElement('div');
     parentDiv.appendChild(div);
-    expect(applyStaticLayout(div)).to.equal(Layout.FLUID);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FLUID);
     expect(div).to.have.class('i-amphtml-layout-awaiting-size');
     expect(div.children.length).to.equal(0);
   });
@@ -475,7 +432,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('layout=fluid - default with width', () => {
     div.setAttribute('height', 'fluid');
     div.setAttribute('width', 300);
-    expect(applyStaticLayout(div)).to.equal(Layout.FLUID);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FLUID);
     expect(div).to.have.class('i-amphtml-layout-awaiting-size');
     expect(div.style.width).to.equal('300px');
     expect(div.children.length).to.equal(0);
@@ -492,7 +449,7 @@ describes.sandboxed('DOM - layout', {}, () => {
 
   it('should configure natural dimensions; default layout', () => {
     const pixel = document.createElement('amp-pixel');
-    expect(applyStaticLayout(pixel)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(pixel)).to.equal(Layout_Enum.FIXED);
     expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('0px');
   });
@@ -500,7 +457,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('should configure natural dimensions; default layout; with width', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('width', '11');
-    expect(applyStaticLayout(pixel)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(pixel)).to.equal(Layout_Enum.FIXED);
     expect(pixel.style.width).to.equal('11px');
     expect(pixel.style.height).to.equal('0px');
   });
@@ -508,7 +465,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('should configure natural dimensions; default layout; with height', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('height', '11');
-    expect(applyStaticLayout(pixel)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(pixel)).to.equal(Layout_Enum.FIXED);
     expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('11px');
   });
@@ -516,7 +473,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('should configure natural dimensions; layout=fixed', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('layout', 'fixed');
-    expect(applyStaticLayout(pixel)).to.equal(Layout.FIXED);
+    expect(applyStaticLayout(pixel)).to.equal(Layout_Enum.FIXED);
     expect(pixel.style.width).to.equal('0px');
     expect(pixel.style.height).to.equal('0px');
   });
@@ -524,7 +481,7 @@ describes.sandboxed('DOM - layout', {}, () => {
   it('should configure natural dimensions; layout=fixed-height', () => {
     const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('layout', 'fixed-height');
-    expect(applyStaticLayout(pixel)).to.equal(Layout.FIXED_HEIGHT);
+    expect(applyStaticLayout(pixel)).to.equal(Layout_Enum.FIXED_HEIGHT);
     expect(pixel.style.height).to.equal('0px');
     expect(pixel.style.width).to.equal('');
   });
@@ -579,7 +536,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.className = 'other';
     div.style.width = '111px';
     div.style.height = '112px';
-    expect(applyStaticLayout(div)).to.equal(Layout.FLEX_ITEM);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.FLEX_ITEM);
     // No other attributes are read or changed.
     expect(div.style.width).to.equal('111px');
     expect(div.style.height).to.equal('112px');
@@ -592,14 +549,14 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('i-amphtml-layout', 'responsive');
     const sizer = document.createElement('i-amphtml-sizer');
     div.appendChild(sizer);
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.sizerElement).to.equal(sizer);
     expect(div.sizerElement.getAttribute('slot')).to.equal('i-amphtml-svc');
   });
 
   it('should allow sizer to be missing', () => {
     div.setAttribute('i-amphtml-layout', 'responsive');
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.sizerElement).to.be.undefined;
   });
 
@@ -607,7 +564,7 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('i-amphtml-layout', 'responsive');
     const other = document.createElement('div');
     div.appendChild(other);
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     expect(div.sizerElement).to.be.undefined;
   });
 
@@ -622,16 +579,11 @@ describes.sandboxed('DOM - layout', {}, () => {
     div.setAttribute('layout', 'responsive');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
-    expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
+    expect(applyStaticLayout(div)).to.equal(Layout_Enum.RESPONSIVE);
     const clone = div.cloneNode(true);
-    expect(applyStaticLayout(clone)).to.equal(Layout.RESPONSIVE);
-    if (aspectRatioEnabled) {
-      expect(div.querySelectorAll('i-amphtml-sizer')).to.have.length(0);
-      expect(clone.querySelectorAll('i-amphtml-sizer')).to.have.length(0);
-    } else {
-      expect(div.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
-      expect(clone.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
-    }
+    expect(applyStaticLayout(clone)).to.equal(Layout_Enum.RESPONSIVE);
+    expect(div.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
+    expect(clone.querySelectorAll('i-amphtml-sizer')).to.have.length(1);
   });
 });
 
@@ -662,7 +614,7 @@ describes.realWin('ampshared.css', {amp: true}, function (env) {
       element.setAttribute('layout', 'responsive');
       element.setAttribute('width', 100);
       element.setAttribute('height', 100);
-      expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
+      expect(applyStaticLayout(element)).to.equal(Layout_Enum.RESPONSIVE);
 
       expect(element.offsetWidth).to.equal(element.offsetHeight);
       expect(overflow.offsetHeight).to.equal(20);
@@ -672,98 +624,10 @@ describes.realWin('ampshared.css', {amp: true}, function (env) {
     it('should allow overflow element to distort container layout', () => {
       element.setAttribute('layout', 'container');
       overflow.text = 'test';
-      expect(applyStaticLayout(element)).to.equal(Layout.CONTAINER);
+      expect(applyStaticLayout(element)).to.equal(Layout_Enum.CONTAINER);
 
       expect(element.offsetHeight).to.equal(overflow.offsetHeight);
       expect(win.getComputedStyle(overflow).position).to.equal('relative');
-    });
-  });
-});
-
-describes.realWin('Layout: aspect-ratio CSS', {amp: true}, function (env) {
-  let win, doc;
-  let element;
-  let ssrSizer;
-
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-    toggleExperiment(win, 'layout-aspect-ratio-css', true, true);
-    resetShouldUseAspectRatioCssForTesting();
-
-    element = doc.createElement('amp-element');
-    element.classList.add('i-amphtml-element');
-    doc.body.appendChild(element);
-
-    ssrSizer = doc.createElement('i-amphtml-sizer');
-    ssrSizer.classList.add('i-amphtml-disable-ar');
-  });
-
-  afterEach(() => {
-    resetShouldUseAspectRatioCssForTesting();
-  });
-
-  describe('aspect-ratio not supported', function () {
-    before(function () {
-      if (CSS.supports('aspect-ratio: 1/1')) {
-        this.skipTest();
-      }
-    });
-
-    it('should apply legacy layout for layout=responsive', () => {
-      element.setAttribute('layout', 'responsive');
-      element.setAttribute('width', 100);
-      element.setAttribute('height', 200);
-      expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
-      expect(element.style.aspectRatio).to.not.be.ok;
-      expect(element.style.width).to.equal('');
-      expect(element.style.height).to.equal('');
-      expect(element).to.have.class('i-amphtml-layout-responsive');
-      expect(element).to.have.class('i-amphtml-layout-size-defined');
-      // Sizer has been added.
-      const sizer = element.querySelector('i-amphtml-sizer');
-      expect(sizer).to.be.ok;
-      expect(getComputedStyle(sizer).display).to.equal('block');
-    });
-
-    it('should pass through SSR sizer for responsive layout', () => {
-      element.setAttribute('i-amphtml-layout', 'responsive');
-      element.appendChild(ssrSizer);
-      expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
-      expect(element.sizerElement).to.equal(ssrSizer);
-      expect(ssrSizer.getAttribute('slot')).to.equal('i-amphtml-svc');
-      expect(getComputedStyle(ssrSizer).display).to.equal('block');
-    });
-  });
-
-  describe('aspect-ratio supported', function () {
-    before(function () {
-      if (!CSS.supports('aspect-ratio: 1/1')) {
-        this.skipTest();
-      }
-    });
-
-    it('should apply layout=responsive via aspect-ratio', () => {
-      element.setAttribute('layout', 'responsive');
-      element.setAttribute('width', 100);
-      element.setAttribute('height', 200);
-      expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
-      expect(element.style.aspectRatio).to.equal('100 / 200');
-      expect(element.style.width).to.equal('');
-      expect(element.style.height).to.equal('');
-      expect(element).to.have.class('i-amphtml-layout-responsive');
-      expect(element).to.have.class('i-amphtml-layout-size-defined');
-      // No sizer added.
-      expect(element.querySelector('i-amphtml-sizer')).to.be.null;
-    });
-
-    it('should disable SSR sizer for responsive layout', () => {
-      element.setAttribute('i-amphtml-layout', 'responsive');
-      element.appendChild(ssrSizer);
-      expect(applyStaticLayout(element)).to.equal(Layout.RESPONSIVE);
-      expect(element.sizerElement).to.equal(ssrSizer);
-      expect(ssrSizer.getAttribute('slot')).to.equal('i-amphtml-svc');
-      expect(getComputedStyle(ssrSizer).display).to.equal('none');
     });
   });
 });

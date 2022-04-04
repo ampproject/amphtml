@@ -3827,7 +3827,7 @@ function getLayoutSizeDefinedClass() {
  * @return {string}
  */
 function getLayoutAwaitingSizeClass() {
-  return "i-amphtml-layout-awaiting-size";
+  return 'i-amphtml-layout-awaiting-size';
 }
 
 /**

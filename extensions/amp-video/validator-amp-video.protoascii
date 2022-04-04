@@ -179,6 +179,15 @@ tags: {  # <amp-video> in amp-story
     name: "cache"
     value: "google"
   }
+  attrs: {
+    name: "captions-id"
+    requires_extension: "amp-story-captions"
+  }
+  attrs: {
+    name: "volume"
+    # Volume must be in the range [0, 1].
+    value_regex: "^(0(\\.0*)?|(0?\\.[0-9]+)?|1(\\.0*)?)$"
+  }
   attr_lists: "extended-amp-global"
   attr_lists: "amp-video-common"
   spec_url: "https://amp.dev/documentation/components/amp-video/"

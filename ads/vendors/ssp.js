@@ -15,8 +15,9 @@
  */
 
 import {computeInMasterFrame, loadScript, validateData} from '#3p/3p';
-import {parseJson} from '#core/types/object/json';
+
 import {setStyle, setStyles} from '#core/dom/style';
+import {parseJson} from '#core/types/object/json';
 
 /*
  * How to develop:
@@ -117,7 +118,7 @@ export function forceElementReflow(element) {
  */
 export function ssp(global, data) {
   // validate AMP input data- attributes
-  validateData(data, ['position'], ['site']);
+  validateData(data, ['position'], ['site', 'said']);
 
   let position = {id: -1};
 
@@ -169,6 +170,7 @@ export function ssp(global, data) {
 
         sssp.config({
           site: data.site || global.context.canonicalUrl,
+          said: data.said || null,
         });
 
         // propagate relevant data across all ad units
@@ -198,7 +200,6 @@ export function ssp(global, data) {
         // todo on SSP side (option to register error callback)
         // requestErrorCallback: () => {},
         AMPcallback: (ads) => {
-          /** @suppress {checkTypes} */
           const adById = keyBy(ads, (item) => item.id);
           const ad = adById[position['id']];
 

@@ -1,46 +1,26 @@
-import {Layout, applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
-import {realChildNodes} from '#core/dom/query';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 
 import {registerElement} from '#service/custom-element-registry';
 
+import {buildDom} from './build-dom';
+
 import {BaseElement} from '../../base-element';
-import {getEffectiveLayout} from '../../static-layout';
 
 export class AmpLayout extends BaseElement {
-  /** @override @nocollapse */
+  /** @override  */
   static prerenderAllowed() {
     return true;
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
+    return layout == Layout_Enum.CONTAINER || isLayoutSizeDefined(layout);
   }
 
   /** @override */
   buildCallback() {
     buildDom(this.element);
   }
-}
-
-/**
- * @see amphtml/compiler/types.js for full description
- *
- * @param {!Element} element
- */
-export function buildDom(element) {
-  const layout = getEffectiveLayout(element);
-  if (layout == Layout.CONTAINER) {
-    return;
-  }
-
-  const doc = element.ownerDocument;
-  const container = doc.createElement('div');
-  applyFillContent(container);
-  realChildNodes(element).forEach((child) => {
-    container.appendChild(child);
-  });
-  element.appendChild(container);
 }
 
 /**

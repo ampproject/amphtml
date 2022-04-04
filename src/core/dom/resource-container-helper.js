@@ -4,14 +4,19 @@ import {arrayOrSingleItemToArray} from '#core/types/array';
 const AMP_CLASS = 'i-amphtml-element';
 const DEEP = true;
 
+/** @type {function(AmpElement): Promise<void>} */
 const ensureLoaded = (element) => element.ensureLoaded();
+
+/** @type {function(AmpElement): void} */
 const pause = (element) => element.pause();
+
+/** @type {function(AmpElement): Promise<void>} */
 const unmount = (element) => element.unmount();
 
 /**
  * Ensure all elements within this container are scheduled to load.
  *
- * @param {!Element|!Array<!Element>} containerOrContainers
+ * @param {Element|Array<Element>} containerOrContainers
  * @param {boolean=} includeSelf
  */
 export function loadAll(containerOrContainers, includeSelf = true) {
@@ -21,7 +26,7 @@ export function loadAll(containerOrContainers, includeSelf = true) {
 /**
  * Pause all elements within this container.
  *
- * @param {!Element|!Array<!Element>} containerOrContainers
+ * @param {Element|Array<Element>} containerOrContainers
  * @param {boolean=} includeSelf
  */
 export function pauseAll(containerOrContainers, includeSelf = true) {
@@ -31,7 +36,7 @@ export function pauseAll(containerOrContainers, includeSelf = true) {
 /**
  * Unmount all elements within this container.
  *
- * @param {!Element|!Array<!Element>} containerOrContainers
+ * @param {Element|Array<Element>} containerOrContainers
  * @param {boolean=} includeSelf
  */
 export function unmountAll(containerOrContainers, includeSelf = true) {
@@ -41,10 +46,10 @@ export function unmountAll(containerOrContainers, includeSelf = true) {
 /**
  * Execute a callback for all elements within the container.
  *
- * @param {!Element|!Array<!Element>} containerOrContainers
+ * @param {Element|Array<Element>} containerOrContainers
  * @param {boolean} includeSelf
  * @param {boolean} deep
- * @param {function(!AmpElement)} callback
+ * @param {function(AmpElement):void} callback
  */
 export function forAllWithin(
   containerOrContainers,
@@ -61,14 +66,14 @@ export function forAllWithin(
 /**
  * Execute a callback for all elements within the container.
  *
- * @param {!Element} container
+ * @param {Element} container
  * @param {boolean} includeSelf
  * @param {boolean} deep
- * @param {function(!AmpElement)} callback
+ * @param {function(AmpElement):void} callback
  */
 function forAllWithinInternal(container, includeSelf, deep, callback) {
   if (includeSelf && container.classList.contains(AMP_CLASS)) {
-    const ampContainer = /** @type {!AmpElement} */ (container);
+    const ampContainer = /** @type {AmpElement} */ (container);
     tryCallback(callback, ampContainer);
     if (!deep) {
       // Also schedule amp-element that is a placeholder for the element.
@@ -86,12 +91,12 @@ function forAllWithinInternal(container, includeSelf, deep, callback) {
   }
 
   const descendants =
-    /** @type {!HTMLCollection<!AmpElement>} */
+    /** @type {HTMLCollection} */
     (container.getElementsByClassName(AMP_CLASS));
   /** @type {?Array<Element>} */
   let seen = null;
   for (let i = 0; i < descendants.length; i++) {
-    const descendant = descendants[i];
+    const descendant = /** @type {AmpElement} */ (descendants[i]);
     if (deep) {
       // In deep search all elements will be covered.
       tryCallback(callback, descendant);

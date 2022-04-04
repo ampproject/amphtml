@@ -10,10 +10,11 @@ import {getBinaryType, isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
 
+import {dev} from '#utils/log';
+
 import {getFlexibleAdSlotData} from './flexible-ad-slot-utils';
 
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {dev} from '../../../src/log';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {RefreshManager} from '../../amp-a4a/0.1/refresh-manager';
 
@@ -40,14 +41,14 @@ const AmpAdImplementation = {
  * than 32 capabilities to this enum.
  * @enum {number}
  */
-const Capability = {
+const Capability_Enum = {
   SVG_SUPPORTED: 1 << 0,
   SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED: 1 << 1,
   SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED: 1 << 2,
 };
 
 /**
- * See `VisibilityState` enum.
+ * See `VisibilityState_Enum` enum.
  * @const {!Object<string, string>}
  */
 const visibilityStateCodes = {
@@ -275,8 +276,13 @@ export class AmpAdNetworkValueimpressionImpl extends AmpA4A {
       const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
       // If slotWidth is -1, that means its width must be determined by its
       // parent container, and so should have the same value as parentWidth.
-      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
-      psz = `${parentWidth}x-1`;
+      if (this.uiHandler.isStickyAd()) {
+        msz = '0x-1';
+        psz = '0x-1';
+      } else {
+        msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
+        psz = `${parentWidth}x-1`;
+      }
       fws = fwSignal ? fwSignal : '0';
 
       const {canonicalUrl, pageViewId} = Services.documentInfoForDoc(ampDoc);
@@ -436,17 +442,17 @@ function getBrowserCapabilitiesBitmap(win) {
   let browserCapabilities = 0;
   const doc = win.document;
   if (win.SVGElement && doc.createElementNS) {
-    browserCapabilities |= Capability.SVG_SUPPORTED;
+    browserCapabilities |= Capability_Enum.SVG_SUPPORTED;
   }
   const iframeEl = doc.createElement('iframe');
   if (iframeEl.sandbox && iframeEl.sandbox.supports) {
     if (iframeEl.sandbox.supports('allow-top-navigation-by-user-activation')) {
       browserCapabilities |=
-        Capability.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
+        Capability_Enum.SANDBOXING_ALLOW_TOP_NAVIGATION_BY_USER_ACTIVATION_SUPPORTED;
     }
     if (iframeEl.sandbox.supports('allow-popups-to-escape-sandbox')) {
       browserCapabilities |=
-        Capability.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
+        Capability_Enum.SANDBOXING_ALLOW_POPUPS_TO_ESCAPE_SANDBOX_SUPPORTED;
     }
   }
   return browserCapabilities;

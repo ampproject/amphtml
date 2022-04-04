@@ -1,6 +1,6 @@
 import {htmlFor} from '#core/dom/static-template';
+import {naturalDimensions_} from '#core/static-layout';
 
-import {naturalDimensions_} from '../../../../src/static-layout';
 import {AmpAudio} from '../amp-audio';
 
 describes.realWin(

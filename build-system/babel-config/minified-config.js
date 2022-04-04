@@ -8,9 +8,10 @@ const {getReplacePlugin} = require('./helpers');
 /**
  * Gets the config for minified babel transforms run, used by 3p vendors.
  *
+ * @param {'preact' | 'react'} buildFor
  * @return {!Object}
  */
-function getMinifiedConfig() {
+function getMinifiedConfig(buildFor = 'preact') {
   const isProd = argv._.includes('dist') && !argv.fortesting;
 
   const reactJsxPlugin = [
@@ -25,13 +26,16 @@ function getMinifiedConfig() {
 
   const plugins = [
     'optimize-objstr',
-    getImportResolverPlugin(),
+    './build-system/babel-plugins/babel-plugin-mangle-object-values',
+    './build-system/babel-plugins/babel-plugin-jsx-style-object',
+    getImportResolverPlugin(buildFor),
     argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-imported-helpers',
     './build-system/babel-plugins/babel-plugin-transform-inline-isenumvalue',
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
-    '@babel/plugin-transform-react-constant-elements',
+    './build-system/babel-plugins/babel-plugin-transform-rename-privates',
+    './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
     (argv.esm || argv.sxg) &&
       './build-system/babel-plugins/babel-plugin-transform-dev-methods',
@@ -40,10 +44,7 @@ function getMinifiedConfig() {
       './build-system/babel-plugins/babel-plugin-transform-log-methods',
       {replaceCallArguments: false},
     ],
-    [
-      './build-system/babel-plugins/babel-plugin-transform-json-import',
-      {freeze: false},
-    ],
+    './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
@@ -66,19 +67,25 @@ function getMinifiedConfig() {
       bugfixes: true,
       modules: false,
       targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
+      shippedProposals: true,
     },
+  ];
+  const presetTypescript = [
+    '@babel/preset-typescript',
+    {jsxPragma: 'Preact', jsxPragmaFrag: 'Preact.Fragment'},
   ];
 
   return {
     compact: false,
     plugins,
-    sourceMaps: 'inline',
-    presets: [presetEnv],
+    sourceMaps: true,
+    presets: [presetTypescript, presetEnv],
     retainLines: true,
     assumptions: {
       constantSuper: true,
       noClassCalls: true,
       setClassMethods: true,
+      setPublicClassFields: true,
     },
   };
 }

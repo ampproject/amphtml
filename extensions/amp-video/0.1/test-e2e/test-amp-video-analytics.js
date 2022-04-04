@@ -30,7 +30,7 @@ describes.endtoend(
 
       // Sleep 1 second for the `video-percentage-played` event trigger
       // and the request to be sent
-      await awaitFrameAfter(500);
+      await awaitFrameAfter(750);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking&id=myVideo'
       ).to.have.been.sent;
@@ -41,7 +41,7 @@ describes.endtoend(
       await expect(isPaused(videoElem2)).to.be.false;
       // Sleep 1 second for the `video-percentage-played` event trigger
       // and the request to be sent
-      await awaitFrameAfter(500);
+      await awaitFrameAfter(750);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking&id=myVideo2'
       ).to.have.been.sent;

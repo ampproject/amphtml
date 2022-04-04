@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>bento-timeago</title>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/bento.mjs"
+    ></script>
+    <script nomodule src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      type="module"
+      async
+      src="https://cdn.ampproject.org/v0/bento-timeago-1.0.mjs"
+    ></script>
+    <script
+      nomodule
+      async
+      src="https://cdn.ampproject.org/v0/bento-timeago-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-timeago-1.0.css"
+    />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol';
+        margin: 2rem;
+        background: #ecf1f3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+      bento-timeago {
+        font-size: 22px;
+      }
+      .buttons {
+        display: flex;
+        flex-direction: column;
+      }
+      button {
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        color: #269da3;
+        background: white;
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0.5rem auto;
+        width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <bento-timeago
+      id="my-timeago"
+      datetime="2017-04-11T00:37:33.809Z"
+      locale="en"
+      style="height: 30px; width: 300px; margin: 0 auto"
+    >
+      Saturday 11 April 2017 00.37
+    </bento-timeago>
+    <div class="buttons" style="margin-top: 8px">
+      <button id="ar-button">Change locale to Arabic</button>
+      <button id="en-button">Change locale to English</button>
+      <button id="now-button">Change time to now</button>
+    </div>
+
+    <script>
+      (async () => {
+        const timeago = document.querySelector('#my-timeago');
+        await customElements.whenDefined('bento-timeago');
+
+        // set up button actions
+        document.querySelector('#ar-button').onclick = () =>
+          timeago.setAttribute('locale', 'ar');
+        document.querySelector('#en-button').onclick = () =>
+          timeago.setAttribute('locale', 'en');
+        document.querySelector('#now-button').onclick = () =>
+          timeago.setAttribute('datetime', 'now');
+      })();
+    </script>
+  </body>
+</html>

@@ -2,7 +2,7 @@ import {parseDateAttrs as parseDateAttrsBase} from '#core/dom/parse-date-attribu
 
 import {PreactBaseElement} from '#preact/base-element';
 
-import {Timeago} from './component';
+import {BentoTimeago} from './component';
 
 export class BaseElement extends PreactBaseElement {
   /** @override */
@@ -12,7 +12,7 @@ export class BaseElement extends PreactBaseElement {
 }
 
 /** @override */
-BaseElement['Component'] = Timeago;
+BaseElement['Component'] = BentoTimeago;
 
 /** @override */
 BaseElement['layoutSizeDefined'] = true;

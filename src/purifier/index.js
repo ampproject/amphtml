@@ -1,7 +1,10 @@
 import purify from 'dompurify';
 
 import {devAssertElement} from '#core/assert';
+import {isAmp4Email} from '#core/document/format';
 import {removeElement} from '#core/dom';
+
+import {user} from '#utils/log';
 
 import {
   ALLOWLISTED_ATTRS,
@@ -10,13 +13,11 @@ import {
   BIND_PREFIX,
   DENYLISTED_TAGS,
   EMAIL_ALLOWLISTED_AMP_TAGS,
+  EMAIL_TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
   isValidAttr,
   markElementForDiffing,
 } from './sanitation';
-
-import {isAmp4Email} from '../format';
-import {user} from '../log';
 
 /** @private @const {string} */
 const TAG = 'purifier';
@@ -103,7 +104,9 @@ export class Purifier {
     // RETURN_DOM_FRAGMENT to keep the <template> and FORCE_BODY to prevent
     // reparenting. See https://github.com/cure53/DOMPurify/issues/285#issuecomment-397810671
     const fragment = this.domPurifyTriple_.sanitize(dirty, {
-      'ALLOWED_TAGS': TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
+      'ALLOWED_TAGS': isAmp4Email(this.doc_)
+        ? EMAIL_TRIPLE_MUSTACHE_ALLOWLISTED_TAGS
+        : TRIPLE_MUSTACHE_ALLOWLISTED_TAGS,
       'FORCE_BODY': true,
       'RETURN_DOM_FRAGMENT': true,
     });
@@ -171,7 +174,7 @@ export class Purifier {
       return true;
     }
     // Don't allow binding attributes for now.
-    if (bindingTypeForAttr(attr) !== BindingType.NONE) {
+    if (bindingTypeForAttr(attr) !== BindingType_Enum.NONE) {
       return false;
     }
     const pure = this.domPurify_.isValidAttribute(tag, attr, value);
@@ -321,11 +324,11 @@ export class Purifier {
       // Rewrite classic bindings e.g. [foo]="bar" -> data-amp-bind-foo="bar".
       // This is because DOMPurify eagerly removes attributes and re-adds them
       // after sanitization, which fails because `[]` are not valid attr chars.
-      if (bindingType === BindingType.CLASSIC) {
+      if (bindingType === BindingType_Enum.CLASSIC) {
         const property = attrName.substring(1, attrName.length - 1);
         element.setAttribute(`${BIND_PREFIX}${property}`, attrValue);
       }
-      if (bindingType !== BindingType.NONE) {
+      if (bindingType !== BindingType_Enum.NONE) {
         // Set a custom attribute to mark this element as containing a binding.
         // This is an optimization that obviates the need for DOM scan later.
         element.setAttribute('i-amphtml-binding', '');
@@ -456,7 +459,7 @@ function standardPurifyConfig() {
 /**
  * @enum {number}
  */
-const BindingType = {
+const BindingType_Enum = {
   NONE: 0,
   CLASSIC: 1,
   ALTERNATIVE: 2,
@@ -464,14 +467,14 @@ const BindingType = {
 
 /**
  * @param {string} attrName
- * @return {BindingType}
+ * @return {BindingType_Enum}
  */
 function bindingTypeForAttr(attrName) {
   if (attrName[0] == '[' && attrName[attrName.length - 1] == ']') {
-    return BindingType.CLASSIC;
+    return BindingType_Enum.CLASSIC;
   }
   if (attrName.startsWith(BIND_PREFIX)) {
-    return BindingType.ALTERNATIVE;
+    return BindingType_Enum.ALTERNATIVE;
   }
-  return BindingType.NONE;
+  return BindingType_Enum.NONE;
 }

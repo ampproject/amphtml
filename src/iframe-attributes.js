@@ -2,7 +2,6 @@ import {DomFingerprint} from '#core/dom/fingerprint';
 import {getLengthNumeral} from '#core/dom/layout';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import * as mode from '#core/mode';
-import {dict} from '#core/types/object';
 
 import {experimentToggles, isCanary} from '#experiments';
 
@@ -28,7 +27,7 @@ export function getContextMetadata(
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
-  attributes = attributes ? attributes : dict();
+  attributes = attributes ? attributes : {};
   attributes['width'] = getLengthNumeral(width);
   attributes['height'] = getLengthNumeral(height);
   if (element.getAttribute('title')) {
@@ -57,7 +56,7 @@ export function getContextMetadata(
   // perserved name to extern. We are doing both right now.
   // Please also add new introduced variable
   // name to the extern list.
-  attributes['_context'] = dict({
+  attributes['_context'] = {
     'ampcontextVersion': mode.version(),
     'ampcontextFilepath': `${
       urls.thirdParty
@@ -85,7 +84,7 @@ export function getContextMetadata(
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
     'sentinel': sentinel,
-  });
+  };
   const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes['src'] = adSrc;

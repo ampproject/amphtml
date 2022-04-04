@@ -1,14 +1,17 @@
-import {CSS} from '../../../build/amp-tiktok-0.1.css';
 import {Deferred} from '#core/data-structures/promise';
-import {Services} from '#service';
-import {childElementByAttr, childElementByTag} from '#core/dom/query';
 import {createElementWithAttributes, removeElement} from '#core/dom';
-import {debounce} from '#core/types/function';
-import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '#core/dom/static-template';
 import {isLayoutSizeDefined} from '#core/dom/layout';
+import {childElementByAttr, childElementByTag} from '#core/dom/query';
+import {htmlFor} from '#core/dom/static-template';
 import {px, resetStyles, setStyles} from '#core/dom/style';
+import {debounce} from '#core/types/function';
 import {tryParseJson} from '#core/types/object/json';
+
+import {Services} from '#service';
+
+import {getData, listen} from '#utils/event-helper';
+
+import {CSS} from '../../../build/amp-tiktok-0.1.css';
 
 let id = 0;
 const NAME_PREFIX = '__tt_embed__v';
@@ -73,7 +76,7 @@ export class AmpTiktok extends AMP.BaseElement {
     );
   }
 
-  /** @override @nocollapse */
+  /** @override  */
   static createLoaderLogoCallback(element) {
     const html = htmlFor(element);
     const placeholder = childElementByAttr(element, 'placeholder');
@@ -197,6 +200,9 @@ export class AmpTiktok extends AMP.BaseElement {
       this.handleTiktokMessages_.bind(this)
     );
 
+    const {promise, resolve} = new Deferred();
+    this.resolveReceivedFirstMessage_ = resolve;
+
     Promise.resolve(this.oEmbedResponsePromise_).then((data) => {
       if (data?.['title']) {
         iframe.title = `TikTok: ${data['title']}`;
@@ -205,13 +211,10 @@ export class AmpTiktok extends AMP.BaseElement {
 
     this.element.appendChild(iframe);
     return this.loadPromise(iframe).then(() => {
-      const {promise, resolve} = new Deferred();
-
-      this.resolveRecievedFirstMessage_ = resolve;
       Services.timerFor(this.win)
         .timeoutPromise(1000, promise)
         .catch(() => {
-          // If no resize messages are recieved the fallback is to
+          // If no resize messages are received the fallback is to
           // resize to the fallbackHeight value.
           this.resizeOuter_(this.fallbackHeight_);
           setStyles(this.iframe_, {

@@ -47,7 +47,7 @@ import {Deferred} from '#core/data-structures/promise';
 import {createElementWithAttributes, isRTL, removeElement} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {domFingerprintPlain} from '#core/dom/fingerprint';
-import {Layout, isLayoutSizeDefined} from '#core/dom/layout';
+import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {
   assertDoesNotContainDisplay,
@@ -55,7 +55,7 @@ import {
   setStyles,
 } from '#core/dom/style';
 import {isArray} from '#core/types';
-import {deepMerge, dict} from '#core/types/object';
+import {deepMerge} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 import {stringHash32} from '#core/types/string';
 import {getCryptoRandomBytesArray, utf8Decode} from '#core/types/string/bytes';
@@ -67,13 +67,13 @@ import {
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '#experiments';
-import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
 import {StoryAdPlacements} from '#experiments/story-ad-placements';
-import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {Navigation} from '#service/navigation';
 import {RTC_VENDORS} from '#service/real-time-config/callout-vendors';
+
+import {dev, devAssert, user} from '#utils/log';
 
 import {
   FlexibleAdSlotDataTypeDef,
@@ -90,7 +90,6 @@ import {
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {isCancellation} from '../../../src/error-reporting';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {dev, devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {
   AmpA4A,
@@ -100,7 +99,7 @@ import {
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {
-  RefreshManager, // eslint-disable-line no-unused-vars
+  RefreshManager, // eslint-disable-line @typescript-eslint/no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
 import {AMP_SIGNATURE_HEADER} from '../../amp-a4a/0.1/signature-verifier';
@@ -416,7 +415,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isLayoutSupported(layout) {
-    this.isFluidPrimaryRequest_ = layout == Layout.FLUID;
+    this.isFluidPrimaryRequest_ = layout == Layout_Enum.FLUID;
     this.isFluidRequest_ = this.isFluidRequest_ || this.isFluidPrimaryRequest_;
     return this.isFluidPrimaryRequest_ || isLayoutSizeDefined(layout);
   }
@@ -495,22 +494,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     );
     if (storyAdPlacementsExpId) {
       addExperimentIdToElement(storyAdPlacementsExpId, this.element);
-    }
-
-    const autoAdvanceExpBranch = getExperimentBranch(
-      this.win,
-      StoryAdAutoAdvance.ID
-    );
-    if (autoAdvanceExpBranch) {
-      addExperimentIdToElement(autoAdvanceExpBranch, this.element);
-    }
-
-    const storyAdSegmentBranch = getExperimentBranch(
-      this.win,
-      StoryAdSegmentExp.ID
-    );
-    if (storyAdSegmentBranch) {
-      addExperimentIdToElement(storyAdSegmentBranch, this.element);
     }
   }
 
@@ -683,8 +666,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {fwSignal, parentWidth, slotWidth} = this.flexibleAdSlotData_;
     // If slotWidth is -1, that means its width must be determined by its
     // parent container, and so should have the same value as parentWidth.
-    msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
-    psz = `${parentWidth}x-1`;
+
+    // For amp-sticky-ad, it returns 0, so we follow them for amp-ad sticky ads here.
+    if (this.uiHandler.isStickyAd()) {
+      msz = '0x-1';
+      psz = '0x-1';
+    } else {
+      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
+      psz = `${parentWidth}x-1`;
+    }
     fws = fwSignal ? fwSignal : '0';
     return {
       'iu': this.element.getAttribute('data-slot'),
@@ -712,6 +702,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'spsa': this.isSinglePageStoryAd
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
+      'ppid': (this.jsonTargeting && this.jsonTargeting['ppid']) || null,
       ...googleBlockParameters(this),
     };
   }
@@ -946,6 +937,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           ).forEach((exclusion) => {
             exclusions[exclusion] = true;
           });
+        }
+        if (rtcResponse.response['ppid']) {
+          this.jsonTargeting['ppid'] = rtcResponse.response['ppid'];
         }
       }
     });
@@ -1225,8 +1219,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  viewportCallbackTemp(inViewport) {
-    super.viewportCallbackTemp(inViewport);
+  viewportCallback(inViewport) {
+    super.viewportCallback(inViewport);
     if (this.reattemptToExpandFluidCreative_ && !inViewport) {
       // If the initial expansion attempt failed (e.g., the slot was within the
       // viewport), then we will re-attempt to expand it here whenever the slot
@@ -1589,15 +1583,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getAmpDoc()
             .getBody()
             .appendChild(
-              createElementWithAttributes(
-                this.win.document,
-                'amp-pixel',
-                dict({
-                  'src':
-                    'https://pagead2.googlesyndication.com/pagead/gen_204?' +
-                    `id=${encodeURIComponent('a4a::sra')}&ifi=${this.ifi_}`,
-                })
-              )
+              createElementWithAttributes(this.win.document, 'amp-pixel', {
+                'src':
+                  'https://pagead2.googlesyndication.com/pagead/gen_204?' +
+                  `id=${encodeURIComponent('a4a::sra')}&ifi=${this.ifi_}`,
+              })
             );
         }
       }
@@ -1628,16 +1618,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return;
         }
         // Create amp-pixel and append to document to send impression.
-        this.win.document.body.appendChild(
-          createElementWithAttributes(
-            this.win.document,
-            'amp-pixel',
-            dict({
+        this.getAmpDoc()
+          .getBody()
+          .appendChild(
+            createElementWithAttributes(this.win.document, 'amp-pixel', {
               'src': url,
               'referrerpolicy': scrubReferer ? 'no-referrer' : '',
             })
-          )
-        );
+          );
       } catch (unusedError) {}
     });
   }
@@ -1928,32 +1916,30 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return this.troubleshootData_.adUrl.then((adUrl) => {
       const slotId =
         this.troubleshootData_.slotId + '_' + this.troubleshootData_.slotIndex;
-      const payload = dict({
-        'gutData': JSON.stringify(
-          dict({
-            'events': [
-              {
-                'timestamp': Date.now(),
-                'slotid': slotId,
-                'messageId': 4,
-              },
-            ],
-            'slots': [
-              {
-                'contentUrl': adUrl || '',
-                'id': slotId,
-                'leafAdUnitName': this.troubleshootData_.slotId,
-                'domId': slotId,
-                'lineItemId': this.troubleshootData_.lineItemId,
-                'creativeId': this.troubleshootData_.creativeId,
-              },
-            ],
-          })
-        ),
+      const payload = {
+        'gutData': JSON.stringify({
+          'events': [
+            {
+              'timestamp': Date.now(),
+              'slotid': slotId,
+              'messageId': 4,
+            },
+          ],
+          'slots': [
+            {
+              'contentUrl': adUrl || '',
+              'id': slotId,
+              'leafAdUnitName': this.troubleshootData_.slotId,
+              'domId': slotId,
+              'lineItemId': this.troubleshootData_.lineItemId,
+              'creativeId': this.troubleshootData_.creativeId,
+            },
+          ],
+        }),
         'userAgent': navigator.userAgent,
         'referrer': this.win.location.href,
         'messageType': 'LOAD',
-      });
+      };
       this.win.opener./*OK*/ postMessage(payload, '*');
     });
   }

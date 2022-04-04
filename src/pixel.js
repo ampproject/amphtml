@@ -1,8 +1,7 @@
 import {createElementWithAttributes} from '#core/dom';
-import {dict} from '#core/types/object';
 import {WindowInterface} from '#core/window/interface';
 
-import {user} from './log';
+import {user} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'pixel';
@@ -38,10 +37,10 @@ function createNoReferrerPixel(win, src) {
     const iframe = createElementWithAttributes(
       /** @type {!Document} */ (win.document),
       'iframe',
-      dict({
+      {
         'src': 'about:blank',
         'style': 'display:none',
-      })
+      }
     );
     iframe.onload = () => {
       createImagePixel(iframe.contentWindow, src);

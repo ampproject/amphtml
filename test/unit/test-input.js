@@ -1,6 +1,6 @@
 import {installTimerService} from '#service/timer-impl';
 
-import {stubService} from '#testing/test-helper';
+import {stubService} from '#testing/helpers/service';
 
 import {Input} from '../../src/input';
 

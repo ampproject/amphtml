@@ -3,16 +3,14 @@ import {isString} from '#core/types';
 /**
  * Number between 0 and 1 that designates normalized time, as in "from start to
  * end".
- * @typedef {number}
+ * @typedef {number} NormTimeDef
  */
-export let NormTimeDef;
 
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another
  * normtime value.
- * @typedef {function(NormTimeDef): NormTimeDef}
+ * @typedef {function(NormTimeDef): NormTimeDef} CurveDef
  */
-export let CurveDef;
 
 /**
  * Returns a cubic bezier curve.
@@ -20,7 +18,7 @@ export let CurveDef;
  * @param {number} y1 Y coordinate of the first control point.
  * @param {number} x2 X coordinate of the second control point.
  * @param {number} y2 Y coordinate of the second control point.
- * @return {!CurveDef}
+ * @return {CurveDef}
  */
 export function bezierCurve(x1, y1, x2, y2) {
   return (xVal) =>
@@ -198,13 +196,13 @@ class Bezier {
 /**
  * A collection of common curves.
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function
- * @enum {!CurveDef}
+ * @enum {CurveDef}
  */
-export const Curves = {
+export const Curves_Enum = {
   /**
    * linear
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   LINEAR(xVal) {
     return xVal;
@@ -212,8 +210,8 @@ export const Curves = {
 
   /**
    * ease
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.25, 0.1, 0.25, 1.0, 1, 1);
@@ -221,8 +219,8 @@ export const Curves = {
 
   /**
    * ease-in: slow out, fast in
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE_IN(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 1.0, 1.0, 1, 1);
@@ -230,8 +228,8 @@ export const Curves = {
 
   /**
    * ease-out: fast out, slow in
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE_OUT(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.0, 0.0, 0.58, 1.0, 1, 1);
@@ -239,8 +237,8 @@ export const Curves = {
 
   /**
    * ease-in-out
-   * @param {!NormTimeDef} xVal
-   * @return {!NormTimeDef}
+   * @param {NormTimeDef} xVal
+   * @return {NormTimeDef}
    */
   EASE_IN_OUT(xVal) {
     return Bezier.solveYValueFromXValue(xVal, 0, 0, 0.42, 0.0, 0.58, 1.0, 1, 1);
@@ -248,14 +246,15 @@ export const Curves = {
 };
 
 /**
- * @const {!Object<string, !CurveDef>}
+ * @type {Object<string, CurveDef>}
+ * @const
  */
 const NAME_MAP = {
-  'linear': Curves.LINEAR,
-  'ease': Curves.EASE,
-  'ease-in': Curves.EASE_IN,
-  'ease-out': Curves.EASE_OUT,
-  'ease-in-out': Curves.EASE_IN_OUT,
+  'linear': Curves_Enum.LINEAR,
+  'ease': Curves_Enum.EASE,
+  'ease-in': Curves_Enum.EASE_IN,
+  'ease-out': Curves_Enum.EASE_OUT,
+  'ease-in-out': Curves_Enum.EASE_IN_OUT,
 };
 
 /**
@@ -287,5 +286,5 @@ export function getCurve(curve) {
     }
     return NAME_MAP[curve];
   }
-  return /** @type {!CurveDef} */ (curve);
+  return /** @type {CurveDef} */ (curve);
 }

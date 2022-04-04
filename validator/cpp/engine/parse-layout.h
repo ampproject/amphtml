@@ -1,5 +1,5 @@
-#ifndef AMPVALIDATOR__PARSE_LAYOUT_H_
-#define AMPVALIDATOR__PARSE_LAYOUT_H_
+#ifndef CPP_ENGINE_PARSE_LAYOUT_H_
+#define CPP_ENGINE_PARSE_LAYOUT_H_
 
 #include <string>
 
@@ -117,4 +117,4 @@ std::string GetLayoutAwaitingSizeClass();
 
 }  // namespace amp::validator::parse_layout
 
-#endif  // AMPVALIDATOR__PARSE_LAYOUT_H_
+#endif  // CPP_ENGINE_PARSE_LAYOUT_H_

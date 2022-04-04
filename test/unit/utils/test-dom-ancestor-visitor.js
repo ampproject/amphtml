@@ -1,4 +1,4 @@
-import {DomAncestorVisitor} from '../../../src/utils/dom-ancestor-visitor';
+import {DomAncestorVisitor} from '#utils/dom-ancestor-visitor';
 
 describes.realWin('#DomAncestorVisitor', {amp: true}, (env) => {
   let doc, win;

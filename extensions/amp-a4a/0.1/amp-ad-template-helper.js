@@ -1,12 +1,12 @@
 import {LruCache} from '#core/data-structures/lru-cache';
 import {createElementWithAttributes} from '#core/dom';
 import {isArray} from '#core/types';
-import {dict} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {devAssert} from '#utils/log';
+
 import {urls} from '../../../src/config';
-import {devAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,
@@ -95,9 +95,9 @@ export class AmpAdTemplateHelper {
         const scriptElem = createElementWithAttributes(
           element.ownerDocument,
           'script',
-          dict({
+          {
             'type': 'application/json',
-          })
+          }
         );
         scriptElem.textContent = JSON.stringify(config['inline']);
         analyticsEle.appendChild(scriptElem);

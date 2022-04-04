@@ -1,10 +1,11 @@
 import {setStyle, setStyles} from '#core/dom/style';
 
+import {listen} from '#utils/event-helper';
+import {dev} from '#utils/log';
+
 import {delayAfterDeferringToEventLoop} from './utils';
 
-import {listen} from '../../../src/event-helper';
 import {SwipeDef} from '../../../src/gesture-recognizers';
-import {dev} from '../../../src/log';
 
 /**
  * The number of pixels of movement to go from the darkest to lightest overlay

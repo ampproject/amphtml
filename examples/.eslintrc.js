@@ -26,7 +26,6 @@ module.exports = {
     'local/no-log-array': 0,
     'local/no-mixed-operators': 0,
     'local/no-module-exports': 0,
-    'local/no-static-this': 0,
     'local/no-style-display': 0,
     'local/no-style-property-setting': 0,
     'local/no-unload-listener': 0,

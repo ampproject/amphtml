@@ -1,4 +1,5 @@
-import {loadPromise} from '../../src/event-helper';
+import {loadPromise} from '#utils/event-helper';
+
 import {
   adoptServiceFactoryForEmbedDoc,
   adoptServiceForEmbedDoc,

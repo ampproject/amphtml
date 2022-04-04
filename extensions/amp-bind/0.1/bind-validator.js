@@ -1,7 +1,7 @@
 import {parseSrcset} from '#core/dom/srcset';
 import {hasOwn, ownProperty} from '#core/types/object';
 
-import {user} from '../../../src/log';
+import {user} from '#utils/log';
 
 const TAG = 'amp-bind';
 
@@ -362,6 +362,7 @@ function createElementRules_() {
           'fb-messenger': true,
           'intent': true,
           'line': true,
+          'microsoft-edge': true,
           'skype': true,
           'sms': true,
           'snapchat': true,

@@ -1,5 +1,8 @@
 import {map} from '#core/types/object';
 
+// eslint-disable-next-line no-script-url
+export const INVALID_PROTOCOLS = ['javascript:', 'data:', 'vbscript:'];
+
 const QUERY_STRING_REGEX = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
 
 /**
@@ -23,7 +26,7 @@ export function tryDecodeUriComponent(component, fallback = '') {
  * map. If there are duplicate keys the latest value is returned.
  *
  * @param {string} queryString
- * @return {!JsonObject}
+ * @return {JsonObject}
  */
 export function parseQueryString(queryString) {
   const params = map();
@@ -44,8 +47,8 @@ export function parseQueryString(queryString) {
 
 /**
  * Parses the query # params.
- * @param {!Window=} opt_win
- * @return {!JsonObject}
+ * @param {Window=} opt_win
+ * @return {JsonObject}
  */
 export function getHashParams(opt_win) {
   const {location} = opt_win || self;

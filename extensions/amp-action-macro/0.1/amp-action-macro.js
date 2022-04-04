@@ -1,8 +1,8 @@
-import {LayoutPriority} from '#core/dom/layout';
+import {LayoutPriority_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
 
-import {userAssert} from '../../../src/log';
+import {userAssert} from '#utils/log';
 
 /** @const {string} */
 const TAG = 'amp-action-macro';
@@ -39,7 +39,7 @@ export class AmpActionMacro extends AMP.BaseElement {
   /** @override */
   getLayoutPriority() {
     // Loads after other content.
-    return LayoutPriority.METADATA;
+    return LayoutPriority_Enum.METADATA;
   }
 
   /**

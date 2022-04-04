@@ -1,5 +1,5 @@
-#ifndef AMPVALIDATOR__TESTING_UTILS_H_
-#define AMPVALIDATOR__TESTING_UTILS_H_
+#ifndef CPP_ENGINE_TESTING_UTILS_H_
+#define CPP_ENGINE_TESTING_UTILS_H_
 
 #include <map>
 
@@ -37,4 +37,4 @@ const std::map<std::string, TestCase>& TestCases();
 }  // namespace amp::validator::testing
 
 
-#endif  // AMPVALIDATOR__TESTING_UTILS_H_
+#endif  // CPP_ENGINE_TESTING_UTILS_H_

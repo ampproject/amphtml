@@ -8,12 +8,14 @@ export function broadstreetads(global, data) {
   validateData(
     data,
     ['network', 'zone', 'width', 'height'],
-    ['keywords', 'place']
+    ['keywords', 'place', 'initurl', 'initoptions']
   );
 
   data.place = data.place || 0;
 
   const placeholderID = 'placement_' + data.zone + '_' + data.place;
+  const initUrl =
+    data.initurl || 'https://cdn.broadstreetads.com/init-2.min.js';
 
   // placeholder div
   const d = global.document.createElement('div');
@@ -36,7 +38,8 @@ export function broadstreetads(global, data) {
       softKeywords: true,
       width: data.width,
       zoneId: data.zone,
+      options: data.initoptions,
     });
   });
-  loadScript(global, 'https://cdn.broadstreetads.com/init-2.min.js');
+  loadScript(global, initUrl);
 }

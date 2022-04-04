@@ -1,6 +1,9 @@
-import {ActionTrust} from '#core/constants/action-constants';
+import {ActionTrust_Enum} from '#core/constants/action-constants';
 
 import {Services} from '#service';
+
+import {getDetail} from '#utils/event-helper';
+import {userAssert} from '#utils/log';
 
 import {
   AmpGwdRuntimeService,
@@ -9,9 +12,7 @@ import {
 } from './amp-gwd-animation-impl';
 
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
-import {getDetail} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
-import {userAssert} from '../../../src/log';
 import {
   getParentWindowFrameElement,
   getServiceForDocOrNull,
@@ -234,7 +235,7 @@ export class GwdAnimation extends AMP.BaseElement {
       this.element,
       timelineEventName,
       event,
-      ActionTrust.HIGH
+      ActionTrust_Enum.HIGH
     );
   }
 

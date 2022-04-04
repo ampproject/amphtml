@@ -2,13 +2,15 @@ import {bytesToString, stringToBytes, utf8Decode, utf8Encode} from './bytes';
 
 /**
  * Character mapping from base64url to base64.
- * @const {!Object<string, string>}
+ * @type {Object<string, string>}
+ * @const
  */
 const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
 
 /**
  * Character mapping from base64 to base64url.
- * @const {!Object<string, string>}
+ * @type {Object<string, string>}
+ * @const
  */
 const base64UrlEncodeSubs = {'+': '-', '/': '_', '=': '.'};
 
@@ -16,7 +18,7 @@ const base64UrlEncodeSubs = {'+': '-', '/': '_', '=': '.'};
  * Converts a string which is in base64url encoding into a Uint8Array
  * containing the decoded value.
  * @param {string} str
- * @return {!Uint8Array}
+ * @return {Uint8Array}
  */
 export function base64UrlDecodeToBytes(str) {
   const encoded = atob(str.replace(/[-_.]/g, (ch) => base64UrlDecodeSubs[ch]));
@@ -27,7 +29,7 @@ export function base64UrlDecodeToBytes(str) {
  * Converts a string which is in base64 encoding into a Uint8Array
  * containing the decoded value.
  * @param {string} str
- * @return {!Uint8Array}
+ * @return {Uint8Array}
  */
 export function base64DecodeToBytes(str) {
   return stringToBytes(atob(str));
@@ -36,7 +38,7 @@ export function base64DecodeToBytes(str) {
 /**
  * Converts a bytes array into base64url encoded string.
  * base64url is defined in RFC 4648. It is sometimes referred to as "web safe".
- * @param {!Uint8Array} bytes
+ * @param {Uint8Array} bytes
  * @return {string}
  */
 export function base64UrlEncodeFromBytes(bytes) {
@@ -67,7 +69,7 @@ export function base64UrlDecodeFromString(str) {
 
 /**
  * Converts a bytes array into base64 encoded string.
- * @param {!Uint8Array} bytes
+ * @param {Uint8Array} bytes
  * @return {string}
  */
 export function base64EncodeFromBytes(bytes) {

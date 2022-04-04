@@ -4,6 +4,8 @@ import {map} from '#core/types/object';
 
 import {Services} from '#service';
 
+import {dev, devAssert, user} from '#utils/log';
+
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
@@ -12,7 +14,6 @@ import {
 import {createExtensionScript, getExtensionScripts} from './extension-script';
 import {registerExtendedTemplateForDoc} from './template-impl';
 
-import {dev, devAssert, user} from '../log';
 import {getMode} from '../mode';
 import {
   registerServiceBuilder,

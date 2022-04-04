@@ -1,20 +1,20 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {iterateCursor} from '#core/dom';
 import {tryCallback} from '#core/error';
+
+import {listen} from '#utils/event-helper';
+import {devAssert} from '#utils/log';
 
 import {
   FxBindings,
   FxObservesSignal,
-  FxType, // eslint-disable-line no-unused-vars
+  FxType, // eslint-disable-line @typescript-eslint/no-unused-vars
   getFxTypes,
 } from './fx-type';
 import {
   installPositionBoundFx,
   installScrollToggledFx,
 } from './providers/fx-provider';
-
-import {listen} from '../../../src/event-helper';
-import {devAssert} from '../../../src/log';
 
 const TAG = 'amp-fx-collection';
 
@@ -39,7 +39,7 @@ export class AmpFxCollection {
       // Scan when page becomes visible.
       this.scan_();
       // Rescan as DOM changes happen.
-      listen(root, AmpEvents.DOM_UPDATE, () => this.scan_());
+      listen(root, AmpEvents_Enum.DOM_UPDATE, () => this.scan_());
     });
   }
 

@@ -1,0 +1,130 @@
+
+
+@import '../../amp-story/1.0/amp-story-shadow-reset.css';
+
+:host {
+  border-radius: inherit !important; /* Propogate border-radius */
+}
+
+.i-amphtml-story-draggable-drawer-header {
+  display: flex !important;
+  justify-content: center !important;
+  position: sticky !important;
+  top: 0 !important;
+  border-radius: inherit !important;
+  z-index: 1 !important;
+  --i-amphtml-draggable-drawer-background-color: #fff !important;
+  --i-amphtml-draggable-drawer-text-color: #202125 !important;
+  --i-amphtml-draggable-drawer-header-twenty-percent-gray: rgba(0, 0, 0, .2) !important;
+  --i-amphtml-draggable-drawer-header-font-family: 'Roboto', sans-serif !important;
+  --i-amphtml-draggable-drawer-header-font-size: 18px !important;
+  --i-amphtml-draggable-drawer-header-title-height: 44px !important;
+  background: var(--i-amphtml-draggable-drawer-background-color) !important;
+}
+
+.i-amphtml-story-draggable-drawer-header.i-amphtml-story-page-attachment-with-form {
+  /* Additional space upon which the domain label can appear in an absolute position. */
+  padding-bottom: 40px !important;
+}
+
+/* Draggable handle UI */
+:not([desktop]).i-amphtml-story-draggable-drawer-header:before {
+  content: '' !important;
+  position: absolute !important;
+  top: 8px !important;
+  width: 40px !important;
+  height: 3px !important;
+  background-color: var(--i-amphtml-draggable-drawer-header-twenty-percent-gray) !important;
+  border-radius: 3px !important;
+}
+
+[theme="dark"].i-amphtml-story-draggable-drawer-header {
+  --i-amphtml-draggable-drawer-background-color: #202125 !important;
+  --i-amphtml-draggable-drawer-text-color: #fff !important;
+  --i-amphtml-draggable-drawer-header-twenty-percent-gray: rgba(255, 255, 255, .2) !important;
+}
+
+:not([desktop]).i-amphtml-story-draggable-drawer-header {
+  height: 20px !important;
+}
+
+.i-amphtml-story-page-attachment-close-button {
+  display: block !important;
+  padding: 15px !important;
+  width: 14px !important;
+  height: 14px !important;
+  background-origin: content-box !important;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="rgba(0, 0, 0, .4)" viewBox="0 0 14 14"><path d="M13.3 2.1A1 1 0 1 0 11.9.7L7 5.6 2.1.7A1 1 0 1 0 .7 2.1L5.6 7 .7 11.9a1 1 0 1 0 1.4 1.4L7 8.4l4.9 4.9a1 1 0 1 0 1.4-1.4L8.4 7l4.9-4.9z"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  cursor: pointer !important;
+  margin-inline-start: auto !important; /* RTL support */
+  /* default button style overrides */
+  box-sizing: content-box !important;
+  border: none !important;
+  background-color: transparent !important;
+}
+
+[theme="dark"] .i-amphtml-story-page-attachment-close-button {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="rgba(255, 255, 255, .4)" viewBox="0 0 14 14"><path d="M13.3 2.1A1 1 0 1 0 11.9.7L7 5.6 2.1.7A1 1 0 1 0 .7 2.1L5.6 7 .7 11.9a1 1 0 1 0 1.4 1.4L7 8.4l4.9 4.9a1 1 0 1 0 1.4-1.4L8.4 7l4.9-4.9z"/></svg>') !important;
+}
+
+.i-amphtml-story-page-attachment-domain-label {
+  background: var(--i-amphtml-draggable-drawer-background-color) !important;
+  color: var(--i-amphtml-draggable-drawer-text-color) !important;
+  display: block !important;
+  font-family: var(--i-amphtml-draggable-drawer-header-font-family) !important;
+  font-size: calc(var(--i-amphtml-draggable-drawer-header-font-size) - 3px) !important;
+  font-weight: 300 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  top: 35px !important;
+  white-space: nowrap !important;
+  width: calc(100% - 112px) !important;
+}
+
+.i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
+  opacity: 1 !important;
+  height: var(--i-amphtml-draggable-drawer-header-title-height) !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--i-amphtml-draggable-drawer-background-color) !important;
+  border-radius: inherit !important;
+  box-shadow: 0px 0px 1px var(--i-amphtml-draggable-drawer-header-twenty-percent-gray) !important;
+}
+
+:not([desktop]).i-amphtml-story-draggable-drawer-header .i-amphtml-story-draggable-drawer-header-title-and-close {
+  position: absolute !important;
+  opacity: 0 !important;
+  transition: opacity .3s, visibility .3s !important;
+  /* Visibility is toggled to prevent screen readers from selecting content. */
+  visibility: hidden !important;
+}
+
+:not([desktop]).i-amphtml-story-draggable-drawer-header.i-amphtml-story-draggable-drawer-header-stuck .i-amphtml-story-draggable-drawer-header-title-and-close {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.i-amphtml-story-page-attachment-title {
+  position: absolute !important;
+  font-family: var(--i-amphtml-draggable-drawer-header-font-family) !important;
+  width: calc(100% - 80px) !important;
+  color: var(--i-amphtml-draggable-drawer-text-color) !important;
+  font-size: var(--i-amphtml-draggable-drawer-header-font-size) !important;
+  font-weight: 500 !important;
+  line-height: 40px !important;
+  overflow: hidden !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/** Overrides. */
+
+.i-amphtml-story-draggable-drawer-header-attachment-remote {
+  display: none !important;
+}

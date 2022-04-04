@@ -1,6 +1,8 @@
-import {MediaPool, MediaType} from '../media-pool';
-import {Services} from '#service';
 import {findIndex} from '#core/types/array';
+
+import {Services} from '#service';
+
+import {MediaPool, MediaType} from '../media-pool';
 
 const NOOP = () => {};
 

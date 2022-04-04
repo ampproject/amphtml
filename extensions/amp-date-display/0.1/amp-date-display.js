@@ -1,12 +1,13 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {removeChildren} from '#core/dom';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {dashToCamelCase} from '#core/types/string';
 
 import {Services} from '#service';
 
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {createCustomEvent} from '#utils/event-helper';
+import {dev, devAssert, user, userAssert} from '#utils/log';
+
 import {getTimeZoneName} from '../format';
 
 /** @const {string} */
@@ -370,7 +371,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
 
       const event = createCustomEvent(
         this.win,
-        AmpEvents.DOM_UPDATE,
+        AmpEvents_Enum.DOM_UPDATE,
         /* detail */ null,
         {bubbles: true}
       );

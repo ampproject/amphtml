@@ -1,7 +1,7 @@
+import {devAssert} from '#utils/log';
+
 import {Renderer} from './amp-ad-type-defs';
 import {renderCreativeIntoFriendlyFrame} from './friendly-frame-util';
-
-import {devAssert} from '../../../src/log';
 
 /**
  * @typedef {{

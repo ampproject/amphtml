@@ -1,7 +1,8 @@
 import '../amp-tiktok';
 import * as dom from '#core/dom';
-import {Services} from '#service';
 import {computedStyle} from '#core/dom/style';
+
+import {Services} from '#service';
 
 const VIDEOID = '6948210747285441798';
 
@@ -99,6 +100,28 @@ describes.realWin(
 
       const playerIframe = player.querySelector('iframe');
       expect(computedStyle(win, playerIframe).height).to.equal('775.25px');
+    });
+
+    it('should resolve messages received before load', async () => {
+      const tiktok = await getTiktokBuildOnly({height: '600'});
+      const impl = await tiktok.getImpl();
+
+      // ensure that loadPromise is never resolved
+      env.sandbox.stub(impl, 'loadPromise').returns(new Promise(() => {}));
+      impl.layoutCallback();
+
+      // ensure that resolver is set after layoutCallback
+      expect(impl.resolveReceivedFirstMessage_).to.be.ok;
+      const firstMessageStub = env.sandbox.stub(
+        impl,
+        'resolveReceivedFirstMessage_'
+      );
+      impl.handleTiktokMessages_({
+        origin: 'https://www.tiktok.com',
+        source: tiktok.querySelector('iframe').contentWindow,
+        data: JSON.stringify({height: 555}),
+      });
+      expect(firstMessageStub).to.be.calledOnce;
     });
 
     it('renders placeholder', async () => {

@@ -1,4 +1,4 @@
-import {devAssert} from '../../../src/log';
+import {devAssert} from '#utils/log';
 
 /**
  * Maintains state in between different AdSense slots on the same page. This

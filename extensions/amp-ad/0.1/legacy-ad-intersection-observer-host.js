@@ -1,8 +1,9 @@
-import {MessageType} from '#core/3p-frame-messaging';
-import {Services} from '#service';
-import {SubscriptionApi} from '../../../src/iframe-helper';
-import {dict} from '#core/types/object';
+import {MessageType_Enum} from '#core/3p-frame-messaging';
 import {intersectionEntryToJson} from '#core/dom/layout/intersection';
+
+import {Services} from '#service';
+
+import {SubscriptionApi} from '../../../src/iframe-helper';
 
 /**
  * LegacyAdIntersectionObserverHost exists for backward compatibility to support
@@ -65,7 +66,7 @@ export class LegacyAdIntersectionObserverHost {
      */
     this.postMessageApi_ = new SubscriptionApi(
       adIframe,
-      MessageType.SEND_INTERSECTIONS,
+      MessageType_Enum.SEND_INTERSECTIONS,
       true, // is3p
       // Each time someone subscribes we make sure that they
       // get an update.
@@ -198,12 +199,9 @@ export class LegacyAdIntersectionObserverHost {
       return;
     }
     // Note that SubscribeApi multicasts the update to all interested windows.
-    this.postMessageApi_.send(
-      MessageType.INTERSECTION,
-      dict({
-        'changes': this.pendingChanges_,
-      })
-    );
+    this.postMessageApi_.send(MessageType_Enum.INTERSECTION, {
+      'changes': this.pendingChanges_,
+    });
     this.pendingChanges_.length = 0;
   }
 

@@ -25,6 +25,14 @@
       "automerge": true
     },
     {
+      "groupName": "chrome and chromedriver",
+      "matchFiles": ["build-system/tasks/e2e/package.json"],
+      "matchPackageNames": ["chromedriver"],
+      "labels": ["WG: infra"],
+      "rebaseWhen": "never",
+      "automerge": true
+    },
+    {
       "groupName": "build-system devDependencies",
       "matchPaths": ["build-system/**"],
       "labels": ["WG: infra"],
@@ -91,7 +99,8 @@
       "matchDepTypes": ["dependencies"],
       "labels": ["WG: bento", "WG: components", "WG: performance"],
       "rebaseWhen": "never",
-      "automerge": false
+      "automerge": false,
+      "schedule": null
     },
     {
       "groupName": "core dependencies",

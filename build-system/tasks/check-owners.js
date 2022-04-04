@@ -9,7 +9,7 @@
 const fetch = require('node-fetch');
 const fs = require('fs-extra');
 const JSON5 = require('json5');
-const {cyan, green, red} = require('../common/colors');
+const {cyan, green, red} = require('kleur/colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {log, logLocalDev} = require('../common/logging');
 

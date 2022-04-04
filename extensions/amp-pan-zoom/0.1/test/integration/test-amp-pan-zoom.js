@@ -1,4 +1,4 @@
-import {AmpEvents} from '#core/constants/amp-events';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
 
 import {toggleExperiment} from '#experiments';
 
@@ -27,7 +27,7 @@ describes.sandboxed
 
     // TODO(cathyxz): Flaky on Chrome 67 on Windows 7.
     it.skip('should resize and center content', () => {
-      return fixture.awaitEvent(AmpEvents.LOAD_END, 2).then(() => {
+      return fixture.awaitEvent(AmpEvents_Enum.LOAD_END, 2).then(() => {
         const panZoom = fixture.doc.querySelector('#amp-pan-zoom-1');
         const content = panZoom.children[0];
         expect(content.style.width).to.equal('300px');
@@ -41,7 +41,7 @@ describes.sandboxed
 
     // TODO(cathyxz): Flaky on Chrome 67 on Windows 7.
     it.skip('should apply initial configurations correctly', () => {
-      return fixture.awaitEvent(AmpEvents.LOAD_END, 4).then(() => {
+      return fixture.awaitEvent(AmpEvents_Enum.LOAD_END, 4).then(() => {
         const panZoom = fixture.doc.querySelector('#amp-pan-zoom-2');
         const content = panZoom.children[0];
         expect(content.style.transform).to.equal(

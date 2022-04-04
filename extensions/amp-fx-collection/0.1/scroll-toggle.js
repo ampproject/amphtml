@@ -4,7 +4,7 @@ import {once} from '#core/types/function';
 
 import {Services} from '#service';
 
-import {devAssert, user} from '../../../src/log';
+import {devAssert, user} from '#utils/log';
 
 const TAG = 'amp-fx';
 

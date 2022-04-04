@@ -1,9 +1,12 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {select, text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
-import {AnimationTemplate} from './template';
+import {
+  AnimationTemplate,
+  animationDirectionArgType,
+  animationFillArgType,
+} from './template';
 
 const KEYFRAMES_OPTIONS = {
   'rotate': {
@@ -29,6 +32,8 @@ const KEYFRAMES_OPTIONS = {
   },
 };
 
+const keyframesOptions = Object.keys(KEYFRAMES_OPTIONS);
+
 const BLOCK_STYLE = {
   background: 'blue',
   width: '100px',
@@ -37,23 +42,41 @@ const BLOCK_STYLE = {
 
 export default {
   title: 'Animation',
-  decorators: [withKnobs, withAmp],
-
+  decorators: [withAmp],
   parameters: {
     extensions: [{name: 'amp-animation', version: 0.1}],
   },
+  argTypes: {
+    fill: animationFillArgType,
+    direction: animationDirectionArgType,
+    keyframesName: {
+      name: 'keyframesName',
+      control: {type: 'select'},
+      options: keyframesOptions,
+    },
+  },
+  args: {
+    duration: '1s',
+    iterations: 2,
+    keyframesName: keyframesOptions[0],
+    easing: 'cubic-bezier(0,0,.21,1)',
+  },
 };
 
-export const Default = () => {
-  const keyframesOptions = Object.keys(KEYFRAMES_OPTIONS);
-  const keyframesName = select(
-    'Keyframes',
-    keyframesOptions,
-    keyframesOptions[0]
-  );
+export const Default = ({
+  direction,
+  duration,
+  easing,
+  fill,
+  iterations,
+  keyframesName,
+}) => {
   const keyframes = KEYFRAMES_OPTIONS[keyframesName];
-  const easing = text('Easing', 'cubic-bezier(0,0,.21,1)');
   const spec = {
+    direction,
+    duration,
+    fill,
+    iterations,
     animations: {
       selector: '#block',
       easing,

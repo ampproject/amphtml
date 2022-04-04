@@ -1,7 +1,7 @@
-import {CommonSignals} from '#core/constants/common-signals';
+import {CommonSignals_Enum} from '#core/constants/common-signals';
 
-import {forceExperimentBranch, toggleExperiment} from '#experiments';
-import {StoryAdAutoAdvance} from '#experiments/story-ad-auto-advance';
+import * as experiments from '#experiments';
+import {forceExperimentBranch, getExperimentBranch} from '#experiments';
 
 import {Services} from '#service';
 
@@ -23,8 +23,13 @@ import {
   getStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
 import * as storyEvents from '../../../amp-story/1.0/events';
-import {AmpStoryAutoAds, Attributes} from '../amp-story-auto-ads';
+import {
+  AmpStoryAutoAds,
+  Attributes,
+  RELEVANT_PLAYER_EXPS,
+} from '../amp-story-auto-ads';
 import {StoryAdPage} from '../story-ad-page';
+forceExperimentBranch;
 
 const NOOP = () => {};
 
@@ -70,6 +75,59 @@ describes.realWin(
         .withArgs(StateProperty.PAGE_IDS)
         .returns(['1', '2', '3', '4', '5', '6', '7', '8']);
       storeGetterStub.callThrough();
+    });
+
+    describe('shared experiments', () => {
+      beforeEach(async () => {
+        RELEVANT_PLAYER_EXPS[123] = 'fake-exp';
+        env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(adElement);
+      });
+
+      it('handles null response', async () => {
+        const forceExpStub = env.sandbox.stub(
+          experiments,
+          'forceExperimentBranch'
+        );
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve(null));
+        await autoAds.buildCallback();
+        expect(forceExpStub).not.to.be.called;
+      });
+
+      it('handles empty array', async () => {
+        const forceExpStub = env.sandbox.stub(
+          experiments,
+          'forceExperimentBranch'
+        );
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve({experimentIds: []}));
+        await autoAds.buildCallback();
+        expect(forceExpStub).not.to.be.called;
+      });
+
+      it('correctly ssets relevant ids', async () => {
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve({experimentIds: [123]}));
+        await autoAds.buildCallback();
+        expect(getExperimentBranch(win, 'fake-exp')).to.equal('123');
+      });
+
+      it('does not set random ids', async () => {
+        const forceExpStub = env.sandbox.stub(
+          experiments,
+          'forceExperimentBranch'
+        );
+        env.sandbox
+          .stub(viewer, 'sendMessageAwaitResponse')
+          .returns(Promise.resolve({experimentIds: [456]}));
+        await autoAds.buildCallback();
+        expect(forceExpStub).not.to.be.called;
+      });
     });
 
     describe('ad creation', () => {
@@ -258,37 +316,16 @@ describes.realWin(
       });
     });
 
-    // TODO(#33969) remove when launched.
-    it('should create progress bar from #storyNextUp', async () => {
-      env.sandbox.stub(viewer, 'getParam').returns('6s');
-      env.sandbox.stub(autoAds, 'mutateElement').callsArg(0);
-      addStoryAutoAdsConfig(adElement);
-      await story.buildCallback();
-      // Fire these events so that story ads thinks the parent story is ready.
-      story.signals().signal(CommonSignals.BUILT);
-      story.signals().signal(CommonSignals.INI_LOAD);
-      await autoAds.buildCallback();
-      await autoAds.layoutCallback();
-
-      const progressBar = doc.querySelector('.i-amphtml-story-ad-progress-bar');
-      expect(progressBar).to.exist;
-    });
-
     describe('system layer', () => {
       beforeEach(async () => {
         // TODO(#33969) remove when launched.
-        forceExperimentBranch(
-          win,
-          'story-ad-auto-advance',
-          StoryAdAutoAdvance.EIGHT_SECONDS
-        );
         // Force sync mutateElement.
         env.sandbox.stub(autoAds, 'mutateElement').callsArg(0);
         addStoryAutoAdsConfig(adElement);
         await story.buildCallback();
         // Fire these events so that story ads thinks the parent story is ready.
-        story.signals().signal(CommonSignals.BUILT);
-        story.signals().signal(CommonSignals.INI_LOAD);
+        story.signals().signal(CommonSignals_Enum.BUILT);
+        story.signals().signal(CommonSignals_Enum.INI_LOAD);
         await autoAds.buildCallback();
         await autoAds.layoutCallback();
       });
@@ -298,65 +335,25 @@ describes.realWin(
         expect(adBadge).to.exist;
       });
 
-      it('should create progress bar', () => {
-        const progressBar = doc.querySelector(
-          '.i-amphtml-story-ad-progress-bar'
-        );
-        expect(progressBar).to.exist;
-      });
-
-      it('should propagate the ad-showing attribute to badge & progress bar', () => {
+      it('should propagate the ad-showing attribute to badge', () => {
         const adBadgeContainer = doc.querySelector(
           '.i-amphtml-ad-overlay-container'
-        );
-        const progressBackground = doc.querySelector(
-          '.i-amphtml-story-ad-progress-background'
         );
         expect(adBadgeContainer).not.to.have.attribute(Attributes.AD_SHOWING);
-        expect(progressBackground).not.to.have.attribute(Attributes.AD_SHOWING);
         storeService.dispatch(Action.TOGGLE_AD, true);
         expect(adBadgeContainer).to.have.attribute(Attributes.AD_SHOWING);
-        expect(progressBackground).to.have.attribute(Attributes.AD_SHOWING);
       });
 
-      it('should propagate the desktop-panels attribute to badge & progress bar', () => {
+      it('should propagate the desktop-one-panel attribute to ad badge', () => {
         const adBadgeContainer = doc.querySelector(
           '.i-amphtml-ad-overlay-container'
         );
-        const progressBackground = doc.querySelector(
-          '.i-amphtml-story-ad-progress-background'
-        );
+        storeService.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
         expect(adBadgeContainer).not.to.have.attribute(
-          Attributes.DESKTOP_PANELS
-        );
-        expect(progressBackground).not.to.have.attribute(
-          Attributes.DESKTOP_PANELS
-        );
-        storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_PANELS);
-        expect(adBadgeContainer).to.have.attribute(Attributes.DESKTOP_PANELS);
-        expect(progressBackground).to.have.attribute(Attributes.DESKTOP_PANELS);
-      });
-
-      it('should propagate the desktop-one-panel attribute to badge & progress bar', () => {
-        toggleExperiment(win, 'amp-story-desktop-one-panel', true);
-
-        const adBadgeContainer = doc.querySelector(
-          '.i-amphtml-ad-overlay-container'
-        );
-        const progressBackground = doc.querySelector(
-          '.i-amphtml-story-ad-progress-background'
-        );
-        expect(adBadgeContainer).not.to.have.attribute(
-          Attributes.DESKTOP_ONE_PANEL
-        );
-        expect(progressBackground).not.to.have.attribute(
           Attributes.DESKTOP_ONE_PANEL
         );
         storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_ONE_PANEL);
         expect(adBadgeContainer).to.have.attribute(
-          Attributes.DESKTOP_ONE_PANEL
-        );
-        expect(progressBackground).to.have.attribute(
           Attributes.DESKTOP_ONE_PANEL
         );
       });
@@ -368,31 +365,6 @@ describes.realWin(
         expect(adBadgeContainer).not.to.have.attribute(Attributes.DIR);
         storeService.dispatch(Action.TOGGLE_RTL, true);
         expect(adBadgeContainer).to.have.attribute(Attributes.DIR, 'rtl');
-      });
-
-      it('should propagate the pause state if ad showing', () => {
-        const progressBackground = doc.querySelector(
-          '.i-amphtml-story-ad-progress-background'
-        );
-        storeService.dispatch(Action.TOGGLE_AD, true);
-        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
-        storeService.dispatch(Action.TOGGLE_PAUSED, true);
-        expect(progressBackground).to.have.attribute(Attributes.PAUSED);
-        storeService.dispatch(Action.TOGGLE_PAUSED, false);
-        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
-      });
-
-      // TODO(calebcordry): Skipping test since it's failing on main, marking for review.
-      it.skip('should not propagate the pause state if no ad showing', () => {
-        const progressBackground = doc.querySelector(
-          '.i-amphtml-story-ad-progress-background'
-        );
-        storeService.dispatch(Action.TOGGLE_AD, false);
-        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
-        storeService.dispatch(Action.TOGGLE_PAUSED, true);
-        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
-        storeService.dispatch(Action.TOGGLE_PAUSED, false);
-        expect(progressBackground).not.to.have.attribute(Attributes.PAUSED);
       });
     });
 
@@ -473,7 +445,7 @@ describes.realWin(
         const dispatchStub = env.sandbox.spy(storyEvents, 'dispatch');
 
         const ampAd = doc.querySelector('amp-ad');
-        ampAd.signals().signal(CommonSignals.INI_LOAD);
+        ampAd.signals().signal(CommonSignals_Enum.INI_LOAD);
         await macroTask();
 
         expect(insertSpy).calledWith('story-page-0', 'i-amphtml-ad-page-1');

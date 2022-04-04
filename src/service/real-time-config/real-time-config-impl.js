@@ -4,10 +4,11 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {Services} from '#service';
 
+import {dev, user, userAssert} from '#utils/log';
+
 import {RTC_VENDORS} from './callout-vendors';
 
 import {isCancellation} from '../../error-reporting';
-import {dev, user, userAssert} from '../../log';
 import {getMode} from '../../mode';
 import {registerServiceBuilderForDoc} from '../../service-helpers';
 import {isAmpScriptUri} from '../../url';

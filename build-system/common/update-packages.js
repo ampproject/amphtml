@@ -4,7 +4,7 @@ const checkDependencies = require('check-dependencies');
 const del = require('del');
 const fs = require('fs-extra');
 const path = require('path');
-const {cyan, red} = require('./colors');
+const {cyan, red} = require('kleur/colors');
 const {execOrDie} = require('./exec');
 const {getOutput} = require('./process');
 const {isCiBuild} = require('./ci');
@@ -17,7 +17,10 @@ const {runNpmChecks} = require('./npm-checks');
  * @param {string} file Contents to write
  */
 function writeIfUpdated(patchedName, file) {
-  if (!fs.existsSync(patchedName) || fs.readFileSync(patchedName) != file) {
+  if (
+    !fs.existsSync(patchedName) ||
+    fs.readFileSync(patchedName, 'utf8') != file
+  ) {
     fs.writeFileSync(patchedName, file);
     logLocalDev('Patched', cyan(patchedName));
   }
@@ -42,16 +45,6 @@ function patchWebAnimations() {
     }
     return 'window.' + a;
   });
-  // Fix web-animations-js code that violates strict mode.
-  // See https://github.com/ampproject/amphtml/issues/18612 and
-  // https://github.com/web-animations/web-animations-js/issues/46
-  file = file.replace(/b.true=a/g, 'b?b.true=a:true');
-
-  // Fix web-animations-js code that attempts to write a read-only property.
-  // See https://github.com/ampproject/amphtml/issues/19783 and
-  // https://github.com/web-animations/web-animations-js/issues/160
-  file = file.replace(/this\._isFinished\s*=\s*\!0,/, '');
-
   // Wrap the contents inside the install function.
   file =
     'export function installWebAnimations(window) {\n' +

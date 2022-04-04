@@ -11,10 +11,6 @@ const privateServiceFactory =
 const shouldNeverBeUsed =
   'Usage of this API is not allowed - only for internal purposes.';
 
-const backwardCompat =
-  'This method must not be called. It is only retained ' +
-  'for backward compatibility during rollout.';
-
 const realiasGetMode =
   'Do not re-alias getMode or its return so it can be ' +
   'DCE\'d. Use explicitly like "getMode().localDev" instead.';
@@ -100,6 +96,9 @@ const forbiddenTermsGlobal = {
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
     checkInTestFolder: true,
+    allowlist: [
+      'build-system/tasks/remap-dependencies-plugin/test-remap-dependencies.js',
+    ],
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
@@ -144,12 +143,14 @@ const forbiddenTermsGlobal = {
     message:
       'Do not use build constants directly. Instead, use the helpers in `#core/mode`.',
     allowlist: [
-      'src/core/mode/version.js',
+      'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
+      'build-system/compile/build-compiler.js',
+      'build-system/compile/build-constants.js',
+      'src/core/mode/esm.js',
+      'src/core/mode/globals.d.ts',
       'src/core/mode/minified.js',
       'src/core/mode/prod.js',
-      'src/core/mode/esm.js',
-      'build-system/compile/build-constants.js',
-      'build-system/babel-plugins/babel-plugin-amp-mode-transformer/index.js',
+      'src/core/mode/version.js',
     ],
   },
   '\\.prefetch\\(': {
@@ -220,7 +221,7 @@ const forbiddenTermsGlobal = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/ampdoc-impl.js',
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'testing/describes.js',
       'testing/iframe.js',
     ],
@@ -315,7 +316,7 @@ const forbiddenTermsGlobal = {
       'src/service/origin-experiments-impl.js',
       'src/service/template-impl.js',
       'src/utils/display-observer.js',
-      'testing/test-helper.js',
+      'testing/helpers/service.js',
     ],
   },
   'initLogConstructor|setReportError': {
@@ -331,7 +332,7 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'src/amp-story-player/amp-story-component-manager.js',
       'src/runtime.js',
-      'src/log.js',
+      'src/utils/log.js',
       'src/error-reporting.js',
       'src/web-worker/web-worker.js',
       'testing/async-errors.js',
@@ -429,6 +430,7 @@ const forbiddenTermsGlobal = {
       'build-system/externs/amp.extern.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
       'extensions/amp-video/0.1/video-cache.js',
+      'extensions/amp-story/1.0/amp-story.js',
       'src/utils/xhr-utils.js',
     ],
   },
@@ -464,9 +466,11 @@ const forbiddenTermsGlobal = {
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments/index.js',
+      'src/preact/hooks/useLocalStorage.ts',
       'src/service/cid-impl.js',
+      'src/service/standard-actions-impl.js',
       'src/service/storage-impl.js',
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'testing/fake-dom.js',
     ],
   },
@@ -537,7 +541,7 @@ const forbiddenTermsGlobal = {
       ', depending on your use case.',
     allowlist: [
       'src/core/3p-frame-messaging.js',
-      'src/event-helper.js',
+      'src/utils/event-helper.js',
       'src/core/dom/event-helper-listen.js',
     ],
   },
@@ -587,14 +591,9 @@ const forbiddenTermsGlobal = {
     message: 'Use src/open-window-dialog',
     allowlist: ['src/open-window-dialog.js'],
   },
-  '\\.getWin\\(': {
-    message: backwardCompat,
-  },
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     allowlist: [
-      'src/core/assert/base.js', // Has actual implementation of assertElement.
-      'src/core/assert/dev.js', // Has actual implementation of assertElement.
       'src/polyfills/custom-elements.js',
       'ads/google/ima/ima-video.js', // Required until #22277 is fixed.
       '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
@@ -614,10 +613,7 @@ const forbiddenTermsGlobal = {
   '\\b(__)?AMP_EXP\\b': {
     message:
       'Do not access AMP_EXP directly. Use isExperimentOn() to access config',
-    allowlist: [
-      'src/experiments/index.js',
-      'src/experiments/experiments.extern.js',
-    ],
+    allowlist: ['src/experiments/index.js', 'src/experiments/amp-globals.d.ts'],
   },
   'AMP_CONFIG': {
     message:
@@ -637,16 +633,13 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/build.js',
       'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
-      'build-system/tasks/helpers.js',
       'src/config.js',
-      'src/core/window/window.extern.js',
       'src/experiments/index.js',
-      'src/experiments/shame.extern.js',
       'src/mode.js',
       'src/core/mode/test.js',
       'src/core/mode/local-dev.js',
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
-      'testing/init-tests.js',
+      'testing/init-tests-helpers.js',
       'tools/experiments/experiments.js',
     ],
   },
@@ -681,7 +674,7 @@ const forbiddenTermsGlobal = {
       'Use of `this.skip()` is forbidden in test files. Use ' +
       '`this.skipTest()` from within a `before()` block instead. See #17245.',
     checkInTestFolder: true,
-    allowlist: ['testing/init-tests.js'],
+    allowlist: ['testing/init-tests-helpers.js'],
   },
   '[^\\.]makeBodyVisible\\(': {
     message:
@@ -726,6 +719,8 @@ const forbiddenTermsGlobal = {
     ],
     checkInTestFolder: true,
   },
+  'withA11y':
+    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
 };
 
 const bannedTermsHelpString =
@@ -774,6 +769,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.pageXOffset(?!_)': bannedTermsHelpString,
   '\\.pageYOffset(?!_)': bannedTermsHelpString,
   '\\.innerWidth(?!_)': bannedTermsHelpString,
+  '\\.toggleAttribute(?!_)': 'please use `toggleAttribute()` from core/dom',
   '\\.innerHeight(?!_)': bannedTermsHelpString,
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,
@@ -870,7 +866,7 @@ const forbiddenTermsSrcInclusive = {
     message: 'Most users should use BaseElement…loadPromise.',
     allowlist: [
       'src/base-element.js',
-      'src/event-helper.js',
+      'src/utils/event-helper.js',
       'src/friendly-iframe-embed.js',
       'src/service/resources-impl.js',
       'src/service/variable-source.js',
@@ -1033,23 +1029,12 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad/0.1/amp-ad-3p-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
-      'extensions/amp-iframe/0.1/amp-iframe.js',
     ],
   },
   "require\\('fancy-log'\\)": {
     message:
       'Instead of fancy-log, use the logging functions in build-system/common/logging.js.',
   },
-  "require\\('kleur\\/colors'\\)": {
-    message:
-      'Instead of kleur/colors, use the log-coloring functions in build-system/common/colors.js',
-    allowlist: [
-      'build-system/common/colors.js',
-      'third_party/react-dates/scope-require.js',
-    ],
-  },
-  'withA11y':
-    'The Storybook decorator "withA11y" has been deprecated. You may simply remove it, since the a11y addon is now globally configured.',
   'detectIsAutoplaySupported': {
     message:
       'Detecting autoplay support is expensive. Use the cached function "isAutoplaySupported" instead.',

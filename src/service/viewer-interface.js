@@ -3,7 +3,7 @@
  */
 export let RequestResponderDef;
 
-/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @interface
  */
@@ -161,6 +161,11 @@ export class ViewerInterface {
    * @param {string} origin
    */
   setMessageDeliverer(deliverer, origin) {}
+
+  /**
+   * @return {?function(string, (?JsonObject|string|undefined), boolean):(!Promise<*>|undefined)}
+   */
+  maybeGetMessageDeliverer() {}
 
   /**
    * Sends the message to the viewer without waiting for any response.

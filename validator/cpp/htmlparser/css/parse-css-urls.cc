@@ -1,4 +1,4 @@
-#include "css/parse-css-urls.h"
+#include "cpp/htmlparser/css/parse-css-urls.h"
 
 #include <memory>
 
@@ -8,8 +8,8 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/variant.h"
-#include "logging.h"
-#include "strings.h"
+#include "cpp/htmlparser/logging.h"
+#include "cpp/htmlparser/strings.h"
 
 using absl::AsciiStrToLower;
 using absl::c_find;
@@ -141,8 +141,9 @@ class Tokenizer {
   }
 
   char32_t Next(int num = 1) {
-    CHECK(num >= 0, "Spec Error; negative lookahead.");
-    CHECK(num <= 3, "Spec Error; no more than three codepoints of lookahead.");
+    CHECK(num >= 0) << "Spec Error; negative lookahead.";
+    CHECK(num <= 3)
+        << "Spec Error; no more than three codepoints of lookahead.";
     return Codepoint(pos_ + num);
   }
 
@@ -614,7 +615,7 @@ int ConsumeABlock(const vector<unique_ptr<Token>>& tokens,
 int ConsumeAComponentValue(const vector<unique_ptr<Token>>& tokens,
                            const int start_pos) {
   TokenType::Code type = TypeOrEof(tokens, start_pos);
-  CHECK(type != TokenType::EOF_TOKEN, "");
+  CHECK(type != TokenType::EOF_TOKEN);
   if (type == TokenType::OPEN_CURLY || type == TokenType::OPEN_SQUARE ||
       type == TokenType::OPEN_PAREN || type == TokenType::FUNCTION_TOKEN) {
     return ConsumeABlock(tokens, start_pos);
@@ -627,11 +628,11 @@ int ConsumeAComponentValue(const vector<unique_ptr<Token>>& tokens,
 // starts at position |start_pos|.
 int ConsumeAFontFace(const vector<unique_ptr<Token>>& tokens,
                      const int start_pos) {
-  CHECK(TypeOrEof(tokens, start_pos) == TokenType::AT_KEYWORD,
-        TokenType::Code_Name(TypeOrEof(tokens, start_pos)));
+  CHECK(TypeOrEof(tokens, start_pos) == TokenType::AT_KEYWORD)
+      << TokenType::Code_Name(TypeOrEof(tokens, start_pos));
   CHECK(static_cast<const AtKeywordToken&>(*tokens[start_pos]).StringValue() ==
-            "font-face",
-        static_cast<const AtKeywordToken&>(*tokens[start_pos]).StringValue());
+        "font-face")
+      << static_cast<const AtKeywordToken&>(*tokens[start_pos]).StringValue();
   int cur_pos = start_pos;
   while (true) {
     cur_pos++;
@@ -649,7 +650,7 @@ int ConsumeAFontFace(const vector<unique_ptr<Token>>& tokens,
 int ConsumeAUrlFunction(const vector<unique_ptr<Token>>& tokens,
                         const int start_pos, std::string* url) {
   TokenType::Code type = TypeOrEof(tokens, start_pos);
-  CHECK(type == TokenType::FUNCTION_TOKEN, TokenType::Code_Name(type));
+  CHECK(type == TokenType::FUNCTION_TOKEN) << TokenType::Code_Name(type);
   int cur_pos = start_pos;
   *url = "";
   while (true) {
@@ -735,7 +736,7 @@ bool SegmentCss(const std::string& utf8_css, vector<CssSegment>* segments) {
         segments->emplace_back(segment);
       }
 
-      CHECK(cur_pos + 1 < tokens.size(), "tokens missing EOF_TOKEN");
+      CHECK(cur_pos + 1 < tokens.size()) << "tokens missing EOF_TOKEN";
       // Set our next range start to the start of the next token.
       css_chars_emitted_until = tokens[cur_pos + 1]->pos();
     }

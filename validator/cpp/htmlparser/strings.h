@@ -1,5 +1,5 @@
-#ifndef HTMLPARSER__STRINGS_H_
-#define HTMLPARSER__STRINGS_H_
+#ifndef CPP_HTMLPARSER_STRINGS_H_
+#define CPP_HTMLPARSER_STRINGS_H_
 
 #include <optional>
 #include <sstream>
@@ -301,4 +301,4 @@ class Strings {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__STRINGS_H_
+#endif  // CPP_HTMLPARSER_STRINGS_H_

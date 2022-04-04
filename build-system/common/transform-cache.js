@@ -3,22 +3,24 @@ const fs = require('fs-extra');
 const path = require('path');
 
 /**
+ * Used to bust caches when the TransformCache makes a breaking change to the API.
+ */
+const API_VERSION = 2;
+
+/**
  * Cache for storing transformed files on both memory and on disk.
+ * @template T
  */
 class TransformCache {
   /**
    * @param {string} cacheName
-   * @param {string} fileExtension
    */
-  constructor(cacheName, fileExtension) {
-    /** @type {string} */
-    this.fileExtension = fileExtension;
-
+  constructor(cacheName) {
     /** @type {string} */
     this.cacheDir = path.resolve(__dirname, '..', '..', cacheName);
     fs.ensureDirSync(this.cacheDir);
 
-    /** @type {Map<string, Promise<Buffer|string>>} */
+    /** @type {Map<string, Promise<T>>} */
     this.transformMap = new Map();
 
     /** @type {Set<string>} */
@@ -27,35 +29,45 @@ class TransformCache {
 
   /**
    * @param {string} hash
-   * @return {null|Promise<Buffer|string>}
+   * @return {null|Promise<T>}
    */
   get(hash) {
     const cached = this.transformMap.get(hash);
     if (cached) {
       return cached;
     }
-    const filename = hash + this.fileExtension;
+
+    const filename = this.key_(hash);
     if (this.fsCache.has(filename)) {
-      const transformedPromise = fs.readFile(
-        path.join(this.cacheDir, filename)
-      );
-      this.transformMap.set(hash, transformedPromise);
-      return transformedPromise;
+      const persisted = fs.readJson(path.join(this.cacheDir, filename));
+      this.transformMap.set(hash, persisted);
+      return persisted;
     }
+
     return null;
   }
 
   /**
    * @param {string} hash
-   * @param {Promise<string>} transformPromise
+   * @param {Promise<T>} transformPromise
    */
   set(hash, transformPromise) {
     if (this.transformMap.has(hash)) {
-      throw new Error('Read race: Attempting to transform a file twice.');
+      throw new Error(`Read race: Attempting to transform ${hash} file twice.`);
     }
     this.transformMap.set(hash, transformPromise);
-    const filepath = path.join(this.cacheDir, hash) + this.fileExtension;
-    transformPromise.then((contents) => fs.outputFile(filepath, contents));
+
+    const filepath = path.join(this.cacheDir, this.key_(hash));
+    transformPromise.then((contents) => fs.outputJson(filepath, contents));
+  }
+
+  /**
+   * @param {string} hash
+   * @return {string}
+   * @private
+   */
+  key_(hash) {
+    return `${API_VERSION}_${hash}.json`;
   }
 }
 
@@ -91,17 +103,16 @@ const readCache = new Map();
  * completed, the result will be reused.
  *
  * @param {string} path
- * @param {string=} optionsHash
  * @return {Promise<ReadResult>}
  */
-function batchedRead(path, optionsHash) {
+function batchedRead(path) {
   let read = readCache.get(path);
   if (!read) {
     read = fs
       .readFile(path)
       .then((contents) => ({
         contents,
-        hash: md5(contents, optionsHash ?? ''),
+        hash: md5(contents),
       }))
       .finally(() => {
         readCache.delete(path);

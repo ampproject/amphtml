@@ -1,6 +1,8 @@
-import {AmpEvents} from '#core/constants/amp-events';
-import {Layout} from '#core/dom/layout';
+import {AmpEvents_Enum} from '#core/constants/amp-events';
+import {Layout_Enum} from '#core/dom/layout';
 import {childElementByAttr} from '#core/dom/query';
+
+import {user, userAssert} from '#utils/log';
 
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
@@ -9,7 +11,6 @@ import {
 } from './live-list-manager';
 
 import {CSS} from '../../../build/amp-live-list-0.1.css';
-import {user, userAssert} from '../../../src/log';
 
 /**
  * @enum {string}
@@ -171,7 +172,9 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || layout == Layout.FIXED_HEIGHT;
+    return (
+      layout == Layout_Enum.CONTAINER || layout == Layout_Enum.FIXED_HEIGHT
+    );
   }
 
   /** @override */
@@ -1012,7 +1015,7 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   sendAmpDomUpdateEvent_() {
     const event = this.win.document.createEvent('Event');
-    event.initEvent(AmpEvents.DOM_UPDATE, true, true);
+    event.initEvent(AmpEvents_Enum.DOM_UPDATE, true, true);
     this.itemsSlot_.dispatchEvent(event);
   }
 }

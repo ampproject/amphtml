@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1.2.1
+  browser-tools: circleci/browser-tools@1.2.3
   node: circleci/node@4.7.0
 
 push_and_pr_builds: &push_and_pr_builds
@@ -15,6 +15,13 @@ push_builds_only: &push_builds_only
     branches:
       only:
         - main
+        - /^amp-release-.*$/
+
+release_builds_only: &release_builds_only
+  filters:
+    branches:
+      only:
+        - nightly
         - /^amp-release-.*$/
 
 pr_builds_only: &pr_builds_only
@@ -32,7 +39,7 @@ experiment_job: &experiment_job
       type: enum
       enum: ['A', 'B', 'C']
   environment:
-    EXP: << parameters.exp >>
+    FLAVOR: experiment<< parameters.exp >>
 
 executors:
   base-docker-small:
@@ -53,12 +60,12 @@ executors:
     resource_class: xlarge
   jdk-docker-xlarge:
     docker:
-      - image: cimg/openjdk:16.0-node
+      - image: cimg/openjdk:17.0-node
     resource_class: xlarge
   macos-medium:
     macos:
       xcode: 12.4.0
-    resource_class: medium
+    resource_class: macos.x86.medium.gen2
 
 commands:
   checkout_repo:
@@ -89,6 +96,10 @@ commands:
           install-npm: false
       - node/install-packages
   setup_vm:
+    parameters:
+      save-git-cache:
+        type: boolean
+        default: false
     steps:
       - attach_workspace:
           at: /tmp
@@ -100,7 +111,8 @@ commands:
       - run:
           name: 'Maybe Gracefully Halt'
           command: /tmp/restored-workspace/maybe_gracefully_halt.sh
-      - checkout_repo
+      - checkout_repo:
+          save-git-cache: << parameters.save-git-cache >>
       - run:
           name: 'Configure Development Environment'
           command: |
@@ -116,7 +128,11 @@ commands:
             - workspace
   install_chrome:
     steps:
+      - run:
+          name: 'Get Pinned Chrome Version'
+          command: ./.circleci/get_pinned_chrome_version.sh
       - browser-tools/install-chrome:
+          chrome-version: ${CHROME_VERSION}
           replace-existing: true
       - browser-tools/install-chromedriver
   install_firefox:
@@ -141,6 +157,10 @@ commands:
           path: result-reports
       - store_test_results:
           path: result-reports
+  store_filelist:
+    steps:
+      - store_artifacts:
+          path: /tmp/filelist.txt
   skip_on_push_builds:
     steps:
       - when:
@@ -207,7 +227,7 @@ jobs:
           name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/module-build.js
       - teardown_vm
-  nomodule_build_prod:
+  nomodule_build_bundle_size:
     executor:
       name: node-docker-xlarge
     steps:
@@ -216,7 +236,7 @@ jobs:
           name: '⭐ Nomodule Build ⭐'
           command: node build-system/pr-check/bundle-size-nomodule-build.js
       - teardown_vm
-  module_build_prod:
+  module_build_bundle_size:
     executor:
       name: node-docker-xlarge
     steps:
@@ -263,7 +283,6 @@ jobs:
       name: node-docker-large
     steps:
       - setup_vm
-      - install_chrome
       - run:
           name: '⭐ Visual Diff Tests ⭐'
           command: node build-system/pr-check/visual-diff-tests.js
@@ -292,6 +311,7 @@ jobs:
           name: '⭐ All Unit Tests ⭐'
           command: node build-system/pr-check/unit-tests.js
       - store_test_output
+      - store_filelist
       - teardown_vm
   unminified_tests:
     executor:
@@ -347,12 +367,14 @@ jobs:
           name: '⭐ End-to-End Tests ⭐'
           command: node build-system/pr-check/e2e-tests.js
       - store_test_output
+      - store_filelist
       - teardown_vm
   browser_tests_safari:
     executor:
       name: macos-medium
     steps:
-      - setup_vm
+      - setup_vm:
+          save-git-cache: true
       - enable_safari_automation
       - run:
           name: '⭐ Browser Tests (Safari) ⭐'
@@ -426,9 +448,53 @@ jobs:
           name: '⭐ Experiment << parameters.exp >> End-to-End Tests ⭐'
           command: node build-system/pr-check/experiment-e2e-tests.js --experiment=experiment<< parameters.exp >>
       - store_test_output
+      - store_filelist
+      - teardown_vm
+  amp_release:
+    executor:
+      name: node-docker-xlarge
+    parameters:
+      flavor:
+        description: 'Which of the release flavors to build'
+        type: enum
+        enum: ['base', 'experimentA', 'experimentB', 'experimentC']
+      esm:
+        description: 'Whether to build module or nomodule release'
+        type: enum
+        enum: ['no-esm', 'esm']
+    environment:
+      FLAVOR: << parameters.flavor >>
+      ESM: << parameters.esm >>
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ amp release ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/build-release.js
+      - teardown_vm
+  upload_release:
+    executor:
+      name: node-docker-medium
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ Upload Release Artifacts ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/upload-release.js
+      - store_artifacts:
+          path: /tmp/release.tar.gz
+      - teardown_vm
+  trigger_promote:
+    executor:
+      name: base-docker-small
+    steps:
+      - setup_vm
+      - run:
+          name: '⭐ Trigger Promote Workflow ⭐'
+          command: node --unhandled-rejections=strict build-system/release-workflows/trigger-promote.js
       - teardown_vm
 
 workflows:
+  version: 2
+
   'CircleCI':
     jobs:
       - initialize_repository:
@@ -454,13 +520,13 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - nomodule_build_prod:
-          name: 'Nomodule Build (Prod)'
+      - nomodule_build_bundle_size:
+          name: 'Nomodule Build (Bundle Size)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - module_build_prod:
-          name: 'Module Build (Prod)'
+      - module_build_bundle_size:
+          name: 'Module Build (Bundle Size)'
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
@@ -473,8 +539,8 @@ workflows:
           name: 'Bundle Size'
           <<: *push_and_pr_builds
           requires:
-            - 'Nomodule Build (Prod)'
-            - 'Module Build (Prod)'
+            - 'Nomodule Build (Bundle Size)'
+            - 'Module Build (Bundle Size)'
       - validator_tests:
           name: 'Validator Tests'
           <<: *push_and_pr_builds
@@ -484,6 +550,7 @@ workflows:
           name: 'Visual Diff Tests'
           <<: *push_and_pr_builds
           requires:
+            - 'Module Build (Test)'
             - 'Nomodule Build (Test)'
       - local_unit_tests:
           name: 'Local Unit Tests'
@@ -566,3 +633,32 @@ workflows:
       #     <<: *push_builds_only
       #     requires:
       #       - 'Nomodule Build (Test)'
+
+  'Release':
+    jobs:
+      - initialize_repository:
+          name: 'Initialize Repository'
+          <<: *release_builds_only
+      - amp_release:
+          name: '<< matrix.flavor >> << matrix.esm >>'
+          matrix:
+            parameters:
+              flavor: ['base', 'experimentA', 'experimentB', 'experimentC']
+              esm: ['no-esm', 'esm']
+          <<: *release_builds_only
+          requires:
+            - 'Initialize Repository'
+      - upload_release:
+          name: 'Upload Release'
+          <<: *release_builds_only
+          requires:
+            - amp_release
+          context:
+            - release-build-uploader
+      - trigger_promote:
+          name: 'Trigger Promote'
+          <<: *release_builds_only
+          requires:
+            - 'Upload Release'
+          context:
+            - release-build-uploader

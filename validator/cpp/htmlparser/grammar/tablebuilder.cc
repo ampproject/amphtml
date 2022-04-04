@@ -1,13 +1,13 @@
-#include "grammar/tablebuilder.h"
+#include "cpp/htmlparser/grammar/tablebuilder.h"
 
 #include <array>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 
-#include "defer.h"
-#include "fileutil.h"
-#include "strings.h"
+#include "cpp/htmlparser/defer.h"
+#include "cpp/htmlparser/fileutil.h"
+#include "cpp/htmlparser/strings.h"
 
 namespace htmlparser::grammar {
 
@@ -165,7 +165,7 @@ bool TableBuilder::OutputHeaderFile(
   fd << "// -*- C++ -*-\n";
 
   fd << "\n// AUTO GENERATED; DO NOT EDIT.\n";
-  fd << "// To regenerate this file, see comments in bin/jsongrammargen\n\n";
+  fd << "// To regenerate this file, see comments in bin/statetablegen\n\n";
   if (!header_options_.ifdef_guard.empty()) {
     fd << "#ifndef " << header_options_.ifdef_guard << "\n";
     fd << "#define " << header_options_.ifdef_guard << "\n\n";

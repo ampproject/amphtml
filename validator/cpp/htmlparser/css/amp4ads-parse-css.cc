@@ -1,9 +1,9 @@
-#include "css/amp4ads-parse-css.h"
+#include "cpp/htmlparser/css/amp4ads-parse-css.h"
 
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#include "css/parse-css.h"
+#include "cpp/htmlparser/css/parse-css.h"
 #include "re2/re2.h"
 
 using absl::make_unique;

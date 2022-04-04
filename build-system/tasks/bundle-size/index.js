@@ -1,8 +1,8 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const fastGlob = require('fast-glob');
 const fetch = require('node-fetch');
-const globby = require('globby');
 const path = require('path');
 const url = require('url');
 const {
@@ -20,7 +20,7 @@ const {
 const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
-const {cyan, red, yellow} = require('../../common/colors');
+const {cyan, red, yellow} = require('kleur/colors');
 const {log, logWithoutTimestamp} = require('../../common/logging');
 const {NoTTYReport, report} = require('@ampproject/filesize');
 
@@ -226,7 +226,7 @@ async function reportBundleSize() {
  * @return {Promise<void>}
  */
 async function getLocalBundleSize() {
-  if ((await globby(fileGlobs)).length === 0) {
+  if ((await fastGlob(fileGlobs)).length === 0) {
     log('Could not find runtime files.');
     log('Run', cyan('amp dist --noextensions'), 'and re-run this task.');
     process.exitCode = 1;

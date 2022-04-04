@@ -1,7 +1,7 @@
 // Uniform resouce locator parsing related static functions.
 
-#ifndef HTMLPARSER__URL_H_
-#define HTMLPARSER__URL_H_
+#ifndef CPP_HTMLPARSER_URL_H_
+#define CPP_HTMLPARSER_URL_H_
 
 #include <arpa/inet.h>
 #include <cctype>
@@ -83,4 +83,4 @@ class URL {
 
 }  // namespace htmlparser
 
-#endif  // HTMLPARSER__URL_H_
+#endif  // CPP_HTMLPARSER_URL_H_

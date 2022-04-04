@@ -89,7 +89,7 @@ Bento AMP allows you to use AMP components in non-AMP pages without needing to c
 
 #### Interactivity and API usage
 
-Bento enabled components in standalone use are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
+Bento are highly interactive through their API. In Bento standalone use, the element's API replaces AMP Actions and events and [`amp-bind`](https://amp.dev/documentation/components/amp-bind/?format=websites).
 
 The `amp-youtube` component API is accessible by including the following script tag in your document:
 
