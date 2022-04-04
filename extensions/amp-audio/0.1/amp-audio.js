@@ -1,4 +1,8 @@
-import {Layout_Enum, isLayoutSizeFixed} from '#core/dom/layout';
+import {
+  Layout_Enum,
+  applyFillContent,
+  isLayoutSizeFixed,
+} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 import {realChildNodes} from '#core/dom/query';
 import {setStyle} from '#core/dom/style';
@@ -100,11 +104,10 @@ export class AmpAudio extends AMP.BaseElement {
    * Builds the internal <audio> element.
    */
   buildAudioElement() {
-    let audio = this.element.getElementsByTagName('audio')[0];
-    let hasAudioTag = true;
+    let audio = this.element.querySelector('audio');
     if (!audio) {
-      hasAudioTag = false;
       audio = this.element.ownerDocument.createElement('audio');
+      this.element.appendChild(audio);
     }
 
     if (!audio.play) {
@@ -143,8 +146,9 @@ export class AmpAudio extends AMP.BaseElement {
       audio
     );
 
+    applyFillContent(audio);
     realChildNodes(this.element).forEach((child) => {
-      if (child.tagName === 'AUDIO' && hasAudioTag) {
+      if (child.tagName === 'AUDIO') {
         return;
       }
       if (child.getAttribute && child.getAttribute('src')) {
@@ -153,9 +157,6 @@ export class AmpAudio extends AMP.BaseElement {
       audio.appendChild(child);
     });
 
-    if (!hasAudioTag) {
-      this.element.appendChild(audio);
-    }
     this.audio_ = audio;
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
