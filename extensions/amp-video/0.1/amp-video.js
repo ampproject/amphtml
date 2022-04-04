@@ -764,10 +764,29 @@ export class AmpVideo extends AMP.BaseElement {
    * @private
    */
   setUpCaptions_() {
+    console.log('setup');
     const captionsId = this.element.getAttribute('captions-id');
-    if (!captionsId) {
+    const trackEl = this.element.querySelector('track');
+
+    if (!captionsId && trackEl) {
+      // Does not work
+      // const captionsEl = this.win.document.createElement('amp-story-captions');
+      // this.element.appendChild(captionsEl);
+      // captionsEl.getImpl().then((impl) => {
+      //   if (impl.setVideoElement) {
+      //     impl.setVideoElement(this.video_);
+      //   }
+      // });
+
+      // Works because this function is called twice, so this function runs again after it is attached from the first time it's called.
+      const captionsId = trackEl.getAttribute('src');
+      const captionsEl = this.win.document.createElement('amp-story-captions');
+      captionsEl.setAttribute('id', captionsId);
+      this.element.setAttribute('captions-id', captionsId);
+      this.element.appendChild(captionsEl);
       return;
     }
+
     const captionsElement = this.win.document.querySelector(
       `amp-story-captions#${escapeCssSelectorIdent(captionsId)}`
     );

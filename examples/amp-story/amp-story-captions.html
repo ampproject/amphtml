@@ -31,6 +31,11 @@
     .page2 {
       background-color: #fff;
     }
+
+    #captions-container-2 {
+      position: relative;
+      z-index: 2;
+    }
   </style>
 </head>
 <body>
@@ -40,7 +45,7 @@
       publisher="AMP Story"
       publisher-logo-src="example.com/logo.png"
       poster-portrait-src="example.com/poster.jpg">
-    <amp-story-page id="page1" auto-advance-after="video">
+    <!-- <amp-story-page id="page1" auto-advance-after="video">
       <amp-story-grid-layer template="fill">
         <amp-video id="video"
             src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
@@ -89,7 +94,25 @@
           <div class="static-text">This element is always below captions and never overlaps.</div>
         </div>
       </amp-story-grid-layer>
+    </amp-story-page> -->
+
+    <amp-story-page id="videeo-in0video">
+      <amp-story-grid-layer template="fill">
+        <amp-video
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay>
+          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
+          <!-- <amp-story-csaptions id="captions-container-2" layout="container"></amp-story-captions> -->
+        </amp-video>
+      </amp-story-grid-layer>
+      <!-- <amp-story-grid-layer template="vertical" class="bottom"> -->
+        <!-- <div class="scrim"> -->
+          <!-- <div class="static-text">This element is always above captions and never overlaps.</div> -->
+          <!-- <div class="static-text">This element is always below captions and never overlaps.</div> -->
+        <!-- </div> -->
+      <!-- </amp-story-grid-layer> -->
     </amp-story-page>
+
   </amp-story>
 </body>
 
