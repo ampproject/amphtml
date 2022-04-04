@@ -944,9 +944,11 @@ export class MediaPool {
     if (!queue.length) {
       return;
     }
-    const [item] = queue;
-    const [task, resolve] = item;
-    const [fn, requiresSynchronousExecution] = task;
+    // Using object destructure {0: item} syntax rather than array destructure
+    // since the latter forces a runtime utility to be included.
+    const {0: item} = queue;
+    const {0: task, 1: resolve} = item;
+    const {0: fn, 1: requiresSynchronousExecution} = task;
     const executionFn = () => {
       Promise.resolve(fn(mediaEl))
         .then(resolve, (reason) => dev().error('AMP-STORY', reason))
