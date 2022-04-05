@@ -4,6 +4,9 @@ on:
     types: [opened]
   issue_comment:
     types: [edited]
+permissions:
+  contents: read
+
 jobs:
   status-page:
     if: contains(github.event.issue.title, '🌸 Cherry-pick request')

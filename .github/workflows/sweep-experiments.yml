@@ -8,8 +8,15 @@ on:
     # First day of the month at 00:00:00
     - cron: '0 0 1 * *'
 
+permissions:
+  contents: read
+
 jobs:
   sweep-experiments:
+    permissions:
+      contents: write  # for peter-evans/create-pull-request to create branch
+      issues: write  # for peter-evans/create-or-update-comment to create or update comment
+      pull-requests: write  # for peter-evans/create-pull-request to create a PR
     if: github.repository == 'ampproject/amphtml'
     name: Sweep Experiments
     runs-on: ubuntu-latest

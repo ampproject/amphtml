@@ -7,6 +7,9 @@ on:
     # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
     - cron: '0 8 * * 2-6'
 
+permissions:
+  contents: read
+
 jobs:
   cut-nightly:
     environment: release_tagger

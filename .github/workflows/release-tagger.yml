@@ -17,6 +17,9 @@ on:
       sha:
         description: 'commit sha'
         required: true
+permissions:
+  contents: read
+
 jobs:
   tagger:
     environment: release_tagger
