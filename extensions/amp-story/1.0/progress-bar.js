@@ -14,7 +14,7 @@ import {isExperimentOn} from 'src/experiments';
 
 import {
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {EventType} from './events';
@@ -399,16 +399,16 @@ export class ProgressBar {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     switch (uiState) {
-      case UIType.DESKTOP_FULLBLEED:
+      case UIType_Enum.DESKTOP_FULLBLEED:
         MAX_SEGMENTS = 70;
         ELLIPSE_WIDTH_PX = 3;
         break;
-      case UIType.MOBILE:
+      case UIType_Enum.MOBILE:
         MAX_SEGMENTS = 20;
         ELLIPSE_WIDTH_PX = 2;
         break;

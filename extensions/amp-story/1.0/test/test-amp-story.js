@@ -29,10 +29,10 @@ import {
   AmpStoryStoreService,
   StateProperty,
   SubscriptionsState,
-  UIType,
+  UIType_Enum,
 } from '../amp-story-store-service';
 import {EventType, dispatch} from '../events';
-import {MediaType} from '../media-pool';
+import {MediaType_Enum} from '../media-pool';
 import {AdvancementMode} from '../story-analytics';
 import * as utils from '../utils';
 
@@ -350,7 +350,7 @@ describes.realWin(
 
       await story.layoutCallback();
       expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
-        UIType.DESKTOP_ONE_PANEL
+        UIType_Enum.DESKTOP_ONE_PANEL
       );
     });
 
@@ -365,7 +365,7 @@ describes.realWin(
 
       await story.layoutCallback();
       expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
-        UIType.DESKTOP_FULLBLEED
+        UIType_Enum.DESKTOP_FULLBLEED
       );
     });
 
@@ -979,8 +979,8 @@ describes.realWin(
 
           await story.layoutCallback();
           const expected = {
-            [MediaType.AUDIO]: 2,
-            [MediaType.VIDEO]: 2,
+            [MediaType_Enum.AUDIO]: 2,
+            [MediaType_Enum.VIDEO]: 2,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
         });
@@ -999,8 +999,8 @@ describes.realWin(
           story.element.appendChild(ampAudoEl);
 
           const expected = {
-            [MediaType.AUDIO]: 3,
-            [MediaType.VIDEO]: 3,
+            [MediaType_Enum.AUDIO]: 3,
+            [MediaType_Enum.VIDEO]: 3,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
         });
@@ -1022,8 +1022,8 @@ describes.realWin(
           }
 
           const expected = {
-            [MediaType.AUDIO]: 4,
-            [MediaType.VIDEO]: 8,
+            [MediaType_Enum.AUDIO]: 4,
+            [MediaType_Enum.VIDEO]: 8,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
         });
@@ -1256,7 +1256,7 @@ describes.realWin(
 
         const dispatchSwipeEvent = (deltaX, deltaY) => {
           // Triggers mobile UI so hint overlay can attach.
-          story.storeService_.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
+          story.storeService_.dispatch(Action.TOGGLE_UI, UIType_Enum.MOBILE);
 
           story.element.dispatchEvent(
             new TouchEvent('touchstart', getTouchOptions(-10, -10))
