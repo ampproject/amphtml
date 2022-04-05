@@ -121,152 +121,178 @@
   in comments in lieu of the next selector when running under polyfill.
 */
 
-export const ShadowCSS = {
-  strictStyling: false,
-  // change a selector like 'div' to 'name div'
-  /** @this {ShadowCSS} */
-  scopeRules: function(cssRules, scopeSelector, opt_transformer) {
-    var cssText = '';
-    if (cssRules) {
-      Array.prototype.forEach.call(cssRules, function(rule) {
-        if (rule.selectorText && (rule.style && rule.style.cssText !== undefined)) {
-          cssText += this.scopeSelector(rule.selectorText, scopeSelector,
-            this.strictStyling, opt_transformer) + ' {\n\t';
-          cssText += this.propertiesFromRule(rule) + '\n}\n\n';
-        } else if (rule.type === CSSRule.MEDIA_RULE) {
-          cssText += '@media ' + rule.media.mediaText + ' {\n';
-          cssText += this.scopeRules(rule.cssRules, scopeSelector);
-          cssText += '\n}\n\n';
-        } else {
-          // KEYFRAMES_RULE in IE throws when we query cssText
-          // when it contains a -webkit- property.
-          // if this happens, we fallback to constructing the rule
-          // from the CSSRuleSet
-          // https://connect.microsoft.com/IE/feedbackdetail/view/955703/accessing-csstext-of-a-keyframe-rule-that-contains-a-webkit-property-via-cssom-generates-exception
-          try {
-            if (rule.cssText) {
-              cssText += rule.cssText + '\n\n';
-            }
-          } catch(x) {
-            if (rule.type === CSSRule.KEYFRAMES_RULE && rule.cssRules) {
-              cssText += this.ieSafeCssTextFromKeyFrameRule(rule);
-            }
+// [@ampproject difference with original]
+// All exported functions were originally part of an object named `ShadowCSS`.
+// Exporting them as plain functions allow them to be dead-code-eliminated, and
+// for their names to be mangled.
+// This also involves changing references to each function from `this.x()` to
+// just `x()`.
+
+const strictStyling = false;
+const allowArraySelectors = false;
+const isIeSupported = false;
+
+// change a selector like 'div' to 'name div'
+/** @this {ShadowCSS} */
+export function scopeRules(cssRules, scopeSelector, opt_transformer) {
+  var cssText = '';
+  if (cssRules) {
+    Array.prototype.forEach.call(cssRules, function(rule) {
+      if (rule.selectorText && (rule.style && rule.style.cssText !== undefined)) {
+        cssText += scopeSelector(rule.selectorText, scopeSelector,
+          strictStyling, opt_transformer) + ' {\n\t';
+        cssText += propertiesFromRule(rule) + '\n}\n\n';
+      } else if (rule.type === CSSRule.MEDIA_RULE) {
+        cssText += '@media ' + rule.media.mediaText + ' {\n';
+        cssText += scopeRules(rule.cssRules, scopeSelector);
+        cssText += '\n}\n\n';
+      } else {
+        // KEYFRAMES_RULE in IE throws when we query cssText
+        // when it contains a -webkit- property.
+        // if this happens, we fallback to constructing the rule
+        // from the CSSRuleSet
+        // https://connect.microsoft.com/IE/feedbackdetail/view/955703/accessing-csstext-of-a-keyframe-rule-that-contains-a-webkit-property-via-cssom-generates-exception
+        try {
+          if (rule.cssText) {
+            cssText += rule.cssText + '\n\n';
+          }
+        } catch(x) {
+          // [@ampproject difference with original]
+          // We introduce a switch for IE support. When this is `false`, the
+          // function used here is dead-code-eliminated.
+          if (
+            isIeSupported &&
+            rule.type === CSSRule.KEYFRAMES_RULE &&
+            rule.cssRules
+          ) {
+            cssText += ieSafeCssTextFromKeyFrameRule(rule);
           }
         }
-      }, this);
-    }
-    return cssText;
-  },
-  /** @this {ShadowCSS} */
-  ieSafeCssTextFromKeyFrameRule: function(rule) {
-    var cssText = '@keyframes ' + rule.name + ' {';
-    Array.prototype.forEach.call(rule.cssRules, function(rule) {
-      cssText += ' ' + rule.keyText + ' {' + rule.style.cssText + '}';
+      }
     });
-    cssText += ' }';
-    return cssText;
-  },
-  /** @this {ShadowCSS} */
-  scopeSelector: function(selector, scopeSelector, strict, opt_transformer) {
-    var r = [], parts = selector.split(',');
-    parts.forEach(function(p) {
-      p = p.trim();
-      if (opt_transformer) {
-        p = opt_transformer(p);
-      }
-      if (this.selectorNeedsScoping(p, scopeSelector)) {
-        p = (strict && !p.match(polyfillHostNoCombinator)) ?
-            this.applyStrictSelectorScope(p, scopeSelector) :
-            this.applySelectorScope(p, scopeSelector);
-      }
-      r.push(p);
-    }, this);
-    return r.join(', ');
-  },
-  /** @this {ShadowCSS} */
-  selectorNeedsScoping: function(selector, scopeSelector) {
-    if (Array.isArray(scopeSelector)) {
-      return true;
-    }
-    var re = this.makeScopeMatcher(scopeSelector);
-    return !selector.match(re);
-  },
-  /** @this {ShadowCSS} */
-  makeScopeMatcher: function(scopeSelector) {
-    scopeSelector = scopeSelector.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
-    return new RegExp('^(' + scopeSelector + ')' + selectorReSuffix, 'm');
-  },
-  /** @this {ShadowCSS} */
-  applySelectorScope: function(selector, selectorScope) {
-    return Array.isArray(selectorScope) ?
-        this.applySelectorScopeList(selector, selectorScope) :
-        this.applySimpleSelectorScope(selector, selectorScope);
-  },
-  // apply an array of selectors
-  /** @this {ShadowCSS} */
-  applySelectorScopeList: function(selector, scopeSelectorList) {
-    var r = [];
-    for (var i=0, s; (s=scopeSelectorList[i]); i++) {
-      r.push(this.applySimpleSelectorScope(selector, s));
-    }
-    return r.join(', ');
-  },
-  // scope via name and [is=name]
-  /** @this {ShadowCSS} */
-  applySimpleSelectorScope: function(selector, scopeSelector) {
-    if (selector.match(polyfillHostRe)) {
-      selector = selector.replace(polyfillHostNoCombinator, scopeSelector);
-      return selector.replace(polyfillHostRe, scopeSelector + ' ');
-    } else {
-      return scopeSelector + ' ' + selector;
-    }
-  },
-  // return a selector with [name] suffix on each simple selector
-  // e.g. .foo.bar > .zot becomes .foo[name].bar[name] > .zot[name]
-  /** @this {ShadowCSS} */
-  applyStrictSelectorScope: function(selector, scopeSelector) {
-    scopeSelector = scopeSelector.replace(/\[is=([^\]]*)\]/g, '$1');
-    var splits = [' ', '>', '+', '~'],
-      scoped = selector,
-      attrName = '[' + scopeSelector + ']';
-    splits.forEach(function(sep) {
-      var parts = scoped.split(sep);
-      scoped = parts.map(function(p) {
-        // remove :host since it should be unnecessary
-        var t = p.trim().replace(polyfillHostRe, '');
-        if (t && (splits.indexOf(t) < 0) && (t.indexOf(attrName) < 0)) {
-          p = t.replace(/([^:]*)(:*)(.*)/, '$1' + attrName + '$2$3');
-        }
-        return p;
-      }).join(sep);
-    });
-    return scoped;
-  },
-  /** @this {ShadowCSS} */
-  propertiesFromRule: function(rule) {
-    var cssText = rule.style.cssText;
-    // TODO(sorvell): Safari cssom incorrectly removes quotes from the content
-    // property. (https://bugs.webkit.org/show_bug.cgi?id=118045)
-    // don't replace attr rules
-    if (rule.style.content && !rule.style.content.match(/['"]+|attr/)) {
-      cssText = cssText.replace(/content:[^;]*;/g, 'content: \'' +
-          rule.style.content + '\';');
-    }
-    // TODO(sorvell): we can workaround this issue here, but we need a list
-    // of troublesome properties to fix https://github.com/Polymer/platform/issues/53
-    //
-    // inherit rules can be omitted from cssText
-    // TODO(sorvell): remove when Blink bug is fixed:
-    // https://code.google.com/p/chromium/issues/detail?id=358273
-    var style = rule.style;
-    for (var i in style) {
-      if (style[i] === 'initial') {
-        cssText += i + ': initial; ';
-      }
-    }
-    return cssText;
   }
-};
+  return cssText;
+}
+/** @this {ShadowCSS} */
+export function ieSafeCssTextFromKeyFrameRule(rule) {
+  var cssText = '@keyframes ' + rule.name + ' {';
+  Array.prototype.forEach.call(rule.cssRules, function(rule) {
+    cssText += ' ' + rule.keyText + ' {' + rule.style.cssText + '}';
+  });
+  cssText += ' }';
+  return cssText;
+}
+// [@ampproject difference with original]
+// We removed a `strict` argument before `opt_transformer`, to be replaced
+// with the constant value for `strictStyling`.
+/** @this {ShadowCSS} */
+export function scopeSelector(selector, scopeSelector, opt_transformer) {
+  var r = [], parts = selector.split(',');
+  parts.forEach(function(p) {
+    p = p.trim();
+    if (opt_transformer) {
+      p = opt_transformer(p);
+    }
+    if (selectorNeedsScoping(p, scopeSelector)) {
+      p = (strictStyling && !p.match(polyfillHostNoCombinator)) ?
+          applyStrictSelectorScope(p, scopeSelector) :
+          applySelectorScope(p, scopeSelector);
+    }
+    r.push(p);
+  });
+  return r.join(', ');
+}
+// [@ampproject difference with original]
+// We introduce a switch for the `Array.isArray` codepath to conditionally
+// enable array selectors. When this value is `false`, the requires utilities
+// are dead-code-eliminated
+/** @this {ShadowCSS} */
+export function selectorNeedsScoping(selector, scopeSelector) {
+  if (allowArraySelectors && Array.isArray(scopeSelector)) {
+    return true;
+  }
+  var re = makeScopeMatcher(scopeSelector);
+  return !selector.match(re);
+}
+/** @this {ShadowCSS} */
+export function makeScopeMatcher(scopeSelector) {
+  scopeSelector = scopeSelector.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
+  return new RegExp('^(' + scopeSelector + ')' + selectorReSuffix, 'm');
+}
+// [@ampproject difference with original]
+// We introduce a switch for the `Array.isArray` codepath to conditionally
+// enable array selectors. When this value is `false`, the requires utilities
+// are dead-code-eliminated
+/** @this {ShadowCSS} */
+export function applySelectorScope(selector, selectorScope) {
+  return allowArraySelectors && Array.isArray(selectorScope) ?
+      applySelectorScopeList(selector, selectorScope) :
+      applySimpleSelectorScope(selector, selectorScope);
+}
+// apply an array of selectors
+/** @this {ShadowCSS} */
+export function applySelectorScopeList(selector, scopeSelectorList) {
+  var r = [];
+  for (var i=0, s; (s=scopeSelectorList[i]); i++) {
+    r.push(applySimpleSelectorScope(selector, s));
+  }
+  return r.join(', ');
+}
+// scope via name and [is=name]
+/** @this {ShadowCSS} */
+export function applySimpleSelectorScope(selector, scopeSelector) {
+  if (selector.match(polyfillHostRe)) {
+    selector = selector.replace(polyfillHostNoCombinator, scopeSelector);
+    return selector.replace(polyfillHostRe, scopeSelector + ' ');
+  } else {
+    return scopeSelector + ' ' + selector;
+  }
+}
+// return a selector with [name] suffix on each simple selector
+// e.g. .foo.bar > .zot becomes .foo[name].bar[name] > .zot[name]
+/** @this {ShadowCSS} */
+export function applyStrictSelectorScope(selector, scopeSelector) {
+  scopeSelector = scopeSelector.replace(/\[is=([^\]]*)\]/g, '$1');
+  var splits = [' ', '>', '+', '~'],
+    scoped = selector,
+    attrName = '[' + scopeSelector + ']';
+  splits.forEach(function(sep) {
+    var parts = scoped.split(sep);
+    scoped = parts.map(function(p) {
+      // remove :host since it should be unnecessary
+      var t = p.trim().replace(polyfillHostRe, '');
+      if (t && (splits.indexOf(t) < 0) && (t.indexOf(attrName) < 0)) {
+        p = t.replace(/([^:]*)(:*)(.*)/, '$1' + attrName + '$2$3');
+      }
+      return p;
+    }).join(sep);
+  });
+  return scoped;
+}
+/** @this {ShadowCSS} */
+export function propertiesFromRule(rule) {
+  var cssText = rule.style.cssText;
+  // TODO(sorvell): Safari cssom incorrectly removes quotes from the content
+  // property. (https://bugs.webkit.org/show_bug.cgi?id=118045)
+  // don't replace attr rules
+  if (rule.style.content && !rule.style.content.match(/['"]+|attr/)) {
+    cssText = cssText.replace(/content:[^;]*;/g, 'content: \'' +
+        rule.style.content + '\';');
+  }
+  // TODO(sorvell): we can workaround this issue here, but we need a list
+  // of troublesome properties to fix https://github.com/Polymer/platform/issues/53
+  //
+  // inherit rules can be omitted from cssText
+  // TODO(sorvell): remove when Blink bug is fixed:
+  // https://code.google.com/p/chromium/issues/detail?id=358273
+  var style = rule.style;
+  for (var i in style) {
+    if (style[i] === 'initial') {
+      cssText += i + ': initial; ';
+    }
+  }
+  return cssText;
+}
 
 var selectorRe = /([^{]*)({[\s\S]*?})/gim,
     cssCommentRe = /\/\*[^*]*\*+([^/*][^*]*\*+)*\//gim,
