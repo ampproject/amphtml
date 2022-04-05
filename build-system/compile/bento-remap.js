@@ -100,7 +100,7 @@ const getAllRemappings = once(() => {
           return {
             source: resolved,
             cdn: formatPathLikeSource(cdn),
-            npm: formatPathLikeSource(npm),
+            npm,
           };
         }
       })
