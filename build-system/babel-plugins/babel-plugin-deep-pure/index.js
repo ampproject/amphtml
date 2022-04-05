@@ -57,28 +57,27 @@ module.exports = function () {
         },
       },
       CallExpression(path) {
-        if (!isPureFnCallExpression(path)) {
-          path.skip();
-          return;
-        }
-        path.traverse({
-          NewExpression(path) {
-            addPureComment(path);
-          },
-          CallExpression(path) {
-            if (isPureFnCallExpression(path)) {
-              replaceWithFirstArgument(path);
-            } else {
+        if (isPureFnCallExpression(path)) {
+          path.traverse({
+            NewExpression(path) {
               addPureComment(path);
-            }
-          },
-          MemberExpression(path) {
-            throw path.buildCodeFrameError(
-              `${pureFnName}() expressions cannot contain member expressions`
-            );
-          },
-        });
-        replaceWithFirstArgument(path);
+            },
+            CallExpression(path) {
+              if (isPureFnCallExpression(path)) {
+                replaceWithFirstArgument(path);
+              } else {
+                addPureComment(path);
+              }
+            },
+            MemberExpression(path) {
+              throw path.buildCodeFrameError(
+                `${pureFnName}() expressions cannot contain member expressions`
+              );
+            },
+          });
+          replaceWithFirstArgument(path);
+        }
+        path.skip();
       },
     },
   };
