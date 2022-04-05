@@ -531,12 +531,6 @@ export class ManualAdvancement extends AdvancementConfig {
           return false;
         }
 
-        if (tagName === 'amp-story-cta-layer') {
-          const anchorSet = el.querySelectorAll('a');
-          valid = anchorSet && anchorSet.length > 1;
-          return valid;
-        }
-
         return tagName === 'amp-story-page' && valid;
       },
       /* opt_stopAt */ this.element_

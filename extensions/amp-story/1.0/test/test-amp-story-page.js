@@ -747,15 +747,13 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     describe('should convert cta layer to page outlink tag', async () => {
       beforeEach(() => {
-        element.appendChild(
+        page.element.appendChild(
           <amp-story-cta-layer>
             <a href="https://www.ampproject.org" class="button">
               CTA Text!
             </a>
           </amp-story-cta-layer>
         );
-        page = new AmpStoryPage(element);
-        env.sandbox.stub(page, 'mutateElement').callsFake((fn) => fn());
       });
 
       it('should remove amp-story-cta-layer', () => {
