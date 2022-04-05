@@ -1397,18 +1397,10 @@ export class AmpStory extends AMP.BaseElement {
           }
         }
 
-        let storePageIndex = pageIndex;
+        this.storeService_.dispatch(Action.TOGGLE_AD, targetPage.isAd());
         if (targetPage.isAd()) {
-          this.storeService_.dispatch(Action.TOGGLE_AD, true);
           setAttributeInMutate(this, Attributes.AD_SHOWING);
-
-          // Keep current page index when an ad is shown. Otherwise it messes
-          // up with the progress variable in the VariableService.
-          storePageIndex = this.storeService_.get(
-            StateProperty.CURRENT_PAGE_INDEX
-          );
         } else {
-          this.storeService_.dispatch(Action.TOGGLE_AD, false);
           removeAttributeInMutate(this, Attributes.AD_SHOWING);
 
           // Start progress bar update for pages that are not ads or auto-
@@ -1423,7 +1415,7 @@ export class AmpStory extends AMP.BaseElement {
 
         this.storeService_.dispatch(Action.CHANGE_PAGE, {
           id: targetPageId,
-          index: storePageIndex,
+          index: pageIndex,
         });
 
         // If first navigation.
@@ -2134,13 +2126,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @return {number}
-   */
-  getPageCount() {
-    return this.pages_.length - this.adPages_.length;
-  }
-
-  /**
    * @param {!./amp-story-page.AmpStoryPage} desiredPage
    * @return {number} The index of the page.
    */
@@ -2506,6 +2491,21 @@ export class AmpStory extends AMP.BaseElement {
       nextPageEl.setAttribute(Attributes.RETURN_TO, pageToBeInsertedId);
     }
 
+    // Adjust the page's position in this.pages_ array to reflect the actual.
+    const insertedPageIndex = this.getPageIndexById(pageToBeInsertedId);
+    if (insertedPageIndex != -1) {
+      this.pages_.splice(insertedPageIndex, 1);
+    }
+    this.pages_.splice(
+      this.getPageIndexById(pageBeforeId) + 1,
+      0,
+      pageToBeInserted
+    );
+
+    this.storeService_.dispatch(
+      Action.SET_PAGE_IDS,
+      this.pages_.map((el) => el.element.id)
+    );
     return true;
   }
 
