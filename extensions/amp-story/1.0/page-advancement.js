@@ -524,12 +524,17 @@ export class ManualAdvancement extends AdvancementConfig {
         tagName = el.tagName.toLowerCase();
 
         if (
-          tagName === 'amp-story-cta-layer' ||
           tagName === 'amp-story-page-attachment' ||
           tagName === 'amp-story-page-outlink'
         ) {
           valid = false;
           return false;
+        }
+
+        if (tagName === 'amp-story-cta-layer') {
+          const anchorSet = el.querySelectorAll('a');
+          valid = anchorSet && anchorSet.length > 1;
+          return valid;
         }
 
         return tagName === 'amp-story-page' && valid;
