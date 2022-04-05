@@ -2162,7 +2162,7 @@ describes.realWin(
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.have.been.calledOnceWithExactly(
-            '/dist/v0/amp-story.es-419.json',
+            '/dist/rtv/123/v0/amp-story.es-419.json',
             env.sandbox.match.any
           );
         });
