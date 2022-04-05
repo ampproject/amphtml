@@ -30,7 +30,7 @@ import {setStyle, setStyles, toggle} from '#core/dom/style';
 export const naturalDimensions_ = {
   'AMP-PIXEL': {width: '0px', height: '0px'},
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
-  'AMP-AUDIO': {width: 'auto', height: '3.5rem'},
+  'AMP-AUDIO': null,
   'AMP-SOCIAL-SHARE': {width: '60px', height: '44px'},
 };
 

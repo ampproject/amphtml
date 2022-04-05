@@ -148,7 +148,7 @@ export class AmpAudio extends AMP.BaseElement {
 
     applyFillContent(audio);
     realChildNodes(this.element).forEach((child) => {
-      if (child.tagName === 'AUDIO') {
+      if (child === audio) {
         return;
       }
       if (child.getAttribute && child.getAttribute('src')) {
