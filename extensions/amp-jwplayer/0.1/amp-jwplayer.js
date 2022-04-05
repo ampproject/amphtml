@@ -11,6 +11,7 @@ import {
 } from '#core/dom/fullscreen';
 import {applyFillContent, isLayoutSizeDefined} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
+import {isAutoplaySupported} from '#core/dom/video';
 import {PauseHelper} from '#core/dom/video/pause-helper';
 import {once} from '#core/types/function';
 import {tryParseJson} from '#core/types/object/json';
@@ -119,6 +120,9 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     /**@private {?object} */
     this.consentMetadata_ = null;
+
+    /**@private {?object} */
+    this.config_ = tryParseJson(element.getAttribute('data-config-json')) || {};
   }
 
   /** @override */
@@ -128,6 +132,15 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   isInteractive() {
+    if (
+      this.element.hasAttribute('autoplay') &&
+      isAutoplaySupported(this.win) &&
+      this.config_.controls === false
+    ) {
+      return false;
+    }
+
+    delete this.config_.controls;
     return true;
   }
 
@@ -396,35 +409,33 @@ class AmpJWPlayer extends AMP.BaseElement {
    * @private
    */
   onSetup_() {
-    const {element} = this;
+    const {config_, element} = this;
     const configAttributes = getDataParamsFromAttributes(
       element,
       null,
       /^config(.+)/
     );
-    const configJSON = element.getAttribute('data-config-json');
-    const config = tryParseJson(configJSON) || {};
 
     Object.keys(configAttributes).forEach((attr) => {
       if (attr.indexOf('json') !== -1) {
         return;
       }
-      config[attr] = configAttributes[attr];
+      config_[attr] = configAttributes[attr];
     });
 
     // Add custom ad params to config
     const adCustParamsJSON = element.getAttribute('data-ad-cust-params');
     if (adCustParamsJSON) {
-      config.adCustParams = tryParseJson(adCustParamsJSON);
+      config_.adCustParams = tryParseJson(adCustParamsJSON);
     }
 
     // Add custom ad macros to config
     const adMacros = getDataParamsFromAttributes(element, null, /^adMacro(.+)/);
     if (Object.keys(adMacros).length !== 0) {
-      config.adMacros = adMacros;
+      config_.adMacros = adMacros;
     }
 
-    this.postCommandMessage_('setupConfig', config);
+    this.postCommandMessage_('setupConfig', config_);
   }
 
   /**

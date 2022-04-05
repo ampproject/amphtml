@@ -152,10 +152,6 @@ describes.realWin(
         expect(impl.supportsPlatform()).to.be.true;
       });
 
-      it('is interactive', () => {
-        expect(impl.isInteractive()).to.be.true;
-      });
-
       it('does not implement auto-fullscreen', () => {
         expect(impl.preimplementsAutoFullscreen()).to.be.false;
       });
@@ -367,6 +363,44 @@ describes.realWin(
           impl.showControls();
           expect(spy).calledWith('setControls', true);
         });
+      });
+    });
+
+    describe('is interactive', () => {
+      it('defaults to true', async () => {
+        const jwp = await getjwplayer({
+          'data-media-id': 'BZ6tc0gy',
+          'data-player-id': 'uoIbMPm3',
+        });
+        const impl = await jwp.getImpl(false);
+
+        expect(impl.isInteractive()).to.be.true;
+      });
+
+      it('returns true if autoplay with controls', async () => {
+        const jwp = await getjwplayer({
+          'data-media-id': 'BZ6tc0gy',
+          'data-player-id': 'uoIbMPm3',
+          'data-config-json': '{"controls":true}',
+        });
+        jwp.setAttribute('autoplay', '');
+
+        const impl = await jwp.getImpl(false);
+
+        expect(impl.isInteractive()).to.be.true;
+      });
+
+      it('returns false if autoplay with false controls', async () => {
+        const jwp = await getjwplayer({
+          'data-media-id': 'BZ6tc0gy',
+          'data-player-id': 'uoIbMPm3',
+          'data-config-json': '{"controls":false}',
+        });
+        jwp.setAttribute('autoplay', '');
+
+        const impl = await jwp.getImpl(false);
+
+        expect(impl.isInteractive()).to.be.false;
       });
     });
 
