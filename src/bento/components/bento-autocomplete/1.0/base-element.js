@@ -41,12 +41,16 @@ export class BaseElement extends PreactBaseElement {
    * @override
    * */
   getDefaultProps() {
+    const defaultProps = super.getDefaultProps();
     const jsonScript = this.element.querySelector(
       'script[type="application/json"]'
     );
     if (jsonScript) {
       const items = this.getInlineData_(jsonScript);
-      return {items};
+      return {
+        ...defaultProps,
+        items,
+      };
     } else if (!this.element.hasAttribute('src')) {
       user().warn(
         TAG,
@@ -54,7 +58,7 @@ export class BaseElement extends PreactBaseElement {
           'a URL specified in "src".'
       );
     }
-    return super.getDefaultProps();
+    return defaultProps;
   }
 }
 
