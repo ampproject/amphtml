@@ -234,7 +234,7 @@ describes.realWin(
         /* options */ {}
       );
 
-      const offsetX = -dimensions.targetWidth / 2;
+      const offsetX = (dimensions.pageWidth - dimensions.targetWidth) / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       const expectedKeyframes = [
