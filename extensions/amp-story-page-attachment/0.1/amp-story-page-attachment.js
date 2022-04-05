@@ -29,7 +29,7 @@ import {getSourceOrigin} from '../../../src/url';
 import {
   Action,
   StateProperty,
-  UIType,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {HistoryState, setHistoryState} from '../../amp-story/1.0/history';
 import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
@@ -247,10 +247,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     while (this.element.firstChild && this.element.firstChild !== templateEl) {
       this.contentEl.appendChild(this.element.firstChild);
     }
-
-    // Ensures the content of the attachment won't be rendered/loaded until we
-    // actually need it.
-    toggle(dev().assertElement(this.containerEl), true);
   }
 
   /**
@@ -468,7 +464,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     };
 
     const isMobileUI =
-      this.storeService.get(StateProperty.UI_STATE) === UIType.MOBILE;
+      this.storeService.get(StateProperty.UI_STATE) === UIType_Enum.MOBILE;
     if (!isMobileUI) {
       programaticallyClickOnTarget();
     } else {

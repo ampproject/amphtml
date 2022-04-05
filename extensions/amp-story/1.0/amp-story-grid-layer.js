@@ -103,7 +103,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR
     );
 
-    Array.prototype.forEach.call(elementsToUpgradeStyles, (element) => {
+    elementsToUpgradeStyles.forEach((element) => {
       this.setCssGridStyles_(element);
     });
   }

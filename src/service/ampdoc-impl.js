@@ -8,7 +8,7 @@ import {
   getDocumentVisibilityState,
   removeDocumentVisibilityChangeListener,
 } from '#core/document/visibility';
-import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
+import {rootNodeFor, waitForBodyOpenPromise} from '#core/dom';
 import {isEnumValue} from '#core/types';
 import {map} from '#core/types/object';
 import {parseQueryString} from '#core/types/string/url';
@@ -356,7 +356,7 @@ export class AmpDoc {
     const metaEls = dev()
       .assertElement(this.win.document.head)
       .querySelectorAll('meta[name]');
-    iterateCursor(metaEls, (metaEl) => {
+    metaEls.forEach((metaEl) => {
       const name = metaEl.getAttribute('name');
       const content = metaEl.getAttribute('content');
       if (!name || content === null) {
