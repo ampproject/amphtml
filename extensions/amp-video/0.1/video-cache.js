@@ -1,8 +1,4 @@
-import {
-  createElementWithAttributes,
-  iterateCursor,
-  removeElement,
-} from '#core/dom';
+import {createElementWithAttributes, removeElement} from '#core/dom';
 import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 
@@ -210,8 +206,7 @@ function maybeReplaceSrcWithSourceElement(videoEl, win) {
 
   // Remove all existing sources as they are never supposed to play for a video
   // that has a src, cf https://html.spec.whatwg.org/#concept-media-load-algorithm
-  const sourceEls = videoEl.querySelectorAll('source');
-  iterateCursor(sourceEls, (el) => removeElement(el));
+  videoEl.querySelectorAll('source').forEach(removeElement);
 
   videoEl.insertBefore(sourceEl, videoEl.firstChild);
 }

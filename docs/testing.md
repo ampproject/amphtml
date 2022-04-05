@@ -401,12 +401,12 @@ The task will kick off `amp build` and then `amp serve` before running the tests
 
 ## Performance Testing Node Build Tools
 
-You can create flamecharts for any node process used by the build system by leveraging `0x` which is included as a `devDepenendency`.
+You can create flamecharts for any node process used by the build system by leveraging `0x`.
 
-Here's an example for `amp dist --closure_concurrency=1`:
+Here's an example for `amp dist`:
 
 ```sh
-npx 0x -o node_modules/.bin/amp dist --closure_concurrency=1
+npx 0x -o node_modules/.bin/amp dist
 ```
 
 Important to note is `0x` will automatically create a flamechart and a serving folder locally within the repository, please don't add them to PRs!

@@ -443,6 +443,18 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * Get width/height of the browser area.
+   * @return {!Promise<[number, number]>}
+   */
+  async getWindowRect() {
+    const htmlElement = this.driver.findElement(By.tagName('html'));
+    return await Promise.all([
+      htmlElement.getAttribute('clientWidth'),
+      htmlElement.getAttribute('clientHeight'),
+    ]);
+  }
+
+  /**
    * Sets width/height of the browser area.
    * @param {!selenium.WindowRectDef} rect
    * @return {!Promise}
