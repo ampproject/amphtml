@@ -49,7 +49,7 @@ module.exports = function (babel) {
             path.insertAfter(
               buildNamespace({
                 NAMESPACE: namespace,
-                GETTER: getter,
+                GETTER: getter.name,
               })
             );
           } else if (specifier.isImportSpecifier()) {
@@ -60,7 +60,7 @@ module.exports = function (babel) {
                 IMPORTED: t.isIdentifier(imported)
                   ? imported.name
                   : imported.value,
-                GETTER: getter,
+                GETTER: getter.name,
               })
             );
           } else {
