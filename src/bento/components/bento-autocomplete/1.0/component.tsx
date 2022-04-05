@@ -23,19 +23,27 @@ import {xhrUtils} from '#preact/utils/xhr';
 import fuzzysearch from '#third_party/fuzzysearch';
 
 import {useStyles} from './component.jss';
-import {DEFAULT_ON_ERROR, DEFAULT_PARSE_JSON} from './constants';
-import {getEnabledResults, getItemElement, getTextValue} from './helpers';
+import {
+  getEnabledResults,
+  getItemElement,
+  getSelectedObjectValue,
+  getSelectedTextValue,
+} from './helpers';
 import {tokenPrefixMatch} from './token-prefix-match';
 import {
   BentoAutocompleteProps,
   InputElement,
   Item,
   ItemTemplateProps,
+  OnSelectData,
   isValidFilterType,
 } from './types';
 import {useAutocompleteBinding} from './use-autocomplete-binding';
 
 const INITIAL_ACTIVE_INDEX = -1;
+
+const getItems = (response: {items: Item[]}) =>
+  getValueForExpr(response, 'items');
 
 /**
  * @param {!BentoAutocomplete.Props} props
@@ -44,7 +52,8 @@ const INITIAL_ACTIVE_INDEX = -1;
 export function BentoAutocomplete({
   id,
   children,
-  onError = DEFAULT_ON_ERROR,
+  onError = () => {},
+  onSelect = () => {},
   filter = 'none',
   minChars = 1,
   items = [],
@@ -54,7 +63,7 @@ export function BentoAutocomplete({
   highlightUserEntry = false,
   inline,
   itemTemplate,
-  parseJson = DEFAULT_PARSE_JSON,
+  parseJson = getItems,
   suggestFirst = false,
   src,
 }: BentoAutocompleteProps) {
@@ -122,6 +131,19 @@ export function BentoAutocomplete({
   const resetUserInput = useCallback(() => {
     setInputValue(substring);
   }, [substring, setInputValue]);
+
+  const selectItem = useCallback(
+    (value: string, valueAsObject?: object | null) => {
+      setInputValue(value);
+      const selectData: OnSelectData = {
+        value,
+        ...(valueAsObject ? {valueAsObject} : {}),
+      };
+      onSelect(selectData);
+      hideResults();
+    },
+    [onSelect, setInputValue, hideResults]
+  );
 
   const getItemId = useCallback(
     (index: number) => {
@@ -258,7 +280,7 @@ export function BentoAutocomplete({
       setActiveIndex(index);
       inputRef.current?.setAttribute('aria-activedescendant', getItemId(index));
 
-      setInputValue(getTextValue(activeResult as HTMLElement));
+      setInputValue(getSelectedTextValue(activeResult as HTMLElement));
     },
     [activeIndex, getItemId, showAutocompleteResults, setInputValue]
   );
@@ -309,7 +331,7 @@ export function BentoAutocomplete({
           break;
         }
         case Keys_Enum.ENTER: {
-          hideResults();
+          selectItem(inputRef.current!.value);
           break;
         }
         case Keys_Enum.ESCAPE: {
@@ -318,7 +340,7 @@ export function BentoAutocomplete({
           break;
         }
         case Keys_Enum.TAB: {
-          hideResults();
+          selectItem(inputRef.current!.value);
           break;
         }
       }
@@ -329,21 +351,20 @@ export function BentoAutocomplete({
       resetUserInput,
       hideResults,
       resetActiveItem,
+      selectItem,
     ]
   );
 
-  const selectItem = useCallback(
+  const handleMousedown = useCallback(
     (event: MouseEvent) => {
       const element = getItemElement(event.target as HTMLElement);
       if (!element?.hasAttribute('data-disabled')) {
-        setInputValue(getTextValue(element));
+        const value = getSelectedTextValue(element);
+        const objectValue = getSelectedObjectValue(element);
+        selectItem(value, objectValue);
       }
-      // It isn't documented whether the input should stay open or closed
-      // if the user clicks a disabled item. The demo closes the results after
-      // clicking on any item.
-      setAreResultsDisplayed(false);
     },
-    [setInputValue, setAreResultsDisplayed]
+    [selectItem]
   );
 
   const getItemChildren = useCallback(
@@ -428,7 +449,7 @@ export function BentoAutocomplete({
         id: getItemId(index),
         key: item,
         // unlike onClick, onMouseDown overrides the blur event handler
-        onMouseDown: selectItem,
+        onMouseDown: handleMousedown,
         part: 'option',
         role: 'option',
         ...component.props,
@@ -439,7 +460,7 @@ export function BentoAutocomplete({
       getItemId,
       activeIndex,
       classes,
-      selectItem,
+      handleMousedown,
       getItemChildren,
       onError,
     ]

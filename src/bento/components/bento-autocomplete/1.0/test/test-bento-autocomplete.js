@@ -12,13 +12,11 @@ describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
   let win;
   let html;
   let warnSpy;
-  let errorSpy;
 
   beforeEach(() => {
     win = env.win;
     html = htmlFor(win.document);
     warnSpy = env.sandbox.stub(user(), 'warn');
-    errorSpy = env.sandbox.stub(user(), 'error');
     defineBentoElement('bento-autocomplete', BentoAutocomplete, win);
   });
 

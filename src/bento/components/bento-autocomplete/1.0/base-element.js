@@ -7,7 +7,8 @@ import {user} from '#utils/log';
 
 import {BentoAutocomplete} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
-import {TAG} from './constants';
+
+const TAG = 'bento-autocomplete';
 
 export class BaseElement extends PreactBaseElement {
   /**

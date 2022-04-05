@@ -29,8 +29,10 @@ function Autocomplete(initialProps) {
 
 describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
   let onError;
+  let onSelect;
   beforeEach(() => {
     onError = env.sandbox.spy();
+    onSelect = env.sandbox.spy();
   });
 
   it('requires a single input or textarea descendant', () => {
@@ -495,7 +497,12 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
     it('hides the options on enter and sets the input to the selected item', () => {
       const wrapper = mount(
-        <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
+        <Autocomplete
+          id="id"
+          filter="prefix"
+          items={['one', 'two', 'three']}
+          onSelect={onSelect}
+        >
           <input type="text"></input>
         </Autocomplete>
       );
@@ -507,13 +514,19 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
       input.simulate('keydown', {key: Keys_Enum.ENTER});
 
+      expect(onSelect).to.have.been.calledWith({value: 'two'});
       expect(input.getDOMNode().value).to.equal('two');
       expect(areOptionsVisible(wrapper)).to.be.false;
     });
 
     it('hides the options on tab and sets the input to the selected item', () => {
       const wrapper = mount(
-        <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
+        <Autocomplete
+          id="id"
+          filter="prefix"
+          items={['one', 'two', 'three']}
+          onSelect={onSelect}
+        >
           <input type="text"></input>
         </Autocomplete>
       );
@@ -525,6 +538,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
       input.simulate('keydown', {key: Keys_Enum.TAB});
 
+      expect(onSelect).to.have.been.calledWith({value: 'two'});
       expect(input.getDOMNode().value).to.equal('two');
       expect(areOptionsVisible(wrapper)).to.be.false;
     });
@@ -555,9 +569,14 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(input.getDOMNode().value).to.equal('two');
     });
 
-    it('selects an option on mouse down', () => {
+    it('selects an option on mousedown', () => {
       const wrapper = mount(
-        <Autocomplete id="id" filter="prefix" items={['one', 'two', 'three']}>
+        <Autocomplete
+          id="id"
+          filter="prefix"
+          items={['one', 'two', 'three']}
+          onSelect={onSelect}
+        >
           <input type="text"></input>
         </Autocomplete>
       );
@@ -569,6 +588,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       const option = wrapper.find('[data-value="two"]');
       option.simulate('mousedown');
 
+      expect(onSelect).to.have.been.calledWith({value: 'two'});
       expect(input.getDOMNode().value).to.equal('two');
       expect(areOptionsVisible(wrapper)).to.be.false;
     });
@@ -708,7 +728,11 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       },
     ];
     const itemTemplate = ({city, state}) => (
-      <div class="city-item" data-value={`${city}, ${state}`}>
+      <div
+        class="city-item"
+        data-value={`${city}, ${state}`}
+        data-json={JSON.stringify({city, state})}
+      >
         <span>
           {city}, {state}
         </span>
@@ -862,7 +886,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       );
     });
 
-    it('sets the input value using the data-value attribute on mouse down', () => {
+    it('selects an item using the data-value attribute on mousedown', () => {
       const wrapper = mount(
         <Autocomplete
           id="id"
@@ -871,6 +895,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
           filter="token-prefix"
           itemTemplate={itemTemplate}
           minChars={0}
+          onSelect={onSelect}
         >
           <input type="text"></input>
         </Autocomplete>
@@ -883,6 +908,10 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       wrapper.find('[data-value="Seattle, WA"]').simulate('mousedown');
 
+      expect(onSelect).to.have.been.calledWith({
+        value: 'Seattle, WA',
+        valueAsObject: {city: 'Seattle', state: 'WA'},
+      });
       expect(input.getDOMNode().value).to.equal('Seattle, WA');
     });
 
@@ -998,8 +1027,6 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         wrapper.find('[data-disabled=true]').simulate('mousedown');
 
         expect(input.getDOMNode().value).to.equal('');
-
-        expect(areOptionsVisible(wrapper)).to.be.false;
       });
     });
   });

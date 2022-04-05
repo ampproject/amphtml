@@ -17,9 +17,12 @@ export function isValidFilterType(filterType: any): filterType is FilterType {
 
 export type Item = string | object;
 
+export type OnSelectData = {value: string; valueAsObject?: object};
+
 export interface BentoAutocompleteProps {
   id?: string;
   onError?: (message: string) => void;
+  onSelect?: (data: OnSelectData) => void;
   children?: ComponentChildren;
   filter?: FilterType;
   minChars?: number;

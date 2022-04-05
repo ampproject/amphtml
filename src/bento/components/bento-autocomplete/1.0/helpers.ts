@@ -1,3 +1,5 @@
+import {tryParseJson} from '#core/types/object/json';
+
 export function getItemElement(
   element: HTMLElement | null
 ): HTMLElement | null {
@@ -10,8 +12,19 @@ export function getItemElement(
   return getItemElement(element.parentElement);
 }
 
-export function getTextValue(element: HTMLElement | null): string {
+export function getSelectedTextValue(element: HTMLElement | null): string {
   return element?.getAttribute('data-value') || element?.textContent || '';
+}
+
+export function getSelectedObjectValue(
+  element: HTMLElement | null
+): object | null {
+  if (!element?.hasAttribute('data-json')) {
+    return null;
+  }
+  return tryParseJson(element.getAttribute('data-json')!, (error) => {
+    throw error;
+  });
 }
 
 export function getEnabledResults(
