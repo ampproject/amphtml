@@ -143,7 +143,7 @@ export function scopeRules(cssRules, scopeSelector, opt_transformer) {
   if (cssRules) {
     Array.prototype.forEach.call(cssRules, function(rule) {
       if (rule.selectorText && (rule.style && rule.style.cssText !== undefined)) {
-        cssText += scopeSelector(rule.selectorText, scopeSelector,
+        cssText += doScopeSelector(rule.selectorText, scopeSelector,
           strictStyling, opt_transformer) + ' {\n\t';
         cssText += propertiesFromRule(rule) + '\n}\n\n';
       } else if (rule.type === CSSRule.MEDIA_RULE) {
@@ -189,8 +189,10 @@ export function ieSafeCssTextFromKeyFrameRule(rule) {
 // [@ampproject difference with original]
 // We removed a `strict` argument before `opt_transformer`, to be replaced
 // with the constant value for `strictStyling`.
+// We also rename it to `doScopeSelector` since the original name conflicts with
+// argument `scopeSelector` after removing `this.`.
 /** @this {ShadowCSS} */
-export function scopeSelector(selector, scopeSelector, opt_transformer) {
+export function doScopeSelector(selector, scopeSelector, opt_transformer) {
   var r = [], parts = selector.split(',');
   parts.forEach(function(p) {
     p = p.trim();
