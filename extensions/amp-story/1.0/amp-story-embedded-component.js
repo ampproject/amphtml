@@ -394,10 +394,9 @@ export class AmpStoryEmbeddedComponent {
     this.mutator_.mutateElement(
       dev().assertElement(this.focusedStateOverlay_),
       () => {
-        const isDesktop = [
-          UIType.DESKTOP_FULLBLEED,
-          UIType.DESKTOP_ONE_PANEL,
-        ].includes(uiState);
+        const isDesktop =
+          uiState === UIType.DESKTOP_FULLBLEED ||
+          uiState === UIType.DESKTOP_ONE_PANEL;
         toggleAttribute(this.focusedStateOverlay_, 'desktop', isDesktop);
       }
     );
