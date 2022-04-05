@@ -14,7 +14,7 @@ module.exports = function () {
   function isPureFnCallExpression(path) {
     return (
       path.node.arguments.length === 1 &&
-      path.get('callee').isIdentifier({name: pureFnName})
+      path.get('callee').referencesImport(pureFnImportSource, pureFnName)
     );
   }
 
@@ -28,38 +28,10 @@ module.exports = function () {
     path.replaceWith(path.node.arguments[0]);
   }
 
-  /**
-   * @param {null | undefined | import('@babel/core').NodePath} path
-   * @return {path is import('@babel/types').ImportSpecifier}
-   */
-  function isPureFnImportSpecifier(path) {
-    if (!path?.isImportSpecifier()) {
-      return false;
-    }
-    const {parentPath} = path;
-    return (
-      parentPath.isImportDeclaration() &&
-      parentPath.get('source').isStringLiteral({value: pureFnImportSource})
-    );
-  }
-
-  let enabled = false;
   return {
     name: 'deep-pure',
     visitor: {
-      Program: {
-        enter(path) {
-          const pureFnBinding = path.scope.getBinding(pureFnName);
-          enabled = isPureFnImportSpecifier(pureFnBinding?.path);
-          if (enabled) {
-            pureFnBinding?.path.getStatementParent()?.remove();
-          }
-        },
-      },
       CallExpression(path) {
-        if (!enabled) {
-          return;
-        }
         if (isPureFnCallExpression(path)) {
           path.traverse({
             NewExpression(path) {
