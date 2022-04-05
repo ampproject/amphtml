@@ -523,7 +523,7 @@ export class AmpForm {
     const validityElements = this.form_.querySelectorAll(
       '.user-valid, .user-invalid'
     );
-    iterateCursor(validityElements, (element) => {
+    validityElements.forEach((element) => {
       element.classList.remove('user-valid');
       element.classList.remove('user-invalid');
     });
@@ -531,7 +531,7 @@ export class AmpForm {
     const messageElements = this.form_.querySelectorAll(
       '.visible[validation-for]'
     );
-    iterateCursor(messageElements, (element) => {
+    messageElements.forEach((element) => {
       element.classList.remove('visible');
     });
 
@@ -1401,7 +1401,7 @@ export class AmpForm {
         maybeFillField(field, key);
       } else if (formControls.length) {
         const fields = /** @type {!NodeList} */ (formControls);
-        iterateCursor(fields, (field) => maybeFillField(field, key));
+        fields.forEach((field) => maybeFillField(field, key));
       }
     });
   }
@@ -1434,7 +1434,7 @@ export class AmpForm {
  */
 function checkUserValidityOnSubmission(form) {
   const elements = form.querySelectorAll('input,select,textarea,fieldset');
-  iterateCursor(elements, (element) => checkUserValidity(element));
+  elements.forEach((element) => checkUserValidity(element));
   return checkUserValidity(form);
 }
 
@@ -1477,7 +1477,7 @@ function removeValidityStateClasses(form) {
     const elements = form.querySelectorAll(
       `.${escapeCssSelectorIdent(validityState)}`
     );
-    iterateCursor(elements, (element) => {
+    elements.forEach((element) => {
       dev().assertElement(element).classList.remove(validityState);
     });
   }
@@ -1620,8 +1620,7 @@ export class AmpFormService {
 
   /**
    * Install submission handler on all forms in the document.
-   * @param {?IArrayLike<T>} forms
-   * @template T
+   * @param {NodeList} forms
    * @private
    */
   installSubmissionHandlers_(forms) {
@@ -1629,7 +1628,7 @@ export class AmpFormService {
       return;
     }
 
-    iterateCursor(forms, (form, index) => {
+    forms.forEach((form, index) => {
       const existingAmpForm = formOrNullForElement(form);
       if (!existingAmpForm) {
         new AmpForm(form, `amp-form-${index}`);

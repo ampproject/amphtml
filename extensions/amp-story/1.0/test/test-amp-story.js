@@ -85,6 +85,14 @@ describes.realWin(
       return pageArray;
     }
 
+    function createStoryAdPage(id) {
+      const page = win.document.createElement('amp-story-page');
+      page.id = id;
+      page.setAttribute('ad', '');
+      element.appendChild(page);
+      return page.getImpl();
+    }
+
     /**
      * @param {string} eventType
      * @return {!Event}
@@ -141,13 +149,6 @@ describes.realWin(
 
     afterEach(() => {
       element.remove();
-    });
-
-    it('should build with the expected number of pages', async () => {
-      const pagesCount = 2;
-      await createStoryWithPages(pagesCount, ['cover', 'page-1']);
-      await story.layoutCallback();
-      expect(story.getPageCount()).to.equal(pagesCount);
     });
 
     it('should activate the first page when built', async () => {
@@ -1059,6 +1060,35 @@ describes.realWin(
           iframe.contentDocument.body.appendChild(elToFind);
           const distance = story.getElementDistance(elToFind);
           expect(distance).to.equal(4);
+        });
+      });
+
+      describe('amp-story ads', () => {
+        it('should return a valid page index', async () => {
+          const adId = 'i-amphtml-ad-page-1';
+          const pageElements = await createStoryWithPages(4, [
+            'cover',
+            'page-1',
+            'page-2',
+            'page-3',
+          ]);
+          await story.layoutCallback();
+          // Getting all the AmpStoryPage objets.
+          let pages = Array.from(pageElements).map((el) => el.getImpl());
+
+          pages = await Promise.all(pages);
+
+          // Insert ads
+          const adPage = await createStoryAdPage(adId);
+          story.addPage(adPage);
+          story.insertPage('page-2', adId);
+
+          pages.splice(3, 0, adPage);
+
+          // Only the first page should be active.
+          for (let i = 0; i < pages.length; i++) {
+            expect(story.getPageIndex(pages[i])).to.equal(i);
+          }
         });
       });
 
@@ -2087,7 +2117,7 @@ describes.realWin(
           toggleExperiment(env.win, 'story-remote-localization', false);
         });
 
-        it('should fetch the localization strings for the default laguage from the cdn', async () => {
+        it('should fetch the localization strings for the default language from the cdn', async () => {
           const fetchStub = env.sandbox
             .stub(Services.xhrFor(env.win), 'fetchJson')
             .resolves({
@@ -2097,12 +2127,12 @@ describes.realWin(
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.be.calledOnceWithExactly(
-            'https://cdn.ampproject.org/v0/amp-story.en.json',
+            'https://cdn.ampproject.org/rtv/123/v0/amp-story.en.json',
             env.sandbox.match.any
           );
         });
 
-        it('should fetch the localization strings for the document laguage from the cdn', async () => {
+        it('should fetch the localization strings for the document language from the cdn', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
 
           const fetchStub = env.sandbox
@@ -2114,12 +2144,12 @@ describes.realWin(
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.have.been.calledOnceWithExactly(
-            'https://cdn.ampproject.org/v0/amp-story.es-419.json',
+            'https://cdn.ampproject.org/rtv/123/v0/amp-story.es-419.json',
             env.sandbox.match.any
           );
         });
 
-        it('should fetch the localization strings for the document laguage from the local dist if testing locally', async () => {
+        it('should fetch the localization strings for the document language from the local dist if testing locally', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
           env.win.__AMP_MODE.localDev = true;
 

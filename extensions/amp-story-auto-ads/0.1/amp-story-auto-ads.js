@@ -387,7 +387,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Respond to page navigation event. This method is not called for the first
    * page that is shown on load.
-   * @param {number} pageIndex Does not update when ad is showing.
+   * @param {number} pageIndex
    * @param {string} pageId
    * @private
    */
@@ -399,7 +399,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       return;
     }
 
-    this.placementAlgorithm_.onPageChange(pageId);
+    // Not a story ads page.
+    if (!this.adPageManager_.hasId(pageId)) {
+      this.placementAlgorithm_.onPageChange(pageId);
+    }
 
     if (this.visibleAdPage_) {
       this.transitionFromAdShowing_();
@@ -427,15 +430,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /**
    * We are switching to an ad.
-   * @param {number} pageIndex
+   * @param {number} adPageIndex
    * @param {string} adPageId
    */
-  transitionToAdShowing_(pageIndex, adPageId) {
+  transitionToAdShowing_(adPageIndex, adPageId) {
     const adPage = this.adPageManager_.getAdPageById(adPageId);
     const adIndex = this.adPageManager_.getIndexById(adPageId);
 
     if (!adPage.hasBeenViewed()) {
-      this.placementAlgorithm_.onNewAdView(pageIndex);
+      this.placementAlgorithm_.onNewAdView(adPageIndex);
     }
 
     // Tell the iframe that it is visible.

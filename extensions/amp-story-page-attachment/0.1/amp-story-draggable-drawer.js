@@ -137,6 +137,10 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.containerEl = dev().assertElement(
       templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
     );
+    // Hide `containerEl` to ensure that its content is not rendered/loaded by
+    // the AMP Resources manager before we can set the draggable drawer as the
+    // resource manager.
+    toggle(dev().assertElement(this.containerEl), false);
 
     this.contentEl = dev().assertElement(
       this.containerEl.querySelector(
@@ -184,7 +188,7 @@ export class DraggableDrawer extends AMP.BaseElement {
     }
 
     // `containerEl` is hidden by default, to ensure that its content is not
-    // rendered/loaded by the AMP Resources manager before we can set a 
+    // rendered/loaded by the AMP Resources manager before we can set a
     // different owner. Now that the owner has been set, we can unhide it.
     toggle(dev().assertElement(this.containerEl), true);
   }
