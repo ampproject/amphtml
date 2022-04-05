@@ -9,7 +9,7 @@ import {LocalizationService} from '#service/localization';
 import {
   Action,
   AmpStoryStoreService,
-  UIType,
+  UIType_Enum,
 } from 'extensions/amp-story/1.0/amp-story-store-service';
 import {registerServiceBuilder} from 'src/service-helpers';
 
@@ -135,7 +135,7 @@ describes.realWin('amp-story-page-attachment', {amp: true}, (env) => {
   });
 
   it('should click on anchor when outlink open method is called', async () => {
-    storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_ONE_PANEL);
+    storeService.dispatch(Action.TOGGLE_UI, UIType_Enum.DESKTOP_ONE_PANEL);
     const anchorEl = outlinkEl.querySelector('amp-story-page-outlink a');
 
     const clickSpy = env.sandbox.spy(anchorEl, 'click');

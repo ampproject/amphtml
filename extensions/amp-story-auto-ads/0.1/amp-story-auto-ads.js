@@ -23,7 +23,7 @@ import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,
-  UIType,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -324,7 +324,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Reacts to UI state updates and passes the information along as
    * attributes to the shadowed ad badge.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -333,10 +333,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.adBadgeContainer_.removeAttribute(DESKTOP_FULLBLEED);
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
 
-      if (uiState === UIType.DESKTOP_FULLBLEED) {
+      if (uiState === UIType_Enum.DESKTOP_FULLBLEED) {
         this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
       }
-      if (uiState === UIType.DESKTOP_ONE_PANEL) {
+      if (uiState === UIType_Enum.DESKTOP_ONE_PANEL) {
         this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
       }
     });

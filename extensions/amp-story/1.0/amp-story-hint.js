@@ -7,7 +7,7 @@ import {localizeTemplate} from './amp-story-localization-service';
 import {
   EmbeddedComponentState,
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {createShadowRootWithStyle} from './utils';
@@ -148,7 +148,7 @@ export class AmpStoryHint {
    * @private
    */
   showHint_(hintClass) {
-    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType.MOBILE) {
+    if (this.storeService_.get(StateProperty.UI_STATE) !== UIType_Enum.MOBILE) {
       return;
     }
 
