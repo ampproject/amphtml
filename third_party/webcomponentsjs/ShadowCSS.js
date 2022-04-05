@@ -121,18 +121,8 @@
   in comments in lieu of the next selector when running under polyfill.
 */
 
-// [@ampproject difference with original]
-// All exported functions were originally part of an object named `ShadowCSS`.
-// Exporting them as plain functions allow them to be dead-code-eliminated, and
-// for their names to be mangled.
-// This also involves changing references to each function from `this.x()` to
-// just `x()`.
 
 const strictStyling = false;
-
-// [@ampproject difference with original]
-// We added the following feature switches. This allows certain codepaths to be
-// dead-code-eliminated.
 const allowArraySelectors = false;
 const isIeSupported = false;
 
@@ -161,9 +151,6 @@ export function scopeRules(cssRules, scopeSelector, opt_transformer) {
             cssText += rule.cssText + '\n\n';
           }
         } catch(x) {
-          // [@ampproject difference with original]
-          // We introduce a switch for IE support. When this is `false`, the
-          // function used here is dead-code-eliminated.
           if (
             isIeSupported &&
             rule.type === CSSRule.KEYFRAMES_RULE &&
@@ -186,11 +173,6 @@ export function ieSafeCssTextFromKeyFrameRule(rule) {
   cssText += ' }';
   return cssText;
 }
-// [@ampproject difference with original]
-// We removed a `strict` argument before `opt_transformer`, to be replaced
-// with the constant value for `strictStyling`.
-// We also rename it to `doScopeSelector` since the original name conflicts with
-// argument `scopeSelector` after removing `this.`.
 /** @this {ShadowCSS} */
 export function doScopeSelector(selector, scopeSelector, opt_transformer) {
   var r = [], parts = selector.split(',');
@@ -208,10 +190,6 @@ export function doScopeSelector(selector, scopeSelector, opt_transformer) {
   });
   return r.join(', ');
 }
-// [@ampproject difference with original]
-// We introduce a switch for the `Array.isArray` codepath to conditionally
-// enable array selectors. When this value is `false`, the requires utilities
-// are dead-code-eliminated
 /** @this {ShadowCSS} */
 export function selectorNeedsScoping(selector, scopeSelector) {
   if (allowArraySelectors && Array.isArray(scopeSelector)) {
@@ -225,10 +203,6 @@ export function makeScopeMatcher(scopeSelector) {
   scopeSelector = scopeSelector.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
   return new RegExp('^(' + scopeSelector + ')' + selectorReSuffix, 'm');
 }
-// [@ampproject difference with original]
-// We introduce a switch for the `Array.isArray` codepath to conditionally
-// enable array selectors. When this value is `false`, the requires utilities
-// are dead-code-eliminated
 /** @this {ShadowCSS} */
 export function applySelectorScope(selector, selectorScope) {
   return allowArraySelectors && Array.isArray(selectorScope) ?
