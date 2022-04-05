@@ -1,3 +1,5 @@
+import {pure} from '#core/types/pure';
+
 /**
  * Allows for runtime configuration. Internally, the runtime should import this
  * module for various constants. We can use the AMP_CONFIG global to translate
@@ -7,17 +9,13 @@
  */
 const env = (key) => (self.AMP_CONFIG ? self.AMP_CONFIG[key] : null);
 
-/**
- * @param {T} value
- * @return {T}
- * @template {T}
- */
-const pure = (value) => value;
+// Important: Make sure to wrap every exported symbol with `pure()`. This allows
+// this module to be dead-code-eliminated.
 
 /* Note that cdnProxyRegex is only ever checked against origins
  * (proto://host[:port]) so does not need to consider path
  */
-const cdnProxyRegex = pure(
+export const cdnProxyRegex = pure(
   (typeof env('cdnProxyRegex') == 'string'
     ? new RegExp(env('cdnProxyRegex'))
     : env('cdnProxyRegex')) ||
@@ -51,35 +49,37 @@ function getMetaUrl(name) {
   return (metaEl && metaEl.getAttribute('content')) || null;
 }
 
-const thirdParty = pure(env('thirdPartyUrl') || 'https://3p.ampproject.net');
+export const thirdParty = pure(
+  env('thirdPartyUrl') || 'https://3p.ampproject.net'
+);
 
-const thirdPartyFrameHost = pure(
+export const thirdPartyFrameHost = pure(
   env('thirdPartyFrameHost') || 'ampproject.net'
 );
 
-const thirdPartyFrameRegex = pure(
+export const thirdPartyFrameRegex = pure(
   (typeof env('thirdPartyFrameRegex') == 'string'
     ? new RegExp(env('thirdPartyFrameRegex'))
     : env('thirdPartyFrameRegex')) || /^d-\d+\.ampproject\.net$/
 );
 
-const cdn = pure(
+export const cdn = pure(
   env('cdnUrl') || getMetaUrl('runtime-host') || 'https://cdn.ampproject.org'
 );
 
-const localhostRegex = pure(/^https?:\/\/localhost(:\d+)?$/);
+export const localhostRegex = pure(/^https?:\/\/localhost(:\d+)?$/);
 
-const errorReporting = pure(
+export const errorReporting = pure(
   env('errorReportingUrl') ||
     'https://us-central1-amp-error-reporting.cloudfunctions.net/r'
 );
 
-const betaErrorReporting = pure(
+export const betaErrorReporting = pure(
   env('betaErrorReportingUrl') ||
     'https://us-central1-amp-error-reporting.cloudfunctions.net/r-beta'
 );
 
-const localDev = pure(env('localDev') || false);
+export const localDev = pure(env('localDev') || false);
 
 /**
  * These domains are trusted with more sensitive viewer operations such as
@@ -90,24 +90,10 @@ const localDev = pure(env('localDev') || false);
  *
  * @type {!Array<!RegExp>}
  */
-const trustedViewerHosts = pure([
+export const trustedViewerHosts = pure([
   /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
   /(^|\.)gmail\.(com|dev)$/,
 ]);
 
 // Optional fallback API if amp-geo is left unpatched
-const geoApi = pure(env('geoApiUrl') || getMetaUrl('amp-geo-api'));
-
-export {
-  thirdParty,
-  thirdPartyFrameHost,
-  thirdPartyFrameRegex,
-  cdn,
-  cdnProxyRegex,
-  localhostRegex,
-  errorReporting,
-  betaErrorReporting,
-  localDev,
-  trustedViewerHosts,
-  geoApi,
-};
+export const geoApi = pure(env('geoApiUrl') || getMetaUrl('amp-geo-api'));
