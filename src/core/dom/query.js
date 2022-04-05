@@ -2,6 +2,7 @@ import {devAssert, devAssertElement} from '#core/assert';
 import * as mode from '#core/mode';
 import {isElement, isString} from '#core/types';
 
+import {copyChildren} from '.';
 import {isScopeSelectorSupported, prependSelectorsWith} from './css-selectors';
 
 /** @fileoverview Helper functions for DOM queries. */
@@ -413,4 +414,27 @@ export function querySelectorInSlot(slot, selector) {
     }
   }
   return null;
+}
+
+/**
+ * Finds a matching node inside an HTML template slot's children
+ * @param {HTMLSlotElement} slot
+ * @param {string} selector
+ * @return {HTMLElement[]}
+ */
+export function querySelectorAllInSlot(slot, selector) {
+  const nodes = /** @type {HTMLElement[] } */ (slot.assignedElements());
+
+  const list = [];
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (matches(node, selector)) {
+      list.push(node);
+    }
+    const child = scopedQuerySelector(node, selector);
+    if (child) {
+      list.push(child);
+    }
+  }
+  return list;
 }

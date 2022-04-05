@@ -1,6 +1,7 @@
 import objStr from 'obj-str';
 
 import {Keys_Enum} from '#core/constants/key-codes';
+import {querySelectorAllInSlot, scopedQuerySelectorAll} from '#core/dom/query';
 import {mod} from '#core/math';
 import {getValueForExpr} from '#core/types/object';
 import {includes} from '#core/types/string';
@@ -131,7 +132,18 @@ export function BentoAutocomplete({
 
   const getSingleInputOrTextarea = useCallback(
     (element: HTMLElement) => {
-      const possibleElements = element.querySelectorAll('input,textarea');
+      const inputSelector = 'input,textarea';
+      // TODO: Figure out how to type this
+      let possibleElements: any = scopedQuerySelectorAll(
+        element,
+        inputSelector
+      );
+      if (possibleElements.length === 0) {
+        const slot = element.querySelector('slot');
+        if (slot) {
+          possibleElements = querySelectorAllInSlot(slot, inputSelector);
+        }
+      }
       if (possibleElements.length !== 1) {
         onError(
           `${TAG} should contain exactly one <input> or <textarea> descendant.`
