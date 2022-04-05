@@ -8,8 +8,6 @@ import {defineBentoElement} from '#preact/bento-ce';
 
 import {user} from '#utils/log';
 
-import {waitFor, whenCalled} from '#testing/helpers/service';
-
 describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
   let win;
   let html;
