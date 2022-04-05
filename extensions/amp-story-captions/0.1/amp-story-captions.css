@@ -1,12 +1,18 @@
 amp-story-captions {
   white-space: pre-wrap;
+  z-index: 1;
+  font-size: calc(2.5 * var(--story-page-vh, 8px)) !important;
+}
+
+amp-video amp-story-captions {
+  position: absolute !important;
+  bottom: 5.875em !important;
+  width: 100% !important;
 }
 
 .amp-story-captions-cue-wrapper {
   display: flex;
   justify-content: center;
-  position: absolute;
-  bottom: 94px;
   flex-direction: column;
   align-items: center;
   width: 100%;
@@ -15,13 +21,12 @@ amp-story-captions {
 .amp-story-captions-cue {
   font-family: 'Roboto', sans-serif !important;
   text-align: center;
-  font-size: 16px;
+  font-size: 1em;
   color: #fff;
-  border-radius: 15px; 
-  padding: 4px 14px;
-  backdrop-filter: blur(20px);
-  background: rgba(0,0,0,.45);
-  max-width: calc(100% - 28px);
+  border-radius: .94em;
+  padding: 0.35em 0.94em;
+  background-color: hsla(0, 0%, 10%, 0.6)!important;
+  max-width: calc(var(--story-page-vw) * 92);
 }
 
 .amp-story-captions-cue-future {
