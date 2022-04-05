@@ -1,10 +1,14 @@
 const {addNamed} = require('@babel/helper-module-imports');
+const {dirname, relative} = require('path');
+
+const importSource = `${process.cwd()}/src/config/urls`;
 
 /**
  * @param {import('@babel/core')} babel
  * @return {import('@babel/core').PluginObj}
  */
 module.exports = function (babel) {
+  let importSourceRelative;
   const {template, types: t} = babel;
   const buildNamespace = template(
     `const NAMESPACE = /* #__PURE__ */ GETTER()`,
@@ -17,25 +21,21 @@ module.exports = function (babel) {
   return {
     name: 'amp-config-urls',
     visitor: {
+      Program: {
+        enter(_, state) {
+          const {filename} = state;
+          if (!filename) {
+            throw new Error(
+              'babel-plugin-amp-config-urls must be called with a filename'
+            );
+          }
+          importSourceRelative = relative(dirname(filename), importSource);
+        },
+      },
       ImportDeclaration(path) {
         if (
-          !t.isStringLiteral(path.node.source) ||
-          // TODO: real path
-          !path.node.source.value.endsWith('/config/urls')
+          !t.isStringLiteral(path.node.source, {value: importSourceRelative})
         ) {
-          return;
-        }
-        let named = [];
-        let namespace;
-        for (const specifier of path.node.specifiers) {
-          if (t.isImportNamespaceSpecifier(specifier)) {
-            namespace = specifier.local.name;
-          } else if (t.isImportSpecifier(specifier)) {
-            named = named || [];
-            named.push(specifier);
-          }
-        }
-        if (!namespace && !named.length) {
           return;
         }
         const getter = addNamed(
@@ -43,22 +43,29 @@ module.exports = function (babel) {
           'ampConfigUrlsDoNotImportMeUseConfigUrlsInstead',
           '#core/amp-config-urls'
         );
-        if (namespace) {
-          path.insertAfter(
-            buildNamespace({
-              NAMESPACE: namespace,
-              GETTER: getter,
-            })
-          );
-        }
-        for (const {imported, local} of named) {
-          path.insertAfter(
-            buildNamed({
-              LOCAL: local.name,
-              IMPORTED: imported.name,
-              GETTER: getter,
-            })
-          );
+        for (const specifier of path.get('specifiers')) {
+          if (specifier.isImportNamespaceSpecifier()) {
+            const namespace = specifier.node.local.name;
+            path.insertAfter(
+              buildNamespace({
+                NAMESPACE: namespace,
+                GETTER: getter,
+              })
+            );
+          } else if (specifier.isImportSpecifier()) {
+            const {imported, local} = specifier.node;
+            path.insertAfter(
+              buildNamed({
+                LOCAL: local.name,
+                IMPORTED: t.isIdentifier(imported)
+                  ? imported.name
+                  : imported.value,
+                GETTER: getter,
+              })
+            );
+          } else {
+            throw specifier.buildCodeFrameError('Unresolvable specifier');
+          }
         }
         path.remove();
       },
