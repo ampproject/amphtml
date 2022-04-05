@@ -16,30 +16,6 @@ import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
 const TAG = 'amp-story-subscriptions';
 
-/** @const {!Array<!Object>} fontFaces */
-const fontsToLoad = [
-  {
-    family: 'Poppins',
-    weight: '400',
-    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
-  },
-  {
-    family: 'Poppins',
-    weight: '500',
-    src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLGT9Z1xlFd2JQEk.woff2) format('woff2')",
-  },
-  {
-    family: 'Poppins',
-    weight: '600',
-    src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
-  },
-  {
-    family: 'Poppins',
-    weight: '700',
-    src: "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
-  },
-];
-
 export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -60,8 +36,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.loadFonts_();
-
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
       Services.subscriptionsServiceForDoc(this.element),
@@ -227,17 +201,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         </div>
       </div>
     );
-  }
-
-  /** @private */
-  loadFonts_() {
-    if (this.win.document.fonts && FontFace) {
-      fontsToLoad.forEach(({family, src, style = 'normal', weight}) =>
-        new FontFace(family, src, {weight, style})
-          .load()
-          .then((font) => this.win.document.fonts.add(font))
-      );
-    }
   }
 }
 

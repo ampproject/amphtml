@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@500');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700');
+
 amp-story-subscriptions {
   position: absolute !important;
   display: flex !important;
@@ -40,6 +43,7 @@ amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
 amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   border-radius: 16px 16px 0px 0px !important;
   font-family: Poppins, sans-serif !important;
+  font-weight: 400 !important;
   background: white !important;
   color: black !important;
 }
@@ -67,15 +71,16 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
 .i-amphtml-story-subscriptions-price, .i-amphtml-story-subscriptions-title,
 .i-amphtml-story-subscriptions-subtitle-first, .i-amphtml-story-subscriptions-subtitle-second {
   overflow: hidden !important;
-  white-space: nowrap;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
+  white-space: nowrap !important;
+  text-align: center !important;
+  display: flex !important;
+  justify-content: center !important;
+  flex-direction: column !important;
 }
 
 .i-amphtml-story-subscriptions-price {
   width: 100% !important;
+  font-weight: 500 !important;
   font-size: 24px !important;
   margin-top: 28px !important;
   letter-spacing: -0.4px !important;
@@ -84,7 +89,7 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
 
 .i-amphtml-story-subscriptions-title {
   width: 100% !important;
-  font-weight: bold !important;
+  font-weight: 700, bold !important;
   font-size: 20px !important;
   letter-spacing: -0.25px !important;
   height: 41px !important;
@@ -127,20 +132,22 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
 }
 
 .i-amphtml-story-subscriptions-publisher-logo {
-  margin-right: 11px !important;
+  margin-right: 10px !important;
   width: 32px !important;
   height: 32px !important;
   border-radius: 50% !important;
-  margin-left: -16px !important;
+  margin-left: -12px !important;
 }
 
 .i-amphtml-story-subscriptions-publisher-button-text {
-  display: flex;
-  align-items: center;
+  text-align: center !important;
   letter-spacing: 0.15px;
+  width: 149px;
+  white-space: nowrap !important;
 
   color: white !important;
   font-size: 13px !important;
+  font-weight: 500 !important;
 }
 
 .i-amphtml-story-subscriptions-google-button {
@@ -155,9 +162,10 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   height: 20px !important;
   margin-bottom: 24px !important;
   font-size: 12px !important;
+  font-weight: 600 !important;
 }
 
 .i-amphtml-story-subscriptions-signin a {
   text-decoration: underline !important;
-  font-weight: bold !important;
+  font-weight: 700, bold !important;
 }
