@@ -95,6 +95,9 @@ export class GlobalVariableSource extends VariableSource {
 
     /** @private {Object<string,(string|Array<string>)>|null} */
     this.cachedGeo_ = null;
+
+    /** @private {Object<string,string>}*/
+    this.cachedUach_ = {};
   }
 
   /**
@@ -459,16 +462,12 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     // Returns the user agent client hint.
-    this.setAsync(
+    this.setBoth(
       'UACH',
-      (variable) =>
-        win.navigator?.userAgentData
-          ?.getHighEntropyValues([variable])
-          ?.then((values) =>
-            typeof values[variable] !== 'object'
-              ? values[variable]
-              : JSON.stringify(values[variable])
-          ) || Promise.resolve('')
+      // Synchronous alternative, will only work if the requested values were
+      // previously requested using the async method.
+      (variable) => this.cachedUach_[variable] ?? '',
+      (variable) => this.getUach_(variable, win)
     );
 
     // Returns the time it took to load the whole page. (excludes amp-* elements
@@ -792,6 +791,31 @@ export class GlobalVariableSource extends VariableSource {
       this.cachedGeo_ = geo;
       return getter(geo);
     });
+  }
+
+  /**
+   * Returns cached uach signal if available, calculate it if not.
+   * @param {string} variable
+   * @param {!Window} win
+   * @return {!Promise<string>}
+   */
+  getUach_(variable, win) {
+    if (variable in this.cachedUach_) {
+      return Promise.resolve(this.cachedUach_[variable]);
+    } else {
+      return (
+        win.navigator?.userAgentData
+          ?.getHighEntropyValues([variable])
+          ?.then((values) => {
+            const value =
+              typeof values[variable] !== 'object'
+                ? values[variable]
+                : JSON.stringify(values[variable]);
+            this.cachedUach_[variable] = value;
+            return value;
+          }) || Promise.resolve('')
+      );
+    }
   }
 }
 

@@ -38,7 +38,7 @@ export const getStoreService = (win) => {
  * Different UI experiences to display the story.
  * @const @enum {number}
  */
-export const UIType = {
+export const UIType_Enum = {
   MOBILE: 0,
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
   DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
@@ -88,7 +88,7 @@ export let InteractiveReactData;
  * @typedef {{
  *   productId: string,
  *   productTitle: string,
- *   productVendor: string,
+ *   productBrand: string,
  *   productPrice: number,
  *   productPriceCurrency: string,
  *   productIcon: string,
@@ -137,7 +137,7 @@ export let ShoppingDataDef;
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
  *    systemUiIsVisibleState: boolean,
- *    uiState: !UIType,
+ *    uiState: !UIType_Enum,
  *    viewportWarningState: boolean,
  *    actionsAllowlist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
@@ -410,10 +410,10 @@ const actions = (state, action, data) => {
       });
     case Action.TOGGLE_UI:
       if (
-        state[StateProperty.UI_STATE] === UIType.VERTICAL &&
-        data !== UIType.VERTICAL
+        state[StateProperty.UI_STATE] === UIType_Enum.VERTICAL &&
+        data !== UIType_Enum.VERTICAL
       ) {
-        dev().error(TAG, 'Cannot switch away from UIType.VERTICAL');
+        dev().error(TAG, 'Cannot switch away from UIType_Enum.VERTICAL');
         return state;
       }
       return /** @type {!State} */ ({
@@ -596,7 +596,7 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
-      [StateProperty.UI_STATE]: UIType.MOBILE,
+      [StateProperty.UI_STATE]: UIType_Enum.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
       [StateProperty.ACTIONS_ALLOWLIST]: [],

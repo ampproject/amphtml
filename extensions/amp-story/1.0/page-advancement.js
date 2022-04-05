@@ -13,7 +13,7 @@ import {
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
@@ -709,7 +709,7 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Calculates the pageRect based on the UIType.
+   * Calculates the pageRect based on the UIType_Enum.
    * We can an use LayoutBox for mobile since the story page occupies entire screen.
    * Desktop UI needs the most recent value from the getBoundingClientRect function.
    * @return {DOMRect | LayoutBox}
@@ -717,7 +717,7 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   getStoryPageRect_() {
     const uiState = this.storeService_.get(StateProperty.UI_STATE);
-    if (uiState !== UIType.DESKTOP_ONE_PANEL) {
+    if (uiState !== UIType_Enum.DESKTOP_ONE_PANEL) {
       return this.element_.getLayoutBox();
     } else {
       return this.element_

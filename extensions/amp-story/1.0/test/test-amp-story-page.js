@@ -17,9 +17,10 @@ import {afterRenderPromise} from '#testing/helpers';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
+import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {MediaType} from '../media-pool';
+import {MediaType_Enum} from '../media-pool';
 
 const extensions = ['amp-story:1.0', 'amp-audio'];
 
@@ -43,8 +44,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
       getMaxMediaElementCounts: () => ({
-        [MediaType.VIDEO]: 8,
-        [MediaType.AUDIO]: 8,
+        [MediaType_Enum.VIDEO]: 8,
+        [MediaType_Enum.AUDIO]: 8,
       }),
     };
 
@@ -52,6 +53,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
+    localizationService.registerLocalizedStringBundles({
+      'en': LocalizedStringsEn,
+    });
 
     storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {

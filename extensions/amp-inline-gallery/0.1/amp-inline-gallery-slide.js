@@ -1,6 +1,5 @@
 import {Layout_Enum} from '#core/dom/layout';
 import {htmlFor} from '#core/dom/static-template';
-import {toArray} from '#core/types/array';
 
 import {isExperimentOn} from '#experiments';
 
@@ -85,23 +84,17 @@ export class AmpInlineGallerySlide extends AMP.BaseElement {
     const attributionSlot = dom.querySelector(
       '.i-amphtml-inline-gallery-slide-persistent-slot'
     );
-    const childNodesArray = toArray(this.element.childNodes);
 
-    childNodesArray
-      .filter((n) => {
-        return n.hasAttribute && n.getAttribute('slot') === 'caption';
-      })
-      .forEach((node) => captionSlot.appendChild(node));
-    childNodesArray
-      .filter((n) => {
-        return !n.hasAttribute || !n.hasAttribute('slot');
-      })
-      .forEach((node) => contentSlot.appendChild(node));
-    childNodesArray
-      .filter((n) => {
-        return n.hasAttribute && n.getAttribute('slot') === 'attribution';
-      })
-      .forEach((node) => attributionSlot.appendChild(node));
+    this.element.childNodes.forEach((node) => {
+      const slot = node.getAttribute?.('slot');
+      if (slot === 'caption') {
+        captionSlot.appendChild(node);
+      } else if (slot === 'attribution') {
+        attributionSlot.appendChild(node);
+      } else if (slot == null) {
+        contentSlot.appendChild(node);
+      }
+    });
 
     this.element.appendChild(dom);
   }

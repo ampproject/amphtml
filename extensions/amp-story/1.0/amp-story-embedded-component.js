@@ -12,7 +12,7 @@ import {
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {EventType, dispatch} from './events';
@@ -387,17 +387,16 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Reacts to desktop state updates and hides navigation buttons since we
    * already have in the desktop UI.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     this.mutator_.mutateElement(
       dev().assertElement(this.focusedStateOverlay_),
       () => {
-        const isDesktop = [
-          UIType.DESKTOP_FULLBLEED,
-          UIType.DESKTOP_ONE_PANEL,
-        ].includes(uiState);
+        const isDesktop =
+          uiState === UIType_Enum.DESKTOP_FULLBLEED ||
+          uiState === UIType_Enum.DESKTOP_ONE_PANEL;
         toggleAttribute(this.focusedStateOverlay_, 'desktop', isDesktop);
       }
     );

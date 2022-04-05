@@ -26,7 +26,7 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'lamp',
           'productTitle': 'Brass Lamp',
-          'productVendor': 'Lamp Co',
+          'productBrand': 'Lamp Co',
           'productPrice': 799.0,
           'productPriceCurrency': 'USD',
           'productImages': [
@@ -45,12 +45,14 @@ describes.realWin(
             'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
+          'productDetails':
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
         },
         {
           'productUrl': 'https://www.google.com',
           'productId': 'art',
           'productTitle': 'Abstract Art',
-          'productVendor': 'V. Artsy',
+          'productBrand': 'V. Artsy',
           'productPrice': 1200.0,
           'productPriceCurrency': 'JPY',
           'productImages': [
@@ -71,7 +73,7 @@ describes.realWin(
           'productUrl': 'https://www.google.com',
           'productId': 'chair',
           'productTitle': 'Yellow chair',
-          'productVendor': 'Chair Co.',
+          'productBrand': 'Chair Co.',
           'productPrice': 1000.0,
           'productPriceCurrency': 'BRL',
           'productTagText': 'The perfectly imperfect yellow chair',
@@ -86,12 +88,14 @@ describes.realWin(
             'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
+          'productDetails':
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
         },
         {
           'productUrl': 'https://www.google.com',
           'productId': 'flowers',
           'productTitle': 'Flowers',
-          'productVendor': 'Very Long Flower Company Name',
+          'productBrand': 'Very Long Flower Company Name',
           'productPrice': 10.0,
           'productPriceCurrency': 'USD',
           'productIcon':
@@ -107,6 +111,8 @@ describes.realWin(
             'reviewCount': 89,
             'reviewUrl': 'https://www.google.com',
           },
+          'productDetails':
+            'Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
         },
       ],
     };
@@ -167,7 +173,7 @@ describes.realWin(
             'productUrl': 'https://www.google.com',
             'productId': 'art',
             'productTitle': 'Abstract Art',
-            'productVendor': 'V. Artsy',
+            'productBrand': 'V. Artsy',
             'productPrice': 1200.0,
             'productPriceCurrency': 'JPY',
             'productImages': [
@@ -182,7 +188,7 @@ describes.realWin(
               'reviewUrl': 'https://www.google.com',
             },
             'productDetails':
-              'Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci.',
+              'Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. \n\n Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto exped. Laborum ea molestias veritatis sint laudantium iusto exped.',
           },
         };
       env.sandbox.stub(Services, 'xhrFor').returns({
