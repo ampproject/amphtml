@@ -43,20 +43,23 @@ module.exports = function () {
     );
   }
 
+  let enabled = false;
   return {
     name: 'deep-pure',
     visitor: {
       Program: {
         enter(path) {
           const pureFnBinding = path.scope.getBinding(pureFnName);
-          if (isPureFnImportSpecifier(pureFnBinding?.path)) {
-            pureFnBinding?.path.remove();
-          } else {
-            path.skip();
+          enabled = isPureFnImportSpecifier(pureFnBinding?.path);
+          if (enabled) {
+            pureFnBinding?.path.getStatementParent()?.remove();
           }
         },
       },
       CallExpression(path) {
+        if (!enabled) {
+          return;
+        }
         if (isPureFnCallExpression(path)) {
           path.traverse({
             NewExpression(path) {
@@ -77,7 +80,6 @@ module.exports = function () {
           });
           replaceWithFirstArgument(path);
         }
-        path.skip();
       },
     },
   };
