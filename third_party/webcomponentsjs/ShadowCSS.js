@@ -143,8 +143,8 @@ export function scopeRules(cssRules, scopeSelector, opt_transformer) {
   if (cssRules) {
     Array.prototype.forEach.call(cssRules, function(rule) {
       if (rule.selectorText && (rule.style && rule.style.cssText !== undefined)) {
-        cssText += doScopeSelector(rule.selectorText, scopeSelector,
-          strictStyling, opt_transformer) + ' {\n\t';
+        cssText += doScopeSelector(
+          rule.selectorText, scopeSelector, opt_transformer) + ' {\n\t';
         cssText += propertiesFromRule(rule) + '\n}\n\n';
       } else if (rule.type === CSSRule.MEDIA_RULE) {
         cssText += '@media ' + rule.media.mediaText + ' {\n';
