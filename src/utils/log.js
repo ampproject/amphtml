@@ -16,7 +16,7 @@ import {isArray, isString} from '#core/types';
 import {once} from '#core/types/function';
 import {getHashParams} from '#core/types/string/url';
 
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {getMode} from '../mode';
 
 const noop = () => {};
