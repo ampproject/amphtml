@@ -1,42 +1,52 @@
-const {dirname, relative} = require('path');
-
 const pureFnName = 'pure';
-const pureFnImportSourceAliased = '#core/types/pure';
-const pureFnImportSourceDirect = 'src/core/types/pure';
+const pureFnImportSourceRe = new RegExp(
+  '(^#|/)core/types/pure(\\.{js,jsx,ts,tsx})?$'
+);
 
 /**
  * Deeply adds #__PURE__ comments to an expression passed to a function named
  * `pure()`.
+ * @param {import('@babel/core')} babel
  * @return {import('@babel/core').PluginObj}
  */
-module.exports = function () {
-  let filename;
-  let relativePureFnImportSource;
+module.exports = function (babel) {
+  const {types: t} = babel;
+
+  /**
+   * @param {import('@babel/core').NodePath} path
+   * @return {boolean}
+   */
+  function referencesPureFnImport(path) {
+    if (!path.isIdentifier()) {
+      return false;
+    }
+    const binding = path.scope.getBinding(path.node.name);
+    if (!binding || binding.kind !== 'module') {
+      return false;
+    }
+    const bindingPath = binding.path;
+    const parent = bindingPath.parentPath;
+    if (
+      !parent?.isImportDeclaration() ||
+      !pureFnImportSourceRe.test(parent?.node.source.value)
+    ) {
+      return false;
+    }
+    return (
+      bindingPath.isImportSpecifier() &&
+      t.isIdentifier(bindingPath.node.imported, {name: pureFnName})
+    );
+  }
 
   /**
    * @param {import('@babel/core').NodePath<import('@babel/types').CallExpression>} path
    * @return {boolean}
    */
   function isPureFnCallExpression(path) {
-    if (path.node.arguments.length !== 1) {
-      return false;
-    }
-    const callee = path.get('callee');
-    if (callee.referencesImport(pureFnImportSourceAliased, pureFnName)) {
-      return true;
-    }
-    if (!relativePureFnImportSource) {
-      if (!filename) {
-        throw new Error(
-          'babel-plugin-deep-pure must be called with a filename'
-        );
-      }
-      relativePureFnImportSource = relative(
-        dirname(filename),
-        `${process.cwd()}/${pureFnImportSourceDirect}`
-      );
-    }
-    return callee.referencesImport(relativePureFnImportSource, pureFnName);
+    return (
+      path.node.arguments.length === 1 &&
+      referencesPureFnImport(path.get('callee'))
+    );
   }
 
   /** @param {import('@babel/core').NodePath} path */
@@ -52,11 +62,6 @@ module.exports = function () {
   return {
     name: 'deep-pure',
     visitor: {
-      Program: {
-        enter() {
-          filename = this.file.opts.filename;
-        },
-      },
       CallExpression(path) {
         if (isPureFnCallExpression(path)) {
           path.traverse({
