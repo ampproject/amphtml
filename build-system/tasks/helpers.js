@@ -325,27 +325,29 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
-  const babelPluginsForBinary = options.wrapper?.startsWith(
-    '(self.AMP=self.AMP||[]).push('
-  )
-    ? ['./build-system/babel-plugins/babel-plugin-amp-config-urls']
+  const dependsOnRuntime = !!options.wrapper
+    ?.replace(/[\n\s]+/g, '')
+    .startsWith('(self.AMP=self.AMP||[]).push({');
+  const babelPluginsForBinary = dependsOnRuntime
+    ? [
+        // amp-config-urls can only be used if a binary depends on the runtime,
+        // like an extension
+        './build-system/babel-plugins/babel-plugin-amp-config-urls',
+      ]
     : null;
-
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
     /* enableCache */ true,
     {
-      modifyOptions: !babelPluginsForBinary
-        ? undefined
-        : (babelOptions) => {
-            return {
-              ...babelOptions,
-              plugins: [
-                ...babelPluginsForBinary,
-                ...(babelOptions.plugins || []),
-              ],
-            };
-          },
+      modifyOptions: babelPluginsForBinary
+        ? (babelOptions) => ({
+            ...babelOptions,
+            plugins: [
+              ...babelPluginsForBinary,
+              ...(babelOptions.plugins || []),
+            ],
+          })
+        : undefined,
     }
   );
   const plugins = [babelPlugin];
