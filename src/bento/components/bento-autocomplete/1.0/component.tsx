@@ -23,7 +23,7 @@ import {xhrUtils} from '#preact/utils/xhr';
 import fuzzysearch from '#third_party/fuzzysearch';
 
 import {useStyles} from './component.jss';
-import {DEFAULT_ON_ERROR, DEFAULT_PARSE_JSON, TAG} from './constants';
+import {DEFAULT_ON_ERROR, DEFAULT_PARSE_JSON} from './constants';
 import {getEnabledResults, getItemElement, getTextValue} from './helpers';
 import {tokenPrefixMatch} from './token-prefix-match';
 import {
@@ -145,9 +145,7 @@ export function BentoAutocomplete({
         }
       }
       if (possibleElements.length !== 1) {
-        onError(
-          `${TAG} should contain exactly one <input> or <textarea> descendant.`
-        );
+        onError(`should contain exactly one <input> or <textarea> descendant.`);
         return;
       }
       return possibleElements[0];
@@ -163,7 +161,7 @@ export function BentoAutocomplete({
           const inputType = inputElement.getAttribute('type');
           if (inputType !== 'text' && inputType !== 'search') {
             onError(
-              `${TAG} requires the "type" attribute to be "text" or "search" if present on <input>.`
+              `requires the "type" attribute to be "text" or "search" if present on <input>.`
             );
           }
         }
@@ -192,7 +190,7 @@ export function BentoAutocomplete({
       onError(`Unexpected filter: ${filter}.`);
     }
     if (!inline && suggestFirst && filter !== 'prefix') {
-      onError(`${TAG} "suggest-first" expected "filter" type "prefix".`);
+      onError(`"suggest-first" expected "filter" type "prefix".`);
       setShouldSuggestFirst(false);
     }
   }, [filter, onError, inline, suggestFirst]);
@@ -222,9 +220,7 @@ export function BentoAutocomplete({
         item = getValueForExpr(item, filterValue);
       }
       if (typeof item !== 'string') {
-        onError(
-          `${TAG} data property "${filterValue}" must map to string type.`
-        );
+        onError(`data property "${filterValue}" must map to string type.`);
         return;
       }
       item = item.toLocaleLowerCase();
@@ -402,7 +398,7 @@ export function BentoAutocomplete({
       let component;
       if (typeof item === 'object') {
         if (!itemTemplate) {
-          onError(`${TAG} data must provide template for non-string items.`);
+          onError(`data must provide template for non-string items.`);
           return null;
         }
         component = itemTemplate(item);
@@ -417,7 +413,7 @@ export function BentoAutocomplete({
       const isDisabled = component.props['data-disabled'];
       if (!component.props['data-value'] && !isDisabled) {
         onError(
-          `${TAG} expected a "data-value" or "data-disabled" attribute on the rendered template item.`
+          `expected a "data-value" or "data-disabled" attribute on the rendered template item.`
         );
       }
       return cloneElement(component, {

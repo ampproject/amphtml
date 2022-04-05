@@ -36,7 +36,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
   it('requires a single input or textarea descendant', () => {
     mount(<Autocomplete onError={onError}></Autocomplete>);
     expect(onError).to.have.been.calledWith(
-      'bento-autocomplete should contain exactly one <input> or <textarea> descendant.'
+      'should contain exactly one <input> or <textarea> descendant.'
     );
 
     mount(
@@ -55,7 +55,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       </Autocomplete>
     );
     expect(onError).to.have.been.calledWith(
-      'bento-autocomplete requires the "type" attribute to be "text" or "search" if present on <input>.'
+      'requires the "type" attribute to be "text" or "search" if present on <input>.'
     );
   });
 
@@ -611,7 +611,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         );
 
         expect(onError).to.have.been.calledWith(
-          `bento-autocomplete "suggest-first" expected "filter" type "prefix".`
+          `"suggest-first" expected "filter" type "prefix".`
         );
       });
 
@@ -728,7 +728,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       );
 
       expect(onError).to.have.been.calledWith(
-        'bento-autocomplete data must provide template for non-string items.'
+        'data must provide template for non-string items.'
       );
     });
 
@@ -778,7 +778,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('input');
 
       expect(onError).to.have.been.calledWith(
-        'bento-autocomplete data property "value" must map to string type.'
+        'data property "value" must map to string type.'
       );
     });
 
@@ -803,7 +803,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('input');
 
       expect(onError).to.have.been.calledWith(
-        'bento-autocomplete data property "something" must map to string type.'
+        'data property "something" must map to string type.'
       );
     });
 
@@ -858,7 +858,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       input.simulate('input');
 
       expect(onError).to.have.been.calledWith(
-        'bento-autocomplete expected a "data-value" or "data-disabled" attribute on the rendered template item.'
+        'expected a "data-value" or "data-disabled" attribute on the rendered template item.'
       );
     });
 
