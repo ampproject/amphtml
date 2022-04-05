@@ -1,5 +1,5 @@
 <!doctype html>
-<html amp lang="de">
+<html amp lang="en">
   <head>
     <meta charset="utf-8">
     <title>Shopping</title>
@@ -8,7 +8,6 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <script async custom-element="amp-story-auto-analytics" src="https://cdn.ampproject.org/v0/amp-story-auto-analytics-0.1.js"></script>
     <script async custom-element="amp-story-shopping" src="https://cdn.ampproject.org/v0/amp-story-shopping-0.1.js"></script>
     <style amp-custom>
       [data-product-id="lamp"] {
@@ -30,7 +29,6 @@
     </style>
   </head>
   <body>
-    <amp-story-auto-analytics gtag-id="UA-174115079-1"></amp-story-auto-analytics>
     <amp-story
         standalone
         title="Story Shopping Component"
@@ -39,7 +37,7 @@
         poster-portrait-src="example.com/poster.jpg">
       <amp-story-page id="inline-light-theme">
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
@@ -58,16 +56,16 @@
                     "productUrl": "https://www.google.com",
                     "productId": "lamp",
                     "productTitle": "Brass Lamp",
-                    "productBrand": "Lamp Co",
+                    "productVendor": "Lamp Co",
                     "productPrice": 799.00,
                     "productPriceCurrency": "USD",
                     "productImages": [
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 1"},
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 2"},
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 3"},
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 4"},
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 5"},
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 6"}
+                      {"url": "https://source.unsplash.com/Ry9WBo3qmoc/500x500", "alt": "lamp 1"},
+                      {"url": "https://source.unsplash.com/KP7p0-DRGbg", "alt": "lamp 2"},
+                      {"url": "https://source.unsplash.com/mFnbFaCIu1I", "alt": "lamp 3"},
+                      {"url": "https://source.unsplash.com/py9sH2rThWs", "alt": "lamp 4"},
+                      {"url": "https://source.unsplash.com/VDPauwJ_sHo", "alt": "lamp 5"},
+                      {"url": "https://source.unsplash.com/3LTht2nxd34", "alt": "lamp 6"}
                     ],
                     "aggregateRating": {
                       "ratingValue": 4.4,
@@ -80,16 +78,11 @@
                     "productUrl": "https://www.google.com",
                     "productId": "art",
                     "productTitle": "Abstract Art",
-                    "productBrand": "V. Artsy",
+                    "productVendor": "V. Artsy",
                     "productPrice": 1200.00,
                     "productPriceCurrency": "INR",
-                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "art"}],
-                    "aggregateRating": {
-                      "ratingValue": 4.4,
-                      "reviewCount": 89,
-                      "reviewUrl": "https://www.google.com"
-                    },
-                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                    "productImages": [{"url": "https://source.unsplash.com/BdVQU-NDtA8/500x500", "alt": "art"}],
+                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci. Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
                    },
                    {
                     "productUrl": "https://www.google.com",
@@ -98,7 +91,7 @@
                     "productPrice": 1000.00,
                     "productPriceCurrency": "BRL",
                     "productTagText": "The perfectly imperfect yellow chair",
-                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "chair"}],
+                    "productImages": [{"url": "https://source.unsplash.com/DgQGKKLaVhY/500x500", "alt": "chair"}],
                     "aggregateRating": {
                       "ratingValue": 4.4,
                       "reviewCount": 89,
@@ -110,17 +103,16 @@
                     "productUrl": "https://www.google.com",
                     "productId": "flowers",
                     "productTitle": "Flowers",
-                    "productBrand": "Very Long Flower Company Name",
+                    "productVendor": "Very Long Flower Company Name",
                     "productPrice": 10.00,
                     "productPriceCurrency": "USD",
                     "productIcon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
-                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "flowers"}],
+                    "productImages": [{"url": "https://source.unsplash.com/SavQfLRm4Do/500x500", "alt": "flowers"}],
                     "aggregateRating": {
                       "ratingValue": 4.4,
                       "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
-                    },
-                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                    }
                    }
                 ]
               }
@@ -132,7 +124,7 @@
           Dark theme example of Inline config. Multiple product tags with icon defined.
         -->
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag data-product-id="lamp" ></amp-story-shopping-tag>
@@ -148,38 +140,36 @@
                     "productUrl": "https://www.google.com",
                     "productId": "lamp",
                     "productTitle": "Brass Lamp",
-                    "productBrand": "Lamp Co",
+                    "productVendor": "Lamp Co",
                     "productPrice": 799.00,
                     "productPriceCurrency": "USD",
                     "productImages": [
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 1"},
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 2"},
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 3"},
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 4"},
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 5"},
-                       {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 6"}
+                      {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 1"},
+                      {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 2"},
+                      {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 3"},
+                      {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 4"},
+                      {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 5"},
+                      {"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "lamp 6"}
                     ],
                     "aggregateRating": {
                       "ratingValue": 4.4,
                       "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
-                    },
-                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                    }
                    },
                    {
                     "productUrl": "https://www.google.com",
                     "productId": "art",
                     "productTitle": "Abstract Art",
-                    "productBrand": "V. Artsy",
+                    "productVendor": "V. Artsy",
                     "productPrice": 1200.00,
                     "productPriceCurrency": "INR",
-                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "art"}],
+                    "productImages": [{"url": "https://source.unsplash.com/BdVQU-NDtA8/500x500", "alt": "art"}],
                     "aggregateRating": {
                       "ratingValue": 4.4,
                       "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
-                    },
-                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                    }
                    },
                    {
                     "productUrl": "https://www.google.com",
@@ -188,29 +178,27 @@
                     "productPrice": 1000.00,
                     "productPriceCurrency": "BRL",
                     "productTagText": "The perfectly imperfect yellow chair",
-                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "chair"}],
+                    "productImages": [{"url": "https://source.unsplash.com/DgQGKKLaVhY/500x500", "alt": "chair"}],
                     "aggregateRating": {
                       "ratingValue": 4.4,
                       "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
-                    },
-                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                    }
                    },
                    {
                     "productUrl": "https://www.google.com",
                     "productId": "flowers",
                     "productTitle": "Flowers",
-                    "productBrand": "Very Long Flower Company Name",
+                    "productVendor": "Very Long Flower Company Name",
                     "productPrice": 10.00,
                     "productPriceCurrency": "USD",
                     "productIcon": "/examples/visual-tests/amp-story/img/shopping/icon.png",
-                    "productImages": [{"url": "/examples/visual-tests/amp-story/img/cat1.jpg", "alt": "flowers"}],
+                    "productImages": [{"url": "https://source.unsplash.com/SavQfLRm4Do/500x500", "alt": "flowers"}],
                     "aggregateRating": {
                       "ratingValue": 4.4,
                       "reviewCount": 89,
                       "reviewUrl": "https://www.google.com"
-                    },
-                    "productDetails": "Lorem ipsum dolor sit amet consectetur adipisicing elit. \n Facere error deserunt dignissimos in laborum ea molestias veritatis sint laudantium iusto expedita atque provident doloremque, ad voluptatem culpa adipisci."
+                    }
                    }
                 ]
               }
@@ -219,7 +207,7 @@
       </amp-story-page>
       <amp-story-page id="remote-with-product">
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
@@ -238,7 +226,7 @@
       </amp-story-page>
       <amp-story-page id="inline-no-product">
       <amp-story-grid-layer template="fill">
-        <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+        <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
       </amp-story-grid-layer>
         <!--
           Example of:
@@ -258,7 +246,7 @@
         -->
       <amp-story-page id="remote-dark-theme">
         <amp-story-grid-layer template="fill">
-          <amp-img layout="fill" src="/examples/visual-tests/amp-story/img/cat1.jpg"></amp-img>
+          <amp-img layout="fill" src="https://source.unsplash.com/_HqHX3LBN18/1000x2000"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <amp-story-shopping-tag data-product-id="art" ></amp-story-shopping-tag>
