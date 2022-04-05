@@ -325,9 +325,28 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
   const babelCaller =
     options.babelCaller ?? (options.minify ? 'minified' : 'unminified');
 
+  const babelPluginsForBinary = options.wrapper?.startsWith(
+    '(self.AMP=self.AMP||[]).push('
+  )
+    ? ['./build-system/babel-plugins/babel-plugin-amp-config-urls']
+    : null;
+
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
-    /* enableCache */ true
+    /* enableCache */ true,
+    {
+      modifyOptions: !babelPluginsForBinary
+        ? undefined
+        : (babelOptions) => {
+            return {
+              ...babelOptions,
+              plugins: [
+                ...babelPluginsForBinary,
+                ...(babelOptions.plugins || []),
+              ],
+            };
+          },
+    }
   );
   const plugins = [babelPlugin];
 

@@ -29,15 +29,16 @@ let transformCache;
  * @param {string} callerName
  * @param {boolean} enableCache
  * @param {{
- *   preSetup?: function():void,
- *   postLoad?: function():void,
+ *   preSetup?: () => void,
+ *   postLoad?: () => void,
+ *   modifyOptions?: (opts: import('@babel/core').TransformOptions) => void | null | import('@babel/core').TransformOptions,
  * }} callbacks
  * @return {!Object}
  */
 function getEsbuildBabelPlugin(
   callerName,
   enableCache,
-  {preSetup = () => {}, postLoad = () => {}} = {}
+  {preSetup = () => {}, postLoad = () => {}, modifyOptions} = {}
 ) {
   const babelMaps = new Map();
 
@@ -90,10 +91,11 @@ function getEsbuildBabelPlugin(
         {filter: /\.(cjs|mjs|js|jsx|ts|tsx)$/, namespace: ''},
         async (file) => {
           const filename = file.path;
-          const babelOptions = /** @type {*} */ (
+          let babelOptions = /** @type {*} */ (
             babel.loadOptions({caller: {name: callerName}, filename}) || {}
           );
           babelOptions.sourceMaps = true;
+          babelOptions = modifyOptions?.(babelOptions) ?? babelOptions;
 
           const {contents, hash} = await batchedRead(filename);
           const rehash = md5(
