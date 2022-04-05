@@ -129,6 +129,10 @@
 // just `x()`.
 
 const strictStyling = false;
+
+// [@ampproject difference with original]
+// We added the following feature switches. This allows certain codepaths to be
+// dead-code-eliminated.
 const allowArraySelectors = false;
 const isIeSupported = false;
 
