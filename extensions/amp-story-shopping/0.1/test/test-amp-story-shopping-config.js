@@ -110,7 +110,7 @@ describes.realWin(
       shoppingAttachment.appendChild(
         <script type="application/json">{JSON.stringify(config)}</script>
       );
-      return getShoppingConfig(shoppingAttachment);
+      return getShoppingConfig(shoppingAttachment, pageElement);
     }
 
     it('does use inline config', async () => {
@@ -195,7 +195,7 @@ describes.realWin(
         delete invalidConfig['items'][0][requiredKey];
 
         const errorString =
-          "#page1 items[0] Brass Lamp must have required property 'productId'";
+          "[#page1 items[0] Brass Lamp] must have required property 'productId'";
 
         const spy = env.sandbox.spy(user(), 'warn');
         const keyedShoppingConfig = await createAmpStoryShoppingConfig(
@@ -212,7 +212,7 @@ describes.realWin(
         const invalidValue = 50; // This value is not a string
         invalidConfig['items'][0]['productTitle'] = invalidValue;
 
-        const errorString = '#page1 items[0] 50/productTitle must be string';
+        const errorString = '[#page1 items[0] 50]/productTitle must be string';
 
         const spy = env.sandbox.spy(user(), 'warn');
         const keyedShoppingConfig = await createAmpStoryShoppingConfig(
@@ -230,7 +230,7 @@ describes.realWin(
         invalidConfig['items'][0]['productPrice'] = invalidValue;
 
         const errorString =
-          '#page1 items[0] Brass Lamp/productPrice must be number';
+          '[#page1 items[0] Brass Lamp]/productPrice must be number';
 
         const spy = env.sandbox.spy(user(), 'warn');
         const keyedShoppingConfig = await createAmpStoryShoppingConfig(
@@ -248,7 +248,7 @@ describes.realWin(
         invalidConfig['items'][0]['productPriceCurrency'] = invalidValue;
 
         const errorString =
-          '#page1 items[0] Brass Lamp/productPriceCurrency must be a valid ISO 4217 currency code';
+          '[#page1 items[0] Brass Lamp]/productPriceCurrency must be a valid ISO 4217 currency code';
 
         const spy = env.sandbox.spy(user(), 'warn');
         const keyedShoppingConfig = await createAmpStoryShoppingConfig(
@@ -271,7 +271,7 @@ describes.realWin(
           invalidConfig
         );
         const errorString =
-          '#page1 items[0] Brass Lamp/productUrl must match pattern "^(/|https://|https?://(127.0.0.1|([^/]+\\.)?localhost)(:[0-9]+)?/)"';
+          '[#page1 items[0] Brass Lamp]/productUrl must match pattern "^(/|https://|https?://(127.0.0.1|([^/]+\\.)?localhost)(:[0-9]+)?/)"';
         expect(spy).to.have.been.calledWith(errorStringTagName, errorString);
         expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
         expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');

@@ -1,5 +1,3 @@
-import {closestAncestorElementBySelector} from '#core/dom/query';
-
 import {Services} from '#service';
 
 import {user} from '#utils/log';
@@ -44,22 +42,18 @@ let KeyedShoppingConfigDef;
  * amp-story-shopping-attachment element.
  * @param {!Element} shoppingAttachmentEl <amp-story-shopping-attachment>
  *     The amp story shopping attachment element
+ * @param {!Element} pageEl the page element
  * @return {!Promise<!KeyedShoppingConfigDef>} An object with product ID
  *     keys that each have a `ShoppingConfigDataDef` value
  */
-export function getShoppingConfig(shoppingAttachmentEl) {
+export function getShoppingConfig(shoppingAttachmentEl, pageEl) {
   return getElementConfig(shoppingAttachmentEl).then((config) => {
-    const pageId = closestAncestorElementBySelector(
-      shoppingAttachmentEl,
-      'amp-story-page'
-    ).id;
-
     const allItems = config['items'];
     const validItems = allItems.filter((item, i) => {
       const productTitle = item?.productTitle ?? '';
       return validateConfig(
         item,
-        `#${pageId} items[${i}] ${productTitle}`.trim()
+        `[${`#${pageEl.id} items[${i}] ${productTitle}`.trim()}]`
       );
     });
 
