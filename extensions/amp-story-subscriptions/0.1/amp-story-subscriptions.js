@@ -132,57 +132,47 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   /**
    * @return {!Element}
    * @private
+   * TODO(#37285): add "next story" button to the banner
    */
   renderSubscriptionsDialogTemplate_() {
     return (
       <div subscriptions-dialog subscriptions-display="NOT granted">
         <div class="i-amphtml-story-subscriptions-dialog-banner"></div>
         <div class="i-amphtml-story-subscriptions-dialog-content">
-          <div class="i-amphtml-story-subscriptions-publisher-text">
-            <div class="i-amphtml-story-subscriptions-price">
-              {this.element.getAttribute('price')}
-            </div>
-            <div class="i-amphtml-story-subscriptions-title">
-              {this.element.getAttribute('title')}
-            </div>
-            <div class="i-amphtml-story-subscriptions-subtitle-first">
-              {this.element.getAttribute('subtitle-first')}
-            </div>
-            <div class="i-amphtml-story-subscriptions-subtitle-second">
-              {this.element.getAttribute('subtitle-second')}
-            </div>
+          <div class="i-amphtml-story-subscriptions-price">
+            {this.element.getAttribute('price')}
           </div>
-          <div class="i-amphtml-story-subscriptions-button-container">
-            <div class="i-amphtml-story-subscriptions-publisher-button-container">
-              <div
-                class="i-amphtml-story-subscriptions-publisher-button"
-                subscriptions-action="subscribe"
-                subscriptions-display="NOT granted"
-              >
-                <img class="i-amphtml-story-subscriptions-publisher-logo"></img>
-                <div class="i-amphtml-story-subscriptions-publisher-button-text">
-                  {this.localizationService_.getLocalizedString(
-                    LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_CTA
-                  )}
-                  &nbsp;
-                  {getStoryAttributeSrc(
-                    this.element,
-                    'publisher',
-                    /* warn */ true
-                  )}
-                </div>
-              </div>
-            </div>
-            <div class="i-amphtml-story-subscriptions-google-button-container">
-              <div
-                class="i-amphtml-story-subscriptions-google-button"
-                subscriptions-action="subscribe"
-                subscriptions-display="NOT granted"
-                subscriptions-service="subscribe.google.com"
-                subscriptions-decorate="false"
-              ></div>
-            </div>
+          <div class="i-amphtml-story-subscriptions-title">
+            {this.element.getAttribute('title')}
           </div>
+          <div class="i-amphtml-story-subscriptions-subtitle-first">
+            {this.element.getAttribute('subtitle-first')}
+          </div>
+          <div class="i-amphtml-story-subscriptions-subtitle-second">
+            {this.element.getAttribute('subtitle-second')}
+          </div>
+          <button
+            class="i-amphtml-story-subscriptions-publisher-button"
+            subscriptions-action="subscribe"
+            subscriptions-display="NOT granted"
+          >
+            <img class="i-amphtml-story-subscriptions-publisher-logo"></img>
+            <span class="i-amphtml-story-subscriptions-publisher-button-text">
+              {this.localizationService_.getLocalizedString(
+                LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_CTA
+              )}
+              &nbsp;
+              {getStoryAttributeSrc(this.element, 'publisher', /* warn */ true)}
+              aeferggerg
+            </span>
+          </button>
+          <button
+            class="i-amphtml-story-subscriptions-google-button"
+            subscriptions-action="subscribe"
+            subscriptions-display="NOT granted"
+            subscriptions-service="subscribe.google.com"
+            subscriptions-decorate="false"
+          ></button>
           <div class="i-amphtml-story-subscriptions-signin">
             {this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION
