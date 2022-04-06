@@ -7,6 +7,5 @@
  */
 export const ampConfigUrlsDoNotImportMeUseConfigUrlsInstead = (k) => {
   // @ts-ignore
-  const {urls} = self.AMP.config;
-  return k != null ? urls[k] : urls;
+  return self.AMP.config;
 };

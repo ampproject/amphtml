@@ -14,10 +14,6 @@ module.exports = function (babel) {
     `const NAMESPACE = /* #__PURE__ */ GETTER()`,
     {preserveComments: true}
   );
-  const buildNamed = template(
-    `const LOCAL = /* #__PURE__ */ GETTER('IMPORTED')`,
-    {preserveComments: true}
-  );
   return {
     name: 'amp-config-urls',
     visitor: {
@@ -33,39 +29,30 @@ module.exports = function (babel) {
         },
       },
       ImportDeclaration(path) {
-        if (
-          !t.isStringLiteral(path.node.source, {value: importSourceRelative})
-        ) {
+        const {source} = path.node;
+        if (!t.isStringLiteral(source, {value: importSourceRelative})) {
           return;
         }
-        const getter = addNamed(
-          path,
-          'ampConfigUrlsDoNotImportMeUseConfigUrlsInstead',
-          '#core/amp-config-urls'
-        );
+        let getter;
         for (const specifier of path.get('specifiers')) {
-          if (specifier.isImportNamespaceSpecifier()) {
-            const namespace = specifier.node.local.name;
-            path.insertAfter(
-              buildNamespace({
-                NAMESPACE: namespace,
-                GETTER: getter.name,
-              })
+          if (!specifier.isImportNamespaceSpecifier()) {
+            throw specifier.buildCodeFrameError(
+              `Unresolvable specifier. You must import \`urls\` as a namespace:\n` +
+                `\`import * as urls from '${source.value}';\``
             );
-          } else if (specifier.isImportSpecifier()) {
-            const {imported, local} = specifier.node;
-            path.insertAfter(
-              buildNamed({
-                LOCAL: local.name,
-                IMPORTED: t.isIdentifier(imported)
-                  ? imported.name
-                  : imported.value,
-                GETTER: getter.name,
-              })
-            );
-          } else {
-            throw specifier.buildCodeFrameError('Unresolvable specifier');
           }
+          getter ??= addNamed(
+            path,
+            'ampConfigUrlsDoNotImportMeUseConfigUrlsInstead',
+            '#core/amp-config-urls'
+          );
+          const namespace = specifier.node.local.name;
+          path.insertAfter(
+            buildNamespace({
+              NAMESPACE: namespace,
+              GETTER: getter.name,
+            })
+          );
         }
         path.remove();
       },
