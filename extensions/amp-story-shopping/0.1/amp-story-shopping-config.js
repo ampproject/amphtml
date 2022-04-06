@@ -42,7 +42,7 @@ let KeyedShoppingConfigDef;
  * amp-story-shopping-attachment element.
  * @param {!Element} shoppingAttachmentEl <amp-story-shopping-attachment>
  *     The amp story shopping attachment element
- * @param {string} itemNamePrefix the name prefix of the element
+ * @param {string} itemNamePrefix the name prefix of the element, i.e. the Page ID
  * @return {!Promise<!KeyedShoppingConfigDef>} An object with product ID
  *     keys that each have a `ShoppingConfigDataDef` value
  */
