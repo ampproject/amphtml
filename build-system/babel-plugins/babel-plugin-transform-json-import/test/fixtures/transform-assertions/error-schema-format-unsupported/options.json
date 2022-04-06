@@ -1,0 +1,7 @@
+{
+  "plugins": [
+    "../../../.."
+  ],
+  "sourceType": "module",
+  "throws": "unknown format \"int64\" ignored in schema at path \"#\""
+}

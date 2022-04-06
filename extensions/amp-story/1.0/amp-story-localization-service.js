@@ -1,3 +1,5 @@
+import {getWin} from '#core/window';
+
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
@@ -24,10 +26,37 @@ export function getLocalizationService(element) {
 }
 
 /**
- * @param {!Node} context
- * @param {import('#service/localization/strings).LocalizedStringId_Enum} key
- * @return {?string}
+ * Adds the localized strings onto the template as aria labels or text contents.
+ * Uses `i-amphtml-i18n-text-content` or `i-amphtml-i18n-aria-label` attributes.
+ * @param {!Element} template
+ * @param {!Element} context
+ * @return {!Promise}
  */
-export function localize(context, key) {
-  return getLocalizationService(context).getLocalizedString(key);
+export function localizeTemplate(template, context) {
+  const localizationService = Services.localizationForDoc(context);
+  const vsync = Services.vsyncFor(getWin(context));
+  const promises = [];
+  template.querySelectorAll('[i-amphtml-i18n-aria-label]').forEach((el) => {
+    promises.push(
+      localizationService
+        .getLocalizedStringAsync(el.getAttribute('i-amphtml-i18n-aria-label'))
+        .then((str) => el.setAttribute('aria-label', str))
+    );
+    el.removeAttribute('i-amphtml-i18n-aria-label');
+  });
+  template.querySelectorAll('[i-amphtml-i18n-text-content]').forEach((el) => {
+    promises.push(
+      localizationService
+        .getLocalizedStringAsync(el.getAttribute('i-amphtml-i18n-text-content'))
+        .then((str) =>
+          template.isConnected
+            ? vsync.mutatePromise(() => {
+                el.textContent = str;
+              })
+            : (el.textContent = str)
+        )
+    );
+    el.removeAttribute('i-amphtml-i18n-text-content');
+  });
+  return Promise.all(promises);
 }

@@ -236,10 +236,14 @@
     "description": "Button label prompting users to read about details of a product."
   },
   "106": {
+    "string": "Read more",
+    "description": "Label for a button to open a drawer containing additional content."
+  },
+  "107": {
     "string": "Captions on",
     "description": "Label for the captions button that indicates the captions are turned on"
   },
-  "107": {
+  "108": {
     "string": "Captions off",
     "description": "Label for the captions button that indicates the captions are turned off"
   }

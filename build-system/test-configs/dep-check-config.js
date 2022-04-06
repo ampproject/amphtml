@@ -79,7 +79,7 @@ exports.rules = [
     allowlist: [
       '3p/**->src/utils/log.js',
       '3p/**->src/url.js',
-      '3p/**->src/config.js',
+      '3p/**->src/config/urls.js',
       '3p/**->src/mode.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
@@ -246,6 +246,10 @@ exports.rules = [
       'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/variable-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/variable-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/story-analytics.js',
 
       // Interactive components that depend on story functionality.
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -260,6 +264,16 @@ exports.rules = [
 
       // AMP Story Subscriptions.
       'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/amp-story-store-service.js',
+
+      // Story localization.
+      'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-img-quiz.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-interactive/0.1/amp-story-interactive-quiz.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-share-menu/0.1/amp-story-share-menu.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-draggable-drawer.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-form.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-page-attachment/0.1/amp-story-page-attachment.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-localization-service.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
@@ -400,6 +414,7 @@ exports.rules = [
       'extensions/amp-story/1.0/amp-story-localization-service.js->src/service/localization/index.js',
       'extensions/amp-story*/**/*.js->src/service/localization/strings.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization/index.js',
+      'extensions/amp-story/1.0/amp-story.js->src/service/extension-script.js',
 
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +

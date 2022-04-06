@@ -3,8 +3,9 @@
 const argv = require('minimist')(process.argv.slice(2));
 const karmaConfig = require('../../test-configs/karma.conf');
 const {
+  bentoUnitTestPaths,
   commonIntegrationTestPaths,
-  commonUnitTestPaths,
+  getCommonUnitTestPaths,
   integrationTestPaths,
   karmaHtmlFixturesPath,
   karmaJsPaths,
@@ -56,8 +57,9 @@ class RuntimeTestConfig {
 
   /**
    * @param {string} testType
+   * @param {{bentoOnly?: boolean}} [options]
    */
-  constructor(testType) {
+  constructor(testType, {bentoOnly = false} = {}) {
     this.testType = testType;
     /**
      * TypeScript is used for typechecking here and is unable to infer the type
@@ -67,7 +69,7 @@ class RuntimeTestConfig {
     Object.assign(this, karmaConfig);
     this.updateBrowsers();
     this.updateReporters();
-    this.updateFiles();
+    this.updateFiles({bentoOnly});
     this.updatePreprocessors();
     this.updateEsbuildConfig();
     this.updateClient();
@@ -151,10 +153,12 @@ class RuntimeTestConfig {
   /**
    * Computes the set of files for Karma to load based on factors like test type,
    * target browser, and flags.
+   * @param {{bentoOnly: boolean}} options
    */
-  updateFiles() {
+  updateFiles({bentoOnly}) {
     switch (this.testType) {
       case 'unit':
+        const commonUnitTestPaths = getCommonUnitTestPaths({bentoOnly});
         if (argv.files || argv.filelist) {
           this.files = commonUnitTestPaths
             .concat(getFilesFromArgv())
@@ -166,10 +170,12 @@ class RuntimeTestConfig {
           return;
         }
         if (argv.local_changes) {
-          this.files = commonUnitTestPaths.concat(unitTestsToRun());
+          this.files = commonUnitTestPaths.concat(unitTestsToRun({bentoOnly}));
           return;
         }
-        this.files = commonUnitTestPaths.concat(unitTestPaths);
+        this.files = commonUnitTestPaths.concat(
+          bentoOnly ? bentoUnitTestPaths : unitTestPaths
+        );
         return;
 
       case 'integration':

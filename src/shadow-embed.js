@@ -1,4 +1,3 @@
-import {iterateCursor} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {setInitialDisplay, setStyle} from '#core/dom/style';
 import {
@@ -52,7 +51,7 @@ export function createShadowRoot(hostElement) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
         get: function () {
           const items = [];
-          iterateCursor(shadowRoot.childNodes, (child) => {
+          shadowRoot.childNodes.forEach((child) => {
             if (child.tagName === 'STYLE') {
               items.push(child.sheet);
             }
