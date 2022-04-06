@@ -1,7 +1,14 @@
 
 
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
 @import '../../amp-story/1.0/amp-story-shadow-reset.css';
+
+/* Using https://www.industrialempathy.com/perfect-ish-font-fallback/?font=Open%20Sans */
+@font-face {
+  font-family: "Open Sans-fallback";
+  size-adjust: 105.44%;
+  src: local("Arial");
+}
 
 amp-story-education {
   position: fixed !important;
@@ -20,7 +27,8 @@ amp-story-education {
   width: 100% !important;
   background: rgba(0, 0, 0, 0.8) !important;
   color: #FFF !important;
-  font-family: 'Open Sans', sans-serif !important;
+  font-family: 'Open Sans', 'Open Sans-fallback', sans-serif !important;
+  line-height: 1.5em !important;
   font-weight: 400 !important;
   pointer-events: auto !important;
   opacity: 1 !important;

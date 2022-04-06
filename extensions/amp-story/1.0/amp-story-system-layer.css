@@ -81,6 +81,7 @@
   justify-content: flex-end !important;
   padding: 8px 4px !important;
   box-sizing: border-box !important;
+  flex: 1 !important;
 }
 
 .i-amphtml-story-system-layer-buttons-start-position {
