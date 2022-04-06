@@ -206,12 +206,14 @@ export function userAssertValidProtocol(element, url) {
  */
 export function getSourceOriginForElement(element, url) {
   const urlService = Services.urlForDoc(element);
+  let parsed;
   try {
-    url = urlService.getSourceOrigin(url);
+    parsed = urlService.parse(urlService.getSourceOrigin(url));
   } catch (_) {
     // Unknown path prefix in url.
+    parsed = urlService.parse(url);
   }
-  return urlService.parse(url).hostname;
+  return parsed.hostname;
 }
 
 /**
@@ -239,32 +241,17 @@ export function getStoryAttributeSrc(element, attribute, warn) {
   const storyEl = dev().assertElement(
     closestAncestorElementBySelector(element, 'AMP-STORY')
   );
-  return getAttributeUrl(storyEl, attribute, warn);
-}
-
-/**
- *
- * @param {Element} element
- * @param {string} attribute
- * @param {boolean=} warn
- * @return {?string}
- */
-export function getAttributeUrl(element, attribute, warn) {
-  const attrSrc = element.getAttribute(attribute);
-  if (!attrSrc) {
+  const url = storyEl.getAttribute(attribute);
+  if (!url) {
     if (warn) {
       user().warn(
         'AMP-STORY',
-        `Expected ${attribute} attribute on <${element.localName}>`
+        `Expected ${attribute} attribute on <amp-story>`
       );
     }
     return null;
   }
-  return Services.urlForDoc(element).assertHttpsUrl(
-    attrSrc,
-    element,
-    attribute
-  );
+  return Services.urlForDoc(storyEl).assertHttpsUrl(url, storyEl, attribute);
 }
 
 /**
