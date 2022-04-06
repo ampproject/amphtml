@@ -62,6 +62,16 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
     });
   });
 
+  describe('isXhrAllowed', () => {
+    it('should be not allowed', async () => {
+      impl = new AmpAdNetworkSmartadserverImpl(
+        createElementWithAttributes(doc, 'amp-ad', {})
+      );
+
+      expect(impl.isXhrAllowed()).to.be.false;
+    });
+  });
+
   describe('getCustomRealTimeConfigMacros', () => {
     it('should return correct macros', () => {
       const macros = {

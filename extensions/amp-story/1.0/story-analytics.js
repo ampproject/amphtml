@@ -27,6 +27,10 @@ export const StoryAnalyticsEvent = {
   STORY_CONTENT_LOADED: 'story-content-loaded',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
+  SHOPPING_BUY_NOW_CLICK: 'story-shopping-buy-now-click',
+  SHOPPING_PLP_VIEW: 'story-shopping-plp-view',
+  SHOPPING_PDP_VIEW: 'story-shopping-pdp-view',
+  SHOPPING_TAG_CLICK: 'story-shopping-tag-click',
 };
 
 /**

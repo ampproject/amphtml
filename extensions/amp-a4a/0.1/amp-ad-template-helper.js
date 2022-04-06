@@ -6,7 +6,7 @@ import {Services} from '#service';
 
 import {devAssert} from '#utils/log';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {getMode} from '../../../src/mode';
 import {
   getServiceForDoc,

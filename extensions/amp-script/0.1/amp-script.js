@@ -22,7 +22,7 @@ import {dev, user, userAssert} from '#utils/log';
 import {UserActivationTracker} from './user-activation-tracker';
 
 import {CSS} from '../../../build/amp-script-0.1.css';
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {cancellation} from '../../../src/error-reporting';
 import {getMode} from '../../../src/mode';

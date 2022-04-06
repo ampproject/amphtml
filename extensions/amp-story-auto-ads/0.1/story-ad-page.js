@@ -38,7 +38,7 @@ import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {
   StateProperty,
-  UIType,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 
 /** @const {string} */
@@ -499,7 +499,7 @@ export class StoryAdPage {
   /**
    * Reacts to UI state updates and passes the information along as
    * attributes to the shadowed attribution icon.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -509,7 +509,7 @@ export class StoryAdPage {
 
     this.adChoicesIcon_.classList.toggle(
       DESKTOP_FULLBLEED_CLASS,
-      uiState === UIType.DESKTOP_FULLBLEED
+      uiState === UIType_Enum.DESKTOP_FULLBLEED
     );
   }
 
