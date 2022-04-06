@@ -16,15 +16,8 @@
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
-  display: none !important;
-}
-
-.i-amphtml-story-unsupported-browser-overlay .i-amphtml-story-overlay-text {
-  color: #fff !important;
-}
-
-.i-amphtml-story-unsupported-browser-overlay {
   display: flex !important;
+  color: #fff !important;
 }
 
 .i-amphtml-gear-icon {

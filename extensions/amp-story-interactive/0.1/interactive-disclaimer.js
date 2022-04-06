@@ -81,9 +81,11 @@ export function buildInteractiveDisclaimer(interactive, attrs = {}) {
     urlEl.textContent = backendUrl;
     linkEl.remove();
   }
-  noteEl.textContent = interactive.localizationService.getLocalizedString(
-    LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
-  );
+  interactive.localizationService
+    .getLocalizedStringAsync(
+      LocalizedStringId_Enum.AMP_STORY_INTERACTIVE_DISCLAIMER_NOTE
+    )
+    .then((str) => (noteEl.textContent = str));
 
   // Set the described-by for a11y.
   const disclaimerDescriptionId = `i-amphtml-story-disclaimer-${interactive.element.id}-description`;

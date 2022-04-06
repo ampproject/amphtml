@@ -633,7 +633,7 @@ const forbiddenTermsGlobal = {
       'build-system/tasks/build.js',
       'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
-      'src/config.js',
+      'src/config/urls.js',
       'src/experiments/index.js',
       'src/mode.js',
       'src/core/mode/test.js',
@@ -922,7 +922,7 @@ const forbiddenTermsSrcInclusive = {
   '(cdn|3p)\\.ampproject\\.': {
     message:
       'The CDN domain should typically not be hardcoded in source ' +
-      'code. Use a property of urls from src/config.js instead.',
+      'code. Use urls from src/config/urls.js instead.',
     allowlist: [
       'ads/_a4a-config.js',
       'build-system/server/amp4test.js',
@@ -936,7 +936,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/tasks/performance/helpers.js',
       'src/3p-frame.js',
       'src/amp-story-player/amp-story-player-impl.js',
-      'src/config.js',
+      'src/config/urls.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/experiments/experiments.js',
       'validator/js/engine/htmlparser-interface.js',
