@@ -126,17 +126,15 @@ const renderSystemLayerElement = (element, children) => (
       <div class="i-amphtml-story-captions-display">
         <button
           class={CAPTIONS_CLASS + ' i-amphtml-story-button'}
-          aria-label={localize(
-            element,
+          i-amphtml-i18n-aria-label={
             LocalizedStringId_Enum.AMP_STORY_CAPTIONS_ON_LABEL
-          )}
+          }
         />
         <button
           class={NOCAPTIONS_CLASS + ' i-amphtml-story-button'}
-          aria-label={localize(
-            element,
+          i-amphtml-i18n-aria-label={
             LocalizedStringId_Enum.AMP_STORY_CAPTIONS_OFF_LABEL
-          )}
+          }
         />
       </div>
       <div class="i-amphtml-story-sound-display">
