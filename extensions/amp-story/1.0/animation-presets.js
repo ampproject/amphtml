@@ -340,7 +340,7 @@ export const presets = {
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
-      const offsetX = -dimensions.targetWidth / 2;
+      const offsetX = (dimensions.pageWidth - dimensions.targetWidth) * 0.5;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       return scaleAndTranslate(
@@ -363,7 +363,7 @@ export const presets = {
       dimensions.targetWidth *= scalingFactor;
       dimensions.targetHeight *= scalingFactor;
 
-      const offsetX = -dimensions.targetWidth / 2;
+      const offsetX = (dimensions.pageWidth - dimensions.targetWidth) * 0.5;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;
 
       return scaleAndTranslate(

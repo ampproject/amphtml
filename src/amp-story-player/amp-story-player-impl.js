@@ -20,7 +20,7 @@ import {PageScroller} from './page-scroller';
 
 import {cssText} from '../../build/amp-story-player-shadow.css';
 import {applySandbox} from '../3p-frame';
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {getMode} from '../mode';
 import {
   addParamsToUrl,
