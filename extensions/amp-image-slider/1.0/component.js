@@ -32,6 +32,11 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
  */
 // eslint-disable-next-line
 initLogConstructor();
+
+/**
+ * Required for Gestures.get otherwise throws:
+ * "Uncaught Error: Expected service timer to be registered"
+ */
 installTimerService(global);
 
 /**
