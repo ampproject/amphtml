@@ -13,12 +13,7 @@ import {StateProperty} from './amp-story-store-service';
 
 import {getMode} from '../../../src/mode';
 import {createShadowRoot} from '../../../src/shadow-embed';
-import {
-  assertHttpsUrl,
-  getSourceOrigin,
-  isProxyOrigin,
-  resolveRelativeUrl,
-} from '../../../src/url';
+import {assertHttpsUrl} from '../../../src/url';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -211,33 +206,13 @@ export function userAssertValidProtocol(element, url) {
  * @return {string}
  */
 export function getSourceOriginForElement(element, url) {
-  let domainName;
-
+  const urlService = Services.urlForDoc(element);
   try {
-    domainName = getSourceOrigin(Services.urlForDoc(element).parse(url));
-    // Remove protocol prefix.
-    domainName = Services.urlForDoc(element).parse(domainName).hostname;
-  } catch (e) {
+    url = urlService.getSourceOrigin(url);
+  } catch (_) {
     // Unknown path prefix in url.
-    domainName = Services.urlForDoc(element).parse(url).hostname;
   }
-  return domainName;
-}
-
-/**
- * Resolves an image url and optimizes it if served from the cache.
- * @param {!Window} win
- * @param {string} url
- * @return {string}
- */
-export function resolveImgSrc(win, url) {
-  let urlSrc = resolveRelativeUrl(url, win.location);
-  if (isProxyOrigin(win.location.href)) {
-    // TODO(Enriqe): add extra params for resized image, for example:
-    // (/ii/w${width}/s)
-    urlSrc = urlSrc.replace('/c/s/', '/i/s/');
-  }
-  return urlSrc;
+  return urlService.parse(url).hostname;
 }
 
 /**
@@ -261,19 +236,36 @@ export function shouldShowStoryUrlInfo(viewer, storeService) {
  * @param {string=} warn
  * @return {?string}
  */
-export function getStoryAttributeSrc(element, attribute, warn = false) {
+export function getStoryAttributeSrc(element, attribute, warn) {
   const storyEl = dev().assertElement(
     closestAncestorElementBySelector(element, 'AMP-STORY')
   );
-  const attrSrc = storyEl && storyEl.getAttribute(attribute);
+  return getAttributeUrl(storyEl, attribute, warn);
+}
 
-  if (attrSrc) {
-    assertHttpsUrl(attrSrc, storyEl, attribute);
-  } else if (warn) {
-    user().warn('AMP-STORY', `Expected ${attribute} attribute on <amp-story>`);
+/**
+ *
+ * @param {Element} element
+ * @param {string} attribute
+ * @param {boolean=} warn
+ * @return {?string}
+ */
+export function getAttributeUrl(element, attribute, warn) {
+  const attrSrc = element.getAttribute(attribute);
+  if (!attrSrc) {
+    if (warn) {
+      user().warn(
+        'AMP-STORY',
+        `Expected ${attribute} attribute on <${element.localName}>`
+      );
+    }
+    return null;
   }
-
-  return attrSrc;
+  return Services.urlForDoc(element).assertHttpsUrl(
+    attrSrc,
+    element,
+    attribute
+  );
 }
 
 /**

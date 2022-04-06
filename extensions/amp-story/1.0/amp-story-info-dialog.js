@@ -20,7 +20,6 @@ import {
 import {createShadowRootWithStyle, triggerClickFromLightDom} from './utils';
 
 import {CSS} from '../../../build/amp-story-info-dialog-1.0.css';
-import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 
 /** @const {string} Class to toggle the info dialog. */
 export const DIALOG_VISIBLE_CLASS = 'i-amphtml-story-info-dialog-visible';
@@ -197,7 +196,9 @@ export class InfoDialog {
         if (!moreInfoUrl) {
           return null;
         }
-        return assertAbsoluteHttpOrHttpsUrl(dev().assertString(moreInfoUrl));
+        return Services.urlForDoc(this.parentEl_).assertAbsoluteHttpOrHttpsUrl(
+          dev().assertString(moreInfoUrl)
+        );
       });
   }
 }
