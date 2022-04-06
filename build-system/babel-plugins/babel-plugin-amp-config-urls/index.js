@@ -4,6 +4,16 @@ const {dirname, relative} = require('path');
 const importSource = `${process.cwd()}/src/config/urls`;
 
 /**
+ * @param {string} fromFilename
+ * @param {string} toModule
+ * @return {string}
+ */
+function relativeModule(fromFilename, toModule) {
+  const resolved = relative(dirname(fromFilename), toModule);
+  return resolved.startsWith('.') ? resolved : `./${resolved}`;
+}
+
+/**
  * @param {import('@babel/core')} babel
  * @return {import('@babel/core').PluginObj}
  */
@@ -25,7 +35,7 @@ module.exports = function (babel) {
               'babel-plugin-amp-config-urls must be called with a filename'
             );
           }
-          importSourceRelative = relative(dirname(filename), importSource);
+          importSourceRelative = relativeModule(filename, importSource);
         },
       },
       ImportDeclaration(path) {
