@@ -160,12 +160,7 @@ export class AmpTruvidPlayer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return (
-      layout == Layout_Enum.FIXED ||
-      layout == Layout_Enum.FIXED_HEIGHT ||
-      layout == Layout_Enum.RESPONSIVE ||
-      layout == Layout_Enum.FILL
-    );
+    return layout == Layout_Enum.RESPONSIVE;
   }
 
   /** @override */
