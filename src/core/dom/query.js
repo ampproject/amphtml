@@ -89,6 +89,9 @@ export function scopedQuerySelectorAll(root, selector) {
  * @return {boolean} True if the element matched the selector. False otherwise.
  */
 export function matches(el, selector) {
+  if (mode.isEsm()) {
+    return el./*OK*/ matches(selector);
+  }
   const matcher =
     el.matches ||
     el.webkitMatchesSelector ||
@@ -145,7 +148,7 @@ export function closestNode(node, callback) {
  * @return {?HTMLElement} closest ancestor if found.
  */
 export function closestAncestorElementBySelector(element, selector) {
-  return element.closest
+  return mode.isEsm() || element.closest
     ? element.closest(selector)
     : closest(element, (el) => matches(el, selector));
 }
