@@ -64,6 +64,11 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     return isPrerenderActivePage(element.parentElement);
   }
 
+  /** @override  */
+  static previewAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
