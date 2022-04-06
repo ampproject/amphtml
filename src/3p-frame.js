@@ -5,7 +5,7 @@ import {tryParseJson} from '#core/types/object/json';
 
 import {dev, devAssert, user, userAssert} from '#utils/log';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 import {getContextMetadata} from './iframe-attributes';
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 

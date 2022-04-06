@@ -30,6 +30,7 @@ const imports = {
     'setStyles',
   ],
   '#core/types/enum': ['mangleObjectValues'],
+  '#core/types/pure': ['pure'],
   '#experiments': ['isExperimentOn'],
   '#utils/log': ['user', 'dev'],
   '#preact/utils': ['propName', 'tabindexFromProps'],

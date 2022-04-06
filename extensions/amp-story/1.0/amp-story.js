@@ -55,7 +55,7 @@ import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 import {isExperimentOn} from '#experiments';
 
 import {Services} from '#service';
-import {calculateScriptBaseUrl} from '#service/extension-script';
+import {calculateExtensionFileUrl} from '#service/extension-script';
 import {createPseudoLocale} from '#service/localization/strings';
 
 import {getDetail} from '#utils/event-helper';
@@ -2668,14 +2668,12 @@ export class AmpStory extends AMP.BaseElement {
   fetchLocalizationStrings_(languageCode) {
     const localizationService = getLocalizationService(this.element);
 
-    const base = calculateScriptBaseUrl(
+    const localizationUrl = calculateExtensionFileUrl(
+      this.win,
       this.win.location,
+      `amp-story.${languageCode}.json`,
       getMode(this.win).localDev
     );
-    const rtvPath = getMode(this.win).localDev
-      ? ''
-      : `rtv/${getMode(this.win).rtvVersion}/`;
-    const localizationUrl = `${base}/${rtvPath}v0/amp-story.${languageCode}.json`;
 
     // The cache fallbacks to english if language not found, locally it errors.
     Services.xhrFor(this.win)

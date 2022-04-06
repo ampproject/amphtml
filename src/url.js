@@ -9,7 +9,7 @@ import {Services} from '#service';
 
 import {userAssert} from '#utils/log';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 
 const SERVING_TYPE_PREFIX = new Set([
   // No viewer

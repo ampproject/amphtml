@@ -79,7 +79,7 @@ exports.rules = [
     allowlist: [
       '3p/**->src/utils/log.js',
       '3p/**->src/url.js',
-      '3p/**->src/config.js',
+      '3p/**->src/config/urls.js',
       '3p/**->src/mode.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
