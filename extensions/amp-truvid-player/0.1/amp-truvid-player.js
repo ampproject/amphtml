@@ -1,6 +1,6 @@
 import {Deferred} from '#core/data-structures/promise';
 import {dispatchCustomEvent, removeElement} from '#core/dom';
-import {applyFillContent, Layout_Enum} from '#core/dom/layout';
+import {Layout_Enum, applyFillContent} from '#core/dom/layout';
 import {propagateAttributes} from '#core/dom/propagate-attributes';
 
 import {Services} from '#service';

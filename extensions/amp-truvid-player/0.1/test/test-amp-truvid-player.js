@@ -39,6 +39,7 @@ describes.realWin(
     it('requires data-org-id', () => {
       return allowConsoleError(() => {
         return getTruvidPlayer({
+          'layout': 'responsive',
           'data-playlist-id': '229',
           'data-widget-id': '442',
         }).should.eventually.be.rejectedWith(
@@ -50,6 +51,7 @@ describes.realWin(
     it('requires data-widget-id', () => {
       return allowConsoleError(() => {
         return getTruvidPlayer({
+          'layout': 'responsive',
           'data-org-id': '73',
           'data-playlist-id': '229',
         }).should.eventually.be.rejectedWith(
@@ -62,6 +64,7 @@ describes.realWin(
       it('should create a placeholder image', () => {
         return getTruvidPlayer({
           'data-org-id': '73',
+          'layout': 'responsive',
           'data-playlist-id': '229',
           'data-widget-id': '442',
         }).then((truvid) => {
@@ -82,6 +85,7 @@ describes.realWin(
           'data-playlist-id': '229',
           'data-widget-id': '442',
           'aria-label': 'truvid video',
+          'layout': 'responsive',
         }).then((truvid) => {
           const img = truvid.querySelector('img');
           expect(img).to.not.be.null;
