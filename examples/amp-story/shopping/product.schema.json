@@ -1,11 +1,4 @@
 {
-  "$defs": {
-    "https": {
-      "type": "string",
-      "format": "uri-reference",
-      "pattern": "^(/|https://|https?://(127.0.0.1|([^/]+\\.)?localhost)(:[0-9]+)?/)"
-    }
-  },
   "title": "Product",
   "description": "A product from an amp-story-shopping configuration.",
   "type": "object",
@@ -277,5 +270,12 @@
     "productPriceCurrency",
     "productImages",
     "productDetails"
-  ]
+  ],
+  "$defs": {
+    "https": {
+      "type": "string",
+      "format": "uri-reference",
+      "pattern": "^(/|https://|https?://(127.0.0.1|([^/]+\\.)?localhost)(:[0-9]+)?/)"
+    }
+  }
 }

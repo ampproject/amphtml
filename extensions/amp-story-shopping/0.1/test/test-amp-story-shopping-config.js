@@ -110,7 +110,7 @@ describes.realWin(
       shoppingAttachment.appendChild(
         <script type="application/json">{JSON.stringify(config)}</script>
       );
-      return getShoppingConfig(shoppingAttachment, pageElement);
+      return getShoppingConfig(shoppingAttachment, pageElement.id);
     }
 
     it('does use inline config', async () => {
@@ -276,6 +276,22 @@ describes.realWin(
         expect(Object.keys(keyedShoppingConfig).length).to.eql(1);
         expect(Object.keys(keyedShoppingConfig)[0]).to.eql('art');
       });
+    });
+
+    it('should pass config validation with realtive urls', async () => {
+      const validConfig = copyObject(defaultInlineConfig);
+      const relativeUrl = '/relative/url.com'; // This is not a valid url
+      validConfig['items'][0]['productUrl'] = relativeUrl;
+
+      const spy = env.sandbox.spy(user(), 'warn');
+      const keyedShoppingConfig = await createAmpStoryShoppingConfig(
+        null,
+        validConfig
+      );
+      const errorString =
+        '[#page1 items[0] Brass Lamp]/productUrl must match pattern "^(/|https://|https?://(127.0.0.1|([^/]+\\.)?localhost)(:[0-9]+)?/)"';
+      expect(spy).to.have.been.not.calledWith(errorStringTagName, errorString);
+      expect(Object.keys(keyedShoppingConfig).length).to.eql(2);
     });
   }
 );

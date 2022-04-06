@@ -557,7 +557,10 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
  */
 export function relativeToSourceUrl(relativeUrlString, element) {
   const {sourceUrl} = Services.documentInfoForDoc(element);
-  return resolveRelativeUrl(relativeUrlString, sourceUrl);
+  return Services.urlForDoc(element).resolveRelativeUrl(
+    relativeUrlString,
+    sourceUrl
+  );
 }
 
 /**

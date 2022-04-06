@@ -42,18 +42,18 @@ let KeyedShoppingConfigDef;
  * amp-story-shopping-attachment element.
  * @param {!Element} shoppingAttachmentEl <amp-story-shopping-attachment>
  *     The amp story shopping attachment element
- * @param {!Element} pageEl the page element
+ * @param {string} itemNamePrefix the name prefix of the element
  * @return {!Promise<!KeyedShoppingConfigDef>} An object with product ID
  *     keys that each have a `ShoppingConfigDataDef` value
  */
-export function getShoppingConfig(shoppingAttachmentEl, pageEl) {
+export function getShoppingConfig(shoppingAttachmentEl, itemNamePrefix) {
   return getElementConfig(shoppingAttachmentEl).then((config) => {
     const allItems = config['items'];
     const validItems = allItems.filter((item, i) => {
       const productTitle = item?.productTitle ?? '';
       return validateConfig(
         item,
-        `[${`#${pageEl.id} items[${i}] ${productTitle}`.trim()}]`
+        `[${`#${itemNamePrefix} items[${i}] ${productTitle}`.trim()}]`
       );
     });
 
