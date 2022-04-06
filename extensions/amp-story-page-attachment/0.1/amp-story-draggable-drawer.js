@@ -42,7 +42,7 @@ export const DrawerState = {
 const renderDrawerElement = () => {
   return (
     <div class="i-amphtml-story-draggable-drawer">
-      <div class="i-amphtml-story-draggable-drawer-container" hidden>
+      <div class="i-amphtml-story-draggable-drawer-container">
         <div class="i-amphtml-story-draggable-drawer-content"></div>
       </div>
     </div>
