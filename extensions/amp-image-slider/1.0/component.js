@@ -3,6 +3,7 @@ import objstr from 'obj-str';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {setStyle} from '#core/dom/style';
 import {clamp} from '#core/math';
+import {isFiniteNumber} from '#core/types';
 
 import * as Preact from '#preact';
 import {
@@ -442,6 +443,10 @@ export function BentoImageSliderWithRef(
 
     registerEvents();
     if (initialPosition) {
+      if (!isFiniteNumber(initialPosition)) {
+        displayWarning('initialPosition must be a finite number');
+        return null;
+      }
       updatePositions(initialPosition);
     }
   }, [
@@ -464,6 +469,11 @@ export function BentoImageSliderWithRef(
       }),
     [updatePositions]
   );
+
+  if (!isFiniteNumber(stepSize)) {
+    displayWarning('stepSize must be a finite number');
+    return null;
+  }
 
   if (!checkProps(firstImageAs, secondImageAs)) {
     displayWarning('2 images must be provided for comparison');
