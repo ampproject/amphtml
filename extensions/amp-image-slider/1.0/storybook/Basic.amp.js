@@ -1,11 +1,10 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-image-slider-1_0',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [{name: 'amp-image-slider', version: '1.0'}],
@@ -13,22 +12,14 @@ export default {
   },
 };
 
-export const ExampleUseCase = () => {
-  const first = text(
-    'First image',
-    'https://amp.dev/static/samples/img/canoe_900x600.jpg'
-  );
-  const second = text(
-    'Second image',
-    'https://amp.dev/static/samples/img/canoe_900x600_blur.jpg'
-  );
-
+export const ExampleUseCase = ({first, second, ...args}) => {
   return (
     <amp-image-slider
       layout="fixed"
       width="600"
       height="300"
       initial-slider-position="0"
+      {...args}
     >
       <amp-img
         slot="first-image"
@@ -48,6 +39,7 @@ export const ExampleUseCase = () => {
   );
 };
 
-ExampleUseCase.story = {
-  name: 'Example use case story',
+ExampleUseCase.args = {
+  first: 'https://amp.dev/static/samples/img/canoe_900x600.jpg',
+  second: 'https://amp.dev/static/samples/img/canoe_900x600_blur.jpg',
 };
