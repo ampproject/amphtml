@@ -29,7 +29,6 @@ import {
 
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {getAmpdoc} from '../../../src/service-helpers';
-import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 
 /** @private @const {string} */
 const LAUNCH_ICON_CLASS = 'i-amphtml-tooltip-action-icon-launch';
@@ -158,6 +157,9 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {!Element} */
     this.storyEl_ = storyEl;
+
+    /** @private @const {../../../src/service/url-impl.js.Url} */
+    this.urlService_ = Services.urlForDoc(storyEl);
 
     /** @private {?Element} */
     this.shadowRoot_ = null;
@@ -455,12 +457,12 @@ export class AmpStoryEmbeddedComponent {
       );
     }
     const elUrl = target.getAttribute('href');
-    if (!isProtocolValid(elUrl)) {
+    if (!this.urlService_.isProtocolValid(elUrl)) {
       user().error(TAG, 'The tooltip url is invalid');
       return '';
     }
 
-    return parseUrlDeprecated(elUrl).href;
+    return this.urlService_.parse(elUrl).href;
   }
 
   /**
@@ -518,7 +520,7 @@ export class AmpStoryEmbeddedComponent {
    */
   updateTooltipComponentIcon_(target, embedConfig) {
     const iconUrl = target.getAttribute('data-tooltip-icon');
-    if (!isProtocolValid(iconUrl)) {
+    if (!this.urlService_.isProtocolValid(iconUrl)) {
       user().error(TAG, 'The tooltip icon url is invalid');
       return;
     }
@@ -538,8 +540,9 @@ export class AmpStoryEmbeddedComponent {
       this.mutator_.mutateElement(
         dev().assertElement(tooltipCustomIcon),
         () => {
+          const {href} = this.urlService_.parse(iconUrl);
           setImportantStyles(dev().assertElement(tooltipCustomIcon), {
-            'background-image': `url(${parseUrlDeprecated(iconUrl).href})`,
+            'background-image': `url(${href})`,
           });
         }
       );

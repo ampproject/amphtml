@@ -25,7 +25,6 @@ import {
 
 import {CSS as pageAttachmentCss} from '../../../build/amp-story-open-page-attachment-0.1.css';
 import {CSS} from '../../../build/amp-story-page-attachment-0.1.css';
-import {getSourceOrigin} from '../../../src/url';
 import {
   Action,
   StateProperty,
@@ -605,7 +604,9 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
    * @private
    */
   getPublisherOrigin_() {
-    const publisherOrigin = getSourceOrigin(this.getAmpDoc().getUrl());
+    const urlService = Services.urlForDoc(this.element);
+    const url = this.getAmpDoc().getUrl();
+    const publisherOrigin = urlService.getSourceOrigin(url);
     return publisherOrigin.replace(/^http(s)?:\/\/(www.)?/, '');
   }
 }
