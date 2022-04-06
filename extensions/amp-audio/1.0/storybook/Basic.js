@@ -1,5 +1,3 @@
-import {withKnobs} from '@storybook/addon-knobs';
-
 import * as Preact from '#preact';
 
 import {Audio} from '../component';
@@ -7,7 +5,6 @@ import {Audio} from '../component';
 export default {
   title: 'Audio',
   component: Audio,
-  decorators: [withKnobs],
 };
 
 export const _default = () => {
