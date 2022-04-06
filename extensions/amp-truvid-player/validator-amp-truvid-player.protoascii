@@ -1,0 +1,23 @@
+tags: {  # amp-truvid-player
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-truvid-player"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-truvid-player>
+  html_format: AMP
+  tag_name: "TRUVID-PLAYER"
+  requires_extension: "amp-truvid-player"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://amp.dev/documentation/components/amp-truvid-player/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+  }
+}
