@@ -363,70 +363,6 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
     });
   });
 
-  describe('sendXhrRequest', () => {
-    function mockXhrFor(response) {
-      return {
-        fetch: () =>
-          Promise.resolve({
-            text: () => Promise.resolve(response),
-          }),
-      };
-    }
-
-    it('should not collapse when ad response', async () => {
-      env.sandbox
-        .stub(Services, 'xhrFor')
-        .returns(
-          mockXhrFor('<html><body><div>advertisement</div></body></html>')
-        );
-
-      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
-      const stub = env.sandbox.stub(impl, 'collapse');
-
-      expect(stub.notCalled).to.equal(true);
-      await impl.sendXhrRequest();
-      expect(stub.notCalled).to.equal(true);
-    });
-
-    it('should collapse when no ad response', async () => {
-      env.sandbox
-        .stub(Services, 'xhrFor')
-        .returns(mockXhrFor('<html><head></head><body></body></html>'));
-
-      impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
-      const stub = env.sandbox.stub(impl, 'collapse');
-
-      expect(stub.notCalled).to.equal(true);
-      await impl.sendXhrRequest();
-      expect(stub.calledOnce).to.equal(true);
-    });
-
-    it('should collapse on collapse event', async () => {
-      element = createElementWithAttributes(doc, 'amp-ad');
-      const iframe = createIframeWithMessageStub(win);
-      element.appendChild(iframe);
-      doc.body.appendChild(element);
-
-      impl = new AmpAdNetworkSmartadserverImpl(element, doc, win);
-      const stub = env.sandbox.stub(impl, 'collapse');
-      const data = {
-        sentinel: impl.sentinel,
-        type: 'collapse',
-      };
-
-      expect(stub).to.not.be.called;
-
-      iframe.contentWindow.parent.postMessage('collapse', '*');
-      expect(stub).to.not.be.called;
-
-      iframe.contentWindow.parent.postMessage(data, '*');
-      expect(stub).to.be.calledOnce;
-
-      iframe.contentWindow.parent.postMessage(data, '*');
-      expect(stub).to.be.calledOnce;
-    });
-  });
-
   describe('getBestRtcCallout', () => {
     beforeEach(() => {
       impl = new AmpAdNetworkSmartadserverImpl(doc.createElement('amp-ad'));
@@ -508,6 +444,79 @@ describes.realWin('amp-ad-network-smartadserver-impl', realWinConfig, (env) => {
 
     it('should return empty object when falsy argument', async () => {
       expect(impl.getBestRtcCallout_(null)).to.deep.equal({});
+    });
+  });
+
+  describe('addListener', () => {
+    it('should collapse below viewport on collapse event', async () => {
+      const offset = createElementWithAttributes(doc, 'div');
+      offset.setAttribute('style', 'width:100%; height:10000px');
+      doc.body.appendChild(offset);
+
+      element = createElementWithAttributes(doc, 'amp-ad');
+      const iframe = createIframeWithMessageStub(win);
+      element.appendChild(iframe);
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkSmartadserverImpl(element, doc, win);
+
+      const attemptCollapse = env.sandbox
+        .stub(impl, 'attemptCollapse')
+        .callsFake(() => {
+          return Promise.resolve();
+        });
+
+      const data = {
+        sentinel: impl.sentinel,
+        type: 'collapse',
+      };
+
+      expect(element.getBoundingClientRect().top).to.equal(10000);
+      expect(attemptCollapse).to.not.be.called;
+
+      iframe.contentWindow.parent.postMessage('collapse', '*');
+      expect(attemptCollapse).to.not.be.called;
+
+      iframe.contentWindow.parent.postMessage(
+        {
+          sentinel: 1234,
+          type: 'collapse',
+        },
+        '*'
+      );
+      expect(attemptCollapse).to.not.be.called;
+
+      iframe.contentWindow.parent.postMessage(data, '*');
+      expect(attemptCollapse).to.be.calledOnce;
+
+      iframe.contentWindow.parent.postMessage(data, '*');
+      expect(attemptCollapse).to.be.calledOnce;
+    });
+
+    it('should not collapse in viewport on collapse event', async () => {
+      element = createElementWithAttributes(doc, 'amp-ad');
+      const iframe = createIframeWithMessageStub(win);
+      element.appendChild(iframe);
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkSmartadserverImpl(element, doc, win);
+
+      const attemptCollapse = env.sandbox
+        .stub(impl, 'attemptCollapse')
+        .callsFake(() => {
+          return Promise.resolve();
+        });
+
+      const data = {
+        sentinel: impl.sentinel,
+        type: 'collapse',
+      };
+
+      expect(element.getBoundingClientRect().top).to.equal(0);
+      expect(doc.body.getBoundingClientRect().height).to.be.lt(160);
+      expect(attemptCollapse).to.not.be.called;
+
+      iframe.contentWindow.parent.postMessage(data, '*');
+      expect(attemptCollapse).to.be.calledOnce;
+      expect(element.getBoundingClientRect().height).to.be.gt(150);
     });
   });
 });

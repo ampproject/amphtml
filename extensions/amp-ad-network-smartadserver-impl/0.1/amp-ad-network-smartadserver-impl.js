@@ -18,7 +18,6 @@ import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {tryParseJson} from '#core/types/object/json';
-import {includes} from '#core/types/string';
 
 import {Services} from '#service';
 
@@ -33,9 +32,6 @@ const TAG = 'amp-ad-network-smartadserver-impl';
 
 /** @const {number} */
 const MAX_URL_LENGTH = 15360;
-
-/** @type {string} */
-const SAS_NO_AD_STR = '<html><head></head><body></body></html>';
 
 /**
  * @const {!./shared/url-builder.QueryParameterDef}
@@ -118,28 +114,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /** @override */
-  isValidElement() {
-    return this.isAmpAdElement();
-  }
-
-  /** @override */
-  isXhrAllowed() {
-    return false;
-  }
-
-  /** @override */
-  sendXhrRequest(adUrl) {
-    return super.sendXhrRequest(adUrl).then((response) => {
-      return response.text().then((responseText) => {
-        if (includes(responseText, SAS_NO_AD_STR)) {
-          this./*OK*/ collapse();
-        }
-        return new Response(response);
-      });
-    });
-  }
-
-  /** @override */
   getCustomRealTimeConfigMacros_() {
     const allowed = {
       'width': true,
@@ -186,6 +160,16 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     };
   }
 
+  /** @override */
+  isValidElement() {
+    return this.isAmpAdElement();
+  }
+
+  /** @override */
+  isXhrAllowed() {
+    return false;
+  }
+
   /**
    * Adds message event listener and triggers collapsing
    */
@@ -195,7 +179,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
         event.data.sentinel === this.sentinel &&
         event.data.type === 'collapse'
       ) {
-        this./*OK*/ collapse();
+        this.attemptCollapse().catch(() => {});
         this.win.removeEventListener('message', messageListener);
       }
     };
