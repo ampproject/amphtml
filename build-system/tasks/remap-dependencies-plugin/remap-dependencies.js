@@ -3,45 +3,61 @@ const {resolvePath} = require('../../babel-config/import-resolver');
 
 /**
  * Generates a plugin to remap the dependencies of a JS bundle.
- * `remaps` is an object. The keys are regexes that match file path(s) relative to the root of the amphtml repo and the values are strings that used to replace imports to files that match their key.
+ *
+ * `remaps` is an object where each entry indicates that the module identified by the key should be remapped to the module identified by the value.
+ *  Keys can use regex syntax.
+ *  Modules can be local modules (js/jsx/ts/tsx files in the repo) or npm modules (in the node_modules at the root of the repo).
+ *  Local modules must be declared with a leading '.' (e.g './mod1.js'). They don't need a file extension.
+ *
  * `externals` is a list of strings representing import paths that should be external-ized
- * @param {{remaps: Object, externals: Array<string>, resolve?: *}} remapDependenciesPluginConfig
+ *
+ * `resolve` is function that will return the absolute path of a module given the import path, directory of the importer, and repo root
+ * @param {{remaps: Object, externals: Array<string>, resolve: AmpResolve}} remapDependenciesPluginConfig
  * @return {Object}
  */
-function remapDependenciesPlugin({externals, remaps, resolve = resolvePath}) {
+function remapDependenciesPlugin({externals, remaps, resolve}) {
   const remapArr = Object.entries(remaps).map(([path, value]) => ({
     regex: new RegExp(`^${path}(\.js|\.jsx|\.ts|\.tsx)?$`),
     value,
   }));
+  const rootDir = process.cwd();
+
   return {
     name: 'remap-dependencies',
     setup(build) {
-      build.onResolve(
-        {filter: /.*/},
-        onResolveRemapDeps.bind(undefined, {externals, remapArr, resolve})
+      build.onResolve({filter: /.*/}, (args) =>
+        onResolveRemapDeps(
+          {
+            externals,
+            remapArr,
+            resolve,
+            rootDir,
+          },
+          args
+        )
       );
     },
   };
 }
 
 /**
- * @param {{externals: string, remapArr: Array<*>, resolve: *}} remapConfig
+ * Checks if the path that's being imported matches a declared remap.
+ * If import path matches, returns correct path with info on if it's an external.
+ * If not, returns undefined
+ * @param {{externals: string[], remapArr: Array<*>, resolve: AmpResolve, rootDir: string}} remapConfig
  * @param {{resolveDir: string, path: string}} args
  * @return {*}
  */
-function onResolveRemapDeps({externals, remapArr, resolve}, args) {
+function onResolveRemapDeps({externals, remapArr, resolve, rootDir}, args) {
   const {path: importPath, resolveDir} = args;
 
+  // Construct candidate for remapping
+  // If importing local module, must resolve module relative to repo-root and prefix with `./`
+  // because local modules listed in `remap` keys use relative paths from the repo-root
   let dep;
   if (importPath.startsWith('.')) {
-    /**
-     * Handles local imports by reconstructing the importPath's repo-relative path. Uses repo-relative import path to check if it matches any of the remap regexes.
-     * Uses resolvePath() to handle directory imports and non-js imports (jsx, ts, tsx)
-     */
-    const absImportPath = path.posix.join(resolveDir, importPath);
-    const rootDir = process.cwd();
-    const rootRelativePath = path.posix.relative(rootDir, absImportPath);
-    dep = resolve(rootRelativePath);
+    const absPath = resolve(importPath, resolveDir, rootDir);
+    dep = `./${path.posix.relative(rootDir, absPath)}`;
   } else {
     dep = importPath;
   }
@@ -52,20 +68,38 @@ function onResolveRemapDeps({externals, remapArr, resolve}, args) {
     }
 
     const isExternal = externals.includes(value);
-    // TODO: remove this garbage after PR #37857 is merged or we come up with a better solution
-    if (value === 'react' || value === 'react-dom') {
-      return {
-        path: isExternal ? value : require.resolve(value),
-        external: isExternal,
-      };
-    }
     return {
-      path: isExternal ? value : resolve(value),
+      path: isExternal ? value : resolve(value, resolveDir, rootDir),
       external: isExternal,
     };
   }
 }
 
+/**
+ * @typedef {typeof ampResolve} AmpResolve
+ */
+
+/**
+ * Resolves mostly arbitrary import paths to (node or local) modules.
+ * Similar to require.resolve() but handles aliased paths and paths to non-js modules (jsx/ts/tsx).
+ *
+ * @param {string} importPath path to the import relative to importer
+ * @param {string} absResolveDir absolute path to directory of the importer
+ * @param {string} absRootDir absolute path to repo's root
+ * @return {string} absolute path to import
+ */
+function ampResolve(importPath, absResolveDir, absRootDir) {
+  const absImportPath = path.posix.join(absResolveDir, importPath);
+  const rootRelImportPath = path.posix.relative(absRootDir, absImportPath);
+  const babelResolvePath = resolvePath(rootRelImportPath);
+  if (babelResolvePath) {
+    return path.posix.join(absRootDir, babelResolvePath);
+  } else {
+    return require.resolve(importPath);
+  }
+}
+
 module.exports = {
   remapDependenciesPlugin,
+  ampResolve,
 };

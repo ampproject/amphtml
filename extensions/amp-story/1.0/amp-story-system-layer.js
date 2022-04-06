@@ -13,7 +13,7 @@ import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
@@ -656,7 +656,7 @@ export class SystemLayer {
   /**
    * Reacts to UI state updates and triggers the expected UI.
    * Called inside a mutate context if not initializing.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -667,11 +667,11 @@ export class SystemLayer {
     shadowRoot.removeAttribute('desktop');
 
     switch (uiState) {
-      case UIType.DESKTOP_FULLBLEED:
+      case UIType_Enum.DESKTOP_FULLBLEED:
         shadowRoot.setAttribute('desktop', '');
         shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
         break;
-      case UIType.DESKTOP_ONE_PANEL:
+      case UIType_Enum.DESKTOP_ONE_PANEL:
         shadowRoot.classList.add('i-amphtml-story-desktop-one-panel');
         break;
     }

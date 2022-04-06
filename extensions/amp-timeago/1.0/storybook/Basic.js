@@ -20,6 +20,7 @@ export default {
   args: {
     cutoff: 0,
     placeholder: 'Time passed!',
+    dateTime: Date.now(),
   },
   argTypes: {
     dateTime: {

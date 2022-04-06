@@ -123,6 +123,11 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
   }
 
   /** @override */
+  isXhrAllowed() {
+    return false;
+  }
+
+  /** @override */
   sendXhrRequest(adUrl) {
     return super.sendXhrRequest(adUrl).then((response) => {
       return response.text().then((responseText) => {

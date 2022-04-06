@@ -6,35 +6,39 @@ const path = require('path');
 const {remapDependenciesPlugin} = require('./remap-dependencies');
 
 /**
- * slightly complex but mocks resolvePath() which is itself complex
- * handles resolving node modules by returning them back
+ * slightly complex but mocks ampResolve() which is itself complex
+ * handles resolving node modules by returning input
  * handles resolving local paths by
  *  ensuring it's prefixed with './'
  *  ensuring it resolves barrel files (ie. directory imports) by
  *    suffixing filepath with '/index' and appropriate file extension
  */
-const resolveMock = sinon.fake((s) => {
-  if (s.startsWith('node-mod-')) {
+const resolveMock = sinon.fake((s, resolveDir, unusedAbsRootDir) => {
+  if (s.startsWith('#')) {
+    // do nothing
+    // technically ampResolve handles aliased paths, but I'm not mocking it since this functionality isn't actually used in the remap-dependencies plugin
+    // esbuild should have already resolved path aliases because it adheres to tsconfig.compilerOptions.paths config (https://esbuild.github.io/content-types/#tsconfig-json)
+  } else if (s.startsWith('node-mod-')) {
     // return input if it's a node module (use special "node-mod-" prefix in tests to indicate node module)
+    // later we will assert that we resolved to the node-mod-
     return s;
   } else {
-    if (!s.startsWith('.')) {
-      // otherwise, assume local module,
-      // ensure local modules always have leading .
-      s = `./${s}`;
-    }
     // handle directory imports with barrel file and appropriate file extension to emulate behavior of resolvePath
-    if (s.match(/((js|jsx|ts|tsx)-)?dir\d?(\/index)?$/)) {
+    s = path.posix.join(resolveDir, s);
+    if (s.match(/((js|jsx|ts|tsx)-)?dir\d?\/?(index)?$/)) {
       // return barrel file if importing a directory (use special "dir" in tests to indicate path to directory)
       const [, , fileType, indexStr] = s.match(
-        /((js|jsx|ts|tsx)-)?dir\d?(\/index)?$/
+        /((js|jsx|ts|tsx)-)?dir\d?\/?(index)?$/
       );
-      s = `${s}${!!indexStr ? '' : '/index'}.${fileType || 'js'}`;
+      if (!indexStr) {
+        s = path.posix.join(s, '/index');
+      }
+      s += `.${fileType || 'js'}`;
     }
     // handle file imports with appropriate file extension to emulate behavior of resolvePath
     if (s.match(/\/((js|jsx|ts|tsx)-)?mod\d?$/)) {
       const fileType = s.match(/\/((js|jsx|ts|tsx)-)?mod\d?$/)[2];
-      s = `${s}.${fileType || 'js'}`;
+      s += `.${fileType || 'js'}`;
     }
     return s;
   }

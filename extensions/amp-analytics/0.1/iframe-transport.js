@@ -7,7 +7,7 @@ import {devAssert, user} from '#utils/log';
 
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {getMode} from '../../../src/mode';
 
 /**
