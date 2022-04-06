@@ -61,7 +61,6 @@ defaultTask.flags = {
   fortesting: 'Compile production binaries for local testing',
   noconfig: 'Compile production binaries without applying AMP_CONFIG',
   config: 'Set the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  closure_concurrency: 'Set the number of concurrent invocations of closure',
   extensions: 'Pre-build the given extensions, lazily builds the rest.',
   extensions_from:
     'Pre-build the extensions used by the provided example page.',
