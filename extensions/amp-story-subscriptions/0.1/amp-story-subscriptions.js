@@ -29,9 +29,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
-
-    /** @private {?Element} */
-    this.dialogEl_ = null;
   }
 
   /** @override */
@@ -55,8 +52,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
       // Create a paywall dialog element that have required attributes to be able to be
       // rendered by amp-subscriptions.
-      this.dialogEl_ = this.renderSubscriptionsDialogTemplate_();
-      this.element.appendChild(this.dialogEl_);
+      this.element.appendChild(this.renderSubscriptionsDialogTemplate_());
 
       this.initializeListeners_();
     });

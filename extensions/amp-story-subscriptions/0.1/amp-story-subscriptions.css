@@ -120,10 +120,8 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
 .i-amphtml-story-subscriptions-publisher-button {
   display: flex !important;
   justify-content: center !important;
-
   width: 212px !important;
   height: 40px !important;
-
   background: black !important;
   border-radius: 51px !important;
   display: flex !important;
@@ -144,7 +142,6 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   letter-spacing: 0.15px;
   width: 149px;
   white-space: nowrap !important;
-
   color: white !important;
   font-size: 13px !important;
   font-weight: 500 !important;
