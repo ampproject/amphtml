@@ -30,6 +30,7 @@ function getUnminifiedConfig(buildFor = 'preact') {
       loose: true,
       targets,
       shippedProposals: true,
+      exclude: ['@babel/plugin-transform-for-of'],
     },
   ];
   const presetTypescript = [

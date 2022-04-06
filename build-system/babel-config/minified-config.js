@@ -60,7 +60,6 @@ function getMinifiedConfig(buildFor = 'preact') {
       './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
       BUILD_CONSTANTS,
     ],
-    ['@babel/plugin-transform-for-of', {loose: true, allowArrayLike: true}],
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
@@ -69,6 +68,7 @@ function getMinifiedConfig(buildFor = 'preact') {
       modules: false,
       targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
       shippedProposals: true,
+      exclude: ['@babel/plugin-transform-for-of'],
     },
   ];
   const presetTypescript = [
