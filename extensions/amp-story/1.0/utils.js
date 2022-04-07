@@ -13,12 +13,6 @@ import {StateProperty} from './amp-story-store-service';
 
 import {getMode} from '../../../src/mode';
 import {createShadowRoot} from '../../../src/shadow-embed';
-import {
-  assertHttpsUrl,
-  getSourceOrigin,
-  isProxyOrigin,
-  resolveRelativeUrl,
-} from '../../../src/url';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
