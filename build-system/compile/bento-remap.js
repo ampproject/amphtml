@@ -6,21 +6,20 @@ const {once} = require('../common/once');
 const {bentoBundles} = require('./bundles.config');
 const glob = require('globby');
 const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
-const {posix} = require('path');
+const {posix, sep} = require('path');
 
-const formatPathLikeSource = (path) => `./${path.replace(/^\.\//, '')}`;
+const formatPathLikeSource = (path) =>
+  path.startsWith('.') ? path : `./${path}`;
 
 /**
  * @param {string} path
  * @return {?string}
  */
 function resolveExactModuleFile(path) {
-  let unaliased = path.startsWith('#')
-    ? resolvePath(path)
-    : formatPathLikeSource(path);
+  let unaliased = path.startsWith('#') ? resolvePath(path) : path;
   try {
     if (lstatSync(unaliased).isDirectory()) {
-      unaliased += '/index';
+      unaliased = '/index';
     }
   } catch {
     // lstat fails if not directory
@@ -29,7 +28,7 @@ function resolveExactModuleFile(path) {
   if (result.length !== 1) {
     return null;
   }
-  return result[0];
+  return formatPathLikeSource(posix.join(...result[0].split(sep)));
 }
 
 /**
