@@ -1,3 +1,1 @@
-import { ampConfigUrlsDoNotImportMeUseConfigUrlsInstead as _ampConfigUrlsDoNotImportMeUseConfigUrlsInstead } from "#core/amp-config-urls";
-
-const urls = /* #__PURE__ */_ampConfigUrlsDoNotImportMeUseConfigUrlsInstead();
+const urls = /* #__PURE__ */(() => self.AMP.config.urls)();
