@@ -68,12 +68,19 @@ export function unscaledClientRect(el) {
 }
 
 /**
- * Finds an amp-video/amp-audio ancestor.
+ * Finds an amp-video/amp-audio parent.
  * @param {!Element} el
  * @return {?AmpElement}
  */
 export function ampMediaElementFor(el) {
-  return closestAncestorElementBySelector(el, 'amp-video, amp-audio');
+  const {parentElement} = el;
+  if (
+    parentElement.tagName === 'AMP-VIDEO' ||
+    parentElement.tagName === 'AMP-AUDIO'
+  ) {
+    return parentElement;
+  }
+  return null;
 }
 
 /**
