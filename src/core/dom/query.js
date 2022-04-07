@@ -2,7 +2,6 @@ import {devAssert, devAssertElement} from '#core/assert';
 import * as mode from '#core/mode';
 import {isElement, isString} from '#core/types';
 
-import {copyChildren} from '.';
 import {isScopeSelectorSupported, prependSelectorsWith} from './css-selectors';
 
 /** @fileoverview Helper functions for DOM queries. */
