@@ -89,4 +89,4 @@ jobs:
     if: failure()
     uses: ampproject/amphtml/.github/workflows/create-issue-on-error.yml@main
     with:
-      mention: '@ampproject/build-on-duty'
+      mention: '@ampproject/wg-infra'
