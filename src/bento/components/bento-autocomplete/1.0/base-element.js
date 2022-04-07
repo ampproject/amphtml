@@ -77,6 +77,7 @@ BaseElement['props'] = {
   'minChars': {attr: 'min-chars', type: 'number'},
   'src': {attr: 'src'},
   'suggestFirst': {attr: 'suggest-first', type: 'boolean'},
+  'query': {attr: 'query', type: 'string'},
 };
 
 /** @override */
