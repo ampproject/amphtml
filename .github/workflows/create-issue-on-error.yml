@@ -1,0 +1,34 @@
+# Creates an issue on this repository when a build fails.
+
+on:
+  workflow_call:
+    inputs:
+      mention:
+        description: 'Who should be @-mentioned in the issue body (include the @ sign)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  create-an-error-issue:
+    if: ${{ github.repository == 'ampproject/amphtml' }}
+    name: Report an issue
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: ⭐ Report an issue ⭐
+        uses: JasonEtco/create-an-issue@v2
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: ${{ inputs.mention }}
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

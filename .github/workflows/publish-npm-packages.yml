@@ -144,3 +144,10 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  create-issue-on-error:
+    needs: publish
+    if: failure()
+    uses: ampproject/amphtml/.github/workflows/create-issue-on-error.yml@main
+    with:
+      mention: '@ampproject/wg-infra'
