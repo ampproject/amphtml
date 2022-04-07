@@ -229,7 +229,7 @@
   },
   "104": {
     "string": "reviews",
-    "description": "Button label prompting users to read about peoples assessments of an item."
+    "description": "Button label prompting users to read about peoples assessments of an item. It is not capitalized since it is after a number."
   },
   "105": {
     "string": "Details",
