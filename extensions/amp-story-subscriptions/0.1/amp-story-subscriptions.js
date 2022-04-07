@@ -16,6 +16,9 @@ import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
 const TAG = 'amp-story-subscriptions';
 
+const GOOGLE_LOGO_IMAGE_URL =
+  'https://www.freepnglogos.com/uploads/google-logo-png/google-logo-icon-png-transparent-background-osteopathy-16.png';
+
 export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -71,6 +74,11 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       )
     );
     publisherLogoEl.setAttribute('src', logoSrc);
+
+    const googleLogoEl = dev().assertElement(
+      this.element.querySelector('.i-amphtml-story-subscriptions-google-logo')
+    );
+    googleLogoEl.setAttribute('src', GOOGLE_LOGO_IMAGE_URL);
   }
 
   /** @override */
@@ -163,7 +171,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
               )}
               &nbsp;
               {getStoryAttributeSrc(this.element, 'publisher', /* warn */ true)}
-              aeferggerg
+              &nbsp;aeferggerg
             </span>
           </button>
           <button
@@ -172,7 +180,14 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
             subscriptions-display="NOT granted"
             subscriptions-service="subscribe.google.com"
             subscriptions-decorate="false"
-          ></button>
+          >
+            <img class="i-amphtml-story-subscriptions-google-logo"></img>
+            <span class="i-amphtml-story-subscriptions-google-button-text">
+              {this.localizationService_.getLocalizedString(
+                LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SWG
+              )}
+            </span>
+          </button>
           <div class="i-amphtml-story-subscriptions-signin">
             {this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION

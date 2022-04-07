@@ -250,5 +250,9 @@
   "109": {
     "string": "Subscribe with",
     "description": "Button label prompting users to subscribe with the publisher."
+  },
+  "110": {
+    "string": "Subscribe with Google",
+    "description": "Button label prompting users to subscribe with the publisher via SwG."
   }
 }
