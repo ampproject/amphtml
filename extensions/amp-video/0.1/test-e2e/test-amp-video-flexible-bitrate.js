@@ -86,7 +86,7 @@ describes.endtoend(
         await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
         const video1El = await controller.findElement(
-          '#video1 video.i-amphtml-pool-video'
+          '#video1 video.i-amphtml-pool'
         );
 
         await expect(
@@ -127,7 +127,7 @@ describes.endtoend(
         await forceEventOnVideo(VIDEO_EVENTS.DOWNGRADE, 1);
 
         const video4El = await controller.findElement(
-          '#video2 video.i-amphtml-pool-video'
+          '#video2 video.i-amphtml-pool'
         );
 
         await expect(
@@ -144,7 +144,7 @@ describes.endtoend(
         await controller.findElement('amp-story-page#page-3[active]');
 
         const sources = await controller.findElements(
-          '#video3 video.i-amphtml-pool-media source'
+          '#video3 video.i-amphtml-pool source'
         );
 
         await testElementForSrcAndBitrate(
@@ -177,7 +177,7 @@ describes.endtoend(
         await controller.findElement('amp-story-page#page-6[active]');
 
         const sources = await controller.findElements(
-          '#video6 video.i-amphtml-pool-media source'
+          '#video6 video.i-amphtml-pool source'
         );
 
         await testElementForSrcAndBitrate(
@@ -227,7 +227,7 @@ describes.endtoend(
         await controller.findElement('amp-story-page#page-4[active]');
 
         const video4El = await controller.findElement(
-          '#video4 video.i-amphtml-pool-media'
+          '#video4 video.i-amphtml-pool'
         );
 
         await expect(
@@ -248,7 +248,7 @@ describes.endtoend(
         await afterRenderPromise();
 
         const video4El = await controller.findElement(
-          '#video4 video.i-amphtml-pool-video'
+          '#video4 video.i-amphtml-pool'
         );
 
         await expect(

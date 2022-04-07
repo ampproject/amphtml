@@ -12,36 +12,6 @@ import {Sources} from './sources';
 export const ELEMENT_BLESSED_PROPERTY_NAME = '__AMP_MEDIA_IS_BLESSED__';
 
 /**
- * CSS class names that should not be removed from an element when swapping it
- * into/out of the DOM.
- * @const {!Array<string>}
- */
-const PROTECTED_CSS_CLASS_NAMES = [
-  'i-amphtml-pool-media',
-  'i-amphtml-pool-audio',
-  'i-amphtml-pool-video',
-];
-
-/**
- * Attribute names that should not be removed from an element when swapping it
- * into/out of the DOM.
- * @const {!Array<string>}
- */
-const PROTECTED_ATTRIBUTES = ['id', 'src', 'class', 'autoplay'];
-
-/**
- * Determines whether a CSS class name is allowed to be removed or copied from
- * media elements.
- * @param {string} cssClassName The CSS class name name to check.
- * @return {boolean} true, if the specified CSS class name is allowed to be
- *     removed or copied from media elements; false otherwise.
- * @private
- */
-function isProtectedCssClassName(cssClassName) {
-  return PROTECTED_CSS_CLASS_NAMES.indexOf(cssClassName) >= 0;
-}
-
-/**
  * Determines whether an attribute is allowed to be removed or copied from
  * media elements.
  * @param {string} attributeName The attribute name to check.
@@ -50,62 +20,37 @@ function isProtectedCssClassName(cssClassName) {
  * @private
  */
 function isProtectedAttributeName(attributeName) {
-  return PROTECTED_ATTRIBUTES.indexOf(attributeName) >= 0;
+  return (
+    attributeName === 'autoplay' ||
+    attributeName === 'id' ||
+    attributeName === 'src'
+  );
 }
 
 /**
- * Copies all unprotected CSS classes from fromEl to toEl.
- * @param {!Element} fromEl The element from which CSS classes should
- *     be copied.
- * @param {!Element} toEl The element to which CSS classes should be
- *     copied.
- * @private
+ * @param {!Element} replaced
+ * @param {!Element} inserted
  */
-function copyCssClasses(fromEl, toEl) {
-  // Remove all of the unprotected CSS classes from the toEl.
-  for (let i = toEl.classList.length - 1; i >= 0; i--) {
-    const cssClass = toEl.classList.item(i);
-    if (!isProtectedCssClassName(cssClass)) {
-      toEl.classList.remove(cssClass);
+function swapMediaElements(replaced, inserted) {
+  // 'i-amphtml-pool' is the only protected classname.
+  // Restore its value after overriding the `class` attribute.
+  const hasOurClassname = inserted.classList.contains('i-amphtml-pool');
+
+  // Remove inserted element's unprotected attributes, and add those of the
+  // replaced element.
+  for (const {name} of inserted.attributes) {
+    if (!isProtectedAttributeName(name)) {
+      inserted.removeAttribute(name);
+    }
+  }
+  for (const {name, value} of replaced.attributes) {
+    if (!isProtectedAttributeName(name)) {
+      inserted.setAttribute(name, value);
     }
   }
 
-  // Copy all of the unprotected CSS classes from the fromEl to the toEl.
-  for (let i = 0; i < fromEl.classList.length; i++) {
-    const cssClass = fromEl.classList.item(i);
-    if (!isProtectedCssClassName(cssClass)) {
-      toEl.classList.add(cssClass);
-    }
-  }
-}
-
-/**
- * Copies all unprotected attributes from fromEl to toEl.
- * @param {!Element} fromEl The element from which attributes should
- *     be copied.
- * @param {!Element} toEl The element to which attributes should be
- *     copied.
- * @private
- */
-function copyAttributes(fromEl, toEl) {
-  const fromAttributes = fromEl.attributes;
-  const toAttributes = toEl.attributes;
-
-  // Remove all of the unprotected attributes from the toEl.
-  for (let i = toAttributes.length - 1; i >= 0; i--) {
-    const attributeName = toAttributes[i].name;
-    if (!isProtectedAttributeName(attributeName)) {
-      toEl.removeAttribute(attributeName);
-    }
-  }
-
-  // Copy all of the unprotected attributes from the fromEl to the toEl.
-  for (let i = 0; i < fromAttributes.length; i++) {
-    const {name: attributeName, value: attributeValue} = fromAttributes[i];
-    if (!isProtectedAttributeName(attributeName)) {
-      toEl.setAttribute(attributeName, attributeValue);
-    }
-  }
+  inserted.classList.toggle('i-amphtml-pool', hasOurClassname);
+  replaced.parentElement.replaceChild(inserted, replaced);
 }
 
 /**
@@ -393,13 +338,7 @@ export class SwapIntoDomTask extends MediaTask {
       this.failTask('Cannot swap media for element that is not in DOM.');
       return Promise.resolve();
     }
-
-    copyCssClasses(this.placeholderEl_, mediaEl);
-    copyAttributes(this.placeholderEl_, mediaEl);
-    this.placeholderEl_.parentElement.replaceChild(
-      mediaEl,
-      this.placeholderEl_
-    );
+    swapMediaElements(this.placeholderEl_, mediaEl);
     return Promise.resolve();
   }
 
@@ -426,9 +365,7 @@ export class SwapOutOfDomTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    copyCssClasses(mediaEl, this.placeholderEl_);
-    copyAttributes(mediaEl, this.placeholderEl_);
-    mediaEl.parentElement.replaceChild(this.placeholderEl_, mediaEl);
+    swapMediaElements(mediaEl, this.placeholderEl_);
     return Promise.resolve();
   }
 
