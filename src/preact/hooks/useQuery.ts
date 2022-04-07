@@ -1,4 +1,4 @@
-import {useCallback, useEffect} from '#preact';
+import {useCallback, useEffect, useState} from '#preact';
 import {useValueRef} from '#preact/component';
 
 import {useStateSafe} from './useStateSafe';
@@ -110,5 +110,5 @@ export function useQuery<TData>(
     }
   }, [enabled, fetchQueryData]);
 
-  return state;
+  return {...state, refetch: fetchQueryData};
 }

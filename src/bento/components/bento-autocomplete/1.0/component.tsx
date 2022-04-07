@@ -22,6 +22,8 @@ import {xhrUtils} from '#preact/utils/xhr';
 
 import fuzzysearch from '#third_party/fuzzysearch';
 
+import {addParamToUrl} from 'src/url';
+
 import {useStyles} from './component.jss';
 import {
   getEnabledResults,
@@ -66,6 +68,7 @@ export function BentoAutocomplete({
   parseJson = getItems,
   suggestFirst = false,
   src,
+  query,
 }: BentoAutocompleteProps) {
   const elementRef = useRef<HTMLElement>(null);
   const containerId = useValueRef<string>(
@@ -81,20 +84,46 @@ export function BentoAutocomplete({
   const [shouldSuggestFirst, setShouldSuggestFirst] =
     useState<boolean>(suggestFirst);
   const classes = useStyles();
-  const [shouldFetchItems, setShouldFetchItems] = useState(false);
+  const [hasFetchedInitialData, setHasFetchedInitialData] = useState(false);
+  // In order to enable refetching, we currently have to disable the request between
+  // and re-enable it on user input.
+  const [hasFetchedData, setHasFetchedData] = useState(false);
 
   const binding = useAutocompleteBinding(inline);
 
+  const url = useMemo(() => {
+    if (src && query) {
+      // Don't create an invalid URL if there is a query key but not a value
+      return substring ? addParamToUrl(src, query, substring) : null;
+    }
+    return src;
+  }, [src, substring, query]);
+
+  const isFetchEnabled = useMemo(() => {
+    if (url) {
+      if (query) {
+        return !hasFetchedData;
+      }
+      return !hasFetchedInitialData;
+    }
+    return false;
+  }, [url, hasFetchedInitialData, hasFetchedData, query]);
+
+  const shouldRefetch = useMemo(() => {
+    return !!query;
+  }, [query]);
+
   const {data} = useQuery<Item[]>(
     async () => {
-      const response = await fetchJson(src!);
+      const response = await fetchJson(url!);
       return parseJson(response);
     },
     {
-      enabled: !!src && shouldFetchItems,
+      enabled: isFetchEnabled,
       initialData: items,
       onSettled: () => {
-        setShouldFetchItems(false);
+        setHasFetchedInitialData(true);
+        setHasFetchedData(true);
       },
       onError: (error) => {
         onError(error.message);
@@ -286,21 +315,21 @@ export function BentoAutocomplete({
   );
 
   const maybeFetchAndAutocomplete = useCallback(
-    async (element: InputElement) => {
-      const isFirstInteraction =
-        substring.length === 0 && element.value.length === 1;
-      setShouldFetchItems(isFirstInteraction);
-
+    (element: InputElement) => {
+      if (shouldRefetch) {
+        setHasFetchedData(false);
+      }
       setSubstring(binding.getUserInputForUpdate(element));
       displayResults();
     },
-    [binding, displayResults, substring]
+    [shouldRefetch, displayResults, binding]
   );
 
   const handleInput = useCallback(
     async (event: Event) => {
-      if (binding.shouldAutocomplete(event.target as InputElement)) {
-        return await maybeFetchAndAutocomplete(event.target as InputElement);
+      const element = event.target as InputElement;
+      if (binding.shouldAutocomplete(element)) {
+        maybeFetchAndAutocomplete(element);
       }
     },
     [binding, maybeFetchAndAutocomplete]
@@ -339,6 +368,9 @@ export function BentoAutocomplete({
           hideResults();
           break;
         }
+        // TODO: In the original amp-autocomplete, there are some
+        // differences between ENTER and TAB. However, I'm not sure
+        // at this time what the behavior should be.
         case Keys_Enum.TAB: {
           selectItem(inputRef.current!.value);
           break;

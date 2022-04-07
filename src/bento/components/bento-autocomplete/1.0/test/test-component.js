@@ -1050,30 +1050,30 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       component.update();
     }
 
-    it('does not fetch items on initial render', async () => {
+    it('fetches data on initial render if a src is provided', async () => {
       const wrapper = mount(
         <Autocomplete id="id" src="/items.json">
           <input type="text"></input>
         </Autocomplete>
       );
 
-      await waitForData(wrapper, 0);
+      await waitForData(wrapper);
 
-      expect(fetchJson).to.have.callCount(0);
+      expect(fetchJson).calledWith('/items.json').callCount(1);
     });
 
-    it('fetches on first interaction if a src is provided', async () => {
+    it('displays fetched results and does not re-fetch by default', async () => {
       const wrapper = mount(
         <Autocomplete id="id" src="/items.json">
           <input type="text"></input>
         </Autocomplete>
       );
+
+      await waitForData(wrapper);
 
       const input = wrapper.find('input');
       input.getDOMNode().value = 'o';
       input.simulate('input');
-
-      await waitForData(wrapper);
 
       expect(fetchJson).calledWith('/items.json').callCount(1);
 
@@ -1111,6 +1111,51 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(wrapper.exists('[data-value="one"]')).to.be.true;
       expect(wrapper.exists('[data-value="two"]')).to.be.true;
       expect(wrapper.exists('[data-value="three"]')).to.be.true;
+    });
+
+    it('accepts a query prop and fetches from the URL with query params', async () => {
+      const wrapper = mount(
+        <Autocomplete id="id" src="https://test.com/api/items" query="q">
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 'value';
+      input.simulate('input');
+
+      await waitForData(wrapper);
+
+      expect(fetchJson)
+        .to.have.been.calledWith('https://test.com/api/items?q=value')
+        .callCount(1);
+    });
+
+    it('re-fetches when the input value changes', async () => {
+      const wrapper = mount(
+        <Autocomplete id="id" src="https://test.com/api/items" query="q">
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 'value';
+      input.simulate('input');
+
+      await waitForData(wrapper);
+
+      expect(fetchJson).to.have.been.calledWith(
+        'https://test.com/api/items?q=value'
+      );
+
+      input.getDOMNode().value = 'value2';
+      input.simulate('input');
+
+      await waitForData(wrapper, 2);
+
+      expect(fetchJson).to.have.been.calledWith(
+        'https://test.com/api/items?q=value2'
+      );
     });
   });
 });
