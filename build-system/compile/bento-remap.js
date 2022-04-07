@@ -19,7 +19,7 @@ function resolveExactModuleFile(path) {
   let unaliased = path.startsWith('#') ? resolvePath(path) : path;
   try {
     if (lstatSync(unaliased).isDirectory()) {
-      unaliased = '/index';
+      unaliased += '/index';
     }
   } catch {
     // lstat fails if not directory
