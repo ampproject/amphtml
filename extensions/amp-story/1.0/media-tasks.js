@@ -135,19 +135,6 @@ export function mute(mediaEl) {
 }
 
 /**
- * Updates the sources of the specified media element.
- * @param {!Window} win
- * @param {!HTMLMediaElement} mediaEl
- * @param {!Sources} newSources The sources to which the media element should
- *     be updated.
- * @return {MediaTask}
- */
-export function updateSources(win, mediaEl, newSources) {
-  Sources.removeFrom(win, mediaEl);
-  newSources.applyToElement(win, mediaEl);
-}
-
-/**
  * "Blesses" the specified media element for future playback without a user
  * gesture.  In order for this to bless the media element, this function must
  * be invoked in response to a user gesture.
@@ -159,6 +146,19 @@ export function bless(mediaEl) {
   if (isMuted) {
     mediaEl.muted = true;
   }
+}
+
+/**
+ * Updates the sources of the specified media element.
+ * @param {!Window} win
+ * @param {!HTMLMediaElement} mediaEl
+ * @param {!Sources} newSources The sources to which the media element should
+ *     be updated.
+ * @return {MediaTask}
+ */
+export function updateSources(win, mediaEl, newSources) {
+  Sources.removeFrom(win, mediaEl);
+  newSources.applyToElement(win, mediaEl);
 }
 
 /**
