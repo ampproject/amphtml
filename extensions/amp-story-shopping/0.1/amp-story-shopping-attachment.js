@@ -53,9 +53,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     /** @private {?Element} */
     this.pageEl_ = null;
 
-    /** @private {?Array<!Element>} */
-    this.shoppingTags_ = null;
-
     /** @private @const {!Element} */
     this.templateContainer_ = <div></div>;
 
@@ -78,39 +75,42 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.pageEl_ = this.element.closest('amp-story-page');
-    this.shoppingTags_ = Array.from(
-      this.pageEl_.querySelectorAll('amp-story-shopping-tag')
-    );
 
-    getShoppingConfig(this.element, this.pageEl_.id).then((config) =>
-      storeShoppingConfig(this.pageEl_, config)
-    );
+    return getShoppingConfig(this.element, this.pageEl_.id).then((config) => {
+      storeShoppingConfig(this.pageEl_, config);
 
-    if (this.shoppingTags_.length === 0) {
-      return;
-    }
+      const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
 
-    return this.localizationService_
-      .getLocalizedStringAsync(
-        LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
-      )
-      .then((ctaText) => {
-        this.attachmentEl_ = (
-          <amp-story-page-attachment
-            layout="nodisplay"
-            theme={this.element.getAttribute('theme')}
-            cta-text={ctaText}
-          >
-            {this.templateContainer_}
-          </amp-story-page-attachment>
-        );
-        this.element.appendChild(this.attachmentEl_);
-      });
+      if (Object.keys(shoppingData[this.pageEl_.id]).length === 0) {
+        return;
+      }
+
+      return this.localizationService_
+        .getLocalizedStringAsync(
+          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+        )
+        .then((ctaText) => {
+          this.attachmentEl_ = (
+            <amp-story-page-attachment
+              layout="nodisplay"
+              theme={this.element.getAttribute('theme')}
+              cta-text={ctaText}
+            >
+              {this.templateContainer_}
+            </amp-story-page-attachment>
+          );
+          this.element.appendChild(this.attachmentEl_);
+        });
+    });
   }
 
   /** @override */
   layoutCallback() {
-    if (this.shoppingTags_.length === 0) {
+    if (
+      Object.keys(
+        this.storeService_.get(StateProperty.SHOPPING_DATA)[this.pageEl_.id]
+      ).length === 0
+    ) {
       return;
     }
     loadFonts(this.win, FONTS_TO_LOAD);
