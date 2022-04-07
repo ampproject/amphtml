@@ -24,3 +24,10 @@ jobs:
         run: bash ./.github/workflows/install_dependencies.sh
       - name: ${{ matrix.flavor }}
         run: node build-system/pr-check/cross-platform-builds.js --flavor=${{ matrix.flavor }}
+
+  create-issue-on-error:
+    needs: compile
+    if: failure()
+    uses: ampproject/amphtml/.github/workflows/create-issue-on-error.yml@main
+    with:
+      mention: '@ampproject/release-on-duty'
