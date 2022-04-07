@@ -38,14 +38,14 @@ function swapMediaElements(replaced, inserted) {
 
   // Remove inserted element's unprotected attributes, and add those of the
   // replaced element.
-  for (const {name} of inserted.attributes) {
-    if (!isProtectedAttributeName(name)) {
-      inserted.removeAttribute(name);
+  for (const attr of inserted.attributes) {
+    if (!isProtectedAttributeName(attr.name)) {
+      inserted.removeAttribute(attr.name);
     }
   }
-  for (const {name, value} of replaced.attributes) {
-    if (!isProtectedAttributeName(name)) {
-      inserted.setAttribute(name, value);
+  for (const attr of replaced.attributes) {
+    if (!isProtectedAttributeName(attr.name)) {
+      inserted.setAttribute(attr.name, attr.value);
     }
   }
 
