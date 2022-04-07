@@ -22,8 +22,6 @@ import {xhrUtils} from '#preact/utils/xhr';
 
 import fuzzysearch from '#third_party/fuzzysearch';
 
-import {addParamToUrl} from 'src/url';
-
 import {useStyles} from './component.jss';
 import {
   getEnabledResults,
@@ -41,6 +39,8 @@ import {
   isValidFilterType,
 } from './types';
 import {useAutocompleteBinding} from './use-autocomplete-binding';
+
+import {addParamToUrl} from '../../../../url';
 
 const INITIAL_ACTIVE_INDEX = -1;
 
