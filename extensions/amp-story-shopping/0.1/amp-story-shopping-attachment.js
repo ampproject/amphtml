@@ -157,15 +157,20 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onShoppingDataUpdate_(shoppingData) {
+    const isOpen = this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
+
+    if (isOpen) {
+      // If open, update the template.
+      // This happens when a product card is clicked in the PLP template
+      // or when the shopping attachment is opened when product data is loaded.
+      this.updateTemplate_(shoppingData);
+    }
+
     if (!shoppingData.activeProductData || !this.isOnActivePage_()) {
       return;
     }
-    const isOpen = this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
-    if (isOpen) {
-      // If open, update the template.
-      // This happens when a product card is clicked in the PLP template.
-      this.updateTemplate_(shoppingData);
-    } else {
+
+    if (!isOpen) {
       // Otherwise, open the attachment and then update the template.
       // This happens when clicking a shopping tag.
       this.attachmentEl_.getImpl().then((impl) => {
@@ -195,6 +200,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    */
   updateTemplate_(shoppingData) {
     const productOnPageToConfig = shoppingData[this.pageEl_.id];
+    if (productOnPageToConfig === undefined) {
+      return;
+    }
     const shoppingDataPerPage = Object.values(productOnPageToConfig);
 
     let productForPdp = shoppingData.activeProductData;
