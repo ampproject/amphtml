@@ -1,14 +1,7 @@
-import {isConnectedNode} from '#core/dom';
 import {tryPlay} from '#core/dom/video';
 
 import {Sources} from './sources';
-
-/**
- * The name for a boolean property on an element indicating whether that element
- * has already been "blessed".
- * @const {string}
- */
-export const ELEMENT_BLESSED_PROPERTY_NAME = '__AMP_MEDIA_IS_BLESSED__';
+import {ampMediaElementFor} from './utils';
 
 /**
  * CSS class names that should not be removed from an element when swapping it
@@ -107,127 +100,52 @@ function copyAttributes(fromEl, toEl) {
   }
 }
 
-/** @typedef {(HTMLMediaElement: mediaEl) => Promise|void} */
-let MediaTaskFnDef;
-
-/** @typedef {[MediaTaskFnDef]} */
-let AsyncMediaTaskDef;
-
-/** @typedef {[MediaTaskFnDef, true]} */
-let SyncMediaTaskDef;
-
 /**
- * A task on an HTMLMediaElement that runs sequentially on a queue.
- * It must be specified as an array whose first item is a function:
- *
- *   const fn = (mediaEl) => {};
- *   const MyTask = [fn];
- *
- * This function is executed asynchronously as a result of `setTimeout(fn, 0)`.
- *
- * If this is not desired because the function requires synchronous execution
- * (for example, if it should run as a result of a user gesture), the task
- * must include a second item that annotates this property as `true`:
- *
- *   const MyTask = [fn, /* requiresSynchronousExecution *\/ true];
- *
- * If the function requires arguments in addition to HTMLMediaElement, you must
- * implement a factory that returns the task (see exported functions named
- * `create*` for more examples):
- *
- *   function createMyTask(a, b) {
- *     const fn = (mediaEl) => {
- *       x(mediaEl, a, b);
- *     };
- *     return [fn];
- *   }
- *
- * @typedef {AsyncMediaTaskDef|SyncMediaTaskDef}
- */
-export let MediaTask;
-
-/**
- * Plays the specified media element.
- * @param {HTMLMediaElement} mediaEl
- * @return {Promise|void}
- */
-const play = (mediaEl) => {
-  if (!mediaEl.paused) {
-    // We do not want to invoke play() if the media element is already
-    // playing, as this can interrupt playback in some browsers.
-    return;
-  }
-  return tryPlay(mediaEl);
-};
-
-/** @const {MediaTask} */
-export const PlayTask = [play];
-
-/**
- * Pauses the specified media element.
- * @param {HTMLMediaElement} mediaEl
- */
-const pause = (mediaEl) => {
-  mediaEl.pause();
-};
-
-/** @const {MediaTask} */
-export const PauseTask = [pause];
-
-/**
- * Unmutes the specified media element.
- * @param {HTMLMediaElement} mediaEl
- */
-const unmute = (mediaEl) => {
-  mediaEl.muted = false;
-  mediaEl.removeAttribute('muted');
-};
-
-/** @const {MediaTask} */
-export const UnmuteTask = [unmute];
-
-/**
- * Mutes the specified media element.
- * @param {HTMLMediaElement} mediaEl
- */
-const mute = (mediaEl) => {
-  mediaEl.muted = true;
-  mediaEl.setAttribute('muted', '');
-};
-
-/** @const {MediaTask} */
-export const MuteTask = [mute];
-
-/**
- * Seeks the specified media element to the provided time, in seconds.
- * @param {number} currentTime
+ * @param {!Element} replaced
+ * @param {!Element} inserted
  * @return {MediaTask}
  */
-export function createSetCurrentTimeTask(currentTime) {
-  return [
-    (mediaEl) => {
-      mediaEl.currentTime = currentTime;
-    },
-  ];
+export function swapMediaElements(replaced, inserted) {
+  copyCssClasses(replaced, inserted);
+  copyAttributes(replaced, inserted);
+  replaced.parentElement.replaceChild(inserted, replaced);
 }
 
 /**
- * Loads the specified media element.
  * @param {HTMLMediaElement} mediaEl
  */
-const load = (mediaEl) => {
-  mediaEl.load();
-};
+export function play(mediaEl) {
+  // We do not want to invoke play() if the media element is already
+  // playing, as this can interrupt playback in some browsers.
+  if (mediaEl.paused) {
+    tryPlay(mediaEl);
+  }
+}
 
-/** @const {MediaTask} */
-export const LoadTask = [
-  load,
-  // When recycling a media pool element, its sources are removed and the
-  // LoadTask runs to reset it (buffered data, readyState, etc). It needs to
-  // run synchronously so the media element can't be used in a new context
-  // but with old data.
-  /* requiresSynchronousExecution */ true,
-];
+/** @param {HTMLMediaElement} mediaEl */
+export function unmute(mediaEl) {
+  mediaEl.muted = false;
+  mediaEl.removeAttribute('muted');
+}
+
+/** @param {HTMLMediaElement} mediaEl */
+export function mute(mediaEl) {
+  mediaEl.muted = true;
+  mediaEl.setAttribute('muted', '');
+}
+
+/**
+ * Updates the sources of the specified media element.
+ * @param {!Window} win
+ * @param {!HTMLMediaElement} mediaEl
+ * @param {!Sources} newSources The sources to which the media element should
+ *     be updated.
+ * @return {MediaTask}
+ */
+export function updateSources(win, mediaEl, newSources) {
+  Sources.removeFrom(win, mediaEl);
+  newSources.applyToElement(win, mediaEl);
+}
 
 /**
  * "Blesses" the specified media element for future playback without a user
@@ -235,73 +153,24 @@ export const LoadTask = [
  * be invoked in response to a user gesture.
  * @param {HTMLMediaElement} mediaEl
  */
-const bless = (mediaEl) => {
+export function bless(mediaEl) {
   const isMuted = mediaEl.muted;
   mediaEl.muted = false;
   if (isMuted) {
     mediaEl.muted = true;
   }
-};
-
-/** @const {MediaTask} */
-export const BlessTask = [
-  bless,
-  // Must be sync since it's from a user gesture
-  /* requiresSynchronousExecution */ true,
-];
-
-/**
- * Updates the sources of the specified media element.
- * @param {!Window} win
- * @param {!Sources} newSources The sources to which the media element should
- *     be updated.
- * @return {MediaTask}
- */
-export function createUpdateSourcesTask(win, newSources) {
-  return [
-    (mediaEl) => {
-      Sources.removeFrom(win, mediaEl);
-      newSources.applyToElement(win, mediaEl);
-    },
-    /* requiresSynchronousExecution */ true,
-  ];
 }
 
 /**
- * Swaps a media element into the DOM, in the place of a placeholder element.
- * @param {!Element} placeholderEl The element to be replaced by the media
- *     element on which this task is executed.
- * @return {MediaTask}
+ * @param {?Element|undefined} element
+ * @return {Promise<void | null | undefined>}
  */
-export function createSwapIntoDomTask(placeholderEl) {
-  return [
-    (mediaEl) => {
-      if (!isConnectedNode(placeholderEl)) {
-        return Promise.reject(
-          'Cannot swap media for element that is not in DOM.'
-        );
-      }
-      copyCssClasses(placeholderEl, mediaEl);
-      copyAttributes(placeholderEl, mediaEl);
-      placeholderEl.parentElement.replaceChild(mediaEl, placeholderEl);
-    },
-    /* requiresSynchronousExecution */ true,
-  ];
-}
-
-/**
- * Swaps a media element out the DOM, replacing it with a placeholder element.
- * @param {!Element} placeholderEl The element to replace the media element on
- *     which this task is executed.
- * @return {MediaTask}
- */
-export function createSwapOutOfDomTask(placeholderEl) {
-  return [
-    (mediaEl) => {
-      copyCssClasses(mediaEl, placeholderEl);
-      copyAttributes(mediaEl, placeholderEl);
-      mediaEl.parentElement.replaceChild(placeholderEl, mediaEl);
-    },
-    /* requiresSynchronousExecution */ true,
-  ];
+export function resetAmpMediaOnDomChange(element) {
+  return Promise.resolve(
+    ampMediaElementFor(element)
+      ?.getImpl()
+      .then((impl) => {
+        impl.resetOnDomChange?.();
+      })
+  );
 }

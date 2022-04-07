@@ -1,109 +1,61 @@
+import {expect} from 'chai';
+
+import * as Preact from '#core/dom/jsx';
 import {toArray} from '#core/types/array';
 
 import {
-  LoadTask,
-  MuteTask,
-  PauseTask,
-  PlayTask,
-  UnmuteTask,
-  createSetCurrentTimeTask,
-  createSwapIntoDomTask,
-  createSwapOutOfDomTask,
-  createUpdateSourcesTask,
+  mute,
+  play,
+  swapMediaElements,
+  unmute,
+  updateSources,
 } from '../media-tasks';
 import {Sources} from '../sources';
 
 describes.realWin('media-tasks', {}, (env) => {
   let win;
   let el;
-  let vsyncApi;
 
   beforeEach(() => {
     win = env.win;
     el = document.createElement('video');
-
-    // Mock vsync
-    vsyncApi = {
-      mutatePromise: () => {},
-    };
-    env.sandbox.stub(vsyncApi, 'mutatePromise').resolves((callback) => {
-      callback();
-    });
   });
 
-  describe('PauseTask', () => {
-    it('should call pause()', () => {
-      const pause = env.sandbox.spy(el, 'pause');
-      const [execute] = PauseTask;
-      execute(el);
-      expect(pause).to.have.been.called;
-    });
-  });
-
-  describe('PlayTask', () => {
+  describe('play', () => {
     it('should call play() if element was not yet playing', () => {
       expect(el.paused).to.be.true;
-
-      const play = env.sandbox.spy(el, 'play');
-      const [execute] = PlayTask;
-      execute(el);
-      expect(play).to.have.been.called;
+      const spy = env.sandbox.spy(el, 'play');
+      play(el);
+      expect(spy).to.have.been.called;
     });
-
     it('should not call play() if element was already playing', () => {
       el.play();
       expect(el.paused).to.be.false;
-
-      const play = env.sandbox.spy(el, 'play');
-      const [execute] = PlayTask;
-      execute(el);
-      expect(play).not.to.have.been.called;
+      const spy = env.sandbox.spy(el, 'play');
+      play(el);
+      expect(spy).not.to.have.been.called;
     });
   });
 
-  describe('MuteTask', () => {
+  describe('mute', () => {
     it('should set muted to true', () => {
       el.muted = false;
       expect(el.muted).to.be.false;
-
-      const [execute] = MuteTask;
-      execute(el);
+      mute(el);
       expect(el.muted).to.be.true;
     });
   });
 
-  describe('UnmuteTask', () => {
+  describe('unmute', () => {
     it('should set muted to false', () => {
       el.muted = true;
       expect(el.muted).to.be.true;
-
-      const [execute] = UnmuteTask;
-      execute(el);
+      unmute(el);
       expect(el.muted).to.be.false;
     });
   });
 
-  describe('LoadTask', () => {
-    it('should call load()', () => {
-      const load = env.sandbox.spy(el, 'load');
-      const [execute] = LoadTask;
-      execute(el);
-      expect(load).to.have.been.called;
-    });
-  });
-
-  describe('SetCurrentTimeTask', () => {
-    it('should set currentTime to the passed value', () => {
-      el.currentTime = 1;
-      expect(el.currentTime).to.equal(1);
-
-      const [execute] = createSetCurrentTimeTask(2);
-      execute(el);
-      expect(el.currentTime).to.equal(2);
-    });
-  });
-
-  describe('UpdateSourcesTask', () => {
+  describe('updateSources', () => {
     /**
      * @param {number} index
      * @return {string}
@@ -136,8 +88,7 @@ describes.realWin('media-tasks', {}, (env) => {
 
       expect(el.src).to.not.be.empty;
       const newSources = new Sources(null, []);
-      const [execute] = createUpdateSourcesTask(win, newSources);
-      execute(el);
+      updateSources(win, el, newSources);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.be.empty;
     });
@@ -150,8 +101,7 @@ describes.realWin('media-tasks', {}, (env) => {
 
       expect(toArray(el.children)).to.deep.equal(OLD_SRC_ELS);
       const newSources = new Sources(null, []);
-      const [execute] = createUpdateSourcesTask(win, newSources);
-      execute(el);
+      updateSources(win, el, newSources);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.be.empty;
     });
@@ -163,8 +113,7 @@ describes.realWin('media-tasks', {}, (env) => {
 
       expect(el.src).to.not.be.empty;
       const newSources = new Sources(NEW_SRC_URL, []);
-      const [execute] = createUpdateSourcesTask(win, newSources);
-      execute(el);
+      updateSources(win, el, newSources);
       expect(el.src).to.equal(NEW_SRC_URL);
       expect(toArray(el.children)).to.be.empty;
     });
@@ -179,8 +128,7 @@ describes.realWin('media-tasks', {}, (env) => {
 
       expect(toArray(el.children)).to.deep.equal(OLD_SRC_ELS);
       const newSources = new Sources(null, NEW_SRC_ELS);
-      const [execute] = createUpdateSourcesTask(win, newSources);
-      execute(el);
+      updateSources(win, el, newSources);
       expect(el.src).to.be.empty;
       expect(toArray(el.children)).to.deep.equal(NEW_SRC_ELS);
     });
@@ -188,8 +136,7 @@ describes.realWin('media-tasks', {}, (env) => {
     it('should propagate the src attribute as a source', () => {
       el.setAttribute('src', './foo.mp4');
       const newSources = Sources.removeFrom(win, el);
-      const [execute] = createUpdateSourcesTask(win, newSources);
-      execute(el);
+      updateSources(win, el, newSources);
       expect(el).to.not.have.attribute('src');
       expect(toArray(el.children)).to.have.length(1);
       expect(el.firstElementChild).to.have.attribute('src');
@@ -200,8 +147,7 @@ describes.realWin('media-tasks', {}, (env) => {
       el.setAttribute('src', './foo.mp4');
       el.setAttribute('amp-orig-src', './bar.mp4');
       const newSources = Sources.removeFrom(win, el);
-      const [execute] = createUpdateSourcesTask(win, newSources);
-      execute(el);
+      updateSources(win, el, newSources);
       expect(el.firstElementChild).to.have.attribute('amp-orig-src');
       expect(el.firstElementChild.getAttribute('amp-orig-src')).to.equal(
         './bar.mp4'
@@ -214,8 +160,7 @@ describes.realWin('media-tasks', {}, (env) => {
         el.appendChild(source);
       });
       const newSources = Sources.removeFrom(win, el);
-      const [execute] = createUpdateSourcesTask(win, newSources);
-      execute(el);
+      updateSources(win, el, newSources);
       expect(el).to.not.have.attribute('src');
       expect(toArray(el.children)).to.have.length(1);
       expect(el.firstElementChild).to.have.attribute('src');
@@ -223,7 +168,7 @@ describes.realWin('media-tasks', {}, (env) => {
     });
   });
 
-  describe('BlessTask', () => {
+  describe('bless', () => {
     // TODO(newmuis): Blessing depends on the media element's play() promise
     // being resolved, which does not happen until the video starts playing.
     // However, the video will not play unless it is visible in the DOM.  We
@@ -231,38 +176,87 @@ describes.realWin('media-tasks', {}, (env) => {
     // browser behavior.
   });
 
-  describe('SwapIntoDomTask', () => {
-    // TODO(newmuis): Get this test working.
-    it.skip('should replace element in DOM', async () => {
-      const parent = document.createElement('div');
-      const replacedMedia = document.createElement('video');
-      parent.appendChild(replacedMedia);
-
-      expect(replacedMedia.parentElement).to.equal(parent);
-      expect(el.parentElement).to.equal(null);
-
-      const [execute] = createSwapIntoDomTask(replacedMedia);
-      await execute(el);
-      expect(replacedMedia.parentElement).to.equal(null);
-      expect(el.parentElement).to.equal(parent);
+  describe('swapMediaElements', () => {
+    it('should swap in tree', () => {
+      const parent = (
+        <div>
+          <video />
+        </div>
+      );
+      const inserted = <video />;
+      swapMediaElements(parent.firstElementChild, inserted);
+      expect(parent.firstElementChild).to.equal(inserted);
+      expect(parent.children).to.have.length(1);
     });
-  });
 
-  describe('SwapOutOfDomTask', () => {
-    // TODO(newmuis): Get this test working.
-    it.skip('should replace element in DOM', async () => {
-      const placeholderEl = document.createElement('video');
+    it('should copy classname', () => {
+      const className = 'foo bar';
+      const parent = (
+        <div>
+          <video class={String(className)} />
+        </div>
+      );
+      const inserted = <video />;
+      swapMediaElements(parent.firstElementChild, inserted);
+      expect(inserted.className).to.equal(className);
+    });
 
-      const parent = document.createElement('div');
-      parent.appendChild(el);
+    it('should copy classname except protected', () => {
+      const className = 'foo bar';
+      const protectedClassName =
+        'i-amphtml-pool-media i-amphtml-pool-audio i-amphtml-pool-video';
+      const parent = (
+        <div>
+          <video class={`${protectedClassName} ${className}`} />
+        </div>
+      );
+      const inserted = <video />;
+      swapMediaElements(parent.firstElementChild, inserted);
+      expect(inserted.className).to.equal(className);
+    });
 
-      expect(el.parentElement).to.equal(parent);
-      expect(placeholderEl.parentElement).to.equal(null);
+    it('should preserve protected classname', () => {
+      const className = 'foo bar';
+      const protectedClassName =
+        'i-amphtml-pool-media i-amphtml-pool-audio i-amphtml-pool-video';
+      const parent = (
+        <div>
+          <video class={String(className)} />
+        </div>
+      );
+      const inserted = <video class={String(protectedClassName)} />;
+      swapMediaElements(parent.firstElementChild, inserted);
+      expect(inserted.className).to.equal(`${protectedClassName} ${className}`);
+    });
 
-      const [execute] = createSwapOutOfDomTask(placeholderEl);
-      await execute(el);
-      expect(el.parentElement).to.equal(null);
-      expect(placeholderEl.parentElement).to.equal(parent);
+    it('should replace attributes except protected', () => {
+      const parent = (
+        <div>
+          <video id="foo" src="bar" autoplay a="copied value of a" b />
+        </div>
+      );
+      const inserted = <video data-should-be-removed />;
+      swapMediaElements(parent.firstElementChild, inserted);
+      expect(inserted).to.not.have.attribute('id');
+      expect(inserted).to.not.have.attribute('src');
+      expect(inserted).to.not.have.attribute('autoplay');
+      expect(inserted).to.not.have.attribute('data-should-be-removed');
+      expect(inserted.getAttribute('a')).to.equal('copied value of a');
+      expect(inserted.getAttribute('b')).to.equal('');
+    });
+
+    it('should preserve protected attributes', () => {
+      const parent = (
+        <div>
+          <video id="wrong id" src="wrong src" autoplay a="copied value of a" />
+        </div>
+      );
+      const inserted = <video id="preserved id" src="preserved src" />;
+      swapMediaElements(parent.firstElementChild, inserted);
+      expect(inserted).to.not.have.attribute('autoplay');
+      expect(inserted.getAttribute('id')).to.equal('preserved id');
+      expect(inserted.getAttribute('src')).to.equal('preserved src');
+      expect(inserted.getAttribute('a')).to.equal('copied value of a');
     });
   });
 });

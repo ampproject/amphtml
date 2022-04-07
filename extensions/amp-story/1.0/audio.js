@@ -10,7 +10,7 @@ const BACKGROUND_AUDIO_ELEMENT_CLASS_NAME = 'i-amphtml-story-background-audio';
  * @param {!Element} element The element to upgrade with support for background
  *     audio.
  * @param {boolean=} loop
- * @return {?Element} audioEl
+ * @return {?HTMLMediaElement} audioEl
  */
 export function upgradeBackgroundAudio(element, loop = true) {
   if (!element.hasAttribute('background-audio')) {
@@ -32,5 +32,5 @@ export function upgradeBackgroundAudio(element, loop = true) {
   audioEl.classList.add(BACKGROUND_AUDIO_ELEMENT_CLASS_NAME);
   element.appendChild(audioEl);
 
-  return audioEl;
+  return /** @type {!HTMLMediaElement} */ (audioEl);
 }

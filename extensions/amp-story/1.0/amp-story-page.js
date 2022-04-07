@@ -48,6 +48,7 @@ import {EventType, dispatch} from './events';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {MediaPool} from './media-pool';
+import {mute, unmute} from './media-tasks';
 import {AdvancementConfig} from './page-advancement';
 import {isPrerenderActivePage} from './prerender-active-page';
 import {renderPageDescription} from './semantic-render';
@@ -855,10 +856,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   pauseMedia_(mediaPool, mediaEl, rewindToBeginning) {
     if (this.isBotUserAgent_) {
-      mediaEl.pause();
-      return Promise.resolve();
+      return;
     } else {
-      return mediaPool.pause(
+      mediaPool.pause(
         /** @type {!./media-pool.DomElementDef} */ (mediaEl),
         rewindToBeginning
       );
@@ -880,45 +880,47 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Plays the given media.
    * @param {!./media-pool.MediaPool} mediaPool
    * @param {!Element} mediaEl
-   * @return {!Promise} Promise that resolves after the media is played.
+   * @return {Promise|void}
    * @private
    */
   playMedia_(mediaPool, mediaEl) {
     if (this.isBotUserAgent_) {
       tryPlay(mediaEl);
-      return Promise.resolve();
+      return;
     } else {
       return this.loadPromise(mediaEl).then(
         () => {
-          return mediaPool
-            .play(/** @type {!./media-pool.DomElementDef} */ (mediaEl))
-            .catch((unusedError) => {
-              // Auto playing the media failed, which could be caused by a data
-              // saver, or a battery saving mode. Display a message so we can
-              // get a user gesture to bless the media elements, and play them.
-              if (mediaEl.tagName === 'VIDEO') {
-                this.debounceToggleLoadingSpinner_(false);
+          try {
+            mediaPool.play(
+              /** @type {!./media-pool.DomElementDef} */ (mediaEl)
+            );
+          } catch {
+            // Auto playing the media failed, which could be caused by a data
+            // saver, or a battery saving mode. Display a message so we can
+            // get a user gesture to bless the media elements, and play them.
+            if (mediaEl.tagName === 'VIDEO') {
+              this.debounceToggleLoadingSpinner_(false);
 
-                // If autoplay got rejected, display a "play" button. If
-                // autoplay was supported, dispay an error message.
-                this.isAutoplaySupported_().then((isAutoplaySupported) => {
-                  if (isAutoplaySupported) {
-                    this.toggleErrorMessage_(true);
-                    return;
-                  }
+              // If autoplay got rejected, display a "play" button. If
+              // autoplay was supported, dispay an error message.
+              this.isAutoplaySupported_().then((isAutoplaySupported) => {
+                if (isAutoplaySupported) {
+                  this.toggleErrorMessage_(true);
+                  return;
+                }
 
-                  // Error was expected, don't send the performance metrics.
-                  this.stopMeasuringAllVideoPerformance_(
-                    false /** sendMetrics */
-                  );
-                  this.togglePlayMessage_(true);
-                });
-              }
+                // Error was expected, don't send the performance metrics.
+                this.stopMeasuringAllVideoPerformance_(
+                  false /** sendMetrics */
+                );
+                this.togglePlayMessage_(true);
+              });
+            }
 
-              if (mediaEl.tagName === 'AUDIO') {
-                this.playAudioElementFromTimestamp_ = Date.now();
-              }
-            });
+            if (mediaEl.tagName === 'AUDIO') {
+              this.playAudioElementFromTimestamp_ = Date.now();
+            }
+          }
         },
         () => {
           this.debounceToggleLoadingSpinner_(false);
@@ -943,17 +945,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Preloads the given media.
    * @param {!./media-pool.MediaPool} mediaPool
    * @param {!Element} mediaEl
-   * @return {!Promise<!Element|undefined>} Promise that resolves with the preloading element.
    * @private
    */
   preloadMedia_(mediaPool, mediaEl) {
     if (this.isBotUserAgent_) {
       // No-op.
-      return Promise.resolve();
+      return;
     } else {
-      return mediaPool.preload(
-        /** @type {!./media-pool.DomElementDef} */ (mediaEl)
-      );
+      mediaPool.preload(/** @type {!./media-pool.DomElementDef} */ (mediaEl));
     }
   }
 
@@ -976,13 +975,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   muteMedia_(mediaPool, mediaEl) {
     if (this.isBotUserAgent_) {
-      mediaEl.muted = true;
-      mediaEl.setAttribute('muted', '');
-      return Promise.resolve();
+      mute(mediaEl);
+      return;
     } else {
-      return mediaPool.mute(
-        /** @type {!./media-pool.DomElementDef} */ (mediaEl)
-      );
+      mediaPool.mute(/** @type {!./media-pool.DomElementDef} */ (mediaEl));
     }
   }
 
@@ -1005,15 +1001,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   unmuteMedia_(mediaPool, mediaEl) {
     if (this.isBotUserAgent_) {
-      mediaEl.muted = false;
-      mediaEl.removeAttribute('muted');
+      unmute(mediaEl);
       if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
         tryPlay(mediaEl);
       }
-      return Promise.resolve();
+      return;
     } else {
       mediaEl = /** @type {!./media-pool.DomElementDef} */ (mediaEl);
-      const promises = [mediaPool.unmute(mediaEl)];
+      mediaPool.unmute(mediaEl);
 
       // Audio element might not be playing if the page navigation did not
       // happen after a user intent, and the media element was not "blessed".
@@ -1027,16 +1022,12 @@ export class AmpStoryPage extends AMP.BaseElement {
         const currentTime =
           (Date.now() - this.playAudioElementFromTimestamp_) / 1000;
         if (mediaEl.hasAttribute('loop') || currentTime < mediaEl.duration) {
-          promises.push(
-            mediaPool.setCurrentTime(mediaEl, currentTime % mediaEl.duration)
-          );
-          promises.push(mediaPool.play(mediaEl));
+          mediaPool.setCurrentTime(mediaEl, currentTime % mediaEl.duration);
+          mediaPool.play(mediaEl);
         }
 
         this.playAudioElementFromTimestamp_ = null;
       }
-
-      return Promise.all(promises);
     }
   }
 
@@ -1059,17 +1050,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Registers the given media.
    * @param {!./media-pool.MediaPool} mediaPool
    * @param {!Element} mediaEl
-   * @return {!Promise} Promise that resolves after the media is registered.
    * @private
    */
   registerMedia_(mediaPool, mediaEl) {
     if (this.isBotUserAgent_) {
       // No-op.
-      return Promise.resolve();
+      return;
     } else {
-      return mediaPool.register(
-        /** @type {!./media-pool.DomElementDef} */ (mediaEl)
-      );
+      mediaPool.register(/** @type {!./media-pool.DomElementDef} */ (mediaEl));
     }
   }
 
@@ -1556,9 +1544,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.playMessageEl_ = renderPlayMessageElement(() => {
       this.togglePlayMessage_(false);
       this.startMeasuringAllVideoPerformance_();
-      this.mediaPoolPromise_
-        .then((mediaPool) => mediaPool.blessAll())
-        .then(() => this.playAllMedia_());
+      this.mediaPoolPromise_.then((mediaPool) => {
+        mediaPool.blessAll();
+        this.playAllMedia_();
+      });
     });
 
     localizeTemplate(this.playMessageEl_, this.element).then(() =>
