@@ -163,14 +163,12 @@ export function updateSources(win, mediaEl, newSources) {
 
 /**
  * @param {?Element|undefined} element
- * @return {Promise<void | null | undefined>}
+ * @return {null | Promise<void>}
  */
 export function resetAmpMediaOnDomChange(element) {
-  return Promise.resolve(
-    ampMediaElementFor(element)
-      ?.getImpl()
-      .then((impl) => {
-        impl.resetOnDomChange?.();
-      })
-  );
+  return ampMediaElementFor(element)
+    ?.getImpl()
+    .then((impl) => {
+      impl.resetOnDomChange?.();
+    });
 }
