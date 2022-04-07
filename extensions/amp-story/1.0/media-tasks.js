@@ -1,7 +1,7 @@
 import {tryPlay} from '#core/dom/video';
 
 import {Sources} from './sources';
-import {ampMediaElementFor} from './utils';
+import {getAmpVideoParent} from './utils';
 
 /**
  * CSS class names that should not be removed from an element when swapping it
@@ -163,10 +163,10 @@ export function updateSources(win, mediaEl, newSources) {
 
 /**
  * @param {?Element|undefined} element
- * @return {null | Promise<void>}
+ * @return {undefined | Promise<void>}
  */
 export function resetAmpMediaOnDomChange(element) {
-  return ampMediaElementFor(element)
+  return getAmpVideoParent(element)
     ?.getImpl()
     .then((impl) => {
       impl.resetOnDomChange?.();

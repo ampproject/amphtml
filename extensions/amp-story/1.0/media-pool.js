@@ -16,6 +16,7 @@ import {
   updateSources,
 } from './media-tasks';
 import {Sources} from './sources';
+import {getAmpVideoParent} from './utils';
 
 import {userInteractedWith} from '../../../src/video-interface';
 
@@ -681,16 +682,14 @@ export class MediaPool {
       return;
     }
 
-    const ampVideoEl = domMediaEl.parentElement;
-    if (ampVideoEl.tagName == 'AMP-VIDEO') {
-      if (ampVideoEl) {
-        if (ampVideoEl.hasAttribute('noaudio')) {
-          this.setVolume_(domMediaEl, 0);
-        } else {
-          const volume = ampVideoEl.getAttribute('volume');
-          if (volume) {
-            this.setVolume_(domMediaEl, parseFloat(volume));
-          }
+    const ampVideoEl = getAmpVideoParent(poolMediaEl);
+    if (ampVideoEl) {
+      if (ampVideoEl.hasAttribute('noaudio')) {
+        this.setVolume_(domMediaEl, 0);
+      } else {
+        const volume = ampVideoEl.getAttribute('volume');
+        if (volume) {
+          this.setVolume_(domMediaEl, parseFloat(volume));
         }
       }
     }

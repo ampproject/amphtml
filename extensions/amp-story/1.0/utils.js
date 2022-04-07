@@ -13,6 +13,12 @@ import {StateProperty} from './amp-story-store-service';
 
 import {getMode} from '../../../src/mode';
 import {createShadowRoot} from '../../../src/shadow-embed';
+import {
+  assertHttpsUrl,
+  getSourceOrigin,
+  isProxyOrigin,
+  resolveRelativeUrl,
+} from '../../../src/url';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -68,16 +74,21 @@ export function unscaledClientRect(el) {
 }
 
 /**
- * Finds an amp-video/amp-audio parent.
+ * Finds an amp-video/amp-audio ancestor.
  * @param {!Element} el
  * @return {?AmpElement}
  */
 export function ampMediaElementFor(el) {
-  const {parentElement} = el;
-  if (
-    parentElement.tagName === 'AMP-VIDEO' ||
-    parentElement.tagName === 'AMP-AUDIO'
-  ) {
+  return closestAncestorElementBySelector(el, 'amp-video, amp-audio');
+}
+
+/**
+ * @param {Element} element
+ * @return {null | AmpElement}
+ */
+export function getAmpVideoParent(element) {
+  const {parentElement} = element;
+  if (parentElement?.tagName === 'AMP-VIDEO') {
     return parentElement;
   }
   return null;
