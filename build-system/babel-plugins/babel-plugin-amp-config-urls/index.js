@@ -1,7 +1,7 @@
-const {addNamed} = require('@babel/helper-module-imports');
-const {dirname, relative} = require('path');
+const {dirname, join, posix, relative, sep} = require('path');
 
-const importSource = `${process.cwd()}/src/config/urls`;
+const importSource = join(process.cwd(), 'src', 'config', 'urls');
+const reference = 'self.AMP.config.urls';
 
 /**
  * @param {string} fromFilename
@@ -10,7 +10,8 @@ const importSource = `${process.cwd()}/src/config/urls`;
  */
 function relativeModule(fromFilename, toModule) {
   const resolved = relative(dirname(fromFilename), toModule);
-  return resolved.startsWith('.') ? resolved : `./${resolved}`;
+  const resolvedPosix = resolved.split(sep).join(posix.sep);
+  return resolvedPosix.startsWith('.') ? resolvedPosix : `./${resolvedPosix}`;
 }
 
 /**
@@ -20,9 +21,9 @@ function relativeModule(fromFilename, toModule) {
 module.exports = function (babel) {
   let importSourceRelative;
   const {template, types: t} = babel;
-  const buildNamespace = template(
-    `const NAMESPACE = /* #__PURE__ */ GETTER()`,
-    {preserveComments: true}
+  const buildNamespace = template.statement(
+    `const name = /* #__PURE__ */ (() => ${reference})()`,
+    {preserveComments: true, placeholderPattern: /^name$/}
   );
   return {
     name: 'amp-config-urls',
@@ -43,7 +44,6 @@ module.exports = function (babel) {
         if (!t.isStringLiteral(source, {value: importSourceRelative})) {
           return;
         }
-        let getter;
         for (const specifier of path.get('specifiers')) {
           if (!specifier.isImportNamespaceSpecifier()) {
             throw specifier.buildCodeFrameError(
@@ -51,20 +51,9 @@ module.exports = function (babel) {
                 `\`import * as urls from '${source.value}';\``
             );
           }
-          getter ??= addNamed(
-            path,
-            'ampConfigUrlsDoNotImportMeUseConfigUrlsInstead',
-            '#core/amp-config-urls'
-          );
-          const namespace = specifier.node.local.name;
-          path.insertAfter(
-            buildNamespace({
-              NAMESPACE: namespace,
-              GETTER: getter.name,
-            })
-          );
+          const {name} = specifier.node.local;
+          path.replaceWith(buildNamespace({name}));
         }
-        path.remove();
       },
     },
   };
