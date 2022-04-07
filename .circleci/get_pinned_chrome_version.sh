@@ -6,6 +6,7 @@ set -e
 
 GREEN() { echo -e "\033[0;32m$1\033[0m"; }
 RED() { echo -e "\033[0;31m$1\033[0m"; }
+YELLOW() { echo -e "\033[0;33m$1\033[0m"; }
 CYAN() { echo -e "\033[0;36m$1\033[0m"; }
 
 # Extract the chromedriver version used by AMP's E2E tests
@@ -46,7 +47,18 @@ echo "$(GREEN "Chrome version history URL is") $(CYAN "${CHROME_VERSION_HISTORY_
 # Determine the Chrome version
 # See https://developer.chrome.com/docs/versionhistory/guide
 echo "$(GREEN "Determining Chrome version...")"
-CHROME_VERSION="$(curl -sS ${CHROME_VERSION_HISTORY_URL} | jq -r ".versions[]|.version" | grep -m 1 "${CHROME_MAJOR_VERSION}\.")"
+for attempt in {2..0}
+do
+  CHROME_VERSION_HISTORY_JSON="$(curl -sS ${CHROME_VERSION_HISTORY_URL})"
+  if [[ $(echo ${CHROME_VERSION_HISTORY_JSON} | jq -r .error) == "null" ]]; then
+    break
+  fi
+
+  echo "$(YELLOW "Error fetching Chrome version history due to rate limit.") $(GREEN "${attempt}") $(YELLOW "attempt(s) remaining...")"
+  sleep 3
+done
+
+CHROME_VERSION="$(echo ${CHROME_VERSION_HISTORY_JSON} | jq -r ".versions[]|.version" | grep -m 1 "${CHROME_MAJOR_VERSION}\.")"
 if [[ -z "$CHROME_VERSION" ]]; then
   echo "$(RED "Could not determine Chrome version")"
   exit 1
