@@ -28,6 +28,9 @@ on:
 env:
   SCRIPTS_REPO: 'https://raw.githubusercontent.com/ampproject/amphtml/main'
   SCRIPTS_DIR: 'build-system/npm-publish'
+permissions:
+  contents: read
+
 jobs:
   setup:
     runs-on: ubuntu-latest
