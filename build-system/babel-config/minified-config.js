@@ -71,7 +71,7 @@ function getMinifiedConfig(buildFor = 'preact') {
       modules: false,
       targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
       shippedProposals: true,
-      exclude: argv.esm || argv.sxg ? ['@babel/plugin-transform-for-of'] : null,
+      exclude: argv.esm || argv.sxg ? ['@babel/plugin-transform-for-of'] : [],
     },
   ];
   const presetTypescript = [
