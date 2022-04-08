@@ -228,7 +228,7 @@ function transformAjvCode(code, taken, config) {
    * @param {any} value
    * @return {string}
    */
-  function getValueReference(statement, value) {
+  function getOrInsertValueReference(statement, value) {
     const serial = JSON.stringify(value);
     if (valueReferences[serial]) {
       return valueReferences[serial];
@@ -319,7 +319,7 @@ function transformAjvCode(code, taken, config) {
       if (parentIsHasOwnPropertyCall(memberExpression)) {
         value = Object.fromEntries(Object.keys(value).map((k) => [k, 0]));
       }
-      const name = getValueReference(statement, value);
+      const name = getOrInsertValueReference(statement, value);
       memberExpression.replaceWith(t.identifier(name));
     }
     path.remove();
