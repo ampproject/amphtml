@@ -1,7 +1,5 @@
 import {isConnectedNode} from '#core/dom';
 import {matches} from '#core/dom/query';
-import {findIndex} from '#core/types/array';
-import {getWin} from '#core/window';
 
 import {Services} from '#service';
 
@@ -33,12 +31,6 @@ export const MediaType_Enum = {
   VIDEO: 'video',
 };
 
-/** @const @enum {string} */
-const MediaElementOrigin = {
-  PLACEHOLDER: 'placeholder',
-  POOL: 'pool',
-};
-
 /**
  * A marker type to indicate an element that originated in the document that is
  * being swapped for an element from the pool.
@@ -66,52 +58,19 @@ export let DomElementDef;
 export let ElementDistanceFnDef;
 
 /**
- * Represents a task to be executed on a media element.
- * @typedef {function(!PoolBoundElementDef, *): !Promise}
- */
-let ElementTask_1_0_Def; // eslint-disable-line local/camelcase
-
-/**
- * @const {string}
- */
-const PLACEHOLDER_ELEMENT_ID_PREFIX = 'i-amphtml-placeholder-media-';
-
-/**
- * @const {string}
- */
-const POOL_ELEMENT_ID_PREFIX = 'i-amphtml-pool-media-';
-
-/**
- * @const {string}
- */
-const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
-
-/**
  * @const {string}
  */
 const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
 
 /**
- * @const {string}
+ * @param {Element} element
+ * @return {boolean}
  */
-const MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_ORIGIN__';
+const isPoolElement = (element) =>
+  element.classList.contains('i-amphtml-pool-media');
 
-/**
- * The name for a string attribute that represents the ID of a media element
- * that the element containing this attribute replaced.
- * @const {string}
- */
-export const REPLACED_MEDIA_PROPERTY_NAME = 'replaced-media';
-
-/**
- * @type {!Object<string, !MediaPool>}
- */
-const instances = {};
-
-/**
- * @type {number}
- */
-let nextInstanceId = 0;
+/** @type {WeakMap<MediaPoolRoot, MediaPool>} */
+const instances = new WeakMap();
 
 /**
  * 🍹 MediaPool
@@ -156,35 +115,22 @@ export class MediaPool {
     this.unallocated = {};
 
     /**
-     * Maps a media element's ID to the object containing its sources.
-     * @private @const {!Object<string, !Sources>}
-     */
-    this.sources_ = {};
-
-    /**
      * The audio context.
      * @private {?AudioContext}
      */
     this.audioContext_ = null;
 
-    /**
-     * Maps a media element's ID to its audio source.
-     * @private @const {!Object<string, !MediaElementAudioSourceNode>}
-     */
-    this.audioSources_ = {};
+    /** @private @const {WeakMap<HTMLMediaElement, Sources>} */
+    this.sources_ = new WeakMap();
 
-    /**
-     * Maps a media element's ID to the element.  This is necessary, as elements
-     * are kept in memory when they are swapped out of the DOM.
-     * @private @const {!Object<string, !PlaceholderElementDef>}
-     */
-    this.placeholderEls_ = {};
+    /** @private @const {WeakMap<HTMLMediaElement, MediaElementAudioSourceNode>} */
+    this.audioSources_ = new WeakMap();
 
-    /**
-     * Counter used to produce unique IDs for placeholder media elements.
-     * @private {number}
-     */
-    this.placeholderIdCounter_ = 0;
+    /** @private @const {WeakMap<HTMLMediaElement, HTMLMediaElement>} */
+    this.swapped_ = new WeakMap();
+
+    /** @private @const {Set<PlaceholderElementDef>} */
+    this.placeholderEls_ = new Set();
 
     /**
      * Whether the media elements in this MediaPool instance have been "blessed"
@@ -230,8 +176,6 @@ export class MediaPool {
    * @private
    */
   initializeMediaPool_(maxCounts) {
-    let poolIdCounter = 0;
-
     for (const type in maxCounts) {
       const count = maxCounts[type];
 
@@ -240,29 +184,15 @@ export class MediaPool {
         `Factory for media type \`${type}\` unset.`
       );
 
-      // Cloning nodes is faster than building them.
-      // Construct a seed media element as a small optimization.
-      const mediaElSeed = ctor();
-
       this.allocated[type] = [];
-      this.unallocated[type] = [];
-
-      // Reverse-looping is generally faster and Closure would usually make
-      // this optimization automatically. However, it skips it due to a
-      // comparison with the itervar below, so we have to roll it by hand.
-      for (let i = count; i > 0; i--) {
-        // Use seed element at end of set to prevent wasting it.
-        const mediaEl = /** @type {!PoolBoundElementDef} */ (
-          i == 1 ? mediaElSeed : mediaElSeed.cloneNode(/* deep */ true)
-        );
+      this.unallocated[type] = new Array(count).map(() => {
+        const mediaEl = ctor();
         mediaEl.addEventListener('error', this.onMediaError_, {capture: true});
-        mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
         // In Firefox, cloneNode() does not properly copy the muted property
         // that was set in the seed. We need to set it again here.
         mediaEl.muted = true;
-        mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
-        this.unallocated[type].push(mediaEl);
-      }
+        return mediaEl;
+      });
     }
   }
 
@@ -305,26 +235,6 @@ export class MediaPool {
   }
 
   /**
-   * @return {string} A unique ID.
-   * @private
-   */
-  createPlaceholderElementId_() {
-    return PLACEHOLDER_ELEMENT_ID_PREFIX + this.placeholderIdCounter_++;
-  }
-
-  /**
-   * @param {!DomElementDef} mediaElement
-   * @return {boolean}
-   * @private
-   */
-  isPoolMediaElement_(mediaElement) {
-    return (
-      mediaElement[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] ===
-      MediaElementOrigin.POOL
-    );
-  }
-
-  /**
    * Gets the media type from a given element.
    * @param {!PoolBoundElementDef|!PlaceholderElementDef} mediaElement The
    *     element whose media type should be retrieved.
@@ -364,17 +274,12 @@ export class MediaPool {
    *     represents the specified media element
    */
   getMatchingMediaElementFromPool_(mediaType, domMediaEl) {
-    if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
-      // The media element in the DOM was already from the pool.
-      return /** @type {!PoolBoundElementDef} */ (domMediaEl);
+    if (isPoolElement(domMediaEl)) {
+      return domMediaEl;
     }
-
-    const allocatedEls = this.allocated[mediaType];
-    const index = findIndex(allocatedEls, (poolMediaEl) => {
-      return poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] === domMediaEl.id;
+    return this.allocated[mediaType].find((poolMediaEl) => {
+      return this.swapped_.get(poolMediaEl) === domMediaEl;
     });
-
-    return allocatedEls[index];
   }
 
   /**
@@ -476,21 +381,6 @@ export class MediaPool {
   }
 
   /**
-   * @param {!MediaType_Enum} mediaType The media type to check.
-   * @param {!DomElementDef} domMediaEl The element to check.
-   * @return {boolean} true, if the specified element has already been allocated
-   *     as the specified type of media element.
-   * @private
-   */
-  isAllocatedMediaElement_(mediaType, domMediaEl) {
-    // Since we don't know whether or not the specified domMediaEl is a
-    // placeholder or originated from the pool, we coerce it to a pool-bound
-    // element, to check against the allocated list of pool-bound elements.
-    const poolMediaEl = /** @type {!PoolBoundElementDef} */ (domMediaEl);
-    return this.allocated[mediaType].indexOf(poolMediaEl) >= 0;
-  }
-
-  /**
    * Replaces a media element that was originally in the DOM with a media
    * element from the pool.
    * @param {!PlaceholderElementDef} placeholderEl The placeholder element
@@ -505,7 +395,7 @@ export class MediaPool {
   swapPoolMediaElementIntoDom_(placeholderEl, poolMediaEl, sources) {
     const ampMediaForPoolEl = ampMediaElementFor(poolMediaEl);
     const ampMediaForDomEl = ampMediaElementFor(placeholderEl);
-    poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = placeholderEl.id;
+    this.swapped_.set(poolMediaEl, placeholderEl);
 
     return this.enqueueMediaElementTask_(
       poolMediaEl,
@@ -576,15 +466,13 @@ export class MediaPool {
    * @private
    */
   swapPoolMediaElementOutOfDom_(poolMediaEl) {
-    const placeholderElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (
       dev().assertElement(
-        this.placeholderEls_[placeholderElId],
-        `No media element ${placeholderElId} to put back into DOM after` +
-          'eviction.'
+        this.swapped_.get(poolMediaEl),
+        'No media element to put back into DOM after eviction'
       )
     );
-    poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
+    this.swapped_.delete(poolMediaEl);
 
     const swapOutOfDom = this.enqueueMediaElementTask_(
       poolMediaEl,
@@ -625,8 +513,8 @@ export class MediaPool {
     // it is a placeholder element.
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (domMediaEl);
 
-    const sources = this.sources_[placeholderEl.id];
-    devAssert(sources instanceof Sources, 'Cannot play unregistered element.');
+    const sources = this.sources_.get(placeholderEl);
+    devAssert(sources, 'Cannot play unregistered element.');
 
     const poolMediaEl =
       this.reserveUnallocatedMediaElement_(mediaType) ||
@@ -680,7 +568,7 @@ export class MediaPool {
       this.trackAmpElementToBless_(/** @type {!AmpElement} */ (parent));
     }
 
-    if (this.isPoolMediaElement_(domMediaEl)) {
+    if (isPoolElement(domMediaEl)) {
       // This media element originated from the media pool.
       return Promise.resolve();
     }
@@ -688,20 +576,18 @@ export class MediaPool {
     // Since this is not an existing pool media element, we can be certain that
     // it is a placeholder element.
     const placeholderEl = /** @type {!PlaceholderElementDef} */ (domMediaEl);
-    placeholderEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] =
-      MediaElementOrigin.PLACEHOLDER;
+    this.placeholderEls_.add(placeholderEl);
 
-    const id = placeholderEl.id || this.createPlaceholderElementId_();
-    if (this.sources_[id] && this.placeholderEls_[id]) {
+    if (
+      this.sources_.has(placeholderEl) &&
+      this.placeholderEls_.has(placeholderEl)
+    ) {
       // This media element is already registered.
       return Promise.resolve();
     }
 
-    // This media element has not yet been registered.
-    placeholderEl.id = id;
     const sources = Sources.removeFrom(this.win_, placeholderEl);
-    this.sources_[id] = sources;
-    this.placeholderEls_[id] = placeholderEl;
+    this.sources_.set(placeholderEl, sources);
 
     if (placeholderEl instanceof HTMLMediaElement) {
       placeholderEl.muted = true;
@@ -834,7 +720,7 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    const audioSource = this.audioSources_[domMediaEl.id];
+    const audioSource = this.audioSources_.get(domMediaEl);
     if (audioSource) {
       audioSource.disconnect();
     }
@@ -892,10 +778,11 @@ export class MediaPool {
     }
 
     if (this.audioContext_) {
-      const audioSource =
-        this.audioSources_[domMediaEl.id] ||
-        this.audioContext_.createMediaElementSource(domMediaEl);
-      this.audioSources_[domMediaEl.id] = audioSource;
+      let audioSource = this.audioSources_.get(domMediaEl);
+      if (!audioSource) {
+        audioSource = this.audioContext_.createMediaElementSource(domMediaEl);
+        this.audioSources_.set(domMediaEl, audioSource);
+      }
       const gainNode = this.audioContext_.createGain();
       gainNode.gain.value = volume;
       audioSource.connect(gainNode).connect(this.audioContext_.destination);
@@ -997,23 +884,17 @@ export class MediaPool {
    * @return {!MediaPool}
    */
   static for(root) {
-    const element = root.getElement();
-    const existingId = element[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
-    const hasInstanceAllocated = existingId && instances[existingId];
-
-    if (hasInstanceAllocated) {
-      return instances[existingId];
+    const existing = instances.get(root);
+    if (existing) {
+      return existing;
     }
-
-    const newId = String(nextInstanceId++);
-    element[POOL_MEDIA_ELEMENT_PROPERTY_NAME] = newId;
-    instances[newId] = new MediaPool(
-      getWin(root.getElement()),
+    const instance = new MediaPool(
+      root.win,
       root.getMaxMediaElementCounts(),
       (element) => root.getElementDistance(element)
     );
-
-    return instances[newId];
+    instances.set(root, instance);
+    return instance;
   }
 }
 
@@ -1024,9 +905,9 @@ export class MediaPool {
  */
 export class MediaPoolRoot {
   /**
-   * @return {!Element} The root element of this media pool.
+   * @return {Window}
    */
-  getElement() {}
+  get win() {}
 
   /**
    * @param {!Element} unusedElement The element whose distance should be

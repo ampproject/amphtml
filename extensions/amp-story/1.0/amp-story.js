@@ -2199,11 +2199,6 @@ export class AmpStory extends AMP.BaseElement {
     };
   }
 
-  /** @override */
-  getElement() {
-    return this.element;
-  }
-
   /**
    * Reacts to muted state updates.
    * @param  {boolean} isMuted Whether the story just got muted.
