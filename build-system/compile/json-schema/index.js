@@ -234,7 +234,7 @@ function transformAjvCode(code, taken, config) {
       return valueReferences[serial];
     }
     const name = path.scope.generateUid('schema');
-    path.getStatementParent()?.insertBefore(babel.template.statement.ast`
+    path.getStatementParent()?.insertBefore(template.statement.ast`
       const ${name} = ${t.valueToNode(value)};
     `);
     return (valueReferences[serial] = name);
