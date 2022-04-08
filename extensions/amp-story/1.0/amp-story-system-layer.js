@@ -27,7 +27,6 @@ import {
 
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
-import {getSourceOrigin} from '../../../src/url';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -340,7 +339,9 @@ export class SystemLayer {
 
     anchorEl.href =
       getStoryAttributeSrc(this.parentEl_, 'entity-url') ||
-      getSourceOrigin(Services.documentInfoForDoc(this.parentEl_).sourceUrl);
+      Services.urlForDoc(this.parentEl_).getSourceOrigin(
+        Services.documentInfoForDoc(this.parentEl_).sourceUrl
+      );
 
     this.systemLayerEl_.querySelector(
       '.i-amphtml-story-attribution-text'

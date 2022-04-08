@@ -37,3 +37,10 @@ jobs:
             --sha ${{ github.event.inputs.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+
+  create-issue-on-error:
+    needs: tagger
+    if: failure()
+    uses: ampproject/amphtml/.github/workflows/create-issue-on-error.yml@main
+    with:
+      mention: '@ampproject/wg-infra'

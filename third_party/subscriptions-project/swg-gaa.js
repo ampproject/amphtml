@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.211 */
+/** Version: 0.1.22.212 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -954,6 +954,9 @@ const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
 /** ID for the Regwall title element. */
 const REGWALL_TITLE_ID = 'swg-regwall-title';
 
+/** URL parameter to append in the redirect mode for 3P Sign-in.  */
+const REDIRECT_SOURCE_URL_PARAM = 'source';
+
 /**
  * HTML for the metering regwall dialog, where users can sign in with Google.
  * The script creates a dialog based on this HTML.
@@ -1829,9 +1832,17 @@ class GaaGoogle3pSignInButton {
   /**
    * Renders the third party Google Sign-In button for external authentication.
    * @nocollapse
-   * @param {{ allowedOrigins: !Array<string>, authorizationUrl: string }} params
+   * @param {{
+   *    allowedOrigins: !Array<string>,
+   *    authorizationUrl: string,
+   *    redirectMode: boolean,
+   * }} params GaaGoogle3pSignInButton operates in two modes: redirect and
+   * popup. The default mode is pop-up mode which opens the authorizationUrl
+   * in a new window. To use a redirect mode and open the authorizationUrl in
+   * the same window, set redirectMode to true. For webview applications
+   * redirectMode is recommended.
    */
-  static show({allowedOrigins, authorizationUrl}) {
+  static show({allowedOrigins, authorizationUrl, redirectMode = false}) {
     // Optionally grab language code from URL.
     const queryString = GaaUtils.getQueryString();
     const queryParams = parseQueryString(queryString);
@@ -1851,7 +1862,16 @@ class GaaGoogle3pSignInButton {
     buttonEl.tabIndex = 0;
     buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
     buttonEl.onclick = () => {
-      self.open(authorizationUrl);
+      if (redirectMode) {
+        const parameterizedAuthUrl = new URL(authorizationUrl);
+        parameterizedAuthUrl.searchParams.append(
+          REDIRECT_SOURCE_URL_PARAM,
+          self.parent.location.href
+        );
+        self.open(parameterizedAuthUrl, '_parent');
+      } else {
+        self.open(authorizationUrl);
+      }
     };
     self.document.body.appendChild(buttonEl);
 
