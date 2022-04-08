@@ -1,7 +1,12 @@
 const {dirname, join, posix, relative, sep} = require('path');
 
-const importSource = join(process.cwd(), 'src', 'config', 'urls');
-const reference = 'self.AMP.config.urls';
+const urlsImportSource = join(process.cwd(), 'src', 'config', 'urls');
+const urlsReference = 'self.AMP.config.urls';
+
+const getModeFilename = join(process.cwd(), 'src', 'mode.js');
+const getModeFunction = `function getMode(win) {
+  return (win || self).__AMP_MODE;
+}`;
 
 /**
  * @param {string} fromFilename
@@ -21,8 +26,8 @@ function relativeModule(fromFilename, toModule) {
 module.exports = function (babel) {
   let importSourceRelative;
   const {template, types: t} = babel;
-  const buildNamespace = template.statement(
-    `const name = /* #__PURE__ */ (() => ${reference})()`,
+  const buildUrlsDeclarator = template.statement(
+    `const name = /* #__PURE__ */ (() => ${urlsReference})()`,
     {preserveComments: true, placeholderPattern: /^name$/}
   );
   return {
@@ -36,10 +41,24 @@ module.exports = function (babel) {
               'babel-plugin-amp-config-urls must be called with a filename'
             );
           }
-          importSourceRelative = relativeModule(filename, importSource);
+          importSourceRelative = relativeModule(filename, urlsImportSource);
         },
       },
+      FunctionDeclaration(path, state) {
+        const {filename} = state;
+        if (filename === getModeFilename) {
+          if (t.isIdentifier(path.node.id, {name: 'getMode'})) {
+            path.replaceWithSourceString(getModeFunction);
+          }
+        }
+      },
       ImportDeclaration(path) {
+        return;
+        //
+        //
+        //
+        //
+
         const {source} = path.node;
         if (!t.isStringLiteral(source, {value: importSourceRelative})) {
           return;
@@ -52,7 +71,7 @@ module.exports = function (babel) {
             );
           }
           const {name} = specifier.node.local;
-          path.replaceWith(buildNamespace({name}));
+          path.replaceWith(buildUrlsDeclarator({name}));
         }
       },
     },
