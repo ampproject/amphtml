@@ -288,14 +288,17 @@ export function BentoAutocomplete({
 
   const updateActiveItem = useCallback(
     (delta: number) => {
-      const results = getEnabledResults(elementRef.current);
+      const keyUpWhenNoneActive =
+        activeIndex === INITIAL_ACTIVE_INDEX && delta < 0;
+      const index = keyUpWhenNoneActive ? delta : activeIndex + delta;
+      const enabledResults = getEnabledResults(elementRef.current);
       if (delta === 0 || !showAutocompleteResults) {
         return;
       }
-      const index = mod(activeIndex + delta, results?.length || 0);
-      const activeResult = results?.item(index);
+      const modifiedIndex = mod(index, enabledResults?.length || 0);
+      const activeResult = enabledResults?.item(modifiedIndex);
 
-      setActiveIndex(index);
+      setActiveIndex(modifiedIndex);
       inputRef.current?.setAttribute('aria-activedescendant', getItemId(index));
 
       setInputValue(getSelectedTextValue(activeResult as HTMLElement));
@@ -335,6 +338,12 @@ export function BentoAutocomplete({
       switch (event.key) {
         case Keys_Enum.DOWN_ARROW: {
           event.preventDefault();
+          const results = getEnabledResults(elementRef.current) || [];
+          if (activeIndex === results.length - 1) {
+            resetUserInput();
+            resetActiveItem();
+            return;
+          }
           updateActiveItem(1);
           break;
         }

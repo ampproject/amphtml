@@ -420,7 +420,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         .true;
     });
 
-    it('does not update the input value or active index if the bottom result is selected', () => {
+    it('resets the input value and attributes if the user arrows down the bottom', () => {
       const wrapper = mount(
         <Autocomplete id="id" filter="prefix" items={['one']} minChars={0}>
           <input type="text"></input>
@@ -441,12 +441,12 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
 
       input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
 
-      expect(input.getDOMNode().value).to.equal('one');
-      expect(input.getDOMNode().getAttribute('aria-activedescendant')).to.equal(
-        'id-0'
-      );
+      expect(input.getDOMNode().value).to.equal('');
+      expect(input.getDOMNode().getAttribute('aria-activedescendant')).to.be
+        .null;
       expect(wrapper.find('[data-value="one"]').prop('aria-selected')).to.be
-        .true;
+        .false;
+      expect(areOptionsVisible(wrapper)).to.be.true;
     });
 
     it('updates the input value on arrow up', () => {
@@ -493,6 +493,27 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(wrapper.find('[data-value="two"]').prop('aria-selected')).to.be
         .false;
       expect(areOptionsVisible(wrapper)).to.be.true;
+    });
+
+    it('selects the last item if the user uses the up arrow without an active item', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          filter="prefix"
+          items={['one', 'two', 'three']}
+          minChars={0}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.simulate('focus');
+
+      input.simulate('keydown', {key: Keys_Enum.UP_ARROW});
+
+      expect(wrapper.find('[data-value="three"]').prop('aria-selected')).to.be
+        .true;
     });
 
     it('hides the options on enter and sets the input to the selected item', () => {
