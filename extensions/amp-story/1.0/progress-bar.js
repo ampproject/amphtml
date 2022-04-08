@@ -129,10 +129,10 @@ export class ProgressBar {
 
   /**
    * Builds the progress bar.
-   * @param {string} initialSegmentId
+   * @param {string} unusedInitialSegmentId
    * @return {!Element}
    */
-  build(initialSegmentId) {
+  build(unusedInitialSegmentId) {
     if (this.root_) {
       return this.root_;
     }
@@ -210,20 +210,6 @@ export class ProgressBar {
     Services.viewportForDoc(this.ampdoc_).onResize(
       debounce(this.win_, () => this.onResize_(), 300)
     );
-
-    this.segmentsAddedPromise_.then(() => {
-      if (this.segmentCount_ > MAX_SEGMENTS) {
-        this.getInitialFirstExpandedSegmentIndex_(
-          this.segmentIdMap_[initialSegmentId]
-        );
-
-        this.render_(false /** shouldAnimate */);
-      }
-      root.classList.toggle(
-        'i-amphtml-progress-bar-overflow',
-        this.segmentCount_ > MAX_SEGMENTS
-      );
-    });
 
     return root;
   }
