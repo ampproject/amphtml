@@ -46,7 +46,7 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   font-weight: 400 !important;
   background: white !important;
   color: black !important;
-  overflow: hidden !important;
+  overflow: hidden !important; 
 }
 
 .i-amphtml-story-subscriptions-dialog-banner {
@@ -110,6 +110,9 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   height: 32px !important;
   border-radius: 50% !important;
   margin-left: -12px !important;
+}
+.i-amphtml-story-subscriptions-google-logo {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none"><path fill="#fff" d="M16 32a16 16 0 1 0 0-32 16 16 0 0 0 0 32Z"/><path fill="#4285F4" d="M28.56 13.78H16v5h7.19a6.19 6.19 0 0 1-2.67 3.99v3.33h4.3c3.34-3.1 4.46-7.93 3.74-12.32Z"/><path fill="#34A853" d="M16 29.33c3.6 0 6.61-1.2 8.81-3.23l-4.29-3.33A8.04 8.04 0 0 1 16 24.06a7.96 7.96 0 0 1-7.48-5.52H4.1v3.44A13.31 13.31 0 0 0 16 29.33Z"/><path fill="#FBBC05" d="M8.52 18.54a7.93 7.93 0 0 1 0-5.08v-3.44H4.1a13.18 13.18 0 0 0 0 11.96l4.42-3.44Z"/><path fill="#EA4335" d="M16 7.94c1.97 0 3.72.68 5.11 2l3.8-3.8A12.75 12.75 0 0 0 16 2.67c-5.21 0-9.71 3-11.9 7.35l4.42 3.44A7.96 7.96 0 0 1 16 7.94Z"/></svg>') !important;
 }
 
 .i-amphtml-story-subscriptions-publisher-button-text, .i-amphtml-story-subscriptions-google-button-text {
