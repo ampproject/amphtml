@@ -46,7 +46,7 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   font-weight: 400 !important;
   background: white !important;
   color: black !important;
-  overflow: hidden !important; 
+  overflow: hidden !important;
 }
 amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   width: 100% !important;
