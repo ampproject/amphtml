@@ -363,7 +363,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
             : options.outputFormat,
         banner,
         footer,
-        target: 'es6',
+        // For es5 builds, ensure esbuild-injected code is transpiled.
+        target: argv.esm ? 'es6' : 'es5',
         incremental: !!options.watch,
         logLevel: 'silent',
         external: options.externalDependencies,
