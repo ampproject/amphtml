@@ -1,5 +1,3 @@
-import objStr from 'obj-str';
-
 import {Keys_Enum} from '#core/constants/key-codes';
 import {querySelectorAllInSlot, scopedQuerySelectorAll} from '#core/dom/query';
 import {mod} from '#core/math';
@@ -7,21 +5,14 @@ import {getValueForExpr} from '#core/types/object';
 import {includes} from '#core/types/string';
 
 import * as Preact from '#preact';
-import {
-  cloneElement,
-  isValidElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from '#preact';
+import {useCallback, useEffect, useMemo, useRef, useState} from '#preact';
 import {ContainWrapper, useValueRef} from '#preact/component';
 import {useQuery} from '#preact/hooks/useQuery';
 import {xhrUtils} from '#preact/utils/xhr';
 
 import fuzzysearch from '#third_party/fuzzysearch';
 
+import {AutocompleteItem} from './autocomplete-item';
 import {useStyles} from './component.jss';
 import {
   getEnabledResults,
@@ -29,17 +20,19 @@ import {
   getSelectedObjectValue,
   getSelectedTextValue,
 } from './helpers';
+import {HighlightedText} from './highlighted-text';
 import {tokenPrefixMatch} from './token-prefix-match';
 import {
   BentoAutocompleteProps,
   InputElement,
   Item,
-  ItemTemplateProps,
+  ItemTemplateFn,
   OnSelectData,
   isValidFilterType,
 } from './types';
 import {useAutocompleteBinding} from './use-autocomplete-binding';
 
+// @ts-ignore
 import {addParamToUrl} from '../../../../url';
 
 const INITIAL_ACTIVE_INDEX = -1;
@@ -47,10 +40,6 @@ const INITIAL_ACTIVE_INDEX = -1;
 const getItems = (response: {items: Item[]}) =>
   getValueForExpr(response, 'items');
 
-/**
- * @param {!BentoAutocomplete.Props} props
- * @return {PreactDef.Renderable}
- */
 export function BentoAutocomplete({
   id,
   children,
@@ -399,103 +388,36 @@ export function BentoAutocomplete({
     [selectItem]
   );
 
-  const getItemChildren = useCallback(
+  const getTextForStringItem = useCallback(
     (item: string) => {
-      const lowerCaseItem = item.toLocaleLowerCase();
-      const lowerCaseSubstring = substring.toLocaleLowerCase();
-      if (
-        highlightUserEntry &&
-        substring.length &&
-        substring.length <= item.length &&
-        includes(lowerCaseItem, lowerCaseSubstring)
-      ) {
-        const substringStart = lowerCaseItem.indexOf(lowerCaseSubstring);
-        const substringEnd = substringStart + lowerCaseSubstring.length;
-        return (
-          <>
-            {item.slice(0, substringStart)}
-            <span class="autocomplete-partial">
-              {item.slice(substringStart, substringEnd)}
-            </span>
-            {item.slice(substringEnd, item.length)}
-          </>
-        );
-      } else if (
-        highlightUserEntry &&
-        substring.length &&
-        substring.length <= item.length &&
-        filter === 'fuzzy'
-      ) {
-        // This will create a separate span for each character in the substring.
-        // This isn't ideal for every match, but it enables highlighting for fuzzy
-        // matches.
-        const lowerCaseSubstring = substring.toLocaleLowerCase();
-        return (
-          <>
-            {item.split('').map((char) => {
-              if (lowerCaseSubstring.includes(char.toLocaleLowerCase())) {
-                return <span class="autocomplete-partial">{char}</span>;
-              }
-              return char;
-            })}
-          </>
-        );
+      if (highlightUserEntry && substring.length > 0) {
+        if (includes(item.toLocaleLowerCase(), substring.toLocaleLowerCase())) {
+          return <HighlightedText text={item} substring={substring} />;
+        }
+        if (filter === 'fuzzy') {
+          return <HighlightedText text={item} substring={substring} fuzzy />;
+        }
       }
       return item;
     },
     [highlightUserEntry, substring, filter]
   );
 
-  const getRenderedItem = useCallback(
-    (item: Item, index: number) => {
-      let component;
+  const getItemTemplate = useCallback<(item: Item) => ItemTemplateFn>(
+    (item: Item) => {
       if (typeof item === 'object') {
         if (!itemTemplate) {
           onError(`data must provide template for non-string items.`);
-          return null;
+          return () => null;
         }
-        component = itemTemplate(item);
+        return itemTemplate;
       } else {
-        component = (
-          <div data-value={item}>{getItemChildren(item as string)}</div>
-        );
+        return (item: string) => {
+          return <div data-value={item}>{getTextForStringItem(item)}</div>;
+        };
       }
-      if (!isValidElement<ItemTemplateProps>(component)) {
-        return component;
-      }
-      const isDisabled = component.props['data-disabled'];
-      if (!component.props['data-value'] && !isDisabled) {
-        onError(
-          `expected a "data-value" or "data-disabled" attribute on the rendered template item.`
-        );
-      }
-      return cloneElement(component, {
-        'aria-disabled': isDisabled,
-        'aria-selected': activeIndex === index,
-        class: objStr({
-          'autocomplete-item': true,
-          [classes.autocompleteItem]: true,
-          [classes.autocompleteItemActive]: index === activeIndex,
-        }),
-        dir: 'auto',
-        id: getItemId(index),
-        key: item,
-        // unlike onClick, onMouseDown overrides the blur event handler
-        onMouseDown: handleMousedown,
-        part: 'option',
-        role: 'option',
-        ...component.props,
-      });
     },
-    [
-      itemTemplate,
-      getItemId,
-      activeIndex,
-      classes,
-      handleMousedown,
-      getItemChildren,
-      onError,
-    ]
+    [itemTemplate, getTextForStringItem, onError]
   );
 
   useEffect(() => {
@@ -546,9 +468,20 @@ export function BentoAutocomplete({
         // @ts-ignore
         part="results"
       >
-        {filteredData.map((item: Item, index: number) =>
-          getRenderedItem(item, index)
-        )}
+        {filteredData.map((item: Item, index: number) => {
+          const id = getItemId(index);
+          return (
+            <AutocompleteItem
+              key={id}
+              item={item}
+              itemTemplate={getItemTemplate(item)}
+              id={id}
+              selected={activeIndex === index}
+              onError={onError}
+              onMouseDown={handleMousedown}
+            />
+          );
+        })}
       </div>
     </ContainWrapper>
   );

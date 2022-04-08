@@ -6,4 +6,5 @@ export type {
   FunctionalComponent,
   Ref,
   RenderableProps,
+  VNode,
 } from 'preact';

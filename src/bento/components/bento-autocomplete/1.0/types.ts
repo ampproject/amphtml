@@ -1,4 +1,4 @@
-import {Component, ComponentChildren} from '#preact/types';
+import {ComponentChildren, ComponentProps, VNode} from '#preact/types';
 
 const filterTypes = [
   'substring',
@@ -19,6 +19,16 @@ export type Item = string | object;
 
 export type OnSelectData = {value: string; valueAsObject?: object};
 
+export type InputElement = HTMLInputElement | HTMLTextAreaElement;
+
+export type ItemTemplateProps = {
+  'data-value'?: string;
+  'data-disabled'?: boolean;
+};
+
+export type ItemNode = VNode<ItemTemplateProps> | null;
+
+export type ItemTemplateFn = (item: Item) => ItemNode;
 export interface BentoAutocompleteProps {
   id?: string;
   onError?: (message: string) => void;
@@ -31,7 +41,7 @@ export interface BentoAutocompleteProps {
   maxItems?: number;
   highlightUserEntry?: boolean;
   inline?: string;
-  itemTemplate?: (item: Item) => Component<any>;
+  itemTemplate?: ItemTemplateFn;
   suggestFirst?: boolean;
   src?: string;
   fetchJson?: (src: string) => Promise<Item[]>;
@@ -39,15 +49,15 @@ export interface BentoAutocompleteProps {
   query?: string;
 }
 
-export type InputElement = HTMLInputElement | HTMLTextAreaElement;
+export interface AutocompleteItemProps extends ComponentProps<any> {
+  item: Item;
+  itemTemplate: ItemTemplateFn;
+  onError?: (message: string) => void;
+  selected?: boolean;
+}
 
 export interface AutocompleteBinding {
   shouldAutocomplete(inputEl: InputElement): boolean;
   getUserInputForUpdate(inputEl: InputElement): string;
   shouldShowOnFocus: boolean;
 }
-
-export type ItemTemplateProps = {
-  'data-value'?: string;
-  'data-disabled'?: boolean;
-};
