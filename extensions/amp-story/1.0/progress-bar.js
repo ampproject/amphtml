@@ -150,11 +150,12 @@ export class ProgressBar {
       StateProperty.PAGE_IDS,
       (pageIds) => {
         const attached = !!root.parentElement;
-        if (attached) {
-          this.clear_();
-        }
 
         this.segmentsAddedPromise_ = this.mutator_.mutateElement(root, () => {
+          if (attached) {
+            this.clear_();
+          }
+
           /** @type {!Array} */ (pageIds).forEach((id) => {
             if (
               // Do not show progress bar for the ad page.
@@ -164,6 +165,15 @@ export class ProgressBar {
               this.addSegment_(id);
             }
           });
+
+          if (this.segmentCount_ > MAX_SEGMENTS) {
+            this.getInitialFirstExpandedSegmentIndex_(this.activeSegmentIndex_);
+            this.render_(false /** shouldAnimate */);
+          }
+          root.classList.toggle(
+            'i-amphtml-progress-bar-overflow',
+            this.segmentCount_ > MAX_SEGMENTS
+          );
         });
 
         if (attached) {
@@ -482,6 +492,7 @@ export class ProgressBar {
     removeChildren(devAssert(this.root_));
     this.segmentIdMap_ = map();
     this.segmentCount_ = 0;
+    this.segments_ = [];
   }
 
   /**
