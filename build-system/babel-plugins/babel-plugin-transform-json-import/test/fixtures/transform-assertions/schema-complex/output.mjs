@@ -2,7 +2,7 @@ import { isIso4217CurrencyCode } from '#core/json-schema';
 "use strict";
 
 const _validate = validate0;
-const schema0 = {
+const _schema = {
   recursive: 0,
   a: 0,
   b: 0,
@@ -15,18 +15,6 @@ const schema0 = {
   i: 0
 };
 const func0 = Object.prototype.hasOwnProperty;
-const schema1 = {
-  recursive: 0,
-  a: 0,
-  b: 0,
-  c: 0,
-  d: 0,
-  h: 0,
-  e: 0,
-  f: 0,
-  g: 0,
-  i: 0
-};
 const wrapper0 = {
   validate: validate1
 };
@@ -171,7 +159,7 @@ function validate1(data, instancePath = "") {
         }
 
         for (const key0 in data0) {
-          if (!func0.call(schema1, key0)) {
+          if (!func0.call(_schema, key0)) {
             const err9 = (instancePath + "/" + i0 + ' ' + "must NOT have additional properties").trim();
 
             if (vErrors === null) {
@@ -779,7 +767,7 @@ function validate0(data, instancePath = "") {
             }
 
             for (const key1 in data2) {
-              if (!func0.call(schema0, key1)) {
+              if (!func0.call(_schema, key1)) {
                 const err11 = (instancePath + "/items/" + i0 + ' ' + "must NOT have additional properties").trim();
 
                 if (vErrors === null) {
