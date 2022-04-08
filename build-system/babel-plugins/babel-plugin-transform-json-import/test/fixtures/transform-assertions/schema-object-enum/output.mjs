@@ -1,12 +1,5 @@
 const _validate = validate0;
-const schema0 = [[{
-  foo: "This object should be included in the schema object",
-  bar: {
-    "all keys are included": true
-  }
-}, {
-  bar: "This object should also be included in the schema object"
-}], [{
+const _schema = {
   prop_a: 0,
   prop_b: 0,
   prop_c: 0,
@@ -16,22 +9,33 @@ const schema0 = [[{
   prop_g: 0,
   prop_h: 0,
   prop_i: 0
-}, {
+};
+const _schema2 = {
   prop_z: 0,
   prop_y: 0,
   prop_x: 0,
-  prop_w: {
-    object: true,
-    bar: {
-      "all keys are included": true
-    }
-  },
+  prop_w: 0,
   prop_v: 0,
   prop_u: 0,
   prop_t: 0,
   prop_s: 0,
   prop_r: 0
-}]];
+};
+const _schema3 = {
+  foo: "This object should be included in the schema object",
+  bar: {
+    "all keys are included": true
+  }
+};
+const _schema4 = {
+  bar: "This object should also be included in the schema object"
+};
+const _schema5 = {
+  object: true,
+  bar: {
+    "all keys are included": true
+  }
+};
 
 const func0 = require("ajv/dist/runtime/equal").default;
 
@@ -76,7 +80,7 @@ function validate0(data, instancePath = "") {
 
           const _errs6 = errors;
 
-          if (!(data1 === 123 || data1 === 345 || func0(data1, schema0[0][0]) || data1 === "this string should NOT be included in the schema object" || data1 === "this string should also NOT be included in the schema object" || func0(data1, schema0[0][1]))) {
+          if (!(data1 === 123 || data1 === 345 || func0(data1, _schema3) || data1 === "this string should NOT be included in the schema object" || data1 === "this string should also NOT be included in the schema object" || func0(data1, _schema4))) {
             const err1 = (instancePath + "/" + i0 + "/prop_a" + ' ' + "must be equal to one of the allowed values").trim();
 
             if (vErrors === null) {
@@ -150,7 +154,7 @@ function validate0(data, instancePath = "") {
 
                   if (data4 && typeof data4 == "object" && !Array.isArray(data4)) {
                     for (const key1 in data4) {
-                      if (!func1.call(schema0[1][0], key1)) {
+                      if (!func1.call(_schema, key1)) {
                         const err4 = (instancePath + "/" + i0 + "/prop_c/prop_z/objectWithoutAditionalPropertiesA" + ' ' + "must NOT have additional properties").trim();
 
                         if (vErrors === null) {
@@ -170,7 +174,7 @@ function validate0(data, instancePath = "") {
 
                   if (data5 && typeof data5 == "object" && !Array.isArray(data5)) {
                     for (const key2 in data5) {
-                      if (!func1.call(schema0[1][1], key2)) {
+                      if (!func1.call(_schema2, key2)) {
                         const err5 = (instancePath + "/" + i0 + "/prop_c/prop_z/objectWithoutAditionalPropertiesB" + ' ' + "must NOT have additional properties").trim();
 
                         if (vErrors === null) {
@@ -194,7 +198,7 @@ function validate0(data, instancePath = "") {
                             if (data7.prop_abc !== undefined) {
                               let data8 = data7.prop_abc;
 
-                              if (!(data8 === "this string should NOT be included in the schema object" || data8 === 123 || func0(data8, schema0[1][1].prop_w))) {
+                              if (!(data8 === "this string should NOT be included in the schema object" || data8 === 123 || func0(data8, _schema5))) {
                                 const err6 = (instancePath + "/" + i0 + "/prop_c/prop_z/objectWithoutAditionalPropertiesB/prop_w/prop_xyz/prop_abc" + ' ' + "must be equal to one of the allowed values").trim();
 
                                 if (vErrors === null) {
