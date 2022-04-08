@@ -221,22 +221,25 @@ function transformAjvCode(code, taken, config) {
     return resolved.getSource().trim() === 'Object.prototype.hasOwnProperty';
   }
 
+  /** @type {{[serial: string]: string}} */
   const valueReferences = {};
 
   /**
-   * @param {babel.NodePath<babel.types.Statement>} statement
+   * @param {babel.NodePath} path
    * @param {any} value
    * @return {string}
    */
-  function getOrInsertValueReference(statement, value) {
+  function getOrInsertValueReference(path, value) {
     const serial = JSON.stringify(value);
     if (valueReferences[serial]) {
       return valueReferences[serial];
     }
-    const name = statement.scope.generateUid('schema');
-    statement.insertBefore(template.statement.ast`
-      const ${name} = ${t.valueToNode(value)};
-    `);
+    const name = path.scope.generateUid('schema');
+    path.scope.push({
+      kind: 'const',
+      id: t.identifier(name),
+      init: t.valueToNode(value),
+    });
     return (valueReferences[serial] = name);
   }
 
@@ -259,68 +262,55 @@ function transformAjvCode(code, taken, config) {
     if (!init.isObjectExpression()) {
       return;
     }
-    const statement = path.getStatementParent();
-    if (!statement) {
-      return;
-    }
     // Re-construct schema from references
     const original = init.evaluate().value;
     if (original == null) {
       // original is dynamic, deopt
       return;
     }
-    const queue = [...referencePaths];
-    for (const referencePath of queue) {
-      // Navigate MemberExpression to find deepest key to insert.
-      let value = original;
-      let memberExpression;
-      let {parentPath} = referencePath;
-      while (parentPath?.isMemberExpression()) {
-        memberExpression = parentPath;
-        parentPath = memberExpression.parentPath;
-        const key = evaluatePropertyKey(memberExpression.get('property'));
-        if (key == null) {
-          break;
-        }
-        value = value[key];
-      }
-      // deopt full schema if we can't resolve at least one key deep
-      if (!memberExpression) {
-        return;
-      }
-      // Fill indirect references with fully qualified paths, and add those
-      // to the queue.
-      if (
-        parentPath?.isVariableDeclarator() &&
-        t.isIdentifier(parentPath.node.id)
-      ) {
-        const {name} = parentPath.node.id;
-        const localBinding = parentPath.scope.getBinding(name);
-        if (localBinding?.constant) {
-          const {referencePaths} = localBinding;
-          for (const referencePath of referencePaths) {
-            const [replacedWithMemberExpression] = referencePath.replaceWith(
-              t.cloneNode(memberExpression.node)
-            );
-            let object = replacedWithMemberExpression.get('object');
-            while (object.isMemberExpression()) {
-              object = object.get('object');
-            }
-            queue.push(object);
+    /** @type {[any, babel.NodePath[]][]} */
+    const queue = [[original, referencePaths]];
+    for (const [startValue, referencePaths] of queue) {
+      for (let referencePath of referencePaths) {
+        // Navigate MemberExpression to find deepest value to insert.
+        let value = startValue;
+        while (referencePath.parentPath?.isMemberExpression()) {
+          referencePath = referencePath.parentPath;
+          const key = evaluatePropertyKey(referencePath.get('property'));
+          if (key == null) {
+            break;
           }
-          parentPath.remove();
-          continue;
+          value = value[key];
         }
+        // deopt full schema if we can't resolve at least one key deep
+        if (value === original) {
+          return;
+        }
+        // Add declarator references to queue.
+        const {parentPath} = referencePath;
+        if (
+          parentPath?.isVariableDeclarator() &&
+          t.isIdentifier(parentPath.node.id)
+        ) {
+          const {name} = parentPath.node.id;
+          const binding = parentPath.scope.getBinding(name);
+          if (binding?.constant) {
+            const {referencePaths} = binding;
+            queue.push([value, referencePaths]);
+            parentPath.remove();
+            continue;
+          }
+        }
+        // Objects may in some cases be referenced only for their key list, in
+        // which we define each unset value as a zero rather than the original.
+        // If the original value is needed, it will be included during a
+        // different loop pass.
+        if (parentIsHasOwnPropertyCall(referencePath)) {
+          value = Object.fromEntries(Object.keys(value).map((k) => [k, 0]));
+        }
+        const name = getOrInsertValueReference(path, value);
+        referencePath.replaceWith(t.identifier(name));
       }
-      // Objects may in some cases be referenced only for their key list, in
-      // which we define each unset value as a zero rather than the original.
-      // If the original value is needed, it will be included during a
-      // different loop pass.
-      if (parentIsHasOwnPropertyCall(memberExpression)) {
-        value = Object.fromEntries(Object.keys(value).map((k) => [k, 0]));
-      }
-      const name = getOrInsertValueReference(statement, value);
-      memberExpression.replaceWith(t.identifier(name));
     }
     path.remove();
   }

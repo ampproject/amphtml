@@ -1,7 +1,3 @@
-import { isIso4217CurrencyCode } from '#core/json-schema';
-"use strict";
-
-const _validate = validate0;
 const _schema = {
   recursive: 0,
   a: 0,
@@ -14,6 +10,10 @@ const _schema = {
   g: 0,
   i: 0
 };
+import { isIso4217CurrencyCode } from '#core/json-schema';
+"use strict";
+
+const _validate = validate0;
 const func0 = Object.prototype.hasOwnProperty;
 const wrapper0 = {
   validate: validate1

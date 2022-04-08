@@ -1,4 +1,3 @@
-const _validate = validate0;
 const _schema = {
   prop_a: 0,
   prop_b: 0,
@@ -9,8 +8,8 @@ const _schema = {
   prop_g: 0,
   prop_h: 0,
   prop_i: 0
-};
-const _schema2 = {
+},
+      _schema2 = {
   prop_z: 0,
   prop_y: 0,
   prop_x: 0,
@@ -20,22 +19,23 @@ const _schema2 = {
   prop_t: 0,
   prop_s: 0,
   prop_r: 0
-};
-const _schema3 = {
+},
+      _schema3 = {
   foo: "This object should be included in the schema object",
   bar: {
     "all keys are included": true
   }
-};
-const _schema4 = {
+},
+      _schema4 = {
   bar: "This object should also be included in the schema object"
-};
-const _schema5 = {
+},
+      _schema5 = {
   object: true,
   bar: {
     "all keys are included": true
   }
 };
+const _validate = validate0;
 
 const func0 = require("ajv/dist/runtime/equal").default;
 
