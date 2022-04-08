@@ -224,17 +224,17 @@ function transformAjvCode(code, taken, config) {
   const valueReferences = {};
 
   /**
-   * @param {babel.NodePath} path
+   * @param {babel.NodePath<babel.types.Statement>} statement
    * @param {any} value
    * @return {string}
    */
-  function getValueReference(path, value) {
+  function getValueReference(statement, value) {
     const serial = JSON.stringify(value);
     if (valueReferences[serial]) {
       return valueReferences[serial];
     }
-    const name = path.scope.generateUid('schema');
-    path.getStatementParent()?.insertBefore(template.statement.ast`
+    const name = statement.scope.generateUid('schema');
+    statement.insertBefore(template.statement.ast`
       const ${name} = ${t.valueToNode(value)};
     `);
     return (valueReferences[serial] = name);
@@ -259,16 +259,20 @@ function transformAjvCode(code, taken, config) {
     if (!init.isObjectExpression()) {
       return;
     }
+    const statement = path.getStatementParent();
+    if (!statement) {
+      return;
+    }
     // Re-construct schema from references
-    const {value} = init.evaluate();
-    if (value == null) {
+    const original = init.evaluate().value;
+    if (original == null) {
       // original is dynamic, deopt
       return;
     }
     const queue = [...referencePaths];
     for (const referencePath of queue) {
       // Navigate MemberExpression to find deepest key to insert.
-      let currentValue = value;
+      let value = original;
       let memberExpression;
       let {parentPath} = referencePath;
       while (parentPath?.isMemberExpression()) {
@@ -278,7 +282,7 @@ function transformAjvCode(code, taken, config) {
         if (key == null) {
           break;
         }
-        currentValue = currentValue[key];
+        value = value[key];
       }
       // deopt full schema if we can't resolve at least one key deep
       if (!memberExpression) {
@@ -313,11 +317,9 @@ function transformAjvCode(code, taken, config) {
       // If the original value is needed, it will be included during a
       // different loop pass.
       if (parentIsHasOwnPropertyCall(memberExpression)) {
-        currentValue = Object.fromEntries(
-          Object.keys(currentValue).map((k) => [k, 0])
-        );
+        value = Object.fromEntries(Object.keys(value).map((k) => [k, 0]));
       }
-      const name = getValueReference(path, currentValue);
+      const name = getValueReference(statement, value);
       memberExpression.replaceWith(t.identifier(name));
     }
     path.remove();
