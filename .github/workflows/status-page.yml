@@ -43,3 +43,5 @@ jobs:
     uses: ampproject/amphtml/.github/workflows/create-issue-on-error.yml@main
     with:
       mention: '@ampproject/wg-infra'
+    permissions:
+      issues: write
