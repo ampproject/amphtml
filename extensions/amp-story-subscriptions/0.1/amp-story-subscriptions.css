@@ -39,7 +39,7 @@ amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
   transition: opacity 0.2s cubic-bezier(0, 0, 0.2, 1) !important;
 }
 
-/** Make the dialog wrapper from amp-subscriptions round corner. */
+/** Override the dialog styles from amp-subscriptions. */
 amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   border-radius: 16px 16px 0px 0px !important;
   font-family: Poppins, sans-serif !important;
@@ -47,6 +47,18 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   background: white !important;
   color: black !important;
   overflow: hidden !important; 
+}
+amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
+  width: 100% !important;
+  left: 0 !important;
+  margin-left: 0 !important;
+}
+@media(min-aspect-ratio: 3/4) {
+  amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
+    width: var(--i-amphtml-story-desktop-one-panel-width) !important;
+    left: 50% !important;
+    margin-left: calc(-0.5 * var(--i-amphtml-story-desktop-one-panel-width)) !important;
+  }
 }
 
 .i-amphtml-story-subscriptions-dialog-banner {
