@@ -274,20 +274,21 @@ function transformAjvCode(code, taken, config) {
       for (let referencePath of referencePaths) {
         // Navigate MemberExpression to find deepest value to insert.
         let value = startValue;
-        while (referencePath.parentPath?.isMemberExpression()) {
-          referencePath = referencePath.parentPath;
-          const key = evaluatePropertyKey(referencePath.get('property'));
+        let {parentPath} = referencePath;
+        while (parentPath?.isMemberExpression()) {
+          const key = evaluatePropertyKey(parentPath.get('property'));
           if (key == null) {
             break;
           }
           value = value[key];
+          referencePath = parentPath;
+          parentPath = referencePath.parentPath;
         }
         // deopt full schema if we can't resolve at least one key deep
         if (value === original) {
           return;
         }
         // Add declarator references to queue.
-        const {parentPath} = referencePath;
         if (
           parentPath?.isVariableDeclarator() &&
           t.isIdentifier(parentPath.node.id)
