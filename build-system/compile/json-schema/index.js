@@ -160,16 +160,16 @@ function getImportCode(validatorFns) {
 /**
  * Transforms ajv's generated code to make it usable in a bundle:
  *  - Creates strings for error messages instead of an object.
- *  - If provided a "scope" of used names, it will rescope the current code
- *    to prevent collisions, and remove `export`.
+ *  - Removes exports (it expects to be included inline).
+ *  - Rescopes the current code to prevent collisions with taken names.
  *  - Strips down included schemas so that they only contain the referenced
  *    portions.
  * @param {string} code
- * @param {string[]=} scope
+ * @param {Set<string>} taken
  * @param {babel.TransformOptions=} config
  * @return {{result: babel.BabelFileResult | null, name: string}}
  */
-function transformAjvCode(code, scope, config) {
+function transformAjvCode(code, taken, config) {
   const {template, types: t} = babel;
 
   // ajvCompile's generated name
@@ -400,13 +400,9 @@ function transformAjvCode(code, scope, config) {
   /**
    * Prevents collisions with outer scope
    * @param {babel.NodePath<babel.types.Program>} path
-   * @param {Set<string>|null} taken
    * @param {string} id
    */
-  function rescope(path, taken, id) {
-    if (!taken) {
-      return;
-    }
+  function rescope(path, id) {
     let renamed = id;
     while (taken.has(renamed)) {
       renamed = path.scope.generateUid(id);
@@ -426,25 +422,18 @@ function transformAjvCode(code, scope, config) {
       Program: {
         exit(path) {
           path.scope.crawl();
-          const taken = scope ? new Set(scope) : null;
           for (const id in path.scope.bindings) {
             treeShakeSchema(path.scope.bindings[id]);
-            rescope(path, taken, id);
+            rescope(path, id);
           }
         },
       },
       ExportDefaultDeclaration(path) {
         // Remove `export default validate`
-        if (!scope) {
-          return;
-        }
         path.remove();
       },
       ExportNamedDeclaration(path) {
         // Unexport named exports.
-        if (!scope) {
-          return;
-        }
         if (path.node.declaration) {
           path.replaceWith(path.node.declaration);
         } else {

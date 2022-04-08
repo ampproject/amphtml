@@ -51,8 +51,8 @@ module.exports = function (babel) {
       const schema = json5.parse(readFileSync(jsonPath, 'utf8'));
       const code = ajvCompile(schema);
 
-      const scope = Object.keys(path.scope.bindings);
-      const {name, result} = transformAjvCode(code, scope, {
+      const taken = new Set(Object.keys(path.scope.bindings));
+      const {name, result} = transformAjvCode(code, taken, {
         code: false,
         ast: true,
       });
