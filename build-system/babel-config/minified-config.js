@@ -12,6 +12,7 @@ const {getReplacePlugin} = require('./helpers');
  * @return {!Object}
  */
 function getMinifiedConfig(buildFor = 'preact') {
+  const isEsmBuild = argv.esm || argv.sxg;
   const isProd = argv._.includes('dist') && !argv.fortesting;
 
   const reactJsxPlugin = [
@@ -38,7 +39,7 @@ function getMinifiedConfig(buildFor = 'preact') {
     './build-system/babel-plugins/babel-plugin-transform-rename-privates',
     './build-system/babel-plugins/babel-plugin-dom-jsx-svg-namespace',
     reactJsxPlugin,
-    (argv.esm || argv.sxg) &&
+    isEsmBuild &&
       './build-system/babel-plugins/babel-plugin-transform-dev-methods',
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     [
@@ -60,15 +61,18 @@ function getMinifiedConfig(buildFor = 'preact') {
       './build-system/babel-plugins/babel-plugin-amp-mode-transformer',
       BUILD_CONSTANTS,
     ],
-    ['@babel/plugin-transform-for-of', {loose: true, allowArrayLike: true}],
+    !isEsmBuild
+      ? ['@babel/plugin-transform-for-of', {loose: true, allowArrayLike: true}]
+      : null,
   ].filter(Boolean);
   const presetEnv = [
     '@babel/preset-env',
     {
       bugfixes: true,
       modules: false,
-      targets: argv.esm || argv.sxg ? {esmodules: true} : {ie: 11, chrome: 41},
+      targets: isEsmBuild ? {esmodules: true} : {ie: 11, chrome: 41},
       shippedProposals: true,
+      exclude: isEsmBuild ? ['@babel/plugin-transform-for-of'] : [],
     },
   ];
   const presetTypescript = [
