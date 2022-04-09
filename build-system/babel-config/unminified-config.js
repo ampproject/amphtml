@@ -11,6 +11,8 @@ const {getReplacePlugin} = require('./helpers');
  * @return {!Object}
  */
 function getUnminifiedConfig(buildFor = 'preact') {
+  const isEsmBuild = argv.esm || argv.sxg;
+
   const reactJsxPlugin = [
     '@babel/plugin-transform-react-jsx',
     {
@@ -20,17 +22,15 @@ function getUnminifiedConfig(buildFor = 'preact') {
     },
   ];
 
-  const targets =
-    argv.esm || argv.sxg ? {esmodules: true} : {browsers: ['Last 2 versions']};
   const presetEnv = [
     '@babel/preset-env',
     {
       bugfixes: true,
       modules: false,
       loose: true,
-      targets,
+      targets: isEsmBuild ? {esmodules: true} : {browsers: ['Last 2 versions']},
       shippedProposals: true,
-      exclude: argv.esm || argv.sxg ? ['@babel/plugin-transform-for-of'] : [],
+      exclude: isEsmBuild ? ['@babel/plugin-transform-for-of'] : [],
     },
   ];
   const presetTypescript = [
