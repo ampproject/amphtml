@@ -1,3 +1,10 @@
+/**
+ * @fileoverview
+ * Replaces imports of `src/config/urls` into references to self.AMP.config.urls
+ * This allows us to re-use the value defined by the runtime in extensions.
+ * Binaries that don't depend on the runtime should not use this transform, so
+ * that they can directly use the values from `src/config/urls`.
+ */
 const {dirname, join, posix, relative, sep} = require('path');
 
 const importSource = join(process.cwd(), 'src', 'config', 'urls');
