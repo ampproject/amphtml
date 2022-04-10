@@ -327,7 +327,8 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
 
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
-    /* enableCache */ true
+    /* enableCache */ true,
+    {plugins: options.babelPlugins}
   );
   const plugins = [babelPlugin];
 
