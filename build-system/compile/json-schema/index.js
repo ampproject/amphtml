@@ -182,113 +182,123 @@ function transformAjvCode(code, taken, config) {
   const findProperty = (properties, name) =>
     properties.find((node) => isObjectProperty(node, name));
 
-  const evaluatePropertyKey = (property) =>
-    property.isIdentifier() ? property.node.name : property.evaluate().value;
+  /**
+   * @param {babel.NodePath<babel.types.MemberExpression>} memberExpression
+   * @return {null | undefined | number | string}
+   */
+  function evaluatePropertyKey(memberExpression) {
+    const property = memberExpression.get('property');
+    return property.isIdentifier()
+      ? property.node.name
+      : property.evaluate().value;
+  }
 
-  const schemaVariableDeclaratorRe = /^schema[0-9]*$/;
+  const schemaIdRegexp = /^schema[0-9]*$/;
+
+  /**
+   * @param {babel.NodePath<any>} path
+   * @param {string[]} keys
+   * @return {boolean}
+   */
+  function isMemberExpressionLeftwards(path, keys) {
+    let i = keys.length - 1;
+    while (true) {
+      if (path.isMemberExpression()) {
+        const key = evaluatePropertyKey(path);
+        if (key !== keys[i--]) {
+          return false;
+        }
+        path = path.get('object');
+      } else if (path.isVariableDeclarator()) {
+        const init = path.get('init');
+        if (!init) {
+          break;
+        }
+        path = init;
+      } else if (path.isIdentifier()) {
+        const binding = path.scope.getBinding(path.node.name);
+        if (!binding) {
+          break;
+        }
+        path = binding.path;
+      } else {
+        break;
+      }
+    }
+    return i === 0 && path.isIdentifier({name: keys[i]});
+  }
 
   /**
    * @param {babel.NodePath} path
    * @return {boolean}
    */
-  function parentIsHasOwnPropertyCall(path) {
+  function isReferenceToObjectKeyList(path) {
     const {parentPath} = path;
-    if (
-      !parentPath?.isCallExpression() ||
-      parentPath.node.arguments[0] !== path.node
-    ) {
-      return false;
+    if (parentPath?.isMemberExpression() && path.key === 'object') {
+      return (
+        t.isIdentifier(parentPath.node.property, {name: 'hasOwnProperty'}) &&
+        parentPath.parentPath?.isCallExpression()
+      );
     }
-    const callee = parentPath.get('callee');
-    if (
-      !callee.isMemberExpression() ||
-      !callee.get('property').isIdentifier({name: 'call'})
-    ) {
-      return false;
+    if (parentPath?.isCallExpression() && path.key === 0) {
+      const callee = parentPath.get('callee');
+      return (
+        isMemberExpressionLeftwards(callee, ['Object', 'keys']) ||
+        isMemberExpressionLeftwards(callee, [
+          'Object',
+          'prototype',
+          'hasOwnProperty',
+          'call',
+        ])
+      );
     }
-    /** @type {babel.NodePath<any>} */
-    let resolved = callee.get('object');
-    while (resolved.isIdentifier()) {
-      const binding = path.scope.getBinding(resolved.node.name);
-      if (!binding) {
-        break;
-      }
-      resolved = binding.path;
-      if (resolved.isVariableDeclarator()) {
-        resolved = resolved.get('init');
-      }
-    }
-    return resolved.getSource().trim() === 'Object.prototype.hasOwnProperty';
+    return false;
   }
 
-  /** @type {{[serial: string]: string}} */
+  /** @type {{[stringified: string]: string}} */
   const valueReferences = {};
 
   /**
-   * @param {babel.NodePath} path
-   * @param {any} value
-   * @return {string}
-   */
-  function getOrInsertValueReference(path, value) {
-    const serial = JSON.stringify(value);
-    if (valueReferences[serial]) {
-      return valueReferences[serial];
-    }
-    const name = path.scope.generateUid('schema');
-    path.scope.push({
-      kind: 'const',
-      id: t.identifier(name),
-      init: t.valueToNode(value),
-    });
-    return (valueReferences[serial] = name);
-  }
-
-  /**
-   * Strips down an included schema binding so that it only contains the
-   * referenced portions.
+   * Resolves static references to object properties as deeply as possible,
+   * and hoists references to those values.
    * @param {import('@babel/traverse').Binding} binding
    */
-  function treeShakeSchema(binding) {
-    const {path, referencePaths} = binding;
-    if (
-      !binding.constant ||
-      !path.isVariableDeclarator() ||
-      !t.isIdentifier(path.node.id) ||
-      !schemaVariableDeclaratorRe.test(path.node.id.name)
-    ) {
+  function hoistProperties(binding) {
+    const {constant, identifier, path, referencePaths} = binding;
+    if (!constant || !path.isVariableDeclarator()) {
       return;
     }
     const init = path.get('init');
     if (!init.isObjectExpression()) {
       return;
     }
-    // Re-construct schema from references
     const original = init.evaluate().value;
     if (original == null) {
       // original is dynamic, deopt
       return;
     }
+    /** @type {Map<Object, babel.NodePath[]>} */
+    const hoisted = new Map();
     /** @type {[any, babel.NodePath[]][]} */
     const queue = [[original, referencePaths]];
     for (const [startValue, referencePaths] of queue) {
       for (let referencePath of referencePaths) {
-        // Navigate MemberExpression to find deepest value to insert.
         let value = startValue;
         let {parentPath} = referencePath;
         while (parentPath?.isMemberExpression()) {
-          const key = evaluatePropertyKey(parentPath.get('property'));
-          if (key == null) {
+          const key = evaluatePropertyKey(parentPath);
+          if (key == null || !value.hasOwnProperty(key)) {
             break;
           }
           value = value[key];
           referencePath = parentPath;
           parentPath = referencePath.parentPath;
         }
-        // deopt full schema if we can't resolve at least one key deep
         if (value === original) {
+          // deopt
           return;
         }
-        // Add declarator references to queue.
+        // Follow references to declared variable.
         if (
           parentPath?.isVariableDeclarator() &&
           t.isIdentifier(parentPath.node.id)
@@ -302,14 +312,32 @@ function transformAjvCode(code, taken, config) {
             continue;
           }
         }
-        // Objects may in some cases be referenced only for their key list, in
-        // which we define each unset value as a zero rather than the original.
-        // If the original value is needed, it will be included during a
-        // different loop pass.
-        if (parentIsHasOwnPropertyCall(referencePath)) {
-          value = Object.fromEntries(Object.keys(value).map((k) => [k, 0]));
+        const hoistedReferences = hoisted.get(value) ?? [];
+        hoistedReferences.push(referencePath);
+        hoisted.set(value, hoistedReferences);
+      }
+    }
+    for (const [value, referencePaths] of hoisted) {
+      // Override every property value as `0` when we only need a key list.
+      if (referencePaths.every(isReferenceToObjectKeyList)) {
+        for (const k in value) {
+          value[k] = 0;
         }
-        const name = getOrInsertValueReference(path, value);
+      }
+      // Stringify to de-dupe identical objects.
+      // (This may occur as a result of some uses of $ref)
+      const stringified = JSON.stringify(value);
+      let name = valueReferences[stringified];
+      if (!name) {
+        name = rescope(path, path.scope.generateUid(identifier.name));
+        path.scope.push({
+          kind: 'const',
+          id: t.identifier(name),
+          init: t.valueToNode(value),
+        });
+        valueReferences[stringified] = name;
+      }
+      for (const referencePath of referencePaths) {
         referencePath.replaceWith(t.identifier(name));
       }
     }
@@ -318,21 +346,22 @@ function transformAjvCode(code, taken, config) {
 
   /**
    * Prevents collisions with outer scope
-   * @param {babel.NodePath<babel.types.Program>} path
+   * @param {babel.NodePath} path
    * @param {string} id
+   * @return {string}
    */
   function rescope(path, id) {
     let renamed = id;
     while (taken.has(renamed)) {
       renamed = path.scope.generateUid(id);
     }
-    if (renamed === id) {
-      return;
+    if (renamed !== id) {
+      path.scope.rename(id, renamed);
+      if (id === name) {
+        name = renamed;
+      }
     }
-    path.scope.rename(id, renamed);
-    if (id === name) {
-      name = renamed;
-    }
+    return renamed;
   }
 
   /** @type {babel.PluginObj} */
@@ -342,7 +371,10 @@ function transformAjvCode(code, taken, config) {
         exit(path) {
           path.scope.crawl();
           for (const id in path.scope.bindings) {
-            treeShakeSchema(path.scope.bindings[id]);
+            const binding = path.scope.bindings[id];
+            if (schemaIdRegexp.test(id)) {
+              hoistProperties(binding);
+            }
             rescope(path, id);
           }
         },
