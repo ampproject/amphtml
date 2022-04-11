@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   cut-nightly:
-    environment: release_tagger
+    environment: cut_nightly
     if: github.repository == 'ampproject/amphtml'
     name: Cut Nightly Branch
     runs-on: ubuntu-latest
