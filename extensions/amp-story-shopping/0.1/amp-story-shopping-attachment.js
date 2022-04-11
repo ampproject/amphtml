@@ -160,10 +160,15 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onShoppingDataUpdate_(shoppingData) {
+    if (!this.isOnActivePage_() || !shoppingData.activeProductData) {
+      return;
+    }
     const isOpen = this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
     if (isOpen) {
       // If open, update the template.
+      // This happens when a product card is clicked in the PLP template.
       this.updateTemplate_(shoppingData);
+    } else {
       // Otherwise, open the attachment and then update the template.
       // This happens when clicking a shopping tag.
       this.attachmentEl_.getImpl().then((impl) => {
