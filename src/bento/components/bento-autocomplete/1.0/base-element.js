@@ -1,6 +1,10 @@
+import mustache from '#bento/components/bento-mustache/1.0/bento-mustache';
+import {getTemplate} from '#bento/util/template';
+
 import {getValueForExpr} from '#core/types/object';
 import {tryParseJson} from '#core/types/object/json';
 
+import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 
 import {user} from '#utils/log';
@@ -61,6 +65,22 @@ export class BaseElement extends PreactBaseElement {
     }
     return defaultProps;
   }
+
+  /** @override */
+  checkPropsPostMutations() {
+    const template = getTemplate(this.element);
+    if (!template) {
+      // show error?
+      return;
+    }
+
+    this.mutateProps({
+      'itemTemplate': (data) => {
+        const html = mustache.render(template./*OK*/ innerHTML, data);
+        return <div dangerouslySetInnerHTML={{__html: html}} />;
+      },
+    });
+  }
 }
 
 /** @override */
@@ -70,6 +90,7 @@ BaseElement['Component'] = BentoAutocomplete;
 BaseElement['props'] = {
   'children': {passthrough: true},
   'filter': {attr: 'filter'},
+  'filterValue': {attr: 'filter-value'},
   'highlightUserEntry': {attr: 'highlight-user-entry', type: 'boolean'},
   'id': {attr: 'id'},
   'inline': {attr: 'inline'},

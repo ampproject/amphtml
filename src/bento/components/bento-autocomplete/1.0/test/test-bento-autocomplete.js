@@ -85,4 +85,32 @@ describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
     expect(results[1].getAttribute('data-value')).to.equal('two');
     expect(results[2].getAttribute('data-value')).to.equal('three');
   });
+
+  it('renders items from a mustache template', async () => {
+    const element = await mountElement(html`
+      <bento-autocomplete filter-value="city">
+        <input type="text" />
+        <script type="application/json">
+          {
+            "items": [
+              {"city": "Seattle", "state": "WA"},
+              {"city": "New York", "state": "NY"},
+              {"city": "Chicago", "state": "IL"}
+            ]
+          }
+        </script>
+        <template type="bento-mustache">
+          <div class="city-item" data-value="{{city}}, {{state}}">
+            <div>{{city}}, {{state}}</div>
+          </div>
+        </template>
+      </bento-autocomplete>
+    `);
+    const results = element.shadowRoot.querySelectorAll('.city-item');
+
+    expect(results.length).to.equal(3);
+    expect(results[0].getAttribute('data-value')).to.equal('Seattle, WA');
+    expect(results[1].getAttribute('data-value')).to.equal('New York, NY');
+    expect(results[2].getAttribute('data-value')).to.equal('Chicago, IL');
+  });
 });
