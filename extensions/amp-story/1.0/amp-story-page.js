@@ -532,12 +532,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.muteAllMedia();
 
     this.installPageAttachmentExtension_();
+    this.initializeCaptionsListener_();
 
     return Promise.all([
-      this.waitForMediaLayout_().then(() => {
-        this.markPageAsLoaded_();
-        this.initializeCaptionsListener_();
-      }),
+      this.waitForMediaLayout_().then(() => this.markPageAsLoaded_()),
       this.mediaPoolPromise_,
     ]);
   }
