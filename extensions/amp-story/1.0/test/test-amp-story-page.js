@@ -717,7 +717,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
   describe('maybeConvertCtaLayerToPageOutlink_', () => {
     it('should do nothing if amp-story-cta-layer has two anchor tags', () => {
-      element.appendChild(
+      page.element.appendChild(
         <amp-story-cta-layer>
           <a href="https://www.ampproject.org" class="button">
             CTA Text!
@@ -725,7 +725,6 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
           <a>dummy anchor</a>
         </amp-story-cta-layer>
       );
-      page = new AmpStoryPage(element);
 
       page.buildCallback();
 
@@ -733,12 +732,11 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     });
 
     it('should do nothing if the anchor tag in amp-story-cta-layer has no href attribute', () => {
-      element.appendChild(
+      page.element.appendChild(
         <amp-story-cta-layer>
           <a class="button">CTA Text!</a>
         </amp-story-cta-layer>
       );
-      page = new AmpStoryPage(element);
 
       page.buildCallback();
 
