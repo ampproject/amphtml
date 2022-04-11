@@ -41,10 +41,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AnimationManager, hasAnimations} from './animation';
-import {
-  upgradeBackgroundAudio,
-  waitForElementsWithUnresolvedAudio,
-} from './audio';
+import {upgradeBackgroundAudio, waitForVideosWithCachedSources} from './audio';
 import {EventType, dispatch} from './events';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
@@ -517,7 +514,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
-      this.togglePageCaptions_();
+      this.checkPageHasCaptions_();
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
@@ -537,7 +534,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.installPageAttachmentExtension_();
 
     return Promise.all([
-      this.waitForMediaLayout_().then(() => this.markPageAsLoaded_()),
+      this.waitForMediaLayout_().then(() => {
+        this.markPageAsLoaded_();
+        this.initializeCaptionsListener_();
+      }),
       this.mediaPoolPromise_,
     ]);
   }
@@ -611,9 +611,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         mediaEl.addEventListener('error', resolve, true /* useCapture */);
       });
     });
-    return Promise.all(mediaPromises).then(() =>
-      this.initializeCaptionsListener_()
-    );
+    return Promise.all(mediaPromises);
   }
 
   /**
@@ -1313,11 +1311,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     const hasAudioPromise = hasAudioElements
       ? Promise.resolve(true)
-      : this.hasLoadedVideoWith_(
-          (video) =>
-            !video.hasAttribute('noaudio') &&
-            parseFloat(video.getAttribute('volume')) !== 0
-        );
+      : this.hasVideoWithAudio_();
 
     hasAudioPromise.then((hasAudio) =>
       this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, hasAudio)
@@ -1325,15 +1319,33 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the page has any videos that meet the requirement after receiving the video cache response.
-   * @param {function<!Element, boolean>} func
+   * Checks if the page has any videos with audio.
    * @return {!Promise<boolean>}
    * @private
    */
-  hasLoadedVideoWith_(func) {
+  hasVideoWithAudio_() {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
-    return waitForElementsWithUnresolvedAudio(this.element).then(() =>
-      Array.prototype.some.call(ampVideoEls, func)
+    return waitForVideosWithCachedSources(this.element).then(() =>
+      Array.prototype.some.call(
+        ampVideoEls,
+        (video) =>
+          !video.hasAttribute('noaudio') &&
+          parseFloat(video.getAttribute('volume')) !== 0
+      )
+    );
+  }
+
+  /**
+   * Checks if the page has any videos with captions.
+   * @return {!Promise<boolean>}
+   * @private
+   */
+  hasVideoWithCaptions_() {
+    const ampVideoEls = this.element.querySelectorAll('amp-video');
+    return waitForVideosWithCachedSources(this.element).then(() =>
+      Array.prototype.some.call(ampVideoEls, (video) =>
+        video.querySelector('track')
+      )
     );
   }
 
@@ -1357,21 +1369,19 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Checks if the page has any captions and toggles them.
    * @private
    */
-  togglePageCaptions_() {
-    this.hasLoadedVideoWith_((video) => video.querySelector('track')).then(
-      (hasVideoWithCaptions) => {
-        this.storeService_.dispatch(
-          Action.TOGGLE_PAGE_HAS_CAPTIONS,
-          hasVideoWithCaptions
-        );
+  checkPageHasCaptions_() {
+    this.hasVideoWithCaptions_().then((hasVideoWithCaptions) => {
+      this.storeService_.dispatch(
+        Action.TOGGLE_PAGE_HAS_CAPTIONS,
+        hasVideoWithCaptions
+      );
 
-        if (hasVideoWithCaptions) {
-          this.toggleCaptions_(
-            this.storeService_.get(StateProperty.CAPTIONS_STATE)
-          );
-        }
+      if (hasVideoWithCaptions) {
+        this.toggleCaptions_(
+          this.storeService_.get(StateProperty.CAPTIONS_STATE)
+        );
       }
-    );
+    });
   }
 
   /**
@@ -1688,22 +1698,20 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   initializeCaptionsListener_() {
-    this.hasLoadedVideoWith_((video) => video.querySelector('track')).then(
-      (hasVideoWithCaptions) => {
-        if (!hasVideoWithCaptions) {
-          return;
-        }
-        this.storeService_.subscribe(
-          StateProperty.CAPTIONS_STATE,
-          (captionsOn) => {
-            if (this.isActive()) {
-              this.toggleCaptions_(captionsOn);
-            }
-          },
-          true
-        );
+    this.hasVideoWithCaptions_().then((hasVideoWithCaptions) => {
+      if (!hasVideoWithCaptions) {
+        return;
       }
-    );
+      this.storeService_.subscribe(
+        StateProperty.CAPTIONS_STATE,
+        (captionsOn) => {
+          if (this.isActive()) {
+            this.toggleCaptions_(captionsOn);
+          }
+        },
+        true
+      );
+    });
   }
 
   /**
