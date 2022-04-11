@@ -138,7 +138,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
   /* line clamping and ellipses */
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;  
+  -webkit-box-orient: vertical !important;
   overflow: hidden !important;
 }
 .i-amphtml-story-subscriptions-publisher-button-text {
