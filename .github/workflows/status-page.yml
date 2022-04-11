@@ -44,6 +44,7 @@ jobs:
       contents: read
       issues: write
     runs-on: ubuntu-latest
+    environment: create_issue_on_error
     steps:
       - uses: actions/checkout@v3
 
