@@ -28,12 +28,12 @@ import {
 import {
   createShadowRootWithStyle,
   getRGBFromCssColorValue,
+  getStoryAttributeSrc,
   getTextColorForRGB,
   triggerClickFromLightDom,
 } from './utils';
 
 import {CSS} from '../../../build/amp-story-consent-1.0.css';
-import {assertAbsoluteHttpOrHttpsUrl, assertHttpsUrl} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-story-consent';
@@ -145,9 +145,6 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     this.assertAndParseConfig_();
 
-    const storyEl = dev().assertElement(
-      closestAncestorElementBySelector(this.element, 'AMP-STORY')
-    );
     const consentEl = closestAncestorElementBySelector(
       this.element,
       'AMP-CONSENT'
@@ -156,16 +153,11 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     this.storeConsentId_(consentId);
 
-    const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
-
-    if (logoSrc) {
-      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src');
-    } else {
-      user().warn(
-        TAG,
-        'Expected "publisher-logo-src" attribute on <amp-story>'
-      );
-    }
+    const logoSrc = getStoryAttributeSrc(
+      this.element,
+      'publisher-logo-src',
+      /* warn */ true
+    );
 
     // Story consent config is set by the `assertAndParseConfig_` method.
     if (this.storyConsentConfig_) {
@@ -317,7 +309,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
         this.storyConsentConfig_.externalLink.href,
         `${TAG}: config requires "externalLink.href" to be an absolute URL`
       );
-      assertAbsoluteHttpOrHttpsUrl(this.storyConsentConfig_.externalLink.href);
+      Services.urlForDoc(this.element).assertAbsoluteHttpOrHttpsUrl(
+        this.storyConsentConfig_.externalLink.href
+      );
     }
   }
 
