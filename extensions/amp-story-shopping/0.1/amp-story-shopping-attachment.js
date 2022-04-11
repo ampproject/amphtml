@@ -78,47 +78,47 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.pageEl_ = this.element.closest('amp-story-page');
-
     this.shoppingTags_ = Array.from(
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
 
-    return getShoppingConfig(this.element, this.pageEl_.id)
-      .then((config) => {
-        if (
-          this.shoppingTags_.length === 0 ||
-          Object.keys(config).length === 0
-        ) {
-          return;
-        }
+    if (this.shoppingTags_.length === 0) {
+      return;
+    }
 
-        storeShoppingConfig(this.pageEl_, config);
+    return Promise.all([
+      getShoppingConfig(this.element, this.pageEl_.id),
+      this.localizationService_.getLocalizedStringAsync(
+        LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+      ),
+    ]).then((results) => {
+      const config = results[0];
+      const ctaText = results[1];
 
-        return this.localizationService_.getLocalizedStringAsync(
-          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
-        );
-      })
-      .then((ctaText) => {
-        this.attachmentEl_ = (
-          <amp-story-page-attachment
-            layout="nodisplay"
-            theme={this.element.getAttribute('theme')}
-            cta-text={ctaText}
-          >
-            {this.templateContainer_}
-          </amp-story-page-attachment>
-        );
-        this.element.appendChild(this.attachmentEl_);
-      });
+      if (Object.keys(config).length === 0) {
+        return;
+      }
+      storeShoppingConfig(this.pageEl_, config);
+      this.attachmentEl_ = (
+        <amp-story-page-attachment
+          layout="nodisplay"
+          theme={this.element.getAttribute('theme')}
+          cta-text={ctaText}
+        >
+          {this.templateContainer_}
+        </amp-story-page-attachment>
+      );
+      this.element.appendChild(this.attachmentEl_);
+      // Listen to transiton end events on attachment to check to clear active data.
+      this.attachmentEl_.addEventListener('transitionend', () =>
+        this.clearActiveProductDataIfClosed_()
+      );
+    });
   }
 
   /** @override */
   layoutCallback() {
-    if (
-      this.shoppingTags_.length === 0 ||
-      this.storeService_.get(StateProperty.SHOPPING_DATA)[this.pageEl_.id] ===
-        undefined
-    ) {
+    if (this.shoppingTags_.length === 0) {
       return;
     }
     loadFonts(this.win, FONTS_TO_LOAD);
@@ -132,10 +132,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       StateProperty.SHOPPING_DATA,
       (shoppingData) => this.onShoppingDataUpdate_(shoppingData),
       true /** callToInitialize */
-    );
-    // Listen to transiton end events on attachment to check to clear active data.
-    this.attachmentEl_.addEventListener('transitionend', () =>
-      this.clearActiveProductDataIfClosed_()
     );
   }
 
@@ -165,15 +161,20 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onShoppingDataUpdate_(shoppingData) {
-    if (!shoppingData.activeProductData || !this.isOnActivePage_()) {
-      return;
-    }
     const isOpen = this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
+
     if (isOpen) {
       // If open, update the template.
-      // This happens when a product card is clicked in the PLP template.
+      // This happens when a product card is clicked in the PLP template
+      // or when page attachment state is open on refresh.
       this.updateTemplate_(shoppingData);
-    } else {
+    }
+
+    if (!this.isOnActivePage_() || !shoppingData.activeProductData) {
+      return;
+    }
+
+    if (!isOpen) {
       // Otherwise, open the attachment and then update the template.
       // This happens when clicking a shopping tag.
       this.attachmentEl_.getImpl().then((impl) => {
@@ -203,6 +204,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    */
   updateTemplate_(shoppingData) {
     const productOnPageToConfig = shoppingData[this.pageEl_.id];
+    if (productOnPageToConfig === undefined) {
+      return;
+    }
     const shoppingDataPerPage = Object.values(productOnPageToConfig);
 
     let productForPdp = shoppingData.activeProductData;
