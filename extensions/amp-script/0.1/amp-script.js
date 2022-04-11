@@ -226,6 +226,12 @@ export class AmpScript extends AMP.BaseElement {
    */
   callFunction(unusedFnId, unusedFnArgs) {
     return this.initialize_.promise.then(() => {
+      if (!this.workerDom_) {
+        return Promise.reject(
+          'Attempted to call function on an amp-script which initialization.'
+        );
+      }
+
       return this.workerDom_.callFunction.apply(this.workerDom_, arguments);
     });
   }
