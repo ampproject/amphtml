@@ -3,7 +3,7 @@ import {parseQueryString} from '#core/types/string/url';
 
 import {dev} from '#utils/log';
 
-import {urls} from '../../src/config';
+import * as urls from '../../src/config/urls';
 import {openWindowDialog} from '../../src/open-window-dialog';
 import {
   addParamToUrl,

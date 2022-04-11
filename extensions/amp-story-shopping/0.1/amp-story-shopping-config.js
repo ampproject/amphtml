@@ -1,7 +1,10 @@
 import {Services} from '#service';
 
+import {user} from '#utils/log';
+
 import {getElementConfig} from 'extensions/amp-story/1.0/request-utils';
 
+import validateProduct from '../../../examples/amp-story/shopping/product.schema.json' assert {type: 'json-schema'}; // lgtm[js/syntax-error]
 import {
   Action,
   ShoppingConfigDataDef,
@@ -14,29 +17,59 @@ import {
  */
 let ShoppingConfigResponseDef;
 
+/**
+ * Uses the specified validation configuration to run validation against
+ * the user's shopping configuration.
+ * @param {!ShoppingConfigDataDef} productConfig The user's config object.
+ * @param {string} name the name of the item in the config object.
+ * @return {boolean} returns a boolean indicating whether the validation
+ *     was successful.
+ */
+function validateConfig(productConfig, name) {
+  const errors = validateProduct(productConfig, name);
+  if (errors.length > 0) {
+    user().warn('AMP-STORY-SHOPPING-CONFIG', `${errors}`);
+    return false;
+  }
+  return true;
+}
+
 /** @typedef {!Object<string, !ShoppingConfigDataDef> */
-export let KeyedShoppingConfigDef;
+let KeyedShoppingConfigDef;
 
 /**
- * Gets Shopping config from an element.
- * The config is validated and keyed by 'product-tag-id'.
- * @param {!Element} element <amp-story-shopping-attachment>
- * @return {!Promise<!KeyedShoppingConfigDef>}
+ * Validates and returns the shopping config corresponding to the given
+ * amp-story-shopping-attachment element.
+ * @param {!Element} shoppingAttachmentEl <amp-story-shopping-attachment>
+ *     The amp story shopping attachment element
+ * @param {string} itemNamePrefix the name prefix of the element i.e. the Page ID
+ * @return {!Promise<!KeyedShoppingConfigDef>} An object with product ID
+ *     keys that each have a `ShoppingConfigDataDef` value
  */
-export function getShoppingConfig(element) {
-  return getElementConfig(element).then((config) => {
-    //TODO(#36412): Add call to validate config here.
-    return keyByProductTagId(config);
+export function getShoppingConfig(shoppingAttachmentEl, itemNamePrefix) {
+  return getElementConfig(shoppingAttachmentEl).then((config) => {
+    const allItems = config['items'];
+    const validItems = allItems.filter((item, i) => {
+      const productTitle = item?.productTitle ?? '';
+      return validateConfig(
+        item,
+        `[${`#${itemNamePrefix} items[${i}] ${productTitle}`.trim()}]`
+      );
+    });
+
+    return keyByProductId(validItems);
   });
 }
 
 /**
- * @param {!ShoppingConfigResponseDef} config
+ * Takes an array of product configs and returns a map of product IDs to
+ * product configs.
+ * @param {ShoppingConfigDataDef[]} configItems
  * @return {!KeyedShoppingConfigDef}
  */
-function keyByProductTagId(config) {
+function keyByProductId(configItems) {
   const keyed = {};
-  for (const item of config.items) {
+  for (const item of configItems) {
     keyed[item.productId] = item;
   }
   return keyed;
