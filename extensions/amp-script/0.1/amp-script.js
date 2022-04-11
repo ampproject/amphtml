@@ -228,7 +228,9 @@ export class AmpScript extends AMP.BaseElement {
     return this.initialize_.promise.then(() => {
       if (!this.workerDom_) {
         return Promise.reject(
-          'Attempted to call function on an amp-script which initialization.'
+          new Error(
+            'Attempted to call a function on an amp-script which failed initialization.'
+          )
         );
       }
 
