@@ -95,7 +95,7 @@ function ampResolve(importPath, absResolveDir, absRootDir) {
   if (babelResolvePath) {
     return path.posix.join(absRootDir, babelResolvePath);
   } else {
-    return require.resolve(importPath);
+    return path.posix.resolve(importPath);
   }
 }
 
