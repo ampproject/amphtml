@@ -9,7 +9,6 @@
  * </code>
  */
 
-import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
 
@@ -83,7 +82,6 @@ import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lg
 import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
@@ -2693,7 +2691,6 @@ export class AmpStory extends AMP.BaseElement {
 AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story', AmpStory, CSS);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
-  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
 });
