@@ -1,15 +1,15 @@
 import * as Preact from '#preact';
 
-import {Audio} from '../component';
+import {BentoAudio} from '../component';
 
 export default {
   title: 'Audio',
-  component: Audio,
+  component: BentoAudio,
 };
 
 export const _default = () => {
   return (
-    <Audio
+    <BentoAudio
       src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
       artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
       title="Snow Fight"
@@ -17,13 +17,13 @@ export const _default = () => {
       artist="Sintel"
       style={{height: '75px', width: 'auto'}}
       controls
-    ></Audio>
+    ></BentoAudio>
   );
 };
 
 export const LoadAudioThroughSources = () => {
   return (
-    <Audio
+    <BentoAudio
       artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
       title="Snow Fight"
       album="Jan Morgenstern"
@@ -37,6 +37,6 @@ export const LoadAudioThroughSources = () => {
           type="audio/mpeg"
         />
       }
-    ></Audio>
+    ></BentoAudio>
   );
 };

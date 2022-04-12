@@ -2,12 +2,12 @@ import {mount} from 'enzyme';
 
 import * as Preact from '#preact';
 
-import {Audio} from '../component';
+import {BentoAudio} from '../component';
 
 describes.realWin('Audio preact component v1.0', {}, (env) => {
   it('should load audio through attribute', () => {
     const wrapper = mount(
-      <Audio src="audio.mp3" style={{height: '30px', width: '300px'}} />
+      <BentoAudio src="audio.mp3" style={{height: '30px', width: '300px'}} />
     );
 
     const component = wrapper.find('audio');
@@ -23,14 +23,14 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
     });
   });
   it('should not preload audio', () => {
-    const wrapper = mount(<Audio src="audio.mp3" preload="none" />);
+    const wrapper = mount(<BentoAudio src="audio.mp3" preload="none" />);
 
     const component = wrapper.find('audio');
     expect(component).to.have.lengthOf(1);
     expect(component.prop('preload')).to.equal('none');
   });
   it('should only preload audio metadata', () => {
-    const wrapper = mount(<Audio src="audio.mp3" preload="metadata" />);
+    const wrapper = mount(<BentoAudio src="audio.mp3" preload="metadata" />);
 
     const component = wrapper.find('audio');
     expect(component).to.have.lengthOf(1);
@@ -38,7 +38,7 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
   });
   it('should load audio through sources', () => {
     const wrapper = mount(
-      <Audio
+      <BentoAudio
         autoplay=""
         preload=""
         muted=""
@@ -51,7 +51,7 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
             <source src="audio.ogg" type="audio/ogg" />
           </>
         }
-      ></Audio>,
+      ></BentoAudio>,
       {attachTo: env.win.document.body}
     );
 
@@ -85,7 +85,7 @@ describes.realWin('Audio preact component v1.0', {}, (env) => {
   });
   it('should propagate ARIA attributes', () => {
     const wrapper = mount(
-      <Audio
+      <BentoAudio
         src="audio.mp3"
         aria-label="Hello"
         aria-labelledby="id2"

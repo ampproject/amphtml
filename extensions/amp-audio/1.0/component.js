@@ -16,7 +16,7 @@ import {setMediaSession} from '../../../src/mediasession-helper';
  * @param {{current: ?AudioDef.AudioApi}} ref
  * @return {PreactDef.Renderable}
  */
-export function AudioWithRef(
+export function BentoAudioWithRef(
   {
     album = '',
     'aria-describedby': ariaDescribedby,
@@ -140,6 +140,6 @@ export function AudioWithRef(
   );
 }
 
-const Audio = forwardRef(AudioWithRef);
-Audio.displayName = 'Audio'; // Make findable for tests.
-export {Audio};
+const BentoAudio = forwardRef(BentoAudioWithRef);
+BentoAudio.displayName = 'BentoAudio'; // Make findable for tests.
+export {BentoAudio};

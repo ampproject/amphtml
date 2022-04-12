@@ -1,11 +1,11 @@
 import {PreactBaseElement} from '#preact/base-element';
 
-import {Audio} from './component';
+import {BentoAudio} from './component';
 
 export class BaseElement extends PreactBaseElement {}
 
 /** @override */
-BaseElement['Component'] = Audio;
+BaseElement['Component'] = BentoAudio;
 
 /** @override */
 BaseElement['props'] = {
