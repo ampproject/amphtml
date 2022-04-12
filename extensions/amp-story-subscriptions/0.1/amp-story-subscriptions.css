@@ -41,7 +41,7 @@ amp-story-subscriptions.i-amphtml-story-subscriptions-visible::before {
 
 /** Override the dialog styles from amp-subscriptions. */
 amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
-  border-radius: 16px 16px 0px 0px !important;
+  border-radius: 16px 16px 0 0 !important;
   font-family: Poppins, sans-serif !important;
   font-weight: 400 !important;
   background: white !important;
@@ -62,12 +62,12 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 }
 
 .i-amphtml-story-subscriptions-dialog-banner {
-  height: 44px !important;
+  height: 2.5em !important;
   background: #EDEDED !important;
 }
 
 .i-amphtml-story-subscriptions-dialog-content {
-  margin: 28px 28px 0px !important;
+  margin: 1.6em 1.6em 0 !important;
   text-align: center !important;
   white-space: nowrap !important;
 }
@@ -75,7 +75,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 .i-amphtml-story-subscriptions-price {
   font-weight: 400 !important;
   font-size: 1.4em !important;
-  letter-spacing: -0.4px !important;
+  letter-spacing: -0.02em !important;
   text-overflow: ellipsis !important;
   overflow: hidden !important;
   margin-bottom: 0.3em !important;
@@ -84,7 +84,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 .i-amphtml-story-subscriptions-title {
   font-weight: 700 !important;
   font-size: 1.15em !important;
-  letter-spacing: -0.25px !important;
+  letter-spacing: -0.015em !important;
   text-overflow: ellipsis !important;
   overflow: hidden !important;
   margin-bottom: 0.15em !important;
@@ -92,13 +92,13 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 
 .i-amphtml-story-subscriptions-subtitle-first, .i-amphtml-story-subscriptions-subtitle-second {
   font-size: 0.9em !important;
-  letter-spacing: -0.25px !important;
+  letter-spacing: -0.015em !important;
   text-overflow: ellipsis !important;
   overflow: hidden !important;
 }
 
 .i-amphtml-story-subscriptions-publisher-button, .i-amphtml-story-subscriptions-google-button {
-  margin: 0 auto 12px !important;
+  margin: 0 auto 0.7em !important;
   padding: 0 !important;
   border: none !important;
   width: 12.2em !important;
@@ -109,7 +109,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
   cursor: pointer !important;
 }
 .i-amphtml-story-subscriptions-publisher-button {
-  margin-top: 39px !important;
+  margin-top: 2.25em !important;
   background: black !important;
 }
 .i-amphtml-story-subscriptions-google-button {
@@ -120,7 +120,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
   width: 1.85em !important;
   height: 1.85em !important;
   border-radius: 50% !important;
-  margin-inline: 4px 11px !important;
+  margin-inline: 0.25em 0.65em !important;
 }
 .i-amphtml-story-subscriptions-google-logo {
   background-size: contain !important;
@@ -128,7 +128,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 }
 
 .i-amphtml-story-subscriptions-publisher-button-text, .i-amphtml-story-subscriptions-google-button-text {
-  letter-spacing: 0.15px !important;
+  letter-spacing: 0.01em !important;
   font-size: 0.75em !important;
   font-family: Google Sans, sans-serif !important;
   max-width: 12.6em !important;
@@ -149,8 +149,8 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 }
 
 .i-amphtml-story-subscriptions-signin {
-  margin-top: 40px !important;
-  margin-bottom: 24px !important;
+  margin-top: 2.3em !important;
+  margin-bottom: 1.4em !important;
   font-size: 0.7em !important;
 }
 
