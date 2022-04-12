@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@500');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700');
 
 amp-story-subscriptions {
@@ -62,12 +62,12 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 }
 
 .i-amphtml-story-subscriptions-dialog-banner {
-  height: 2.5em !important;
+  height: 2.54em !important;
   background: #EDEDED !important;
 }
 
 .i-amphtml-story-subscriptions-dialog-content {
-  margin: 1.6em 1.6em 0 !important;
+  margin: 2.1em 1.6em 0 !important;
   text-align: center !important;
   white-space: nowrap !important;
 }
@@ -98,7 +98,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 }
 
 .i-amphtml-story-subscriptions-publisher-button, .i-amphtml-story-subscriptions-google-button {
-  margin: 0 auto 0.7em !important;
+  margin: 0 auto 0.8em !important;
   padding: 0 !important;
   border: none !important;
   width: 12.2em !important;
@@ -109,7 +109,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
   cursor: pointer !important;
 }
 .i-amphtml-story-subscriptions-publisher-button {
-  margin-top: 2.25em !important;
+  margin-top: 2.48em !important;
   background: black !important;
 }
 .i-amphtml-story-subscriptions-google-button {
@@ -130,6 +130,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 .i-amphtml-story-subscriptions-publisher-button-text, .i-amphtml-story-subscriptions-google-button-text {
   letter-spacing: 0.01em !important;
   font-size: 0.75em !important;
+  font-weight: 400 !important;
   font-family: Google Sans, sans-serif !important;
   max-width: 12.6em !important;
   text-align: initial !important;
@@ -149,7 +150,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 }
 
 .i-amphtml-story-subscriptions-signin {
-  margin-top: 2.3em !important;
+  margin-top: 2.75em !important;
   margin-bottom: 1.4em !important;
   font-size: 0.7em !important;
 }
