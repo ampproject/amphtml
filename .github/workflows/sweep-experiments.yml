@@ -8,8 +8,15 @@ on:
     # First day of the month at 00:00:00
     - cron: '0 0 1 * *'
 
+permissions:
+  contents: read
+
 jobs:
   sweep-experiments:
+    permissions:
+      contents: write # for peter-evans/create-pull-request to create branch
+      issues: write # for peter-evans/create-or-update-comment to create or update comment
+      pull-requests: write # for peter-evans/create-pull-request to create a PR
     if: github.repository == 'ampproject/amphtml'
     name: Sweep Experiments
     runs-on: ubuntu-latest
@@ -84,3 +91,25 @@ jobs:
         if: ${{ steps.pull-request.outputs.pull-request-number }}
         run: |
           node build-system/tasks/sweep-experiments/cleanup-branches.js --except="${{ steps.sweep.outputs.branch }}"
+
+  create-issue-on-error:
+    if: failure()
+    needs: sweep-experiments
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    environment: create_issue_on_error
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create issue on error
+        uses: JasonEtco/create-an-issue@v2
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: '@ampproject/wg-infra'
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

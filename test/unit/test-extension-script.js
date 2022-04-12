@@ -2,6 +2,7 @@ import {createElementWithAttributes} from '#core/dom';
 
 import {
   calculateEntryPointScriptUrl,
+  calculateExtensionFileUrl,
   calculateExtensionScriptUrl,
   getExtensionScripts,
   parseExtensionUrl,
@@ -319,6 +320,54 @@ describes.sandboxed('Module Extension Location', {}, () => {
       );
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('latest');
+    });
+  });
+});
+
+describes.sandboxed('Extension File Location', {}, () => {
+  describe('get correct file location', () => {
+    beforeEach(() => {
+      // These functions must not rely on log for cases in SW.
+      resetLogConstructorForTesting();
+    });
+
+    afterEach(() => {
+      initLogConstructor();
+      window.__AMP_MODE = {};
+    });
+
+    it('with local mode', () => {
+      window.__AMP_MODE = {rtvVersion: '123'};
+      const script = calculateExtensionFileUrl(
+        window,
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'some-file.json',
+        true
+      );
+      expect(script).to.equal(
+        'http://localhost:8000/dist/rtv/123/v0/some-file.json'
+      );
+    });
+
+    it('with remote mode', () => {
+      window.__AMP_MODE = {rtvVersion: '123'};
+      const script = calculateExtensionFileUrl(
+        window,
+        {
+          pathname: 'examples/ads.amp.html',
+          host: 'localhost:8000',
+          protocol: 'http:',
+        },
+        'some-file.json',
+        false
+      );
+      expect(script).to.equal(
+        'https://cdn.ampproject.org/rtv/123/v0/some-file.json'
+      );
     });
   });
 });

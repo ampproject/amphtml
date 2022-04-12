@@ -3,7 +3,6 @@ import {AmpEvents_Enum} from '#core/constants/amp-events';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import {isAmp4Email} from '#core/document/format';
-import {iterateCursor} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {closestAncestorElementBySelector} from '#core/dom/query';
@@ -705,7 +704,7 @@ export class Bind {
     // created elements. Should do what <amp-state> does.
     const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros = /** @type {!Array<!BindMacroDef>} */ ([]);
-    iterateCursor(elements, (element) => {
+    elements.forEach((element) => {
       const argumentNames = (element.getAttribute('arguments') || '')
         .split(',')
         .map((s) => s.trim());

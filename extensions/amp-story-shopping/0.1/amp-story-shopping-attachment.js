@@ -5,17 +5,22 @@ import {Layout_Enum} from '#core/dom/layout';
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 import {
   getShoppingConfig,
   storeShoppingConfig,
 } from './amp-story-shopping-config';
 
+import {relativeToSourceUrl} from '../../../src/url';
 import {
   Action,
   ShoppingConfigDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
+import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 
 /** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
@@ -30,6 +35,12 @@ const FONTS_TO_LOAD = [
     src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
+
+/**
+ * @const {number}
+ * Max amount of characters for the product details text section.
+ */
+const MAX_PRODUCT_DETAILS_TEXT_LENGTH = 3000;
 
 export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -56,6 +67,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     /** @private {!Map<string, Element>} */
     this.builtTemplates_ = {};
+
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = Services.storyAnalyticsService(this.win);
+
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.variableService_ = Services.storyVariableService(this.win);
   }
 
   /** @override */
@@ -65,7 +82,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
 
-    getShoppingConfig(this.element).then((config) =>
+    getShoppingConfig(this.element, this.pageEl_.id).then((config) =>
       storeShoppingConfig(this.pageEl_, config)
     );
 
@@ -73,18 +90,22 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       return;
     }
 
-    this.attachmentEl_ = (
-      <amp-story-page-attachment
-        layout="nodisplay"
-        theme={this.element.getAttribute('theme')}
-        cta-text={this.localizationService_.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
-        )}
-      >
-        {this.templateContainer_}
-      </amp-story-page-attachment>
-    );
-    this.element.appendChild(this.attachmentEl_);
+    return this.localizationService_
+      .getLocalizedStringAsync(
+        LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+      )
+      .then((ctaText) => {
+        this.attachmentEl_ = (
+          <amp-story-page-attachment
+            layout="nodisplay"
+            theme={this.element.getAttribute('theme')}
+            cta-text={ctaText}
+          >
+            {this.templateContainer_}
+          </amp-story-page-attachment>
+        );
+        this.element.appendChild(this.attachmentEl_);
+      });
   }
 
   /** @override */
@@ -112,7 +133,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Triggers template update if opening without active product data.
-   * This happens when the "Shop Now" CTA is clicked.
+   * This happens either when the "Shop Now" CTA is clicked or when a
+   * shopping tag is clicked.
    * @param {boolean} isOpen
    * @private
    */
@@ -120,7 +142,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (!this.isOnActivePage_() || !isOpen) {
       return;
     }
+
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
+
     if (!shoppingData.activeProductData) {
       this.updateTemplate_(shoppingData);
     }
@@ -209,6 +233,21 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.builtTemplates_[templateId] = template;
       this.mutateElement(() => this.templateContainer_.appendChild(template));
     }
+
+    // PDP view that calls the analytics service sending the product id.
+    if (productForPdp) {
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+        productForPdp.productId
+      );
+    }
+
+    // Triggers an analytics event for the PDP or PLP depending on if there is an active product.
+    this.analyticsService_.triggerEvent(
+      productForPdp
+        ? StoryAnalyticsEvent.SHOPPING_PDP_VIEW
+        : StoryAnalyticsEvent.SHOPPING_PLP_VIEW
+    );
   }
 
   /**
@@ -220,7 +259,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   getTemplate_(templateId, productForPdp, shoppingDataForPage) {
-    const buildTemplate = () => (
+    if (this.builtTemplates_[templateId]) {
+      return this.builtTemplates_[templateId];
+    }
+    const template = (
       <div class="i-amphtml-amp-story-shopping">
         {/* If there is a product for the PDP, render PDP. */}
         {productForPdp && this.renderPdpTemplate_(productForPdp)}
@@ -231,8 +273,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           )}
       </div>
     );
-
-    return this.builtTemplates_[templateId] || buildTemplate();
+    localizeTemplate(template, this.element);
+    return template;
   }
 
   /**
@@ -296,6 +338,18 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   * onclick event that fires when buy now is clicked,
+   * sends an analytics event containing product id.
+   * @return {boolean}
+   * @private
+   */
+  onClickBuyNow_() {
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK
+    );
+  }
+
+  /**
    * @param {!ShoppingConfigDataDef} activeProductData
    * @return {Element}
    * @private
@@ -311,9 +365,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
-          {activeProductData.productVendor && (
-            <span class="i-amphtml-amp-story-shopping-pdp-header-vendor">
-              {activeProductData.productVendor}
+          {activeProductData.productBrand && (
+            <span class="i-amphtml-amp-story-shopping-pdp-header-brand">
+              {activeProductData.productBrand}
             </span>
           )}
           <div class="i-amphtml-amp-story-shopping-pdp-header-title-and-price">
@@ -334,28 +388,34 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               {activeProductData.aggregateRating.ratingValue} (
               <a
                 class="i-amphtml-amp-story-shopping-pdp-reviews-link"
-                href={activeProductData.aggregateRating.reviewUrl}
+                href={relativeToSourceUrl(
+                  activeProductData.aggregateRating.reviewUrl,
+                  this.element
+                )}
                 target="_top"
               >
                 {activeProductData.aggregateRating.reviewCount + ' '}
-                {this.localizationService_.getLocalizedString(
-                  LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL,
-                  this.element
-                )}
+                <span
+                  i-amphtml-i18n-text-content={
+                    LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL
+                  }
+                ></span>
               </a>
               )
             </span>
           )}
           <a
             class="i-amphtml-amp-story-shopping-pdp-cta"
-            href={activeProductData.productUrl}
-            target="_top"
-          >
-            {this.localizationService_.getLocalizedString(
-              LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL,
+            href={relativeToSourceUrl(
+              activeProductData.productUrl,
               this.element
             )}
-          </a>
+            target="_top"
+            onClick={() => this.onClickBuyNow_()}
+            i-amphtml-i18n-text-content={
+              LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL
+            }
+          ></a>
         </div>
         <div class="i-amphtml-amp-story-shopping-pdp-carousel">
           {activeProductData.productImages.map((image) => (
@@ -363,7 +423,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               class="i-amphtml-amp-story-shopping-pdp-carousel-card"
               role="img"
               aria-label={image.alt}
-              style={`background-image: url("${image.url}")`}
+              style={`background-image: url("${relativeToSourceUrl(
+                image.url,
+                this.element
+              )}")`}
               onClick={(e) => this.onPdpCarouselCardClick_(e.target)}
             ></div>
           ))}
@@ -374,12 +437,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               class="i-amphtml-amp-story-shopping-button-reset i-amphtml-amp-story-shopping-pdp-details-header"
               onClick={(e) => onDetailsHeaderClick(e.target)}
             >
-              <span class="i-amphtml-amp-story-shopping-sub-section-header">
-                {this.localizationService_.getLocalizedString(
-                  LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_DETAILS,
-                  this.element
-                )}
-              </span>
+              <span
+                class="i-amphtml-amp-story-shopping-sub-section-header"
+                i-amphtml-i18n-text-content={
+                  LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_DETAILS
+                }
+              ></span>
               <svg
                 viewBox="0 0 10 6"
                 class="i-amphtml-amp-story-shopping-pdp-details-header-arrow"
@@ -391,9 +454,19 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               class="i-amphtml-amp-story-shopping-pdp-details-text"
               aria-hidden="true"
             >
-              {activeProductData.productDetails
-                // Replaces two newlines with 0 or more spaces between them with two newlines.
-                .replace(/\n\s*\n/g, '\n\n')}
+              {
+                // Add ellipses if product details text is greater than max.
+                (activeProductData.productDetails.length >
+                MAX_PRODUCT_DETAILS_TEXT_LENGTH
+                  ? activeProductData.productDetails.slice(
+                      0,
+                      MAX_PRODUCT_DETAILS_TEXT_LENGTH
+                    ) + '...'
+                  : activeProductData.productDetails
+                )
+                  // Replaces two newlines with 0 or more spaces between them with two newlines.
+                  .replace(/\n\s*\n/g, '\n\n')
+              }
             </span>
           </div>
         )}
@@ -409,12 +482,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   renderPlpTemplate_(shoppingDataForPage) {
     return (
       <div class="i-amphtml-amp-story-shopping-plp">
-        <div class="i-amphtml-amp-story-shopping-sub-section-header">
-          {this.localizationService_.getLocalizedString(
-            LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER,
-            this.element
-          )}
-        </div>
+        <div
+          class="i-amphtml-amp-story-shopping-sub-section-header"
+          i-amphtml-i18n-text-content={
+            LocalizedStringId_Enum.AMP_STORY_SHOPPING_PLP_HEADER
+          }
+        ></div>
         <div class="i-amphtml-amp-story-shopping-plp-cards">
           {shoppingDataForPage.map((data) => (
             <button
@@ -425,12 +498,15 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               <div
                 class="i-amphtml-amp-story-shopping-plp-card-image"
                 style={{
-                  backgroundImage: `url("${data['productImages'][0].url}")`,
+                  backgroundImage: `url("${relativeToSourceUrl(
+                    data['productImages'][0].url,
+                    this.element
+                  )}")`,
                 }}
               ></div>
-              {data['productVendor'] && (
+              {data['productBrand'] && (
                 <div class="i-amphtml-amp-story-shopping-plp-card-brand">
-                  {data['productVendor']}
+                  {data['productBrand']}
                 </div>
               )}
               <div class="i-amphtml-amp-story-shopping-plp-card-title">

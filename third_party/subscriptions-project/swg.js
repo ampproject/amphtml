@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.209 */
+/** Version: 0.1.22.212 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5020,7 +5020,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.209',
+    '_client': 'SwG 0.1.22.212',
   });
 }
 
@@ -6350,7 +6350,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.209',
+        '_client': 'SwG 0.1.22.212',
         'supportsEventManager': true,
       },
       args || {}
@@ -7263,7 +7263,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.209');
+    context.setClientVersion('SwG 0.1.22.212');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -8552,26 +8552,32 @@ class AttributionParams {
  */
 class AutoPromptConfig {
   /**
-   * @param {number|undefined} maxImpressionsPerWeek
+   * @param {!AutoPromptConfigParams=} params
    */
-  constructor(
-    maxImpressionsPerWeek,
+  constructor({
     displayDelaySeconds,
-    backoffSeconds,
+    dismissalBackoffSeconds,
     maxDismissalsPerWeek,
-    maxDismissalsResultingHideSeconds
-  ) {
-    /** @const {number|undefined} */
-    this.maxImpressionsPerWeek = maxImpressionsPerWeek;
-
+    maxDismissalsResultingHideSeconds,
+    impressionBackoffSeconds,
+    maxImpressions,
+    maxImpressionsResultingHideSeconds,
+  } = {}) {
     /** @const {!ClientDisplayTrigger} */
     this.clientDisplayTrigger = new ClientDisplayTrigger(displayDelaySeconds);
 
     /** @const {!ExplicitDismissalConfig} */
     this.explicitDismissalConfig = new ExplicitDismissalConfig(
-      backoffSeconds,
+      dismissalBackoffSeconds,
       maxDismissalsPerWeek,
       maxDismissalsResultingHideSeconds
+    );
+
+    /** @const {!ImpressionConfig} */
+    this.impressionConfig = new ImpressionConfig(
+      impressionBackoffSeconds,
+      maxImpressions,
+      maxImpressionsResultingHideSeconds
     );
   }
 }
@@ -8611,6 +8617,32 @@ class ExplicitDismissalConfig {
 
     /** @const {number|undefined} */
     this.maxDismissalsResultingHideSeconds = maxDismissalsResultingHideSeconds;
+  }
+}
+
+/**
+ * Configuration of impression behavior and its effects.
+ */
+class ImpressionConfig {
+  /**
+   * @param {number|undefined} backoffSeconds
+   * @param {number|undefined} maxImpressions
+   * @param {number|undefined} maxImpressionsResultingHideSeconds
+   */
+  constructor(
+    backoffSeconds,
+    maxImpressions,
+    maxImpressionsResultingHideSeconds
+  ) {
+    /** @const {number|undefined} */
+    this.backoffSeconds = backoffSeconds;
+
+    /** @const {number|undefined} */
+    this.maxImpressions = maxImpressions;
+
+    /** @const {number|undefined} */
+    this.maxImpressionsResultingHideSeconds =
+      maxImpressionsResultingHideSeconds;
   }
 }
 
@@ -8894,13 +8926,23 @@ class ClientConfigManager {
     const autoPromptConfigJson = json['autoPromptConfig'];
     let autoPromptConfig = undefined;
     if (autoPromptConfigJson) {
-      autoPromptConfig = new AutoPromptConfig(
-        autoPromptConfigJson.maxImpressionsPerWeek,
-        autoPromptConfigJson.clientDisplayTrigger?.displayDelaySeconds,
-        autoPromptConfigJson.explicitDismissalConfig?.backoffSeconds,
-        autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsPerWeek,
-        autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsResultingHideSeconds
-      );
+      autoPromptConfig = new AutoPromptConfig({
+        displayDelaySeconds:
+          autoPromptConfigJson.clientDisplayTrigger?.displayDelaySeconds,
+        dismissalBackoffSeconds:
+          autoPromptConfigJson.explicitDismissalConfig?.backoffSeconds,
+        maxDismissalsPerWeek:
+          autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsPerWeek,
+        maxDismissalsResultingHideSeconds:
+          autoPromptConfigJson.explicitDismissalConfig
+            ?.maxDismissalsResultingHideSeconds,
+        impressionBackoffSeconds:
+          autoPromptConfigJson.impressionConfig?.backoffSeconds,
+        maxImpressions: autoPromptConfigJson.impressionConfig?.maxImpressions,
+        maxImpressionsResultingHideSeconds:
+          autoPromptConfigJson.impressionConfig
+            ?.maxImpressionsResultingHideSeconds,
+      });
     }
 
     const uiPredicatesJson = json['uiPredicates'];

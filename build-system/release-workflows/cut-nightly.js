@@ -14,6 +14,15 @@ const params = {owner: 'ampproject', repo: 'amphtml'};
 // Permanent external ID as assigned by the GitHub Actions runner.
 const GITHUB_EXTERNAL_ID = 'be30aa50-41df-5bf3-2e88-b5215679ea95';
 
+const CHECKS_TO_SKIP = [
+  'Cut Nightly Branch',
+  'create-issue-on-error',
+  'status-page',
+  // TODO(wg-infra): fix Windows build
+  'compile (windows, Dist)',
+  'compile (windows, Build)',
+];
+
 /**
  * Get last green commit
  * @param {Octokit} octokit
@@ -33,15 +42,18 @@ async function getCommit(octokit) {
   );
 
   for (const {sha} of commits.data) {
-    const checkRuns = await octokit.paginate(octokit.rest.checks.listForRef, {
-      ...params,
-      ref: sha,
-    });
-    if (
-      checkRuns
-        .filter(({'external_id': id}) => id !== GITHUB_EXTERNAL_ID)
-        .some(({status}) => status != 'completed')
-    ) {
+    const checkRuns = (
+      await octokit.paginate(octokit.rest.checks.listForRef, {
+        ...params,
+        ref: sha,
+        'per_page': 100,
+      })
+    ).filter(
+      ({'external_id': id, name}) =>
+        id !== GITHUB_EXTERNAL_ID && !CHECKS_TO_SKIP.includes(name)
+    );
+
+    if (checkRuns.some(({status}) => status != 'completed')) {
       log(
         'Not all check runs for commit',
         cyan(sha),
