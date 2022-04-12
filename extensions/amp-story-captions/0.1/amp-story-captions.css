@@ -5,36 +5,3 @@ amp-story-captions {
 .amp-story-captions-cue-future {
   color: gray;
 }
-
-/* amp-story-captions {
-  white-space: pre-wrap;
-  z-index: 1;
-} */
-
-/* amp-video amp-story-captions {
-  position: absolute !important;
-  bottom: 5.875em !important;
-  width: 100% !important;
-  margin: 0 !important;
-} */
-
-[data-preset="default"] .amp-story-captions-cue-wrapper {
-  font-size: calc(2.5 * var(--story-page-vh, 8px)) !important;
-  margin: 1em 0 !important;
-  display: flex !important;
-  justify-content: center !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  width: 100% !important;
-}
-
-[data-preset="default"] .amp-story-captions-cue {
-  font-family: 'Roboto', sans-serif !important;
-  text-align: center !important;
-  font-size: 1em !important;
-  color: #fff !important;
-  border-radius: .94em !important;
-  padding: 0.35em 0.94em !important;
-  background-color: hsla(0, 0%, 10%, 0.6) !important;
-  max-width: calc(var(--story-page-vw) * 92) !important;
-}

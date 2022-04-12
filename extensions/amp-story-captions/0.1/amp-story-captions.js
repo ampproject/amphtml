@@ -1,11 +1,15 @@
 import {Layout_Enum, isLayoutSizeDefined} from '#core/dom/layout';
 import {toArray} from '#core/types/array';
+import * as Preact from '#core/dom/jsx';
 
 import {listen} from '#utils/event-helper';
 
 import {TrackRenderer} from './track-renderer';
 
 import {CSS} from '../../../build/amp-story-captions-0.1.css';
+import {CSS as PRESETS_CSS} from '../../../build/amp-story-captions-presets-0.1.css';
+
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
 export class AmpStoryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -28,7 +32,18 @@ export class AmpStoryCaptions extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.container_ = this.element.ownerDocument.createElement('div');
-    this.element.appendChild(this.container_);
+    const preset = this.element.getAttribute('data-preset');
+    if (preset === 'default') {
+      const root = createShadowRootWithStyle(
+        <div />,
+        this.container_,
+        PRESETS_CSS
+      );
+      this.container_.classList.add(`amp-story-captions-default`);
+      this.element.appendChild(root);
+    } else {
+      this.element.appendChild(this.container_);
+    }
   }
 
   /** @override */
