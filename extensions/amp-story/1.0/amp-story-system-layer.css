@@ -130,8 +130,6 @@
   overflow: hidden !important;
 }
 
-/* TODO(#33969): clean up when ad progress bar is finalized. */
-[ad-showing] .i-amphtml-story-progress-bar:not([i-amphtml-ad-progress-exp]),
 [ad-showing] .i-amphtml-story-attribution {
   visibility: hidden !important;
 }
@@ -167,32 +165,10 @@
 }
 
 .i-amphtml-story-ad-progress-value {
-  animation-name: i-amphtml-story-ad-value !important;
-  animation-duration: 10s;
-  animation-timing-function: linear !important;
   background-color: #fbc02d !important;
-  height: 100% !important;
-  position: relative !important;
-  top: -100% !important;
-  transform-origin: left !important;
-  width: 100% !important;
 }
 
-@keyframes i-amphtml-story-ad-value {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-[paused] .i-amphtml-story-ad-progress-value {
-  animation-play-state: paused !important;
-}
-
-[dir=rtl] .i-amphtml-story-page-progress-value,
-[dir=rtl] .i-amphtml-story-ad-progress-value {
+[dir=rtl] .i-amphtml-story-page-progress-value {
   transform-origin: right !important;
 }
 
