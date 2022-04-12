@@ -26,8 +26,9 @@ jobs:
           node-version: 16
       - name: Install Dependencies
         run: bash ./.github/workflows/install_dependencies.sh
-      - name: ${{ matrix.flavor }}
-        run: node build-system/pr-check/cross-platform-builds.js --flavor=${{ matrix.flavor }}
+      #  TODO(38089): Fix cross-platform builds.
+      # - name: ${{ matrix.flavor }}
+      #   run: node build-system/pr-check/cross-platform-builds.js --flavor=${{ matrix.flavor }}
 
   create-issue-on-error:
     if: failure()
