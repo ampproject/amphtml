@@ -45,7 +45,6 @@ export interface BentoAutocompleteProps {
   prefetch?: boolean;
   suggestFirst?: boolean;
   src?: string;
-  fetchJson?: (src: string) => Promise<Item[]>;
   parseJson?: (response: any) => Item[];
   query?: string;
 }

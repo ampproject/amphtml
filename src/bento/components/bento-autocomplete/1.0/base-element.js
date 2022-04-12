@@ -70,7 +70,6 @@ export class BaseElement extends PreactBaseElement {
   checkPropsPostMutations() {
     const template = getTemplate(this.element);
     if (!template) {
-      // show error?
       return;
     }
 
@@ -96,6 +95,7 @@ BaseElement['props'] = {
   'inline': {attr: 'inline'},
   'maxItems': {attr: 'max-items', type: 'number'},
   'minChars': {attr: 'min-chars', type: 'number'},
+  'prefetch': {attr: 'prefetch', type: 'boolean'},
   'src': {attr: 'src'},
   'suggestFirst': {attr: 'suggest-first', type: 'boolean'},
   'query': {attr: 'query', type: 'string'},

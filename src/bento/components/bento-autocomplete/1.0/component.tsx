@@ -41,23 +41,22 @@ const getItems = (response: {items: Item[]}) =>
   getValueForExpr(response, 'items');
 
 export function BentoAutocomplete({
-  id,
   children,
+  filter = 'none',
+  filterValue = 'value',
+  highlightUserEntry = false,
+  id,
+  inline: inlineTrigger,
+  items = [],
+  itemTemplate,
+  maxItems,
+  minChars = 1,
   onError = () => {},
   onSelect = () => {},
-  filter = 'none',
-  minChars = 1,
-  items = [],
-  fetchJson = xhrUtils.fetchJson,
-  filterValue = 'value',
-  maxItems,
-  highlightUserEntry = false,
-  inline,
-  itemTemplate,
   parseJson = getItems,
   prefetch = false,
-  suggestFirst = false,
   src,
+  suggestFirst = false,
   query,
 }: BentoAutocompleteProps) {
   const elementRef = useRef<HTMLElement>(null);
@@ -79,7 +78,7 @@ export function BentoAutocomplete({
   // and re-enable it on user input.
   const [hasFetchedData, setHasFetchedData] = useState(false);
 
-  const binding = useAutocompleteBinding(inline);
+  const binding = useAutocompleteBinding(inlineTrigger);
 
   const url = useMemo(() => {
     if (src && query) {
@@ -114,7 +113,7 @@ export function BentoAutocomplete({
 
   const {data} = useQuery<Item[]>(
     () => {
-      return fetchJson(url!).then((response) => parseJson(response));
+      return xhrUtils.fetchJson(url!).then((response) => parseJson(response));
     },
     {
       enabled: isFetchEnabled,
@@ -238,11 +237,11 @@ export function BentoAutocomplete({
     if (!isValidFilterType(filter)) {
       onError(`Unexpected filter: ${filter}.`);
     }
-    if (!inline && suggestFirst && filter !== 'prefix') {
+    if (!inlineTrigger && suggestFirst && filter !== 'prefix') {
       onError(`"suggest-first" expected "filter" type "prefix".`);
       setShouldSuggestFirst(false);
     }
-  }, [filter, onError, inline, suggestFirst]);
+  }, [filter, onError, inlineTrigger, suggestFirst]);
 
   const showAutocompleteResults = useMemo(() => {
     if (!areResultsDisplayed || data?.length === 0) {
