@@ -20,8 +20,12 @@
     .scrim {
       background: linear-gradient(to bottom, transparent, #000);
       color: #fff;
-      font-size: 1em;
-      padding: 1em;
+      font-size: calc(5 * var(--story-page-vw));
+      padding: 32px;
+    }
+
+    amp-story-captions {
+      margin-bottom: 16px;
     }
 
     .page2 {
@@ -80,23 +84,9 @@
       </amp-story-grid-layer>
       <amp-story-grid-layer template="vertical" class="bottom">
         <div class="scrim">
+          <div class="static-text">This element is always above captions and never overlaps.</div>
           <amp-story-captions id="captions-fill" layout="fill"></amp-story-captions>
-          <div class="static-text">Example of captions with layout="fill"</div>
-        </div>
-      </amp-story-grid-layer>
-    </amp-story-page>
-
-    <amp-story-page id="page-amp-story-captions-default" auto-advance-after="video-fill">
-      <amp-story-grid-layer template="fill">
-        <amp-video id="video-fill"
-            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
-            width="1280" height="720" layout="responsive" autoplay>
-          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
-        </amp-video>
-      </amp-story-grid-layer>
-      <amp-story-grid-layer template="vertical" class="bottom">
-        <div class="scrim">
-          <div class="static-text">Example of page without an amp-story-captions element.</div>
+          <div class="static-text">This element is always below captions and never overlaps.</div>
         </div>
       </amp-story-grid-layer>
     </amp-story-page>
