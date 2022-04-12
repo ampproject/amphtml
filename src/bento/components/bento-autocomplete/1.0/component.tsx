@@ -103,9 +103,8 @@ export function BentoAutocomplete({
   }, [query]);
 
   const {data} = useQuery<Item[]>(
-    async () => {
-      const response = await fetchJson(url!);
-      return parseJson(response);
+    () => {
+      return fetchJson(url!).then((response) => parseJson(response));
     },
     {
       enabled: isFetchEnabled,
@@ -318,7 +317,7 @@ export function BentoAutocomplete({
   );
 
   const handleInput = useCallback(
-    async (event: Event) => {
+    (event: Event) => {
       const element = event.target as InputElement;
       if (binding.shouldAutocomplete(element)) {
         maybeFetchAndAutocomplete(element);

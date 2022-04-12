@@ -12,6 +12,10 @@
       async
       src="https://cdn.ampproject.org/v0/bento-autocomplete-1.0.js"
     ></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-mustache.js"
+    ></script>
     <link
       rel="stylesheet"
       type="text/css"
@@ -29,6 +33,24 @@
             "items": ["apple", "orange", "banana"]
           }
         </script>
+      </bento-autocomplete>
+      <h1>With template</h1>
+      <bento-autocomplete filter-value="city">
+        <input type="text" />
+        <script type="application/json">
+          {
+            "items": [
+              {"city": "Seattle", "state": "WA"},
+              {"city": "New York", "state": "NY"},
+              {"city": "Chicago", "state": "IL"}
+            ]
+          }
+        </script>
+        <template type="bento-mustache">
+          <div class="city-item" data-value="{{city}}, {{state}}">
+            {{city}}, {{state}}
+          </div>
+        </template>
       </bento-autocomplete>
     </section>
   </body>

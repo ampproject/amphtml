@@ -101,7 +101,7 @@ describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
         </script>
         <template type="bento-mustache">
           <div class="city-item" data-value="{{city}}, {{state}}">
-            <div>{{city}}, {{state}}</div>
+            {{city}}, {{state}}
           </div>
         </template>
       </bento-autocomplete>
