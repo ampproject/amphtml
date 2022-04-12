@@ -5,15 +5,26 @@
   "author": "Bento Authors",
   "license": "Apache-2.0",
   "main": "./dist/bento.core.js",
+  "browser": "./dist/bento.core.js",
   "module": "./dist/bento.core.module.js",
   "exports": {
     ".": {
       "import": "./dist/bento.core.module.js",
       "require": "./dist/bento.core.js"
+    },
+    "./preact": {
+      "import": "./preact/dist/bento-preact.core.module.js",
+      "require": "./preact/dist/bento-preact.core.js"
+    },
+    "./react": {
+      "import": "./react/dist/bento-react.core.module.js",
+      "require": "./react/dist/bento-react.core.js"
     }
   },
   "files": [
-    "dist/*"
+    "dist/*",
+    "preact/*",
+    "react/*"
   ],
   "repository": {
     "type": "git",
