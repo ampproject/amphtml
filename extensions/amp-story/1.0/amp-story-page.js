@@ -41,7 +41,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AnimationManager, hasAnimations} from './animation';
-import {upgradeBackgroundAudio, waitForVideosWithCachedSources} from './audio';
+import {upgradeBackgroundAudio} from './audio';
 import {EventType, dispatch} from './events';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
@@ -647,6 +647,19 @@ export class AmpStoryPage extends AMP.BaseElement {
       mediaPromises.push(this.backgroundAudioDeferred_.promise);
     }
 
+    return Promise.all(mediaPromises);
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  waitForAmpVideosBuilt_() {
+    const mediaSet = this.getAllAmpVideos_();
+
+    const mediaPromises = mediaSet.map((mediaEl) =>
+      whenUpgradedToCustomElement(mediaEl).then((el) => el.whenBuilt())
+    );
     return Promise.all(mediaPromises);
   }
 
@@ -1325,10 +1338,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   hasVideoWithAudio_() {
-    const ampVideoEls = this.element.querySelectorAll('amp-video');
-    return waitForVideosWithCachedSources(this.element).then(() =>
+    return this.waitForAmpVideosBuilt_().then(() =>
       Array.prototype.some.call(
-        ampVideoEls,
+        this.getAllAmpVideos_(),
         (video) =>
           !video.hasAttribute('noaudio') &&
           parseFloat(video.getAttribute('volume')) !== 0
@@ -1343,7 +1355,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   hasVideoWithCaptions_() {
     const ampVideoEls = this.element.querySelectorAll('amp-video');
-    return waitForVideosWithCachedSources(this.element).then(() =>
+    return this.waitForAmpVideosBuilt_().then(() =>
       Array.prototype.some.call(ampVideoEls, (video) =>
         video.querySelector('track')
       )

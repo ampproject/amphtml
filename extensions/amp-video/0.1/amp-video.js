@@ -1047,7 +1047,7 @@ export class AmpVideo extends AMP.BaseElement {
   toggleCaptions(captionsOn) {
     toArray(this.video_.textTracks).forEach((track) => {
       if (captionsOn) {
-        // If captions are delegated, hide instead of show.
+        // If captions are delegated then hide (so they show in amp-story-captions), otherwise show.
         track.mode = this.captionsAreDelegated_ ? 'hidden' : 'showing';
       } else {
         track.mode = 'disabled';
