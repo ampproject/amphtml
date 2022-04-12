@@ -18,9 +18,6 @@ const CHECKS_TO_SKIP = [
   'Cut Nightly Branch',
   'create-issue-on-error',
   'status-page',
-  // TODO(wg-infra): fix Windows build
-  'compile (windows, Dist)',
-  'compile (windows, Build)',
 ];
 
 /**
