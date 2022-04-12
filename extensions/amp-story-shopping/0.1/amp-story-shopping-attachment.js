@@ -83,43 +83,37 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
 
     if (this.shoppingTags_.length === 0) {
-      return;
+      return Promise.reject(new Error('No shopping tags on the page.'));
     }
 
-    return Promise.all([
-      getShoppingConfig(this.element, this.pageEl_.id),
-      this.localizationService_.getLocalizedStringAsync(
-        LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
-      ),
-    ]).then((results) => {
-      const config = results[0];
-      const ctaText = results[1];
-      if (Object.keys(config).length === 0) {
-        return;
-      }
-      storeShoppingConfig(this.pageEl_, config);
-      this.attachmentEl_ = (
-        <amp-story-page-attachment
-          layout="nodisplay"
-          theme={this.element.getAttribute('theme')}
-          cta-text={ctaText}
-        >
-          {this.templateContainer_}
-        </amp-story-page-attachment>
-      );
-      this.element.appendChild(this.attachmentEl_);
-      // Listen to transiton end events on attachment to check to clear active data.
-      this.attachmentEl_.addEventListener('transitionend', () =>
-        this.clearActiveProductDataIfClosed_()
-      );
-    });
+    return getShoppingConfig(this.element, this.pageEl_.id)
+      .then((config) => {
+        if (Object.keys(config).length === 0) {
+          return Promise.reject(new Error('No valid shopping data on page.'));
+        }
+        storeShoppingConfig(this.pageEl_, config);
+      })
+      .then(() =>
+        this.localizationService_.getLocalizedStringAsync(
+          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+        )
+      )
+      .then((ctaText) => {
+        this.attachmentEl_ = (
+          <amp-story-page-attachment
+            layout="nodisplay"
+            theme={this.element.getAttribute('theme')}
+            cta-text={ctaText}
+          >
+            {this.templateContainer_}
+          </amp-story-page-attachment>
+        );
+        this.element.appendChild(this.attachmentEl_);
+      });
   }
 
   /** @override */
   layoutCallback() {
-    if (this.shoppingTags_.length === 0) {
-      return;
-    }
     loadFonts(this.win, FONTS_TO_LOAD);
     // Update template on attachment state update or shopping data update.
     this.storeService_.subscribe(
@@ -131,6 +125,10 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       StateProperty.SHOPPING_DATA,
       (shoppingData) => this.onShoppingDataUpdate_(shoppingData),
       true /** callToInitialize */
+    );
+    // Listen to transiton end events on attachment to check to clear active data.
+    this.attachmentEl_.addEventListener('transitionend', () =>
+      this.clearActiveProductDataIfClosed_()
     );
   }
 
