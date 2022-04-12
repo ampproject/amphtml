@@ -8,6 +8,8 @@ import {defineBentoElement} from '#preact/bento-ce';
 
 import {user} from '#utils/log';
 
+import {waitFor} from '#testing/helpers/service';
+
 describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
   let win;
   let html;
@@ -24,6 +26,14 @@ describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
     win.document.body.appendChild(element);
     await element.getApi();
     return element;
+  }
+
+  async function waitForInputSetup(element) {
+    const inputHasAttributes = () => {
+      const input = element.querySelector('input');
+      return input.getAttribute('aria-autocomplete') === 'both';
+    };
+    await waitFor(inputHasAttributes, 'input is set up');
   }
 
   it('warns if there is no script tag or src', async () => {
@@ -112,5 +122,36 @@ describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
     expect(results[0].getAttribute('data-value')).to.equal('Seattle, WA');
     expect(results[1].getAttribute('data-value')).to.equal('New York, NY');
     expect(results[2].getAttribute('data-value')).to.equal('Chicago, IL');
+  });
+
+  it('updates the input value when selecting a template item', async () => {
+    const element = await mountElement(html`
+      <bento-autocomplete filter-value="city" min-chars="0">
+        <input type="text" />
+        <script type="application/json">
+          {
+            "items": [
+              {"city": "Seattle", "state": "WA"},
+              {"city": "New York", "state": "NY"},
+              {"city": "Chicago", "state": "IL"}
+            ]
+          }
+        </script>
+        <template type="bento-mustache">
+          <div class="city-item" data-value="{{city}}, {{state}}">
+            {{city}}, {{state}}
+          </div>
+        </template>
+      </bento-autocomplete>
+    `);
+
+    await waitForInputSetup(element);
+    const input = element.querySelector('input');
+    input.click();
+
+    const results = element.shadowRoot.querySelectorAll('[role="option"]');
+    results[0].dispatchEvent(new Event('mousedown'));
+
+    expect(input.value).to.equal('Seattle, WA');
   });
 });

@@ -13,7 +13,12 @@ export function getItemElement(
 }
 
 export function getSelectedTextValue(element: HTMLElement | null): string {
-  return element?.getAttribute('data-value') || element?.textContent || '';
+  return (
+    element?.getAttribute('data-value') ||
+    element?.firstElementChild?.getAttribute('data-value') ||
+    element?.textContent?.trim() ||
+    ''
+  );
 }
 
 export function getSelectedObjectValue(
