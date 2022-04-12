@@ -188,9 +188,13 @@ function transformAjvCode(code, taken, config) {
    */
   function evaluatePropertyKey(memberExpression) {
     const property = memberExpression.get('property');
-    return property.isIdentifier()
-      ? property.node.name
-      : property.evaluate().value;
+    if (property.isIdentifier()) {
+      return property.node.name;
+    }
+    if (memberExpression.node.computed) {
+      return property.evaluate().value;
+    }
+    return null;
   }
 
   const schemaIdRegexp = /^schema[0-9]*$/;
@@ -240,7 +244,10 @@ function transformAjvCode(code, taken, config) {
         parentPath.parentPath?.isCallExpression()
       );
     }
-    if (parentPath?.isCallExpression() && path.key === 0) {
+    if (
+      parentPath?.isCallExpression() &&
+      parentPath.node.arguments[0] === path.node
+    ) {
       const callee = parentPath.get('callee');
       return (
         isMemberExpressionLeftwards(callee, ['Object', 'keys']) ||
