@@ -14,15 +14,13 @@ const params = {owner: 'ampproject', repo: 'amphtml'};
 // Permanent external ID as assigned by the GitHub Actions runner.
 const GITHUB_EXTERNAL_ID = 'be30aa50-41df-5bf3-2e88-b5215679ea95';
 
-const CHECKS_TO_CHECK = [
-  'CircleCI',
-  'compile (macos, Dist)',
-  'compile (macos, Build)',
-  'compile (ubuntu, Dist)',
-  'compile (ubuntu, Build)',
+const CHECKS_TO_SKIP = [
+  'Cut Nightly Branch',
+  'create-issue-on-error',
+  'status-page',
   // TODO(wg-infra): fix Windows build
-  // 'compile (windows, Dist)',
-  // 'compile (windows, Build)',
+  'compile (windows, Dist)',
+  'compile (windows, Build)',
 ];
 
 /**
@@ -52,7 +50,7 @@ async function getCommit(octokit) {
       })
     ).filter(
       ({'external_id': id, name}) =>
-        id !== GITHUB_EXTERNAL_ID && CHECKS_TO_CHECK.includes(name)
+        id !== GITHUB_EXTERNAL_ID && !CHECKS_TO_SKIP.includes(name)
     );
 
     if (checkRuns.some(({status}) => status != 'completed')) {
