@@ -161,6 +161,7 @@ export function BentoAutocomplete({
   const selectItem = useCallback(
     (value: string, valueAsObject?: object | null) => {
       setInputValue(value);
+      setSubstring(value);
       const selectData: OnSelectData = {
         value,
         ...(valueAsObject ? {valueAsObject} : {}),

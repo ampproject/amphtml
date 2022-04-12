@@ -590,6 +590,34 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       expect(input.getDOMNode().value).to.equal('two');
     });
 
+    it('does not reset the input value if an option has been selected', () => {
+      const wrapper = mount(
+        <Autocomplete
+          id="id"
+          filter="prefix"
+          items={['one', 'two', 'three']}
+          onSelect={onSelect}
+        >
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 't';
+      input.simulate('input');
+
+      input.simulate('keydown', {key: Keys_Enum.DOWN_ARROW});
+      input.simulate('keydown', {key: Keys_Enum.ENTER});
+
+      expect(input.getDOMNode().value).to.equal('two');
+      expect(areOptionsVisible(wrapper)).to.be.false;
+
+      // It should not reset the input value
+      input.simulate('keydown', {key: Keys_Enum.ESCAPE});
+
+      expect(input.getDOMNode().value).to.equal('two');
+    });
+
     it('selects an option on mousedown', () => {
       const wrapper = mount(
         <Autocomplete
