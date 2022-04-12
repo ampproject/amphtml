@@ -1,26 +1,4 @@
 const validate = validate0;
-const schema0 = {
-  "$defs": {
-    "https": {
-      "type": "string",
-      "format": "uri",
-      "pattern": "^https://"
-    }
-  },
-  "properties": {
-    "foo": {
-      "$ref": "#/$defs/https"
-    },
-    "bar": {
-      "$ref": "#/$defs/https"
-    }
-  }
-};
-const schema1 = {
-  "type": "string",
-  "format": "uri",
-  "pattern": "^https://"
-};
 const formats0 = /^(?:[a-z][a-z0-9+\-.]*:)(?:\/?\/)?[^\s]*$/i;
 const pattern0 = new RegExp("^https://", "u");
 

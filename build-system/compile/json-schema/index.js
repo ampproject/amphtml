@@ -160,17 +160,17 @@ function getImportCode(validatorFns) {
 /**
  * Transforms ajv's generated code to make it usable in a bundle:
  *  - Creates strings for error messages instead of an object.
- *  - If provided a "scope" of used names, it will rescope the current code
- *    to prevent collisions, and remove `export`.
+ *  - Removes exports (it expects to be included inline).
+ *  - Rescopes the current code to prevent collisions with taken names.
+ *  - Strips down included schemas so that they only contain the referenced
+ *    portions.
  * @param {string} code
- * @param {string[]=} scope
+ * @param {Set<string>} taken
  * @param {babel.TransformOptions=} config
  * @return {{result: babel.BabelFileResult | null, name: string}}
  */
-function transformAjvCode(code, scope, config) {
-  const {types: t} = babel;
-
-  const scopeSet = scope ? new Set(scope) : null;
+function transformAjvCode(code, taken, config) {
+  const {template, types: t} = babel;
 
   // ajvCompile's generated name
   let name = 'validate';
@@ -182,42 +182,216 @@ function transformAjvCode(code, scope, config) {
   const findProperty = (properties, name) =>
     properties.find((node) => isObjectProperty(node, name));
 
+  /**
+   * @param {babel.NodePath<babel.types.MemberExpression>} memberExpression
+   * @return {null | undefined | number | string}
+   */
+  function evaluatePropertyKey(memberExpression) {
+    const property = memberExpression.get('property');
+    if (property.isIdentifier()) {
+      return property.node.name;
+    }
+    if (memberExpression.node.computed) {
+      return property.evaluate().value;
+    }
+    return null;
+  }
+
+  const schemaIdRegexp = /^schema[0-9]*$/;
+
+  /**
+   * @param {babel.NodePath<any>} path
+   * @param {string[]} keys
+   * @return {boolean}
+   */
+  function isMemberExpressionLeftwards(path, keys) {
+    let i = keys.length - 1;
+    while (true) {
+      if (path.isMemberExpression()) {
+        const key = evaluatePropertyKey(path);
+        if (key !== keys[i--]) {
+          return false;
+        }
+        path = path.get('object');
+      } else if (path.isVariableDeclarator()) {
+        const init = path.get('init');
+        if (!init) {
+          break;
+        }
+        path = init;
+      } else if (path.isIdentifier()) {
+        const binding = path.scope.getBinding(path.node.name);
+        if (!binding) {
+          break;
+        }
+        path = binding.path;
+      } else {
+        break;
+      }
+    }
+    return i === 0 && path.isIdentifier({name: keys[i]});
+  }
+
+  /**
+   * @param {babel.NodePath} path
+   * @return {boolean}
+   */
+  function isReferenceToObjectKeyList(path) {
+    const {parentPath} = path;
+    if (parentPath?.isMemberExpression() && path.key === 'object') {
+      return (
+        t.isIdentifier(parentPath.node.property, {name: 'hasOwnProperty'}) &&
+        parentPath.parentPath?.isCallExpression()
+      );
+    }
+    if (
+      parentPath?.isCallExpression() &&
+      parentPath.node.arguments[0] === path.node
+    ) {
+      const callee = parentPath.get('callee');
+      return (
+        isMemberExpressionLeftwards(callee, ['Object', 'keys']) ||
+        isMemberExpressionLeftwards(callee, [
+          'Object',
+          'prototype',
+          'hasOwnProperty',
+          'call',
+        ])
+      );
+    }
+    return false;
+  }
+
+  /** @type {{[stringified: string]: string}} */
+  const valueReferences = {};
+
+  /**
+   * Resolves static references to object properties as deeply as possible,
+   * and hoists references to those values.
+   * @param {import('@babel/traverse').Binding} binding
+   */
+  function hoistProperties(binding) {
+    const {constant, identifier, path, referencePaths} = binding;
+    if (!constant || !path.isVariableDeclarator()) {
+      return;
+    }
+    const init = path.get('init');
+    if (!init.isObjectExpression()) {
+      return;
+    }
+    const original = init.evaluate().value;
+    if (original == null) {
+      // original is dynamic, deopt
+      return;
+    }
+    /** @type {Map<Object, babel.NodePath[]>} */
+    const hoisted = new Map();
+    /** @type {[any, babel.NodePath[]][]} */
+    const queue = [[original, referencePaths]];
+    for (const [startValue, referencePaths] of queue) {
+      for (let referencePath of referencePaths) {
+        let value = startValue;
+        let {parentPath} = referencePath;
+        while (parentPath?.isMemberExpression()) {
+          const key = evaluatePropertyKey(parentPath);
+          if (key == null || !value.hasOwnProperty(key)) {
+            break;
+          }
+          value = value[key];
+          referencePath = parentPath;
+          parentPath = referencePath.parentPath;
+        }
+        if (value === original) {
+          // deopt
+          return;
+        }
+        // Follow references to declared variable.
+        if (
+          parentPath?.isVariableDeclarator() &&
+          t.isIdentifier(parentPath.node.id)
+        ) {
+          const {name} = parentPath.node.id;
+          const binding = parentPath.scope.getBinding(name);
+          if (binding?.constant) {
+            const {referencePaths} = binding;
+            queue.push([value, referencePaths]);
+            parentPath.remove();
+            continue;
+          }
+        }
+        const hoistedReferences = hoisted.get(value) ?? [];
+        hoistedReferences.push(referencePath);
+        hoisted.set(value, hoistedReferences);
+      }
+    }
+    for (const [value, referencePaths] of hoisted) {
+      // Override every property value as `0` when we only need a key list.
+      if (referencePaths.every(isReferenceToObjectKeyList)) {
+        for (const k in value) {
+          value[k] = 0;
+        }
+      }
+      // Stringify to de-dupe identical objects.
+      // (This may occur as a result of some uses of $ref)
+      const stringified = JSON.stringify(value);
+      let name = valueReferences[stringified];
+      if (!name) {
+        name = rescope(path, path.scope.generateUid(identifier.name));
+        path.scope.push({
+          kind: 'const',
+          id: t.identifier(name),
+          init: t.valueToNode(value),
+        });
+        valueReferences[stringified] = name;
+      }
+      for (const referencePath of referencePaths) {
+        referencePath.replaceWith(t.identifier(name));
+      }
+    }
+    path.remove();
+  }
+
+  /**
+   * Prevents collisions with outer scope
+   * @param {babel.NodePath} path
+   * @param {string} id
+   * @return {string}
+   */
+  function rescope(path, id) {
+    let renamed = id;
+    while (taken.has(renamed)) {
+      renamed = path.scope.generateUid(id);
+    }
+    if (renamed !== id) {
+      path.scope.rename(id, renamed);
+      if (id === name) {
+        name = renamed;
+      }
+    }
+    return renamed;
+  }
+
   /** @type {babel.PluginObj} */
   const plugin = {
     visitor: {
       Program: {
         exit(path) {
-          // Prevent collisions with outer scope
-          if (!scopeSet) {
-            return;
-          }
-          for (const binding in path.scope.bindings) {
-            let renamed = binding;
-            while (scopeSet.has(renamed)) {
-              renamed = path.scope.generateUid(binding);
+          path.scope.crawl();
+          for (const id in path.scope.bindings) {
+            const binding = path.scope.bindings[id];
+            if (schemaIdRegexp.test(id)) {
+              hoistProperties(binding);
             }
-            if (renamed === binding) {
-              continue;
-            }
-            path.scope.rename(binding, renamed);
-            if (binding === name) {
-              name = renamed;
-            }
+            rescope(path, id);
           }
         },
       },
       ExportDefaultDeclaration(path) {
         // Remove `export default validate`
-        if (!scope) {
-          return;
-        }
         path.remove();
       },
       ExportNamedDeclaration(path) {
         // Unexport named exports.
-        if (!scope) {
-          return;
-        }
         if (path.node.declaration) {
           path.replaceWith(path.node.declaration);
         } else {
@@ -237,7 +411,7 @@ function transformAjvCode(code, scope, config) {
           path.replaceWith(instancePath.value);
           return;
         }
-        path.replaceWith(babel.template.expression.ast`
+        path.replaceWith(template.expression.ast`
           (${instancePath.value} + ' ' + ${message.value}).trim()
         `);
       },
