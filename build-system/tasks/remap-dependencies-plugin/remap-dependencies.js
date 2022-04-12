@@ -92,7 +92,7 @@ function onResolveRemapDeps({externals, remapArr, resolve, rootDir}, args) {
 function ampResolve(importPath, absResolveDir, absRootDir) {
   const absImportPath = path.posix.join(absResolveDir, importPath);
   const rootRelImportPath = path.posix.relative(absRootDir, absImportPath);
-  const babelResolvePath = resolvePath(rootRelImportPath);
+  const babelResolvePath = resolvePath(rootRelImportPath, null);
   if (babelResolvePath) {
     return path.posix.join(absRootDir, babelResolvePath);
   } else {
