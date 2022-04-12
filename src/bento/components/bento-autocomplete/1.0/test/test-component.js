@@ -1071,12 +1071,30 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       component.update();
     }
 
-    it('fetches data on initial render if a src is provided', async () => {
+    it('fetches data on initial render if a src is provided and prefetch is true', async () => {
       const wrapper = mount(
-        <Autocomplete id="id" src="/items.json">
+        <Autocomplete id="id" src="/items.json" prefetch>
           <input type="text"></input>
         </Autocomplete>
       );
+
+      await waitForData(wrapper);
+
+      expect(fetchJson).calledWith('/items.json').callCount(1);
+    });
+
+    it('fetches on user input if prefetch is false', async () => {
+      const wrapper = mount(
+        <Autocomplete id="id" src="/items.json" prefetch={false}>
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      expect(fetchJson).not.to.have.been.called;
+
+      const input = wrapper.find('input');
+      input.getDOMNode().value = 'o';
+      input.simulate('input');
 
       await waitForData(wrapper);
 
@@ -1090,11 +1108,11 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         </Autocomplete>
       );
 
-      await waitForData(wrapper);
-
       const input = wrapper.find('input');
       input.getDOMNode().value = 'o';
       input.simulate('input');
+
+      await waitForData(wrapper);
 
       expect(fetchJson).calledWith('/items.json').callCount(1);
 
@@ -1140,6 +1158,10 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
           <input type="text"></input>
         </Autocomplete>
       );
+
+      await waitForData(wrapper, 0);
+
+      expect(fetchJson).not.to.have.been.called;
 
       const input = wrapper.find('input');
       input.getDOMNode().value = 'value';

@@ -55,6 +55,7 @@ export function BentoAutocomplete({
   inline,
   itemTemplate,
   parseJson = getItems,
+  prefetch = false,
   suggestFirst = false,
   src,
   query,
@@ -93,10 +94,19 @@ export function BentoAutocomplete({
       if (query) {
         return !hasFetchedData;
       }
-      return !hasFetchedInitialData;
+      if (!hasFetchedInitialData) {
+        return prefetch || areResultsDisplayed;
+      }
     }
     return false;
-  }, [url, hasFetchedInitialData, hasFetchedData, query]);
+  }, [
+    url,
+    hasFetchedInitialData,
+    hasFetchedData,
+    query,
+    prefetch,
+    areResultsDisplayed,
+  ]);
 
   const shouldRefetch = useMemo(() => {
     return !!query;
