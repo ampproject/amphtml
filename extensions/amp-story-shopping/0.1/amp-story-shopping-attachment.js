@@ -83,7 +83,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
 
     if (this.shoppingTags_.length === 0) {
-      return;
+      return Promise.reject('No shopping tags on the page.');
     }
 
     return getShoppingConfig(this.element, this.pageEl_.id)
