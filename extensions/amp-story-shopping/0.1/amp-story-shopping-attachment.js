@@ -88,7 +88,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     return getShoppingConfig(this.element, this.pageEl_.id)
       .then((config) => {
-        // Do not build or layout component if no valid shopping data on page.
         if (Object.keys(config).length === 0) {
           return Promise.reject('No valid shopping data on page.');
         }
