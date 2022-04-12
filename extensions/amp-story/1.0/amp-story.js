@@ -655,7 +655,10 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      if (!this.activePage_.isAd()) {
+      if (
+        !this.activePage_.isAd() ||
+        isExperimentOn(this.win, 'story-ad-auto-advance')
+      ) {
         this.systemLayer_.updateProgress(pageId, progress);
       }
     });

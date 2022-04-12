@@ -802,6 +802,11 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
   `).replace('__name__', JSON.stringify(name));
 }
 
+/** @type {import('@babel/core').PluginItem[]} */
+const extensionBabelPlugins = [
+  './build-system/babel-plugins/babel-plugin-amp-config-urls',
+];
+
 /**
  * Build the JavaScript for the extension specified
  *
@@ -837,6 +842,7 @@ async function buildExtensionJs(dir, name, options) {
     minifiedName: `${name}-${version}.js`,
     aliasName: isLatest ? `${name}-latest.js` : '',
     wrapper: resolvedWrapper,
+    babelPlugins: wrapper === 'extension' ? extensionBabelPlugins : null,
   });
 
   // If an incremental watch build fails, simply return.
