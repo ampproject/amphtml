@@ -6,6 +6,7 @@ on:
   schedule:
     # 1 a.m. PST / 12 a.m. PDT, Tuesdays through Saturdays.
     - cron: '0 8 * * 2-6'
+  workflow_dispatch:
 
 permissions:
   contents: read
