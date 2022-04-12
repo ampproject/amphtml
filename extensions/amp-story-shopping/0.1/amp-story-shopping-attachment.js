@@ -87,12 +87,20 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
 
     if (this.shoppingTags_.length === 0) {
-      return;
+      return Promise.reject(new Error('No shopping tags on the page.'));
     }
 
-    return this.localizationService_
-      .getLocalizedStringAsync(
-        LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+    return getShoppingConfig(this.element, this.pageEl_.id)
+      .then((config) => {
+        if (Object.keys(config).length === 0) {
+          return Promise.reject(new Error('No valid shopping data on page.'));
+        }
+        storeShoppingConfig(this.pageEl_, config);
+      })
+      .then(() =>
+        this.localizationService_.getLocalizedStringAsync(
+          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+        )
       )
       .then((ctaText) => {
         this.attachmentEl_ = (
@@ -161,16 +169,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     if (isOpen) {
       // If open, update the template.
-      // This happens when a product card is clicked in the PLP template
-      // or when page attachment state is open on refresh.
-      this.updateTemplate_(shoppingData);
-    }
 
-    if (!this.isOnActivePage_() || !shoppingData.activeProductData) {
-      return;
-    }
-
-    if (!isOpen) {
       // Otherwise, open the attachment and then update the template.
       // This happens when clicking a shopping tag.
       this.attachmentEl_.getImpl().then((impl) => {
@@ -200,9 +199,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    */
   updateTemplate_(shoppingData) {
     const productOnPageToConfig = shoppingData[this.pageEl_.id];
-    if (productOnPageToConfig === undefined) {
-      return;
-    }
     const shoppingDataPerPage = Object.values(productOnPageToConfig);
 
     let productForPdp = shoppingData.activeProductData;
