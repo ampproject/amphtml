@@ -12,6 +12,9 @@ export class AmpStoryCaptions extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {?Element} */
+    this.container_ = null;
+
     /** @private {?HTMLVideoElement} */
     this.video_ = null;
 
@@ -20,6 +23,12 @@ export class AmpStoryCaptions extends AMP.BaseElement {
 
     /** @private {!Array<!TrackRenderer>} */
     this.trackRenderers_ = [];
+  }
+
+  /** @override */
+  buildCallback() {
+    this.container_ = this.element.ownerDocument.createElement('div');
+    this.element.appendChild(this.container_);
   }
 
   /** @override */
@@ -60,7 +69,7 @@ export class AmpStoryCaptions extends AMP.BaseElement {
       if (track.mode === 'showing' || track.mode === 'hidden') {
         track.mode = 'hidden';
         this.trackRenderers_.push(
-          new TrackRenderer(this.video_, track, this.element)
+          new TrackRenderer(this.video_, track, this.container_)
         );
       }
     });

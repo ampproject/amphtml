@@ -1,16 +1,20 @@
 amp-story-captions {
   white-space: pre-wrap;
+}
+
+/* amp-story-captions {
+  white-space: pre-wrap;
   z-index: 1;
   font-size: calc(2.5 * var(--story-page-vh, 8px)) !important;
   margin: 1em 0 !important;
-}
+} */
 
-amp-video amp-story-captions {
+/* amp-video amp-story-captions {
   position: absolute !important;
   bottom: 5.875em !important;
   width: 100% !important;
   margin: 0 !important;
-}
+} */
 
 .amp-story-captions-cue-wrapper {
   display: flex;
