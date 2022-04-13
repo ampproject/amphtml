@@ -142,7 +142,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
           <span class="i-amphtml-story-subscriptions-price">
             {this.element.getAttribute('price')}
           </span>
-          {!!this.element.getAttribute('title') && (
+          {this.element.getAttribute('title') && (
             <span class="i-amphtml-story-subscriptions-title">
               {this.element.getAttribute('title')}
             </span>
@@ -150,7 +150,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
           <span class="i-amphtml-story-subscriptions-subtitle-first">
             {this.element.getAttribute('subtitle-first')}
           </span>
-          {!!this.element.getAttribute('subtitle-second') && (
+          {this.element.getAttribute('subtitle-second') && (
             <span class="i-amphtml-story-subscriptions-subtitle-second">
               {this.element.getAttribute('subtitle-second')}
             </span>
