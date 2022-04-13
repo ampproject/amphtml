@@ -14,7 +14,7 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
  * List of valid preset values.
  * @const {Array<string>}
  */
-const presetValues = ['default', 'fade-in'];
+const presetValues = ['default', 'appear'];
 
 export class AmpStoryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */

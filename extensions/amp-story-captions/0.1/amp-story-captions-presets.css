@@ -1,5 +1,5 @@
 
-/* default */
+/* default preset */
 
 .amp-story-captions-default .amp-story-captions-cue-wrapper {
   font-size: calc(2.5 * var(--story-page-vh, 8px)) !important;
@@ -26,29 +26,41 @@
   color: #fff !important;
 }
 
-/* fade in */
+/* fade in preset */
 
-.amp-story-captions-fade-in .amp-story-captions-cue-wrapper {
-  font-size: calc(2.5 * var(--story-page-vh, 8px)) !important;
+/* Shadow override for user customizable CSS. */
+:host {
+  font-size: inherit;
+}
+
+.amp-story-captions-appear .amp-story-captions-cue-wrapper  {
+  font-size: calc(2.5 * var(--story-page-vh, 8px));
   margin: 1em 0 !important;
   display: flex !important;
-  justify-content: center !important;
+  /* justify-content: center !important; */
   flex-direction: column !important;
   align-items: center !important;
   width: 100% !important;
 }
 
-.amp-story-captions-fade-in .amp-story-captions-cue {
-  font-family: 'Roboto', sans-serif !important;
-  text-align: center !important;
-  font-size: 1em !important;
+.amp-story-captions-appear .amp-story-captions-cue {
+  /* font-size customizable */
+  font-size: 1em;
+  /* font-family customizable */
+  font-family: 'Roboto', sans-serif !important; 
+  /* text-align: center !important; */
   color: #fff !important;
   border-radius: .94em !important;
-  padding: 0.35em 0.94em !important;
-  background-color: hsla(0, 0%, 10%, 0.6) !important;
+  padding: .35em .94em !important;
   max-width: calc(var(--story-page-vw) * 92) !important;
+  text-shadow: .06em .06em black;
 }
 
-.amp-story-captions-fade-in .amp-story-captions-future {
-  color: grey !important;
+.amp-story-captions-appear .amp-story-captions-cue span {
+  transition: opacity .3s !important;
+  opacity: 1 !important;
+}
+
+.amp-story-captions-appear .amp-story-captions-cue span.amp-story-captions-future {
+  opacity: .1 !important;
 }

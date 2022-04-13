@@ -31,6 +31,10 @@
     .page2 {
       background-color: #fff;
     }
+
+    amp-story-captions {
+      /* font-size: 2px !important; */
+    }
   </style>
 </head>
 <body>
@@ -92,19 +96,19 @@
       </amp-story-grid-layer>
     </amp-story-page>
 
-    <amp-story-page id="page-captions-preset-fade-in" auto-advance-after="video-container">
+    <amp-story-page id="page-captions-preset-appear" auto-advance-after="video-container">
       <amp-story-grid-layer template="fill">
         <amp-video id="video-container"
             src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
-            width="1280" height="720" layout="responsive" autoplay captions-id="captions-preset-fade-in">
+            width="1280" height="720" layout="responsive" autoplay captions-id="captions-preset-appear">
           <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
         </amp-video>
       </amp-story-grid-layer>
       <amp-story-grid-layer template="vertical" class="bottom">
         <div class="scrim">
-          <div class="static-text">fade-in preset example.</div>
+          <div class="static-text">appear preset example.</div>
           <div class="static-text">This element is always above captions and never overlaps.</div>
-          <amp-story-captions data-preset="fade-in" id="captions-preset-fade-in" layout="container"></amp-story-captions>
+          <amp-story-captions data-preset="appear" id="captions-preset-appear" layout="container"></amp-story-captions>
           <div class="static-text">This element is always below captions and never overlaps.</div>
         </div>
       </amp-story-grid-layer>
