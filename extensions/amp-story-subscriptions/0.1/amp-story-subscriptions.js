@@ -139,23 +139,21 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       <div subscriptions-dialog subscriptions-display="NOT granted">
         <div class="i-amphtml-story-subscriptions-dialog-banner"></div>
         <div class="i-amphtml-story-subscriptions-dialog-content">
-          <div class="i-amphtml-story-subscriptions-price">
+          <span class="i-amphtml-story-subscriptions-price">
             {this.element.getAttribute('price')}
-          </div>
+          </span>
           {!!this.element.getAttribute('title') && (
-            <div class="i-amphtml-story-subscriptions-title">
+            <span class="i-amphtml-story-subscriptions-title">
               {this.element.getAttribute('title')}
-            </div>
+            </span>
           )}
-          {!!this.element.getAttribute('subtitle-first') && (
-            <div class="i-amphtml-story-subscriptions-subtitle-first">
-              {this.element.getAttribute('subtitle-first')}
-            </div>
-          )}
+          <span class="i-amphtml-story-subscriptions-subtitle-first">
+            {this.element.getAttribute('subtitle-first')}
+          </span>
           {!!this.element.getAttribute('subtitle-second') && (
-            <div class="i-amphtml-story-subscriptions-subtitle-second">
+            <span class="i-amphtml-story-subscriptions-subtitle-second">
               {this.element.getAttribute('subtitle-second')}
-            </div>
+            </span>
           )}
           <div
             class="i-amphtml-story-subscriptions-publisher-button"
@@ -187,7 +185,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
               )}
             </span>
           </div>
-          <div class="i-amphtml-story-subscriptions-signin">
+          <span class="i-amphtml-story-subscriptions-signin">
             {this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION
             )}
@@ -197,7 +195,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
                 LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SIGN_IN
               )}
             </a>
-          </div>
+          </span>
         </div>
       </div>
     );
