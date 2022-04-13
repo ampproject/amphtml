@@ -168,6 +168,10 @@
   animation: i-amphtml-tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
+.i-amphtml-story-page-open-attachment-outlink-no-animation-exp.i-amphtml-story-page-open-attachment-outlink-no-animation-exp[active] {
+  animation: none !important;
+}
+
 .i-amphtml-story-outlink-page-attachment-arrow {
   display: block !important;
   cursor: pointer !important;
@@ -178,6 +182,10 @@
 
 .i-amphtml-story-page-open-attachment[active] .i-amphtml-story-outlink-page-attachment-arrow {
   animation: i-amphtml-move-up-arrow var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
+}
+
+.i-amphtml-story-page-open-attachment.i-amphtml-story-page-open-attachment-outlink-no-animation-exp[active] .i-amphtml-story-outlink-page-attachment-arrow {
+  animation: none !important;
 }
 
 @keyframes i-amphtml-move-up-arrow {

@@ -1,10 +1,14 @@
 /**
  * @fileoverview Helper for amp-story rendering of page-attachment UI.
  */
+import objStr from 'obj-str';
+
 import * as Preact from '#core/dom/jsx';
 import {scopedQuerySelector} from '#core/dom/query';
 import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {getWin} from '#core/window';
+
+import {getExperimentBranch} from '#experiments';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -128,13 +132,21 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
   // Set image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
+  const noAnimation =
+    getExperimentBranch(getWin(pageEl), 'story-ad-auto-advance') == 'c';
+
   return openLabelOrFallback(
     pageEl,
     anchorChild?.textContent || ctaLabelFromAttr(attachmentEl)
   ).then((openLabel) => {
     const openAttachmentEl = (
       <a
-        class="i-amphtml-story-page-open-attachment i-amphtml-story-page-open-attachment-outlink"
+        class={objStr({
+          'i-amphtml-story-page-open-attachment': true,
+          'i-amphtml-story-page-open-attachment-outlink': true,
+          'i-amphtml-story-page-open-attachment-outlink-no-animation-exp':
+            noAnimation,
+        })}
         role="button"
         target="_top"
         title={attachmentTitle}
