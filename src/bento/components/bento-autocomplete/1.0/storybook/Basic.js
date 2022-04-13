@@ -25,6 +25,7 @@ export default {
     minChars: 1,
     highlightUserEntry: true,
     suggestFirst: false,
+    onError: console.error,
   },
   argTypes: {
     filter: {

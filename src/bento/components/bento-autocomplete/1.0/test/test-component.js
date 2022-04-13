@@ -70,10 +70,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
     expect(input.getAttribute('aria-autocomplete')).to.equal('both');
     expect(input.getAttribute('aria-controls')).to.equal('id');
     expect(input.getAttribute('role')).to.equal('combobox');
-    expect(input.getAttribute('aria-multiline')).to.equal('false');
-    expect(input.getAttribute('aria-haspopup')).to.equal('listbox');
     expect(input.getAttribute('aria-expanded')).to.equal('false');
-    expect(input.getAttribute('aria-owns')).to.equal('id');
   });
 
   it('adds attributes to the textarea input field', () => {
@@ -89,9 +86,7 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
     expect(input.getAttribute('aria-autocomplete')).to.equal('both');
     expect(input.getAttribute('role')).to.equal('textbox');
     expect(input.getAttribute('aria-controls')).to.equal('id');
-    expect(input.getAttribute('aria-haspopup')).to.equal('listbox');
     expect(input.getAttribute('aria-expanded')).to.equal('false');
-    expect(input.getAttribute('aria-owns')).to.equal('id');
   });
 
   it('requires the filer value to be one of the expected types', () => {

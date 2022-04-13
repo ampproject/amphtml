@@ -220,12 +220,9 @@ export function BentoAutocomplete({
         inputElement.setAttribute('dir', 'auto');
         inputElement.setAttribute('aria-autocomplete', 'both');
         inputElement.setAttribute('aria-controls', containerId.current!);
-        inputElement.setAttribute('aria-haspopup', 'listbox');
-        inputElement.setAttribute('aria-owns', containerId.current!);
         inputElement.setAttribute('aria-expanded', 'false');
         if (inputElement.tagName === 'INPUT') {
           inputElement.setAttribute('role', 'combobox');
-          inputElement.setAttribute('aria-multiline', 'false');
         } else {
           inputElement.setAttribute('role', 'textbox');
         }
