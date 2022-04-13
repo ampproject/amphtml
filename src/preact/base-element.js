@@ -532,7 +532,6 @@ export class PreactBaseElement extends BaseElement {
   /**
    * A callback called to compute props before rendering is run. The properties
    * computed here and ephemeral and thus should not be persisted via a
-          hideResults();
    * `mutateProps()` method.
    * @param {JsonObject} unusedProps
    * @protected
