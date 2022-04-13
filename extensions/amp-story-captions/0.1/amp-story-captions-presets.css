@@ -1,5 +1,4 @@
-
-/* default preset */
+/* default */
 
 .amp-story-captions-default .amp-story-captions-cue-wrapper {
   font-size: calc(2.5 * var(--story-page-vh, 8px)) !important;
@@ -25,28 +24,20 @@
   color: #fff !important;
 }
 
-/* fade in preset */
+/* fade in */
 
 .amp-story-captions-appear .amp-story-captions-cue-wrapper  {
   font-size: var(--amp-story-captions-font-size, calc(2.5 * var(--story-page-vh, 8px))) !important;
   font-family: var(--amp-story-captions-font-family, 'Roboto', sans-serif) !important; 
-  margin: 1em 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  width: 100% !important;
 }
 
 .amp-story-captions-appear .amp-story-captions-cue {
   color: #fff !important;
-  border-radius: .94em !important;
-  padding: .35em .94em !important;
-  max-width: calc(var(--story-page-vw) * 92) !important;
-  text-shadow: .06em .06em black;
+  text-shadow: .06em .06em black !important;
 }
 
 .amp-story-captions-appear .amp-story-captions-cue span {
-  transition: opacity .3s !important;
+  transition: opacity .3s cubic-bezier(0.3, 0, 0, 1) !important;
   opacity: 1 !important;
 }
 
