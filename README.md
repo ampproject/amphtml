@@ -1,41 +1,23 @@
-# AMP ⚡
+# Storyteller AMP ⚡
 
-⚡⚡⚡
+## Running The Project
 
-[![Build Status](https://img.shields.io/circleci/build/github/ampproject/amphtml/main 'Build Status')](https://app.circleci.com/pipelines/github/ampproject/amphtml?branch=main)
-[![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square 'GitHub Release')](https://github.com/ampproject/amphtml/releases/latest)
-[![Commits](https://img.shields.io/github/commit-activity/m/ampproject/amphtml.svg?logo=GitHub&style=flat-square 'Commits')](https://github.com/ampproject/amphtml/pulse/monthly)
-[![Badges](https://img.shields.io/badge/badges-16-brightgreen?logo=GitHub&style=flat-square)](#)
+- Clone the repo and `cd` to the root directory
+- Run `amp` to start run the project
+- Open `http://localhost:8000` in a browser to view the site with examples for each component. These can be used for testing any changes you make to AMP components
 
-<details>
-<summary>
-Metrics
-  
-</summary>
+## Making Changes
 
-[![Absolute Code Coverage](https://img.shields.io/endpoint.svg?logo=Codecov&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FAbsoluteCoverageMetric 'Test coverage for the repository as computed by CodeCov')](https://codecov.io/gh/ampproject/amphtml/)
-[![Cherrypick Issue Count](https://img.shields.io/endpoint.svg?logo=GitHub&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FCherrypickIssueCountMetric 'Number of cherry-pick issues in the last 90 days')](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aissue+title%3A+%22Cherry-pick%22)
-[![Release Granularity](https://img.shields.io/endpoint.svg?logo=GitHub&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FReleaseGranularityMetric 'Average commits per release over the last 90 days')](https://github.com/ampproject/amphtml/releases)
+- Most changes will be made to components in `src/extensions/amp-story` or in `src\amp-story-player\amp-story-player-impl.js`
+- Any changes you make can be tested using the component examples
+- Changes relating to stories/story player can be tested at usually `http://localhost:8000/examples/amp-story/player-local-stories.html`. This example uses stories located in the `examples/amp-story` folder. These stories can be edited iof different features need to be tested.
+- Changes should also be tested on the Web SDK demo site. This should be done by merging the changes to main and testing on the demo site
 
-</details>
+## CI/CD
 
-<details>
-<summary>
-Tooling
-
-</summary>
-
-[![Percy](https://img.shields.io/badge/%F0%9F%A6%94%20visual%20testing-Percy-violet.svg?style=flat-square 'Percy')](https://percy.io/ampproject/amphtml)
-[![Prettier](https://img.shields.io/badge/code_style-Prettier-ff69b4.svg?logo=Prettier&logoColor=white&style=flat-square 'Prettier')](https://github.com/prettier/prettier)
-[![Codecov](https://img.shields.io/badge/test_coverage-CodeCov-f01f7a.svg?logo=Codecov&logoColor=white&style=flat-square 'Codecov')](https://codecov.io/gh/ampproject/amphtml/)
-[![LGTM](https://img.shields.io/lgtm/alerts/github/ampproject/amphtml.svg?logo=lgtm&style=flat-square 'LGTM')](https://lgtm.com/projects/g/ampproject/amphtml/)
-[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg?logo=dependabot&style=flat-square 'Renovate')](https://renovateapp.com/)
-
-</details>
-
-[AMP](https://amp.dev) is a web component framework for easily creating user-first websites, stories, ads, emails and more.
-
-AMP is an open source project, and we'd love your help making it better!
+- Deploys to `main` will trigger the CI to build a new version
+- This build will then be automatically deployed to both dev and staging environments
+- Once the build has been tested on dev and staging, it can be manually deployed to prod
 
 ## Want to know more about AMP?
 
