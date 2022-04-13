@@ -212,6 +212,11 @@ const TAG = 'amp-story';
 const DEFAULT_THEME_COLOR = '#202125';
 
 /**
+ * @const {string[]}
+ */
+const SUPPORTED_LANGUAGES = AMP_STORY_SUPPORTED_LANGUAGES;
+
+/*
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
@@ -808,7 +813,10 @@ export class AmpStory extends AMP.BaseElement {
     new AmpStoryShare(this.win, this.element);
   }
 
-  /** @private */
+  /**
+   * @param {MutationRecord} mutations
+   * @private
+   */
   onBodyElMutation_(mutations) {
     mutations.forEach((mutation) => {
       const bodyEl = dev().assertElement(mutation.target);
@@ -1196,7 +1204,10 @@ export class AmpStory extends AMP.BaseElement {
     return layout == Layout_Enum.CONTAINER;
   }
 
-  /** @private */
+  /**
+   * @return {!Promise}
+   * @private
+   */
   initializePages_() {
     const pageImplPromises = Array.prototype.map.call(
       this.element.querySelectorAll('amp-story-page'),
@@ -2549,6 +2560,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Loads amp-story-dev-tools if it is enabled.
    * @private
+   * @return {boolean}
    */
   maybeLoadStoryDevTools_() {
     if (
@@ -2592,14 +2604,14 @@ export class AmpStory extends AMP.BaseElement {
    */
   installLocalizationStrings_() {
     const localizationService = getLocalizationService(this.element);
-    const storyLanguage = localizationService.getLanguageCodesForElement(
+    const storyLanguages = localizationService.getLanguageCodesForElement(
       this.element
-    )[0];
-    if (this.maybeRegisterInlineLocalizationStrings_(storyLanguage)) {
+    );
+    if (this.maybeRegisterInlineLocalizationStrings_(storyLanguages[0])) {
       return;
     }
     if (isExperimentOn(this.win, 'story-remote-localization')) {
-      this.fetchLocalizationStrings_(storyLanguage);
+      this.fetchLocalizationStrings_(storyLanguages);
       Services.performanceFor(this.win).addEnabledExperiment(
         'story-remote-localization'
       );
@@ -2665,11 +2677,30 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Fetches from the CDN or localhost the localization strings.
-   * @param {string} languageCode
+   * @param {string[]} candidateLanguageCodes
    * @private
    */
-  fetchLocalizationStrings_(languageCode) {
+  fetchLocalizationStrings_(candidateLanguageCodes) {
     const localizationService = getLocalizationService(this.element);
+    // We set it to 'en' since this is the default.
+    let languageCode = 'en';
+
+    // IETF BCP 47 language tag and ISO-639 are not case sensitive but
+    // the request to the Google AMP Cache is so we make sure to maintain
+    // the correct language code casing when making the request.
+    for (const x = 0; x < candidateLanguageCodes.length; x++) {
+      const curCandidateLanguageCode = candidateLanguageCodes[x];
+      for (const y = 0; y < SUPPORTED_LANGUAGES.length; y++) {
+        const curSupportedLanguage = SUPPORTED_LANGUAGES[y];
+        if (
+          curSupportedLanguage.toLowerCase() ===
+          curCandidateLanguageCode.toLowerCase()
+        ) {
+          languageCode = curCandidateLanguageCode;
+          break;
+        }
+      }
+    }
 
     const localizationUrl = calculateExtensionFileUrl(
       this.win,
@@ -2678,7 +2709,6 @@ export class AmpStory extends AMP.BaseElement {
       getMode(this.win).localDev
     );
 
-    // The cache fallbacks to english if language not found, locally it errors.
     Services.xhrFor(this.win)
       .fetchJson(localizationUrl, {prerenderSafe: true})
       .then((res) => res.json())
