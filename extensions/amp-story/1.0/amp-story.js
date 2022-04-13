@@ -88,7 +88,10 @@ import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {InfoDialog} from './amp-story-info-dialog';
-import {getLocalizationService} from './amp-story-localization-service';
+import {
+  getLocalizationService,
+  getSupportedLanguageCode,
+} from './amp-story-localization-service';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryShare} from './amp-story-share';
 import {
@@ -212,6 +215,8 @@ const TAG = 'amp-story';
 const DEFAULT_THEME_COLOR = '#202125';
 
 /**
+ * AMP_STORY_SUPPORTED_LANGUAGES is replaced by a babel plugin with a list
+ * of supported languages amp-story supports for localization string.
  * @const {string[]}
  */
 const SUPPORTED_LANGUAGES = AMP_STORY_SUPPORTED_LANGUAGES;
@@ -2682,25 +2687,10 @@ export class AmpStory extends AMP.BaseElement {
    */
   fetchLocalizationStrings_(candidateLanguageCodes) {
     const localizationService = getLocalizationService(this.element);
-    // We set it to 'en' since this is the default.
-    let languageCode = 'en';
-
-    // IETF BCP 47 language tag and ISO-639 are not case sensitive but
-    // the request to the Google AMP Cache is so we make sure to maintain
-    // the correct language code casing when making the request.
-    for (const x = 0; x < candidateLanguageCodes.length; x++) {
-      const curCandidateLanguageCode = candidateLanguageCodes[x];
-      for (const y = 0; y < SUPPORTED_LANGUAGES.length; y++) {
-        const curSupportedLanguage = SUPPORTED_LANGUAGES[y];
-        if (
-          curSupportedLanguage.toLowerCase() ===
-          curCandidateLanguageCode.toLowerCase()
-        ) {
-          languageCode = curCandidateLanguageCode;
-          break;
-        }
-      }
-    }
+    const languageCode = getSupportedLanguageCode(
+      candidateLanguageCodes,
+      SUPPORTED_LANGUAGES
+    );
 
     const localizationUrl = calculateExtensionFileUrl(
       this.win,

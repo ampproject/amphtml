@@ -60,3 +60,33 @@ export function localizeTemplate(template, context) {
   });
   return Promise.all(promises);
 }
+
+/**
+ * Cross references the candidateLanguageCodes with the supportedLanguageCodes
+ * to ensure that the candidate language is supported.
+ * @param {string[]} candidateLanguageCodes
+ * @param {string[]} supportedLanguageCodes
+ * @return {string}
+ * @private
+ */
+export function getSupportedLanguageCode(
+  candidateLanguageCodes,
+  supportedLanguageCodes
+) {
+  // IETF BCP 47 language tag and ISO-639 are not case sensitive but
+  // the request to the Google AMP Cache is, so we make sure to maintain
+  // the correct language code casing when making the request.
+  for (let x = 0; x < candidateLanguageCodes.length; x++) {
+    const curCandidateLanguageCode = candidateLanguageCodes[x];
+    for (let y = 0; y < supportedLanguageCodes.length; y++) {
+      const curSupportedLanguage = supportedLanguageCodes[y];
+      if (
+        curSupportedLanguage.toLowerCase() ===
+        curCandidateLanguageCode.toLowerCase()
+      ) {
+        return curCandidateLanguageCode;
+      }
+    }
+  }
+  return 'en';
+}

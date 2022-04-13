@@ -6,6 +6,14 @@ const AMP_STORY_SUPPORTED_LANGUAGES = fastGlob.sync(LOCALES_DIR).map((x) => {
 });
 
 /**
+ * @fileoverview
+ * We need to ensure that the language files we request from the Google AMP
+ * cache is supported on the client before making the request. To do this
+ * we embed the supported list of language codes through this symbol
+ * replacement which can be used anywhere in the codebase.
+ */
+
+/**
  * @interface {babel.PluginPass}
  * @param {babel} babel
  * @return {babel.PluginObj}
