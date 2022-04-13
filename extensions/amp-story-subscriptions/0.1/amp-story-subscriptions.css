@@ -157,4 +157,5 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
 
 .i-amphtml-story-subscriptions-signin a {
   font-weight: bold !important;
+  cursor: pointer !important;
 }
