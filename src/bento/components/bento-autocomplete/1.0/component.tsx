@@ -385,9 +385,6 @@ export function BentoAutocomplete({
           hideResults();
           break;
         }
-        // TODO: In the original amp-autocomplete, there are some
-        // differences between ENTER and TAB. However, I'm not sure
-        // at this time what the behavior should be.
         case Keys_Enum.TAB: {
           if (areResultsDisplayed && hasActiveItem) {
             event.preventDefault();
