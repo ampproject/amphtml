@@ -162,6 +162,8 @@ export function BentoAutocomplete({
   const selectItem = useCallback(
     (value: string, valueAsObject?: object | null) => {
       setInputValue(value);
+      // Set the substring value to the user input value so
+      // it can no longer be reset on ESCAPE.
       setSubstring(value);
       const selectData: OnSelectData = {
         value,
@@ -183,8 +185,7 @@ export function BentoAutocomplete({
   const getSingleInputOrTextarea = useCallback(
     (element: HTMLElement) => {
       const inputSelector = 'input,textarea';
-      // TODO: Figure out how to type this
-      let possibleElements: any = scopedQuerySelectorAll(
+      let possibleElements: NodeList | HTMLElement[] = scopedQuerySelectorAll(
         element,
         inputSelector
       );
@@ -198,7 +199,7 @@ export function BentoAutocomplete({
         onError(`should contain exactly one <input> or <textarea> descendant.`);
         return;
       }
-      return possibleElements[0];
+      return possibleElements[0] as HTMLElement;
     },
     [onError]
   );
