@@ -84,8 +84,27 @@
       </amp-story-grid-layer>
       <amp-story-grid-layer template="vertical" class="bottom">
         <div class="scrim">
+          <div class="static-text">default preset example.</div>
           <div class="static-text">This element is always above captions and never overlaps.</div>
           <amp-story-captions data-preset="default" id="captions-preset-default" layout="container"></amp-story-captions>
+          <div class="static-text">This element is always below captions and never overlaps.</div>
+        </div>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="page-captions-preset-fade-in" auto-advance-after="video-container">
+      <amp-story-grid-layer template="fill">
+        <amp-video id="video-container"
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay captions-id="captions-preset-fade-in">
+          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
+        </amp-video>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical" class="bottom">
+        <div class="scrim">
+          <div class="static-text">fade-in preset example.</div>
+          <div class="static-text">This element is always above captions and never overlaps.</div>
+          <amp-story-captions data-preset="fade-in" id="captions-preset-fade-in" layout="container"></amp-story-captions>
           <div class="static-text">This element is always below captions and never overlaps.</div>
         </div>
       </amp-story-grid-layer>

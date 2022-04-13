@@ -10,6 +10,12 @@ import {CSS} from '../../../build/amp-story-captions-0.1.css';
 import {CSS as PRESETS_CSS} from '../../../build/amp-story-captions-presets-0.1.css';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
+/**
+ * List of valid preset values.
+ * @const {Array<string>}
+ */
+const presetValues = ['default', 'fade-in'];
+
 export class AmpStoryCaptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -32,8 +38,8 @@ export class AmpStoryCaptions extends AMP.BaseElement {
   buildCallback() {
     this.container_ = <div />;
     const preset = this.element.getAttribute('data-preset');
-    if (preset === 'default') {
-      this.container_.classList.add(`amp-story-captions-default`);
+    if (presetValues.includes(preset)) {
+      this.container_.classList.add(`amp-story-captions-${preset}`);
       createShadowRootWithStyle(this.element, this.container_, PRESETS_CSS);
     } else {
       this.element.appendChild(this.container_);
