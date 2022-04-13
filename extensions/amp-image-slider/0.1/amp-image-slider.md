@@ -176,5 +176,5 @@ given percentage from left.
 
 ## Validation
 
-See [`amp-image-slider` rules](validator-amp-image-slider.protoascii)
+See [`amp-image-slider` rules](../validator-amp-image-slider.protoascii)
 in the AMP validator specification.
