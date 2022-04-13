@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from '#preact';
+import {useCallback, useEffect} from '#preact';
 import {useValueRef} from '#preact/component';
 
 import {useStateSafe} from './useStateSafe';
