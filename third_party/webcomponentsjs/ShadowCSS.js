@@ -127,7 +127,6 @@ const allowArraySelectors = false;
 const isIeSupported = false;
 
 // change a selector like 'div' to 'name div'
-/** @this {ShadowCSS} */
 export function scopeRules(cssRules, scopeSelector, opt_transformer) {
   var cssText = '';
   if (cssRules) {
@@ -164,7 +163,7 @@ export function scopeRules(cssRules, scopeSelector, opt_transformer) {
   }
   return cssText;
 }
-/** @this {ShadowCSS} */
+
 export function ieSafeCssTextFromKeyFrameRule(rule) {
   var cssText = '@keyframes ' + rule.name + ' {';
   Array.prototype.forEach.call(rule.cssRules, function(rule) {
@@ -173,7 +172,7 @@ export function ieSafeCssTextFromKeyFrameRule(rule) {
   cssText += ' }';
   return cssText;
 }
-/** @this {ShadowCSS} */
+
 export function doScopeSelector(selector, scopeSelector, opt_transformer) {
   var r = [], parts = selector.split(',');
   parts.forEach(function(p) {
@@ -190,7 +189,7 @@ export function doScopeSelector(selector, scopeSelector, opt_transformer) {
   });
   return r.join(', ');
 }
-/** @this {ShadowCSS} */
+
 export function selectorNeedsScoping(selector, scopeSelector) {
   if (allowArraySelectors && Array.isArray(scopeSelector)) {
     return true;
@@ -198,19 +197,19 @@ export function selectorNeedsScoping(selector, scopeSelector) {
   var re = makeScopeMatcher(scopeSelector);
   return !selector.match(re);
 }
-/** @this {ShadowCSS} */
+
 export function makeScopeMatcher(scopeSelector) {
   scopeSelector = scopeSelector.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
   return new RegExp('^(' + scopeSelector + ')' + selectorReSuffix, 'm');
 }
-/** @this {ShadowCSS} */
+
 export function applySelectorScope(selector, selectorScope) {
   return allowArraySelectors && Array.isArray(selectorScope) ?
       applySelectorScopeList(selector, selectorScope) :
       applySimpleSelectorScope(selector, selectorScope);
 }
+
 // apply an array of selectors
-/** @this {ShadowCSS} */
 export function applySelectorScopeList(selector, scopeSelectorList) {
   var r = [];
   for (var i=0, s; (s=scopeSelectorList[i]); i++) {
@@ -218,8 +217,8 @@ export function applySelectorScopeList(selector, scopeSelectorList) {
   }
   return r.join(', ');
 }
+
 // scope via name and [is=name]
-/** @this {ShadowCSS} */
 export function applySimpleSelectorScope(selector, scopeSelector) {
   if (selector.match(polyfillHostRe)) {
     selector = selector.replace(polyfillHostNoCombinator, scopeSelector);
@@ -228,9 +227,9 @@ export function applySimpleSelectorScope(selector, scopeSelector) {
     return scopeSelector + ' ' + selector;
   }
 }
+
 // return a selector with [name] suffix on each simple selector
 // e.g. .foo.bar > .zot becomes .foo[name].bar[name] > .zot[name]
-/** @this {ShadowCSS} */
 export function applyStrictSelectorScope(selector, scopeSelector) {
   scopeSelector = scopeSelector.replace(/\[is=([^\]]*)\]/g, '$1');
   var splits = [' ', '>', '+', '~'],
@@ -249,7 +248,7 @@ export function applyStrictSelectorScope(selector, scopeSelector) {
   });
   return scoped;
 }
-/** @this {ShadowCSS} */
+
 export function propertiesFromRule(rule) {
   var cssText = rule.style.cssText;
   // TODO(sorvell): Safari cssom incorrectly removes quotes from the content
