@@ -11,6 +11,7 @@
   <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
   <script async custom-element="amp-story-captions" src="https://cdn.ampproject.org/v0/amp-story-captions-0.1.js"></script>
   <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap" rel="stylesheet">
   <style amp-custom>
     .bottom {
       align-content: end;
@@ -108,7 +109,7 @@
         <div class="scrim">
           <div class="static-text">appear preset example.</div>
           <div class="static-text">This element is always above captions and never overlaps.</div>
-          <amp-story-captions data-preset="appear" id="captions-preset-appear" layout="container"></amp-story-captions>
+          <amp-story-captions data-preset="appear" style="--amp-story-captions-font-size: .8em; --amp-story-captions-font-family: 'Shadows Into Light'" id="captions-preset-appear" layout="container"></amp-story-captions>
           <div class="static-text">This element is always below captions and never overlaps.</div>
         </div>
       </amp-story-grid-layer>
