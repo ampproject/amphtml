@@ -12,12 +12,6 @@ import {areOptionsVisible} from './test-helpers';
 
 import {BentoAutocomplete} from '../component';
 
-// TODO
-// something with backspace (1357)
-
-// Maybe TODO
-// it sets the item id to be autocomplete-selected
-
 const defaultProps = {
   items: [],
 };
