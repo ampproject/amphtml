@@ -2680,10 +2680,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   fetchLocalizationStrings_(candidateLanguageCodes) {
     const localizationService = getLocalizationService(this.element);
-    const languageCode = getSupportedLanguageCode(
-      candidateLanguageCodes,
-      SUPPORTED_LANGUAGES
-    );
+    const languageCode = getSupportedLanguageCode(candidateLanguageCodes);
 
     const localizationUrl = calculateExtensionFileUrl(
       this.win,

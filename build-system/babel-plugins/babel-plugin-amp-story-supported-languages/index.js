@@ -27,9 +27,7 @@ module.exports = function ({types: t}) {
           return;
         }
 
-        path.replaceWith(
-          t.valueToNode(AMP_STORY_SUPPORTED_LANGUAGES)
-        );
+        path.replaceWith(t.valueToNode(AMP_STORY_SUPPORTED_LANGUAGES));
       },
     },
   };

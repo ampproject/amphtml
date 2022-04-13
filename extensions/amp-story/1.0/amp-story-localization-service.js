@@ -80,14 +80,12 @@ export function getSupportedLanguageCode(candidateLanguageCodes) {
   // the request to the Google AMP Cache is, so we make sure to maintain
   // the correct language code casing when making the request.
   for (let x = 0; x < candidateLanguageCodes.length; x++) {
-    const curCandidateLanguageCode = candidateLanguageCodes[x];
+    const curCandidateLanguageCode = candidateLanguageCodes[x].toLowerCase();
     for (let y = 0; y < SUPPORTED_LANGUAGES.length; y++) {
-      const curSupportedLanguage = SUPPORTED_LANGUAGES[y];
-      if (
-        curSupportedLanguage.toLowerCase() ===
-        curCandidateLanguageCode.toLowerCase()
-      ) {
-        return curCandidateLanguageCode;
+      const curSupportedLanguage = SUPPORTED_LANGUAGES[y].toLowerCase();
+      if (curSupportedLanguage === curCandidateLanguageCode) {
+        // We return the original un-lowercased value.
+        return SUPPORTED_LANGUAGES[y];
       }
     }
   }
