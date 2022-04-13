@@ -30,16 +30,11 @@ export class AmpStoryCaptions extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.container_ = this.element.ownerDocument.createElement('div');
+    this.container_ = <div />;
     const preset = this.element.getAttribute('data-preset');
     if (preset === 'default') {
-      const root = createShadowRootWithStyle(
-        <div />,
-        this.container_,
-        PRESETS_CSS
-      );
       this.container_.classList.add(`amp-story-captions-default`);
-      this.element.appendChild(root);
+      createShadowRootWithStyle(this.element, this.container_, PRESETS_CSS);
     } else {
       this.element.appendChild(this.container_);
     }
