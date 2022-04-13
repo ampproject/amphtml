@@ -8,8 +8,6 @@ import {xhrUtils} from '#preact/utils/xhr';
 
 import {waitFor} from '#testing/helpers/service';
 
-import {areOptionsVisible} from './test-helpers';
-
 import {BentoAutocomplete} from '../component';
 
 const defaultProps = {
@@ -19,6 +17,10 @@ const defaultProps = {
 function Autocomplete(initialProps) {
   const props = {...defaultProps, ...initialProps};
   return <BentoAutocomplete {...props} />;
+}
+
+function areOptionsVisible(wrapper) {
+  return !wrapper.find('[role="listbox"]').prop('hidden');
 }
 
 describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
