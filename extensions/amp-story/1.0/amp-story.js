@@ -9,7 +9,6 @@
  * </code>
  */
 
-import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
 
@@ -83,7 +82,6 @@ import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lg
 import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
@@ -200,7 +198,7 @@ export const PAYWALL_PAGE_INDEX = 2;
  * The number of milliseconds to wait before showing the paywall on paywall page.
  * @const {number}
  */
-export const PAYWALL_DELAY_DURATION = 500;
+export const PAYWALL_DELAY_DURATION = 2000;
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -960,6 +958,7 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => {
         // Enable paywall if required element found in DOM.
         if (
+          isExperimentOn(this.win, 'amp-story-subscriptions') &&
           this.element.querySelector('amp-story-subscriptions') !== null &&
           this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
             SubscriptionsState.DISABLED
@@ -2692,7 +2691,6 @@ export class AmpStory extends AMP.BaseElement {
 AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story', AmpStory, CSS);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
-  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
 });
