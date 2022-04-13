@@ -214,13 +214,6 @@ const TAG = 'amp-story';
  */
 const DEFAULT_THEME_COLOR = '#202125';
 
-/**
- * AMP_STORY_SUPPORTED_LANGUAGES is replaced by a babel plugin with a list
- * of supported languages amp-story supports for localization string.
- * @const {string[]}
- */
-const SUPPORTED_LANGUAGES = AMP_STORY_SUPPORTED_LANGUAGES;
-
 /*
  * @implements {./media-pool.MediaPoolRoot}
  */
