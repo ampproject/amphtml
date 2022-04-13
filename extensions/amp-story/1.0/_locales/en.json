@@ -234,5 +234,9 @@
   "105": {
     "string": "Details",
     "description": "Button label prompting users to read about details of a product."
+  },
+  "106": {
+    "string": "Read more",
+    "description": "Label for a button to open a drawer containing additional content."
   }
 }

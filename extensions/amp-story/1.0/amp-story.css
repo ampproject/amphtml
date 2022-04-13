@@ -149,6 +149,9 @@ amp-story[standalone] {
   max-width: initial !important;
   min-height: initial !important;
   min-width: initial !important;
+
+  /* Unblocks rendering when this CSS file is installed. Info on #37990. */
+  visibility: visible !important;
 }
 
 amp-story[standalone].amp-notbuilt {

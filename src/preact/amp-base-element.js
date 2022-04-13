@@ -108,9 +108,12 @@ export class AmpPreactBaseElement extends PreactBaseElement {
   registerApiAction(alias, handler, minTrust = ActionTrust_Enum.DEFAULT) {
     this.registerAction?.(
       alias,
-      /** @param {*} invocation */
+      /**
+       * @param {*} invocation
+       * @return {*}
+       */
       (invocation) => {
-        handler(this.api(), invocation);
+        return handler(this.api(), invocation);
       },
       minTrust
     );

@@ -68,7 +68,7 @@ export const renderOutlinkLinkIconElement = () => (
  * Determines which open attachment UI to render.
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
- * @return {!Element}
+ * @return {!Promise<Element>}
  */
 export const renderPageAttachmentUI = (pageEl, attachmentEl) => {
   // Outlinks can be an amp-story-page-outlink or the legacy version,
@@ -93,17 +93,16 @@ const ctaLabelFromAttr = (element) =>
 
 /**
  * @param {!Element} element
- * @param {!Element} attachmentEl
  * @param {?string} label
- * @return {?string}
+ * @return {!Promise<string>}
  */
-const openLabelOrFallback = (element, attachmentEl, label) => {
+const openLabelOrFallback = (element, label) => {
+  if (label) {
+    return Promise.resolve(label.trim());
+  }
   const localizationService = Services.localizationForDoc(element);
-  return (
-    label?.trim() ||
-    localizationService.getLocalizedString(
-      LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
-    )
+  return localizationService.getLocalizedStringAsync(
+    LocalizedStringId_Enum.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
   );
 };
 
@@ -111,7 +110,7 @@ const openLabelOrFallback = (element, attachmentEl, label) => {
  * Renders inline page attachment UI.
  * @param {!Element} pageEl
  * @param {!Element} attachmentEl
- * @return {!Element}
+ * @return {!Promise<Element>}
  */
 const renderOutlinkUI = (pageEl, attachmentEl) => {
   // amp-story-page-outlink requires an anchor element child for SEO and analytics optimisations.
@@ -126,51 +125,49 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
 
   const theme = attachmentEl.getAttribute('theme')?.toLowerCase();
 
-  const openLabel = openLabelOrFallback(
-    pageEl,
-    attachmentEl,
-    anchorChild?.textContent || ctaLabelFromAttr(attachmentEl)
-  );
-
   // Set image.
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
-  const openAttachmentEl = (
-    <a
-      class="i-amphtml-story-page-open-attachment"
-      role="button"
-      target="_top"
-      title={attachmentTitle}
-      theme={theme}
-      aria-label={openLabel}
-    >
-      {renderOutlinkAttachmentArrow()}
-      <div class="i-amphtml-story-outlink-page-attachment-outlink-chip">
-        {openImgAttr && openImgAttr !== 'none' ? (
-          <div
-            class="i-amphtml-story-outlink-page-attachment-img"
-            style={{backgroundImage: `url(${openImgAttr}) !important`}}
-          ></div>
-        ) : (
-          renderOutlinkLinkIconElement()
-        )}
-        <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
-      </div>
-    </a>
-  );
+  return openLabelOrFallback(
+    pageEl,
+    anchorChild?.textContent || ctaLabelFromAttr(attachmentEl)
+  ).then((openLabel) => {
+    const openAttachmentEl = (
+      <a
+        class="i-amphtml-story-page-open-attachment i-amphtml-story-page-open-attachment-outlink"
+        role="button"
+        target="_top"
+        title={attachmentTitle}
+        theme={theme}
+        aria-label={openLabel}
+      >
+        {renderOutlinkAttachmentArrow()}
+        <div class="i-amphtml-story-outlink-page-attachment-outlink-chip">
+          {openImgAttr && openImgAttr !== 'none' ? (
+            <div
+              class="i-amphtml-story-outlink-page-attachment-img"
+              style={{backgroundImage: `url(${openImgAttr}) !important`}}
+            ></div>
+          ) : (
+            renderOutlinkLinkIconElement()
+          )}
+          <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
+        </div>
+      </a>
+    );
 
-  if (theme === AttachmentTheme.CUSTOM) {
-    setCustomThemeStyles(attachmentEl, openAttachmentEl);
-  }
+    if (theme === AttachmentTheme.CUSTOM) {
+      setCustomThemeStyles(attachmentEl, openAttachmentEl);
+    }
 
-  // Copy href to the element so it can be previewed on hover and long press.
-  const attachmentHref =
-    anchorChild?.getAttribute('href') || attachmentEl.getAttribute('href');
-  if (attachmentHref) {
-    openAttachmentEl.setAttribute('href', attachmentHref);
-  }
-
-  return openAttachmentEl;
+    // Copy href to the element so it can be previewed on hover and long press.
+    const attachmentHref =
+      anchorChild?.getAttribute('href') || attachmentEl.getAttribute('href');
+    if (attachmentHref) {
+      openAttachmentEl.setAttribute('href', attachmentHref);
+    }
+    return openAttachmentEl;
+  });
 };
 
 /**
@@ -195,28 +192,25 @@ const renderInlineUi = (pageEl, attachmentEl) => {
   };
 
   const theme = attachmentEl.getAttribute('theme')?.toLowerCase();
-  const openLabel = openLabelOrFallback(
-    pageEl,
-    attachmentEl,
-    ctaLabelFromAttr(attachmentEl)
-  );
 
-  return (
-    <a
-      class="i-amphtml-story-page-open-attachment i-amphtml-story-system-reset"
-      role="button"
-      theme={AttachmentTheme.DARK === theme && theme}
-      aria-label={openLabel}
-    >
-      <div class="i-amphtml-story-inline-page-attachment-chip">
-        {makeImgElWithBG('cta-image')}
-        {makeImgElWithBG('cta-image-2')}
-        <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
-      </div>
-      {openLabel !== 'none' && (
-        <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
-      )}
-    </a>
+  return openLabelOrFallback(pageEl, ctaLabelFromAttr(attachmentEl)).then(
+    (openLabel) => (
+      <a
+        class="i-amphtml-story-page-open-attachment i-amphtml-story-page-open-attachment-inline"
+        role="button"
+        theme={AttachmentTheme.DARK === theme && theme}
+        aria-label={openLabel}
+      >
+        <div class="i-amphtml-story-inline-page-attachment-chip">
+          {makeImgElWithBG('cta-image')}
+          {makeImgElWithBG('cta-image-2')}
+          <div class="i-amphtml-story-inline-page-attachment-arrow"></div>
+        </div>
+        {openLabel !== 'none' && (
+          <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
+        )}
+      </a>
+    )
   );
 };
 

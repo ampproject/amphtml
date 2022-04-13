@@ -34,7 +34,7 @@ export class Sources {
    * @private
    */
   applyTracksToElement_(element) {
-    Array.prototype.forEach.call(this.trackEls_, (trackEl) => {
+    this.trackEls_.forEach((trackEl) => {
       const track = document.createElement('track');
       track.id = trackEl.id;
       track.kind = trackEl.kind;
@@ -65,9 +65,7 @@ export class Sources {
       element.setAttribute('src', this.srcAttr_);
     }
 
-    Array.prototype.forEach.call(this.srcEls_, (srcEl) =>
-      element.appendChild(srcEl)
-    );
+    this.srcEls_.forEach((srcEl) => element.appendChild(srcEl));
     if (element.changedSources) {
       element.changedSources();
     }

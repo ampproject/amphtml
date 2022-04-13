@@ -1,19 +1,20 @@
 import {withAmp} from '@ampproject/storybook-addon';
-import {text, withKnobs} from '@storybook/addon-knobs';
 
 import * as Preact from '#preact';
 
 export default {
   title: 'amp-youtube-0_1',
-  decorators: [withKnobs, withAmp],
+  decorators: [withAmp],
 
   parameters: {
     extensions: [{name: 'amp-youtube', version: 0.1}],
   },
+  args: {
+    videoId: 'mGENRKrdoGY',
+  },
 };
 
-export const Default = () => {
-  const videoId = text('Video ID', 'mGENRKrdoGY');
+export const Default = ({videoId}) => {
   return (
     <amp-youtube
       data-videoid={videoId}
@@ -26,8 +27,7 @@ export const Default = () => {
 
 Default.storyName = 'default';
 
-export const Responsive = () => {
-  const videoId = text('Video ID', 'mGENRKrdoGY');
+export const Responsive = ({videoId}) => {
   return (
     <amp-youtube
       data-videoid={videoId}
@@ -40,8 +40,7 @@ export const Responsive = () => {
 
 Responsive.storyName = 'responsive';
 
-export const Autoplay = () => {
-  const videoId = text('Video ID', 'mGENRKrdoGY');
+export const Autoplay = ({videoId}) => {
   return (
     <amp-youtube
       data-videoid={videoId}

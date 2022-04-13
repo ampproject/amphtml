@@ -18,7 +18,6 @@ import {buildUrl} from '#ads/google/a4a/shared/url-builder';
 
 import {getPageLayoutBoxBlocking} from '#core/dom/layout/page-layout-box';
 import {tryParseJson} from '#core/types/object/json';
-import {includes} from '#core/types/string';
 
 import {Services} from '#service';
 
@@ -33,9 +32,6 @@ const TAG = 'amp-ad-network-smartadserver-impl';
 
 /** @const {number} */
 const MAX_URL_LENGTH = 15360;
-
-/** @type {string} */
-const SAS_NO_AD_STR = '<html><head></head><body></body></html>';
 
 /**
  * @const {!./shared/url-builder.QueryParameterDef}
@@ -53,6 +49,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+    this.addListener();
   }
 
   /** @override */
@@ -100,7 +97,7 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
             ...urlParams,
             'gdpr_consent': consentString,
             'pgDomain': Services.documentInfoForDoc(this.element).canonicalUrl,
-            'tmstp': Date.now(),
+            'tmstp': this.sentinel,
           },
           MAX_URL_LENGTH,
           TRUNCATION_PARAM
@@ -114,23 +111,6 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
     return Services.platformFor(this.win).isIos()
       ? XORIGIN_MODE.IFRAME_GET
       : super.getNonAmpCreativeRenderingMethod(headerValue);
-  }
-
-  /** @override */
-  isValidElement() {
-    return this.isAmpAdElement();
-  }
-
-  /** @override */
-  sendXhrRequest(adUrl) {
-    return super.sendXhrRequest(adUrl).then((response) => {
-      return response.text().then((responseText) => {
-        if (includes(responseText, SAS_NO_AD_STR)) {
-          this./*OK*/ collapse();
-        }
-        return new Response(response);
-      });
-    });
   }
 
   /** @override */
@@ -178,6 +158,32 @@ export class AmpAdNetworkSmartadserverImpl extends AmpA4A {
         Services.viewportForDoc(this.getAmpDoc()).getScrollHeight(),
       BKG_STATE: () => (this.getAmpDoc().isVisible() ? 'visible' : 'hidden'),
     };
+  }
+
+  /** @override */
+  isValidElement() {
+    return this.isAmpAdElement();
+  }
+
+  /** @override */
+  isXhrAllowed() {
+    return false;
+  }
+
+  /**
+   * Adds message event listener and triggers collapsing
+   */
+  addListener() {
+    const messageListener = (event) => {
+      if (
+        event.data.sentinel === this.sentinel &&
+        event.data.type === 'collapse'
+      ) {
+        this.attemptCollapse().catch(() => {});
+        this.win.removeEventListener('message', messageListener);
+      }
+    };
+    this.win.addEventListener('message', messageListener);
   }
 
   /**
