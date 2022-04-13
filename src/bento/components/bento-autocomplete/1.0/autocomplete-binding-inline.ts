@@ -65,4 +65,12 @@ export class AutocompleteBindingInline implements AutocompleteBinding {
     }
     return this.match_[0].slice(this.trigger_.length);
   }
+
+  /**
+   * If results are not showing or there is no actively navigated-to suggestion item,
+   * the user should be able to 'Enter' to add a new line.
+   */
+  shouldPreventDefaultOnEnter(activeElement: boolean) {
+    return activeElement;
+  }
 }

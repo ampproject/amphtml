@@ -43,6 +43,7 @@ export interface BentoAutocompleteProps {
   inline?: string;
   itemTemplate?: ItemTemplateFn;
   prefetch?: boolean;
+  submitOnEnter?: boolean;
   suggestFirst?: boolean;
   src?: string;
   parseJson?: (response: any) => Item[];
@@ -60,4 +61,8 @@ export interface AutocompleteBinding {
   shouldAutocomplete(inputEl: InputElement): boolean;
   getUserInputForUpdate(inputEl: InputElement): string;
   shouldShowOnFocus: boolean;
+  shouldPreventDefaultOnEnter(
+    activeElement: boolean,
+    submitOnEnter: boolean
+  ): boolean;
 }

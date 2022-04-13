@@ -97,6 +97,7 @@ BaseElement['props'] = {
   'minChars': {attr: 'min-chars', type: 'number'},
   'prefetch': {attr: 'prefetch', type: 'boolean'},
   'src': {attr: 'src'},
+  'submitOnEnter': {attr: 'submit-on-enter', type: 'boolean'},
   'suggestFirst': {attr: 'suggest-first', type: 'boolean'},
   'query': {attr: 'query', type: 'string'},
 };

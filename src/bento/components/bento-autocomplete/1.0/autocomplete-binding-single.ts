@@ -12,4 +12,11 @@ export class AutocompleteBindingSingle implements AutocompleteBinding {
   getUserInputForUpdate(inputEl: InputElement): string {
     return inputEl.value || '';
   }
+
+  shouldPreventDefaultOnEnter(
+    unusedActiveElement: boolean,
+    submitOnEnter: boolean
+  ): boolean {
+    return !submitOnEnter;
+  }
 }

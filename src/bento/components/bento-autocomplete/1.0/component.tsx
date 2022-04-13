@@ -56,6 +56,7 @@ export function BentoAutocomplete({
   parseJson = getItems,
   prefetch = false,
   src,
+  submitOnEnter = false,
   suggestFirst = false,
   query,
 }: BentoAutocompleteProps) {
@@ -344,6 +345,8 @@ export function BentoAutocomplete({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      const hasActiveItem = activeIndex > INITIAL_ACTIVE_INDEX;
+
       switch (event.key) {
         case Keys_Enum.DOWN_ARROW: {
           event.preventDefault();
@@ -367,6 +370,12 @@ export function BentoAutocomplete({
           break;
         }
         case Keys_Enum.ENTER: {
+          const hasActiveItem = activeIndex > INITIAL_ACTIVE_INDEX;
+          if (
+            binding.shouldPreventDefaultOnEnter(hasActiveItem, submitOnEnter)
+          ) {
+            event.preventDefault();
+          }
           selectItem(inputRef.current!.value);
           break;
         }
@@ -379,7 +388,10 @@ export function BentoAutocomplete({
         // differences between ENTER and TAB. However, I'm not sure
         // at this time what the behavior should be.
         case Keys_Enum.TAB: {
-          selectItem(inputRef.current!.value);
+          if (areResultsDisplayed && hasActiveItem) {
+            event.preventDefault();
+            selectItem(inputRef.current!.value);
+          }
           break;
         }
       }
@@ -391,6 +403,9 @@ export function BentoAutocomplete({
       hideResults,
       resetActiveItem,
       selectItem,
+      binding,
+      submitOnEnter,
+      areResultsDisplayed,
     ]
   );
 
