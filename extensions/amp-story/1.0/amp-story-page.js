@@ -1344,9 +1344,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.waitForAmpVideosBuilt_().then(() =>
       Array.prototype.some.call(
         this.getAllAmpVideos_(),
-        (video) =>
-          !video.hasAttribute('noaudio') &&
-          parseFloat(video.getAttribute('volume')) !== 0
+        (ampVideo) =>
+          !ampVideo.hasAttribute('noaudio') &&
+          parseFloat(ampVideo.getAttribute('volume')) !== 0
       )
     );
   }
@@ -1358,8 +1358,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   hasVideoWithCaptions_() {
     return this.waitForAmpVideosBuilt_().then(() =>
-      Array.prototype.some.call(this.getAllAmpVideos_(), (video) =>
-        video.querySelector('track')
+      Array.prototype.some.call(this.getAllAmpVideos_(), (ampVideo) =>
+        ampVideo.querySelector('track')
       )
     );
   }

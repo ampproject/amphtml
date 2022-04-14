@@ -493,13 +493,14 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.PAGE_HAS_CAPTIONS_STATE,
-      (config) => this.onPageHasCaptionsState_(config),
+      (pageHasCaptionsState) =>
+        this.onPageHasCaptionsState_(pageHasCaptionsState),
       true /* callToInitialize */
     );
 
     this.storeService_.subscribe(
       StateProperty.CAPTIONS_STATE,
-      (config) => this.onCaptionsStateUpdate_(config),
+      (captionsState) => this.onCaptionsStateUpdate_(captionsState),
       true /* callToInitialize */
     );
 
@@ -604,11 +605,11 @@ export class SystemLayer {
 
   /**
    * Toggles the captions.
-   * @param {boolean} toggleCaptions
+   * @param {boolean} captions
    * @private
    */
-  onCaptionsClick_(toggleCaptions) {
-    this.storeService_.dispatch(Action.TOGGLE_CAPTIONS, toggleCaptions);
+  onCaptionsClick_(captions) {
+    this.storeService_.dispatch(Action.TOGGLE_CAPTIONS, captions);
   }
 
   /**
@@ -635,18 +636,18 @@ export class SystemLayer {
 
   /**
    * Toggles whether the active page has captions or not.
-   * @param {boolean} hasCaptions
+   * @param {boolean} pageHasCaptions
    */
-  onPageHasCaptionsState_(hasCaptions) {
-    toggleAttribute(this.systemLayerEl_, PAGE_HAS_CAPTIONS, hasCaptions);
+  onPageHasCaptionsState_(pageHasCaptions) {
+    toggleAttribute(this.systemLayerEl_, PAGE_HAS_CAPTIONS, pageHasCaptions);
   }
 
   /**
    * Toggles whether the captions are active or not.
-   * @param {boolean} captions
+   * @param {boolean} captionsState
    */
-  onCaptionsStateUpdate_(captions) {
-    toggleAttribute(this.systemLayerEl_, 'captions-on', captions);
+  onCaptionsStateUpdate_(captionsState) {
+    toggleAttribute(this.systemLayerEl_, 'captions-on', captionsState);
   }
 
   /**

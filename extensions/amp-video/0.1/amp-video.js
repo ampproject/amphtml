@@ -1041,12 +1041,12 @@ export class AmpVideo extends AMP.BaseElement {
 
   /**
    * Shows or hides the captions.
-   * @param {boolean} captionsOn
+   * @param {boolean} captionsState
    * @public
    */
-  toggleCaptions(captionsOn) {
+  toggleCaptions(captionsState) {
     toArray(this.video_.textTracks).forEach((track) => {
-      if (captionsOn) {
+      if (captionsState) {
         // If a custom captions renderer is configured (e.g. amp-story-captions),
         // enable captions but keep them hidden to avoid double rendering.
         track.mode = this.hasCaptionsRenderer_ ? 'hidden' : 'showing';
