@@ -20,6 +20,7 @@ import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handl
 import {ProgressBar} from './progress-bar';
 import {
   createShadowRootWithStyle,
+  getStoryAttributeLive,
   getStoryAttributeSrc,
   shouldShowStoryUrlInfo,
   triggerClickFromLightDom,
@@ -332,6 +333,7 @@ export class SystemLayer {
     }
 
     this.maybeBuildAttribution_();
+    this.maybeBuildLiveChip_();
 
     this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.root_;
@@ -362,6 +364,17 @@ export class SystemLayer {
       this.parentEl_.getAttribute('publisher');
 
     anchorEl.classList.add('i-amphtml-story-attribution-visible');
+  }
+
+  /** @private */
+  maybeBuildLiveChip_() {
+    const isLiveStory = getStoryAttributeLive(this.parentEl_, 'is-live');
+
+    if (isLiveStory) {
+      this.systemLayerEl_
+        .querySelector(`.${escapeCssSelectorIdent(LIVE_CLASS)}`)
+        .classList.add(`.${escapeCssSelectorIdent(LIVE_VISIBLE_CLASS)}`);
+    }
   }
 
   /**

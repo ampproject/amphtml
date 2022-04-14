@@ -277,6 +277,21 @@ export function getStoryAttributeSrc(element, attribute, warn = false) {
 }
 
 /**
+ * Retrieves an attribute src from the <amp-story> element.
+ * @param {!Element} element
+ * @param {string} attribute
+ * @return {?string}
+ */
+export function getStoryAttributeLive(element, attribute) {
+  const storyEl = dev().assertElement(
+    closestAncestorElementBySelector(element, 'AMP-STORY')
+  );
+  const attrSrc = storyEl && storyEl.getAttribute(attribute);
+
+  return attrSrc;
+}
+
+/**
  * The attribute name for text background color
  * @private @const {string}
  */
