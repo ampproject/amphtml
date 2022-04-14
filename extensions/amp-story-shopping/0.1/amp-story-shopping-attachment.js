@@ -99,7 +99,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
           <amp-story-page-attachment
             layout="nodisplay"
             theme={this.element.getAttribute('theme')}
-            cta-text={this.element.getAttribute('cta-text').trim() ?? ctaText}
+            cta-text={this.element.getAttribute('cta-text')?.trim() ?? ctaText}
           >
             {this.templateContainer_}
           </amp-story-page-attachment>
