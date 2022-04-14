@@ -30,7 +30,9 @@ export function installAutoLightboxExtension(ampdoc) {
   if (
     !isAmphtml(win.document) ||
     !ampdoc.isSingleDoc() ||
-    win.document.body.hasAttribute('data-amp-auto-lightbox-disable')
+    // Prevent loading auto lightbox when disabled using 'data-amp-auto-lightbox-disable' attribute (#37854)
+    // Check if HTML Tag has 'data-amp-auto-lightbox-disable' attribute
+    win.document.documentElement.hasAttribute('data-amp-auto-lightbox-disable')
   ) {
     return;
   }
