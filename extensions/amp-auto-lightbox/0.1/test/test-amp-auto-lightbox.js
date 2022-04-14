@@ -242,6 +242,10 @@ describes.realWin(
           wrapWith: () => html` <a id="my-anchor"></a> `,
         },
         {
+          rejects: 'explicitly opted-out subnodes',
+          mutate: (el) => el.setAttribute('data-amp-auto-lightbox-disable', ''),
+        },
+        {
           rejects: 'amp-subscriptions subnodes',
           mutate: (el) => el.setAttribute('subscriptions-action', ''),
         },
