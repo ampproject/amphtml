@@ -64,6 +64,9 @@ const DISABLED_BY_ATTR = [
   // Runtime-specific.
   '[placeholder]',
 
+  // Explicitly opted out.
+  '[data-amp-auto-lightbox-disable]',
+
   // Considered "actionable", i.e. that are bound to a default
   // onclick action(e.g. `button`) or where it cannot be determined whether
   // they're actionable or not (e.g. `amp-script`).
