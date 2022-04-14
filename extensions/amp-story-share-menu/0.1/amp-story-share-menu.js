@@ -24,7 +24,7 @@ import {getAmpdoc} from '../../../src/service-helpers';
 import {
   Action,
   StateProperty,
-  UIType,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {
   createShadowRootWithStyle,
@@ -158,12 +158,12 @@ export class AmpStoryShareMenu extends AMP.BaseElement {
 
   /**
    * Reacts to UI state updates and triggers the right UI.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     this.vsync_.mutate(() => {
-      uiState !== UIType.MOBILE
+      uiState !== UIType_Enum.MOBILE
         ? this.rootEl_.setAttribute('desktop', '')
         : this.rootEl_.removeAttribute('desktop');
     });

@@ -240,7 +240,7 @@
     "ping": "https://pp.lp4.io/u?i=!id&u=_client_id(_lp4_u)_&p=_canonical_url_&uActive=true&isPing=yes&c=amp&t=!type&s=!section&_t=amp&_r=_random_"
   },
   "lotame": {
-    "pageview": "https://bcp.crwdcntrl.net/amp?c=!account&pv=y"
+    "pageview": "https://bcp.crwdcntrl.net/amp?c=!account&pv=y&gdpr_consent=_consent_string_&gdpr=_if(_equals(_consent_metadata(gdprApplies)_%2Ctrue)_%2C1)__if(_equals(_consent_metadata(gdprApplies)_%2Cfalse)_%2C0)_"
   },
   "mapp_intelligence": {
     "trackURL": "https://!trackDomain/!trackId/wt",

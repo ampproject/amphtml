@@ -29,10 +29,10 @@ import {
   AmpStoryStoreService,
   StateProperty,
   SubscriptionsState,
-  UIType,
+  UIType_Enum,
 } from '../amp-story-store-service';
 import {EventType, dispatch} from '../events';
-import {MediaType} from '../media-pool';
+import {MediaType_Enum} from '../media-pool';
 import {AdvancementMode} from '../story-analytics';
 import * as utils from '../utils';
 
@@ -83,6 +83,14 @@ describes.realWin(
       story = await element.getImpl();
 
       return pageArray;
+    }
+
+    function createStoryAdPage(id) {
+      const page = win.document.createElement('amp-story-page');
+      page.id = id;
+      page.setAttribute('ad', '');
+      element.appendChild(page);
+      return page.getImpl();
     }
 
     /**
@@ -141,13 +149,6 @@ describes.realWin(
 
     afterEach(() => {
       element.remove();
-    });
-
-    it('should build with the expected number of pages', async () => {
-      const pagesCount = 2;
-      await createStoryWithPages(pagesCount, ['cover', 'page-1']);
-      await story.layoutCallback();
-      expect(story.getPageCount()).to.equal(pagesCount);
     });
 
     it('should activate the first page when built', async () => {
@@ -349,7 +350,7 @@ describes.realWin(
 
       await story.layoutCallback();
       expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
-        UIType.DESKTOP_ONE_PANEL
+        UIType_Enum.DESKTOP_ONE_PANEL
       );
     });
 
@@ -364,7 +365,7 @@ describes.realWin(
 
       await story.layoutCallback();
       expect(story.storeService_.get(StateProperty.UI_STATE)).to.equals(
-        UIType.DESKTOP_FULLBLEED
+        UIType_Enum.DESKTOP_FULLBLEED
       );
     });
 
@@ -978,8 +979,8 @@ describes.realWin(
 
           await story.layoutCallback();
           const expected = {
-            [MediaType.AUDIO]: 2,
-            [MediaType.VIDEO]: 2,
+            [MediaType_Enum.AUDIO]: 2,
+            [MediaType_Enum.VIDEO]: 2,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
         });
@@ -998,8 +999,8 @@ describes.realWin(
           story.element.appendChild(ampAudoEl);
 
           const expected = {
-            [MediaType.AUDIO]: 3,
-            [MediaType.VIDEO]: 3,
+            [MediaType_Enum.AUDIO]: 3,
+            [MediaType_Enum.VIDEO]: 3,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
         });
@@ -1021,8 +1022,8 @@ describes.realWin(
           }
 
           const expected = {
-            [MediaType.AUDIO]: 4,
-            [MediaType.VIDEO]: 8,
+            [MediaType_Enum.AUDIO]: 4,
+            [MediaType_Enum.VIDEO]: 8,
           };
           expect(story.getMaxMediaElementCounts()).to.deep.equal(expected);
         });
@@ -1059,6 +1060,35 @@ describes.realWin(
           iframe.contentDocument.body.appendChild(elToFind);
           const distance = story.getElementDistance(elToFind);
           expect(distance).to.equal(4);
+        });
+      });
+
+      describe('amp-story ads', () => {
+        it('should return a valid page index', async () => {
+          const adId = 'i-amphtml-ad-page-1';
+          const pageElements = await createStoryWithPages(4, [
+            'cover',
+            'page-1',
+            'page-2',
+            'page-3',
+          ]);
+          await story.layoutCallback();
+          // Getting all the AmpStoryPage objets.
+          let pages = Array.from(pageElements).map((el) => el.getImpl());
+
+          pages = await Promise.all(pages);
+
+          // Insert ads
+          const adPage = await createStoryAdPage(adId);
+          story.addPage(adPage);
+          story.insertPage('page-2', adId);
+
+          pages.splice(3, 0, adPage);
+
+          // Only the first page should be active.
+          for (let i = 0; i < pages.length; i++) {
+            expect(story.getPageIndex(pages[i])).to.equal(i);
+          }
         });
       });
 
@@ -1226,7 +1256,7 @@ describes.realWin(
 
         const dispatchSwipeEvent = (deltaX, deltaY) => {
           // Triggers mobile UI so hint overlay can attach.
-          story.storeService_.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
+          story.storeService_.dispatch(Action.TOGGLE_UI, UIType_Enum.MOBILE);
 
           story.element.dispatchEvent(
             new TouchEvent('touchstart', getTouchOptions(-10, -10))
@@ -2087,7 +2117,7 @@ describes.realWin(
           toggleExperiment(env.win, 'story-remote-localization', false);
         });
 
-        it('should fetch the localization strings for the default laguage from the cdn', async () => {
+        it('should fetch the localization strings for the default language from the cdn', async () => {
           const fetchStub = env.sandbox
             .stub(Services.xhrFor(env.win), 'fetchJson')
             .resolves({
@@ -2097,12 +2127,12 @@ describes.realWin(
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.be.calledOnceWithExactly(
-            'https://cdn.ampproject.org/v0/amp-story.en.json',
+            'https://cdn.ampproject.org/rtv/123/v0/amp-story.en.json',
             env.sandbox.match.any
           );
         });
 
-        it('should fetch the localization strings for the document laguage from the cdn', async () => {
+        it('should fetch the localization strings for the document language from the cdn', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
 
           const fetchStub = env.sandbox
@@ -2114,12 +2144,12 @@ describes.realWin(
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.have.been.calledOnceWithExactly(
-            'https://cdn.ampproject.org/v0/amp-story.es-419.json',
+            'https://cdn.ampproject.org/rtv/123/v0/amp-story.es-419.json',
             env.sandbox.match.any
           );
         });
 
-        it('should fetch the localization strings for the document laguage from the local dist if testing locally', async () => {
+        it('should fetch the localization strings for the document language from the local dist if testing locally', async () => {
           env.win.document.body.parentElement.setAttribute('lang', 'es-419');
           env.win.__AMP_MODE.localDev = true;
 
@@ -2132,7 +2162,7 @@ describes.realWin(
           await createStoryWithPages(1, ['cover']);
 
           expect(fetchStub).to.have.been.calledOnceWithExactly(
-            '/dist/v0/amp-story.es-419.json',
+            '/dist/rtv/123/v0/amp-story.es-419.json',
             env.sandbox.match.any
           );
         });

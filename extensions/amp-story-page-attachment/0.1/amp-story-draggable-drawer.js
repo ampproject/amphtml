@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-story-draggable-drawer-header-0.1.css';
 import {
   Action,
   StateProperty,
-  UIType,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 
@@ -137,6 +137,11 @@ export class DraggableDrawer extends AMP.BaseElement {
     this.containerEl = dev().assertElement(
       templateEl.querySelector('.i-amphtml-story-draggable-drawer-container')
     );
+    // Hide `containerEl` to ensure that its content is not rendered/loaded by
+    // the AMP Resources manager before we can set the draggable drawer as the
+    // resource manager.
+    toggle(dev().assertElement(this.containerEl), false);
+
     this.contentEl = dev().assertElement(
       this.containerEl.querySelector(
         '.i-amphtml-story-draggable-drawer-content'
@@ -181,7 +186,11 @@ export class DraggableDrawer extends AMP.BaseElement {
         Services.ownersForDoc(this.element).setOwner(el, this.element);
       }
     }
-    return Promise.resolve();
+
+    // `containerEl` is hidden by default, to ensure that its content is not
+    // rendered/loaded by the AMP Resources manager before we can set a
+    // different owner. Now that the owner has been set, we can unhide it.
+    toggle(dev().assertElement(this.containerEl), true);
   }
 
   /**
@@ -233,11 +242,11 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @protected
    */
   onUIStateUpdate_(uiState) {
-    const isMobile = uiState === UIType.MOBILE;
+    const isMobile = uiState === UIType_Enum.MOBILE;
     isMobile
       ? this.startListeningForTouchEvents_()
       : this.stopListeningForTouchEvents_();

@@ -729,6 +729,27 @@ _Example_: An image panning 50px down over 15 seconds.
 </amp-img>
 ```
 
+#### pan-scaling-factor [optional, only works with `pan-left`, `pan-right`, `pan-up`, & `pan-down` animations]
+
+The target scales automatically in a pan-left/pan-right/pan-up/pan-down animation to ensure it does not go out of the target boundary when panning.
+
+Use this attribute to override the default scaling factor calculation, and specify a static scaling factor. The value must be greater than 0, and decimals are allowed.
+
+_Example_: An image scales 1.3x when panning.
+
+```html
+<amp-img
+  animate-in="pan-left"
+  pan-scaling-factor="1.3"
+  layout="fixed"
+  src="https://picsum.photos/720/320?image=1026"
+  width="720"
+  height="320"
+  alt="..."
+>
+</amp-img>
+```
+
 ### Sequencing animations
 
 To chain animations in sequence, use the `animate-in-after` attribute. All elements in a given chain must be present in the same `<amp-story-page>`. Elements without the `animate-in-after` attribute do not belong to a sequence chain, and will start independently on page entrance.

@@ -18,6 +18,8 @@ import {
   ShoppingConfigDataDef,
   StateProperty,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {StoryAnalyticsEvent} from '../../amp-story/1.0/story-analytics';
+import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 
 /** @const {!Array<!Object>} fontFaces */
 const FONTS_TO_LOAD = [
@@ -32,6 +34,12 @@ const FONTS_TO_LOAD = [
     src: "url(https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2) format('woff2')",
   },
 ];
+
+/**
+ * @const {number}
+ * Max amount of characters for the product details text section.
+ */
+const MAX_PRODUCT_DETAILS_TEXT_LENGTH = 3000;
 
 export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -58,6 +66,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     /** @private {!Map<string, Element>} */
     this.builtTemplates_ = {};
+
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = Services.storyAnalyticsService(this.win);
+
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.variableService_ = Services.storyVariableService(this.win);
   }
 
   /** @override */
@@ -118,7 +132,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Triggers template update if opening without active product data.
-   * This happens when the "Shop Now" CTA is clicked.
+   * This happens either when the "Shop Now" CTA is clicked or when a
+   * shopping tag is clicked.
    * @param {boolean} isOpen
    * @private
    */
@@ -126,7 +141,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     if (!this.isOnActivePage_() || !isOpen) {
       return;
     }
+
     const shoppingData = this.storeService_.get(StateProperty.SHOPPING_DATA);
+
     if (!shoppingData.activeProductData) {
       this.updateTemplate_(shoppingData);
     }
@@ -215,6 +232,21 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.builtTemplates_[templateId] = template;
       this.mutateElement(() => this.templateContainer_.appendChild(template));
     }
+
+    // PDP view that calls the analytics service sending the product id.
+    if (productForPdp) {
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
+        productForPdp.productId
+      );
+    }
+
+    // Triggers an analytics event for the PDP or PLP depending on if there is an active product.
+    this.analyticsService_.triggerEvent(
+      productForPdp
+        ? StoryAnalyticsEvent.SHOPPING_PDP_VIEW
+        : StoryAnalyticsEvent.SHOPPING_PLP_VIEW
+    );
   }
 
   /**
@@ -305,6 +337,18 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
   }
 
   /**
+   * onclick event that fires when buy now is clicked,
+   * sends an analytics event containing product id.
+   * @return {boolean}
+   * @private
+   */
+  onClickBuyNow_() {
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.SHOPPING_BUY_NOW_CLICK
+    );
+  }
+
+  /**
    * @param {!ShoppingConfigDataDef} activeProductData
    * @return {Element}
    * @private
@@ -360,6 +404,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             class="i-amphtml-amp-story-shopping-pdp-cta"
             href={activeProductData.productUrl}
             target="_top"
+            onClick={() => this.onClickBuyNow_()}
             i-amphtml-i18n-text-content={
               LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_CTA_LABEL
             }
@@ -399,9 +444,19 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
               class="i-amphtml-amp-story-shopping-pdp-details-text"
               aria-hidden="true"
             >
-              {activeProductData.productDetails
-                // Replaces two newlines with 0 or more spaces between them with two newlines.
-                .replace(/\n\s*\n/g, '\n\n')}
+              {
+                // Add ellipses if product details text is greater than max.
+                (activeProductData.productDetails.length >
+                MAX_PRODUCT_DETAILS_TEXT_LENGTH
+                  ? activeProductData.productDetails.slice(
+                      0,
+                      MAX_PRODUCT_DETAILS_TEXT_LENGTH
+                    ) + '...'
+                  : activeProductData.productDetails
+                )
+                  // Replaces two newlines with 0 or more spaces between them with two newlines.
+                  .replace(/\n\s*\n/g, '\n\n')
+              }
             </span>
           </div>
         )}
