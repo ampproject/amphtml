@@ -37,14 +37,8 @@ export class AmpStoryCaptions extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.container_ = <div />;
-    this.checkAndMaybeSetPreset_();
-  }
-  /**
-   * Checks if data preset is defined and valid.
-   * If valid it renders in shadow dom with preset syles.
-   * @private
-   */
-  checkAndMaybeSetPreset_() {
+    // Check if data-preset is defined and valid.
+    // If valid it renders in shadow dom with preset syles.
     const preset = this.element.getAttribute('data-preset');
     if (presetValues.includes(preset)) {
       this.container_.classList.add(`amp-story-captions-${preset}`);

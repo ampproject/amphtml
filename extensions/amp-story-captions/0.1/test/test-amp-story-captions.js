@@ -78,7 +78,7 @@ describes.realWin(
       return video;
     }
 
-    it('should contain be empty when built', async () => {
+    it('should be empty when built', async () => {
       await element.whenBuilt();
       expect(element.querySelector('div').textContent).to.equal('');
     });

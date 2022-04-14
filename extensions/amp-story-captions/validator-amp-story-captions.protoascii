@@ -45,7 +45,8 @@ tags: {  # <amp-story-captions>
     mandatory_num_child_tags: 0
   }
   attrs: {
-    name: "data-preset",
-    mandatory_oneof: "['default', 'appear']"
+    name: "data-preset"
+    value: "default"
+    value: "appear"
   }
 }
