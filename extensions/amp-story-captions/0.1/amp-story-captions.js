@@ -37,9 +37,9 @@ export class AmpStoryCaptions extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.container_ = <div />;
-    // Check if data-preset is defined and valid.
+    // Check if style-preset is defined and valid.
     // If valid it renders in shadow dom with preset syles.
-    const preset = this.element.getAttribute('data-preset');
+    const preset = this.element.getAttribute('style-preset');
     if (presetValues.includes(preset)) {
       this.container_.classList.add(`amp-story-captions-${preset}`);
       createShadowRootWithStyle(this.element, this.container_, PRESETS_CSS);

@@ -96,13 +96,13 @@ describes.realWin(
     });
 
     it('should apply preset when attribute is present and value is valid', async () => {
-      element.setAttribute('data-preset', 'default');
+      element.setAttribute('style-preset', 'default');
       await setUpVideoWithCaptions();
       expect(element.querySelector('.amp-story-captions-default')).to.exist;
     });
 
     it('should not apply preset when attribute value is invalid', async () => {
-      element.setAttribute('data-preset', 'dflt');
+      element.setAttribute('style-preset', 'dflt');
       await setUpVideoWithCaptions();
       expect(element.querySelector('.amp-story-captions-default')).to.be.null;
     });
