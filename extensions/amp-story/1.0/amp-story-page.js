@@ -510,11 +510,14 @@ export class AmpStoryPage extends AMP.BaseElement {
               this.unmuteAllMedia();
             }
           });
+          this.toggleCaptions_(
+            this.storeService_.get(StateProperty.CAPTIONS_STATE)
+          );
         });
       });
       this.maybeStartAnimations_();
-      this.updatePageAudioState_();
-      this.updatePageCaptionsState_();
+      this.checkPageHasAudio_();
+      this.checkPageHasCaptions_();
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
@@ -1318,7 +1321,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Checks if the page has audio elements or video elements with audio and updates the store service state.
    * @private
    */
-  updatePageAudioState_() {
+  checkPageHasAudio_() {
     const hasAudioElements =
       this.element.hasAttribute('background-audio') ||
       this.element.querySelector('amp-audio');
@@ -1378,18 +1381,16 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the page has any captions, updates the store service and toggles them.
+   * Checks if the page has any captions.
    * @private
    */
-  updatePageCaptionsState_() {
+  checkPageHasCaptions_() {
     this.hasVideoWithCaptions_().then((hasVideoWithCaptions) => {
       this.storeService_.dispatch(
         Action.TOGGLE_PAGE_HAS_CAPTIONS,
         hasVideoWithCaptions
       );
     });
-
-    this.toggleCaptions_(this.storeService_.get(StateProperty.CAPTIONS_STATE));
   }
 
   /**
