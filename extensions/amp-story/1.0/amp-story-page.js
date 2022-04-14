@@ -278,16 +278,14 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
-    this.mutateElement(() => {
-      removeElement(ctaLayerEl);
-      this.element.appendChild(
-        <amp-story-page-outlink layout="nodisplay">
-          <a href={anchorSet[0].getAttribute('href')}>
-            {anchorSet[0].textContent}
-          </a>
-        </amp-story-page-outlink>
-      );
-    });
+    removeElement(ctaLayerEl);
+    this.element.appendChild(
+      <amp-story-page-outlink layout="nodisplay">
+        <a href={anchorSet[0].getAttribute('href')}>
+          {anchorSet[0].textContent}
+        </a>
+      </amp-story-page-outlink>
+    );
   }
 
   /** @override */
@@ -1576,7 +1574,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   installPageAttachmentExtension_() {
     const elementsThatRequireExtension = this.element.querySelector(
-      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment, amp-story-cta-layer'
+      'amp-story-page-attachment, amp-story-page-outlink, amp-story-shopping-attachment'
     );
 
     if (!elementsThatRequireExtension) {
