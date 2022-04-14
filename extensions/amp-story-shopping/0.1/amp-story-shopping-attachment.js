@@ -82,24 +82,21 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
 
-    getShoppingConfig(this.element, this.pageEl_.id).then((config) =>
-      storeShoppingConfig(this.pageEl_, config)
-    );
-
-    if (this.shoppingTags_.length === 0) {
-      return;
-    }
-
-    return this.localizationService_
-      .getLocalizedStringAsync(
-        LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+    return getShoppingConfig(this.element, this.pageEl_.id)
+      .then((config) => {
+        storeShoppingConfig(this.pageEl_, config);
+      })
+      .then(() =>
+        this.localizationService_.getLocalizedStringAsync(
+          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+        )
       )
       .then((ctaText) => {
         this.attachmentEl_ = (
           <amp-story-page-attachment
             layout="nodisplay"
             theme={this.element.getAttribute('theme')}
-            cta-text={ctaText}
+            cta-text={this.element.getAttribute('cta-text') ?? ctaText}
           >
             {this.templateContainer_}
           </amp-story-page-attachment>
