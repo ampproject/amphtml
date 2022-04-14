@@ -147,7 +147,7 @@ layout="intrinsic" width="800" height="135">
 
 #### `cta-text` {string} optional
 
-Sets the Call To Action Text for the shopping attachment page outlink.
+String that customizes the call to action button text. The default is "Shop now".
 
 ### amp-story-shopping-attachment templates
 
