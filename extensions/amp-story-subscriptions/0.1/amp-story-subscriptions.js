@@ -200,7 +200,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     return (
       <div subscriptions-dialog subscriptions-display="NOT granted">
         <div class="i-amphtml-story-subscriptions-dialog-banner">
-          <div
+          <span
             class="i-amphtml-story-subscriptions-dialog-banner-button"
             role="button"
           >
@@ -208,7 +208,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
               LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SKIP
             )}
             <span class="i-amphtml-story-subscriptions-dialog-banner-button-logo"></span>
-          </div>
+          </span>
         </div>
         <div class="i-amphtml-story-subscriptions-dialog-content">
           <span class="i-amphtml-story-subscriptions-price">
