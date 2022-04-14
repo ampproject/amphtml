@@ -49,14 +49,16 @@ amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
   overflow: hidden !important;
 }
 
-amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
+amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper,
+iframe.swg-dialog {
   width: 100% !important;
   left: 0 !important;
   margin-left: 0 !important;
 }
 
 @media(min-aspect-ratio: 3/4) {
-  amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper {
+  amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-subscriptions-dialog-wrapper,
+  iframe.swg-dialog  {
     width: var(--i-amphtml-story-desktop-one-panel-width) !important;
     left: 50% !important;
     margin-left: calc(-0.5 * var(--i-amphtml-story-desktop-one-panel-width)) !important;
