@@ -237,7 +237,7 @@
       "type": "string"
     },
     "productTagText": {
-      "description": "Text for the Product tag. Supersedes productPrice",
+      "description": "Text for the Product tag. Supersedes productPrice.",
       "type": "string"
     },
     "aggregateRating": {
