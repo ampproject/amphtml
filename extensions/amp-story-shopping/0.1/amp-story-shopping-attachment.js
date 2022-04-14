@@ -81,15 +81,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.shoppingTags_ = Array.from(
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
-
-    getShoppingConfig(this.element, this.pageEl_.id).then((config) =>
-      storeShoppingConfig(this.pageEl_, config)
-    );
-
     if (this.shoppingTags_.length === 0) {
       return Promise.reject(new Error('No shopping tags on the page.'));
     }
-
     return getShoppingConfig(this.element, this.pageEl_.id)
       .then((config) => {
         if (Object.keys(config).length === 0) {
@@ -118,9 +112,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.shoppingTags_.length === 0) {
-      return;
-    }
     loadFonts(this.win, FONTS_TO_LOAD);
     // Update template on attachment state update or shopping data update.
     this.storeService_.subscribe(
@@ -165,11 +156,16 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onShoppingDataUpdate_(shoppingData) {
+    const shopdata = this.storeService_.get(StateProperty.SHOPPING_DATA);
+    if (!shoppingData.activeProductData || !this.isOnActivePage_()) {
+      return;
+    }
     const isOpen = this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
-
     if (isOpen) {
       // If open, update the template.
-
+      // This happens when a product card is clicked in the PLP template.
+      this.updateTemplate_(shoppingData);
+    } else {
       // Otherwise, open the attachment and then update the template.
       // This happens when clicking a shopping tag.
       this.attachmentEl_.getImpl().then((impl) => {

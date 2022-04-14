@@ -565,6 +565,7 @@ export class AmpStoryStoreService {
   getDefaultState_() {
     // Compiler won't resolve the object keys and trigger an error for missing
     // properties, so we have to force the type.
+
     return /** @type {!State} */ ({
       [StateProperty.CAN_INSERT_AUTOMATIC_AD]: true,
       [StateProperty.CAN_SHOW_AUDIO_UI]: true,
