@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.212 */
+/** Version: 0.1.22.213 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -219,6 +219,28 @@ const I18N_STRINGS = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
 
 /**
  * @param  {...*} var_args [description]
@@ -946,6 +968,10 @@ const SIGN_IN_WITH_GOOGLE_BUTTON_ID = 'swg-sign-in-with-google-button';
 const PUBLISHER_SIGN_IN_BUTTON_ID = 'swg-publisher-sign-in-button';
 
 /** ID for the Regwall container element. */
+const REGISTRATION_BUTTON_CONTAINER_ID =
+  'swg-registration-button-container';
+
+/** ID for the Regwall container element. */
 const REGWALL_CONTAINER_ID = 'swg-regwall-container';
 
 /** ID for the Regwall dialog element. */
@@ -973,6 +999,7 @@ const REGWALL_HTML = `
   .gaa-metering-regwall--description,
   .gaa-metering-regwall--description strong,
   .gaa-metering-regwall--iframe,
+  .gaa-metering-regwall--registration-button-container,
   .gaa-metering-regwall--casl {
     all: initial !important;
     box-sizing: border-box !important;
@@ -1041,6 +1068,14 @@ const REGWALL_HTML = `
     width: 100% !important;
   }
 
+  .gaa-metering-regwall--registration-button-container {
+    border: none !important;
+    display: block !important;
+    height: 44px !important;
+    margin: 0 0 30px !important;
+    width: 100% !important;
+  }
+
   .gaa-metering-regwall--casl {
     color: #646464 !important;
     display: block !important;
@@ -1097,11 +1132,7 @@ const REGWALL_HTML = `
       $SHOWCASE_REGWALL_DESCRIPTION$
     </div>
 
-    <iframe
-        id="${GOOGLE_SIGN_IN_IFRAME_ID}"
-        class="gaa-metering-regwall--iframe"
-        src="$iframeUrl$">
-    </iframe>
+    $SHOWCASE_REGISTRATION_BUTTON$
 
     $SHOWCASE_REGWALL_CASL$
 
@@ -1119,6 +1150,27 @@ const REGWALL_HTML = `
 `;
 
 /**
+ * HTML for iFrame to render registration widget.
+ */
+const REGISTRATION_WIDGET_IFRAME_HTML = `
+  <iframe
+      id="${GOOGLE_SIGN_IN_IFRAME_ID}"
+      class="gaa-metering-regwall--iframe"
+      src="$iframeUrl$">
+  </iframe>
+`;
+
+/**
+ * HTML for container of the registration button.
+ */
+const REGISTRATION_BUTTON_HTML = `
+  <div
+      id="${REGISTRATION_BUTTON_CONTAINER_ID}"
+      class="gaa-metering-regwall--registration-button-container">
+  </div>
+`;
+
+/**
  * HTML for the CASL blurb.
  * CASL stands for Canadian Anti-Spam Law.
  */
@@ -1129,11 +1181,7 @@ const CASL_HTML = `
 `;
 
 /** Base styles for both the Google and Google 3p Sign-In button iframes. */
-const GOOGLE_SIGN_IN_IFRAME_STYLES = `
-  body {
-    margin: 0;
-    overflow: hidden;
-  }
+const GOOGLE_SIGN_IN_BUTTON_STYLES = `
   #${GOOGLE_3P_SIGN_IN_BUTTON_ID},
   #${SIGN_IN_WITH_GOOGLE_BUTTON_ID},
   #${GOOGLE_SIGN_IN_BUTTON_ID} {
@@ -1184,6 +1232,12 @@ const GOOGLE_SIGN_IN_IFRAME_STYLES = `
     content: '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$';
     font-size: 15px;
   }`;
+const GOOGLE_SIGN_IN_IFRAME_STYLES = `
+  body {
+    margin: 0;
+    overflow: hidden;
+  }${GOOGLE_SIGN_IN_BUTTON_STYLES}
+`;
 
 /**
  * User object that Publisher JS receives after users sign in.
@@ -1210,7 +1264,7 @@ let GaaUserDef;
  * GoogleUser object that Google Sign-In returns after users sign in.
  * https://developers.google.com/identity/sign-in/web/reference#googleusergetbasicprofile
  * @typedef {{
- *   getAuthResponse: function(boolean): {
+ *  getAuthResponse: function(boolean): {
  *     access_token: string,
  *     id_token: string,
  *     scope: string,
@@ -1316,6 +1370,42 @@ class GaaMeteringRegwall {
   }
 
   /**
+   * Returns a promise for a Google user object.
+   * The user object will be a GoogleIdentityV1
+   *
+   * This method opens a metering regwall dialog,
+   * where users can sign in with Google.
+   * @nocollapse
+   * @param {{ caslUrl: string, clientId: string }} params
+   * @return {!Promise<!GoogleIdentityV1>}
+   */
+  static showWithNativeRegistrationButton({caslUrl, clientId}) {
+    logEvent({
+      showcaseEvent: ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL,
+      isFromUserAction: false,
+    });
+
+    GaaMeteringRegwall.render_({
+      iframeUrl: '',
+      caslUrl,
+      useNativeMode: true,
+    });
+
+    return GaaMeteringRegwall.createNativeRegistrationButton({clientId})
+      .then((jwt) => {
+        GaaMeteringRegwall.remove();
+        return jwt;
+      })
+      .catch((err) => {
+        // Close the Regwall, since the flow failed.
+        GaaMeteringRegwall.remove();
+
+        // Rethrow error.
+        debugLog(`Regwall failed: ${err}`);
+      });
+  }
+
+  /**
    * Removes the Regwall.
    * @nocollapse
    */
@@ -1343,17 +1433,14 @@ class GaaMeteringRegwall {
    * Renders the Regwall.
    * @private
    * @nocollapse
-   * @param {{ iframeUrl: string, caslUrl: string }} params
+   * @param {{ iframeUrl: string, caslUrl: string, useNativeMode: (boolean|undefined)}} params
    */
-  static render_({iframeUrl, caslUrl}) {
+  static render_({iframeUrl, caslUrl, useNativeMode = false}) {
     const languageCode = getLanguageCodeFromElement(self.document.body);
     const publisherName = GaaMeteringRegwall.getPublisherNameFromPageConfig_();
     const placeholderPatternForPublication = /<ph name="PUBLICATION".+?\/ph>/g;
     const placeholderPatternForLinkStart = /<ph name="LINK_START".+?\/ph>/g;
     const placeholderPatternForLinkEnd = /<ph name="LINK_END".+?\/ph>/g;
-
-    // Tell the iframe which language to render.
-    iframeUrl = addQueryParam(iframeUrl, 'lang', languageCode);
 
     // Create and style container element.
     // TODO: Consider using a FriendlyIframe here, to avoid CSS conflicts.
@@ -1398,10 +1485,22 @@ class GaaMeteringRegwall {
         );
     }
 
+    let registrationButtonHtml = '';
+    if (useNativeMode) {
+      registrationButtonHtml = REGISTRATION_BUTTON_HTML;
+    } else {
+      // Tell the iframe which language to render.
+      iframeUrl = addQueryParam(iframeUrl, 'lang', languageCode);
+      registrationButtonHtml = REGISTRATION_WIDGET_IFRAME_HTML.replace(
+        '$iframeUrl$',
+        iframeUrl
+      );
+    }
+
     // Prepare HTML.
     containerEl./*OK*/ innerHTML = REGWALL_HTML.replace(
-      '$iframeUrl$',
-      iframeUrl
+      '$SHOWCASE_REGISTRATION_BUTTON$',
+      registrationButtonHtml
     )
       .replace(
         '$SHOWCASE_REGWALL_TITLE$',
@@ -1608,6 +1707,52 @@ class GaaMeteringRegwall {
         new URL(iframeUrl).origin
       );
     };
+  }
+
+  static createNativeRegistrationButton({clientId}) {
+    const languageCode = getLanguageCodeFromElement(self.document.body);
+    const parentElement = self.document.getElementById(
+      REGISTRATION_BUTTON_CONTAINER_ID
+    );
+    if (!parentElement) {
+      return false;
+    }
+    // Apply iframe styles.
+    const styleEl = self.document.createElement('style');
+    styleEl./*OK*/ innerText = GOOGLE_SIGN_IN_BUTTON_STYLES.replace(
+      '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
+      msg(I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'], languageCode)
+    );
+    self.document.head.appendChild(styleEl);
+
+    const buttonEl = self.document.createElement('div');
+    buttonEl.id = SIGN_IN_WITH_GOOGLE_BUTTON_ID;
+    buttonEl.tabIndex = 0;
+
+    parentElement.appendChild(buttonEl);
+
+    // Track button clicks.
+    buttonEl.addEventListener('click', () => {
+      logEvent({
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+        isFromUserAction: true,
+      });
+    });
+
+    return new Promise((resolve) => {
+      self.google.accounts.id.initialize({
+        /* eslint-disable google-camelcase/google-camelcase */
+        client_id: clientId,
+        callback: resolve,
+        /* eslint-enable google-camelcase/google-camelcase */
+      });
+      self.google.accounts.id.renderButton(buttonEl, {
+        'type': 'standard',
+        'theme': 'outline',
+        'text': 'continue_with',
+        'logo_alignment': 'center',
+      });
+    });
   }
 }
 

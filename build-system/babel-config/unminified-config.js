@@ -42,6 +42,7 @@ function getUnminifiedConfig(buildFor = 'preact') {
     './build-system/babel-plugins/babel-plugin-jsx-style-object',
     getImportResolverPlugin(buildFor),
     argv.coverage ? 'babel-plugin-istanbul' : null,
+    './build-system/babel-plugins/babel-plugin-amp-story-supported-languages',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-json-import',
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
