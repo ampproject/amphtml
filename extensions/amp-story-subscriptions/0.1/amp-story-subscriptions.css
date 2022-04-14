@@ -108,8 +108,9 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
   margin: 0 auto 0.8em !important;
   padding: 0 !important;
   border: none !important;
-  height: 2.3em !important;
-  border-radius: 2.9em !important;
+  --i-amphtml-button-height: 2.3em;
+  height: var(--i-amphtml-button-height) !important;
+  border-radius: calc(var(--i-amphtml-button-height) / 2) !important;
   display: flex !important;
   align-items: center !important;
   cursor: pointer !important;
