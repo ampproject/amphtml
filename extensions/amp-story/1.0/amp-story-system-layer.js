@@ -84,6 +84,10 @@ const LIVE_CLASS = 'i-amphtml-story-live';
 /** @private @const {string} */
 const LIVE_VISIBLE_CLASS = 'i-amphtml-story-live-visible';
 
+/** @private @const {string} */
+const HIDE_LOGO_CONTAINER_CLASS =
+  'i-amphtml-story-attribution-logo-container-hide';
+
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
@@ -373,7 +377,11 @@ export class SystemLayer {
     if (isLiveStory) {
       this.systemLayerEl_
         .querySelector(`.${escapeCssSelectorIdent(LIVE_CLASS)}`)
-        .classList.add(`.${escapeCssSelectorIdent(LIVE_VISIBLE_CLASS)}`);
+        .classList.add(`${escapeCssSelectorIdent(LIVE_VISIBLE_CLASS)}`);
+
+      this.systemLayerEl_
+        .querySelector('.i-amphtml-story-attribution-logo-container')
+        .classList.add(`${escapeCssSelectorIdent(HIDE_LOGO_CONTAINER_CLASS)}`);
     }
   }
 

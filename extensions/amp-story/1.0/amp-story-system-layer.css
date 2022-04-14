@@ -412,3 +412,7 @@
   text-transform: capitalize;
 }
 
+.i-amphtml-story-attribution-logo-container-hide{
+  display: none !important;
+}
+
