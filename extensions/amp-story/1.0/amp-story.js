@@ -198,7 +198,7 @@ export const PAYWALL_PAGE_INDEX = 2;
  * The number of milliseconds to wait before showing the paywall on paywall page.
  * @const {number}
  */
-export const PAYWALL_DELAY_DURATION = 2000;
+export const PAYWALL_DELAY_DURATION = 500;
 
 /** @type {string} */
 const TAG = 'amp-story';
