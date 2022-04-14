@@ -4,6 +4,9 @@ on:
     types: [opened]
   issue_comment:
     types: [edited]
+permissions:
+  contents: read
+
 jobs:
   status-page:
     if: contains(github.event.issue.title, '🌸 Cherry-pick request')
@@ -33,3 +36,25 @@ jobs:
           COMMENT_AFTER: ${{ github.event.comment.body }}
           STATUS_PAGE_ID: ${{ secrets.STATUS_PAGE_ID }}
           STATUS_PAGE_TOKEN: ${{ secrets.STATUS_PAGE_TOKEN }}
+
+  create-issue-on-error:
+    if: failure()
+    needs: status-page
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    environment: create_issue_on_error
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create issue on error
+        uses: JasonEtco/create-an-issue@v2
+        with:
+          filename: .github/create_issue_on_error.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.AMPPROJECTBOT }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          MENTION: '@ampproject/wg-infra'
+          REPO_SLUG: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}

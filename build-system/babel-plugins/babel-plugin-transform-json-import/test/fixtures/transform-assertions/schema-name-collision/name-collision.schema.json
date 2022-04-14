@@ -1,3 +1,9 @@
 {
-  "type": "string"
+  "properties": {
+    "foo": {
+      "const": {
+        "bar": 123
+      }
+    }
+  }
 }

@@ -51,6 +51,7 @@ function getTestConfig() {
   const testPlugins = [
     getImportResolverPlugin(),
     argv.coverage ? instanbulPlugin : null,
+    './build-system/babel-plugins/babel-plugin-amp-story-supported-languages',
     replacePlugin,
     replaceGlobalsPlugin,
     './build-system/babel-plugins/babel-plugin-jsx-style-object',

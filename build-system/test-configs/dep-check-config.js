@@ -79,7 +79,7 @@ exports.rules = [
     allowlist: [
       '3p/**->src/utils/log.js',
       '3p/**->src/url.js',
-      '3p/**->src/config.js',
+      '3p/**->src/config/urls.js',
       '3p/**->src/mode.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
@@ -427,6 +427,9 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->src/service/real-time-config/callout-vendors.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->src/service/real-time-config/real-time-config-impl.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->src/service/real-time-config/real-time-config-impl.js',
+
+      // For amp-image-slider_1.0: Required for `Gestures.get`
+      'extensions/amp-image-slider/1.0/component.js->src/service/timer-impl.js',
     ],
   },
   {

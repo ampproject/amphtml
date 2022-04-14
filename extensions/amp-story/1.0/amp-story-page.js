@@ -10,6 +10,7 @@
  */
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
+import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
@@ -262,6 +263,31 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
   }
 
+  /**
+   * @private
+   * @return {Element}
+   */
+  maybeConvertCtaLayerToPageOutlink_() {
+    const ctaLayerEl = this.element.querySelector('amp-story-cta-layer');
+    if (!ctaLayerEl) {
+      return;
+    }
+
+    const anchorSet = ctaLayerEl.querySelectorAll('a');
+    if (anchorSet.length !== 1 || !anchorSet[0].getAttribute('href')) {
+      return;
+    }
+
+    removeElement(ctaLayerEl);
+    this.element.appendChild(
+      <amp-story-page-outlink layout="nodisplay">
+        <a href={anchorSet[0].getAttribute('href')}>
+          {anchorSet[0].textContent}
+        </a>
+      </amp-story-page-outlink>
+    );
+  }
+
   /** @override */
   buildCallback() {
     this.delegateVideoAutoplay();
@@ -289,6 +315,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.initializeImgAltTags_();
     this.initializeTabbableElements_();
     this.maybeApplyFirstAnimationFrameOrFinish();
+    this.maybeConvertCtaLayerToPageOutlink_();
   }
 
   /** @private */
@@ -1105,7 +1132,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   emitProgress_(progress) {
     // Don't emit progress for ads, since the progress bar is hidden.
     // Don't emit progress for inactive pages, because race conditions.
-    if (this.isAd() || this.state_ === PageState.NOT_ACTIVE) {
+    if (
+      (!isExperimentOn(this.win, 'story-ad-auto-advance') && this.isAd()) ||
+      this.state_ === PageState.NOT_ACTIVE
+    ) {
       return;
     }
 

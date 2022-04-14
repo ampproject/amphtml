@@ -6,6 +6,13 @@ import {LocalizationService} from '#service/localization';
 import {registerServiceBuilderForDoc} from '../../../src/service-helpers';
 
 /**
+ * AMP_STORY_SUPPORTED_LANGUAGES is replaced by a babel plugin with a list
+ * of supported languages amp-story supports for localization string.
+ * @const {string[]}
+ */
+const SUPPORTED_LANGUAGES = AMP_STORY_SUPPORTED_LANGUAGES;
+
+/**
  * Util function to retrieve the localization service. Ensures we can retrieve
  * the service synchronously from the amp-story codebase without running into
  * race conditions.
@@ -59,4 +66,28 @@ export function localizeTemplate(template, context) {
     el.removeAttribute('i-amphtml-i18n-text-content');
   });
   return Promise.all(promises);
+}
+
+/**
+ * Cross references the candidateLanguageCodes with the supportedLanguageCodes
+ * to ensure that the candidate language is supported.
+ * @param {string[]} candidateLanguageCodes
+ * @return {string}
+ * @private
+ */
+export function getSupportedLanguageCode(candidateLanguageCodes) {
+  // IETF BCP 47 language tag and ISO-639 are not case sensitive but
+  // the request to the Google AMP Cache is, so we make sure to maintain
+  // the correct language code casing when making the request.
+  for (let x = 0; x < candidateLanguageCodes.length; x++) {
+    const curCandidateLanguageCode = candidateLanguageCodes[x].toLowerCase();
+    for (let y = 0; y < SUPPORTED_LANGUAGES.length; y++) {
+      const curSupportedLanguage = SUPPORTED_LANGUAGES[y].toLowerCase();
+      if (curSupportedLanguage === curCandidateLanguageCode) {
+        // We return the original un-lowercased value.
+        return SUPPORTED_LANGUAGES[y];
+      }
+    }
+  }
+  return 'en';
 }
