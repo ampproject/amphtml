@@ -94,7 +94,7 @@ Diagram demonstrating how product JSON renders within [`amp-story-shopping-tag`]
 
 <amp-img alt="An example of opening the attachment and navigating through an amp story shopping attachment" src="https://user-images.githubusercontent.com/3860311/155758474-3fa4e666-c1a9-44d3-bbf6-61dc3fe16498.gif" layout="intrinsic" width="338" height="548">
 
-The [`amp-story-shopping-attachment`](#amp-story-shopping-attachment) renders a tappable CTA button with the text "Shop Now" that opens an inline shopping experience.
+The [`amp-story-shopping-attachment`](#amp-story-shopping-attachment) renders a tappable Call To Action button with the text "Shop Now" that opens an inline shopping experience.
 Product JSON data must be configured and at least one [`amp-story-shopping-tag`](#amp-story-shopping-tag) must be on the same page.
 
 ### Product JSON configuration
@@ -140,14 +140,14 @@ A url for remote product JSON configuration. When defined it overrides inline JS
 
 #### `theme` {string} optional
 
-Sets the color of the CTA button and drawer.
+Sets the color of the Call To Action button and drawer.
 "light" (default) and "dark" values are accepted.
 <img alt="theme" src="https://user-images.githubusercontent.com/3860311/161297644-f25837e0-82ec-4960-a219-edfaf7d09fd9.png"
 layout="intrinsic" width="800" height="135">
 
 #### `cta-text` {string} optional
 
-Sets the CTA Text for the shopping attachment page outlink.
+Sets the Call To Action Text for the shopping attachment page outlink.
 
 ### amp-story-shopping-attachment templates
 
