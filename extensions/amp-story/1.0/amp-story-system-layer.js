@@ -77,6 +77,12 @@ const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 /** @private @const {string} */
 const ATTRIBUTION_CLASS = 'i-amphtml-story-attribution';
 
+/** @private @const {string} */
+const LIVE_CLASS = 'i-amphtml-story-live';
+
+/** @private @const {string} */
+const LIVE_VISIBLE_CLASS = 'i-amphtml-story-live-visible';
+
 /** @private @const {number} */
 const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
@@ -89,6 +95,7 @@ const renderSystemLayerElement = (element, children) => (
   <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
     {children}
     <a class={String(ATTRIBUTION_CLASS)} target="_blank">
+      <div class={`${String(LIVE_CLASS)}`}>LIVE</div>
       <div class="i-amphtml-story-attribution-logo-container">
         <img alt="" class="i-amphtml-story-attribution-logo" />
       </div>

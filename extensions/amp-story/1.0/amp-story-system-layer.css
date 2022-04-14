@@ -402,3 +402,13 @@
     --i-amphtml-story-desktop-one-panel-border-radius
   ) !important;
 }
+
+.i-amphtml-story-live-visible {
+  background-color: #E21219;
+  color: white;
+  font-size: 11px;
+  border-radius: 8px;
+  padding: 2px 8px;
+  text-transform: capitalize;
+}
+
