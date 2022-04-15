@@ -17,7 +17,7 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 import {isLoadErrorMessage} from '#utils/event-helper';
 import {dev, setReportError} from '#utils/log';
 
-import {urls} from './config';
+import * as urls from './config/urls';
 import {getMode} from './mode';
 import {makeBodyVisibleRecovery} from './style-installer';
 import {isProxyOrigin} from './url';

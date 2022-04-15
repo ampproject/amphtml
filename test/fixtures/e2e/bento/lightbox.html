@@ -15,7 +15,7 @@
   <body>
     <button id="open-button">Open</button>
     <button id="close-button">Close</button>
-    <bento-lightbox id="my-lightbox" hidden>
+    <bento-lightbox id="my-lightbox">
       <p>Test</p>
       <button slot="close-button">Close</button>
     </bento-lightbox>
@@ -30,7 +30,7 @@
           api.open()
         })
         closeBtn.addEventListener('click', () => {
-          api.closeBtn()
+          api.close()
         })
       })();
     </script>

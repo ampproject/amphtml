@@ -41,7 +41,7 @@ import {dev, user, userAssert} from '#utils/log';
 import {GEO_IN_GROUP} from './amp-geo-in-group';
 import {ampGeoPresets} from './amp-geo-presets';
 
-import {urls} from '../../../src/config';
+import * as urls from '../../../src/config/urls';
 import {getMode} from '../../../src/mode';
 
 /** @const */

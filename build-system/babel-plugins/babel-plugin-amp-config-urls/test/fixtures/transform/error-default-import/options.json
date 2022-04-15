@@ -1,0 +1,6 @@
+{
+  "plugins": [
+    "../../../.."
+  ],
+  "throws": "Unresolvable specifier. You must import `urls` as a namespace:\n`import * as urls from '../../../../../../../src/config/urls';`"
+}

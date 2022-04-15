@@ -47,6 +47,7 @@ amp-story-shopping-attachment a {
   justify-content: space-between !important;
   display: flex !important;
   flex-wrap: wrap !important;
+  align-items: flex-start;
 }
 
 .i-amphtml-amp-story-shopping-plp-card {

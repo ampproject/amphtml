@@ -41,6 +41,7 @@ const {
   getRemapBentoDependencies,
   getRemapBentoNpmDependencies,
 } = require('../compile/bento-remap');
+const {findJsSourceFilename} = require('../common/fs');
 
 const legacyLatestVersions = json5.parse(
   fs.readFileSync(
@@ -435,7 +436,6 @@ async function buildExtension(name, version, hasCss, options) {
   }
 
   if (hasCss) {
-    await fs.mkdir('build/css', {recursive: true});
     await buildExtensionCss(extDir, name, version, options);
     if (options.compileOnlyCss) {
       return;
@@ -515,6 +515,7 @@ async function buildNpmBentoWebComponentCss(extDir, options) {
     await buildExtensionCss(extDir, options.name, options.version, options);
   }
   const destFilepath = path.resolve(`${extDir}/dist/web-component.css`);
+  await fs.ensureDir(path.dirname(destFilepath));
   await fs.copyFile(srcFilepath, destFilepath);
 }
 
@@ -674,7 +675,9 @@ async function buildNpmBinaries(extDir, name, options) {
         ...(npm[mode].remap || {}),
         ...bentoRemaps,
       };
-      npm[mode].external = [...(npm[mode].external || []), ...bentoExternals];
+      npm[mode].external = [
+        ...new Set([...(npm[mode].external || []), ...bentoExternals]),
+      ];
     }
   }
   const binaries = Object.values(npm);
@@ -688,11 +691,14 @@ async function buildNpmBinaries(extDir, name, options) {
  * @return {!Promise}
  */
 function buildBinaries(extDir, binaries, options) {
+  // If outputPath is not defined, then use extDir
+  const {outputPath = extDir} = options;
+
   const promises = binaries.map((binary) => {
     const {babelCaller, entryPoint, external, outfile, remap, wrapper} = binary;
     const {name} = pathParse(outfile);
     const esm = argv.esm || argv.sxg || false;
-    return esbuildCompile(extDir + '/', entryPoint, `${extDir}/dist`, {
+    return esbuildCompile(extDir + '/', entryPoint, `${outputPath}/dist`, {
       ...options,
       toName: maybeToNpmEsmName(`${name}.max.js`),
       minifiedName: maybeToNpmEsmName(`${name}.js`),
@@ -705,19 +711,6 @@ function buildBinaries(extDir, binaries, options) {
     });
   });
   return Promise.all(promises);
-}
-
-/**
- * @param {string} nameWithoutExtension
- * @param {?string|void} cwd
- * @return {Promise<string|undefined>}
- */
-async function findJsSourceFilename(nameWithoutExtension, cwd) {
-  const [filename] = await fastGlob(
-    `${nameWithoutExtension}.{js,ts,tsx}`,
-    cwd ? {cwd} : undefined
-  );
-  return filename;
 }
 
 /**
@@ -734,7 +727,7 @@ async function buildBentoExtensionJs(dir, name, options) {
   );
   await buildExtensionJs(dir, name, {
     ...options,
-    externalDependencies: Object.values(remapDependencies),
+    externalDependencies: [...new Set(Object.values(remapDependencies))],
     remapDependencies,
     wrapper: 'none',
     outputFormat: argv.esm ? 'esm' : 'nomodule-loader',
@@ -801,13 +794,18 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
     import {BaseElement} from '../base-element';
     import {defineBentoElement} from '${bentoCePath}';
 
-    function defineElement() {
-      defineBentoElement(__name__, BaseElement);
+    function defineElement(win) {
+      defineBentoElement(__name__, BaseElement, win);
     }
 
     ${toExport ? 'export {defineElement};' : 'defineElement();'}
   `).replace('__name__', JSON.stringify(name));
 }
+
+/** @type {import('@babel/core').PluginItem[]} */
+const extensionBabelPlugins = [
+  './build-system/babel-plugins/babel-plugin-amp-config-urls',
+];
 
 /**
  * Build the JavaScript for the extension specified
@@ -820,7 +818,11 @@ function generateBentoEntryPointSource(name, toExport, outputFilename) {
  */
 async function buildExtensionJs(dir, name, options) {
   const isLatest = legacyLatestVersions[options.name] === options.version;
-  const {version, filename = `${name}.js`, wrapper = 'extension'} = options;
+  const {
+    filename = await findJsSourceFilename(name, dir),
+    version,
+    wrapper = 'extension',
+  } = options;
 
   const wrapperOrFn = wrappers[wrapper];
   if (!wrapperOrFn) {
@@ -840,6 +842,7 @@ async function buildExtensionJs(dir, name, options) {
     minifiedName: `${name}-${version}.js`,
     aliasName: isLatest ? `${name}-latest.js` : '',
     wrapper: resolvedWrapper,
+    babelPlugins: wrapper === 'extension' ? extensionBabelPlugins : null,
   });
 
   // If an incremental watch build fails, simply return.

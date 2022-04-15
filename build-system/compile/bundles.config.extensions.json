@@ -187,6 +187,14 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-audio",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "bento": true
+    }
+  },
+  {
     "name": "amp-auto-ads",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -349,6 +357,16 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-date-picker",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "npm": true,
+      "hasCss": true,
+      "bento": true
     }
   },
   {
@@ -544,6 +562,16 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-image-slider",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
     }
   },
   {

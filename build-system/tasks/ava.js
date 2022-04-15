@@ -15,6 +15,7 @@ const testFiles = [
   'build-system/tasks/make-extension/test/test.js',
   'build-system/tasks/markdown-toc/test/test.js',
   'build-system/tasks/prepend-global/prepend-global.test.js',
+  'build-system/tasks/remap-dependencies-plugin/test-remap-dependencies.js',
 ];
 
 let targetFiles;

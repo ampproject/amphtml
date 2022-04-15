@@ -38,7 +38,7 @@ export const getStoreService = (win) => {
  * Different UI experiences to display the story.
  * @const @enum {number}
  */
-export const UIType = {
+export const UIType_Enum = {
   MOBILE: 0,
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
   DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
@@ -52,6 +52,17 @@ export const UIType = {
 export const EmbeddedComponentState = {
   HIDDEN: 0, // Component is present in page, but hasn't been interacted with.
   FOCUSED: 1, // Component has been clicked, a tooltip should be shown.
+};
+
+/**
+ * Subscription states for the paywall-enabled stories.
+ * @enum {number}
+ */
+export const SubscriptionsState = {
+  DISABLED: 0,
+  PENDING: 1,
+  GRANTED: 2,
+  BLOCKED: 3,
 };
 
 /**
@@ -126,7 +137,7 @@ export let ShoppingDataDef;
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
  *    systemUiIsVisibleState: boolean,
- *    uiState: !UIType,
+ *    uiState: !UIType_Enum,
  *    viewportWarningState: boolean,
  *    actionsAllowlist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
@@ -192,7 +203,8 @@ const StateProperty = mangleObjectValues({
   PAGE_SIZE: 'pageSize',
 
   // AMP Story paywall states.
-  SUBSCRIPTIONS_DIALOG_STATE: 'subscriptionsDialogState',
+  SUBSCRIPTIONS_DIALOG_UI_STATE: 'subscriptionsDialogUiState',
+  SUBSCRIPTIONS_STATE: 'subscriptionsState',
 });
 
 export {StateProperty};
@@ -226,7 +238,8 @@ const Action = mangleObjectValues({
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
-  TOGGLE_SUBSCRIPTIONS_DIALOG: 'toggleSubscriptionsDialog',
+  TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE: 'toggleSubscriptionsDialogUiState',
+  TOGGLE_SUBSCRIPTIONS_STATE: 'toggleSubscriptionsState',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
 });
@@ -397,10 +410,10 @@ const actions = (state, action, data) => {
       });
     case Action.TOGGLE_UI:
       if (
-        state[StateProperty.UI_STATE] === UIType.VERTICAL &&
-        data !== UIType.VERTICAL
+        state[StateProperty.UI_STATE] === UIType_Enum.VERTICAL &&
+        data !== UIType_Enum.VERTICAL
       ) {
-        dev().error(TAG, 'Cannot switch away from UIType.VERTICAL');
+        dev().error(TAG, 'Cannot switch away from UIType_Enum.VERTICAL');
         return state;
       }
       return /** @type {!State} */ ({
@@ -448,11 +461,16 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.VIEWER_CUSTOM_CONTROLS]: data,
       });
-    case Action.TOGGLE_SUBSCRIPTIONS_DIALOG:
+    case Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE:
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.SUBSCRIPTIONS_DIALOG_STATE]: !!data,
+        [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
+      });
+    case Action.TOGGLE_SUBSCRIPTIONS_STATE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SUBSCRIPTIONS_STATE]: data,
       });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
@@ -578,7 +596,7 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
-      [StateProperty.UI_STATE]: UIType.MOBILE,
+      [StateProperty.UI_STATE]: UIType_Enum.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
       [StateProperty.ACTIONS_ALLOWLIST]: [],
@@ -591,7 +609,8 @@ export class AmpStoryStoreService {
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
       [StateProperty.PREVIEW_STATE]: false,
-      [StateProperty.SUBSCRIPTIONS_DIALOG_STATE]: false,
+      [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: false,
+      [StateProperty.SUBSCRIPTIONS_STATE]: SubscriptionsState.DISABLED,
     });
   }
 

@@ -46,7 +46,7 @@ describes.sandboxed('BentoInstagram preact component v1.0', {}, (env) => {
     expect(wrapper.find('div')).to.have.lengthOf(2);
   });
 
-  it('Resize prop is called', () => {
+  it.skip('Resize prop is called', () => {
     const requestResizeSpy = env.sandbox.spy();
     const wrapper = mount(
       <BentoInstagram
@@ -66,7 +66,7 @@ describes.sandboxed('BentoInstagram preact component v1.0', {}, (env) => {
     expect(requestResizeSpy).to.have.been.calledOnce;
   });
 
-  it('Height is changed', async () => {
+  it.skip('Height is changed', async () => {
     const wrapper = mount(
       <BentoInstagram
         shortcode="B8QaZW4AQY_"

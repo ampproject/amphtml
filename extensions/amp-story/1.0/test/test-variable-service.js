@@ -53,4 +53,52 @@ describes.fakeWin('amp-story variable service', {}, (env) => {
     const variables = variableService.get();
     expect(variables['storyProgress']).to.equal(0);
   });
+
+  describe('with ads', () => {
+    it('should calculate correct pageIndex and pageId on change without regards to ads', () => {
+      storeService.dispatch(Action.SET_PAGE_IDS, [
+        'a',
+        'b',
+        'c',
+        'i-amphtml-ad-page-0',
+        'd',
+        'e',
+      ]);
+      storeService.dispatch(Action.CHANGE_PAGE, {
+        id: 'c',
+        index: 2,
+      });
+
+      const variablesBeforeAds = variableService.get();
+      expect(variablesBeforeAds['storyPageIndex']).to.equal(2);
+      expect(variablesBeforeAds['storyPageId']).to.equal('c');
+
+      storeService.dispatch(Action.CHANGE_PAGE, {
+        id: 'd',
+        index: 4,
+      });
+
+      const variablesAfterAds = variableService.get();
+      expect(variablesAfterAds['storyPageIndex']).to.equal(3);
+      expect(variablesAfterAds['storyPageId']).to.equal('d');
+    });
+
+    it('should calculate correct storyProgress correctly on change', () => {
+      storeService.dispatch(Action.SET_PAGE_IDS, [
+        'a',
+        'b',
+        'c',
+        'i-amphtml-ad-page-0',
+        'd',
+        'e',
+      ]);
+      storeService.dispatch(Action.CHANGE_PAGE, {
+        id: 'd',
+        index: 4,
+      });
+
+      const variables = variableService.get();
+      expect(variables['storyProgress']).to.equal(0.75);
+    });
+  });
 });

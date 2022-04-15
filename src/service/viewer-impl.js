@@ -17,7 +17,7 @@ import {dev, devAssert} from '#utils/log';
 
 import {ViewerInterface} from './viewer-interface';
 
-import {urls} from '../config';
+import * as urls from '../config/urls';
 import {reportError} from '../error-reporting';
 import {registerServiceBuilderForDoc} from '../service-helpers';
 import {
