@@ -2,8 +2,8 @@ import objStr from 'obj-str';
 
 import {cloneElement, isValidElement} from '#preact';
 
-import {useStyles} from './component.jss';
-import {AutocompleteItemProps, ItemNode, ItemTemplateProps} from './types';
+import {useStyles} from '../component.jss';
+import {AutocompleteItemProps, ItemNode, ItemTemplateProps} from '../types';
 
 export function AutocompleteItem({
   id,

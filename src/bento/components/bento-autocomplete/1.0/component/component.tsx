@@ -13,7 +13,6 @@ import {xhrUtils} from '#preact/utils/xhr';
 import fuzzysearch from '#third_party/fuzzysearch';
 
 import {AutocompleteItem} from './autocomplete-item';
-import {useStyles} from './component.jss';
 import {
   getEnabledResults,
   getItemElement,
@@ -22,6 +21,10 @@ import {
 } from './helpers';
 import {HighlightedText} from './highlighted-text';
 import {tokenPrefixMatch} from './token-prefix-match';
+import {useAutocompleteBinding} from './use-autocomplete-binding';
+
+import {addParamToUrl} from '../../../../../url';
+import {useStyles} from '../component.jss';
 import {
   BentoAutocompleteProps,
   InputElement,
@@ -29,11 +32,7 @@ import {
   ItemTemplateFn,
   OnSelectData,
   isValidFilterType,
-} from './types';
-import {useAutocompleteBinding} from './use-autocomplete-binding';
-
-// @ts-ignore
-import {addParamToUrl} from '../../../../url';
+} from '../types';
 
 const INITIAL_ACTIVE_INDEX = -1;
 
