@@ -125,10 +125,9 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
     );
 
-    const ampSubscriptionsEl =
-      this.element.parentElement.parentElement.querySelector(
-        'amp-subscriptions-dialog'
-      );
+    const ampSubscriptionsEl = document.querySelector(
+      'amp-subscriptions-dialog'
+    );
     ampSubscriptionsEl.addEventListener('click', (event) =>
       this.onSkipButtonClick_(event)
     );
@@ -194,7 +193,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
   /**
    * @return {!Element}
    * @private
-   * TODO(#37285): add "next story" button to the banner
    */
   renderSubscriptionsDialogTemplate_() {
     return (
@@ -207,7 +205,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
             {this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SKIP
             )}
-            <span class="i-amphtml-story-subscriptions-dialog-banner-button-logo"></span>
           </span>
         </div>
         <div class="i-amphtml-story-subscriptions-dialog-content">
