@@ -559,6 +559,65 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
       const trackEl = videoEl.querySelector('track');
       expect(trackEl).to.not.exist;
     });
+    it.only('should append amp-story-captions element for captions', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'captions': {
+              'src': 'captions_src_response.vtt',
+              'srclang': 'en-us',
+            },
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const captionsEl = videoEl.querySelector('amp-story-captions');
+      expect(captionsEl).to.exist;
+    });
+    it.only('should append amp-story-captions if video already has a track child', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'captions': {
+              'src': 'captions_src_response.vtt',
+              'srclang': 'en-us',
+            },
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      videoEl.appendChild(<track />);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const captionsEl = videoEl.querySelector('amp-story-captions');
+      expect(captionsEl).to.exist;
+    });
+    it.only('should not append amp-story-captions if page already has an amp-story-captions child', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'captions': {
+              'src': 'captions_src_response.vtt',
+              'srclang': 'en-us',
+            },
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      videoEl.appendChild(<track />);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const captionsEl = videoEl.querySelector('amp-story-captions');
+      expect(captionsEl).to.exist;
+    });
   });
 
   describe('web stories: inlined video', async () => {

@@ -113,6 +113,37 @@
       <!-- </amp-story-grid-layer> -->
     </amp-story-page>
 
+
+
+
+
+    <amp-story-page id="normal-scenario">
+      <amp-story-grid-layer template="fill">
+        <amp-video
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay
+            captions-id="normal-scenario">
+          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
+        </amp-video>
+      </amp-story-grid-layer>
+      <amp-story-grid-layer template="vertical">
+        <amp-story-captions id="normal-scenario" layout="container"></amp-story-captions>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
+    <amp-story-page id="automatic-append-when-track-exists">
+      <amp-story-grid-layer template="fill">
+        <amp-video
+            src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            width="1280" height="720" layout="responsive" autoplay
+            captions-id="normal-scenario"
+            >
+          <track kind="subtitles" src="captions-for-container-layout.vtt" srclang="en" default>
+          <amp-story-captions id="normal-scenario" layout="container"></amp-story-captions>
+        </amp-video>
+      </amp-story-grid-layer>
+    </amp-story-page>
+
   </amp-story>
 </body>
 

@@ -62,6 +62,7 @@ export class AmpStoryCaptions extends AMP.BaseElement {
     while (this.trackRenderers_.length) {
       this.trackRenderers_.pop().dispose();
     }
+
     toArray(this.video_.textTracks).forEach((track) => {
       // Render both showing and hidden, because otherwise we would need to remember when we set it to hidden.
       // Disabled tracks are ignored.

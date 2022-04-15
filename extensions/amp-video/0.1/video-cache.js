@@ -10,6 +10,8 @@ import {Services} from '#service';
 
 import {user} from '#utils/log';
 
+import * as Preact from '#core/dom/jsx';
+
 import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 
 /** @const {!Array<string>} */
@@ -169,6 +171,23 @@ function applyAudioInfoToVideo(videoEl, hasAudio) {
  * @param {!Object} captionsResponse
  */
 function applyCaptionsTrackToVideo(videoEl, captionsResponse) {
+  // Append captions element if track is on page without amp-story-captions already defined
+  const captionsAlreadyExists = videoEl
+    .closest('amp-story-page')
+    .querySelector('amp-story-captions');
+  if (!captionsAlreadyExists && videoEl.querySelector('track')) {
+    const trackEl = videoEl.querySelector('track');
+    videoEl.setAttribute('captions-id', trackEl['src']);
+    const captionsEl = (
+      <amp-story-captions
+        id={trackEl['src']}
+        layout="container"
+      ></amp-story-captions>
+    );
+    videoEl.appendChild(captionsEl);
+    return;
+  }
+
   if (
     !captionsResponse ||
     !captionsResponse['src'] ||
@@ -177,12 +196,23 @@ function applyCaptionsTrackToVideo(videoEl, captionsResponse) {
   ) {
     return;
   }
-  const trackEl = createElementWithAttributes(videoEl.ownerDocument, 'track', {
-    'src': captionsResponse['src'],
-    'srclang': captionsResponse['srclang'],
-    'kind': 'captions',
-  });
+  const trackEl = (
+    <track
+      src={captionsResponse['src']}
+      srclang={captionsResponse['srclang']}
+      kind="captions"
+    ></track>
+  );
   videoEl.appendChild(trackEl);
+  videoEl.setAttribute('captions-id', captionsResponse['src']);
+
+  const captionsEl = (
+    <amp-story-captions
+      id={captionsResponse['src']}
+      layout="container"
+    ></amp-story-captions>
+  );
+  videoEl.appendChild(captionsEl);
 }
 
 /**
