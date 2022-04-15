@@ -125,7 +125,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
     );
 
-    const ampSubscriptionsEl = document.querySelector(
+    const ampSubscriptionsEl = this.win.document.querySelector(
       'amp-subscriptions-dialog'
     );
     ampSubscriptionsEl.addEventListener('click', (event) =>
