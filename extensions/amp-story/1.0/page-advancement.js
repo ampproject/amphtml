@@ -524,7 +524,6 @@ export class ManualAdvancement extends AdvancementConfig {
         tagName = el.tagName.toLowerCase();
 
         if (
-          tagName === 'amp-story-cta-layer' ||
           tagName === 'amp-story-page-attachment' ||
           tagName === 'amp-story-page-outlink'
         ) {
