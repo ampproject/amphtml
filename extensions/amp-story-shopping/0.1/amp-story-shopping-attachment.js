@@ -162,7 +162,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
    * @private
    */
   onShoppingDataUpdate_(shoppingData) {
-    if (!this.isOnActivePage_() || !shoppingData.activeProductData) {
+    if (!shoppingData.activeProductData || !this.isOnActivePage_()) {
       return;
     }
     const isOpen = this.storeService_.get(StateProperty.PAGE_ATTACHMENT_STATE);
