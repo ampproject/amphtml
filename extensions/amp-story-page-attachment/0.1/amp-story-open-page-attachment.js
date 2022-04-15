@@ -9,6 +9,7 @@ import {computedStyle, setImportantStyles} from '#core/dom/style';
 import {getWin} from '#core/window';
 
 import {getExperimentBranch} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -133,7 +134,8 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
   const openImgAttr = attachmentEl.getAttribute('cta-image');
 
   const noAnimation =
-    getExperimentBranch(getWin(pageEl), 'story-ad-auto-advance') == 'c';
+    getExperimentBranch(getWin(pageEl), 'story-ad-auto-advance') ==
+    StoryAdSegmentExp.AUTO_ADVANCE_NEW_CTA_NOT_ANIMATED;
 
   return openLabelOrFallback(
     pageEl,
