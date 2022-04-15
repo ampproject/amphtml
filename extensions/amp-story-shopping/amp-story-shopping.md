@@ -132,6 +132,12 @@ Inline data may be served from cache which may take time to propogate. `src` JSO
 }
 ```
 
+### Product JSON Schema
+
+See the schema for product JSON validation in [product.schema.json](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/shopping/product.schema.json).
+If validation fails on one or more of the shopping tags, an error message will be displayed, and the tag and product details / listing associated with the product(s) that have errors will not be rendered.
+Validation is performed with [ajv](https://ajv.js.org/json-schema.html) using the default ajv JSON schema draft.
+
 ### amp-story-shopping-attachment attributes
 
 #### `src` {string} optional

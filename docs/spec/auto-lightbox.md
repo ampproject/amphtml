@@ -53,12 +53,20 @@ To disable it on a particular document section:
 </section>
 ```
 
-Or to disable it for your entire document altogether:
+To disable it for your entire document altogether:
 
 ```html
 <body data-amp-auto-lightbox-disable>
   <!-- No elements in the document will be automatically lightboxed -->
 </body>
+```
+
+Or to prevent automatically loading of `amp-auto-lightbox` script on page load:
+
+```html
+<html ⚡ lang="en" data-amp-auto-lightbox-disable>
+  <!-- Prevent automatically loading of `amp-auto-lightbox` script on page-load -->
+</html>
 ```
 
 If you'd like manual tuning of disabled/enabled images and/or grouping, please use

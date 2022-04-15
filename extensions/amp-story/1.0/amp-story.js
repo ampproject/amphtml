@@ -9,7 +9,6 @@
  * </code>
  */
 
-import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
 
@@ -83,12 +82,14 @@ import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lg
 import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {InfoDialog} from './amp-story-info-dialog';
-import {getLocalizationService} from './amp-story-localization-service';
+import {
+  getLocalizationService,
+  getSupportedLanguageCode,
+} from './amp-story-localization-service';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryShare} from './amp-story-share';
 import {
@@ -200,7 +201,7 @@ export const PAYWALL_PAGE_INDEX = 2;
  * The number of milliseconds to wait before showing the paywall on paywall page.
  * @const {number}
  */
-export const PAYWALL_DELAY_DURATION = 2000;
+export const PAYWALL_DELAY_DURATION = 500;
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -211,7 +212,7 @@ const TAG = 'amp-story';
  */
 const DEFAULT_THEME_COLOR = '#202125';
 
-/**
+/*
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
@@ -808,7 +809,10 @@ export class AmpStory extends AMP.BaseElement {
     new AmpStoryShare(this.win, this.element);
   }
 
-  /** @private */
+  /**
+   * @param {MutationRecord} mutations
+   * @private
+   */
   onBodyElMutation_(mutations) {
     mutations.forEach((mutation) => {
       const bodyEl = dev().assertElement(mutation.target);
@@ -1196,7 +1200,10 @@ export class AmpStory extends AMP.BaseElement {
     return layout == Layout_Enum.CONTAINER;
   }
 
-  /** @private */
+  /**
+   * @return {!Promise}
+   * @private
+   */
   initializePages_() {
     const pageImplPromises = Array.prototype.map.call(
       this.element.querySelectorAll('amp-story-page'),
@@ -2549,6 +2556,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Loads amp-story-dev-tools if it is enabled.
    * @private
+   * @return {boolean}
    */
   maybeLoadStoryDevTools_() {
     if (
@@ -2592,14 +2600,14 @@ export class AmpStory extends AMP.BaseElement {
    */
   installLocalizationStrings_() {
     const localizationService = getLocalizationService(this.element);
-    const storyLanguage = localizationService.getLanguageCodesForElement(
+    const storyLanguages = localizationService.getLanguageCodesForElement(
       this.element
-    )[0];
-    if (this.maybeRegisterInlineLocalizationStrings_(storyLanguage)) {
+    );
+    if (this.maybeRegisterInlineLocalizationStrings_(storyLanguages[0])) {
       return;
     }
     if (isExperimentOn(this.win, 'story-remote-localization')) {
-      this.fetchLocalizationStrings_(storyLanguage);
+      this.fetchLocalizationStrings_(storyLanguages);
       Services.performanceFor(this.win).addEnabledExperiment(
         'story-remote-localization'
       );
@@ -2665,11 +2673,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Fetches from the CDN or localhost the localization strings.
-   * @param {string} languageCode
+   * @param {string[]} candidateLanguageCodes
    * @private
    */
-  fetchLocalizationStrings_(languageCode) {
+  fetchLocalizationStrings_(candidateLanguageCodes) {
     const localizationService = getLocalizationService(this.element);
+    const languageCode = getSupportedLanguageCode(candidateLanguageCodes);
 
     const localizationUrl = calculateExtensionFileUrl(
       this.win,
@@ -2678,7 +2687,6 @@ export class AmpStory extends AMP.BaseElement {
       getMode(this.win).localDev
     );
 
-    // The cache fallbacks to english if language not found, locally it errors.
     Services.xhrFor(this.win)
       .fetchJson(localizationUrl, {prerenderSafe: true})
       .then((res) => res.json())
@@ -2696,7 +2704,6 @@ export class AmpStory extends AMP.BaseElement {
 AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story', AmpStory, CSS);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
-  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
 });

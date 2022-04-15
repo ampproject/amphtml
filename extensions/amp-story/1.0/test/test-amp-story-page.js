@@ -3,6 +3,7 @@ import {expect} from 'chai';
 import {Deferred} from '#core/data-structures/promise';
 import {Signals} from '#core/data-structures/signals';
 import {addAttributesToElement, createElementWithAttributes} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {scopedQuerySelectorAll} from '#core/dom/query';
 import {htmlFor} from '#core/dom/static-template';
 import * as VideoUtils from '#core/dom/video';
@@ -712,5 +713,66 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.setState(PageState.PLAYING);
 
     expect(startMeasuringStub).to.not.have.been.called;
+  });
+
+  describe('maybeConvertCtaLayerToPageOutlink_', () => {
+    it('should do nothing if amp-story-cta-layer has two anchor tags', () => {
+      page.element.appendChild(
+        <amp-story-cta-layer>
+          <a href="https://www.ampproject.org" class="button">
+            CTA Text!
+          </a>
+          <a>dummy anchor</a>
+        </amp-story-cta-layer>
+      );
+
+      page.buildCallback();
+
+      expect(page.element.querySelector('amp-story-cta-layer')).to.be.not.null;
+    });
+
+    it('should do nothing if the anchor tag in amp-story-cta-layer has no href attribute', () => {
+      page.element.appendChild(
+        <amp-story-cta-layer>
+          <a class="button">CTA Text!</a>
+        </amp-story-cta-layer>
+      );
+
+      page.buildCallback();
+
+      expect(page.element.querySelector('amp-story-cta-layer')).to.be.not.null;
+    });
+
+    describe('should convert cta layer to page outlink tag', async () => {
+      beforeEach(() => {
+        page.element.appendChild(
+          <amp-story-cta-layer>
+            <a href="https://www.ampproject.org" class="button">
+              CTA Text!
+            </a>
+          </amp-story-cta-layer>
+        );
+      });
+
+      it('should remove amp-story-cta-layer', () => {
+        page.buildCallback();
+
+        expect(page.element.querySelector('amp-story-cta-layer')).to.be.null;
+      });
+
+      it('should append amp-story-page-outlink', () => {
+        page.buildCallback();
+
+        const outlinkElAfterBuild = page.element.querySelector(
+          'amp-story-page-outlink'
+        );
+        const expectedOutlinkEl = (
+          <amp-story-page-outlink layout="nodisplay">
+            <a href="https://www.ampproject.org">CTA Text!</a>
+          </amp-story-page-outlink>
+        );
+        expect(outlinkElAfterBuild.isEqualNode(expectedOutlinkEl)).is.true;
+      });
+    });
   });
 });
