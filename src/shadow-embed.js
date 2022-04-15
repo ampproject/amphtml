@@ -1,4 +1,3 @@
-import {iterateCursor} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {setInitialDisplay, setStyle} from '#core/dom/style';
 import {
@@ -13,7 +12,7 @@ import {Services} from '#service';
 
 import {dev, devAssert} from '#utils/log';
 
-import {ShadowCSS} from '#third_party/webcomponentsjs/ShadowCSS';
+import * as ShadowCSS from '#third_party/webcomponentsjs/ShadowCSS';
 
 import {installCssTransformer} from './style-installer';
 import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
@@ -52,7 +51,7 @@ export function createShadowRoot(hostElement) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
         get: function () {
           const items = [];
-          iterateCursor(shadowRoot.childNodes, (child) => {
+          shadowRoot.childNodes.forEach((child) => {
             if (child.tagName === 'STYLE') {
               items.push(child.sheet);
             }
@@ -224,10 +223,7 @@ export function scopeShadowCss(shadowRoot, css) {
   }
 
   // Patch selectors.
-  // Invoke `ShadowCSS.scopeRules` via `call` because the way it uses `this`
-  // internally conflicts with Closure compiler's advanced optimizations.
-  const {scopeRules} = ShadowCSS;
-  return scopeRules.call(ShadowCSS, rules, `.${id}`, transformRootSelectors);
+  return ShadowCSS.scopeRules(rules, `.${id}`, transformRootSelectors);
 }
 
 /**

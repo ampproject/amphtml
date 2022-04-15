@@ -17,6 +17,8 @@ import {dev, user, userAssert} from '#utils/log';
 
 import {Matrix, Renderer} from '#third_party/zuho/zuho';
 
+import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+
 import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {
   Action,
@@ -51,7 +53,11 @@ const MIN_WEBGL_DISTANCE = 2;
  */
 const renderActivateButtonTemplate = () => (
   <button class="i-amphtml-story-360-activate-button" role="button">
-    <span class="i-amphtml-story-360-activate-text"></span>
+    <span
+      i-amphtml-i18n-text-content={
+        LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
+      }
+    ></span>
     <span class="i-amphtml-story-360-activate-button-icon">
       360°
       <svg
@@ -97,7 +103,12 @@ const renderActivateButtonTemplate = () => (
 const renderDiscoveryTemplate = () => (
   <div class="i-amphtml-story-360-discovery" aria-live="polite">
     <div class="i-amphtml-story-360-discovery-animation"></div>
-    <span class="i-amphtml-story-360-discovery-text"></span>
+    <span
+      class="i-amphtml-story-360-discovery-text"
+      i-amphtml-i18n-text-content={
+        LocalizedStringId_Enum.AMP_STORY_DISCOVERY_DIALOG_TEXT
+      }
+    ></span>
   </div>
 );
 
@@ -226,9 +237,6 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = null;
 
     /** @private {!Array<!CameraOrientation>} */
     this.orientations_ = [];
@@ -547,14 +555,9 @@ export class AmpStory360 extends AMP.BaseElement {
       const page = this.getPage_();
       const discoveryTemplate = page && renderDiscoveryTemplate();
       // Support translation of discovery dialogue text.
-      this.mutateElement(() => {
-        discoveryTemplate.querySelector(
-          '.i-amphtml-story-360-discovery-text'
-        ).textContent = this.localizationService_.getLocalizedString(
-          LocalizedStringId_Enum.AMP_STORY_DISCOVERY_DIALOG_TEXT
-        );
-      });
-      this.mutateElement(() => page.appendChild(discoveryTemplate));
+      localizeTemplate(discoveryTemplate, page).then(() =>
+        this.mutateElement(() => page.appendChild(discoveryTemplate))
+      );
     }
   }
 
@@ -587,11 +590,7 @@ export class AmpStory360 extends AMP.BaseElement {
     const ampStoryPage = this.getPage_();
     this.activateButton_ = ampStoryPage && renderActivateButtonTemplate();
 
-    this.activateButton_.querySelector(
-      '.i-amphtml-story-360-activate-text'
-    ).textContent = this.localizationService_.getLocalizedString(
-      LocalizedStringId_Enum.AMP_STORY_ACTIVATE_BUTTON_TEXT
-    );
+    localizeTemplate(this.activateButton_, ampStoryPage);
 
     this.activateButton_.addEventListener('click', () =>
       this.requestGyroscopePermissions_()

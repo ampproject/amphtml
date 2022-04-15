@@ -4,6 +4,18 @@ formats:
   - stories
 teaser:
   text: A panel of content that opens inline with an AMP story page.
+toc: true
+$title: amp-story-page-attachment
+version: '0.1'
+versions:
+  - '0.1'
+latest_version: '0.1'
+is_current: true
+$path: /documentation/components/amp-story-page-attachment.html
+$localization:
+  path: '/{locale}/documentation/components/amp-story-page-attachment.html'
+layouts:
+  - nodisplay  
 ---
 
 # amp-story-page-attachment

@@ -62,6 +62,10 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://data.24smi.net',
   },
 
+  '4wmarketplace': {
+    renderStartImplemented: true,
+  },
+
   'a8': {
     prefetch: 'https://statics.a8.net/amp/ad.js',
     renderStartImplemented: true,

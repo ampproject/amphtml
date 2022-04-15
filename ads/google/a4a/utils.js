@@ -368,6 +368,8 @@ export function googlePageParameters(a4a, startTime) {
       'uam': uaDataValues?.model,
       'uafv': uaDataValues?.uaFullVersion,
       'uab': uaDataValues?.bitness,
+      'uafvl': JSON.stringify(uaDataValues?.fullVersionList),
+      'uaw': uaDataValues?.wow64,
     };
   });
 }

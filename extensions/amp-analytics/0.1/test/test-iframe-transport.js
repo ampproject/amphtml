@@ -2,7 +2,7 @@ import {user} from '#utils/log';
 
 import {expectPostMessage} from '#testing/iframe';
 
-import {urls} from '../../../../src/config';
+import * as urls from '../../../../src/config/urls';
 import {addParamsToUrl} from '../../../../src/url';
 import {
   IframeTransport,

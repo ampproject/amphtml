@@ -13,7 +13,7 @@ import {
   EmbeddedComponentState,
   InteractiveComponentDef,
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
@@ -487,6 +487,11 @@ export class ManualAdvancement extends AdvancementConfig {
           return true;
         }
 
+        if (tagName === 'amp-story-subscriptions') {
+          shouldHandleEvent = true;
+          return true;
+        }
+
         return false;
       },
       /* opt_stopAt */ this.element_
@@ -519,7 +524,6 @@ export class ManualAdvancement extends AdvancementConfig {
         tagName = el.tagName.toLowerCase();
 
         if (
-          tagName === 'amp-story-cta-layer' ||
           tagName === 'amp-story-page-attachment' ||
           tagName === 'amp-story-page-outlink'
         ) {
@@ -699,7 +703,7 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Calculates the pageRect based on the UIType.
+   * Calculates the pageRect based on the UIType_Enum.
    * We can an use LayoutBox for mobile since the story page occupies entire screen.
    * Desktop UI needs the most recent value from the getBoundingClientRect function.
    * @return {DOMRect | LayoutBox}
@@ -707,7 +711,7 @@ export class ManualAdvancement extends AdvancementConfig {
    */
   getStoryPageRect_() {
     const uiState = this.storeService_.get(StateProperty.UI_STATE);
-    if (uiState !== UIType.DESKTOP_ONE_PANEL) {
+    if (uiState !== UIType_Enum.DESKTOP_ONE_PANEL) {
       return this.element_.getLayoutBox();
     } else {
       return this.element_

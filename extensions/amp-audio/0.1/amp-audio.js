@@ -46,7 +46,7 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeFixed(layout);
+    return isLayoutSizeFixed(layout) || layout == Layout_Enum.CONTAINER;
   }
 
   /** @override */
@@ -104,7 +104,12 @@ export class AmpAudio extends AMP.BaseElement {
    * Builds the internal <audio> element.
    */
   buildAudioElement() {
-    const audio = this.element.ownerDocument.createElement('audio');
+    let audio = this.element.querySelector('audio');
+    if (!audio) {
+      audio = this.element.ownerDocument.createElement('audio');
+      this.element.appendChild(audio);
+    }
+
     if (!audio.play) {
       this.toggleFallback(true);
       return;
@@ -143,12 +148,15 @@ export class AmpAudio extends AMP.BaseElement {
 
     applyFillContent(audio);
     realChildNodes(this.element).forEach((child) => {
+      if (child === audio) {
+        return;
+      }
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'), dev().assertElement(child));
       }
       audio.appendChild(child);
     });
-    this.element.appendChild(audio);
+
     this.audio_ = audio;
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());

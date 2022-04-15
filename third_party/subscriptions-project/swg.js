@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.208 */
+/** Version: 0.1.22.213 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -3282,7 +3282,7 @@ class ActivityIframeView extends View {
    * @param {!Window} win
    * @param {!../components/activities.ActivityPorts} activityPorts
    * @param {string} src
-   * @param {!Object<string, ?>=} args
+   * @param {!Object<string, ?>=} args Additional data to be passed to the iframe.
    * @param {boolean=} shouldFadeBody
    * @param {boolean=} hasLoadingIndicator
    */
@@ -4672,9 +4672,6 @@ function defaultConfig() {
  * limitations under the License.
  */
 
-// NOTE: This regex was copied from SwG's AMP extension. https://github.com/ampproject/amphtml/blob/c23bf281f817a2ee5df73f6fd45e9f4b71bb68b6/extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js#L56
-const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
-
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
  * @type {HTMLAnchorElement}
@@ -4817,17 +4814,7 @@ function getCanonicalUrl(doc) {
 }
 
 const PARSED_URL = parseUrl(self.window.location.href);
-const PARSED_REFERRER = parseUrl(self.document.referrer);
-
-/**
- * True for Google domains
- * @param {LocationDef=} parsedUrl Defaults to the current page's URL
- * @return {boolean}
- */
-function isGoogleDomain(parsedUrl) {
-  parsedUrl = parsedUrl || PARSED_URL;
-  return GOOGLE_DOMAIN_RE.test(parsedUrl.hostname);
-}
+parseUrl(self.document.referrer);
 
 /**
  * True for HTTPS URLs
@@ -4837,17 +4824,6 @@ function isGoogleDomain(parsedUrl) {
 function isSecure(parsedUrl) {
   parsedUrl = parsedUrl || PARSED_URL;
   return parsedUrl.protocol === 'https' || parsedUrl.protocol === 'https:';
-}
-
-/**
- * True when the page is rendered within a secure Google application or
- * was linked to from a secure Google domain.
- * @param {LocationDef=} parsedReferrer Defaults to the current page's referrer
- * @return {boolean}
- */
-function wasReferredByGoogle(parsedReferrer) {
-  parsedReferrer = parsedReferrer || PARSED_REFERRER;
-  return isSecure(parsedReferrer) && isGoogleDomain(parsedReferrer);
 }
 
 /**
@@ -5020,7 +4996,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.208',
+    '_client': 'SwG 0.1.22.213',
   });
 }
 
@@ -5906,7 +5882,10 @@ class OffersFlow {
    */
   getDialogConfig_(clientConfig) {
     return clientConfig.useUpdatedOfferFlows
-      ? {desktopConfig: {isCenterPositioned: true, supportsWideScreen: true}}
+      ? {
+          desktopConfig: {isCenterPositioned: true, supportsWideScreen: true},
+          shouldDisableBodyScrolling: true,
+        }
       : {};
   }
 
@@ -6350,7 +6329,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.208',
+        '_client': 'SwG 0.1.22.213',
         'supportsEventManager': true,
       },
       args || {}
@@ -7263,7 +7242,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.208');
+    context.setClientVersion('SwG 0.1.22.213');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -8214,6 +8193,7 @@ const CallbackId = {
   FLOW_STARTED: 7,
   FLOW_CANCELED: 8,
   PAY_CONFIRM_OPENED: 9,
+  OFFERS_FLOW_REQUEST: 10,
 };
 
 /**
@@ -8344,6 +8324,27 @@ class Callbacks {
    */
   hasSubscribeRequestCallback() {
     return !!this.callbacks_[CallbackId.SUBSCRIBE_REQUEST];
+  }
+
+  /**
+   * @param {function()} callback
+   */
+  setOnOffersFlowRequest(callback) {
+    this.setCallback_(CallbackId.OFFERS_FLOW_REQUEST, callback);
+  }
+
+  /**
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerOffersFlowRequest() {
+    return this.trigger_(CallbackId.OFFERS_FLOW_REQUEST, true);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasOffersFlowRequestCallback() {
+    return !!this.callbacks_[CallbackId.OFFERS_FLOW_REQUEST];
   }
 
   /**
@@ -8552,26 +8553,32 @@ class AttributionParams {
  */
 class AutoPromptConfig {
   /**
-   * @param {number|undefined} maxImpressionsPerWeek
+   * @param {!AutoPromptConfigParams=} params
    */
-  constructor(
-    maxImpressionsPerWeek,
+  constructor({
     displayDelaySeconds,
-    backoffSeconds,
+    dismissalBackOffSeconds,
     maxDismissalsPerWeek,
-    maxDismissalsResultingHideSeconds
-  ) {
-    /** @const {number|undefined} */
-    this.maxImpressionsPerWeek = maxImpressionsPerWeek;
-
+    maxDismissalsResultingHideSeconds,
+    impressionBackOffSeconds,
+    maxImpressions,
+    maxImpressionsResultingHideSeconds,
+  } = {}) {
     /** @const {!ClientDisplayTrigger} */
     this.clientDisplayTrigger = new ClientDisplayTrigger(displayDelaySeconds);
 
     /** @const {!ExplicitDismissalConfig} */
     this.explicitDismissalConfig = new ExplicitDismissalConfig(
-      backoffSeconds,
+      dismissalBackOffSeconds,
       maxDismissalsPerWeek,
       maxDismissalsResultingHideSeconds
+    );
+
+    /** @const {!ImpressionConfig} */
+    this.impressionConfig = new ImpressionConfig(
+      impressionBackOffSeconds,
+      maxImpressions,
+      maxImpressionsResultingHideSeconds
     );
   }
 }
@@ -8594,23 +8601,49 @@ class ClientDisplayTrigger {
  */
 class ExplicitDismissalConfig {
   /**
-   * @param {number|undefined} backoffSeconds
+   * @param {number|undefined} backOffSeconds
    * @param {number|undefined} maxDismissalsPerWeek
    * @param {number|undefined} maxDismissalsResultingHideSeconds
    */
   constructor(
-    backoffSeconds,
+    backOffSeconds,
     maxDismissalsPerWeek,
     maxDismissalsResultingHideSeconds
   ) {
     /** @const {number|undefined} */
-    this.backoffSeconds = backoffSeconds;
+    this.backOffSeconds = backOffSeconds;
 
     /** @const {number|undefined} */
     this.maxDismissalsPerWeek = maxDismissalsPerWeek;
 
     /** @const {number|undefined} */
     this.maxDismissalsResultingHideSeconds = maxDismissalsResultingHideSeconds;
+  }
+}
+
+/**
+ * Configuration of impression behavior and its effects.
+ */
+class ImpressionConfig {
+  /**
+   * @param {number|undefined} backOffSeconds
+   * @param {number|undefined} maxImpressions
+   * @param {number|undefined} maxImpressionsResultingHideSeconds
+   */
+  constructor(
+    backOffSeconds,
+    maxImpressions,
+    maxImpressionsResultingHideSeconds
+  ) {
+    /** @const {number|undefined} */
+    this.backOffSeconds = backOffSeconds;
+
+    /** @const {number|undefined} */
+    this.maxImpressions = maxImpressions;
+
+    /** @const {number|undefined} */
+    this.maxImpressionsResultingHideSeconds =
+      maxImpressionsResultingHideSeconds;
   }
 }
 
@@ -8894,13 +8927,23 @@ class ClientConfigManager {
     const autoPromptConfigJson = json['autoPromptConfig'];
     let autoPromptConfig = undefined;
     if (autoPromptConfigJson) {
-      autoPromptConfig = new AutoPromptConfig(
-        autoPromptConfigJson.maxImpressionsPerWeek,
-        autoPromptConfigJson.clientDisplayTrigger?.displayDelaySeconds,
-        autoPromptConfigJson.explicitDismissalConfig?.backoffSeconds,
-        autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsPerWeek,
-        autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsResultingHideSeconds
-      );
+      autoPromptConfig = new AutoPromptConfig({
+        displayDelaySeconds:
+          autoPromptConfigJson.clientDisplayTrigger?.displayDelaySeconds,
+        dismissalBackOffSeconds:
+          autoPromptConfigJson.explicitDismissalConfig?.backOffSeconds,
+        maxDismissalsPerWeek:
+          autoPromptConfigJson.explicitDismissalConfig?.maxDismissalsPerWeek,
+        maxDismissalsResultingHideSeconds:
+          autoPromptConfigJson.explicitDismissalConfig
+            ?.maxDismissalsResultingHideSeconds,
+        impressionBackOffSeconds:
+          autoPromptConfigJson.impressionConfig?.backOffSeconds,
+        maxImpressions: autoPromptConfigJson.impressionConfig?.maxImpressions,
+        maxImpressionsResultingHideSeconds:
+          autoPromptConfigJson.impressionConfig
+            ?.maxImpressionsResultingHideSeconds,
+      });
     }
 
     const uiPredicatesJson = json['uiPredicates'];
@@ -9063,8 +9106,30 @@ class ContributionsFlow {
       );
       activityIframeView.on(SkuSelectedResponse, this.startPayFlow_.bind(this));
       this.activityIframeView_ = activityIframeView;
-      return this.dialogManager_.openView(this.activityIframeView_);
+      return this.clientConfigManager_
+        .getClientConfig()
+        .then((clientConfig) => {
+          if (!this.activityIframeView_) {
+            return;
+          }
+          return this.dialogManager_.openView(
+            this.activityIframeView_,
+            /* hidden */ false,
+            this.getDialogConfig_(clientConfig)
+          );
+        });
     });
+  }
+
+  /**
+   *
+   * @param {!../model/client-config.ClientConfig} clientConfig
+   * @return {!../components/dialog.DialogConfig}
+   */
+  getDialogConfig_(clientConfig) {
+    return clientConfig.useUpdatedOfferFlows
+      ? {shouldDisableBodyScrolling: true}
+      : {};
   }
 
   /**
@@ -9941,6 +10006,10 @@ class Dialog {
     /** @const @private {boolean} */
     this.positionCenterOnDesktop_ = !!desktopDialogConfig.isCenterPositioned;
 
+    /** @const @private {boolean} */
+    this.shouldDisableBodyScrolling_ =
+      !!dialogConfig.shouldDisableBodyScrolling;
+
     /** @const @private {!MediaQueryList} */
     this.desktopMediaQuery_ = this.doc_
       .getWin()
@@ -10058,6 +10127,9 @@ class Dialog {
     } else {
       animating = Promise.resolve();
     }
+
+    this.doc_.getBody().classList.remove('swg-disable-scroll');
+
     return animating.then(() => {
       const iframeEl = this.iframe_.getElement();
       iframeEl.parentNode.removeChild(iframeEl);
@@ -10168,6 +10240,10 @@ class Dialog {
 
     this.view_ = view;
     this.getContainer().appendChild(view.getElement());
+
+    if (this.shouldDisableBodyScrolling_) {
+      this.doc_.getBody().classList.add('swg-disable-scroll');
+    }
 
     // If the current view should fade the parent document.
     if (view.shouldFadeBody() && !this.hidden_) {
@@ -10760,9 +10836,12 @@ class MeterToastApi {
           .triggerFlowStarted(SubscriptionFlows.SHOW_METER_TOAST);
         this.activityIframeView_.on(
           ViewSubscriptionsResponse,
-          this.startNativeFlow_.bind(this)
+          this.startSubscriptionFlow_.bind(this)
         );
-        if (!this.deps_.callbacks().hasSubscribeRequestCallback()) {
+        if (
+          !this.deps_.callbacks().hasSubscribeRequestCallback() &&
+          !this.deps_.callbacks().hasOffersFlowRequestCallback()
+        ) {
           const errorMessage =
             '[swg.js]: `setOnNativeSubscribeRequest` has not been set ' +
             'before starting the metering flow, so users will not be able to ' +
@@ -10908,12 +10987,14 @@ class MeterToastApi {
    * @param {ViewSubscriptionsResponse} response
    * @private
    */
-  startNativeFlow_(response) {
+  startSubscriptionFlow_(response) {
+    this.removeCloseEventListener();
+    // We shouldn't decrement the meter on redirects, so don't call onConsumeCallback.
+    this.onConsumeCallbackHandled_ = true;
     if (response.getNative()) {
-      this.removeCloseEventListener();
-      // We shouldn't decrement the meter on redirects, so don't call onConsumeCallback.
-      this.onConsumeCallbackHandled_ = true;
       this.deps_.callbacks().triggerSubscribeRequest();
+    } else {
+      this.deps_.callbacks().triggerOffersFlowRequest();
     }
   }
 
@@ -17591,7 +17672,7 @@ class Propensity {
   }
 }
 
-const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}\n/*# sourceURL=/./src/components/dialog.css*/\n";
+const CSS = ".swg-dialog,.swg-toast{background-color:#fff!important;box-sizing:border-box}.swg-toast{border:none!important;bottom:0!important;max-height:46px!important;position:fixed!important;z-index:2147483647!important}@media (min-width:871px) and (min-height:641px){.swg-dialog.swg-wide-dialog{left:-435px!important;width:870px!important}}@media (max-height:640px),(max-width:640px){.swg-dialog,.swg-toast{border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important;left:-240px!important;margin-left:50vw!important;width:480px!important}}@media (min-width:641px) and (min-height:641px){.swg-dialog{background-color:transparent!important;border:none!important;left:-315px!important;margin-left:50vw!important;width:630px!important}.swg-toast{border-radius:4px!important;bottom:8px!important;box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)!important;left:8px!important}}@media (max-width:480px){.swg-dialog,.swg-toast{left:0!important;margin-left:0!important;right:0!important;width:100%!important}}body.swg-disable-scroll{height:100%!important}body.swg-disable-scroll,body.swg-disable-scroll *{overflow:hidden!important}\n/*# sourceURL=/./src/components/dialog.css*/\n";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -18407,7 +18488,6 @@ class ConfiguredRuntime {
     if (
       !entitlement ||
       !isSecure(this.win().location) ||
-      !wasReferredByGoogle(parseUrl(this.win().document.referrer)) ||
       !queryStringHasFreshGaaParams(
         this.win().location.search,
         /*allowAllAccessTypes=*/ true

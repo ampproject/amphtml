@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.208 */
+/** Version: 0.1.22.213 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -104,36 +104,36 @@ const I18N_STRINGS = {
     'te': '<strong></strong>ఈ కంటెంట్‌కు మీరు సాధారణంగా పేమెంట్ చేయాల్సి ఉంటుంది, కానీ మీరు Google ఖాతాను ఉపయోగించి <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>తో రిజిస్టర్ చేసుకున్నప్పుడు, ఈ వార్తా కథనానికి ఇంకా మరెన్నో వాటికి Google, ఉచిత యాక్సెస్‌ను ఇస్తుంది.',
   },
   'SHOWCASE_REGWALL_PUBLISHER_SIGN_IN_BUTTON': {
-    'bg': 'Вече имате профил?',
-    'bn': 'আপনার কি আগে থেকেই অ্যাকাউন্ট আছে?',
-    'cs': 'Už máte účet?',
-    'da': 'Har du allerede en konto?',
-    'de': 'Du hast bereits ein Konto?',
-    'el': 'Διαθέτετε ήδη λογαριασμό;',
-    'en': 'Already have an account?',
-    'es': '¿Ya tienes una cuenta?',
-    'es-419': '¿Ya tienes una cuenta?',
+    'bg': 'Вече сте се регистрирали? Вход',
+    'bn': 'আগে থেকেই রেজিস্টার করেছেন? সাইন-ইন করুন',
+    'cs': 'Jste už zaregistrováni? Přihlásit se',
+    'da': 'Er du allerede tilmeldt? Log ind',
+    'de': 'Bereits registriert? Anmelden',
+    'el': 'Έχετε εγγραφεί ήδη; Σύνδεση',
+    'en': 'Already registered? Sign in',
+    'es': '¿Ya te has registrado? Iniciar sesión',
+    'es-419': '¿Ya te registraste? Accede',
     'es-ar': '¿Ya tienes una cuenta?',
-    'fr': 'Vous avez déjà un compte&nbsp;?',
-    'fr-ca': 'Vous avez déjà un compte?',
-    'hi': 'क्या आपके पास पहले से कोई प्रकाशक खाता है?',
-    'it': 'Hai già un account?',
-    'ja': 'すでにアカウントをお持ちですか？',
-    'kn': 'ಈಗಾಗಲೇ ಖಾತೆಯೊಂದನ್ನು ಹೊಂದಿದ್ದೀರಾ?',
-    'lt': 'Jau turite paskyrą?',
-    'lv': 'Vai jums jau ir konts?',
-    'ml': 'മുമ്പേ അക്കൗണ്ടുണ്ടോ?',
-    'mr': 'आधीपासून खाते आहे?',
-    'nl': 'Heb je al een account?',
-    'pl': 'Masz już konto?',
-    'pt-br': 'Já tem uma conta?',
-    'pt-pt': 'Já tem uma conta?',
-    'ro': 'Aveți deja un cont?',
-    'sk': 'Už máte účet?',
-    'sl': 'Že imate račun?',
-    'sv': 'Har du redan ett konto?',
-    'ta': 'ஏற்கெனவே கணக்கு உள்ளதா?',
-    'te': 'ఇప్పటికే ఖాతా ఉందా?',
+    'fr': 'Déjà inscrit&nbsp;? Connectez-vous',
+    'fr-ca': 'Déjà inscrit? Se connecter',
+    'hi': 'पहले से रजिस्टर किया हुआ है? साइन इन करें',
+    'it': 'Hai già effettuato la registrazione? Accedi',
+    'ja': '登録済みの方: ログイン',
+    'kn': 'ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಲಾಗಿದೆಯೇ? ಸೈನ್ ಇನ್',
+    'lt': 'Jau užsiregistravote? Prisijungti',
+    'lv': 'Vai esat jau reģistrējies? Pierakstīties',
+    'ml': 'മുമ്പേ രജിസ്റ്റർ ചെയ്തിട്ടുണ്ടോ? സൈൻ ഇൻ ചെയ്യുക',
+    'mr': 'आधीपासून नोंदणी केली आहे का? साइन इन करा',
+    'nl': 'Al geregistreerd? Inloggen',
+    'pl': 'Jesteś już zarejestrowanym użytkownikiem? Zaloguj się',
+    'pt-br': 'Já se inscreveu? Fazer login',
+    'pt-pt': 'Já fez o seu registo? Inicie sessão',
+    'ro': 'V-ați înregistrat deja? Conectați-vă',
+    'sk': 'Už máte zaregistrovaný účet? Prihlásiť sa',
+    'sl': 'Ste že registrirani? Prijavite se.',
+    'sv': 'Har du redan registrerat dig? Logga in',
+    'ta': 'ஏற்கெனவே பதிவுசெய்துள்ளீர்களா? உள்நுழைக',
+    'te': 'ఇప్పటికే రిజిస్టర్ చేయబడి ఉందా? సైన్ ఇన్ చేయండి',
   },
   'SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON': {
     'bg': 'Вход с Google',
@@ -152,8 +152,8 @@ const I18N_STRINGS = {
     'it': 'Accedi con Google',
     'ja': 'Google でログイン',
     'kn': 'Google ಖಾತೆ ಬಳಸಿಕೊಂಡು ಸೈನ್ ಇನ್ ಮಾಡಿ',
-    'lt': 'Prisijungimas naudojant „Google“',
-    'lv': 'Pierakstīšanās ar Google kontu',
+    'lt': 'Prisijunkite su „Google“',
+    'lv': 'Pierakstīties, izmantojot Google',
     'ml': 'Google ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക',
     'mr': 'Google वापरून साइन इन करा',
     'nl': 'Inloggen met Google',
@@ -186,7 +186,7 @@ const I18N_STRINGS = {
     'ja': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> の <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL 規約<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>を見る',
     'kn': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> ನ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL ನಿಯಮಗಳು<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> ಅನ್ನು ಪರಿಶೀಲಿಸಿ',
     'lt': 'Peržiūrėkite „<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>“ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL sąlygas<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
-    'lv': 'Pārskatīt izdevuma <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL noteikumus<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
+    'lv': 'Pārskatīt <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL noteikumus<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph>',
     'ml': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> എന്നതിന്റെ <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL നിബന്ധനകൾ<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> അവലോകനം ചെയ്യുക',
     'mr': '<ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph> च्या <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL अटी<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> यांचे पुनरावलोकन करा',
     'nl': 'Bekijk de <ph name="LINK_START"><ex>&lt;a&gt;</ex></ph>CASL-voorwaarden<ph name="LINK_END"><ex>&lt;/a&gt;</ex></ph> van <ph name="PUBLICATION"><ex>AP News</ex>{publication}</ph>',
@@ -219,6 +219,28 @@ const I18N_STRINGS = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
 
 /**
  * @param  {...*} var_args [description]
@@ -946,6 +968,10 @@ const SIGN_IN_WITH_GOOGLE_BUTTON_ID = 'swg-sign-in-with-google-button';
 const PUBLISHER_SIGN_IN_BUTTON_ID = 'swg-publisher-sign-in-button';
 
 /** ID for the Regwall container element. */
+const REGISTRATION_BUTTON_CONTAINER_ID =
+  'swg-registration-button-container';
+
+/** ID for the Regwall container element. */
 const REGWALL_CONTAINER_ID = 'swg-regwall-container';
 
 /** ID for the Regwall dialog element. */
@@ -953,6 +979,9 @@ const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
 
 /** ID for the Regwall title element. */
 const REGWALL_TITLE_ID = 'swg-regwall-title';
+
+/** URL parameter to append in the redirect mode for 3P Sign-in.  */
+const REDIRECT_SOURCE_URL_PARAM = 'source';
 
 /**
  * HTML for the metering regwall dialog, where users can sign in with Google.
@@ -970,6 +999,7 @@ const REGWALL_HTML = `
   .gaa-metering-regwall--description,
   .gaa-metering-regwall--description strong,
   .gaa-metering-regwall--iframe,
+  .gaa-metering-regwall--registration-button-container,
   .gaa-metering-regwall--casl {
     all: initial !important;
     box-sizing: border-box !important;
@@ -1038,6 +1068,14 @@ const REGWALL_HTML = `
     width: 100% !important;
   }
 
+  .gaa-metering-regwall--registration-button-container {
+    border: none !important;
+    display: block !important;
+    height: 44px !important;
+    margin: 0 0 30px !important;
+    width: 100% !important;
+  }
+
   .gaa-metering-regwall--casl {
     color: #646464 !important;
     display: block !important;
@@ -1094,11 +1132,7 @@ const REGWALL_HTML = `
       $SHOWCASE_REGWALL_DESCRIPTION$
     </div>
 
-    <iframe
-        id="${GOOGLE_SIGN_IN_IFRAME_ID}"
-        class="gaa-metering-regwall--iframe"
-        src="$iframeUrl$">
-    </iframe>
+    $SHOWCASE_REGISTRATION_BUTTON$
 
     $SHOWCASE_REGWALL_CASL$
 
@@ -1116,6 +1150,27 @@ const REGWALL_HTML = `
 `;
 
 /**
+ * HTML for iFrame to render registration widget.
+ */
+const REGISTRATION_WIDGET_IFRAME_HTML = `
+  <iframe
+      id="${GOOGLE_SIGN_IN_IFRAME_ID}"
+      class="gaa-metering-regwall--iframe"
+      src="$iframeUrl$">
+  </iframe>
+`;
+
+/**
+ * HTML for container of the registration button.
+ */
+const REGISTRATION_BUTTON_HTML = `
+  <div
+      id="${REGISTRATION_BUTTON_CONTAINER_ID}"
+      class="gaa-metering-regwall--registration-button-container">
+  </div>
+`;
+
+/**
  * HTML for the CASL blurb.
  * CASL stands for Canadian Anti-Spam Law.
  */
@@ -1126,11 +1181,7 @@ const CASL_HTML = `
 `;
 
 /** Base styles for both the Google and Google 3p Sign-In button iframes. */
-const GOOGLE_SIGN_IN_IFRAME_STYLES = `
-  body {
-    margin: 0;
-    overflow: hidden;
-  }
+const GOOGLE_SIGN_IN_BUTTON_STYLES = `
   #${GOOGLE_3P_SIGN_IN_BUTTON_ID},
   #${SIGN_IN_WITH_GOOGLE_BUTTON_ID},
   #${GOOGLE_SIGN_IN_BUTTON_ID} {
@@ -1181,6 +1232,12 @@ const GOOGLE_SIGN_IN_IFRAME_STYLES = `
     content: '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$';
     font-size: 15px;
   }`;
+const GOOGLE_SIGN_IN_IFRAME_STYLES = `
+  body {
+    margin: 0;
+    overflow: hidden;
+  }${GOOGLE_SIGN_IN_BUTTON_STYLES}
+`;
 
 /**
  * User object that Publisher JS receives after users sign in.
@@ -1207,7 +1264,7 @@ let GaaUserDef;
  * GoogleUser object that Google Sign-In returns after users sign in.
  * https://developers.google.com/identity/sign-in/web/reference#googleusergetbasicprofile
  * @typedef {{
- *   getAuthResponse: function(boolean): {
+ *  getAuthResponse: function(boolean): {
  *     access_token: string,
  *     id_token: string,
  *     scope: string,
@@ -1313,6 +1370,42 @@ class GaaMeteringRegwall {
   }
 
   /**
+   * Returns a promise for a Google user object.
+   * The user object will be a GoogleIdentityV1
+   *
+   * This method opens a metering regwall dialog,
+   * where users can sign in with Google.
+   * @nocollapse
+   * @param {{ caslUrl: string, clientId: string }} params
+   * @return {!Promise<!GoogleIdentityV1>}
+   */
+  static showWithNativeRegistrationButton({caslUrl, clientId}) {
+    logEvent({
+      showcaseEvent: ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL,
+      isFromUserAction: false,
+    });
+
+    GaaMeteringRegwall.render_({
+      iframeUrl: '',
+      caslUrl,
+      useNativeMode: true,
+    });
+
+    return GaaMeteringRegwall.createNativeRegistrationButton({clientId})
+      .then((jwt) => {
+        GaaMeteringRegwall.remove();
+        return jwt;
+      })
+      .catch((err) => {
+        // Close the Regwall, since the flow failed.
+        GaaMeteringRegwall.remove();
+
+        // Rethrow error.
+        debugLog(`Regwall failed: ${err}`);
+      });
+  }
+
+  /**
    * Removes the Regwall.
    * @nocollapse
    */
@@ -1340,17 +1433,14 @@ class GaaMeteringRegwall {
    * Renders the Regwall.
    * @private
    * @nocollapse
-   * @param {{ iframeUrl: string, caslUrl: string }} params
+   * @param {{ iframeUrl: string, caslUrl: string, useNativeMode: (boolean|undefined)}} params
    */
-  static render_({iframeUrl, caslUrl}) {
+  static render_({iframeUrl, caslUrl, useNativeMode = false}) {
     const languageCode = getLanguageCodeFromElement(self.document.body);
     const publisherName = GaaMeteringRegwall.getPublisherNameFromPageConfig_();
     const placeholderPatternForPublication = /<ph name="PUBLICATION".+?\/ph>/g;
     const placeholderPatternForLinkStart = /<ph name="LINK_START".+?\/ph>/g;
     const placeholderPatternForLinkEnd = /<ph name="LINK_END".+?\/ph>/g;
-
-    // Tell the iframe which language to render.
-    iframeUrl = addQueryParam(iframeUrl, 'lang', languageCode);
 
     // Create and style container element.
     // TODO: Consider using a FriendlyIframe here, to avoid CSS conflicts.
@@ -1395,10 +1485,22 @@ class GaaMeteringRegwall {
         );
     }
 
+    let registrationButtonHtml = '';
+    if (useNativeMode) {
+      registrationButtonHtml = REGISTRATION_BUTTON_HTML;
+    } else {
+      // Tell the iframe which language to render.
+      iframeUrl = addQueryParam(iframeUrl, 'lang', languageCode);
+      registrationButtonHtml = REGISTRATION_WIDGET_IFRAME_HTML.replace(
+        '$iframeUrl$',
+        iframeUrl
+      );
+    }
+
     // Prepare HTML.
     containerEl./*OK*/ innerHTML = REGWALL_HTML.replace(
-      '$iframeUrl$',
-      iframeUrl
+      '$SHOWCASE_REGISTRATION_BUTTON$',
+      registrationButtonHtml
     )
       .replace(
         '$SHOWCASE_REGWALL_TITLE$',
@@ -1605,6 +1707,52 @@ class GaaMeteringRegwall {
         new URL(iframeUrl).origin
       );
     };
+  }
+
+  static createNativeRegistrationButton({clientId}) {
+    const languageCode = getLanguageCodeFromElement(self.document.body);
+    const parentElement = self.document.getElementById(
+      REGISTRATION_BUTTON_CONTAINER_ID
+    );
+    if (!parentElement) {
+      return false;
+    }
+    // Apply iframe styles.
+    const styleEl = self.document.createElement('style');
+    styleEl./*OK*/ innerText = GOOGLE_SIGN_IN_BUTTON_STYLES.replace(
+      '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
+      msg(I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'], languageCode)
+    );
+    self.document.head.appendChild(styleEl);
+
+    const buttonEl = self.document.createElement('div');
+    buttonEl.id = SIGN_IN_WITH_GOOGLE_BUTTON_ID;
+    buttonEl.tabIndex = 0;
+
+    parentElement.appendChild(buttonEl);
+
+    // Track button clicks.
+    buttonEl.addEventListener('click', () => {
+      logEvent({
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+        isFromUserAction: true,
+      });
+    });
+
+    return new Promise((resolve) => {
+      self.google.accounts.id.initialize({
+        /* eslint-disable google-camelcase/google-camelcase */
+        client_id: clientId,
+        callback: resolve,
+        /* eslint-enable google-camelcase/google-camelcase */
+      });
+      self.google.accounts.id.renderButton(buttonEl, {
+        'type': 'standard',
+        'theme': 'outline',
+        'text': 'continue_with',
+        'logo_alignment': 'center',
+      });
+    });
   }
 }
 
@@ -1829,9 +1977,17 @@ class GaaGoogle3pSignInButton {
   /**
    * Renders the third party Google Sign-In button for external authentication.
    * @nocollapse
-   * @param {{ allowedOrigins: !Array<string>, authorizationUrl: string }} params
+   * @param {{
+   *    allowedOrigins: !Array<string>,
+   *    authorizationUrl: string,
+   *    redirectMode: boolean,
+   * }} params GaaGoogle3pSignInButton operates in two modes: redirect and
+   * popup. The default mode is pop-up mode which opens the authorizationUrl
+   * in a new window. To use a redirect mode and open the authorizationUrl in
+   * the same window, set redirectMode to true. For webview applications
+   * redirectMode is recommended.
    */
-  static show({allowedOrigins, authorizationUrl}) {
+  static show({allowedOrigins, authorizationUrl, redirectMode = false}) {
     // Optionally grab language code from URL.
     const queryString = GaaUtils.getQueryString();
     const queryParams = parseQueryString(queryString);
@@ -1851,7 +2007,16 @@ class GaaGoogle3pSignInButton {
     buttonEl.tabIndex = 0;
     buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
     buttonEl.onclick = () => {
-      self.open(authorizationUrl);
+      if (redirectMode) {
+        const parameterizedAuthUrl = new URL(authorizationUrl);
+        parameterizedAuthUrl.searchParams.append(
+          REDIRECT_SOURCE_URL_PARAM,
+          self.parent.location.href
+        );
+        self.open(parameterizedAuthUrl, '_parent');
+      } else {
+        self.open(authorizationUrl);
+      }
     };
     self.document.body.appendChild(buttonEl);
 

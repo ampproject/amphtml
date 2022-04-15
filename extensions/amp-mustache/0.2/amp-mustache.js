@@ -1,4 +1,4 @@
-import {iterateCursor, templateContentClone} from '#core/dom';
+import {templateContentClone} from '#core/dom';
 
 import {Purifier} from '#purifier';
 
@@ -88,7 +88,7 @@ export class AmpMustache extends BaseTemplate {
    */
   processNestedTemplates_(content) {
     const templates = content.querySelectorAll('template');
-    iterateCursor(templates, (template, index) => {
+    templates.forEach((template, index) => {
       const key = `__AMP_NESTED_TEMPLATE_${index}`;
 
       // Store the nested template markup, keyed by index.
