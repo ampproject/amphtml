@@ -83,13 +83,17 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     );
 
     if (this.shoppingTags_.length === 0) {
-      return Promise.reject(new Error('No shopping tags on the page.'));
+      return Promise.reject(
+        new Error(`No shopping tags on page ${this.pageEl_.id}.`)
+      );
     }
 
     return getShoppingConfig(this.element, this.pageEl_.id)
       .then((config) => {
         if (Object.keys(config).length === 0) {
-          return Promise.reject(new Error('No valid shopping data on page.'));
+          return Promise.reject(
+            new Error(`No valid shopping data on page ${this.pageEl_.id}.`)
+          );
         }
         storeShoppingConfig(this.pageEl_, config);
       })
