@@ -151,6 +151,10 @@ Sets the color of the CTA button and drawer.
 <img alt="theme" src="https://user-images.githubusercontent.com/3860311/161297644-f25837e0-82ec-4960-a219-edfaf7d09fd9.png"
 layout="intrinsic" width="800" height="135">
 
+#### `cta-text` {string} optional
+
+String that customizes the call to action button text. The default is "Shop now".
+
 ### amp-story-shopping-attachment templates
 
 Two types of templated pages render within the shopping attachment. They automatically populate with the product data from the configured JSON. the Product listing page (PLP) is a list of all products on the active story page. The Product details page (PDP) displays in-depth detail about the product such as images, text and a "Buy Now" button.

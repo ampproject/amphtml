@@ -41,6 +41,9 @@ tags: {  # <amp-story-shopping-attachment>
     value: "dark"
     value: "light"
   }
+  attrs: {
+    name: "cta-text"
+  }
   child_tags: {
     child_tag_name_oneof: "SCRIPT"
     mandatory_min_num_child_tags: 1
