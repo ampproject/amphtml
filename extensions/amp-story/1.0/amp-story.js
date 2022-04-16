@@ -51,7 +51,8 @@ import {endsWith} from '#core/types/string';
 import {parseQueryString} from '#core/types/string/url';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 
-import {isExperimentOn} from '#experiments';
+import {getExperimentBranch, isExperimentOn} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {calculateExtensionFileUrl} from '#service/extension-script';
@@ -656,9 +657,14 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
+      const storyAdSegmentBranch = getExperimentBranch(
+        this.win,
+        StoryAdSegmentExp.ID
+      );
       if (
         !this.activePage_.isAd() ||
-        isExperimentOn(this.win, 'story-ad-auto-advance')
+        (storyAdSegmentBranch &&
+          storyAdSegmentBranch != StoryAdSegmentExp.CONTROL)
       ) {
         this.systemLayer_.updateProgress(pageId, progress);
       }

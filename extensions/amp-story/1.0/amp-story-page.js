@@ -25,7 +25,8 @@ import {isAutoplaySupported, tryPlay} from '#core/dom/video';
 import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
 
-import {isExperimentOn} from '#experiments';
+import {getExperimentBranch, isExperimentOn} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -1132,8 +1133,15 @@ export class AmpStoryPage extends AMP.BaseElement {
   emitProgress_(progress) {
     // Don't emit progress for ads, since the progress bar is hidden.
     // Don't emit progress for inactive pages, because race conditions.
+    const storyAdSegmentBranch = getExperimentBranch(
+      this.win,
+      StoryAdSegmentExp.ID
+    );
+    const progressBarExpDisabled =
+      !storyAdSegmentBranch ||
+      storyAdSegmentBranch == StoryAdSegmentExp.CONTROL;
     if (
-      (!isExperimentOn(this.win, 'story-ad-auto-advance') && this.isAd()) ||
+      (progressBarExpDisabled && this.isAd()) ||
       this.state_ === PageState.NOT_ACTIVE
     ) {
       return;
