@@ -257,6 +257,8 @@ export class VideoManager {
       } else {
         video.pause();
       }
+      // Signals VideoService that user has "USER_INTERACTED"
+      userInteractedWith(video);
     });
 
     // fullscreen/fullscreenenter are a special case.
