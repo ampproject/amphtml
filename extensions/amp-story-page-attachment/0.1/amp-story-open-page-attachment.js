@@ -162,7 +162,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
               class="i-amphtml-story-outlink-page-attachment-img"
               style={{backgroundImage: `url(${openImgAttr}) !important`}}
             ></div>
-          ) : (
+          ) : openImgAttr ? null : (
             renderOutlinkLinkIconElement()
           )}
           <span class="i-amphtml-story-page-attachment-label">{openLabel}</span>
