@@ -179,9 +179,7 @@ In the following example, the responses are rendered in an inline template insid
     ...
   </fieldset>
   <div submitting>
-    <template type="amp-mustache">
-      Form submitting... Thank you for waiting.
-    </template>
+    Form submitting... Thank you for waiting.
   </div>
   <div submit-success>
     <template type="amp-mustache">

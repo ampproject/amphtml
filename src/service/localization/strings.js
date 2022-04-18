@@ -9,7 +9,7 @@ import {parseJson} from '#core/types/object/json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 111
+ * Next ID: 113
  *
  * @const @enum {string}
  */
@@ -46,6 +46,8 @@ export const LocalizedStringId_Enum = {
   AMP_STORY_PAGE_PLAY_VIDEO: '34',
   AMP_STORY_PAUSE_BUTTON_LABEL: '85',
   AMP_STORY_PLAY_BUTTON_LABEL: '86',
+  AMP_STORY_CAPTIONS_ON_LABEL: '111',
+  AMP_STORY_CAPTIONS_OFF_LABEL: '112',
   AMP_STORY_PREVIOUS_PAGE: '93',
   AMP_STORY_READ_MORE_LABEL: '106',
   AMP_STORY_REPLAY: '92',

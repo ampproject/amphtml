@@ -115,7 +115,7 @@ describes.realWin(
           <amp-story-page id="page1">
             <amp-story-shopping-tag data-product-id="lamp"></amp-story-shopping-tag>
             <amp-story-shopping-tag data-product-id="art"></amp-story-shopping-tag>
-            <amp-story-shopping-attachment>
+            <amp-story-shopping-attachment cta-text="Shop Now!">
               <script type="application/json">
                 {JSON.stringify(shoppingData)}
               </script>
@@ -159,8 +159,8 @@ describes.realWin(
       expect(() => shoppingImpl.layoutCallback()).to.not.throw();
     });
 
-    it('should build CTA with i18n shopping label text', () => {
-      expect(attachmentChildEl.getAttribute('cta-text')).to.equal('Shop Now');
+    it('should build CTA with custom i18n shopping label text', () => {
+      expect(attachmentChildEl.getAttribute('cta-text')).to.equal('Shop Now!');
     });
 
     it('should build PLP on attachment state open if no active product data', async () => {
