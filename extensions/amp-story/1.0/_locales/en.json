@@ -254,5 +254,13 @@
   "110": {
     "string": "Subscribe with Google",
     "description": "Button label prompting users to subscribe with the publisher via SwG."
+  },
+  "111": {
+    "string": "Captions on",
+    "description": "Label for the captions button that indicates the captions are turned on"
+  },
+  "112": {
+    "string": "Captions off",
+    "description": "Label for the captions button that indicates the captions are turned off"
   }
 }

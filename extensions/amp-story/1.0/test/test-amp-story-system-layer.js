@@ -202,6 +202,34 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
     expect(systemLayer.getShadowRoot()).to.not.have.attribute('paused');
   });
 
+  it('click on the captions button should change state to false', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_CAPTIONS, true);
+    storeService.dispatch(Action.TOGGLE_CAPTIONS, true);
+    systemLayer
+      .getShadowRoot()
+      .querySelector('.i-amphtml-story-captions-control')
+      .click();
+    expect(storeService.get(StateProperty.CAPTIONS_STATE)).to.be.false;
+    expect(systemLayer.getShadowRoot()).to.not.have.attribute('captions-on');
+  });
+
+  it('click on the no captions button should change state to true', () => {
+    systemLayer.build();
+
+    storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+    storeService.dispatch(Action.TOGGLE_PAGE_HAS_CAPTIONS, true);
+    storeService.dispatch(Action.TOGGLE_CAPTIONS, true);
+    systemLayer
+      .getShadowRoot()
+      .querySelector('.i-amphtml-story-nocaptions-control')
+      .click();
+    expect(storeService.get(StateProperty.CAPTIONS_STATE)).to.be.true;
+    expect(systemLayer.getShadowRoot()).to.have.attribute('captions-on');
+  });
+
   it('click on the pause button should change state to true', () => {
     systemLayer.build();
 

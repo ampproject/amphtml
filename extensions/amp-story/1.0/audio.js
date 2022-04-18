@@ -34,16 +34,3 @@ export function upgradeBackgroundAudio(element, loop = true) {
 
   return audioEl;
 }
-
-/**
- * Waits for elements that can resolve their audio status on runtime.
- * @param {!Element} element the root
- * @return {!Promise}
- */
-export function waitForElementsWithUnresolvedAudio(element) {
-  return Promise.all(
-    Array.from(element.querySelectorAll('amp-video[cache]:not([noaudio])')).map(
-      (el) => el.getImpl()
-    )
-  );
-}
