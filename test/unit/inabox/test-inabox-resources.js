@@ -72,6 +72,22 @@ describes.realWin('inabox-resources', {amp: true}, (env) => {
     expect(schedulePassSpy).to.be.calledOnce;
   });
 
+  it('upgraded: should handle when build() returns undefined', async () => {
+    const schedulePassSpy = env.sandbox.stub(resources, 'schedulePass');
+    const element1 = env.createAmpElement('amp-foo');
+    resources.add(element1);
+    const resource1 = resources.getResourceForElement(element1);
+    const buildStub = env.sandbox.stub(resource1, 'build');
+    buildStub.returns(undefined);
+    resources.upgraded(element1);
+
+    await env.ampdoc.whenReady();
+    await new Promise(setTimeout);
+
+    expect(buildStub).to.be.calledOnce;
+    expect(schedulePassSpy).to.be.calledTwice;
+  });
+
   it('eagerly builds amp elements', async () => {
     toggleExperiment(win, 'inabox-resources-eager', true);
     const readySignal = new Deferred();

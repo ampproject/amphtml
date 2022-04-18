@@ -9,7 +9,7 @@ const {getNameWithoutComponentPrefix} = require('../tasks/bento-helpers');
 const {posix, sep} = require('path');
 
 const formatPathLikeSource = (path) =>
-  path.startsWith('.') ? path : `./${path}`;
+  path.startsWith('.') ? path : `.${sep}${path}`;
 
 /**
  * @param {string} path
@@ -99,7 +99,7 @@ const getAllRemappings = once(() => {
           return {
             source: resolved,
             cdn: formatPathLikeSource(cdn),
-            npm: formatPathLikeSource(npm),
+            npm,
           };
         }
       })

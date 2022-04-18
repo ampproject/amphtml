@@ -208,7 +208,7 @@
       ]
     },
     "productImages": {
-      "description": "A list of images for the product used in the carousel of the product page",
+      "description": "A list of images for the product used in the carousel of the product page.",
       "type": "array",
       "items": {
         "required": ["url", "alt"],
@@ -225,7 +225,7 @@
       }
     },
     "productDetails": {
-      "description": "Details about the product used in the product details page",
+      "description": "Details about the product used in the product details page.",
       "type": "string"
     },
     "productBrand": {
@@ -237,7 +237,7 @@
       "type": "string"
     },
     "productTagText": {
-      "description": "Text for the Prodcut tag. Supersedes productPrice",
+      "description": "Text for the Product tag. Supersedes productPrice.",
       "type": "string"
     },
     "aggregateRating": {
