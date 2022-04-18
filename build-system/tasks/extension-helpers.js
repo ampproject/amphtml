@@ -40,6 +40,8 @@ const {watch} = require('chokidar');
 const {
   getRemapBentoDependencies,
   getRemapBentoNpmDependencies,
+  getRemapBentoNpmPreactDependencies,
+  getRemapBentoNpmReactDependencies,
 } = require('../compile/bento-remap');
 const {findJsSourceFilename} = require('../common/fs');
 
@@ -646,13 +648,14 @@ async function buildNpmBinaries(extDir, name, options) {
         external: ['react', 'react-dom'],
         remap: {
           'preact': 'react',
-          '.*/preact/compat': 'react',
+          'preact/compat': 'react',
+          './src/preact/compat/internal.js': './src/preact/compat/external.js',
           'preact/hooks': 'react',
           'preact/dom': 'react-dom',
         },
         wrapper: '',
       },
-      bento: {
+      standalone: {
         entryPoint: await getBentoBuildFilename(
           extDir,
           getBentoName(name),
@@ -669,7 +672,15 @@ async function buildNpmBinaries(extDir, name, options) {
     // rempas any cross-extension (e.g imports to bento-foo) imports to @bentoproject/foo
     for (const mode in npm) {
       const fullEntryPoint = path.join(extDir, npm[mode].entryPoint);
-      const bentoRemaps = getRemapBentoNpmDependencies(fullEntryPoint);
+      const bentoRemaps =
+        mode === 'standalone'
+          ? getRemapBentoNpmDependencies(fullEntryPoint)
+          : mode === 'preact'
+          ? getRemapBentoNpmPreactDependencies(fullEntryPoint)
+          : mode === 'react'
+          ? getRemapBentoNpmReactDependencies(fullEntryPoint)
+          : {};
+
       const bentoExternals = Object.values(bentoRemaps);
       npm[mode].remap = {
         ...(npm[mode].remap || {}),
