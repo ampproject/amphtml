@@ -164,7 +164,7 @@
   --i-amphtml-outlink-cta-text-color: white !important;
 }
 
-.i-amphtml-story-page-open-attachment-outlink[active] {
+.i-amphtml-story-page-open-attachment-outlink[active]:not(.i-amphtml-story-page-open-attachment-outlink-no-animation-exp) {
   animation: i-amphtml-tap-scale var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
@@ -176,7 +176,7 @@
   filter: drop-shadow(0px 2px 6px rgba(0, 0, 0, 0.3)) !important;
 }
 
-.i-amphtml-story-page-open-attachment[active] .i-amphtml-story-outlink-page-attachment-arrow {
+.i-amphtml-story-page-open-attachment[active]:not(.i-amphtml-story-page-open-attachment-outlink-no-animation-exp) .i-amphtml-story-outlink-page-attachment-arrow {
   animation: i-amphtml-move-up-arrow var(--i-amphtml-page-attachment-ui-animation-duration) var(--i-amphtml-page-attachment-ui-animation-delay) both !important;
 }
 
