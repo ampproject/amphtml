@@ -8,6 +8,8 @@ import {user} from '#utils/log';
 
 import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
 
+import * as Preact from '#core/dom/jsx';
+
 /** @const {!Array<string>} */
 const CODECS_IN_ASCENDING_PRIORITY = ['h264', 'vp09'];
 
@@ -50,7 +52,7 @@ export function fetchCachedSources(
     .then((response) => {
       applySourcesToVideo(videoEl, response['sources'], maxBitrate);
       applyAudioInfoToVideo(videoEl, response['has_audio']);
-      applyCaptionsTrackToVideo(videoEl, response['captions']);
+      applyCaptionsTrackToVideo(videoEl, response['captions'], ampdoc);
     })
     .catch(() => {
       // If cache fails, video should still load properly.
@@ -163,8 +165,9 @@ function applyAudioInfoToVideo(videoEl, hasAudio) {
  * element doesn't have a track child specified in the document.
  * @param {!Element} videoEl
  * @param {!Object} captionsResponse
+ * @param {!AmpDoc} ampdoc
  */
-function applyCaptionsTrackToVideo(videoEl, captionsResponse) {
+function applyCaptionsTrackToVideo(videoEl, captionsResponse, ampdoc) {
   if (
     !captionsResponse ||
     !captionsResponse['src'] ||
@@ -173,12 +176,32 @@ function applyCaptionsTrackToVideo(videoEl, captionsResponse) {
   ) {
     return;
   }
-  const trackEl = createElementWithAttributes(videoEl.ownerDocument, 'track', {
-    'src': captionsResponse['src'],
-    'srclang': captionsResponse['srclang'],
-    'kind': 'captions',
-  });
+
+  Services.extensionsFor(ampdoc.win).installExtensionForDoc(
+    ampdoc,
+    'amp-story-captions',
+    '0.1'
+  );
+
+  const trackEl = (
+    <track
+      src={captionsResponse['src']}
+      srclang={captionsResponse['srclang']}
+      kind="captions"
+    ></track>
+  );
+
+  const captionsEl = (
+    <amp-story-captions
+      id={captionsResponse['src']}
+      style-preset="default"
+      layout="container"
+    ></amp-story-captions>
+  );
+
   videoEl.appendChild(trackEl);
+  videoEl.appendChild(captionsEl);
+  videoEl.setAttribute('captions-id', captionsResponse['src']);
 }
 
 /**

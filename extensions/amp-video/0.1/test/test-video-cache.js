@@ -503,6 +503,28 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
   });
 
   describe('captions field', async () => {
+    it('should install the story-captions extension if the cache responds with captions', async () => {
+      env.sandbox.stub(xhrService, 'fetch').resolves({
+        json: () =>
+          Promise.resolve({
+            'captions': {
+              'src': 'captions_src_response.vtt',
+              'srclang': 'en-us',
+            },
+            'sources': [
+              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+            ],
+          }),
+      });
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      expect(extensionsService.installExtensionForDoc).to.have.been.calledWith(
+        env.sandbox.match.any,
+        'amp-story-captions',
+        '0.1'
+      );
+    });
     it('should append track element if the cache responds with captions', async () => {
       env.sandbox.stub(xhrService, 'fetch').resolves({
         json: () =>
