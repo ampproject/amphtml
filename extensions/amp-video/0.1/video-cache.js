@@ -160,8 +160,9 @@ function applyAudioInfoToVideo(videoEl, hasAudio) {
 }
 
 /**
- * Appends captions track to video if captions url is defined and video
- * element doesn't have a track child specified in the document.
+ * Appends captions track and amp-story-captions to video if captions
+ * url is defined and video element doesn't have a track child
+ * specified in the document.
  * @param {!Element} videoEl
  * @param {!Object} captionsResponse
  * @param {!AmpDoc} ampdoc
