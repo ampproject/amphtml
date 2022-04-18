@@ -8,7 +8,6 @@ import {LocalizationService} from '#service/localization';
 import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
 
 import * as history from 'extensions/amp-story/1.0/history';
-import {HistoryState} from 'extensions/amp-story/1.0/history';
 
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
@@ -142,10 +141,10 @@ describes.realWin(
     });
 
     it('should call history service on tag click', async () => {
-      const hist = env.sandbox.stub(history, 'setHistoryState');
+      const historyStub = env.sandbox.stub(history, 'setHistoryState');
       await setupShoppingTagAndData();
       await shoppingTag.shoppingTagEl_.click();
-      expect(hist).to.have.been.called;
+      expect(historyStub).to.have.been.called;
     });
   }
 );
