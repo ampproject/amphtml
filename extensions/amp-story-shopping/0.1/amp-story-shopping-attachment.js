@@ -6,6 +6,7 @@ import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+import {HistoryState, setHistoryState} from 'extensions/amp-story/1.0/history';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 import {
@@ -304,6 +305,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
+
+    setHistoryState(
+      this.win,
+      HistoryState.ACTIVE_PRODUCT_SHOPPING_DATA,
+      shoppingData
+    );
   }
 
   /**
