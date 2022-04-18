@@ -25,7 +25,7 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story-shopping:0.1', 'amp-story-page-attachment:0.1'],
+      extensions: ['amp-story-shopping:0.1'],
     },
   },
   (env) => {
@@ -68,7 +68,6 @@ describes.realWin(
           <amp-story-shopping-attachment></amp-story-shopping-attachment>
         </amp-story-page>
       );
-
       shoppingTag = await tagEl.getImpl();
     }
 
