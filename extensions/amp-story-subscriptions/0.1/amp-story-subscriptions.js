@@ -198,14 +198,11 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     return (
       <div subscriptions-dialog subscriptions-display="NOT granted">
         <div class="i-amphtml-story-subscriptions-dialog-banner">
-          <span
-            class="i-amphtml-story-subscriptions-dialog-banner-button"
-            role="button"
-          >
+          <button class="i-amphtml-story-subscriptions-dialog-banner-button">
             {this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SKIP
             )}
-          </span>
+          </button>
         </div>
         <div class="i-amphtml-story-subscriptions-dialog-content">
           <span class="i-amphtml-story-subscriptions-price">

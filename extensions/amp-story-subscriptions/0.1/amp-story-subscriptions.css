@@ -82,6 +82,12 @@ iframe.swg-dialog {
   font-size: 0.75em !important;
   opacity: 0 !important;
   transition: opacity 0.3s cubic-bezier(0.42, 0.0, 1, 1) !important;
+
+  /* Override default button styles. */
+  padding: 0 !important;
+  border: 0 !important;
+  font-family: Poppins, sans-serif !important;
+  font-weight: 400 !important;
 }
 
 /* TODO: confirm with UX about better animation. */
@@ -89,7 +95,7 @@ iframe.swg-dialog {
   opacity: 1 !important;
 }
 
-.i-amphtml-story-subscriptions-dialog-banner-button:after, [dir="rtl"] .i-amphtml-story-subscriptions-dialog-banner-button:after {
+.i-amphtml-story-subscriptions-dialog-banner-button:after {
   content: '' !important;
   width: 0.93em !important;
   height: 0.93em !important;
