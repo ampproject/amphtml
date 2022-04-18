@@ -164,6 +164,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     return isPrerenderActivePage(element);
   }
 
+  /** @override  */
+  static previewAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
