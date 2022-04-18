@@ -996,14 +996,12 @@ export class AmpStory extends AMP.BaseElement {
                 attachmentImpl.open(false /** shouldAnimate */)
               );
 
-            const lastKnownActiveProductData = getHistoryState(
+            const shoppingData = getHistoryState(
               this.win,
-              HistoryState.ACTIVE_PRODUCT_SHOPPING_DATA
+              HistoryState.SHOPPING_DATA
             );
 
-            this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
-              'activeProductData': lastKnownActiveProductData,
-            });
+            this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
           }
         }
 

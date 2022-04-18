@@ -308,8 +308,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
     setHistoryState(
       this.win,
-      HistoryState.ACTIVE_PRODUCT_SHOPPING_DATA,
-      shoppingData
+      HistoryState.SHOPPING_DATA,
+      this.storeService_.get(StateProperty.SHOPPING_DATA)
     );
   }
 

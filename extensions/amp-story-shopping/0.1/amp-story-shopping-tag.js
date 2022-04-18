@@ -172,18 +172,18 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       'activeProductData': this.tagData_,
     });
 
+    setHistoryState(
+      this.win,
+      HistoryState.SHOPPING_DATA,
+      this.storeService_.get(StateProperty.SHOPPING_DATA)
+    );
+
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
       this.tagData_.productId
     );
 
     this.analyticsService_.triggerEvent(StoryAnalyticsEvent.SHOPPING_TAG_CLICK);
-
-    setHistoryState(
-      this.win,
-      HistoryState.ACTIVE_PRODUCT_SHOPPING_DATA,
-      this.tagData_
-    );
   }
 
   /** @override */
