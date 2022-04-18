@@ -90,7 +90,7 @@ iframe.swg-dialog {
   font-weight: 400 !important;
 }
 
-/* TODO: confirm with UX about better animation. */
+/* TODO: confirm with UX about if there's better animation to be used. */
 .i-amphtml-story-subscriptions-dialog-banner-button.i-amphtml-story-subscriptions-dialog-banner-button-visible {
   opacity: 1 !important;
 }
