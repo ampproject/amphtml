@@ -27,7 +27,13 @@ export const AutoLightboxEvents_Enum = {
 export function installAutoLightboxExtension(ampdoc) {
   const {win} = ampdoc;
   // Only enabled on single documents tagged as <html amp> or <html ⚡>.
-  if (!isAmphtml(win.document) || !ampdoc.isSingleDoc()) {
+  if (
+    !isAmphtml(win.document) ||
+    !ampdoc.isSingleDoc() ||
+    // Prevent loading auto lightbox when disabled using 'data-amp-auto-lightbox-disable' attribute (#37854)
+    // Check if HTML Tag has 'data-amp-auto-lightbox-disable' attribute
+    win.document.documentElement.hasAttribute('data-amp-auto-lightbox-disable')
+  ) {
     return;
   }
   chunk(

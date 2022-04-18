@@ -8,7 +8,7 @@ import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {AmpStoryGridLayer} from '../amp-story-grid-layer';
 import {AmpStoryPage} from '../amp-story-page';
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
-import {MediaType} from '../media-pool';
+import {MediaType_Enum} from '../media-pool';
 
 describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
   let win;
@@ -28,8 +28,8 @@ describes.realWin('amp-story-grid-layer', {amp: true}, (env) => {
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
       getMaxMediaElementCounts: () => ({
-        [MediaType.VIDEO]: 8,
-        [MediaType.AUDIO]: 8,
+        [MediaType_Enum.VIDEO]: 8,
+        [MediaType_Enum.AUDIO]: 8,
       }),
     };
 

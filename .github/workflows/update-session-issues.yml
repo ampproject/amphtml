@@ -9,8 +9,13 @@ on:
     - cron: '30 16,17 * * 3' # Africa/Europe/western Asia
     - cron: '0 21,22 * * 3' # Americas
 
+permissions:
+  contents: read
+
 jobs:
   update-session-issues:
+    permissions:
+      issues: write
     if: github.repository == 'ampproject/amphtml'
     name: Update Session Issues
     runs-on: ubuntu-latest

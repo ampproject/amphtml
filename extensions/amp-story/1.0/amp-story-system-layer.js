@@ -13,7 +13,7 @@ import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
@@ -27,7 +27,6 @@ import {
 
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {AMP_STORY_PLAYER_EVENT} from '../../../src/amp-story-player/event';
-import {getSourceOrigin} from '../../../src/url';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
@@ -340,7 +339,9 @@ export class SystemLayer {
 
     anchorEl.href =
       getStoryAttributeSrc(this.parentEl_, 'entity-url') ||
-      getSourceOrigin(Services.documentInfoForDoc(this.parentEl_).sourceUrl);
+      Services.urlForDoc(this.parentEl_).getSourceOrigin(
+        Services.documentInfoForDoc(this.parentEl_).sourceUrl
+      );
 
     this.systemLayerEl_.querySelector(
       '.i-amphtml-story-attribution-text'
@@ -656,7 +657,7 @@ export class SystemLayer {
   /**
    * Reacts to UI state updates and triggers the expected UI.
    * Called inside a mutate context if not initializing.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -667,11 +668,11 @@ export class SystemLayer {
     shadowRoot.removeAttribute('desktop');
 
     switch (uiState) {
-      case UIType.DESKTOP_FULLBLEED:
+      case UIType_Enum.DESKTOP_FULLBLEED:
         shadowRoot.setAttribute('desktop', '');
         shadowRoot.classList.add('i-amphtml-story-desktop-fullbleed');
         break;
-      case UIType.DESKTOP_ONE_PANEL:
+      case UIType_Enum.DESKTOP_ONE_PANEL:
         shadowRoot.classList.add('i-amphtml-story-desktop-one-panel');
         break;
     }

@@ -13,12 +13,6 @@ import {StateProperty} from './amp-story-store-service';
 
 import {getMode} from '../../../src/mode';
 import {createShadowRoot} from '../../../src/shadow-embed';
-import {
-  assertHttpsUrl,
-  getSourceOrigin,
-  isProxyOrigin,
-  resolveRelativeUrl,
-} from '../../../src/url';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -211,33 +205,15 @@ export function userAssertValidProtocol(element, url) {
  * @return {string}
  */
 export function getSourceOriginForElement(element, url) {
-  let domainName;
-
+  const urlService = Services.urlForDoc(element);
+  let parsed;
   try {
-    domainName = getSourceOrigin(Services.urlForDoc(element).parse(url));
-    // Remove protocol prefix.
-    domainName = Services.urlForDoc(element).parse(domainName).hostname;
-  } catch (e) {
+    parsed = urlService.parse(urlService.getSourceOrigin(url));
+  } catch (_) {
     // Unknown path prefix in url.
-    domainName = Services.urlForDoc(element).parse(url).hostname;
+    parsed = urlService.parse(url);
   }
-  return domainName;
-}
-
-/**
- * Resolves an image url and optimizes it if served from the cache.
- * @param {!Window} win
- * @param {string} url
- * @return {string}
- */
-export function resolveImgSrc(win, url) {
-  let urlSrc = resolveRelativeUrl(url, win.location);
-  if (isProxyOrigin(win.location.href)) {
-    // TODO(Enriqe): add extra params for resized image, for example:
-    // (/ii/w${width}/s)
-    urlSrc = urlSrc.replace('/c/s/', '/i/s/');
-  }
-  return urlSrc;
+  return parsed.hostname;
 }
 
 /**
@@ -261,19 +237,21 @@ export function shouldShowStoryUrlInfo(viewer, storeService) {
  * @param {string=} warn
  * @return {?string}
  */
-export function getStoryAttributeSrc(element, attribute, warn = false) {
+export function getStoryAttributeSrc(element, attribute, warn) {
   const storyEl = dev().assertElement(
     closestAncestorElementBySelector(element, 'AMP-STORY')
   );
-  const attrSrc = storyEl && storyEl.getAttribute(attribute);
-
-  if (attrSrc) {
-    assertHttpsUrl(attrSrc, storyEl, attribute);
-  } else if (warn) {
-    user().warn('AMP-STORY', `Expected ${attribute} attribute on <amp-story>`);
+  const url = storyEl.getAttribute(attribute);
+  if (!url) {
+    if (warn) {
+      user().warn(
+        'AMP-STORY',
+        `Expected ${attribute} attribute on <amp-story>`
+      );
+    }
+    return null;
   }
-
-  return attrSrc;
+  return Services.urlForDoc(storyEl).assertHttpsUrl(url, storyEl, attribute);
 }
 
 /**
@@ -299,7 +277,7 @@ export function setTextBackgroundColor(element) {
     TEXT_BACKGROUND_COLOR_SELECTOR
   );
 
-  Array.prototype.forEach.call(elementsToUpgradeStyles, (el) => {
+  elementsToUpgradeStyles.forEach((el) => {
     const color = el.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
     setStyle(el, 'background-color', color);
   });

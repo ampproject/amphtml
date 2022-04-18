@@ -10,7 +10,7 @@
  */
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Deferred} from '#core/data-structures/promise';
-import {iterateCursor} from '#core/dom';
+import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
@@ -25,7 +25,8 @@ import {isAutoplaySupported, tryPlay} from '#core/dom/video';
 import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
 
-import {isExperimentOn} from '#experiments';
+import {getExperimentBranch, isExperimentOn} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -38,7 +39,7 @@ import {localizeTemplate} from './amp-story-localization-service';
 import {
   Action,
   StateProperty,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {AnimationManager, hasAnimations} from './animation';
@@ -263,6 +264,31 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
   }
 
+  /**
+   * @private
+   * @return {Element}
+   */
+  maybeConvertCtaLayerToPageOutlink_() {
+    const ctaLayerEl = this.element.querySelector('amp-story-cta-layer');
+    if (!ctaLayerEl) {
+      return;
+    }
+
+    const anchorSet = ctaLayerEl.querySelectorAll('a');
+    if (anchorSet.length !== 1 || !anchorSet[0].getAttribute('href')) {
+      return;
+    }
+
+    removeElement(ctaLayerEl);
+    this.element.appendChild(
+      <amp-story-page-outlink layout="nodisplay">
+        <a href={anchorSet[0].getAttribute('href')}>
+          {anchorSet[0].textContent}
+        </a>
+      </amp-story-page-outlink>
+    );
+  }
+
   /** @override */
   buildCallback() {
     this.delegateVideoAutoplay();
@@ -290,6 +316,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.initializeImgAltTags_();
     this.initializeTabbableElements_();
     this.maybeApplyFirstAnimationFrameOrFinish();
+    this.maybeConvertCtaLayerToPageOutlink_();
   }
 
   /** @private */
@@ -389,7 +416,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * play videos from an inactive page.
    */
   delegateVideoAutoplay() {
-    iterateCursor(this.element.querySelectorAll('amp-video'), delegateAutoplay);
+    this.element.querySelectorAll('amp-video').forEach(delegateAutoplay);
   }
 
   /** @private */
@@ -413,7 +440,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   markMediaElementsWithPreload_() {
     const mediaSet = this.element.querySelectorAll('amp-audio, amp-video');
-    Array.prototype.forEach.call(mediaSet, (mediaItem) => {
+    mediaSet.forEach((mediaItem) => {
       mediaItem.setAttribute('preload', 'auto');
     });
   }
@@ -554,12 +581,12 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     // On vertical rendering, render all the animations with their final state.
-    if (uiState === UIType.VERTICAL) {
+    if (uiState === UIType_Enum.VERTICAL) {
       this.maybeFinishAnimations_();
     }
   }
@@ -738,18 +765,15 @@ export class AmpStoryPage extends AMP.BaseElement {
       );
     const mediaSet = [];
 
-    iterateCursor(scopedQuerySelectorAll(this.element, selector), (el) =>
+    scopedQuerySelectorAll(this.element, selector).forEach((el) =>
       mediaSet.push(el)
     );
 
     if (fie) {
-      iterateCursor(
-        scopedQuerySelectorAll(
-          fie.win.document.body,
-          selector.replace(/amp-story-grid-layer/g, '')
-        ),
-        (el) => mediaSet.push(el)
-      );
+      scopedQuerySelectorAll(
+        fie.win.document.body,
+        selector.replace(/amp-story-grid-layer/g, '')
+      ).forEach((el) => mediaSet.push(el));
     }
 
     return mediaSet;
@@ -1109,7 +1133,17 @@ export class AmpStoryPage extends AMP.BaseElement {
   emitProgress_(progress) {
     // Don't emit progress for ads, since the progress bar is hidden.
     // Don't emit progress for inactive pages, because race conditions.
-    if (this.isAd() || this.state_ === PageState.NOT_ACTIVE) {
+    const storyAdSegmentBranch = getExperimentBranch(
+      this.win,
+      StoryAdSegmentExp.ID
+    );
+    const progressBarExpDisabled =
+      !storyAdSegmentBranch ||
+      storyAdSegmentBranch == StoryAdSegmentExp.CONTROL;
+    if (
+      (progressBarExpDisabled && this.isAd()) ||
+      this.state_ === PageState.NOT_ACTIVE
+    ) {
       return;
     }
 
@@ -1420,7 +1454,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       }
     }
 
-    Array.prototype.forEach.call(videoEls, (videoEl) => {
+    videoEls.forEach((videoEl) => {
       this.unlisteners_.push(
         listen(videoEl, 'playing', () =>
           this.debounceToggleLoadingSpinner_(false)

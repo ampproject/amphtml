@@ -22,11 +22,7 @@ import {deduplicateInteractiveIds} from './utils';
 
 import {CSS as hostCss} from '../../../build/amp-story-interactive-host-0.1.css';
 import {CSS as shadowCss} from '../../../build/amp-story-interactive-shadow-0.1.css';
-import {
-  addParamsToUrl,
-  appendPathToUrl,
-  assertAbsoluteHttpOrHttpsUrl,
-} from '../../../src/url';
+import {addParamsToUrl, appendPathToUrl} from '../../../src/url';
 import {
   Action,
   StateProperty,
@@ -710,7 +706,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   executeInteractiveRequest_(method, optionSelected = undefined) {
     let url = this.element.getAttribute('endpoint');
-    if (!assertAbsoluteHttpOrHttpsUrl(url)) {
+    if (!Services.urlForDoc(this.element).assertAbsoluteHttpOrHttpsUrl(url)) {
       return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
