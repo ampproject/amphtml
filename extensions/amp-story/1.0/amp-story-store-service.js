@@ -38,7 +38,7 @@ export const getStoreService = (win) => {
  * Different UI experiences to display the story.
  * @const @enum {number}
  */
-export const UIType = {
+export const UIType_Enum = {
   MOBILE: 0,
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
   DESKTOP_ONE_PANEL: 4, // Desktop UI with one panel and space around story.
@@ -128,6 +128,8 @@ export let ShoppingDataDef;
  *    keyboardActiveState: boolean,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
+ *    pageCaptionsState: boolean,
+ *    captionsState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
  *    panningMediaState: !Map<string, ../../amp-story-panning-media/0.1/amp-story-panning-media.panningMediaPositionDef> ,
  *    pausedState: boolean,
@@ -137,7 +139,7 @@ export let ShoppingDataDef;
  *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
  *    systemUiIsVisibleState: boolean,
- *    uiState: !UIType,
+ *    uiState: !UIType_Enum,
  *    viewportWarningState: boolean,
  *    actionsAllowlist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
@@ -176,6 +178,8 @@ const StateProperty = mangleObjectValues({
   KEYBOARD_ACTIVE_STATE: 'keyboardActiveState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
+  PAGE_HAS_CAPTION_STATE: 'pageCaptionState',
+  CAPTIONS_STATE: 'captionsState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
   PANNING_MEDIA_STATE: 'panningMediaState',
   PAUSED_STATE: 'pausedState',
@@ -232,6 +236,8 @@ const Action = mangleObjectValues({
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_ATTACHMENT_STATE: 'togglePageAttachmentState',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
+  TOGGLE_PAGE_HAS_CAPTIONS: 'togglePageHasCaptions',
+  TOGGLE_CAPTIONS: 'toggleCaptions',
   TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
@@ -377,6 +383,16 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.PAGE_HAS_AUDIO_STATE]: !!data,
       });
+    case Action.TOGGLE_PAGE_HAS_CAPTIONS:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_HAS_CAPTIONS_STATE]: !!data,
+      });
+    case Action.TOGGLE_CAPTIONS:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.CAPTIONS_STATE]: !!data,
+      });
     case Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK:
       return /** @type {!State} */ ({
         ...state,
@@ -410,10 +426,10 @@ const actions = (state, action, data) => {
       });
     case Action.TOGGLE_UI:
       if (
-        state[StateProperty.UI_STATE] === UIType.VERTICAL &&
-        data !== UIType.VERTICAL
+        state[StateProperty.UI_STATE] === UIType_Enum.VERTICAL &&
+        data !== UIType_Enum.VERTICAL
       ) {
-        dev().error(TAG, 'Cannot switch away from UIType.VERTICAL');
+        dev().error(TAG, 'Cannot switch away from UIType_Enum.VERTICAL');
         return state;
       }
       return /** @type {!State} */ ({
@@ -587,6 +603,8 @@ export class AmpStoryStoreService {
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
+      [StateProperty.PAGE_HAS_CAPTIONS_STATE]: false,
+      [StateProperty.CAPTIONS_STATE]: true,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PANNING_MEDIA_STATE]: {},
       [StateProperty.PAUSED_STATE]: false,
@@ -596,7 +614,7 @@ export class AmpStoryStoreService {
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
-      [StateProperty.UI_STATE]: UIType.MOBILE,
+      [StateProperty.UI_STATE]: UIType_Enum.MOBILE,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
       [StateProperty.ACTIONS_ALLOWLIST]: [],

@@ -9,7 +9,6 @@
  * </code>
  */
 
-import './amp-story-cta-layer';
 import './amp-story-grid-layer';
 import './amp-story-page';
 
@@ -52,10 +51,11 @@ import {endsWith} from '#core/types/string';
 import {parseQueryString} from '#core/types/string/url';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 
-import {isExperimentOn} from '#experiments';
+import {getExperimentBranch, isExperimentOn} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
-import {calculateScriptBaseUrl} from '#service/extension-script';
+import {calculateExtensionFileUrl} from '#service/extension-script';
 import {createPseudoLocale} from '#service/localization/strings';
 
 import {getDetail} from '#utils/event-helper';
@@ -83,12 +83,14 @@ import LocalizedStringsVi from './_locales/vi.json' assert {type: 'json'}; // lg
 import LocalizedStringsZhCn from './_locales/zh-CN.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import LocalizedStringsZhTw from './_locales/zh-TW.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {AmpStoryConsent} from './amp-story-consent';
-import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {InfoDialog} from './amp-story-info-dialog';
-import {getLocalizationService} from './amp-story-localization-service';
+import {
+  getLocalizationService,
+  getSupportedLanguageCode,
+} from './amp-story-localization-service';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryShare} from './amp-story-share';
 import {
@@ -97,7 +99,7 @@ import {
   InteractiveComponentDef,
   StateProperty,
   SubscriptionsState,
-  UIType,
+  UIType_Enum,
   getStoreService,
 } from './amp-story-store-service';
 import {SystemLayer} from './amp-story-system-layer';
@@ -109,7 +111,7 @@ import {isPreviewMode} from './embed-mode';
 import {EventType, dispatch} from './events';
 import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {LiveStoryManager} from './live-story-manager';
-import {MediaPool, MediaType} from './media-pool';
+import {MediaPool, MediaType_Enum} from './media-pool';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {PaginationButtons} from './pagination-buttons';
 import {
@@ -186,8 +188,8 @@ const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
-  [MediaType.AUDIO]: 4,
-  [MediaType.VIDEO]: 8,
+  [MediaType_Enum.AUDIO]: 4,
+  [MediaType_Enum.VIDEO]: 8,
 };
 
 /**
@@ -200,7 +202,7 @@ export const PAYWALL_PAGE_INDEX = 2;
  * The number of milliseconds to wait before showing the paywall on paywall page.
  * @const {number}
  */
-export const PAYWALL_DELAY_DURATION = 2000;
+export const PAYWALL_DELAY_DURATION = 500;
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -211,7 +213,7 @@ const TAG = 'amp-story';
  */
 const DEFAULT_THEME_COLOR = '#202125';
 
-/**
+/*
  * @implements {./media-pool.MediaPoolRoot}
  */
 export class AmpStory extends AMP.BaseElement {
@@ -310,7 +312,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?BackgroundBlur} */
     this.backgroundBlur_ = null;
 
-    /** @private {?UIType} */
+    /** @private {?UIType_Enum} */
     this.uiState_ = null;
 
     /** @private {boolean} whether the styles were rewritten */
@@ -655,7 +657,15 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      if (!this.activePage_.isAd()) {
+      const storyAdSegmentBranch = getExperimentBranch(
+        this.win,
+        StoryAdSegmentExp.ID
+      );
+      if (
+        !this.activePage_.isAd() ||
+        (storyAdSegmentBranch &&
+          storyAdSegmentBranch != StoryAdSegmentExp.CONTROL)
+      ) {
         this.systemLayer_.updateProgress(pageId, progress);
       }
     });
@@ -746,7 +756,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.win.document.addEventListener('contextmenu', (e) => {
       const uiState = this.storeService_.get(StateProperty.UI_STATE);
-      if (uiState === UIType.MOBILE) {
+      if (uiState === UIType_Enum.MOBILE) {
         if (!this.allowContextMenuOnMobile_(e.target)) {
           e.preventDefault();
         }
@@ -805,7 +815,10 @@ export class AmpStory extends AMP.BaseElement {
     new AmpStoryShare(this.win, this.element);
   }
 
-  /** @private */
+  /**
+   * @param {MutationRecord} mutations
+   * @private
+   */
   onBodyElMutation_(mutations) {
     mutations.forEach((mutation) => {
       const bodyEl = dev().assertElement(mutation.target);
@@ -1193,7 +1206,10 @@ export class AmpStory extends AMP.BaseElement {
     return layout == Layout_Enum.CONTAINER;
   }
 
-  /** @private */
+  /**
+   * @return {!Promise}
+   * @private
+   */
   initializePages_() {
     const pageImplPromises = Array.prototype.map.call(
       this.element.querySelectorAll('amp-story-page'),
@@ -1687,14 +1703,14 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Reacts to UI state updates.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
     this.backgroundBlur_?.detach();
     this.backgroundBlur_ = null;
     switch (uiState) {
-      case UIType.MOBILE:
+      case UIType_Enum.MOBILE:
         this.vsync_.mutate(() => {
           this.win.document.documentElement.setAttribute(
             'i-amphtml-story-mobile',
@@ -1705,7 +1721,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.remove('i-amphtml-story-desktop-one-panel');
         });
         break;
-      case UIType.DESKTOP_ONE_PANEL:
+      case UIType_Enum.DESKTOP_ONE_PANEL:
         if (!this.backgroundBlur_) {
           this.backgroundBlur_ = new BackgroundBlur(this.win, this.element);
           this.backgroundBlur_.attach();
@@ -1723,7 +1739,7 @@ export class AmpStory extends AMP.BaseElement {
           this.element.classList.remove('i-amphtml-story-desktop-fullbleed');
         });
         break;
-      case UIType.DESKTOP_FULLBLEED:
+      case UIType_Enum.DESKTOP_FULLBLEED:
         this.vsync_.mutate(() => {
           this.win.document.documentElement.removeAttribute(
             'i-amphtml-story-mobile'
@@ -1735,7 +1751,7 @@ export class AmpStory extends AMP.BaseElement {
         break;
       // Because of the DOM mutations, switching from this mode to another is
       // not allowed, and prevented within the store service.
-      case UIType.VERTICAL:
+      case UIType_Enum.VERTICAL:
         const pageAttachments = scopedQuerySelectorAll(
           this.element,
           'amp-story-page amp-story-page-attachment'
@@ -1781,12 +1797,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Retrieves the UI type that should be used to view the story.
-   * @return {!UIType}
+   * @return {!UIType_Enum}
    * @private
    */
   getUIType_() {
     if (
-      this.uiState_ === UIType.MOBILE &&
+      this.uiState_ === UIType_Enum.MOBILE &&
       this.androidSoftKeyboardIsProbablyOpen_()
     ) {
       // The opening of the Android soft keyboard triggers a viewport resize
@@ -1794,23 +1810,23 @@ export class AmpStory extends AMP.BaseElement {
       // desktop. Here, we assume that the soft keyboard is open if the latest
       // UI state is mobile while an input element has focus, and we then
       // ensure that the UI type does not unintentionally alter.
-      return UIType.MOBILE;
+      return UIType_Enum.MOBILE;
     }
 
     if (this.platform_.isBot()) {
-      return UIType.VERTICAL;
+      return UIType_Enum.VERTICAL;
     }
 
     if (!this.isDesktop_()) {
-      return UIType.MOBILE;
+      return UIType_Enum.MOBILE;
     }
 
     if (this.isLandscapeSupported_()) {
-      return UIType.DESKTOP_FULLBLEED;
+      return UIType_Enum.DESKTOP_FULLBLEED;
     }
 
     // Desktop one panel UI (default).
-    return UIType.DESKTOP_ONE_PANEL;
+    return UIType_Enum.DESKTOP_ONE_PANEL;
   }
 
   /**
@@ -2188,13 +2204,13 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     return {
-      [MediaType.AUDIO]: Math.min(
+      [MediaType_Enum.AUDIO]: Math.min(
         audioMediaElementsCount + MINIMUM_AD_MEDIA_ELEMENTS,
-        MAX_MEDIA_ELEMENT_COUNTS[MediaType.AUDIO]
+        MAX_MEDIA_ELEMENT_COUNTS[MediaType_Enum.AUDIO]
       ),
-      [MediaType.VIDEO]: Math.min(
+      [MediaType_Enum.VIDEO]: Math.min(
         videoMediaElementsCount + MINIMUM_AD_MEDIA_ELEMENTS,
-        MAX_MEDIA_ELEMENT_COUNTS[MediaType.VIDEO]
+        MAX_MEDIA_ELEMENT_COUNTS[MediaType_Enum.VIDEO]
       ),
     };
   }
@@ -2546,6 +2562,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Loads amp-story-dev-tools if it is enabled.
    * @private
+   * @return {boolean}
    */
   maybeLoadStoryDevTools_() {
     if (
@@ -2589,14 +2606,14 @@ export class AmpStory extends AMP.BaseElement {
    */
   installLocalizationStrings_() {
     const localizationService = getLocalizationService(this.element);
-    const storyLanguage = localizationService.getLanguageCodesForElement(
+    const storyLanguages = localizationService.getLanguageCodesForElement(
       this.element
-    )[0];
-    if (this.maybeRegisterInlineLocalizationStrings_(storyLanguage)) {
+    );
+    if (this.maybeRegisterInlineLocalizationStrings_(storyLanguages[0])) {
       return;
     }
     if (isExperimentOn(this.win, 'story-remote-localization')) {
-      this.fetchLocalizationStrings_(storyLanguage);
+      this.fetchLocalizationStrings_(storyLanguages);
       Services.performanceFor(this.win).addEnabledExperiment(
         'story-remote-localization'
       );
@@ -2662,22 +2679,20 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Fetches from the CDN or localhost the localization strings.
-   * @param {string} languageCode
+   * @param {string[]} candidateLanguageCodes
    * @private
    */
-  fetchLocalizationStrings_(languageCode) {
+  fetchLocalizationStrings_(candidateLanguageCodes) {
     const localizationService = getLocalizationService(this.element);
+    const languageCode = getSupportedLanguageCode(candidateLanguageCodes);
 
-    const base = calculateScriptBaseUrl(
+    const localizationUrl = calculateExtensionFileUrl(
+      this.win,
       this.win.location,
+      `amp-story.${languageCode}.json`,
       getMode(this.win).localDev
     );
-    const rtvPath = getMode(this.win).localDev
-      ? ''
-      : `rtv/${getMode(this.win).rtvVersion}/`;
-    const localizationUrl = `${base}/${rtvPath}v0/amp-story.${languageCode}.json`;
 
-    // The cache fallbacks to english if language not found, locally it errors.
     Services.xhrFor(this.win)
       .fetchJson(localizationUrl, {prerenderSafe: true})
       .then((res) => res.json())
@@ -2695,7 +2710,6 @@ export class AmpStory extends AMP.BaseElement {
 AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story', AmpStory, CSS);
   AMP.registerElement('amp-story-consent', AmpStoryConsent);
-  AMP.registerElement('amp-story-cta-layer', AmpStoryCtaLayer);
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
 });

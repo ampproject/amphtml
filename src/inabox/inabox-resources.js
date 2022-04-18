@@ -231,7 +231,9 @@ export class InaboxResources {
         hasNextNodeInDocumentOrder(resource.element, this.ampdoc_.getRootNode())
       ) {
         this.pendingBuildResources_.splice(i, 1);
-        resource.build().then(() => this./*OK*/ schedulePass());
+        (resource.build() || Promise.resolve()).then(() =>
+          this./*OK*/ schedulePass()
+        );
         dev().fine(TAG, 'resource upgraded:', resource.debugid);
       }
     }

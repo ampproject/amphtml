@@ -2,6 +2,7 @@ import {CommonSignals_Enum} from '#core/constants/common-signals';
 
 import {forceExperimentBranch} from '#experiments';
 import {divertStoryAdPlacements} from '#experiments/story-ad-placements';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 
@@ -23,7 +24,7 @@ import {CSS as sharedCSS} from '../../../build/amp-story-auto-ads-shared-0.1.css
 import {getServicePromiseForDoc} from '../../../src/service-helpers';
 import {
   StateProperty,
-  UIType,
+  UIType_Enum,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {EventType, dispatch} from '../../amp-story/1.0/events';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
@@ -43,7 +44,12 @@ const MUSTACHE_TAG = 'amp-mustache';
  * @const {Object<string, string>}
  * @visibleForTesting
  */
-export const RELEVANT_PLAYER_EXPS = {};
+export const RELEVANT_PLAYER_EXPS = {
+  [StoryAdSegmentExp.CONTROL]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.AUTO_ADVANCE_OLD_CTA]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.AUTO_ADVANCE_NEW_CTA]: StoryAdSegmentExp.ID,
+  [StoryAdSegmentExp.AUTO_ADVANCE_NEW_CTA_NOT_ANIMATED]: StoryAdSegmentExp.ID,
+};
 
 /** @enum {string} */
 export const Attributes = {
@@ -324,7 +330,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Reacts to UI state updates and passes the information along as
    * attributes to the shadowed ad badge.
-   * @param {!UIType} uiState
+   * @param {!UIType_Enum} uiState
    * @private
    */
   onUIStateUpdate_(uiState) {
@@ -333,10 +339,10 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.adBadgeContainer_.removeAttribute(DESKTOP_FULLBLEED);
       this.adBadgeContainer_.removeAttribute(DESKTOP_ONE_PANEL);
 
-      if (uiState === UIType.DESKTOP_FULLBLEED) {
+      if (uiState === UIType_Enum.DESKTOP_FULLBLEED) {
         this.adBadgeContainer_.setAttribute(DESKTOP_FULLBLEED, '');
       }
-      if (uiState === UIType.DESKTOP_ONE_PANEL) {
+      if (uiState === UIType_Enum.DESKTOP_ONE_PANEL) {
         this.adBadgeContainer_.setAttribute(DESKTOP_ONE_PANEL, '');
       }
     });

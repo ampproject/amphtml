@@ -1,17 +1,4 @@
 const validate = validate0;
-const schema0 = {
-  "properties": {
-    "my-date": {
-      "format": "date"
-    },
-    "my-date-time": {
-      "format": "date-time"
-    },
-    "my-time": {
-      "format": "time"
-    }
-  }
-};
 const formats0 = /^\d\d\d\d-[0-1]\d-[0-3]\d$/;
 const formats2 = /^\d\d\d\d-[0-1]\d-[0-3]\d[t\s](?:[0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(?:\.\d+)?(?:z|[+-]\d\d(?::?\d\d)?)$/i;
 const formats4 = /^(?:[0-2]\d:[0-5]\d:[0-5]\d|23:59:60)(?:\.\d+)?(?:z|[+-]\d\d(?::?\d\d)?)?$/i;
