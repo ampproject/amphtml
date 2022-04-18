@@ -1,4 +1,5 @@
 import {createElementWithAttributes, removeElement} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 
@@ -7,8 +8,6 @@ import {Services} from '#service';
 import {user} from '#utils/log';
 
 import {addParamsToUrl, resolveRelativeUrl} from '../../../src/url';
-
-import * as Preact from '#core/dom/jsx';
 
 /** @const {!Array<string>} */
 const CODECS_IN_ASCENDING_PRIORITY = ['h264', 'vp09'];
