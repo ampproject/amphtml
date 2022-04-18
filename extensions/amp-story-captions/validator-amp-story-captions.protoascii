@@ -44,4 +44,9 @@ tags: {  # <amp-story-captions>
   child_tags: {
     mandatory_num_child_tags: 0
   }
+  attrs: {
+    name: "style-preset"
+    value: "default"
+    value: "appear"
+  }
 }
