@@ -5,6 +5,11 @@ import '../amp-story-shopping';
 import {Services} from '#service';
 import {LocalizationService} from '#service/localization';
 
+import '../../../amp-story-page-attachment/0.1/amp-story-page-attachment';
+
+import * as history from 'extensions/amp-story/1.0/history';
+import {HistoryState} from 'extensions/amp-story/1.0/history';
+
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import {
   Action,
@@ -20,7 +25,7 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story-shopping:0.1'],
+      extensions: ['amp-story-shopping:0.1', 'amp-story-page-attachment:0.1'],
     },
   },
   (env) => {
@@ -63,6 +68,7 @@ describes.realWin(
           <amp-story-shopping-attachment></amp-story-shopping-attachment>
         </amp-story-page>
       );
+
       shoppingTag = await tagEl.getImpl();
     }
 
@@ -128,6 +134,7 @@ describes.realWin(
 
     it('should call analytics service on tag click', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+      env.sandbox.stub(history, 'setHistoryState');
       await setupShoppingTagAndData();
       await shoppingTag.shoppingTagEl_.click();
       expect(trigger).to.have.been.calledWith(
