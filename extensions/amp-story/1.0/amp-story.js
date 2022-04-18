@@ -990,18 +990,22 @@ export class AmpStory extends AMP.BaseElement {
           );
 
           if (attachmentEl) {
-            whenUpgradedToCustomElement(attachmentEl)
-              .then(() => attachmentEl.getImpl())
-              .then((attachmentImpl) =>
-                attachmentImpl.open(false /** shouldAnimate */)
-              );
+            if (attachmentEl.tagName !== 'AMP-STORY-SHOPPING-ATTACHMENT') {
+              whenUpgradedToCustomElement(attachmentEl)
+                .then(() => attachmentEl.getImpl())
+                .then((attachmentImpl) =>
+                  attachmentImpl.open(false /** shouldAnimate */)
+                );
+            }
 
             const shoppingData = getHistoryState(
               this.win,
               HistoryState.SHOPPING_DATA
             );
 
-            this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, shoppingData);
+            this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+              'activeProductData': shoppingData,
+            });
           }
         }
 

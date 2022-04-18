@@ -172,11 +172,7 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
       'activeProductData': this.tagData_,
     });
 
-    setHistoryState(
-      this.win,
-      HistoryState.SHOPPING_DATA,
-      this.storeService_.get(StateProperty.SHOPPING_DATA)
-    );
+    setHistoryState(this.win, HistoryState.SHOPPING_DATA, this.tagData_);
 
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
