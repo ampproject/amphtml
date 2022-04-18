@@ -140,5 +140,12 @@ describes.realWin(
         StoryAnalyticsEvent.SHOPPING_TAG_CLICK
       );
     });
+
+    it('should call history service on tag click', async () => {
+      const hist = env.sandbox.stub(history, 'setHistoryState');
+      await setupShoppingTagAndData();
+      await shoppingTag.shoppingTagEl_.click();
+      expect(hist).to.have.been.called;
+    });
   }
 );
