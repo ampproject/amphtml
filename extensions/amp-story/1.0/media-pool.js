@@ -619,7 +619,7 @@ export class MediaPool {
    * so that there's no return value.
    */
   preload(domMediaEl) {
-    // Empty then() so we hide the value yielded by the loadInternal_
+    // Empty then() invocation hides the value yielded by the loadInternal_
     // promise, so that we do not leak the pool media element outside of the
     // scope of the media pool.
     return Promise.resolve(this.loadInternal_(domMediaEl)).then();
@@ -630,8 +630,6 @@ export class MediaPool {
    * element from the pool and playing that.
    * @param {!DomElementDef} domMediaEl The media element to be played.
    * @return {Promise<void>}
-   * TODO(wg-stories): This method is async to preserve callsites. Refactor
-   * so that there's no return value.
    */
   play(domMediaEl) {
     const poolMediaEl = this.loadInternal_(domMediaEl);
