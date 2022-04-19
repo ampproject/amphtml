@@ -934,7 +934,6 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    console.log('amp-story.layoutCallback()');
     if (!AmpStory.isBrowserSupported(this.win) && !this.platform_.isBot()) {
       return this.displayUnsupportedBrowser_();
     }
