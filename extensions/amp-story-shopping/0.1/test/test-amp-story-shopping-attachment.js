@@ -2,6 +2,7 @@ import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 
+import {HistoryState} from 'extensions/amp-story/1.0/history';
 import * as history from 'extensions/amp-story/1.0/history';
 
 import '../../../amp-story/1.0/amp-story';
@@ -287,8 +288,11 @@ describes.realWin(
         '.i-amphtml-amp-story-shopping-plp-card'
       );
       plpCard.dispatchEvent(new Event('click'));
-
-      expect(historyStub).to.have.been.called;
+      expect(historyStub).to.have.been.called.calledWith(
+        win,
+        HistoryState.SHOPPING_DATA,
+        shoppingData.items[0]
+      );
     });
   }
 );

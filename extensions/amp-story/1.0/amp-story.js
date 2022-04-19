@@ -986,7 +986,7 @@ export class AmpStory extends AMP.BaseElement {
 
         if (shouldReOpenAttachmentForPageId === this.activePage_.element.id) {
           const attachmentEl = this.activePage_.element.querySelector(
-            'amp-story-shopping-attachment, amp-story-page-attachment, amp-story-page-outlink'
+            'amp-story-page-attachment, amp-story-page-outlink'
           );
 
           if (
