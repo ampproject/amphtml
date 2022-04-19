@@ -196,6 +196,7 @@ function applyCaptionsTrackToVideo(videoEl, captionsResponse, ampdoc) {
       id={captionsResponse['src']}
       style-preset="default"
       layout="container"
+      auto-append
     ></amp-story-captions>
   );
 
