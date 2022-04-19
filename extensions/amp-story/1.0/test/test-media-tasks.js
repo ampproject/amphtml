@@ -6,6 +6,7 @@ import {toArray} from '#core/types/array';
 import {
   mute,
   play,
+  resetAmpMediaOnDomChange,
   swapMediaElements,
   unmute,
   updateSources,
@@ -257,6 +258,71 @@ describes.realWin('media-tasks', {}, (env) => {
       expect(inserted.getAttribute('id')).to.equal('preserved id');
       expect(inserted.getAttribute('src')).to.equal('preserved src');
       expect(inserted.getAttribute('a')).to.equal('copied value of a');
+    });
+  });
+
+  describe('resetAmpMediaOnDomChange', () => {
+    it('resolves when no AMP element parent', async () => {
+      const parent = (
+        <div>
+          <video />
+        </div>
+      );
+      const {firstElementChild} = parent;
+      const result = await resetAmpMediaOnDomChange(firstElementChild);
+      expect(result).to.be.undefined;
+    });
+
+    it('amp-video: resolves when `resetOnDomChange()` is not provided', async () => {
+      const parent = (
+        <amp-video>
+          <video />
+        </amp-video>
+      );
+      parent.getImpl = () => Promise.resolve({});
+      const {firstElementChild} = parent;
+      const result = await resetAmpMediaOnDomChange(firstElementChild);
+      expect(result).to.be.undefined;
+    });
+
+    it('amp-audio: resolves when `resetOnDomChange()` is not provided', async () => {
+      const parent = (
+        <amp-audio>
+          <audio />
+        </amp-audio>
+      );
+      parent.getImpl = () => Promise.resolve({});
+      const {firstElementChild} = parent;
+      const result = await resetAmpMediaOnDomChange(firstElementChild);
+      expect(result).to.be.undefined;
+    });
+
+    it('amp-video: calls `resetOnDomChange()`', async () => {
+      const parent = (
+        <amp-video>
+          <video />
+        </amp-video>
+      );
+      const resetOnDomChange = env.sandbox.spy();
+      parent.getImpl = () => Promise.resolve({resetOnDomChange});
+      const {firstElementChild} = parent;
+      const result = await resetAmpMediaOnDomChange(firstElementChild);
+      expect(result).to.be.undefined;
+      expect(resetOnDomChange).to.have.been.calledOnce;
+    });
+
+    it('amp-audio: calls `resetOnDomChange()`', async () => {
+      const parent = (
+        <amp-audio>
+          <audio />
+        </amp-audio>
+      );
+      const resetOnDomChange = env.sandbox.spy();
+      parent.getImpl = () => Promise.resolve({resetOnDomChange});
+      const {firstElementChild} = parent;
+      const result = await resetAmpMediaOnDomChange(firstElementChild);
+      expect(result).to.be.undefined;
+      expect(resetOnDomChange).to.have.been.calledOnce;
     });
   });
 });
