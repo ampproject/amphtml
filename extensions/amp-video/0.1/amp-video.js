@@ -168,6 +168,9 @@ export class AmpVideo extends AMP.BaseElement {
 
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
+
+    /** @private {boolean} whether another element is in charge of the captions. */
+    this.hasCaptionsRenderer_ = false;
   }
 
   /**
@@ -774,6 +777,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (!captionsElement) {
       return;
     }
+    this.hasCaptionsRenderer_ = true;
     captionsElement.getImpl().then((impl) => {
       if (impl.setVideoElement) {
         impl.setVideoElement(this.video_);
@@ -1033,6 +1037,23 @@ export class AmpVideo extends AMP.BaseElement {
   /** @override */
   seekTo(timeSeconds) {
     this.video_.currentTime = timeSeconds;
+  }
+
+  /**
+   * Shows or hides the captions.
+   * @param {boolean} captionsState
+   * @public
+   */
+  toggleCaptions(captionsState) {
+    toArray(this.video_.textTracks).forEach((track) => {
+      if (captionsState) {
+        // If a custom captions renderer is configured (e.g. amp-story-captions),
+        // enable captions but keep them hidden to avoid double rendering.
+        track.mode = this.hasCaptionsRenderer_ ? 'hidden' : 'showing';
+      } else {
+        track.mode = 'disabled';
+      }
+    });
   }
 }
 
