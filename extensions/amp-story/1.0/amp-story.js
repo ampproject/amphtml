@@ -989,10 +989,7 @@ export class AmpStory extends AMP.BaseElement {
             'amp-story-page-attachment, amp-story-page-outlink'
           );
 
-          if (
-            attachmentEl &&
-            attachmentEl.tagName !== 'AMP-STORY-SHOPPING-ATTACHMENT'
-          ) {
+          if (attachmentEl) {
             whenUpgradedToCustomElement(attachmentEl)
               .then(() => attachmentEl.getImpl())
               .then((attachmentImpl) =>
