@@ -1,6 +1,7 @@
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
+import {LocalizationService} from '#service/localization';
 
 import {afterRenderPromise} from '#testing/helpers';
 
@@ -41,6 +42,11 @@ describes.realWin(
         .stub(Services, 'storyStoreServiceForOrNull')
         .returns(Promise.resolve(storeService));
       env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
+
+      const localizationService = new LocalizationService(doc.body);
+      env.sandbox
+        .stub(Services, 'localizationServiceForOrNull')
+        .returns(Promise.resolve(localizationService));
 
       const platformConfig = {
         'services': [

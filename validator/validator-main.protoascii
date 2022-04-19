@@ -2026,7 +2026,7 @@ tags: {
   spec_url: "https://amp.dev/documentation/components/amp-video/"
 }
 # 4.7.7 The audio element
-# Only allowed in noscript tags. Otherwise use amp-audio.
+# Allowed in noscript tags and inside amp-audio for server side rendering.
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
   tag_name: "AUDIO"
@@ -2046,6 +2046,14 @@ tags: {
     }
     disallowed_value_regex: "__amp_source_origin"
   }
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
+}
+tags: {
+  html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
+  tag_name: "AUDIO"
+  mandatory_ancestor: "AMP-AUDIO"
+  spec_name: "amp-audio > audio"
+  attrs: { name: "controls" }
   spec_url: "https://amp.dev/documentation/components/amp-audio/"
 }
 # 4.7.7 The picture element

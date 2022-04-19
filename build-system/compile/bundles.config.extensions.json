@@ -187,6 +187,14 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-audio",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "bento": true
+    }
+  },
+  {
     "name": "amp-auto-ads",
     "version": "0.1",
     "latestVersion": "0.1"
@@ -557,6 +565,16 @@
     }
   },
   {
+    "name": "amp-image-slider",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true,
+      "npm": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-image-viewer",
     "version": "0.1",
     "latestVersion": "0.1",
@@ -816,6 +834,14 @@
     "latestVersion": "0.1",
     "options": {
       "hasCss": true
+    }
+  },
+  {
+    "name": "amp-pan-zoom",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true
     }
   },
   {

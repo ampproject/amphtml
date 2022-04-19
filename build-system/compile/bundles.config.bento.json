@@ -44,6 +44,14 @@
     }
   },
   {
+    "name": "bento-imgur",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
+    }
+  },
+  {
     "name": "bento-inline-gallery",
     "version": "1.0",
     "latestVersion": "0.1",
