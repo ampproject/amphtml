@@ -6,6 +6,7 @@ import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+import {HistoryState, setHistoryState} from 'extensions/amp-story/1.0/history';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 import {
@@ -82,17 +83,25 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
 
-    getShoppingConfig(this.element, this.pageEl_.id).then((config) =>
-      storeShoppingConfig(this.pageEl_, config)
-    );
-
     if (this.shoppingTags_.length === 0) {
-      return;
+      return Promise.reject(
+        new Error(`No shopping tags on page ${this.pageEl_.id}.`)
+      );
     }
 
-    return this.localizationService_
-      .getLocalizedStringAsync(
-        LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+    return getShoppingConfig(this.element, this.pageEl_.id)
+      .then((config) => {
+        if (Object.keys(config).length === 0) {
+          return Promise.reject(
+            new Error(`No valid shopping data on page ${this.pageEl_.id}.`)
+          );
+        }
+        storeShoppingConfig(this.pageEl_, config);
+      })
+      .then(() =>
+        this.localizationService_.getLocalizedStringAsync(
+          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+        )
       )
       .then((ctaText) => {
         this.attachmentEl_ = (
@@ -110,9 +119,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.shoppingTags_.length === 0) {
-      return;
-    }
     loadFonts(this.win, FONTS_TO_LOAD);
     // Update template on attachment state update or shopping data update.
     this.storeService_.subscribe(
@@ -299,6 +305,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
+
+    setHistoryState(this.win, HistoryState.SHOPPING_DATA, shoppingData);
   }
 
   /**
