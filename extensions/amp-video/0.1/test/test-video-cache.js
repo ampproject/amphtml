@@ -517,17 +517,6 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     });
   }
   describe('captions field', async () => {
-    it('should install the story-captions extension if the cache responds with captions', async () => {
-      stubSourcesWithCapionsRequest();
-      const videoEl = createVideo([{src: 'video.mp4'}]);
-      await fetchCachedSources(videoEl, env.ampdoc);
-
-      expect(extensionsService.installExtensionForDoc).to.have.been.calledWith(
-        env.sandbox.match.any,
-        'amp-story-captions',
-        '0.1'
-      );
-    });
     it('should append track element if the cache responds with captions', async () => {
       stubSourcesWithCapionsRequest();
       const videoEl = createVideo([{src: 'video.mp4'}]);

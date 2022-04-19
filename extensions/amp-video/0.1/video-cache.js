@@ -177,12 +177,6 @@ function applyCaptionsTrackToVideo(videoEl, captionsResponse, ampdoc) {
     return;
   }
 
-  Services.extensionsFor(ampdoc.win).installExtensionForDoc(
-    ampdoc,
-    'amp-story-captions',
-    '0.1'
-  );
-
   const trackEl = (
     <track
       src={captionsResponse['src']}
