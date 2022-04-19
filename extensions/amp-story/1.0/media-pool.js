@@ -519,7 +519,7 @@ export class MediaPool {
    * a media element that can be used in its stead for playback.
    * @param {!DomElementDef} domMediaEl The media element, found in the
    *     DOM, whose content should be loaded.
-   * @return {PoolBoundElementDef} A media element from the pool that
+   * @return {PoolBoundElementDef|undefined} A media element from the pool that
    *     can be used to replace the specified element.
    */
   loadInternal_(domMediaEl) {
