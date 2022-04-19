@@ -199,10 +199,11 @@ function applyCaptionsTrackToVideo(videoEl, captionsResponse, ampdoc) {
       auto-append
     ></amp-story-captions>
   );
+  // Set captions-id on video to pass track to story-captions.
+  videoEl.setAttribute('captions-id', captionsResponse['src']);
 
   videoEl.appendChild(trackEl);
   videoEl.appendChild(captionsEl);
-  videoEl.setAttribute('captions-id', captionsResponse['src']);
 }
 
 /**
