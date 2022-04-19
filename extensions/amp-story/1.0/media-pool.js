@@ -726,7 +726,7 @@ export class MediaPool {
     }
 
     const {parentElement} = domMediaEl;
-    if (parentElement.tagName === 'AMP-VIDEO') {
+    if (parentElement?.tagName === 'AMP-VIDEO') {
       const ampVideoEl = parentElement;
       if (ampVideoEl.hasAttribute('noaudio')) {
         this.setVolume_(domMediaEl, 0);
