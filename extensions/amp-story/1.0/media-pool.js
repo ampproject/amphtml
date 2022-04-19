@@ -725,15 +725,16 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    const {parentElement} = domMediaEl;
-    if (parentElement?.tagName === 'AMP-VIDEO') {
-      const ampVideoEl = parentElement;
-      if (ampVideoEl.hasAttribute('noaudio')) {
-        this.setVolume_(domMediaEl, 0);
-      } else {
-        const volume = ampVideoEl.getAttribute('volume');
-        if (volume) {
-          this.setVolume_(domMediaEl, parseFloat(volume));
+    if (mediaType == MediaType_Enum.VIDEO) {
+      const ampVideoEl = domMediaEl.parentElement;
+      if (ampVideoEl) {
+        if (ampVideoEl.hasAttribute('noaudio')) {
+          this.setVolume_(domMediaEl, 0);
+        } else {
+          const volume = ampVideoEl.getAttribute('volume');
+          if (volume) {
+            this.setVolume_(domMediaEl, parseFloat(volume));
+          }
         }
       }
     }
