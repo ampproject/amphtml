@@ -996,7 +996,7 @@ export class AmpStory extends AMP.BaseElement {
             whenUpgradedToCustomElement(attachmentEl)
               .then(() => attachmentEl.getImpl())
               .then((attachmentImpl) =>
-                attachmentImpl.open(false /** shouldAnimate */)
+                attachmentImpl.open(false /** shouldAnimate  */)
               );
           }
 
