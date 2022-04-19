@@ -989,20 +989,23 @@ export class AmpStory extends AMP.BaseElement {
             'amp-story-shopping-attachment, amp-story-page-attachment, amp-story-page-outlink'
           );
 
-          if (attachmentEl) {
-            if (attachmentEl.tagName !== 'AMP-STORY-SHOPPING-ATTACHMENT') {
-              whenUpgradedToCustomElement(attachmentEl)
-                .then(() => attachmentEl.getImpl())
-                .then((attachmentImpl) =>
-                  attachmentImpl.open(false /** shouldAnimate */)
-                );
-            }
+          if (
+            attachmentEl &&
+            attachmentEl.tagName !== 'AMP-STORY-SHOPPING-ATTACHMENT'
+          ) {
+            whenUpgradedToCustomElement(attachmentEl)
+              .then(() => attachmentEl.getImpl())
+              .then((attachmentImpl) =>
+                attachmentImpl.open(false /** shouldAnimate */)
+              );
+          }
 
-            const shoppingData = getHistoryState(
-              this.win,
-              HistoryState.SHOPPING_DATA
-            );
+          const shoppingData = getHistoryState(
+            this.win,
+            HistoryState.SHOPPING_DATA
+          );
 
+          if (shoppingData) {
             this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
               'activeProductData': shoppingData,
             });
