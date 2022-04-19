@@ -153,7 +153,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         .maybeRenderDialogForSelectedPlatform()
         .then(() => {
           if (this.viewer_.isEmbedded()) {
-            setTimeout(() => {
+            this.win.setTimeout(() => {
               const buttonEl = this.win.document.querySelector(
                 'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
               );
