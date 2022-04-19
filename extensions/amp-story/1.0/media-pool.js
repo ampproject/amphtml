@@ -11,12 +11,12 @@ import {
   mute,
   play,
   resetAmpMediaOnDomChange,
-  swapMediaElements,
+  swapMediaIntoDom,
+  swapMediaOutOfDom,
   unmute,
   updateSources,
 } from './media-tasks';
 import {Sources} from './sources';
-import {getAmpVideoParent} from './utils';
 
 import {userInteractedWith} from '../../../src/video-interface';
 
@@ -325,13 +325,13 @@ export class MediaPool {
   /**
    * Retrieves the media element from the pool that matches the specified
    * element, if one exists.
+   * @param {!MediaType_Enum} mediaType The type of media element to get.
    * @param {!DomElementDef} domMediaEl The element whose matching media
    *     element should be retrieved.
    * @return {?PoolBoundElementDef} The media element in the pool that
    *     represents the specified media element
    */
-  getMatchingMediaElementFromPool_(domMediaEl) {
-    const mediaType = this.getMediaType_(domMediaEl);
+  getMatchingMediaElementFromPool_(mediaType, domMediaEl) {
     if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
       // The media element in the DOM was already from the pool.
       return /** @type {!PoolBoundElementDef} */ (domMediaEl);
@@ -463,19 +463,14 @@ export class MediaPool {
    * @param {!PoolBoundElementDef} poolMediaEl The media element originating
    *     from the pool.
    * @param {!Sources} sources The sources for the media element.
+   * @return {!Promise} A promise that is resolved when the media element has
+   *     been successfully swapped into the DOM.
    * @private
    */
   swapPoolMediaElementIntoDom_(placeholderEl, poolMediaEl, sources) {
-    const isPlaceholderConnected = devAssert(
-      isConnectedNode(placeholderEl),
-      'Cannot swap media for element that is not in DOM.'
-    );
-    if (!isPlaceholderConnected) {
-      return;
-    }
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = placeholderEl.id;
-    swapMediaElements(placeholderEl, poolMediaEl);
-    Promise.all([
+    swapMediaIntoDom(poolMediaEl, placeholderEl);
+    return Promise.all([
       resetAmpMediaOnDomChange(poolMediaEl),
       resetAmpMediaOnDomChange(placeholderEl),
     ]).then(() => {
@@ -505,8 +500,18 @@ export class MediaPool {
       )
     );
     poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
-    swapMediaElements(poolMediaEl, placeholderEl);
-    Sources.removeFrom(this.win_, poolMediaEl);
+    swapMediaOutOfDom(poolMediaEl, placeholderEl);
+    this.resetPoolMediaElementSource_(poolMediaEl);
+  }
+
+  /**
+   * @param {!PoolBoundElementDef} poolMediaEl
+   * @private
+   */
+  resetPoolMediaElementSource_(poolMediaEl) {
+    // TODO(wg-stories): This should be a simpler Sources.removeFrom() call.
+    // Test current use, and update.
+    updateSources(this.win, poolMediaEl, new Sources());
   }
 
   /**
@@ -523,8 +528,11 @@ export class MediaPool {
       return;
     }
 
-    const existingPoolMediaEl =
-      this.getMatchingMediaElementFromPool_(domMediaEl);
+    const mediaType = this.getMediaType_(domMediaEl);
+    const existingPoolMediaEl = this.getMatchingMediaElementFromPool_(
+      mediaType,
+      domMediaEl
+    );
     if (existingPoolMediaEl) {
       // The element being loaded already has an allocated media element.
       return existingPoolMediaEl;
@@ -537,7 +545,6 @@ export class MediaPool {
     const sources = this.sources_[placeholderEl.id];
     devAssert(sources instanceof Sources, 'Cannot play unregistered element.');
 
-    const mediaType = this.getMediaType_(placeholderEl);
     const poolMediaEl =
       this.reserveUnallocatedMediaElement_(mediaType) ||
       this.evictMediaElement_(mediaType, placeholderEl);
@@ -607,23 +614,31 @@ export class MediaPool {
    * Preloads the content of the specified media element in the DOM.
    * @param {!DomElementDef} domMediaEl The media element, found in the
    *     DOM, whose content should be loaded.
-   * @return {boolean}
+   * TODO(wg-stories): This method is async to preserve callsites. Refactor
+   * so that there's no return value.
+   * @return {Promise}
    */
   preload(domMediaEl) {
-    return !!this.loadInternal_(domMediaEl);
+    // Empty then() so we hide the value yielded by the loadInternal_
+    // promise, so that we do not leak the pool media element outside of the
+    // scope of the media pool.
+    return Promise.resolve(this.loadInternal_(domMediaEl)).then();
   }
 
   /**
    * Plays the specified media element in the DOM by replacing it with a media
    * element from the pool and playing that.
    * @param {!DomElementDef} domMediaEl The media element to be played.
+   * @return {Promise<void>}
+   * TODO(wg-stories): This method is async to preserve callsites. Refactor
+   * so that there's no return value.
    */
   play(domMediaEl) {
     const poolMediaEl = this.loadInternal_(domMediaEl);
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
-    play(poolMediaEl);
+    return play(poolMediaEl);
   }
 
   /**
@@ -631,9 +646,16 @@ export class MediaPool {
    * @param {!DomElementDef} domMediaEl The media element to be paused.
    * @param {boolean=} rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
+   * @return {Promise<void>}
+   * TODO(wg-stories): This method is async to preserve callsites. Refactor
+   * so that there's no return value.
    */
   pause(domMediaEl, rewindToBeginning = false) {
-    const poolMediaEl = this.getMatchingMediaElementFromPool_(domMediaEl);
+    const mediaType = this.getMediaType_(domMediaEl);
+    const poolMediaEl = this.getMatchingMediaElementFromPool_(
+      mediaType,
+      domMediaEl
+    );
     if (!poolMediaEl) {
       return;
     }
@@ -641,49 +663,73 @@ export class MediaPool {
     if (rewindToBeginning) {
       poolMediaEl.currentTime = 0;
     }
+    return Promise.resolve();
   }
 
   /**
    * Sets currentTime for a specified media element in the DOM.
    * @param {!DomElementDef} domMediaEl The media element.
    * @param {number} currentTime The time to seek to, in seconds.
+   * @return {Promise<void>}
+   * TODO(wg-stories): This method is async to preserve callsites. Refactor
+   * so that there's no return value.
    */
   setCurrentTime(domMediaEl, currentTime) {
-    const poolMediaEl = this.getMatchingMediaElementFromPool_(domMediaEl);
-    if (!poolMediaEl) {
-      return;
+    const mediaType = this.getMediaType_(domMediaEl);
+    const poolMediaEl = this.getMatchingMediaElementFromPool_(
+      mediaType,
+      domMediaEl
+    );
+    if (poolMediaEl) {
+      poolMediaEl.currentTime = currentTime;
     }
-    poolMediaEl.currentTime = currentTime;
+    return Promise.resolve();
   }
 
   /**
    * Mutes the specified media element in the DOM.
    * @param {!DomElementDef} domMediaEl The media element to be muted.
+   * @return {Promise<void>}
+   * TODO(wg-stories): This method is async to preserve callsites. Refactor
+   * so that there's no return value.
    */
   mute(domMediaEl) {
-    const poolMediaEl = this.getMatchingMediaElementFromPool_(domMediaEl);
+    const mediaType = this.getMediaType_(domMediaEl);
+    const poolMediaEl = this.getMatchingMediaElementFromPool_(
+      mediaType,
+      domMediaEl
+    );
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
     const audioSource = this.audioSources_[domMediaEl.id];
     if (audioSource) {
       audioSource.disconnect();
     }
     mute(domMediaEl);
+    return Promise.resolve();
   }
 
   /**
    * Unmutes the specified media element in the DOM.
    * @param {!DomElementDef} domMediaEl The media element to be unmuted.
+   * @return {Promise<void>}
+   * TODO(wg-stories): This method is async to preserve callsites. Refactor
+   * so that there's no return value.
    */
   unmute(domMediaEl) {
-    const poolMediaEl = this.getMatchingMediaElementFromPool_(domMediaEl);
+    const mediaType = this.getMediaType_(domMediaEl);
+    const poolMediaEl = this.getMatchingMediaElementFromPool_(
+      mediaType,
+      domMediaEl
+    );
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
 
-    const ampVideoEl = getAmpVideoParent(poolMediaEl);
-    if (ampVideoEl) {
+    const {parentElement} = domMediaEl;
+    if (parentElement.tagName === 'AMP-VIDEO') {
+      const ampVideoEl = parentElement;
       if (ampVideoEl.hasAttribute('noaudio')) {
         this.setVolume_(domMediaEl, 0);
       } else {
@@ -695,6 +741,7 @@ export class MediaPool {
     }
 
     unmute(domMediaEl);
+    return Promise.resolve();
   }
 
   /**
@@ -727,10 +774,13 @@ export class MediaPool {
    * "Blesses" all media elements in the media pool for future playback without
    * a user gesture.  In order for this to bless the media elements, this
    * function must be invoked in response to a user gesture.
+   * @return {Promise<void>}
+   * TODO(wg-stories): This method is async to preserve callsites. Refactor
+   * so that there's no return value.
    */
   blessAll() {
     if (this.blessed_) {
-      return;
+      return Promise.resolve();
     }
 
     (this.ampElementsToBless_ || []).forEach(userInteractedWith);
@@ -756,6 +806,8 @@ export class MediaPool {
     } else {
       dev().expectedError('AMP-STORY', 'Blessing failed:', error.message);
     }
+
+    return Promise.resolve();
   }
 
   /**

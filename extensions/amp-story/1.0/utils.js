@@ -77,18 +77,6 @@ export function ampMediaElementFor(el) {
 }
 
 /**
- * @param {Element} element
- * @return {null | AmpElement}
- */
-export function getAmpVideoParent(element) {
-  const {parentElement} = element;
-  if (parentElement?.tagName === 'AMP-VIDEO') {
-    return parentElement;
-  }
-  return null;
-}
-
-/**
  * Creates a shadow root for the provided container, and appends the element
  * along with its CSS.
  * @param  {!Element} container

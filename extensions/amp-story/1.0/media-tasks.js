@@ -1,7 +1,10 @@
+import {isConnectedNode} from '#core/dom';
 import {tryPlay} from '#core/dom/video';
 
+import {dev} from '#utils/log';
+
 import {Sources} from './sources';
-import {getAmpVideoParent} from './utils';
+import {ampMediaElementFor} from './utils';
 
 /**
  * CSS class names that should not be removed from an element when swapping it
@@ -113,13 +116,15 @@ export function swapMediaElements(replaced, inserted) {
 
 /**
  * @param {HTMLMediaElement} mediaEl
+ * @return {undefined | Promise<void>}
  */
 export function play(mediaEl) {
   // We do not want to invoke play() if the media element is already
   // playing, as this can interrupt playback in some browsers.
-  if (mediaEl.paused) {
-    tryPlay(mediaEl);
+  if (!mediaEl.paused) {
+    return Promise.resolve();
   }
+  return tryPlay(mediaEl);
 }
 
 /** @param {HTMLMediaElement} mediaEl */
@@ -162,13 +167,38 @@ export function updateSources(win, mediaEl, newSources) {
 }
 
 /**
+ * Swaps a media element into the DOM, in the place of a placeholder element.
+ * @param {HTMLMediaElement} mediaEl
+ * @param {HTMLMediaElement} placeholderEl
+ */
+export function swapMediaIntoDom(mediaEl, placeholderEl) {
+  if (!isConnectedNode(placeholderEl)) {
+    throw dev().createError(
+      'Cannot swap media for element that is not in DOM.'
+    );
+  }
+  swapMediaElements(placeholderEl, mediaEl);
+}
+
+/**
+ * Swaps a media element out the DOM, replacing it with a placeholder element.
+ * @param {HTMLMediaElement} mediaEl
+ * @param {HTMLMediaElement} placeholderEl
+ */
+export function swapMediaOutOfDom(mediaEl, placeholderEl) {
+  swapMediaElements(mediaEl, placeholderEl);
+}
+
+/**
  * @param {?Element|undefined} element
- * @return {undefined | Promise<void>}
+ * @return {Promise<void>}
  */
 export function resetAmpMediaOnDomChange(element) {
-  return getAmpVideoParent(element)
-    ?.getImpl()
-    .then((impl) => {
-      impl.resetOnDomChange?.();
-    });
+  const ampMediaElement = ampMediaElementFor(element);
+  if (!ampMediaElement) {
+    return Promise.resolve();
+  }
+  return ampMediaElement.getImpl().then((impl) => {
+    impl.resetOnDomChange?.();
+  });
 }

@@ -173,7 +173,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should perform media operations when state becomes active', (done) => {
-    env.sandbox.stub(page, 'loadPromise').resolves();
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
@@ -192,7 +192,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         mediaPoolMock
           .expects('preload')
           .withExactArgs(videoEl)
-          .returns()
+          .returns(Promise.resolve())
           .once();
 
         mediaPoolMock.expects('play').withExactArgs(videoEl).once();
@@ -209,7 +209,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('should unmute audio when state becomes active', (done) => {
-    env.sandbox.stub(page, 'loadPromise').resolves();
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
     storeService.dispatch(Action.TOGGLE_MUTED, false);
 
@@ -225,8 +225,8 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       .then(() => page.mediaPoolPromise_)
       .then(async (mediaPool) => {
         mediaPoolMock = env.sandbox.mock(mediaPool);
-        mediaPoolMock.expects('preload').returns();
-        mediaPoolMock.expects('play').returns();
+        mediaPoolMock.expects('preload').resolves();
+        mediaPoolMock.expects('play').resolves();
         mediaPoolMock.expects('unmute').once();
 
         page.setState(PageState.PLAYING);
@@ -244,7 +244,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       html: '<video src="https://example.com/video.mp3"></video>',
       extensions: [],
     });
-    env.sandbox.stub(page, 'loadPromise').resolves();
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
     fiePromise.then((fie) => {
       const fieDoc = fie.win.document;
@@ -263,7 +263,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
           mediaPoolMock
             .expects('preload')
             .withExactArgs(videoEl)
-            .returns()
+            .returns(Promise.resolve())
             .once();
 
           mediaPoolMock.expects('play').withExactArgs(videoEl).once();
@@ -599,7 +599,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   });
 
   it('play message should have role="button" to prevent story page navigation', async () => {
-    env.sandbox.stub(page, 'loadPromise').resolves();
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
     env.sandbox.stub(VideoUtils, 'isAutoplaySupported').resolves(false);
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp4');
@@ -608,7 +608,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     page.buildCallback();
     const mediaPool = await page.mediaPoolPromise_;
     const mediaPoolPlay = env.sandbox.stub(mediaPool, 'play');
-    mediaPoolPlay.throws();
+    mediaPoolPlay.returns(Promise.reject());
 
     page.layoutCallback();
 

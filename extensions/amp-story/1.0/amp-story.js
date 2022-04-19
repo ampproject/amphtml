@@ -25,6 +25,7 @@ import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {prefersReducedMotion} from '#core/dom/media-query-props';
 import {
+  childElement,
   childElementByTag,
   childElements,
   childNodes,
@@ -2062,7 +2063,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   registerAndPreloadBackgroundAudio_() {
-    const backgroundAudioEl = upgradeBackgroundAudio(this.element);
+    let backgroundAudioEl = upgradeBackgroundAudio(this.element);
+
     if (!backgroundAudioEl) {
       return;
     }
@@ -2074,10 +2076,17 @@ export class AmpStory extends AMP.BaseElement {
       .signals()
       .whenSignal(CommonSignals_Enum.LOAD_END)
       .then(() => {
+        backgroundAudioEl = /** @type {!HTMLMediaElement} */ (
+          backgroundAudioEl
+        );
         this.mediaPool_.register(backgroundAudioEl);
-        this.mediaPool_.preload(backgroundAudioEl);
+        return this.mediaPool_.preload(backgroundAudioEl);
+      })
+      .then(() => {
         this.backgroundAudioEl_ = /** @type {!HTMLMediaElement} */ (
-          childElementByTag(this.element, 'audio')
+          childElement(this.element, (el) => {
+            return el.tagName.toLowerCase() === 'audio';
+          })
         );
       });
   }
@@ -2250,11 +2259,14 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   unmute_() {
-    this.mediaPool_.blessAll();
-    this.playBackgroundAudio_();
-    if (this.activePage_) {
-      this.activePage_.unmuteAllMedia();
-    }
+    const unmuteAllMedia = () => {
+      this.playBackgroundAudio_();
+      if (this.activePage_) {
+        this.activePage_.unmuteAllMedia();
+      }
+    };
+
+    this.mediaPool_.blessAll().then(unmuteAllMedia, unmuteAllMedia);
   }
 
   /**
