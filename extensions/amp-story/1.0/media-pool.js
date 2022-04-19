@@ -614,9 +614,9 @@ export class MediaPool {
    * Preloads the content of the specified media element in the DOM.
    * @param {!DomElementDef} domMediaEl The media element, found in the
    *     DOM, whose content should be loaded.
+   * @return {Promise}
    * TODO(wg-stories): This method is async to preserve callsites. Refactor
    * so that there's no return value.
-   * @return {Promise}
    */
   preload(domMediaEl) {
     // Empty then() so we hide the value yielded by the loadInternal_
