@@ -396,7 +396,6 @@ export class AmpVideo extends AMP.BaseElement {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-
       pendingOriginPromise = this.getAmpDoc()
         .whenFirstPreviewedOrVisible()
         .then(() => {
