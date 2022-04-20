@@ -13,6 +13,7 @@ import {
   SubscriptionsState,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from '../../amp-story/1.0/amp-story-viewer-messaging-handler';
+import {AdvancementMode} from '../../amp-story/1.0/story-analytics';
 import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
 const TAG = 'amp-story-subscriptions';
@@ -180,12 +181,9 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         'i-amphtml-story-subscriptions-dialog-banner-button-visible'
       )
     ) {
-      const advancementMode = this.storeService_.get(
-        StateProperty.ADVANCEMENT_MODE
-      );
       this.viewerMessagingHandler_.send('selectDocument', {
         'next': true,
-        'advancementMode': advancementMode,
+        'advancementMode': AdvancementMode.MANUAL_ADVANCE,
       });
     }
   }
