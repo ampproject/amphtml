@@ -803,7 +803,10 @@ describes.realWin(
               env.ampdoc,
               'getVisibilityState'
             ),
-            whenFirstPreviewedOrVisible: env.sandbox.stub(env.ampdoc, 'whenFirstPreviewedOrVisible'),
+            whenFirstPreviewedOrVisible: env.sandbox.stub(
+              env.ampdoc,
+              'whenFirstPreviewedOrVisible'
+            ),
           };
           visibilityStubs.getVisibilityState.returns(
             VisibilityState_Enum.PRERENDER
