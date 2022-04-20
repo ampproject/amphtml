@@ -148,13 +148,18 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     );
 
     if (showDialog) {
+      console.log('show dialog ui');
       // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
       // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
       return this.subscriptionService_
         .maybeRenderDialogForSelectedPlatform()
         .then(() => {
+          console.log('finish render dialog');
           if (this.viewer_.isEmbedded()) {
-            this.win.setTimeout(() => {
+            console.log('isEmbedded');
+            // debugger;
+            Services.timerFor(this.win).delay(() => {
+              console.log('after timeout');
               const buttonEl = this.win.document.querySelector(
                 'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
               );
@@ -165,6 +170,19 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
                   )
                 );
             }, SKIP_BUTTON_DELAY_DURATION);
+            // const timeout = setTimeout(() => {
+            //   console.log('after timeout');
+            //   const buttonEl = this.win.document.querySelector(
+            //     'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
+            //   );
+            //   buttonEl &&
+            //     this.mutateElement(() =>
+            //       buttonEl.classList.add(
+            //         'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+            //       )
+            //     );
+            // }, 1000);
+            // console.log('timeout id: ' + timeout);
           }
         });
     }

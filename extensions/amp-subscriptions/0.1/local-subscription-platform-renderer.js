@@ -64,6 +64,7 @@ export class LocalSubscriptionPlatformRenderer {
    * @return {!Promise<boolean>}
    */
   renderDialog_(authResponse) {
+    console.log('render dialog inside renderer');
     // Make sure the document is fully parsed.
     return this.ampdoc_
       .whenReady()

@@ -113,6 +113,7 @@ export class Dialog {
    * @private
    */
   open_(content, showCloseAction = true) {
+    console.log('openning dialog');
     if (this.content_) {
       this.wrapper_.replaceChild(content, this.content_);
     } else {

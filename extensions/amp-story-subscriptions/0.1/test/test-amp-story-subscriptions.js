@@ -1,3 +1,5 @@
+import * as fakeTimers from '@sinonjs/fake-timers';
+
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
@@ -221,64 +223,82 @@ describes.realWin(
       );
     });
 
-    describe('skip button behaviors when embedded in a viewer', () => {
+    describe.only('skip button behaviors when embedded in a viewer', () => {
       beforeEach(async () => {
         const viewer = Services.viewerForDoc(env.ampdoc);
         env.sandbox.stub(viewer, 'isEmbedded').withArgs().returns(true);
         env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+        env.sandbox
+          .stub(storySubscriptions, 'mutateElement')
+          .callsFake((fn) => fn());
+        env.sandbox
+          .stub(subscriptionService, 'getGrantStatus')
+          .returns(Promise.resolve(false));
+        env.sandbox
+          .stub(subscriptionService, 'maybeRenderDialogForSelectedPlatform')
+          .returns(Promise.resolve(true));
 
         storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
-        await nextTick(); // wait to make sure AmpStorySubscriptions is built.
+        // await nextTick(); // wait to make sure AmpStorySubscriptions is built.
+
+        const dialog = subscriptionService.getDialog();
+        dialog.open(subscriptionsEl);
+
+        console.log('before mocking the clock');
+        // const clock = env.sandbox.useFakeTimers();
+        const clock = fakeTimers.withGlobal(win).install({
+          toFake: ['setTimeout'],
+        });
 
         storeService.dispatch(
           Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
           true
         );
+        await nextTick();
 
-        await afterRenderPromise(win);
+        console.log('before ticking the time');
+        clock.tick(SKIP_BUTTON_DELAY_DURATION); // Button is shown after delay.
+
+        console.log('win.document: ' + doc.body.outerHTML);
       });
 
       it('should show skip button after delay', async () => {
-        await setTimeout(() => {
-          const buttonEl = this.win.document.querySelector(
-            'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
-          );
-          expect(buttonEl).to.have.class(
-            'i-amphtml-story-subscriptions-dialog-banner-button-visible'
-          );
-        }, SKIP_BUTTON_DELAY_DURATION);
+        // await setTimeout(() => {
+
+        const buttonEl = doc.querySelector(
+          'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
+        );
+        expect(buttonEl).to.have.class(
+          'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+        );
+        // }, SKIP_BUTTON_DELAY_DURATION - 1000);
       });
 
       it('click on the button element should fire the event to navigate to next story', async () => {
-        await setTimeout(() => {
-          const advancementMode = AdvancementMode.MANUAL_ADVANCE;
-          env.sandbox
-            .stub(storeService, 'get')
-            .withArgs(StateProperty.ADVANCEMENT_MODE)
-            .returns(advancementMode);
-          const handlerSpy = env.sandbox.spy(
-            storySubscriptions.viewerMessagingHandler_,
-            'send'
-          );
+        // await setTimeout(() => {
+        const handlerSpy = env.sandbox.spy(
+          storySubscriptions.viewerMessagingHandler_,
+          'send'
+        );
 
-          const subscriptionsDialogEl = this.win.document.querySelector(
-            'amp-subscriptions-dialog'
-          );
-          subscriptionsDialogEl.click();
-          expect(handlerSpy).to.not.have.been.called;
+        const subscriptionsDialogEl = doc.querySelector(
+          'amp-subscriptions-dialog'
+        );
+        subscriptionsDialogEl.click();
+        expect(handlerSpy).to.not.have.been.called;
 
-          const buttonEl = this.win.document.querySelector(
-            'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
-          );
-          buttonEl.click();
-          expect(handlerSpy).to.have.been.calledOnceWithExactly(
-            'selectDocument',
-            {
-              'next': true,
-              'advancementMode': advancementMode,
-            }
-          );
-        }, SKIP_BUTTON_DELAY_DURATION);
+        const buttonEl = doc.querySelector(
+          'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
+        );
+        buttonEl.click();
+        expect(handlerSpy).to.have.been.calledOnceWithExactly(
+          'selectDocument',
+          {
+            'next': true,
+            'advancementMode': AdvancementMode.MANUAL_ADVANCE,
+          }
+        );
+        // }, SKIP_BUTTON_DELAY_DURATION);
       });
     });
   }

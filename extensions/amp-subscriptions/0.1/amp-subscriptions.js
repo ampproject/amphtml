@@ -681,13 +681,16 @@ export class SubscriptionService {
    * @private
    */
   selectAndActivatePlatform_() {
+    console.log('selectAndActivatePlatform_');
     const requireValuesPromise = Promise.all([
       this.platformStore_.getGrantStatus(),
       this.platformStore_.selectPlatform(),
       this.platformStore_.getGrantEntitlement(),
     ]);
+    // debugger;
 
     return requireValuesPromise.then((resolvedValues) => {
+      console.log('activating platform');
       const selectedPlatform = resolvedValues[1];
       const grantEntitlement = resolvedValues[2];
       const selectedEntitlement = this.platformStore_.getResolvedEntitlementFor(
