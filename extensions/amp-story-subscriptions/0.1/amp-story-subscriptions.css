@@ -130,6 +130,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
   height: 1.85em !important;
   border-radius: 50% !important;
   margin-inline: 0.25em 0.65em !important;
+  pointer-events: none !important;
 }
 
 .i-amphtml-story-subscriptions-google-logo {
@@ -147,6 +148,7 @@ amp-story:not([supports-landscape]) + amp-subscriptions-dialog.i-amphtml-story-s
   text-align: initial !important;
   white-space: normal !important;
   margin-inline-end: 1.3em !important;
+  pointer-events: none !important;
 
   /* Line clamping and ellipses. */
   display: -webkit-box !important;

@@ -1,5 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {setImportantStyles} from '#core/dom/style';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -15,6 +16,10 @@ import {
 import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
 const TAG = 'amp-story-subscriptions';
+
+// The delay we should wait to select the SwG background element. This needs to be changed corresponding to
+// https://github.com/ampproject/amphtml/blob/main/third_party/subscriptions-project/swg.js#L9582.
+export const SWG_BACKGROUND_TRANSITION_DELAY = 300;
 
 export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -106,6 +111,34 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
       (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
     );
+
+    const ampSubscriptionsEl = this.win.document.querySelector(
+      'amp-subscriptions-dialog'
+    );
+    ampSubscriptionsEl.addEventListener('click', (event) =>
+      this.onSubscriptionsDialogClick_(event)
+    );
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  onSubscriptionsDialogClick_(event) {
+    if (
+      event.target.classList.contains(
+        'i-amphtml-story-subscriptions-google-button'
+      )
+    ) {
+      setTimeout(() => {
+        const swgPopupBackgroundEl = this.win.document.querySelector(
+          'swg-popup-background'
+        );
+        setImportantStyles(swgPopupBackgroundEl, {
+          'pointer-events': 'auto',
+        });
+      }, SWG_BACKGROUND_TRANSITION_DELAY);
+    }
   }
 
   /**
