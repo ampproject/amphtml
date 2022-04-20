@@ -803,7 +803,7 @@ describes.realWin(
               env.ampdoc,
               'getVisibilityState'
             ),
-            whenFirstVisible: env.sandbox.stub(env.ampdoc, 'whenFirstVisible'),
+            whenFirstPreviewedOrVisible: env.sandbox.stub(env.ampdoc, 'whenFirstPreviewedOrVisible'),
           };
           visibilityStubs.getVisibilityState.returns(
             VisibilityState_Enum.PRERENDER
@@ -811,7 +811,7 @@ describes.realWin(
           const visiblePromise = new Promise((resolve) => {
             makeVisible = resolve;
           });
-          visibilityStubs.whenFirstVisible.returns(visiblePromise);
+          visibilityStubs.whenFirstPreviewedOrVisible.returns(visiblePromise);
         });
 
         it('should propagate cached sources in prerendering', async () => {
