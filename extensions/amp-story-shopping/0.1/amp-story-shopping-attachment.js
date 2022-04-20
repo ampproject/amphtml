@@ -369,7 +369,12 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       );
       const shouldOpen = !detailsContainer.hasAttribute('active');
       this.toggleDetailsText_(detailsContainer, shouldOpen);
+
+      // Returns a value between 0 and 100 in increments of 10.
+      // Rounds rating value to closest .5 value and multiplies by 10.
     };
+    const roundRatingValForStars = (ratingVal) =>
+      Math.round(ratingVal * 2) * 10;
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
@@ -392,25 +397,39 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             </span>
           </div>
           {activeProductData.aggregateRating && (
-            <span class="i-amphtml-amp-story-shopping-pdp-reviews">
-              {activeProductData.aggregateRating.ratingValue} (
+            // Wrapper prevents anchor from spanning entire width.
+            <div>
               <a
-                class="i-amphtml-amp-story-shopping-pdp-reviews-link"
+                class="i-amphtml-amp-story-shopping-pdp-reviews"
                 href={relativeToSourceUrl(
                   activeProductData.aggregateRating.reviewUrl,
                   this.element
                 )}
                 target="_top"
               >
-                {activeProductData.aggregateRating.reviewCount + ' '}
-                <span
-                  i-amphtml-i18n-text-content={
-                    LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL
-                  }
-                ></span>
+                <span>{activeProductData.aggregateRating.ratingValue}</span>
+                <span class="i-amphtml-amp-story-shopping-pdp-reviews-stars">
+                  <span
+                    class="i-amphtml-amp-story-shopping-pdp-reviews-stars-highlight"
+                    style={`width: ${roundRatingValForStars(
+                      activeProductData.aggregateRating.ratingValue
+                    )}%`}
+                  ></span>
+                  <span
+                    style={`width: ${
+                      100 -
+                      roundRatingValForStars(
+                        activeProductData.aggregateRating.ratingValue
+                      )
+                    }%`}
+                    class="i-amphtml-amp-story-shopping-pdp-reviews-stars-dark"
+                  ></span>
+                </span>
+                <span class="i-amphtml-amp-story-shopping-pdp-reviews-count">
+                  {activeProductData.aggregateRating.reviewCount}
+                </span>
               </a>
-              )
-            </span>
+            </div>
           )}
           <a
             class="i-amphtml-amp-story-shopping-pdp-cta"
