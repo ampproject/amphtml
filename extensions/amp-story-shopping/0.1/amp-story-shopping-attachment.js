@@ -139,7 +139,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Triggers template update if opening without active product data.
-   * This happens either when the "Shop Now" CTA is clicked or when a
+   * This happens either when the "Shop now" CTA is clicked or when a
    * shopping tag is clicked.
    * @param {boolean} isOpen
    * @private
