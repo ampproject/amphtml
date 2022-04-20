@@ -397,11 +397,7 @@ export class AmpVideo extends AMP.BaseElement {
         this.video_.setAttribute('preload', 'auto');
       }
 
-      pendingOriginPromise = Promise.any([
-        this.getAmpDoc().whenFirstVisible(),
-        this.getAmpDoc().whenFirstPreviewed(),
-      ]);
-      pendingOriginPromise.then(() => {
+      pendingOriginPromise = this.getAmpDoc().whenFirstPreviewedOrVisible().then(() => {
         this.propagateLayoutChildren_();
         // We need to yield to the event queue before listing for loadPromise
         // because this element may still be in error state from the pre-render
