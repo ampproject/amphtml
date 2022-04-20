@@ -586,7 +586,6 @@ export class AmpDoc {
     let visibilityState;
     const visibilityStateOverride =
       this.visibilityStateOverride_ || VisibilityState_Enum.VISIBLE;
-
     if (
       visibilityStateOverride == VisibilityState_Enum.VISIBLE &&
       parentVisibilityState == VisibilityState_Enum.VISIBLE &&
@@ -655,6 +654,7 @@ export class AmpDoc {
         this.hasBeenPreviewed_ = true;
         this.signals_.signal(AmpDocSignals_Enum.FIRST_PREVIEWED);
       }
+
       this.visibilityState_ = visibilityState;
       this.visibilityStateHandlers_.fire();
     }
@@ -720,15 +720,6 @@ export class AmpDoc {
    */
   getLastVisibleTime() {
     return this.lastVisibleTime_;
-  }
-
-  /**
-   * Returns the time when the document has become previewed for the last time.
-   * If document has not yet been previewed, the returned value is `null`.
-   * @return {?time}
-   */
-  getLastPreviewTime() {
-    return this.lastPreviewTime_;
   }
 
   /**
