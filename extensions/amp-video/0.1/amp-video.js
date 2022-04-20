@@ -396,23 +396,26 @@ export class AmpVideo extends AMP.BaseElement {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-      pendingOriginPromise = this.getAmpDoc()
-        .whenFirstVisible()
-        .then(() => {
-          this.propagateLayoutChildren_();
-          // We need to yield to the event queue before listing for loadPromise
-          // because this element may still be in error state from the pre-render
-          // load.
-          return Services.timerFor(this.win)
-            .promise(1)
-            .then(() => {
-              // Don't wait for the source to load if media pool is taking over.
-              if (this.isManagedByPool_()) {
-                return;
-              }
-              return this.loadPromise(this.video_);
-            });
-        });
+
+      pendingOriginPromise = Promise.any([
+        this.getAmpDoc().whenFirstVisible(),
+        this.getAmpDoc().whenFirstPreviewed(),
+      ]);
+      pendingOriginPromise.then(() => {
+        this.propagateLayoutChildren_();
+        // We need to yield to the event queue before listing for loadPromise
+        // because this element may still be in error state from the pre-render
+        // load.
+        return Services.timerFor(this.win)
+          .promise(1)
+          .then(() => {
+            // Don't wait for the source to load if media pool is taking over.
+            if (this.isManagedByPool_()) {
+              return;
+            }
+            return this.loadPromise(this.video_);
+          });
+      });
     } else {
       this.propagateLayoutChildren_();
     }

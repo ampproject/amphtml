@@ -48,6 +48,8 @@ const AmpDocSignals_Enum = {
   FIRST_VISIBLE: '-ampdoc-first-visible',
   // Signals when the document becomes visible the next time.
   NEXT_VISIBLE: '-ampdoc-next-visible',
+  // Signals the document has been previewed for the first time.
+  FIRST_PREVIEWED: '-ampdoc-first-previewed',
 };
 
 /**
@@ -278,6 +280,9 @@ export class AmpDoc {
 
     /** @private {?time} */
     this.lastVisibleTime_ = null;
+
+    /** @private {boolean} */
+    this.hasBeenPreviewed_ = false;
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.unsubsribes_ = [];
@@ -645,9 +650,34 @@ export class AmpDoc {
       } else {
         this.signals_.reset(AmpDocSignals_Enum.NEXT_VISIBLE);
       }
+
+      if (visibilityState == VisibilityState_Enum.PREVIEW) {
+        this.hasBeenPreviewed_ = true;
+        this.signals_.signal(AmpDocSignals_Enum.FIRST_PREVIEWED);
+      }
       this.visibilityState_ = visibilityState;
       this.visibilityStateHandlers_.fire();
     }
+  }
+
+  /**
+   * Returns a Promise that only ever resolved when the current
+   * AMP document first reaches the `PREVIEW` visibility state.
+   * @return {!Promise}
+   */
+  whenFirstPreviewedOrVisible() {
+    return Promise.any([this.whenFirstPreviewed(), this.whenFirstVisible()]);
+  }
+
+  /**
+   * Returns a Promise that only ever resolved when the current
+   * AMP document first reaches the `PREVIEW` visibility state.
+   * @return {!Promise}
+   */
+  whenFirstPreviewed() {
+    return this.signals_
+      .whenSignal(AmpDocSignals_Enum.FIRST_PREVIEWED)
+      .then(() => undefined);
   }
 
   /**
@@ -693,6 +723,15 @@ export class AmpDoc {
   }
 
   /**
+   * Returns the time when the document has become previewed for the last time.
+   * If document has not yet been previewed, the returned value is `null`.
+   * @return {?time}
+   */
+  getLastPreviewTime() {
+    return this.lastPreviewTime_;
+  }
+
+  /**
    * Returns visibility state configured by the viewer.
    * See {@link isVisible}.
    * @return {!VisibilityState_Enum}
@@ -720,6 +759,14 @@ export class AmpDoc {
    */
   hasBeenVisible() {
     return this.getLastVisibleTime() != null;
+  }
+
+  /**
+   * Whether the AMP document has been previewed before.
+   * @return {boolean}
+   */
+  hasBeenPreviewed() {
+    return this.hasBeenPreviewed_;
   }
 
   /**

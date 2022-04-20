@@ -953,8 +953,9 @@ export class AmpStory extends AMP.BaseElement {
     this.setThemeColor_();
 
     const storyLayoutPromise = Promise.all([
-      this.getAmpDoc().whenFirstVisible(), // Pauses execution during prerender.
       this.initializePages_(),
+      // Pauses execution during prerender.
+      this.getAmpDoc().whenFirstPreviewedOrVisible(),
     ])
       .then(() => {
         this.handleConsentExtension_();
@@ -1030,11 +1031,14 @@ export class AmpStory extends AMP.BaseElement {
 
     // Story is being prerendered: resolve the layoutCallback when the active
     // page is built. Other pages will only build if the document becomes
-    // visible.
+    // previewed or visible.
     const initialPageEl = this.element.querySelector(
       `amp-story-page#${escapeCssSelectorIdent(initialPageId)}`
     );
-    if (!this.getAmpDoc().hasBeenVisible()) {
+    if (
+      !this.getAmpDoc().hasBeenVisible() &&
+      !this.getAmpDoc().hasBeenPreviewed()
+    ) {
       return whenUpgradedToCustomElement(initialPageEl).then(() => {
         return initialPageEl.build();
       });
@@ -1684,7 +1688,12 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    this.getAmpDoc().isVisible() ? this.resume_() : this.pause_();
+    const vState = this.getAmpDoc().getVisibilityState();
+    const playableStates = [
+      VisibilityState_Enum.PREVIEW,
+      VisibilityState_Enum.VISIBLE,
+    ];
+    playableStates.includes(vState) ? this.resume_() : this.pause_();
   }
 
   /**
