@@ -55,9 +55,8 @@ export class CarouselControls {
       return;
     }
 
-    const input = Services.inputFor(this.win_);
-    input.onMouseDetected((mouseDetected) => {
-      if (mouseDetected) {
+    const handleInputDeviceDetected = (mouseOrKeyboardDetected) => {
+      if (mouseOrKeyboardDetected) {
         this.showControls_ = true;
         toggleAttribute(
           this.element_,
@@ -66,7 +65,10 @@ export class CarouselControls {
         );
         this.element_.classList.add(ClassNames.HAS_CONTROL);
       }
-    }, true);
+    };
+    const input = Services.inputFor(this.win_);
+    input.onMouseDetected(handleInputDeviceDetected, true);
+    input.onKeyboardStateChanged(handleInputDeviceDetected, true);
   }
 
   /**
