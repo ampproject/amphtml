@@ -1010,6 +1010,17 @@ export class AmpStory extends AMP.BaseElement {
                 attachmentImpl.open(false /** shouldAnimate */)
               );
           }
+
+          const shoppingData = getHistoryState(
+            this.win,
+            HistoryState.SHOPPING_DATA
+          );
+
+          if (shoppingData) {
+            this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+              'activeProductData': shoppingData,
+            });
+          }
         }
 
         if (
