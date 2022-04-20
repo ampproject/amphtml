@@ -4,7 +4,7 @@
   auto append
   Used when captions are provided from cache.
 */
-.amp-story-captions-auto-append {
+.i-amphtml-amp-story-captions-auto-append {
   position: absolute !important;
   z-index: 1 !important;
   bottom: 5em !important;

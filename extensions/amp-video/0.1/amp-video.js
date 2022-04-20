@@ -771,17 +771,17 @@ export class AmpVideo extends AMP.BaseElement {
     if (!captionsId) {
       return;
     }
-    Services.extensionsFor(ampdoc.win).installExtensionForDoc(
-      ampdoc,
-      'amp-story-captions',
-      '0.1'
-    );
     const captionsElement = this.win.document.querySelector(
       `amp-story-captions#${escapeCssSelectorIdent(captionsId)}`
     );
     if (!captionsElement) {
       return;
     }
+    Services.extensionsFor(ampdoc.win).installExtensionForDoc(
+      ampdoc,
+      'amp-story-captions',
+      '0.1'
+    );
     this.hasCaptionsRenderer_ = true;
     captionsElement.getImpl().then((impl) => {
       if (impl.setVideoElement) {

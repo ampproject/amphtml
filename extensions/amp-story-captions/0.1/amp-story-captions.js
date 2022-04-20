@@ -47,7 +47,7 @@ export class AmpStoryCaptions extends AMP.BaseElement {
       this.element.appendChild(this.container_);
     }
     if (this.element.hasAttribute('auto-append')) {
-      this.container_.classList.add(`amp-story-captions-auto-append`);
+      this.container_.classList.add(`i-amphtml-amp-story-captions-auto-append`);
     }
   }
 
