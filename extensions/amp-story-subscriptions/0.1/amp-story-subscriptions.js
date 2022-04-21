@@ -22,7 +22,7 @@ const TAG = 'amp-story-subscriptions';
  * The number of milliseconds to wait before showing the skip button on dialog banner.
  * @const {number}
  */
-export const SKIP_BUTTON_DELAY_DURATION = 2000;
+const SKIP_BUTTON_DELAY_DURATION = 2000;
 
 export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -154,7 +154,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         .maybeRenderDialogForSelectedPlatform()
         .then(() => {
           if (this.viewer_.isEmbedded()) {
-            this.win.setTimeout(() => {
+            setTimeout(() => {
               const buttonEl = this.win.document.querySelector(
                 'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
               );
