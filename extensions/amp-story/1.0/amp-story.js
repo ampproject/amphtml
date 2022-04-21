@@ -1046,10 +1046,7 @@ export class AmpStory extends AMP.BaseElement {
     const initialPageEl = this.element.querySelector(
       `amp-story-page#${escapeCssSelectorIdent(initialPageId)}`
     );
-    if (
-      !this.getAmpDoc().hasBeenVisible() &&
-      !this.getAmpDoc().hasBeenPreviewed()
-    ) {
+    if (!this.getAmpDoc().hasBeenVisible()) {
       return whenUpgradedToCustomElement(initialPageEl).then(() => {
         return initialPageEl.build();
       });
@@ -1700,11 +1697,9 @@ export class AmpStory extends AMP.BaseElement {
    */
   onVisibilityChanged_() {
     const vState = this.getAmpDoc().getVisibilityState();
-    const playableStates = [
-      VisibilityState_Enum.PREVIEW,
-      VisibilityState_Enum.VISIBLE,
-    ];
-    playableStates.includes(vState) ? this.resume_() : this.pause_();
+    const isPreview = vState === VisibilityState_Enum.PREVIEW;
+    const isVisible = vState === VisibilityState_Enum.VISIBLE;
+    isPreview || isVisible ? this.resume_() : this.pause_();
   }
 
   /**
