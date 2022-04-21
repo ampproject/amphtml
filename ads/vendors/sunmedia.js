@@ -20,6 +20,6 @@ export function sunmedia(global, data) {
 
   loadScript(
     global,
-    'https://vod.addevweb.com/sunmedia/amp/ads/SMIntextAMP.js'
+    `https://static.sunmedia.tv/integrations/${data.cid}/${data.cid}.js`
   );
 }
