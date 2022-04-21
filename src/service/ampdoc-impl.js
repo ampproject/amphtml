@@ -281,9 +281,6 @@ export class AmpDoc {
     /** @private {?time} */
     this.lastVisibleTime_ = null;
 
-    /** @private {boolean} */
-    this.hasBeenPreviewed_ = false;
-
     /** @private @const {!Array<!UnlistenDef>} */
     this.unsubsribes_ = [];
 
@@ -651,7 +648,6 @@ export class AmpDoc {
       }
 
       if (visibilityState == VisibilityState_Enum.PREVIEW) {
-        this.hasBeenPreviewed_ = true;
         this.signals_.signal(AmpDocSignals_Enum.FIRST_PREVIEWED);
       }
 
@@ -666,7 +662,7 @@ export class AmpDoc {
    * @return {!Promise}
    */
   whenFirstPreviewedOrVisible() {
-    return Promise.any([this.whenFirstPreviewed(), this.whenFirstVisible()]);
+    return Promise.race([this.whenFirstPreviewed(), this.whenFirstVisible()]);
   }
 
   /**
@@ -750,14 +746,6 @@ export class AmpDoc {
    */
   hasBeenVisible() {
     return this.getLastVisibleTime() != null;
-  }
-
-  /**
-   * Whether the AMP document has been previewed before.
-   * @return {boolean}
-   */
-  hasBeenPreviewed() {
-    return this.hasBeenPreviewed_;
   }
 
   /**
