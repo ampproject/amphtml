@@ -369,10 +369,9 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       );
       const shouldOpen = !detailsContainer.hasAttribute('active');
       this.toggleDetailsText_(detailsContainer, shouldOpen);
-
-      // Returns a value between 0 and 100 in increments of 10.
-      // Rounds rating value to closest .5 value and multiplies by 10.
     };
+    // Returns a value between 0 and 100 in increments of 10.
+    // Rounds rating value to closest .5 value and multiplies by 10.
     const roundRatingValForStars = (ratingVal) =>
       Math.round(ratingVal * 2) * 10;
     return (
