@@ -1042,7 +1042,7 @@ export class AmpStory extends AMP.BaseElement {
 
     // Story is being prerendered: resolve the layoutCallback when the active
     // page is built. Other pages will only build if the document becomes
-    // previewed or visible.
+    // visible.
     const initialPageEl = this.element.querySelector(
       `amp-story-page#${escapeCssSelectorIdent(initialPageId)}`
     );
