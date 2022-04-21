@@ -396,7 +396,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             </span>
           </div>
           {activeProductData.aggregateRating && (
-            // Wrapper prevents anchor from spanning entire width.
+            // Wrapper prevents anchor from spanning entire width of container.
+            // This prevents accidental clicks.
             <div>
               <a
                 class="i-amphtml-amp-story-shopping-pdp-reviews"
