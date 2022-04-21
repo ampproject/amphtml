@@ -1252,6 +1252,7 @@ const adConfig = jsonConfiguration({
       'https://creative.sunmedia.tv',
       'https://vod.sunmedia.tv',
     ],
+    clientIdScope: 'AMP_ECID_SUNMEDIA',
     renderStartImplemented: true,
   },
 
