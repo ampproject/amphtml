@@ -370,10 +370,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       const shouldOpen = !detailsContainer.hasAttribute('active');
       this.toggleDetailsText_(detailsContainer, shouldOpen);
     };
-    // Returns a value between 0 and 100 in increments of 10.
-    // Rounds rating value to closest .5 value and multiplies by 10.
-    const roundRatingValForStars = (ratingVal) =>
-      Math.round(ratingVal * 2) * 10;
     return (
       <div class="i-amphtml-amp-story-shopping-pdp">
         <div class="i-amphtml-amp-story-shopping-pdp-header">
@@ -408,23 +404,15 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
                 target="_top"
               >
                 <span>{activeProductData.aggregateRating.ratingValue}</span>
-                <span class="i-amphtml-amp-story-shopping-pdp-reviews-stars">
-                  <span
-                    class="i-amphtml-amp-story-shopping-pdp-reviews-stars-highlight"
-                    style={`width: ${roundRatingValForStars(
-                      activeProductData.aggregateRating.ratingValue
-                    )}%`}
-                  ></span>
-                  <span
-                    style={`width: ${
-                      100 -
-                      roundRatingValForStars(
-                        activeProductData.aggregateRating.ratingValue
-                      )
-                    }%`}
-                    class="i-amphtml-amp-story-shopping-pdp-reviews-stars-dark"
-                  ></span>
-                </span>
+                <span
+                  class="i-amphtml-amp-story-shopping-pdp-reviews-stars"
+                  style={`--i-amphtml-star-rating-width: ${
+                    // Creates a value between 0 and 100 in increments of 10.
+                    Math.round(
+                      activeProductData.aggregateRating.ratingValue * 2
+                    ) * 10
+                  }%`}
+                ></span>
                 <span class="i-amphtml-amp-story-shopping-pdp-reviews-count">
                   {activeProductData.aggregateRating.reviewCount}
                 </span>
