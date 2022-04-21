@@ -777,7 +777,7 @@ export class AmpVideo extends AMP.BaseElement {
     if (!captionsElement) {
       return;
     }
-    const ampdoc = this.getAmpdoc();
+    const ampdoc = this.getAmpDoc();
     Services.extensionsFor(ampdoc.win).installExtensionForDoc(
       ampdoc,
       'amp-story-captions',
