@@ -167,7 +167,7 @@ function applyAudioInfoToVideo(videoEl, hasAudio) {
  * @param {!Object} captionsResponse
  * @param {!AmpDoc} ampdoc
  */
-function applyCaptionsTrackToVideo(videoEl, captionsResponse, ampdoc) {
+function applyCaptionsTrackToVideo(videoEl, captionsResponse) {
   if (
     !captionsResponse ||
     !captionsResponse['src'] ||
