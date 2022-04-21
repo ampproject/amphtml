@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.213 */
+/** Version: 0.1.22.214 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -979,9 +979,6 @@ const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
 
 /** ID for the Regwall title element. */
 const REGWALL_TITLE_ID = 'swg-regwall-title';
-
-/** URL parameter to append in the redirect mode for 3P Sign-in.  */
-const REDIRECT_SOURCE_URL_PARAM = 'source';
 
 /**
  * HTML for the metering regwall dialog, where users can sign in with Google.
@@ -2008,12 +2005,7 @@ class GaaGoogle3pSignInButton {
     buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
     buttonEl.onclick = () => {
       if (redirectMode) {
-        const parameterizedAuthUrl = new URL(authorizationUrl);
-        parameterizedAuthUrl.searchParams.append(
-          REDIRECT_SOURCE_URL_PARAM,
-          self.parent.location.href
-        );
-        self.open(parameterizedAuthUrl, '_parent');
+        self.open(authorizationUrl, '_parent');
       } else {
         self.open(authorizationUrl);
       }

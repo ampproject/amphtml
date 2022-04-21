@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.213 */
+/** Version: 0.1.22.214 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4996,7 +4996,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.213',
+    '_client': 'SwG 0.1.22.214',
   });
 }
 
@@ -5900,16 +5900,17 @@ class OffersFlow {
       return feUrl('/offersiframe');
     }
 
+    const params = {'publicationId': pageConfig.getPublicationId()};
+
     if (this.clientConfigManager_.shouldForceLangInIframes()) {
-      return feUrl('/subscriptionoffersiframe', {
-        'hl': this.clientConfigManager_.getLanguage(),
-        'publicationId': pageConfig.getPublicationId(),
-      });
+      params['hl'] = this.clientConfigManager_.getLanguage();
     }
 
-    return feUrl('/subscriptionoffersiframe', {
-      'publicationId': pageConfig.getPublicationId(),
-    });
+    if (clientConfig.uiPredicates?.purchaseUnavailableRegion) {
+      params['purchaseUnavailableRegion'] = 'true';
+    }
+
+    return feUrl('/subscriptionoffersiframe', params);
   }
 
   /**
@@ -6329,7 +6330,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.213',
+        '_client': 'SwG 0.1.22.214',
         'supportsEventManager': true,
       },
       args || {}
@@ -7242,7 +7243,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.213');
+    context.setClientVersion('SwG 0.1.22.214');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -8648,23 +8649,6 @@ class ImpressionConfig {
 }
 
 /**
- * Predicates of whether or not to show button and prompt.
- */
-class UiPredicates {
-  /**
-   * @param {boolean|undefined} canDisplayAutoPrompt
-   * @param {boolean|undefined} canDisplayButton
-   */
-  constructor(canDisplayAutoPrompt, canDisplayButton) {
-    /** @const {boolean|undefined} */
-    this.canDisplayAutoPrompt = canDisplayAutoPrompt;
-
-    /** @const {boolean|undefined} */
-    this.canDisplayButton = canDisplayButton;
-  }
-}
-
-/**
  * Copyright 2021 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -8711,11 +8695,36 @@ class ClientConfig {
     /** @const {boolean} */
     this.skipAccountCreationScreen = skipAccountCreationScreen || false;
 
-    /** @const {./auto-prompt-config.UiPredicates|undefined} */
+    /** @const {UiPredicates|undefined} */
     this.uiPredicates = uiPredicates;
 
     /** @const {./attribution-params.AttributionParams|undefined} */
     this.attributionParams = attributionParams;
+  }
+}
+
+/**
+ * Predicates to control UI elements.
+ */
+class UiPredicates {
+  /**
+   * @param {boolean|undefined} canDisplayAutoPrompt
+   * @param {boolean|undefined} canDisplayButton
+   * @param {boolean|undefined} purchaseUnavailableRegion
+   */
+  constructor(
+    canDisplayAutoPrompt,
+    canDisplayButton,
+    purchaseUnavailableRegion
+  ) {
+    /** @const {boolean|undefined} */
+    this.canDisplayAutoPrompt = canDisplayAutoPrompt;
+
+    /** @const {boolean|undefined} */
+    this.canDisplayButton = canDisplayButton;
+
+    /** @const {boolean|undefined} */
+    this.purchaseUnavailableRegion = purchaseUnavailableRegion;
   }
 }
 
@@ -8951,7 +8960,8 @@ class ClientConfigManager {
     if (uiPredicatesJson) {
       uiPredicates = new UiPredicates(
         uiPredicatesJson.canDisplayAutoPrompt,
-        uiPredicatesJson.canDisplayButton
+        uiPredicatesJson.canDisplayButton,
+        uiPredicatesJson.purchaseUnavailableRegion
       );
     }
 
