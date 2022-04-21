@@ -397,7 +397,7 @@ export class AmpVideo extends AMP.BaseElement {
         this.video_.setAttribute('preload', 'auto');
       }
       pendingOriginPromise = this.getAmpDoc()
-        .whenFirstPreviewedOrVisible()
+        .whenFirstVisible()
         .then(() => {
           this.propagateLayoutChildren_();
           // We need to yield to the event queue before listing for loadPromise
