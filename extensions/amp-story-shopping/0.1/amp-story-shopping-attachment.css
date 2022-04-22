@@ -168,26 +168,53 @@ amp-story-shopping-attachment a {
   line-height: 0.9em !important;
   font-size: 1.1em !important;
   margin-bottom: 1.2em !important;
-}
-
-.i-amphtml-amp-story-shopping-pdp-reviews:before {
-  content: '' !important;
-  background-image: url("data:image/svg+xml;charset=utf-8,<svg width='10' height='10' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M4.524.463a.5.5 0 0 1 .952 0L6.235 2.8a.5.5 0 0 0 .475.346h2.458a.5.5 0 0 1 .294.904L7.474 5.495a.5.5 0 0 0-.182.559l.76 2.337a.5.5 0 0 1-.77.559L5.294 7.506a.5.5 0 0 0-.588 0L2.718 8.95a.5.5 0 0 1-.77-.56l.76-2.336a.5.5 0 0 0-.182-.56L.538 4.05a.5.5 0 0 1 .294-.904H3.29a.5.5 0 0 0 .475-.346l.76-2.337Z' fill='#000'/></svg>") !important;
-  width: 0.8em !important;
-  height: 0.8em !important;
-  display: inline-block !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  background-size: cover !important;
-  margin-inline-end: 0.2em !important;
-}
-
-[theme="dark"] .i-amphtml-amp-story-shopping-pdp-reviews:before {
-  filter: invert(1) !important;
-}
-
-.i-amphtml-amp-story-shopping-pdp-reviews-link {
+  /* Overrides default system link color. */
   color: inherit !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-reviews-stars {
+  --i-amphtml-star-size: .9em;
+  width: calc(var(--i-amphtml-star-size) * 5) !important;
+  height: var(--i-amphtml-star-size) !important;
+  margin: 0 0.3em !important;
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-reviews-stars:before,
+.i-amphtml-amp-story-shopping-pdp-reviews-stars:after {
+  content: '' !important;
+  height: 100% !important;
+  background-repeat: repeat-x !important;
+  background-size: var(--i-amphtml-star-size) !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-reviews-stars:before {
+  background-position: 0% !important;
+  width: var(--i-amphtml-star-rating-width);
+  background-image: url("data:image/svg+xml;charset=utf-8,<svg width='11' height='10' fill='#fbc02d' xmlns='http://www.w3.org/2000/svg'><path transform='translate(.5px, 0)' d='M4.524.463a.5.5 0 0 1 .952 0L6.235 2.8a.5.5 0 0 0 .475.346h2.458a.5.5 0 0 1 .294.904L7.474 5.495a.5.5 0 0 0-.182.559l.76 2.337a.5.5 0 0 1-.77.559L5.294 7.506a.5.5 0 0 0-.588 0L2.718 8.95a.5.5 0 0 1-.77-.56l.76-2.336a.5.5 0 0 0-.182-.56L.538 4.05a.5.5 0 0 1 .294-.904H3.29a.5.5 0 0 0 .475-.346l.76-2.337Z'/></svg>") !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-reviews-stars:after {
+  background-position: 100% !important;
+  width: calc(100% - var(--i-amphtml-star-rating-width));
+  background-image: url("data:image/svg+xml;charset=utf-8,<svg width='11' height='10' fill='#333' xmlns='http://www.w3.org/2000/svg'><path transform='translate(.5px, 0)' d='M4.524.463a.5.5 0 0 1 .952 0L6.235 2.8a.5.5 0 0 0 .475.346h2.458a.5.5 0 0 1 .294.904L7.474 5.495a.5.5 0 0 0-.182.559l.76 2.337a.5.5 0 0 1-.77.559L5.294 7.506a.5.5 0 0 0-.588 0L2.718 8.95a.5.5 0 0 1-.77-.56l.76-2.336a.5.5 0 0 0-.182-.56L.538 4.05a.5.5 0 0 1 .294-.904H3.29a.5.5 0 0 0 .475-.346l.76-2.337Z'/></svg>") !important;
+}
+
+[dir="rtl"] .i-amphtml-amp-story-shopping-pdp-reviews-stars:before {
+  background-position: 100% !important;
+}
+
+[dir="rtl"] .i-amphtml-amp-story-shopping-pdp-reviews-stars:after {
+  background-position: 0% !important;
+}
+
+[theme="dark"] .i-amphtml-amp-story-shopping-pdp-reviews-stars:before {
+  filter: invert(.3) !important;
+}
+
+.i-amphtml-amp-story-shopping-pdp-reviews-count {
   text-decoration: underline !important;
 }
 
