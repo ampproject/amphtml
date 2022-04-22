@@ -241,9 +241,10 @@ describes.realWin(
 
     describe('buildDom', () => {
       it('buildDom and buildCallback should result in the same outerHTML', async () => {
-        env.sandbox
-          .stub(Services, 'inputFor')
-          .returns({onMouseDetected: () => {}});
+        env.sandbox.stub(Services, 'inputFor').returns({
+          onMouseDetected: () => {},
+          onKeyboardStateChanged: () => {},
+        });
 
         const el1 = await getAmpScrollableCarousel(/* addToDom */ false);
         const el2 = el1.cloneNode(/* deep */ true);
