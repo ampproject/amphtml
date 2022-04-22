@@ -216,7 +216,7 @@
     "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
   },
   "101": {
-    "string": "Shop Now",
+    "string": "Shop now",
     "description": "Label for the shopping CTA button."
   },
   "102": {

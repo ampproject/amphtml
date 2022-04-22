@@ -8,6 +8,8 @@ import {
 
 import {Services} from '#service';
 
+import {HistoryState, setHistoryState} from 'extensions/amp-story/1.0/history';
+
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 
 import {CSS as shoppingSharedCSS} from '../../../build/amp-story-shopping-shared-0.1.css';
@@ -169,6 +171,8 @@ export class AmpStoryShoppingTag extends AMP.BaseElement {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': this.tagData_,
     });
+
+    setHistoryState(this.win, HistoryState.SHOPPING_DATA, this.tagData_);
 
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.STORY_SHOPPING_PRODUCT_ID,
