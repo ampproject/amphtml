@@ -1,5 +1,3 @@
-import * as fakeTimers from '@sinonjs/fake-timers';
-
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
