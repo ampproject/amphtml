@@ -8,7 +8,6 @@ tags:
   - shopping
 author: philipbell
 toc: true
-draft: true
 $title: amp-story-shopping
 version: '0.1'
 versions:
@@ -94,7 +93,7 @@ Diagram demonstrating how product JSON renders within [`amp-story-shopping-tag`]
 
 <amp-img alt="An example of opening the attachment and navigating through an amp story shopping attachment" src="https://user-images.githubusercontent.com/3860311/155758474-3fa4e666-c1a9-44d3-bbf6-61dc3fe16498.gif" layout="intrinsic" width="338" height="548">
 
-The [`amp-story-shopping-attachment`](#amp-story-shopping-attachment) renders a tappable CTA button with the text "Shop Now" that opens an inline shopping experience.
+The [`amp-story-shopping-attachment`](#amp-story-shopping-attachment) renders a tappable CTA button with the text "Shop now" that opens an inline shopping experience.
 Product JSON data must be configured and at least one [`amp-story-shopping-tag`](#amp-story-shopping-tag) must be on the same page.
 
 ### Product JSON configuration
@@ -132,6 +131,12 @@ Inline data may be served from cache which may take time to propogate. `src` JSO
 }
 ```
 
+### Product JSON Schema
+
+See the schema for product JSON validation in [product.schema.json](https://github.com/ampproject/amphtml/blob/main/examples/amp-story/shopping/product.schema.json).
+If validation fails on one or more of the shopping tags, an error message will be displayed, and the tag and product details / listing associated with the product(s) that have errors will not be rendered.
+Validation is performed with [ajv](https://ajv.js.org/json-schema.html) using the default ajv JSON schema draft.
+
 ### amp-story-shopping-attachment attributes
 
 #### `src` {string} optional
@@ -142,19 +147,23 @@ A url for remote product JSON configuration. When defined it overrides inline JS
 
 Sets the color of the CTA button and drawer.
 "light" (default) and "dark" values are accepted.
-<img alt="theme" src="https://user-images.githubusercontent.com/3860311/161297644-f25837e0-82ec-4960-a219-edfaf7d09fd9.png"
-layout="intrinsic" width="800" height="135">
+<img alt="theme" src="https://user-images.githubusercontent.com/3860311/164291421-b2ec3044-0867-4dca-84a1-01985e9dc958.png"
+layout="intrinsic" width="920" height="141">
+
+#### `cta-text` {string} optional
+
+String that customizes the call to action button text. The default is "Shop now".
 
 ### amp-story-shopping-attachment templates
 
-Two types of templated pages render within the shopping attachment. They automatically populate with the product data from the configured JSON. the Product listing page (PLP) is a list of all products on the active story page. The Product details page (PDP) displays in-depth detail about the product such as images, text and a "Buy Now" button.
+Two types of templated pages render within the shopping attachment. They automatically populate with the product data from the configured JSON. the Product listing page (PLP) is a list of all products on the active story page. The Product details page (PDP) displays in-depth detail about the product such as images, text and a "Buy now" button.
 
 #### Product listing page (PLP)
 
 <amp-img alt="An example of a product listing page" src="https://user-images.githubusercontent.com/3860311/155760155-a27dfeed-0ae4-4e95-b043-cab1a47ec4e4.png" layout="intrinsic" width="335" height="547">
 
 The PLP template renders a list of products on the active [`amp-story-page`](https://amp.dev/documentation/components/amp-story-page/?format=stories).
-Open it by tapping the "Shop Now" CTA button that automatically displays on the bottom of the page when the shopping experience is configured.
+Open it by tapping the "Shop now" CTA button that automatically displays on the bottom of the page when the shopping experience is configured.
 At least two associated [`amp-story-shopping-tag`](#amp-story-shopping-tag) elements must be on the page for the PLP render.
 
 Diagram demonstrating how product JSON renders within the PLP template:
@@ -166,7 +175,7 @@ Diagram demonstrating how product JSON renders within the PLP template:
 
 The PDP template displays detailed information about a product.
 Tapping an [`amp-story-shopping-tag`](#amp-story-shopping-tag) or the product's card within the PLP will open the product's PDP.
-If only one product is on the page the PDP will render by default when tapping the "Shop Now" CTA button.
+If only one product is on the page the PDP will render by default when tapping the "Shop now" CTA button.
 
 Diagram demonstrating how product JSON renders within the PDP template:
 <amp-img alt="A diagram of product data rendering in the PDP template" src="https://user-images.githubusercontent.com/3860311/160697640-44bb55c5-3e26-48fd-b2ae-d16a05f71038.jpg" layout="intrinsic" width="806" height="425">

@@ -244,5 +244,32 @@ describes.realWin(
 
       expect(openAttachmentLabelEl.textContent).to.equal('CTA text');
     });
+
+    it('should build the open attachment UI with link icon', async () => {
+      outlinkEl.setAttribute('layout', 'nodisplay');
+      outlinkEl.setAttribute('cta-text', 'Outlink with icon');
+
+      await outlink.buildCallback();
+      await outlink.layoutCallback();
+
+      const openAttachmentLinkIcon = page.querySelector(
+        '.i-amphtml-story-page-open-attachment .i-amphtml-story-page-open-attachment-link-icon'
+      );
+      expect(openAttachmentLinkIcon).to.exist;
+    });
+
+    it('should build the open attachment UI with no icon if cta-image=none', async () => {
+      outlinkEl.setAttribute('layout', 'nodisplay');
+      outlinkEl.setAttribute('cta-text', 'Outlink without icon');
+      outlinkEl.setAttribute('cta-image', 'none');
+
+      await outlink.buildCallback();
+      await outlink.layoutCallback();
+
+      const openAttachmentLinkIcon = page.querySelector(
+        '.i-amphtml-story-page-open-attachment .i-amphtml-story-page-open-attachment-link-icon'
+      );
+      expect(openAttachmentLinkIcon).to.not.exist;
+    });
   }
 );

@@ -50,6 +50,7 @@ function getMinifiedConfig(buildFor = 'preact') {
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
     './build-system/babel-plugins/babel-plugin-transform-jss',
+    './build-system/babel-plugins/babel-plugin-amp-story-supported-languages',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
     // TODO(erwinm, #28698): fix this in fixit week

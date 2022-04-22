@@ -47,7 +47,9 @@ function buildEndToEndBinaries(options, bentoComponentName, testFor) {
           wrapper: '',
           remap: {
             'preact': 'react',
-            '.*/preact/compat': 'react',
+            'preact/compat': 'react',
+            './src/preact/compat/internal.js':
+              './src/preact/compat/external.js',
             'preact/hooks': 'react',
             'preact/dom': 'react-dom',
           },

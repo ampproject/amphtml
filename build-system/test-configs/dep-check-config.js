@@ -227,6 +227,10 @@ exports.rules = [
       // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-ui.js->extensions/amp-story/1.0/utils.js',
+
+      // Story captions
+      'extensions/amp-story-captions/0.1/amp-story-captions.js->extensions/amp-story/1.0/utils.js',
+
       // Story education
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/utils.js',
@@ -248,8 +252,10 @@ exports.rules = [
       'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/variable-service.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-attachment.js->extensions/amp-story/1.0/history.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/variable-service.js',
       'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-shopping/0.1/amp-story-shopping-tag.js->extensions/amp-story/1.0/history.js',
 
       // Interactive components that depend on story functionality.
       'extensions/amp-story-interactive/0.1/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -264,6 +270,7 @@ exports.rules = [
 
       // AMP Story Subscriptions.
       'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions.js->extensions/amp-story/1.0/utils.js',
 
       // Story localization.
       'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-localization-service.js',
@@ -426,6 +433,9 @@ exports.rules = [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->src/service/real-time-config/callout-vendors.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->src/service/real-time-config/real-time-config-impl.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->src/service/real-time-config/real-time-config-impl.js',
+
+      // For amp-image-slider_1.0: Required for `Gestures.get`
+      'extensions/amp-image-slider/1.0/component.js->src/service/timer-impl.js',
     ],
   },
   {

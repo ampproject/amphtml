@@ -15,6 +15,7 @@ jobs:
       matrix:
         platform: [ubuntu, macos, windows]
         flavor: [Build, Dist]
+      fail-fast: false
     runs-on: ${{ matrix.platform }}-latest
     steps:
       - name: Checkout Repo

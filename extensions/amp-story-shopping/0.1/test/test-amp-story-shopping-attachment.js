@@ -2,6 +2,9 @@ import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
 
+import {HistoryState} from 'extensions/amp-story/1.0/history';
+import * as history from 'extensions/amp-story/1.0/history';
+
 import '../../../amp-story/1.0/amp-story';
 import '../../../amp-story/1.0/amp-story-page';
 import '../amp-story-shopping';
@@ -115,7 +118,7 @@ describes.realWin(
           <amp-story-page id="page1">
             <amp-story-shopping-tag data-product-id="lamp"></amp-story-shopping-tag>
             <amp-story-shopping-tag data-product-id="art"></amp-story-shopping-tag>
-            <amp-story-shopping-attachment>
+            <amp-story-shopping-attachment cta-text="Shop Now!">
               <script type="application/json">
                 {JSON.stringify(shoppingData)}
               </script>
@@ -159,8 +162,8 @@ describes.realWin(
       expect(() => shoppingImpl.layoutCallback()).to.not.throw();
     });
 
-    it('should build CTA with i18n shopping label text', () => {
-      expect(attachmentChildEl.getAttribute('cta-text')).to.equal('Shop Now');
+    it('should build CTA with custom i18n shopping label text', () => {
+      expect(attachmentChildEl.getAttribute('cta-text')).to.equal('Shop Now!');
     });
 
     it('should build PLP on attachment state open if no active product data', async () => {
@@ -273,6 +276,22 @@ describes.realWin(
 
       expect(trigger).to.have.been.calledWith(
         StoryAnalyticsEvent.SHOPPING_PDP_VIEW
+      );
+    });
+
+    it('should call history service on Product Listing Page card click', async () => {
+      const historyStub = env.sandbox.stub(history, 'setHistoryState');
+
+      await layoutShoppingImplAndAttachmentChildImpl();
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
+      const plpCard = attachmentChildEl.querySelector(
+        '.i-amphtml-amp-story-shopping-plp-card'
+      );
+      plpCard.dispatchEvent(new Event('click'));
+      expect(historyStub).to.have.been.called.calledWith(
+        win,
+        HistoryState.SHOPPING_DATA,
+        shoppingData.items[0]
       );
     });
   }

@@ -58,7 +58,7 @@ function moduleAliases(buildFor) {
 
 /**
  * Import map configuration.
- * @param {'preact' | 'react'} buildFor
+ * @param {'preact' | 'react' | null} buildFor determines whether to include preact or react aliases or neither. By default, uses preact aliases (in addition to jsconfig paths).
  * @return {Object}
  */
 function getImportResolver(buildFor = 'preact') {
@@ -66,7 +66,7 @@ function getImportResolver(buildFor = 'preact') {
     root: ['.'],
     alias: {
       ...readJsconfigPaths(),
-      ...moduleAliases(buildFor),
+      ...(buildFor ? moduleAliases(buildFor) : {}),
     },
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     stripExtensions: [],
@@ -106,12 +106,17 @@ function getImportResolverPlugin(buildFor = 'preact') {
  * The return value is a relative path from the amphtml folder.
  *
  * @param {string} filepath
+ * @param {'preact' | 'react' | null} buildFor
  * @return {string}
  */
-function resolvePath(filepath) {
+function resolvePath(filepath, buildFor = 'preact') {
   // 2nd arg is a file from which to make a relative path.
   // The actual file doesn't need to exist. In this case it is process.cwd()/anything
-  return moduleResolver.resolvePath(filepath, 'anything', getImportResolver());
+  return moduleResolver.resolvePath(
+    filepath,
+    'anything',
+    getImportResolver(buildFor)
+  );
 }
 
 module.exports = {

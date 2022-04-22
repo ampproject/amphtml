@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 
-import {toggleExperiment} from '#experiments';
+import {forceExperimentBranch} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 
@@ -45,7 +46,11 @@ describes.realWin('amp-story-progress-bar', {amp: true}, (env) => {
 
   describe('story ad progress segment', async () => {
     it('should create progress bar with ad pages', () => {
-      toggleExperiment(win, 'story-ad-auto-advance', true);
+      forceExperimentBranch(
+        win,
+        StoryAdSegmentExp.ID,
+        StoryAdSegmentExp.AUTO_ADVANCE_NEW_CTA
+      );
       expect(doc.querySelector('.i-amphtml-story-ad-progress-value')).not.to
         .exist;
       progressBar.activeSegmentId_ = 'page-3';
