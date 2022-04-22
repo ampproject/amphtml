@@ -25,10 +25,6 @@ const TAG = 'amp-story-subscriptions';
  */
 const SKIP_BUTTON_DELAY_DURATION = 2000;
 
-// The delay we should wait to select the SwG background element. This needs to be changed corresponding to
-// https://github.com/ampproject/amphtml/blob/main/third_party/subscriptions-project/swg.js#L9582.
-export const SWG_BACKGROUND_TRANSITION_DELAY = 300;
-
 export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -197,14 +193,20 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         'i-amphtml-story-subscriptions-google-button'
       )
     ) {
-      setTimeout(() => {
-        const swgPopupBackgroundEl = this.win.document.querySelector(
-          'swg-popup-background'
-        );
-        setImportantStyles(swgPopupBackgroundEl, {
-          'pointer-events': 'auto',
+      const observer = new MutationObserver((mutationsList) => {
+        mutationsList.forEach((mutation) => {
+          mutation.addedNodes.forEach((addedNode) => {
+            if (addedNode.tagName === 'SWG-POPUP-BACKGROUND') {
+              setImportantStyles(addedNode, {'pointer-events': 'all'});
+              observer.disconnect();
+            }
+          });
         });
-      }, SWG_BACKGROUND_TRANSITION_DELAY);
+      });
+      observer.observe(this.win.document.body, {
+        subtree: false,
+        childList: true,
+      });
     }
   }
 

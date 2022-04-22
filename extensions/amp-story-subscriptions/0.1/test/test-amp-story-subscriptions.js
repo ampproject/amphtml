@@ -15,10 +15,7 @@ import {
 } from '../../../amp-story/1.0/amp-story-store-service';
 import {SubscriptionService} from '../../../amp-subscriptions/0.1/amp-subscriptions';
 import {Dialog} from '../../../amp-subscriptions/0.1/dialog';
-import {
-  AmpStorySubscriptions,
-  SWG_BACKGROUND_TRANSITION_DELAY,
-} from '../amp-story-subscriptions';
+import {AmpStorySubscriptions} from '../amp-story-subscriptions';
 
 describes.realWin(
   'amp-story-subscriptions-v0.1',
@@ -276,23 +273,21 @@ describes.realWin(
     });
 
     it('should allow pointer events on swg background to intercept clicks on background', async () => {
-      storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
-      await nextTick(); // wait to make sure AmpStorySubscriptions is built.
-
-      storeService.dispatch(Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE, true);
-      await afterRenderPromise(win);
+      const dialog = subscriptionService.getDialog();
+      await dialog.open(subscriptionsEl);
 
       const buttonEl = doc.querySelector(
-        '.i-amphtml-story-subscriptions-google-button'
+        'amp-subscriptions-dialog .i-amphtml-story-subscriptions-google-button'
       );
       buttonEl.click();
 
-      await setTimeout(() => {
-        const swgPopupBackgroundEl = doc.querySelector('swg-popup-background');
-        expect(
-          swgPopupBackgroundEl.style.getPropertyValue('pointer-events')
-        ).equal('auto !important');
-      }, SWG_BACKGROUND_TRANSITION_DELAY);
+      doc.body.appendChild(<swg-popup-background></swg-popup-background>);
+      await nextTick();
+
+      const swgPopupBackgroundEl = doc.querySelector('swg-popup-background');
+      expect(
+        swgPopupBackgroundEl.style.getPropertyValue('pointer-events')
+      ).equal('all');
     });
   }
 );
