@@ -81,7 +81,8 @@ iframe.swg-dialog {
   letter-spacing: 0.015em !important;
   font-size: 0.75em !important;
   opacity: 0 !important;
-  transition: opacity 0.3s cubic-bezier(0.42, 0.0, 1, 1) !important;
+  transition: transform 0.3s ease-out !important;
+  margin-right: 0.5em !important;
 
   /* Override default button styles. */
   padding: 0 !important;
@@ -90,9 +91,9 @@ iframe.swg-dialog {
   font-weight: 400 !important;
 }
 
-/* TODO(#38112): confirm with UX about if there's better animation to be used. */
 .i-amphtml-story-subscriptions-dialog-banner-button.i-amphtml-story-subscriptions-dialog-banner-button-visible {
   opacity: 1 !important;
+  transform: translate(0.5em) !important;
 }
 
 .i-amphtml-story-subscriptions-dialog-banner-button:after {
