@@ -51,7 +51,7 @@ export function fetchCachedSources(
     .then((response) => {
       applySourcesToVideo(videoEl, response['sources'], maxBitrate);
       applyAudioInfoToVideo(videoEl, response['has_audio']);
-      applyCaptionsTrackToVideo(videoEl, response['captions'], ampdoc);
+      applyCaptionsTrackToVideo(videoEl, response['captions']);
     })
     .catch(() => {
       // If cache fails, video should still load properly.
