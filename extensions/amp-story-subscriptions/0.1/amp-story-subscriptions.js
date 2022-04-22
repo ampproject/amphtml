@@ -1,5 +1,6 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {setImportantStyles} from '#core/dom/style';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -130,8 +131,24 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       'amp-subscriptions-dialog'
     );
     ampSubscriptionsEl.addEventListener('click', (event) =>
-      this.onSkipButtonClick_(event)
+      this.onSubscriptionsDialogClick_(event)
     );
+
+    // Make sure SWG dialog background always intercept clicks to prevent users
+    // from interacting with the paywall page underneath.
+    const observer = new MutationObserver((mutationsList) => {
+      mutationsList.forEach((mutation) => {
+        mutation.addedNodes.forEach((addedNode) => {
+          if (addedNode.tagName === 'SWG-POPUP-BACKGROUND') {
+            setImportantStyles(addedNode, {'pointer-events': 'all'});
+          }
+        });
+      });
+    });
+    observer.observe(this.win.document.body, {
+      subtree: false,
+      childList: true,
+    });
   }
 
   /**
@@ -175,7 +192,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
    * @param {!Event} event
    * @private
    */
-  onSkipButtonClick_(event) {
+  onSubscriptionsDialogClick_(event) {
     if (
       event.target.classList.contains(
         'i-amphtml-story-subscriptions-dialog-banner-button-visible'
