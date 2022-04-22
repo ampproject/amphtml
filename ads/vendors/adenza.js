@@ -1,4 +1,4 @@
-import {writeScript, validateData} from '#3p/3p';
+import {validateData, writeScript} from '#3p/3p';
 
 /**
  * @param {!Window} global
@@ -6,9 +6,6 @@ import {writeScript, validateData} from '#3p/3p';
  */
 export function adenza(global, data) {
   validateData(data, ['blockId']);
-
-  console.log('global', global);
-  console.log('data', data);
 
   const url =
     'https://adenza.network/network/data/teasers/' +
