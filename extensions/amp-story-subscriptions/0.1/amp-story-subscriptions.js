@@ -12,9 +12,17 @@ import {
   StateProperty,
   SubscriptionsState,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {AmpStoryViewerMessagingHandler} from '../../amp-story/1.0/amp-story-viewer-messaging-handler';
+import {AdvancementMode} from '../../amp-story/1.0/story-analytics';
 import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
 const TAG = 'amp-story-subscriptions';
+
+/**
+ * The number of milliseconds to wait before showing the skip button on dialog banner.
+ * @const {number}
+ */
+const SKIP_BUTTON_DELAY_DURATION = 2000;
 
 export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -29,10 +37,21 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
     /** @private {?../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
+
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
+
+    /** @private {?AmpStoryViewerMessagingHandler} */
+    this.viewerMessagingHandler_ = null;
   }
 
   /** @override */
   buildCallback() {
+    this.viewer_ = Services.viewerForDoc(this.element);
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
+      : null;
+
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
       Services.subscriptionsServiceForDoc(this.element),
@@ -106,6 +125,13 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
       (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
     );
+
+    const ampSubscriptionsEl = this.win.document.querySelector(
+      'amp-subscriptions-dialog'
+    );
+    ampSubscriptionsEl.addEventListener('click', (event) =>
+      this.onSkipButtonClick_(event)
+    );
   }
 
   /**
@@ -124,20 +150,58 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     if (showDialog) {
       // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
       // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
-      return this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
+      return this.subscriptionService_
+        .maybeRenderDialogForSelectedPlatform()
+        .then(() => {
+          if (this.viewer_.isEmbedded()) {
+            setTimeout(() => {
+              const buttonEl = this.win.document.querySelector(
+                'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
+              );
+              buttonEl &&
+                this.mutateElement(() =>
+                  buttonEl.classList.add(
+                    'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+                  )
+                );
+            }, SKIP_BUTTON_DELAY_DURATION);
+          }
+        });
     }
     this.subscriptionService_.getDialog().close();
   }
 
   /**
+   * @param {!Event} event
+   * @private
+   */
+  onSkipButtonClick_(event) {
+    if (
+      event.target.classList.contains(
+        'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+      )
+    ) {
+      this.viewerMessagingHandler_.send('selectDocument', {
+        'next': true,
+        'advancementMode': AdvancementMode.MANUAL_ADVANCE,
+      });
+    }
+  }
+
+  /**
    * @return {!Element}
    * @private
-   * TODO(#37285): add "next story" button to the banner
    */
   renderSubscriptionsDialogTemplate_() {
     return (
       <div subscriptions-dialog subscriptions-display="NOT granted">
-        <div class="i-amphtml-story-subscriptions-dialog-banner"></div>
+        <div class="i-amphtml-story-subscriptions-dialog-banner">
+          <button class="i-amphtml-story-subscriptions-dialog-banner-button">
+            {this.localizationService_.getLocalizedString(
+              LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SKIP
+            )}
+          </button>
+        </div>
         <div class="i-amphtml-story-subscriptions-dialog-content">
           <span class="i-amphtml-story-subscriptions-price">
             {this.element.getAttribute('price')}

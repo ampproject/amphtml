@@ -258,5 +258,9 @@
   "112": {
     "string": "Captions off",
     "description": "Label for the captions button that indicates the captions are turned off"
+  },
+  "113": {
+    "string": "Skip",
+    "description": "Button label prompting users to exit paywall and potentially go to the next story."
   }
 }
