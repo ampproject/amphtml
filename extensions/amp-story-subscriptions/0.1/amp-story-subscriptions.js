@@ -133,6 +133,22 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     ampSubscriptionsEl.addEventListener('click', (event) =>
       this.onSubscriptionsDialogClick_(event)
     );
+
+    // Make sure SWG dialog background always intercept clicks to prevent users
+    // from interacting with the paywall page underneath.
+    const observer = new MutationObserver((mutationsList) => {
+      mutationsList.forEach((mutation) => {
+        mutation.addedNodes.forEach((addedNode) => {
+          if (addedNode.tagName === 'SWG-POPUP-BACKGROUND') {
+            setImportantStyles(addedNode, {'pointer-events': 'all'});
+          }
+        });
+      });
+    });
+    observer.observe(this.win.document.body, {
+      subtree: false,
+      childList: true,
+    });
   }
 
   /**
@@ -185,27 +201,6 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.viewerMessagingHandler_.send('selectDocument', {
         'next': true,
         'advancementMode': AdvancementMode.MANUAL_ADVANCE,
-      });
-    }
-
-    if (
-      event.target.classList.contains(
-        'i-amphtml-story-subscriptions-google-button'
-      )
-    ) {
-      const observer = new MutationObserver((mutationsList) => {
-        mutationsList.forEach((mutation) => {
-          mutation.addedNodes.forEach((addedNode) => {
-            if (addedNode.tagName === 'SWG-POPUP-BACKGROUND') {
-              setImportantStyles(addedNode, {'pointer-events': 'all'});
-              observer.disconnect();
-            }
-          });
-        });
-      });
-      observer.observe(this.win.document.body, {
-        subtree: false,
-        childList: true,
       });
     }
   }
