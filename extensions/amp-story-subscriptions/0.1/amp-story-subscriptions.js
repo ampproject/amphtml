@@ -135,8 +135,8 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     );
 
     // Make sure SWG dialog background always intercept clicks to prevent users
-    // from interacting with the paywall page underneath.
-    const observer = new MutationObserver((mutationsList) => {
+    // from interacting with anything underneath.
+    new MutationObserver((mutationsList) => {
       mutationsList.forEach((mutation) => {
         mutation.addedNodes.forEach((addedNode) => {
           if (addedNode.tagName === 'SWG-POPUP-BACKGROUND') {
@@ -144,8 +144,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
           }
         });
       });
-    });
-    observer.observe(this.win.document.body, {
+    }).observe(this.win.document.body, {
       subtree: false,
       childList: true,
     });
