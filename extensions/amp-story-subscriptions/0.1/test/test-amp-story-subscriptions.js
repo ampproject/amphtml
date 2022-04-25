@@ -271,5 +271,23 @@ describes.realWin(
         });
       });
     });
+
+    it('should allow pointer events on swg background to intercept clicks on background', async () => {
+      const dialog = subscriptionService.getDialog();
+      await dialog.open(subscriptionsEl);
+
+      const buttonEl = doc.querySelector(
+        'amp-subscriptions-dialog .i-amphtml-story-subscriptions-google-button'
+      );
+      buttonEl.click();
+
+      doc.body.appendChild(<swg-popup-background></swg-popup-background>);
+      await nextTick();
+
+      const swgPopupBackgroundEl = doc.querySelector('swg-popup-background');
+      expect(
+        swgPopupBackgroundEl.style.getPropertyValue('pointer-events')
+      ).equal('all');
+    });
   }
 );
