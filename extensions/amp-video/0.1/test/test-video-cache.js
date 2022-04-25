@@ -502,39 +502,39 @@ describes.realWin('amp-video cached-sources', {amp: true}, (env) => {
     });
   });
 
+  function stubSourcesWithCapionsRequest() {
+    env.sandbox.stub(xhrService, 'fetch').resolves({
+      json: () =>
+        Promise.resolve({
+          'captions': {
+            'src': 'captions_src_response.vtt',
+            'srclang': 'en-us',
+          },
+          'sources': [
+            {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
+          ],
+        }),
+    });
+  }
   describe('captions field', async () => {
     it('should append track element if the cache responds with captions', async () => {
-      env.sandbox.stub(xhrService, 'fetch').resolves({
-        json: () =>
-          Promise.resolve({
-            'captions': {
-              'src': 'captions_src_response.vtt',
-              'srclang': 'en-us',
-            },
-            'sources': [
-              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
-            ],
-          }),
-      });
+      stubSourcesWithCapionsRequest();
       const videoEl = createVideo([{src: 'video.mp4'}]);
       await fetchCachedSources(videoEl, env.ampdoc);
 
       const trackEl = videoEl.querySelector('track');
       expect(trackEl).to.exist;
     });
+    it('should append story-captions element if the cache responds with captions', async () => {
+      stubSourcesWithCapionsRequest();
+      const videoEl = createVideo([{src: 'video.mp4'}]);
+      await fetchCachedSources(videoEl, env.ampdoc);
+
+      const captionsEl = videoEl.querySelector('amp-story-captions');
+      expect(captionsEl).to.exist;
+    });
     it('should not append track element if video already has a track child', async () => {
-      env.sandbox.stub(xhrService, 'fetch').resolves({
-        json: () =>
-          Promise.resolve({
-            'captions': {
-              'src': 'captions_src_response.vtt',
-              'srclang': 'en-us',
-            },
-            'sources': [
-              {'url': 'video.mp4', 'bitrate_kbps': 700, 'type': 'video/mp4'},
-            ],
-          }),
-      });
+      stubSourcesWithCapionsRequest();
       const videoEl = createVideo([{src: 'video.mp4'}]);
       videoEl.appendChild(<track />);
       await fetchCachedSources(videoEl, env.ampdoc);
