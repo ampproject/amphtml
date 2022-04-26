@@ -1,44 +1,40 @@
 import {createUseStyles} from 'react-jss';
 
-const content = {
+const mainNav = {
   'white-space': 'nowrap',
-  '& > nav': {
-    background: 'white',
+  display: 'flex',
+  background: 'white',
 
-    '& > *': {
-      margin: 0,
-      padding: 0,
-    },
-    '& > ul, & > ol': {
-      '& > li': {
-        display: 'inline',
+  '& > ul': {
+    margin: 0,
+    padding: 0,
 
-        // Heading:
-        '& > *': {
-          display: 'inline-block',
-        },
-        '& > button, & > [role=button]': {
-          cursor: 'pointer',
-        },
-
-        // Content:
-        '& > [role=dialog]': {
-          display: 'none',
-          position: 'absolute !important',
-          left: '0',
-          width: '100vw',
-          background: 'white',
-          opacity: 0,
-          visibility: 'hidden',
-
-          '&.open': {
-            display: 'block',
-            opacity: 1,
-            visibility: 'visible',
-          },
-        },
+    '& > li': {
+      display: 'inline',
+      margin: '1em',
+      '&:first-child': {
+        margin: 0,
       },
     },
+  },
+};
+const item = {
+  display: 'inline-block',
+  cursor: 'pointer',
+};
+const content = {
+  display: 'none',
+  position: 'absolute !important',
+  left: '0',
+  width: '100vw',
+  background: 'white',
+  opacity: 0,
+  visibility: 'hidden',
+
+  '&.open': {
+    display: 'block',
+    opacity: 1,
+    visibility: 'visible',
   },
 };
 const parent = {
@@ -65,6 +61,8 @@ const mask = {
 };
 
 const JSS = {
+  mainNav,
+  item,
   content,
   mask,
 };

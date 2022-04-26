@@ -1,6 +1,6 @@
 import * as Preact from '#preact';
-import {BentoMegaMenu} from '../component';
 import {mount} from 'enzyme';
+import { BentoMegaMenu } from "../component/BentoMegaMenu";
 
 describes.sandboxed('BentoMegaMenu preact component v1.0', {}, (env) => {
   // DO NOT SUBMIT: This is example code only.

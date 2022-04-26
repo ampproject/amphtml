@@ -1,1 +1,1 @@
-export * from './component-ts';
+export * from './component/BentoMegaMenu';

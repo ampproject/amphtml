@@ -1,6 +1,6 @@
-import {BentoMegaMenu} from '#bento/components/bento-mega-menu/1.0/component';
-
 import * as Preact from '#preact';
+
+import {BentoMegaMenu} from '../component/BentoMegaMenu';
 
 import '../component.jss';
 
@@ -12,6 +12,22 @@ export default {
 
 function PageLayout({children: megaMenu}) {
   const css = String.raw;
+  const loremIpsum = (
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cupiditate
+      doloremque eius enim expedita illo iusto quidem rem voluptas? Animi,
+      assumenda cumque, cupiditate dicta dignissimos eaque earum eveniet
+      excepturi inventore libero maxime modi natus neque officia, officiis quam
+      quia quibusdam quis suscipit unde vero voluptatibus voluptatum? Debitis,
+      eum fugiat id impedit natus saepe tempora tempore. Culpa dicta doloribus
+      inventore numquam optio rerum tempore. Aperiam architecto consectetur
+      cumque est ex explicabo incidunt natus nulla omnis porro quia quisquam
+      quod, repellat repellendus reprehenderit tempore ullam. Debitis et
+      explicabo nemo officia repellendus! Ad atque commodi cupiditate dolor
+      dolore doloribus illo, quis quisquam quo repellat.
+    </p>
+  );
+
   return (
     <>
       <style>{css`
@@ -31,27 +47,27 @@ function PageLayout({children: megaMenu}) {
       {megaMenu}
 
       <h1>Page Contents</h1>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid
-        aspernatur autem cupiditate delectus, deleniti dignissimos eligendi
-        laborum minima quasi sapiente.
-      </p>
+      {loremIpsum}
+      {loremIpsum}
+      {loremIpsum}
+      {loremIpsum}
+      {loremIpsum}
+      {loremIpsum}
+      {loremIpsum}
+      {loremIpsum}
+      {loremIpsum}
     </>
   );
 }
 
-function CommonMenu() {
+export const _default = (args) => {
   return (
-    <nav>
-      <ul>
-        <li>
-          <h4>This is the mega menu:</h4>
-        </li>
-        <li>
-          <h4 class="heading" role="button">
-            Form
-          </h4>
-          <div class="content" role="dialog" id="subscribe">
+    <PageLayout>
+      <BentoMegaMenu {...args}>
+        This is the mega menu:
+        <BentoMegaMenu.Item>
+          <BentoMegaMenu.Title class="heading">Form</BentoMegaMenu.Title>
+          <BentoMegaMenu.Content class="content">
             <p>
               Use the form below to subscribe to our{' '}
               <a href="#">weekly newsletter.</a>
@@ -73,24 +89,11 @@ function CommonMenu() {
               <div>Subscription successful!</div>
               <div>Subscription failed!</div>
             </form>
-          </div>
-        </li>
-        <li>
-          <h4 class="heading" role="button">
-            Video & Images
-          </h4>
-          <div class="content" role="dialog">
-            <video
-              width="400"
-              height="250"
-              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-              poster="https://peach.blender.org/wp-content/uploads/bbb-splash.png"
-              controls
-            >
-              <div fallback>
-                <p>Your browser doesn't support HTML5 video.</p>
-              </div>
-            </video>
+          </BentoMegaMenu.Content>
+        </BentoMegaMenu.Item>
+        <BentoMegaMenu.Item class="heading">
+          <BentoMegaMenu.Title>Images</BentoMegaMenu.Title>
+          <BentoMegaMenu.Content class="content">
             <div>
               <img
                 src="https://picsum.photos/id/469/367/267"
@@ -111,23 +114,27 @@ function CommonMenu() {
                 alt="and another sample image"
               />
             </div>
-          </div>
-        </li>
-        <li>
-          <a class="heading" href="#">
-            Regular link
-          </a>
-        </li>
-      </ul>
-    </nav>
-  );
-}
-
-export const _default = (args) => {
-  return (
-    <PageLayout>
-      <BentoMegaMenu {...args}>
-        <CommonMenu />
+          </BentoMegaMenu.Content>
+        </BentoMegaMenu.Item>
+        <BentoMegaMenu.Item class="heading">
+          <BentoMegaMenu.Title>Video</BentoMegaMenu.Title>
+          <BentoMegaMenu.Content class="content">
+            <video
+              width="400"
+              height="250"
+              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              poster="https://peach.blender.org/wp-content/uploads/bbb-splash.png"
+              controls
+            >
+              <div fallback>
+                <p>Your browser doesn't support HTML5 video.</p>
+              </div>
+            </video>
+          </BentoMegaMenu.Content>
+        </BentoMegaMenu.Item>
+        <a class="heading" href="#">
+          Regular link
+        </a>
       </BentoMegaMenu>
     </PageLayout>
   );

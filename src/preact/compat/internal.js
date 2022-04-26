@@ -80,7 +80,7 @@ function toArray(children) {
 
 /**
  * @param {import('preact').ComponentChildren} children
- * @param {function(import('preact').ComponentChildren):R} fn
+ * @param {function(import('preact').ComponentChildren, number):R} fn
  * @return {Array<R>}
  * @template R
  */
