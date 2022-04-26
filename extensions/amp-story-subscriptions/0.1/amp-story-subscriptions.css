@@ -211,7 +211,13 @@ iframe.swg-dialog {
   font-size: 0.7em !important;
 }
 
-.i-amphtml-story-subscriptions-signin a {
+.i-amphtml-story-subscriptions-signin button {
   font-weight: 600 !important;
   cursor: pointer !important;
+
+  /* Override default button styles. */
+  padding: 0 !important;
+  border: none !important;
+  font-family: Poppins, sans-serif !important;
+  background-color: white !important;
 }

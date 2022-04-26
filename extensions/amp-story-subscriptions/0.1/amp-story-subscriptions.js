@@ -252,15 +252,14 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
               LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION
             )}
             &nbsp;
-            <a
+            <button
               subscriptions-action="login"
               subscriptions-display="NOT granted"
-              tabindex="0"
             >
               {this.localizationService_.getLocalizedString(
                 LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SIGN_IN
               )}
-            </a>
+            </button>
           </span>
         </div>
       </div>
