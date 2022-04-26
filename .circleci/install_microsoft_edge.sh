@@ -2,7 +2,7 @@
 #
 # Script used by AMP's CI builds to install Microsoft Edge Beta on CircleCI.
 # Reference: https://www.microsoftedgeinsider.com/en-us/download?platform=linux-deb
-# TODO(rsimha): Switch from Beta to Stable once it's available.
+# TODO(wg-infra): Switch from Beta to Stable once it's available.
 
 set -e
 
