@@ -1,4 +1,5 @@
 import {createElementWithAttributes, removeElement} from '#core/dom';
+import * as Preact from '#core/dom/jsx';
 import {matches} from '#core/dom/query';
 import {toArray} from '#core/types/array';
 
@@ -159,8 +160,9 @@ function applyAudioInfoToVideo(videoEl, hasAudio) {
 }
 
 /**
- * Appends captions track to video if captions url is defined and video
- * element doesn't have a track child specified in the document.
+ * Appends captions track and amp-story-captions to video if captions
+ * url is defined and video element doesn't have a track child
+ * specified in the document.
  * @param {!Element} videoEl
  * @param {!Object} captionsResponse
  */
@@ -173,12 +175,28 @@ function applyCaptionsTrackToVideo(videoEl, captionsResponse) {
   ) {
     return;
   }
-  const trackEl = createElementWithAttributes(videoEl.ownerDocument, 'track', {
-    'src': captionsResponse['src'],
-    'srclang': captionsResponse['srclang'],
-    'kind': 'captions',
-  });
+
+  const trackEl = (
+    <track
+      src={captionsResponse['src']}
+      srclang={captionsResponse['srclang']}
+      kind="captions"
+    ></track>
+  );
+
+  const captionsEl = (
+    <amp-story-captions
+      id={captionsResponse['src']}
+      style-preset="default"
+      layout="container"
+      auto-append
+    ></amp-story-captions>
+  );
+  // Set captions-id on video to pass track to story-captions.
+  videoEl.setAttribute('captions-id', captionsResponse['src']);
+
   videoEl.appendChild(trackEl);
+  videoEl.appendChild(captionsEl);
 }
 
 /**
