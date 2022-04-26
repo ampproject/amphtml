@@ -81,7 +81,8 @@ iframe.swg-dialog {
   letter-spacing: 0.015em !important;
   font-size: 0.75em !important;
   opacity: 0 !important;
-  transition: opacity 0.3s cubic-bezier(0.42, 0.0, 1, 1) !important;
+  transform: translateX(-0.2em) !important;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out !important;
 
   /* Override default button styles. */
   padding: 0 !important;
@@ -90,9 +91,13 @@ iframe.swg-dialog {
   font-weight: 400 !important;
 }
 
-/* TODO(#38112): confirm with UX about if there's better animation to be used. */
+[dir="rtl"] .i-amphtml-story-subscriptions-dialog-banner-button {
+  transform: translateX(0.2em) !important;
+}
+
 .i-amphtml-story-subscriptions-dialog-banner-button.i-amphtml-story-subscriptions-dialog-banner-button-visible {
   opacity: 1 !important;
+  transform: translateX(0) !important;
 }
 
 .i-amphtml-story-subscriptions-dialog-banner-button:after {
@@ -100,13 +105,23 @@ iframe.swg-dialog {
   width: 0.93em !important;
   height: 0.93em !important;
   margin: 0 0.6em !important;
+  transform: translateX(-0.1em) !important;
+  transition: transform 0.3s ease-out !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" stroke="black" fill="none" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.75,1.5 6,6 1.75,10.6"/></svg>') !important;
 }
 
+.i-amphtml-story-subscriptions-dialog-banner-button.i-amphtml-story-subscriptions-dialog-banner-button-visible:after {
+  transform: translateX(0) !important;
+}
+
 [dir="rtl"] .i-amphtml-story-subscriptions-dialog-banner-button:after {
-  transform: scale(-1, 1) !important;
+  transform: translateX(0.1em) scaleX(-1)  !important;
+}
+
+[dir="rtl"] .i-amphtml-story-subscriptions-dialog-banner-button.i-amphtml-story-subscriptions-dialog-banner-button-visible:after {
+  transform: translateX(0) scaleX(-1)  !important;
 }
 
 .i-amphtml-story-subscriptions-dialog-content {
