@@ -155,9 +155,9 @@ iframe.swg-dialog {
   display: flex !important;
   align-items: center !important;
   cursor: pointer !important;
-  font-size: 0.75em !important;
-  font-weight: 400 !important;
-  font-family: Google Sans, sans-serif !important;
+
+  /* Override default button styles. */
+  font-size: calc(var(--story-font-size)) !important;
 }
 
 .i-amphtml-story-subscriptions-publisher-button {
@@ -188,6 +188,9 @@ iframe.swg-dialog {
   text-align: initial !important;
   white-space: normal !important;
   margin-inline-end: 1.3em !important;
+  font-size: 0.75em !important;
+  font-weight: 400 !important;
+  font-family: Google Sans, sans-serif !important;
 
   /* Line clamping and ellipses. */
   display: -webkit-box !important;
@@ -218,6 +221,7 @@ iframe.swg-dialog {
   /* Override default button styles. */
   padding: 0 !important;
   border: none !important;
+  font-size: 1em !important;
   font-family: Poppins, sans-serif !important;
   background-color: white !important;
 }
