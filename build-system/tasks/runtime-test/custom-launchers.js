@@ -43,7 +43,7 @@ const customLaunchers = {
     flags: argv.headless ? ['-headless'] : [],
   },
   EdgeCustom: {
-    // TODO(rsimha): Switch from Beta to Stable once it's available.
+    // TODO(wg-infra): Switch from Beta to Stable once it's available.
     base: argv.headless ? 'EdgeBetaHeadless' : 'EdgeBeta',
     flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
   },

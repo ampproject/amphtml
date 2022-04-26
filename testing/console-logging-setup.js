@@ -26,7 +26,7 @@ export function setTestName(name) {
 
 /**
  * Exposes the test runner object so that errors can be associated with it.
- * TODO(rsimha): Remove this after karma-runner/karma-mocha#236 is fixed.
+ * TODO(wg-infra): Remove this after karma-runner/karma-mocha#236 is fixed.
  * @param {Object} runner
  */
 export function setTestRunner(runner) {
