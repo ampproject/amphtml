@@ -81,8 +81,8 @@ iframe.swg-dialog {
   letter-spacing: 0.015em !important;
   font-size: 0.75em !important;
   opacity: 0 !important;
+  transform: translateX(-0.2em) !important;
   transition: opacity 0.3s ease-out, transform 0.3s ease-out !important;
-  transform: translate(-0.2em) !important;
 
   /* Override default button styles. */
   padding: 0 !important;
@@ -92,12 +92,12 @@ iframe.swg-dialog {
 }
 
 [dir="rtl"] .i-amphtml-story-subscriptions-dialog-banner-button {
-  transform: translate(0.2em) !important;
+  transform: translateX(0.2em) !important;
 }
 
 .i-amphtml-story-subscriptions-dialog-banner-button.i-amphtml-story-subscriptions-dialog-banner-button-visible {
   opacity: 1 !important;
-  transform: translate(0) !important;
+  transform: translateX(0) !important;
 }
 
 .i-amphtml-story-subscriptions-dialog-banner-button:after {
@@ -105,18 +105,19 @@ iframe.swg-dialog {
   width: 0.93em !important;
   height: 0.93em !important;
   margin: 0 0.6em !important;
-  transform: translate(-0.1em) !important;
+  transform: translateX(-0.1em) !important;
+  transition: transform 0.3s ease-out !important;
   background-size: contain !important;
   background-repeat: no-repeat !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" stroke="black" fill="none" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.75,1.5 6,6 1.75,10.6"/></svg>') !important;
 }
 
 [dir="rtl"] .i-amphtml-story-subscriptions-dialog-banner-button:after {
-  transform: scale(-1, 1) translate(0.1em) !important;
+  transform: scale(-1, 1) translateX(0.1em) !important;
 }
 
-.i-amphtml-story-subscriptions-dialog-banner-button:after.i-amphtml-story-subscriptions-dialog-banner-button-visible {
-  transform: translate(0) !important;
+.i-amphtml-story-subscriptions-dialog-banner-button.i-amphtml-story-subscriptions-dialog-banner-button-visible:after {
+  transform: scale(-1, 1) translateX(0) !important;
 }
 
 .i-amphtml-story-subscriptions-dialog-content {
