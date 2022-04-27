@@ -19,7 +19,7 @@ const [Item, useMegaMenuItem] = createProviderFromHook(
         overrideItemId: setItemId,
         toggle() {
           if (openId === id) {
-            actions.close();
+            actions.closeMenu();
           } else {
             actions.setOpenId(id);
           }

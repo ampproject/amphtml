@@ -2,30 +2,29 @@ import objStr from 'obj-str';
 
 import * as Preact from '#preact';
 import {useLayoutEffect} from '#preact';
-import {
-  ComponentChildren,
-  ComponentType,
-  IntrinsicElements,
-} from '#preact/types';
+import {ComponentChildren} from '#preact/types';
+import {propName} from '#preact/utils';
 
 import {useMegaMenuItem} from './Item';
-import {AsProps} from './types';
+import {AsComponent, AsProps} from './types';
 
 import {useStyles} from '../component.jss';
 
-type ContentProps<TAs extends ComponentType | keyof IntrinsicElements> = {
+type ContentProps<TAs extends AsComponent> = AsProps<TAs> & {
   children?: ComponentChildren;
   class?: string;
   id?: string;
-} & AsProps<TAs>;
+};
 
-export function Content<TAs extends ComponentType | keyof IntrinsicElements>({
+export function Content<TAs extends AsComponent = 'div'>({
   as: Comp = 'div',
   children,
   id: idProp,
+  [propName('class')]: className,
+  ...rest
 }: ContentProps<TAs>) {
   const classes = useStyles();
-  const {actions, isOpen} = useMegaMenuItem();
+  const {actions, id, isOpen} = useMegaMenuItem();
 
   // If this ID is set, pass it to the parent:
   useLayoutEffect(() => {
@@ -44,11 +43,14 @@ export function Content<TAs extends ComponentType | keyof IntrinsicElements>({
   return (
     <Comp
       role="dialog"
+      id={id}
+      {...ariaAttrs}
+      {...rest}
       class={objStr({
+        [className!]: !!className,
         [classes.content]: true,
         ['open']: isOpen,
       })}
-      {...ariaAttrs}
     >
       {children}
     </Comp>

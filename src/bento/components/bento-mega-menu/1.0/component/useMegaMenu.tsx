@@ -9,7 +9,7 @@ export function useMegaMenu() {
   const [openId, setOpenId] = useState<string | null>(null);
   const actions = useMemo(
     () => ({
-      close() {
+      closeMenu() {
         setOpenId(null);
       },
       setOpenId,

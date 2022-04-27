@@ -34,10 +34,6 @@ function PageLayout({children: megaMenu}) {
         body {
           padding: 0 !important;
         }
-        .heading {
-          margin: 0;
-          padding: 10px;
-        }
       `}</style>
 
       <header>
@@ -66,8 +62,8 @@ export const _default = (args) => {
       <BentoMegaMenu {...args}>
         This is the mega menu:
         <BentoMegaMenu.Item>
-          <BentoMegaMenu.Title class="heading">Form</BentoMegaMenu.Title>
-          <BentoMegaMenu.Content class="content">
+          <BentoMegaMenu.Title>Form</BentoMegaMenu.Title>
+          <BentoMegaMenu.Content>
             <p>
               Use the form below to subscribe to our{' '}
               <a href="#">weekly newsletter.</a>
@@ -91,9 +87,9 @@ export const _default = (args) => {
             </form>
           </BentoMegaMenu.Content>
         </BentoMegaMenu.Item>
-        <BentoMegaMenu.Item class="heading">
+        <BentoMegaMenu.Item>
           <BentoMegaMenu.Title>Images</BentoMegaMenu.Title>
-          <BentoMegaMenu.Content class="content">
+          <BentoMegaMenu.Content>
             <div>
               <img
                 src="https://picsum.photos/id/469/367/267"
@@ -116,9 +112,9 @@ export const _default = (args) => {
             </div>
           </BentoMegaMenu.Content>
         </BentoMegaMenu.Item>
-        <BentoMegaMenu.Item class="heading">
+        <BentoMegaMenu.Item>
           <BentoMegaMenu.Title>Video</BentoMegaMenu.Title>
-          <BentoMegaMenu.Content class="content">
+          <BentoMegaMenu.Content>
             <video
               width="400"
               height="250"
@@ -132,9 +128,7 @@ export const _default = (args) => {
             </video>
           </BentoMegaMenu.Content>
         </BentoMegaMenu.Item>
-        <a class="heading" href="#">
-          Regular link
-        </a>
+        <a href="#">Regular link</a>
       </BentoMegaMenu>
     </PageLayout>
   );

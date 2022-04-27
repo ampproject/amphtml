@@ -1,24 +1,20 @@
 import objStr from 'obj-str';
 
 import * as Preact from '#preact';
-import {
-  ComponentChildren,
-  ComponentType,
-  IntrinsicElements,
-} from '#preact/types';
+import type {ComponentChildren} from '#preact/types';
 import {propName} from '#preact/utils';
 
 import {useMegaMenuItem} from './Item';
-import {AsProps} from './types';
+import {AsComponent, AsProps} from './types';
 
 import {useStyles} from '../component.jss';
 
-type TitleProps<TAs extends ComponentType | keyof IntrinsicElements> = {
+type TitleProps<TAs extends AsComponent> = AsProps<TAs> & {
   children?: ComponentChildren;
   class?: string;
-} & AsProps<TAs>;
+};
 
-export function Title<TAs extends ComponentType | keyof IntrinsicElements>({
+export function Title<TAs extends AsComponent = 'span'>({
   as: Comp = 'span',
   children,
   [propName('class')]: className,
@@ -38,8 +34,10 @@ export function Title<TAs extends ComponentType | keyof IntrinsicElements>({
           ['open']: isOpen,
         })}
         onClick={(ev: MouseEvent) => {
-          actions.toggle();
           (props as any).onClick?.(ev);
+          if (!ev.defaultPrevented) {
+            actions.toggle();
+          }
         }}
       >
         {children}

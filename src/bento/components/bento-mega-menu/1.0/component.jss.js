@@ -1,49 +1,47 @@
 import {createUseStyles} from 'react-jss';
 
 const mainNav = {
-  'white-space': 'nowrap',
-  display: 'flex',
+  whiteSpace: 'nowrap',
   background: 'white',
 
   '& > ul': {
-    margin: 0,
+    display: 'flex',
+    listStyleType: 'none',
     padding: 0,
+    flexWrap: 'wrap',
 
-    '& > li': {
-      display: 'inline',
-      margin: '1em',
-      '&:first-child': {
-        margin: 0,
-      },
-    },
+    gap: '0.5em',
   },
 };
+
 const item = {
   display: 'inline-block',
   cursor: 'pointer',
 };
 const content = {
-  display: 'none',
-  position: 'absolute !important',
+  position: 'absolute',
   left: '0',
   width: '100vw',
   background: 'white',
   opacity: 0,
   visibility: 'hidden',
+  transition: 'opacity 200ms, visibility 0s 200ms',
+  transitionTimingFunction: 'ease-in',
 
   '&.open': {
-    display: 'block',
     opacity: 1,
     visibility: 'visible',
+    transitionDelay: 0,
+    transitionTimingFunction: 'ease-out',
   },
 };
 const parent = {
-  'z-index': 1000,
+  zIndex: 1000,
 };
 
 const mask = {
   position: 'fixed',
-  'z-index': -1,
+  zIndex: -1,
   visibility: 'hidden',
   opacity: 0,
   top: 0,
@@ -52,11 +50,13 @@ const mask = {
   right: 0,
   background: 'rgba(0,0,0,0.5)',
   transition: 'opacity 200ms, visibility 0s 200ms',
+  transitionTimingFunction: 'ease-in',
 
   '&.open': {
     opacity: 1,
     visibility: 'visible',
-    transition: 'opacity 200ms',
+    transitionDelay: 0,
+    transitionTimingFunction: 'ease-out',
   },
 };
 

@@ -1,8 +1,10 @@
 import {ComponentType, IntrinsicElements} from '#preact/types';
 
-export type AsProps<TAs extends ComponentType | keyof IntrinsicElements> =
-  TAs extends ComponentType<infer TProps>
-    ? {as: TAs} & TProps
-    : TAs extends keyof IntrinsicElements
-    ? {as: TAs} & IntrinsicElements[TAs]
-    : never;
+export type AsComponent = ComponentType | keyof IntrinsicElements;
+export type AsProps<TAs extends AsComponent> = TAs extends ComponentType<
+  infer TProps
+>
+  ? {as?: TAs} & TProps
+  : TAs extends keyof IntrinsicElements
+  ? {as?: TAs} & IntrinsicElements[TAs]
+  : never;
