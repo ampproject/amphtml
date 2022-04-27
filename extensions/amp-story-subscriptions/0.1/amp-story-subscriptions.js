@@ -235,11 +235,10 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
               {this.element.getAttribute('subtitle-second')}
             </span>
           )}
-          <div
+          <button
             class="i-amphtml-story-subscriptions-publisher-button"
             subscriptions-action="subscribe"
             subscriptions-display="NOT granted"
-            role="button"
           >
             <img class="i-amphtml-story-subscriptions-publisher-logo"></img>
             <span class="i-amphtml-story-subscriptions-publisher-button-text">
@@ -249,14 +248,13 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
               &nbsp;
               {getStoryAttributeSrc(this.element, 'publisher', /* warn */ true)}
             </span>
-          </div>
-          <div
+          </button>
+          <button
             class="i-amphtml-story-subscriptions-google-button"
             subscriptions-action="subscribe"
             subscriptions-display="NOT granted"
             subscriptions-service="subscribe.google.com"
             subscriptions-decorate="false"
-            role="button"
           >
             <span class="i-amphtml-story-subscriptions-google-logo"></span>
             <span class="i-amphtml-story-subscriptions-google-button-text">
@@ -264,17 +262,20 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
                 LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SWG
               )}
             </span>
-          </div>
+          </button>
           <span class="i-amphtml-story-subscriptions-signin">
             {this.localizationService_.getLocalizedString(
               LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION
             )}
             &nbsp;
-            <a subscriptions-action="login" subscriptions-display="NOT granted">
+            <button
+              subscriptions-action="login"
+              subscriptions-display="NOT granted"
+            >
               {this.localizationService_.getLocalizedString(
                 LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SIGN_IN
               )}
-            </a>
+            </button>
           </span>
         </div>
       </div>
