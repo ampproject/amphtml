@@ -4,11 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        {name: 'chrisantaki'},
-        {name: 'jpettitt'},
-        {name: 'mmmicedcoffee'},
-      ],
+      owners: [{name: 'adolgachev'}, {name: 'jpettitt', notify: true}],
     },
   ],
 }

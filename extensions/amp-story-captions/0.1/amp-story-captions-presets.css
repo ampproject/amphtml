@@ -1,5 +1,18 @@
 @import '../../amp-story/1.0/amp-story-shadow-reset.css';
 
+/*
+  auto append
+  Used when captions are provided from cache.
+*/
+.i-amphtml-amp-story-captions-auto-append {
+  position: absolute !important;
+  z-index: 1 !important;
+  bottom: 5em !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 3em !important;
+}
+
 /* default */
 
 .amp-story-captions-default .amp-story-captions-cue-wrapper {
