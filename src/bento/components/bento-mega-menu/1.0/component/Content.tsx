@@ -6,7 +6,7 @@ import {ComponentChildren} from '#preact/types';
 import {propName} from '#preact/utils';
 
 import {useMegaMenuItem} from './Item';
-import {AsComponent, AsProps} from './types';
+import {AriaAttributes, AsComponent, AsProps} from './types';
 
 import {useStyles} from '../component.jss';
 
@@ -24,7 +24,7 @@ export function Content<TAs extends AsComponent = 'div'>({
   ...rest
 }: ContentProps<TAs>) {
   const classes = useStyles();
-  const {actions, id, isOpen} = useMegaMenuItem();
+  const {actions, isOpen, itemId} = useMegaMenuItem();
 
   // If this ID is set, pass it to the parent:
   useLayoutEffect(() => {
@@ -33,17 +33,14 @@ export function Content<TAs extends AsComponent = 'div'>({
     }
   }, [actions, idProp]);
 
-  const ariaAttrs: Partial<AriaAttributes> = isOpen
-    ? {
-        'aria-expanded': true,
-        'aria-modal': true,
-      }
-    : {};
+  const ariaAttrs: Partial<AriaAttributes> = {
+    'aria-modal': isOpen,
+  };
 
   return (
     <Comp
       role="dialog"
-      id={id}
+      id={itemId}
       {...ariaAttrs}
       {...rest}
       class={objStr({
@@ -56,10 +53,3 @@ export function Content<TAs extends AsComponent = 'div'>({
     </Comp>
   );
 }
-
-type AriaAttributes = {
-  'aria-expanded': boolean;
-  'aria-controls': string;
-  'aria-haspopup': 'dialog';
-  'aria-modal': boolean;
-};

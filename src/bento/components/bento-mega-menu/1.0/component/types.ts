@@ -8,3 +8,10 @@ export type AsProps<TAs extends AsComponent> = TAs extends ComponentType<
   : TAs extends keyof IntrinsicElements
   ? {as?: TAs} & IntrinsicElements[TAs]
   : never;
+
+export type AriaAttributes = {
+  'aria-expanded'?: boolean;
+  'aria-controls'?: string;
+  'aria-haspopup'?: 'dialog';
+  'aria-modal'?: boolean;
+};

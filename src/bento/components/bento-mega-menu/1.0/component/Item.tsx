@@ -1,30 +1,43 @@
-import {useMegaMenuContext} from '#bento/components/bento-mega-menu/1.0/component/useMegaMenu';
-import {createProviderFromHook} from '#bento/components/bento-mega-menu/1.0/createProviderFromHook';
+import {useLayoutEffect, useMemo, useRef, useState} from '#preact';
 
-import {sequentialIdGenerator} from '#core/data-structures/id-generator';
+import {useMegaMenuContext} from './useMegaMenu';
 
-import {useState} from '#preact';
+import {createProviderFromHook} from '../createProviderFromHook';
 
-const generateItemId = sequentialIdGenerator();
 const [Item, useMegaMenuItem] = createProviderFromHook(
   function useMegaMenuItem({id: propId = ''}) {
-    const {actions, openId} = useMegaMenuContext();
-    const [genId, setItemId] = useState(generateItemId);
-    const id = propId || genId;
+    const megaMenu = useMegaMenuContext();
 
-    return {
-      id,
-      isOpen: openId === id,
-      actions: {
-        overrideItemId: setItemId,
+    const [itemId, overrideItemId] = useState(megaMenu.actions.generateItemId);
+
+    // Sync the itemId:
+    useLayoutEffect(() => {
+      overrideItemId(propId || megaMenu.actions.generateItemId());
+    }, [propId, megaMenu.actions]);
+
+    const megaMenuRefObj = {megaMenu, itemId};
+    const megaMenuRef = useRef(megaMenuRefObj);
+    megaMenuRef.current = megaMenuRefObj;
+
+    const actions = useMemo(
+      () => ({
+        overrideItemId,
         toggle() {
-          if (openId === id) {
-            actions.closeMenu();
+          const {itemId, megaMenu} = megaMenuRef.current;
+          if (megaMenu.openId === itemId) {
+            megaMenu.actions.closeMenu();
           } else {
-            actions.setOpenId(id);
+            megaMenu.actions.setOpenId(itemId);
           }
         },
-      },
+      }),
+      []
+    );
+
+    return {
+      itemId,
+      isOpen: megaMenu.openId === itemId,
+      actions,
     };
   }
 );

@@ -5,7 +5,7 @@ import type {ComponentChildren} from '#preact/types';
 import {propName} from '#preact/utils';
 
 import {useMegaMenuItem} from './Item';
-import {AsComponent, AsProps} from './types';
+import {AriaAttributes, AsComponent, AsProps} from './types';
 
 import {useStyles} from '../component.jss';
 
@@ -21,12 +21,19 @@ export function Title<TAs extends AsComponent = 'span'>({
   ...props
 }: TitleProps<TAs>) {
   const classes = useStyles();
-  const {actions, isOpen} = useMegaMenuItem();
+  const {actions, isOpen, itemId} = useMegaMenuItem();
+
+  const ariaAttrs: AriaAttributes = {
+    'aria-controls': itemId,
+    'aria-expanded': isOpen,
+    'aria-haspopup': 'dialog',
+  };
 
   return (
     <>
       <Comp
         role="button"
+        {...ariaAttrs}
         {...props}
         class={objStr({
           [className!]: !!className,
