@@ -9,7 +9,6 @@
  * </code>
  */
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -650,32 +649,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise} A promise that blocks until all playback media on the
-   *     page have begun their layouts.
+   * @return {!Promise}
    * @private
    */
-  waitForPlaybackMediaLayoutStart_() {
-    return this.waitForPlaybackMediaLayout_(true /* waitForLayoutStart */);
-  }
-
-  /**
-   * @return {!Promise} A promise that blocks until all playback media on the
-   *     page have completed their layouts.
-   * @private
-   */
-  waitForPlaybackMediaLayoutEnd_() {
-    return this.waitForPlaybackMediaLayout_(false /* waitForLayoutStart */);
-  }
-
-  /**
-   * @param {boolean} waitForLayoutStart Whether this method should only block
-   *     until all playback media have begun their layouts, as opposed to
-   *     having completed them.
-   * @return {!Promise} A promise that blocks until all playback media on the
-   *     page have begun or completed their layouts,  `waitForLayoutStart`.
-   * @private
-   */
-  waitForPlaybackMediaLayout_(waitForLayoutStart) {
+  waitForPlaybackMediaLayout_() {
     const mediaSet = toArray(
       this.getMediaBySelector_(Selectors.ALL_PLAYBACK_AMP_MEDIA)
     );
@@ -685,13 +662,10 @@ export class AmpStoryPage extends AMP.BaseElement {
         switch (mediaEl.tagName.toLowerCase()) {
           case 'amp-audio':
           case 'amp-video':
-            const loadSignal = waitForLayoutStart
-              ? CommonSignals_Enum.LOAD_START
-              : CommonSignals_Enum.LOAD_END;
             const signal =
               mediaEl.getAttribute('layout') === Layout_Enum.NODISPLAY
                 ? CommonSignals_Enum.BUILT
-                : loadSignal;
+                : CommonSignals_Enum.LOAD_END;
 
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(signal))
@@ -1073,16 +1047,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     if (!this.registerAllMediaPromise_) {
-      const visibilityState = this.getAmpDoc().getVisibilityState();
-      const isPreview = visibilityState === VisibilityState_Enum.PREVIEW;
-      // In preview mode, the `amp-video` layout callback does not resolve
-      // because it is blocked on requests for origin sources that cannot be
-      // made in the SERP due to privacy concerns. So, instead of indefinitely
-      // blocking registration, we register media elements at layout start.
-      const waitForPlaybackMediaLayoutPromise = isPreview
-        ? this.waitForPlaybackMediaLayoutStart_()
-        : this.waitForPlaybackMediaLayoutEnd_();
-      this.registerAllMediaPromise_ = waitForPlaybackMediaLayoutPromise.then(
+      this.registerAllMediaPromise_ = this.waitForPlaybackMediaLayout_().then(
         () => this.whenAllMediaElements_((p, e) => this.registerMedia_(p, e))
       );
     }
