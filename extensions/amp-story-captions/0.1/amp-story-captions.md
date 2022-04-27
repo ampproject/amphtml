@@ -38,27 +38,27 @@ The position of the captions is controlled by the position of the `amp-story-cap
 To allow more granular control, we expose `amp-story-captions-future` to control the style of future parts of the cue for karaoke-style captions.
 
 ```html
-amp-video-captions {
+amp-story-captions {
   color: white;
   font-size: 24px;
   padding: 16px;
 }
 
 // Words not spoken yet shown in gray.
-.amp-video-captions-future {
+.amp-story-captions-future {
   color: gray;
 }
 ```
 
 ### Style presets
 
-The optional `style-preset` attribute applies pre made styles to `amp-story-captoins`. The accepted values are `default` and `appear`.
+The optional `style-preset` attribute applies pre made styles to `amp-story-captions`. The accepted values are `default` and `appear`.
 
-Style presets are not be effected by custom CSS. Some customizable options are provided by defining CSS variables on the `amp-story-captions` element.
+Style presets are not affected by custom CSS. Some customizable options are provided by defining CSS variables on the `amp-story-captions` element.
 
 #### Default
 
-The default preset renders the captions to match the Web Stories system UI.
+The `default` preset renders the captions to match the Web Stories system UI.
 
 <amp-img src="https://user-images.githubusercontent.com/3860311/165548375-bc08a45a-e028-4f77-a46f-8c9811591529.png" layout="intrinsic" width="300" height="497">
 
@@ -82,7 +82,7 @@ Example:
 
 #### Appear
 
-Fades in text based on its [timestamp](https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API#cue_timings).
+The `appear` preset fades in text based on its [timestamp](https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API#cue_timings).
 
 <amp-img src="https://user-images.githubusercontent.com/3860311/165548414-4e0b0506-c980-4971-9b6f-a514baf24e79.png" layout="intrinsic" width="300" height="507">
 
