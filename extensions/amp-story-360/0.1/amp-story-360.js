@@ -268,9 +268,6 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {boolean} */
     this.isOnActivePage_ = false;
 
-    /** @private {?number} */
-    this.distance_ = null;
-
     /** @private {number} */
     this.sceneHeading_ = 0;
 
