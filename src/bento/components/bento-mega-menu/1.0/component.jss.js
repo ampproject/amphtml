@@ -3,6 +3,8 @@ import {createUseStyles} from 'react-jss';
 const mainNav = {
   whiteSpace: 'nowrap',
   background: 'white',
+  position: 'relative',
+  zIndex: 1000,
 
   '& > ul': {
     display: 'flex',
@@ -41,19 +43,21 @@ const parent = {
 
 const mask = {
   position: 'fixed',
-  zIndex: -1,
+  zIndex: 999,
   visibility: 'hidden',
   opacity: 0,
+
   top: 0,
   bottom: 0,
   left: 0,
   right: 0,
-  background: 'rgba(0,0,0,0.5)',
+
+  background: 'black',
   transition: 'opacity 200ms, visibility 0s 200ms',
   transitionTimingFunction: 'ease-in',
 
   '&.open': {
-    opacity: 1,
+    opacity: 0.5,
     visibility: 'visible',
     transitionDelay: 0,
     transitionTimingFunction: 'ease-out',

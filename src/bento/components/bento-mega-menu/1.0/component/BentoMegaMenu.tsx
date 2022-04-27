@@ -1,17 +1,18 @@
 import objStr from 'obj-str';
 
-import {useStyles} from '#bento/components/bento-mega-menu/1.0/component.jss';
-
 import * as Preact from '#preact';
+import {useRef} from '#preact';
 import {Children} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
-import {ComponentType} from '#preact/types';
 import type {ComponentChildren} from '#preact/types';
 
 import {Content} from './Content';
 import {Item} from './Item';
 import {Title} from './Title';
+import {useClickOutside} from './useClickOutside';
 import {MegaMenuContext, useMegaMenu} from './useMegaMenu';
+
+import {useStyles} from '../component.jss';
 
 export type BentoMegaMenuProps = {
   children?: ComponentChildren;
@@ -23,15 +24,19 @@ export type BentoMegaMenuProps = {
  */
 export function BentoMegaMenu({children, ...rest}: BentoMegaMenuProps) {
   const megaMenu = useMegaMenu();
-  const {openId} = megaMenu;
 
-  const isAnyOpen = openId !== null;
+  const isAnyOpen = megaMenu.openId !== null;
+
+  const navRef = useRef<HTMLDivElement>(null);
+  useClickOutside(navRef, () => {
+    megaMenu.actions.closeMenu();
+  });
 
   const classes = useStyles();
   return (
     <ContainWrapper {...rest}>
       <MegaMenuContext.Provider value={megaMenu}>
-        <nav class={classes.mainNav}>
+        <nav class={classes.mainNav} ref={navRef}>
           <ul>
             {Children.map(children, (child, index) => {
               return <li key={index}>{child}</li>;
