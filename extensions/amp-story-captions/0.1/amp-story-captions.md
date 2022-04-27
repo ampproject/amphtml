@@ -12,6 +12,8 @@ The `amp-story-captions` component allows custom video [captions](https://develo
 
 ## Usage
 
+The `captions-id` value on [`amp-video`](https://amp.dev/documentation/components/amp-video/) connects the two components. This must be the same value as the `id` on the `amp-story-captions` component.
+
 ```html
 <amp-story-grid-layer>
   <amp-video captions-id="captions" src="...">
@@ -25,17 +27,13 @@ The `amp-story-captions` component allows custom video [captions](https://develo
 </amp-story-grid-layer>
 ```
 
-### API
+### Layout
 
-The `captions-id` value on [`amp-video`](https://amp.dev/documentation/components/amp-video/) connects the two components. This must be the same value as the `id` on the `amp-story-captions` component.
-
-### layout
-
-`container` layout in this component is different than other components because the HTML tree does not determine its size. Instead, the text height of the dynamically loaded captions determine the size. Thus it may cause CLS issue if the caption content changes while playing the video or audio.
+`container` layout in this component is different than other components because the HTML tree does not determine its size. Instead, the text height of the dynamically loaded captions determine the size. Thus it may cause CLS if the caption content changes while playing the video or audio.
 
 ### Styling
 
-The position of captions is controlled by the position of the `amp-story-captions` element. Properties like `font-size` and `line-height` can be specified using CSS on `amp-story-captions` itself.
+The position of the captions is controlled by the position of the `amp-story-captions` element. Properties like `font-size` and `line-height` can be specified using CSS on `amp-story-captions` itself.
 
 To allow more granular control, we expose `amp-story-captions-future` to control the style of future parts of the cue for karaoke-style captions.
 
@@ -54,11 +52,11 @@ amp-video-captions {
 
 ### Style presets
 
-The optional `style-preset` attribute applies pre-created styles to `amp-story-captoins`. The accepted values are `default` and `appear`.
+The optional `style-preset` attribute applies pre made styles to `amp-story-captoins`. The accepted values are `default` and `appear`.
 
 Style presets are not be effected by custom CSS. Some customizable options are provided by defining CSS variables on the `amp-story-captions` element.
 
-#### default
+#### Default
 
 The default preset renders the captions to match the Web Stories system UI.
 
@@ -73,11 +71,16 @@ Example:
   </amp-video>
 </amp-story-grid-layer>
 <amp-story-grid-layer>
-  <amp-story-captions id="captions" style=preset="default" layout="fixed-height" height="300"></amp-story-captions>
+  <amp-story-captions
+    id="captions"
+    style-preset="default"
+    layout="fixed-height"
+    height="300">
+  </amp-story-captions>
 </amp-story-grid-layer>
 ```
 
-#### appear
+#### Appear
 
 Fades in text based on its [timestamp](https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API#cue_timings).
 
