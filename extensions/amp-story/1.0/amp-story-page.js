@@ -548,6 +548,19 @@ export class AmpStoryPage extends AMP.BaseElement {
             this.storeService_.get(StateProperty.CAPTIONS_STATE)
           );
         });
+      }).then(() => {
+        this.waitForPlaybackMediaLayoutEnd_().then(() => {  // Currently unsure whether this is being called at the right place/time
+          const allMedia = this.getAllMedia_();
+          const allVideos = allMedia.filter((el) => el.tagName === 'AMP-VIDEO');
+          const unplayedVideos = allVideos.filter(
+            (el) => el.getCurrentTime() == 0  // Is there a better way to determine whether a video has successfully played
+          );
+          this.mediaPoolPromise_.then((pool) => {
+            unplayedVideos.forEach((video) => {
+              this.registerMedia_(pool, video, true /** isReregistration */);  // I'll add re-registration logic in a following commit
+            });
+          })
+        });
       });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
