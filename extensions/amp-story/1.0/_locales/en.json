@@ -216,7 +216,7 @@
     "description": "Text displayed to users when they press a button to submit a form, and this submission succeeds."
   },
   "101": {
-    "string": "Shop Now",
+    "string": "Shop now",
     "description": "Label for the shopping CTA button."
   },
   "102": {
@@ -226,10 +226,6 @@
   "103": {
     "string": "Buy now",
     "description": "Button label prompting users to shop for something."
-  },
-  "104": {
-    "string": "reviews",
-    "description": "Button label prompting users to read about peoples assessments of an item."
   },
   "105": {
     "string": "Details",
@@ -262,5 +258,9 @@
   "112": {
     "string": "Captions off",
     "description": "Label for the captions button that indicates the captions are turned off"
+  },
+  "113": {
+    "string": "Skip",
+    "description": "Button label prompting users to exit paywall and potentially go to the next story."
   }
 }

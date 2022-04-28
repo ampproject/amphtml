@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.213 */
+/** Version: 0.1.22.215 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -250,6 +250,149 @@ function warn(var_args) {
 }
 
 /**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} message The assertion message
+ * @param {...*} var_args Arguments substituted into %s in the message.
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ */
+function assert(shouldBeTrueish, message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    message = message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
+
+function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Character mapping from base64url to base64.
+ * @const {!Object<string, string>}
+ */
+const base64UrlDecodeSubs = {'-': '+', '_': '/'};
+
+/**
+ * Converts a string which holds 8-bit code points, such as the result of atob,
+ * into a Uint8Array with the corresponding bytes.
+ * If you have a string of characters, you probably want to be using utf8Encode.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function stringToBytes(str) {
+  const bytes = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str.charCodeAt(i);
+    assert(charCode <= 255, 'Characters must be in range [0,255]');
+    bytes[i] = charCode;
+  }
+  return bytes;
+}
+
+/**
+ * Converts a 8-bit bytes array into a string
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function bytesToString(bytes) {
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
+  const array = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+  return array.join('');
+}
+
+/**
+ * Interpret a byte array as a UTF-8 string.
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function utf8DecodeSync(bytes) {
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  const asciiString = bytesToString(new Uint8Array(bytes));
+  return decodeURIComponent(escape(asciiString));
+}
+
+/**
+ * Converts a string which is in base64url encoding into a Uint8Array
+ * containing the decoded value.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function base64UrlDecodeToBytes(str) {
+  const encoded = atob(str.replace(/[-_]/g, (ch) => base64UrlDecodeSubs[ch]));
+  return stringToBytes(encoded);
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -279,6 +422,89 @@ function warn(var_args) {
  */
 function parseJson(json) {
   return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
+}
+
+/**
+ * Parses the given `json` string without throwing an exception if not valid.
+ * Returns `undefined` if parsing fails.
+ * Returns the `Object` corresponding to the JSON string when parsing succeeds.
+ * @param {*} json JSON string to parse
+ * @param {function(!Error)=} onFailed Optional function that will be called
+ *     with the error if parsing fails.
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
+ */
+function tryParseJson(json, onFailed) {
+  try {
+    return parseJson(json);
+  } catch (e) {
+    if (onFailed) {
+      onFailed(e);
+    }
+    return undefined;
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Provides helper methods to decode and verify JWT tokens.
+ */
+class JwtHelper {
+  constructor() {}
+
+  /**
+   * Decodes JWT token and returns its payload.
+   * @param {string} encodedToken
+   * @return {?JsonObject|undefined}
+   */
+  decode(encodedToken) {
+    return this.decodeInternal_(encodedToken).payload;
+  }
+
+  /**
+   * @param {string} encodedToken
+   * @return {!JwtTokenInternalDef}
+   * @private
+   */
+  decodeInternal_(encodedToken) {
+    // See https://jwt.io/introduction/
+    /**
+     * Throws error about invalid token.
+     */
+    function invalidToken() {
+      throw new Error(`Invalid token: "${encodedToken}"`);
+    }
+
+    // Encoded token has three parts: header.payload.sig
+    // Note! The padding is not allowed by JWT spec:
+    // http://self-issued.info/docs/draft-goland-json-web-token-00.html#rfc.section.5
+    const parts = encodedToken.split('.');
+    if (parts.length != 3) {
+      invalidToken();
+    }
+    const headerUtf8Bytes = base64UrlDecodeToBytes(parts[0]);
+    const payloadUtf8Bytes = base64UrlDecodeToBytes(parts[1]);
+    return {
+      header: tryParseJson(utf8DecodeSync(headerUtf8Bytes), invalidToken),
+      payload: tryParseJson(utf8DecodeSync(payloadUtf8Bytes), invalidToken),
+      verifiable: `${parts[0]}.${parts[1]}`,
+      sig: parts[2],
+    };
+  }
 }
 
 /**
@@ -980,9 +1206,6 @@ const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
 /** ID for the Regwall title element. */
 const REGWALL_TITLE_ID = 'swg-regwall-title';
 
-/** URL parameter to append in the redirect mode for 3P Sign-in.  */
-const REDIRECT_SOURCE_URL_PARAM = 'source';
-
 /**
  * HTML for the metering regwall dialog, where users can sign in with Google.
  * The script creates a dialog based on this HTML.
@@ -1376,10 +1599,10 @@ class GaaMeteringRegwall {
    * This method opens a metering regwall dialog,
    * where users can sign in with Google.
    * @nocollapse
-   * @param {{ caslUrl: string, clientId: string }} params
+   * @param {{ caslUrl: string, clientId: string, rawJwt: (boolean|null) }} params
    * @return {!Promise<!GoogleIdentityV1>}
    */
-  static showWithNativeRegistrationButton({caslUrl, clientId}) {
+  static showWithNativeRegistrationButton({caslUrl, clientId, rawJwt = true}) {
     logEvent({
       showcaseEvent: ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL,
       isFromUserAction: false,
@@ -1394,7 +1617,11 @@ class GaaMeteringRegwall {
     return GaaMeteringRegwall.createNativeRegistrationButton({clientId})
       .then((jwt) => {
         GaaMeteringRegwall.remove();
-        return jwt;
+        if (rawJwt) {
+          return jwt;
+        } else {
+          return new JwtHelper().decode(jwt.credential);
+        }
       })
       .catch((err) => {
         // Close the Regwall, since the flow failed.
@@ -2008,12 +2235,7 @@ class GaaGoogle3pSignInButton {
     buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
     buttonEl.onclick = () => {
       if (redirectMode) {
-        const parameterizedAuthUrl = new URL(authorizationUrl);
-        parameterizedAuthUrl.searchParams.append(
-          REDIRECT_SOURCE_URL_PARAM,
-          self.parent.location.href
-        );
-        self.open(parameterizedAuthUrl, '_parent');
+        self.open(authorizationUrl, '_parent');
       } else {
         self.open(authorizationUrl);
       }

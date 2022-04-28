@@ -609,7 +609,9 @@ describes.realWin(
       it('should pause the story when tab becomes inactive', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
-        env.sandbox.stub(ampdoc, 'isVisible').returns(false);
+        env.sandbox
+          .stub(ampdoc, 'getVisibilityState')
+          .returns(VisibilityState_Enum.PRERENDER);
         const onVisibilityChangedStub = env.sandbox.stub(
           ampdoc,
           'onVisibilityChanged'

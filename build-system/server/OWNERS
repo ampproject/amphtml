@@ -6,9 +6,5 @@
     {
       owners: [{name: 'ampproject/wg-infra'}],
     },
-    {
-      pattern: 'lazy-build.js',
-      owners: [{name: 'rsimha', notify: true}],
-    },
   ],
 }

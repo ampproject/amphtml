@@ -139,7 +139,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Triggers template update if opening without active product data.
-   * This happens either when the "Shop Now" CTA is clicked or when a
+   * This happens either when the "Shop now" CTA is clicked or when a
    * shopping tag is clicked.
    * @param {boolean} isOpen
    * @private
@@ -392,25 +392,32 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             </span>
           </div>
           {activeProductData.aggregateRating && (
-            <span class="i-amphtml-amp-story-shopping-pdp-reviews">
-              {activeProductData.aggregateRating.ratingValue} (
+            // Wrapper prevents anchor from spanning entire width of container.
+            // This prevents accidental clicks.
+            <div>
               <a
-                class="i-amphtml-amp-story-shopping-pdp-reviews-link"
+                class="i-amphtml-amp-story-shopping-pdp-reviews"
                 href={relativeToSourceUrl(
                   activeProductData.aggregateRating.reviewUrl,
                   this.element
                 )}
                 target="_top"
               >
-                {activeProductData.aggregateRating.reviewCount + ' '}
+                <span>{activeProductData.aggregateRating.ratingValue}</span>
                 <span
-                  i-amphtml-i18n-text-content={
-                    LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL
-                  }
+                  class="i-amphtml-amp-story-shopping-pdp-reviews-stars"
+                  style={`--i-amphtml-star-rating-width: ${
+                    // Creates a value between 0 and 100 in increments of 10.
+                    Math.round(
+                      activeProductData.aggregateRating.ratingValue * 2
+                    ) * 10
+                  }%`}
                 ></span>
+                <span class="i-amphtml-amp-story-shopping-pdp-reviews-count">
+                  {activeProductData.aggregateRating.reviewCount}
+                </span>
               </a>
-              )
-            </span>
+            </div>
           )}
           <a
             class="i-amphtml-amp-story-shopping-pdp-cta"
