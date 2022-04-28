@@ -40,6 +40,7 @@ To use RTC, you must meet the following requirements:
 -   Mediasquare
 -   OpenX
 -   PubMatic OpenWrap
+-   [PubWise](https://pubwise.io)
 -   Purch
 -   Rubicon
 -   Salesforce
