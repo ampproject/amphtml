@@ -953,8 +953,9 @@ export class AmpStory extends AMP.BaseElement {
     this.setThemeColor_();
 
     const storyLayoutPromise = Promise.all([
-      this.getAmpDoc().whenFirstVisible(), // Pauses execution during prerender.
       this.initializePages_(),
+      // Pauses execution during prerender.
+      this.getAmpDoc().whenFirstPreviewedOrVisible(),
     ])
       .then(() => {
         this.handleConsentExtension_();
@@ -1695,7 +1696,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    this.getAmpDoc().isVisible() ? this.resume_() : this.pause_();
+    const vState = this.getAmpDoc().getVisibilityState();
+    const isPreview = vState === VisibilityState_Enum.PREVIEW;
+    const isVisible = vState === VisibilityState_Enum.VISIBLE;
+    isPreview || isVisible ? this.resume_() : this.pause_();
   }
 
   /**
