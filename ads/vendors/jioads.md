@@ -59,9 +59,7 @@
 ```
 ## Configuration
 
-For configuration semantics, [contact Jioads](https://jioads.jio.com).
-
-For details on the configuration semantics, please contact JIO ADS
+For details on the configuration semantics, please contact JIOADS https://jioads.jio.com
 
 ### Required parameters
 
