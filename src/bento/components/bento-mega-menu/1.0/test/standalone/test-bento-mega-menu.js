@@ -12,14 +12,24 @@ import {waitFor} from '#testing/helpers/service';
 describes.realWin('bento-mega-menu:1.0', {amp: false}, (env) => {
   let win;
   let html;
-  let element;
+
+  async function mount(element) {
+    win.document.body.appendChild(element);
+    await element.getApi();
+    return element;
+  }
 
   beforeEach(async () => {
     win = env.win;
     html = htmlFor(win.document);
-    element = html`
+    defineBentoElement('bento-mega-menu', BentoMegaMenu, win);
+    // adoptStyles(win, CSS);
+  });
+
+  it('should render expanded and collapsed sections', async () => {
+    const element = await mount(html`
       <bento-mega-menu>
-        <section expanded id="section1">
+        <section id="section1">
           <h1>header1</h1>
           <div>content1</div>
         </section>
@@ -32,15 +42,10 @@ describes.realWin('bento-mega-menu:1.0', {amp: false}, (env) => {
           <div>content3</div>
         </section>
       </bento-mega-menu>
-    `;
-    defineBentoElement('bento-mega-menu', BentoMegaMenu, win);
-    // adoptStyles(win, CSS);
-    win.document.body.appendChild(element);
-    await element.getApi();
-  });
-
-  it('should render expanded and collapsed sections', () => {
+    `);
     const sections = element.children;
+    debugger;
+
     /*
     expect(sections[0]).to.have.attribute('expanded');
     expect(
