@@ -44,13 +44,11 @@ export function jioads(global, data) {
       const container = document.createElement('div');
       container.classList.add('jads-flex-center', 'jads-f-align-center');
       container.setAttribute('id', 'jads_amp_ad');
-      setStyle(
-        container,
+      container.setStyle(
         'width',
         `${global.context.initialIntersection.boundingClientRect.width}px`
       );
-      setStyle(
-        container,
+      container.setStyle(
         'height',
         `${global.context.initialIntersection.boundingClientRect.height}px`
       );
