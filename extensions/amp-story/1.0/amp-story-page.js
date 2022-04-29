@@ -551,9 +551,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           });
         })
         .then(() => {
-          const visibilityState = this.getAmpDoc().getVisibilityState();
-          const isPreview = visibilityState === VisibilityState_Enum.PREVIEW;
-          if (!isPreview) {
+          if (!this.storyIsBeingPreviewed_()) {
             // DESCRIPTION
             return;
           }
@@ -1100,13 +1098,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     if (!this.registerAllMediaPromise_) {
-      const visibilityState = this.getAmpDoc().getVisibilityState();
-      const isPreview = visibilityState === VisibilityState_Enum.PREVIEW;
       // In preview mode, the `amp-video` layout callback does not resolve
       // because it is blocked on requests for origin sources that cannot be
       // made in the SERP due to privacy concerns. So, instead of indefinitely
       // blocking registration, we register media elements at layout start.
-      const waitForPlaybackMediaLayoutPromise = isPreview
+      const waitForPlaybackMediaLayoutPromise = this.storyIsBeingPreviewed_()
         ? this.waitForPlaybackMediaLayoutStart_()
         : this.waitForPlaybackMediaLayoutEnd_();
       this.registerAllMediaPromise_ = waitForPlaybackMediaLayoutPromise.then(
@@ -1151,6 +1147,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         /** @type {!./media-pool.DomElementDef} */ (mediaEl)
       );
     }
+  }
+
+  /**
+   * @returns {boolean} Whether this page's story is currently being previewed.
+   * @private
+   */
+  storyIsBeingPreviewed_() {
+    const visibilityState = this.getAmpDoc().getVisibilityState();
+    return visibilityState === VisibilityState_Enum.PREVIEW;
   }
 
   /**
