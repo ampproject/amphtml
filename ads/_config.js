@@ -101,6 +101,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://servedbyadbutler.com/app.js',
   },
 
+  'adenza': {
+    renderStartImplemented: true,
+  },
+
   'adform': {},
 
   'adfox': {
