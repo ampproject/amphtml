@@ -19,12 +19,12 @@ export function jioads(global, data) {
   writeScript(
     global,
     'https://mercury.akamaized.net/jioads/websdk/amp/jioAds.js?rnd=' +
-    Math.random()
+      Math.random()
   );
   loadScript(
     global,
     'https://mercury.akamaized.net/jioads/websdk/amp/ampwrapper.js?rnd=' +
-    Math.random(),
+      Math.random(),
     () => {
       let refresh = '';
       let adMetaData = '';
@@ -44,10 +44,14 @@ export function jioads(global, data) {
       const container = document.createElement('div');
       container.classList.add('jads-flex-center', 'jads-f-align-center');
       container.setAttribute('id', 'jads_amp_ad');
-      container.setStyle('width',
-            `${global.context.initialIntersection.boundingClientRect.width}px`);
-      container.setStyle('height',
-            `${global.context.initialIntersection.boundingClientRect.height}px`);
+      container.setStyle(
+            'width',
+            `${global.context.initialIntersection.boundingClientRect.width}px`
+            );
+      container.setStyle(
+            'height',
+            `${global.context.initialIntersection.boundingClientRect.height}px`
+            );
       html = `${video} <ins id="${global.context.container}"
        data-adspot-key="${data['adspot']}"
        data-source="${data['pkgName']}"
@@ -61,13 +65,13 @@ export function jioads(global, data) {
   );
   // addon observation on entering/leaving the view when scroll vertically and horizontally
   window.context.observeIntersection(function (newrequest) {
-      /** @type {!Array} */
-      (newrequest).forEach(function (data) {
-          if (data.intersectionRatio >= 0.5) {
-              global.context.initialViewAbility = true;
-          } else {
-              global.context.initialViewAbility = false;
-          }
-      });
+    /** @type {!Array} */
+    (newrequest).forEach(function (data) {
+        if (data.intersectionRatio >= 0.5) {
+            global.context.initialViewAbility = true;
+        } else {
+            global.context.initialViewAbility = false;
+        }
+    });
   });
 }
