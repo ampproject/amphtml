@@ -551,28 +551,17 @@ export class AmpStoryPage extends AMP.BaseElement {
           });
         })
         .then(() => {
-          if (!this.storyIsBeingPreviewed_()) {
-            // DESCRIPTION
-            return;
-          }
-
-          // DESCRIPTION
-          this.waitForPlaybackMediaLayoutEnd_().then(() => {
-            const videos = this.getAllMedia_().filter(
-              (el) => el.tagName === 'VIDEO'
-            );
-            const unplayedVideos = videos.filter(
-              (video) => video.readyState < /* HAVE_CURRENT_DATA */ 2
-            );
-            this.mediaPoolPromise_.then((pool) => {
-              const playPromises = unplayedVideos.map((video) => {
-                return this.reregisterMedia_(pool, video).then(() => {
-                  return this.playMedia_(pool, video);
-                });
-              });
-              return Promise.all(playPromises);
+          // In the PREVIEW state, a video can only use cached sources. If it
+          // fails to play due to any issue with the cached sources, we
+          // reregister the video once it has obtained its origin sources.
+          if (this.storyIsBeingPreviewed_()) {
+            // We first block the reregistration on video layout end because
+            // that is the point at which the story has entered the VISIBLE
+            // state and its origin sources have been added.
+            return this.waitForPlaybackMediaLayoutEnd_().then(() => {
+              return this.reregisterUnplayedVideos_();
             });
-          });
+          }
         });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
@@ -580,6 +569,26 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
+  }
+
+  /**
+   * @return {!Promise} A promise that resolves when all unplayed videos have
+   *     been reregistered and played.
+   * @private
+   */
+  reregisterUnplayedVideos_() {
+    const videos = this.getAllMedia_().filter((el) => el.tagName === 'VIDEO');
+    const unplayedVideos = videos.filter(
+      (video) => video.readyState < /* HAVE_CURRENT_DATA */ 2
+    );
+    return this.mediaPoolPromise_.then((pool) => {
+      const playPromises = unplayedVideos.map((video) => {
+        return this.reregisterMedia_(pool, video).then(() => {
+          return this.playMedia_(pool, video);
+        });
+      });
+      return Promise.all(playPromises);
+    });
   }
 
   /** @override */
@@ -1150,7 +1159,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @returns {boolean} Whether this page's story is currently being previewed.
+   * @return {boolean} Whether this page's story is currently being previewed.
    * @private
    */
   storyIsBeingPreviewed_() {
