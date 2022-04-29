@@ -44,14 +44,16 @@ export function jioads(global, data) {
       const container = document.createElement('div');
       container.classList.add('jads-flex-center', 'jads-f-align-center');
       container.setAttribute('id', 'jads_amp_ad');
-      container.setStyle(
-            'width',
-            `${global.context.initialIntersection.boundingClientRect.width}px`
-            );
-      container.setStyle(
-            'height',
-            `${global.context.initialIntersection.boundingClientRect.height}px`
-            );
+      setStyle(
+        container,
+        'width',
+        `${global.context.initialIntersection.boundingClientRect.width}px`
+      );
+      setStyle(
+        container,
+        'height',
+        `${global.context.initialIntersection.boundingClientRect.height}px`
+      );
       html = `${video} <ins id="${global.context.container}"
        data-adspot-key="${data['adspot']}"
        data-source="${data['pkgName']}"
@@ -67,11 +69,11 @@ export function jioads(global, data) {
   window.context.observeIntersection(function (newrequest) {
     /** @type {!Array} */
     (newrequest).forEach(function (data) {
-        if (data.intersectionRatio >= 0.5) {
-            global.context.initialViewAbility = true;
-        } else {
-            global.context.initialViewAbility = false;
-        }
+      if (data.intersectionRatio >= 0.5) {
+        global.context.initialViewAbility = true;
+      } else {
+        global.context.initialViewAbility = false;
+      }
     });
   });
 }
