@@ -664,17 +664,30 @@ export class MediaPool {
   }
 
   /**
+   * DESCRIPTION
+   * Reregisters the specified element to be usable by the media pool. This
+   * @param {!DomElementDef} domMediaEl The media element to be reregistered.
+   * @return {!Promise} A promise that is resolved when the element has been
+   *     successfully reregistered, or rejected otherwise.
+   */
+  reregister(domMediaEl) {
+    return this.register(domMediaEl, true /** isReregistration */);
+  }
+
+  /**
+   * DESCRIPTION
    * Registers the specified element to be usable by the media pool.  Elements
    * should be registered as early as possible, in order to prevent them from
-   * being played while not managed by the media pool.  If the media element is
-   * already registered, this is a no-op.  Registering elements from within the
+   * being played while not managed by the media pool. If the media element is
+   * already registered with, this is a no-op.  Registering elements from within the
    * pool is not allowed, and will also be a no-op.
    * @param {!DomElementDef} domMediaEl The media element to be
    *     registered.
+   * @param {boolean} isReregistration
    * @return {!Promise} A promise that is resolved when the element has been
    *     successfully registered, or rejected otherwise.
    */
-  register(domMediaEl) {
+  register(domMediaEl, isReregistration = false) {
     const parent = domMediaEl.parentNode;
     if (parent && parent.signals) {
       this.trackAmpElementToBless_(/** @type {!AmpElement} */ (parent));
@@ -693,6 +706,13 @@ export class MediaPool {
 
     const id = placeholderEl.id || this.createPlaceholderElementId_();
     if (this.sources_[id] && this.placeholderEls_[id]) {
+      // DESCRIPTION
+      if (isReregistration) {
+        const sources = Sources.removeFrom(this.win_, placeholderEl);
+        this.sources_[id] = sources;
+        return this.resetPoolMediaElementSource_(placeholderEl);
+      }
+
       // This media element is already registered.
       return Promise.resolve();
     }

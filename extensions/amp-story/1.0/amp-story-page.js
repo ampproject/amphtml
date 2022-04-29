@@ -518,50 +518,64 @@ export class AmpStoryPage extends AMP.BaseElement {
     const registerAllPromise = this.registerAllMedia_();
 
     if (this.isActive()) {
-      registerAllPromise.then(() => {
-        if (this.state_ === PageState.NOT_ACTIVE) {
-          return;
-        }
-        this.signals()
-          .whenSignal(CommonSignals_Enum.LOAD_END)
-          .then(() => {
-            if (this.state_ == PageState.PLAYING) {
-              this.advancement_.start();
-            }
-          });
-        this.preloadAllMedia_().then(() => {
+      registerAllPromise
+        .then(() => {
           if (this.state_ === PageState.NOT_ACTIVE) {
             return;
           }
-          this.startMeasuringAllVideoPerformance_();
-          this.startListeningToVideoEvents_();
-          // iOS 14.2 and 14.3 requires play to be called before unmute
-          this.playAllMedia_().then(() => {
-            if (
-              !this.storeService_.get(StateProperty.MUTED_STATE) &&
-              this.state_ !== PageState.NOT_ACTIVE
-            ) {
-              this.unmuteAllMedia();
-            }
-          });
-          this.toggleCaptions_(
-            this.storeService_.get(StateProperty.CAPTIONS_STATE)
-          );
-        });
-      }).then(() => {
-        this.waitForPlaybackMediaLayoutEnd_().then(() => {  // Currently unsure whether this is being called at the right place/time
-          const allMedia = this.getAllMedia_();
-          const allVideos = allMedia.filter((el) => el.tagName === 'AMP-VIDEO');
-          const unplayedVideos = allVideos.filter(
-            (el) => el.getCurrentTime() == 0  // Is there a better way to determine whether a video has successfully played
-          );
-          this.mediaPoolPromise_.then((pool) => {
-            unplayedVideos.forEach((video) => {
-              this.registerMedia_(pool, video, true /** isReregistration */);  // I'll add re-registration logic in a following commit
+          this.signals()
+            .whenSignal(CommonSignals_Enum.LOAD_END)
+            .then(() => {
+              if (this.state_ == PageState.PLAYING) {
+                this.advancement_.start();
+              }
             });
-          })
+          this.preloadAllMedia_().then(() => {
+            if (this.state_ === PageState.NOT_ACTIVE) {
+              return;
+            }
+            this.startMeasuringAllVideoPerformance_();
+            this.startListeningToVideoEvents_();
+            // iOS 14.2 and 14.3 requires play to be called before unmute
+            this.playAllMedia_().then(() => {
+              if (
+                !this.storeService_.get(StateProperty.MUTED_STATE) &&
+                this.state_ !== PageState.NOT_ACTIVE
+              ) {
+                this.unmuteAllMedia();
+              }
+            });
+            this.toggleCaptions_(
+              this.storeService_.get(StateProperty.CAPTIONS_STATE)
+            );
+          });
+        })
+        .then(() => {
+          const visibilityState = this.getAmpDoc().getVisibilityState();
+          const isPreview = visibilityState === VisibilityState_Enum.PREVIEW;
+          if (!isPreview) {
+            // DESCRIPTION
+            return;
+          }
+
+          // DESCRIPTION
+          this.waitForPlaybackMediaLayoutEnd_().then(() => {
+            const videos = this.getAllMedia_().filter(
+              (el) => el.tagName === 'VIDEO'
+            );
+            const unplayedVideos = videos.filter(
+              (video) => video.readyState < /* HAVE_CURRENT_DATA */ 2
+            );
+            this.mediaPoolPromise_.then((pool) => {
+              const playPromises = unplayedVideos.map((video) => {
+                return this.reregisterMedia_(pool, video).then(() => {
+                  return this.playMedia_(pool, video);
+                });
+              });
+              return Promise.all(playPromises);
+            });
+          });
         });
-      });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
       this.checkPageHasCaptions_();
@@ -1116,6 +1130,24 @@ export class AmpStoryPage extends AMP.BaseElement {
       return Promise.resolve();
     } else {
       return mediaPool.register(
+        /** @type {!./media-pool.DomElementDef} */ (mediaEl)
+      );
+    }
+  }
+
+  /**
+   * Reregisters the given media.
+   * @param {!./media-pool.MediaPool} mediaPool
+   * @param {!Element} mediaEl
+   * @return {!Promise} Promise that resolves after the media is reregistered.
+   * @private
+   */
+  reregisterMedia_(mediaPool, mediaEl) {
+    if (this.isBotUserAgent_) {
+      // No-op.
+      return Promise.resolve();
+    } else {
+      return mediaPool.reregister(
         /** @type {!./media-pool.DomElementDef} */ (mediaEl)
       );
     }
