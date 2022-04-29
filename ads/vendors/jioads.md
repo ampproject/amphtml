@@ -57,9 +57,10 @@
   <div fallback>Something went wrong in ad load</div>
   </amp-ad>
 ```
+
 ## Configuration
 
-For details on the configuration semantics, please contact JIOADS https://jioads.jio.com
+For details on the configuration semantics, please contact JioAds
 
 ### Required parameters
 
@@ -67,6 +68,7 @@ For details on the configuration semantics, please contact JIOADS https://jioads
 -   `data-pkg-name`: PACKAGE NAME (publisher will get from jioads campaign dashboard as unique for each ad)
 
 ### Optional parameters
+
 -   `data-video-ad`: VIDEO AD boolean, only for instream ad (publisher will get from jioads campaign dashboard and decide taht want to publish video)
 -   `data-refersh-rate`: REFRESH RATE integer seconds, defaut refresh rate is 30 seconds, manually set should be greater than 30 (publisher can set refresh rate in seconds, so ad will be refreshed according to given seconds)
 -   `data-ad-meta-data`: AD META DATA json format (publisher can set json data like category etc, full example on campaign dashboard)
