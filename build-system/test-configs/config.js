@@ -187,6 +187,7 @@ const linkCheckGlobs = [
   '.github/ISSUE_TEMPLATE/*.yml',
   '**/*.md',
   '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
+  '!.github/*.md',
 ];
 
 /**

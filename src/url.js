@@ -5,6 +5,8 @@ import {hasOwn} from '#core/types/object';
 import {endsWith} from '#core/types/string';
 import {INVALID_PROTOCOLS, parseQueryString} from '#core/types/string/url';
 
+import {Services} from '#service';
+
 import {userAssert} from '#utils/log';
 
 import * as urls from './config/urls';
@@ -545,6 +547,20 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
     return new URL(relativeUrlString, baseUrl.href).toString();
   }
   return resolveRelativeUrlFallback_(relativeUrlString, baseUrl);
+}
+
+/**
+ * Returns absolute URL resolved based on the relative URL and the element.
+ * @param {string} relativeUrlString
+ * @param {!element} element
+ * @return {string}
+ */
+export function relativeToSourceUrl(relativeUrlString, element) {
+  const {sourceUrl} = Services.documentInfoForDoc(element);
+  return Services.urlForDoc(element).resolveRelativeUrl(
+    relativeUrlString,
+    sourceUrl
+  );
 }
 
 /**

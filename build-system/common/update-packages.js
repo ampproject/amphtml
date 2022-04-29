@@ -190,7 +190,7 @@ function patchPreact() {
 
 /**
  * Deletes the map file for rrule, which breaks closure compiler.
- * TODO(rsimha): Remove this workaround after a fix is merged for
+ * TODO(wg-infra): Remove this workaround after a fix is merged for
  * https://github.com/google/closure-compiler/issues/3720.
  */
 function removeRruleSourcemap() {

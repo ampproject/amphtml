@@ -9,6 +9,9 @@ import {pure} from '#core/types/pure';
  */
 const env = (key) => (self.AMP_CONFIG ? self.AMP_CONFIG[key] : null);
 
+// Important: Make sure that every exported symbol has the same name as in
+// `global.AMP.config.urls` (see runtime.js for reference)
+
 // Important: Make sure to wrap every exported symbol with `pure()`. This allows
 // this module to be dead-code-eliminated.
 
