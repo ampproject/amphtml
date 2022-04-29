@@ -56,7 +56,7 @@ export function jioads(global, data) {
        data-adspot-key="${data['adspot']}"
        data-source="${data['pkgName']}"
        ${refresh} ${adMetaData} ${videocontainer}></ins>`;
-      container.innerHTML = html;
+      container./*OK*/ innerHTML = html;
       global.document.getElementById('c').appendChild(container);
     },
     () => {
