@@ -1,5 +1,8 @@
 import {loadScript, validateData, writeScript} from '#3p/3p';
 
+import {setStyle} from '#core/dom/style';
+import {hasOwn} from '#core/types/object';
+
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -30,13 +33,13 @@ export function jioads(global, data) {
       let adMetaData = '';
       let video = '';
       let videocontainer = '';
-      if (data.hasOwn('refreshRate')) {
+      if (hasOwn(data, 'refreshRate')) {
         refresh = ` data-refresh-rate="${data['refreshRate']}"`;
       }
-      if (data.hasOwn('adMetaData')) {
+      if (hasOwn(data, 'adMetaData')) {
         adMetaData = ` data-adMetaData="${data['adMetaData']}"`;
       }
-      if (data.hasOwn('videoAd') && data['videoAd'] == '1') {
+      if (hasOwn(data, 'videoAd') && data['videoAd'] == '1') {
         video = `<div id="instreamContainer" style="width:100%;"></div>`;
         videocontainer = ` data-container-id="instreamContainer"`;
       }
@@ -44,11 +47,13 @@ export function jioads(global, data) {
       const container = document.createElement('div');
       container.classList.add('jads-flex-center', 'jads-f-align-center');
       container.setAttribute('id', 'jads_amp_ad');
-      container.setStyle(
+      setStyle(
+        container,
         'width',
         `${global.context.initialIntersection.boundingClientRect.width}px`
       );
-      container.setStyle(
+      setStyle(
+        container,
         'height',
         `${global.context.initialIntersection.boundingClientRect.height}px`
       );

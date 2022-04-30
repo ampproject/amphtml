@@ -150,7 +150,6 @@ import {insticator} from '#ads/vendors/insticator';
 import {invibes} from '#ads/vendors/invibes';
 import {iprom} from '#ads/vendors/iprom';
 import {ix} from '#ads/vendors/ix';
-import {jioads} from '#ads/vendors/jioads';
 import {jixie} from '#ads/vendors/jixie';
 import {jubna} from '#ads/vendors/jubna';
 import {kargo} from '#ads/vendors/kargo';
