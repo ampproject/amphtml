@@ -681,7 +681,7 @@ export class MediaPool {
    * should be registered as early as possible, in order to prevent them from
    * being played while not managed by the media pool. Registering elements
    * from within the pool is not allowed, and will also be a no-op.
-   * 
+   *
    * If the media element is already registered and `isReregistration` is true,
    * then the media element will be loaded. However, if the element is
    * registered and `isReregistration` is false, then this is a no-op.
