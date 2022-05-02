@@ -44,6 +44,8 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     this.dataId = null;
 
+    this.dataPlayer = null;
+
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
   }
@@ -67,6 +69,12 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.dataId = userAssert(
       el.getAttribute('data-id'),
       'The data-id attribute is required for <amp-3q-player> %s',
+      el
+    );
+
+    this.dataPlayer = userAssert(
+      el.getAttribute('data-player'),
+      'The data-player attribute is required for <amp-3q-player> %s',
       el
     );
 
@@ -103,13 +111,9 @@ class Amp3QPlayer extends AMP.BaseElement {
       dev().assertString(this.dataId) +
       // Autoplay is handled by VideoManager
       '?autoplay=false&amp=true';
-
-    explicitParamsAttributes.forEach((explicitParam) => {
-      const val = this.element.getAttribute(`data-${explicitParam}`);
-      if (val) {
-        iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
-      }
-    });
+    if (this.dataPlayer) {
+      iframeSrc += '&player=' + this.dataPlayer;
+    }
 
     return iframeSrc;
   }
