@@ -437,7 +437,6 @@ register('insticator', insticator);
 register('invibes', invibes);
 register('iprom', iprom);
 register('ix', ix);
-register('jioads', jioads);
 register('jixie', jixie);
 register('jubna', jubna);
 register('kargo', kargo);
