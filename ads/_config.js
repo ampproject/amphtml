@@ -693,7 +693,9 @@ const adConfig = jsonConfiguration({
   'kiosked': {
     renderStartImplemented: true,
   },
-
+  'jioads': {
+    renderStartImplemented: true,
+  },
   'jixie': {
     prefetch: ['https://scripts.jixie.media/jxamp.min.js'],
     clientIdScope: '__jxamp',
