@@ -664,8 +664,10 @@ export class MediaPool {
   }
 
   /**
-   * DESCRIPTION
    * Reregisters the specified element to be usable by the media pool. This
+   * is useful in cases where the element's sources have updated since the
+   * previous registration and a reload of the element using these new sources
+   * is desired.
    * @param {!DomElementDef} domMediaEl The media element to be reregistered.
    * @return {!Promise} A promise that is resolved when the element has been
    *     successfully reregistered, or rejected otherwise.
@@ -675,12 +677,14 @@ export class MediaPool {
   }
 
   /**
-   * DESCRIPTION
    * Registers the specified element to be usable by the media pool.  Elements
    * should be registered as early as possible, in order to prevent them from
-   * being played while not managed by the media pool. If the media element is
-   * already registered with, this is a no-op.  Registering elements from within the
-   * pool is not allowed, and will also be a no-op.
+   * being played while not managed by the media pool. Registering elements
+   * from within the pool is not allowed, and will also be a no-op.
+   * 
+   * If the media element is already registered and `isReregistration` is true,
+   * then the media element will be loaded. However, if the element is
+   * registered and `isReregistration` is false, then this is a no-op.
    * @param {!DomElementDef} domMediaEl The media element to be
    *     registered.
    * @param {boolean} isReregistration
@@ -706,11 +710,13 @@ export class MediaPool {
 
     const id = placeholderEl.id || this.createPlaceholderElementId_();
     if (this.sources_[id] && this.placeholderEls_[id]) {
-      // DESCRIPTION
+      // In the case of a reregistration, `UpdateSourcesTask` and `LoadTask`
+      // are used to load the element using its sources (which may have changed
+      // since the previous registration).
       if (isReregistration) {
         const sources = Sources.removeFrom(this.win_, placeholderEl);
         this.sources_[id] = sources;
-        return this.resetPoolMediaElementSource_(placeholderEl);
+        return this.resetPoolMediaElementSource_(placeholderEl, sources);
       }
 
       // This media element is already registered.
