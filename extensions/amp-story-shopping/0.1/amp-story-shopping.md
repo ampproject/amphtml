@@ -23,7 +23,7 @@ scripts:
 
 # amp-story-shopping
 
-<amp-img alt="An example of amp story shopping tag in each type of configuration" src="https://user-images.githubusercontent.com/3860311/152416815-61a63a88-76c0-4ae8-9300-a7ad277dbe7a.jpg" layout="intrinsic" width="806" height="428"></amp-img>
+<amp-img alt="An example of user flow within amp story shopping" src="https://user-images.githubusercontent.com/3860311/152416815-61a63a88-76c0-4ae8-9300-a7ad277dbe7a.jpg" layout="intrinsic" width="806" height="428"></amp-img>
 
 Use `amp-story-shopping` to create configurable, templated shopping experiences within [amp-story](https://amp.dev/documentation/components/amp-story/?format=stories).
 
@@ -58,7 +58,7 @@ They are positioned [`absolute`](https://developer.mozilla.org/en-US/docs/Web/CS
 ```
 
 Example of positioning an [`amp-story-shopping-tag`](#amp-story-shopping-tag) and testing responsiveness:
-<amp-img alt="An example of positioning an `amp-story-shopping-tag` and teseting responsiveness" src="https://user-images.githubusercontent.com/3860311/155751130-558b5ab6-1db3-4ca7-b913-4be4761fdb29.gif" layout="intrinsic" width="840" height="543"></amp-img>
+<amp-img alt="An example of positioning an amp-story-shopping-tag and testing responsiveness" src="https://user-images.githubusercontent.com/3860311/155751130-558b5ab6-1db3-4ca7-b913-4be4761fdb29.gif" layout="intrinsic" width="840" height="543"></amp-img>
 
 ### `amp-story-shopping-tag` attributes
 
