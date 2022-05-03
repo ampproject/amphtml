@@ -1,10 +1,11 @@
 import objStr from 'obj-str';
 
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {removeChildren} from '#core/dom';
 import {escapeCssSelectorNth} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
 import {scopedQuerySelector} from '#core/dom/query';
-import {scale, setImportantStyles} from '#core/dom/style';
+import {resetStyles, scale, setImportantStyles} from '#core/dom/style';
 import {debounce} from '#core/types/function';
 import {hasOwn, map} from '#core/types/object';
 
@@ -142,6 +143,8 @@ export class ProgressBar {
       <ol aria-hidden="true" class="i-amphtml-story-progress-bar"></ol>
     );
     this.root_ = root;
+
+    this.ampdoc_.onVisibilityChanged(() => this.onVisibilityChanged_());
 
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
       this.replay_();
@@ -633,6 +636,21 @@ export class ProgressBar {
         'transform': scale(`${progress},1`),
         'transition': transition,
       });
+    });
+  }
+
+  /**
+   * Hides or un-hides the progress bar in response to visibility state updates.
+   * @private
+   */
+  onVisibilityChanged_() {
+    const visibilityState = this.ampdoc_.getVisibilityState();
+    this.mutator_.mutateElement(this.getRoot_(), () => {
+      if (visibilityState === VisibilityState_Enum.PREVIEW) {
+        setImportantStyles(this.getRoot_(), {visibility: 'hidden'});
+      } else if (visibilityState === VisibilityState_Enum.VISIBLE) {
+        resetStyles(this.getRoot_(), ['visibility']);
+      }
     });
   }
 }

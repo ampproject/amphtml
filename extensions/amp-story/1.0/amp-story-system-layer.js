@@ -1,8 +1,9 @@
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {toggleAttribute} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
 import {closest, matches, scopedQuerySelector} from '#core/dom/query';
-import {setImportantStyles} from '#core/dom/style';
+import {resetStyles, setImportantStyles} from '#core/dom/style';
 import {toArray} from '#core/types/array';
 
 import {Services} from '#service';
@@ -244,6 +245,9 @@ export class SystemLayer {
     /** @protected @const {!Element} */
     this.parentEl_ = parentEl;
 
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = Services.ampdocServiceFor(this.win_).getSingleDoc();
+
     /**
      * Root element containing a shadow DOM root.
      * @private {?Element}
@@ -416,6 +420,8 @@ export class SystemLayer {
         triggerClickFromLightDom(anchorClicked, this.parentEl_);
       }
     });
+
+    this.ampdoc_.onVisibilityChanged(() => this.onVisibilityChanged_());
 
     this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
@@ -948,6 +954,21 @@ export class SystemLayer {
       }
 
       element[VIEWER_CONTROL_EVENT_NAME] = `amp-story-player-${control.name}`;
+    });
+  }
+
+  /**
+   * Hides or un-hides the system layer in response to visibility state updates.
+   * @private
+   */
+  onVisibilityChanged_() {
+    const visibilityState = this.ampdoc_.getVisibilityState();
+    this.vsync_.mutate(() => {
+      if (visibilityState === VisibilityState_Enum.PREVIEW) {
+        setImportantStyles(this.getShadowRoot(), {visibility: 'hidden'});
+      } else if (visibilityState === VisibilityState_Enum.VISIBLE) {
+        resetStyles(this.getShadowRoot(), ['visibility']);
+      }
     });
   }
 
