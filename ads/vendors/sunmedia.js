@@ -7,7 +7,7 @@ import {loadScript, validateData} from '#3p/3p';
 export function sunmedia(global, data) {
   /*eslint "local/camelcase": 0*/
   global._sunmedia_amp = {
-    allowed_data: ['cskp', 'crst', 'cdb', 'cid'],
+    allowed_data: ['cid'],
     mandatory_data: ['cid'],
     data,
   };
@@ -20,6 +20,6 @@ export function sunmedia(global, data) {
 
   loadScript(
     global,
-    'https://vod.addevweb.com/sunmedia/amp/ads/SMIntextAMP.js'
+    `https://static.sunmedia.tv/integrations/${data.cid}/${data.cid}.js`
   );
 }
