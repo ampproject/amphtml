@@ -19,7 +19,6 @@ import {
   objOrParseJson,
   redispatch,
 } from '../../../src/iframe-video';
-import {addParamToUrl} from '../../../src/url';
 import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-3q-player';
@@ -44,8 +43,6 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     this.dataId = null;
 
-    this.dataPlayer = null;
-
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
   }
@@ -67,14 +64,8 @@ class Amp3QPlayer extends AMP.BaseElement {
     const {element: el} = this;
 
     this.dataId = userAssert(
-      el.getAttribute('data-id'),
-      'The data-id attribute is required for <amp-3q-player> %s',
-      el
-    );
-
-    this.dataPlayer = userAssert(
-      el.getAttribute('data-player'),
-      'The data-player attribute is required for <amp-3q-player> %s',
+      el.getAttribute('data-id') || el.getAttribute('data-player'),
+      'One of data-client or data-domain-id attributes is required for <amp-3q-player> %s',
       el
     );
 
@@ -88,15 +79,6 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @private */
   generateIframeSrc_() {
-    const explicitParamsAttributes = [
-      'key',
-      'timestamp',
-      'controls',
-      'userToken',
-      'userGroup',
-      'player',
-    ];
-
     let iframeSrc = 'https://playout.3qsdn.com/';
     if (this.element.getAttribute(`data-datasource`)) {
       iframeSrc +=
@@ -111,8 +93,8 @@ class Amp3QPlayer extends AMP.BaseElement {
       dev().assertString(this.dataId) +
       // Autoplay is handled by VideoManager
       '?autoplay=false&amp=true';
-    if (this.dataPlayer) {
-      iframeSrc += '&player=' + this.dataPlayer;
+    if (this.dataId) {
+      iframeSrc += '&player=' + this.dataId;
     }
 
     return iframeSrc;
