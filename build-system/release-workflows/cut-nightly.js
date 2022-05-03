@@ -14,10 +14,7 @@ const params = {owner: 'ampproject', repo: 'amphtml'};
 // Permanent external ID as assigned by the GitHub Actions runner.
 const GITHUB_EXTERNAL_ID = 'be30aa50-41df-5bf3-2e88-b5215679ea95';
 
-const CHECKS_TO_SKIP = [
-  'Cut Nightly Branch',
-  'create-issue-on-error',
-];
+const CHECKS_TO_SKIP = ['Cut Nightly Branch', 'create-issue-on-error'];
 
 /**
  * Get last green commit
