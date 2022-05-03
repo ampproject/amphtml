@@ -5237,6 +5237,7 @@ attr_lists: {
   attrs: { name: "aria-readonly" }
   attrs: { name: "aria-relevant" }
   attrs: { name: "aria-required" }
+  attrs: { name: "aria-roledescription" }
   attrs: { name: "aria-selected" }
   attrs: { name: "aria-setsize" }
   attrs: { name: "aria-sort" }
