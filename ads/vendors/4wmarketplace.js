@@ -19,17 +19,18 @@ export function _4wmarketplace(global, data) {
       $4wm.fwtag.addSlotNative({
         id: containerId,
         sid: data.sid,
-        n: data.n,
-        hd: data.hd,
-        r: data.r,
-        imgsize: data.imgsize,
-        excludeMobCss: data.excludeMobCss,
-        css: data.css,
-        class: data.class,
+        n: data.n ? data.n : null,
+        hd: data.hd ? data.hd : null,
+        r: data.r ? data.r : null,
+        imgsize: data.imgsize ? data.imgsize : null,
+        excludeMobCss: data.excludemobcss ? data.excludemobcss : null,
+        css: data.css ? data.css : null,
+        class: data.class ? data.class : null,
+        size: data.size ? data.size : null,
         amp: 1,
       });
     });
-    loadScript($4wm, 'https://adsr.4wnetwork.com/js/fwloader.js', () => {
+    loadScript($4wm, 'https://static-adsr.4wnetwork.com/js/fwloader.js', () => {
       window.addEventListener('message', (e) => {
         if (
           e.data.message == 'RESIZE_AMP' &&
@@ -57,7 +58,7 @@ export function _4wmarketplace(global, data) {
 
     $4wm.objFw = [];
     $4wm.objFw.push(obj);
-    loadScript($4wm, 'https://optimized-by.4wnetwork.com/js/sdk.min.js', () => {
+    loadScript($4wm, 'https://static.4wnetwork.com/js/sdk.min.js', () => {
       window.addEventListener('message', (e) => {
         if (
           e.data.message == 'RESIZE_AMP' &&

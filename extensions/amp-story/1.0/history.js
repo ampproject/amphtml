@@ -11,6 +11,7 @@ export const LOCAL_STORAGE_KEY = 'amp-story-state';
 export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
   NAVIGATION_PATH: 'ampStoryNavigationPath',
+  SHOPPING_DATA: 'ampStoryShoppingData',
 };
 
 /**

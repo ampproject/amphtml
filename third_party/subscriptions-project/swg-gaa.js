@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.212 */
+/** Version: 0.1.22.215 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -221,10 +221,175 @@ const I18N_STRINGS = {
  */
 
 /**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
+
+/**
  * @param  {...*} var_args [description]
  */
 function warn(var_args) {
   console.warn.apply(console, arguments);
+}
+
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} message The assertion message
+ * @param {...*} var_args Arguments substituted into %s in the message.
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ */
+function assert(shouldBeTrueish, message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    message = message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
+
+function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Character mapping from base64url to base64.
+ * @const {!Object<string, string>}
+ */
+const base64UrlDecodeSubs = {'-': '+', '_': '/'};
+
+/**
+ * Converts a string which holds 8-bit code points, such as the result of atob,
+ * into a Uint8Array with the corresponding bytes.
+ * If you have a string of characters, you probably want to be using utf8Encode.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function stringToBytes(str) {
+  const bytes = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str.charCodeAt(i);
+    assert(charCode <= 255, 'Characters must be in range [0,255]');
+    bytes[i] = charCode;
+  }
+  return bytes;
+}
+
+/**
+ * Converts a 8-bit bytes array into a string
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function bytesToString(bytes) {
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
+  const array = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+  return array.join('');
+}
+
+/**
+ * Interpret a byte array as a UTF-8 string.
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function utf8DecodeSync(bytes) {
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  const asciiString = bytesToString(new Uint8Array(bytes));
+  return decodeURIComponent(escape(asciiString));
+}
+
+/**
+ * Converts a string which is in base64url encoding into a Uint8Array
+ * containing the decoded value.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function base64UrlDecodeToBytes(str) {
+  const encoded = atob(str.replace(/[-_]/g, (ch) => base64UrlDecodeSubs[ch]));
+  return stringToBytes(encoded);
 }
 
 /**
@@ -257,6 +422,89 @@ function warn(var_args) {
  */
 function parseJson(json) {
   return /** @type {?JsonObject} */ (JSON.parse(/** @type {string} */ (json)));
+}
+
+/**
+ * Parses the given `json` string without throwing an exception if not valid.
+ * Returns `undefined` if parsing fails.
+ * Returns the `Object` corresponding to the JSON string when parsing succeeds.
+ * @param {*} json JSON string to parse
+ * @param {function(!Error)=} onFailed Optional function that will be called
+ *     with the error if parsing fails.
+ * @return {?JsonObject|undefined} May be extend to parse arrays.
+ */
+function tryParseJson(json, onFailed) {
+  try {
+    return parseJson(json);
+  } catch (e) {
+    if (onFailed) {
+      onFailed(e);
+    }
+    return undefined;
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Provides helper methods to decode and verify JWT tokens.
+ */
+class JwtHelper {
+  constructor() {}
+
+  /**
+   * Decodes JWT token and returns its payload.
+   * @param {string} encodedToken
+   * @return {?JsonObject|undefined}
+   */
+  decode(encodedToken) {
+    return this.decodeInternal_(encodedToken).payload;
+  }
+
+  /**
+   * @param {string} encodedToken
+   * @return {!JwtTokenInternalDef}
+   * @private
+   */
+  decodeInternal_(encodedToken) {
+    // See https://jwt.io/introduction/
+    /**
+     * Throws error about invalid token.
+     */
+    function invalidToken() {
+      throw new Error(`Invalid token: "${encodedToken}"`);
+    }
+
+    // Encoded token has three parts: header.payload.sig
+    // Note! The padding is not allowed by JWT spec:
+    // http://self-issued.info/docs/draft-goland-json-web-token-00.html#rfc.section.5
+    const parts = encodedToken.split('.');
+    if (parts.length != 3) {
+      invalidToken();
+    }
+    const headerUtf8Bytes = base64UrlDecodeToBytes(parts[0]);
+    const payloadUtf8Bytes = base64UrlDecodeToBytes(parts[1]);
+    return {
+      header: tryParseJson(utf8DecodeSync(headerUtf8Bytes), invalidToken),
+      payload: tryParseJson(utf8DecodeSync(payloadUtf8Bytes), invalidToken),
+      verifiable: `${parts[0]}.${parts[1]}`,
+      sig: parts[2],
+    };
+  }
 }
 
 /**
@@ -946,6 +1194,10 @@ const SIGN_IN_WITH_GOOGLE_BUTTON_ID = 'swg-sign-in-with-google-button';
 const PUBLISHER_SIGN_IN_BUTTON_ID = 'swg-publisher-sign-in-button';
 
 /** ID for the Regwall container element. */
+const REGISTRATION_BUTTON_CONTAINER_ID =
+  'swg-registration-button-container';
+
+/** ID for the Regwall container element. */
 const REGWALL_CONTAINER_ID = 'swg-regwall-container';
 
 /** ID for the Regwall dialog element. */
@@ -953,9 +1205,6 @@ const REGWALL_DIALOG_ID = 'swg-regwall-dialog';
 
 /** ID for the Regwall title element. */
 const REGWALL_TITLE_ID = 'swg-regwall-title';
-
-/** URL parameter to append in the redirect mode for 3P Sign-in.  */
-const REDIRECT_SOURCE_URL_PARAM = 'source';
 
 /**
  * HTML for the metering regwall dialog, where users can sign in with Google.
@@ -973,6 +1222,7 @@ const REGWALL_HTML = `
   .gaa-metering-regwall--description,
   .gaa-metering-regwall--description strong,
   .gaa-metering-regwall--iframe,
+  .gaa-metering-regwall--registration-button-container,
   .gaa-metering-regwall--casl {
     all: initial !important;
     box-sizing: border-box !important;
@@ -1041,6 +1291,14 @@ const REGWALL_HTML = `
     width: 100% !important;
   }
 
+  .gaa-metering-regwall--registration-button-container {
+    border: none !important;
+    display: block !important;
+    height: 44px !important;
+    margin: 0 0 30px !important;
+    width: 100% !important;
+  }
+
   .gaa-metering-regwall--casl {
     color: #646464 !important;
     display: block !important;
@@ -1097,11 +1355,7 @@ const REGWALL_HTML = `
       $SHOWCASE_REGWALL_DESCRIPTION$
     </div>
 
-    <iframe
-        id="${GOOGLE_SIGN_IN_IFRAME_ID}"
-        class="gaa-metering-regwall--iframe"
-        src="$iframeUrl$">
-    </iframe>
+    $SHOWCASE_REGISTRATION_BUTTON$
 
     $SHOWCASE_REGWALL_CASL$
 
@@ -1119,6 +1373,27 @@ const REGWALL_HTML = `
 `;
 
 /**
+ * HTML for iFrame to render registration widget.
+ */
+const REGISTRATION_WIDGET_IFRAME_HTML = `
+  <iframe
+      id="${GOOGLE_SIGN_IN_IFRAME_ID}"
+      class="gaa-metering-regwall--iframe"
+      src="$iframeUrl$">
+  </iframe>
+`;
+
+/**
+ * HTML for container of the registration button.
+ */
+const REGISTRATION_BUTTON_HTML = `
+  <div
+      id="${REGISTRATION_BUTTON_CONTAINER_ID}"
+      class="gaa-metering-regwall--registration-button-container">
+  </div>
+`;
+
+/**
  * HTML for the CASL blurb.
  * CASL stands for Canadian Anti-Spam Law.
  */
@@ -1129,11 +1404,7 @@ const CASL_HTML = `
 `;
 
 /** Base styles for both the Google and Google 3p Sign-In button iframes. */
-const GOOGLE_SIGN_IN_IFRAME_STYLES = `
-  body {
-    margin: 0;
-    overflow: hidden;
-  }
+const GOOGLE_SIGN_IN_BUTTON_STYLES = `
   #${GOOGLE_3P_SIGN_IN_BUTTON_ID},
   #${SIGN_IN_WITH_GOOGLE_BUTTON_ID},
   #${GOOGLE_SIGN_IN_BUTTON_ID} {
@@ -1184,6 +1455,12 @@ const GOOGLE_SIGN_IN_IFRAME_STYLES = `
     content: '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$';
     font-size: 15px;
   }`;
+const GOOGLE_SIGN_IN_IFRAME_STYLES = `
+  body {
+    margin: 0;
+    overflow: hidden;
+  }${GOOGLE_SIGN_IN_BUTTON_STYLES}
+`;
 
 /**
  * User object that Publisher JS receives after users sign in.
@@ -1210,7 +1487,7 @@ let GaaUserDef;
  * GoogleUser object that Google Sign-In returns after users sign in.
  * https://developers.google.com/identity/sign-in/web/reference#googleusergetbasicprofile
  * @typedef {{
- *   getAuthResponse: function(boolean): {
+ *  getAuthResponse: function(boolean): {
  *     access_token: string,
  *     id_token: string,
  *     scope: string,
@@ -1316,6 +1593,46 @@ class GaaMeteringRegwall {
   }
 
   /**
+   * Returns a promise for a Google user object.
+   * The user object will be a GoogleIdentityV1
+   *
+   * This method opens a metering regwall dialog,
+   * where users can sign in with Google.
+   * @nocollapse
+   * @param {{ caslUrl: string, clientId: string, rawJwt: (boolean|null) }} params
+   * @return {!Promise<!GoogleIdentityV1>}
+   */
+  static showWithNativeRegistrationButton({caslUrl, clientId, rawJwt = true}) {
+    logEvent({
+      showcaseEvent: ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL,
+      isFromUserAction: false,
+    });
+
+    GaaMeteringRegwall.render_({
+      iframeUrl: '',
+      caslUrl,
+      useNativeMode: true,
+    });
+
+    return GaaMeteringRegwall.createNativeRegistrationButton({clientId})
+      .then((jwt) => {
+        GaaMeteringRegwall.remove();
+        if (rawJwt) {
+          return jwt;
+        } else {
+          return new JwtHelper().decode(jwt.credential);
+        }
+      })
+      .catch((err) => {
+        // Close the Regwall, since the flow failed.
+        GaaMeteringRegwall.remove();
+
+        // Rethrow error.
+        debugLog(`Regwall failed: ${err}`);
+      });
+  }
+
+  /**
    * Removes the Regwall.
    * @nocollapse
    */
@@ -1343,17 +1660,14 @@ class GaaMeteringRegwall {
    * Renders the Regwall.
    * @private
    * @nocollapse
-   * @param {{ iframeUrl: string, caslUrl: string }} params
+   * @param {{ iframeUrl: string, caslUrl: string, useNativeMode: (boolean|undefined)}} params
    */
-  static render_({iframeUrl, caslUrl}) {
+  static render_({iframeUrl, caslUrl, useNativeMode = false}) {
     const languageCode = getLanguageCodeFromElement(self.document.body);
     const publisherName = GaaMeteringRegwall.getPublisherNameFromPageConfig_();
     const placeholderPatternForPublication = /<ph name="PUBLICATION".+?\/ph>/g;
     const placeholderPatternForLinkStart = /<ph name="LINK_START".+?\/ph>/g;
     const placeholderPatternForLinkEnd = /<ph name="LINK_END".+?\/ph>/g;
-
-    // Tell the iframe which language to render.
-    iframeUrl = addQueryParam(iframeUrl, 'lang', languageCode);
 
     // Create and style container element.
     // TODO: Consider using a FriendlyIframe here, to avoid CSS conflicts.
@@ -1398,10 +1712,22 @@ class GaaMeteringRegwall {
         );
     }
 
+    let registrationButtonHtml = '';
+    if (useNativeMode) {
+      registrationButtonHtml = REGISTRATION_BUTTON_HTML;
+    } else {
+      // Tell the iframe which language to render.
+      iframeUrl = addQueryParam(iframeUrl, 'lang', languageCode);
+      registrationButtonHtml = REGISTRATION_WIDGET_IFRAME_HTML.replace(
+        '$iframeUrl$',
+        iframeUrl
+      );
+    }
+
     // Prepare HTML.
     containerEl./*OK*/ innerHTML = REGWALL_HTML.replace(
-      '$iframeUrl$',
-      iframeUrl
+      '$SHOWCASE_REGISTRATION_BUTTON$',
+      registrationButtonHtml
     )
       .replace(
         '$SHOWCASE_REGWALL_TITLE$',
@@ -1608,6 +1934,52 @@ class GaaMeteringRegwall {
         new URL(iframeUrl).origin
       );
     };
+  }
+
+  static createNativeRegistrationButton({clientId}) {
+    const languageCode = getLanguageCodeFromElement(self.document.body);
+    const parentElement = self.document.getElementById(
+      REGISTRATION_BUTTON_CONTAINER_ID
+    );
+    if (!parentElement) {
+      return false;
+    }
+    // Apply iframe styles.
+    const styleEl = self.document.createElement('style');
+    styleEl./*OK*/ innerText = GOOGLE_SIGN_IN_BUTTON_STYLES.replace(
+      '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
+      msg(I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'], languageCode)
+    );
+    self.document.head.appendChild(styleEl);
+
+    const buttonEl = self.document.createElement('div');
+    buttonEl.id = SIGN_IN_WITH_GOOGLE_BUTTON_ID;
+    buttonEl.tabIndex = 0;
+
+    parentElement.appendChild(buttonEl);
+
+    // Track button clicks.
+    buttonEl.addEventListener('click', () => {
+      logEvent({
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+        isFromUserAction: true,
+      });
+    });
+
+    return new Promise((resolve) => {
+      self.google.accounts.id.initialize({
+        /* eslint-disable google-camelcase/google-camelcase */
+        client_id: clientId,
+        callback: resolve,
+        /* eslint-enable google-camelcase/google-camelcase */
+      });
+      self.google.accounts.id.renderButton(buttonEl, {
+        'type': 'standard',
+        'theme': 'outline',
+        'text': 'continue_with',
+        'logo_alignment': 'center',
+      });
+    });
   }
 }
 
@@ -1863,12 +2235,7 @@ class GaaGoogle3pSignInButton {
     buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
     buttonEl.onclick = () => {
       if (redirectMode) {
-        const parameterizedAuthUrl = new URL(authorizationUrl);
-        parameterizedAuthUrl.searchParams.append(
-          REDIRECT_SOURCE_URL_PARAM,
-          self.parent.location.href
-        );
-        self.open(parameterizedAuthUrl, '_parent');
+        self.open(authorizationUrl, '_parent');
       } else {
         self.open(authorizationUrl);
       }

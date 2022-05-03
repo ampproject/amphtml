@@ -20,6 +20,7 @@
     "@ampproject/toolbox-cache-url": "2.8.0",
     "@ampproject/viewer-messaging": "1.1.2",
     "@ampproject/worker-dom": "0.33.0",
+    "@use-gesture/react": "10.2.10",
     "@webcomponents/webcomponentsjs": "2.6.0",
     "date-fns": "2.27.0",
     "dompurify": "2.3.3",

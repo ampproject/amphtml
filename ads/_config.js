@@ -101,6 +101,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://servedbyadbutler.com/app.js',
   },
 
+  'adenza': {
+    renderStartImplemented: true,
+  },
+
   'adform': {},
 
   'adfox': {
@@ -689,7 +693,9 @@ const adConfig = jsonConfiguration({
   'kiosked': {
     renderStartImplemented: true,
   },
-
+  'jioads': {
+    renderStartImplemented: true,
+  },
   'jixie': {
     prefetch: ['https://scripts.jixie.media/jxamp.min.js'],
     clientIdScope: '__jxamp',

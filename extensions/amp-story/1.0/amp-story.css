@@ -11,7 +11,8 @@
   --story-page-vmin: min(var(--story-page-vw), var(--story-page-vh)) !important;
   --story-page-vmax: max(var(--story-page-vw), var(--story-page-vh)) !important;
   --story-100dvh: calc(var(--story-dvh, 1vh) * 100) !important;
-  font-size: calc(2.5 * var(--story-page-vh, 8px));
+  --story-font-size: calc(2.5 * var(--story-page-vh, 8px)) !important;
+  font-size: var(--story-font-size);
 }
 
 @supports (height: 1dvh) {
