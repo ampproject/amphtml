@@ -258,7 +258,7 @@ const RTC_VENDORS = jsonConfiguration({
     url: 'https://shb.richaudience.com/amp?p=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&mref=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&targeting=TGT&consentString=CONSENT_STRING&gdpr=CONSENT_METADATA(gdprApplies)&addtl_consent=CONSENT_METADATA(additionalConsent)&consent_type=CONSENT_METADATA(consentStringType)',
     macros: ['PLACEMENT_ID', 'CONSENT_STRING'],
     disableKeyAppend: true,
-  },
+  }, 
 });
 
 // DO NOT MODIFY: Setup for tests
