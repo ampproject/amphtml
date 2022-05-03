@@ -43,6 +43,7 @@ To use RTC, you must meet the following requirements:
 -   [PubWise](https://pubwise.io)
 -   Purch
 -   Rubicon
+-   RichAudience
 -   Salesforce
 -   [Snigel](https://www.snigel.com)
 -   T13

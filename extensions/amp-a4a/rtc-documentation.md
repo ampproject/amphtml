@@ -149,6 +149,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   [PubWise](https://www.pubwise.io)
 -   Purch
 -   Rubicon
+-   RichAudience
 -   Salesforce
 -   [Snigel](https://www.snigel.com)
 -   T13
