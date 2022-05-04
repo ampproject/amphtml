@@ -148,8 +148,8 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 -   PubMatic OpenWrap
 -   [PubWise](https://www.pubwise.io)
 -   Purch
--   Rubicon
 -   RichAudience
+-   Rubicon
 -   Salesforce
 -   [Snigel](https://www.snigel.com)
 -   T13

@@ -42,8 +42,8 @@ To use RTC, you must meet the following requirements:
 -   PubMatic OpenWrap
 -   [PubWise](https://pubwise.io)
 -   Purch
--   Rubicon
 -   RichAudience
+-   Rubicon
 -   Salesforce
 -   [Snigel](https://www.snigel.com)
 -   T13
