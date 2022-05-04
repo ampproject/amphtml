@@ -687,7 +687,8 @@ export class MediaPool {
    * registered and `isReregistration` is false, then this is a no-op.
    * @param {!DomElementDef} domMediaEl The media element to be
    *     registered.
-   * @param {boolean} isReregistration
+   * @param {boolean=} isReregistration Whether the given element has already
+   *     been registered.
    * @return {!Promise} A promise that is resolved when the element has been
    *     successfully registered, or rejected otherwise.
    */
@@ -698,6 +699,15 @@ export class MediaPool {
     }
 
     if (this.isPoolMediaElement_(domMediaEl)) {
+      // In the case of a reregistration, `UpdateSourcesTask` and `LoadTask`
+      // are used to load the element using its sources (which may have changed
+      // since the previous registration).
+      if (isReregistration) {
+        const sources = Sources.removeFrom(this.win_, domMediaEl);
+        this.sources_[id] = sources;
+        return this.resetPoolMediaElementSource_(domMediaEl, sources);
+      }
+
       // This media element originated from the media pool.
       return Promise.resolve();
     }
@@ -710,15 +720,6 @@ export class MediaPool {
 
     const id = placeholderEl.id || this.createPlaceholderElementId_();
     if (this.sources_[id] && this.placeholderEls_[id]) {
-      // In the case of a reregistration, `UpdateSourcesTask` and `LoadTask`
-      // are used to load the element using its sources (which may have changed
-      // since the previous registration).
-      if (isReregistration) {
-        const sources = Sources.removeFrom(this.win_, placeholderEl);
-        this.sources_[id] = sources;
-        return this.resetPoolMediaElementSource_(placeholderEl, sources);
-      }
-
       // This media element is already registered.
       return Promise.resolve();
     }
