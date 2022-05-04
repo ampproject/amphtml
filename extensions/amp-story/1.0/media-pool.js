@@ -704,7 +704,7 @@ export class MediaPool {
       // since the previous registration).
       if (isReregistration) {
         const sources = Sources.removeFrom(this.win_, domMediaEl);
-        this.sources_[id] = sources;
+        this.sources_[domMediaEl.id] = sources;
         return this.resetPoolMediaElementSource_(domMediaEl, sources);
       }
 
