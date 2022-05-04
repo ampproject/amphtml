@@ -245,17 +245,6 @@ jobs:
           name: '⭐ Module Build ⭐'
           command: node build-system/pr-check/bundle-size-module-build.js
       - teardown_vm
-  pr_deploy:
-    executor:
-      name: node-docker-medium
-    steps:
-      - setup_vm
-      - run:
-          name: '⭐ PR Deploy ⭐'
-          command: node build-system/pr-check/pr-deploy.js
-      - store_artifacts:
-          path: /tmp/artifacts/amp_nomodule_build.tar.gz
-      - teardown_vm
   bundle_size:
     executor:
       name: node-docker-medium
@@ -530,11 +519,6 @@ workflows:
           <<: *push_and_pr_builds
           requires:
             - 'Initialize Repository'
-      - pr_deploy:
-          name: 'PR Deploy'
-          <<: *pr_builds_only
-          requires:
-            - 'Nomodule Build (Test)'
       - bundle_size:
           name: 'Bundle Size'
           <<: *push_and_pr_builds
