@@ -518,50 +518,51 @@ export class AmpStoryPage extends AMP.BaseElement {
     const registerAllPromise = this.registerAllMedia_();
 
     if (this.isActive()) {
-      registerAllPromise.then(() => {
-        if (this.state_ === PageState.NOT_ACTIVE) {
-          return;
-        }
-        this.signals()
-          .whenSignal(CommonSignals_Enum.LOAD_END)
-          .then(() => {
-            if (this.state_ == PageState.PLAYING) {
-              this.advancement_.start();
-            }
-          });
-        this.preloadAllMedia_().then(() => {
+      registerAllPromise
+        .then(() => {
           if (this.state_ === PageState.NOT_ACTIVE) {
             return;
           }
-          this.startMeasuringAllVideoPerformance_();
-          this.startListeningToVideoEvents_();
-          // iOS 14.2 and 14.3 requires play to be called before unmute
-          this.playAllMedia_().then(() => {
-            if (
-              !this.storeService_.get(StateProperty.MUTED_STATE) &&
-              this.state_ !== PageState.NOT_ACTIVE
-            ) {
-              this.unmuteAllMedia();
+          this.signals()
+            .whenSignal(CommonSignals_Enum.LOAD_END)
+            .then(() => {
+              if (this.state_ == PageState.PLAYING) {
+                this.advancement_.start();
+              }
+            });
+          this.preloadAllMedia_().then(() => {
+            if (this.state_ === PageState.NOT_ACTIVE) {
+              return;
             }
+            this.startMeasuringAllVideoPerformance_();
+            this.startListeningToVideoEvents_();
+            // iOS 14.2 and 14.3 requires play to be called before unmute
+            this.playAllMedia_().then(() => {
+              if (
+                !this.storeService_.get(StateProperty.MUTED_STATE) &&
+                this.state_ !== PageState.NOT_ACTIVE
+              ) {
+                this.unmuteAllMedia();
+              }
+            });
+            this.toggleCaptions_(
+              this.storeService_.get(StateProperty.CAPTIONS_STATE)
+            );
           });
-          this.toggleCaptions_(
-            this.storeService_.get(StateProperty.CAPTIONS_STATE)
-          );
+        })
+        .then(() => {
+          // In the PREVIEW state, a video can only use cached sources. If it
+          // fails to play due to any issue with the cached sources, we
+          // reregister the video once it has obtained its origin sources.
+          if (this.storyIsBeingPreviewed_()) {
+            // We first block the reregistration on video layout end because
+            // that is the point at which the story has entered the VISIBLE
+            // state and its origin sources have been added.
+            return this.waitForPlaybackMediaLayoutEnd_().then(() => {
+              return this.reregisterUnplayedVideos_();
+            });
+          }
         });
-      })
-      .then(() => {
-        // In the PREVIEW state, a video can only use cached sources. If it
-        // fails to play due to any issue with the cached sources, we
-        // reregister the video once it has obtained its origin sources.
-        if (this.storyIsBeingPreviewed_()) {
-          // We first block the reregistration on video layout end because
-          // that is the point at which the story has entered the VISIBLE
-          // state and its origin sources have been added.
-          return this.waitForPlaybackMediaLayoutEnd_().then(() => {
-            return this.reregisterUnplayedVideos_();
-          });
-        }
-      });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
       this.checkPageHasCaptions_();
