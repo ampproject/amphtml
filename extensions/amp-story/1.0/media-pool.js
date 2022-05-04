@@ -554,15 +554,14 @@ export class MediaPool {
   /**
    * @param {!PoolBoundElementDef} poolMediaEl The element whose source should
    *     be reset.
+   * @param {!Sources=} sources Optional sources for the media element.
    * @return {!Promise} A promise that is resolved when the pool media element
    *     has been reset.
    */
-  resetPoolMediaElementSource_(poolMediaEl) {
-    const defaultSources = this.getDefaultSource_();
-
+  resetPoolMediaElementSource_(poolMediaEl, sources = this.getDefaultSource_()) {
     return this.enqueueMediaElementTask_(
       poolMediaEl,
-      new UpdateSourcesTask(this.win_, defaultSources)
+      new UpdateSourcesTask(this.win_, sources)
     ).then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()));
   }
 
