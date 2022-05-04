@@ -705,7 +705,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     until all playback media have begun their layouts, as opposed to
    *     having completed them.
    * @return {!Promise} A promise that blocks until all playback media on the
-   *     page have begun or completed their layouts,  `waitForLayoutStart`.
+   *     page have begun or completed their layouts, depending on the value of
+   *     `waitForLayoutStart`.
    * @private
    */
   waitForPlaybackMediaLayout_(waitForLayoutStart) {
