@@ -728,6 +728,14 @@ export class AmpDoc {
   }
 
   /**
+   * Whether the AMP document currently being previewed.
+   * @return {boolean}
+   */
+  isPreviewing() {
+    return this.visibilityState_ == VisibilityState_Enum.PREVIEW;
+  }
+
+  /**
    * Whether the AMP document currently visible. The reasons why it might not
    * be visible include user switching to another tab, browser running the
    * document in the prerender mode or viewer running the document in the
