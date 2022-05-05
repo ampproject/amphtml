@@ -1702,7 +1702,8 @@ export class AmpStory extends AMP.BaseElement {
 
     if (isPreview) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
-    } else if (isVisible) {
+    }
+    if (isVisible) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
     }
 
