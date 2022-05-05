@@ -6,6 +6,7 @@ import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
 import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+import {HistoryState, setHistoryState} from 'extensions/amp-story/1.0/history';
 
 import {formatI18nNumber, loadFonts} from './amp-story-shopping';
 import {
@@ -82,24 +83,32 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
       this.pageEl_.querySelectorAll('amp-story-shopping-tag')
     );
 
-    getShoppingConfig(this.element, this.pageEl_.id).then((config) =>
-      storeShoppingConfig(this.pageEl_, config)
-    );
-
     if (this.shoppingTags_.length === 0) {
-      return;
+      return Promise.reject(
+        new Error(`No shopping tags on page ${this.pageEl_.id}.`)
+      );
     }
 
-    return this.localizationService_
-      .getLocalizedStringAsync(
-        LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+    return getShoppingConfig(this.element, this.pageEl_.id)
+      .then((config) => {
+        if (Object.keys(config).length === 0) {
+          return Promise.reject(
+            new Error(`No valid shopping data on page ${this.pageEl_.id}.`)
+          );
+        }
+        storeShoppingConfig(this.pageEl_, config);
+      })
+      .then(() =>
+        this.localizationService_.getLocalizedStringAsync(
+          LocalizedStringId_Enum.AMP_STORY_SHOPPING_CTA_LABEL
+        )
       )
       .then((ctaText) => {
         this.attachmentEl_ = (
           <amp-story-page-attachment
             layout="nodisplay"
             theme={this.element.getAttribute('theme')}
-            cta-text={ctaText}
+            cta-text={this.element.getAttribute('cta-text')?.trim() || ctaText}
           >
             {this.templateContainer_}
           </amp-story-page-attachment>
@@ -110,9 +119,6 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.shoppingTags_.length === 0) {
-      return;
-    }
     loadFonts(this.win, FONTS_TO_LOAD);
     // Update template on attachment state update or shopping data update.
     this.storeService_.subscribe(
@@ -133,7 +139,7 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
 
   /**
    * Triggers template update if opening without active product data.
-   * This happens either when the "Shop Now" CTA is clicked or when a
+   * This happens either when the "Shop now" CTA is clicked or when a
    * shopping tag is clicked.
    * @param {boolean} isOpen
    * @private
@@ -299,6 +305,8 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
     this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
       'activeProductData': shoppingData,
     });
+
+    setHistoryState(this.win, HistoryState.SHOPPING_DATA, shoppingData);
   }
 
   /**
@@ -384,25 +392,32 @@ export class AmpStoryShoppingAttachment extends AMP.BaseElement {
             </span>
           </div>
           {activeProductData.aggregateRating && (
-            <span class="i-amphtml-amp-story-shopping-pdp-reviews">
-              {activeProductData.aggregateRating.ratingValue} (
+            // Wrapper prevents anchor from spanning entire width of container.
+            // This prevents accidental clicks.
+            <div>
               <a
-                class="i-amphtml-amp-story-shopping-pdp-reviews-link"
+                class="i-amphtml-amp-story-shopping-pdp-reviews"
                 href={relativeToSourceUrl(
                   activeProductData.aggregateRating.reviewUrl,
                   this.element
                 )}
                 target="_top"
               >
-                {activeProductData.aggregateRating.reviewCount + ' '}
+                <span>{activeProductData.aggregateRating.ratingValue}</span>
                 <span
-                  i-amphtml-i18n-text-content={
-                    LocalizedStringId_Enum.AMP_STORY_SHOPPING_ATTACHMENT_REVIEWS_LABEL
-                  }
+                  class="i-amphtml-amp-story-shopping-pdp-reviews-stars"
+                  style={`--i-amphtml-star-rating-width: ${
+                    // Creates a value between 0 and 100 in increments of 10.
+                    Math.round(
+                      activeProductData.aggregateRating.ratingValue * 2
+                    ) * 10
+                  }%`}
                 ></span>
+                <span class="i-amphtml-amp-story-shopping-pdp-reviews-count">
+                  {activeProductData.aggregateRating.reviewCount}
+                </span>
               </a>
-              )
-            </span>
+            </div>
           )}
           <a
             class="i-amphtml-amp-story-shopping-pdp-cta"

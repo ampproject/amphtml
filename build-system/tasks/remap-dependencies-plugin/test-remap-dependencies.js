@@ -67,6 +67,8 @@ test.afterEach(() => {
   sinon.restore();
 });
 
+const rootDir = path.join(__dirname, '../../..');
+
 test('remap node modules to other node modules', (t) => {
   const onResolve = setup(['node-mod-A', 'node-mod-C'], {
     // multiple mods to same external mod
@@ -146,8 +148,6 @@ test('remap local modules to node modules', (t) => {
     './src/4/dir/index': 'node-mod-B',
   });
 
-  const rootDir = path.join(__dirname, '../../..');
-
   // test various types of file imports
   const res1 = onResolve({resolveDir: rootDir, path: './mod1'});
   t.is(res1.path, 'node-mod-A');
@@ -221,4 +221,34 @@ test('remap local modules to node modules', (t) => {
   });
   t.is(resNoExtensionBundled.path, 'node-mod-B');
   t.is(resNoExtensionBundled.external, false);
+});
+
+test('remap local modules to local modules', (t) => {
+  const onResolve = setup([], {
+    // multiple mods => same external mod
+    './mod1': './mod2',
+    './js-dir/mod1.js': './mod2.js',
+    './jsx-dir/mod1.jsx': './mod2.jsx',
+    './ts-dir/mod1.ts': './mod2.ts',
+    './tsx-dir/mod1.tsx': './mod2.tsx',
+  });
+
+  const expectations = {
+    'mod1': 'mod2.js',
+    'js-dir/mod1.js': 'mod2.js',
+    'jsx-dir/mod1.jsx': 'mod2.jsx',
+    'ts-dir/mod1.ts': 'mod2.ts',
+    'tsx-dir/mod1.tsx': 'mod2.tsx',
+  };
+
+  for (const imp in expectations) {
+    const val = expectations[imp];
+    t.is(
+      `.${path.posix.sep}${path.posix.relative(
+        rootDir,
+        onResolve({path: `.${path.posix.sep}${imp}`, resolveDir: rootDir}).path
+      )}`,
+      `.${path.posix.sep}${val}`
+    );
+  }
 });

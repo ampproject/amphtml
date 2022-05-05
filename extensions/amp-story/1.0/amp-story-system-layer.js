@@ -1,3 +1,4 @@
+import {toggleAttribute} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
 import {closest, matches, scopedQuerySelector} from '#core/dom/query';
@@ -39,6 +40,15 @@ const PAUSED_ATTRIBUTE = 'paused';
 
 /** @private @const {string} */
 const HAS_INFO_BUTTON_ATTRIBUTE = 'info';
+
+/** @private @const {string} */
+const CAPTIONS_CLASS = 'i-amphtml-story-captions-control';
+
+/** @private @const {string} */
+const NOCAPTIONS_CLASS = 'i-amphtml-story-nocaptions-control';
+
+/** @private @const {string} */
+const PAGE_HAS_CAPTIONS = 'i-amphtml-current-page-has-captions';
 
 /** @private @const {string} */
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
@@ -112,6 +122,20 @@ const renderSystemLayerElement = (element, children) => (
           LocalizedStringId_Enum.AMP_STORY_INFO_BUTTON_LABEL
         }
       />
+      <div class="i-amphtml-story-captions-display">
+        <button
+          class={CAPTIONS_CLASS + ' i-amphtml-story-button'}
+          i-amphtml-i18n-aria-label={
+            LocalizedStringId_Enum.AMP_STORY_CAPTIONS_ON_LABEL
+          }
+        />
+        <button
+          class={NOCAPTIONS_CLASS + ' i-amphtml-story-button'}
+          i-amphtml-i18n-aria-label={
+            LocalizedStringId_Enum.AMP_STORY_CAPTIONS_OFF_LABEL
+          }
+        />
+      </div>
       <div class="i-amphtml-story-sound-display">
         <button
           class={UNMUTE_CLASS + ' i-amphtml-story-button'}
@@ -368,6 +392,12 @@ export class SystemLayer {
         this.onPausedClick_(true);
       } else if (matches(target, `.${PLAY_CLASS}, .${PLAY_CLASS} *`)) {
         this.onPausedClick_(false);
+      } else if (matches(target, `.${CAPTIONS_CLASS}, .${CAPTIONS_CLASS} *`)) {
+        this.onCaptionsClick_(false);
+      } else if (
+        matches(target, `.${NOCAPTIONS_CLASS}, .${NOCAPTIONS_CLASS} *`)
+      ) {
+        this.onCaptionsClick_(true);
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
         this.onShareClick_(event);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
@@ -459,6 +489,19 @@ export class SystemLayer {
         this.onKeyboardActiveUpdate_(keyboardState);
       },
       true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.PAGE_HAS_CAPTIONS_STATE,
+      (pageHasCaptionsState) =>
+        this.onPageHasCaptionsState_(pageHasCaptionsState),
+      true /* callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.CAPTIONS_STATE,
+      (captionsState) => this.onCaptionsStateUpdate_(captionsState),
+      true /* callToInitialize */
     );
 
     this.storeService_.subscribe(
@@ -561,6 +604,15 @@ export class SystemLayer {
   }
 
   /**
+   * Toggles the captions.
+   * @param {boolean} captions
+   * @private
+   */
+  onCaptionsClick_(captions) {
+    this.storeService_.dispatch(Action.TOGGLE_CAPTIONS, captions);
+  }
+
+  /**
    * Reacts to the presence of audio on a page to determine which audio messages
    * to display.
    * @param {boolean} pageHasAudio
@@ -580,6 +632,22 @@ export class SystemLayer {
             CURRENT_PAGE_HAS_AUDIO_ATTRIBUTE
           );
     });
+  }
+
+  /**
+   * Toggles whether the active page has captions or not.
+   * @param {boolean} pageHasCaptions
+   */
+  onPageHasCaptionsState_(pageHasCaptions) {
+    toggleAttribute(this.systemLayerEl_, PAGE_HAS_CAPTIONS, pageHasCaptions);
+  }
+
+  /**
+   * Toggles whether the captions are active or not.
+   * @param {boolean} captionsState
+   */
+  onCaptionsStateUpdate_(captionsState) {
+    toggleAttribute(this.systemLayerEl_, 'captions-on', captionsState);
   }
 
   /**

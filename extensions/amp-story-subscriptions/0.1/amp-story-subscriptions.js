@@ -1,7 +1,11 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
+import {setImportantStyles} from '#core/dom/style';
 
 import {Services} from '#service';
+import {LocalizedStringId_Enum} from '#service/localization/strings';
+
+import {dev} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-subscriptions-0.1.css';
 import {
@@ -9,8 +13,17 @@ import {
   StateProperty,
   SubscriptionsState,
 } from '../../amp-story/1.0/amp-story-store-service';
+import {AmpStoryViewerMessagingHandler} from '../../amp-story/1.0/amp-story-viewer-messaging-handler';
+import {AdvancementMode} from '../../amp-story/1.0/story-analytics';
+import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
 const TAG = 'amp-story-subscriptions';
+
+/**
+ * The number of milliseconds to wait before showing the skip button on dialog banner.
+ * @const {number}
+ */
+const SKIP_BUTTON_DELAY_DURATION = 2000;
 
 export class AmpStorySubscriptions extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -22,24 +35,32 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
 
     /** @private {?../../../extensions/amp-subscriptions/0.1/amp-subscriptions.SubscriptionService} */
     this.subscriptionService_ = null;
+
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = null;
+
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
+
+    /** @private {?AmpStoryViewerMessagingHandler} */
+    this.viewerMessagingHandler_ = null;
   }
 
   /** @override */
   buildCallback() {
-    // Create a paywall dialog element that have required attributes to be able to be
-    // rendered by amp-subscriptions.
-    // TODO(#37285): complete the rest of paywall dialog UI based on the publisher-provided attributes.
-    const dialogEl = (
-      <div subscriptions-dialog subscriptions-display="NOT granted"></div>
-    );
-    this.element.appendChild(dialogEl);
+    this.viewer_ = Services.viewerForDoc(this.element);
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
+      : null;
 
     return Promise.all([
       Services.storyStoreServiceForOrNull(this.win),
       Services.subscriptionsServiceForDoc(this.element),
-    ]).then(([storeService, subscriptionService]) => {
+      Services.localizationServiceForOrNull(this.element),
+    ]).then(([storeService, subscriptionService, localizationService]) => {
       this.storeService_ = storeService;
       this.subscriptionService_ = subscriptionService;
+      this.localizationService_ = localizationService;
 
       // Get grant status immediately to set up the initial subscriptions state.
       this.getGrantStatusAndUpdateState_();
@@ -49,8 +70,27 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         this.getGrantStatusAndUpdateState_()
       );
 
+      // Create a paywall dialog element that have required attributes to be able to be
+      // rendered by amp-subscriptions.
+      this.element.appendChild(this.renderSubscriptionsDialogTemplate_());
+
       this.initializeListeners_();
     });
+  }
+
+  /** @override */
+  layoutCallback() {
+    const logoSrc = getStoryAttributeSrc(
+      this.element,
+      'publisher-logo-src',
+      /* warn */ true
+    );
+    const publisherLogoEl = dev().assertElement(
+      this.element.querySelector(
+        '.i-amphtml-story-subscriptions-publisher-logo'
+      )
+    );
+    publisherLogoEl.setAttribute('src', logoSrc);
   }
 
   /** @override */
@@ -86,6 +126,28 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE,
       (showDialog) => this.onSubscriptionsDialogUiStateChange_(showDialog)
     );
+
+    const ampSubscriptionsEl = this.win.document.querySelector(
+      'amp-subscriptions-dialog'
+    );
+    ampSubscriptionsEl.addEventListener('click', (event) =>
+      this.onSubscriptionsDialogClick_(event)
+    );
+
+    // Make sure SWG dialog background always intercept clicks to prevent users
+    // from interacting with anything underneath.
+    new MutationObserver((mutationsList) => {
+      mutationsList.forEach((mutation) => {
+        mutation.addedNodes.forEach((addedNode) => {
+          if (addedNode.tagName === 'SWG-POPUP-BACKGROUND') {
+            setImportantStyles(addedNode, {'pointer-events': 'all'});
+          }
+        });
+      });
+    }).observe(this.win.document.body, {
+      subtree: false,
+      childList: true,
+    });
   }
 
   /**
@@ -104,9 +166,120 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
     if (showDialog) {
       // This call would first retrieve entitlements that are already fetched from publisher backend when page loads.
       // If the response is granted, do nothing. If the response is not granted, the paywall would be triggered.
-      return this.subscriptionService_.maybeRenderDialogForSelectedPlatform();
+      return this.subscriptionService_
+        .maybeRenderDialogForSelectedPlatform()
+        .then(() => {
+          if (this.viewer_.isEmbedded()) {
+            setTimeout(() => {
+              const buttonEl = this.win.document.querySelector(
+                'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
+              );
+              buttonEl &&
+                this.mutateElement(() =>
+                  buttonEl.classList.add(
+                    'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+                  )
+                );
+            }, SKIP_BUTTON_DELAY_DURATION);
+          }
+        });
     }
     this.subscriptionService_.getDialog().close();
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  onSubscriptionsDialogClick_(event) {
+    if (
+      event.target.classList.contains(
+        'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+      )
+    ) {
+      this.viewerMessagingHandler_.send('selectDocument', {
+        'next': true,
+        'advancementMode': AdvancementMode.MANUAL_ADVANCE,
+      });
+    }
+  }
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  renderSubscriptionsDialogTemplate_() {
+    return (
+      <div subscriptions-dialog subscriptions-display="NOT granted">
+        <div class="i-amphtml-story-subscriptions-dialog-banner">
+          <button class="i-amphtml-story-subscriptions-dialog-banner-button">
+            {this.localizationService_.getLocalizedString(
+              LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SKIP
+            )}
+          </button>
+        </div>
+        <div class="i-amphtml-story-subscriptions-dialog-content">
+          <span class="i-amphtml-story-subscriptions-price">
+            {this.element.getAttribute('price')}
+          </span>
+          {this.element.getAttribute('title') && (
+            <span class="i-amphtml-story-subscriptions-title">
+              {this.element.getAttribute('title')}
+            </span>
+          )}
+          <span class="i-amphtml-story-subscriptions-subtitle-first">
+            {this.element.getAttribute('subtitle-first')}
+          </span>
+          {this.element.getAttribute('subtitle-second') && (
+            <span class="i-amphtml-story-subscriptions-subtitle-second">
+              {this.element.getAttribute('subtitle-second')}
+            </span>
+          )}
+          <button
+            class="i-amphtml-story-subscriptions-publisher-button"
+            subscriptions-action="subscribe"
+            subscriptions-display="NOT granted"
+          >
+            <img class="i-amphtml-story-subscriptions-publisher-logo"></img>
+            <span class="i-amphtml-story-subscriptions-publisher-button-text">
+              {this.localizationService_.getLocalizedString(
+                LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_CTA
+              )}
+              &nbsp;
+              {getStoryAttributeSrc(this.element, 'publisher', /* warn */ true)}
+            </span>
+          </button>
+          <button
+            class="i-amphtml-story-subscriptions-google-button"
+            subscriptions-action="subscribe"
+            subscriptions-display="NOT granted"
+            subscriptions-service="subscribe.google.com"
+            subscriptions-decorate="false"
+          >
+            <span class="i-amphtml-story-subscriptions-google-logo"></span>
+            <span class="i-amphtml-story-subscriptions-google-button-text">
+              {this.localizationService_.getLocalizedString(
+                LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SWG
+              )}
+            </span>
+          </button>
+          <span class="i-amphtml-story-subscriptions-signin">
+            {this.localizationService_.getLocalizedString(
+              LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SUBSCRIBER_QUESTION
+            )}
+            &nbsp;
+            <button
+              subscriptions-action="login"
+              subscriptions-display="NOT granted"
+            >
+              {this.localizationService_.getLocalizedString(
+                LocalizedStringId_Enum.AMP_STORY_SUBSCRIPTIONS_SIGN_IN
+              )}
+            </button>
+          </span>
+        </div>
+      </div>
+    );
   }
 }
 
