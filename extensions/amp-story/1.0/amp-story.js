@@ -583,12 +583,13 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Builds the system layer DOM.
    * @param {string} initialPageId
+   * @param {boolean} isHidden
    * @private
    */
-  buildSystemLayer_(initialPageId) {
+  buildSystemLayer_(initialPageId, isHidden) {
     this.updateAudioIcon_();
     this.updatePausedIcon_();
-    this.element.appendChild(this.systemLayer_.build(initialPageId));
+    this.element.appendChild(this.systemLayer_.build(initialPageId, isHidden));
   }
 
   /** @private */
@@ -949,7 +950,9 @@ export class AmpStory extends AMP.BaseElement {
   layoutStory_() {
     const initialPageId = this.getInitialPageId_();
 
-    this.buildSystemLayer_(initialPageId);
+    const shouldHideSystemLayer = this.getAmpDoc().isPreviewing();
+    this.buildSystemLayer_(initialPageId, shouldHideSystemLayer);
+
     this.setThemeColor_();
 
     const storyLayoutPromise = Promise.all([
@@ -1696,9 +1699,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    const vState = this.getAmpDoc().getVisibilityState();
-    const isPreview = vState === VisibilityState_Enum.PREVIEW;
-    const isVisible = vState === VisibilityState_Enum.VISIBLE;
+    const isPreview = this.getAmpDoc().isPreviewing();
+    const isVisible = this.getAmpDoc().isVisible();
 
     if (isPreview) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
