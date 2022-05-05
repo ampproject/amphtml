@@ -1699,8 +1699,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    const isPreview = this.getAmpDoc().isPreviewing();
-    const isVisible = this.getAmpDoc().isVisible();
+    const vState = this.getAmpDoc().getVisibilityState();
+    const isPreview = vState === VisibilityState_Enum.PREVIEW;
+    const isVisible = vState === VisibilityState_Enum.VISIBLE;
 
     if (isPreview) {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
