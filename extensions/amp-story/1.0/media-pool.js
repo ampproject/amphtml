@@ -558,7 +558,10 @@ export class MediaPool {
    * @return {!Promise} A promise that is resolved when the pool media element
    *     has been reset.
    */
-  resetPoolMediaElementSource_(poolMediaEl, sources = this.getDefaultSource_()) {
+  resetPoolMediaElementSource_(
+    poolMediaEl,
+    sources = this.getDefaultSource_()
+  ) {
     return this.enqueueMediaElementTask_(
       poolMediaEl,
       new UpdateSourcesTask(this.win_, sources)
