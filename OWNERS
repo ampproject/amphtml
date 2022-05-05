@@ -45,7 +45,7 @@
       pattern: '**/OWNERS',
       owners: [
         {name: 'mrjoro', requestReviews: false},
-        {name: 'newmuis', requestReviews: false}
+        {name: 'newmuis', requestReviews: false},
       ],
     },
     {
