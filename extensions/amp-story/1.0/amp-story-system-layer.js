@@ -183,7 +183,8 @@ const renderSystemLayerElement = (element, children, isHidden) => {
         />
         <button
           class={
-            CLOSE_CLASS + ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
+            CLOSE_CLASS +
+            ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
           }
           i-amphtml-i18n-aria-label={
             LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
@@ -199,7 +200,7 @@ const renderSystemLayerElement = (element, children, isHidden) => {
   }
 
   return systemLayerElement;
-}
+};
 
 /**
  * Contains the event name belonging to the viewer control.
@@ -301,7 +302,9 @@ export class SystemLayer {
     }
 
     this.systemLayerEl_ = renderSystemLayerElement(
-      this.parentEl_, this.progressBar_.build(initialPageId), isHidden
+      this.parentEl_,
+      this.progressBar_.build(initialPageId),
+      isHidden
     );
     localizeTemplate(this.systemLayerEl_, this.parentEl_);
 
