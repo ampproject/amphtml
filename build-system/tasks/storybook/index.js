@@ -6,11 +6,8 @@ const {createCtrlcHandler} = require('../../common/ctrlcHandler');
 const {cyan} = require('kleur/colors');
 const {defaultTask: runAmpDevBuildServer} = require('../default-task');
 const {exec, execScriptAsync} = require('../../common/exec');
-const {getBaseUrl} = require('../pr-deploy-bot-utils');
 const {isCiBuild} = require('../../common/ci');
-const {isPullRequestBuild} = require('../../common/ci');
 const {log} = require('../../common/logging');
-const {writeFileSync} = require('fs-extra');
 const {updateSubpackages} = require('../../common/update-packages');
 const {bootstrapThirdPartyFrames} = require('../helpers');
 
@@ -35,9 +32,7 @@ const envDir = (env) => path.join(__dirname, 'env', env);
  */
 function startStorybook(env) {
   const {'storybook_port': port = ENV_PORTS[env]} = argv;
-
   log(`Launching storybook for the ${cyan(env)} environment...`);
-
   execScriptAsync(
     [
       'npx',
@@ -58,21 +53,6 @@ function startStorybook(env) {
  */
 function buildStorybook(env) {
   log(`Building storybook for the ${cyan(env)} environment...`);
-
-  if (env === 'amp' && isPullRequestBuild()) {
-    // Allows PR deploys to reference built binaries.
-    const parameters = {
-      ampBaseUrlOptions: [`${getBaseUrl()}/dist`],
-    };
-    const previewFileContents = [
-      // eslint-disable-next-line local/no-forbidden-terms
-      '// DO NOT SUBMIT',
-      '// This preview.js file was generated for a specific PR build.',
-      // JSON.stringify here. prevents XSS and other types of garbling.
-      `export const parameters = (${JSON.stringify(parameters)});`,
-    ].join('\n');
-    writeFileSync(`${envDir(env)}/preview.js`, previewFileContents);
-  }
 
   const result = exec(
     [

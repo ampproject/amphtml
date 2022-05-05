@@ -9,7 +9,8 @@ import {setStyle} from '#core/dom/style';
 import {map} from '#core/types/object';
 import {parseJson} from '#core/types/object/json';
 
-import {isExperimentOn} from '#experiments';
+import {getExperimentBranch} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {getData, listen} from '#utils/event-helper';
 import {dev, devAssert, userAssert} from '#utils/log';
@@ -313,7 +314,14 @@ export class StoryAdPage {
       'id': this.id_,
     };
 
-    if (isExperimentOn(this.win_, 'story-ad-auto-advance')) {
+    const storyAdSegmentBranch = getExperimentBranch(
+      this.win_,
+      StoryAdSegmentExp.ID
+    );
+    if (
+      storyAdSegmentBranch &&
+      storyAdSegmentBranch != StoryAdSegmentExp.CONTROL
+    ) {
       attributes['auto-advance-after'] = '10s';
     }
 

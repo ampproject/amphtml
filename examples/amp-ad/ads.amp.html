@@ -51,6 +51,12 @@
       height: 100px;
     }
 
+    amp-ad[type="adenza"] {
+      max-width: unset;
+      padding: 0;
+      border: none;
+    }
+
     amp-ad[type="adsloom"] {
       width: 100%;
       max-width: 980px;
@@ -160,6 +166,7 @@
     <option>adagio</option>
     <option>adblade</option>
     <option>adbutler</option>
+    <option>Adenza</option>
     <option>adfox</option>
     <option>adgeneration</option>
     <option>adglare</option>
@@ -272,6 +279,7 @@
     <option>insurads</option>
     <option>invibes</option>
     <option>ix</option>
+    <option>jioads</option>
     <option>jixie</option>
     <option>jubna</option>
     <option>kargo</option>
@@ -568,6 +576,13 @@
     type="adbutler"
     data-account="167283"
     data-zone="212491">
+  </amp-ad>
+
+  <h2>Adenza</h2>
+  <amp-ad width="768" height="480"
+    type="adenza"
+    layout="responsive"
+    data-block-id="614f579bdd5b213cd8bdae26">
   </amp-ad>
 
   <h2>adincube</h2>
@@ -1377,6 +1392,19 @@
   data-options='{"miscParams":{"reserve1":"test1","reserve2":"test2"}}'>
   </amp-ad>
 
+  <h2>JioAds</h2>
+  <amp-ad
+  width="320"
+  height="50"
+  layout="fixed"
+  type="jioads"
+  data-adspot="s1o2i3rv"
+  data-pkg-name="com.jio.web"
+  data-refresh-rate="40"
+  >
+  <div placeholder>Loading....</div>
+  <div fallback>Something went wrong in ad load</div>
+  </amp-ad>
   <h2>Jubna widget</h2>
   <amp-embed width="200" height="200" type="jubna" layout="responsive" data-wid="1078" data-pid="792">
   </amp-embed>
@@ -1690,6 +1718,16 @@
     data-slot="/23081961/monetizemore.com_test_300x250">
   </amp-ad>
 
+  <h2>PubWise</h2>
+  <amp-ad width="320" height="50" data-block-on-consent type="doubleclick"
+    data-slot="/test/test" json='{"targeting":{"hb_format": "banner"}}' rtc-config='{
+      "vendors": {
+        "pubwise": {"TAG_ID": "test"}
+        },
+        "sendRegardlessOfConsentState": true,
+      "timeoutMillis": 2500}'>
+  </amp-ad>
+
   <h2>Pubmine 300x250</h2>
   <amp-ad width="300" height="265" type="pubmine" data-section="1" data-siteid="37790885">
   </amp-ad>
@@ -1972,8 +2010,7 @@
   </amp-ad>
 
   <h2>SunMedia</h2>
-  <amp-ad width="300" height="1" type="sunmedia" layout="responsive" data-cskp="1" data-cid="sunmedia_test"
-    data-crst="1">
+  <amp-ad width="1" height="1" type="sunmedia" layout="responsive" data-cid="5898aec7-32f5-4e3b-bd67-41f68b58b412">
   </amp-ad>
 
   <h2>SVK Native widget</h2>

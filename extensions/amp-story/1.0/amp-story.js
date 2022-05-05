@@ -51,7 +51,8 @@ import {endsWith} from '#core/types/string';
 import {parseQueryString} from '#core/types/string/url';
 import {getHistoryState as getWindowHistoryState} from '#core/window/history';
 
-import {isExperimentOn} from '#experiments';
+import {getExperimentBranch, isExperimentOn} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {calculateExtensionFileUrl} from '#service/extension-script';
@@ -656,9 +657,14 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
+      const storyAdSegmentBranch = getExperimentBranch(
+        this.win,
+        StoryAdSegmentExp.ID
+      );
       if (
         !this.activePage_.isAd() ||
-        isExperimentOn(this.win, 'story-ad-auto-advance')
+        (storyAdSegmentBranch &&
+          storyAdSegmentBranch != StoryAdSegmentExp.CONTROL)
       ) {
         this.systemLayer_.updateProgress(pageId, progress);
       }
@@ -947,8 +953,9 @@ export class AmpStory extends AMP.BaseElement {
     this.setThemeColor_();
 
     const storyLayoutPromise = Promise.all([
-      this.getAmpDoc().whenFirstVisible(), // Pauses execution during prerender.
       this.initializePages_(),
+      // Pauses execution during prerender.
+      this.getAmpDoc().whenFirstPreviewedOrVisible(),
     ])
       .then(() => {
         this.handleConsentExtension_();
@@ -1002,6 +1009,17 @@ export class AmpStory extends AMP.BaseElement {
               .then((attachmentImpl) =>
                 attachmentImpl.open(false /** shouldAnimate */)
               );
+          }
+
+          const shoppingData = getHistoryState(
+            this.win,
+            HistoryState.SHOPPING_DATA
+          );
+
+          if (shoppingData) {
+            this.storeService_.dispatch(Action.ADD_SHOPPING_DATA, {
+              'activeProductData': shoppingData,
+            });
           }
         }
 
@@ -1678,7 +1696,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    this.getAmpDoc().isVisible() ? this.resume_() : this.pause_();
+    const vState = this.getAmpDoc().getVisibilityState();
+    const isPreview = vState === VisibilityState_Enum.PREVIEW;
+    const isVisible = vState === VisibilityState_Enum.VISIBLE;
+    isPreview || isVisible ? this.resume_() : this.pause_();
   }
 
   /**

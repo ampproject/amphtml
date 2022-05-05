@@ -8,11 +8,13 @@ import {scale, setImportantStyles} from '#core/dom/style';
 import {debounce} from '#core/types/function';
 import {hasOwn, map} from '#core/types/object';
 
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
+
 import {Services} from '#service';
 
 import {dev, devAssert} from '#utils/log';
 
-import {isExperimentOn} from 'src/experiments';
+import {getExperimentBranch} from 'src/experiments';
 
 import {
   StateProperty,
@@ -155,12 +157,17 @@ export class ProgressBar {
             this.clear_();
           }
 
+          const storyAdSegmentBranch = getExperimentBranch(
+            this.win_,
+            StoryAdSegmentExp.ID
+          );
           /** @type {!Array} */ (pageIds).forEach((id) => {
             if (
               // Do not show progress bar for the ad page (control group).
               // Show progress bar for the ad page (experiment group).
               (!this.isAdSegment_(id) ||
-                isExperimentOn(this.win_, 'story-ad-auto-advance')) &&
+                (storyAdSegmentBranch &&
+                  storyAdSegmentBranch != StoryAdSegmentExp.CONTROL)) &&
               !(id in this.segmentIdMap_)
             ) {
               this.addSegment_(id);

@@ -25,7 +25,8 @@ import {isAutoplaySupported, tryPlay} from '#core/dom/video';
 import {toArray} from '#core/types/array';
 import {debounce, once} from '#core/types/function';
 
-import {isExperimentOn} from '#experiments';
+import {getExperimentBranch, isExperimentOn} from '#experiments';
+import {StoryAdSegmentExp} from '#experiments/story-ad-progress-segment';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -42,10 +43,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AnimationManager, hasAnimations} from './animation';
-import {
-  upgradeBackgroundAudio,
-  waitForElementsWithUnresolvedAudio,
-} from './audio';
+import {upgradeBackgroundAudio} from './audio';
 import {EventType, dispatch} from './events';
 import {renderLoadingSpinner, toggleLoadingSpinner} from './loading-spinner';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
@@ -164,6 +162,11 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override  */
   static prerenderAllowed(element) {
     return isPrerenderActivePage(element);
+  }
+
+  /** @override  */
+  static previewAllowed() {
+    return true;
   }
 
   /** @param {!AmpElement} element */
@@ -540,10 +543,14 @@ export class AmpStoryPage extends AMP.BaseElement {
               this.unmuteAllMedia();
             }
           });
+          this.toggleCaptions_(
+            this.storeService_.get(StateProperty.CAPTIONS_STATE)
+          );
         });
       });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
+      this.checkPageHasCaptions_();
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
@@ -561,6 +568,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.muteAllMedia();
 
     this.installPageAttachmentExtension_();
+    this.initializeCaptionsListener_();
 
     return Promise.all([
       this.waitForMediaLayout_().then(() => this.markPageAsLoaded_()),
@@ -675,6 +683,19 @@ export class AmpStoryPage extends AMP.BaseElement {
       mediaPromises.push(this.backgroundAudioDeferred_.promise);
     }
 
+    return Promise.all(mediaPromises);
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  waitForAmpVideosBuilt_() {
+    const mediaSet = this.getAllAmpVideos_();
+
+    const mediaPromises = mediaSet.map((mediaEl) =>
+      whenUpgradedToCustomElement(mediaEl).then((el) => el.whenBuilt())
+    );
     return Promise.all(mediaPromises);
   }
 
@@ -1132,8 +1153,15 @@ export class AmpStoryPage extends AMP.BaseElement {
   emitProgress_(progress) {
     // Don't emit progress for ads, since the progress bar is hidden.
     // Don't emit progress for inactive pages, because race conditions.
+    const storyAdSegmentBranch = getExperimentBranch(
+      this.win,
+      StoryAdSegmentExp.ID
+    );
+    const progressBarExpDisabled =
+      !storyAdSegmentBranch ||
+      storyAdSegmentBranch == StoryAdSegmentExp.CONTROL;
     if (
-      (!isExperimentOn(this.win, 'story-ad-auto-advance') && this.isAd()) ||
+      (progressBarExpDisabled && this.isAd()) ||
       this.state_ === PageState.NOT_ACTIVE
     ) {
       return;
@@ -1330,7 +1358,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the page has audio elements or video elements with audio.
+   * Checks if the page has audio elements or video elements with audio and updates the store service state.
    * @private
    */
   checkPageHasAudio_() {
@@ -1353,13 +1381,25 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   hasVideoWithAudio_() {
-    const ampVideoEls = this.element.querySelectorAll('amp-video');
-    return waitForElementsWithUnresolvedAudio(this.element).then(() =>
+    return this.waitForAmpVideosBuilt_().then(() =>
       Array.prototype.some.call(
-        ampVideoEls,
-        (video) =>
-          !video.hasAttribute('noaudio') &&
-          parseFloat(video.getAttribute('volume')) !== 0
+        this.getAllAmpVideos_(),
+        (ampVideo) =>
+          !ampVideo.hasAttribute('noaudio') &&
+          parseFloat(ampVideo.getAttribute('volume')) !== 0
+      )
+    );
+  }
+
+  /**
+   * Checks if the page has any videos with captions.
+   * @return {!Promise<boolean>}
+   * @private
+   */
+  hasVideoWithCaptions_() {
+    return this.waitForAmpVideosBuilt_().then(() =>
+      Array.prototype.some.call(this.getAllAmpVideos_(), (ampVideo) =>
+        ampVideo.querySelector('track')
       )
     );
   }
@@ -1378,6 +1418,19 @@ export class AmpStoryPage extends AMP.BaseElement {
       Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK,
       pageHasElementWithPlayback
     );
+  }
+
+  /**
+   * Checks if the page has any captions.
+   * @private
+   */
+  checkPageHasCaptions_() {
+    this.hasVideoWithCaptions_().then((hasVideoWithCaptions) => {
+      this.storeService_.dispatch(
+        Action.TOGGLE_PAGE_HAS_CAPTIONS,
+        hasVideoWithCaptions
+      );
+    });
   }
 
   /**
@@ -1687,5 +1740,41 @@ export class AmpStoryPage extends AMP.BaseElement {
         toggle ? el.getAttribute('i-amphtml-orig-tabindex') : -1
       );
     });
+  }
+
+  /**
+   * Listens for changes on captions if there are tracks on videos and page is active.
+   * @private
+   */
+  initializeCaptionsListener_() {
+    this.hasVideoWithCaptions_().then((hasVideoWithCaptions) => {
+      if (!hasVideoWithCaptions) {
+        return;
+      }
+      this.storeService_.subscribe(
+        StateProperty.CAPTIONS_STATE,
+        (captionsState) => {
+          if (this.isActive()) {
+            this.toggleCaptions_(captionsState);
+          }
+        },
+        true
+      );
+    });
+  }
+
+  /**
+   * Shows or hides the captions for all elements that implement toggleCaptions.
+   * @param {boolean} captionsState
+   * @return {!Promise}
+   */
+  toggleCaptions_(captionsState) {
+    return this.getAllAmpVideos_().map((ampVideo) =>
+      ampVideo.getImpl().then((impl) => {
+        if (impl.toggleCaptions) {
+          impl.toggleCaptions(captionsState);
+        }
+      })
+    );
   }
 }

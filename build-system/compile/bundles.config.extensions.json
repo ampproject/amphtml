@@ -837,6 +837,14 @@
     }
   },
   {
+    "name": "amp-pan-zoom",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "bento": true
+    }
+  },
+  {
     "name": "amp-pinterest",
     "version": "0.1",
     "latestVersion": "0.1",
