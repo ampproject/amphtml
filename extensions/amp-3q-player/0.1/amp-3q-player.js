@@ -43,6 +43,8 @@ class Amp3QPlayer extends AMP.BaseElement {
 
     this.dataId = null;
 
+    this.playerId = null;
+
     /** @private @const */
     this.pauseHelper_ = new PauseHelper(this.element);
   }
@@ -64,11 +66,18 @@ class Amp3QPlayer extends AMP.BaseElement {
     const {element: el} = this;
 
     this.dataId = userAssert(
-      el.getAttribute('data-id') || el.getAttribute('data-player'),
-      'One of data-id or data-player attributes is required for <amp-3q-player>',
+      el.getAttribute('data-id'),
+      'data-id is required for <amp-3q-player>',
       el
     );
 
+    if (el.getAttribute('data-player')) {
+      this.playerId = userAssert(
+        el.getAttribute('data-player'),
+        'data-player attribute is required for <amp-3q-player>',
+        el
+      );
+    }
     const deferred = new Deferred();
     this.playerReadyPromise_ = deferred.promise;
     this.playerReadyResolver_ = deferred.resolve;
@@ -93,8 +102,8 @@ class Amp3QPlayer extends AMP.BaseElement {
       dev().assertString(this.dataId) +
       // Autoplay is handled by VideoManager
       '?autoplay=false&amp=true';
-    if (this.dataId) {
-      iframeSrc += '&player=' + this.dataId;
+    if (this.playerId) {
+      iframeSrc += '&player=' + this.playerId;
     }
 
     return iframeSrc;
