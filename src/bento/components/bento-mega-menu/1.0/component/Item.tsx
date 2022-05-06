@@ -1,4 +1,5 @@
-import {useLayoutEffect, useMemo, useRef, useState} from '#preact';
+import {useLayoutEffect, useMemo, useState} from '#preact';
+import useEvent from '#preact/hooks/useEvent';
 
 import {useMegaMenuContext} from './useMegaMenu';
 
@@ -15,21 +16,18 @@ const [Item, useMegaMenuItem] = createProviderFromHook(
       overrideItemId(propId || megaMenu.actions.generateItemId());
     }, [propId, megaMenu.actions]);
 
-    const megaMenuRefObj = {megaMenu, itemId};
-    const megaMenuRef = useRef(megaMenuRefObj);
-    megaMenuRef.current = megaMenuRefObj;
+    const toggle = useEvent(() => {
+      if (megaMenu.openId === itemId) {
+        megaMenu.actions.closeMenu();
+      } else {
+        megaMenu.actions.setOpenId(itemId);
+      }
+    });
 
     const actions = useMemo(
       () => ({
         overrideItemId,
-        toggle() {
-          const {itemId, megaMenu} = megaMenuRef.current;
-          if (megaMenu.openId === itemId) {
-            megaMenu.actions.closeMenu();
-          } else {
-            megaMenu.actions.setOpenId(itemId);
-          }
-        },
+        toggle,
       }),
       []
     );
