@@ -306,6 +306,13 @@ export class SystemLayer {
       this.progressBar_.build(initialPageId),
       isHidden
     );
+    if (isHidden) {
+      // The default value of `SYSTEM_UI_IS_VISIBLE_STATE` is `true`. We set it
+      // to `false` here solely to ensure that a subsequent firing of the
+      // `TOGGLE_SYSTEM_UI_IS_VISIBLE` action with a `true` value registers as a
+      // change in state instead of being a no-op.
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    }
     localizeTemplate(this.systemLayerEl_, this.parentEl_);
 
     // Make the share button link to the current document to make sure
