@@ -1,82 +1,27 @@
-import {toggleAttribute} from '#core/dom';
-import {childElementsByTag} from '#core/dom/query';
-import {toArray} from '#core/types/array';
-
 import * as Preact from '#preact';
-import {useLayoutEffect} from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 
 import {BentoMegaMenu} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 
-export class BaseElement extends PreactBaseElement {
-  /** @override */
-  init() {
-    const {element} = this;
-    const mu = new MutationObserver(() => {
-      // this.mutateProps({children: mapChildrenFromDom(element, mu)});
-    });
-    mu.observe(element, {
-      attributeFilter: ['expanded', 'id'],
-      subtree: true,
-      childList: true,
-    });
-
-    return {children: mapChildrenFromDom(element, mu)};
-  }
-}
-
-function mapChildrenFromDom(element, mu) {
-  const sections = toArray(childElementsByTag(element, 'section'));
-  const children = sections.map((section) => {
-    const {firstElementChild: title, lastElementChild: contents} = section;
-
-    const TitleShim = getTitleShim(title);
-    const ContentShim = getContentShim(contents);
-
-    const item = (
-      <BentoMegaMenu.Item>
-        <BentoMegaMenu.Title as={TitleShim} />
-        <BentoMegaMenu.Content as={ContentShim} />
-      </BentoMegaMenu.Item>
-    );
-    return item;
-  });
-  return children;
-}
-
-function getTitleShim(element) {
-  return function TitleShim(props) {
-    useLayoutEffect(() => {
-      setAttributes(element, props);
-      return () => unsetAttributes(element, props);
-    }, [props]);
-
-    return null;
-  };
-}
-function getContentShim(element) {
-  return function ContentShim(props) {
-    useLayoutEffect(() => {
-      setAttributes(element, props);
-      return () => unsetAttributes(element, props);
-    }, [props]);
-
-    return null;
-  };
-}
+export class BaseElement extends PreactBaseElement {}
 
 /** @override */
 BaseElement['Component'] = BentoMegaMenu;
 
 /** @override */
 BaseElement['props'] = {
-  // 'children': {passthrough: true},
+  'children': {
+    selector: '*',
+    single: false,
+  },
 };
 
-// Prevent the Preact component from showing:
 /** @override */
-// BaseElement['detached'] = true;
+BaseElement['usesShadowDom'] = true;
+
+/** @override */
+BaseElement['shadowCss'] = COMPONENT_CSS;
 
 function setAttributes(element, props) {
   updateAttributes(element, props, false);
