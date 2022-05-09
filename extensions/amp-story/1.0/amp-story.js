@@ -196,7 +196,7 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
  * The number of milliseconds to wait before showing the paywall on paywall page.
  * @const {number}
  */
-export const PAYWALL_DELAY_DURATION = 500;
+export const SUBSCRIPTIONS_DELAY_DURATION = 500;
 
 /** @type {string} */
 const TAG = 'amp-story';
@@ -1647,7 +1647,7 @@ export class AmpStory extends AMP.BaseElement {
         this.pageAfterSubscriptionsGranted_ = targetPageId;
         this.showSubscriptionsDialog_();
         this.showSubscriptionsUITimeout_ = null;
-      }, PAYWALL_DELAY_DURATION);
+      }, SUBSCRIPTIONS_DELAY_DURATION);
     }
     // Hide paywall UI when navigating back to the previous page.
     if (

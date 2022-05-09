@@ -19,7 +19,7 @@ import {DEFAULT_SUBSCRIPTIONS_PAGE_INDEX} from 'extensions/amp-story-subscriptio
 import * as consent from '../../../../src/consent';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import {AmpStory, PAYWALL_DELAY_DURATION} from '../amp-story';
+import {AmpStory, SUBSCRIPTIONS_DELAY_DURATION} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {NavigationDirection, PageState} from '../amp-story-page';
 import {
@@ -1373,7 +1373,7 @@ describes.realWin(
       });
     });
 
-    describe.only('amp-story-subscriptions navigation', () => {
+    describe('amp-story-subscriptions navigation', () => {
       let subscriptionsEl;
       let storeService;
       const pages = ['cover', 'page-1', 'page-2', 'page-3', 'page-4'];
@@ -1476,7 +1476,7 @@ describes.realWin(
             SubscriptionsState.BLOCKED
           );
           await nextTick();
-          clock.tick(PAYWALL_DELAY_DURATION);
+          clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.true;
         });
@@ -1577,7 +1577,7 @@ describes.realWin(
           });
 
           it('should not show paywall on the default paywall page', () => {
-            clock.tick(PAYWALL_DELAY_DURATION);
+            clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
             expect(
               storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
             ).to.be.false;
@@ -1589,7 +1589,7 @@ describes.realWin(
             );
             defaultPaywallPage.element.dispatchEvent(clickRightEvent);
 
-            clock.tick(PAYWALL_DELAY_DURATION);
+            clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
             expect(
               storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
             ).to.be.true;
@@ -1609,7 +1609,7 @@ describes.realWin(
 
         it('should resume to paywall page once status becomes granted from blocked if the paywall is triggered on time delay', async () => {
           const clock = env.sandbox.useFakeTimers();
-          clock.tick(PAYWALL_DELAY_DURATION); // Paywall is shown after delay.
+          clock.tick(SUBSCRIPTIONS_DELAY_DURATION); // Paywall is shown after delay.
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.GRANTED
@@ -1840,7 +1840,7 @@ describes.realWin(
           paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
-          clock.tick(PAYWALL_DELAY_DURATION);
+          clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
 
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
