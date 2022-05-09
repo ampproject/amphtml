@@ -572,8 +572,8 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise} A promise that resolves when all unplayed videos have
-   *     been reregistered and played.
+   * @return {!Promise} A promise that resolves when all videos that failed to
+   *     play have been reregistered and played.
    * @private
    */
   reregisterUnplayedVideos_() {
@@ -584,6 +584,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.mediaPoolPromise_.then((pool) => {
       const playPromises = unplayedVideos.map((video) => {
         return this.reregisterMedia_(pool, video).then(() => {
+          this.toggleErrorMessage_(false);
           return this.playMedia_(pool, video);
         });
       });
