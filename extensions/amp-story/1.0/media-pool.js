@@ -554,15 +554,17 @@ export class MediaPool {
   /**
    * @param {!PoolBoundElementDef} poolMediaEl The element whose source should
    *     be reset.
+   * @param {!Sources=} sources Optional sources for the media element.
    * @return {!Promise} A promise that is resolved when the pool media element
    *     has been reset.
    */
-  resetPoolMediaElementSource_(poolMediaEl) {
-    const defaultSources = this.getDefaultSource_();
-
+  resetPoolMediaElementSource_(
+    poolMediaEl,
+    sources = this.getDefaultSource_()
+  ) {
     return this.enqueueMediaElementTask_(
       poolMediaEl,
-      new UpdateSourcesTask(this.win_, defaultSources)
+      new UpdateSourcesTask(this.win_, sources)
     ).then(() => this.enqueueMediaElementTask_(poolMediaEl, new LoadTask()));
   }
 
@@ -664,23 +666,50 @@ export class MediaPool {
   }
 
   /**
+   * Reregisters the specified element to be usable by the media pool. This
+   * is useful in cases where the element's sources have updated since the
+   * previous registration and a reload of the element using these new sources
+   * is desired.
+   * @param {!DomElementDef} domMediaEl The media element to be reregistered.
+   * @return {!Promise} A promise that is resolved when the element has been
+   *     successfully reregistered, or rejected otherwise.
+   */
+  reregister(domMediaEl) {
+    return this.register(domMediaEl, true /** isReregistration */);
+  }
+
+  /**
    * Registers the specified element to be usable by the media pool.  Elements
    * should be registered as early as possible, in order to prevent them from
-   * being played while not managed by the media pool.  If the media element is
-   * already registered, this is a no-op.  Registering elements from within the
-   * pool is not allowed, and will also be a no-op.
+   * being played while not managed by the media pool. Registering elements
+   * from within the pool is not allowed, and will also be a no-op.
+   *
+   * If the media element is already registered and `isReregistration` is true,
+   * then the media element will be loaded. However, if the element is
+   * registered and `isReregistration` is false, then this is a no-op.
    * @param {!DomElementDef} domMediaEl The media element to be
    *     registered.
+   * @param {boolean=} isReregistration Whether the given element has already
+   *     been registered.
    * @return {!Promise} A promise that is resolved when the element has been
    *     successfully registered, or rejected otherwise.
    */
-  register(domMediaEl) {
+  register(domMediaEl, isReregistration = false) {
     const parent = domMediaEl.parentNode;
     if (parent && parent.signals) {
       this.trackAmpElementToBless_(/** @type {!AmpElement} */ (parent));
     }
 
     if (this.isPoolMediaElement_(domMediaEl)) {
+      // In the case of a reregistration, `UpdateSourcesTask` and `LoadTask`
+      // are used to load the element using its sources (which may have changed
+      // since the previous registration).
+      if (isReregistration) {
+        const sources = Sources.removeFrom(this.win_, domMediaEl);
+        this.sources_[domMediaEl.id] = sources;
+        return this.resetPoolMediaElementSource_(domMediaEl, sources);
+      }
+
       // This media element originated from the media pool.
       return Promise.resolve();
     }
