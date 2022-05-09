@@ -577,7 +577,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   reregisterAndPlayUnplayedVideos_() {
-    const videos = this.getAllMedia_().filter((el) => el.tagName === 'VIDEO');
+    const videos = this.getAllVideos_();
     const unplayedVideos = videos.filter(
       (video) => video.readyState < /* HAVE_CURRENT_DATA */ 2
     );
