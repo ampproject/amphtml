@@ -193,12 +193,6 @@ const MAX_MEDIA_ELEMENT_COUNTS = {
 };
 
 /**
- * The index of the page where the paywall would be triggered.
- * @const {number}
- */
-export const PAYWALL_PAGE_INDEX = 2;
-
-/**
  * The number of milliseconds to wait before showing the paywall on paywall page.
  * @const {number}
  */
@@ -328,6 +322,14 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?number} the timeout to show subscriptions dialog after delay */
     this.showSubscriptionsUITimeout_ = null;
+
+    /** @private {?number} the index of the page where the paywall would be triggered. */
+    this.subscriptionsPageIndex_ = this.storeService_.get(
+      StateProperty.SUBSCRIPTIONS_PAGE_INDEX
+    );
+
+    /** @private {!Deferred} a promise that is resolved once the subscriptions page index is extracted from amp-story-subscriptions. */
+    this.subscriptionsPageIndexPromise_ = new Deferred();
   }
 
   /** @override */
@@ -721,6 +723,14 @@ export class AmpStory extends AMP.BaseElement {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.SUBSCRIPTIONS_PAGE_INDEX,
+      (subscriptionsPageIndex) => {
+        this.subscriptionsPageIndexPromise_.resolve();
+        this.subscriptionsPageIndex_ = subscriptionsPageIndex;
+      }
     );
 
     this.storeService_.subscribe(
@@ -1350,12 +1360,23 @@ export class AmpStory extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    // Block until the subscription state gets resolved.
+    // Block until the subscriptions page index gets resolved.
     const subscriptionsState = this.storeService_.get(
       StateProperty.SUBSCRIPTIONS_STATE
     );
     if (
-      pageIndex >= PAYWALL_PAGE_INDEX &&
+      subscriptionsState !== SubscriptionsState.DISABLED &&
+      this.subscriptionsPageIndex_ === -1
+    ) {
+      return this.blockOnPendingSubscriptionsPageIndex_(
+        targetPageId,
+        direction
+      );
+    }
+
+    // Block until the subscription state gets resolved.
+    if (
+      pageIndex >= this.subscriptionsPageIndex_ &&
       subscriptionsState === SubscriptionsState.PENDING
     ) {
       return this.blockOnPendingSubscriptionsState_(targetPageId, direction);
@@ -1363,13 +1384,13 @@ export class AmpStory extends AMP.BaseElement {
     // Navigation to the locked pages after the paywall page should be redirected to the paywall page.
     // This is necessary for deeplinking case to make sure the paywall dialog shows on the paywall page.
     if (
-      pageIndex > PAYWALL_PAGE_INDEX &&
+      pageIndex > this.subscriptionsPageIndex_ &&
       subscriptionsState === SubscriptionsState.BLOCKED
     ) {
       this.pageAfterSubscriptionsGranted_ = targetPageId;
       this.showSubscriptionsDialog_();
       return this.switchTo_(
-        this.pages_[PAYWALL_PAGE_INDEX].element.id,
+        this.pages_[this.subscriptionsPageIndex_].element.id,
         direction
       );
     }
@@ -1573,6 +1594,19 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
+   * Block while waiting to resolve subscriptions page index.
+   * @param {string} targetPageId
+   * @param {!NavigationDirection} direction
+   * @return {!Promise}
+   * @private
+   */
+  blockOnPendingSubscriptionsPageIndex_(targetPageId, direction) {
+    return this.subscriptionsPageIndexPromise_.promise.then(() => {
+      return this.switchTo_(targetPageId, direction);
+    });
+  }
+
+  /**
    * @private
    */
   showSubscriptionsDialog_() {
@@ -1604,7 +1638,7 @@ export class AmpStory extends AMP.BaseElement {
     );
     // Navigation to the paywall page should show dialog after delay if not already shown.
     if (
-      pageIndex === PAYWALL_PAGE_INDEX &&
+      pageIndex === this.subscriptionsPageIndex_ &&
       !subscriptionsDialogUIState &&
       this.storeService_.get(StateProperty.SUBSCRIPTIONS_STATE) ===
         SubscriptionsState.BLOCKED
@@ -1616,7 +1650,10 @@ export class AmpStory extends AMP.BaseElement {
       }, PAYWALL_DELAY_DURATION);
     }
     // Hide paywall UI when navigating back to the previous page.
-    if (pageIndex < PAYWALL_PAGE_INDEX && subscriptionsDialogUIState) {
+    if (
+      pageIndex < this.subscriptionsPageIndex_ &&
+      subscriptionsDialogUIState
+    ) {
       this.hideSubscriptionsDialog_();
     }
   }

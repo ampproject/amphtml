@@ -20,6 +20,12 @@ import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 const TAG = 'amp-story-subscriptions';
 
 /**
+ * The index of the page where the paywall would be triggered.
+ * @const {number}
+ */
+export const DEFAULT_SUBSCRIPTIONS_PAGE_INDEX = 2;
+
+/**
  * The number of milliseconds to wait before showing the skip button on dialog banner.
  * @const {number}
  */
@@ -61,6 +67,18 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.storeService_ = storeService;
       this.subscriptionService_ = subscriptionService;
       this.localizationService_ = localizationService;
+
+      const pages = this.win.document.querySelectorAll('amp-story-page');
+      const subscriptionsPageIndex = this.element.getAttribute(
+        'subscriptions-page-index'
+      );
+      this.storeService_.dispatch(
+        Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+        subscriptionsPageIndex > 2 &&
+          subscriptionsPageIndex !== pages.length - 1
+          ? subscriptionsPageIndex
+          : DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+      );
 
       // Get grant status immediately to set up the initial subscriptions state.
       this.getGrantStatusAndUpdateState_();
