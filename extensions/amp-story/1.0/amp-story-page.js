@@ -559,7 +559,7 @@ export class AmpStoryPage extends AMP.BaseElement {
             // that is the point at which the story has entered the VISIBLE
             // state and its origin sources have been added.
             return this.waitForPlaybackMediaLayoutEnd_().then(() => {
-              return this.reregisterUnplayedVideos_();
+              return this.reregisterAndPlayUnplayedVideos_();
             });
           }
         });
@@ -576,7 +576,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     play have been reregistered and played.
    * @private
    */
-  reregisterUnplayedVideos_() {
+  reregisterAndPlayUnplayedVideos_() {
     const videos = this.getAllMedia_().filter((el) => el.tagName === 'VIDEO');
     const unplayedVideos = videos.filter(
       (video) => video.readyState < /* HAVE_CURRENT_DATA */ 2
