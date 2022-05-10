@@ -116,7 +116,7 @@ Subscription/offer price.
 
 A headline string that describes the subscription/offer.
 
-### `Description` {string} required
+### `description` {string} required
 
 One line of description for the subscription/offer.
 
