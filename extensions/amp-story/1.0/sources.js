@@ -96,7 +96,16 @@ export class Sources {
    *     element.
    */
   static removeFrom(win, element) {
-    const elementToUse = ampMediaElementFor(element) || element;
+    let elementToUse;
+    if (element.tagName === 'VIDEO') {
+      // A video element and its amp-video parent can each have different
+      // sources. We prefer to remove and return the video's sources because
+      // amp-video's sources are primarily those provided by the publisher's
+      // whereas the video's sources are added and modified via amp-video JS.
+      elementToUse = element;
+    } else {
+      elementToUse = ampMediaElementFor(element) || element;
+    }
 
     let srcEl = null;
     // If the src attribute is specified, create a source element from it as it
