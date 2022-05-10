@@ -731,7 +731,7 @@ export class AmpDoc {
    * Whether the AMP document currently being previewed.
    * @return {boolean}
    */
-  isPreviewing() {
+  isPreview() {
     return this.visibilityState_ == VisibilityState_Enum.PREVIEW;
   }
 
