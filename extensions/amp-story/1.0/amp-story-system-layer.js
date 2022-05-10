@@ -92,10 +92,10 @@ const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 /**
  * @param {!Element} element
  * @param {?Element=} children
- * @param {boolean} isHidden
+ * @param {boolean} isVisible
  * @return {!Element}
  */
-const renderSystemLayerElement = (element, children, isHidden) => {
+const renderSystemLayerElement = (element, children, isVisible) => {
   const systemLayerElement = (
     <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
       {children}
@@ -195,7 +195,7 @@ const renderSystemLayerElement = (element, children, isHidden) => {
     </aside>
   );
 
-  if (isHidden) {
+  if (!isVisible) {
     systemLayerElement.classList.add('i-amphtml-story-hidden');
   }
 
@@ -293,10 +293,10 @@ export class SystemLayer {
 
   /**
    * @param {string} initialPageId
-   * @param {boolean=} isHidden
+   * @param {boolean=} isVisible
    * @return {!Element}
    */
-  build(initialPageId, isHidden = false) {
+  build(initialPageId, isVisible = true) {
     if (this.root_) {
       return this.root_;
     }
@@ -304,15 +304,8 @@ export class SystemLayer {
     this.systemLayerEl_ = renderSystemLayerElement(
       this.parentEl_,
       this.progressBar_.build(initialPageId),
-      isHidden
+      isVisible
     );
-    if (isHidden) {
-      // The default value of `SYSTEM_UI_IS_VISIBLE_STATE` is `true`. We set it
-      // to `false` here solely to ensure that a subsequent firing of the
-      // `TOGGLE_SYSTEM_UI_IS_VISIBLE` action with a `true` value registers as a
-      // change in state instead of being a no-op.
-      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
-    }
     localizeTemplate(this.systemLayerEl_, this.parentEl_);
 
     // Make the share button link to the current document to make sure

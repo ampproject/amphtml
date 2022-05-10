@@ -583,13 +583,13 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Builds the system layer DOM.
    * @param {string} initialPageId
-   * @param {boolean} isHidden
+   * @param {boolean} isVisible
    * @private
    */
-  buildSystemLayer_(initialPageId, isHidden) {
+  buildSystemLayer_(initialPageId, isVisible) {
     this.updateAudioIcon_();
     this.updatePausedIcon_();
-    this.element.appendChild(this.systemLayer_.build(initialPageId, isHidden));
+    this.element.appendChild(this.systemLayer_.build(initialPageId, isVisible));
   }
 
   /** @private */
@@ -950,8 +950,15 @@ export class AmpStory extends AMP.BaseElement {
   layoutStory_() {
     const initialPageId = this.getInitialPageId_();
 
-    const shouldHideSystemLayer = this.getAmpDoc().isPreviewing();
-    this.buildSystemLayer_(initialPageId, shouldHideSystemLayer);
+    const shouldShowSystemLayer = !this.getAmpDoc().isPreview();
+    if (!shouldShowSystemLayer) {
+      // The default value of `SYSTEM_UI_IS_VISIBLE_STATE` is `true`. We set it
+      // to `false` here solely to ensure that a subsequent firing of the
+      // `TOGGLE_SYSTEM_UI_IS_VISIBLE` action with a `true` value registers as
+      // a change in state instead of being a no-op.
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    }
+    this.buildSystemLayer_(initialPageId, shouldShowSystemLayer);
 
     this.setThemeColor_();
 
