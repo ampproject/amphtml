@@ -1,3 +1,4 @@
+import {setFormForElement} from '#core/dom/form';
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
@@ -98,6 +99,11 @@ describes.realWin(
         <amp-story-subscriptions layout="container"> </amp-story-subscriptions>
       );
       storyEl.appendChild(subscriptionsEl);
+
+      for (let i = 0; i < 4; i++) {
+        storyEl.appendChild(win.document.createElement('amp-story-page'));
+      }
+
       win.document.body.appendChild(storyEl);
       await subscriptionsEl.whenBuilt();
     });

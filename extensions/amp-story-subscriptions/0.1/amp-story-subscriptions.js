@@ -6,7 +6,7 @@ import {clamp} from '#core/math';
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
-import {dev} from '#utils/log';
+import {dev, devAssert} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-subscriptions-0.1.css';
 import {
@@ -72,6 +72,12 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       const pages = this.win.document.querySelectorAll(
         'amp-story-page:not([ad])'
       );
+      devAssert(
+        pages.length >= 4,
+        'The number of pages should be at least 4 to enable subscriptions feature, got %s',
+        pages.length
+      );
+
       const subscriptionsPageIndex = this.element.getAttribute(
         'subscriptions-page-index'
       );
