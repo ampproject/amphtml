@@ -24,6 +24,10 @@ export function handleCompanionDisplay(media, apesterElement) {
     /**@type {!JsonObject}*/ (companionOptions),
     'settings'
   );
+  const rtcConfig = getValueForExpr(
+    /**@type {!JsonObject}*/ (companionOptions),
+    'rtcConfig'
+  );
 
   if (
     enabledDisplayAd &&
@@ -39,7 +43,8 @@ export function handleCompanionDisplay(media, apesterElement) {
       slot,
       bannerSizes,
       apesterElement,
-      refreshInterval
+      refreshInterval,
+      rtcConfig
     );
   }
 }
@@ -49,13 +54,15 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @param {Array} bannerSizes
  * @param {!AmpElement} apesterElement
  * @param {number} refreshInterval
+ * @param {!JsonObject} rtcConfig
  * @return {!Element}
  */
 function constructCompanionDisplayAd(
   slot,
   bannerSizes,
   apesterElement,
-  refreshInterval
+  refreshInterval,
+  rtcConfig
 ) {
   const maxWidth = Math.max.apply(
     null,
@@ -81,6 +88,9 @@ function constructCompanionDisplayAd(
       'data-enable-refresh': `${refreshInterval}`,
     }
   );
+  if (rtcConfig) {
+    ampAd.setAttribute('rtc-config', JSON.stringify(rtcConfig));
+  }
   ampAd.classList.add('i-amphtml-amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
   Services.mutatorForDoc(apesterElement).requestChangeSize(
