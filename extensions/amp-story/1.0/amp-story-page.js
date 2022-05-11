@@ -95,13 +95,13 @@ const TAG = 'amp-story-page';
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 /** @private @const {string} */
-const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '2s';
+const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '3s';
 
 /** @private @const {string} */
 const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
 
 /** @private @const {number} */
-const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
+const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 5;
 
 /**
  * @param {function(Event)} onClick
@@ -321,7 +321,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.maybeConvertCtaLayerToPageOutlink_();
   }
 
-  /** @private */
+  /**
+   * DESCRIPTION
+   * @private
+   */
   maybeSetPreviewDuration_() {
     if (!this.getAmpDoc().isPreview()) {
       return;
@@ -334,21 +337,25 @@ export class AmpStoryPage extends AMP.BaseElement {
       : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
     this.element.setAttribute('auto-advance-after', autoAdvanceDuration);
 
-    firstVideo &&
+    // DESCRIPTION
+    if (firstVideo) {
       whenUpgradedToCustomElement(firstVideo)
         .then(() => firstVideo.getImpl())
         .then((videoImpl) => {
-          const duration = videoImpl.getDuration();
-          if (duration < VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S) {
-            if (!isNaN(duration)) {
-              videoImpl.loop(true);
-            } else {
-              listenOnce(firstVideo, VideoEvents_Enum.LOADEDMETADATA, () => {
-                videoImpl.loop(true);
-              });
-            }
+          const loopVideoIfTooShort = (duration) => {
+            videoImpl.loop(duration < VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S);
+          };
+
+          // DESCRIPTION
+          if (!isNaN(videoImpl.getDuration())) {
+            loopVideoIfTooShort(videoImpl.getDuration());
+          } else {
+            listenOnce(firstVideo, VideoEvents_Enum.LOADEDMETADATA, () => {
+              loopVideoIfTooShort(videoImpl.getDuration());
+            });
           }
         });
+    }
   }
 
   /**
