@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
@@ -1412,11 +1414,6 @@ describes.realWin(
         storeService = new AmpStoryStoreService(win);
         env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
 
-        storeService.dispatch(
-          Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
-          DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
-        );
-
         // This stub makes requestAnimationFrame a sync call so that each dispatch of click event
         // can be a sync operation, which means it can be used as doing await switchTo call.
         env.sandbox.stub(win, 'requestAnimationFrame').callsFake((cb) => cb());
@@ -1424,6 +1421,10 @@ describes.realWin(
 
       describe('UNKNOWN subscription state before paywall page', () => {
         beforeEach(async () => {
+          storeService.dispatch(
+            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+          );
           await setUpStorySubscriptions();
           tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX);
         });
@@ -1511,6 +1512,10 @@ describes.realWin(
       });
 
       describe('GRANTED subscription state before paywall page', async () => {
+        storeService.dispatch(
+          Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+          DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+        );
         await setUpStorySubscriptions();
         storeService.dispatch(
           Action.TOGGLE_SUBSCRIPTIONS_STATE,
@@ -1539,25 +1544,18 @@ describes.realWin(
       });
 
       describe('unresolved subscriptions page index', () => {
-        beforeEach(async () => {
-          await setUpStorySubscriptions();
+        beforeEach(async () => {});
+
+        it('should block on the first page if subscriptions page index is unresolved', async () => {
+          setUpStorySubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          storeService.dispatch(Action.SET_SUBSCRIPTIONS_PAGE_INDEX, -1);
-        });
 
-        it('should block on the first page if subscriptions page index is unresolved', () => {
-          const cover = story.getPageById(
-            storeService.get(StateProperty.CURRENT_PAGE_ID)
-          );
-          cover.element.dispatchEvent(clickRightEvent);
+          // Blocking on unresolved page index during layout callback so the current page id is not set yet.
+          expect(storeService.get(StateProperty.CURRENT_PAGE_ID)).to.equal('');
 
-          const currentPage = story.getPageById(
-            storeService.get(StateProperty.CURRENT_PAGE_ID)
-          );
-          expect(currentPage.element.id).to.equal(pages[0]);
           storeService.dispatch(
             Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
             DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
@@ -1567,11 +1565,17 @@ describes.realWin(
         describe('subscriptions page index is resolved', () => {
           let clock;
 
-          beforeEach(() => {
+          beforeEach(async () => {
             storeService.dispatch(
               Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
               DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1
             );
+            await setUpStorySubscriptions();
+            storeService.dispatch(
+              Action.TOGGLE_SUBSCRIPTIONS_STATE,
+              SubscriptionsState.BLOCKED
+            );
+
             tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX);
             clock = env.sandbox.useFakeTimers();
           });
@@ -1599,6 +1603,10 @@ describes.realWin(
 
       describe('BLOCKED subscription state before paywall page', () => {
         beforeEach(async () => {
+          storeService.dispatch(
+            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+          );
           await setUpStorySubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
@@ -1704,6 +1712,13 @@ describes.realWin(
       });
 
       describe('switch event and deep link', () => {
+        beforeEach(() => {
+          storeService.dispatch(
+            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+          );
+        });
+
         it('should navigate to paywall page and navigate back to original page after granted with any switch events', async () => {
           await setUpStorySubscriptions();
           storeService.dispatch(

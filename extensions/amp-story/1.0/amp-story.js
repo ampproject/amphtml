@@ -132,6 +132,7 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {getMode, isModeDevelopment} from '../../../src/mode';
+// import {DEFAULT_SUBSCRIPTIONS_PAGE_INDEX} from '../../amp-story-subscriptions/0.1/amp-story-subscriptions';
 
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;
@@ -318,18 +319,16 @@ export class AmpStory extends AMP.BaseElement {
     this.pageAfterSubscriptionsGranted_ = null;
 
     /** @private {!Deferred} a promise that is resolved once the subscription state is received */
-    this.subscriptionsStatePromise_ = new Deferred();
+    this.subscriptionsStateDeferred_ = new Deferred();
 
     /** @private {?number} the timeout to show subscriptions dialog after delay */
     this.showSubscriptionsUITimeout_ = null;
 
     /** @private {?number} the index of the page where the paywall would be triggered. */
-    this.subscriptionsPageIndex_ = this.storeService_.get(
-      StateProperty.SUBSCRIPTIONS_PAGE_INDEX
-    );
+    this.subscriptionsPageIndex_ = -1;
 
     /** @private {!Deferred} a promise that is resolved once the subscriptions page index is extracted from amp-story-subscriptions. */
-    this.subscriptionsPageIndexPromise_ = new Deferred();
+    this.subscriptionsPageIndexDeferred_ = new Deferred();
   }
 
   /** @override */
@@ -728,9 +727,12 @@ export class AmpStory extends AMP.BaseElement {
     this.storeService_.subscribe(
       StateProperty.SUBSCRIPTIONS_PAGE_INDEX,
       (subscriptionsPageIndex) => {
-        this.subscriptionsPageIndexPromise_.resolve();
-        this.subscriptionsPageIndex_ = subscriptionsPageIndex;
-      }
+        if (subscriptionsPageIndex !== -1) {
+          this.subscriptionsPageIndexDeferred_.resolve();
+          this.subscriptionsPageIndex_ = subscriptionsPageIndex;
+        }
+      },
+      true
     );
 
     this.storeService_.subscribe(
@@ -740,7 +742,7 @@ export class AmpStory extends AMP.BaseElement {
           return;
         }
 
-        this.subscriptionsStatePromise_.resolve();
+        this.subscriptionsStateDeferred_.resolve();
         if (subscriptionsState === SubscriptionsState.GRANTED) {
           this.hideSubscriptionsDialog_();
         }
@@ -1368,18 +1370,22 @@ export class AmpStory extends AMP.BaseElement {
       subscriptionsState !== SubscriptionsState.DISABLED &&
       this.subscriptionsPageIndex_ === -1
     ) {
-      return this.blockOnPendingSubscriptionsPageIndex_(
+      return this.blockOnPendingSubscriptionsData_(
+        this.subscriptionsPageIndexDeferred_,
         targetPageId,
         direction
       );
     }
-
     // Block until the subscription state gets resolved.
     if (
       pageIndex >= this.subscriptionsPageIndex_ &&
       subscriptionsState === SubscriptionsState.PENDING
     ) {
-      return this.blockOnPendingSubscriptionsState_(targetPageId, direction);
+      return this.blockOnPendingSubscriptionsData_(
+        this.subscriptionsStateDeferred_,
+        targetPageId,
+        direction
+      );
     }
     // Navigation to the locked pages after the paywall page should be redirected to the paywall page.
     // This is necessary for deeplinking case to make sure the paywall dialog shows on the paywall page.
@@ -1582,29 +1588,34 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Block while waiting to resolve subscriptions state.
+   * @param {Promise} subscriptionsDataDeferred
    * @param {string} targetPageId
    * @param {!NavigationDirection} direction
    * @return {!Promise}
    * @private
    */
-  blockOnPendingSubscriptionsState_(targetPageId, direction) {
-    return this.subscriptionsStatePromise_.promise.then(() => {
+  blockOnPendingSubscriptionsData_(
+    subscriptionsDataDeferred,
+    targetPageId,
+    direction
+  ) {
+    return subscriptionsDataDeferred.promise.then(() => {
       return this.switchTo_(targetPageId, direction);
     });
   }
 
-  /**
-   * Block while waiting to resolve subscriptions page index.
-   * @param {string} targetPageId
-   * @param {!NavigationDirection} direction
-   * @return {!Promise}
-   * @private
-   */
-  blockOnPendingSubscriptionsPageIndex_(targetPageId, direction) {
-    return this.subscriptionsPageIndexPromise_.promise.then(() => {
-      return this.switchTo_(targetPageId, direction);
-    });
-  }
+  // /**
+  //  * Block while waiting to resolve subscriptions page index.
+  //  * @param {string} targetPageId
+  //  * @param {!NavigationDirection} direction
+  //  * @return {!Promise}
+  //  * @private
+  //  */
+  // blockOnPendingSubscriptionsPageIndex_(targetPageId, direction) {
+  //   return this.subscriptionsPageIndexDeferred_.promise.then(() => {
+  //     return this.switchTo_(targetPageId, direction);
+  //   });
+  // }
 
   /**
    * @private

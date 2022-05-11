@@ -1,6 +1,7 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {setImportantStyles} from '#core/dom/style';
+import {clamp} from '#core/math';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
@@ -68,16 +69,19 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.subscriptionService_ = subscriptionService;
       this.localizationService_ = localizationService;
 
-      const pages = this.win.document.querySelectorAll('amp-story-page');
+      const pages = this.win.document.querySelectorAll(
+        'amp-story-page:not([ad])'
+      );
       const subscriptionsPageIndex = this.element.getAttribute(
         'subscriptions-page-index'
       );
       this.storeService_.dispatch(
         Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
-        subscriptionsPageIndex > 2 &&
-          subscriptionsPageIndex !== pages.length - 1
-          ? subscriptionsPageIndex
-          : DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+        clamp(
+          subscriptionsPageIndex,
+          DEFAULT_SUBSCRIPTIONS_PAGE_INDEX,
+          pages.length - 1
+        )
       );
 
       // Get grant status immediately to set up the initial subscriptions state.
