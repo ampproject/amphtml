@@ -1599,23 +1599,10 @@ export class AmpStory extends AMP.BaseElement {
     targetPageId,
     direction
   ) {
-    return subscriptionsDataDeferred.promise.then(() => {
-      return this.switchTo_(targetPageId, direction);
-    });
+    return subscriptionsDataDeferred.promise.then(() =>
+      this.switchTo_(targetPageId, direction)
+    );
   }
-
-  // /**
-  //  * Block while waiting to resolve subscriptions page index.
-  //  * @param {string} targetPageId
-  //  * @param {!NavigationDirection} direction
-  //  * @return {!Promise}
-  //  * @private
-  //  */
-  // blockOnPendingSubscriptionsPageIndex_(targetPageId, direction) {
-  //   return this.subscriptionsPageIndexDeferred_.promise.then(() => {
-  //     return this.switchTo_(targetPageId, direction);
-  //   });
-  // }
 
   /**
    * @private
