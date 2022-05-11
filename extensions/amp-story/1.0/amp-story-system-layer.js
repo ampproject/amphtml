@@ -92,105 +92,115 @@ const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 /**
  * @param {!Element} element
  * @param {?Element=} children
+ * @param {boolean} isVisible
  * @return {!Element}
  */
-const renderSystemLayerElement = (element, children) => (
-  <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
-    {children}
-    <a class={String(ATTRIBUTION_CLASS)} target="_blank">
-      <div class="i-amphtml-story-attribution-logo-container">
-        <img alt="" class="i-amphtml-story-attribution-logo" />
+const renderSystemLayerElement = (element, children, isVisible) => {
+  const systemLayerElement = (
+    <aside class="i-amphtml-story-system-layer i-amphtml-story-system-reset">
+      {children}
+      <a class={String(ATTRIBUTION_CLASS)} target="_blank">
+        <div class="i-amphtml-story-attribution-logo-container">
+          <img alt="" class="i-amphtml-story-attribution-logo" />
+        </div>
+        <div class="i-amphtml-story-attribution-text" />
+      </a>
+      <div class="i-amphtml-story-has-new-page-notification-container">
+        <div class="i-amphtml-story-has-new-page-text-wrapper">
+          <span class="i-amphtml-story-has-new-page-circle-icon" />
+          <div
+            class="i-amphtml-story-has-new-page-text"
+            i-amphtml-i18n-text-content={
+              LocalizedStringId_Enum.AMP_STORY_HAS_NEW_PAGE_TEXT
+            }
+          ></div>
+        </div>
       </div>
-      <div class="i-amphtml-story-attribution-text" />
-    </a>
-    <div class="i-amphtml-story-has-new-page-notification-container">
-      <div class="i-amphtml-story-has-new-page-text-wrapper">
-        <span class="i-amphtml-story-has-new-page-circle-icon" />
+      <div class="i-amphtml-story-system-layer-buttons">
         <div
-          class="i-amphtml-story-has-new-page-text"
-          i-amphtml-i18n-text-content={
-            LocalizedStringId_Enum.AMP_STORY_HAS_NEW_PAGE_TEXT
+          role="button"
+          class={INFO_CLASS + ' i-amphtml-story-button'}
+          i-amphtml-i18n-aria-label={
+            LocalizedStringId_Enum.AMP_STORY_INFO_BUTTON_LABEL
           }
-        ></div>
+        />
+        <div class="i-amphtml-story-captions-display">
+          <button
+            class={CAPTIONS_CLASS + ' i-amphtml-story-button'}
+            i-amphtml-i18n-aria-label={
+              LocalizedStringId_Enum.AMP_STORY_CAPTIONS_ON_LABEL
+            }
+          />
+          <button
+            class={NOCAPTIONS_CLASS + ' i-amphtml-story-button'}
+            i-amphtml-i18n-aria-label={
+              LocalizedStringId_Enum.AMP_STORY_CAPTIONS_OFF_LABEL
+            }
+          />
+        </div>
+        <div class="i-amphtml-story-sound-display">
+          <button
+            class={UNMUTE_CLASS + ' i-amphtml-story-button'}
+            i-amphtml-i18n-aria-label={
+              LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
+            }
+          />
+          <button
+            class={MUTE_CLASS + ' i-amphtml-story-button'}
+            i-amphtml-i18n-aria-label={
+              LocalizedStringId_Enum.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
+            }
+          />
+        </div>
+        <div class="i-amphtml-paused-display">
+          <button
+            class={PAUSE_CLASS + ' i-amphtml-story-button'}
+            i-amphtml-i18n-aria-label={
+              LocalizedStringId_Enum.AMP_STORY_PAUSE_BUTTON_LABEL
+            }
+          />
+          <button
+            class={PLAY_CLASS + ' i-amphtml-story-button'}
+            i-amphtml-i18n-aria-label={
+              LocalizedStringId_Enum.AMP_STORY_PLAY_BUTTON_LABEL
+            }
+          />
+        </div>
+        <button
+          class={
+            SKIP_TO_NEXT_CLASS +
+            ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
+          }
+          i-amphtml-i18n-aria-label={
+            LocalizedStringId_Enum.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
+          }
+        />
+        <button
+          class={SHARE_CLASS + ' i-amphtml-story-button'}
+          i-amphtml-i18n-aria-label={
+            LocalizedStringId_Enum.AMP_STORY_SHARE_BUTTON_LABEL
+          }
+        />
+        <button
+          class={
+            CLOSE_CLASS +
+            ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
+          }
+          i-amphtml-i18n-aria-label={
+            LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
+          }
+        />
       </div>
-    </div>
-    <div class="i-amphtml-story-system-layer-buttons">
-      <div
-        role="button"
-        class={INFO_CLASS + ' i-amphtml-story-button'}
-        i-amphtml-i18n-aria-label={
-          LocalizedStringId_Enum.AMP_STORY_INFO_BUTTON_LABEL
-        }
-      />
-      <div class="i-amphtml-story-captions-display">
-        <button
-          class={CAPTIONS_CLASS + ' i-amphtml-story-button'}
-          i-amphtml-i18n-aria-label={
-            LocalizedStringId_Enum.AMP_STORY_CAPTIONS_ON_LABEL
-          }
-        />
-        <button
-          class={NOCAPTIONS_CLASS + ' i-amphtml-story-button'}
-          i-amphtml-i18n-aria-label={
-            LocalizedStringId_Enum.AMP_STORY_CAPTIONS_OFF_LABEL
-          }
-        />
-      </div>
-      <div class="i-amphtml-story-sound-display">
-        <button
-          class={UNMUTE_CLASS + ' i-amphtml-story-button'}
-          i-amphtml-i18n-aria-label={
-            LocalizedStringId_Enum.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL
-          }
-        />
-        <button
-          class={MUTE_CLASS + ' i-amphtml-story-button'}
-          i-amphtml-i18n-aria-label={
-            LocalizedStringId_Enum.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL
-          }
-        />
-      </div>
-      <div class="i-amphtml-paused-display">
-        <button
-          class={PAUSE_CLASS + ' i-amphtml-story-button'}
-          i-amphtml-i18n-aria-label={
-            LocalizedStringId_Enum.AMP_STORY_PAUSE_BUTTON_LABEL
-          }
-        />
-        <button
-          class={PLAY_CLASS + ' i-amphtml-story-button'}
-          i-amphtml-i18n-aria-label={
-            LocalizedStringId_Enum.AMP_STORY_PLAY_BUTTON_LABEL
-          }
-        />
-      </div>
-      <button
-        class={
-          SKIP_TO_NEXT_CLASS +
-          ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
-        }
-        i-amphtml-i18n-aria-label={
-          LocalizedStringId_Enum.AMP_STORY_SKIP_TO_NEXT_BUTTON_LABEL
-        }
-      />
-      <button
-        class={SHARE_CLASS + ' i-amphtml-story-button'}
-        i-amphtml-i18n-aria-label={
-          LocalizedStringId_Enum.AMP_STORY_SHARE_BUTTON_LABEL
-        }
-      />
-      <button
-        class={
-          CLOSE_CLASS + ' i-amphtml-story-ui-hide-button i-amphtml-story-button'
-        }
-        i-amphtml-i18n-aria-label={
-          LocalizedStringId_Enum.AMP_STORY_CLOSE_BUTTON_LABEL
-        }
-      />
-    </div>
-    <div class="i-amphtml-story-system-layer-buttons-start-position" />
-  </aside>
-);
+      <div class="i-amphtml-story-system-layer-buttons-start-position" />
+    </aside>
+  );
+
+  if (!isVisible) {
+    systemLayerElement.classList.add('i-amphtml-story-hidden');
+  }
+
+  return systemLayerElement;
+};
 
 /**
  * Contains the event name belonging to the viewer control.
@@ -282,17 +292,19 @@ export class SystemLayer {
   }
 
   /**
-   * @return {!Element}
    * @param {string} initialPageId
+   * @param {boolean=} isVisible
+   * @return {!Element}
    */
-  build(initialPageId) {
+  build(initialPageId, isVisible = true) {
     if (this.root_) {
       return this.root_;
     }
 
     this.systemLayerEl_ = renderSystemLayerElement(
       this.parentEl_,
-      this.progressBar_.build(initialPageId)
+      this.progressBar_.build(initialPageId),
+      isVisible
     );
     localizeTemplate(this.systemLayerEl_, this.parentEl_);
 

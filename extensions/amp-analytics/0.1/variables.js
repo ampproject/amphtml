@@ -395,7 +395,7 @@ export class VariableService {
    * @return {!Promise<string>} The expanded string.
    */
   expandTemplate(template, options, element, opt_bindings, opt_allowlist) {
-    return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
+    return asyncStringReplace(template, /\${([^{}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
           TAG,
