@@ -39,24 +39,9 @@ class AmpContentpass extends AMP.BaseElement {
       this.element.getAttribute('data-property-id'),
       'The data-property-id attribute is required'
     );
-  }
-
-  /** @override */
-  layoutCallback() {
-    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
+    listen(this.win, 'message', (event) => {
       this.handleContentpassMessage_(event);
     });
-
-    return Promise.resolve();
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.unlistenMessage_) {
-      this.unlistenMessage_();
-    }
-
-    return true;
   }
 
   /**
