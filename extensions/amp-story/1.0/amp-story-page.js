@@ -307,6 +307,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.addProgressListener((progress) =>
       this.emitProgress_(progress)
     );
+    this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
     this.setDescendantCssTextStyles_();
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
@@ -355,6 +356,27 @@ export class AmpStoryPage extends AMP.BaseElement {
             });
           }
         });
+    }
+  }
+
+  /**
+   * DESCRIPTION
+   * @private
+   */
+   maybeUnsetPreviewDuration_() {
+     
+   }
+
+  /**
+   * DESCRIPTION
+   * @private
+   */
+  onVisibilityChanged_() {
+    if (this.getAmpDoc().isPreview()) {
+      this.maybeSetPreviewDuration_();
+    }
+    if (this.getAmpDoc().isVisible()) {
+      this.maybeUnsetPreviewDuration_();
     }
   }
 
