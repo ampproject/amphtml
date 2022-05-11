@@ -9,7 +9,6 @@
  * </code>
  */
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -324,16 +323,32 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   maybeSetPreviewDuration_() {
-    if (this.storeService_.get(StateProperty.PREVIEW_STATE)) {
-      const videos = this.getAllVideos_();
-
-      const autoAdvanceAttr =
-        videos.length > 0
-          ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
-          : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
-
-      this.element.setAttribute('auto-advance-after', autoAdvanceAttr);
+    if (!this.getAmpDoc().isPreview()) {
+      return;
     }
+
+    // DESCRIPTION
+    const firstVideo = this.getFirstAmpVideo_();
+    const autoAdvanceDuration = firstVideo
+      ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
+      : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
+    this.element.setAttribute('auto-advance-after', autoAdvanceDuration);
+
+    firstVideo &&
+      whenUpgradedToCustomElement(firstVideo)
+        .then(() => firstVideo.getImpl())
+        .then((videoImpl) => {
+          const duration = videoImpl.getDuration();
+          if (duration < VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S) {
+            if (!isNaN(duration)) {
+              videoImpl.loop(true);
+            } else {
+              listenOnce(firstVideo, VideoEvents_Enum.LOADEDMETADATA, () => {
+                videoImpl.loop(true);
+              });
+            }
+          }
+        });
   }
 
   /**

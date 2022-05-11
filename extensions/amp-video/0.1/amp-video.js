@@ -1061,6 +1061,15 @@ export class AmpVideo extends AMP.BaseElement {
       }
     });
   }
+
+  /**
+   * Loops or stops looping the video.
+   * @param {boolean} shouldLoop
+   * @public
+   */
+  loop(shouldLoop) {
+    this.video_.loop = shouldLoop;
+  }
 }
 
 /**
