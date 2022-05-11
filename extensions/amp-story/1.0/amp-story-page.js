@@ -247,6 +247,12 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    /** @private {?number} DESCRIPTION */
+    this.originalAutoAdvanceDuration_ = null;
+
+    /** @private {?boolean} DESCRIPTION */
+    this.originalVideoLoopAttributeValue_ = null;
   }
 
   /**
@@ -331,6 +337,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       return;
     }
 
+    this.originalAutoAdvanceDuration_ = this.element.getAttribute('auto-advance-after');
+
     // DESCRIPTION
     const firstVideo = this.getFirstAmpVideo_();
     const autoAdvanceDuration = firstVideo
@@ -344,6 +352,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         .then(() => firstVideo.getImpl())
         .then((videoImpl) => {
           const loopVideoIfTooShort = (duration) => {
+            this.originalFirstVideoLoopValue_ = firstVideo.getAttribute('loop');
             videoImpl.loop(duration < VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S);
           };
 
@@ -363,9 +372,27 @@ export class AmpStoryPage extends AMP.BaseElement {
    * DESCRIPTION
    * @private
    */
-   maybeUnsetPreviewDuration_() {
-     
-   }
+  maybeUnsetPreviewDuration_() {
+    if (this.originalAutoAdvanceDuration_) {
+      this.advancement_.updateTimeDelay(
+        this.originalAutoAdvanceDuration_ + 's'
+      );
+      // 'auto-advance-after' is only read during buildCallback(), but we update it
+      // here to keep the DOM consistent with the AdvancementConfig.
+      this.element.setAttribute(
+        'auto-advance-after', this.originalAutoAdvanceDuration_ + 's'
+      );
+      
+      if (this.originalFirstVideoLoopValue_) {
+        this.getFirstAmpVideo_().setAttribute('loop', this.originalFirstVideoLoopValue_);
+      } else {
+        this.getFirstAmpVideo_().removeAttribute('loop');
+      }
+    } else {
+      this.element.removeAttribute('auto-advance-after');
+      this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    }
+  }
 
   /**
    * DESCRIPTION
