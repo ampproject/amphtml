@@ -1,0 +1,24 @@
+tags: {  # amp-contentpass
+  html_format: AMP
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-contentpass"
+    version: "0.1"
+    version: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+
+tags: {  # <amp-contentpass>
+  html_format: AMP
+  tag_name: "AMP-CONTENTPASS"
+  requires_extension: "amp-contentpass"
+  attrs: {
+      name: "data-property-id"
+      mandatory: true
+  }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}

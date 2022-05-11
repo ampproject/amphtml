@@ -29,6 +29,7 @@ amp-call-tracking
 amp-carousel
 amp-connatix-player
 amp-consent
+amp-contentpass
 amp-dailymotion
 amp-date-countdown
 amp-date-display
