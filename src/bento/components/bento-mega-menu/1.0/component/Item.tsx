@@ -1,11 +1,17 @@
+import * as Preact from '#preact';
 import {useLayoutEffect, useMemo, useState} from '#preact';
 import useEvent from '#preact/hooks/useEvent';
+import {FC} from '#preact/types';
 
 import {useMegaMenuContext} from './useMegaMenu';
 
 import {createProviderFromHook} from '../createProviderFromHook';
 
-const [Item, useMegaMenuItem] = createProviderFromHook(
+export const Item: FC = ({children}) => {
+  return <ItemProvider>{children}</ItemProvider>;
+};
+
+export const [ItemProvider, useMegaMenuItem] = createProviderFromHook(
   function useMegaMenuItem({id: propId = ''}) {
     const megaMenu = useMegaMenuContext();
 
@@ -39,4 +45,3 @@ const [Item, useMegaMenuItem] = createProviderFromHook(
     };
   }
 );
-export {Item, useMegaMenuItem};

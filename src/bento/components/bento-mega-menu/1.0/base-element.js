@@ -3,8 +3,14 @@ import {PreactBaseElement} from '#preact/base-element';
 
 import {BentoMegaMenu} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
+import {BentoItem} from './component/BentoItem';
 
-export class BaseElement extends PreactBaseElement {}
+export class BaseElement extends PreactBaseElement {
+  init() {
+    super.init();
+    return {ItemWrapper: BentoItem};
+  }
+}
 
 /** @override */
 BaseElement['Component'] = BentoMegaMenu;
@@ -22,40 +28,3 @@ BaseElement['usesShadowDom'] = true;
 
 /** @override */
 BaseElement['shadowCss'] = COMPONENT_CSS;
-
-function setAttributes(element, props) {
-  updateAttributes(element, props, false);
-}
-function unsetAttributes(element, props) {
-  updateAttributes(element, props, true);
-}
-function updateAttributes(element, props, unset) {
-  Object.keys(props).forEach((prop) => {
-    const value = props[prop];
-    if (value === undefined || value === false) {
-      return;
-    }
-
-    if (prop === 'onClick') {
-      if (!unset) {
-        console.log('addEventListener', value);
-        element.addEventListener('click', value);
-      } else {
-        element.removeEventListener('click', value);
-      }
-    } else if (prop === 'class' || prop === 'className') {
-      const classes = value.split(' ');
-      if (!unset) {
-        element.classList.add(...classes);
-      } else {
-        element.classList.remove(...classes);
-      }
-    } else {
-      if (!unset) {
-        element.setAttribute(prop, value);
-      } else {
-        element.removeAttribute(prop);
-      }
-    }
-  });
-}

@@ -1,6 +1,7 @@
 import type {RefObject} from 'preact';
 
-import {useEffect, useRef} from '#preact';
+import {useEffect} from '#preact';
+import useEvent from '#preact/hooks/useEvent';
 
 /**
  * Triggers the callback if a click occurs outside the element.
@@ -10,8 +11,7 @@ export function useClickOutside(
   elementRef: RefObject<HTMLElement>,
   callback: (ev: MouseEvent) => void
 ) {
-  const cbRef = useRef(callback);
-  cbRef.current = callback;
+  const cb = useEvent(callback);
 
   useEffect(() => {
     if (!elementRef.current) {
@@ -19,11 +19,9 @@ export function useClickOutside(
     }
 
     const handler = (ev: MouseEvent) => {
-      const isOutside = !elementRef.current?.contains(ev.target as Element);
-      if (isOutside) {
-        ev.preventDefault();
-        ev.stopPropagation();
-        cbRef.current(ev);
+      const element = elementRef.current;
+      if (element && !shadowContains(element, ev.target as Element)) {
+        cb(ev);
       }
     };
     const document = elementRef.current.ownerDocument;
@@ -31,5 +29,29 @@ export function useClickOutside(
     return () => {
       document.removeEventListener('click', handler, {capture: true});
     };
-  }, [elementRef]);
+  }, [elementRef, cb]);
+}
+
+/**
+ * Same as Element.contains, except it traverses shadow DOM too.
+ * @param element - The element that might contain the target
+ * @param target - The element that might be contained
+ */
+function shadowContains(element: HTMLElement, target: Element | null) {
+  let parent: Node | null = target;
+  while (parent) {
+    if (parent === element) {
+      return true;
+    }
+
+    // Traverse "into" the shadowDOM, if possible:
+    parent = (parent as Element).assignedSlot || parent.parentNode;
+
+    // Traverse "out" of the shadowDOM:
+    if (parent instanceof ShadowRoot) {
+      parent = parent.host;
+    }
+  }
+
+  return false;
 }

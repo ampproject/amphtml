@@ -4,7 +4,7 @@ import * as Preact from '#preact';
 import {useRef} from '#preact';
 import {Children} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
-import type {ComponentChildren} from '#preact/types';
+import type {ComponentChildren, ComponentType} from '#preact/types';
 
 import {Content} from './Content';
 import {Item} from './Item';
@@ -16,20 +16,30 @@ import {useStyles} from '../component.jss';
 
 export type BentoMegaMenuProps = {
   children?: ComponentChildren;
+  ItemWrapper?: ComponentType;
 };
 
 /**
  * @param {!BentoMegaMenu.Props} props
  * @return {PreactDef.Renderable}
  */
-export function BentoMegaMenu({children, ...rest}: BentoMegaMenuProps) {
+export function BentoMegaMenu({
+  ItemWrapper,
+  children,
+  ...rest
+}: BentoMegaMenuProps) {
   const megaMenu = useMegaMenu();
 
   const isAnyOpen = megaMenu.openId !== null;
 
   const navRef = useRef<HTMLDivElement>(null);
-  useClickOutside(navRef, () => {
-    megaMenu.actions.closeMenu();
+  useClickOutside(navRef, (ev: MouseEvent) => {
+    if (megaMenu.isOpen) {
+      megaMenu.actions.closeMenu();
+
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
   });
 
   const classes = useStyles();
@@ -39,6 +49,9 @@ export function BentoMegaMenu({children, ...rest}: BentoMegaMenuProps) {
         <nav class={classes.mainNav} ref={navRef}>
           <ul>
             {Children.map(children, (child, index) => {
+              if (ItemWrapper) {
+                child = <ItemWrapper>{child}</ItemWrapper>;
+              }
               return <li key={index}>{child}</li>;
             })}
           </ul>
