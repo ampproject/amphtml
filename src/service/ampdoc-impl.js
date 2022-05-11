@@ -728,7 +728,7 @@ export class AmpDoc {
   }
 
   /**
-   * Whether the AMP document currently being previewed.
+   * Whether the AMP document is currently being previewed.
    * @return {boolean}
    */
   isPreview() {
