@@ -583,12 +583,13 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Builds the system layer DOM.
    * @param {string} initialPageId
+   * @param {boolean} isVisible
    * @private
    */
-  buildSystemLayer_(initialPageId) {
+  buildSystemLayer_(initialPageId, isVisible) {
     this.updateAudioIcon_();
     this.updatePausedIcon_();
-    this.element.appendChild(this.systemLayer_.build(initialPageId));
+    this.element.appendChild(this.systemLayer_.build(initialPageId, isVisible));
   }
 
   /** @private */
@@ -949,7 +950,16 @@ export class AmpStory extends AMP.BaseElement {
   layoutStory_() {
     const initialPageId = this.getInitialPageId_();
 
-    this.buildSystemLayer_(initialPageId);
+    const shouldShowSystemLayer = !this.getAmpDoc().isPreview();
+    if (!shouldShowSystemLayer) {
+      // The default value of `SYSTEM_UI_IS_VISIBLE_STATE` is `true`. We set it
+      // to `false` here solely to ensure that a subsequent firing of the
+      // `TOGGLE_SYSTEM_UI_IS_VISIBLE` action with a `true` value registers as
+      // a change in state instead of being a no-op.
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    }
+    this.buildSystemLayer_(initialPageId, shouldShowSystemLayer);
+
     this.setThemeColor_();
 
     const storyLayoutPromise = Promise.all([
@@ -1699,6 +1709,14 @@ export class AmpStory extends AMP.BaseElement {
     const vState = this.getAmpDoc().getVisibilityState();
     const isPreview = vState === VisibilityState_Enum.PREVIEW;
     const isVisible = vState === VisibilityState_Enum.VISIBLE;
+
+    if (isPreview) {
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    }
+    if (isVisible) {
+      this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    }
+
     isPreview || isVisible ? this.resume_() : this.pause_();
   }
 
