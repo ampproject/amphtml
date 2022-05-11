@@ -16,7 +16,7 @@ type TitleProps<TAs extends AsComponent> = AsProps<TAs> & {
 };
 
 export function Title<TAs extends AsComponent = 'span'>({
-  as: Comp = 'span',
+  as: As = 'span',
   children,
   [propName('class')]: className,
   ...props
@@ -39,7 +39,7 @@ export function Title<TAs extends AsComponent = 'span'>({
 
   return (
     <>
-      <Comp
+      <As
         role="button"
         {...ariaAttrs}
         {...props}
@@ -51,7 +51,7 @@ export function Title<TAs extends AsComponent = 'span'>({
         onClick={handleClick}
       >
         {children}
-      </Comp>
+      </As>
     </>
   );
 }

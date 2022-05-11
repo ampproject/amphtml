@@ -1,7 +1,8 @@
+import {Shim} from '#bento/components/bento-mega-menu/1.0/component/Shim';
+
 import * as Preact from '#preact';
-import {useEffect, useLayoutEffect, useRef} from '#preact';
-import {memo} from '#preact/compat/external';
-import {EventHandler, FC, RefObject} from '#preact/types';
+import {useLayoutEffect, useRef} from '#preact';
+import {FC} from '#preact/types';
 
 import {Content} from './Content';
 import {ItemProvider, useMegaMenuItem} from './Item';
@@ -42,73 +43,6 @@ const SlottedDomWrapper: FC = ({children: slot}) => {
   );
 };
 
-type ShimProps = {elementRef: RefObject<HTMLElement>};
-const Shim: FC<ShimProps> = memo(({elementRef, ...props}) => {
-  useEffect(() => {
-    const element = elementRef.current;
-    if (!element) {
-      return;
-    }
-
-    setAttributes(element, props);
-    return () => unsetAttributes(element, props);
-  });
-
-  return null;
-});
 const ItemShim = Shim;
 const HeaderShim = Shim;
 const ContentsShim = Shim;
-
-type HtmlProps = Record<string, string | boolean | Function>;
-
-function setAttributes(element: HTMLElement, props: HtmlProps) {
-  updateAttributes(element, props, false);
-}
-function unsetAttributes(element: HTMLElement, props: HtmlProps) {
-  updateAttributes(element, props, true);
-}
-function updateAttributes(
-  element: HTMLElement,
-  props: HtmlProps,
-  unset: boolean
-) {
-  Object.keys(props).forEach((prop) => {
-    const value = props[prop];
-
-    if (typeof value === 'boolean' || value === null || value === undefined) {
-      if (unset || !value) {
-        element.removeAttribute(prop);
-      } else {
-        element.setAttribute(prop, '');
-      }
-    } else if (value === 'class' || value === 'className') {
-      const classes = value.split(' ');
-      if (!unset) {
-        element.classList.add(...classes);
-      } else {
-        element.classList.remove(...classes);
-      }
-    } else if (typeof value === 'string') {
-      if (!unset) {
-        element.setAttribute(prop, value);
-      } else {
-        element.removeAttribute(prop);
-      }
-    } else if (typeof value === 'function') {
-      const eventName = prop === 'onClick' ? 'click' : null;
-      if (!eventName) {
-        throw new Error(`unexpected event name "${prop}"`);
-      }
-      if (!unset) {
-        element.addEventListener(eventName, value as EventHandler<any>);
-      } else {
-        element.removeEventListener(eventName, value as EventHandler<any>);
-      }
-    } else {
-      throw new Error(
-        `Unexpected prop; cannot set "${prop}" to a "${typeof value}"`
-      );
-    }
-  });
-}

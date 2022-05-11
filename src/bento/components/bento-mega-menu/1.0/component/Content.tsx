@@ -17,7 +17,7 @@ type ContentProps<TAs extends AsComponent> = AsProps<TAs> & {
 };
 
 export function Content<TAs extends AsComponent = 'div'>({
-  as: Comp = 'div',
+  as: As = 'div',
   children,
   id: idProp,
   [propName('class')]: className,
@@ -38,7 +38,7 @@ export function Content<TAs extends AsComponent = 'div'>({
   };
 
   return (
-    <Comp
+    <As
       role="dialog"
       id={itemId}
       {...ariaAttrs}
@@ -50,6 +50,6 @@ export function Content<TAs extends AsComponent = 'div'>({
       })}
     >
       {children}
-    </Comp>
+    </As>
   );
 }
