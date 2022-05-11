@@ -15,7 +15,6 @@ const {
 const {log} = require('../common/logging');
 const {red, yellow} = require('kleur/colors');
 const {runCiJob} = require('./ci-job');
-const {signalPrDeployUpload} = require('../tasks/pr-deploy-bot-utils');
 const {Targets, buildTargetsInclude} = require('./build-targets');
 
 const jobName = 'nomodule-build.js';
@@ -48,12 +47,10 @@ async function prBuildWorkflow() {
         ? process.error.message
         : 'Unknown error, check logs';
       log(red('ERROR'), yellow(message));
-      await signalPrDeployUpload('errored');
       return abortTimedJob(jobName, startTime);
     }
     storeNomoduleBuildToWorkspace();
   } else {
-    await signalPrDeployUpload('skipped');
     timedExecOrDie('amp visual-diff --empty');
     skipDependentJobs(
       jobName,
