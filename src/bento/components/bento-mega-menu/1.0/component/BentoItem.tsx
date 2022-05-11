@@ -1,5 +1,6 @@
 import * as Preact from '#preact';
 import {useEffect, useLayoutEffect, useRef} from '#preact';
+import {memo} from '#preact/compat/external';
 import {EventHandler, FC, RefObject} from '#preact/types';
 
 import {Content} from './Content';
@@ -34,11 +35,7 @@ const SlottedDomWrapper: FC = ({children: slot}) => {
   return (
     <div ref={ref}>
       {slot}
-      <ItemShim
-        elementRef={itemRef}
-        expanded={isOpen}
-        data-item-shim-test="FOO"
-      />
+      <ItemShim elementRef={itemRef} expanded={isOpen} />
       <Title as={HeaderShim} elementRef={headerRef} />
       <Content as={ContentsShim} elementRef={contentsRef} />
     </div>
@@ -46,7 +43,7 @@ const SlottedDomWrapper: FC = ({children: slot}) => {
 };
 
 type ShimProps = {elementRef: RefObject<HTMLElement>};
-const Shim: FC<ShimProps> = ({elementRef, ...props}) => {
+const Shim: FC<ShimProps> = memo(({elementRef, ...props}) => {
   useEffect(() => {
     const element = elementRef.current;
     if (!element) {
@@ -58,7 +55,7 @@ const Shim: FC<ShimProps> = ({elementRef, ...props}) => {
   });
 
   return null;
-};
+});
 const ItemShim = Shim;
 const HeaderShim = Shim;
 const ContentsShim = Shim;

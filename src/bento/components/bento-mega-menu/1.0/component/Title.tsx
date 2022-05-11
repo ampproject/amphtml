@@ -1,6 +1,7 @@
 import objStr from 'obj-str';
 
 import * as Preact from '#preact';
+import useEvent from '#preact/hooks/useEvent';
 import type {ComponentChildren} from '#preact/types';
 import {propName} from '#preact/utils';
 
@@ -29,6 +30,13 @@ export function Title<TAs extends AsComponent = 'span'>({
     'aria-haspopup': 'dialog',
   };
 
+  const handleClick = useEvent((ev: MouseEvent) => {
+    (props as any).onClick?.(ev);
+    if (!ev.defaultPrevented) {
+      actions.toggle();
+    }
+  });
+
   return (
     <>
       <Comp
@@ -40,12 +48,7 @@ export function Title<TAs extends AsComponent = 'span'>({
           [classes.item]: true,
           ['open']: isOpen,
         })}
-        onClick={(ev: MouseEvent) => {
-          (props as any).onClick?.(ev);
-          if (!ev.defaultPrevented) {
-            actions.toggle();
-          }
-        }}
+        onClick={handleClick}
       >
         {children}
       </Comp>
