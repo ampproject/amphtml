@@ -1,4 +1,3 @@
-import {setFormForElement} from '#core/dom/form';
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
