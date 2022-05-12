@@ -101,6 +101,9 @@ const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '3s';
 const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
 
 /** @private @const {number} */
+const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION_S = 5;
+
+/** @private @const {number} */
 const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
 
 /**
@@ -298,7 +301,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
     if (this.getAmpDoc().isPreview()) {
-      this.setPreviewAutoAdvanceDuration_();
+      this.setupAutoAdvanceForPreview_();
     }
     this.maybeSetStoryNextUp_();
     this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
@@ -327,12 +330,29 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Configures the page to auto advance using preview-specific durations.
    * @private
    */
-  setPreviewAutoAdvanceDuration_() {
-    const autoAdvanceAttr =
-      this.getAllVideos_().length > 0
-        ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
-        : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
-    this.element.setAttribute('auto-advance-after', autoAdvanceAttr);
+  setupAutoAdvanceForPreview_() {
+    const firstVideo = this.getFirstAmpVideo_();
+    const autoAdvanceDuration = firstVideo
+      ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
+      : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
+    this.element.setAttribute('auto-advance-after', autoAdvanceDuration);
+
+    if (firstVideo) {
+      whenUpgradedToCustomElement(firstVideo)
+        .then(() => firstVideo.getImpl())
+        .then((videoImpl) => {
+          const loopVideoIfTooShort = (vidLength) =>
+            videoImpl.loop(vidLength < VIDEO_PREVIEW_AUTO_ADVANCE_DURATION_S);
+
+          if (videoImpl.getDuration()) {
+            loopVideoIfTooShort(videoImpl.getDuration());
+          } else {
+            listenOnce(firstVideo, VideoEvents_Enum.LOADEDMETADATA, () => {
+              loopVideoIfTooShort(videoImpl.getDuration());
+            });
+          }
+        });
+    }
   }
 
   /**
