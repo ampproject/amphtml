@@ -252,7 +252,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.originalAutoAdvanceDuration_ = null;
 
     /** @private {?boolean} DESCRIPTION */
-    this.originalVideoLoopAttributeValue_ = null;
+    this.shouldLoopWhenVisible_ = null;
   }
 
   /**
@@ -333,6 +333,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   maybeSetPreviewDuration_() {
+    console.log('maybeSetPreviewDuration_()');
     if (!this.getAmpDoc().isPreview()) {
       return;
     }
@@ -352,7 +353,7 @@ export class AmpStoryPage extends AMP.BaseElement {
         .then(() => firstVideo.getImpl())
         .then((videoImpl) => {
           const loopVideoIfTooShort = (duration) => {
-            this.originalFirstVideoLoopValue_ = firstVideo.getAttribute('loop');
+            this.shouldLoopWhenVisible_ = firstVideo.hasAttribute('loop');
             videoImpl.loop(duration < VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S);
           };
 
@@ -373,6 +374,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   maybeUnsetPreviewDuration_() {
+    console.log('maybeUnsetPreviewDuration_()');
+
+    const videos = this.getAllVideos_();
+    const firstVideoEl = videos.length ? videos[0] : null;
+
     if (this.originalAutoAdvanceDuration_) {
       this.advancement_.updateTimeDelay(
         this.originalAutoAdvanceDuration_ + 's'
@@ -383,14 +389,34 @@ export class AmpStoryPage extends AMP.BaseElement {
         'auto-advance-after', this.originalAutoAdvanceDuration_ + 's'
       );
       
-      if (this.originalFirstVideoLoopValue_) {
-        this.getFirstAmpVideo_().setAttribute('loop', this.originalFirstVideoLoopValue_);
-      } else {
-        this.getFirstAmpVideo_().removeAttribute('loop');
-      }
     } else {
+      // DESCRIPTION
+      this.advancement_.removeAllPreviousListeners();
+      this.advancement_.removeAllAdvanceListeners();
+      this.advancement_.removeAllProgressListeners();
       this.element.removeAttribute('auto-advance-after');
+
       this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+      this.advancement_.addPreviousListener(() => this.previous());
+      this.advancement_.addAdvanceListener(() =>
+        this.next(/* opt_isAutomaticAdvance */ true)
+      );
+      this.advancement_.addProgressListener((progress) =>
+        this.emitProgress_(progress)
+      );
+
+      if (this.isActive() && firstVideoEl) {
+        const progress = firstVideoEl.currentTime / firstVideoEl.duration;
+        this.emitProgress_(progress);
+        console.log('    emitting progress: ' + progress);
+      }
+    }
+
+    if (this.shouldLoopWhenVisible_) {
+      firstVideoEl?.setAttribute('loop', '');
+    } else {
+      console.log('    removing loop attribute');
+      firstVideoEl?.removeAttribute('loop');
     }
   }
 
