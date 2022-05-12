@@ -10,14 +10,14 @@ const mainNav = {
     display: 'flex',
     listStyleType: 'none',
     padding: 0,
+    margin: 0,
     flexWrap: 'wrap',
 
     gap: '0.5em',
   },
 };
 
-const item = {
-  display: 'inline-block',
+const title = {
   cursor: 'pointer',
 };
 const content = {
@@ -66,7 +66,7 @@ const mask = {
 
 const JSS = {
   mainNav,
-  item,
+  title,
   content,
   mask,
 };

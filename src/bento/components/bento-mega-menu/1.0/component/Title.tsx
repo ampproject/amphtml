@@ -45,7 +45,7 @@ export function Title<TAs extends AsComponent = 'span'>({
         {...props}
         class={objStr({
           [className!]: !!className,
-          [classes.item]: true,
+          [classes.title]: true,
           ['open']: isOpen,
         })}
         onClick={handleClick}
