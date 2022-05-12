@@ -6,8 +6,6 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {defineBentoElement} from '#preact/bento-ce';
 
-import {user} from '#utils/log';
-
 import {waitFor} from '#testing/helpers/service';
 
 describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
@@ -18,7 +16,7 @@ describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
   beforeEach(() => {
     win = env.win;
     html = htmlFor(win.document);
-    warnSpy = env.sandbox.stub(user(), 'warn');
+    warnSpy = env.sandbox.stub(console, 'log');
     defineBentoElement('bento-autocomplete', BentoAutocomplete, win);
   });
 
@@ -42,7 +40,7 @@ describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
         <input type="text" />
       </bento-autocomplete>
     `);
-    expect(warnSpy).calledWithMatch('bento-autocomplete', /script/i);
+    expect(warnSpy).calledWithMatch(/script/i);
   });
 
   it('gets the items from a script tag', async () => {
@@ -72,11 +70,7 @@ describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
       </bento-autocomplete>
     `);
 
-    expect(warnSpy).calledWithMatch(
-      'bento-autocomplete',
-      /Expected key/i,
-      'customItems'
-    );
+    expect(warnSpy).calledWithMatch(/Expected key/i);
   });
 
   it('gets custom items', async () => {

@@ -23,6 +23,7 @@ import {HighlightedText} from './highlighted-text';
 import {tokenPrefixMatch} from './token-prefix-match';
 import {useAutocompleteBinding} from './use-autocomplete-binding';
 
+// @ts-ignore
 import {addParamToUrl} from '../../../../../url';
 import {useStyles} from '../component.jss';
 import {
