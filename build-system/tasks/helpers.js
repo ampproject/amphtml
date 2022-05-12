@@ -48,9 +48,6 @@ const {
  */
 const CompileOptionsDef = {};
 
-/** @type {Remapping.default} */
-const remapping = /** @type {*} */ (Remapping);
-
 /**
  * Tasks that should print the `--nobuild` help text.
  * @private @const {!Set<string>}
@@ -148,16 +145,12 @@ async function compileCoreRuntime(options) {
 }
 
 /**
-<<<<<<< HEAD
  * Compiles the "core" utilies used by all bento extensions
  *
  * Outputs 2 scripts:
  * 1) for direct consumption in the browser
  * 2) for consumption by npm package users
- * @param {Object} options
-=======
  * @param {!CompileOptionsDef} options
->>>>>>> df25bce1b0 (add CompileOptionsDef)
  * @return {Promise<void>}
  */
 async function compileBentoRuntimeAndCore(options) {
@@ -386,7 +379,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     babelCaller += '-ssr-ready';
   }
 
-  const babelMaps = new Map();
   const babelPlugin = getEsbuildBabelPlugin(
     babelCaller,
     /* enableCache */ true,
@@ -488,38 +480,6 @@ async function esbuildCompile(srcDir, srcFilename, destDir, options) {
     ]);
 
     await finishBundle(destDir, destFilename, options, startTime);
-  }
-
-  /**
-   * Generates a plugin to remap the dependencies of a JS bundle.
-   * @return {Object}
-   */
-  function remapDependenciesPlugin() {
-    const remaps = Object.entries(
-      /** @type {!Record<string, string>} */ (options.remapDependencies)
-    ).map(([path, value]) => ({regex: new RegExp(`^${path}$`), value}));
-    const external = options.externalDependencies;
-    return {
-      name: 'remap-dependencies',
-      setup(build) {
-        build.onResolve({filter: /.*/}, (args) => {
-          const {path: importPath, resolveDir} = args;
-          const dep = importPath.startsWith('.')
-            ? path.posix.join(resolveDir, importPath)
-            : importPath;
-          for (const {regex, value} of remaps) {
-            if (!regex.test(dep)) {
-              continue;
-            }
-            const isExternal = external?.includes(value);
-            return {
-              path: isExternal ? value : require.resolve(value),
-              external: isExternal,
-            };
-          }
-        });
-      },
-    };
   }
 
   await build(startTime).catch((err) =>

@@ -12,7 +12,7 @@ const {getReplacePlugin} = require('./helpers');
  * @param {!Object=} opt_replacePluginOverrides
  * @return {!Object}
  */
-function getMinifiedConfig(buildFor = 'preact') {
+function getMinifiedConfig(buildFor = 'preact', opt_replacePluginOverrides) {
   const isEsmBuild = argv.esm || argv.sxg;
   const isProd = argv._.includes('dist') && !argv.fortesting;
 
