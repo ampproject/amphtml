@@ -95,7 +95,7 @@ const TAG = 'amp-story-page';
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 /** @private @const {string} */
-const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '2s';
+const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '3s';
 
 /** @private @const {string} */
 const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
