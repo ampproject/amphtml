@@ -9,7 +9,6 @@
  * </code>
  */
 import {CommonSignals_Enum} from '#core/constants/common-signals';
-import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -554,7 +553,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           // In the PREVIEW state, a video can only use cached sources. If it
           // fails to play due to any issue with the cached sources, we
           // reregister the video once it has obtained its origin sources.
-          if (this.storyIsBeingPreviewed_()) {
+          if (this.getAmpDoc().isPreview()) {
             // We first block the reregistration on video layout end because
             // that is the point at which the story has entered the VISIBLE
             // state and its origin sources have been added.
@@ -1113,7 +1112,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       // because it is blocked on requests for origin sources that cannot be
       // made in the SERP due to privacy concerns. So, instead of indefinitely
       // blocking registration, we register media elements at layout start.
-      const waitForPlaybackMediaLayoutPromise = this.storyIsBeingPreviewed_()
+      const waitForPlaybackMediaLayoutPromise = this.getAmpDoc().isPreview()
         ? this.waitForPlaybackMediaLayoutStart_()
         : this.waitForPlaybackMediaLayoutEnd_();
       this.registerAllMediaPromise_ = waitForPlaybackMediaLayoutPromise.then(
@@ -1158,15 +1157,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         /** @type {!./media-pool.DomElementDef} */ (mediaEl)
       );
     }
-  }
-
-  /**
-   * @return {boolean} Whether this page's story is currently being previewed.
-   * @private
-   */
-  storyIsBeingPreviewed_() {
-    const visibilityState = this.getAmpDoc().getVisibilityState();
-    return visibilityState === VisibilityState_Enum.PREVIEW;
   }
 
   /**
