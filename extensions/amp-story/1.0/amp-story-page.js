@@ -323,11 +323,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   maybeSetPreviewDuration_() {
-    if (this.storeService_.get(StateProperty.PREVIEW_STATE)) {
-      const videos = this.getAllVideos_();
-
+    if (this.getAmpDoc().isPreview()) {
       const autoAdvanceAttr =
-        videos.length > 0
+        this.getAllVideos_().length > 0
           ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
           : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
 
