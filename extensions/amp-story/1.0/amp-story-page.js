@@ -297,7 +297,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
-    this.maybeSetPreviewDuration_();
+    if (this.getAmpDoc().isPreview()) {
+      this.setPreviewAutoAdvanceDuration_();
+    }
     this.maybeSetStoryNextUp_();
     this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
     this.advancement_.addPreviousListener(() => this.previous());
@@ -321,16 +323,16 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.maybeConvertCtaLayerToPageOutlink_();
   }
 
-  /** @private */
-  maybeSetPreviewDuration_() {
-    if (this.getAmpDoc().isPreview()) {
-      const autoAdvanceAttr =
-        this.getAllVideos_().length > 0
-          ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
-          : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
-
-      this.element.setAttribute('auto-advance-after', autoAdvanceAttr);
-    }
+  /**
+   * Configures the page to auto advance using preview-specific durations.
+   * @private
+   */
+  setPreviewAutoAdvanceDuration_() {
+    const autoAdvanceAttr =
+      this.getAllVideos_().length > 0
+        ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
+        : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
+    this.element.setAttribute('auto-advance-after', autoAdvanceAttr);
   }
 
   /**
