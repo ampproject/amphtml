@@ -56,7 +56,7 @@ const DEFAULT_STATE_VALUES = {
  *
  * @example
  * const {data, error, loading} = useQuery(
- *  async () => await fetchJson('https://example.com/items'),
+ *  () => fetchJson('https://example.com/items').then(data => data.items),
  *  {
  *   enabled: shouldFetchItems,
  *   initialData: [],
@@ -89,13 +89,14 @@ export function useQuery<TData>(
     queryFn,
   });
 
-  const fetchQueryData = useCallback(async () => {
+  const fetchQueryData = useCallback(() => {
     const {onError, onSettled, onSuccess, queryFn, state} = ref.current!;
     setState((s) => ({...s, error: null, loading: true}));
     try {
-      const data = await queryFn();
-      setState((s) => ({...s, error: null, loading: false, data}));
-      onSuccess(data);
+      queryFn().then((data) => {
+        setState((s) => ({...s, error: null, loading: false, data}));
+        onSuccess(data);
+      });
     } catch (error) {
       setState((s) => ({...s, data: null, loading: false, error}));
       onError(error);
