@@ -32,8 +32,6 @@ const Shim = memo(
 
 export {Shim};
 
-// type HtmlProps = Record<string, string | boolean | Function>;
-
 function setAttributes(element: HTMLElement, props: HTMLAttributes) {
   updateAttributes(element, props, false);
 }

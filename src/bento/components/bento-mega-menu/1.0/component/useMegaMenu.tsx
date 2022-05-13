@@ -30,7 +30,7 @@ export function useMegaMenu() {
   );
   return {
     openId,
-    isOpen: openId !== null,
+    isAnyOpen: openId !== null,
     actions,
   };
 }

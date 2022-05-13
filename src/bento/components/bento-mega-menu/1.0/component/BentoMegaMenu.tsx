@@ -16,6 +16,9 @@ import {useStyles} from '../component.jss';
 
 export type BentoMegaMenuProps = {
   children?: ComponentChildren;
+  /**
+   * Used for Bento web-component mode
+   */
   ItemWrapper?: ComponentType;
 };
 
@@ -34,7 +37,7 @@ export function BentoMegaMenu({
 
   const navRef = useRef<HTMLDivElement>(null);
   useClickOutside(navRef, (ev: MouseEvent) => {
-    if (megaMenu.isOpen) {
+    if (megaMenu.isAnyOpen) {
       megaMenu.actions.closeMenu();
 
       ev.preventDefault();

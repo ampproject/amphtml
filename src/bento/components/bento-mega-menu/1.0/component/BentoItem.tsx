@@ -1,4 +1,5 @@
 import {Shim} from '#bento/components/bento-mega-menu/1.0/component/Shim';
+import {useAttributeObserver} from '#bento/components/bento-mega-menu/1.0/component/UseMutationObserver';
 
 import * as Preact from '#preact';
 import {useLayoutEffect, useRef} from '#preact';
@@ -31,7 +32,14 @@ const SlottedDomWrapper: FC = ({children: slot}) => {
     headerRef.current = header as HTMLElement;
   }, []);
 
-  const {isOpen} = useMegaMenuItem();
+  const {actions, isOpen} = useMegaMenuItem();
+  useAttributeObserver(itemRef, 'expanded', (attrName, attrValue) => {
+    const expanded = attrValue !== null;
+    const shouldToggle = (expanded && !isOpen) || (!expanded && isOpen);
+    if (shouldToggle) {
+      actions.toggle();
+    }
+  });
 
   return (
     <div ref={ref}>
