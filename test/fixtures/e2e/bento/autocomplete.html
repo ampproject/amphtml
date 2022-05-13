@@ -26,7 +26,7 @@
   <body>
     <section>
       <h1>Default Autocomplete</h1>
-      <bento-autocomplete id="default">
+      <bento-autocomplete id="default" min-chars="0">
         <input type="text" id="autocomplete" />
         <script type="application/json">
           {
@@ -37,8 +37,8 @@
     </section>
     <section>
       <h1>With template</h1>
-      <bento-autocomplete id="with-template" filter-value="city">
-        <input type="text" />
+      <bento-autocomplete id="with-template" filter-value="city" min-chars="0">
+        <input type="text" id="autocomplete-template" />
         <script type="application/json">
           {
             "items": [

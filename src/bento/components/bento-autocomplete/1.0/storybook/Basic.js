@@ -1,7 +1,7 @@
+import {BentoAutocomplete} from '#bento/components/bento-autocomplete/1.0/component';
+
 import * as Preact from '#preact';
 import {xhrUtils} from '#preact/utils/xhr';
-
-import {BentoAutocomplete} from '../component';
 
 import '../component.jss';
 

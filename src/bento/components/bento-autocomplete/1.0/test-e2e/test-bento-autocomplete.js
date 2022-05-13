@@ -19,5 +19,61 @@ describes.endtoend(
       const input = await controller.findElement('input#autocomplete');
       await expect(controller.isElementDisplayed(input)).to.be.true;
     });
+
+    describe('default autocomplete', () => {
+      it('displays options', async () => {
+        const element = await controller.findElement('bento-autocomplete');
+        const input = await controller.findElement('input#autocomplete');
+
+        controller.click(input);
+
+        await controller.switchToShadowRoot(element);
+
+        const results = await controller.findElement('[part="results"]');
+        await expect(controller.isElementDisplayed(results)).to.be.true;
+
+        const options = await controller.findElements('[role="option"]');
+        await expect(options.length).to.equal(3);
+      });
+
+      it('can select an option', async () => {
+        const element = await controller.findElement('bento-autocomplete');
+        const input = await controller.findElement('input#autocomplete');
+
+        controller.click(input);
+
+        await controller.switchToShadowRoot(element);
+
+        const option = await controller.findElement('[data-value="apple"]');
+
+        controller.click(option);
+
+        // await expect(controller.getElementAttribute(input, 'value')).to.equal(
+        //   'apple'
+        // );
+
+        const results = await controller.findElement('[part="results"]');
+        await expect(controller.isElementDisplayed(results)).to.be.false;
+      });
+    });
+
+    describe('autocomplete with template', () => {
+      it('displays options', async () => {
+        const element = await controller.findElement(
+          'bento-autocomplete#with-template'
+        );
+
+        const input = await controller.findElement(
+          'input#autocomplete-template'
+        );
+        controller.click(input);
+
+        await controller.switchToShadowRoot(element);
+
+        const options = await controller.findElements('.city-item');
+
+        await expect(options.length).to.equal(3);
+      });
+    });
   }
 );
