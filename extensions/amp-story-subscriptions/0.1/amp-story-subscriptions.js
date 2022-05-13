@@ -84,7 +84,7 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.storeService_.dispatch(
         Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
         clamp(
-          subscriptionsPageIndex,
+          parseInt(subscriptionsPageIndex, 10),
           DEFAULT_SUBSCRIPTIONS_PAGE_INDEX,
           pages.length - 1
         )

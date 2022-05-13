@@ -211,7 +211,23 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-3">
+      <amp-story-page id="page-3" auto-advance-after="5s">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="https://images.unsplash.com/photo-1574236170880-fbbca132d83d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=926&q=80"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer aspect-ratio="9:16">
+          <div class="text-section">
+            <h3>Cultral Experiences</h3>
+            <p>As a birthplace of Sado, or Japanese tea ceremony, the historic neighborhoods of Gion and Higashiyama are perfect places to visit machiyas and learn about the ancient art of tea-making. During the ritual performed on a tatami floor by a professional tea master, you'll have a chance to learn about the philosophy and etiquette of drinking tea, as well as master the basics of making matcha.</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-4">
         <amp-story-grid-layer template="fill">
           <amp-img src="https://images.unsplash.com/photo-1574236170880-fbbca132d83d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=926&q=80"
               width="720" height="1280"
@@ -228,6 +244,7 @@
       </amp-story-page>
 
       <amp-story-subscriptions layout='container'
+        subscriptions-page-index="3"
         price='$0.50/week'
         title='Information at your fingertips'
         subtitle-first='Subscribe for unlimited access.'
