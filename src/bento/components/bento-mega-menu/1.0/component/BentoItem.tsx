@@ -1,8 +1,8 @@
 import {Shim} from '#bento/components/bento-mega-menu/1.0/component/Shim';
-import {useAttributeObserver} from '#bento/components/bento-mega-menu/1.0/component/UseMutationObserver';
 
 import * as Preact from '#preact';
 import {useLayoutEffect, useRef} from '#preact';
+import {useAttributeObserver} from '#preact/hooks/useMutationObserver';
 import {FC} from '#preact/types';
 
 import {Content} from './Content';
