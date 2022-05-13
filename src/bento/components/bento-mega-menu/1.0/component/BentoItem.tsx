@@ -17,23 +17,29 @@ export const BentoItem: FC = ({children}) => {
   );
 };
 
+/**
+ * Renders the slot, and uses a bunch of shims to control the slotted elements
+ */
 const SlottedDomWrapper: FC = ({children: slot}) => {
+  const {actions, isOpen} = useMegaMenuItem();
+
   const ref = useRef<HTMLDivElement>(null);
+
+  // Capture all the Light DOM elements:
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLElement>(null);
   const contentsRef = useRef<HTMLElement>(null);
-  // Capture all the Light DOM elements:
   useLayoutEffect(() => {
-    const slot = ref.current!.querySelector('slot');
-    const section = slot!.assignedElements()[0];
+    const slot = ref.current!.querySelector('slot')!;
+    const section = slot.assignedElements()[0];
     const {firstElementChild: header, lastElementChild: contents} = section;
     sectionRef.current = section as HTMLElement;
     contentsRef.current = contents as HTMLElement;
     titleRef.current = header as HTMLElement;
   }, []);
 
-  const {actions, isOpen} = useMegaMenuItem();
-  useAttributeObserver(sectionRef, 'expanded', (attrName, attrValue) => {
+  // Watch the section's 'expanded' attribute:
+  useAttributeObserver(sectionRef, 'expanded', (attrValue) => {
     const expanded = attrValue !== null;
     const shouldToggle = (expanded && !isOpen) || (!expanded && isOpen);
     if (shouldToggle) {
@@ -44,7 +50,8 @@ const SlottedDomWrapper: FC = ({children: slot}) => {
   const sectionAttributes = {
     expanded: isOpen,
   };
-
+  // Render the slot, Title, and Content elements.
+  // Render these using Shims, to control the Light DOM elements
   return (
     <div ref={ref}>
       {slot}
