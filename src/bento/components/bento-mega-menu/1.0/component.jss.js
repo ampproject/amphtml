@@ -37,9 +37,6 @@ const content = {
     transitionTimingFunction: 'ease-out',
   },
 };
-const parent = {
-  zIndex: 1000,
-};
 
 const mask = {
   position: 'fixed',
