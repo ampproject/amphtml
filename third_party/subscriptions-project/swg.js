@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.216 */
+/** Version: 0.1.22.217 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4996,7 +4996,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.216',
+    '_client': 'SwG 0.1.22.217',
   });
 }
 
@@ -5190,8 +5190,8 @@ class PayStartFlow {
       {
         forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
-        // basic flow does not support native.
-        forceDisableNative: paySwgVersion == '2',
+        // SwG basic and TwG flows do not support native.
+        forceDisableNative: paySwgVersion == '2' || paySwgVersion == '3',
       }
     );
     return Promise.resolve();
@@ -6330,7 +6330,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.216',
+        '_client': 'SwG 0.1.22.217',
         'supportsEventManager': true,
       },
       args || {}
@@ -7243,7 +7243,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.216');
+    context.setClientVersion('SwG 0.1.22.217');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -11424,6 +11424,30 @@ const AnalyticsEventToGoogleAnalyticsEvent = {
       '',
       true
     ),
+  [AnalyticsEvent.IMPRESSION_NEWSLETTER_OPT_IN]: createGoogleAnalyticsEvent(
+    'NTG newsletter',
+    'newsletter modal impression',
+    '',
+    true
+  ),
+  [AnalyticsEvent.EVENT_NEWSLETTER_OPTED_IN]: createGoogleAnalyticsEvent(
+    'NTG newsletter',
+    'newsletter signup',
+    'success',
+    false
+  ),
+  [AnalyticsEvent.IMPRESSION_REGWALL_OPT_IN]: createGoogleAnalyticsEvent(
+    'NTG account',
+    'registration modal impression',
+    '',
+    true
+  ),
+  [AnalyticsEvent.EVENT_REGWALL_OPTED_IN]: createGoogleAnalyticsEvent(
+    'NTG account',
+    'registration',
+    'success',
+    false
+  ),
 };
 
 /** @const {!Object<?AnalyticsEvent,?Object>} */
