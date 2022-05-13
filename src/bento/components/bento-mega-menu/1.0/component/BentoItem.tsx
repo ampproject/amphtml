@@ -19,21 +19,21 @@ export const BentoItem: FC = ({children}) => {
 
 const SlottedDomWrapper: FC = ({children: slot}) => {
   const ref = useRef<HTMLDivElement>(null);
-  const itemRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLElement>(null);
   const contentsRef = useRef<HTMLElement>(null);
   // Capture all the Light DOM elements:
   useLayoutEffect(() => {
     const slot = ref.current!.querySelector('slot');
     const section = slot!.assignedElements()[0];
     const {firstElementChild: header, lastElementChild: contents} = section;
-    itemRef.current = section as HTMLElement;
+    sectionRef.current = section as HTMLElement;
     contentsRef.current = contents as HTMLElement;
-    headerRef.current = header as HTMLElement;
+    titleRef.current = header as HTMLElement;
   }, []);
 
   const {actions, isOpen} = useMegaMenuItem();
-  useAttributeObserver(itemRef, 'expanded', (attrName, attrValue) => {
+  useAttributeObserver(sectionRef, 'expanded', (attrName, attrValue) => {
     const expanded = attrValue !== null;
     const shouldToggle = (expanded && !isOpen) || (!expanded && isOpen);
     if (shouldToggle) {
@@ -48,13 +48,9 @@ const SlottedDomWrapper: FC = ({children: slot}) => {
   return (
     <div ref={ref}>
       {slot}
-      <ItemShim elementRef={itemRef} {...sectionAttributes} />
-      <Title as={HeaderShim} elementRef={headerRef} />
-      <Content as={ContentsShim} elementRef={contentsRef} />
+      <Shim elementRef={sectionRef} {...sectionAttributes} />
+      <Title as={Shim} elementRef={titleRef} />
+      <Content as={Shim} elementRef={contentsRef} />
     </div>
   );
 };
-
-const ItemShim = Shim;
-const HeaderShim = Shim;
-const ContentsShim = Shim;

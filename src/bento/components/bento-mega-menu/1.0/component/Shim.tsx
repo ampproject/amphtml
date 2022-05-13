@@ -1,20 +1,22 @@
 import {useEffect} from '#preact';
 import {memo} from '#preact/compat/external';
-import type {EventHandler, HTMLAttributes, RefObject} from '#preact/types';
+import type {
+  EventHandler,
+  FunctionalComponent,
+  HTMLAttributes,
+  RefObject,
+} from '#preact/types';
 
-export type ShimProps<TElement extends HTMLElement> = {
-  elementRef: RefObject<TElement>;
-} & HTMLAttributes<TElement>;
+export type ShimProps = {
+  elementRef: RefObject<HTMLElement>;
+};
 /**
  * This Shim takes a DOM element,
  * and manually applies the props to it,
  * using setAttribute and addEventListener.
  */
-const Shim = memo(
-  <TElement extends HTMLElement>({
-    elementRef,
-    ...props
-  }: ShimProps<TElement>) => {
+const Shim: FunctionalComponent<ShimProps> = memo(
+  ({elementRef, ...props}: ShimProps) => {
     useEffect(() => {
       const element = elementRef.current;
       if (!element) {
