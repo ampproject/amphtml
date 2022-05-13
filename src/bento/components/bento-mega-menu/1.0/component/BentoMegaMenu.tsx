@@ -9,7 +9,7 @@ import type {ComponentChildren, ComponentType} from '#preact/types';
 import {Content} from './Content';
 import {Item} from './Item';
 import {Title} from './Title';
-import {useClickOutside} from './useClickOutside';
+import {useClickOutside} from '#preact/hooks/useClickOutside';
 import {MegaMenuContext, useMegaMenu} from './useMegaMenu';
 
 import {useStyles} from '../component.jss';

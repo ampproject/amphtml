@@ -5,7 +5,7 @@ import useEvent from '#preact/hooks/useEvent';
 
 /**
  * Triggers the callback if a click occurs outside the element.
- * Prevents default behavior and propagation.
+ * Works with any combination of Light DOM and Shadow DOM.
  */
 export function useClickOutside(
   elementRef: RefObject<HTMLElement>,
