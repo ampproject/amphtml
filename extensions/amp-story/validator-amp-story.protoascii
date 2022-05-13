@@ -110,6 +110,7 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
     child_tag_name_oneof: "AMP-STORY-PAGE"
     child_tag_name_oneof: "AMP-STORY-SOCIAL-SHARE"
+    child_tag_name_oneof: "AMP-STORY-SUBSCRIPTIONS"
   }
 }
 tags: {  # <amp-story-page>
