@@ -4,11 +4,11 @@
  * - contain:layout element
  */
 bento-mega-menu {
-  /*white-space: nowrap;*/
   background: white;
   position: relative;
   z-index: 1000;
 
+  /* Before built, display the contents correctly: */
   display: flex;
   flex-wrap: wrap;
   gap: 0.5em;
@@ -16,10 +16,6 @@ bento-mega-menu {
 
 bento-mega-menu.i-amphtml-built {
   display: block;
-}
-
-bento-mega-menu > section {
-
 }
 
 bento-mega-menu > section > :first-child {
