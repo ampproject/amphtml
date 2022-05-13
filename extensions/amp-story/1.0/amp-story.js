@@ -132,7 +132,6 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {getMode, isModeDevelopment} from '../../../src/mode';
-// import {DEFAULT_SUBSCRIPTIONS_PAGE_INDEX} from '../../amp-story-subscriptions/0.1/amp-story-subscriptions';
 
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;
