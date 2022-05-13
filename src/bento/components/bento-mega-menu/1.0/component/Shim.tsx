@@ -9,7 +9,6 @@ export type ShimProps<TElement extends HTMLElement> = {
  * This Shim takes a DOM element,
  * and manually applies the props to it,
  * using setAttribute and addEventListener.
- *
  */
 const Shim = memo(
   <TElement extends HTMLElement>({
@@ -32,14 +31,17 @@ const Shim = memo(
 
 export {Shim};
 
+/**
+ * It doesn't make sense for shadowDom to set lightDom classes, so let's skip that
+ */
+const ignoreClasses = true;
+
 function setAttributes(element: HTMLElement, props: HTMLAttributes) {
   updateAttributes(element, props, false);
 }
-
 function unsetAttributes(element: HTMLElement, props: HTMLAttributes) {
   updateAttributes(element, props, true);
 }
-
 function updateAttributes(
   element: HTMLElement,
   props: HTMLAttributes,
@@ -54,12 +56,14 @@ function updateAttributes(
       } else {
         element.setAttribute(prop, '');
       }
-    } else if (value === 'class' || value === 'className') {
-      const classes = value.split(' ');
-      if (!unset) {
-        element.classList.add(...classes);
-      } else {
-        element.classList.remove(...classes);
+    } else if (prop === 'class' || prop === 'className') {
+      if (!ignoreClasses) {
+        const classes = value.split(' ');
+        if (!unset) {
+          element.classList.add(...classes);
+        } else {
+          element.classList.remove(...classes);
+        }
       }
     } else if (typeof value === 'string') {
       if (!unset) {
@@ -70,7 +74,9 @@ function updateAttributes(
     } else if (typeof value === 'function') {
       const eventName = prop === 'onClick' ? 'click' : null;
       if (!eventName) {
-        throw new Error(`unexpected event name "${prop}"`);
+        throw new Error(
+          `Only 'click' events are supported; Unsupported event name "${prop}"`
+        );
       }
       const handler = value as EventHandler<any>;
       if (!unset) {
