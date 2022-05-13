@@ -41,10 +41,14 @@ const SlottedDomWrapper: FC = ({children: slot}) => {
     }
   });
 
+  const sectionAttributes = {
+    expanded: isOpen,
+  };
+
   return (
     <div ref={ref}>
       {slot}
-      <ItemShim elementRef={itemRef} expanded={isOpen} />
+      <ItemShim elementRef={itemRef} {...sectionAttributes} />
       <Title as={HeaderShim} elementRef={headerRef} />
       <Content as={ContentsShim} elementRef={contentsRef} />
     </div>

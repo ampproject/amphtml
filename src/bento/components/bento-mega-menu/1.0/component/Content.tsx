@@ -33,7 +33,7 @@ export function Content<TAs extends AsComponent = 'div'>({
     }
   }, [actions, idProp]);
 
-  const ariaAttrs: Partial<AriaAttributes> = {
+  const ariaAttrs: AriaAttributes = {
     'aria-modal': isOpen,
   };
 
