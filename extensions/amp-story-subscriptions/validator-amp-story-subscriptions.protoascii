@@ -15,12 +15,4 @@ tags: {  # <amp-story-subscriptions>
   amp_layout: {
     supported_layouts: CONTAINER
   }
-  attrs: {
-    name: "price"
-    mandatory: true
-  }
-  attrs: {
-    name: "description"
-    mandatory: true
-  }
 }
