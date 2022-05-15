@@ -78,13 +78,17 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
         pages.length
       );
 
-      const subscriptionsPageIndex = this.element.getAttribute(
-        'subscriptions-page-index'
+      let subscriptionsPageIndex = parseInt(
+        this.element.getAttribute('subscriptions-page-index'),
+        10
       );
+      subscriptionsPageIndex = isNaN(subscriptionsPageIndex)
+        ? DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+        : subscriptionsPageIndex;
       this.storeService_.dispatch(
         Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
         clamp(
-          parseInt(subscriptionsPageIndex, 10),
+          subscriptionsPageIndex,
           DEFAULT_SUBSCRIPTIONS_PAGE_INDEX,
           pages.length - 1
         )
