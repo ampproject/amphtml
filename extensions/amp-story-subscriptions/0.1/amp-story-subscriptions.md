@@ -43,7 +43,7 @@ This component enables Web Stories to support paywalls and subscriptions in a ma
     - Paywall cannot be triggered on the first two pages of a Story or on the last page or on a Story with fewer than 4 pages.
 2. When the user navigates to the first paywalled page of the Story, <amp-story-subscriptions> will check if the user has access via <amp-subscriptions>. If yes, the user can consume the Story without any interruption.
 3. If the access is not granted, a paywall bottomsheet is shown at the bottom of the page. The paywall only prevents users from accessing the remaining pages of the Story, the user can otherwise navigate as normal (tap to previous pages, or swipe to a different Story if available).
-4. The paywall has a standard UX, but allows for key messages to be customized by the publisher.
+4. The paywall has a templated UX that allows for key messages to be customized by the publisher.
 5. Depending on publisher configuration, the dialog can support three different ways to progress:
     - Sign-in with publisher’s sign-in flow (i.e. publisher provided sign-in page).
     - Subscribe directly via the publisher (i.e. via a publisher provided subscription page).
