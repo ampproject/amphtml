@@ -1,8 +1,7 @@
 import * as Preact from '#preact';
+import '../component.jss';
 
 import {BentoMegaMenu} from '../component/BentoMegaMenu';
-
-import '../component.jss';
 
 export default {
   title: 'MegaMenu',
@@ -178,5 +177,232 @@ export const Simple = (args) => {
         </BentoMegaMenu.Item>
       </BentoMegaMenu>
     </PageLayout>
+  );
+};
+
+const css = String.raw;
+
+export const Detailed = (args) => {
+  return (
+    <>
+      <style>
+        {css`
+          .menu-title {
+            margin-right: 2em;
+          }
+          .menu-content {
+            display: flex;
+          }
+        `}
+      </style>
+      <PageLayout>
+        <BentoMegaMenu>
+          <BentoMegaMenu.Item>
+            <BentoMegaMenu.Title class="menu-title">
+              Clothing, Shoes, Jewelry &amp; Watches
+            </BentoMegaMenu.Title>
+            <BentoMegaMenu.Content class="menu-content">
+              <img
+                alt="Clothing, Shoes, Jewelry &amp; Watches"
+                src="https://picsum.photos/id/535/367/267"
+                height="250"
+                width="300"
+              />
+              <div>
+                <h4>Clothing, Shoes, Jewelry &amp; Watches</h4>
+                <ul>
+                  <li>
+                    <a href="#">Women</a>
+                  </li>
+                  <li>
+                    <a href="#">Men</a>
+                  </li>
+                  <li>
+                    <a href="#">Girls</a>
+                  </li>
+                  <li>
+                    <a href="#">Boys</a>
+                  </li>
+                  <li>
+                    <a href="#">Baby</a>
+                  </li>
+                  <li>
+                    <a href="#">Luggage</a>
+                  </li>
+                  <li>
+                    <a href="#">Accessories</a>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4>More to Explore</h4>
+                <ul>
+                  <li>
+                    <a href="#">Our Brands</a>
+                  </li>
+                </ul>
+              </div>
+            </BentoMegaMenu.Content>
+          </BentoMegaMenu.Item>
+          <BentoMegaMenu.Item>
+            <BentoMegaMenu.Title class="menu-title">
+              Movies, Music &amp; Games
+            </BentoMegaMenu.Title>
+            <BentoMegaMenu.Content class="menu-content">
+              <img
+                alt="Movies, Music &amp; Games"
+                src="https://picsum.photos/id/452/367/267"
+                height="250"
+                width="300"
+              />
+              <div>
+                <h4>Movies, Music &amp; Games</h4>
+                <ul>
+                  <li>
+                    <a href="#">Movies &amp; TV</a>
+                  </li>
+                  <li>
+                    <a href="#">Blue-ray</a>
+                  </li>
+                  <li>
+                    <a href="#">CDs &amp; Vinyl</a>
+                  </li>
+                  <li>
+                    <a href="#">Digital Music</a>
+                  </li>
+                  <li>
+                    <a href="#">Video Games</a>
+                  </li>
+                  <li>
+                    <a href="#">Headphones</a>
+                  </li>
+                  <li>
+                    <a href="#">Musical Instruments</a>
+                  </li>
+                  <li>
+                    <a href="#">Entertainment Collectibles</a>
+                  </li>
+                </ul>
+              </div>
+            </BentoMegaMenu.Content>
+          </BentoMegaMenu.Item>
+          <BentoMegaMenu.Item>
+            <BentoMegaMenu.Title class="menu-title">
+              Sports &amp; Outdoors
+            </BentoMegaMenu.Title>
+            <BentoMegaMenu.Content class="menu-content">
+              <img
+                alt="Sports &amp; Outdoors"
+                src="https://picsum.photos/id/469/367/267"
+                height="250"
+                width="300"
+              />
+              <div>
+                <h4>Sports</h4>
+                <ul>
+                  <li>
+                    <a href="#">Athletic Clothing</a>
+                  </li>
+                  <li>
+                    <a href="#">Exercise &amp; Fitness</a>
+                  </li>
+                  <li>
+                    <a href="#">Hunting &amp; Fishing</a>
+                  </li>
+                  <li>
+                    <a href="#">Team Sports</a>
+                  </li>
+                  <li>
+                    <a href="#">Sports Collectibles</a>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4>Outdoors</h4>
+                <ul>
+                  <li>
+                    <a href="#">Camping &amp; Hiking</a>
+                  </li>
+                  <li>
+                    <a href="#">Cycling</a>
+                  </li>
+                  <li>
+                    <a href="#">Outdoor Clothing</a>
+                  </li>
+                  <li>
+                    <a href="#">Climbing</a>
+                  </li>
+                  <li>
+                    <a href="#">Accessories</a>
+                  </li>
+                </ul>
+              </div>
+            </BentoMegaMenu.Content>
+          </BentoMegaMenu.Item>
+          <BentoMegaMenu.Item>
+            <BentoMegaMenu.Title class="menu-title">
+              Home, Garden &amp; Tools
+            </BentoMegaMenu.Title>
+            <BentoMegaMenu.Content class="menu-content">
+              <img
+                alt="Home, Garden &amp; Tools"
+                src="https://picsum.photos/id/491/367/267"
+                height="250"
+                width="300"
+              />
+              <div>
+                <h4>Home, Garden &amp; Pets</h4>
+                <ul>
+                  <li>
+                    <a href="#">Furniture</a>
+                  </li>
+                  <li>
+                    <a href="#">Kitchen &amp; Dining</a>
+                  </li>
+                  <li>
+                    <a href="#">Bed &amp; Bath</a>
+                  </li>
+                  <li>
+                    <a href="#">Garden &amp; Outdoor</a>
+                  </li>
+                  <li>
+                    <a href="#">Mattresses</a>
+                  </li>
+                  <li>
+                    <a href="#">Lighting</a>
+                  </li>
+                  <li>
+                    <a href="#">Appliances</a>
+                  </li>
+                  <li>
+                    <a href="#">Pet Supplies</a>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4>Tools, Home Improvement</h4>
+                <ul>
+                  <li>
+                    <a href="#">Home Improvment</a>
+                  </li>
+                  <li>
+                    <a href="#">Power &amp; Hand Tools</a>
+                  </li>
+                  <li>
+                    <a href="#">Cookware</a>
+                  </li>
+                  <li>
+                    <a href="#">Hardware</a>
+                  </li>
+                  <li>
+                    <a href="#">Smart Home</a>
+                  </li>
+                </ul>
+              </div>
+            </BentoMegaMenu.Content>
+          </BentoMegaMenu.Item>
+        </BentoMegaMenu>
+      </PageLayout>
+    </>
   );
 };
