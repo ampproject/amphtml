@@ -1,11 +1,12 @@
 import * as Preact from '#core/dom/jsx';
 import {Layout_Enum} from '#core/dom/layout';
 import {setImportantStyles} from '#core/dom/style';
+import {clamp} from '#core/math';
 
 import {Services} from '#service';
 import {LocalizedStringId_Enum} from '#service/localization/strings';
 
-import {dev} from '#utils/log';
+import {dev, devAssert} from '#utils/log';
 
 import {CSS} from '../../../build/amp-story-subscriptions-0.1.css';
 import {
@@ -18,6 +19,12 @@ import {AdvancementMode} from '../../amp-story/1.0/story-analytics';
 import {getStoryAttributeSrc} from '../../amp-story/1.0/utils';
 
 const TAG = 'amp-story-subscriptions';
+
+/**
+ * The index of the page where the paywall would be triggered.
+ * @const {number}
+ */
+export const DEFAULT_SUBSCRIPTIONS_PAGE_INDEX = 2;
 
 /**
  * The number of milliseconds to wait before showing the skip button on dialog banner.
@@ -61,6 +68,31 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
       this.storeService_ = storeService;
       this.subscriptionService_ = subscriptionService;
       this.localizationService_ = localizationService;
+
+      const pages = this.win.document.querySelectorAll(
+        'amp-story-page:not([ad])'
+      );
+      devAssert(
+        pages.length >= 4,
+        'The number of pages should be at least 4 to enable subscriptions feature, got %s',
+        pages.length
+      );
+
+      let subscriptionsPageIndex = parseInt(
+        this.element.getAttribute('subscriptions-page-index'),
+        10
+      );
+      subscriptionsPageIndex = isNaN(subscriptionsPageIndex)
+        ? DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+        : subscriptionsPageIndex;
+      this.storeService_.dispatch(
+        Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+        clamp(
+          subscriptionsPageIndex,
+          DEFAULT_SUBSCRIPTIONS_PAGE_INDEX,
+          pages.length - 1
+        )
+      );
 
       // Get grant status immediately to set up the initial subscriptions state.
       this.getGrantStatusAndUpdateState_();
@@ -222,17 +254,17 @@ export class AmpStorySubscriptions extends AMP.BaseElement {
           <span class="i-amphtml-story-subscriptions-price">
             {this.element.getAttribute('price')}
           </span>
-          {this.element.getAttribute('title') && (
-            <span class="i-amphtml-story-subscriptions-title">
-              {this.element.getAttribute('title')}
+          {this.element.getAttribute('headline') && (
+            <span class="i-amphtml-story-subscriptions-headline">
+              {this.element.getAttribute('headline')}
             </span>
           )}
-          <span class="i-amphtml-story-subscriptions-subtitle-first">
-            {this.element.getAttribute('subtitle-first')}
+          <span class="i-amphtml-story-subscriptions-description">
+            {this.element.getAttribute('description')}
           </span>
-          {this.element.getAttribute('subtitle-second') && (
-            <span class="i-amphtml-story-subscriptions-subtitle-second">
-              {this.element.getAttribute('subtitle-second')}
+          {this.element.getAttribute('additional-description') && (
+            <span class="i-amphtml-story-subscriptions-additional-description">
+              {this.element.getAttribute('additional-description')}
             </span>
           )}
           <button

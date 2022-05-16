@@ -211,7 +211,23 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-3">
+      <amp-story-page id="page-3" auto-advance-after="5s">
+        <amp-story-grid-layer template="fill">
+          <amp-img src="https://images.unsplash.com/photo-1599849913403-f45ef2181b49?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3024&q=80"
+              width="720" height="1280"
+              layout="responsive"
+              alt="">
+          </amp-img>
+        </amp-story-grid-layer>
+        <amp-story-grid-layer aspect-ratio="9:16">
+          <div class="text-section">
+            <h3>arashiyama</h3>
+            <p>The rolling foothills of Arashiyama are home to the iconic Sagano Bamboo Forest. The verdant grove is accessed via the 14th-century Buddhist temple Tenryu-ji. A unique serenity is experienced from the wind rustling through the soaring trees making a zawa zawa sound and the filtered sunlight filling the space with a tranquil green glow.</p>
+          </div>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-4">
         <amp-story-grid-layer template="fill">
           <amp-img src="https://images.unsplash.com/photo-1574236170880-fbbca132d83d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=926&q=80"
               width="720" height="1280"
@@ -228,10 +244,11 @@
       </amp-story-page>
 
       <amp-story-subscriptions layout='container'
+        subscriptions-page-index='3'
         price='$0.50/week'
-        title='Information at your fingertips'
-        subtitle-first='Subscribe for unlimited access.'
-        subtitle-second='Cancel anytime.'>
+        headline='Information at your fingertips'
+        description='Subscribe for unlimited access.'
+        additional-description='Cancel anytime.'>
       </amp-story-subscriptions>
     </amp-story>>
   </body>
