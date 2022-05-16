@@ -8,6 +8,8 @@ import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
 
+import * as helpers from '../../base-element-helpers';
+
 describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
   let win;
   let html;
@@ -16,8 +18,12 @@ describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
   beforeEach(() => {
     win = env.win;
     html = htmlFor(win.document);
-    warnSpy = env.sandbox.stub(console, 'log');
+    warnSpy = env.sandbox.spy(helpers, 'warn');
     defineBentoElement('bento-autocomplete', BentoAutocomplete, win);
+  });
+
+  afterEach(() => {
+    env.sandbox.restore();
   });
 
   async function mountElement(element) {

@@ -8,6 +8,7 @@ import {tryParseJson} from '#core/types/object/json';
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 
+import {warn} from './base-element-helpers';
 import {BentoAutocomplete} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 
@@ -26,10 +27,9 @@ export class BaseElement extends PreactBaseElement {
     const itemsExpr = this.element.getAttribute('items') || 'items';
     const items = getValueForExpr(/**@type {!JsonObject}*/ (json), itemsExpr);
     if (!items) {
-      console /*OK*/
-        .log(
-          `Expected key "${itemsExpr}" in data but found nothing. Rendering empty results.`
-        );
+      warn(
+        `Expected key "${itemsExpr}" in data but found nothing. Rendering empty results.`
+      );
       return [];
     }
     if (!isArray(items)) {
@@ -56,10 +56,9 @@ export class BaseElement extends PreactBaseElement {
         items,
       };
     } else if (!this.element.hasAttribute('src')) {
-      console /*OK*/
-        .log(
-          `Expected a <script type="application/json"> child or a URL specified in "src"`
-        );
+      warn(
+        `Expected a <script type="application/json"> child or a URL specified in "src"`
+      );
     }
     return defaultProps;
   }
