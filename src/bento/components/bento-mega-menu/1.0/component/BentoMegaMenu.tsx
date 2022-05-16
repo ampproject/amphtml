@@ -1,11 +1,11 @@
 import objStr from 'obj-str';
 
 import * as Preact from '#preact';
-import {useRef} from '#preact';
-import {Children} from '#preact/compat';
+import {useImperativeHandle, useRef} from '#preact';
+import {Children, forwardRef} from '#preact/compat';
 import {ContainWrapper} from '#preact/component';
 import {useClickOutside} from '#preact/hooks/useClickOutside';
-import type {ComponentChildren, ComponentType} from '#preact/types';
+import type {ComponentChildren, ComponentType, Ref} from '#preact/types';
 
 import {Content} from './Content';
 import {Item} from './Item';
@@ -22,15 +22,15 @@ export type BentoMegaMenuProps = {
   ItemWrapper?: ComponentType;
 };
 
+export type BentoMegaMenuApi = ReturnType<typeof useMegaMenu>;
+
 /**
- * @param {!BentoMegaMenu.Props} props
  * @return {PreactDef.Renderable}
  */
-export function BentoMegaMenu({
-  ItemWrapper,
-  children,
-  ...rest
-}: BentoMegaMenuProps) {
+function BentoMegaMenuWithRef(
+  {ItemWrapper, children, ...rest}: BentoMegaMenuProps,
+  ref: Ref<BentoMegaMenuApi>
+) {
   const megaMenu = useMegaMenu();
 
   const isAnyOpen = megaMenu.openId !== null;
@@ -45,6 +45,7 @@ export function BentoMegaMenu({
     }
   });
 
+  useImperativeHandle(ref, () => megaMenu, [megaMenu]);
   const classes = useStyles();
   return (
     <ContainWrapper {...rest}>
@@ -71,6 +72,10 @@ export function BentoMegaMenu({
   );
 }
 
-BentoMegaMenu.Title = Title;
-BentoMegaMenu.Content = Content;
-BentoMegaMenu.Item = Item;
+const BentoMegaMenuFwd = forwardRef(BentoMegaMenuWithRef);
+const BentoMegaMenu = Object.assign(BentoMegaMenuFwd, {
+  Title,
+  Content,
+  Item,
+});
+export {BentoMegaMenu};
