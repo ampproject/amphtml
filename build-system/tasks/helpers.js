@@ -28,27 +28,6 @@ const {
 } = require('./remap-dependencies-plugin/remap-dependencies');
 
 /**
- * @typedef {{
- *   babelCaller?: string,
- *   ssrReady?: boolean,
- *   includePolyfills?: boolean,
- *   watch?: boolean,
- *   esbuild?: boolean,
- *   minify?: boolean,
- *   aliasName?: string,
- *   extraGlobs?: string[],
- *   toName?: string,
- *   minifiedName?: string,
- *   remapDependencies?: !Record<string, string>,
- *   outputFormat?: esbuild.Format,
- *   externalDependencies?: string[],
- *   onWatchBuild?: function(Promise): void,
- *   wrapper?: string
- * }}
- */
-const CompileOptionsDef = {};
-
-/**
  * Tasks that should print the `--nobuild` help text.
  * @private @const {!Set<string>}
  */
@@ -84,7 +63,7 @@ const watchedTargets = new Map();
 /**
  * @param {!Object} jsBundles
  * @param {string} name
- * @param {!CompileOptionsDef} extraOptions
+ * @param {!Object} extraOptions
  * @return {!Promise}
  */
 function doBuildJs(jsBundles, name, extraOptions) {
@@ -150,7 +129,7 @@ async function compileCoreRuntime(options) {
  * Outputs 2 scripts:
  * 1) for direct consumption in the browser
  * 2) for consumption by npm package users
- * @param {!CompileOptionsDef} options
+ * @param {!Object} options
  * @return {Promise<void>}
  */
 async function compileBentoRuntimeAndCore(options) {
@@ -200,7 +179,7 @@ async function compileBentoRuntimeAndCore(options) {
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  *
- * @param {!CompileOptionsDef} options
+ * @param {!Object} options
  * @return {!Promise}
  */
 async function compileAllJs(options) {
@@ -332,7 +311,7 @@ async function finishBundle(destDir, destFilename, options, startTime) {
  * @param {string} srcDir
  * @param {string} srcFilename
  * @param {string} destDir
- * @param {!CompileOptionsDef} options
+ * @param {!Object} options
  * @return {!Promise}
  */
 async function esbuildCompile(srcDir, srcFilename, destDir, options) {
@@ -586,7 +565,7 @@ const watchedEntryPoints = new Set();
  * @param {string} srcDir Path to the src directory
  * @param {string} srcFilename Name of the JS source file
  * @param {string} destDir Destination folder for output script
- * @param {?CompileOptionsDef} options
+ * @param {?Object} options
  * @return {!Promise}
  */
 async function compileJs(srcDir, srcFilename, destDir, options) {
@@ -743,7 +722,7 @@ async function thirdPartyBootstrap(input, outputName, options) {
  * used to compile the entrypoint.
  *
  * @param {string} entryPoint
- * @param {!CompileOptionsDef} options
+ * @param {!Object} options
  * @return {Promise<Array<string>>}
  */
 async function getDependencies(entryPoint, options) {

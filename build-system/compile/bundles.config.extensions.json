@@ -1135,14 +1135,6 @@
     }
   },
   {
-    "name": "amp-story-ssr",
-    "src": "amp-story",
-    "version": "1.0",
-    "options": {
-      "hasCss": false
-    }
-  },
-  {
     "name": "amp-stream-gallery",
     "version": "0.1",
     "latestVersion": "0.1",
