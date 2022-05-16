@@ -79,7 +79,7 @@ function constructCompanionDisplayAd(
     'amp-ad',
     {
       'width': `${maxWidth}`,
-      'height': '0',
+      'height': `${maxHeight}`,
       'type': 'doubleclick',
       'layout': 'fixed',
       'data-slot': `${slot}`,
