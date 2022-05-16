@@ -20,7 +20,7 @@ export const BentoItem: FC = ({children}) => {
 /**
  * Renders the slot, and uses a bunch of shims to control the slotted (light DOM) elements
  */
-const SlottedDomWrapper: FC = ({children: slot}) => {
+const SlottedDomWrapper: FC = ({children}) => {
   const {actions, isOpen} = useMegaMenuItem();
 
   const ref = useRef<HTMLDivElement>(null);
@@ -54,7 +54,7 @@ const SlottedDomWrapper: FC = ({children: slot}) => {
   // Render these using Shims, to control the Light DOM elements
   return (
     <div ref={ref}>
-      {slot}
+      {children}
       <Shim elementRef={sectionRef} {...sectionAttributes} />
       <Title as={Shim} elementRef={titleRef} />
       <Content as={Shim} elementRef={contentsRef} />
