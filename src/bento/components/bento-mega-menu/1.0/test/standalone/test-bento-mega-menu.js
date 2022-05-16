@@ -7,7 +7,7 @@ import {htmlFor} from '#core/dom/static-template';
 
 import {defineBentoElement} from '#preact/bento-ce';
 
-import {waitFor} from '#testing/helpers/service';
+import {cleanHtml, cleanWhitespace} from '#testing/helpers/cleanHtml';
 
 describes.realWin('bento-mega-menu:1.0', {amp: false}, (env) => {
   let win;
@@ -26,10 +26,12 @@ describes.realWin('bento-mega-menu:1.0', {amp: false}, (env) => {
     return element;
   }
 
-  it('should render expanded and collapsed sections', async () => {
-    const element = await mount(html`
+  /** @type {HTMLElement} */
+  let element;
+  beforeEach(async () => {
+    element = await mount(html`
       <bento-mega-menu>
-        <section id="section1">
+        <section>
           <span>header1</span>
           <div>content1</div>
         </section>
@@ -43,28 +45,95 @@ describes.realWin('bento-mega-menu:1.0', {amp: false}, (env) => {
         </section>
       </bento-mega-menu>
     `);
-    const sections = element.children;
-    console.log({sections});
+  });
 
-    /*
-    expect(sections[0]).to.have.attribute('expanded');
-    expect(
-      sections[0].firstElementChild.getAttribute('aria-expanded')
-    ).to.equal('true');
-    expect(sections[0].lastElementChild).to.have.display('block');
+  function getTitles() {
+    return element.querySelectorAll('span');
+  }
 
-    expect(sections[1]).to.not.have.attribute('expanded');
-    expect(
-      sections[1].firstElementChild.getAttribute('aria-expanded')
-    ).to.equal('false');
-    expect(sections[1].lastElementChild).to.have.display('none');
+  function getContents() {
+    return element.querySelectorAll('div');
+  }
 
-    expect(sections[2]).to.not.have.attribute('expanded');
-    expect(
-      sections[2].firstElementChild.getAttribute('aria-expanded')
-    ).to.equal('false');
-    expect(sections[2].lastElementChild).to.have.display('none');
+  it('should render a shadow DOM alongside the light DOM', async () => {
+    expect(element.children).to.have.lengthOf(3);
+    expect(element.shadowRoot).not.to.be.null;
+  });
+  it('should add appropriate aria labels to the light DOM', async () => {
+    const ariaAttributes = [
+      'id',
+      'role',
+      'aria-haspopup',
+      'aria-expanded',
+      'aria-controls',
+    ];
 
-     */
+    // Since ids are dynamically generated, we have to grab the values:
+    const ids = Array.from(getContents()).map((c) => c.id);
+
+    expect(snapshot(element, ariaAttributes)).to.equal(
+      cleanWhitespace(`
+        <bento-mega-menu>
+          <section>
+            <span role="button" aria-controls="${ids[0]}" aria-haspopup="dialog">header1</span>
+            <div role="dialog" id="${ids[0]}">content1</div>
+          </section>
+          <section>
+            <span role="button" aria-controls="${ids[1]}" aria-haspopup="dialog">header2</span>
+            <div role="dialog" id="${ids[1]}">content2</div>
+          </section>
+          <section>
+            <span role="button" aria-controls="${ids[2]}" aria-haspopup="dialog">header3</span>
+            <div role="dialog" id="${ids[2]}">content3</div>
+          </section>
+        </bento-mega-menu>
+      `)
+    );
+  });
+
+  describe('clicking a menu title', () => {
+    beforeEach(async () => {
+      getTitles()[0].click();
+      await rerender();
+    });
+    it('should expand that section', async () => {
+      const sections = element.children;
+      expect(sections[0]).to.have.attribute('expanded');
+      expect(sections[1]).not.to.have.attribute('expanded');
+      expect(sections[2]).not.to.have.attribute('expanded');
+    });
+    it('clicking the menu title again will hide the menu', async () => {
+      getTitles()[0].click();
+      await rerender();
+
+      const sections = element.children;
+      expect(sections[0]).not.to.have.attribute('expanded');
+      expect(sections[1]).not.to.have.attribute('expanded');
+      expect(sections[2]).not.to.have.attribute('expanded');
+    });
+    it('clicking a second menu title will expand the second section', async () => {
+      getTitles()[1].click();
+      await rerender();
+
+      const sections = element.children;
+      expect(sections[0]).not.to.have.attribute('expanded');
+      expect(sections[1]).to.have.attribute('expanded');
+      expect(sections[2]).not.to.have.attribute('expanded');
+    });
   });
 });
+
+/**
+ * @param {HTMLElement} el
+ * @param {string[]} keepAttrs
+ * @return {string}
+ */
+function snapshot(el, keepAttrs = ['expanded']) {
+  return cleanHtml(el.outerHTML, keepAttrs);
+}
+
+function rerender() {
+  return new Promise((resolve) =>
+    requestAnimationFrame(() => setTimeout(resolve, 0))
+  );
+}
