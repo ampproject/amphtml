@@ -114,7 +114,7 @@ Subscription/offer price.
 
 ### `headline` {string} optional
 
-A headline string that describes the subscription/offer.
+A headline string that describes the subscription/offer. If not provided, the line would be removed, e.g. the dialog would get shorter since the content is one line less.
 
 ### `description` {string} required
 
@@ -122,7 +122,7 @@ One line of description for the subscription/offer.
 
 ### `additional-description` {string} optional
 
-Additional line of description for the subscription/offer.
+Additional line of description for the subscription/offer. If not provided, the line would be removed, e.g. the dialog would get shorter since the content is one line less.
 
 # Validation
 
