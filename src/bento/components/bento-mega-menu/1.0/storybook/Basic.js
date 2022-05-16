@@ -133,3 +133,50 @@ export const _default = (args) => {
     </PageLayout>
   );
 };
+
+export const Simple = (args) => {
+  return (
+    <PageLayout>
+      <BentoMegaMenu {...args}>
+        <BentoMegaMenu.Item>
+          <BentoMegaMenu.Title>Menu Item 1</BentoMegaMenu.Title>
+          <BentoMegaMenu.Content>
+            These are the menu contents
+          </BentoMegaMenu.Content>
+        </BentoMegaMenu.Item>
+        <BentoMegaMenu.Item>
+          <BentoMegaMenu.Title>Menu Item 2</BentoMegaMenu.Title>
+          <BentoMegaMenu.Content>
+            Alias aspernatur beatae deserunt error esse eveniet excepturi quia
+            suscipit totam vero.
+          </BentoMegaMenu.Content>
+        </BentoMegaMenu.Item>
+        <BentoMegaMenu.Item>
+          <BentoMegaMenu.Title>Menu Item 3</BentoMegaMenu.Title>
+          <BentoMegaMenu.Content>
+            <p>
+              Hic impedit iste iure maiores minus necessitatibus nihil non
+              numquam obcaecati pariatur perferendis quisquam quos recusandae
+              saepe similique tempora ullam velit voluptatibus.
+            </p>
+            <p>
+              Hic impedit iste iure maiores minus necessitatibus nihil non
+              numquam obcaecati pariatur perferendis quisquam quos recusandae
+              saepe similique tempora ullam velit voluptatibus.
+            </p>
+            <p>
+              Hic impedit iste iure maiores minus necessitatibus nihil non
+              numquam obcaecati pariatur perferendis quisquam quos recusandae
+              saepe similique tempora ullam velit voluptatibus.
+            </p>
+            <p>
+              Hic impedit iste iure maiores minus necessitatibus nihil non
+              numquam obcaecati pariatur perferendis quisquam quos recusandae
+              saepe similique tempora ullam velit voluptatibus.
+            </p>
+          </BentoMegaMenu.Content>
+        </BentoMegaMenu.Item>
+      </BentoMegaMenu>
+    </PageLayout>
+  );
+};
