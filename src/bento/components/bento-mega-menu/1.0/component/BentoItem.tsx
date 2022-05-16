@@ -6,19 +6,19 @@ import {useAttributeObserver} from '#preact/hooks/useMutationObserver';
 import {FC} from '#preact/types';
 
 import {Content} from './Content';
-import {ItemProvider, useMegaMenuItem} from './Item';
+import {Item, useMegaMenuItem} from './Item';
 import {Title} from './Title';
 
 export const BentoItem: FC = ({children}) => {
   return (
-    <ItemProvider>
+    <Item>
       <SlottedDomWrapper>{children}</SlottedDomWrapper>
-    </ItemProvider>
+    </Item>
   );
 };
 
 /**
- * Renders the slot, and uses a bunch of shims to control the slotted elements
+ * Renders the slot, and uses a bunch of shims to control the slotted (light DOM) elements
  */
 const SlottedDomWrapper: FC = ({children: slot}) => {
   const {actions, isOpen} = useMegaMenuItem();
