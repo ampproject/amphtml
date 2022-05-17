@@ -1,5 +1,3 @@
-import {expect} from 'chai';
-
 import {BaseElement as BentoAutocomplete} from '#bento/components/bento-autocomplete/1.0/base-element';
 
 import {htmlFor} from '#core/dom/static-template';
@@ -7,8 +5,6 @@ import {htmlFor} from '#core/dom/static-template';
 import {defineBentoElement} from '#preact/bento-ce';
 
 import {waitFor} from '#testing/helpers/service';
-
-import * as helpers from '../../base-element-helpers';
 
 describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
   let win;
@@ -18,7 +14,7 @@ describes.realWin('bento-autocomplete:1.0', {amp: false}, (env) => {
   beforeEach(() => {
     win = env.win;
     html = htmlFor(win.document);
-    warnSpy = env.sandbox.spy(helpers, 'warn');
+    warnSpy = env.sandbox.spy(win.console, 'warn');
     defineBentoElement('bento-autocomplete', BentoAutocomplete, win);
   });
 
