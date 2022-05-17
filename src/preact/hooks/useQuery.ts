@@ -92,17 +92,20 @@ export function useQuery<TData>(
   const fetchQueryData = useCallback(() => {
     const {onError, onSettled, onSuccess, queryFn, state} = ref.current!;
     setState((s) => ({...s, error: null, loading: true}));
-    try {
-      queryFn().then((data) => {
+    // This function intentionally does not use async/await in order to avoid
+    // issues with regenerator-runtime in bento components.
+    queryFn()
+      .then((data) => {
         setState((s) => ({...s, error: null, loading: false, data}));
         onSuccess(data);
+      })
+      .catch((error) => {
+        setState((s) => ({...s, data: null, loading: false, error}));
+        onError(error);
+      })
+      .finally(() => {
+        onSettled(state.data, state.error);
       });
-    } catch (error) {
-      setState((s) => ({...s, data: null, loading: false, error}));
-      onError(error);
-    } finally {
-      onSettled(state.data, state.error);
-    }
   }, [ref, setState]);
 
   useEffect(() => {
