@@ -430,10 +430,8 @@ export function querySelectorAllInSlot(slot, selector) {
     if (matches(node, selector)) {
       list.push(node);
     }
-    const child = scopedQuerySelector(node, selector);
-    if (child) {
-      list.push(child);
-    }
+    const children = scopedQuerySelectorAll(node, selector);
+    children.forEach((child) => list.push(child));
   }
   return list;
 }
