@@ -3,11 +3,8 @@
 /** @const */
 var BentoMegaMenuDef = {};
 
-/**
- * @typedef {{
- * }}
- */
+/** @type {BentoMegaMenuProps} */
 BentoMegaMenuDef.Props;
 
-/** @interface */
+/** @type {BentoMegaMenuApi} */
 BentoMegaMenuDef.BentoMegaMenuApi = class {};
