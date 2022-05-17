@@ -1,4 +1,4 @@
-import {AutocompleteBinding, InputElement} from './types';
+import {AutocompleteBinding, InputElement} from '../types';
 
 export class AutocompleteBindingSingle implements AutocompleteBinding {
   get shouldShowOnFocus() {
