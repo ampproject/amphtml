@@ -676,6 +676,8 @@ export class AmpStory extends AMP.BaseElement {
         this.systemLayer_.updateProgress(pageId, progress);
       }
 
+      // We can reliably dispatch `PREVIEW_COMPLETE` from the `PAGE_PROGRESS`
+      // event's callback because story pages autoplay in preview mode.
       const lastPageId = this.pages_[this.pages_.length - 1]?.element.id;
       const isLastPage = pageId === lastPageId;
       const isPreviewComplete =
