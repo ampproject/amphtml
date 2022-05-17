@@ -1,14 +1,14 @@
 import {expect} from 'chai';
 import {mount} from 'enzyme';
 
+import {BentoAutocomplete} from '#bento/components/bento-autocomplete/1.0/component';
+
 import {Keys_Enum} from '#core/constants/key-codes';
 
 import * as Preact from '#preact';
 import {xhrUtils} from '#preact/utils/xhr';
 
 import {waitFor} from '#testing/helpers/service';
-
-import {BentoAutocomplete} from '../component';
 
 const defaultProps = {
   items: [],
