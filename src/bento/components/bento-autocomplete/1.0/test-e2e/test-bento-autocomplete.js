@@ -36,7 +36,7 @@ describes.endtoend(
         await expect(options.length).to.equal(3);
       });
 
-      it('can select an option', async () => {
+      it('hides the options when one is selected', async () => {
         const element = await controller.findElement('bento-autocomplete');
         const input = await controller.findElement('input#autocomplete');
 
@@ -47,10 +47,6 @@ describes.endtoend(
         const option = await controller.findElement('[data-value="apple"]');
 
         controller.click(option);
-
-        // await expect(controller.getElementAttribute(input, 'value')).to.equal(
-        //   'apple'
-        // );
 
         const results = await controller.findElement('[part="results"]');
         await expect(controller.isElementDisplayed(results)).to.be.false;
@@ -73,6 +69,28 @@ describes.endtoend(
         const options = await controller.findElements('.city-item');
 
         await expect(options.length).to.equal(3);
+      });
+
+      it('hides the options when one is selected', async () => {
+        const element = await controller.findElement(
+          'bento-autocomplete#with-template'
+        );
+        const input = await controller.findElement(
+          'input#autocomplete-template'
+        );
+
+        controller.click(input);
+
+        await controller.switchToShadowRoot(element);
+
+        const option = await controller.findElement(
+          '[data-value="Seattle, WA"]'
+        );
+
+        controller.click(option);
+
+        const results = await controller.findElement('[part="results"]');
+        await expect(controller.isElementDisplayed(results)).to.be.false;
       });
     });
   }
