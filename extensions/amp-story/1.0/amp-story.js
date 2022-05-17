@@ -328,6 +328,12 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {?number} the timeout to show subscriptions dialog after delay */
     this.showSubscriptionsUITimeout_ = null;
+
+    /**
+     * whether the `PREVIEW_COMPLETE` event has been dispatched.
+     * @private {boolean}
+     */
+    this.hasDispatchedPreviewComplete_ = false;
   }
 
   /** @override */
@@ -668,6 +674,21 @@ export class AmpStory extends AMP.BaseElement {
           storyAdSegmentBranch != StoryAdSegmentExp.CONTROL)
       ) {
         this.systemLayer_.updateProgress(pageId, progress);
+      }
+
+      const lastPageId = this.pages_[this.pages_.length - 1]?.element.id;
+      const isLastPage = pageId === lastPageId;
+      const isPreviewComplete =
+        this.getAmpDoc().isPreview() && isLastPage && progress === 1.0;
+      if (isPreviewComplete && !this.hasDispatchedPreviewComplete_) {
+        dispatch(
+          this.win,
+          this.element,
+          EventType.PREVIEW_COMPLETE,
+          /* payload */ undefined,
+          {bubbles: true}
+        );
+        this.hasDispatchedPreviewComplete_ = true;
       }
     });
 
