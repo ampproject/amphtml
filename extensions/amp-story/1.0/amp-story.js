@@ -330,10 +330,10 @@ export class AmpStory extends AMP.BaseElement {
     this.showSubscriptionsUITimeout_ = null;
 
     /**
-     * whether the `PREVIEW_COMPLETE` event has been dispatched.
+     * Whether the `PREVIEW_FINISHED` event has been dispatched.
      * @private {boolean}
      */
-    this.hasDispatchedPreviewComplete_ = false;
+    this.hasDispatchedPreviewFinished_ = false;
   }
 
   /** @override */
@@ -676,21 +676,21 @@ export class AmpStory extends AMP.BaseElement {
         this.systemLayer_.updateProgress(pageId, progress);
       }
 
-      // We can reliably dispatch `PREVIEW_COMPLETE` from the `PAGE_PROGRESS`
+      // We can reliably dispatch `PREVIEW_FINISHED` from the `PAGE_PROGRESS`
       // event's callback because story pages autoplay in preview mode.
       const lastPageId = this.pages_[this.pages_.length - 1]?.element.id;
       const isLastPage = pageId === lastPageId;
-      const isPreviewComplete =
+      const isPreviewFinished =
         this.getAmpDoc().isPreview() && isLastPage && progress === 1.0;
-      if (isPreviewComplete && !this.hasDispatchedPreviewComplete_) {
+      if (isPreviewFinished && !this.hasDispatchedPreviewFinished_) {
         dispatch(
           this.win,
           this.element,
-          EventType.PREVIEW_COMPLETE,
+          EventType.PREVIEW_FINISHED,
           /* payload */ undefined,
           {bubbles: true}
         );
-        this.hasDispatchedPreviewComplete_ = true;
+        this.hasDispatchedPreviewFinished_ = true;
       }
     });
 
