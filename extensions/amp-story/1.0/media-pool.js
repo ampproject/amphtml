@@ -897,14 +897,14 @@ export class MediaPool {
       if (ampVideoEl) {
         const volume = parseFloat(ampVideoEl.getAttribute('volume'));
         // If volume not set (parseFloat returns NaN), all comparisons with NaN are false.
-        if (volume <= 0 || ampVideoEl.hasAttribute('noaudio')) {
+        if (
+          volume <= 0 ||
+          ampVideoEl.hasAttribute('noaudio') ||
+          isNaN(volume)
+        ) {
           return Promise.resolve();
         }
-        if (volume < 1) {
-          this.setVolume_(domMediaEl, volume);
-        } else if (this.audioGainNodes_[domMediaEl.id]) {
-          this.setVolume_(domMediaEl, 1);
-        }
+        this.setVolume_(domMediaEl, volume);
       }
     }
 
