@@ -102,15 +102,17 @@ See details about specifying this configuration in [`amp-subscriptions`](https:/
 
 ### `publisher-logo-src` {string} required
 
-A logo URL to show the publisher’s subscribe button.
+A URL to the story publisher's logo in square format (1x1 aspect ratio). This logo would be shown on the publisher's subscribe button. For example publisher-logo-src="https://example.com/logo/1x1.png", where 1x1.png is a 96x96 px logo. See the guidelines at [`amp-story` dev document](https://amp.dev/documentation/components/amp-story/?format=stories#publisher-logo-src-guidelines).
 
 ### `subscriptions-page-index` {number} optional
 
-The index of the page that would show the subscriptions dialog. If not specified, it defaults to 2, which is the 3rd page of the story. Note that this specified page cannot be the first two pages nor the last page of the story.
+The index of the `amp-story-page` that displays the subscriptions dialog. The `amp-story-page` index in `amp-story` starts from 0, e.g. the first `amp-story-page` has index of 0. If not specified, it defaults to 2, which is the 3rd `amp-story-page` of the story.
+
+Note that this specified page cannot be the first two pages nor the last page of the story.
 
 ### `price` {string} required
 
-Subscription/offer price.
+Subscription/offer price. This can be any arbitrary string that describe any offers like free trial, monthly, annually, etc. Note that it would be omitted with ellipsis at the end if too long, which is determined by the view width.
 
 ### `headline` {string} optional
 
