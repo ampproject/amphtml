@@ -903,8 +903,9 @@ export class MediaPool {
           isNaN(volume)
         ) {
           return Promise.resolve();
+        } else if (volume) {
+          this.setVolume_(domMediaEl, volume);
         }
-        this.setVolume_(domMediaEl, volume);
       }
     }
 
