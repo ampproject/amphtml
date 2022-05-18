@@ -1220,20 +1220,51 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
       );
     });
 
-    it('calls onError if the request returns an error', async () => {
-      fetchJson.returns(Promise.reject({message: 'test error'}));
+    describe('when the request returns an error', () => {
+      it('calls onError', async () => {
+        fetchJson.returns(Promise.reject({message: 'test error'}));
 
-      const wrapper = mount(
-        <Autocomplete id="id" src="/items.json" onError={onError} prefetch>
-          <input type="text"></input>
-        </Autocomplete>
-      );
+        const wrapper = mount(
+          <Autocomplete id="id" src="/items.json" onError={onError} prefetch>
+            <input type="text"></input>
+          </Autocomplete>
+        );
 
-      await waitForData(wrapper);
+        await waitForData(wrapper);
 
-      expect(fetchJson).calledWith('/items.json').callCount(1);
+        expect(fetchJson).calledWith('/items.json').callCount(1);
 
-      expect(onError).to.have.been.calledOnceWith('test error');
+        expect(onError).to.have.been.calledOnceWith('test error');
+      });
+
+      it('refetches when the data changes', async () => {
+        fetchJson.returns(Promise.reject({message: 'test error'}));
+
+        const wrapper = mount(
+          <Autocomplete id="id" src="https://test.com/api/items" query="q">
+            <input type="text"></input>
+          </Autocomplete>
+        );
+
+        const input = wrapper.find('input');
+        input.getDOMNode().value = 'value';
+        input.simulate('input');
+
+        await waitForData(wrapper);
+
+        expect(fetchJson).to.have.been.calledWith(
+          'https://test.com/api/items?q=value'
+        );
+
+        input.getDOMNode().value = 'value2';
+        input.simulate('input');
+
+        await waitForData(wrapper, 2);
+
+        expect(fetchJson).to.have.been.calledWith(
+          'https://test.com/api/items?q=value2'
+        );
+      });
     });
   });
 });
