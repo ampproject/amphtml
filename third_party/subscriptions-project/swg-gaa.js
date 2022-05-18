@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.215 */
+/** Version: 0.1.22.217 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1085,6 +1085,296 @@ function setImportantStyles(element, styles) {
 }
 
 /**
+ * Sets the CSS style of the specified element with optional units, e.g. "px".
+ * @param {Element} element
+ * @param {string} property
+ * @param {?string|number|boolean} value
+ * @param {string=} units
+ * @param {boolean=} bypassCache
+ */
+function setStyle(element, property, value, units, bypassCache) {
+  const propertyName = getVendorJsPropertyName(
+    element.style,
+    property,
+    bypassCache
+  );
+  if (propertyName) {
+    element.style[propertyName] = /** @type {string} */ (
+      units ? value + units : value
+    );
+  }
+}
+
+/**
+ * Sets the CSS styles of the specified element. The styles
+ * a specified as a map from CSS property names to their values.
+ * @param {!Element} element
+ * @param {!Object<string, ?string|number|boolean>} styles
+ */
+function setStyles(element, styles) {
+  for (const k in styles) {
+    setStyle(element, k, styles[k]);
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {string} */
+const styleType = 'text/css';
+
+/**
+ * Add attributes to an element.
+ * @param {!Element} element
+ * @param {!Object<string, string|number|boolean|!Object<string, string|number|boolean>>} attributes
+ * @return {!Element} updated element.
+ */
+function addAttributesToElement(element, attributes) {
+  for (const attr in attributes) {
+    if (attr == 'style') {
+      setStyles(
+        element,
+        /** @type {!Object<string, string|boolean|number>} */
+        (attributes[attr])
+      );
+    } else {
+      element.setAttribute(
+        attr,
+        /** @type {string|boolean|number} */ (attributes[attr])
+      );
+    }
+  }
+  return element;
+}
+
+/**
+ * Create a new element on document with specified tagName and attributes.
+ * @param {!Document} doc
+ * @param {string} tagName
+ * @param {!Object<string, string>} attributes
+ * @param {?(string|!Node|!ArrayLike<!Node>|!Array<!Node>)=} content
+ * @return {!Element} created element.
+ */
+function createElement(doc, tagName, attributes, content) {
+  const element = doc.createElement(tagName);
+  addAttributesToElement(element, attributes);
+  if (content != null) {
+    if (typeof content == 'string') {
+      element.textContent = content;
+    } else if (content.nodeType) {
+      element.appendChild(/** @type {!Node} */ (content));
+    } else if ('length' in content) {
+      for (let i = 0; i < content.length; i++) {
+        element.appendChild(content[i]);
+      }
+    } else {
+      assert(false, 'Unsupported content: %s', content);
+    }
+  }
+  return element;
+}
+
+/**
+ * Injects the provided styles in the HEAD section of the document.
+ * @param {!../model/doc.Doc} doc The document object.
+ * @param {string} styleText The style string.
+ * @return {!Element}
+ */
+function injectStyleSheet(doc, styleText) {
+  const styleElement = createElement(doc.getWin().document, 'style', {
+    'type': styleType,
+  });
+  styleElement.textContent = styleText;
+  doc.getHead().appendChild(styleElement);
+  return styleElement;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getReadyState(doc) {
+  return /** @type {string} */ (doc['readyState']);
+}
+
+/**
+ * Whether the document is ready.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isDocumentReady(doc) {
+  const readyState = getReadyState(doc);
+  return readyState != 'loading' && readyState != 'uninitialized';
+}
+
+/**
+ * Calls the callback when document is ready.
+ * @param {!Document} doc
+ * @param {function(!Document)} callback
+ */
+function onDocumentReady(doc, callback) {
+  onDocumentState(doc, isDocumentReady, callback);
+}
+
+/**
+ * Calls the callback once when document's state satisfies the condition.
+ * @param {!Document} doc
+ * @param {function(!Document):boolean} condition
+ * @param {function(!Document)} callback
+ */
+function onDocumentState(doc, condition, callback) {
+  if (condition(doc)) {
+    // Execute callback right now.
+    callback(doc);
+    return;
+  }
+
+  // Execute callback (once!) after condition is satisfied.
+  let callbackHasExecuted = false;
+  const readyListener = () => {
+    if (condition(doc) && !callbackHasExecuted) {
+      callback(doc);
+      callbackHasExecuted = true;
+      doc.removeEventListener('readystatechange', readyListener);
+    }
+  };
+  doc.addEventListener('readystatechange', readyListener);
+}
+
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+function whenDocumentReady(doc) {
+  return new Promise((resolve) => {
+    onDocumentReady(doc, resolve);
+  });
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @implements {Doc} */
+class GlobalDoc {
+  /**
+   * @param {!Window|!Document} winOrDoc
+   */
+  constructor(winOrDoc) {
+    const isWin = !!winOrDoc.document;
+    /** @private @const {!Window} */
+    this.win_ = /** @type {!Window} */ (
+      isWin
+        ? /** @type {!Window} */ (winOrDoc)
+        : /** @type {!Document} */ (winOrDoc).defaultView
+    );
+    /** @private @const {!Document} */
+    this.doc_ = isWin
+      ? /** @type {!Window} */ (winOrDoc).document
+      : /** @type {!Document} */ (winOrDoc);
+  }
+
+  /** @override */
+  getWin() {
+    return this.win_;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.doc_;
+  }
+
+  /** @override */
+  getRootElement() {
+    return this.doc_.documentElement;
+  }
+
+  /** @override */
+  getHead() {
+    // `document.head` always has a chance to be parsed, at least partially.
+    return /** @type {!Element} */ (this.doc_.head);
+  }
+
+  /** @override */
+  getBody() {
+    return this.doc_.body;
+  }
+
+  /** @override */
+  isReady() {
+    return isDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  whenReady() {
+    return whenDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  addToFixedLayer(unusedElement) {
+    return Promise.resolve();
+  }
+}
+
+/**
+ * @param {!Document|!Window|!Doc} input
+ * @return {!Doc}
+ */
+function resolveDoc(input) {
+  // Is it a `Document`
+  if (/** @type {!Document} */ (input).nodeType === /* DOCUMENT */ 9) {
+    return new GlobalDoc(/** @type {!Document} */ (input));
+  }
+  // Is it a `Window`?
+  if (/** @type {!Window} */ (input).document) {
+    return new GlobalDoc(/** @type {!Window} */ (input));
+  }
+  return /** @type {!Doc} */ (input);
+}
+
+/**
  * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1599,10 +1889,14 @@ class GaaMeteringRegwall {
    * This method opens a metering regwall dialog,
    * where users can sign in with Google.
    * @nocollapse
-   * @param {{ caslUrl: string, clientId: string, rawJwt: (boolean|null) }} params
+   * @param {{ caslUrl: string, googleApiClientId: string, rawJwt: (boolean|null) }} params
    * @return {!Promise<!GoogleIdentityV1>}
    */
-  static showWithNativeRegistrationButton({caslUrl, clientId, rawJwt = true}) {
+  static showWithNativeRegistrationButton({
+    caslUrl,
+    googleApiClientId,
+    rawJwt = true,
+  }) {
     logEvent({
       showcaseEvent: ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL,
       isFromUserAction: false,
@@ -1614,7 +1908,9 @@ class GaaMeteringRegwall {
       useNativeMode: true,
     });
 
-    return GaaMeteringRegwall.createNativeRegistrationButton({clientId})
+    return GaaMeteringRegwall.createNativeRegistrationButton({
+      googleApiClientId,
+    })
       .then((jwt) => {
         GaaMeteringRegwall.remove();
         if (rawJwt) {
@@ -1630,6 +1926,30 @@ class GaaMeteringRegwall {
         // Rethrow error.
         debugLog(`Regwall failed: ${err}`);
       });
+  }
+
+  /**
+   * This method opens a metering regwall dialog,
+   * where users can sign in with Google.
+   *
+   * @nocollapse
+   * @param {{ caslUrl: string, authorizationUrl: string }} params
+   * @return {boolean}
+   */
+  static showWithNative3PRegistrationButton({caslUrl, authorizationUrl}) {
+    logEvent({
+      showcaseEvent: ShowcaseEvent.EVENT_SHOWCASE_NO_ENTITLEMENTS_REGWALL,
+      isFromUserAction: false,
+    });
+
+    GaaMeteringRegwall.render_({
+      iframeUrl: '',
+      caslUrl,
+      useNativeMode: true,
+    });
+    return GaaMeteringRegwall.createNative3PRegistrationButton({
+      authorizationUrl,
+    });
   }
 
   /**
@@ -1671,10 +1991,9 @@ class GaaMeteringRegwall {
 
     // Create and style container element.
     // TODO: Consider using a FriendlyIframe here, to avoid CSS conflicts.
-    const containerEl = /** @type {!HTMLDivElement} */ (
-      self.document.createElement('div')
-    );
-    containerEl.id = REGWALL_CONTAINER_ID;
+    const containerEl = createElement(self.document, 'div', {
+      id: REGWALL_CONTAINER_ID,
+    });
     setImportantStyles(containerEl, {
       'all': 'unset',
       'background-color': 'rgba(32, 33, 36, 0.6)',
@@ -1936,7 +2255,7 @@ class GaaMeteringRegwall {
     };
   }
 
-  static createNativeRegistrationButton({clientId}) {
+  static createNativeRegistrationButton({googleApiClientId}) {
     const languageCode = getLanguageCodeFromElement(self.document.body);
     const parentElement = self.document.getElementById(
       REGISTRATION_BUTTON_CONTAINER_ID
@@ -1945,17 +2264,17 @@ class GaaMeteringRegwall {
       return false;
     }
     // Apply iframe styles.
-    const styleEl = self.document.createElement('style');
-    styleEl./*OK*/ innerText = GOOGLE_SIGN_IN_BUTTON_STYLES.replace(
+    const styleText = GOOGLE_SIGN_IN_BUTTON_STYLES.replace(
       '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
       msg(I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'], languageCode)
     );
-    self.document.head.appendChild(styleEl);
+    injectStyleSheet(resolveDoc(self.document), styleText);
 
-    const buttonEl = self.document.createElement('div');
-    buttonEl.id = SIGN_IN_WITH_GOOGLE_BUTTON_ID;
-    buttonEl.tabIndex = 0;
-
+    // Create and append button to regwall
+    const buttonEl = createElement(self.document, 'div', {
+      id: SIGN_IN_WITH_GOOGLE_BUTTON_ID,
+      tabIndex: 0,
+    });
     parentElement.appendChild(buttonEl);
 
     // Track button clicks.
@@ -1969,7 +2288,7 @@ class GaaMeteringRegwall {
     return new Promise((resolve) => {
       self.google.accounts.id.initialize({
         /* eslint-disable google-camelcase/google-camelcase */
-        client_id: clientId,
+        client_id: googleApiClientId,
         callback: resolve,
         /* eslint-enable google-camelcase/google-camelcase */
       });
@@ -1980,6 +2299,42 @@ class GaaMeteringRegwall {
         'logo_alignment': 'center',
       });
     });
+  }
+
+  static createNative3PRegistrationButton({authorizationUrl}) {
+    const languageCode = getLanguageCodeFromElement(self.document.body);
+    const parentElement = self.document.getElementById(
+      REGISTRATION_BUTTON_CONTAINER_ID
+    );
+    if (!parentElement) {
+      return false;
+    }
+    // Apply iframe styles.
+    const styleText = GOOGLE_3P_SIGN_IN_IFRAME_STYLES.replace(
+      '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
+      msg(I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'], languageCode)
+    );
+    injectStyleSheet(resolveDoc(self.document), styleText);
+
+    // Render the third party Google Sign-In button.
+    const buttonEl = createElement(self.document, 'div', {
+      id: GOOGLE_3P_SIGN_IN_BUTTON_ID,
+      tabIndex: 0,
+    });
+    buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
+    parentElement.appendChild(buttonEl);
+
+    buttonEl.addEventListener('click', () => {
+      // Track button clicks.
+      logEvent({
+        analyticsEvent: AnalyticsEvent.ACTION_SHOWCASE_REGWALL_GSI_CLICK,
+        isFromUserAction: true,
+      });
+      // Redirect user using the parent window.
+      self.open(authorizationUrl, '_parent');
+    });
+
+    return buttonEl;
   }
 }
 
@@ -1996,12 +2351,11 @@ class GaaGoogleSignInButton {
     const languageCode = queryParams['lang'] || 'en';
 
     // Apply iframe styles.
-    const styleEl = self.document.createElement('style');
-    styleEl./*OK*/ innerText = GOOGLE_SIGN_IN_IFRAME_STYLES.replace(
+    const styleText = GOOGLE_SIGN_IN_IFRAME_STYLES.replace(
       '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
       msg(I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'], languageCode)
     );
-    self.document.head.appendChild(styleEl);
+    injectStyleSheet(resolveDoc(self.document), styleText);
 
     // Promise a function that sends messages to the parent frame.
     // Note: A function is preferable to a reference to the parent frame
@@ -2056,9 +2410,10 @@ class GaaGoogleSignInButton {
         () =>
           new Promise((resolve) => {
             // Render the Google Sign-In button.
-            const buttonEl = self.document.createElement('div');
-            buttonEl.id = GOOGLE_SIGN_IN_BUTTON_ID;
-            buttonEl.tabIndex = 0;
+            const buttonEl = createElement(self.document, 'div', {
+              id: GOOGLE_SIGN_IN_BUTTON_ID,
+              tabIndex: 0,
+            });
             self.document.body.appendChild(buttonEl);
             self.gapi.signin2.render(GOOGLE_SIGN_IN_BUTTON_ID, {
               'longtitle': true,
@@ -2221,17 +2576,17 @@ class GaaGoogle3pSignInButton {
     const languageCode = queryParams['lang'] || 'en';
 
     // Apply iframe styles.
-    const styleEl = self.document.createElement('style');
-    styleEl./*OK*/ innerText = GOOGLE_3P_SIGN_IN_IFRAME_STYLES.replace(
+    const styleText = GOOGLE_3P_SIGN_IN_IFRAME_STYLES.replace(
       '$SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON$',
       msg(I18N_STRINGS['SHOWCASE_REGWALL_GOOGLE_SIGN_IN_BUTTON'], languageCode)
     );
-    self.document.head.appendChild(styleEl);
+    injectStyleSheet(resolveDoc(self.document), styleText);
 
     // Render the third party Google Sign-In button.
-    const buttonEl = self.document.createElement('div');
-    buttonEl.id = GOOGLE_3P_SIGN_IN_BUTTON_ID;
-    buttonEl.tabIndex = 0;
+    const buttonEl = createElement(self.document, 'div', {
+      id: GOOGLE_3P_SIGN_IN_BUTTON_ID,
+      tabIndex: 0,
+    });
     buttonEl./*OK*/ innerHTML = GOOGLE_3P_SIGN_IN_BUTTON_HTML;
     buttonEl.onclick = () => {
       if (redirectMode) {

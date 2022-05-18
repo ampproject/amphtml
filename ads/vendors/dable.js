@@ -30,7 +30,12 @@ export function dable(global, data) {
   }
 
   const itemId = data['itemId'] || '';
+  const channel = data['channel'] || '';
   const opts = {};
+
+  if (channel) {
+    opts.channel = channel;
+  }
 
   if (itemId) {
     global.dable('sendLog', 'view', {id: itemId});
