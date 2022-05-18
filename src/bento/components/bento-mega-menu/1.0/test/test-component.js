@@ -4,7 +4,7 @@ import * as Preact from '#preact';
 
 import {BentoMegaMenu} from '../component/BentoMegaMenu';
 
-describes.sandboxed('BentoMegaMenu preact component v1.0', {}, (env) => {
+describes.sandboxed('BentoMegaMenu preact component v1.0', {}, (unusedEnv) => {
   it('should render empty', () => {
     const component = mount(<BentoMegaMenu />);
 

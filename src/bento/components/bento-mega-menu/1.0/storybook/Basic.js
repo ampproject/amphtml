@@ -196,7 +196,7 @@ export const Detailed = (args) => {
         `}
       </style>
       <PageLayout>
-        <BentoMegaMenu>
+        <BentoMegaMenu {...args}>
           <BentoMegaMenu.Item>
             <BentoMegaMenu.Title class="menu-title">
               Clothing, Shoes, Jewelry &amp; Watches
