@@ -897,7 +897,6 @@ export class MediaPool {
       if (ampVideoEl) {
         const volume = parseFloat(ampVideoEl.getAttribute('volume'));
         const isMuted = volume <= 0 || ampVideoEl.hasAttribute('noaudio');
-        // If volume not set (parseFloat returns NaN), all comparisons with NaN are false.
         if (isMuted) {
           return Promise.resolve();
         } else if (volume) {
