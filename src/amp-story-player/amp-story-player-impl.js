@@ -252,6 +252,9 @@ export class AmpStoryPlayer {
     /** @private {?Element} */
     this.nextButton_ = null;
 
+    /** @private {boolean} */
+    this.pageAttachmentOpen_ = false;
+
     return this.element_;
   }
 
@@ -1616,6 +1619,7 @@ export class AmpStoryPlayer {
    */
   onPageAttachmentStateUpdate_(pageAttachmentOpen) {
     this.updateButtonVisibility_(!pageAttachmentOpen);
+    this.pageAttachmentOpen_ = pageAttachmentOpen;
     this.dispatchPageAttachmentEvent_(pageAttachmentOpen);
   }
 
@@ -1791,7 +1795,7 @@ export class AmpStoryPlayer {
    * @param {!Object} gesture
    */
   onSwipeX_(gesture) {
-    if (this.stories_.length <= 1) {
+    if (this.stories_.length <= 1 || this.pageAttachmentOpen_) {
       return;
     }
 
