@@ -9,6 +9,7 @@
  * </code>
  */
 import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -517,43 +518,78 @@ export class AmpStoryPage extends AMP.BaseElement {
     const registerAllPromise = this.registerAllMedia_();
 
     if (this.isActive()) {
-      registerAllPromise.then(() => {
-        if (this.state_ === PageState.NOT_ACTIVE) {
-          return;
-        }
-        this.signals()
-          .whenSignal(CommonSignals_Enum.LOAD_END)
-          .then(() => {
-            if (this.state_ == PageState.PLAYING) {
-              this.advancement_.start();
-            }
-          });
-        this.preloadAllMedia_().then(() => {
+      registerAllPromise
+        .then(() => {
           if (this.state_ === PageState.NOT_ACTIVE) {
             return;
           }
-          this.startMeasuringAllVideoPerformance_();
-          this.startListeningToVideoEvents_();
-          // iOS 14.2 and 14.3 requires play to be called before unmute
-          this.playAllMedia_().then(() => {
-            if (
-              !this.storeService_.get(StateProperty.MUTED_STATE) &&
-              this.state_ !== PageState.NOT_ACTIVE
-            ) {
-              this.unmuteAllMedia();
+          this.signals()
+            .whenSignal(CommonSignals_Enum.LOAD_END)
+            .then(() => {
+              if (this.state_ == PageState.PLAYING) {
+                this.advancement_.start();
+              }
+            });
+          this.preloadAllMedia_().then(() => {
+            if (this.state_ === PageState.NOT_ACTIVE) {
+              return;
             }
+            this.startMeasuringAllVideoPerformance_();
+            this.startListeningToVideoEvents_();
+            // iOS 14.2 and 14.3 requires play to be called before unmute
+            this.playAllMedia_().then(() => {
+              if (
+                !this.storeService_.get(StateProperty.MUTED_STATE) &&
+                this.state_ !== PageState.NOT_ACTIVE
+              ) {
+                this.unmuteAllMedia();
+              }
+            });
+            this.toggleCaptions_(
+              this.storeService_.get(StateProperty.CAPTIONS_STATE)
+            );
           });
-          this.toggleCaptions_(
-            this.storeService_.get(StateProperty.CAPTIONS_STATE)
-          );
+        })
+        .then(() => {
+          // In the PREVIEW state, a video can only use cached sources. If it
+          // fails to play due to any issue with the cached sources, we
+          // reregister the video once it has obtained its origin sources.
+          if (this.storyIsBeingPreviewed_()) {
+            // We first block the reregistration on video layout end because
+            // that is the point at which the story has entered the VISIBLE
+            // state and its origin sources have been added.
+            return this.waitForPlaybackMediaLayoutEnd_().then(() => {
+              return this.reregisterAndPlayUnplayedVideos_();
+            });
+          }
         });
-      });
       this.maybeStartAnimations_();
       this.checkPageHasAudio_();
       this.checkPageHasCaptions_();
       this.checkPageHasElementWithPlayback_();
       this.findAndPrepareEmbeddedComponents_();
     }
+  }
+
+  /**
+   * @return {!Promise} A promise that resolves when all videos that failed to
+   *     play have been reregistered and played.
+   * @private
+   */
+  reregisterAndPlayUnplayedVideos_() {
+    const videos = this.getAllVideos_();
+    const unplayedVideos = videos.filter(
+      (video) => video.readyState < /* HAVE_CURRENT_DATA */ 2
+    );
+    return this.mediaPoolPromise_.then((pool) => {
+      const playPromises = unplayedVideos.map((video) => {
+        return this.reregisterMedia_(pool, video).then(() => {
+          this.toggleErrorMessage_(false);
+          return this.playMedia_(pool, video);
+        });
+      });
+      return Promise.all(playPromises);
+    });
   }
 
   /** @override */
@@ -649,10 +685,33 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Promise}
+   * @return {!Promise} A promise that blocks until all playback media on the
+   *     page have begun their layouts.
    * @private
    */
-  waitForPlaybackMediaLayout_() {
+  waitForPlaybackMediaLayoutStart_() {
+    return this.waitForPlaybackMediaLayout_(true /* waitForLayoutStart */);
+  }
+
+  /**
+   * @return {!Promise} A promise that blocks until all playback media on the
+   *     page have completed their layouts.
+   * @private
+   */
+  waitForPlaybackMediaLayoutEnd_() {
+    return this.waitForPlaybackMediaLayout_(false /* waitForLayoutStart */);
+  }
+
+  /**
+   * @param {boolean} waitForLayoutStart Whether this method should only block
+   *     until all playback media have begun their layouts, as opposed to
+   *     having completed them.
+   * @return {!Promise} A promise that blocks until all playback media on the
+   *     page have begun or completed their layouts, depending on the value of
+   *     `waitForLayoutStart`.
+   * @private
+   */
+  waitForPlaybackMediaLayout_(waitForLayoutStart) {
     const mediaSet = toArray(
       this.getMediaBySelector_(Selectors.ALL_PLAYBACK_AMP_MEDIA)
     );
@@ -662,10 +721,13 @@ export class AmpStoryPage extends AMP.BaseElement {
         switch (mediaEl.tagName.toLowerCase()) {
           case 'amp-audio':
           case 'amp-video':
+            const loadSignal = waitForLayoutStart
+              ? CommonSignals_Enum.LOAD_START
+              : CommonSignals_Enum.LOAD_END;
             const signal =
               mediaEl.getAttribute('layout') === Layout_Enum.NODISPLAY
                 ? CommonSignals_Enum.BUILT
-                : CommonSignals_Enum.LOAD_END;
+                : loadSignal;
 
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(signal))
@@ -1047,7 +1109,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     if (!this.registerAllMediaPromise_) {
-      this.registerAllMediaPromise_ = this.waitForPlaybackMediaLayout_().then(
+      // In preview mode, the `amp-video` layout callback does not resolve
+      // because it is blocked on requests for origin sources that cannot be
+      // made in the SERP due to privacy concerns. So, instead of indefinitely
+      // blocking registration, we register media elements at layout start.
+      const waitForPlaybackMediaLayoutPromise = this.storyIsBeingPreviewed_()
+        ? this.waitForPlaybackMediaLayoutStart_()
+        : this.waitForPlaybackMediaLayoutEnd_();
+      this.registerAllMediaPromise_ = waitForPlaybackMediaLayoutPromise.then(
         () => this.whenAllMediaElements_((p, e) => this.registerMedia_(p, e))
       );
     }
@@ -1071,6 +1140,33 @@ export class AmpStoryPage extends AMP.BaseElement {
         /** @type {!./media-pool.DomElementDef} */ (mediaEl)
       );
     }
+  }
+
+  /**
+   * Reregisters the given media.
+   * @param {!./media-pool.MediaPool} mediaPool
+   * @param {!Element} mediaEl
+   * @return {!Promise} Promise that resolves after the media is reregistered.
+   * @private
+   */
+  reregisterMedia_(mediaPool, mediaEl) {
+    if (this.isBotUserAgent_) {
+      // No-op.
+      return Promise.resolve();
+    } else {
+      return mediaPool.reregister(
+        /** @type {!./media-pool.DomElementDef} */ (mediaEl)
+      );
+    }
+  }
+
+  /**
+   * @return {boolean} Whether this page's story is currently being previewed.
+   * @private
+   */
+  storyIsBeingPreviewed_() {
+    const visibilityState = this.getAmpDoc().getVisibilityState();
+    return visibilityState === VisibilityState_Enum.PREVIEW;
   }
 
   /**

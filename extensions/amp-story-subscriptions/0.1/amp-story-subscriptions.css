@@ -142,7 +142,7 @@ iframe.swg-dialog {
   margin-bottom: 0.2em !important;
 }
 
-.i-amphtml-story-subscriptions-title {
+.i-amphtml-story-subscriptions-headline {
   display: block !important;
   font-weight: 700 !important;
   font-size: 1.15em !important;
@@ -152,7 +152,7 @@ iframe.swg-dialog {
   margin: 0.4em 0 0.15em !important;
 }
 
-.i-amphtml-story-subscriptions-subtitle-first, .i-amphtml-story-subscriptions-subtitle-second {
+.i-amphtml-story-subscriptions-description, .i-amphtml-story-subscriptions-additional-description {
   display: block !important;
   font-size: 0.9em !important;
   letter-spacing: -0.015em !important;
