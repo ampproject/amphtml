@@ -102,7 +102,7 @@ See details about specifying this configuration in [`amp-subscriptions`](https:/
 
 ### `publisher-logo-src` {string} required
 
-A URL to the story publisher's logo in square format (1x1 aspect ratio). This logo would be shown on the publisher's subscribe button. For example publisher-logo-src="https://example.com/logo/1x1.png", where 1x1.png is a 96x96 px logo. See the guidelines at [`amp-story` dev document](https://amp.dev/documentation/components/amp-story/?format=stories#publisher-logo-src-guidelines).
+A URL to the story publisher's logo in square format (1x1 aspect ratio). This logo would be shown on the publisher's subscribe button. For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 96x96 px logo. See the guidelines at [`amp-story` dev document](https://amp.dev/documentation/components/amp-story/?format=stories#publisher-logo-src-guidelines).
 
 ### `subscriptions-page-index` {number} optional
 
