@@ -1219,5 +1219,21 @@ describes.sandboxed('BentoAutocomplete preact component v1.0', {}, (env) => {
         'https://test.com/api/items?q=value2'
       );
     });
+
+    it('calls onError if the request returns an error', async () => {
+      fetchJson.returns(Promise.reject({message: 'test error'}));
+
+      const wrapper = mount(
+        <Autocomplete id="id" src="/items.json" onError={onError} prefetch>
+          <input type="text"></input>
+        </Autocomplete>
+      );
+
+      await waitForData(wrapper);
+
+      expect(fetchJson).calledWith('/items.json').callCount(1);
+
+      expect(onError).to.have.been.calledOnceWith('test error');
+    });
   });
 });
