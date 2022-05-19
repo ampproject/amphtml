@@ -217,7 +217,7 @@
         "type": "object",
         "properties": {
           "url": {
-            "type": "string"
+            "type": "string",
             "$ref": "#/$defs/https"
           },
           "alt": {
