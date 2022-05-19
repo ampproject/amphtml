@@ -39,10 +39,8 @@ export function useAttributeObserver(
     }),
     [attributeName]
   );
-  return useMutationObserver(elementRef, config, (record) => {
-    if (record.type === 'attributes') {
-      const newValue = elementRef.current!.getAttribute(attributeName);
-      onChange(newValue);
-    }
+  return useMutationObserver(elementRef, config, () => {
+    const newValue = elementRef.current!.getAttribute(attributeName);
+    onChange(newValue);
   });
 }
