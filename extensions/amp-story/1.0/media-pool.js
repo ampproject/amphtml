@@ -895,7 +895,8 @@ export class MediaPool {
         const isMuted = volume <= 0 || ampVideoEl.hasAttribute('noaudio');
         if (isMuted) {
           return Promise.resolve();
-        } else if (volume < 1) {
+        }
+        if (volume < 1) {
           this.setVolume_(domMediaEl, volume);
         }
       }
