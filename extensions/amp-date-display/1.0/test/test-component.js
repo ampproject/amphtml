@@ -205,7 +205,8 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
     expect(data.timeZoneNameShort).to.equal('UTC');
   });
 
-  it('shows custom locale string when localeOptions is passed', () => {
+  // TODO(#38210): fix in Chrome v101
+  it.skip('shows custom locale string when localeOptions is passed', () => {
     const props = {
       render,
       datetime: Date.parse('2001-02-03T04:05:06.007Z'),

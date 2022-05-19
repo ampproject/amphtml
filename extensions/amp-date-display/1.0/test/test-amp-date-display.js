@@ -168,7 +168,8 @@ describes.realWin(
       });
     }
 
-    it('render localeString with data-options-time-style', async () => {
+    // TODO(#38210): fix in Chrome v101
+    it.skip('render localeString with data-options-time-style', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('display-in', 'UTC');
       element.setAttribute('locale', 'zh-TW');
@@ -180,7 +181,8 @@ describes.realWin(
       expect(data.localeString).to.equal('上午4:05');
     });
 
-    it('render localeString with data-options-date-style & data-options-time-style', async () => {
+    // TODO(#38210): fix in Chrome v101
+    it.skip('render localeString with data-options-date-style & data-options-time-style', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('display-in', 'UTC');
       element.setAttribute('locale', 'zh-TW');
