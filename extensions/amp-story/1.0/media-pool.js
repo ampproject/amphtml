@@ -891,13 +891,12 @@ export class MediaPool {
     if (mediaType == MediaType_Enum.VIDEO) {
       const ampVideoEl = domMediaEl.parentElement;
       if (ampVideoEl) {
-        if (ampVideoEl.hasAttribute('noaudio')) {
-          this.setVolume_(domMediaEl, 0);
-        } else {
-          const volume = ampVideoEl.getAttribute('volume');
-          if (volume) {
-            this.setVolume_(domMediaEl, parseFloat(volume));
-          }
+        const volume = parseFloat(ampVideoEl.getAttribute('volume'));
+        const isMuted = volume <= 0 || ampVideoEl.hasAttribute('noaudio');
+        if (isMuted) {
+          return Promise.resolve();
+        } else if (volume < 1) {
+          this.setVolume_(domMediaEl, volume);
         }
       }
     }
