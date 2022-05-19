@@ -11,20 +11,17 @@ export function useMutationObserver(
   onMutation: (record: MutationRecord) => void
 ) {
   const onMutationHandler = useEvent(onMutation);
-  const mo = useMemo(() => {
-    return new MutationObserver((records) => {
-      records.forEach((record) => {
-        onMutationHandler(record);
-      });
-    });
-  }, [onMutationHandler]);
-
   useEffect(() => {
     if (elementRef.current) {
+      const mo = new MutationObserver((records) => {
+        records.forEach((record) => {
+          onMutationHandler(record);
+        });
+      });
       mo.observe(elementRef.current, config);
       return () => mo.disconnect();
     }
-  }, [config, /** These are stable: */ elementRef, mo]);
+  }, [config, /** These are stable: */ elementRef, onMutationHandler]);
 }
 
 /**
