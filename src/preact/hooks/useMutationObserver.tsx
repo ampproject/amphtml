@@ -1,4 +1,5 @@
 import {useEffect, useMemo} from '#preact';
+import {useDeepValue} from '#preact/hooks/useDeepValue';
 import useEvent from '#preact/hooks/useEvent';
 import {RefObject} from '#preact/types';
 
@@ -10,6 +11,8 @@ export function useMutationObserver(
   config: MutationObserverInit,
   onMutation: (record: MutationRecord) => void
 ) {
+  const configValues = useDeepValue(config);
+
   const onMutationHandler = useEvent(onMutation);
   useEffect(() => {
     if (elementRef.current) {
@@ -18,10 +21,10 @@ export function useMutationObserver(
           onMutationHandler(record);
         });
       });
-      mo.observe(elementRef.current, config);
+      mo.observe(elementRef.current, configValues);
       return () => mo.disconnect();
     }
-  }, [config, /** These are stable: */ elementRef, onMutationHandler]);
+  }, [configValues, /** These are stable: */ elementRef, onMutationHandler]);
 }
 
 /**
