@@ -128,12 +128,6 @@ commands:
             - workspace
   install_chrome:
     steps:
-      # - run:
-      #     name: 'Get Pinned Chrome Version'
-      #     command: ./.circleci/get_pinned_chrome_version.sh
-      # - browser-tools/install-chrome:
-      #     chrome-version: ${CHROME_VERSION}
-      #     replace-existing: true
       - browser-tools/install-chrome
       - browser-tools/install-chromedriver
   install_firefox:
