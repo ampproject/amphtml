@@ -172,8 +172,7 @@ async function createTag(octokit, sha, ampVersion) {
       log('The tag', cyan(ampVersion), 'already exists at', cyan(sha));
     } else {
       throw new Error(
-        `An unaught status returned while attempting to create a tag`,
-        {cause: e}
+        `An unaught status returned while attempting to create a tag\n${e}`
       );
     }
   }
