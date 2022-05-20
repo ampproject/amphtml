@@ -259,7 +259,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {VisibilityState_Enum} */
     this.visibilityState_ = this.getAmpDoc().getVisibilityState();
-    this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
   }
 
   /**
@@ -311,6 +310,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
     this.setUpAdvancementConfig_();
+    this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
     this.setDescendantCssTextStyles_();
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
