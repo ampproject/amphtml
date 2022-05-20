@@ -23,4 +23,13 @@ tags: {  # <amp-story-subscriptions>
     name: "description"
     mandatory: true
   }
+  attrs: {
+    name: "subscriptions-page-index"
+  }
+  attrs: {
+    name: "headline"
+  }
+  attrs: {
+    name: "additional-description"
+  }
 }
