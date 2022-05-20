@@ -8,7 +8,9 @@
  * </amp-story-page>
  * </code>
  */
+import {devAssert} from '#core/assert';
 import {CommonSignals_Enum} from '#core/constants/common-signals';
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {removeElement} from '#core/dom';
 import {whenUpgradedToCustomElement} from '#core/dom/amp-element-helpers';
@@ -250,6 +252,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    /** @private {?string} DESCRIPTION */
+    this.initialAutoAdvanceValue_ =
+      this.element.getAttribute('auto-advance-after');
+
+    /** @private {VisibilityState_Enum} */
+    this.visibilityState_ = this.getAmpDoc().getVisibilityState();
+    this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
   }
 
   /**
@@ -300,18 +310,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
-    if (this.getAmpDoc().isPreview()) {
-      this.setupAutoAdvanceForPreview_();
-    }
-    this.maybeSetStoryNextUp_();
-    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
-    this.advancement_.addPreviousListener(() => this.previous());
-    this.advancement_.addAdvanceListener(() =>
-      this.next(/* opt_isAutomaticAdvance */ true)
-    );
-    this.advancement_.addProgressListener((progress) =>
-      this.emitProgress_(progress)
-    );
+    this.setUpAdvancementConfig_();
     this.setDescendantCssTextStyles_();
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
@@ -324,6 +323,46 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.initializeTabbableElements_();
     this.maybeApplyFirstAnimationFrameOrFinish();
     this.maybeConvertCtaLayerToPageOutlink_();
+  }
+
+  /**
+   * DESCRIPTION
+   * @private
+   */
+  onVisibilityChanged_() {
+    const ampDoc = this.getAmpDoc();
+
+    const wasPreview = this.visibilityState_ === VisibilityState_Enum.PREVIEW;
+    const isPreviewToVisibleTransition = wasPreview && ampDoc.isVisible();
+    this.visibilityState_ = ampDoc.getVisibilityState();
+
+    if (ampDoc.isPreview() || ampDoc.isVisible()) {
+      // DESCRIPTION
+      this.setUpAdvancementConfig_(isPreviewToVisibleTransition);
+    }
+  }
+
+  /**
+   * DESCRIPTION
+   * @param {boolean=} handlePreviewToVisibleTransition
+   * @private
+   */
+  setUpAdvancementConfig_(handlePreviewToVisibleTransition = false) {
+    if (this.getAmpDoc().isPreview()) {
+      this.setupAutoAdvanceForPreview_();
+      this.initializeAdvancementConfig_();
+    }
+
+    if (this.getAmpDoc().isVisible()) {
+      this.setupAutoAdvanceForVisible_();
+      this.maybeSetStoryNextUp_();
+      if (handlePreviewToVisibleTransition && this.isActive()) {
+        // DESCRIPTION
+        this.handlePreviewToVisibleTransition_();
+      } else {
+        this.initializeAdvancementConfig_();
+      }
+    }
   }
 
   /**
@@ -356,6 +395,72 @@ export class AmpStoryPage extends AMP.BaseElement {
           }
         });
     }
+  }
+
+  /**
+   * Configures the page to auto advance using default durations.
+   * @private
+   */
+  setupAutoAdvanceForVisible_() {
+    // DESCRIPTION
+    if (this.initialAutoAdvanceValue_) {
+      this.element.setAttribute(
+        'auto-advance-after',
+        this.initialAutoAdvanceValue_
+      );
+    } else {
+      this.element.removeAttribute('auto-advance-after');
+    }
+  }
+
+  /**
+   * DESCRIPTION
+   * @private
+   */
+  handlePreviewToVisibleTransition_() {
+    devAssert(
+      this.advancement_?.getType() === 'TimeBasedAdvancement',
+      'The advancement is expected to be time-based in preview mode'
+    );
+
+    // DESCRIPTION
+    const progress = this.advancement_.getProgress();
+    const progressMs = this.advancement_.getProgressMs();
+
+    this.initializeAdvancementConfig_();
+
+    switch (this.advancement_.getType()) {
+      case 'AdvancementConfig':
+        // DESCRIPTION
+        this.emitProgress_(1.0);
+        this.advancement_.start();
+        break;
+
+      case 'MediaBasedAdvancement':
+        // DESCRIPTION
+        this.advancement_.start(progress);
+        break;
+
+      case 'TimeBasedAdvancement':
+        // DESCRIPTION
+        this.advancement_.start(progressMs / this.advancement_.getDelayMs());
+    }
+  }
+
+  /**
+   * DESCRIPTION
+   * @private
+   */
+  initializeAdvancementConfig_() {
+    this.advancement_?.removeAllAddedListeners();
+    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    this.advancement_.addPreviousListener(() => this.previous());
+    this.advancement_.addAdvanceListener(() =>
+      this.next(/* opt_isAutomaticAdvance */ true)
+    );
+    this.advancement_.addProgressListener((progress) =>
+      this.emitProgress_(progress)
+    );
   }
 
   /**
