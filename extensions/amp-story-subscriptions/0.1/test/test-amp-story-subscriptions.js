@@ -4,6 +4,10 @@ import {Services} from '#service';
 
 import {afterRenderPromise} from '#testing/helpers';
 
+import {getLocalizationService} from 'extensions/amp-story/1.0/amp-story-localization-service';
+import {AdvancementMode} from 'extensions/amp-story/1.0/story-analytics';
+
+import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   Action,
   AmpStoryStoreService,
@@ -41,6 +45,10 @@ describes.realWin(
         .stub(Services, 'storyStoreServiceForOrNull')
         .returns(Promise.resolve(storeService));
       env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
+
+      getLocalizationService(doc.body).registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
 
       const platformConfig = {
         'services': [
@@ -89,8 +97,12 @@ describes.realWin(
       subscriptionsEl = (
         <amp-story-subscriptions layout="container"> </amp-story-subscriptions>
       );
-      storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
       storyEl.appendChild(subscriptionsEl);
+
+      for (let i = 0; i < 4; i++) {
+        storyEl.appendChild(win.document.createElement('amp-story-page'));
+      }
+
       win.document.body.appendChild(storyEl);
       await subscriptionsEl.whenBuilt();
     });
@@ -115,6 +127,7 @@ describes.realWin(
       let maybeRenderDialogForSelectedPlatformSpy;
 
       beforeEach(() => {
+        storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
         maybeRenderDialogForSelectedPlatformSpy = env.sandbox.spy(
           subscriptionService,
           'maybeRenderDialogForSelectedPlatform'
@@ -152,6 +165,7 @@ describes.realWin(
       let dialogCloseSpy;
 
       beforeEach(() => {
+        storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
         const dialog = new Dialog(env.ampdoc);
         dialogCloseSpy = env.sandbox.spy(dialog, 'close');
         env.sandbox.stub(subscriptionService, 'getDialog').returns(dialog);
@@ -189,7 +203,6 @@ describes.realWin(
         .stub(subscriptionService, 'getGrantStatus')
         .returns(Promise.resolve(false));
 
-      storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
       await nextTick();
 
       expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
@@ -202,12 +215,84 @@ describes.realWin(
         .stub(subscriptionService, 'getGrantStatus')
         .returns(Promise.resolve(true));
 
-      storySubscriptions = new AmpStorySubscriptions(subscriptionsEl);
       await nextTick();
 
       expect(storeService.get(StateProperty.SUBSCRIPTIONS_STATE)).to.equal(
         SubscriptionsState.GRANTED
       );
+    });
+
+    describe('skip button behaviors when embedded in a viewer', () => {
+      beforeEach(async () => {
+        const viewer = Services.viewerForDoc(env.ampdoc);
+        env.sandbox.stub(viewer, 'isEmbedded').withArgs().returns(true);
+        env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+        env.sandbox
+          .stub(subscriptionService, 'maybeRenderDialogForSelectedPlatform')
+          .returns(Promise.resolve(true));
+        env.sandbox.stub(window, 'setTimeout').callsFake((fn) => fn());
+
+        storySubscriptions = await subscriptionsEl.getImpl();
+        await storySubscriptions.buildCallback();
+        storySubscriptions.mutateElement = (fn) => fn();
+
+        const dialog = subscriptionService.getDialog();
+        await dialog.open(subscriptionsEl);
+
+        storeService.dispatch(
+          Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE,
+          true
+        );
+      });
+
+      it('should show skip button after delay', async () => {
+        const buttonEl = doc.querySelector(
+          'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button'
+        );
+        expect(buttonEl).to.have.class(
+          'i-amphtml-story-subscriptions-dialog-banner-button-visible'
+        );
+      });
+
+      it('click on the button element should fire the event to navigate to next story', async () => {
+        const handlerSpy = env.sandbox.spy(
+          storySubscriptions.viewerMessagingHandler_,
+          'send'
+        );
+
+        const subscriptionsDialogEl = doc.querySelector(
+          'amp-subscriptions-dialog'
+        );
+        subscriptionsDialogEl.click();
+        expect(handlerSpy).to.not.have.been.called;
+
+        const buttonEl = doc.querySelector(
+          'amp-subscriptions-dialog .i-amphtml-story-subscriptions-dialog-banner-button-visible'
+        );
+        buttonEl.click();
+        expect(handlerSpy).to.have.been.calledWithExactly('selectDocument', {
+          'next': true,
+          'advancementMode': AdvancementMode.MANUAL_ADVANCE,
+        });
+      });
+    });
+
+    it('should allow pointer events on swg background to intercept clicks on background', async () => {
+      const dialog = subscriptionService.getDialog();
+      await dialog.open(subscriptionsEl);
+
+      const buttonEl = doc.querySelector(
+        'amp-subscriptions-dialog .i-amphtml-story-subscriptions-google-button'
+      );
+      buttonEl.click();
+
+      doc.body.appendChild(<swg-popup-background></swg-popup-background>);
+      await nextTick();
+
+      const swgPopupBackgroundEl = doc.querySelector('swg-popup-background');
+      expect(
+        swgPopupBackgroundEl.style.getPropertyValue('pointer-events')
+      ).equal('all');
     });
   }
 );

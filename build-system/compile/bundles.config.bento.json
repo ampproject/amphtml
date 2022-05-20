@@ -8,6 +8,14 @@
     }
   },
   {
+    "name": "bento-autocomplete",
+    "version": "1.0",
+    "options": {
+      "hasCss": true,
+      "npm": true
+    }
+  },
+  {
     "name": "bento-base-carousel",
     "version": "1.0",
     "latestVersion": "0.1",
@@ -41,6 +49,14 @@
     "options": {
       "hasCss": true,
       "npm": true
+    }
+  },
+  {
+    "name": "bento-imgur",
+    "version": "1.0",
+    "latestVersion": "0.1",
+    "options": {
+      "hasCss": true
     }
   },
   {

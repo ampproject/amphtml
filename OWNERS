@@ -9,7 +9,6 @@
         {name: 'cramforce', requestReviews: false},
         {name: 'dvoytenko', requestReviews: false},
         {name: 'jridgewell', requestReviews: false},
-        {name: 'rsimha', requestReviews: false},
       ],
     },
     {
@@ -44,7 +43,10 @@
     },
     {
       pattern: '**/OWNERS',
-      owners: [{name: 'mrjoro', requestReviews: false}],
+      owners: [
+        {name: 'mrjoro', requestReviews: false},
+        {name: 'newmuis', requestReviews: false},
+      ],
     },
     {
       // Locked down to minimize new import aliases being added

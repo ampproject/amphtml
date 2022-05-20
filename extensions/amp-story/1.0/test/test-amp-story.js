@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 import {CommonSignals_Enum} from '#core/constants/common-signals';
 import {Keys_Enum} from '#core/constants/key-codes';
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
@@ -14,14 +16,12 @@ import {Performance} from '#service/performance-impl';
 import {waitFor} from '#testing/helpers/service';
 import {poll} from '#testing/iframe';
 
+import {DEFAULT_SUBSCRIPTIONS_PAGE_INDEX} from 'extensions/amp-story-subscriptions/0.1/amp-story-subscriptions';
+
 import * as consent from '../../../../src/consent';
 import {registerServiceBuilder} from '../../../../src/service-helpers';
 import LocalizedStringsEn from '../_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
-import {
-  AmpStory,
-  PAYWALL_DELAY_DURATION,
-  PAYWALL_PAGE_INDEX,
-} from '../amp-story';
+import {AmpStory, SUBSCRIPTIONS_DELAY_DURATION} from '../amp-story';
 import {AmpStoryConsent} from '../amp-story-consent';
 import {NavigationDirection, PageState} from '../amp-story-page';
 import {
@@ -609,7 +609,9 @@ describes.realWin(
       it('should pause the story when tab becomes inactive', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
-        env.sandbox.stub(ampdoc, 'isVisible').returns(false);
+        env.sandbox
+          .stub(ampdoc, 'getVisibilityState')
+          .returns(VisibilityState_Enum.PRERENDER);
         const onVisibilityChangedStub = env.sandbox.stub(
           ampdoc,
           'onVisibilityChanged'
@@ -1376,13 +1378,13 @@ describes.realWin(
     describe('amp-story-subscriptions navigation', () => {
       let subscriptionsEl;
       let storeService;
-      const pages = ['cover', 'page-1', 'page-2', 'page-3'];
+      const pages = ['cover', 'page-1', 'page-2', 'page-3', 'page-4'];
 
       const clickRightEvent = new MouseEvent('click', {clientX: 200});
       const clickLeftEvent = new MouseEvent('click', {clientX: 10});
 
       async function setUpStorySubscriptions() {
-        await createStoryWithPages(4, pages);
+        await createStoryWithPages(5, pages);
         subscriptionsEl = win.document.createElement('amp-story-subscriptions');
         story.element.appendChild(subscriptionsEl);
 
@@ -1419,15 +1421,21 @@ describes.realWin(
 
       describe('UNKNOWN subscription state before paywall page', () => {
         beforeEach(async () => {
+          storeService.dispatch(
+            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+          );
           await setUpStorySubscriptions();
-          tapNavigationUntil(PAYWALL_PAGE_INDEX);
+          tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX);
         });
 
         it('should not navigate to locked content while subscription state is unknown', () => {
           const activePage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
-          expect(activePage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX - 1]);
+          expect(activePage.element.id).to.equal(
+            pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX - 1]
+          );
         });
 
         it('should resume to paywall page after the subscription state gets resolved', async () => {
@@ -1439,7 +1447,9 @@ describes.realWin(
           const paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
-          expect(paywallPage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX]);
+          expect(paywallPage.element.id).to.equal(
+            pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
+          );
         });
 
         it('should continue normal navigation after the subscription state gets resolved to granted', async () => {
@@ -1456,7 +1466,7 @@ describes.realWin(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
           expect(postPaywallPage.element.id).to.equal(
-            pages[PAYWALL_PAGE_INDEX + 1]
+            pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1]
           );
         });
 
@@ -1467,7 +1477,7 @@ describes.realWin(
             SubscriptionsState.BLOCKED
           );
           await nextTick();
-          clock.tick(PAYWALL_DELAY_DURATION);
+          clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
           expect(storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE))
             .to.be.true;
         });
@@ -1494,18 +1504,24 @@ describes.realWin(
             const paywallPage = story.getPageById(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
-            expect(paywallPage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX]);
+            expect(paywallPage.element.id).to.equal(
+              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
+            );
           });
         });
       });
 
       describe('GRANTED subscription state before paywall page', async () => {
+        storeService.dispatch(
+          Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+          DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+        );
         await setUpStorySubscriptions();
         storeService.dispatch(
           Action.TOGGLE_SUBSCRIPTIONS_STATE,
           SubscriptionsState.GRANTED
         );
-        tapNavigationUntil(PAYWALL_PAGE_INDEX);
+        tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX);
         const paywallPage = story.getPageById(
           storeService.get(StateProperty.CURRENT_PAGE_ID)
         );
@@ -1522,24 +1538,86 @@ describes.realWin(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
           expect(postPaywallPage.element.id).to.equal(
-            pages[PAYWALL_PAGE_INDEX + 1]
+            pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1]
           );
+        });
+      });
+
+      describe('unresolved subscriptions page index', () => {
+        beforeEach(async () => {});
+
+        it('should block on the first page if subscriptions page index is unresolved', async () => {
+          setUpStorySubscriptions();
+          storeService.dispatch(
+            Action.TOGGLE_SUBSCRIPTIONS_STATE,
+            SubscriptionsState.BLOCKED
+          );
+
+          // Blocking on unresolved page index during layout callback so the current page id is not set yet.
+          expect(storeService.get(StateProperty.CURRENT_PAGE_ID)).to.equal('');
+
+          storeService.dispatch(
+            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+          );
+        });
+
+        describe('subscriptions page index is resolved', () => {
+          let clock;
+
+          beforeEach(async () => {
+            storeService.dispatch(
+              Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+              DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1
+            );
+            await setUpStorySubscriptions();
+            storeService.dispatch(
+              Action.TOGGLE_SUBSCRIPTIONS_STATE,
+              SubscriptionsState.BLOCKED
+            );
+
+            tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX);
+            clock = env.sandbox.useFakeTimers();
+          });
+
+          it('should not show paywall on the default paywall page', () => {
+            clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
+            expect(
+              storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
+            ).to.be.false;
+          });
+
+          it('should show paywall on the specified paywall page', () => {
+            const defaultPaywallPage = story.getPageById(
+              storeService.get(StateProperty.CURRENT_PAGE_ID)
+            );
+            defaultPaywallPage.element.dispatchEvent(clickRightEvent);
+
+            clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
+            expect(
+              storeService.get(StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE)
+            ).to.be.true;
+          });
         });
       });
 
       describe('BLOCKED subscription state before paywall page', () => {
         beforeEach(async () => {
+          storeService.dispatch(
+            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+          );
           await setUpStorySubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          tapNavigationUntil(PAYWALL_PAGE_INDEX);
+          tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX);
         });
 
         it('should resume to paywall page once status becomes granted from blocked if the paywall is triggered on time delay', async () => {
           const clock = env.sandbox.useFakeTimers();
-          clock.tick(PAYWALL_DELAY_DURATION); // Paywall is shown after delay.
+          clock.tick(SUBSCRIPTIONS_DELAY_DURATION); // Paywall is shown after delay.
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.GRANTED
@@ -1556,7 +1634,7 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePageAfterGranted.element.id).to.equal(
-              pages[PAYWALL_PAGE_INDEX]
+              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
             );
           });
         });
@@ -1582,7 +1660,7 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePageAfterGranted.element.id).to.equal(
-              pages[PAYWALL_PAGE_INDEX + 1]
+              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1]
             );
           });
         });
@@ -1604,7 +1682,7 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePage.element.id).to.equal(
-              pages[PAYWALL_PAGE_INDEX - 1]
+              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX - 1]
             );
           });
         });
@@ -1627,20 +1705,27 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePage.element.id).to.equal(
-              pages[PAYWALL_PAGE_INDEX - 1]
+              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX - 1]
             );
           });
         });
       });
 
       describe('switch event and deep link', () => {
+        beforeEach(() => {
+          storeService.dispatch(
+            Action.SET_SUBSCRIPTIONS_PAGE_INDEX,
+            DEFAULT_SUBSCRIPTIONS_PAGE_INDEX
+          );
+        });
+
         it('should navigate to paywall page and navigate back to original page after granted with any switch events', async () => {
           await setUpStorySubscriptions();
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
             SubscriptionsState.BLOCKED
           );
-          tapNavigationUntil(PAYWALL_PAGE_INDEX - 1);
+          tapNavigationUntil(DEFAULT_SUBSCRIPTIONS_PAGE_INDEX - 1);
 
           dispatch(win, story.element, EventType.SWITCH_PAGE, {
             'targetPageId': 'page-3',
@@ -1657,7 +1742,9 @@ describes.realWin(
             const activePage = story.getPageById(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
-            expect(activePage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX]);
+            expect(activePage.element.id).to.equal(
+              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
+            );
           });
 
           storeService.dispatch(
@@ -1676,7 +1763,7 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePage.element.id).to.equal(
-              pages[PAYWALL_PAGE_INDEX + 1]
+              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1]
             );
           });
         });
@@ -1710,7 +1797,9 @@ describes.realWin(
             const activePage = story.getPageById(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
-            expect(activePage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX]);
+            expect(activePage.element.id).to.equal(
+              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
+            );
           });
 
           storeService.dispatch(
@@ -1729,7 +1818,7 @@ describes.realWin(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
             expect(activePage.element.id).to.equal(
-              pages[PAYWALL_PAGE_INDEX + 1]
+              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX + 1]
             );
           });
         });
@@ -1766,7 +1855,7 @@ describes.realWin(
           paywallPage = story.getPageById(
             storeService.get(StateProperty.CURRENT_PAGE_ID)
           );
-          clock.tick(PAYWALL_DELAY_DURATION);
+          clock.tick(SUBSCRIPTIONS_DELAY_DURATION);
 
           storeService.dispatch(
             Action.TOGGLE_SUBSCRIPTIONS_STATE,
@@ -1783,7 +1872,9 @@ describes.realWin(
             const activePage = story.getPageById(
               storeService.get(StateProperty.CURRENT_PAGE_ID)
             );
-            expect(activePage.element.id).to.equal(pages[PAYWALL_PAGE_INDEX]);
+            expect(activePage.element.id).to.equal(
+              pages[DEFAULT_SUBSCRIPTIONS_PAGE_INDEX]
+            );
           });
         });
       });

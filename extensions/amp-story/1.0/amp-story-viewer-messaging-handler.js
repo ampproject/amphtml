@@ -26,6 +26,10 @@ let GetStateConfigurationDef;
 
 /** @enum {!GetStateConfigurationDef} */
 const GET_STATE_CONFIGURATIONS = {
+  'CAPTIONS_STATE': {
+    dataSource: DataSources.STORE_SERVICE,
+    property: StateProperty.CAPTIONS_STATE,
+  },
   'CURRENT_PAGE_ID': {
     dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.CURRENT_PAGE_ID,
@@ -50,6 +54,10 @@ const GET_STATE_CONFIGURATIONS = {
     dataSource: DataSources.VARIABLE_SERVICE,
     property: AnalyticsVariable.STORY_PROGRESS,
   },
+  'STORY_PAGE_COUNT': {
+    dataSource: DataSources.VARIABLE_SERVICE,
+    property: AnalyticsVariable.STORY_PAGE_COUNT,
+  },
 };
 
 /** @typedef {{action: !Action, isValueValid: function(*):boolean}} */
@@ -57,6 +65,10 @@ let SetStateConfigurationDef;
 
 /** @enum {!SetStateConfigurationDef} */
 const SET_STATE_CONFIGURATIONS = {
+  'CAPTIONS_STATE': {
+    action: Action.TOGGLE_CAPTIONS,
+    isValueValid: (value) => typeof value === 'boolean',
+  },
   'MUTED_STATE': {
     action: Action.TOGGLE_MUTED,
     isValueValid: (value) => typeof value === 'boolean',

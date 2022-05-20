@@ -128,6 +128,8 @@ export let ShoppingDataDef;
  *    keyboardActiveState: boolean,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
+ *    pageCaptionsState: boolean,
+ *    captionsState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
  *    panningMediaState: !Map<string, ../../amp-story-panning-media/0.1/amp-story-panning-media.panningMediaPositionDef> ,
  *    pausedState: boolean,
@@ -147,6 +149,7 @@ export let ShoppingDataDef;
  *    newPageAvailableId: string,
  *    pageSize: {width: number, height: number},
  *    subscriptionsDialogState: boolean,
+ *    subscriptionsPageIndex: number,
  * }}
  */
 export let State;
@@ -176,6 +179,8 @@ const StateProperty = mangleObjectValues({
   KEYBOARD_ACTIVE_STATE: 'keyboardActiveState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
+  PAGE_HAS_CAPTION_STATE: 'pageCaptionState',
+  CAPTIONS_STATE: 'captionsState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
   PANNING_MEDIA_STATE: 'panningMediaState',
   PAUSED_STATE: 'pausedState',
@@ -205,6 +210,7 @@ const StateProperty = mangleObjectValues({
   // AMP Story paywall states.
   SUBSCRIPTIONS_DIALOG_UI_STATE: 'subscriptionsDialogUiState',
   SUBSCRIPTIONS_STATE: 'subscriptionsState',
+  SUBSCRIPTIONS_PAGE_INDEX: 'subscriptionsPageIndex',
 });
 
 export {StateProperty};
@@ -224,6 +230,7 @@ const Action = mangleObjectValues({
   SET_PAGE_IDS: 'setPageIds',
   SET_PAGE_SIZE: 'updatePageSize',
   SET_VIEWER_CUSTOM_CONTROLS: 'setCustomControls',
+  SET_SUBSCRIPTIONS_PAGE_INDEX: 'setSubscriptionsPageIndex',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
@@ -232,6 +239,8 @@ const Action = mangleObjectValues({
   TOGGLE_MUTED: 'toggleMuted',
   TOGGLE_PAGE_ATTACHMENT_STATE: 'togglePageAttachmentState',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
+  TOGGLE_PAGE_HAS_CAPTIONS: 'togglePageHasCaptions',
+  TOGGLE_CAPTIONS: 'toggleCaptions',
   TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
@@ -377,6 +386,16 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.PAGE_HAS_AUDIO_STATE]: !!data,
       });
+    case Action.TOGGLE_PAGE_HAS_CAPTIONS:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_HAS_CAPTIONS_STATE]: !!data,
+      });
+    case Action.TOGGLE_CAPTIONS:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.CAPTIONS_STATE]: !!data,
+      });
     case Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK:
       return /** @type {!State} */ ({
         ...state,
@@ -460,6 +479,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.VIEWER_CUSTOM_CONTROLS]: data,
+      });
+    case Action.SET_SUBSCRIPTIONS_PAGE_INDEX:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.SUBSCRIPTIONS_PAGE_INDEX]: data,
       });
     case Action.TOGGLE_SUBSCRIPTIONS_DIALOG_UI_STATE:
       return /** @type {!State} */ ({
@@ -587,6 +611,8 @@ export class AmpStoryStoreService {
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
+      [StateProperty.PAGE_HAS_CAPTIONS_STATE]: false,
+      [StateProperty.CAPTIONS_STATE]: true,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PANNING_MEDIA_STATE]: {},
       [StateProperty.PAUSED_STATE]: false,
@@ -611,6 +637,7 @@ export class AmpStoryStoreService {
       [StateProperty.PREVIEW_STATE]: false,
       [StateProperty.SUBSCRIPTIONS_DIALOG_UI_STATE]: false,
       [StateProperty.SUBSCRIPTIONS_STATE]: SubscriptionsState.DISABLED,
+      [StateProperty.SUBSCRIPTIONS_PAGE_INDEX]: -1,
     });
   }
 

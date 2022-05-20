@@ -5,9 +5,9 @@ const {resolvePath} = require('../../babel-config/import-resolver');
  * Generates a plugin to remap the dependencies of a JS bundle.
  *
  * `remaps` is an object where each entry indicates that the module identified by the key should be remapped to the module identified by the value.
+ *  Modules (in key or value) can be local modules (js/jsx/ts/tsx files in the repo) or npm modules (in the node_modules at the root of the repo).
+ *  Local modules must be declared as a relative-path, relative to repo root, with a leading './' (e.g './mod1.js'). They don't need a file extension.
  *  Keys can use regex syntax.
- *  Modules can be local modules (js/jsx/ts/tsx files in the repo) or npm modules (in the node_modules at the root of the repo).
- *  Local modules must be declared with a leading '.' (e.g './mod1.js'). They don't need a file extension.
  *
  * `externals` is a list of strings representing import paths that should be external-ized
  *
@@ -57,7 +57,7 @@ function onResolveRemapDeps({externals, remapArr, resolve, rootDir}, args) {
   let dep;
   if (importPath.startsWith('.')) {
     const absPath = resolve(importPath, resolveDir, rootDir);
-    dep = `./${path.posix.relative(rootDir, absPath)}`;
+    dep = `.${path.posix.sep}${path.posix.relative(rootDir, absPath)}`;
   } else {
     dep = importPath;
   }
@@ -69,7 +69,8 @@ function onResolveRemapDeps({externals, remapArr, resolve, rootDir}, args) {
 
     const isExternal = externals.includes(value);
     return {
-      path: isExternal ? value : resolve(value, resolveDir, rootDir),
+      // resolve value from rootDir in case value is a local module (local module routes are relative to repo root)
+      path: isExternal ? value : resolve(value, rootDir, rootDir),
       external: isExternal,
     };
   }
@@ -91,11 +92,15 @@ function onResolveRemapDeps({externals, remapArr, resolve, rootDir}, args) {
 function ampResolve(importPath, absResolveDir, absRootDir) {
   const absImportPath = path.posix.join(absResolveDir, importPath);
   const rootRelImportPath = path.posix.relative(absRootDir, absImportPath);
-  const babelResolvePath = resolvePath(rootRelImportPath);
+  const babelResolvePath = resolvePath(rootRelImportPath, null);
   if (babelResolvePath) {
     return path.posix.join(absRootDir, babelResolvePath);
   } else {
-    return require.resolve(importPath);
+    try {
+      return require.resolve(importPath);
+    } catch (e) {
+      return path.posix.resolve(importPath);
+    }
   }
 }
 

@@ -298,17 +298,6 @@
       "loading_complete_selectors": [".i-amphtml-story-loaded"]
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-cta-layer.html",
-      "name": "amp-story: CTA layer",
-      "viewport": {"width": 320, "height": 480},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        "amp-story-page#the-one-with-the-cta-layer[active]"
-      ],
-      // for page navigation
-      "loading_complete_delay_ms": 500
-    },
-    {
       "url": "examples/visual-tests/amp-story/embed-mode-1.html",
       "name": "amp-story: embed mode 1",
       "viewport": {"width": 320, "height": 480},
@@ -389,17 +378,6 @@
       "viewport": {"width": 1440, "height": 900},
       "loading_incomplete_selectors": ["[grid-area]"],
       "loading_complete_selectors": [".i-amphtml-story-loaded"]
-    },
-    {
-      "url": "examples/visual-tests/amp-story/amp-story-cta-layer.html",
-      "name": "amp-story: CTA layer (desktop)",
-      "viewport": {"width": 1440, "height": 900},
-      "loading_complete_selectors": [
-        ".i-amphtml-story-loaded",
-        "amp-story-page#the-one-with-the-cta-layer[active]"
-      ],
-      // for page navigation
-      "loading_complete_delay_ms": 500
     },
     {
       "url": "examples/visual-tests/amp-story/embed-mode-1.html",
@@ -828,6 +806,13 @@
       "viewport": {"width": 1500, "height": 1000},
       "loading_complete_selectors": [".i-amphtml-story-loaded"],
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-shopping.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story-subscriptions.html",
+      "name": "amp-story-subscriptions UI",
+      "viewport": {"width": 400, "height": 800},
+      "loading_complete_selectors": ["amp-subscriptions-dialog:not([hidden])"],
+      "interactive_tests": "examples/visual-tests/amp-story/amp-story-subscriptions.js"
     }
   ]
 }

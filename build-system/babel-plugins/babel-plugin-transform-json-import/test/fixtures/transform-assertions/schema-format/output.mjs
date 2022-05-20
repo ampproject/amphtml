@@ -1,14 +1,4 @@
 const validate = validate0;
-const schema0 = {
-  "properties": {
-    "my-uri": {
-      "format": "uri"
-    },
-    "my-email": {
-      "format": "email"
-    }
-  }
-};
 const formats0 = /^(?:[a-z][a-z0-9+\-.]*:)(?:\/?\/)?[^\s]*$/i;
 const formats2 = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/i;
 
