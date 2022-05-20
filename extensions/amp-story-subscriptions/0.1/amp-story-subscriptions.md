@@ -55,7 +55,7 @@ The extension provides a simple UI and capabilities to surface a paywall bottoms
 6. If the user completes any of the above authentication flows, the user is returned to the Story page, the paywall is dismissed and the user can consume the rest of the Story.
 7. If the user encounters a subsequent paywalled Story from this publisher, they will continue to retain access based on [amp-subscription mechanisms](https://amp.dev/documentation/components/amp-subscriptions/#combining-the-amp-reader-id-with-publisher-cookies).
 
-# `amp-story` and `amp-story-subscriptions` attributes
+# `amp-story-subscriptions` attributes
 
 ```html
 <amp-story publisher-logo-src='https://publisher-domain.com/logo.jpg'>
@@ -66,9 +66,13 @@ The extension provides a simple UI and capabilities to surface a paywall bottoms
 </amp-story>
 ```
 
-### `publisher-logo-src` {string} required
+### `price` {string} required
 
-A URL to the story publisher's logo in square format (1x1 aspect ratio). This logo would be shown on the publisher's subscribe button. For example `publisher-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 96x96 px logo. See the guidelines at [`amp-story` dev document](https://amp.dev/documentation/components/amp-story/?format=stories#publisher-logo-src-guidelines).
+Subscription/offer price, e.g. "$0.50/week" or "4€ every 4 weeks for one year". This can be any arbitrary string that describe any offers like free trial, monthly, annually, etc. Note that it would be omitted with ellipsis at the end if too long, which is determined by the view width.
+
+### `description` {string} required
+
+One line of description for the subscription/offer.
 
 ### `subscriptions-page-index` {number} optional
 
@@ -76,17 +80,9 @@ The index of the `amp-story-page` that displays the subscriptions dialog. The `a
 
 Note that this specified page cannot be the first two pages nor the last page of the story.
 
-### `price` {string} required
-
-Subscription/offer price. This can be any arbitrary string that describe any offers like free trial, monthly, annually, etc. Note that it would be omitted with ellipsis at the end if too long, which is determined by the view width.
-
 ### `headline` {string} optional
 
 A headline string that describes the subscription/offer. If not provided, the line would be removed, e.g. the dialog would get shorter since the content is one line less.
-
-### `description` {string} required
-
-One line of description for the subscription/offer.
 
 ### `additional-description` {string} optional
 
