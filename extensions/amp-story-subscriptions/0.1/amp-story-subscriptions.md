@@ -33,7 +33,11 @@ scripts:
 
 # Summary
 
-This component enables Web Stories to support paywalls and subscriptions in a manner following [`amp-subscriptions`](https://amp.dev/documentation/components/amp-subscriptions/) and [`amp-subscriptions-google`](https://amp.dev/documentation/components/amp-subscriptions-google/). It enables publishers to configure their Stories to feature paywalls and integrate into their backends via authorization URLs (similar to [`amp-subscriptions`](https://amp.dev/documentation/components/amp-subscriptions/#url-variables)). The extension provides a simple UI and capabilities to surface a paywall bottomsheet, and manage blocking / unblocking locked content.
+This component enables Web Stories to support paywalls and subscriptions in a manner following [`amp-subscriptions`](https://amp.dev/documentation/components/amp-subscriptions/) and [`amp-subscriptions-google`](https://amp.dev/documentation/components/amp-subscriptions-google/). It enables publishers to configure their Stories to feature paywalls and integrate into their backends via authorization URLs and other configurations.
+
+The way to specify subscriptions configurations is the same for both a classic AMP page and a Web Story. See more details about configurations in [`amp-subscriptions` configuration](https://amp.dev/documentation/components/amp-subscriptions/#configuration).
+
+The extension provides a simple UI and capabilities to surface a paywall bottomsheet, and manage blocking / unblocking locked content.
 
 > **Important Note**: Please first read API docs for [`amp-subscriptions`](https://amp.dev/documentation/components/amp-subscriptions/) and (optionally) [`amp-subscriptions-google`](https://amp.dev/documentation/components/amp-subscriptions-google/) and ensure you are set up with those basic capabilities before integrating with this component.
 
@@ -50,44 +54,6 @@ This component enables Web Stories to support paywalls and subscriptions in a ma
     - If enabled by the publisher, subscribe via [Subscribe with Google](https://developers.google.com/news/subscribe).
 6. If the user completes any of the above authentication flows, the user is returned to the Story page, the paywall is dismissed and the user can consume the rest of the Story.
 7. If the user encounters a subsequent paywalled Story from this publisher, they will continue to retain access based on [amp-subscription mechanisms](https://amp.dev/documentation/components/amp-subscriptions/#combining-the-amp-reader-id-with-publisher-cookies).
-
-# Subscriptions JSON Configuration Example
-
-```html
-...
-<script type="application/ld+json">
-     {
-       "@context": "http://schema.org",
-       "@type": "NewsArticle",
-       "isAccessibleForFree": "False",
-       "isPartOf": {
-         "@type": ["CreativeWork", "Product"],
-         "name" : "Product A",
-         "productID": "publisher.domain.com:product"
-       }
-     }
-</script>
-<script type="application/json" id="amp-subscriptions">
-     {
-       "services": [
-         {
-           "authorizationUrl": "https://publisher.domain.com/entitlement",
-           "pingbackUrl": "https://publisher.domain/pingback",
-           "actions":{
-             "login": "https://publisher.domain.com/signin",
-             "subscribe": "https://publisher.domain.com/subscribe"
-           }
-         },
-         {
-           "serviceId": "subscribe.google.com"
-         }
-       ]
-     }
-</script>
-...
-```
-
-See details about specifying this configuration in [`amp-subscriptions`](https://amp.dev/documentation/components/amp-subscriptions/).
 
 # `amp-story` and `amp-story-subscriptions` attributes
 
