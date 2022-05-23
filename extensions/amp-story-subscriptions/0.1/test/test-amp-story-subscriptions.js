@@ -1,12 +1,13 @@
 import * as Preact from '#core/dom/jsx';
 
 import {Services} from '#service';
-import {LocalizationService} from '#service/localization';
 
 import {afterRenderPromise} from '#testing/helpers';
 
+import {getLocalizationService} from 'extensions/amp-story/1.0/amp-story-localization-service';
 import {AdvancementMode} from 'extensions/amp-story/1.0/story-analytics';
 
+import LocalizedStringsEn from '../../../amp-story/1.0/_locales/en.json' assert {type: 'json'}; // lgtm[js/syntax-error]
 import {
   Action,
   AmpStoryStoreService,
@@ -45,10 +46,9 @@ describes.realWin(
         .returns(Promise.resolve(storeService));
       env.sandbox.stub(Services, 'storyStoreService').returns(storeService);
 
-      const localizationService = new LocalizationService(doc.body);
-      env.sandbox
-        .stub(Services, 'localizationServiceForOrNull')
-        .returns(Promise.resolve(localizationService));
+      getLocalizationService(doc.body).registerLocalizedStringBundles({
+        'en': LocalizedStringsEn,
+      });
 
       const platformConfig = {
         'services': [
