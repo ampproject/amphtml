@@ -228,6 +228,11 @@ class CameraAnimation {
 }
 
 export class AmpStory360 extends AMP.BaseElement {
+  /** @override  */
+  static previewAllowed() {
+    return true;
+  }
+
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
