@@ -2,6 +2,7 @@ import type {ComponentChildren, FunctionalComponent} from 'preact';
 import {JSXInternal} from 'preact/src/jsx';
 
 export type {
+  Component,
   ComponentChildren,
   ComponentChild,
   ComponentProps,
@@ -10,6 +11,7 @@ export type {
   Ref,
   RefObject,
   RenderableProps,
+  VNode,
 } from 'preact';
 
 export type FC<P = {}> = FunctionalComponent<P>;
