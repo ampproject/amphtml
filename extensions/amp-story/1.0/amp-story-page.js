@@ -254,7 +254,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.playAudioElementFromTimestamp_ = null;
 
     /** @private {?string} DESCRIPTION */
-    this.initialAutoAdvanceValue_ = null;
+    this.initialAutoAdvanceValue_ =
+      this.element.getAttribute('auto-advance-after');
 
     /** @private {?VisibilityState_Enum} */
     this.visibilityState_ = this.getAmpDoc().getVisibilityState();
@@ -305,9 +306,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.initialAutoAdvanceValue_ =
-      this.element.getAttribute('auto-advance-after');
-
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
