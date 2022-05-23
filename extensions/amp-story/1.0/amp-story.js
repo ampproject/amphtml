@@ -683,13 +683,7 @@ export class AmpStory extends AMP.BaseElement {
       const isPreviewFinished =
         this.getAmpDoc().isPreview() && isLastPage && progress === 1.0;
       if (isPreviewFinished && !this.hasDispatchedPreviewFinished_) {
-        dispatch(
-          this.win,
-          this.element,
-          EventType.PREVIEW_FINISHED,
-          /* payload */ undefined,
-          {bubbles: true}
-        );
+        this.viewerMessagingHandler_?.send('storyPreviewFinished', {});
         this.hasDispatchedPreviewFinished_ = true;
       }
     });
