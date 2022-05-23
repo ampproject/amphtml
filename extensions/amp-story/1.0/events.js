@@ -37,9 +37,6 @@ export const EventType = {
 
   // Dispatches an action to the amp-story store service. Only works under test.
   DISPATCH_ACTION: 'ampstory:dispatchaction',
-
-  // Triggered when a story's preview has completely finished playing.
-  PREVIEW_FINISHED: 'ampstory:previewfinished',
 };
 
 /**
