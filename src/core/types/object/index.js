@@ -148,8 +148,8 @@ export function objectsEqualShallow(o1, o2) {
 
 /**
  * Deeply compares 2 objects, and returns `true` if they match.
- * @param {unknown} o1
- * @param {unknown} o2
+ * @param {*} o1
+ * @param {*} o2
  * @return {boolean}
  */
 export function objectsEqualDeep(o1, o2) {
