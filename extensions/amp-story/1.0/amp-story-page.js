@@ -254,11 +254,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.playAudioElementFromTimestamp_ = null;
 
     /** @private {?string} DESCRIPTION */
-    this.initialAutoAdvanceValue_ =
-      this.element.getAttribute('auto-advance-after');
+    this.initialAutoAdvanceValue_ = null;
 
-    /** @private {VisibilityState_Enum} */
+    /** @private {?VisibilityState_Enum} */
     this.visibilityState_ = this.getAmpDoc().getVisibilityState();
+    this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
   }
 
   /**
@@ -305,12 +305,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.initialAutoAdvanceValue_ =
+      this.element.getAttribute('auto-advance-after');
+
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
     this.setUpAdvancementConfig_();
-    this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
     this.setDescendantCssTextStyles_();
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
