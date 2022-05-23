@@ -1,5 +1,10 @@
-// @ts-nocheck
+/*
+ * This file was copied from Preact's source code,
+ * so we're going to disable TS/lint/codecov:
+ */
+/* istanbul ignore file */
 /* eslint-disable */
+// @ts-nocheck
 import {createElement} from '#preact';
 
 // Copied from preact/compat/src/utils.js:
