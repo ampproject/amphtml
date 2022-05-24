@@ -1195,7 +1195,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     });
 
     const mockAdsLoader = {requestAds() {}};
-    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    const mockAdsRequest = {adTagUrl: 'vast.xml'};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
     imaVideoObj.setContextForTesting({
@@ -1204,7 +1204,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
-      'vast.mxl&npa=1'
+      'vast.xml?npa=1'
     );
   });
 
@@ -1217,7 +1217,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     });
 
     const mockAdsLoader = {requestAds() {}};
-    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    const mockAdsRequest = {adTagUrl: 'vast.xml'};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
     imaVideoObj.setContextForTesting({
@@ -1226,7 +1226,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
-      'vast.mxl'
+      'vast.xml'
     );
   });
 
@@ -1239,7 +1239,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     });
 
     const mockAdsLoader = {requestAds() {}};
-    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    const mockAdsRequest = {adTagUrl: 'vast.xml'};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
     imaVideoObj.setContextForTesting({
@@ -1248,7 +1248,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
-      'vast.mxl'
+      'vast.xml'
     );
   });
 
@@ -1261,7 +1261,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     });
 
     const mockAdsLoader = {requestAds() {}};
-    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    const mockAdsRequest = {adTagUrl: 'vast.xml'};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
     imaVideoObj.setContextForTesting({
@@ -1272,7 +1272,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
-      'vast.mxl&gdpr=1&gdpr_consent=myConsentValue'
+      'vast.xml?gdpr=1&gdpr_consent=myConsentValue'
     );
   });
 
@@ -1285,7 +1285,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     });
 
     const mockAdsLoader = {requestAds() {}};
-    const mockAdsRequest = {adTagUrl: 'vast.mxl'};
+    const mockAdsRequest = {adTagUrl: 'vast.xml'};
     imaVideoObj.setAdsLoaderForTesting(mockAdsLoader);
     imaVideoObj.setAdsRequestForTesting(mockAdsRequest);
     imaVideoObj.setContextForTesting({
@@ -1298,7 +1298,7 @@ describes.realWin('UI loaded in frame by amp-ima-video', {}, (env) => {
     imaVideoObj.requestAds();
 
     expect(imaVideoObj.getPropertiesForTesting().adsRequest.adTagUrl).to.eql(
-      'vast.mxl'
+      'vast.xml'
     );
   });
 });
