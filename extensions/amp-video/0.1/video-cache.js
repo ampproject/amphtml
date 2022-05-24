@@ -36,6 +36,7 @@ export function fetchCachedSources(
   // Always set crossorigin attribute so captions can be set.
   if (!videoEl.hasAttribute('crossorigin')) {
     videoEl.setAttribute('crossorigin', '');
+    videoEl.querySelector('video')?.setAttribute('crossorigin', '');
   }
 
   const videoSrc = videoEl.getAttribute('src');

@@ -137,6 +137,10 @@
   overflow: hidden !important;
 }
 
+[ad-showing] .i-amphtml-story-progress-bar-exp-disabled.i-amphtml-story-progress-bar {
+  display: none !important;
+}
+
 [ad-showing] .i-amphtml-story-attribution {
   visibility: hidden !important;
 }

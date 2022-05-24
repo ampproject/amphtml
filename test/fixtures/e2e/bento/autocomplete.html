@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Bento Autocomplete</title>
+    <meta
+      name="viewport"
+      content="width=device-width,minimum-scale=1,initial-scale=1"
+    />
+    <script async src="https://cdn.ampproject.org/bento.js"></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-autocomplete-1.0.js"
+    ></script>
+    <script
+      async
+      src="https://cdn.ampproject.org/v0/bento-mustache-1.0.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.ampproject.org/v0/bento-autocomplete-1.0.css"
+    />
+    <style></style>
+  </head>
+  <body>
+    <section>
+      <h1>Default Autocomplete</h1>
+      <bento-autocomplete id="default" min-chars="0">
+        <input type="text" id="autocomplete" />
+        <script type="application/json">
+          {
+            "items": ["apple", "orange", "banana"]
+          }
+        </script>
+      </bento-autocomplete>
+    </section>
+    <section>
+      <h1>With template</h1>
+      <bento-autocomplete id="with-template" filter-value="city" min-chars="0">
+        <input type="text" id="autocomplete-template" />
+        <script type="application/json">
+          {
+            "items": [
+              {"city": "Seattle", "state": "WA"},
+              {"city": "New York", "state": "NY"},
+              {"city": "Chicago", "state": "IL"}
+            ]
+          }
+        </script>
+        <template type="bento-mustache">
+          <div class="city-item" data-value="{{city}}, {{state}}">
+            {{city}}, {{state}}
+          </div>
+        </template>
+      </bento-autocomplete>
+    </section>
+  </body>
+</html>
