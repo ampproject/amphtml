@@ -1,3 +1,5 @@
+import {expect} from 'chai';
+
 import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
@@ -382,6 +384,56 @@ describes.realWin(
         'https://example.com',
         '_blank',
         'noopener,attributiondestination=https://example.com,attributionsourceeventid=EFnZ8GunL1xrwNTIHbXrvQ==,attributionreportto=https://google.com'
+      );
+    });
+
+    it('should send attribution source ping when attribution reporting is enabled', async () => {
+      env.sandbox
+        .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')
+        .returns(true);
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      const sendBeacon = env.sandbox
+        .stub(win.navigator, 'sendBeacon')
+        .callsFake(() => true);
+      const config = {
+        targets: {
+          tracking: {
+            'finalUrl': 'http://localhost:8000/tracking-test',
+            'trackingUrls': [
+              'http://localhost:8000/tracking?1',
+              'http://localhost:8000/tracking?ase=1&2',
+            ],
+          },
+        },
+      };
+      const el = await makeElementWithConfig(config);
+      const impl = await el.getImpl();
+
+      impl.executeAction({
+        method: 'exit',
+        args: {target: 'tracking'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+
+      expect(open).to.have.been.calledOnce;
+      expect(sendBeacon).to.have.been.calledThrice;
+
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?1',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?ase=1&2',
+        ''
+      );
+      // Inject the `asr=1` param and send the attribution source ping when attribution
+      // source reporting is enabled.
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?ase=1&asr=1&2',
+        ''
       );
     });
 

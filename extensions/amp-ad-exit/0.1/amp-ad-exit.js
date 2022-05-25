@@ -147,9 +147,12 @@ export class AmpAdExit extends AMP.BaseElement {
       target
     );
     if (target.trackingUrls) {
-      target.trackingUrls
-        .map(substituteVariables)
-        .forEach((url) => this.pingTrackingUrl_(url));
+      target.trackingUrls.map(substituteVariables).forEach((url) => {
+        console /*OK*/
+          .log(url);
+        this.pingTrackingUrl_(url);
+        this.maybeSendAttributionSrcPing_(url);
+      });
     }
     const finalUrl = substituteVariables(target.finalUrl);
     // TODO(wg-monetization): clean up unused HostServices.
@@ -308,6 +311,23 @@ export class AmpAdExit extends AMP.BaseElement {
       const req = this.win.document.createElement('img');
       req.src = url;
       return;
+    }
+  }
+
+  /**
+   * Check whether the `attribution-reporting` policy, and the presence of
+   * `ase=1` (attribution-source-enabled) param. If both true, inject the
+   * `asr=1` (attribution-source-request) param into the Url and send the ping.
+   * @param {string} url
+   */
+  maybeSendAttributionSrcPing_(url) {
+    console /*OK*/
+      .log(url);
+    console /*OK*/
+      .log(this.isAttributionReportingSupported_);
+    if (this.isAttributionReportingSupported_ && url.includes('ase=1')) {
+      const asrUrl = url.replace('ase=1', 'ase=1&asr=1');
+      this.pingTrackingUrl_(asrUrl);
     }
   }
 
