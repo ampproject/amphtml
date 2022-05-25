@@ -229,8 +229,24 @@ class CameraAnimation {
 
 export class AmpStory360 extends AMP.BaseElement {
   /** @override  */
-  static previewAllowed() {
-    return true;
+  static previewAllowed(element) {
+    let mediaElementIsCached = true;
+
+    const imgEl = element.querySelector('amp-img');
+    if (imgEl) {
+      let isImgElCached; // How do I determine whether an image is cached?
+      mediaElementIsCached &&= isImgElCached;
+    }
+
+    const videoEl = element.querySelector('amp-video');
+    if (videoEl) {
+      let isVideoElCached; // How do I determine whether a video is cached?
+      mediaElementIsCached &&= isVideoElCached;
+    }
+
+    // Only allow preview mode if the video or image source is cached, because
+    // requests for origin sources cannot be made due to privacy concerns.
+    return mediaElementIsCached;
   }
 
   /** @param {!AmpElement} element */
