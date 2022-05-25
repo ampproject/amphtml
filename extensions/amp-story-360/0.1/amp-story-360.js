@@ -230,23 +230,12 @@ class CameraAnimation {
 export class AmpStory360 extends AMP.BaseElement {
   /** @override  */
   static previewAllowed(element) {
-    let mediaElementIsCached = true;
-
-    const imgEl = element.querySelector('amp-img');
-    if (imgEl) {
-      let isImgElCached; // How do I determine whether an image is cached?
-      mediaElementIsCached &&= isImgElCached;
-    }
-
-    const videoEl = element.querySelector('amp-video');
-    if (videoEl) {
-      let isVideoElCached; // How do I determine whether a video is cached?
-      mediaElementIsCached &&= isVideoElCached;
-    }
-
-    // Only allow preview mode if the video or image source is cached, because
-    // requests for origin sources cannot be made due to privacy concerns.
-    return mediaElementIsCached;
+    // We can assume that images are cached, but the same is not necessarily
+    // true for videos. We only allow preview mode for `AmpStory360` when it
+    // uses cached sources, because requests for origin sources cannot be made
+    // due to privacy concerns.
+    const usesVideo = element.querySelector('amp-video');
+    return !usesVideo;
   }
 
   /** @param {!AmpElement} element */
