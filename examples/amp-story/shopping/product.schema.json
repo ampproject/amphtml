@@ -210,6 +210,7 @@
     "productImages": {
       "description": "A list of images for the product used in the carousel of the product page.",
       "type": "array",
+      "minItems": 1,
       "items": {
         "required": ["url", "alt"],
         "additionalProperties": false,

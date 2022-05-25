@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.215 */
+/** Version: 0.1.22.218 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -4996,7 +4996,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.215',
+    '_client': 'SwG 0.1.22.218',
   });
 }
 
@@ -5190,8 +5190,8 @@ class PayStartFlow {
       {
         forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
-        // basic flow does not support native.
-        forceDisableNative: paySwgVersion == '2',
+        // SwG basic and TwG flows do not support native.
+        forceDisableNative: paySwgVersion == '2' || paySwgVersion == '3',
       }
     );
     return Promise.resolve();
@@ -6330,7 +6330,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.215',
+        '_client': 'SwG 0.1.22.218',
         'supportsEventManager': true,
       },
       args || {}
@@ -7243,7 +7243,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.215');
+    context.setClientVersion('SwG 0.1.22.218');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString(this.getQueryString_());
@@ -7656,9 +7656,82 @@ const SWG_I18N_STRINGS = {
   },
   'REGWALL_ACCOUNT_CREATED_LANG_MAP': {
     'en': 'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'ar': 'تم إنشاء حساب باستخدام <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
+    'de': 'Konto bei <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> wurde erstellt',
+    'en-au':
+      'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'en-ca':
+      'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'en-gb':
+      'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'en-us':
+      'Created an account with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'es': 'Has creado una cuenta con <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'es-419':
+      'Se creó una cuenta con <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'fr': 'A créé un compte avec <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'fr-ca':
+      'Un compte a été créé avec l\'adresse <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'hi': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> का इस्तेमाल करके, एक खाता बनाया गया',
+    'id': 'Membuat akun dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'it': 'È stato creato un account con l\'indirizzo <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'jp': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でアカウントを作成しました',
+    'ko': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>(으)로 계정을 만들었습니다.',
+    'ms': 'Membuat akaun dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'nl': 'Account gemaakt met <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'no': 'Du har opprettet en konto med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'pl': 'Utworzono konto za pomocą adresu <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'pt': 'Criou uma conta com <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'pt-br':
+      'Conta criada com o e-mail <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'ru': 'Вы зарегистрировали аккаунт на адрес <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
+    'se': 'Du skapade ett konto med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'th': 'สร้างบัญชีด้วย <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'tr': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> ile bir hesap oluşturun',
+    'uk': 'Обліковий запис створено за допомогою електронної адреси <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'zh-cn': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 创建帐号',
+    'zh-hk': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 建立帳戶',
+    'zh-tw': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 建立帳戶',
   },
   'NEWSLETTER_SIGNED_UP_LANG_MAP': {
     'en': 'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+    'ar': 'تم الاشتراك في النشرة الإخبارية باستخدام <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
+    'de': 'Du hast dich für den Newsletter von <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> angemeldet',
+    'en-au':
+      'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+    'en-ca':
+      'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+    'en-gb':
+      'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+    'en-us':
+      'Signed up with <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> for the newsletter',
+    'es': 'Te has suscrito a la newsletter con <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'es-419':
+      'Te registraste con <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> para recibir el boletín informativo',
+    'fr': 'S\'est abonné à la newsletter avec <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'fr-ca':
+      'Vous êtes inscrit au bulletin d\'information avec l\'adresse <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'hi': 'न्यूज़लेटर पाने के लिए, <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> से साइन अप किया गया',
+    'id': 'Mendaftar dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> untuk mendapatkan newsletter',
+    'it': 'Iscrizione alla newsletter con l\'indirizzo <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> effettuata',
+    'jp': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> でニュースレターを登録しました',
+    'ko': '<ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>(으)로 뉴스레터에 가입했습니다.',
+    'ms': 'Mendaftar dengan <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> untuk surat berita',
+    'nl': 'Aangemeld met <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> voor de nieuwsbrief',
+    'no': 'Du har registrert deg for nyhetsbrevet med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'pl': 'Zapisano się na newsletter za pomocą adresu <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'pt': 'Inscreveu-se com <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> no boletim informativo',
+    'pt-br':
+      'Inscrição na newsletter feita com o e-mail <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'ru': 'Вы подписались на новостную рассылку, используя аккаунт <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>.',
+    'se': 'Du registrerade dig för nyhetsbrevet med <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'th': 'ลงชื่อเข้าใช้ด้วย <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> สำหรับจดหมายข่าว',
+    'tr': 'Bülten için <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> ile kaydoldunuz',
+    'uk': 'Ви підписалися на інформаційні листи на електронну адресу <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph>',
+    'zh-cn': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 订阅简报',
+    'zh-hk': '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 註冊通訊',
+    'zh-tw':
+      '已使用 <ph name="EMAIL"><ex>user@gmail.com</ex>%s</ph> 訂閱電子報',
   },
 };
 
@@ -11351,6 +11424,30 @@ const AnalyticsEventToGoogleAnalyticsEvent = {
       '',
       true
     ),
+  [AnalyticsEvent.IMPRESSION_NEWSLETTER_OPT_IN]: createGoogleAnalyticsEvent(
+    'NTG newsletter',
+    'newsletter modal impression',
+    '',
+    true
+  ),
+  [AnalyticsEvent.EVENT_NEWSLETTER_OPTED_IN]: createGoogleAnalyticsEvent(
+    'NTG newsletter',
+    'newsletter signup',
+    'success',
+    false
+  ),
+  [AnalyticsEvent.IMPRESSION_REGWALL_OPT_IN]: createGoogleAnalyticsEvent(
+    'NTG account',
+    'registration modal impression',
+    '',
+    true
+  ),
+  [AnalyticsEvent.EVENT_REGWALL_OPTED_IN]: createGoogleAnalyticsEvent(
+    'NTG account',
+    'registration',
+    'success',
+    false
+  ),
 };
 
 /** @const {!Object<?AnalyticsEvent,?Object>} */
