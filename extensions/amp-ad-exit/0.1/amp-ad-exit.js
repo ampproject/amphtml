@@ -148,8 +148,6 @@ export class AmpAdExit extends AMP.BaseElement {
     );
     if (target.trackingUrls) {
       target.trackingUrls.map(substituteVariables).forEach((url) => {
-        console /*OK*/
-          .log(url);
         this.pingTrackingUrl_(url);
         this.maybeSendAttributionSrcPing_(url);
       });
@@ -321,10 +319,6 @@ export class AmpAdExit extends AMP.BaseElement {
    * @param {string} url
    */
   maybeSendAttributionSrcPing_(url) {
-    console /*OK*/
-      .log(url);
-    console /*OK*/
-      .log(this.isAttributionReportingSupported_);
     if (this.isAttributionReportingSupported_ && url.includes('ase=1')) {
       const asrUrl = url.replace('ase=1', 'ase=1&asr=1');
       this.pingTrackingUrl_(asrUrl);
