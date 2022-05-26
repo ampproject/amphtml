@@ -703,7 +703,7 @@ export class AnimationManager {
         .concat(
           Array.prototype.map.call(
             this.page_.querySelectorAll('amp-bodymovin-animation'),
-            (el) => new BodymovinAnimation(el)
+            (el) => new BodymovinAnimationRunner(el)
           )
         )
         .filter(Boolean);
@@ -888,7 +888,7 @@ export class AnimationSequence {
   }
 }
 
-export class BodymovinAnimation {
+export class BodymovinAnimationRunner {
   /**
    * @param {!Element} bodymovinAnimationEl
    */
