@@ -901,20 +901,21 @@ export class BodymovinAnimationRunner {
    * Pauses the bodymovin animation.
    */
   pause() {
-    this.executeAction_({method: 'pause', satisfiesTrust: () => true});
+    this.executeAction_('pause');
   }
 
   /**
    * Plays the bodymovin animation.
    */
   resume() {
-    this.executeAction_({method: 'play', satisfiesTrust: () => true});
+    this.executeAction_('play');
   }
 
   /**
    * Starts the bodymovin animation.
    */
   start() {
+    this.applyFirstFrame();
     this.resume();
   }
 
@@ -922,12 +923,8 @@ export class BodymovinAnimationRunner {
    * Seeks the bodymovin animation to the first frame.
    */
   applyFirstFrame() {
-    this.executeAction_({
-      method: 'seekTo',
-      satisfiesTrust: () => true,
-      args: {
-        percent: 0,
-      },
+    this.executeAction_('seekTo', {
+      percent: 0,
     });
   }
 
@@ -935,12 +932,8 @@ export class BodymovinAnimationRunner {
    * Seeks the bodymovin animation to the last frame.
    */
   applyLastFrame() {
-    this.executeAction_({
-      method: 'seekTo',
-      satisfiesTrust: () => true,
-      args: {
-        percent: 1,
-      },
+    this.executeAction_('seekTo', {
+      percent: 1,
     });
   }
 
@@ -952,12 +945,17 @@ export class BodymovinAnimationRunner {
   }
 
   /**
-   * @param {!any} action
+   * @param {string} method
+   * @param {=any} args
    * @private
    */
-  executeAction_(action) {
+  executeAction_(method, args = null) {
     this.bodymovinAnimationEl_.getImpl().then((impl) => {
-      impl.executeAction(action);
+      impl.executeAction({
+        method,
+        args,
+        satisfiesTrust: () => true,
+      });
     });
   }
 }
