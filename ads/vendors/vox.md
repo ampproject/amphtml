@@ -4,7 +4,7 @@
 
 ```html
 <amp-ad
-  type="vox" 
+  type="vox"
   data-placementid="000000000000000000000000"
   data-vox-params='{"adtype": "simple"}'>
 </amp-ad>

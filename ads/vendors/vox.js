@@ -5,9 +5,9 @@ import {loadScript, validateData} from '#3p/3p';
  * @param {!Object} data
  */
 export function vox(global, data) {
-  const scriptUrl = "https://st.hbrd.io/amp-helper.js?t=" + new Date().getTime();
+  const scriptUrl = 'https://st.hbrd.io/amp-helper.js?t=' + new Date().now();
   validateData(data, ['placementid']);
   loadScript(global, scriptUrl);
-  global._vox_params = data['voxParams'];
-  global._vox_placementId = data['placementid'];
+  global._voxParams = data['voxParams'];
+  global._voxPlacementId = data['placementid'];
 }
