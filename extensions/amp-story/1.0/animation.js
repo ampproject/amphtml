@@ -59,7 +59,7 @@ const DEFAULT_EASING = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
  * TODO(alanorozco): maybe memoize?
  */
 export function hasAnimations(element) {
-  const selector = `${ANIMATABLE_ELEMENTS_SELECTOR},>amp-story-animation`;
+  const selector = `${ANIMATABLE_ELEMENTS_SELECTOR},>amp-story-animation,amp-bodymovin-animation`;
   return !!scopedQuerySelector(element, selector);
 }
 
@@ -700,6 +700,12 @@ export class AnimationManager {
               })
           )
         )
+        .concat(
+          Array.prototype.map.call(
+            this.page_.querySelectorAll('amp-bodymovin-animation'),
+            (el) => new BodymovinAnimation(el)
+          )
+        )
         .filter(Boolean);
     }
     return devAssert(this.runners_);
@@ -879,5 +885,79 @@ export class AnimationSequence {
       this.subscriptionResolvers_[id] = deferred.resolve;
     }
     return this.subscriptionPromises_[id];
+  }
+}
+
+export class BodymovinAnimation {
+  /**
+   * @param {!Element} bodymovinAnimationEl
+   */
+  constructor(bodymovinAnimationEl) {
+    this.bodymovinAnimationEl_ = bodymovinAnimationEl;
+    this.pause();
+  }
+
+  /**
+   * Pauses the bodymovin animation.
+   */
+  pause() {
+    this.executeAction_({method: 'pause', satisfiesTrust: () => true});
+  }
+
+  /**
+   * Plays the bodymovin animation.
+   */
+  resume() {
+    this.executeAction_({method: 'play', satisfiesTrust: () => true});
+  }
+
+  /**
+   * Starts the bodymovin animation.
+   */
+  start() {
+    this.resume();
+  }
+
+  /**
+   * Seeks the bodymovin animation to the first frame.
+   */
+  applyFirstFrame() {
+    this.executeAction_({
+      method: 'seekTo',
+      satisfiesTrust: () => true,
+      args: {
+        percent: 0,
+      },
+    });
+  }
+
+  /**
+   * Seeks the bodymovin animation to the last frame.
+   */
+  applyLastFrame() {
+    this.executeAction_({
+      method: 'seekTo',
+      satisfiesTrust: () => true,
+      args: {
+        percent: 1,
+      },
+    });
+  }
+
+  /**
+   * Cancels the bodymovin animation by pausing it.
+   */
+  cancel() {
+    this.pause();
+  }
+
+  /**
+   * @param {!any} action
+   * @private
+   */
+  executeAction_(action) {
+    this.bodymovinAnimationEl_.getImpl().then((impl) => {
+      impl.executeAction(action);
+    });
   }
 }
