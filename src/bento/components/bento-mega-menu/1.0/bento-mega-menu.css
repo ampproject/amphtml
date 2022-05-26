@@ -1,0 +1,42 @@
+/*
+ * Pre-upgrade:
+ * - display:block element
+ * - contain:layout element
+ */
+bento-mega-menu {
+  background: white;
+  position: relative;
+  z-index: 1000;
+
+  /* Before built, display the contents correctly: */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+bento-mega-menu.i-amphtml-built {
+  display: block;
+}
+
+bento-mega-menu > section > :first-child {
+  /* Title */
+  cursor: pointer;
+}
+bento-mega-menu > section > :last-child {
+  /* Content */
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: white;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms, visibility 0ms 200ms;
+  transition-timing-function: ease-in;
+}
+bento-mega-menu > section[expanded] > :last-child {
+  /* Content (expanded) */
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0ms;
+  transition-timing-function: ease-out;
+}
