@@ -150,7 +150,7 @@
     "event": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&tz=_timezone_&col=_screen_color_depth_&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&sarg=_canonical_url_&extra=gemamp%3D1%7Campid%3D_client_id(gemius)_%7C!extraparams&nc=0&et=action&hsrc=3"
   },
   "gfksensic": {
-    "base": "https://%21regionid-config%21environment.sensic.net/tp?p=!regionID&m=!mediaID&v=1.0.0&t=s2s-amp",
+    "base": "https://%21regionid-config%21environment.sensic.net/tp?m=!mediaID&v=1.0.0&t=s2s-amp",
     "page_params": "<ignore for test>",
     "user_params": "<ignore for test>",
     "streaming_params": "<ignore for test>",
