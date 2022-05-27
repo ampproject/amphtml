@@ -138,9 +138,7 @@ export class AdvancementConfig {
     this.tapNavigationListeners_.push(onTapNavigationListener);
   }
 
-  /**
-   * DESCRIPTION
-   */
+  /** Removes all listeners added to this advancement config. */
   removeAllAddedListeners() {
     this.progressListeners_ = [];
     this.advanceListeners_ = [];
@@ -150,7 +148,8 @@ export class AdvancementConfig {
 
   /**
    * Invoked when the advancement configuration should begin taking effect.
-   * @param {number=} unusedProgressStartVal DESCRIPTION
+   * @param {number=} unusedProgressStartVal An optional value at which to
+   *     start the advancement.
    */
   start(unusedProgressStartVal = undefined) {
     this.isRunning_ = true;
@@ -840,7 +839,9 @@ export class TimeBasedAdvancement extends AdvancementConfig {
     super.start();
 
     if (progressStartVal) {
-      // DESCRIPTION
+      // We calculate this advancement's remaining milliseconds, based upon the
+      // the given start value. This enables the advancement to begin at a
+      // progress percentage greater than 0%.
       const remainingDelayPct = 1 - progressStartVal;
       this.remainingDelayMs_ = this.delayMs_ * remainingDelayPct;
     }
@@ -1058,7 +1059,8 @@ export class MediaBasedAdvancement extends AdvancementConfig {
   }
 
   /**
-   * @param {number=} progressStartVal DESCRIPTION
+   * @param {number=} progressStartVal An optional value at which to start
+   *     the advancement.
    * @private
    */
   startWhenBuilt_(progressStartVal = undefined) {
@@ -1084,7 +1086,8 @@ export class MediaBasedAdvancement extends AdvancementConfig {
   }
 
   /**
-   * @param {number=} progressStartVal DESCRIPTION
+   * @param {number=} progressStartVal An optional value at which to start
+   *     the advancement.
    * @private
    */
   startHtmlMediaElement_(progressStartVal = undefined) {
@@ -1109,7 +1112,8 @@ export class MediaBasedAdvancement extends AdvancementConfig {
   }
 
   /**
-   * @param {number=} progressStartVal DESCRIPTION
+   * @param {number=} progressStartVal An optional value at which to start
+   *     the advancement.
    * @private
    */
   startVideoInterfaceElement_(progressStartVal = undefined) {
