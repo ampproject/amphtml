@@ -996,7 +996,8 @@ export class AmpStory extends AMP.BaseElement {
   layoutStory_() {
     const initialPageId = this.getInitialPageId_();
 
-    const shouldShowSystemLayer = !this.getAmpDoc().isPreview();
+    const shouldShowSystemLayer =
+      this.viewer_.getParam('hideProgressBar') !== '1';
     if (!shouldShowSystemLayer) {
       // The default value of `SYSTEM_UI_IS_VISIBLE_STATE` is `true`. We set it
       // to `false` here solely to ensure that a subsequent firing of the
