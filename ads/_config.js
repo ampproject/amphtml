@@ -1386,6 +1386,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'vox': {
+    renderStartImplemented: true,
+  },
+
   'webediads': {
     prefetch: 'https://eu1.wbdds.com/amp.min.js',
     preconnect: ['https://goutee.top', 'https://mediaathay.org.uk'],
