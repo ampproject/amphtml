@@ -208,6 +208,13 @@ const TAG = 'amp-story';
 const DEFAULT_THEME_COLOR = '#202125';
 
 /**
+ * The default number of story pages that should be shown in preview mode
+ * before the preview is considered to be finished.
+ * @const {number}
+ */
+const DEFAULT_MIN_PAGES_TO_PREVIEW = 1;
+
+/**
  * The default percentage of the total number of story pages that should be
  * shown in preview mode before the preview is considered to be finished.
  * @const {number}
@@ -2815,17 +2822,15 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   calculateIndexOfLastPageToPreview_() {
-    // DESCRIPTION
     const minPreviewPagesStr = this.viewer_?.getParam('minPreviewPages');
     let minPreviewPages;
     if (minPreviewPagesStr) {
       minPreviewPages = parseInt(minPreviewPagesStr, 10);
     }
     if (!minPreviewPages) {
-      minPreviewPages = 1; // Default to a minimum of 1 preview page
+      minPreviewPages = DEFAULT_MIN_PAGES_TO_PREVIEW;
     }
 
-    // DESCRIPTION
     const pctPagesToPreviewStr = this.viewer_?.getParam('pctPagesToPreview');
     let pctPagesToPreview;
     if (pctPagesToPreviewStr) {
@@ -2835,7 +2840,9 @@ export class AmpStory extends AMP.BaseElement {
       pctPagesToPreview = DEFAULT_PCT_PAGES_TO_PREVIEW;
     }
 
-    // DESCRIPTION
+    // We calculate the number of preview pages by taking the larger of the two
+    // values: min # of preview pages vs the % of pages to show. We do not
+    // allow the returned index to exceed the index of the last story page.
     const numPages = this.element.querySelectorAll('amp-story-page').length;
     let numPreviewPages = Math.ceil((pctPagesToPreview / 100) * numPages);
     numPreviewPages = Math.max(numPreviewPages, minPreviewPages);
