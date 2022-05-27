@@ -348,12 +348,6 @@ export class AmpStory extends AMP.BaseElement {
      *     preview mode.
      */
     this.indexOfLastPageToPreview_ = null;
-
-    /**
-     * Whether the `storyPreviewFinished` viewer message has been sent.
-     * @private {boolean}
-     */
-    this.hasSentPreviewFinishedMessage_ = false;
   }
 
   /** @override */
@@ -672,6 +666,14 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     this.element.addEventListener(EventType.SWITCH_PAGE, (e) => {
+      // SWITCH_PAGE is fired with each page advancement in preview mode.
+      // Before advancing beyond the final page of a preview, we send the
+      // viewer a message that the preview has finished. In the SERP, this
+      // message can be used to advance to a subsequent story's preview.
+      if (this.getAmpDoc().isPreview()) {
+        this.sendMessageIfPreviewFinished_();
+      }
+
       this.switchTo_(getDetail(e)['targetPageId'], getDetail(e)['direction']);
       this.ampStoryHint_.hideAllNavigationHint();
     });
@@ -696,20 +698,6 @@ export class AmpStory extends AMP.BaseElement {
           storyAdSegmentBranch != StoryAdSegmentExp.CONTROL)
       ) {
         this.systemLayer_.updateProgress(pageId, progress);
-      }
-
-      const lastPreviewPage = this.pages_[this.indexOfLastPageToPreview_];
-      const isLastPreviewPage = pageId === lastPreviewPage.element.id;
-      if (
-        this.getAmpDoc().isPreview() &&
-        isLastPreviewPage &&
-        progress === 1.0 &&
-        !this.hasSentPreviewFinishedMessage_
-      ) {
-        // We can reliably send 'storyPreviewFinished' from the `PAGE_PROGRESS`
-        // event's callback because story pages autoplay in preview mode.
-        this.viewerMessagingHandler_?.send('storyPreviewFinished', {});
-        this.hasSentPreviewFinishedMessage_ = true;
       }
     });
 
@@ -2841,13 +2829,30 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     // We calculate the number of preview pages by taking the larger of the two
-    // values: min # of preview pages vs the % of pages to show. We do not
-    // allow the returned index to exceed the index of the last story page.
+    // values: min # of preview pages vs the % of pages to show.
     const numPages = this.element.querySelectorAll('amp-story-page').length;
     let numPreviewPages = Math.ceil((pctPagesToPreview / 100) * numPages);
     numPreviewPages = Math.max(numPreviewPages, minPreviewPages);
+
+    // We do not allow the returned index to be negative or exceed the index
+    // of the last story page.
     numPreviewPages = Math.min(numPreviewPages, numPages);
+    numPreviewPages = Math.max(numPreviewPages, 1);
     return numPreviewPages - 1;
+  }
+
+  /**
+   * Sends the 'storyPreviewFinished' viewer message if the active page is
+   * supposed to be the last page shown in the preview.
+   * @private
+   */
+  sendMessageIfPreviewFinished_() {
+    const pageId = this.activePage_.element.id;
+    const lastPreviewPage = this.pages_[this.indexOfLastPageToPreview_];
+    const isLastPreviewPage = pageId === lastPreviewPage.element.id;
+    if (isLastPreviewPage) {
+      this.viewerMessagingHandler_?.send('storyPreviewFinished', {});
+    }
   }
 }
 
