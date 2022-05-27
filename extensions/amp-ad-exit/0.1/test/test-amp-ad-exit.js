@@ -1,5 +1,3 @@
-import {expect} from 'chai';
-
 import {toggleExperiment} from '#experiments';
 
 import {Services} from '#service';
