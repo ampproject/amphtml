@@ -97,13 +97,7 @@ const TAG = 'amp-story-page';
 const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 /** @private @const {string} */
-const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '3s';
-
-/** @private @const {string} */
-const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
-
-/** @private @const {number} */
-const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION_S = 5;
+const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S = 5;
 
 /** @private @const {number} */
 const VIDEO_MINIMUM_AUTO_ADVANCE_DURATION_S = 2;
@@ -177,6 +171,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
 
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
@@ -306,6 +303,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.viewer_ = Services.viewerForDoc(this.win.document.documentElement);
+
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
@@ -370,19 +369,26 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   setupAutoAdvanceForPreview_() {
-    const firstVideo = this.getFirstAmpVideo_();
-    const autoAdvanceDuration = firstVideo
-      ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
-      : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
-    this.element.setAttribute('auto-advance-after', autoAdvanceDuration);
+    let previewSecondsPerPage = this.viewer_.getParam('previewSecondsPerPage');
+    if (previewSecondsPerPage) {
+      previewSecondsPerPage = parseInt(previewSecondsPerPage, 10);
+    }
+    if (isNaN(previewSecondsPerPage) || previewSecondsPerPage <= 0) {
+      previewSecondsPerPage = DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION_S;
+    }
+    this.element.setAttribute(
+      'auto-advance-after',
+      previewSecondsPerPage + 's'
+    );
 
+    const firstVideo = this.getFirstAmpVideo_();
     if (firstVideo) {
       whenUpgradedToCustomElement(firstVideo)
         .then(() => firstVideo.getImpl())
         .then((videoImpl) => {
           const loopVideoIfTooShort = (vidLength) => {
             const videoEl = firstVideo.querySelector('video');
-            const tooShort = vidLength < VIDEO_PREVIEW_AUTO_ADVANCE_DURATION_S;
+            const tooShort = vidLength < previewSecondsPerPage;
             videoEl.loop ||= tooShort;
           };
 
