@@ -207,6 +207,13 @@ const TAG = 'amp-story';
  */
 const DEFAULT_THEME_COLOR = '#202125';
 
+/**
+ * The default percentage of the total number of story pages that should be
+ * shown in preview mode before the preview is considered to be finished.
+ * @const {number}
+ */
+const DEFAULT_PCT_PAGES_TO_PREVIEW = 30;
+
 /*
  * @implements {./media-pool.MediaPoolRoot}
  */
@@ -330,6 +337,12 @@ export class AmpStory extends AMP.BaseElement {
     this.subscriptionsPageIndexDeferred_ = new Deferred();
 
     /**
+     * @private {?number} the index of the last page that should be shown in
+     *     preview mode.
+     */
+    this.indexOfLastPageToPreview_ = null;
+
+    /**
      * Whether the `storyPreviewFinished` viewer message has been sent.
      * @private {boolean}
      */
@@ -352,6 +365,8 @@ export class AmpStory extends AMP.BaseElement {
     this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
       ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
       : null;
+
+    this.indexOfLastPageToPreview_ = this.calculateIndexOfLastPageToPreview_();
 
     this.installLocalizationStrings_();
 
@@ -676,13 +691,16 @@ export class AmpStory extends AMP.BaseElement {
         this.systemLayer_.updateProgress(pageId, progress);
       }
 
-      // We can reliably send 'storyPreviewFinished' from the `PAGE_PROGRESS`
-      // event's callback because story pages autoplay in preview mode.
-      const lastPageId = this.pages_[this.pages_.length - 1]?.element.id;
-      const isLastPage = pageId === lastPageId;
-      const isPreviewFinished =
-        this.getAmpDoc().isPreview() && isLastPage && progress === 1.0;
-      if (isPreviewFinished && !this.hasSentPreviewFinishedMessage_) {
+      const lastPreviewPage = this.pages_[this.indexOfLastPageToPreview_];
+      const isLastPreviewPage = pageId === lastPreviewPage.element.id;
+      if (
+        this.getAmpDoc().isPreview() &&
+        isLastPreviewPage &&
+        progress === 1.0 &&
+        !this.hasSentPreviewFinishedMessage_
+      ) {
+        // We can reliably send 'storyPreviewFinished' from the `PAGE_PROGRESS`
+        // event's callback because story pages autoplay in preview mode.
         this.viewerMessagingHandler_?.send('storyPreviewFinished', {});
         this.hasSentPreviewFinishedMessage_ = true;
       }
@@ -2788,6 +2806,40 @@ export class AmpStory extends AMP.BaseElement {
       .catch((err) => {
         devError(TAG, err, 'Bundle not found for language ' + languageCode);
       });
+  }
+
+  /**
+   * @return {number} The index of the last page that should be shown in
+   *     preview mode.
+   * @private
+   */
+  calculateIndexOfLastPageToPreview_() {
+    // DESCRIPTION
+    const minPreviewPagesStr = this.viewer_?.getParam('minPreviewPages');
+    let minPreviewPages;
+    if (minPreviewPagesStr) {
+      minPreviewPages = parseInt(minPreviewPagesStr, 10);
+    }
+    if (!minPreviewPages) {
+      minPreviewPages = 1; // Default to a minimum of 1 preview page
+    }
+
+    // DESCRIPTION
+    const pctPagesToPreviewStr = this.viewer_?.getParam('pctPagesToPreview');
+    let pctPagesToPreview;
+    if (pctPagesToPreviewStr) {
+      pctPagesToPreview = parseInt(pctPagesToPreviewStr, 10);
+    }
+    if (!pctPagesToPreview) {
+      pctPagesToPreview = DEFAULT_PCT_PAGES_TO_PREVIEW;
+    }
+
+    // DESCRIPTION
+    const numPages = this.element.querySelectorAll('amp-story-page').length;
+    let numPreviewPages = Math.ceil((pctPagesToPreview / 100) * numPages);
+    numPreviewPages = Math.max(numPreviewPages, minPreviewPages);
+    numPreviewPages = Math.min(numPreviewPages, numPages);
+    return numPreviewPages - 1;
   }
 }
 
